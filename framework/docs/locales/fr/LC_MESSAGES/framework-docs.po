@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-01-07 00:31+0000\n"
+"POT-Creation-Date: 2025-01-15 00:30+0000\n"
 "PO-Revision-Date: 2023-09-05 17:54+0000\n"
 "Last-Translator: Charles Beauville <charles@flower.ai>\n"
 "Language: fr\n"
@@ -2364,6 +2364,7 @@ msgstr "Devenez un·e contributeur·ice"
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:18
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:13
 #: ../../source/docker/tutorial-quickstart-docker.rst:11
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:18
 msgid "Prerequisites"
 msgstr "Prérequis"
 
@@ -2955,6 +2956,9 @@ msgstr "Démarrer le serveur"
 #: ../../source/docker/enable-tls.rst
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst
 #: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/how-to-authenticate-supernodes.rst
+#: ../../source/how-to-enable-tls-connections.rst
+#: ../../source/how-to-run-flower-with-deployment-engine.rst
 msgid "Understand the command"
 msgstr ""
 
@@ -3039,6 +3043,8 @@ msgstr "Augmente la version mineure de ``pyproject.toml`` d'une unité."
 #: ../../source/docker/enable-tls.rst:242
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:56
 #: ../../source/docker/tutorial-quickstart-docker.rst:330
+#: ../../source/how-to-enable-tls-connections.rst:118
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:171
 msgid "pyproject.toml"
 msgstr ""
 
@@ -3051,6 +3057,7 @@ msgstr ""
 
 #: ../../source/docker/enable-tls.rst:254
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:65
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:180
 msgid ""
 "You can customize the string that follows ``tool.flwr.federations.`` to "
 "fit your needs. However, please note that the string cannot contain a dot"
@@ -3383,6 +3390,7 @@ msgstr ""
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:18
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:15
 #: ../../source/docker/tutorial-quickstart-docker.rst:13
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:20
 msgid "Before you start, make sure that:"
 msgstr ""
 
@@ -3432,6 +3440,7 @@ msgid ""
 msgstr "Active la virtualenv en exécutant la commande suivante :"
 
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:68
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:183
 msgid ""
 "In this example, ``local-deployment`` has been used. Just remember to "
 "replace ``local-deployment`` with your chosen name in both the "
@@ -5384,132 +5393,149 @@ msgstr ""
 msgid ""
 "Flower has built-in support for authenticated SuperNodes that you can use"
 " to verify the identities of each SuperNode connecting to a SuperLink. "
-"Flower node authentication works similar to how GitHub SSH authentication"
-" works:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:8
-msgid "SuperLink (server) stores a list of known (client) node public keys"
+"For increased security, node authentication can only be used when "
+"encrypted connections (SSL/TLS) are enabled. Flower node authentication "
+"works similar to how GitHub SSH authentication works:"
 msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:9
+msgid ""
+"SuperLink (server) stores a list of public keys of known SuperNodes "
+"(clients)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:10
 msgid ""
 "Using ECDH, both SuperNode and SuperLink independently derive a shared "
 "secret"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:10
+#: ../../source/how-to-authenticate-supernodes.rst:11
 msgid ""
 "Shared secret is used to compute the HMAC value of the message sent from "
 "SuperNode to SuperLink as a token"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:12
+#: ../../source/how-to-authenticate-supernodes.rst:13
 msgid "SuperLink verifies the token"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:14
+#: ../../source/how-to-authenticate-supernodes.rst:17
+msgid ""
+"This guide builds on the Flower App setup presented in the :doc:`how-to-"
+"enable-tls-connections` guide and extends it to introduce node "
+"authentication to the SuperLink ↔ SuperNode connection."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:23
 #, fuzzy
 msgid ""
-"We recommend you to check out the complete `code example "
+"Checkout the `Flower Authentication "
 "<https://github.com/adap/flower/tree/main/examples/flower-"
-"authentication>`_ demonstrating federated learning with Flower in an "
-"authenticated setting."
+"authentication>`_ example for a complete self-contained example on how to"
+" setup TLS and node authentication."
 msgstr ""
 "Réfère-toi à l'exemple de code complet "
 "<https://github.com/adap/flower/tree/main/examples/quickstart-pandas>`_ "
 "pour en savoir plus."
 
-#: ../../source/how-to-authenticate-supernodes.rst:20
+#: ../../source/how-to-authenticate-supernodes.rst:29
 msgid ""
 "This guide covers a preview feature that might change in future versions "
 "of Flower."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:24
+#: ../../source/how-to-authenticate-supernodes.rst:32
+msgid "Generate authentication keys"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:34
 msgid ""
-"For increased security, node authentication can only be used when "
-"encrypted connections (SSL/TLS) are enabled."
+"To establish an authentication mechanism by which only authorized "
+"SuperNodes can connect to a running SuperLink, a set of key pairs for "
+"both SuperLink and SuperNodes need to be created."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:28
-msgid "Enable node authentication in ``SuperLink``"
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:30
+#: ../../source/how-to-authenticate-supernodes.rst:38
 msgid ""
-"To enable node authentication, first you need to configure SSL/TLS "
-"connections to secure the SuperLink<>SuperNode communication. You can "
-"find the complete guide `here <https://flower.ai/docs/framework/how-to-"
-"enable-ssl-connections.html>`_. After configuring secure connections, you"
-" can enable client authentication in a long-running Flower ``SuperLink``."
-" Use the following terminal command to start a Flower ``SuperNode`` that "
-"has both secure connections and node authentication enabled:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:47
-msgid "Let's break down the authentication flags:"
+"We have prepared a script that can be used to generate such set of keys. "
+"While using these are fine for prototyping, we advice you to follow the "
+"standards set in your team/organization and generated the keys and share "
+"them with the corresponding parties. Refer to the **Generate public and "
+"private keys for SuperNode authentication** section in the example linked"
+" at the top of this guide."
 msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:49
 msgid ""
-"The first flag ``--auth-list-public-keys`` expects a path to a CSV file "
-"storing all known node public keys. You need to store all known node "
-"public keys that are allowed to participate in a federation in one CSV "
-"file (``.csv``)."
+"This will generate the keys in a new ``keys/`` directory. By default it "
+"creates a key pair for the SuperLink and one for each SuperNode. Copy "
+"this directory into the directory of your app (e.g. a directory generated"
+" earlier via ``flwr new``)."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:53
+#: ../../source/how-to-authenticate-supernodes.rst:54
+msgid "Enable node authentication in SuperLink"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:56
 msgid ""
-"A valid CSV file storing known node public keys should list the keys in "
-"OpenSSH format, separated by commas and without any comments. For an "
-"example, refer to our code sample, which contains a CSV file with two "
-"known node public keys."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:57
-msgid ""
-"The second and third flags ``--auth-superlink-private-key`` and ``--auth-"
-"superlink-public-key`` expect paths to the server's private and public "
-"keys. For development purposes, you can generate a private and public key"
-" pair using ``ssh-keygen -t ecdsa -b 384``."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:64
-msgid ""
-"In Flower 1.9, there is no support for dynamically removing, editing, or "
-"adding known node public keys to the SuperLink. To change the set of "
-"known nodes, you need to shut the server down, edit the CSV file, and "
-"start the server again. Support for dynamically changing the set of known"
-" nodes is on the roadmap to be released in Flower 1.10 (ETA: June)."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:71
-msgid "Enable node authentication in ``SuperNode``"
+"To launch a SuperLink with SuperNode authentication enabled, you need to "
+"provide three aditional files in addition to the certificates needed for "
+"the TLS connections. Recall that the authentication feature can only be "
+"enabled in the presence of TLS."
 msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:73
 msgid ""
-"Similar to the long-running Flower server (``SuperLink``), you can easily"
-" enable node authentication in the long-running Flower client "
-"(``SuperNode``). Use the following terminal command to start an "
-"authenticated ``SuperNode``:"
+"``--auth-list-public-keys``: Specify the path to a CSV file storing the "
+"public keys of all SuperNodes that should be allowed to connect with the "
+"SuperLink. | A valid CSV file storing known node public keys should list "
+"the keys in OpenSSH format, separated by commas and without any comments."
+" Refer to the code sample, which contains a CSV file with two known node "
+"public keys."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:85
+#: ../../source/how-to-authenticate-supernodes.rst
+msgid "``--auth-superlink-private-key``: the private key of the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst
+msgid "``--auth-superlink-public-key``: the public key of the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:79
+msgid "Enable node authentication in SuperNode"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:81
 msgid ""
-"The ``--auth-supernode-private-key`` flag expects a path to the node's "
-"private key file and the ``--auth-supernode-public-key`` flag expects a "
-"path to the node's public key file. For development purposes, you can "
-"generate a private and public key pair using ``ssh-keygen -t ecdsa -b "
-"384``."
+"Connecting a SuperNode to a SuperLink that has node authentication "
+"enabled requires passing two additional arguments (i.e. the public and "
+"private keys of the SuperNode) in addition to the TLS certificate."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:91
+#: ../../source/how-to-authenticate-supernodes.rst:98
+msgid "``--auth-supernode-private-key``: the private key of this SuperNode."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst
+msgid ""
+"``--auth-supernode-public-key``: the public key of this SuperNode (which "
+"should be the same that was added to othe CSV used by the SuperLink)."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:101
+msgid ""
+"Follow the same procedure to launch the second SuperNode by passing its "
+"corresponding key pair:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:116
 msgid "Security notice"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:93
+#: ../../source/how-to-authenticate-supernodes.rst:118
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
 " SuperNode. Therefore, it is imperative to safeguard and safely store the"
@@ -5520,19 +5546,27 @@ msgid ""
 "methods."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:100
-#: ../../source/how-to-enable-tls-connections.rst:108
+#: ../../source/how-to-authenticate-supernodes.rst:125
+#: ../../source/how-to-enable-tls-connections.rst:134
 #: ../../source/how-to-use-built-in-mods.rst:95
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:287
 msgid "Conclusion"
 msgstr "Conclusion"
 
-#: ../../source/how-to-authenticate-supernodes.rst:102
+#: ../../source/how-to-authenticate-supernodes.rst:127
 msgid ""
-"You should now have learned how to start a long-running Flower server "
-"(``SuperLink``) and client (``SuperNode``) with node authentication "
-"enabled. You should also know the significance of the private key and "
-"store it safely to minimize security risks."
+"You should now have learned how to start a long-running Flower SuperLink "
+"and SuperNode with node authentication enabled. You should also know the "
+"significance of the private key and store it securely to minimize risks."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:133
+#: ../../source/how-to-enable-tls-connections.rst:144
+msgid ""
+"Refer to the :doc:`docker/index` documentation to learn how to setup a "
+"federation where each component runs in its own Docker container. You can"
+" make use of TLS and other security features in Flower such as implement "
+"a SuperNode authentication mechanism."
 msgstr ""
 
 #: ../../source/how-to-configure-clients.rst:2
@@ -5964,70 +5998,59 @@ msgid "Enable TLS connections"
 msgstr "Collecte centralisée des données"
 
 #: ../../source/how-to-enable-tls-connections.rst:4
-#, fuzzy
 msgid ""
-"This guide describes how to a TLS-enabled secure Flower server "
-"(``SuperLink``) can be started and how a Flower client (``SuperNode``) "
-"can establish a secure connections to it."
+"Transport Layer Security (TLS) ensures the communication between "
+"endpoints is encrypted. This guide describes how to establish secure TLS "
+"Superlink ↔ SuperNodes as well as User ↔ SuperLink connections."
 msgstr ""
-"Ce guide décrit comment démarrer un serveur Flower sécurisé par SSL et "
-"comment un client Flower peut établir une connexion sécurisée avec lui."
 
-#: ../../source/how-to-enable-tls-connections.rst:8
-#, fuzzy
+#: ../../source/how-to-enable-tls-connections.rst:10
 msgid ""
-"A complete code example demonstrating a secure connection can be found "
-"`here <https://github.com/adap/flower/tree/main/examples/advanced-"
-"tensorflow>`_."
+"This guide builds on the Flower App setup presented in :doc:`how-to-run-"
+"flower-with-deployment-engine` guide and extends it to replace the use of"
+" ``--insecure`` in favour of TLS."
 msgstr ""
-"Un exemple de code complet démontrant une connexion sécurisée peut être "
-"trouvé ici <https://github.com/adap/flower/tree/main/examples/advanced-"
-"tensorflow>`_."
-
-#: ../../source/how-to-enable-tls-connections.rst:11
-#, fuzzy
-msgid ""
-"The code example comes with a ``README.md`` file which explains how to "
-"start it. Although it is already TLS-enabled, it might be less "
-"descriptive on how it does so. Stick to this guide for a deeper "
-"introduction to the topic."
-msgstr ""
-"L'exemple de code est accompagné d'un fichier README.md qui t'expliquera "
-"comment le démarrer. Bien qu'il soit déjà activé par SSL, il peut être "
-"moins descriptif sur la façon de procéder. Tiens-toi en à ce guide pour "
-"une introduction plus approfondie sur le sujet."
 
 #: ../../source/how-to-enable-tls-connections.rst:16
+msgid ""
+"Checkout the `Flower Authentication "
+"<https://github.com/adap/flower/tree/main/examples/flower-"
+"authentication>`_ example for a complete self-contained example on how to"
+" setup TLS and (optionally) node authentication. Check out the :doc:`how-"
+"to-authenticate-supernodes` guide to learn more about adding an "
+"authentication layer to SuperLink ↔ SuperNode connections."
+msgstr ""
+
+#: ../../source/how-to-enable-tls-connections.rst:23
 msgid "Certificates"
 msgstr "Certificats"
 
-#: ../../source/how-to-enable-tls-connections.rst:18
-#, fuzzy
+#: ../../source/how-to-enable-tls-connections.rst:25
 msgid ""
-"Using TLS-enabled connections requires certificates to be passed to the "
-"server and client. For the purpose of this guide we are going to generate"
-" self-signed certificates. As this can become quite complex we are going "
-"to ask you to run the script in ``examples/advanced-"
-"tensorflow/certificates/generate.sh`` with the following command "
-"sequence:"
+"Using TLS-enabled connections expects some certificates generated and "
+"passed when launching the SuperLink, the SuperNodes and when a user (e.g."
+" a data scientist that wants to submit a ``Run``) interacts with the "
+"federation via the `flwr CLI <ref-api-cli.html>`_."
 msgstr ""
-"L'utilisation de connexions compatibles avec le protocole SSL nécessite "
-"que des certificats soient transmis au serveur et au client. Pour les "
-"besoins de ce guide, nous allons générer des certificats auto-signés. "
-"Comme cela peut devenir assez complexe, nous allons te demander "
-"d'exécuter le script dans :code:`examples/advanced-"
-"tensorflow/certificates/generate.sh`"
 
-#: ../../source/how-to-enable-tls-connections.rst:29
-#, fuzzy
+#: ../../source/how-to-enable-tls-connections.rst:30
 msgid ""
-"This will generate the certificates in ``examples/advanced-"
-"tensorflow/.cache/certificates``."
+"We have prepared a script that can be used to generate such set of "
+"certificates. While using these are fine for prototyping, we advice you "
+"to follow the standards set in your team/organization and generated the "
+"certificates and share them with the corresponding parties. Refer to the "
+"**Generate TLS certificates** section in the example linked at the top of"
+" this guide."
 msgstr ""
-"Cela générera les certificats dans :code:`examples/advanced-"
-"tensorflow/.cache/certificates`."
 
-#: ../../source/how-to-enable-tls-connections.rst:32
+#: ../../source/how-to-enable-tls-connections.rst:41
+msgid ""
+"This will generate the TLS certificates in a new ``certificates/`` "
+"directory. Copy this directory into the directory of your app (e.g. a "
+"directory generated earlier via ``flwr new``)."
+msgstr ""
+
+#: ../../source/how-to-enable-tls-connections.rst:45
 #, fuzzy
 msgid ""
 "The approach for generating TLS certificates in the context of this "
@@ -6042,110 +6065,108 @@ msgstr ""
 "servir d'inspiration et de point de départ, mais ne doit pas être "
 "considérée comme complète pour les environnements de production."
 
-#: ../../source/how-to-enable-tls-connections.rst:40
-#, fuzzy
-msgid "Server (SuperLink)"
-msgstr "flower-superlink"
-
-#: ../../source/how-to-enable-tls-connections.rst:42
-#, fuzzy
-msgid ""
-"Navigate to the ``examples/advanced-tensorflow`` folder (`here "
-"<https://github.com/adap/flower/tree/main/examples/advanced-"
-"tensorflow>`_) and use the following terminal command to start a server "
-"(SuperLink) that uses the previously generated certificates:"
-msgstr ""
-"Nous allons maintenant montrer comment écrire un client qui utilise les "
-"scripts générés précédemment :"
-
-#: ../../source/how-to-enable-tls-connections.rst:54
-msgid ""
-"When providing certificates, the server expects a tuple of three "
-"certificates paths: CA certificate, server certificate and server private"
-" key."
+#: ../../source/how-to-enable-tls-connections.rst:53
+msgid "Launching the SuperLink with TLS"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:58
-#, fuzzy
-msgid "Clients (SuperNode)"
-msgstr "Codes d'état du client."
-
-#: ../../source/how-to-enable-tls-connections.rst:60
-#, fuzzy
+#: ../../source/how-to-enable-tls-connections.rst:55
 msgid ""
-"Use the following terminal command to start a client (SuperNode) that "
-"uses the previously generated certificates:"
+"This section describes how to launch a SuperLink that works on TLS-"
+"enabled connections. The code snippet below assumes the `certificates/` "
+"directory is in the same directory where you execute the command from. "
+"Edit the paths accordingtly if that is not the case. When providing "
+"certificates, the SuperLink expects a tuple of three certificates paths: "
+"CA certificate, server certificate and server private key."
 msgstr ""
-"Nous allons maintenant montrer comment écrire un client qui utilise les "
-"scripts générés précédemment :"
 
 #: ../../source/how-to-enable-tls-connections.rst:71
-#, fuzzy
 msgid ""
-"When setting ``root_certificates``, the client expects a file path to "
-"PEM-encoded root certificates."
+"``--ssl-ca-certfile``: Specify the location of the CA certificate file in"
+" your file. This file is a certificate that is used to verify the "
+"identity of the SuperLink."
 msgstr ""
-"En définissant :code:`root_certificates`, le client s'attend à recevoir "
-"les certificats racine codés en PEM sous forme de chaîne d'octets. Nous "
-"utilisons à nouveau :code:`Path` pour simplifier la lecture de ces "
-"certificats sous forme de chaînes d'octets."
 
-#: ../../source/how-to-enable-tls-connections.rst:74
-#, fuzzy
+#: ../../source/how-to-enable-tls-connections.rst
 msgid ""
-"In another terminal, start a second SuperNode that uses the same "
-"certificates:"
+"``--ssl-certfile``: Specify the location of the SuperLink's TLS "
+"certificate file. This file is used to identify the SuperLink and to "
+"encrypt the packages that are transmitted over the network."
 msgstr ""
-"Nous allons maintenant montrer comment écrire un client qui utilise les "
-"scripts générés précédemment :"
 
-#: ../../source/how-to-enable-tls-connections.rst:84
+#: ../../source/how-to-enable-tls-connections.rst
 msgid ""
-"Note that in the second SuperNode, if you run both on the same machine, "
-"you must specify a different port for the ``ClientAppIO`` API address to "
-"avoid clashing with the first SuperNode."
+"``--ssl-keyfile``: Specify the location of the SuperLink's TLS private "
+"key file. This file is used to decrypt the packages that are transmitted "
+"over the network."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:89
-msgid "Executing ``flwr run`` with TLS"
+#: ../../source/how-to-enable-tls-connections.rst:76
+msgid "Connecting the SuperNodes with TLS"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:91
+#: ../../source/how-to-enable-tls-connections.rst:78
 msgid ""
-"The root certificates used for executing ``flwr run`` is specified in the"
-" ``pyproject.toml`` of your app."
+"This section describes how to launch a SuperNode that works on TLS-"
+"enabled connections. The code snippet below assumes the `certificates/` "
+"directory is in the same directory where you execute the command from. To"
+" enable TLS, the only change required when launching the SuperNode is "
+"replacing ``--insecure`` with ``--root-certificates``"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:100
+#: ../../source/how-to-enable-tls-connections.rst:94
+msgid ""
+"``--root-certificates``:This specifies the location of the CA certificate"
+" file. The ``ca.crt`` file is used to verify the identity of the "
+"SuperLink."
+msgstr ""
+
+#: ../../source/how-to-enable-tls-connections.rst:96
+msgid ""
+"Follow the same procedure, i.e. replacing ``--insecure`` with ``--root-"
+"certificates``, to launch the second SuperNode."
+msgstr ""
+
+#: ../../source/how-to-enable-tls-connections.rst:109
+msgid "TLS-enabled Flower CLI"
+msgstr ""
+
+#: ../../source/how-to-enable-tls-connections.rst:111
+msgid ""
+"The `Flower CLI <ref-api-cli.html>`_ (e.g. ``flwr run`` command) is the "
+"way a user (e.g. a data scientist) can interact with a deployed "
+"federation. The Flower CLI commands are processed by the SuperLink and "
+"therefore, if it has been configured to only operate on TLS conenction, "
+"the requests sent by the Flower CLI need to make use of a TLS "
+"certificate. To do so, replace the ``insecure = true`` field in the "
+"``pyproject.toml`` with a new field that reads the certificate:"
+msgstr ""
+
+#: ../../source/how-to-enable-tls-connections.rst:126
 msgid ""
 "Note that the path to the ``root-certificates`` is relative to the root "
-"of the project. Now, you can run the example by executing the following:"
+"of the project. Now, you can run the example by executing ``flwr run``:"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:110
+#: ../../source/how-to-enable-tls-connections.rst:136
 #, fuzzy
 msgid ""
 "You should now have learned how to generate self-signed certificates "
 "using the given script, start an TLS-enabled server and have two clients "
 "establish secure connections to it. You should also have learned how to "
-"run your Flower project using ``flwr run`` with TLS enabled."
+"run your Flower project using ``flwr run`` with TLS enabled. All other "
+"commands in the `Flower CLI <ref-api-cli.html>`_ will also be TLS-"
+"enabled."
 msgstr ""
 "Tu devrais maintenant avoir appris à générer des certificats auto-signés "
 "à l'aide du script donné, à démarrer un serveur compatible SSL et à "
 "demander à un client d'établir une connexion sécurisée avec lui."
 
-#: ../../source/how-to-enable-tls-connections.rst:117
-msgid ""
-"For running a Docker setup with TLS enabled, please refer to :doc:`docker"
-"/enable-tls`."
-msgstr ""
-
-#: ../../source/how-to-enable-tls-connections.rst:121
+#: ../../source/how-to-enable-tls-connections.rst:150
 #, fuzzy
 msgid "Additional resources"
 msgstr "Ressources supplémentaires"
 
-#: ../../source/how-to-enable-tls-connections.rst:123
+#: ../../source/how-to-enable-tls-connections.rst:152
 msgid ""
 "These additional sources might be relevant if you would like to dive "
 "deeper into the topic of certificates:"
@@ -6153,11 +6174,11 @@ msgstr ""
 "Ces sources supplémentaires peuvent être pertinentes si tu souhaites "
 "approfondir le sujet des certificats :"
 
-#: ../../source/how-to-enable-tls-connections.rst:126
+#: ../../source/how-to-enable-tls-connections.rst:155
 msgid "`Let's Encrypt <https://letsencrypt.org/docs/>`_"
 msgstr "`Let's Encrypt <https://letsencrypt.org/docs/>`_"
 
-#: ../../source/how-to-enable-tls-connections.rst:127
+#: ../../source/how-to-enable-tls-connections.rst:156
 msgid "`certbot <https://certbot.eff.org/>`_"
 msgstr "`certbot <https://certbot.eff.org/>`_"
 
@@ -7101,6 +7122,292 @@ msgid ""
 "To enable authentication and establish secure connections, please refer "
 "to the following resources: |authenticate_supernodes|_, "
 "|enable_tls_connections|_"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:2
+msgid "Run Flower with the Deployment Engine"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:4
+msgid ""
+"This how-to guide demonstrates how to set up and run Flower with the "
+"Deployment Engine using minimal configurations to illustrate the "
+"workflow. This is a complementary guide to the :doc:`docker/index` "
+"guides."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:8
+msgid "In this how-to guide, you will:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:10
+msgid "Create a Flower App using the PyTorch template."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:11
+msgid ""
+"Start a Flower federation consisting of one ``SuperLink`` (\"the "
+"server\") and two ``SuperNodes`` (\"the clients\")."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:13
+msgid "Run the Flower App on this federation."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:15
+msgid "The how-to guide should take less than 10 minutes to complete."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:22
+msgid ""
+"The latest ``flwr`` CLI version is installed on your machine. Follow the "
+"installation instructions :doc:`here <../how-to-install-flower>`."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:24
+msgid ""
+"This guide assumes all commands to be executed in the same machine in "
+"different terminals, each making use of the same Python environment."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:26
+msgid ""
+"This guide also assumes that you are familiar with the basic components "
+"in a Flower deployment (i.e. ``SuperLink`` and ``SuperNode``), what their"
+" roles are and how they interact with each other. Please refer to the "
+":doc:`explanation-flower-architecture` guide and the :doc:`ref-flower-"
+"network-communication` for an overview of what each component does and "
+"how they interact with each other."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:34
+msgid ""
+"In a real deployment you would typically run the ``SuperLink`` the "
+"``SuperNodes`` in different machines/servers from the one you develop "
+"your Flower app (i.e. from where you do ``flwr new`` and ``flwr run``). "
+"The guide presented below is still valid for such scenarios but you will "
+"need to have setup a Python environment with the right set of "
+"dependencies for ``SuperLink`` and ``SuperNodes``. An often easier way to"
+" achieve such deployments is by means of Docker. Check the "
+":doc:`docker/index` to gain a better understanding on how to do so."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:43
+#, fuzzy
+msgid "Step 1: Create a Flower App"
+msgstr "Créer une nouvelle page"
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:45
+msgid ""
+"Although you could write a Flower app from scratch, it is often easier to"
+" start from one of the templates available via ``flwr new`` and then "
+"customize it to your use case. Create a new Flower app (PyTorch), and "
+"follow the instructions show upon executing ``flwr new``:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:69
+msgid ""
+"You might want to update the ``torch`` and ``torchvision`` packages that "
+"come with the proejct to the latets released versions. Do so with: ``pip "
+"install -U torch torchvision``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:73
+msgid ""
+"If you decide to run the project with ``flwr run .``, the Simulation "
+"Engine will be used. Continue to Step 2 to know how to instead use the "
+"Deployment Engine."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:78
+msgid ""
+"Feel free to inspect the code using your favorite code editor before "
+"proceeding. Just open the ``my-project`` that was automatically created "
+"via ``flwr new``. If you would like to get an overview of the code that "
+"was generated, take a look at the :doc:`tutorial-quickstart-pytorch` "
+"tutorial."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:84
+#, fuzzy
+msgid "Step 2: Launch Flower Federation"
+msgstr "Serveur de Flower"
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:86
+msgid ""
+"In this section you will learn how to launch a ``SuperLink`` and connect "
+"two ``SuperNodes`` to it."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:90
+#, fuzzy
+msgid "Start a Flower SuperLink"
+msgstr "flower-superlink"
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:92
+msgid ""
+"In a new terminal, activate your environment and start the ``SuperLink`` "
+"process in insecure mode:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:101
+msgid "``flower-superlink``: Name of the ``SuperLink`` binary."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst
+msgid ""
+"``--insecure``: This flag tells the SuperLink to operate in an insecure "
+"mode, allowing"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst
+msgid ""
+"unencrypted communication. Refer to the :doc:`how-to-enable-tls-"
+"connections` guide to learn how to run your ``SuperLink`` with TLS."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:106
+#, fuzzy
+msgid "Start two Flower SuperNodes"
+msgstr "Démarrer le serveur"
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:108
+msgid ""
+"In this step, you will launch two ``SuperNodes`` and connect them to the "
+"``SuperLink``. You will need two terminals for this step."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:113
+msgid ""
+"Note that the values passed via the ``--node-config`` argument are "
+"specific to the behaviour of the ``ClientApp``. If you inspect the code "
+"generated in the first step via ``flwr new``, you'd see that the "
+"``ClientApp`` is expecting a certain set of key-value pairs to be present"
+" in order to partition and load some data. Typically, your ``ClientApp`` "
+"wouldn't partition a dataset, instead it would access the data directly "
+"available. In such cases you would write your ``ClientApp`` and make it "
+"receive, for example, the path to a directory of images."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:121
+msgid ""
+"**Terminal 1** Start the first ``SuperNode`` after activating your "
+"environment:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:133
+msgid "``flower-supernode``: Name of the ``SuperNode`` binary."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst
+msgid ""
+"``--insecure``: This flag tells the ``SuperNode`` to operate in an "
+"insecure mode, allowing"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst
+msgid ""
+"unencrypted communication. Refer to the :doc:`how-to-enable-tls-"
+"connections` guide to learn how to run your ``SuperNode`` with TLS."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst
+msgid ""
+"``--superlink 127.0.0.1:9092``: Connect to the SuperLink's Fleet API at "
+"the address"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst
+msgid ""
+"``127.0.0.1:9092``. If you had launched the ``SuperLink`` in a different "
+"machine, you'd replace ``127.0.0.1`` with the public IP of that machine."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst
+msgid ""
+"``--clientappio-api-address 127.0.0.1:9094``: Set the address and port "
+"number where the"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst
+msgid "SuperNode is listening to communicate with the ``ClientApp``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst
+msgid ""
+"``--node-config \"partition-id=0 num-partitions=2\"``: The ``ClientApp`` "
+"code generated via the ``flwr new`` template expects those two key-value "
+"pairs to be defined at run time. Set the partition ID to ``0`` and the "
+"number of partitions to ``2`` for the ``SuperNode`` configuration."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:142
+msgid ""
+"**Terminal 2** Start the second ``SuperNode`` after activating your "
+"environment:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:154
+msgid ""
+"``--clientappio-api-address 127.0.0.1:9095``: Note that a different port "
+"is being used. This is only needed because you are running two "
+"``SuperNodes`` on the same machine. Typically you would run one node per "
+"machine and therefore, the ``--clientappio-api-address`` could be omitted"
+" all together and left with its default value."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:155
+msgid ""
+"``--node-config \"partition-id=1 num-partitions=2\"```: Note here we "
+"indicate a different `partition-id`. In this way, a ``ClientApp`` will "
+"use a different data partition depending on which ``SuperNode`` runs in."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:158
+#, fuzzy
+msgid "Step 3: Run a Flower App on the Federation"
+msgstr "Serveur de Flower"
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:160
+msgid ""
+"At this point, you have launched two ``SuperNodes`` that are connected to"
+" the same ``SuperLink``. The system is idling waiting for a ``Run`` to be"
+" submitted. Before you can run your Flower App through the federation we "
+"need a way to tell ``flwr run`` that the App is to be executed via the "
+"SuperLink we just started, instead of using the local Simulation Engine "
+"(the default). Doing this is easy: define a new federation section in the"
+" ``pyproject.toml``, indicate the address of the ``SuperLink`` and pass a"
+" certificate (if any) or set the insecure flag (only when testing "
+"locally, real deployments require TLS)."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:169
+msgid ""
+"Open the ``pyproject.toml`` file and at the end add a new federation "
+"configuration:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:187
+msgid ""
+"In another terminal and with your Python environment activated, run the "
+"Flower App and follow the ``ServerApp`` logs to track the execution of "
+"the run:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:194
+msgid ""
+"If you want to rerun the project or test an updated version by making "
+"changes to the code, simply re-run the command above."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:198
+msgid "Step 4: Clean Up"
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:200
+msgid ""
+"Use the ``Ctrl+C`` command in each terminal to stop the respective "
+"processes."
 msgstr ""
 
 #: ../../source/how-to-run-simulations.rst:22
@@ -9070,7 +9377,7 @@ msgstr "Quickstart tutorials"
 msgid "How-to guides"
 msgstr "Guides"
 
-#: ../../source/index.rst:109 ../../source/index.rst:114
+#: ../../source/index.rst:110 ../../source/index.rst:115
 msgid "Explanations"
 msgstr "Explications"
 
@@ -9078,26 +9385,26 @@ msgstr "Explications"
 msgid "API reference"
 msgstr "Référence pour l'API"
 
-#: ../../source/index.rst:140
+#: ../../source/index.rst:141
 msgid "Reference docs"
 msgstr "Référence pour la documentation"
 
-#: ../../source/index.rst:155
+#: ../../source/index.rst:157
 #, fuzzy
 msgid "Contributor tutorials"
 msgstr "Configuration du contributeur"
 
-#: ../../source/index.rst:162
+#: ../../source/index.rst:164
 #, fuzzy
 msgid "Contributor how-to guides"
 msgstr "Guide pour les contributeurs"
 
-#: ../../source/index.rst:174
+#: ../../source/index.rst:176
 #, fuzzy
 msgid "Contributor explanations"
 msgstr "Explications"
 
-#: ../../source/index.rst:180
+#: ../../source/index.rst:182
 #, fuzzy
 msgid "Contributor references"
 msgstr "Configuration du contributeur"
@@ -9207,7 +9514,7 @@ msgstr ""
 "Guides orientés sur la résolutions étapes par étapes de problèmes ou "
 "objectifs specifiques."
 
-#: ../../source/index.rst:111
+#: ../../source/index.rst:112
 msgid ""
 "Understanding-oriented concept guides explain and discuss key topics and "
 "underlying ideas behind Flower and collaborative AI."
@@ -9215,29 +9522,29 @@ msgstr ""
 "Guides orientés sur la compréhension et l'explication des sujets et idées"
 " de fonds sur lesquels sont construits Flower et l'IA collaborative."
 
-#: ../../source/index.rst:123
+#: ../../source/index.rst:124
 #, fuzzy
 msgid "References"
 msgstr "Référence"
 
-#: ../../source/index.rst:125
+#: ../../source/index.rst:126
 msgid "Information-oriented API reference and other reference material."
 msgstr "Référence de l'API orientée sur l'information pure."
 
-#: ../../source/index.rst:134:<autosummary>:1
+#: ../../source/index.rst:135:<autosummary>:1
 msgid ":py:obj:`flwr <flwr>`\\"
 msgstr ""
 
-#: ../../source/index.rst:134:<autosummary>:1 flwr:1 of
+#: ../../source/index.rst:135:<autosummary>:1 flwr:1 of
 msgid "Flower main package."
 msgstr ""
 
-#: ../../source/index.rst:150
+#: ../../source/index.rst:152
 #, fuzzy
 msgid "Contributor docs"
 msgstr "Configuration du contributeur"
 
-#: ../../source/index.rst:152
+#: ../../source/index.rst:154
 #, fuzzy
 msgid ""
 "The Flower community welcomes contributions. The following docs are "
@@ -25537,7 +25844,7 @@ msgstr ""
 "-federated-learning-in-less-than-20-lines-of-code>`_"
 
 #: ../../source/ref-example-projects.rst:24
-#: ../../source/tutorial-quickstart-pytorch.rst:4
+#: ../../source/tutorial-quickstart-pytorch.rst:8
 msgid "Quickstart PyTorch"
 msgstr "Démarrage rapide de PyTorch"
 
@@ -25792,6 +26099,208 @@ msgid ""
 msgstr ""
 "`Flower rencontre Talan Dépôt GitHub "
 "<https://gitlab.com/Talan_Innovation_Factory/food-waste-prevention>`_ ."
+
+#: ../../source/ref-flower-network-communication.rst:-1
+msgid ""
+"The Flower Network Communication reference describes all mandatory and "
+"optional network connections in Flower federated AI systems."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:6
+#, fuzzy
+msgid "Flower Network Communication"
+msgstr "Rédiger de la documentation"
+
+#: ../../source/ref-flower-network-communication.rst:8
+msgid ""
+"This reference complements the `Flower Architecture <explanation-flower-"
+"architecture.html>`_ explanation by detailing the network connections "
+"used in a deployed Flower federated AI system."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:14
+msgid ""
+"Optionally, a third connection to a third-party service can be "
+"established to provide user-level authentication via `OIDC "
+"<https://openid.net/developers/how-connect-works/>`_. This means that "
+"only users authenticated via ``flwr login`` are able to interface with "
+"the SuperLink."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:34
+msgid ""
+"Click the buttons above to toggle between the network diagrams for "
+"isolation modes **subprocess** and **process**."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:38
+#, fuzzy
+msgid "Mandatory Network Connections"
+msgstr "Collecte centralisée des données"
+
+#: ../../source/ref-flower-network-communication.rst:40
+msgid "Deployed Flower systems have at least two types of network connections:"
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:42
+msgid ""
+"**CLI to SuperLink (Exec API)**: The ``flwr`` `CLI command <ref-api-"
+"cli.html>`_, typically run on the users workstation, is used to interface"
+" with a deployed Flower federation consisting of SuperLink and "
+"SuperNodes. From a networking perspective, the ``flwr`` CLI acts as a "
+"gRPC client and the SuperLink acts as a gRPC server. The ``flwr`` CLI is "
+"the only way for a user (AI researchers, data scientist) to inferface "
+"with a deployed Flower federation. They cannot, for example, interface "
+"directly with SuperNodes connected to the SuperLink. The ``flwr`` CLI to "
+"SuperLink connection should always use TLS, but ``insecure`` mode is "
+"supported for local testing."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:50
+msgid ""
+"**SuperNode to SuperLink (Fleet API)**: In Flower terminology, a Flower "
+"federation is a set of SuperNodes connected to the same SuperLink. From a"
+" networking perspective, each SuperNode acts as a gRPC client and the "
+"SuperLink acts as a gRPC server. This means that, when deploying a "
+"SuperNode, only outgoing connections are necessary to connect to the "
+"SuperLink. Only the SuperNodes can initiate such requests and they do not"
+" respond to incoming requests. The SuperNode to SuperLink connection "
+"should always use TLS (see :doc:`how-to-enable-tls-connections` to learn "
+"more), but ``insecure`` mode is supported for local testing."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:60
+#, fuzzy
+msgid "Optional Network Connections"
+msgstr "Collecte centralisée des données"
+
+#: ../../source/ref-flower-network-communication.rst:62
+msgid ""
+"Depending on the SuperLink and SuperNode configuration, Flower systems "
+"can have/use a number of additional network connections."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:66
+#, fuzzy
+msgid "Isolation mode"
+msgstr "Solution"
+
+#: ../../source/ref-flower-network-communication.rst:68
+msgid ""
+"Both Flower SuperLink and Flower SuperNode can use different isolation "
+"modes. Isolation mode ``subprocess`` configures the SuperLink/SuperNode "
+"to run ServerApp/ClientApp in a sub-process. Isolation mode ``process`` "
+"expects ServerApp or ClientApp to run in separate externally-managed "
+"processes. This allows, for example, to run SuperNode and ``ClientApp`` "
+"in separate Docker containers with different sets of dependencies "
+"installed. Check the :doc:`docker/index` guide to gain a better "
+"understanding on how to use both modes."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:76
+msgid ""
+"In isolation mode ``process``, additional network connections are "
+"necessary to allow the external process running ServerApp or ClientApp to"
+" communicate with the long-running SuperLink or SuperNode:"
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:80
+msgid ""
+"**flwr-serverapp to SuperLink (ServerAppIO API)**: The process running "
+"the ``ServerApp``, ``flwr-serveapp``, acts as a gRPC client and connects "
+"to the SuperLink's ServerAppIO API. This connection enables the ``flwr-"
+"serverapp`` process to pull the necessary inputs to execute the "
+"``ServerApp``. It also allows the ``ServerApp``, once running, to do "
+"typical things like sending/receiving messages to/from available "
+"SuperNodes (via the SuperLink)."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:86
+msgid ""
+"**flwr-clientapp to SuperNode (ClientAppIO API)**: The process running "
+"the ``ClientApp``, ``flwr-clientapp``, acts as a gRPC client and connects"
+" to the SuperNode's ClientAppIO API. This connection enables the ``flwr-"
+"clientapp`` process to pull the necessary details (e.g., FAB file) to "
+"execute the ``ClientApp``, execute the ``ClientApp`` (e.g., local model "
+"training) and return the execution results (e.g., locally update model "
+"parameters) to the SuperNode."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:95
+msgid ""
+"In the current version of Flower, both of these connections are insecure "
+"because Flower expects SuperLink/SuperNode and ``flwr-serverapp`` / "
+"``flwr-clientapp`` to be run in the same network. ``flwr-serverapp`` / "
+"``flwr-clientapp`` and SuperLink/SuperNode should never communicate over "
+"untrusted networks (e.g., public internet)."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:102
+#, fuzzy
+msgid "User authentication"
+msgstr "Vérifie l'installation"
+
+#: ../../source/ref-flower-network-communication.rst:104
+msgid ""
+"When user authentication is enabled, Flower uses an OIDC-compatible "
+"server to authenticate requests:"
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:107
+msgid ""
+"**SuperLink to OIDC server**: A SuperLink can optionally be configured to"
+" only allow authenticated users to interact with it. In this setting, the"
+" Flower SuperLink acts as a REST client to the OIDC-compatible server."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:112
+#, fuzzy
+msgid "Application-specific connections"
+msgstr "Simulation de moniteur"
+
+#: ../../source/ref-flower-network-communication.rst:114
+msgid ""
+"Users who write Flower Apps (``ServerApp`` and ``ClientApp``) can also "
+"make additional network requests. This is, strictly speaking, not part of"
+" Flower as a Federated AI Platform. It is a decision of (a) the user "
+"about what kinds of third-party systems their Flower App should connect "
+"to and (b) the system administrator about what kinds of connections they "
+"want to allow."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:120
+#, fuzzy
+msgid "Typical examples include:"
+msgstr "Voici quelques exemples :"
+
+#: ../../source/ref-flower-network-communication.rst:122
+msgid ""
+"**ClientApp to Database**: ``ClientApp`` instances typically need to be "
+"able to access the data to perform the action they have been designed for"
+" (e.g. train locally a model, run a DB query). How this connection is "
+"established depends on what storage technology is used at the client "
+"side. Note that in the diagram above, we show two representative "
+"connections to DBs in Client-A and Client-B. Your DB connection(s) may "
+"likely be different to the illustration above."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:128
+msgid ""
+"**ServerApp to Database**: ``ServerApp`` instances might want to access "
+"the data to perform the action they have been designed for (e.g. evaluate"
+" a model on some data after aggregation). How this connection is "
+"established depends on what storage technology used at the client side. "
+"Note that in the diagram above we have omitted showing a DB connected to "
+"the ServerApp components."
+msgstr ""
+
+#: ../../source/ref-flower-network-communication.rst:133
+msgid ""
+"**ServerApp to metric logging service**: Metric logging services like "
+"TensorBoard, MLFlow and Weights & Biases are often used to track the "
+"progress of training runs. In this setting, the ``ServerApp`` typically "
+"acts as a client to the metric logging service."
+msgstr ""
 
 #: ../../source/ref-telemetry.md:1
 msgid "Telemetry"
@@ -26124,11 +26633,17 @@ msgstr ""
 "<https://github.com/adap/flower/tree/main/examples/quickstart-pandas>`_ "
 "pour en savoir plus."
 
-#: ../../source/tutorial-quickstart-fastai.rst:4
+#: ../../source/tutorial-quickstart-fastai.rst:-1
+msgid ""
+"Learn how to train a SqueezeNet model on MNIST using federated learning "
+"with Flower and fastai in this step-by-step tutorial."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-fastai.rst:8
 msgid "Quickstart fastai"
 msgstr "Démarrage rapide fastai"
 
-#: ../../source/tutorial-quickstart-fastai.rst:6
+#: ../../source/tutorial-quickstart-fastai.rst:10
 #, fuzzy
 msgid ""
 "In this federated learning tutorial we will learn how to train a "
@@ -26140,24 +26655,24 @@ msgstr ""
 "tout exécuter au sein d'un `virtualenv <https://flower.ai/docs"
 "/recommended-env-setup.html>`_."
 
-#: ../../source/tutorial-quickstart-fastai.rst:10
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:11
+#: ../../source/tutorial-quickstart-fastai.rst:14
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:15
 msgid "Then, clone the code example directly from GitHub:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-fastai.rst:18
+#: ../../source/tutorial-quickstart-fastai.rst:22
 msgid ""
 "This will create a new directory called `quickstart-fastai` containing "
 "the following files:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-fastai.rst:31
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:32
+#: ../../source/tutorial-quickstart-fastai.rst:35
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:36
 #, fuzzy
 msgid "Next, activate your environment, then run:"
 msgstr "et active l'environnement virtuel avec :"
 
-#: ../../source/tutorial-quickstart-fastai.rst:41
+#: ../../source/tutorial-quickstart-fastai.rst:45
 msgid ""
 "This example by default runs the Flower Simulation Engine, creating a "
 "federation of 10 nodes using `FedAvg <https://flower.ai/docs/framework"
@@ -26168,32 +26683,32 @@ msgid ""
 " Let's run the project:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-fastai.rst:54
-#: ../../source/tutorial-quickstart-huggingface.rst:61
-#: ../../source/tutorial-quickstart-jax.rst:60
-#: ../../source/tutorial-quickstart-mlx.rst:60
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:55
-#: ../../source/tutorial-quickstart-pytorch.rst:62
-#: ../../source/tutorial-quickstart-scikitlearn.rst:59
-#: ../../source/tutorial-quickstart-tensorflow.rst:62
-#: ../../source/tutorial-quickstart-xgboost.rst:492
+#: ../../source/tutorial-quickstart-fastai.rst:58
+#: ../../source/tutorial-quickstart-huggingface.rst:65
+#: ../../source/tutorial-quickstart-jax.rst:64
+#: ../../source/tutorial-quickstart-mlx.rst:64
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:59
+#: ../../source/tutorial-quickstart-pytorch.rst:66
+#: ../../source/tutorial-quickstart-scikitlearn.rst:63
+#: ../../source/tutorial-quickstart-tensorflow.rst:66
+#: ../../source/tutorial-quickstart-xgboost.rst:496
 msgid "With default arguments you will see an output like this one:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-fastai.rst:98
-#: ../../source/tutorial-quickstart-huggingface.rst:112
-#: ../../source/tutorial-quickstart-jax.rst:102
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:105
-#: ../../source/tutorial-quickstart-pytorch.rst:103
-#: ../../source/tutorial-quickstart-scikitlearn.rst:101
-#: ../../source/tutorial-quickstart-tensorflow.rst:103
-#: ../../source/tutorial-quickstart-xgboost.rst:537
+#: ../../source/tutorial-quickstart-fastai.rst:102
+#: ../../source/tutorial-quickstart-huggingface.rst:116
+#: ../../source/tutorial-quickstart-jax.rst:106
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:109
+#: ../../source/tutorial-quickstart-pytorch.rst:107
+#: ../../source/tutorial-quickstart-scikitlearn.rst:105
+#: ../../source/tutorial-quickstart-tensorflow.rst:107
+#: ../../source/tutorial-quickstart-xgboost.rst:541
 msgid ""
 "You can also override the parameters defined in the "
 "``[tool.flwr.app.config]`` section in ``pyproject.toml`` like this:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-fastai.rst:108
+#: ../../source/tutorial-quickstart-fastai.rst:112
 #, fuzzy
 msgid ""
 "Check the `source code <https://github.com/adap/flower/tree/main/examples"
@@ -26208,15 +26723,16 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:-1
 msgid ""
-"Check out this Federating Learning quickstart tutorial for using Flower "
-"with 🤗 HuggingFace Transformers in order to fine-tune an LLM."
+"Learn how to train a large language model on the IMDB dataset using "
+"federated learning with Flower and 🤗 Hugging Face in this step-by-step "
+"tutorial."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:4
+#: ../../source/tutorial-quickstart-huggingface.rst:8
 msgid "Quickstart 🤗 Transformers"
 msgstr "Démarrage rapide 🤗 Transformateurs"
 
-#: ../../source/tutorial-quickstart-huggingface.rst:6
+#: ../../source/tutorial-quickstart-huggingface.rst:10
 #, fuzzy
 msgid ""
 "In this federated learning tutorial we will learn how to train a large "
@@ -26230,7 +26746,7 @@ msgstr ""
 "tout exécuter au sein d'un `virtualenv <https://flower.ai/docs"
 "/recommended-env-setup.html>`_."
 
-#: ../../source/tutorial-quickstart-huggingface.rst:12
+#: ../../source/tutorial-quickstart-huggingface.rst:16
 msgid ""
 "Let's use ``flwr new`` to create a complete Flower+🤗 Hugging Face "
 "project. It will generate all the files needed to run, by default with "
@@ -26239,12 +26755,12 @@ msgid ""
 "|iidpartitioner|_."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:17
-#: ../../source/tutorial-quickstart-jax.rst:16
-#: ../../source/tutorial-quickstart-mlx.rst:17
-#: ../../source/tutorial-quickstart-pytorch.rst:18
-#: ../../source/tutorial-quickstart-scikitlearn.rst:15
-#: ../../source/tutorial-quickstart-tensorflow.rst:18
+#: ../../source/tutorial-quickstart-huggingface.rst:21
+#: ../../source/tutorial-quickstart-jax.rst:20
+#: ../../source/tutorial-quickstart-mlx.rst:21
+#: ../../source/tutorial-quickstart-pytorch.rst:22
+#: ../../source/tutorial-quickstart-scikitlearn.rst:19
+#: ../../source/tutorial-quickstart-tensorflow.rst:22
 #, fuzzy
 msgid ""
 "Now that we have a rough idea of what this example is about, let's get "
@@ -26254,63 +26770,52 @@ msgstr ""
 "commençons. Nous devons d'abord installer Flower. Tu peux le faire en "
 "lançant :"
 
-#: ../../source/tutorial-quickstart-huggingface.rst:25
+#: ../../source/tutorial-quickstart-huggingface.rst:29
 msgid ""
 "Then, run the command below. You will be prompted to select one of the "
 "available templates (choose ``HuggingFace``), give a name to your "
 "project, and type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:33
-#: ../../source/tutorial-quickstart-jax.rst:32
-#: ../../source/tutorial-quickstart-mlx.rst:32
-#: ../../source/tutorial-quickstart-pytorch.rst:34
-#: ../../source/tutorial-quickstart-scikitlearn.rst:31
-#: ../../source/tutorial-quickstart-tensorflow.rst:34
+#: ../../source/tutorial-quickstart-huggingface.rst:37
+#: ../../source/tutorial-quickstart-jax.rst:36
+#: ../../source/tutorial-quickstart-mlx.rst:36
+#: ../../source/tutorial-quickstart-pytorch.rst:38
+#: ../../source/tutorial-quickstart-scikitlearn.rst:35
+#: ../../source/tutorial-quickstart-tensorflow.rst:38
 msgid ""
 "After running it you'll notice a new directory with your project name has"
 " been created. It should have the following structure:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:47
-#: ../../source/tutorial-quickstart-jax.rst:46
-#: ../../source/tutorial-quickstart-mlx.rst:46
-#: ../../source/tutorial-quickstart-pytorch.rst:48
-#: ../../source/tutorial-quickstart-scikitlearn.rst:45
-#: ../../source/tutorial-quickstart-tensorflow.rst:48
+#: ../../source/tutorial-quickstart-huggingface.rst:51
+#: ../../source/tutorial-quickstart-jax.rst:50
+#: ../../source/tutorial-quickstart-mlx.rst:50
+#: ../../source/tutorial-quickstart-pytorch.rst:52
+#: ../../source/tutorial-quickstart-scikitlearn.rst:49
+#: ../../source/tutorial-quickstart-tensorflow.rst:52
 msgid ""
 "If you haven't yet installed the project and its dependencies, you can do"
 " so by:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:54
-#: ../../source/tutorial-quickstart-jax.rst:53
-#: ../../source/tutorial-quickstart-pytorch.rst:55
-#: ../../source/tutorial-quickstart-scikitlearn.rst:52
-#: ../../source/tutorial-quickstart-tensorflow.rst:55
-#: ../../source/tutorial-quickstart-xgboost.rst:485
+#: ../../source/tutorial-quickstart-huggingface.rst:58
+#: ../../source/tutorial-quickstart-jax.rst:57
+#: ../../source/tutorial-quickstart-pytorch.rst:59
+#: ../../source/tutorial-quickstart-scikitlearn.rst:56
+#: ../../source/tutorial-quickstart-tensorflow.rst:59
+#: ../../source/tutorial-quickstart-xgboost.rst:489
 msgid "To run the project, do:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:102
+#: ../../source/tutorial-quickstart-huggingface.rst:106
 msgid "You can also run the project with GPU as follows:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:109
+#: ../../source/tutorial-quickstart-huggingface.rst:113
 msgid ""
 "This will use the default arguments where each ``ClientApp`` will use 2 "
 "CPUs and at most 4 ``ClientApp``\\s will run in a given GPU."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-huggingface.rst:120
-#: ../../source/tutorial-quickstart-jax.rst:110
-#: ../../source/tutorial-quickstart-mlx.rst:110
-#: ../../source/tutorial-quickstart-pytorch.rst:111
-#: ../../source/tutorial-quickstart-scikitlearn.rst:109
-msgid ""
-"What follows is an explanation of each component in the project you just "
-"created: dataset partition, the model, defining the ``ClientApp`` and "
-"defining the ``ServerApp``."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:124
@@ -26318,13 +26823,24 @@ msgstr ""
 #: ../../source/tutorial-quickstart-mlx.rst:114
 #: ../../source/tutorial-quickstart-pytorch.rst:115
 #: ../../source/tutorial-quickstart-scikitlearn.rst:113
-#: ../../source/tutorial-quickstart-tensorflow.rst:112
-#: ../../source/tutorial-quickstart-xgboost.rst:89
+msgid ""
+"What follows is an explanation of each component in the project you just "
+"created: dataset partition, the model, defining the ``ClientApp`` and "
+"defining the ``ServerApp``."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-huggingface.rst:128
+#: ../../source/tutorial-quickstart-jax.rst:118
+#: ../../source/tutorial-quickstart-mlx.rst:118
+#: ../../source/tutorial-quickstart-pytorch.rst:119
+#: ../../source/tutorial-quickstart-scikitlearn.rst:117
+#: ../../source/tutorial-quickstart-tensorflow.rst:116
+#: ../../source/tutorial-quickstart-xgboost.rst:93
 #, fuzzy
 msgid "The Data"
 msgstr "Chargement des données"
 
-#: ../../source/tutorial-quickstart-huggingface.rst:126
+#: ../../source/tutorial-quickstart-huggingface.rst:130
 msgid ""
 "This tutorial uses |flowerdatasets|_ to easily download and partition the"
 " `IMDB <https://huggingface.co/datasets/stanfordnlp/imdb>`_ dataset. In "
@@ -26337,17 +26853,17 @@ msgid ""
 "their data partition."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:171
-#: ../../source/tutorial-quickstart-jax.rst:128
-#: ../../source/tutorial-quickstart-mlx.rst:155
-#: ../../source/tutorial-quickstart-pytorch.rst:150
-#: ../../source/tutorial-quickstart-scikitlearn.rst:138
-#: ../../source/tutorial-quickstart-tensorflow.rst:139
+#: ../../source/tutorial-quickstart-huggingface.rst:175
+#: ../../source/tutorial-quickstart-jax.rst:132
+#: ../../source/tutorial-quickstart-mlx.rst:159
+#: ../../source/tutorial-quickstart-pytorch.rst:154
+#: ../../source/tutorial-quickstart-scikitlearn.rst:142
+#: ../../source/tutorial-quickstart-tensorflow.rst:143
 #, fuzzy
 msgid "The Model"
 msgstr "Entraîne le modèle"
 
-#: ../../source/tutorial-quickstart-huggingface.rst:173
+#: ../../source/tutorial-quickstart-huggingface.rst:177
 #, fuzzy
 msgid ""
 "We will leverage 🤗 Hugging Face to federate the training of language "
@@ -26364,13 +26880,13 @@ msgstr ""
 "données d'évaluations IMDB. L'objectif final est de détecter si "
 "l'évaluation d'un film est positive ou négative."
 
-#: ../../source/tutorial-quickstart-huggingface.rst:185
+#: ../../source/tutorial-quickstart-huggingface.rst:189
 msgid ""
 "Note that here, ``model_name`` is a string that will be loaded from the "
 "``Context`` in the ClientApp and ServerApp."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:188
+#: ../../source/tutorial-quickstart-huggingface.rst:192
 msgid ""
 "In addition to loading the pretrained model weights and architecture, we "
 "also include two utility functions to perform both training (i.e. "
@@ -26383,18 +26899,18 @@ msgid ""
 "perform local training or evaluation:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:228
-#: ../../source/tutorial-quickstart-jax.rst:170
-#: ../../source/tutorial-quickstart-mlx.rst:199
-#: ../../source/tutorial-quickstart-pytorch.rst:224
-#: ../../source/tutorial-quickstart-scikitlearn.rst:157
-#: ../../source/tutorial-quickstart-tensorflow.rst:168
-#: ../../source/tutorial-quickstart-xgboost.rst:149
+#: ../../source/tutorial-quickstart-huggingface.rst:232
+#: ../../source/tutorial-quickstart-jax.rst:174
+#: ../../source/tutorial-quickstart-mlx.rst:203
+#: ../../source/tutorial-quickstart-pytorch.rst:228
+#: ../../source/tutorial-quickstart-scikitlearn.rst:161
+#: ../../source/tutorial-quickstart-tensorflow.rst:172
+#: ../../source/tutorial-quickstart-xgboost.rst:153
 #, fuzzy
 msgid "The ClientApp"
 msgstr "client"
 
-#: ../../source/tutorial-quickstart-huggingface.rst:230
+#: ../../source/tutorial-quickstart-huggingface.rst:234
 msgid ""
 "The main changes we have to make to use 🤗 Hugging Face with Flower will "
 "be found in the ``get_weights()`` and ``set_weights()`` functions. Under "
@@ -26407,8 +26923,8 @@ msgid ""
 "them to an existing PyTorch model. Doing this in fairly easy in PyTorch."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:241
-#: ../../source/tutorial-quickstart-pytorch.rst:234
+#: ../../source/tutorial-quickstart-huggingface.rst:245
+#: ../../source/tutorial-quickstart-pytorch.rst:238
 msgid ""
 "The specific implementation of ``get_weights()`` and ``set_weights()`` "
 "depends on the type of models you use. The ones shown below work for a "
@@ -26416,9 +26932,9 @@ msgid ""
 "have more exotic model architectures."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:257
-#: ../../source/tutorial-quickstart-jax.rst:197
-#: ../../source/tutorial-quickstart-pytorch.rst:250
+#: ../../source/tutorial-quickstart-huggingface.rst:261
+#: ../../source/tutorial-quickstart-jax.rst:201
+#: ../../source/tutorial-quickstart-pytorch.rst:254
 msgid ""
 "The rest of the functionality is directly inspired by the centralized "
 "case. The ``fit()`` method in the client trains the model using the local"
@@ -26426,7 +26942,7 @@ msgid ""
 "model received on a held-out validation set that the client might have:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:283
+#: ../../source/tutorial-quickstart-huggingface.rst:287
 msgid ""
 "Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` "
 "defined above by means of a ``client_fn()`` callback. Note that the "
@@ -26437,18 +26953,18 @@ msgid ""
 "additional hyperparameters in ``pyproject.toml`` and access them here."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:316
-#: ../../source/tutorial-quickstart-jax.rst:246
-#: ../../source/tutorial-quickstart-mlx.rst:361
-#: ../../source/tutorial-quickstart-pytorch.rst:307
-#: ../../source/tutorial-quickstart-scikitlearn.rst:255
-#: ../../source/tutorial-quickstart-tensorflow.rst:232
-#: ../../source/tutorial-quickstart-xgboost.rst:269
+#: ../../source/tutorial-quickstart-huggingface.rst:320
+#: ../../source/tutorial-quickstart-jax.rst:250
+#: ../../source/tutorial-quickstart-mlx.rst:365
+#: ../../source/tutorial-quickstart-pytorch.rst:311
+#: ../../source/tutorial-quickstart-scikitlearn.rst:259
+#: ../../source/tutorial-quickstart-tensorflow.rst:236
+#: ../../source/tutorial-quickstart-xgboost.rst:273
 #, fuzzy
 msgid "The ServerApp"
 msgstr "serveur"
 
-#: ../../source/tutorial-quickstart-huggingface.rst:318
+#: ../../source/tutorial-quickstart-huggingface.rst:322
 msgid ""
 "To construct a ``ServerApp`` we define a ``server_fn()`` callback with an"
 " identical signature to that of ``client_fn()`` but the return type is "
@@ -26459,13 +26975,13 @@ msgid ""
 "value defined in the ``pyproject.toml``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:356
+#: ../../source/tutorial-quickstart-huggingface.rst:360
 msgid ""
 "Congratulations! You've successfully built and run your first federated "
 "learning system for an LLM."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:361
+#: ../../source/tutorial-quickstart-huggingface.rst:365
 msgid ""
 "Check the source code of the extended version of this tutorial in "
 "|quickstart_hf_link|_ in the Flower GitHub repository. For a "
@@ -26685,15 +27201,21 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-jax.rst:-1
 msgid ""
+"Learn how to train a linear regression using federated learning with "
+"Flower and JAX in this step-by-step tutorial."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-jax.rst:-1
+msgid ""
 "Check out this Federated Learning quickstart tutorial for using Flower "
 "with Jax to train a linear regression model on a scikit-learn dataset."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:4
+#: ../../source/tutorial-quickstart-jax.rst:8
 msgid "Quickstart JAX"
 msgstr "Démarrage rapide de JAX"
 
-#: ../../source/tutorial-quickstart-jax.rst:6
+#: ../../source/tutorial-quickstart-jax.rst:10
 #, fuzzy
 msgid ""
 "In this federated learning tutorial we will learn how to train a linear "
@@ -26706,7 +27228,7 @@ msgstr ""
 "tout exécuter au sein d'un `virtualenv <https://flower.ai/docs"
 "/recommended-env-setup.html>`_."
 
-#: ../../source/tutorial-quickstart-jax.rst:11
+#: ../../source/tutorial-quickstart-jax.rst:15
 msgid ""
 "Let's use ``flwr new`` to create a complete Flower+JAX project. It will "
 "generate all the files needed to run, by default with the Flower "
@@ -26715,20 +27237,20 @@ msgid ""
 "function."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:24
+#: ../../source/tutorial-quickstart-jax.rst:28
 msgid ""
 "Then, run the command below. You will be prompted to select one of the "
 "available templates (choose ``JAX``), give a name to your project, and "
 "type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:116
+#: ../../source/tutorial-quickstart-jax.rst:120
 msgid ""
 "This tutorial uses scikit-learn's |makeregression|_ function to generate "
 "a random regression problem."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:130
+#: ../../source/tutorial-quickstart-jax.rst:134
 msgid ""
 "We defined a simple linear regression model to demonstrate how to create "
 "a JAX model, but feel free to replace it with a more sophisticated JAX "
@@ -26736,14 +27258,14 @@ msgid ""
 "<https://flax.readthedocs.io/en/latest/index.html>`_):"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:141
+#: ../../source/tutorial-quickstart-jax.rst:145
 msgid ""
 "In addition to defining the model architecture, we also include two "
 "utility functions to perform both training (i.e. ``train()``) and "
 "evaluation (i.e. ``evaluation()``) using the above model."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:172
+#: ../../source/tutorial-quickstart-jax.rst:176
 msgid ""
 "The main changes we have to make to use JAX with Flower will be found in "
 "the ``get_params()`` and ``set_params()`` functions. In ``get_params()``,"
@@ -26752,7 +27274,7 @@ msgid ""
 "NumPy arrays it applies them to an existing JAX model."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:180
+#: ../../source/tutorial-quickstart-jax.rst:184
 msgid ""
 "The ``get_params()`` and ``set_params()`` functions here are conceptually"
 " similar to the ``get_weights()`` and ``set_weights()`` functions that we"
@@ -26760,7 +27282,7 @@ msgid ""
 "tutorial."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:227
+#: ../../source/tutorial-quickstart-jax.rst:231
 msgid ""
 "Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` "
 "defined above by means of a ``client_fn()`` callback. Note that the "
@@ -26771,7 +27293,7 @@ msgid ""
 "additioinal hyperparameters in ``pyproject.toml`` and access them here."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:248
+#: ../../source/tutorial-quickstart-jax.rst:252
 msgid ""
 "To construct a ``ServerApp`` we define a ``server_fn()`` callback with an"
 " identical signature to that of ``client_fn()`` but the return type is "
@@ -26782,13 +27304,13 @@ msgid ""
 " defined in the ``pyproject.toml``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:276
+#: ../../source/tutorial-quickstart-jax.rst:280
 msgid ""
 "Congratulations! You've successfully built and run your first federated "
 "learning system for JAX with Flower!"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:281
+#: ../../source/tutorial-quickstart-jax.rst:285
 #, fuzzy
 msgid ""
 "Check the source code of the extended version of this tutorial in "
@@ -26800,12 +27322,18 @@ msgstr ""
 "mxnet/client.py>`_ de cet exemple se trouve dans :code:`examples"
 "/quickstart-mxnet`."
 
-#: ../../source/tutorial-quickstart-mlx.rst:4
+#: ../../source/tutorial-quickstart-mlx.rst:-1
+msgid ""
+"Learn how to train an MLP on MNIST using federated learning with Flower "
+"and MLX in this step-by-step tutorial."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-mlx.rst:8
 #, fuzzy
 msgid "Quickstart MLX"
 msgstr "Démarrage rapide de JAX"
 
-#: ../../source/tutorial-quickstart-mlx.rst:6
+#: ../../source/tutorial-quickstart-mlx.rst:10
 #, fuzzy
 msgid ""
 "In this federated learning tutorial we will learn how to train simple MLP"
@@ -26817,7 +27345,7 @@ msgstr ""
 "tout exécuter au sein d'un `virtualenv <https://flower.ai/docs"
 "/recommended-env-setup.html>`_."
 
-#: ../../source/tutorial-quickstart-mlx.rst:10
+#: ../../source/tutorial-quickstart-mlx.rst:14
 msgid ""
 "Let's use `flwr new` to create a complete Flower+MLX project. It will "
 "generate all the files needed to run, by default with the Simulation "
@@ -26829,24 +27357,24 @@ msgid ""
 "api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:25
+#: ../../source/tutorial-quickstart-mlx.rst:29
 msgid ""
 "Then, run the command below. You will be prompted to select of the "
 "available templates (choose ``MLX``), give a name to your project, and "
 "type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:53
+#: ../../source/tutorial-quickstart-mlx.rst:57
 msgid "To run the project do:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:102
+#: ../../source/tutorial-quickstart-mlx.rst:106
 msgid ""
 "You can also override the parameters defined in "
 "``[tool.flwr.app.config]`` section in the ``pyproject.toml`` like this:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:116
+#: ../../source/tutorial-quickstart-mlx.rst:120
 msgid ""
 "We will use `Flower Datasets <https://flower.ai/docs/datasets/>`_ to "
 "easily download and partition the `MNIST` dataset. In this example you'll"
@@ -26857,20 +27385,20 @@ msgid ""
 "api/flwr_datasets.partitioner.html>`_ available in Flower Datasets:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:157
+#: ../../source/tutorial-quickstart-mlx.rst:161
 msgid ""
 "We define the model as in the `centralized MLX example "
 "<https://github.com/ml-explore/mlx-examples/tree/main/mnist>`_, it's a "
 "simple MLP:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:180
+#: ../../source/tutorial-quickstart-mlx.rst:184
 msgid ""
 "We also define some utility functions to test our model and to iterate "
 "over batches."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:201
+#: ../../source/tutorial-quickstart-mlx.rst:205
 msgid ""
 "The main changes we have to make to use `MLX` with `Flower` will be found"
 " in the ``get_params()`` and ``set_params()`` functions. Indeed, MLX "
@@ -26879,17 +27407,17 @@ msgid ""
 "messages to work)."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:206
+#: ../../source/tutorial-quickstart-mlx.rst:210
 msgid "The way MLX stores its parameters is as follows:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:219
+#: ../../source/tutorial-quickstart-mlx.rst:223
 msgid ""
 "Therefore, to get our list of ``np.array`` objects, we need to extract "
 "each array and convert them into a NumPy array:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:228
+#: ../../source/tutorial-quickstart-mlx.rst:232
 msgid ""
 "For the ``set_params()`` function, we perform the reverse operation. We "
 "receive a list of NumPy arrays and want to convert them into MLX "
@@ -26897,24 +27425,24 @@ msgid ""
 "them to the `weight` and `bias` keys of each layer dict:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:243
+#: ../../source/tutorial-quickstart-mlx.rst:247
 msgid ""
 "The rest of the functionality is directly inspired by the centralized "
 "case. The ``fit()`` method in the client trains the model using the local"
 " dataset:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:259
+#: ../../source/tutorial-quickstart-mlx.rst:263
 msgid ""
 "Here, after updating the parameters, we perform the training as in the "
 "centralized case, and return the new parameters."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:262
+#: ../../source/tutorial-quickstart-mlx.rst:266
 msgid "And for the ``evaluate()`` method of the client:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:272
+#: ../../source/tutorial-quickstart-mlx.rst:276
 msgid ""
 "We also begin by updating the parameters with the ones sent by the "
 "server, and then we compute the loss and accuracy using the functions "
@@ -26922,12 +27450,12 @@ msgid ""
 "the `MLP` model as well as other components such as the optimizer."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:277
+#: ../../source/tutorial-quickstart-mlx.rst:281
 #, fuzzy
 msgid "Putting everything together we have:"
 msgstr "Tout assembler"
 
-#: ../../source/tutorial-quickstart-mlx.rst:331
+#: ../../source/tutorial-quickstart-mlx.rst:335
 msgid ""
 "Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` "
 "defined above by means of a ``client_fn()`` callback. Note that "
@@ -26938,7 +27466,7 @@ msgid ""
 "method."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:363
+#: ../../source/tutorial-quickstart-mlx.rst:367
 msgid ""
 "To construct a ``ServerApp``, we define a ``server_fn()`` callback with "
 "an identical signature to that of ``client_fn()``, but the return type is"
@@ -26949,15 +27477,15 @@ msgid ""
 "``FedAvg`` strategy."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:386
-#: ../../source/tutorial-quickstart-pytorch.rst:344
-#: ../../source/tutorial-quickstart-tensorflow.rst:266
+#: ../../source/tutorial-quickstart-mlx.rst:390
+#: ../../source/tutorial-quickstart-pytorch.rst:348
+#: ../../source/tutorial-quickstart-tensorflow.rst:270
 msgid ""
 "Congratulations! You've successfully built and run your first federated "
 "learning system."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:390
+#: ../../source/tutorial-quickstart-mlx.rst:394
 #, fuzzy
 msgid ""
 "Check the `source code <https://github.com/adap/flower/blob/main/examples"
@@ -26997,11 +27525,11 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-pytorch.rst:-1
 msgid ""
-"Check out this Federated Learning quickstart tutorial for using Flower "
-"with PyTorch to train a CNN model on MNIST."
+"Learn how to train a Convolutional Neural Network on CIFAR-10 using "
+"federated learning with Flower and PyTorch in this step-by-step tutorial."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:6
+#: ../../source/tutorial-quickstart-pytorch.rst:10
 #, fuzzy
 msgid ""
 "In this federated learning tutorial we will learn how to train a "
@@ -27013,7 +27541,7 @@ msgstr ""
 "tout exécuter au sein d'un `virtualenv <https://flower.ai/docs"
 "/recommended-env-setup.html>`_."
 
-#: ../../source/tutorial-quickstart-pytorch.rst:11
+#: ../../source/tutorial-quickstart-pytorch.rst:15
 msgid ""
 "Let's use `flwr new` to create a complete Flower+PyTorch project. It will"
 " generate all the files needed to run, by default with the Flower "
@@ -27025,14 +27553,14 @@ msgid ""
 "api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:26
+#: ../../source/tutorial-quickstart-pytorch.rst:30
 msgid ""
 "Then, run the command below. You will be prompted to select one of the "
 "available templates (choose ``PyTorch``), give a name to your project, "
 "and type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:117
+#: ../../source/tutorial-quickstart-pytorch.rst:121
 msgid ""
 "This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ "
 "to easily download and partition the `CIFAR-10` dataset. In this example "
@@ -27046,13 +27574,13 @@ msgid ""
 " that correspond to their data partition."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:152
+#: ../../source/tutorial-quickstart-pytorch.rst:156
 msgid ""
 "We defined a simple Convolutional Neural Network (CNN), but feel free to "
 "replace it with a more sophisticated model if you'd like:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:177
+#: ../../source/tutorial-quickstart-pytorch.rst:181
 msgid ""
 "In addition to defining the model architecture, we also include two "
 "utility functions to perform both training (i.e. ``train()``) and "
@@ -27065,7 +27593,7 @@ msgid ""
 "training or evaluation:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:226
+#: ../../source/tutorial-quickstart-pytorch.rst:230
 msgid ""
 "The main changes we have to make to use `PyTorch` with `Flower` will be "
 "found in the ``get_weights()`` and ``set_weights()`` functions. In "
@@ -27075,7 +27603,7 @@ msgid ""
 "PyTorch model. Doing this in fairly easy in PyTorch."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:282
+#: ../../source/tutorial-quickstart-pytorch.rst:286
 msgid ""
 "Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` "
 "defined above by means of a ``client_fn()`` callback. Note that the "
@@ -27086,7 +27614,7 @@ msgid ""
 "additioinal hyperparameters in ``pyproject.toml`` and access them here."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:309
+#: ../../source/tutorial-quickstart-pytorch.rst:313
 msgid ""
 "To construct a ``ServerApp`` we define a ``server_fn()`` callback with an"
 " identical signature to that of ``client_fn()`` but the return type is "
@@ -27100,7 +27628,7 @@ msgid ""
 "``pyproject.toml``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:348
+#: ../../source/tutorial-quickstart-pytorch.rst:352
 #, fuzzy
 msgid ""
 "Check the `source code <https://github.com/adap/flower/blob/main/examples"
@@ -27113,24 +27641,30 @@ msgstr ""
 "mxnet/client.py>`_ de cet exemple se trouve dans :code:`examples"
 "/quickstart-mxnet`."
 
-#: ../../source/tutorial-quickstart-pytorch.rst:354
-#: ../../source/tutorial-quickstart-tensorflow.rst:278
+#: ../../source/tutorial-quickstart-pytorch.rst:358
+#: ../../source/tutorial-quickstart-tensorflow.rst:282
 #, fuzzy
 msgid "Video tutorial"
 msgstr "Tutoriel"
 
-#: ../../source/tutorial-quickstart-pytorch.rst:358
+#: ../../source/tutorial-quickstart-pytorch.rst:362
 msgid ""
 "The video shown below shows how to setup a PyTorch + Flower project using"
 " our previously recommended APIs. A new video tutorial will be released "
 "that shows the new APIs (as the content above does)"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:4
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:-1
+msgid ""
+"Learn how to train an autoencoder on MNIST using federated learning with "
+"Flower and PyTorch Lightning in this step-by-step tutorial."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:8
 msgid "Quickstart PyTorch Lightning"
 msgstr "Démarrage rapide de PyTorch Lightning"
 
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:6
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:10
 #, fuzzy
 msgid ""
 "In this federated learning tutorial we will learn how to train an "
@@ -27142,13 +27676,13 @@ msgstr ""
 "tout exécuter au sein d'un `virtualenv <https://flower.ai/docs"
 "/recommended-env-setup.html>`_."
 
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:19
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:23
 msgid ""
 "This will create a new directory called `quickstart-pytorch-lightning` "
 "containing the following files:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:42
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:46
 msgid ""
 "By default, Flower Simulation Engine will be started and it will create a"
 " federation of 4 nodes using `FedAvg <https://flower.ai/docs/framework"
@@ -27159,13 +27693,13 @@ msgid ""
 " To run the project, do:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:93
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:97
 msgid ""
 "Each simulated `ClientApp` (two per round) will also log a summary of "
 "their local training process. Expect this output to be similar to:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:115
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:119
 #, fuzzy
 msgid ""
 "Check the `source code <https://github.com/adap/flower/tree/main/examples"
@@ -27180,15 +27714,21 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:-1
 msgid ""
+"Learn how to train a logistic regression on MNIST using federated "
+"learning with Flower and scikit-learn in this step-by-step tutorial."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-scikitlearn.rst:-1
+msgid ""
 "Check out this Federated Learning quickstart tutorial for using Flower "
 "with scikit-learn to train a linear regression model."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:4
+#: ../../source/tutorial-quickstart-scikitlearn.rst:8
 msgid "Quickstart scikit-learn"
 msgstr "Démarrage rapide de scikit-learn"
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:6
+#: ../../source/tutorial-quickstart-scikitlearn.rst:10
 #, fuzzy
 msgid ""
 "In this federated learning tutorial we will learn how to train a Logistic"
@@ -27200,7 +27740,7 @@ msgstr ""
 "tout exécuter au sein d'un `virtualenv <https://flower.ai/docs"
 "/recommended-env-setup.html>`_."
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:10
+#: ../../source/tutorial-quickstart-scikitlearn.rst:14
 msgid ""
 "Let's use ``flwr new`` to create a complete Flower+scikit-learn project. "
 "It will generate all the files needed to run, by default with the Flower "
@@ -27208,14 +27748,14 @@ msgid ""
 "will be partitioned using |flowerdatasets|_'s |iidpartitioner|_"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:23
+#: ../../source/tutorial-quickstart-scikitlearn.rst:27
 msgid ""
 "Then, run the command below. You will be prompted to select one of the "
 "available templates (choose ``sklearn``), give a name to your project, "
 "and type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:115
+#: ../../source/tutorial-quickstart-scikitlearn.rst:119
 msgid ""
 "This tutorial uses |flowerdatasets|_ to easily download and partition the"
 " `MNIST <https://huggingface.co/datasets/ylecun/mnist>`_ dataset. In this"
@@ -27226,20 +27766,20 @@ msgid ""
 "partition."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:140
+#: ../../source/tutorial-quickstart-scikitlearn.rst:144
 msgid ""
 "We define the |logisticregression|_ model from scikit-learn in the "
 "``get_model()`` function:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:153
+#: ../../source/tutorial-quickstart-scikitlearn.rst:157
 msgid ""
 "To perform the training and evaluation, we will make use of the "
 "``.fit()`` and ``.score()`` methods available in the "
 "``LogisticRegression`` class."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:159
+#: ../../source/tutorial-quickstart-scikitlearn.rst:163
 msgid ""
 "The main changes we have to make to use scikit-learn with Flower will be "
 "found in the ``get_model_params()``, ``set_model_params()``, and "
@@ -27254,13 +27794,13 @@ msgid ""
 "is 28 × 28). Doing this is fairly easy in scikit-learn."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:198
+#: ../../source/tutorial-quickstart-scikitlearn.rst:202
 msgid ""
 "The rest of the functionality is directly inspired by the centralized "
 "case:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:226
+#: ../../source/tutorial-quickstart-scikitlearn.rst:230
 msgid ""
 "Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` "
 "defined above by means of a ``client_fn()`` callback. Note that the "
@@ -27271,7 +27811,7 @@ msgid ""
 "additioinal hyperparameters in ``pyproject.toml`` and access them here."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:257
+#: ../../source/tutorial-quickstart-scikitlearn.rst:261
 msgid ""
 "To construct a ``ServerApp`` we define a ``server_fn()`` callback with an"
 " identical signature to that of ``client_fn()`` but the return type is "
@@ -27283,13 +27823,13 @@ msgid ""
 "``pyproject.toml``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:295
+#: ../../source/tutorial-quickstart-scikitlearn.rst:299
 msgid ""
 "Congratulations! You've successfully built and run your first federated "
 "learning system in scikit-learn."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:300
+#: ../../source/tutorial-quickstart-scikitlearn.rst:304
 #, fuzzy
 msgid ""
 "Check the source code of the extended version of this tutorial in "
@@ -27303,15 +27843,16 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-tensorflow.rst:-1
 msgid ""
-"Check out this Federated Learning quickstart tutorial for using Flower "
-"with TensorFlow to train a CNN model on CIFAR-10."
+"Learn how to train a Convolutional Neural Network on CIFAR-10 using "
+"federated learning with Flower and TensorFlow in this step-by-step "
+"tutorial."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:4
+#: ../../source/tutorial-quickstart-tensorflow.rst:8
 msgid "Quickstart TensorFlow"
 msgstr "Démarrage rapide de TensorFlow"
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:6
+#: ../../source/tutorial-quickstart-tensorflow.rst:10
 #, fuzzy
 msgid ""
 "In this tutorial we will learn how to train a Convolutional Neural "
@@ -27323,7 +27864,7 @@ msgstr ""
 "tout exécuter au sein d'un `virtualenv <https://flower.ai/docs"
 "/recommended-env-setup.html>`_."
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:11
+#: ../../source/tutorial-quickstart-tensorflow.rst:15
 msgid ""
 "Let's use `flwr new` to create a complete Flower+TensorFlow project. It "
 "will generate all the files needed to run, by default with the Flower "
@@ -27335,14 +27876,14 @@ msgid ""
 "api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:26
+#: ../../source/tutorial-quickstart-tensorflow.rst:30
 msgid ""
 "Then, run the command below. You will be prompted to select one of the "
 "available templates (choose ``TensorFlow``), give a name to your project,"
 " and type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:114
+#: ../../source/tutorial-quickstart-tensorflow.rst:118
 msgid ""
 "This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ "
 "to easily download and partition the `CIFAR-10` dataset. In this example "
@@ -27356,14 +27897,14 @@ msgid ""
 " correspond to their data partition."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:141
+#: ../../source/tutorial-quickstart-tensorflow.rst:145
 msgid ""
 "Next, we need a model. We defined a simple Convolutional Neural Network "
 "(CNN), but feel free to replace it with a more sophisticated model if "
 "you'd like:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:170
+#: ../../source/tutorial-quickstart-tensorflow.rst:174
 msgid ""
 "With `TensorFlow`, we can use the built-in ``get_weights()`` and "
 "``set_weights()`` functions, which simplifies the implementation with "
@@ -27374,7 +27915,7 @@ msgid ""
 "set that the client might have:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:203
+#: ../../source/tutorial-quickstart-tensorflow.rst:207
 msgid ""
 "Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` "
 "defined above by means of a ``client_fn()`` callback. Note that the "
@@ -27386,7 +27927,7 @@ msgid ""
 "``pyproject.toml`` and access them here."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:234
+#: ../../source/tutorial-quickstart-tensorflow.rst:238
 msgid ""
 "To construct a ``ServerApp`` we define a ``server_fn()`` callback with an"
 " identical signature to that of ``client_fn()`` but the return type is "
@@ -27398,7 +27939,7 @@ msgid ""
 "the global model to federate."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:270
+#: ../../source/tutorial-quickstart-tensorflow.rst:274
 #, fuzzy
 msgid ""
 "Check the source code of the extended version of this tutorial in "
@@ -27410,7 +27951,7 @@ msgstr ""
 "mxnet/client.py>`_ de cet exemple se trouve dans :code:`examples"
 "/quickstart-mxnet`."
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:282
+#: ../../source/tutorial-quickstart-tensorflow.rst:286
 msgid ""
 "The video shown below shows how to setup a TensorFlow + Flower project "
 "using our previously recommended APIs. A new video tutorial will be "
@@ -27419,19 +27960,25 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-xgboost.rst:-1
 msgid ""
+"Learn how to train a classification model on the Higgs dataset using "
+"federated learning with Flower and XGBoost in this step-by-step tutorial."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-xgboost.rst:-1
+msgid ""
 "Check out this Federated Learning quickstart tutorial for using Flower "
 "with XGBoost to train classification models on trees."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:4
+#: ../../source/tutorial-quickstart-xgboost.rst:8
 msgid "Quickstart XGBoost"
 msgstr "Démarrage rapide XGBoost"
 
-#: ../../source/tutorial-quickstart-xgboost.rst:7
+#: ../../source/tutorial-quickstart-xgboost.rst:11
 msgid "XGBoost"
 msgstr "XGBoost"
 
-#: ../../source/tutorial-quickstart-xgboost.rst:9
+#: ../../source/tutorial-quickstart-xgboost.rst:13
 msgid ""
 "EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient "
 "implementation of gradient-boosted decision tree (**GBDT**), that "
@@ -27441,19 +27988,19 @@ msgid ""
 "concurrently, unlike the sequential approach taken by GBDT."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:15
+#: ../../source/tutorial-quickstart-xgboost.rst:19
 msgid ""
 "Often, for tabular data on medium-sized datasets with fewer than 10k "
 "training examples, XGBoost surpasses the results of deep learning "
 "techniques."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:19
+#: ../../source/tutorial-quickstart-xgboost.rst:23
 #, fuzzy
 msgid "Why Federated XGBoost?"
 msgstr "Qu'est-ce que l'apprentissage fédéré ?"
 
-#: ../../source/tutorial-quickstart-xgboost.rst:21
+#: ../../source/tutorial-quickstart-xgboost.rst:25
 msgid ""
 "As the demand for data privacy and decentralized learning grows, there's "
 "an increasing requirement to implement federated XGBoost systems for "
@@ -27461,7 +28008,7 @@ msgid ""
 "detection."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:25
+#: ../../source/tutorial-quickstart-xgboost.rst:29
 msgid ""
 "Federated learning ensures that raw data remains on the local device, "
 "making it an attractive approach for sensitive domains where data privacy"
@@ -27470,11 +28017,11 @@ msgid ""
 " challenges."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:31
+#: ../../source/tutorial-quickstart-xgboost.rst:35
 msgid "Environment Setup"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:33
+#: ../../source/tutorial-quickstart-xgboost.rst:37
 msgid ""
 "In this tutorial, we learn how to train a federated XGBoost model on the "
 "HIGGS dataset using Flower and the ``xgboost`` package to perform a "
@@ -27486,7 +28033,7 @@ msgid ""
 "comprehensive>`_) to run various experiments."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:42
+#: ../../source/tutorial-quickstart-xgboost.rst:46
 #, fuzzy
 msgid ""
 "It is recommended to create a virtual environment and run everything "
@@ -27496,31 +28043,31 @@ msgstr ""
 "dans ce `virtualenv <https://flower.ai/docs/recommended-env-"
 "setup.html>`_."
 
-#: ../../source/tutorial-quickstart-xgboost.rst:45
+#: ../../source/tutorial-quickstart-xgboost.rst:49
 msgid ""
 "We first need to install Flower and Flower Datasets. You can do this by "
 "running :"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:52
+#: ../../source/tutorial-quickstart-xgboost.rst:56
 #, fuzzy
 msgid ""
 "Since we want to use ``xgboost`` package to build up XGBoost trees, let's"
 " go ahead and install ``xgboost``:"
 msgstr "Puisque nous voulons utiliser scikt-learn, allons-y et installons-le :"
 
-#: ../../source/tutorial-quickstart-xgboost.rst:60
+#: ../../source/tutorial-quickstart-xgboost.rst:64
 #, fuzzy
 msgid "The Configurations"
 msgstr "Valeurs de configuration"
 
-#: ../../source/tutorial-quickstart-xgboost.rst:62
+#: ../../source/tutorial-quickstart-xgboost.rst:66
 msgid ""
 "We define all required configurations / hyper-parameters inside the "
 "``pyproject.toml`` file:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:84
+#: ../../source/tutorial-quickstart-xgboost.rst:88
 msgid ""
 "The ``local-epochs`` represents the number of iterations for local tree "
 "boost. We use CPU for the training in default. One can assign it to a GPU"
@@ -27528,13 +28075,13 @@ msgid ""
 "metric."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:91
+#: ../../source/tutorial-quickstart-xgboost.rst:95
 msgid ""
 "This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ "
 "to easily download and partition the `HIGGS` dataset."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:105
+#: ../../source/tutorial-quickstart-xgboost.rst:109
 msgid ""
 "In this example, we split the dataset into 20 partitions with uniform "
 "distribution (`IidPartitioner <https://flower.ai/docs/datasets/ref-"
@@ -27543,19 +28090,19 @@ msgid ""
 "``partition_id``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:110
+#: ../../source/tutorial-quickstart-xgboost.rst:114
 msgid ""
 "Subsequently, we train/test split using the given partition (client's "
 "local data), and reformat data to DMatrix for the ``xgboost`` package."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:124
+#: ../../source/tutorial-quickstart-xgboost.rst:128
 msgid ""
 "The functions of ``train_test_split`` and "
 "``transform_dataset_to_dmatrix`` are defined as below:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:151
+#: ../../source/tutorial-quickstart-xgboost.rst:155
 msgid ""
 "*Clients* are responsible for generating individual weight-updates for "
 "the model based on their local datasets. Let's first see how we define "
@@ -27563,19 +28110,19 @@ msgid ""
 "``FlowerClient`` class inherited from ``fl.client.Client``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:176
+#: ../../source/tutorial-quickstart-xgboost.rst:180
 msgid ""
 "All required parameters defined above are passed to ``FlowerClient``'s "
 "constructor."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:178
+#: ../../source/tutorial-quickstart-xgboost.rst:182
 msgid ""
 "Then, we override ``fit`` and ``evaluate`` methods insides "
 "``FlowerClient`` class as follows."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:217
+#: ../../source/tutorial-quickstart-xgboost.rst:221
 msgid ""
 "In ``fit``, at the first round, we call ``xgb.train()`` to build up the "
 "first set of trees. From the second round, we load the global model sent "
@@ -27583,21 +28130,21 @@ msgid ""
 " local training data with function ``_local_boost`` as follows:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:237
+#: ../../source/tutorial-quickstart-xgboost.rst:241
 msgid ""
 "Given ``num_local_round``, we update trees by calling "
 "``bst_input.update`` method. After training, the last "
 "``N=num_local_round`` trees will be extracted to send to the server."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:265
+#: ../../source/tutorial-quickstart-xgboost.rst:269
 msgid ""
 "In ``evaluate``, after loading the global model, we call ``bst.eval_set``"
 " function to conduct evaluation on valid set. The AUC value will be "
 "returned."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:271
+#: ../../source/tutorial-quickstart-xgboost.rst:275
 #, fuzzy
 msgid ""
 "After the local training on clients, clients' model updates are sent to "
@@ -27612,13 +28159,13 @@ msgstr ""
 "cette version améliorée du modèle à chaque *client*. Un cycle complet de "
 "mises à jour de poids s'appelle un *round*."
 
-#: ../../source/tutorial-quickstart-xgboost.rst:275
+#: ../../source/tutorial-quickstart-xgboost.rst:279
 msgid ""
 "In the file named ``server_app.py``, we define a strategy for XGBoost "
 "bagging aggregation:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:308
+#: ../../source/tutorial-quickstart-xgboost.rst:312
 msgid ""
 "An ``evaluate_metrics_aggregation`` function is defined to collect and "
 "wighted average the AUC values from clients. The ``config_func`` function"
@@ -27626,17 +28173,17 @@ msgid ""
 "``evaluate()`` methods."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:313
+#: ../../source/tutorial-quickstart-xgboost.rst:317
 msgid "Tree-based Bagging Aggregation"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:315
+#: ../../source/tutorial-quickstart-xgboost.rst:319
 msgid ""
 "You must be curious about how bagging aggregation works. Let's look into "
 "the details."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:317
+#: ../../source/tutorial-quickstart-xgboost.rst:321
 msgid ""
 "In file ``flwr.server.strategy.fedxgb_bagging.py``, we define "
 "``FedXgbBagging`` inherited from ``flwr.server.strategy.FedAvg``. Then, "
@@ -27644,13 +28191,13 @@ msgid ""
 "``evaluate`` methods as follows:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:414
+#: ../../source/tutorial-quickstart-xgboost.rst:418
 msgid ""
 "In ``aggregate_fit``, we sequentially aggregate the clients' XGBoost "
 "trees by calling ``aggregate()`` function:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:474
+#: ../../source/tutorial-quickstart-xgboost.rst:478
 msgid ""
 "In this function, we first fetch the number of trees and the number of "
 "parallel trees for the current and previous model by calling "
@@ -27659,18 +28206,18 @@ msgid ""
 "generate a new tree model."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:479
+#: ../../source/tutorial-quickstart-xgboost.rst:483
 msgid ""
 "After traversal of all clients' models, a new global model is generated, "
 "followed by serialisation, and sending the global model back to each "
 "client."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:483
+#: ../../source/tutorial-quickstart-xgboost.rst:487
 msgid "Launch Federated XGBoost!"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:533
+#: ../../source/tutorial-quickstart-xgboost.rst:537
 msgid ""
 "Congratulations! You've successfully built and run your first federated "
 "XGBoost system. The AUC values can be checked in ``History (metrics, "
@@ -27678,7 +28225,7 @@ msgid ""
 " FL rounds."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:547
+#: ../../source/tutorial-quickstart-xgboost.rst:551
 #, fuzzy
 msgid ""
 "Check the full `source code "
@@ -27692,11 +28239,11 @@ msgstr ""
 "mxnet/client.py>`_ de cet exemple se trouve dans :code:`examples"
 "/quickstart-mxnet`."
 
-#: ../../source/tutorial-quickstart-xgboost.rst:552
+#: ../../source/tutorial-quickstart-xgboost.rst:556
 msgid "Comprehensive Federated XGBoost"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:554
+#: ../../source/tutorial-quickstart-xgboost.rst:558
 msgid ""
 "Now that you know how federated XGBoost works with Flower, it's time to "
 "run some more comprehensive experiments by customising the experimental "
@@ -27707,12 +28254,12 @@ msgid ""
 "centralised / distributed evaluation. Let's take a look!"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:562
+#: ../../source/tutorial-quickstart-xgboost.rst:566
 #, fuzzy
 msgid "Cyclic Training"
 msgstr "Formation centralisée"
 
-#: ../../source/tutorial-quickstart-xgboost.rst:564
+#: ../../source/tutorial-quickstart-xgboost.rst:568
 msgid ""
 "In addition to bagging aggregation, we offer a cyclic training scheme, "
 "which performs FL in a client-by-client fashion. Instead of aggregating "
@@ -27722,11 +28269,11 @@ msgid ""
 "for next round's boosting."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:570
+#: ../../source/tutorial-quickstart-xgboost.rst:574
 msgid "To do this, we first customise a ``ClientManager`` in ``server_app.py``:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:610
+#: ../../source/tutorial-quickstart-xgboost.rst:614
 msgid ""
 "The customised ``ClientManager`` samples all available clients in each FL"
 " round based on the order of connection to the server. Then, we define a "
@@ -27736,24 +28283,24 @@ msgid ""
 "next client."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:652
+#: ../../source/tutorial-quickstart-xgboost.rst:656
 msgid ""
 "Unlike the original ``FedAvg``, we don't perform aggregation here. "
 "Instead, we just make a copy of the received client model as global model"
 " by overriding ``aggregate_fit``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:655
+#: ../../source/tutorial-quickstart-xgboost.rst:659
 msgid ""
 "Also, the customised ``configure_fit`` and ``configure_evaluate`` methods"
 " ensure the clients to be sequentially selected given FL round:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:685
+#: ../../source/tutorial-quickstart-xgboost.rst:689
 msgid "Customised Data Partitioning"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:687
+#: ../../source/tutorial-quickstart-xgboost.rst:691
 msgid ""
 "In ``task.py``, we use the ``instantiate_fds`` function to instantiate "
 "Flower Datasets and the data partitioner based on the given "
@@ -27762,18 +28309,18 @@ msgid ""
 "data quantity (uniform, linear, square, exponential)."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:726
+#: ../../source/tutorial-quickstart-xgboost.rst:730
 #, fuzzy
 msgid "Customised Centralised / Distributed Evaluation"
 msgstr "Évaluation centralisée"
 
-#: ../../source/tutorial-quickstart-xgboost.rst:728
+#: ../../source/tutorial-quickstart-xgboost.rst:732
 msgid ""
 "To facilitate centralised evaluation, we define a function in "
 "``server_app.py``:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:759
+#: ../../source/tutorial-quickstart-xgboost.rst:763
 msgid ""
 "This function returns an evaluation function, which instantiates a "
 "``Booster`` object and loads the global model weights to it. The "
@@ -27781,25 +28328,25 @@ msgid ""
 "AUC value is reported."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:763
+#: ../../source/tutorial-quickstart-xgboost.rst:767
 msgid ""
 "As for distributed evaluation on the clients, it's same as the quick-"
 "start example by overriding the ``evaluate()`` method insides the "
 "``XgbClient`` class in ``client_app.py``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:768
+#: ../../source/tutorial-quickstart-xgboost.rst:772
 #, fuzzy
 msgid "Arguments Explainer"
 msgstr "Amélioration de la documentation"
 
-#: ../../source/tutorial-quickstart-xgboost.rst:770
+#: ../../source/tutorial-quickstart-xgboost.rst:774
 msgid ""
 "We define all hyper-parameters under ``[tool.flwr.app.config]`` entry in "
 "``pyproject.toml``:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:799
+#: ../../source/tutorial-quickstart-xgboost.rst:803
 msgid ""
 "On the server side, we allow user to specify training strategies / FL "
 "rounds / participating clients / clients for evaluation, and evaluation "
@@ -27808,7 +28355,7 @@ msgid ""
 " be disabled."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:804
+#: ../../source/tutorial-quickstart-xgboost.rst:808
 msgid ""
 "On the client side, we can define various options for client data "
 "partitioning. Besides, clients also have an option to conduct evaluation "
@@ -27817,22 +28364,22 @@ msgid ""
 "clients by setting ``scaled-lr = true``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:810
+#: ../../source/tutorial-quickstart-xgboost.rst:814
 #, fuzzy
 msgid "Example Commands"
 msgstr "Exemples de PyTorch"
 
-#: ../../source/tutorial-quickstart-xgboost.rst:812
+#: ../../source/tutorial-quickstart-xgboost.rst:816
 msgid "To run bagging aggregation for 5 rounds evaluated on centralised test set:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:818
+#: ../../source/tutorial-quickstart-xgboost.rst:822
 msgid ""
 "To run cyclic training with linear partitioner type evaluated on "
 "centralised test set:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:827
+#: ../../source/tutorial-quickstart-xgboost.rst:831
 #, fuzzy
 msgid ""
 "The full `code <https://github.com/adap/flower/blob/main/examples"
@@ -27845,12 +28392,12 @@ msgstr ""
 "mxnet/client.py>`_ de cet exemple se trouve dans :code:`examples"
 "/quickstart-mxnet`."
 
-#: ../../source/tutorial-quickstart-xgboost.rst:833
+#: ../../source/tutorial-quickstart-xgboost.rst:837
 #, fuzzy
 msgid "Video Tutorial"
 msgstr "Tutoriel"
 
-#: ../../source/tutorial-quickstart-xgboost.rst:837
+#: ../../source/tutorial-quickstart-xgboost.rst:841
 msgid ""
 "The video shown below shows how to setup a XGBoost + Flower project using"
 " our previously recommended APIs. A new video tutorial will be released "
@@ -29850,7 +30397,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|2de22ebd50a840dba14a673c6fed3ed5|"
+msgid "|ab47426a03a540aab6d401a2e00e630e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -29869,7 +30416,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|40524cd4aa474db2992d8a8c40807297|"
+msgid "|0d8c9ad409714074ae083557fab3f34b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -29901,7 +30448,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|9da60840ee0644b092f05ba73173f33a|"
+msgid "|20d6250fb8cc4abf9442570fd93706e3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -29922,7 +30469,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|11e0092cabe6445aad58eb94008d2200|"
+msgid "|02a05be7352e4233baec107c46e4ace4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -29944,7 +30491,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|4de4dc335c4e4f7d9295ca4b428cbfd6|"
+msgid "|043c0e55eb7a4411933bfa341890e0b6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -29965,7 +30512,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|ac43194992e34215bfc57033a6166801|"
+msgid "|ca81526a51a940cba568ec4dd9ce4137|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -29991,7 +30538,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|7ff78e3c16f14ec1ac0282d2fad76719|"
+msgid "|d1e5d1d8fc3642069b869a6f656d99a0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -30010,7 +30557,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|09aa0d8c374148f3908afce241381f58|"
+msgid "|227f062dc4844a5bb8055f47cfb36e5d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -30241,7 +30788,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|caf1e69f45ff4824853d1f4bc9b083bb|"
+msgid "|e5b34296888f44e982a4ae1e3d29c4f0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -30276,7 +30823,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|8972366fab9a408b8162ddb6475e1095|"
+msgid "|396ef4bc3df74a3b94142f6e96719951|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -30309,7 +30856,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|67860439ceff4a16a055b8b51cda19b9|"
+msgid "|3557c0ad777c453dad5df7be537236d8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -30340,7 +30887,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|f9ca6f1bc91a4f1397f77ed3bf27ac3e|"
+msgid "|30d31cc898e0476f9e72f9984d5223b8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -30400,7 +30947,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|65a316b05fef4a7bbfe03a9c9aa84b4f|"
+msgid "|6115667841094c2b9c5e5dc12b3aeea0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -30544,7 +31091,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|09111c31a80a4af5a651312e46ee31b5|"
+msgid "|6347089b6d794100af39cc2f5efc2a1b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -44287,5 +44834,349 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|2a721cef360b4f64a96d2647381767d1|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Flower has built-in support for "
+#~ "authenticated SuperNodes that you can "
+#~ "use to verify the identities of "
+#~ "each SuperNode connecting to a "
+#~ "SuperLink. Flower node authentication works"
+#~ " similar to how GitHub SSH "
+#~ "authentication works:"
+#~ msgstr ""
+
+#~ msgid "SuperLink (server) stores a list of known (client) node public keys"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For increased security, node authentication"
+#~ " can only be used when encrypted "
+#~ "connections (SSL/TLS) are enabled."
+#~ msgstr ""
+
+#~ msgid "Enable node authentication in ``SuperLink``"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To enable node authentication, first you"
+#~ " need to configure SSL/TLS connections "
+#~ "to secure the SuperLink<>SuperNode "
+#~ "communication. You can find the complete"
+#~ " guide `here <https://flower.ai/docs/framework/how-"
+#~ "to-enable-ssl-connections.html>`_. After "
+#~ "configuring secure connections, you can "
+#~ "enable client authentication in a "
+#~ "long-running Flower ``SuperLink``. Use the"
+#~ " following terminal command to start "
+#~ "a Flower ``SuperNode`` that has both "
+#~ "secure connections and node authentication "
+#~ "enabled:"
+#~ msgstr ""
+
+#~ msgid "Let's break down the authentication flags:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The first flag ``--auth-list-public-"
+#~ "keys`` expects a path to a CSV "
+#~ "file storing all known node public "
+#~ "keys. You need to store all known"
+#~ " node public keys that are allowed"
+#~ " to participate in a federation in"
+#~ " one CSV file (``.csv``)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A valid CSV file storing known "
+#~ "node public keys should list the "
+#~ "keys in OpenSSH format, separated by "
+#~ "commas and without any comments. For "
+#~ "an example, refer to our code "
+#~ "sample, which contains a CSV file "
+#~ "with two known node public keys."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The second and third flags ``--auth-"
+#~ "superlink-private-key`` and ``--auth-"
+#~ "superlink-public-key`` expect paths to "
+#~ "the server's private and public keys."
+#~ " For development purposes, you can "
+#~ "generate a private and public key "
+#~ "pair using ``ssh-keygen -t ecdsa "
+#~ "-b 384``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In Flower 1.9, there is no support"
+#~ " for dynamically removing, editing, or "
+#~ "adding known node public keys to "
+#~ "the SuperLink. To change the set "
+#~ "of known nodes, you need to shut"
+#~ " the server down, edit the CSV "
+#~ "file, and start the server again. "
+#~ "Support for dynamically changing the set"
+#~ " of known nodes is on the "
+#~ "roadmap to be released in Flower "
+#~ "1.10 (ETA: June)."
+#~ msgstr ""
+
+#~ msgid "Enable node authentication in ``SuperNode``"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Similar to the long-running Flower "
+#~ "server (``SuperLink``), you can easily "
+#~ "enable node authentication in the "
+#~ "long-running Flower client (``SuperNode``). "
+#~ "Use the following terminal command to"
+#~ " start an authenticated ``SuperNode``:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``--auth-supernode-private-key`` "
+#~ "flag expects a path to the node's"
+#~ " private key file and the "
+#~ "``--auth-supernode-public-key`` flag "
+#~ "expects a path to the node's "
+#~ "public key file. For development "
+#~ "purposes, you can generate a private "
+#~ "and public key pair using ``ssh-"
+#~ "keygen -t ecdsa -b 384``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You should now have learned how to"
+#~ " start a long-running Flower server"
+#~ " (``SuperLink``) and client (``SuperNode``) "
+#~ "with node authentication enabled. You "
+#~ "should also know the significance of "
+#~ "the private key and store it "
+#~ "safely to minimize security risks."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This guide describes how to a "
+#~ "TLS-enabled secure Flower server "
+#~ "(``SuperLink``) can be started and how"
+#~ " a Flower client (``SuperNode``) can "
+#~ "establish a secure connections to it."
+#~ msgstr ""
+#~ "Ce guide décrit comment démarrer un "
+#~ "serveur Flower sécurisé par SSL et "
+#~ "comment un client Flower peut établir"
+#~ " une connexion sécurisée avec lui."
+
+#~ msgid ""
+#~ "A complete code example demonstrating a"
+#~ " secure connection can be found `here"
+#~ " <https://github.com/adap/flower/tree/main/examples/advanced-"
+#~ "tensorflow>`_."
+#~ msgstr ""
+#~ "Un exemple de code complet démontrant"
+#~ " une connexion sécurisée peut être "
+#~ "trouvé ici "
+#~ "<https://github.com/adap/flower/tree/main/examples/advanced-"
+#~ "tensorflow>`_."
+
+#~ msgid ""
+#~ "The code example comes with a "
+#~ "``README.md`` file which explains how to"
+#~ " start it. Although it is already "
+#~ "TLS-enabled, it might be less "
+#~ "descriptive on how it does so. "
+#~ "Stick to this guide for a deeper"
+#~ " introduction to the topic."
+#~ msgstr ""
+#~ "L'exemple de code est accompagné d'un"
+#~ " fichier README.md qui t'expliquera comment"
+#~ " le démarrer. Bien qu'il soit déjà"
+#~ " activé par SSL, il peut être "
+#~ "moins descriptif sur la façon de "
+#~ "procéder. Tiens-toi en à ce guide"
+#~ " pour une introduction plus approfondie "
+#~ "sur le sujet."
+
+#~ msgid ""
+#~ "Using TLS-enabled connections requires "
+#~ "certificates to be passed to the "
+#~ "server and client. For the purpose "
+#~ "of this guide we are going to "
+#~ "generate self-signed certificates. As "
+#~ "this can become quite complex we "
+#~ "are going to ask you to run "
+#~ "the script in ``examples/advanced-"
+#~ "tensorflow/certificates/generate.sh`` with the "
+#~ "following command sequence:"
+#~ msgstr ""
+#~ "L'utilisation de connexions compatibles avec"
+#~ " le protocole SSL nécessite que des"
+#~ " certificats soient transmis au serveur "
+#~ "et au client. Pour les besoins de"
+#~ " ce guide, nous allons générer des"
+#~ " certificats auto-signés. Comme cela "
+#~ "peut devenir assez complexe, nous allons"
+#~ " te demander d'exécuter le script "
+#~ "dans :code:`examples/advanced-"
+#~ "tensorflow/certificates/generate.sh`"
+
+#~ msgid ""
+#~ "This will generate the certificates in"
+#~ " ``examples/advanced-tensorflow/.cache/certificates``."
+#~ msgstr ""
+#~ "Cela générera les certificats dans "
+#~ ":code:`examples/advanced-tensorflow/.cache/certificates`."
+
+#~ msgid "Server (SuperLink)"
+#~ msgstr "flower-superlink"
+
+#~ msgid ""
+#~ "Navigate to the ``examples/advanced-"
+#~ "tensorflow`` folder (`here "
+#~ "<https://github.com/adap/flower/tree/main/examples/advanced-"
+#~ "tensorflow>`_) and use the following "
+#~ "terminal command to start a server "
+#~ "(SuperLink) that uses the previously "
+#~ "generated certificates:"
+#~ msgstr ""
+#~ "Nous allons maintenant montrer comment "
+#~ "écrire un client qui utilise les "
+#~ "scripts générés précédemment :"
+
+#~ msgid ""
+#~ "When providing certificates, the server "
+#~ "expects a tuple of three certificates"
+#~ " paths: CA certificate, server certificate"
+#~ " and server private key."
+#~ msgstr ""
+
+#~ msgid "Clients (SuperNode)"
+#~ msgstr "Codes d'état du client."
+
+#~ msgid ""
+#~ "Use the following terminal command to"
+#~ " start a client (SuperNode) that uses"
+#~ " the previously generated certificates:"
+#~ msgstr ""
+#~ "Nous allons maintenant montrer comment "
+#~ "écrire un client qui utilise les "
+#~ "scripts générés précédemment :"
+
+#~ msgid ""
+#~ "When setting ``root_certificates``, the client"
+#~ " expects a file path to PEM-"
+#~ "encoded root certificates."
+#~ msgstr ""
+#~ "En définissant :code:`root_certificates`, le "
+#~ "client s'attend à recevoir les "
+#~ "certificats racine codés en PEM sous "
+#~ "forme de chaîne d'octets. Nous utilisons"
+#~ " à nouveau :code:`Path` pour simplifier "
+#~ "la lecture de ces certificats sous "
+#~ "forme de chaînes d'octets."
+
+#~ msgid ""
+#~ "In another terminal, start a second "
+#~ "SuperNode that uses the same "
+#~ "certificates:"
+#~ msgstr ""
+#~ "Nous allons maintenant montrer comment "
+#~ "écrire un client qui utilise les "
+#~ "scripts générés précédemment :"
+
+#~ msgid ""
+#~ "Note that in the second SuperNode, "
+#~ "if you run both on the same "
+#~ "machine, you must specify a different"
+#~ " port for the ``ClientAppIO`` API "
+#~ "address to avoid clashing with the "
+#~ "first SuperNode."
+#~ msgstr ""
+
+#~ msgid "Executing ``flwr run`` with TLS"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The root certificates used for executing"
+#~ " ``flwr run`` is specified in the "
+#~ "``pyproject.toml`` of your app."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that the path to the "
+#~ "``root-certificates`` is relative to the"
+#~ " root of the project. Now, you "
+#~ "can run the example by executing "
+#~ "the following:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For running a Docker setup with "
+#~ "TLS enabled, please refer to "
+#~ ":doc:`docker/enable-tls`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Check out this Federating Learning "
+#~ "quickstart tutorial for using Flower "
+#~ "with 🤗 HuggingFace Transformers in order"
+#~ " to fine-tune an LLM."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Check out this Federated Learning "
+#~ "quickstart tutorial for using Flower "
+#~ "with PyTorch to train a CNN model"
+#~ " on MNIST."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Check out this Federated Learning "
+#~ "quickstart tutorial for using Flower "
+#~ "with TensorFlow to train a CNN "
+#~ "model on CIFAR-10."
+#~ msgstr ""
+
+#~ msgid "|2de22ebd50a840dba14a673c6fed3ed5|"
+#~ msgstr ""
+
+#~ msgid "|40524cd4aa474db2992d8a8c40807297|"
+#~ msgstr ""
+
+#~ msgid "|9da60840ee0644b092f05ba73173f33a|"
+#~ msgstr ""
+
+#~ msgid "|11e0092cabe6445aad58eb94008d2200|"
+#~ msgstr ""
+
+#~ msgid "|4de4dc335c4e4f7d9295ca4b428cbfd6|"
+#~ msgstr ""
+
+#~ msgid "|ac43194992e34215bfc57033a6166801|"
+#~ msgstr ""
+
+#~ msgid "|7ff78e3c16f14ec1ac0282d2fad76719|"
+#~ msgstr ""
+
+#~ msgid "|09aa0d8c374148f3908afce241381f58|"
+#~ msgstr ""
+
+#~ msgid "|caf1e69f45ff4824853d1f4bc9b083bb|"
+#~ msgstr ""
+
+#~ msgid "|8972366fab9a408b8162ddb6475e1095|"
+#~ msgstr ""
+
+#~ msgid "|67860439ceff4a16a055b8b51cda19b9|"
+#~ msgstr ""
+
+#~ msgid "|f9ca6f1bc91a4f1397f77ed3bf27ac3e|"
+#~ msgstr ""
+
+#~ msgid "|65a316b05fef4a7bbfe03a9c9aa84b4f|"
+#~ msgstr ""
+
+#~ msgid "|09111c31a80a4af5a651312e46ee31b5|"
 #~ msgstr ""
 
