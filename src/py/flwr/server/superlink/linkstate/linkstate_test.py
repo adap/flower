@@ -588,7 +588,8 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
         # Execute
-        node_id = state.create_node(ping_interval=10, public_key=public_key)
+        node_id = state.create_node(ping_interval=10)
+        state.set_node_public_key(node_id, public_key)
         retrieved_node_ids = state.get_nodes(run_id)
         retrieved_node_id = state.get_node_id(public_key)
 
@@ -602,15 +603,21 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         public_key = b"mock"
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        node_id = state.create_node(ping_interval=10, public_key=public_key)
+        node_id = state.create_node(ping_interval=10)
+        state.set_node_public_key(node_id, public_key)
 
         # Execute
-        new_node_id = state.create_node(ping_interval=10, public_key=public_key)
+        new_node_id = state.create_node(ping_interval=10)
+        try:
+            state.set_node_public_key(new_node_id, public_key)
+        except ValueError:
+            state.delete_node(new_node_id)
+        else:
+            raise AssertionError("Should have raised ValueError")
         retrieved_node_ids = state.get_nodes(run_id)
         retrieved_node_id = state.get_node_id(public_key)
 
         # Assert
-        assert new_node_id == 0
         assert len(retrieved_node_ids) == 1
         assert retrieved_node_id == node_id
 
@@ -639,53 +646,17 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         public_key = b"mock"
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        node_id = state.create_node(ping_interval=10, public_key=public_key)
+        node_id = state.create_node(ping_interval=10)
+        state.set_node_public_key(node_id, public_key)
 
         # Execute
-        state.delete_node(node_id, public_key=public_key)
+        state.delete_node(node_id)
         retrieved_node_ids = state.get_nodes(run_id)
         retrieved_node_id = state.get_node_id(public_key)
 
         # Assert
         assert len(retrieved_node_ids) == 0
         assert retrieved_node_id is None
-
-    def test_delete_node_public_key_none(self) -> None:
-        """Test deleting a client node with public key."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        node_id = 0
-
-        # Execute & Assert
-        with self.assertRaises(ValueError):
-            state.delete_node(node_id, public_key=public_key)
-
-        retrieved_node_ids = state.get_nodes(run_id)
-        retrieved_node_id = state.get_node_id(public_key)
-
-        assert len(retrieved_node_ids) == 0
-        assert retrieved_node_id is None
-
-    def test_delete_node_wrong_public_key(self) -> None:
-        """Test deleting a client node with wrong public key."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        public_key = b"mock"
-        wrong_public_key = b"mock_mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        node_id = state.create_node(ping_interval=10, public_key=public_key)
-
-        # Execute & Assert
-        with self.assertRaises(ValueError):
-            state.delete_node(node_id, public_key=wrong_public_key)
-
-        retrieved_node_ids = state.get_nodes(run_id)
-        retrieved_node_id = state.get_node_id(public_key)
-
-        assert len(retrieved_node_ids) == 1
-        assert retrieved_node_id == node_id
 
     def test_get_node_id_wrong_public_key(self) -> None:
         """Test retrieving a client node with wrong public key."""
@@ -696,7 +667,8 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
         # Execute
-        state.create_node(ping_interval=10, public_key=public_key)
+        node_id = state.create_node(ping_interval=10)
+        state.set_node_public_key(node_id, public_key)
         retrieved_node_ids = state.get_nodes(run_id)
         retrieved_node_id = state.get_node_id(wrong_public_key)
 
@@ -820,6 +792,29 @@ class StateTest(unittest.TestCase):
                 new_private_key_bytes, new_public_key_bytes
             )
 
+    def test_clear_supernode_auth_keys_and_credentials(self) -> None:
+        """Test clear_supernode_auth_keys_and_credentials from linkstate."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        key_pairs = [generate_key_pairs() for _ in range(3)]
+        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
+
+        # Execute (store)
+        state.store_node_public_keys(public_keys)
+        private_key, public_key = generate_key_pairs()
+        private_key_bytes = private_key_to_bytes(private_key)
+        public_key_bytes = public_key_to_bytes(public_key)
+        state.store_server_private_public_key(private_key_bytes, public_key_bytes)
+
+        # Execute (clear)
+        state.clear_supernode_auth_keys_and_credentials()
+        node_public_keys = state.get_node_public_keys()
+
+        # Assert
+        assert node_public_keys == set()
+        assert state.get_server_private_key() is None
+        assert state.get_server_public_key() is None
+
     def test_node_public_keys(self) -> None:
         """Test store_node_public_keys and get_node_public_keys from state."""
         # Prepare
@@ -867,6 +862,17 @@ class StateTest(unittest.TestCase):
 
         # Assert
         self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
+
+    def test_acknowledge_ping_failed(self) -> None:
+        """Test that acknowledge_ping returns False when the ping fails."""
+        # Prepare
+        state: LinkState = self.state_factory()
+
+        # Execute
+        is_successful = state.acknowledge_ping(0, ping_interval=30)
+
+        # Assert
+        assert not is_successful
 
     def test_store_task_res_task_ins_expired(self) -> None:
         """Test behavior of store_task_res when the TaskIns it references is expired."""

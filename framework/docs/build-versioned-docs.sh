@@ -45,7 +45,7 @@ for current_version in ${versions}; do
   fi
   echo "INFO: Building sites for ${current_version}"
 
-  if [ -d "framework/docs" ]; then
+  if [ -f "framework/docs/source/conf.py" ]; then
     cd framework/docs
   else
     cd doc

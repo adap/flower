@@ -304,7 +304,7 @@ Solution
 This is a tiny change, but it'll allow us to test your end-to-end setup. After cloning
 and setting up the Flower repo, here's what you should do:
 
-- Find the source file in ``doc/source``
+- Find the source file in ``framework/docs/source``
 - Make the change in the ``.rst`` file (beware, the dashes under the title should be the
   same length as the title itself)
 - Build the docs and `check the result
@@ -320,7 +320,7 @@ avoid that, breaking links can harm our search engine ranking.
 Here's how to change the file name:
 
 - Change the file name to ``save-progress.rst``
-- Add a redirect rule to ``doc/source/conf.py``
+- Add a redirect rule to ``framework/docs/source/conf.py``
 
 This will cause a redirect from ``saving-progress.html`` to ``save-progress.html``, old
 links will continue to work.

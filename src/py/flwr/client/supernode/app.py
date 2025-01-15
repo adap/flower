@@ -114,9 +114,8 @@ def run_client_app() -> None:
     event(EventType.RUN_CLIENT_APP_ENTER)
     log(
         ERROR,
-        "The command `flower-client-app` has been replaced by `flower-supernode`.",
+        "The command `flower-client-app` has been replaced by `flwr run`.",
     )
-    log(INFO, "Execute `flower-supernode --help` to learn how to use it.")
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 

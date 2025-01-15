@@ -156,9 +156,6 @@ jobs:
 
           - directory: e2e-scikit-learn
             e2e: e2e_scikit_learn
-            dataset: |
-              import openml
-              openml.datasets.get_dataset(554)
 
           - directory: e2e-fastai
             e2e: e2e_fastai

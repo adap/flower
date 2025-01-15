@@ -54,6 +54,7 @@ from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.utils import abort_if
 
 
 class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
@@ -110,6 +111,15 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         """Push Simulation process outputs."""
         log(DEBUG, "SimultionIoServicer.PushSimulationOutputs")
         state = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
+
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
         return PushSimulationOutputsResponse()
 
@@ -119,6 +129,9 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         """Update the status of a run."""
         log(DEBUG, "SimultionIoServicer.UpdateRunStatus")
         state = self.state_factory.state()
+
+        # Abort if the run is finished
+        abort_if(request.run_id, [Status.FINISHED], state, context)
 
         # Update the run status
         state.update_run_status(

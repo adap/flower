@@ -1,3 +1,7 @@
+:og:description: Upgrade seamlessly from Flower 0.x to Flower 1.0 with this guide.
+.. meta::
+    :description: Upgrade seamlessly from Flower 0.x to Flower 1.0 with this guide.
+
 Upgrade to Flower 1.0
 =====================
 
