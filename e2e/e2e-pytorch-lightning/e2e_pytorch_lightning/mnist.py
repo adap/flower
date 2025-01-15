@@ -5,11 +5,12 @@ Source: pytorchlightning.ai (2021/02/04)
 
 import pytorch_lightning as pl
 import torch
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from torch import nn
 from torch.nn import functional as F
-from torch.utils.data import DataLoader, Subset, random_split
+from torch.utils.data import DataLoader
 from torchvision import transforms
-from torchvision.datasets import MNIST
 
 
 class LitAutoEncoder(pl.LightningModule):
@@ -35,7 +36,7 @@ class LitAutoEncoder(pl.LightningModule):
         return optimizer
 
     def training_step(self, train_batch, batch_idx):
-        x, y = train_batch
+        x = train_batch["image"]
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
         x_hat = self.decoder(z)
@@ -59,24 +60,46 @@ class LitAutoEncoder(pl.LightningModule):
             self.log(f"{stage}_loss", loss, prog_bar=True)
 
 
-def load_data():
-    # Training / validation set
-    trainset = MNIST(
-        "./../data", train=True, download=True, transform=transforms.ToTensor()
-    )
-    trainset = Subset(trainset, range(1000))
-    mnist_train, mnist_val = random_split(trainset, [800, 200])
-    train_loader = DataLoader(mnist_train, batch_size=32, shuffle=True, num_workers=0)
-    val_loader = DataLoader(mnist_val, batch_size=32, shuffle=False, num_workers=0)
+def apply_transforms(batch):
+    """Apply transforms to the partition from FederatedDataset."""
+    batch["image"] = [transforms.functional.to_tensor(img) for img in batch["image"]]
+    return batch
 
-    # Test set
-    testset = MNIST(
-        "./../data", train=False, download=True, transform=transforms.ToTensor()
-    )
-    testset = Subset(testset, range(10))
-    test_loader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=0)
 
-    return train_loader, val_loader, test_loader
+fds = None  # Cache FederatedDataset
+
+
+def load_data(partition_id, num_partitions):
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="ylecun/mnist",
+            partitioners={"train": partitioner},
+        )
+    partition = fds.load_partition(partition_id, "train")
+
+    partition = partition.with_transform(apply_transforms)
+    # 20 % for on federated evaluation
+    partition_full = partition.train_test_split(test_size=0.2, seed=42)
+    # 60 % for the federated train and 20 % for the federated validation (both in fit)
+    partition_train_valid = partition_full["train"].train_test_split(
+        train_size=0.75, seed=42
+    )
+    trainloader = DataLoader(
+        partition_train_valid["train"],
+        batch_size=32,
+        shuffle=True,
+        num_workers=2,
+    )
+    valloader = DataLoader(
+        partition_train_valid["test"],
+        batch_size=32,
+        num_workers=2,
+    )
+    testloader = DataLoader(partition_full["test"], batch_size=32, num_workers=1)
+    return trainloader, valloader, testloader
 
 
 def main() -> None:
