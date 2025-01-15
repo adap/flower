@@ -3,6 +3,8 @@
 Source: pytorchlightning.ai (2021/02/04)
 """
 
+from random import randint
+
 import pytorch_lightning as pl
 import torch
 from flwr_datasets import FederatedDataset
@@ -105,8 +107,9 @@ def load_data(partition_id, num_partitions):
 def main() -> None:
     """Centralized training."""
     # Load data
-    train_loader, val_loader, test_loader = load_data()
-
+    num_partitions = 10
+    p_id = randint(0, num_partitions - 1)
+    train_loader, val_loader, test_loader = load_data(p_id, num_partitions)
     # Load model
     model = LitAutoEncoder()
 
