@@ -83,6 +83,9 @@ FAB_HASH_TRUNCATION = 8
 FLWR_DIR = ".flwr"  # The default Flower directory: ~/.flwr/
 FLWR_HOME = "FLWR_HOME"  # If set, override the default Flower directory
 
+# Constant for SuperLink
+SUPERLINK_NODE_ID = 1
+
 # Constants entries in Node config for Simulation
 PARTITION_ID_KEY = "partition-id"
 NUM_PARTITIONS_KEY = "num-partitions"
@@ -114,6 +117,8 @@ MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 # Constants for user authentication
 CREDENTIALS_DIR = ".credentials"
 AUTH_TYPE = "auth_type"
+ACCESS_TOKEN_KEY = "access_token"
+REFRESH_TOKEN_KEY = "refresh_token"
 
 
 class MessageType:

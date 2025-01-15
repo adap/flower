@@ -60,7 +60,11 @@ def test_raise_if_false() -> None:
 
     try:
         # Execute
-        _raise_if(validation_error, detail)
+        _raise_if(
+            validation_error=validation_error,
+            request_name="DummyRequest",
+            detail=detail,
+        )
 
         # Assert
         assert True
@@ -78,12 +82,16 @@ def test_raise_if_true() -> None:
 
     try:
         # Execute
-        _raise_if(validation_error, detail)
+        _raise_if(
+            validation_error=validation_error,
+            request_name="DummyRequest",
+            detail=detail,
+        )
 
         # Assert
         raise AssertionError()
     except ValueError as err:
-        assert str(err) == "Malformed PushTaskInsRequest: test"
+        assert str(err) == "Malformed DummyRequest: test"
     except Exception as err:
         raise AssertionError() from err
 
@@ -200,9 +208,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         # Transition status to running. PushTaskRes is only allowed in running status.
         self._transition_run_status(run_id, 2)
@@ -239,9 +245,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         self._transition_run_status(run_id, num_transitions)
 
