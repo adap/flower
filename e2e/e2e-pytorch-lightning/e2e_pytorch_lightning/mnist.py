@@ -51,7 +51,7 @@ class LitAutoEncoder(pl.LightningModule):
         self._evaluate(batch, "test")
 
     def _evaluate(self, batch, stage=None):
-        x, y = batch
+        x = batch["image"]
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
         x_hat = self.decoder(z)
