@@ -93,14 +93,14 @@ def load_data(partition_id, num_partitions):
         partition_train_valid["train"],
         batch_size=32,
         shuffle=True,
-        num_workers=2,
+        num_workers=0,
     )
     valloader = DataLoader(
         partition_train_valid["test"],
         batch_size=32,
-        num_workers=2,
+        num_workers=0,
     )
-    testloader = DataLoader(partition_full["test"], batch_size=32, num_workers=1)
+    testloader = DataLoader(partition_full["test"], batch_size=32, num_workers=0)
     return trainloader, valloader, testloader
 
 
