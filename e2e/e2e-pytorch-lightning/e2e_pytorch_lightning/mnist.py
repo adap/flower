@@ -37,7 +37,7 @@ class LitAutoEncoder(pl.LightningModule):
         return optimizer
 
     def training_step(self, train_batch, batch_idx):
-        x, y = train_batch
+        x = train_batch["image"]
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
         x_hat = self.decoder(z)
@@ -52,7 +52,7 @@ class LitAutoEncoder(pl.LightningModule):
         self._evaluate(batch, "test")
 
     def _evaluate(self, batch, stage=None):
-        x, y = batch
+        x = batch["image"]
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
         x_hat = self.decoder(z)
