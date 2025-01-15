@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+import numpy as np
 import pytorch_lightning as pl
 import torch
 from e2e_pytorch_lightning import mnist
@@ -68,7 +69,10 @@ app = ClientApp(
 def main() -> None:
     # Model and data
     model = mnist.LitAutoEncoder()
-    train_loader, val_loader, test_loader = mnist.load_data()
+    num_partitions = 10
+    train_loader, val_loader, test_loader = mnist.load_data(
+        num_partitions=num_partitions, partition_id=np.random.choice(num_partitions)
+    )
 
     # Flower client
     client = FlowerClient(model, train_loader, val_loader, test_loader).to_client()
