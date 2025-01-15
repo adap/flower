@@ -444,7 +444,8 @@ def run_superlink() -> None:
         sleep(0.1)
 
     # Exit if any thread has exited prematurely
-    flwr_exit(ExitCode.THREAD_CRASH)
+    # This code will not be reached if the SuperLink stops gracefully
+    flwr_exit(ExitCode.SUPERLINK_THREAD_CRASH)
 
 
 def _run_flwr_command(args: list[str]) -> None:

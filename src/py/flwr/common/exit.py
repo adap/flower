@@ -35,7 +35,7 @@ class ExitCode:
     GRACEFUL_EXIT = 10  # Graceful exit requested by the user
 
     # SuperLink-specific exit codes (100-199)
-    THREAD_CRASH = 100
+    SUPERLINK_THREAD_CRASH = 100
 
     # ServerApp-specific exit codes (200-299)
 
@@ -66,7 +66,7 @@ EXIT_CODE_HELP = {
     ExitCode.GENERIC_ERROR: "",
     ExitCode.GRACEFUL_EXIT: "",
     # SuperLink-specific exit codes (100-199)
-    ExitCode.THREAD_CRASH: "An important background thread has crashed.",
+    ExitCode.SUPERLINK_THREAD_CRASH: "An important background thread has crashed.",
     # ServerApp-specific exit codes (200-299)
     # SuperNode-specific exit codes (300-399)
     ExitCode.REST_ADDRESS_INVALID: (
