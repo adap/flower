@@ -120,7 +120,7 @@ def flwr_exit(
 
     - `<code>`: The unique exit code representing the termination reason.
     - `<message>`: Optional context or additional information about the exit.
-    - `<short-help-message>`: A predefined brief explanation for the given exit code.
+    - `<short-help-message>`: A brief explanation for the given exit code.
     - `<help-page-url>`: A URL providing detailed documentation and resolution steps.
     """
     is_error = code not in {ExitCode.SUCCESS, ExitCode.GRACEFUL_EXIT}
