@@ -222,9 +222,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         # Transition status to running. PushTaskRes is only allowed in running status.
         self._transition_run_status(run_id, 2)
@@ -261,9 +259,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         self._transition_run_status(run_id, num_transitions)
 

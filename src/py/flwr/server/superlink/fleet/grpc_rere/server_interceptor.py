@@ -218,11 +218,11 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         # Return previously assigned `node_id` for the provided `public_key`
         if node_id is not None:
             state.acknowledge_ping(node_id, request.ping_interval)
-            return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
+            return CreateNodeResponse(node=Node(node_id=node_id))
 
         # No `node_id` exists for the provided `public_key`
         # Handle `CreateNode` here instead of calling the default method handler
         # Note: the innermost `CreateNode` method will never be called
         node_id = state.create_node(request.ping_interval)
         state.set_node_public_key(node_id, public_key_bytes)
-        return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
+        return CreateNodeResponse(node=Node(node_id=node_id))

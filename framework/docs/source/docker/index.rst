@@ -1,3 +1,7 @@
+:og:description: Learn how to run Flower for federated learning using Docker with pre-made images, including advanced options and Docker Compose for seamless deployment.
+.. meta::
+    :description: Learn how to run Flower for federated learning using Docker with pre-made images, including advanced options and Docker Compose for seamless deployment.
+
 Run Flower using Docker
 =======================
 

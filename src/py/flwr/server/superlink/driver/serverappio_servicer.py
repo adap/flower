@@ -106,9 +106,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         all_ids: set[int] = state.get_nodes(request.run_id)
-        nodes: list[Node] = [
-            Node(node_id=node_id, anonymous=False) for node_id in all_ids
-        ]
+        nodes: list[Node] = [Node(node_id=node_id) for node_id in all_ids]
         return GetNodesResponse(nodes=nodes)
 
     def CreateRun(
