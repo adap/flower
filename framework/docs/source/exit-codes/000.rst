@@ -4,4 +4,4 @@
 Description
 -----------
 
-The application completed successfully.
+The process completed successfully.
