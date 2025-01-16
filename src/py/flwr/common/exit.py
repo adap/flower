@@ -118,7 +118,7 @@ def flwr_exit(
     >>>
     >>> For more information, visit: <help-page-url>
 
-    - `<code>`: The exit code representing the termination reason.
+    - `<code>`: The unique exit code representing the termination reason.
     - `<message>`: Optional context or additional information about the exit.
     - `<short-help-message>`: A predefined brief explanation for the given exit code.
     - `<help-page-url>`: A URL providing detailed documentation and resolution steps.
