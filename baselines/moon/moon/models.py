@@ -1,16 +1,12 @@
-"""Define our models, and training and eval functions.
+"""moon: A Flower Baseline."""
 
-If your model is 100% off-the-shelf (e.g. directly from torchvision without requiring
-modifications) you might be better off instantiating your  model directly from the Hydra
-config. In this way, swapping your model for  another one can be done without changing
-the python code at all
-"""
+from logging import INFO
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
+from torch import nn, optim
 
+from flwr.common.logger import log
 from moon.utils import compute_accuracy
 
 
@@ -166,7 +162,7 @@ class ResNetCifar10(nn.Module):
         if len(replace_stride_with_dilation) != 3:
             raise ValueError(
                 "replace_stride_with_dilation should be None "
-                "or a 3-element tuple, got {}".format(replace_stride_with_dilation)
+                f"or a 3-element tuple, got {replace_stride_with_dilation}"
             )
         self.groups = groups
         self.base_width = width_per_group
@@ -324,6 +320,8 @@ class ModelMOON(nn.Module):
                 input_dim=(16 * 5 * 5), hidden_dims=[120, 84]
             )
             num_ftrs = 84
+        else:
+            raise ValueError(f"Model {base_model} not recognised.")
 
         # projection MLP
         self.l1 = nn.Linear(num_ftrs, num_ftrs)
@@ -353,21 +351,20 @@ class ModelMOON(nn.Module):
 
 def init_net(dataset, model, output_dim, device="cpu"):
     """Initialize model."""
-    if dataset == "cifar10":
+    if dataset == "uoft-cs/cifar10":
         n_classes = 10
-    elif dataset == "cifar100":
+    elif dataset == "uoft-cs/cifar100":
         n_classes = 100
+    else:
+        raise ValueError(f"Dataset '{dataset}' not recognised.")
 
     net = ModelMOON(model, output_dim, n_classes)
-    if device == "cpu":
-        net.to(device)
-    else:
-        net = net.cuda()
+    net.to(device)
 
     return net
 
 
-def train_moon(
+def train_moon(  # pylint: disable=too-many-locals
     net,
     global_net,
     previous_net,
@@ -376,13 +373,12 @@ def train_moon(
     lr,
     mu,
     temperature,
-    device="cpu",
+    device,
 ):
     """Training function for MOON."""
     net.to(device)
     global_net.to(device)
     previous_net.to(device)
-    train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
     optimizer = optim.SGD(
         filter(lambda p: p.requires_grad, net.parameters()),
         lr=lr,
@@ -390,21 +386,21 @@ def train_moon(
         weight_decay=1e-5,
     )
 
-    criterion = nn.CrossEntropyLoss().cuda()
+    criterion = nn.CrossEntropyLoss()
+    criterion.to(device)
 
     previous_net.eval()
     for param in previous_net.parameters():
         param.requires_grad = False
-    previous_net.cuda()
+    previous_net.to(device)
 
     cnt = 0
     cos = torch.nn.CosineSimilarity(dim=-1)
 
-    for epoch in range(epochs):
-        epoch_loss_collector = []
-        epoch_loss1_collector = []
-        epoch_loss2_collector = []
-        for _, (x, target) in enumerate(train_dataloader):
+    for _ in range(epochs):
+        for batch in train_dataloader:
+            x = batch["img"]
+            target = batch["label"]
             x, target = x.to(device), target.to(device)
 
             optimizer.zero_grad()
@@ -420,16 +416,16 @@ def train_moon(
             posi = cos(pro1, pro2)
             logits = posi.reshape(-1, 1)
 
-            previous_net.to(device)
+            # previous_net.to(device)
             # pro 3 is the representation by the previous model (Line 16 of Algorithm 1)
             _, pro3, _ = previous_net(x)
             # nega is the negative pair
             nega = cos(pro1, pro3)
             logits = torch.cat((logits, nega.reshape(-1, 1)), dim=1)
 
-            previous_net.to("cpu")
+            # previous_net.to("cpu")
             logits /= temperature
-            labels = torch.zeros(x.size(0)).cuda().long()
+            labels = torch.zeros(x.size(0)).to(device).long()
             # compute the model-contrastive loss (Line 17 of Algorithm 1)
             loss2 = mu * criterion(logits, labels)
             # compute the cross-entropy loss (Line 13 of Algorithm 1)
@@ -441,36 +437,20 @@ def train_moon(
             optimizer.step()
 
             cnt += 1
-            epoch_loss_collector.append(loss.item())
-            epoch_loss1_collector.append(loss1.item())
-            epoch_loss2_collector.append(loss2.item())
-
-        epoch_loss = sum(epoch_loss_collector) / len(epoch_loss_collector)
-        epoch_loss1 = sum(epoch_loss1_collector) / len(epoch_loss1_collector)
-        epoch_loss2 = sum(epoch_loss2_collector) / len(epoch_loss2_collector)
-        print(
-            "Epoch: %d Loss: %f Loss1: %f Loss2: %f"
-            % (epoch, epoch_loss, epoch_loss1, epoch_loss2)
-        )
 
     previous_net.to("cpu")
-    train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
+    train_acc, train_loss = compute_accuracy(net, train_dataloader, device=device)
 
-    print(">> Training accuracy: %f" % train_acc)
+    log(INFO, "ClientApp finished training: (acc: %f, loss: %f)", train_acc, train_loss)
     net.to("cpu")
     global_net.to("cpu")
-    print(" ** Training complete **")
     return net
 
 
-def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu"):
+def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device):
     """Training function for FedProx."""
     net = nn.DataParallel(net)
-    net.cuda()
-
-    train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
-
-    print(">> Pre-Training Training accuracy: {}".format(train_acc))
+    net.to(device)
 
     optimizer = optim.SGD(
         filter(lambda p: p.requires_grad, net.parameters()),
@@ -479,15 +459,18 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
         weight_decay=1e-5,
     )
 
-    criterion = nn.CrossEntropyLoss().cuda()
+    criterion = nn.CrossEntropyLoss()
+    criterion.to(device)
 
     cnt = 0
-    global_weight_collector = list(global_net.cuda().parameters())
+    global_weight_collector = list(global_net.to(device).parameters())
 
-    for _epoch in range(epochs):
+    for _ in range(epochs):
         epoch_loss_collector = []
-        for _, (x, target) in enumerate(train_dataloader):
-            x, target = x.cuda(), target.cuda()
+        for batch in train_dataloader:
+            x = batch["img"]
+            target = batch["label"]
+            x, target = x.to(device), target.to(device)
 
             optimizer.zero_grad()
             x.requires_grad = False
@@ -500,7 +483,7 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
             fed_prox_reg = 0.0
             for param_index, param in enumerate(net.parameters()):
                 fed_prox_reg += (mu / 2) * torch.norm(
-                    (param - global_weight_collector[param_index])
+                    param - global_weight_collector[param_index]
                 ) ** 2
             loss += fed_prox_reg
 
@@ -510,11 +493,9 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
             cnt += 1
             epoch_loss_collector.append(loss.item())
 
-    train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
-
-    print(">> Training accuracy: %f" % train_acc)
+    train_acc, train_loss = compute_accuracy(net, train_dataloader, device=device)
+    log(INFO, "ClientApp finished training: (acc: %f, loss: %f)", train_acc, train_loss)
     net.to("cpu")
-    print(" ** Training complete **")
     return net
 
 
@@ -522,6 +503,6 @@ def test(net, test_dataloader, device="cpu"):
     """Test function."""
     net.to(device)
     test_acc, loss = compute_accuracy(net, test_dataloader, device=device)
-    print(">> Test accuracy: %f" % test_acc)
+    log(INFO, "Test accuracy: %f", test_acc)
     net.to("cpu")
     return test_acc, loss
