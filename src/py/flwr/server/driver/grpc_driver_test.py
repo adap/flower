@@ -36,8 +36,8 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
-    PullMessagesRequest,
-    PushMessagesRequest,
+    PullResMessagesRequest,
+    PushInsMessagesRequest,
 )
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
@@ -114,7 +114,7 @@ class TestGrpcDriver(unittest.TestCase):
         self.mock_stub.GetRun.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
-        self.assertIsInstance(args[0], PushMessagesRequest)
+        self.assertIsInstance(args[0], PushInsMessagesRequest)
         self.assertEqual(msg_ids, mock_response.message_ids)
         for message in args[0].messages_list:
             self.assertEqual(message.metadata.run_id, 61016)
@@ -164,7 +164,7 @@ class TestGrpcDriver(unittest.TestCase):
         self.mock_stub.GetRun.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
-        self.assertIsInstance(args[0], PullMessagesRequest)
+        self.assertIsInstance(args[0], PullResMessagesRequest)
         self.assertEqual(args[0].message_ids, msg_ids)
         self.assertEqual(reply_tos, {"id2", "id3"})
 

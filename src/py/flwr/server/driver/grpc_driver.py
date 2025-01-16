@@ -39,10 +39,10 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullMessagesRequest,
-    PullMessagesResponse,
-    PushMessagesRequest,
-    PushMessagesResponse,
+    PullResMessagesRequest,
+    PullResMessagesResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
@@ -206,8 +206,8 @@ class GrpcDriver(Driver):
             # Add to list
             message_proto_list.append(msg_proto)
         # Call GrpcDriverStub method
-        res: PushMessagesResponse = self._stub.PushMessages(
-            PushMessagesRequest(
+        res: PushInsMessagesResponse = self._stub.PushMessages(
+            PushInsMessagesRequest(
                 messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
             )
         )
@@ -220,8 +220,8 @@ class GrpcDriver(Driver):
         set of given message IDs.
         """
         # Pull Messages
-        res: PullMessagesResponse = self._stub.PullMessages(
-            PullMessagesRequest(
+        res: PullResMessagesResponse = self._stub.PullMessages(
+            PullResMessagesRequest(
                 message_ids=message_ids,
                 run_id=cast(Run, self._run).run_id,
             )
