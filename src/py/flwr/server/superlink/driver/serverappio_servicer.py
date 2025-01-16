@@ -57,14 +57,14 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullMessagesRequest,
-    PullMessagesResponse,
+    PullResMessagesRequest,
+    PullResMessagesResponse,
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
     PullTaskResRequest,
     PullTaskResResponse,
-    PushMessagesRequest,
-    PushMessagesResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
     PushTaskInsRequest,
@@ -189,10 +189,10 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
     def PushMessages(
-        self, request: PushMessagesRequest, context: grpc.ServicerContext
-    ) -> PushMessagesResponse:
+        self, request: PushInsMessagesRequest, context: grpc.ServicerContext
+    ) -> PushInsMessagesResponse:
         """Push a set of Messages."""
-        return PushMessagesResponse(message_ids=[])
+        return PushInsMessagesResponse(message_ids=[])
 
     def PullTaskRes(
         self, request: PullTaskResRequest, context: grpc.ServicerContext
@@ -234,10 +234,10 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         return PullTaskResResponse(task_res_list=task_res_list)
 
     def PullMessages(
-        self, request: PullMessagesRequest, context: grpc.ServicerContext
-    ) -> PullMessagesResponse:
+        self, request: PullResMessagesRequest, context: grpc.ServicerContext
+    ) -> PullResMessagesResponse:
         """Pull a set of Messages."""
-        return PullMessagesResponse(messages_list=[])
+        return PullResMessagesResponse(messages_list=[])
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext

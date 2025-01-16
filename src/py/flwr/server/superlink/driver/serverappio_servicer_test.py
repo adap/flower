@@ -34,8 +34,12 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
+    PullResMessagesRequest,
+    PullResMessagesResponse,
     PullTaskResRequest,
     PullTaskResResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
     PushTaskInsRequest,
@@ -130,10 +134,20 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=PushTaskInsRequest.SerializeToString,
             response_deserializer=PushTaskInsResponse.FromString,
         )
+        self._push_task_ins = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PushMessage",
+            request_serializer=PushInsMessagesRequest.SerializeToString,
+            response_deserializer=PushInsMessagesResponse.FromString,
+        )
         self._pull_task_res = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PullTaskRes",
             request_serializer=PullTaskResRequest.SerializeToString,
             response_deserializer=PullTaskResResponse.FromString,
+        )
+        self._pull_task_res = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PullMessage",
+            request_serializer=PullResMessagesRequest.SerializeToString,
+            response_deserializer=PullResMessagesResponse.FromString,
         )
         self._push_serverapp_outputs = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PushServerAppOutputs",
