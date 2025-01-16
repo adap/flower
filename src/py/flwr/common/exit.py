@@ -105,7 +105,9 @@ To use the REST API, install `flwr` with the `rest` extra:
 HELP_PAGE_URL = "https://flower.ai/docs/framework/exit-codes/"
 
 
-def flwr_exit(code: int, message: str | None = None) -> NoReturn:
+def flwr_exit(
+    code: int, message: str | None = None, event_type: EventType | None = None
+) -> NoReturn:
     """Handle application exit with an optional message.
 
     The exit message logged and displayed will follow this structure:
@@ -121,30 +123,30 @@ def flwr_exit(code: int, message: str | None = None) -> NoReturn:
     - `<short-help-message>`: A predefined brief explanation for the given exit code.
     - `<help-page-url>`: A URL providing detailed documentation and resolution steps.
     """
+    is_error = code not in {ExitCode.SUCCESS, ExitCode.GRACEFUL_EXIT}
+
     # Construct exit message
-    exit_message = f"Exit Code: {code}\n"
+    exit_message = f"Exit Code: {code}\n" if is_error else ""
     exit_message += message or ""
     if short_help_message := EXIT_CODE_HELP.get(code, ""):
         exit_message += f"\n{short_help_message}"
 
     # Set log level and system exit code
-    log_level = INFO
-    sys_exit_code = 0
-    if code not in {ExitCode.SUCCESS, ExitCode.GRACEFUL_EXIT}:
-        log_level = ERROR
-        sys_exit_code = 1
+    log_level = ERROR if is_error else INFO
+    sys_exit_code = 1 if is_error else 0
 
-    # Add help URL
-    help_url = f"{HELP_PAGE_URL}{code}.html"
-    exit_message += f"\n\nFor more information, visit: <{help_url}>"
+    # Add help URL for non-successful/graceful exits
+    if is_error:
+        help_url = f"{HELP_PAGE_URL}{code}.html"
+        exit_message += f"\n\nFor more information, visit: <{help_url}>"
+
+    # Telemetry event
+    event_type = event_type or _try_obtain_telemetry_event()
+    if event_type:
+        event(event_type, event_details={"exit_code": code}).result()
 
     # Log the exit message
     log(log_level, exit_message)
-
-    # Telemetry event
-    event_type = _try_obtain_telemetry_event()
-    if event_type:
-        event(event_type, event_details={"exit_code": code})
 
     # Exit
     sys.exit(sys_exit_code)

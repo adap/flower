@@ -97,7 +97,9 @@ def run_supernode() -> None:
     )
 
     # Graceful shutdown
-    register_exit_handlers(
+    flwr_exit(
+        ExitCode.GRACEFUL_EXIT,
+        "SuperNode terminated gracefully.",
         event_type=EventType.RUN_SUPERNODE_LEAVE,
     )
 

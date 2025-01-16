@@ -22,7 +22,7 @@ from typing import Optional
 
 from grpc import Server
 
-from flwr.common.telemetry import EventType, event
+from flwr.common.telemetry import EventType
 
 from .exit import ExitCode, flwr_exit
 
@@ -62,8 +62,6 @@ def register_exit_handlers(
         # Reset to default handler
         signal(signalnum, default_handlers[signalnum])
 
-        event_res = event(event_type=event_type)
-
         if grpc_servers is not None:
             for grpc_server in grpc_servers:
                 grpc_server.stop(grace=1)
@@ -72,11 +70,8 @@ def register_exit_handlers(
             for bckg_thread in bckg_threads:
                 bckg_thread.join()
 
-        # Ensure event has happend
-        event_res.result()
-
         # Setup things for graceful exit
-        flwr_exit(ExitCode.GRACEFUL_EXIT, "Graceful exit.")
+        flwr_exit(ExitCode.GRACEFUL_EXIT, "SuperLink terminated gracefully.")
 
     default_handlers[SIGINT] = signal(  # type: ignore
         SIGINT,
