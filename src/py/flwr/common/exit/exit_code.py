@@ -12,18 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Unified exit function."""
+"""Exit codes."""
 
 
 from __future__ import annotations
-
-import sys
-from logging import ERROR, INFO
-from typing import NoReturn
-
-from flwr.common import EventType, event
-
-from .logger import log
 
 
 class ExitCode:
@@ -102,71 +94,3 @@ To use the REST API, install `flwr` with the `rest` extra:
         "Please remove the `app` argument from your command."
     ),
 }
-
-
-HELP_PAGE_URL = "https://flower.ai/docs/framework/exit-codes/"
-
-
-def flwr_exit(
-    code: int, message: str | None = None, event_type: EventType | None = None
-) -> NoReturn:
-    """Handle application exit with an optional message.
-
-    The exit message logged and displayed will follow this structure:
-
-    >>> Exit Code: <code>
-    >>> <message>
-    >>> <short-help-message>
-    >>>
-    >>> For more information, visit: <help-page-url>
-
-    - `<code>`: The unique exit code representing the termination reason.
-    - `<message>`: Optional context or additional information about the exit.
-    - `<short-help-message>`: A brief explanation for the given exit code.
-    - `<help-page-url>`: A URL providing detailed documentation and resolution steps.
-    """
-    is_error = code not in {ExitCode.SUCCESS, ExitCode.GRACEFUL_EXIT}
-
-    # Construct exit message
-    exit_message = f"Exit Code: {code}\n" if is_error else ""
-    exit_message += message or ""
-    if short_help_message := EXIT_CODE_HELP.get(code, ""):
-        exit_message += f"\n{short_help_message}"
-
-    # Set log level and system exit code
-    log_level = ERROR if is_error else INFO
-    sys_exit_code = 1 if is_error else 0
-
-    # Add help URL for non-successful/graceful exits
-    if is_error:
-        help_url = f"{HELP_PAGE_URL}{code}.html"
-        exit_message += f"\n\nFor more information, visit: <{help_url}>"
-
-    # Telemetry event
-    event_type = event_type or _try_obtain_telemetry_event()
-    if event_type:
-        event(event_type, event_details={"exit_code": code}).result()
-
-    # Log the exit message
-    log(log_level, exit_message)
-
-    # Exit
-    sys.exit(sys_exit_code)
-
-
-# pylint: disable-next=too-many-return-statements
-def _try_obtain_telemetry_event() -> EventType | None:
-    """Try to obtain a telemetry event."""
-    if sys.argv[0].endswith("flower-superlink"):
-        return EventType.RUN_SUPERLINK_LEAVE
-    if sys.argv[0].endswith("flower-supernode"):
-        return EventType.RUN_SUPERNODE_LEAVE
-    if sys.argv[0].endswith("flwr-serverapp"):
-        return EventType.FLWR_SERVERAPP_RUN_LEAVE
-    if sys.argv[0].endswith("flwr-clientapp"):
-        return None  # Not yet implemented
-    if sys.argv[0].endswith("flwr-simulation"):
-        return EventType.FLWR_SIMULATION_RUN_LEAVE
-    if sys.argv[0].endswith("flower-simulation"):
-        return EventType.CLI_FLOWER_SIMULATION_LEAVE
-    return None

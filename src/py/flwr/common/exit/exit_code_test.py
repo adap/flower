@@ -17,7 +17,7 @@
 
 from pathlib import Path
 
-from .exit import EXIT_CODE_HELP, ExitCode
+from .exit_code import EXIT_CODE_HELP, ExitCode
 
 
 def test_exit_code_help_exist() -> None:
