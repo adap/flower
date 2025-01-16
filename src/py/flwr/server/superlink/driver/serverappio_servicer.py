@@ -236,7 +236,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             message_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
             message_ids.append(message_id)
 
-        return PushMessagesResponse(
+        return PushInsMessagesResponse(
             message_ids=[
                 str(message_id) if message_id else "" for message_id in message_ids
             ]
@@ -325,7 +325,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
 
-        return PullMessagesResponse(messages_list=messages_list)
+        return PullResMessagesResponse(messages_list=messages_list)
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
