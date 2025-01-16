@@ -44,7 +44,7 @@ torch = "2.5.1"
 scikit-learn = "1.5.0"
 xgboost = "2.0.0"
 torchmetrics = "1.1.2"
-tqdm = "4.66.1"
+tqdm = "4.66.3"
 torchvision = "0.20.1"
 wandb = "0.15.12"
 
