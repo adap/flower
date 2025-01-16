@@ -71,7 +71,11 @@ def register_exit_handlers(
                 bckg_thread.join()
 
         # Setup things for graceful exit
-        flwr_exit(ExitCode.GRACEFUL_EXIT, "SuperLink terminated gracefully.")
+        flwr_exit(
+            code=ExitCode.GRACEFUL_EXIT,
+            message="SuperLink terminated gracefully.",
+            event_type=event_type,
+        )
 
     default_handlers[SIGINT] = signal(  # type: ignore
         SIGINT,

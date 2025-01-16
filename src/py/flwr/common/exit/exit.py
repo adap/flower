@@ -22,10 +22,9 @@ from logging import ERROR, INFO
 from typing import NoReturn
 
 from flwr.common import EventType, event
-from .exit_code import EXIT_CODE_HELP, ExitCode
 
 from ..logger import log
-
+from .exit_code import EXIT_CODE_HELP, ExitCode
 
 HELP_PAGE_URL = "https://flower.ai/docs/framework/exit-codes/"
 

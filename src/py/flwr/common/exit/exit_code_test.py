@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for the unified exit function."""
+"""Tests for exit codes."""
 
 
 from pathlib import Path

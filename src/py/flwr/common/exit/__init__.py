@@ -15,11 +15,10 @@
 """Flower exit functionality."""
 
 
-from .exit_code import ExitCode
 from .exit import flwr_exit
-
+from .exit_code import ExitCode
 
 __all__ = [
-    "ExitCode", 
-    "flwr_exit"
+    "ExitCode",
+    "flwr_exit",
 ]
