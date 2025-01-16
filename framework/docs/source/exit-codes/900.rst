@@ -1,5 +1,5 @@
-[900] REMOVED_APP_ARGUMENT
-==========================
+[900] SUPERNODE_REMOVED_APP_ARGUMENT
+====================================
 
 Description
 -----------

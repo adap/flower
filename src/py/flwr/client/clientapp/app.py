@@ -62,7 +62,8 @@ def flwr_clientapp() -> None:
     args = _parse_args_run_flwr_clientapp().parse_args()
     if not args.insecure:
         flwr_exit(
-            ExitCode.TLS_NOT_SUPPORTED, "flwr-clientapp does not support TLS yet."
+            ExitCode.COMMON_TLS_NOT_SUPPORTED,
+            "flwr-clientapp does not support TLS yet.",
         )
 
     log(INFO, "Starting Flower ClientApp")

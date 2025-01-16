@@ -1,5 +1,5 @@
-[300] REST_ADDRESS_INVALID
-==========================
+[300] SUPERNODE_REST_ADDRESS_INVALID
+====================================
 
 Description
 -----------

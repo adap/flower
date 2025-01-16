@@ -344,7 +344,7 @@ def run_superlink() -> None:
                 and importlib.util.find_spec("starlette")
                 and importlib.util.find_spec("uvicorn")
             ) is None:
-                flwr_exit(ExitCode.MISSING_EXTRA_REST)
+                flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
             _, ssl_certfile, ssl_keyfile = (
                 certificates if certificates is not None else (None, None, None)
@@ -511,7 +511,7 @@ def _format_address(address: str) -> tuple[str, str, int]:
     parsed_address = parse_address(address)
     if not parsed_address:
         flwr_exit(
-            ExitCode.ADDRESS_INVALID,
+            ExitCode.COMMON_ADDRESS_INVALID,
             f"Address ({address}) cannot be parsed.",
         )
     host, port, is_v6 = parsed_address
@@ -703,7 +703,7 @@ def _run_fleet_api_rest(
 
         from flwr.server.superlink.fleet.rest_rere.rest_api import app as fast_api_app
     except ModuleNotFoundError:
-        flwr_exit(ExitCode.MISSING_EXTRA_REST)
+        flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
     log(INFO, "Starting Flower REST server")
 

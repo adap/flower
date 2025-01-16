@@ -40,19 +40,19 @@ class ExitCode:
     # ServerApp-specific exit codes (200-299)
 
     # SuperNode-specific exit codes (300-399)
-    REST_ADDRESS_INVALID = 300
-    NODE_AUTH_KEYS_REQUIRED = 301
-    NODE_AUTH_KEYS_INVALID = 302
+    SUPERNODE_REST_ADDRESS_INVALID = 300
+    SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301
+    SUPERNODE_NODE_AUTH_KEYS_INVALID = 302
 
     # ClientApp-specific exit codes (400-499)
 
     # Common exit codes (500-899)
-    ADDRESS_INVALID = 500
-    MISSING_EXTRA_REST = 501
-    TLS_NOT_SUPPORTED = 502
+    COMMON_ADDRESS_INVALID = 500
+    COMMON_MISSING_EXTRA_REST = 501
+    COMMON_TLS_NOT_SUPPORTED = 502
 
     # Deprecated exit codes (900-)
-    REMOVED_APP_ARGUMENT = 900  # `flower-supernode <app>` is deprecated
+    SUPERNODE_REMOVED_APP_ARGUMENT = 900  # Deprecated `flower-supernode <app>`
 
     def __new__(cls) -> ExitCode:
         """Prevent instantiation."""
@@ -69,33 +69,35 @@ EXIT_CODE_HELP = {
     ExitCode.SUPERLINK_THREAD_CRASH: "An important background thread has crashed.",
     # ServerApp-specific exit codes (200-299)
     # SuperNode-specific exit codes (300-399)
-    ExitCode.REST_ADDRESS_INVALID: (
+    ExitCode.SUPERNODE_REST_ADDRESS_INVALID: (
         "When using the REST API, please provide `https://` or "
         "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
     ),
-    ExitCode.NODE_AUTH_KEYS_REQUIRED: (
+    ExitCode.SUPERNODE_NODE_AUTH_KEYS_REQUIRED: (
         "Node authentication requires file paths to both "
         "'--auth-supernode-private-key' and '--auth-supernode-public-key' "
         "to be provided (providing only one of them is not sufficient)."
     ),
-    ExitCode.NODE_AUTH_KEYS_INVALID: (
+    ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID: (
         "Node uthentication requires elliptic curve private and public key pair. "
         "Please ensure that the file path points to a valid private/public key "
         "file and try again."
     ),
     # ClientApp-specific exit codes (400-499)
     # Common exit codes (500-999)
-    ExitCode.ADDRESS_INVALID: "Please provide a valid URL, IPv4 or IPv6 address.",
-    ExitCode.MISSING_EXTRA_REST: """
+    ExitCode.COMMON_ADDRESS_INVALID: (
+        "Please provide a valid URL, IPv4 or IPv6 address."
+    ),
+    ExitCode.COMMON_MISSING_EXTRA_REST: """
 Extra dependencies required for using the REST-based Fleet API are missing.
 
 To use the REST API, install `flwr` with the `rest` extra:
 
     `pip install "flwr[rest]"`.
 """,
-    ExitCode.TLS_NOT_SUPPORTED: "Please use the '--insecure' flag.",
+    ExitCode.COMMON_TLS_NOT_SUPPORTED: "Please use the '--insecure' flag.",
     # Deprecated exit codes (1000-)
-    ExitCode.REMOVED_APP_ARGUMENT: (
+    ExitCode.SUPERNODE_REMOVED_APP_ARGUMENT: (
         "The `app` argument has been removed. "
         "Please remove the `app` argument from your command."
     ),

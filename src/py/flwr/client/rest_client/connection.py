@@ -60,7 +60,7 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 try:
     import requests
 except ModuleNotFoundError:
-    flwr_exit(ExitCode.MISSING_EXTRA_REST)
+    flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
 
 PATH_CREATE_NODE: str = "api/v0/fleet/create-node"

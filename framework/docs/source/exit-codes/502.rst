@@ -1,5 +1,5 @@
-[502] TLS_NOT_SUPPORTED
-=======================
+[502] COMMON_TLS_NOT_SUPPORTED
+==============================
 
 Description
 -----------

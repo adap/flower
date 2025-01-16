@@ -1,5 +1,5 @@
-[500] ADDRESS_INVALID
-=====================
+[500] COMMON_ADDRESS_INVALID
+============================
 
 Description
 -----------

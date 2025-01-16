@@ -1,5 +1,5 @@
-[501] MISSING_EXTRA_REST
-========================
+[501] COMMON_MISSING_EXTRA_REST
+===============================
 
 Description
 -----------

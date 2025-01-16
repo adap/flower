@@ -1,5 +1,5 @@
-[301] NODE_AUTH_KEYS_REQUIRED
-=============================
+[301] SUPERNODE_NODE_AUTH_KEYS_REQUIRED
+=======================================
 
 Description
 -----------

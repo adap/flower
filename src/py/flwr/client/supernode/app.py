@@ -66,7 +66,7 @@ def run_supernode() -> None:
 
     # Exit if unsupported argument is passed by the user
     if args.app is not None:
-        flwr_exit(ExitCode.REMOVED_APP_ARGUMENT)
+        flwr_exit(ExitCode.SUPERNODE_REMOVED_APP_ARGUMENT)
 
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     load_fn = get_load_client_app_fn(
@@ -275,7 +275,7 @@ def _try_setup_client_authentication(
         return None
 
     if not args.auth_supernode_private_key or not args.auth_supernode_public_key:
-        flwr_exit(ExitCode.NODE_AUTH_KEYS_REQUIRED)
+        flwr_exit(ExitCode.SUPERNODE_NODE_AUTH_KEYS_REQUIRED)
 
     try:
         ssh_private_key = load_ssh_private_key(
@@ -286,7 +286,7 @@ def _try_setup_client_authentication(
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
         flwr_exit(
-            ExitCode.NODE_AUTH_KEYS_INVALID,
+            ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
             "Unable to parse the private key file.",
         )
 
@@ -298,7 +298,7 @@ def _try_setup_client_authentication(
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
         flwr_exit(
-            ExitCode.NODE_AUTH_KEYS_INVALID,
+            ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
             "Unable to parse the public key file.",
         )
 

@@ -777,7 +777,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     parsed_address = parse_address(server_address)
     if not parsed_address:
         flwr_exit(
-            ExitCode.ADDRESS_INVALID,
+            ExitCode.COMMON_ADDRESS_INVALID,
             f"SuperLink address ({server_address}) cannot be parsed.",
         )
     host, port, is_v6 = parsed_address
@@ -794,9 +794,9 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
 
             from .rest_client.connection import http_request_response
         except ModuleNotFoundError:
-            flwr_exit(ExitCode.MISSING_EXTRA_REST)
+            flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
         if server_address[:4] != "http":
-            flwr_exit(ExitCode.REST_ADDRESS_INVALID)
+            flwr_exit(ExitCode.SUPERNODE_REST_ADDRESS_INVALID)
         connection, error_type = http_request_response, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
         connection, error_type = grpc_request_response, RpcError

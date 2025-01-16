@@ -54,7 +54,7 @@ try:
     from starlette.responses import Response
     from starlette.routing import Route
 except ModuleNotFoundError:
-    flwr_exit(ExitCode.MISSING_EXTRA_REST)
+    flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
 
 GrpcRequest = TypeVar("GrpcRequest", bound=GrpcMessage)
