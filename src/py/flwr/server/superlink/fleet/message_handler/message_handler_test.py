@@ -79,7 +79,7 @@ def test_delete_node_failure() -> None:
 def test_delete_node_success() -> None:
     """Test delete_node."""
     # Prepare
-    request = DeleteNodeRequest(node=Node(node_id=123, anonymous=False))
+    request = DeleteNodeRequest(node=Node(node_id=123))
     state = MagicMock()
 
     # Execute
@@ -97,7 +97,7 @@ def test_delete_node_success() -> None:
 def test_pull_task_ins() -> None:
     """Test pull_task_ins."""
     # Prepare
-    request = PullTaskInsRequest(node=Node(node_id=1, anonymous=False))
+    request = PullTaskInsRequest(node=Node(node_id=123))
     state = MagicMock()
 
     # Execute
@@ -115,7 +115,7 @@ def test_pull_task_ins() -> None:
 def test_pull_messages() -> None:
     """Test pull_messages."""
     # Prepare
-    request = PullMessagesRequest(node=Node(node_id=1, anonymous=False))
+    request = PullMessagesRequest(node=Node(node_id=1234))
     state = MagicMock()
 
     # Execute

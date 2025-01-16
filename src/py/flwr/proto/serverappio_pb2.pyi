@@ -101,7 +101,7 @@ class PullTaskResResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["task_res_list",b"task_res_list"]) -> None: ...
 global___PullTaskResResponse = PullTaskResResponse
 
-class PushMessagesRequest(google.protobuf.message.Message):
+class PushInsMessagesRequest(google.protobuf.message.Message):
     """PushMessages messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MESSAGES_LIST_FIELD_NUMBER: builtins.int
@@ -115,9 +115,9 @@ class PushMessagesRequest(google.protobuf.message.Message):
         run_id: builtins.int = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list","run_id",b"run_id"]) -> None: ...
-global___PushMessagesRequest = PushMessagesRequest
+global___PushInsMessagesRequest = PushInsMessagesRequest
 
-class PushMessagesResponse(google.protobuf.message.Message):
+class PushInsMessagesResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MESSAGE_IDS_FIELD_NUMBER: builtins.int
     @property
@@ -127,9 +127,9 @@ class PushMessagesResponse(google.protobuf.message.Message):
         message_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["message_ids",b"message_ids"]) -> None: ...
-global___PushMessagesResponse = PushMessagesResponse
+global___PushInsMessagesResponse = PushInsMessagesResponse
 
-class PullMessagesRequest(google.protobuf.message.Message):
+class PullResMessagesRequest(google.protobuf.message.Message):
     """PullMessages messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MESSAGE_IDS_FIELD_NUMBER: builtins.int
@@ -143,9 +143,9 @@ class PullMessagesRequest(google.protobuf.message.Message):
         run_id: builtins.int = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["message_ids",b"message_ids","run_id",b"run_id"]) -> None: ...
-global___PullMessagesRequest = PullMessagesRequest
+global___PullResMessagesRequest = PullResMessagesRequest
 
-class PullMessagesResponse(google.protobuf.message.Message):
+class PullResMessagesResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MESSAGES_LIST_FIELD_NUMBER: builtins.int
     @property
@@ -155,7 +155,7 @@ class PullMessagesResponse(google.protobuf.message.Message):
         messages_list: typing.Optional[typing.Iterable[flwr.proto.message_pb2.Message]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list"]) -> None: ...
-global___PullMessagesResponse = PullMessagesResponse
+global___PullResMessagesResponse = PullResMessagesResponse
 
 class PullServerAppInputsRequest(google.protobuf.message.Message):
     """PullServerAppInputs messages"""

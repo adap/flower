@@ -34,8 +34,12 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
+    PullResMessagesRequest,
+    PullResMessagesResponse,
     PullTaskResRequest,
     PullTaskResResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
     PushTaskInsRequest,
@@ -130,10 +134,20 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=PushTaskInsRequest.SerializeToString,
             response_deserializer=PushTaskInsResponse.FromString,
         )
+        self._push_message = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PushMessage",
+            request_serializer=PushInsMessagesRequest.SerializeToString,
+            response_deserializer=PushInsMessagesResponse.FromString,
+        )
         self._pull_task_res = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PullTaskRes",
             request_serializer=PullTaskResRequest.SerializeToString,
             response_deserializer=PullTaskResResponse.FromString,
+        )
+        self._pull_message = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PullMessage",
+            request_serializer=PullResMessagesRequest.SerializeToString,
+            response_deserializer=PullResMessagesResponse.FromString,
         )
         self._push_serverapp_outputs = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PushServerAppOutputs",
@@ -208,9 +222,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         # Transition status to running. PushTaskRes is only allowed in running status.
         self._transition_run_status(run_id, 2)
@@ -247,9 +259,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         self._transition_run_status(run_id, num_transitions)
 

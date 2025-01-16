@@ -27,8 +27,8 @@ class ServerAppIoStub:
     """Create one or more tasks"""
 
     PushMessages: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.serverappio_pb2.PushMessagesRequest,
-        flwr.proto.serverappio_pb2.PushMessagesResponse]
+        flwr.proto.serverappio_pb2.PushInsMessagesRequest,
+        flwr.proto.serverappio_pb2.PushInsMessagesResponse]
 
     PullTaskRes: grpc.UnaryUnaryMultiCallable[
         flwr.proto.serverappio_pb2.PullTaskResRequest,
@@ -36,8 +36,8 @@ class ServerAppIoStub:
     """Get task results"""
 
     PullMessages: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.serverappio_pb2.PullMessagesRequest,
-        flwr.proto.serverappio_pb2.PullMessagesResponse]
+        flwr.proto.serverappio_pb2.PullResMessagesRequest,
+        flwr.proto.serverappio_pb2.PullResMessagesResponse]
 
     GetRun: grpc.UnaryUnaryMultiCallable[
         flwr.proto.run_pb2.GetRunRequest,
@@ -102,9 +102,9 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def PushMessages(self,
-        request: flwr.proto.serverappio_pb2.PushMessagesRequest,
+        request: flwr.proto.serverappio_pb2.PushInsMessagesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PushMessagesResponse: ...
+    ) -> flwr.proto.serverappio_pb2.PushInsMessagesResponse: ...
 
     @abc.abstractmethod
     def PullTaskRes(self,
@@ -116,9 +116,9 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def PullMessages(self,
-        request: flwr.proto.serverappio_pb2.PullMessagesRequest,
+        request: flwr.proto.serverappio_pb2.PullResMessagesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PullMessagesResponse: ...
+    ) -> flwr.proto.serverappio_pb2.PullResMessagesResponse: ...
 
     @abc.abstractmethod
     def GetRun(self,

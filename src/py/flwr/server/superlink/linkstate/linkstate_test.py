@@ -26,7 +26,7 @@ from uuid import UUID
 from parameterized import parameterized
 
 from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, RecordSet, now
-from flwr.common.constant import Status, SubStatus
+from flwr.common.constant import SUPERLINK_NODE_ID, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     private_key_to_bytes,
@@ -250,9 +250,7 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         assert task_ins.task.created_at < time.time()  # pylint: disable=no-member
         assert task_ins.task.delivered_at == ""  # pylint: disable=no-member
@@ -286,12 +284,8 @@ class StateTest(unittest.TestCase):
         node_id = state.create_node(1e3)
         invalid_node_id = 61016 if node_id != 61016 else 61017
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=invalid_node_id, anonymous=False, run_id=run_id
-        )
-        task_ins2 = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=invalid_node_id, run_id=run_id)
+        task_ins2 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
         task_ins2.task.producer.node_id = 61016
 
         # Execute and assert
@@ -304,15 +298,9 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins_0 = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
-        task_ins_1 = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
-        task_ins_2 = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins_0 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
+        task_ins_1 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
+        task_ins_2 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         # Insert three TaskIns
         task_id_0 = state.store_task_ins(task_ins=task_ins_0)
@@ -329,7 +317,6 @@ class StateTest(unittest.TestCase):
         # Insert one TaskRes and retrive it to mark it as delivered
         task_res_0 = create_task_res(
             producer_node_id=node_id,
-            anonymous=False,
             ancestry=[str(task_id_0)],
             run_id=run_id,
         )
@@ -340,7 +327,6 @@ class StateTest(unittest.TestCase):
         # Insert one TaskRes, but don't retrive it
         task_res_1: TaskRes = create_task_res(
             producer_node_id=node_id,
-            anonymous=False,
             ancestry=[str(task_id_1)],
             run_id=run_id,
         )
@@ -371,17 +357,11 @@ class StateTest(unittest.TestCase):
         node_id = state.create_node(1e3)
         run_id_0 = state.create_run(None, None, "8g13kl7", {}, ConfigsRecord())
         # Insert tasks with the same run_id
-        task_ins_0 = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id_0
-        )
-        task_ins_1 = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id_0
-        )
+        task_ins_0 = create_task_ins(consumer_node_id=node_id, run_id=run_id_0)
+        task_ins_1 = create_task_ins(consumer_node_id=node_id, run_id=run_id_0)
         # Insert a task with a different run_id to ensure it does not appear in result
         run_id_1 = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins_2 = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id_1
-        )
+        task_ins_2 = create_task_ins(consumer_node_id=node_id, run_id=run_id_1)
 
         # Insert three TaskIns
         task_id_0 = state.store_task_ins(task_ins=task_ins_0)
@@ -410,65 +390,13 @@ class StateTest(unittest.TestCase):
         # Assert
         assert isinstance(state, LinkState)
 
-    # TaskIns tests
-    def test_task_ins_store_anonymous_and_retrieve_anonymous(self) -> None:
-        """Store one TaskIns.
-
-        Create anonymous task and retrieve it.
-        """
-        # Prepare
-        state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
-
-        # Execute
-        task_ins_uuid = state.store_task_ins(task_ins)
-        task_ins_list = state.get_task_ins(node_id=None, limit=None)
-
-        # Assert
-        assert len(task_ins_list) == 1
-        assert task_ins_list[0].task_id == str(task_ins_uuid)
-
-    def test_task_ins_store_anonymous_and_fail_retrieving_identitiy(self) -> None:
-        """Store anonymous TaskIns and fail to retrieve it."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
-
-        # Execute
-        _ = state.store_task_ins(task_ins)
-        task_ins_list = state.get_task_ins(node_id=1, limit=None)
-
-        # Assert
-        assert len(task_ins_list) == 0
-
-    def test_task_ins_store_identity_and_fail_retrieving_anonymous(self) -> None:
-        """Store identity TaskIns and fail retrieving it as anonymous."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
-
-        # Execute
-        _ = state.store_task_ins(task_ins)
-        task_ins_list = state.get_task_ins(node_id=None, limit=None)
-
-        # Assert
-        assert len(task_ins_list) == 0
-
     def test_task_ins_store_identity_and_retrieve_identity(self) -> None:
         """Store identity TaskIns and retrieve it."""
         # Prepare
         state: LinkState = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         # Execute
         task_ins_uuid = state.store_task_ins(task_ins)
@@ -486,9 +414,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         # Execute
         _ = state.store_task_ins(task_ins)
@@ -499,7 +425,7 @@ class StateTest(unittest.TestCase):
         assert len(task_ins_list) == 1
 
         # 2nd get: no TaskIns because it was already delivered before
-        task_ins_list = state.get_task_ins(node_id=1, limit=None)
+        task_ins_list = state.get_task_ins(2, limit=None)
 
         # Assert
         assert len(task_ins_list) == 0
@@ -511,13 +437,13 @@ class StateTest(unittest.TestCase):
 
         # Execute & Assert
         with self.assertRaises(AssertionError):
-            state.get_task_ins(node_id=1, limit=0)
+            state.get_task_ins(node_id=2, limit=0)
 
     def test_task_ins_store_invalid_run_id_and_fail(self) -> None:
         """Store TaskIns with invalid run_id and fail."""
         # Prepare
         state: LinkState = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=61016)
+        task_ins = create_task_ins(consumer_node_id=0, run_id=61016)
 
         # Execute
         task_id = state.store_task_ins(task_ins)
@@ -532,12 +458,12 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        node_id = state.create_node(1e3)
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
         task_ins_id = state.store_task_ins(task_ins)
 
         task_res = create_task_res(
-            producer_node_id=0,
-            anonymous=True,
+            producer_node_id=node_id,
             ancestry=[str(task_ins_id)],
             run_id=run_id,
         )
@@ -694,9 +620,11 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_ins."""
         # Prepare
         state: LinkState = self.state_factory()
+        node_id = state.create_node(1e3)
+
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_0 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
-        task_1 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_0 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
+        task_1 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         # Store two tasks
         state.store_task_ins(task_0)
@@ -713,21 +641,20 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        node_id = state.create_node(1e3)
 
-        task_ins_0 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
-        task_ins_1 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_ins_0 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
+        task_ins_1 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
         task_ins_id_0 = state.store_task_ins(task_ins_0)
         task_ins_id_1 = state.store_task_ins(task_ins_1)
 
         task_0 = create_task_res(
-            producer_node_id=0,
-            anonymous=True,
+            producer_node_id=node_id,
             ancestry=[str(task_ins_id_0)],
             run_id=run_id,
         )
         task_1 = create_task_res(
-            producer_node_id=0,
-            anonymous=True,
+            producer_node_id=node_id,
             ancestry=[str(task_ins_id_1)],
             run_id=run_id,
         )
@@ -879,8 +806,9 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        node_id = state.create_node(1e3)
 
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
         task_ins.task.created_at = time.time() - task_ins.task.ttl + 0.5
         task_ins_id = state.store_task_ins(task_ins)
 
@@ -889,8 +817,7 @@ class StateTest(unittest.TestCase):
             side_effect=lambda: task_ins.task.created_at + task_ins.task.ttl + 0.1,
         ):  # Expired by 0.1 seconds
             task = create_task_res(
-                producer_node_id=0,
-                anonymous=True,
+                producer_node_id=node_id,
                 ancestry=[str(task_ins_id)],
                 run_id=run_id,
             )
@@ -933,17 +860,15 @@ class StateTest(unittest.TestCase):
             # Prepare
             state: LinkState = self.state_factory()
             run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+            node_id = state.create_node(1e3)
 
-            task_ins = create_task_ins(
-                consumer_node_id=0, anonymous=True, run_id=run_id
-            )
+            task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
             task_ins.task.created_at = task_ins_created_at
             task_ins.task.ttl = task_ins_ttl
             task_ins_id = state.store_task_ins(task_ins)
 
             task_res = create_task_res(
-                producer_node_id=0,
-                anonymous=True,
+                producer_node_id=node_id,
                 ancestry=[str(task_ins_id)],
                 run_id=run_id,
             )
@@ -965,9 +890,7 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
         task_ins.task.created_at = time.time() - 5
         task_ins.task.ttl = 5.0
 
@@ -976,7 +899,7 @@ class StateTest(unittest.TestCase):
 
         # Assert
         with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
-            task_ins_list = state.get_task_ins(node_id=1, limit=None)
+            task_ins_list = state.get_task_ins(node_id=2, limit=None)
             assert len(task_ins_list) == 0
 
     def test_get_task_res_expired_task_ins(self) -> None:
@@ -985,17 +908,14 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
         task_ins.task.created_at = time.time() - 5
         task_ins.task.ttl = 5.1
 
         task_id = state.store_task_ins(task_ins=task_ins)
 
         task_res = create_task_res(
-            producer_node_id=1,
-            anonymous=False,
+            producer_node_id=node_id,
             ancestry=[str(task_id)],
             run_id=run_id,
         )
@@ -1006,11 +926,12 @@ class StateTest(unittest.TestCase):
             # Execute
             assert task_id is not None
             task_res_list = state.get_task_res(task_ids={task_id})
+            state.delete_tasks({task_id})
 
             # Assert
             assert len(task_res_list) == 1
             assert task_res_list[0].task.HasField("error")
-            assert state.num_task_ins() == 1
+            assert state.num_task_ins() == 0
             assert state.num_task_res() == 0
 
     def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
@@ -1019,11 +940,12 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        node_id = state.create_node(1e3)
+
         task_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
 
         task_res = create_task_res(
-            producer_node_id=1,
-            anonymous=False,
+            producer_node_id=node_id,
             ancestry=[str(task_ins_id)],
             run_id=run_id,
         )
@@ -1044,9 +966,7 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
         task_ins.task.created_at = time.time() - 5
         task_ins.task.ttl = 7.1
 
@@ -1054,7 +974,6 @@ class StateTest(unittest.TestCase):
 
         task_res = create_task_res(
             producer_node_id=node_id,
-            anonymous=False,
             ancestry=[str(task_id)],
             run_id=run_id,
         )
@@ -1076,16 +995,13 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_ins = create_task_ins(
-            consumer_node_id=node_id, anonymous=False, run_id=run_id
-        )
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         task_id = state.store_task_ins(task_ins=task_ins)
 
         task_res = create_task_res(
             # Different than consumer_node_id
             producer_node_id=100 if node_id != 100 else 101,
-            anonymous=False,
             ancestry=[str(task_id)],
             run_id=run_id,
         )
@@ -1102,7 +1018,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         context = Context(
             run_id=1,
-            node_id=0,
+            node_id=SUPERLINK_NODE_ID,
             node_config={"mock": "mock"},
             state=RecordSet(),
             run_config={"test": "test"},
@@ -1124,7 +1040,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         context = Context(
             run_id=1,
-            node_id=0,
+            node_id=1234,
             node_config={"mock": "mock"},
             state=RecordSet(),
             run_config={"test": "test"},
@@ -1243,14 +1159,12 @@ class StateTest(unittest.TestCase):
 
 def create_task_ins(
     consumer_node_id: int,
-    anonymous: bool,
     run_id: int,
     delivered_at: str = "",
 ) -> TaskIns:
     """Create a TaskIns for testing."""
     consumer = Node(
         node_id=consumer_node_id,
-        anonymous=anonymous,
     )
     task = TaskIns(
         task_id="",
@@ -1258,7 +1172,7 @@ def create_task_ins(
         run_id=run_id,
         task=Task(
             delivered_at=delivered_at,
-            producer=Node(node_id=0, anonymous=True),
+            producer=Node(node_id=SUPERLINK_NODE_ID),
             consumer=consumer,
             task_type="mock",
             recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
@@ -1272,7 +1186,6 @@ def create_task_ins(
 
 def create_task_res(
     producer_node_id: int,
-    anonymous: bool,
     ancestry: list[str],
     run_id: int,
 ) -> TaskRes:
@@ -1282,8 +1195,8 @@ def create_task_res(
         group_id="",
         run_id=run_id,
         task=Task(
-            producer=Node(node_id=producer_node_id, anonymous=anonymous),
-            consumer=Node(node_id=0, anonymous=True),
+            producer=Node(node_id=producer_node_id),
+            consumer=Node(node_id=SUPERLINK_NODE_ID),
             ancestry=ancestry,
             task_type="mock",
             recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
