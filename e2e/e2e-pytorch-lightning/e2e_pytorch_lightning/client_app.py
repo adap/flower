@@ -8,9 +8,14 @@ from e2e_pytorch_lightning import mnist
 from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
+num_partitions = 10
+train_loader, val_loader, test_loader = mnist.load_data(
+    num_partitions=num_partitions, partition_id=np.random.choice(num_partitions)
+)
+
 
 class FlowerClient(NumPyClient):
-    def __init__(self, model, train_loader, val_loader, test_loader):
+    def __init__(self, model):
         self.model = model
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -72,13 +77,9 @@ app = ClientApp(
 def main() -> None:
     # Model and data
     model = mnist.LitAutoEncoder()
-    num_partitions = 20
-    train_loader, val_loader, test_loader = mnist.load_data(
-        num_partitions=num_partitions, partition_id=np.random.choice(num_partitions)
-    )
 
     # Flower client
-    client = FlowerClient(model, train_loader, val_loader, test_loader).to_client()
+    client = FlowerClient(model).to_client()
     start_client(server_address="127.0.0.1:8080", client=client)
 
 
