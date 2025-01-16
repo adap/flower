@@ -320,7 +320,7 @@ def _log_uploader(
 ) -> None:
     """Upload logs to the SuperLink."""
     exit_flag = False
-    node = Node(node_id=node_id, anonymous=False)
+    node = Node(node_id=node_id)
     msgs: list[str] = []
     while True:
         # Fetch all messages from the queue

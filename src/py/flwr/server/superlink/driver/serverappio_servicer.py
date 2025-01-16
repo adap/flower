@@ -60,14 +60,14 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullMessagesRequest,
-    PullMessagesResponse,
+    PullResMessagesRequest,
+    PullResMessagesResponse,
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
     PullTaskResRequest,
     PullTaskResResponse,
-    PushMessagesRequest,
-    PushMessagesResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
     PushTaskInsRequest,
@@ -109,9 +109,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         all_ids: set[int] = state.get_nodes(request.run_id)
-        nodes: list[Node] = [
-            Node(node_id=node_id, anonymous=False) for node_id in all_ids
-        ]
+        nodes: list[Node] = [Node(node_id=node_id) for node_id in all_ids]
         return GetNodesResponse(nodes=nodes)
 
     def CreateRun(
@@ -192,8 +190,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
     def PushMessages(
-        self, request: PushMessagesRequest, context: grpc.ServicerContext
-    ) -> PushMessagesResponse:
+        self, request: PushInsMessagesRequest, context: grpc.ServicerContext
+    ) -> PushInsMessagesResponse:
         """Push a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PushMessages")
 
@@ -238,7 +236,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             message_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
             message_ids.append(message_id)
 
-        return PushMessagesResponse(
+        return PushInsMessagesResponse(
             message_ids=[
                 str(message_id) if message_id else "" for message_id in message_ids
             ]
@@ -284,8 +282,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         return PullTaskResResponse(task_res_list=task_res_list)
 
     def PullMessages(
-        self, request: PullMessagesRequest, context: grpc.ServicerContext
-    ) -> PullMessagesResponse:
+        self, request: PullResMessagesRequest, context: grpc.ServicerContext
+    ) -> PullResMessagesResponse:
         """Pull a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PullMessages")
 
@@ -327,7 +325,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
 
-        return PullMessagesResponse(messages_list=messages_list)
+        return PullResMessagesResponse(messages_list=messages_list)
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
