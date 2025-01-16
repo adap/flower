@@ -311,3 +311,14 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         yield (receive, send, create_node, delete_node, get_run, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
+    # Cleanup
+    finally:
+        try:
+            if node is not None:
+                ping_stop_event.set()
+                # Disable retrying
+                retry_invoker.max_tries = 1
+                delete_node()
+        except grpc.RpcError:
+            pass
+        channel.close()

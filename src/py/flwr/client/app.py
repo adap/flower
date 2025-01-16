@@ -16,11 +16,9 @@
 
 
 import multiprocessing
-import signal
 import sys
 import time
 from contextlib import AbstractContextManager
-from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from os import urandom
 from pathlib import Path
@@ -346,10 +344,7 @@ def start_client_internal(
         transport, server_address
     )
 
-    app_state_tracker = _AppStateTracker()
-
     def _on_sucess(retry_state: RetryState) -> None:
-        app_state_tracker.is_connected = True
         if retry_state.tries > 1:
             log(
                 INFO,
@@ -359,7 +354,6 @@ def start_client_internal(
             )
 
     def _on_backoff(retry_state: RetryState) -> None:
-        app_state_tracker.is_connected = False
         if retry_state.tries == 1:
             log(WARN, "Connection attempt failed, retrying...")
         else:
@@ -396,7 +390,7 @@ def start_client_internal(
 
     runs: dict[int, Run] = {}
 
-    while not app_state_tracker.interrupt:
+    while True:
         sleep_duration: int = 0
         with connection(
             address,
@@ -435,9 +429,8 @@ def start_client_internal(
                         node_config=node_config,
                     )
 
-            app_state_tracker.register_signal_handler()
             # pylint: disable=too-many-nested-blocks
-            while not app_state_tracker.interrupt:
+            while True:
                 try:
                     # Receive
                     message = receive()
@@ -595,10 +588,7 @@ def start_client_internal(
                             e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
                             exc_entity = "SuperNode"
 
-                        if not app_state_tracker.interrupt:
-                            log(
-                                ERROR, "%s raised an exception", exc_entity, exc_info=ex
-                            )
+                        log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
 
                         # Create error message
                         reply_message = message.create_error_reply(
@@ -624,19 +614,14 @@ def start_client_internal(
                         run_id,
                     )
                     log(INFO, "")
-
-                except StopIteration:
-                    sleep_duration = 0
-                    break
             # pylint: enable=too-many-nested-blocks
 
             # Unregister node
-            if delete_node is not None and app_state_tracker.is_connected:
+            if delete_node is not None:
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
-            del app_state_tracker
             break
 
         # Sleep and reconnect afterwards
@@ -810,23 +795,6 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
         )
 
     return connection, address, error_type
-
-
-@dataclass
-class _AppStateTracker:
-    interrupt: bool = False
-    is_connected: bool = False
-
-    def register_signal_handler(self) -> None:
-        """Register handlers for exit signals."""
-
-        def signal_handler(sig, frame):  # type: ignore
-            # pylint: disable=unused-argument
-            self.interrupt = True
-            raise StopIteration from None
-
-        signal.signal(signal.SIGINT, signal_handler)
-        signal.signal(signal.SIGTERM, signal_handler)
 
 
 def _run_flwr_clientapp(args: list[str]) -> None:
