@@ -436,6 +436,7 @@ def run_superlink() -> None:
     # Graceful shutdown
     register_exit_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
+        exit_message="SuperLink terminated gracefully.",
         grpc_servers=grpc_servers,
     )
 

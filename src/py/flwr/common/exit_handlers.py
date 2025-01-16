@@ -29,6 +29,7 @@ from .exit import ExitCode, flwr_exit
 
 def register_exit_handlers(
     event_type: EventType,
+    exit_message: Optional[str] = None,
     grpc_servers: Optional[list[Server]] = None,
     bckg_threads: Optional[list[Thread]] = None,
 ) -> None:
@@ -38,6 +39,8 @@ def register_exit_handlers(
     ----------
     event_type : EventType
         The telemetry event that should be logged before exit.
+    exit_message : Optional[str] (default: None)
+        The message to be logged before exiting.
     grpc_servers: Optional[List[Server]] (default: None)
         An otpional list of gRPC servers that need to be gracefully
         terminated before exiting.
@@ -73,7 +76,7 @@ def register_exit_handlers(
         # Setup things for graceful exit
         flwr_exit(
             code=ExitCode.GRACEFUL_EXIT,
-            message="SuperLink terminated gracefully.",
+            message=exit_message,
             event_type=event_type,
         )
 
