@@ -384,7 +384,6 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     finally:
         try:
             if node is not None:
-                ping_stop_event.set()
                 # Disable retrying
                 retry_invoker.max_tries = 1
                 delete_node()
