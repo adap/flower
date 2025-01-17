@@ -16,7 +16,9 @@
 
 
 import multiprocessing
+import os
 import sys
+import threading
 import time
 from contextlib import AbstractContextManager
 from logging import ERROR, INFO, WARN
@@ -546,7 +548,7 @@ def start_client_internal(
 
                                 proc = mp_spawn_context.Process(
                                     target=_run_flwr_clientapp,
-                                    args=(command,),
+                                    args=(command, os.getpid()),
                                     daemon=True,
                                 )
                                 proc.start()
@@ -797,7 +799,17 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     return connection, address, error_type
 
 
-def _run_flwr_clientapp(args: list[str]) -> None:
+def _run_flwr_clientapp(args: list[str], main_pid: int) -> None:
+    # Monitor the main process in case of SIGKILL
+    def main_process_monitor() -> None:
+        while True:
+            time.sleep(1)
+            if os.getppid() != main_pid:
+                os.kill(os.getpid(), 9)
+
+    threading.Thread(target=main_process_monitor, daemon=True).start()
+
+    # Run the command
     sys.argv = args
     flwr_clientapp()
 
