@@ -1201,7 +1201,7 @@ def create_ins_message(
             dst_node_id=dst_node_id,
             group_id="",
             ttl=DEFAULT_TTL,
-            message_type="",
+            message_type="mock",
             created_at=now().timestamp(),
         ),
         content=ProtoRecordSet(parameters={}, metrics={}, configs={}),
