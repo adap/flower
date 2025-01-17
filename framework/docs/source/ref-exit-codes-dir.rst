@@ -14,7 +14,7 @@ Categories
 - **SuperNode-specific exit codes (300-399)**: Specific to ``flower-supernode``
   (SuperNode) errors.
 - **ClientApp-specific exit codes (400-499)**: Specific to ``flwr-clientapp``
-  (ServerApp) errors.
+  (ClientApp) errors.
 - **Common exit codes (500-899)**: Shared across multiple components.
 - **Exit codes for deprecated/removed usages (900-)**: Reserved for exit codes related
   to deprecated or removed functionalities.
