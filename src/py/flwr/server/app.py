@@ -268,13 +268,7 @@ def run_superlink() -> None:
     # Set the user auth TLS check if args.user_auth_no_tls_check is provided
     tls_check = getattr(args, "user_auth_no_tls_check", True)
     if not tls_check:
-        log(
-            WARN,
-            "User authentication TLS check is disabled. This is insecure and is not "
-            "recommended for production. Use this flag only if you understand the "
-            "risks.",
-        )
-        os.environ["FLWR_USER_AUTH_TLS_CHECK"] = "False"
+        os.environ["FLWR_USER_AUTH_TLS_CHECK"] = "false"
 
     auth_plugin: Optional[ExecAuthPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
