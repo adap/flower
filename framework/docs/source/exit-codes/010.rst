@@ -4,4 +4,4 @@
 Description
 -----------
 
-The application exited gracefully as requested by the user.
+The process exited gracefully as requested by the user.

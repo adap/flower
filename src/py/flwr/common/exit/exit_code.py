@@ -22,8 +22,6 @@ class ExitCode:
     """Exit codes for Flower components."""
 
     # System exit codes
-    SUCCESS = 0
-    GENERIC_ERROR = 1
     GRACEFUL_EXIT = 10  # Graceful exit requested by the user
 
     # SuperLink-specific exit codes (100-199)
@@ -54,8 +52,6 @@ class ExitCode:
 # All short help messages for exit codes
 EXIT_CODE_HELP = {
     # System exit codes
-    ExitCode.SUCCESS: "",
-    ExitCode.GENERIC_ERROR: "",
     ExitCode.GRACEFUL_EXIT: "",
     # SuperLink-specific exit codes (100-199)
     ExitCode.SUPERLINK_THREAD_CRASH: "An important background thread has crashed.",

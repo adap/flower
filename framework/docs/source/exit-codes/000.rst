@@ -1,7 +1,0 @@
-[0] SUCCESS
-===========
-
-Description
------------
-
-The process completed successfully.
