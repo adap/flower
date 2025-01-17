@@ -20,6 +20,7 @@ import csv
 import importlib.util
 import multiprocessing
 import multiprocessing.context
+import os
 import sys
 import threading
 from collections.abc import Sequence
@@ -449,7 +450,17 @@ def run_superlink() -> None:
     flwr_exit(ExitCode.SUPERLINK_THREAD_CRASH)
 
 
-def _run_flwr_command(args: list[str]) -> None:
+def _run_flwr_command(args: list[str], main_pid: int) -> None:
+    # Monitor the main process in case of SIGKILL
+    def main_process_monitor() -> None:
+        while True:
+            sleep(1)
+            if os.getppid() != main_pid:
+                os.kill(os.getpid(), 9)
+
+    threading.Thread(target=main_process_monitor, daemon=True).start()
+
+    # Run the command
     sys.argv = args
     if args[0] == "flwr-serverapp":
         flwr_serverapp()
@@ -495,7 +506,7 @@ def _flwr_scheduler(
             ]
 
             proc = mp_spawn_context.Process(
-                target=_run_flwr_command, args=(command,), daemon=True
+                target=_run_flwr_command, args=(command, os.getpid()), daemon=True
             )
             proc.start()
 

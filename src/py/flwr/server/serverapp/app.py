@@ -115,6 +115,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     log_uploader = None
     success = True
     hash_run_id = None
+    run_status = None
     while True:
 
         try:
