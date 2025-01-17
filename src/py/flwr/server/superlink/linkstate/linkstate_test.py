@@ -35,6 +35,9 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
+from flwr.proto.message_pb2 import Message, Metadata
+
+# pylint: disable=E0611
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
@@ -1182,6 +1185,27 @@ def create_task_ins(
     )
     task.task.pushed_at = time.time()
     return task
+
+
+def create_ins_message(
+    src_node_id: int,
+    dst_node_id: int,
+    run_id: int,
+) -> Message:
+    """Create a Message for testing."""
+    return Message(
+        metadata=Metadata(
+            run_id=run_id,
+            message_id="",
+            src_node_id=src_node_id,
+            dst_node_id=dst_node_id,
+            group_id="",
+            ttl=DEFAULT_TTL,
+            message_type="",
+            created_at=now().timestamp(),
+        ),
+        content=ProtoRecordSet(parameters={}, metrics={}, configs={}),
+    )
 
 
 def create_task_res(
