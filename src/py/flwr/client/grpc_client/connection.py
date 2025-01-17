@@ -15,7 +15,6 @@
 """Contextmanager for a gRPC streaming channel to the Flower server."""
 
 
-import os
 import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -47,12 +46,6 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ServerMessage,
 )
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub  # pylint: disable=E0611
-
-if "GRPC_VERBOSITY" not in os.environ:
-    os.environ["GRPC_VERBOSITY"] = "error"
-# The following flags can be uncommented for debugging. Other possible values:
-# https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
-# os.environ["GRPC_TRACE"] = "tcp,http"
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
