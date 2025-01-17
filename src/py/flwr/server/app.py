@@ -44,6 +44,7 @@ from flwr.common.args import try_obtain_server_certificates
 from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
+    AUTH_TLS_CHECK,
     AUTH_TYPE,
     CLIENT_OCTET,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
@@ -268,7 +269,7 @@ def run_superlink() -> None:
     # Set the user auth TLS check if args.user_auth_no_tls_check is provided
     tls_check = getattr(args, "user_auth_no_tls_check", True)
     if not tls_check:
-        os.environ["FLWR_USER_AUTH_TLS_CHECK"] = "false"
+        os.environ[AUTH_TLS_CHECK] = "false"
 
     auth_plugin: Optional[ExecAuthPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided

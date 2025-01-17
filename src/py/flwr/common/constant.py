@@ -119,6 +119,7 @@ CREDENTIALS_DIR = ".credentials"
 AUTH_TYPE = "auth_type"
 ACCESS_TOKEN_KEY = "access_token"
 REFRESH_TOKEN_KEY = "refresh_token"
+AUTH_TLS_CHECK = "FLWR_USER_AUTH_TLS_CHECK"
 
 
 class MessageType:
