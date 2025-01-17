@@ -1,7 +1,7 @@
 Exit Codes
 ==========
 
-This page provides an index of all exit codes and their resolutions.
+This reference provides an index of all exit codes and recommended  resolutions.
 
 Categories
 ----------
