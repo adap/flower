@@ -266,9 +266,10 @@ def run_superlink() -> None:
     # Obtain certificates
     certificates = try_obtain_server_certificates(args, args.fleet_api_type)
 
-    # Set the user auth TLS check if args.user_auth_no_tls_check is provided
-    tls_check = getattr(args, "user_auth_no_tls_check", True)
-    if not tls_check:
+    # Disable the user auth TLS check if args.disable_oidc_tls_cert_verification is
+    # provided
+    user_auth_tls_check = getattr(args, "disable_oidc_tls_cert_verification", True)
+    if not user_auth_tls_check:
         os.environ[USER_AUTH_TLS_CHECK] = "false"
 
     auth_plugin: Optional[ExecAuthPlugin] = None
