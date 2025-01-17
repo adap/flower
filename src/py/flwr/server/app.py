@@ -264,10 +264,20 @@ def run_superlink() -> None:
     # Obtain certificates
     certificates = try_obtain_server_certificates(args, args.fleet_api_type)
 
+    # Set the user auth TLS check if args.user_auth_no_tls_check is provided
+    tls_check = getattr(args, "user_auth_no_tls_check", True)
+    if not tls_check:
+        log(
+            WARN,
+            "User authentication TLS check is disabled. This is insecure and is not "
+            "recommended for production. Use this flag only if you understand the "
+            "risks.",
+        )
+
     auth_plugin: Optional[ExecAuthPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
-        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path))
+        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path), tls_check)
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -605,7 +615,9 @@ def _try_setup_node_authentication(
         )
 
 
-def _try_obtain_exec_auth_plugin(config_path: Path) -> Optional[ExecAuthPlugin]:
+def _try_obtain_exec_auth_plugin(
+    config_path: Path, tls_check: bool
+) -> Optional[ExecAuthPlugin]:
     # Load YAML file
     with config_path.open("r", encoding="utf-8") as file:
         config: dict[str, Any] = yaml.safe_load(file)
@@ -618,7 +630,7 @@ def _try_obtain_exec_auth_plugin(config_path: Path) -> Optional[ExecAuthPlugin]:
     try:
         all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
         auth_plugin_class = all_plugins[auth_type]
-        return auth_plugin_class(user_auth_config_path=config_path)
+        return auth_plugin_class(user_auth_config_path=config_path, tls_check=tls_check)
     except KeyError:
         if auth_type != "":
             sys.exit(
