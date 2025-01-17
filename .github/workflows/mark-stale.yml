@@ -4,7 +4,7 @@ on:
   schedule:
     # Runs every day at midnight UTC
     - cron: "0 0 * * *"
-  # workflow_dispatch: # Allows manual runs
+  workflow_dispatch: # Allows manual runs
 
 jobs:
   stale:
@@ -14,8 +14,13 @@ jobs:
       - name: Mark stale issues and pull requests
         uses: actions/stale@v8
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN}}
-          days-before-stale: 21 # 3 weeks
-          stale-issue-label: "stale"
-          # stale-pr-label: "stale" 
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           
+          # Default settings for most issues
+          days-before-stale: 21
+          stale-issue-label: "stale"
+          # days-before-close: 7 # Optional
+
+          # Feature request-specific settings
+          only-labels: "feature request"
+          days-before-stale-for-labels: 90 # 90 days for feature requests
