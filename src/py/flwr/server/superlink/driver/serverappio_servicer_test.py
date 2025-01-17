@@ -30,6 +30,7 @@ from flwr.common.constant import (
 from flwr.common.serde import context_to_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
+from flwr.proto.message_pb2 import Message  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
@@ -293,6 +294,41 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         self._assert_push_task_ins_not_allowed(task_ins, run_id)
 
+    def _assert_push_ins_messages_not_allowed(
+        self, message: Message, run_id: int
+    ) -> None:
+        """Assert `PushInsMessages` not allowed."""
+        run_status = self.state.get_run_status({run_id})[run_id]
+        request = PushInsMessagesRequest(messages_list=[message], run_id=run_id)
+
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_messages.with_call(request=request)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert e.exception.details() == self.status_to_msg[run_status.status]
+
+    @parameterized.expand(
+        [
+            (0,),  # Test not successful if RunStatus is pending.
+            (1,),  # Test not successful if RunStatus is starting.
+            (3,),  # Test not successful if RunStatus is finished.
+        ]
+    )  # type: ignore
+    def test_push_ins_messages_not_successful_if_not_running(
+        self, num_transitions: int
+    ) -> None:
+        """Test `PushInsMessages` not successful if RunStatus is not running."""
+        # Prepare
+        node_id = self.state.create_node(ping_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        message_ins = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+        )
+
+        self._transition_run_status(run_id, num_transitions)
+
+        # Execute & Assert
+        self._assert_push_ins_messages_not_allowed(message_ins, run_id)
+
     def test_pull_task_res_successful_if_running(self) -> None:
         """Test `PullTaskRes` success."""
         # Prepare
@@ -351,6 +387,35 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Execute & Assert
         self._assert_pull_task_res_not_allowed(run_id)
+
+    def _assert_pull_messages_not_allowed(self, run_id: int) -> None:
+        """Assert `PullMessages` not allowed."""
+        run_status = self.state.get_run_status({run_id})[run_id]
+        request = PullResMessagesRequest(run_id=run_id)
+
+        with self.assertRaises(grpc.RpcError) as e:
+            self._pull_messages.with_call(request=request)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert e.exception.details() == self.status_to_msg[run_status.status]
+
+    @parameterized.expand(
+        [
+            (0,),  # Test not successful if RunStatus is pending.
+            (1,),  # Test not successful if RunStatus is starting.
+            (3,),  # Test not successful if RunStatus is finished.
+        ]
+    )  # type: ignore
+    def test_pull_messages_not_successful_if_not_running(
+        self, num_transitions: int
+    ) -> None:
+        """Test `PullMessages` not successful if RunStatus is not running."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+
+        self._transition_run_status(run_id, num_transitions)
+
+        # Execute & Assert
+        self._assert_pull_messages_not_allowed(run_id)
 
     def test_push_serverapp_outputs_successful_if_running(self) -> None:
         """Test `PushServerAppOutputs` success."""
