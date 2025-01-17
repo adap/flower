@@ -274,11 +274,12 @@ def run_superlink() -> None:
             "recommended for production. Use this flag only if you understand the "
             "risks.",
         )
+        os.environ["FLWR_USER_AUTH_TLS_CHECK"] = "False"
 
     auth_plugin: Optional[ExecAuthPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
-        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path), tls_check)
+        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path))
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -626,9 +627,7 @@ def _try_setup_node_authentication(
         )
 
 
-def _try_obtain_exec_auth_plugin(
-    config_path: Path, tls_check: bool
-) -> Optional[ExecAuthPlugin]:
+def _try_obtain_exec_auth_plugin(config_path: Path) -> Optional[ExecAuthPlugin]:
     # Load YAML file
     with config_path.open("r", encoding="utf-8") as file:
         config: dict[str, Any] = yaml.safe_load(file)
@@ -641,7 +640,7 @@ def _try_obtain_exec_auth_plugin(
     try:
         all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
         auth_plugin_class = all_plugins[auth_type]
-        return auth_plugin_class(user_auth_config_path=config_path, tls_check=tls_check)
+        return auth_plugin_class(user_auth_config_path=config_path)
     except KeyError:
         if auth_type != "":
             sys.exit(
