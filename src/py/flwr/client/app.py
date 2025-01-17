@@ -555,7 +555,7 @@ def start_client_internal(
 
                                 proc = mp_spawn_context.Process(
                                     target=_run_flwr_clientapp,
-                                    args=(command,),
+                                    args=(command, os.getpid()),
                                     daemon=True,
                                 )
                                 proc.start()
