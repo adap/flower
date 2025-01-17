@@ -53,7 +53,7 @@ pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
-ruff = "==0.0.272"
+ruff = "==0.4.5"
 types-requests = "==2.27.7"
 
 [tool.isort]
@@ -138,5 +138,5 @@ select = ["D", "E", "F", "W", "B", "ISC", "C4"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
 ignore = ["B024", "B027"]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
