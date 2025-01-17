@@ -109,11 +109,8 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 88
-select = ["D", "E", "F", "W", "B", "ISC", "C4"]
-fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
-ignore = ["B024", "B027"]
 exclude = [
     ".bzr",
     ".direnv",
@@ -137,6 +134,11 @@ exclude = [
     "venv",
     "proto",
 ]
+
+[tool.ruff.lint]
+select = ["D", "E", "F", "W", "B", "ISC", "C4"]
+fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
+ignore = ["B024", "B027"]
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
