@@ -1,0 +1,21 @@
+name: Mark Stale Issues
+
+on:
+  schedule:
+    # Runs every day at midnight UTC
+    - cron: "0 0 * * *"
+  # workflow_dispatch: # Allows manual runs
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Mark stale issues and pull requests
+        uses: actions/stale@v8
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN}}
+          days-before-stale: 21 # 3 weeks
+          stale-issue-label: "stale"
+          # stale-pr-label: "stale" 
+          
