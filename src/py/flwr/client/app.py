@@ -21,7 +21,6 @@ import signal
 import sys
 import threading
 import time
-from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from os import urandom
@@ -39,7 +38,7 @@ from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.clientapp.app import flwr_clientapp
 from flwr.client.nodestate.nodestate_factory import NodeStateFactory
 from flwr.client.typing import ClientFnExt
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     CLIENT_OCTET,
@@ -61,13 +60,16 @@ from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
+from flwr.common.typing import Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
-from .grpc_adapter_client.connection import grpc_adapter
-from .grpc_client.connection import grpc_connection
-from .grpc_rere_client.connection import grpc_request_response
+from .connection import (
+    FleetConnection,
+    GrpcAdapterFleetConnection,
+    GrpcBidiFleetConnection,
+    GrpcRereFleetConnection,
+)
 from .message_handler.message_handler import handle_control_message
 from .numpy_client import NumPyClient
 from .run_info_store import DeprecatedRunInfoStore
@@ -408,41 +410,24 @@ def start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run, get_fab = conn
-
             # Register node when connecting the first time
             if run_info_store is None:
-                if create_node is None:
-                    if transport not in ["grpc-bidi", None]:
-                        raise NotImplementedError(
-                            "All transports except `grpc-bidi` require "
-                            "an implementation for `create_node()`.'"
-                        )
-                    # gRPC-bidi doesn't have the concept of node_id,
-                    # so we set it to -1
-                    run_info_store = DeprecatedRunInfoStore(
-                        node_id=-1,
-                        node_config={},
-                    )
-                else:
-                    # Call create_node fn to register node
-                    # and store node_id in state
-                    if (node_id := create_node()) is None:
-                        raise ValueError(
-                            "Failed to register SuperNode with the SuperLink"
-                        )
-                    state.set_node_id(node_id)
-                    run_info_store = DeprecatedRunInfoStore(
-                        node_id=state.get_node_id(),
-                        node_config=node_config,
-                    )
+                # Call create_node fn to register node
+                # and store node_id in state
+                if (node_id := conn.create_node()) is None:
+                    raise ValueError("Failed to register SuperNode with the SuperLink")
+                state.set_node_id(node_id)
+                run_info_store = DeprecatedRunInfoStore(
+                    node_id=state.get_node_id(),
+                    node_config=node_config,
+                )
 
             app_state_tracker.register_signal_handler()
             # pylint: disable=too-many-nested-blocks
             while not app_state_tracker.interrupt:
                 try:
                     # Receive
-                    message = receive()
+                    message = conn.receive()
                     if message is None:
                         time.sleep(3)  # Wait for 3s before asking again
                         continue
@@ -465,21 +450,17 @@ def start_client_internal(
                     # Handle control message
                     out_message, sleep_duration = handle_control_message(message)
                     if out_message:
-                        send(out_message)
+                        conn.send(out_message)
                         break
 
                     # Get run info
                     run_id = message.metadata.run_id
                     if run_id not in runs:
-                        if get_run is not None:
-                            runs[run_id] = get_run(run_id)
-                        # If get_run is None, i.e., in grpc-bidi mode
-                        else:
-                            runs[run_id] = Run.create_empty(run_id=run_id)
+                        runs[run_id] = conn.get_run(run_id)
 
                     run: Run = runs[run_id]
-                    if get_fab is not None and run.fab_hash:
-                        fab = get_fab(run.fab_hash, run_id)
+                    if run.fab_hash:
+                        fab = conn.get_fab(run.fab_hash, run_id)
                         if not isolation:
                             # If `ClientApp` runs in the same process, install the FAB
                             install_from_fab(fab.content, flwr_path, True)
@@ -614,7 +595,7 @@ def start_client_internal(
                         )
 
                     # Send
-                    send(reply_message)
+                    conn.send(reply_message)
                     log(INFO, "Sent reply")
 
                 except RunNotRunningException:
@@ -633,8 +614,8 @@ def start_client_internal(
             # pylint: enable=too-many-nested-blocks
 
             # Unregister node
-            if delete_node is not None and app_state_tracker.is_connected:
-                delete_node()  # pylint: disable=not-callable
+            if app_state_tracker.is_connected:
+                conn.delete_node()
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
@@ -751,30 +732,9 @@ def start_numpy_client(
     )
 
 
-def _init_connection(transport: Optional[str], server_address: str) -> tuple[
-    Callable[
-        [
-            str,
-            bool,
-            RetryInvoker,
-            int,
-            Union[bytes, str, None],
-            Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
-        ],
-        AbstractContextManager[
-            tuple[
-                Callable[[], Optional[Message]],
-                Callable[[Message], None],
-                Optional[Callable[[], Optional[int]]],
-                Optional[Callable[[], None]],
-                Optional[Callable[[int], Run]],
-                Optional[Callable[[str, int], Fab]],
-            ]
-        ],
-    ],
-    str,
-    type[Exception],
-]:
+def _init_connection(
+    transport: Optional[str], server_address: str
+) -> tuple[type[FleetConnection], str, type[Exception]]:
     # Parse IP address
     parsed_address = parse_address(server_address)
     if not parsed_address:
@@ -786,12 +746,13 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     if transport is None:
         transport = TRANSPORT_TYPE_GRPC_BIDI
 
-    # Use either gRPC bidirectional streaming or REST request/response
+    # Use grpc-rere/grpc-adapter/rest/grpc-bidi transport layer
+    connection: Optional[type[FleetConnection]] = None
     if transport == TRANSPORT_TYPE_REST:
         try:
-            from requests.exceptions import ConnectionError as RequestsConnectionError
+            from requests.exceptions import RequestException
 
-            from .rest_client.connection import http_request_response
+            from .connection import RestFleetConnection
         except ModuleNotFoundError:
             sys.exit(MISSING_EXTRA_REST)
         if server_address[:4] != "http":
@@ -799,13 +760,13 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
                 "When using the REST API, please provide `https://` or "
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
-        connection, error_type = http_request_response, RequestsConnectionError
+        connection, error_type = RestFleetConnection, RequestException
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
-        connection, error_type = grpc_request_response, RpcError
+        connection, error_type = GrpcRereFleetConnection, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
-        connection, error_type = grpc_adapter, RpcError
+        connection, error_type = GrpcAdapterFleetConnection, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection, error_type = grpc_connection, RpcError
+        connection, error_type = GrpcBidiFleetConnection, RpcError
     else:
         raise ValueError(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"

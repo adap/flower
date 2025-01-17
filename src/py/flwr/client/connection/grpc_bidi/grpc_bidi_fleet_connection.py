@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,16 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Contextmanager for a gRPC streaming channel to the Flower server."""
+"""Connection for a gRPC bidirectional streaming channel to the SuperLink."""
 
+
+from __future__ import annotations
 
 import uuid
 from collections.abc import Iterator
-from contextlib import contextmanager
 from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Optional, Union, cast
+from types import TracebackType
+from typing import cast
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -36,7 +38,7 @@ from flwr.common import (
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.common.constant import MessageType, MessageTypeLegacy
-from flwr.common.grpc import create_channel
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.typing import Fab, Run
@@ -47,6 +49,8 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub  # pylint: disable=E0611
 
+from ..fleet_connection import FleetConnection
+
 # The following flags can be uncommented for debugging. Other possible values:
 # https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
 # import os
@@ -54,101 +58,76 @@ from flwr.proto.transport_pb2_grpc import FlowerServiceStub  # pylint: disable=E
 # os.environ["GRPC_TRACE"] = "tcp,http"
 
 
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
+class GrpcBidiFleetConnection(FleetConnection):
+    """Grpc-bidi fleet connection (will be deprecated)."""
 
+    def __init__(  # pylint: disable=R0913, R0914, R0915, R0917
+        self,
+        server_address: str,
+        insecure: bool,
+        retry_invoker: RetryInvoker,
+        max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
+        root_certificates: bytes | str | None = None,
+        authentication_keys: (
+            tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+        ) = None,
+    ) -> None:
+        """Initialize the GrpcBidiFleetConnection."""
+        super().__init__(
+            server_address=server_address,
+            insecure=insecure,
+            retry_invoker=retry_invoker,
+            max_message_length=max_message_length,
+            root_certificates=root_certificates,
+            authentication_keys=authentication_keys,
+        )
 
-@contextmanager
-def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-arguments
-    server_address: str,
-    insecure: bool,
-    retry_invoker: RetryInvoker,  # pylint: disable=unused-argument
-    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[Union[bytes, str]] = None,
-    authentication_keys: Optional[  # pylint: disable=unused-argument
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-    ] = None,
-) -> Iterator[
-    tuple[
-        Callable[[], Optional[Message]],
-        Callable[[Message], None],
-        Optional[Callable[[], Optional[int]]],
-        Optional[Callable[[], None]],
-        Optional[Callable[[int], Run]],
-        Optional[Callable[[str, int], Fab]],
-    ]
-]:
-    """Establish a gRPC connection to a gRPC server.
+        if authentication_keys is not None:
+            log(
+                ERROR, "Client authentication is not supported for this transport type."
+            )
+        if isinstance(root_certificates, str):
+            root_certificates = Path(root_certificates).read_bytes()
 
-    Parameters
-    ----------
-    server_address : str
-        The IPv4 or IPv6 address of the server. If the Flower server runs on the same
-        machine on port 8080, then `server_address` would be `"0.0.0.0:8080"` or
-        `"[::]:8080"`.
-    insecure : bool
-        Starts an insecure gRPC connection when True. Enables HTTPS connection
-        when False, using system certificates if `root_certificates` is None.
-    retry_invoker: RetryInvoker
-        Unused argument present for compatibilty.
-    max_message_length : int
-        The maximum length of gRPC messages that can be exchanged with the Flower
-        server. The default should be sufficient for most models. Users who train
-        very large models might need to increase this value. Note that the Flower
-        server needs to be started with the same value
-        (see `flwr.server.start_server`), otherwise it will not know about the
-        increased limit and block larger messages.
-        (default: 536_870_912, this equals 512MB)
-    root_certificates : Optional[bytes] (default: None)
-        The PEM-encoded root certificates as a byte string or a path string.
-        If provided, a secure connection using the certificates will be
-        established to an SSL-enabled Flower server.
-    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
-        Client authentication is not supported for this transport type.
+        channel = create_channel(
+            server_address=server_address,
+            insecure=insecure,
+            root_certificates=root_certificates,
+            max_message_length=max_message_length,
+        )
+        channel.subscribe(on_channel_state_change)
 
-    Returns
-    -------
-    receive, send : Callable, Callable
+        queue: Queue[ClientMessage] = Queue(  # pylint: disable=unsubscriptable-object
+            maxsize=1
+        )
+        stub = FlowerServiceStub(channel)
 
-    Examples
-    --------
-    Establishing a SSL-enabled connection to the server:
+        server_message_iterator: Iterator[ServerMessage] = stub.Join(
+            iter(queue.get, None)
+        )
 
-    >>> from pathlib import Path
-    >>> with grpc_connection(
-    >>>     server_address,
-    >>>     max_message_length=max_message_length,
-    >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
-    >>> ) as conn:
-    >>>     receive, send = conn
-    >>>     server_message = receive()
-    >>>     # do something here
-    >>>     send(client_message)
-    """
-    if isinstance(root_certificates, str):
-        root_certificates = Path(root_certificates).read_bytes()
-    if authentication_keys is not None:
-        log(ERROR, "Client authentication is not supported for this transport type.")
+        self.channel = channel
+        self.queue = queue
+        self.server_message_iterator = server_message_iterator
 
-    channel = create_channel(
-        server_address=server_address,
-        insecure=insecure,
-        root_certificates=root_certificates,
-        max_message_length=max_message_length,
-    )
-    channel.subscribe(on_channel_state_change)
+    def ping(self) -> None:
+        """Ping the SuperLink."""
+        log(DEBUG, "Ping API is not supported by GrpcBidiConnection.")
 
-    queue: Queue[ClientMessage] = Queue(  # pylint: disable=unsubscriptable-object
-        maxsize=1
-    )
-    stub = FlowerServiceStub(channel)
+    def create_node(self) -> int | None:
+        """Request to create a node."""
+        log(DEBUG, "CreateNode API is not supported by GrpcBidiConnection.")
+        # gRPC-bidi doesn't have the concept of node_id,
+        # so we return -1
+        return -1
 
-    server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
+    def delete_node(self) -> None:
+        """Request to delete a node."""
+        log(DEBUG, "DeleteNode API is not supported by GrpcBidiConnection.")
 
-    def receive() -> Message:
-        # Receive ServerMessage proto
-        proto = next(server_message_iterator)
+    def receive(self) -> Message | None:
+        """Receive a message."""  # Receive ServerMessage proto
+        proto = next(self.server_message_iterator)
 
         # ServerMessage proto --> *Ins --> RecordSet
         field = proto.WhichOneof("msg")
@@ -200,7 +179,8 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
             content=recordset,
         )
 
-    def send(message: Message) -> None:
+    def send(self, message: Message) -> None:
+        """Send a message."""
         # Retrieve RecordSet and message_type
         recordset = message.content
         message_type = message.metadata.message_type
@@ -233,12 +213,28 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
             raise ValueError(f"Invalid message type: {message_type}")
 
         # Send ClientMessage proto
-        return queue.put(msg_proto, block=False)
+        return self.queue.put(msg_proto, block=False)
 
-    try:
-        # Yield methods
-        yield (receive, send, None, None, None, None)
-    finally:
+    def get_run(self, run_id: int) -> Run:
+        """Get run info."""
+        log(DEBUG, "GetRun API is not supported by GrpcBidiConnection.")
+        return Run.create_empty(run_id)
+
+    def get_fab(self, fab_hash: str, run_id: int) -> Fab:
+        """Get FAB file."""
+        raise NotImplementedError
+
+    def close(self) -> None:
+        """Close the connection."""
         # Make sure to have a final
-        channel.close()
+        self.channel.close()
         log(DEBUG, "gRPC channel closed")
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType,
+    ) -> None:
+        """Exit from the context."""
+        self.close()

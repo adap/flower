@@ -21,14 +21,11 @@ import threading
 import unittest
 from collections.abc import Sequence
 from concurrent import futures
-from logging import DEBUG, INFO, WARN
 from typing import Optional, Union, get_args
 
 import grpc
 
-from flwr.client.grpc_rere_client.connection import grpc_request_response
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, serde
-from flwr.common.logger import log
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.message import Message, Metadata
 from flwr.common.record import RecordSet
 from flwr.common.retry_invoker import RetryInvoker, exponential
@@ -38,22 +35,28 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
     public_key_to_bytes,
 )
-from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+
+# pylint: disable=E0611
+from flwr.proto.fleet_pb2 import (
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.fleet_pb2_grpc import FleetServicer
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
+from flwr.proto.message_pb2 import Message as MessageProto
+from flwr.proto.message_pb2 import Metadata as MetadataProto
+from flwr.proto.node_pb2 import Node
+from flwr.proto.recordset_pb2 import RecordSet as RecordSetProto
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse
 
+# pylint: enable=E0611
 from .client_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request
+from .grpc_rere_fleet_connection import GrpcRereFleetConnection
 
 
 class _MockServicer:
@@ -68,10 +71,11 @@ class _MockServicer:
         self.server_private_key, self.server_public_key = generate_key_pairs()
         self._received_message_bytes: bytes = b""
 
-    def unary_unary(
-        self, request: Request, context: grpc.ServicerContext
-    ) -> Union[
-        CreateNodeResponse, DeleteNodeResponse, PushTaskResResponse, PullTaskInsResponse
+    def unary_unary(self, request: Request, context: grpc.ServicerContext) -> Union[
+        CreateNodeResponse,
+        DeleteNodeResponse,
+        PushMessagesResponse,
+        PullMessagesResponse,
     ]:
         """Handle unary call."""
         with self._lock:
@@ -92,16 +96,14 @@ class _MockServicer:
                 return CreateNodeResponse(node=Node(node_id=123))
             if isinstance(request, DeleteNodeRequest):
                 return DeleteNodeResponse()
-            if isinstance(request, PushTaskResRequest):
-                return PushTaskResResponse()
+            if isinstance(request, PushMessagesRequest):
+                return PushMessagesResponse()
 
-            return PullTaskInsResponse(
-                task_ins_list=[
-                    TaskIns(
-                        task=Task(
-                            consumer=Node(node_id=123),
-                            recordset=serde.recordset_to_proto(RecordSet()),
-                        )
+            return PullMessagesResponse(
+                messages_list=[
+                    MessageProto(
+                        metadata=MetadataProto(dst_node_id=123),
+                        content=RecordSetProto(),
                     )
                 ]
             )
@@ -131,15 +133,15 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             request_deserializer=DeleteNodeRequest.FromString,
             response_serializer=DeleteNodeResponse.SerializeToString,
         ),
-        "PullTaskIns": grpc.unary_unary_rpc_method_handler(
+        "PullMessages": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
-            request_deserializer=PullTaskInsRequest.FromString,
-            response_serializer=PullTaskInsResponse.SerializeToString,
+            request_deserializer=PullMessagesRequest.FromString,
+            response_serializer=PullMessagesResponse.SerializeToString,
         ),
-        "PushTaskRes": grpc.unary_unary_rpc_method_handler(
+        "PushMessages": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
-            request_deserializer=PushTaskResRequest.FromString,
-            response_serializer=PushTaskResResponse.SerializeToString,
+            request_deserializer=PushMessagesRequest.FromString,
+            response_serializer=PushMessagesResponse.SerializeToString,
         ),
         "GetRun": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
@@ -169,35 +171,6 @@ def _init_retry_invoker() -> RetryInvoker:
         recoverable_exceptions=grpc.RpcError,
         max_tries=1,
         max_time=None,
-        on_giveup=lambda retry_state: (
-            log(
-                WARN,
-                "Giving up reconnection after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-            if retry_state.tries > 1
-            else None
-        ),
-        on_success=lambda retry_state: (
-            log(
-                INFO,
-                "Connection successful after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-            if retry_state.tries > 1
-            else None
-        ),
-        on_backoff=lambda retry_state: (
-            log(WARN, "Connection attempt failed, retrying...")
-            if retry_state.tries == 1
-            else log(
-                DEBUG,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
-        ),
     )
 
 
@@ -216,7 +189,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
         self._server.start()
         self._client_private_key, self._client_public_key = generate_key_pairs()
 
-        self._connection = grpc_request_response
+        self._connection = GrpcRereFleetConnection
         self._address = f"localhost:{port}"
 
     def test_client_auth_create_node(self) -> None:
@@ -233,9 +206,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, _, _ = conn
-            assert create_node is not None
-            create_node()
+            conn.create_node()
 
             received_metadata = self._servicer.received_client_metadata()
             assert received_metadata is not None
@@ -265,11 +236,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, delete_node, _, _ = conn
-            assert create_node is not None
-            create_node()
-            assert delete_node is not None
-            delete_node()
+            conn.create_node()
+            conn.delete_node()
 
             received_metadata = self._servicer.received_client_metadata()
             assert received_metadata is not None
@@ -306,11 +274,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            receive, _, create_node, _, _, _ = conn
-            assert create_node is not None
-            create_node()
-            assert receive is not None
-            receive()
+            conn.create_node()
+            conn.receive()
 
             received_metadata = self._servicer.received_client_metadata()
             assert received_metadata is not None
@@ -348,13 +313,9 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            receive, send, create_node, _, _, _ = conn
-            assert create_node is not None
-            create_node()
-            assert receive is not None
-            receive()
-            assert send is not None
-            send(message)
+            conn.create_node()
+            conn.receive()
+            conn.send(message)
 
             received_metadata = self._servicer.received_client_metadata()
             assert received_metadata is not None
@@ -391,11 +352,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, get_run, _ = conn
-            assert create_node is not None
-            create_node()
-            assert get_run is not None
-            get_run(0)
+            conn.create_node()
+            conn.get_run(0)
 
             received_metadata = self._servicer.received_client_metadata()
             assert received_metadata is not None
@@ -433,9 +391,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, _, _ = conn
-            assert create_node is not None
-            create_node()
+            with self.assertRaises(grpc.RpcError):
+                conn.create_node()
 
             assert self._servicer.received_client_metadata() is None
 

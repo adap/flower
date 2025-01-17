@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
 
-from .connection import grpc_connection
+from .grpc_bidi_fleet_connection import GrpcBidiFleetConnection
 
 EXPECTED_NUM_SERVER_MESSAGE = 10
 
@@ -129,7 +129,7 @@ def test_integration_connection() -> None:
     def run_client() -> int:
         messages_received: int = 0
 
-        with grpc_connection(
+        with GrpcBidiFleetConnection(
             server_address=f"[::]:{port}",
             insecure=True,
             retry_invoker=RetryInvoker(
@@ -139,20 +139,19 @@ def test_integration_connection() -> None:
                 max_time=None,
             ),
         ) as conn:
-            receive, send, _, _, _, _ = conn
 
             # Setup processing loop
             while True:
                 # Block until server responds with a message
-                message = receive()
+                message = conn.receive()
 
                 messages_received += 1
                 if message.metadata.message_type == "reconnect":  # type: ignore
-                    send(MESSAGE_DISCONNECT)
+                    conn.send(MESSAGE_DISCONNECT)
                     break
 
                 # Process server_message and send client_message...
-                send(MESSAGE_GET_PROPERTIES)
+                conn.send(MESSAGE_GET_PROPERTIES)
 
         return messages_received
 
