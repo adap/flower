@@ -26,6 +26,7 @@ from typing import Callable, Optional, TypeVar, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
@@ -379,3 +380,12 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         yield (receive, send, create_node, delete_node, get_run, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
+    # Cleanup
+    finally:
+        try:
+            if node is not None:
+                # Disable retrying
+                retry_invoker.max_tries = 1
+                delete_node()
+        except RequestsConnectionError:
+            pass
