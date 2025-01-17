@@ -1,7 +1,7 @@
 Exit Codes
 ==========
 
-This reference provides an index of all exit codes and recommended  resolutions.
+This reference provides an index of all exit codes and recommended resolutions.
 
 Categories
 ----------
@@ -26,4 +26,4 @@ Indices
     :maxdepth: 1
     :glob:
 
-    exit-codes/*
+    ref-exit-codes/*
