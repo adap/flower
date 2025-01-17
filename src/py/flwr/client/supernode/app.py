@@ -79,6 +79,12 @@ def run_supernode() -> None:
 
     log(DEBUG, "Isolation mode: %s", args.isolation)
 
+    # Register handlers for graceful shutdown
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERNODE_LEAVE,
+        exit_message="SuperNode terminated gracefully.",
+    )
+
     start_client_internal(
         server_address=args.superlink,
         load_client_app_fn=load_fn,
@@ -94,13 +100,6 @@ def run_supernode() -> None:
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
         clientappio_api_address=args.clientappio_api_address,
-    )
-
-    # Graceful shutdown
-    flwr_exit(
-        ExitCode.GRACEFUL_EXIT,
-        "SuperNode terminated gracefully.",
-        event_type=EventType.RUN_SUPERNODE_LEAVE,
     )
 
 
