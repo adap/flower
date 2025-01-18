@@ -133,10 +133,10 @@ exclude = [
     "proto",
 ]
 
-[tool.linter.ruff]
+[tool.ruff.lint]
 select = ["D", "E", "F", "W", "B", "ISC", "C4"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
 ignore = ["B024", "B027"]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
