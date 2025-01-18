@@ -13,7 +13,7 @@ from flwr.client import Client
 from flwr.server.history import History
 from omegaconf import DictConfig
 
-from fedper.client import BaseClient, FedPerClient, get_client_fn_simulation
+from fedper.client import get_client_fn_simulation
 from fedper.implemented_models.mobile_model import MobileNet, MobileNetModelSplit
 from fedper.implemented_models.resnet_model import ResNet, ResNetModelSplit
 
