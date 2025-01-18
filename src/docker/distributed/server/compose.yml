@@ -1,9 +1,7 @@
 services:
   superlink:
-    image: flwr/superlink:${FLWR_VERSION:-1.13.0}
+    image: flwr/superlink:${FLWR_VERSION:-1.14.0}
     command:
-      - --executor
-      - flwr.superexec.deployment:executor
       - --isolation
       - process
       - --ssl-ca-certfile=certificates/ca.crt
@@ -27,7 +25,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/serverapp:${FLWR_VERSION:-1.13.0}
+        FROM flwr/serverapp:${FLWR_VERSION:-1.14.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
@@ -36,13 +34,9 @@ services:
 
         ENTRYPOINT ["flwr-serverapp"]
     command:
+      - --insecure
       - --serverappio-api-address
       - superlink:9091
-      - --root-certificates
-      - certificates/ca.crt
-    secrets:
-      - source: superlink-ca-certfile
-        target: /app/certificates/ca.crt
     depends_on:
       - superlink
 

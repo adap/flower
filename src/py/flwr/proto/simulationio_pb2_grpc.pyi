@@ -35,6 +35,11 @@ class SimulationIoStub:
         flwr.proto.run_pb2.GetFederationOptionsResponse]
     """Get Federation Options"""
 
+    GetRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunStatusRequest,
+        flwr.proto.run_pb2.GetRunStatusResponse]
+    """Get Run Status"""
+
 
 class SimulationIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -75,6 +80,14 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.run_pb2.GetFederationOptionsResponse:
         """Get Federation Options"""
+        pass
+
+    @abc.abstractmethod
+    def GetRunStatus(self,
+        request: flwr.proto.run_pb2.GetRunStatusRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetRunStatusResponse:
+        """Get Run Status"""
         pass
 
 

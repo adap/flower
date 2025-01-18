@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.13.0"
+version = "1.15.0"
 description = "Flower: A Friendly Federated AI Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -68,27 +68,27 @@ flower-client-app = "flwr.client.supernode:run_client_app" # Deprecated
 python = "^3.9"
 # Mandatory dependencies
 numpy = ">=1.26.0,<3.0.0"
-grpcio = "^1.60.0,!=1.64.2,<=1.64.3"
+grpcio = "^1.69.0"
 protobuf = "^4.25.2"
-cryptography = "^42.0.4"
+cryptography = "^43.0.1"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
 typer = "^0.12.5"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 pathspec = "^0.12.1"
-hatchling = "^1.25.0"
 rich = "^13.5.0"
+pyyaml = "^6.0.2"
+requests = "^2.31.0"
 # Optional dependencies (Simulation Engine)
 ray = { version = "==2.10.0", optional = true, python = ">=3.9,<3.12" }
 # Optional dependencies (REST transport layer)
-requests = { version = "^2.31.0", optional = true }
-starlette = { version = "^0.31.0", optional = true }
-uvicorn = { version = "^0.23.0", extras = ["standard"], optional = true }
+starlette = { version = "^0.45.2", optional = true }
+uvicorn = { version = "^0.34.0", extras = ["standard"], optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray"]
-rest = ["requests", "starlette", "uvicorn"]
+rest = ["starlette", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.6"
@@ -106,11 +106,11 @@ flake8 = "==5.0.4"
 parameterized = "==0.9.0"
 pytest = "==7.4.4"
 pytest-cov = "==4.1.0"
-pytest-watcher = "==0.4.1"
+pytest-watcher = "==0.4.3"
 grpcio-tools = "==1.60.0"
 mypy-protobuf = "==3.2.0"
 jupyterlab = "==4.0.12"
-rope = "==1.11.0"
+rope = "==1.13.0"
 semver = "==3.0.2"
 sphinx = "==7.4.7"
 sphinx-intl = "==2.2.0"
@@ -124,13 +124,15 @@ furo = "==2024.8.6"
 sphinx-reredirects = "==0.1.5"
 nbsphinx = "==0.9.5"
 nbstripout = "==0.6.1"
-ruff = "==0.1.9"
+ruff = "==0.4.5"
 sphinx-argparse = "==0.4.0"
 pipreqs = "==0.4.13"
+mdformat = "==0.7.18"
 mdformat-gfm = "==0.3.6"
 mdformat-frontmatter = "==2.0.1"
 mdformat-beautysh = "==0.1.1"
 twine = "==5.1.1"
+types-PyYAML = "^6.0.2"
 pyroma = "==4.2"
 check-wheel-contents = "==0.4.0"
 GitPython = "==3.1.32"
@@ -144,10 +146,10 @@ docsig = "==0.64.0"
 
 [tool.docstrfmt]
 extend_exclude = [
-    "doc/source/conf.py",
-    "doc/source/tutorial-quickstart-huggingface.rst",
-    "doc/source/_templates/autosummary/*",
-    "doc/source/ref-api/*",
+    "framework/docs/source/conf.py",
+    "framework/docs/source/tutorial-quickstart-huggingface.rst",
+    "framework/docs/source/_templates/autosummary/*",
+    "framework/docs/source/ref-api/*",
 ]
 
 [tool.isort]
@@ -199,9 +201,6 @@ wrap-descriptions = 88
 [tool.ruff]
 target-version = "py39"
 line-length = 88
-select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
-fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
-ignore = ["B024", "B027", "D205", "D209"]
 exclude = [
     ".bzr",
     ".direnv",
@@ -226,10 +225,15 @@ exclude = [
     "proto",
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint]
+select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
+fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
+ignore = ["B024", "B027", "D205", "D209"]
+
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "src/py/flwr/server/strategy/*.py" = ["E501"]
 
 [tool.docsig]

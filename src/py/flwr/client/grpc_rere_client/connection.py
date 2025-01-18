@@ -29,7 +29,6 @@ from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
-from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import (
     PING_BASE_MULTIPLIER,
@@ -41,21 +40,21 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
-from flwr.common.typing import Fab, Run
+from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
+from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
     PingRequest,
     PingResponse,
-    PullTaskInsRequest,
-    PushTaskResRequest,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import AuthenticateClientInterceptor
 from .grpc_adapter import GrpcAdapter
@@ -84,7 +83,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
-        Optional[Callable[[str], Fab]],
+        Optional[Callable[[str, int], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -155,6 +154,17 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     ping_thread: Optional[threading.Thread] = None
     ping_stop_event = threading.Event()
 
+    def _should_giveup_fn(e: Exception) -> bool:
+        if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
+            raise RunNotRunningException
+        if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
+            return False
+        return True
+
+    # Restrict retries to cases where the status code is UNAVAILABLE
+    # If the status code is PERMISSION_DENIED, additionally raise RunNotRunningException
+    retry_invoker.should_giveup = _should_giveup_fn
+
     ###########################################################################
     # ping/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
@@ -216,28 +226,31 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         node = None
 
     def receive() -> Optional[Message]:
-        """Receive next task from server."""
+        """Receive next message from server."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
             return None
 
-        # Request instructions (task) from server
-        request = PullTaskInsRequest(node=node)
-        response = retry_invoker.invoke(stub.PullTaskIns, request=request)
+        # Request instructions (message) from server
+        request = PullMessagesRequest(node=node)
+        response: PullMessagesResponse = retry_invoker.invoke(
+            stub.PullMessages, request=request
+        )
 
-        # Get the current TaskIns
-        task_ins: Optional[TaskIns] = get_task_ins(response)
+        # Get the current Messages
+        message_proto = (
+            None if len(response.messages_list) == 0 else response.messages_list[0]
+        )
 
-        # Discard the current TaskIns if not valid
-        if task_ins is not None and not (
-            task_ins.task.consumer.node_id == node.node_id
-            and validate_task_ins(task_ins)
+        # Discard the current message if not valid
+        if message_proto is not None and not (
+            message_proto.metadata.dst_node_id == node.node_id
         ):
-            task_ins = None
+            message_proto = None
 
         # Construct the Message
-        in_message = message_from_taskins(task_ins) if task_ins else None
+        in_message = message_from_proto(message_proto) if message_proto else None
 
         # Remember `metadata` of the in message
         nonlocal metadata
@@ -247,7 +260,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         return in_message
 
     def send(message: Message) -> None:
-        """Send task result back to server."""
+        """Send message reply to server."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
@@ -264,12 +277,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Invalid out message")
             return
 
-        # Construct TaskRes
-        task_res = message_to_taskres(message)
-
-        # Serialize ProtoBuf to bytes
-        request = PushTaskResRequest(node=node, task_res_list=[task_res])
-        _ = retry_invoker.invoke(stub.PushTaskRes, request)
+        # Serialize Message
+        message_proto = message_to_proto(message=message)
+        request = PushMessagesRequest(node=node, messages_list=[message_proto])
+        _ = retry_invoker.invoke(stub.PushMessages, request)
 
         # Cleanup
         metadata = None
@@ -285,9 +296,9 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Return fab_id and fab_version
         return run_from_proto(get_run_response.run)
 
-    def get_fab(fab_hash: str) -> Fab:
+    def get_fab(fab_hash: str, run_id: int) -> Fab:
         # Call FleetAPI
-        get_fab_request = GetFabRequest(node=node, hash_str=fab_hash)
+        get_fab_request = GetFabRequest(node=node, hash_str=fab_hash, run_id=run_id)
         get_fab_response: GetFabResponse = retry_invoker.invoke(
             stub.GetFab,
             request=get_fab_request,
@@ -300,3 +311,13 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         yield (receive, send, create_node, delete_node, get_run, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
+    # Cleanup
+    finally:
+        try:
+            if node is not None:
+                # Disable retrying
+                retry_invoker.max_tries = 1
+                delete_node()
+        except grpc.RpcError:
+            pass
+        channel.close()

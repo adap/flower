@@ -14,19 +14,23 @@
 # ==============================================================================
 """Flower server app."""
 
+
 import argparse
 import csv
 import importlib.util
-import subprocess
+import multiprocessing
+import multiprocessing.context
+import os
 import sys
 import threading
 from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Optional
+from typing import Any, Optional
 
 import grpc
+import yaml
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
@@ -37,8 +41,10 @@ from cryptography.hazmat.primitives.serialization import (
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
+from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
+    AUTH_TYPE,
     CLIENT_OCTET,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
@@ -55,6 +61,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
@@ -64,9 +71,10 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
+from flwr.server.serverapp.app import flwr_serverapp
+from flwr.simulation.app import flwr_simulation
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
-from flwr.superexec.simulation import SimulationEngine
 
 from .client_manager import ClientManager
 from .history import History
@@ -76,10 +84,7 @@ from .strategy import Strategy
 from .superlink.driver.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
-from .superlink.fleet.grpc_bidi.grpc_server import (
-    generic_create_grpc_server,
-    start_grpc_server,
-)
+from .superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.linkstate import LinkStateFactory
@@ -87,6 +92,19 @@ from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
+
+
+try:
+    from flwr.ee import add_ee_args_superlink, get_exec_auth_plugins
+except ImportError:
+
+    # pylint: disable-next=unused-argument
+    def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
+        """Add EE-specific arguments to the parser."""
+
+    def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
+        """Return all Exec API authentication plugins."""
+        raise NotImplementedError("No authentication plugins are currently supported.")
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -247,6 +265,11 @@ def run_superlink() -> None:
     # Obtain certificates
     certificates = try_obtain_server_certificates(args, args.fleet_api_type)
 
+    auth_plugin: Optional[ExecAuthPlugin] = None
+    # Load the auth plugin if the args.user_auth_config is provided
+    if cfg_path := getattr(args, "user_auth_config", None):
+        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path))
+
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
 
@@ -264,21 +287,21 @@ def run_superlink() -> None:
         config=parse_config_args(
             [args.executor_config] if args.executor_config else args.executor_config
         ),
+        auth_plugin=auth_plugin,
     )
     grpc_servers = [exec_server]
 
     # Determine Exec plugin
     # If simulation is used, don't start ServerAppIo and Fleet APIs
-    sim_exec = isinstance(executor, SimulationEngine)
-
-    bckg_threads = []
+    sim_exec = executor.__class__.__qualname__ == "SimulationEngine"
+    bckg_threads: list[threading.Thread] = []
 
     if sim_exec:
         simulationio_server: grpc.Server = run_simulationio_api_grpc(
             address=simulationio_address,
             state_factory=state_factory,
             ffs_factory=ffs_factory,
-            certificates=certificates,
+            certificates=None,  # SimulationAppIo API doesn't support SSL yet
         )
         grpc_servers.append(simulationio_server)
 
@@ -288,7 +311,7 @@ def run_superlink() -> None:
             address=serverappio_address,
             state_factory=state_factory,
             ffs_factory=ffs_factory,
-            certificates=certificates,
+            certificates=None,  # ServerAppIo API doesn't support SSL yet
         )
         grpc_servers.append(serverappio_server)
 
@@ -339,6 +362,7 @@ def run_superlink() -> None:
                     ffs_factory,
                     num_workers,
                 ),
+                daemon=True,
             )
             fleet_thread.start()
             bckg_threads.append(fleet_thread)
@@ -352,6 +376,7 @@ def run_superlink() -> None:
                     server_public_key,
                 ) = maybe_keys
                 state = state_factory.state()
+                state.clear_supernode_auth_keys_and_credentials()
                 state.store_node_public_keys(node_public_keys)
                 state.store_server_private_public_key(
                     private_key_to_bytes(server_private_key),
@@ -362,7 +387,7 @@ def run_superlink() -> None:
                     "Node authentication enabled with %d known public keys",
                     len(node_public_keys),
                 )
-                interceptors = [AuthenticateServerInterceptor(state)]
+                interceptors = [AuthenticateServerInterceptor(state_factory)]
 
             fleet_server = _run_fleet_api_grpc_rere(
                 address=fleet_address,
@@ -389,6 +414,9 @@ def run_superlink() -> None:
         io_address = (
             f"{CLIENT_OCTET}:{_port}" if _octet == SERVER_OCTET else serverappio_address
         )
+        address_arg = (
+            "--simulationio-api-address" if sim_exec else "--serverappio-api-address"
+        )
         address = simulationio_address if sim_exec else io_address
         cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
 
@@ -397,10 +425,11 @@ def run_superlink() -> None:
             target=_flwr_scheduler,
             args=(
                 state_factory,
+                address_arg,
                 address,
-                args.ssl_ca_certfile,
                 cmd,
             ),
+            daemon=True,
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
@@ -409,34 +438,55 @@ def run_superlink() -> None:
     register_exit_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
         grpc_servers=grpc_servers,
-        bckg_threads=bckg_threads,
     )
 
-    # Block
-    while True:
-        if bckg_threads:
-            for thread in bckg_threads:
-                if not thread.is_alive():
-                    sys.exit(1)
-        exec_server.wait_for_termination(timeout=1)
+    # Block until a thread exits prematurely
+    while all(thread.is_alive() for thread in bckg_threads):
+        sleep(0.1)
+
+    # Exit if any thread has exited prematurely
+    sys.exit(1)
+
+
+def _run_flwr_command(args: list[str], main_pid: int) -> None:
+    # Monitor the main process in case of SIGKILL
+    def main_process_monitor() -> None:
+        while True:
+            sleep(1)
+            if os.getppid() != main_pid:
+                os.kill(os.getpid(), 9)
+
+    threading.Thread(target=main_process_monitor, daemon=True).start()
+
+    # Run the command
+    sys.argv = args
+    if args[0] == "flwr-serverapp":
+        flwr_serverapp()
+    elif args[0] == "flwr-simulation":
+        flwr_simulation()
+    else:
+        raise ValueError(f"Unknown command: {args[0]}")
 
 
 def _flwr_scheduler(
     state_factory: LinkStateFactory,
+    io_api_arg: str,
     io_api_address: str,
-    ssl_ca_certfile: Optional[str],
     cmd: str,
 ) -> None:
     log(DEBUG, "Started %s scheduler thread.", cmd)
-
     state = state_factory.state()
+    run_id_to_proc: dict[int, multiprocessing.context.SpawnProcess] = {}
+
+    # Use the "spawn" start method for multiprocessing.
+    mp_spawn_context = multiprocessing.get_context("spawn")
 
     # Periodically check for a pending run in the LinkState
     while True:
-        sleep(3)
+        sleep(0.1)
         pending_run_id = state.get_pending_run_id()
 
-        if pending_run_id:
+        if pending_run_id and pending_run_id not in run_id_to_proc:
 
             log(
                 INFO,
@@ -448,19 +498,23 @@ def _flwr_scheduler(
             command = [
                 cmd,
                 "--run-once",
-                "--serverappio-api-address",
+                io_api_arg,
                 io_api_address,
+                "--insecure",
             ]
-            if ssl_ca_certfile:
-                command.append("--root-certificates")
-                command.append(ssl_ca_certfile)
-            else:
-                command.append("--insecure")
 
-            subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                text=True,
+            proc = mp_spawn_context.Process(
+                target=_run_flwr_command, args=(command, os.getpid()), daemon=True
             )
+            proc.start()
+
+            # Store the process
+            run_id_to_proc[pending_run_id] = proc
+
+        # Clean up finished processes
+        for run_id, proc in list(run_id_to_proc.items()):
+            if not proc.is_alive():
+                del run_id_to_proc[run_id]
 
 
 def _format_address(address: str) -> tuple[str, str, int]:
@@ -562,6 +616,31 @@ def _try_setup_node_authentication(
         )
 
 
+def _try_obtain_exec_auth_plugin(config_path: Path) -> Optional[ExecAuthPlugin]:
+    # Load YAML file
+    with config_path.open("r", encoding="utf-8") as file:
+        config: dict[str, Any] = yaml.safe_load(file)
+
+    # Load authentication configuration
+    auth_config: dict[str, Any] = config.get("authentication", {})
+    auth_type: str = auth_config.get(AUTH_TYPE, "")
+
+    # Load authentication plugin
+    try:
+        all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
+        auth_plugin_class = all_plugins[auth_type]
+        return auth_plugin_class(user_auth_config_path=config_path)
+    except KeyError:
+        if auth_type != "":
+            sys.exit(
+                f'Authentication type "{auth_type}" is not supported. '
+                "Please provide a valid authentication type in the configuration."
+            )
+        sys.exit("No authentication type is provided in the configuration.")
+    except NotImplementedError:
+        sys.exit("No authentication plugins are currently supported.")
+
+
 def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: LinkStateFactory,
@@ -660,6 +739,7 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     )
 
     _add_args_common(parser=parser)
+    add_ee_args_superlink(parser=parser)
     _add_args_serverappio_api(parser=parser)
     _add_args_fleet_api(parser=parser)
     _add_args_exec_api(parser=parser)

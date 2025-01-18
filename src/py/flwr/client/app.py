@@ -14,13 +14,15 @@
 # ==============================================================================
 """Flower client app."""
 
-import signal
-import subprocess
+
+import multiprocessing
+import os
 import sys
+import threading
 import time
 from contextlib import AbstractContextManager
-from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
+from os import urandom
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -32,6 +34,7 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.clientapp.app import flwr_clientapp
 from flwr.client.nodestate.nodestate_factory import NodeStateFactory
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
@@ -41,6 +44,7 @@ from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
+    MAX_RETRY_DELAY,
     MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
     SERVER_OCTET,
@@ -51,13 +55,12 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
     ErrorCode,
 )
+from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Fab, Run, UserConfig
+from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
-from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
-from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
 from .grpc_adapter_client.connection import grpc_adapter
@@ -235,8 +238,6 @@ def start_client_internal(
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
     clientappio_api_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
-    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
-    ssl_ca_certfile: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -300,10 +301,6 @@ def start_client_internal(
     clientappio_api_address : Optional[str]
         (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
         The SuperNode gRPC server address.
-    certificates : Optional[Tuple[bytes, bytes, bytes]] (default: None)
-        Tuple containing the CA certificate, server certificate, and server private key.
-    ssl_ca_certfile : Optional[str] (default: None)
-        The path to the CA certificate file used by `flwr-clientapp` in subprocess mode.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -337,7 +334,7 @@ def start_client_internal(
             )
         _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
             address=clientappio_api_address,
-            certificates=certificates,
+            certificates=None,
         )
     clientappio_api_address = cast(str, clientappio_api_address)
 
@@ -349,10 +346,7 @@ def start_client_internal(
         transport, server_address
     )
 
-    app_state_tracker = _AppStateTracker()
-
     def _on_sucess(retry_state: RetryState) -> None:
-        app_state_tracker.is_connected = True
         if retry_state.tries > 1:
             log(
                 INFO,
@@ -362,7 +356,6 @@ def start_client_internal(
             )
 
     def _on_backoff(retry_state: RetryState) -> None:
-        app_state_tracker.is_connected = False
         if retry_state.tries == 1:
             log(WARN, "Connection attempt failed, retrying...")
         else:
@@ -373,7 +366,7 @@ def start_client_internal(
             )
 
     retry_invoker = RetryInvoker(
-        wait_gen_factory=exponential,
+        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
         recoverable_exceptions=connection_error_type,
         max_tries=max_retries + 1 if max_retries is not None else None,
         max_time=max_wait_time,
@@ -395,10 +388,11 @@ def start_client_internal(
     run_info_store: Optional[DeprecatedRunInfoStore] = None
     state_factory = NodeStateFactory()
     state = state_factory.state()
+    mp_spawn_context = multiprocessing.get_context("spawn")
 
     runs: dict[int, Run] = {}
 
-    while not app_state_tracker.interrupt:
+    while True:
         sleep_duration: int = 0
         with connection(
             address,
@@ -437,9 +431,8 @@ def start_client_internal(
                         node_config=node_config,
                     )
 
-            app_state_tracker.register_signal_handler()
             # pylint: disable=too-many-nested-blocks
-            while not app_state_tracker.interrupt:
+            while True:
                 try:
                     # Receive
                     message = receive()
@@ -479,7 +472,7 @@ def start_client_internal(
 
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
-                        fab = get_fab(run.fab_hash)
+                        fab = get_fab(run.fab_hash, run_id)
                         if not isolation:
                             # If `ClientApp` runs in the same process, install the FAB
                             install_from_fab(fab.content, flwr_path, True)
@@ -517,7 +510,7 @@ def start_client_internal(
                             #    Docker container.
 
                             # Generate SuperNode token
-                            token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+                            token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
 
                             # Mode 1: SuperNode starts ClientApp as subprocess
                             start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
@@ -551,18 +544,15 @@ def start_client_internal(
                                     "--token",
                                     str(token),
                                 ]
-                                if ssl_ca_certfile:
-                                    command.append("--root-certificates")
-                                    command.append(ssl_ca_certfile)
-                                else:
-                                    command.append("--insecure")
+                                command.append("--insecure")
 
-                                subprocess.run(
-                                    command,
-                                    stdout=None,
-                                    stderr=None,
-                                    check=True,
+                                proc = mp_spawn_context.Process(
+                                    target=_run_flwr_clientapp,
+                                    args=(command, os.getpid()),
+                                    daemon=True,
                                 )
+                                proc.start()
+                                proc.join()
                             else:
                                 # Wait for output to become available
                                 while not clientappio_servicer.has_outputs():
@@ -600,10 +590,7 @@ def start_client_internal(
                             e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
                             exc_entity = "SuperNode"
 
-                        if not app_state_tracker.interrupt:
-                            log(
-                                ERROR, "%s raised an exception", exc_entity, exc_info=ex
-                            )
+                        log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
 
                         # Create error message
                         reply_message = message.create_error_reply(
@@ -620,18 +607,23 @@ def start_client_internal(
                     send(reply_message)
                     log(INFO, "Sent reply")
 
-                except StopIteration:
-                    sleep_duration = 0
-                    break
+                except RunNotRunningException:
+                    log(INFO, "")
+                    log(
+                        INFO,
+                        "SuperNode aborted sending the reply message. "
+                        "Run ID %s is not in `RUNNING` status.",
+                        run_id,
+                    )
+                    log(INFO, "")
             # pylint: enable=too-many-nested-blocks
 
             # Unregister node
-            if delete_node is not None and app_state_tracker.is_connected:
+            if delete_node is not None:
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
-            del app_state_tracker
             break
 
         # Sleep and reconnect afterwards
@@ -761,7 +753,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
-                Optional[Callable[[str], Fab]],
+                Optional[Callable[[str, int], Fab]],
             ]
         ],
     ],
@@ -807,21 +799,19 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     return connection, address, error_type
 
 
-@dataclass
-class _AppStateTracker:
-    interrupt: bool = False
-    is_connected: bool = False
+def _run_flwr_clientapp(args: list[str], main_pid: int) -> None:
+    # Monitor the main process in case of SIGKILL
+    def main_process_monitor() -> None:
+        while True:
+            time.sleep(1)
+            if os.getppid() != main_pid:
+                os.kill(os.getpid(), 9)
 
-    def register_signal_handler(self) -> None:
-        """Register handlers for exit signals."""
+    threading.Thread(target=main_process_monitor, daemon=True).start()
 
-        def signal_handler(sig, frame):  # type: ignore
-            # pylint: disable=unused-argument
-            self.interrupt = True
-            raise StopIteration from None
-
-        signal.signal(signal.SIGINT, signal_handler)
-        signal.signal(signal.SIGTERM, signal_handler)
+    # Run the command
+    sys.argv = args
+    flwr_clientapp()
 
 
 def run_clientappio_api_grpc(

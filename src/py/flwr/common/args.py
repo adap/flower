@@ -14,9 +14,10 @@
 # ==============================================================================
 """Common Flower arguments."""
 
+
 import argparse
 import sys
-from logging import DEBUG, WARN
+from logging import DEBUG, ERROR, WARN
 from os.path import isfile
 from pathlib import Path
 from typing import Optional
@@ -49,13 +50,6 @@ def add_args_flwr_app_common(parser: argparse.ArgumentParser) -> None:
         "paths are provided. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
     )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
-    )
 
 
 def try_obtain_root_certificates(
@@ -80,9 +74,18 @@ def try_obtain_root_certificates(
         root_certificates = None
     else:
         # Load the certificates if provided, or load the system certificates
-        if not isfile(root_cert_path):
-            sys.exit("Path argument `--root-certificates` does not point to a file.")
-        root_certificates = Path(root_cert_path).read_bytes()
+        if root_cert_path is None:
+            log(
+                WARN,
+                "Both `--insecure` and `--root-certificates` were not set. "
+                "Using system certificates.",
+            )
+            root_certificates = None
+        elif not isfile(root_cert_path):
+            log(ERROR, "Path argument `--root-certificates` does not point to a file.")
+            sys.exit(1)
+        else:
+            root_certificates = Path(root_cert_path).read_bytes()
         log(
             DEBUG,
             "Starting secure HTTPS channel to %s "
@@ -140,9 +143,11 @@ def try_obtain_server_certificates(
                 "and `--ssl-keyfile` to create a secure connection "
                 "in Fleet API server (REST, experimental)."
             )
-    sys.exit(
+    log(
+        ERROR,
         "Certificates are required unless running in insecure mode. "
         "Please provide certificate paths to `--ssl-certfile`, "
         "`--ssl-keyfile`, and `—-ssl-ca-certfile` or run the server "
-        "in insecure mode using '--insecure' if you understand the risks."
+        "in insecure mode using '--insecure' if you understand the risks.",
     )
+    sys.exit(1)

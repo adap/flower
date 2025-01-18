@@ -16,6 +16,7 @@
 
 
 import argparse
+import sys
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
 from time import sleep
@@ -23,8 +24,9 @@ from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
-from flwr.common import EventType
-from flwr.common.args import try_obtain_root_certificates
+from flwr.cli.utils import get_sha256_hash
+from flwr.common import EventType, event
+from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import (
     get_flwr_dir,
     get_fused_config_from_dir,
@@ -32,7 +34,11 @@ from flwr.common.config import (
     get_project_dir,
     unflatten_dict,
 )
-from flwr.common.constant import Status, SubStatus
+from flwr.common.constant import (
+    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
+    Status,
+    SubStatus,
+)
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -43,6 +49,7 @@ from flwr.common.logger import (
 from flwr.common.serde import (
     configs_record_from_proto,
     context_from_proto,
+    context_to_proto,
     fab_from_proto,
     run_from_proto,
     run_status_to_proto,
@@ -69,61 +76,30 @@ def flwr_simulation() -> None:
     log_queue: Queue[Optional[str]] = Queue()
     mirror_output_to_queue(log_queue)
 
-    parser = argparse.ArgumentParser(
-        description="Run a Flower Simulation",
-    )
-    parser.add_argument(
-        "--superlink",
-        type=str,
-        help="Address of SuperLink's SimulationIO API",
-    )
-    parser.add_argument(
-        "--run-once",
-        action="store_true",
-        help="When set, this process will start a single simulation "
-        "for a pending Run. If no pending run the process will exit. ",
-    )
-    parser.add_argument(
-        "--flwr-dir",
-        default=None,
-        help="""The path containing installed Flower Apps.
-    By default, this value is equal to:
-
-        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-        - `$HOME/.flwr/` in all other cases
-    """,
-    )
-    parser.add_argument(
-        "--insecure",
-        action="store_true",
-        help="Run the server without HTTPS, regardless of whether certificate "
-        "paths are provided. By default, the server runs with HTTPS enabled. "
-        "Use this flag only if you understand the risks.",
-    )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
-    )
-    args = parser.parse_args()
+    args = _parse_args_run_flwr_simulation().parse_args()
 
     log(INFO, "Starting Flower Simulation")
-    certificates = try_obtain_root_certificates(args, args.superlink)
+
+    if not args.insecure:
+        log(
+            ERROR,
+            "`flwr-simulation` does not support TLS yet. "
+            "Please use the '--insecure' flag.",
+        )
+        sys.exit(1)
 
     log(
         DEBUG,
-        "Staring isolated `Simulation` connected to SuperLink DriverAPI at %s",
-        args.superlink,
+        "Starting isolated `Simulation` connected to SuperLink SimulationAppIo API "
+        "at %s",
+        args.simulationio_api_address,
     )
     run_simulation_process(
-        simulationio_api_address=args.superlink,
+        simulationio_api_address=args.simulationio_api_address,
         log_queue=log_queue,
         run_once=args.run_once,
         flwr_dir_=args.flwr_dir,
-        certificates=certificates,
+        certificates=None,
     )
 
     # Restore stdout/stderr
@@ -225,10 +201,19 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 )
             backend_config: BackendConfig = fed_opt.get("backend", {})
             verbose: bool = fed_opt.get("verbose", False)
-            enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", True)
+            enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
+
+            event(
+                EventType.FLWR_SIMULATION_RUN_ENTER,
+                event_details={
+                    "backend": "ray",
+                    "num-supernodes": num_supernodes,
+                    "run-id-hash": get_sha256_hash(run.run_id),
+                },
+            )
 
             # Launch the simulation
-            _run_simulation(
+            updated_context = _run_simulation(
                 server_app_attr=server_app_attr,
                 client_app_attr=client_app_attr,
                 num_supernodes=num_supernodes,
@@ -239,11 +224,11 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 verbose_logging=verbose,
                 server_app_run_config=fused_config,
                 is_app=True,
-                exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
+                exit_event=EventType.FLWR_SIMULATION_RUN_LEAVE,
             )
 
             # Send resulting context
-            context_proto = None  # context_to_proto(updated_context)
+            context_proto = context_to_proto(updated_context)
             out_req = PushSimulationOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )
@@ -257,6 +242,12 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
 
         finally:
+            # Stop log uploader for this run and upload final logs
+            if log_uploader:
+                stop_log_uploader(log_queue, log_uploader)
+                log_uploader = None
+
+            # Update run status
             if run_status:
                 run_status_proto = run_status_to_proto(run_status)
                 conn._stub.UpdateRunStatus(
@@ -265,11 +256,28 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                     )
                 )
 
-            # Stop log uploader for this run
-            if log_uploader:
-                stop_log_uploader(log_queue, log_uploader)
-                log_uploader = None
-
         # Stop the loop if `flwr-simulation` is expected to process a single run
         if run_once:
             break
+
+
+def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
+    """Parse flwr-simulation command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Run a Flower Simulation",
+    )
+    parser.add_argument(
+        "--simulationio-api-address",
+        default=SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
+        type=str,
+        help="Address of SuperLink's SimulationIO API (IPv4, IPv6, or a domain name)."
+        f"By default, it is set to {SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS}.",
+    )
+    parser.add_argument(
+        "--run-once",
+        action="store_true",
+        help="When set, this process will start a single simulation "
+        "for a pending Run. If no pending run the process will exit. ",
+    )
+    add_args_flwr_app_common(parser=parser)
+    return parser

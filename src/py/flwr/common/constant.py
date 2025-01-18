@@ -80,7 +80,11 @@ FAB_ALLOWED_EXTENSIONS = {".py", ".toml", ".md"}
 FAB_CONFIG_FILE = "pyproject.toml"
 FAB_DATE = (2024, 10, 1, 0, 0, 0)
 FAB_HASH_TRUNCATION = 8
-FLWR_HOME = "FLWR_HOME"
+FLWR_DIR = ".flwr"  # The default Flower directory: ~/.flwr/
+FLWR_HOME = "FLWR_HOME"  # If set, override the default Flower directory
+
+# Constant for SuperLink
+SUPERLINK_NODE_ID = 1
 
 # Constants entries in Node config for Simulation
 PARTITION_ID_KEY = "partition-id"
@@ -106,6 +110,15 @@ CONN_REFRESH_PERIOD = 60  # Stream connection refresh period
 CONN_RECONNECT_INTERVAL = 0.5  # Reconnect interval between two stream connections
 LOG_STREAM_INTERVAL = 0.5  # Log stream interval for `ExecServicer.StreamLogs`
 LOG_UPLOAD_INTERVAL = 0.2  # Minimum interval between two log uploads
+
+# Retry configurations
+MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
+
+# Constants for user authentication
+CREDENTIALS_DIR = ".credentials"
+AUTH_TYPE = "auth_type"
+ACCESS_TOKEN_KEY = "access_token"
+REFRESH_TOKEN_KEY = "refresh_token"
 
 
 class MessageType:
@@ -176,5 +189,16 @@ class SubStatus:
     STOPPED = "stopped"
 
     def __new__(cls) -> SubStatus:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class CliOutputFormat:
+    """Define output format for `flwr` CLI commands."""
+
+    DEFAULT = "default"
+    JSON = "json"
+
+    def __new__(cls) -> CliOutputFormat:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
