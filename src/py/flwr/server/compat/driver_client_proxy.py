@@ -28,12 +28,11 @@ from ..driver.driver import Driver
 class DriverClientProxy(ClientProxy):
     """Flower client proxy which delegates work using the Driver API."""
 
-    def __init__(self, node_id: int, driver: Driver, anonymous: bool, run_id: int):
+    def __init__(self, node_id: int, driver: Driver, run_id: int):
         super().__init__(str(node_id))
         self.node_id = node_id
         self.driver = driver
         self.run_id = run_id
-        self.anonymous = anonymous
 
     def get_properties(
         self,

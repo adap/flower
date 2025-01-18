@@ -1,0 +1,61 @@
+# General Configuration
+num_rounds: 5
+num_clients: 10
+clients_per_round: ${num_clients}
+
+# Client Configuration
+client:
+    epochs: 3
+    lr: 0.001
+    batch_size: 256
+
+# Adversarial Settings
+noise_rate: 1
+malicious_clients_ids: [0] # Malicious (also called faulty) client IDs (Ground Truth). Default client 0 is malicious.
+total_malicious_clients: null # For inducing multiple malicious clients in Table-2. e.g., 2 means clients [0, 1] are malicious
+
+# FedDebug Configuration
+feddebug:
+    fast: true # to generate randome inputs faster
+    r_inputs: 10 # number of random inputs to generate
+    na_t: 0.00 # neuron activation threshold
+
+# Model Configuration
+model: lenet # Options: lenet, resnet18, resnet34, resnet50, resnet101, resnet152, densenet121, vgg16
+
+# Dataset Configuration
+distribution: 'iid' # Change to "iid" for iid data distribution. Change it to `non_iid` for non-iid data distribution.
+dataset_channels:
+    cifar10: 3 # RGB
+    mnist: 1
+
+dataset_classes:
+    cifar10: 10
+    mnist: 10
+
+dataset:
+    name: mnist
+    num_classes: ${dataset_classes.${dataset.name}}
+    channels: ${dataset_channels.${dataset.name}}
+
+
+# Device and Resource Configuration
+device: cpu
+total_gpus: 1
+total_cpus: 10
+
+client_resources:
+    num_cpus: 2
+    num_gpus: 0.2 # Note that `num_gpus` is only used when the device is set to `cuda` (i.e., `device = cuda`)
+
+
+# Logging Configuration (Hydra)
+hydra:
+    job_logging:
+        root:
+            level: INFO # Set the job logging level to INFO
+        loggers:
+            flwr:
+                level: INFO
+            accelerate.utils.other:
+                level: ERROR

@@ -71,7 +71,7 @@ def load_data(partition_id: int, num_partitions: int, dataset_name: str):
             partitioners={"train": partitioner},
         )
     client_trainset = FDS.load_partition(partition_id, "train")
-    client_trainset = reformat(client_trainset, llm_task="generalnlp")
+    client_trainset = reformat(client_trainset, llm_task="$llm_challenge_str")
     return client_trainset
 
 

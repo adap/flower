@@ -22,7 +22,7 @@
 
 set -e
 
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )"  >/dev/null 2>&1 && pwd )"/../doc
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )"  >/dev/null 2>&1 && pwd )"/../docs
 
 # Remove the old docs from source/ref-api
 REF_API_DIR="source/ref-api"

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from random import randint
 
 import pytorch_lightning as pl
 import torch
@@ -54,7 +55,11 @@ def _set_parameters(model, parameters):
 
 def client_fn(context: Context):
     model = mnist.LitAutoEncoder()
-    train_loader, val_loader, test_loader = mnist.load_data()
+    partition_id = int(context.node_config.get("partition-id", 0))
+    num_partitions = int(context.node_config.get("num-partitions", 10))
+    train_loader, val_loader, test_loader = mnist.load_data(
+        partition_id, num_partitions
+    )
 
     # Flower client
     return FlowerClient(model, train_loader, val_loader, test_loader).to_client()
@@ -68,7 +73,9 @@ app = ClientApp(
 def main() -> None:
     # Model and data
     model = mnist.LitAutoEncoder()
-    train_loader, val_loader, test_loader = mnist.load_data()
+    num_partitions = 10
+    p_id = randint(0, num_partitions - 1)
+    train_loader, val_loader, test_loader = mnist.load_data(p_id, num_partitions)
 
     # Flower client
     client = FlowerClient(model, train_loader, val_loader, test_loader).to_client()

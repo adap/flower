@@ -14,10 +14,30 @@ class ExecStub:
         flwr.proto.exec_pb2.StartRunResponse]
     """Start run upon request"""
 
+    StopRun: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.exec_pb2.StopRunRequest,
+        flwr.proto.exec_pb2.StopRunResponse]
+    """Stop run upon request"""
+
     StreamLogs: grpc.UnaryStreamMultiCallable[
         flwr.proto.exec_pb2.StreamLogsRequest,
         flwr.proto.exec_pb2.StreamLogsResponse]
     """Start log stream upon request"""
+
+    ListRuns: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.exec_pb2.ListRunsRequest,
+        flwr.proto.exec_pb2.ListRunsResponse]
+    """flwr ls command"""
+
+    GetLoginDetails: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.exec_pb2.GetLoginDetailsRequest,
+        flwr.proto.exec_pb2.GetLoginDetailsResponse]
+    """Get login details upon request"""
+
+    GetAuthTokens: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.exec_pb2.GetAuthTokensRequest,
+        flwr.proto.exec_pb2.GetAuthTokensResponse]
+    """Get auth tokens upon request"""
 
 
 class ExecServicer(metaclass=abc.ABCMeta):
@@ -30,11 +50,43 @@ class ExecServicer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def StopRun(self,
+        request: flwr.proto.exec_pb2.StopRunRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.exec_pb2.StopRunResponse:
+        """Stop run upon request"""
+        pass
+
+    @abc.abstractmethod
     def StreamLogs(self,
         request: flwr.proto.exec_pb2.StreamLogsRequest,
         context: grpc.ServicerContext,
     ) -> typing.Iterator[flwr.proto.exec_pb2.StreamLogsResponse]:
         """Start log stream upon request"""
+        pass
+
+    @abc.abstractmethod
+    def ListRuns(self,
+        request: flwr.proto.exec_pb2.ListRunsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.exec_pb2.ListRunsResponse:
+        """flwr ls command"""
+        pass
+
+    @abc.abstractmethod
+    def GetLoginDetails(self,
+        request: flwr.proto.exec_pb2.GetLoginDetailsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.exec_pb2.GetLoginDetailsResponse:
+        """Get login details upon request"""
+        pass
+
+    @abc.abstractmethod
+    def GetAuthTokens(self,
+        request: flwr.proto.exec_pb2.GetAuthTokensRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.exec_pb2.GetAuthTokensResponse:
+        """Get auth tokens upon request"""
         pass
 
 

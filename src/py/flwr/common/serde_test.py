@@ -14,6 +14,7 @@
 # ==============================================================================
 """(De-)serialization tests."""
 
+
 import random
 import string
 from collections import OrderedDict
@@ -44,6 +45,7 @@ from . import (
     RecordSet,
     typing,
 )
+from .constant import SUPERLINK_NODE_ID
 from .message import Error, Message, Metadata
 from .serde import (
     array_from_proto,
@@ -387,7 +389,7 @@ def test_message_to_and_from_taskins(
     maker = RecordMaker(state=1)
     metadata = maker.metadata()
     # pylint: disable-next=protected-access
-    metadata.__dict__["_src_node_id"] = 0  # Assume driver node
+    metadata.__dict__["_src_node_id"] = SUPERLINK_NODE_ID  # Assume driver node
 
     original = Message(
         metadata=metadata,
@@ -431,7 +433,7 @@ def test_message_to_and_from_taskres(
     # Prepare
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
-    metadata.dst_node_id = 0  # Assume driver node
+    metadata.dst_node_id = SUPERLINK_NODE_ID  # Assume driver node
 
     original = Message(
         metadata=metadata,
@@ -503,6 +505,7 @@ def test_context_serialization_deserialization() -> None:
     # Prepare
     maker = RecordMaker()
     original = Context(
+        run_id=0,
         node_id=1,
         node_config=maker.user_config(),
         state=maker.recordset(1, 1, 1),
@@ -528,6 +531,11 @@ def test_run_serialization_deserialization() -> None:
         fab_version="ipsum",
         fab_hash="hash",
         override_config=maker.user_config(),
+        pending_at="2021-01-01T00:00:00Z",
+        starting_at="2021-01-02T23:02:11Z",
+        running_at="2021-01-03T12:00:50Z",
+        finished_at="",
+        status=typing.RunStatus(status="running", sub_status="", details="OK"),
     )
 
     # Execute

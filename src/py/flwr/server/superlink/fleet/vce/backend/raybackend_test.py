@@ -14,6 +14,7 @@
 # ==============================================================================
 """Test for Ray backend for the Fleet API using the Simulation Engine."""
 
+
 from math import pi
 from typing import Callable, Optional, Union
 from unittest import TestCase
@@ -22,7 +23,7 @@ import ray
 
 from flwr.client import Client, NumPyClient
 from flwr.client.client_app import ClientApp
-from flwr.client.node_state import NodeState
+from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import (
     DEFAULT_TTL,
     Config,
@@ -104,8 +105,10 @@ def _create_message_and_context() -> tuple[Message, Context, float]:
         ),
     )
 
-    # Construct NodeState and retrieve context
-    node_state = NodeState(node_id=run_id, node_config={PARTITION_ID_KEY: str(0)})
+    # Construct DeprecatedRunInfoStore and retrieve context
+    node_state = DeprecatedRunInfoStore(
+        node_id=run_id, node_config={PARTITION_ID_KEY: str(0)}
+    )
     node_state.register_context(run_id=run_id)
     context = node_state.retrieve_context(run_id=run_id)
 

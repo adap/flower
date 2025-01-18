@@ -21,6 +21,8 @@ from typing import Any, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
+from flwr.common.constant import SUPERLINK_NODE_ID
+
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import ClientAppOutputCode, ClientAppOutputStatus
 from flwr.proto.error_pb2 import Error as ProtoError
@@ -40,6 +42,7 @@ from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.recordset_pb2 import SintList, StringList, UintList
 from flwr.proto.run_pb2 import Run as ProtoRun
+from flwr.proto.run_pb2 import RunStatus as ProtoRunStatus
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import (
     ClientMessage,
@@ -604,8 +607,8 @@ def message_to_taskins(message: Message) -> TaskIns:
         group_id=md.group_id,
         run_id=md.run_id,
         task=Task(
-            producer=Node(node_id=0, anonymous=True),  # Assume driver node
-            consumer=Node(node_id=md.dst_node_id, anonymous=False),
+            producer=Node(node_id=SUPERLINK_NODE_ID),  # Assume driver node
+            consumer=Node(node_id=md.dst_node_id),
             created_at=md.created_at,
             ttl=md.ttl,
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
@@ -658,8 +661,8 @@ def message_to_taskres(message: Message) -> TaskRes:
         group_id=md.group_id,
         run_id=md.run_id,
         task=Task(
-            producer=Node(node_id=md.src_node_id, anonymous=False),
-            consumer=Node(node_id=0, anonymous=True),  # Assume driver node
+            producer=Node(node_id=md.src_node_id),
+            consumer=Node(node_id=SUPERLINK_NODE_ID),  # Assume driver node
             created_at=md.created_at,
             ttl=md.ttl,
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
@@ -839,6 +842,7 @@ def message_from_proto(message_proto: ProtoMessage) -> Message:
 def context_to_proto(context: Context) -> ProtoContext:
     """Serialize `Context` to ProtoBuf."""
     proto = ProtoContext(
+        run_id=context.run_id,
         node_id=context.node_id,
         node_config=user_config_to_proto(context.node_config),
         state=recordset_to_proto(context.state),
@@ -850,6 +854,7 @@ def context_to_proto(context: Context) -> ProtoContext:
 def context_from_proto(context_proto: ProtoContext) -> Context:
     """Deserialize `Context` from ProtoBuf."""
     context = Context(
+        run_id=context_proto.run_id,
         node_id=context_proto.node_id,
         node_config=user_config_from_proto(context_proto.node_config),
         state=recordset_from_proto(context_proto.state),
@@ -869,6 +874,11 @@ def run_to_proto(run: typing.Run) -> ProtoRun:
         fab_version=run.fab_version,
         fab_hash=run.fab_hash,
         override_config=user_config_to_proto(run.override_config),
+        pending_at=run.pending_at,
+        starting_at=run.starting_at,
+        running_at=run.running_at,
+        finished_at=run.finished_at,
+        status=run_status_to_proto(run.status),
     )
     return proto
 
@@ -881,6 +891,11 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         fab_version=run_proto.fab_version,
         fab_hash=run_proto.fab_hash,
         override_config=user_config_from_proto(run_proto.override_config),
+        pending_at=run_proto.pending_at,
+        starting_at=run_proto.starting_at,
+        running_at=run_proto.running_at,
+        finished_at=run_proto.finished_at,
+        status=run_status_from_proto(run_proto.status),
     )
     return run
 
@@ -910,3 +925,24 @@ def clientappstatus_from_proto(
     if msg.code == ClientAppOutputCode.UNKNOWN_ERROR:
         code = typing.ClientAppOutputCode.UNKNOWN_ERROR
     return typing.ClientAppOutputStatus(code=code, message=msg.message)
+
+
+# === Run status ===
+
+
+def run_status_to_proto(run_status: typing.RunStatus) -> ProtoRunStatus:
+    """Serialize `RunStatus` to ProtoBuf."""
+    return ProtoRunStatus(
+        status=run_status.status,
+        sub_status=run_status.sub_status,
+        details=run_status.details,
+    )
+
+
+def run_status_from_proto(run_status_proto: ProtoRunStatus) -> typing.RunStatus:
+    """Deserialize `RunStatus` from ProtoBuf."""
+    return typing.RunStatus(
+        status=run_status_proto.status,
+        sub_status=run_status_proto.sub_status,
+        details=run_status_proto.details,
+    )

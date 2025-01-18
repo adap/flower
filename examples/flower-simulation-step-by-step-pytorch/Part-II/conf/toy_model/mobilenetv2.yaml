@@ -1,4 +1,0 @@
----
-# will instantiate TorchVision's MobileNetV2 and set the number of classes to ${foo}
-_target_: torchvision.models.mobilenet_v2
-num_classes: ${foo}

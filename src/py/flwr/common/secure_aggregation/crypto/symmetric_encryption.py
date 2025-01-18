@@ -117,3 +117,48 @@ def verify_hmac(key: bytes, message: bytes, hmac_value: bytes) -> bool:
         return True
     except InvalidSignature:
         return False
+
+
+def sign_message(private_key: ec.EllipticCurvePrivateKey, message: bytes) -> bytes:
+    """Sign a message using the provided EC private key.
+
+    Parameters
+    ----------
+    private_key : ec.EllipticCurvePrivateKey
+        The EC private key to sign the message with.
+    message : bytes
+        The message to be signed.
+
+    Returns
+    -------
+    bytes
+        The signature of the message.
+    """
+    signature = private_key.sign(message, ec.ECDSA(hashes.SHA256()))
+    return signature
+
+
+def verify_signature(
+    public_key: ec.EllipticCurvePublicKey, message: bytes, signature: bytes
+) -> bool:
+    """Verify a signature against a message using the provided EC public key.
+
+    Parameters
+    ----------
+    public_key : ec.EllipticCurvePublicKey
+        The EC public key to verify the signature.
+    message : bytes
+        The original message.
+    signature : bytes
+        The signature to verify.
+
+    Returns
+    -------
+    bool
+        True if the signature is valid, False otherwise.
+    """
+    try:
+        public_key.verify(signature, message, ec.ECDSA(hashes.SHA256()))
+        return True
+    except InvalidSignature:
+        return False

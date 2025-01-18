@@ -14,6 +14,7 @@
 # ==============================================================================
 """RecordSet from legacy messages tests."""
 
+
 from copy import deepcopy
 from typing import Callable
 

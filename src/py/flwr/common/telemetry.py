@@ -27,6 +27,7 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Optional, Union, cast
 
+from flwr.common.constant import FLWR_DIR
 from flwr.common.version import package_name, package_version
 
 FLWR_TELEMETRY_ENABLED = os.getenv("FLWR_TELEMETRY_ENABLED", "1")
@@ -86,7 +87,7 @@ def _get_source_id() -> str:
         # If the home directory can’t be resolved, RuntimeError is raised.
         return source_id
 
-    flwr_dir = home.joinpath(".flwr")
+    flwr_dir = home.joinpath(FLWR_DIR)
     # Create .flwr directory if it does not exist yet.
     try:
         flwr_dir.mkdir(parents=True, exist_ok=True)
@@ -150,11 +151,15 @@ class EventType(str, Enum):
 
     # Not yet implemented
 
-    # --- SuperExec --------------------------------------------------------------------
+    # --- `flwr-*` commands ------------------------------------------------------------
 
-    # SuperExec
-    RUN_SUPEREXEC_ENTER = auto()
-    RUN_SUPEREXEC_LEAVE = auto()
+    # CLI: flwr-simulation
+    FLWR_SIMULATION_RUN_ENTER = auto()
+    FLWR_SIMULATION_RUN_LEAVE = auto()
+
+    # CLI: flwr-serverapp
+    FLWR_SERVERAPP_RUN_ENTER = auto()
+    FLWR_SERVERAPP_RUN_LEAVE = auto()
 
     # --- Simulation Engine ------------------------------------------------------------
 
@@ -176,11 +181,11 @@ class EventType(str, Enum):
     RUN_SUPERNODE_ENTER = auto()
     RUN_SUPERNODE_LEAVE = auto()
 
-    # CLI: `flower-server-app`
+    # --- DEPRECATED -------------------------------------------------------------------
+
+    # [DEPRECATED] CLI: `flower-server-app`
     RUN_SERVER_APP_ENTER = auto()
     RUN_SERVER_APP_LEAVE = auto()
-
-    # --- DEPRECATED -------------------------------------------------------------------
 
     # [DEPRECATED] CLI: `flower-client-app`
     RUN_CLIENT_APP_ENTER = auto()

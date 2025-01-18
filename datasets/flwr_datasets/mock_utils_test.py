@@ -409,7 +409,11 @@ def _load_mocked_dataset_by_partial_download(
         The dataset with the requested samples.
     """
     dataset = datasets.load_dataset(
-        dataset_name, name=subset_name, split=split_name, streaming=True
+        dataset_name,
+        name=subset_name,
+        split=split_name,
+        streaming=True,
+        trust_remote_code=True,
     )
     dataset_list = []
     # It's a list of dict such that each dict represent a single sample of the dataset

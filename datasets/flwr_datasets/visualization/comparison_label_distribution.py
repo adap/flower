@@ -30,6 +30,7 @@ from flwr_datasets.visualization.label_distribution import plot_label_distributi
 
 
 # pylint: disable=too-many-arguments,too-many-locals
+# mypy: disable-error-code="call-overload"
 def plot_comparison_label_distribution(
     partitioner_list: list[Partitioner],
     label_name: Union[str, list[str]],
@@ -153,7 +154,11 @@ def plot_comparison_label_distribution(
     figsize = _initialize_comparison_figsize(figsize, num_partitioners)
     axes_sharing = _initialize_axis_sharing(size_unit, plot_type, partition_id_axis)
     fig, axes = plt.subplots(
-        1, num_partitioners, layout="constrained", figsize=figsize, **axes_sharing
+        nrows=1,
+        ncols=num_partitioners,
+        figsize=figsize,
+        layout="constrained",
+        **axes_sharing,
     )
 
     if titles is None:

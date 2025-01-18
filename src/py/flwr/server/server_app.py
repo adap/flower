@@ -71,7 +71,7 @@ class ServerApp:
     >>>    print("ServerApp running")
     """
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
         server: Optional[Server] = None,

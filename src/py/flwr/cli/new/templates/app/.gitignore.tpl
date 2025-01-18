@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Flower directory
+.flwr
+
 # C extensions
 *.so
 
