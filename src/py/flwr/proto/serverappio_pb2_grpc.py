@@ -51,7 +51,7 @@ class ServerAppIoStub(object):
                 '/flwr.proto.ServerAppIo/PushTaskIns',
                 request_serializer=flwr_dot_proto_dot_serverappio__pb2.PushTaskInsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_serverappio__pb2.PushTaskInsResponse.FromString,
-                )
+                _registered_method=True)
         self.PushMessages = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/PushMessages',
                 request_serializer=flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesRequest.SerializeToString,
@@ -61,7 +61,7 @@ class ServerAppIoStub(object):
                 '/flwr.proto.ServerAppIo/PullTaskRes',
                 request_serializer=flwr_dot_proto_dot_serverappio__pb2.PullTaskResRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_serverappio__pb2.PullTaskResResponse.FromString,
-                )
+                _registered_method=True)
         self.PullMessages = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/PullMessages',
                 request_serializer=flwr_dot_proto_dot_serverappio__pb2.PullResMessagesRequest.SerializeToString,
@@ -367,11 +367,21 @@ class ServerAppIo(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/PushMessages',
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/flwr.proto.ServerAppIo/PushMessages',
             flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesRequest.SerializeToString,
             flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def PullTaskRes(request,
@@ -411,11 +421,21 @@ class ServerAppIo(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/PullMessages',
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/flwr.proto.ServerAppIo/PullMessages',
             flwr_dot_proto_dot_serverappio__pb2.PullResMessagesRequest.SerializeToString,
             flwr_dot_proto_dot_serverappio__pb2.PullResMessagesResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def GetRun(request,
