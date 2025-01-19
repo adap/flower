@@ -24,8 +24,7 @@ file should match the private key.
 
 3. If the files are corrupted or not in the correct format, regenerate the elliptic
 curve key pair and update the file paths accordingly. For example, in Linux/MacOS, for
-rapid prototyping (ensure this is clearly communicated with your team for production
-use):
+rapid prototyping (not for production use):
 
 .. code-block:: bash
 
