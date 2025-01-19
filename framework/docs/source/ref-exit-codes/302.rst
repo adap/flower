@@ -23,8 +23,8 @@ file should be in a format compatible with elliptic curve cryptography. - The pu
 file should match the private key.
 
 3. If the files are corrupted or not in the correct format, regenerate the elliptic
-curve key pair and update the file paths accordingly. For example, in Linux/MacOS, for
-rapid prototyping (not for production use):
+curve key pair and update the file paths accordingly. For example, in Linux/MacOS, **for
+rapid prototyping only** (not production; follow company procedures for key management):
 
 .. code-block:: bash
 
