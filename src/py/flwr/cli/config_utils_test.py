@@ -23,13 +23,13 @@ from typing import Any, Optional
 import click
 import pytest
 
+from flwr.common.config import validate_config, validate_fields_in_config
+
 from .config_utils import (
     load,
     process_loaded_project_config,
-    validate,
     validate_certificate_in_federation_config,
     validate_federation_in_project_config,
-    validate_fields,
 )
 
 
@@ -169,7 +169,7 @@ def test_validate_pyproject_toml_fields_empty() -> None:
     config: dict[str, Any] = {}
 
     # Execute
-    is_valid, errors, warnings = validate_fields(config)
+    is_valid, errors, warnings = validate_fields_in_config(config)
 
     # Assert
     assert not is_valid
@@ -191,7 +191,7 @@ def test_validate_pyproject_toml_fields_no_flower() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate_fields(config)
+    is_valid, errors, warnings = validate_fields_in_config(config)
 
     # Assert
     assert not is_valid
@@ -214,7 +214,7 @@ def test_validate_pyproject_toml_fields_no_flower_components() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate_fields(config)
+    is_valid, errors, warnings = validate_fields_in_config(config)
 
     # Assert
     assert not is_valid
@@ -237,7 +237,7 @@ def test_validate_pyproject_toml_fields_no_server_and_client_app() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate_fields(config)
+    is_valid, errors, warnings = validate_fields_in_config(config)
 
     # Assert
     assert not is_valid
@@ -267,7 +267,7 @@ def test_validate_pyproject_toml_fields() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate_fields(config)
+    is_valid, errors, warnings = validate_fields_in_config(config)
 
     # Assert
     assert is_valid
@@ -300,7 +300,7 @@ def test_validate_pyproject_toml() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate(config)
+    is_valid, errors, warnings = validate_config(config)
 
     # Assert
     assert is_valid
@@ -333,7 +333,7 @@ def test_validate_pyproject_toml_fail() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate(config)
+    is_valid, errors, warnings = validate_config(config)
 
     # Assert
     assert not is_valid
