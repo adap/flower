@@ -39,7 +39,7 @@ def register_exit_handlers(
     grpc_servers: Optional[list[Server]] = None,
     bckg_threads: Optional[list[Thread]] = None,
 ) -> None:
-    """Register exit handlers for `SIGINT` and `SIGTERM` signals.
+    """Register exit handlers for `SIGINT`, `SIGTERM` and `SIGQUIT` signals.
 
     Parameters
     ----------
@@ -56,6 +56,7 @@ def register_exit_handlers(
     """
     default_handlers = {
         SIGINT: None,
+        SIGQUIT: None,
         SIGTERM: None,
     }
 

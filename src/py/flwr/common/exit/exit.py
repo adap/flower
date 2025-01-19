@@ -24,10 +24,9 @@ from typing import Any, NoReturn
 from flwr.common import EventType, event
 
 from ..logger import log
-from ..version import package_version
 from .exit_code import EXIT_CODE_HELP
 
-HELP_PAGE_URL = f"https://flower.ai/docs/framework/{package_version}/en/ref-exit-codes/"
+HELP_PAGE_URL = "https://flower.ai/docs/framework/ref-exit-codes/"
 
 
 def flwr_exit(
@@ -51,7 +50,7 @@ def flwr_exit(
     - `<short-help-message>`: A brief explanation for the given exit code.
     - `<help-page-url>`: A URL providing detailed documentation and resolution steps.
     """
-    is_error = 0 <= code < 100  # 0-99 are success exit codes
+    is_error = not (0 <= code < 100)  # 0-99 are success exit codes
 
     # Construct exit message
     exit_message = f"Exit Code: {code}\n" if is_error else ""
