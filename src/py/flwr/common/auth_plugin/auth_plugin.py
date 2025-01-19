@@ -38,7 +38,7 @@ class ExecAuthPlugin(ABC):
     def __init__(
         self,
         user_auth_config_path: Path,
-        user_auth_tls_check: bool,
+        verify_tls_cert: bool,
     ):
         """Abstract constructor."""
 

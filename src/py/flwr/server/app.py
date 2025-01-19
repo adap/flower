@@ -267,12 +267,12 @@ def run_superlink() -> None:
 
     # Disable the user auth TLS check if args.disable_oidc_tls_cert_verification is
     # provided
-    user_auth_tls_check = getattr(args, "disable_oidc_tls_cert_verification", True)
+    verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", True)
 
     auth_plugin: Optional[ExecAuthPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
-        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path), user_auth_tls_check)
+        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path), verify_tls_cert)
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -621,7 +621,7 @@ def _try_setup_node_authentication(
 
 
 def _try_obtain_exec_auth_plugin(
-    config_path: Path, user_auth_tls_check: bool
+    config_path: Path, verify_tls_cert: bool
 ) -> Optional[ExecAuthPlugin]:
     # Load YAML file
     with config_path.open("r", encoding="utf-8") as file:
@@ -636,7 +636,7 @@ def _try_obtain_exec_auth_plugin(
         all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
         auth_plugin_class = all_plugins[auth_type]
         return auth_plugin_class(
-            user_auth_config_path=config_path, user_auth_tls_check=user_auth_tls_check
+            user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
         )
     except KeyError:
         if auth_type != "":
