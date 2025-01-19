@@ -21,7 +21,7 @@ from typing import Any, Optional, Union
 import tomli
 import typer
 
-from flwr.common.config import get_fab_config, get_metadata_from_config, validate_config
+from flwr.common.config import get_fab_config, get_metadata_from_config, validate_config, fuse_dicts, parse_config_args
 
 
 def get_fab_metadata(fab_file: Union[Path, bytes]) -> tuple[str, str]:
@@ -127,7 +127,7 @@ def process_loaded_project_config(
 
 
 def validate_federation_in_project_config(
-    federation: Optional[str], config: dict[str, Any]
+    federation: Optional[str], config: dict[str, Any], overrides: Optional[str] = None
 ) -> tuple[str, dict[str, Any]]:
     """Validate the federation name in the Flower project configuration."""
     federation = federation or config["tool"]["flwr"]["federations"].get("default")
@@ -156,6 +156,11 @@ def validate_federation_in_project_config(
             bold=True,
         )
         raise typer.Exit(code=1)
+    
+    # Override the federation configuration if provided
+    if overrides:
+        overrides_dict = parse_config_args(overrides, flatten=False)
+        federation_config = fuse_dicts(federation_config, overrides_dict)
 
     return federation, federation_config
 

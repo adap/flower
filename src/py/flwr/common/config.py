@@ -20,7 +20,7 @@ import re
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Any, Optional, Union, cast, get_args
+from typing import IO, Any, Optional, Union, cast, get_args, TypeVar
 
 import tomli
 
@@ -34,6 +34,9 @@ from flwr.common.constant import (
 from flwr.common.typing import Run, UserConfig, UserConfigValue
 
 from . import ConfigsRecord, object_ref
+
+
+T_dict = TypeVar("T_dict", bound=dict)
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
@@ -93,19 +96,28 @@ def get_project_config(project_dir: Union[str, Path]) -> dict[str, Any]:
 
 
 def fuse_dicts(
-    main_dict: UserConfig,
-    override_dict: UserConfig,
-) -> UserConfig:
+    main_dict: T_dict,
+    override_dict: T_dict,
+    check_keys: bool = False,
+) -> T_dict:
     """Merge a config with the overrides.
 
-    Remove the nesting by adding the nested keys as prefixes separated by dots, and fuse
-    it with the override dict.
+    If `check_keys` is set to True, an error will be raised if the override
+    dictionary contains keys that are not present in the main dictionary.
+    Otherwise, only the keys present in the main dictionary will be updated.
     """
+    if not isinstance(main_dict, dict) or not isinstance(override_dict, dict):
+        raise ValueError("Both dictionaries must be of type dict")
+
     fused_dict = main_dict.copy()
 
     for key, value in override_dict.items():
         if key in main_dict:
+            if isinstance(value, dict):
+                fused_dict[key] = fuse_dicts(main_dict[key], value)
             fused_dict[key] = value
+        elif check_keys:
+            raise ValueError(f"Key {key} is not present in the main dictionary")
 
     return fused_dict
 
@@ -194,7 +206,7 @@ def unflatten_dict(flat_dict: dict[str, Any]) -> dict[str, Any]:
 
 
 def parse_config_args(
-    config: Optional[list[str]],
+    config: Optional[list[str]], flatten: bool = True
 ) -> UserConfig:
     """Parse separator separated list of key-value pairs separated by '='."""
     overrides: UserConfig = {}
@@ -223,7 +235,7 @@ def parse_config_args(
             matches = pattern.findall(config_line)
             toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
             overrides.update(tomli.loads(toml_str))
-            flat_overrides = flatten_dict(overrides)
+            flat_overrides = flatten_dict(overrides) if flatten else overrides
 
     return flat_overrides
 

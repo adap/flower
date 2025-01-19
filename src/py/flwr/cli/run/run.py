@@ -79,6 +79,17 @@ def run(
             "inside the `pyproject.toml` in order to be properly overriden.",
         ),
     ] = None,
+    federation_config_overrides: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--federation-config",
+            help="Override federation configuration key-value pairs, "
+            'should be of the format:\n\n `--federation-config \'key1="value1"'
+            ' key2="value2"\' --federation-config \'key3="value3"\'`\n\n'
+            "Note that `key1`, `key2`, and `key3` in this example must exist "
+            "in the federation configuration.",
+        ),
+    ] = None,
     stream: Annotated[
         bool,
         typer.Option(
@@ -97,6 +108,7 @@ def run(
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Run Flower App."""
+    print(config_overrides)
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
@@ -108,7 +120,7 @@ def run(
         config, errors, warnings = load_and_validate(path=pyproject_path)
         config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
-            federation, config
+            federation, config, federation_config_overrides
         )
 
         if "address" in federation_config:
