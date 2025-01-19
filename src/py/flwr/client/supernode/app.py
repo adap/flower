@@ -16,6 +16,7 @@
 
 
 import argparse
+import sys
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import Optional
@@ -66,7 +67,14 @@ def run_supernode() -> None:
 
     # Exit if unsupported argument is passed by the user
     if args.app is not None:
-        flwr_exit(ExitCode.SUPERNODE_REMOVED_APP_ARGUMENT)
+        log(
+            ERROR,
+            "The `app` argument is deprecated. The SuperNode now automatically "
+            "uses the ClientApp delivered from the SuperLink. Providing the app "
+            "directory manually is no longer supported. Please remove the `app` "
+            "argument from your command.",
+        )
+        sys.exit(1)
 
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     load_fn = get_load_client_app_fn(

@@ -23,8 +23,9 @@ class ExitCode:
 
     # Success exit codes (0-99)
     SUCCESS = 0  # Successful exit without any errors or signals
-    GRACEFUL_EXIT_SIGINT = 2  # Graceful exit triggered by SIGINT
-    GRACEFUL_EXIT_SIGTERM = 15  # Graceful exit triggered by SIGTERM
+    GRACEFUL_EXIT_SIGINT = 1  # Graceful exit triggered by SIGINT
+    GRACEFUL_EXIT_SIGQUIT = 2  # Graceful exit triggered by SIGQUIT
+    GRACEFUL_EXIT_SIGTERM = 3  # Graceful exit triggered by SIGTERM
 
     # SuperLink-specific exit codes (100-199)
     SUPERLINK_THREAD_CRASH = 100
@@ -38,13 +39,10 @@ class ExitCode:
 
     # ClientApp-specific exit codes (400-499)
 
-    # Common exit codes (500-899)
+    # Common exit codes (500-)
     COMMON_ADDRESS_INVALID = 500
     COMMON_MISSING_EXTRA_REST = 501
     COMMON_TLS_NOT_SUPPORTED = 502
-
-    # Deprecated exit codes (900-)
-    SUPERNODE_REMOVED_APP_ARGUMENT = 900  # Deprecated `flower-supernode <app>`
 
     def __new__(cls) -> ExitCode:
         """Prevent instantiation."""
@@ -56,6 +54,7 @@ EXIT_CODE_HELP = {
     # Success exit codes (0-99)
     ExitCode.SUCCESS: "",
     ExitCode.GRACEFUL_EXIT_SIGINT: "",
+    ExitCode.GRACEFUL_EXIT_SIGQUIT: "",
     ExitCode.GRACEFUL_EXIT_SIGTERM: "",
     # SuperLink-specific exit codes (100-199)
     ExitCode.SUPERLINK_THREAD_CRASH: "An important background thread has crashed.",
@@ -76,7 +75,7 @@ EXIT_CODE_HELP = {
         "file and try again."
     ),
     # ClientApp-specific exit codes (400-499)
-    # Common exit codes (500-999)
+    # Common exit codes (500-)
     ExitCode.COMMON_ADDRESS_INVALID: (
         "Please provide a valid URL, IPv4 or IPv6 address."
     ),
@@ -88,9 +87,4 @@ To use the REST API, install `flwr` with the `rest` extra:
     `pip install "flwr[rest]"`.
 """,
     ExitCode.COMMON_TLS_NOT_SUPPORTED: "Please use the '--insecure' flag.",
-    # Deprecated exit codes (1000-)
-    ExitCode.SUPERNODE_REMOVED_APP_ARGUMENT: (
-        "The `app` argument has been removed. "
-        "Please remove the `app` argument from your command."
-    ),
 }

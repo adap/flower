@@ -15,7 +15,7 @@
 """Common function to register exit handlers for server and client."""
 
 
-from signal import SIGINT, SIGTERM, signal
+from signal import SIGINT, SIGQUIT, SIGTERM, signal
 from threading import Thread
 from types import FrameType
 from typing import Optional
@@ -28,6 +28,7 @@ from .exit import ExitCode, flwr_exit
 
 SIGNAL_TO_EXIT_CODE = {
     SIGINT: ExitCode.GRACEFUL_EXIT_SIGINT,
+    SIGQUIT: ExitCode.GRACEFUL_EXIT_SIGQUIT,
     SIGTERM: ExitCode.GRACEFUL_EXIT_SIGTERM,
 }
 
@@ -87,6 +88,10 @@ def register_exit_handlers(
 
     default_handlers[SIGINT] = signal(  # type: ignore
         SIGINT,
+        graceful_exit_handler,  # type: ignore
+    )
+    default_handlers[SIGQUIT] = signal(  # type: ignore
+        SIGQUIT,
         graceful_exit_handler,  # type: ignore
     )
     default_handlers[SIGTERM] = signal(  # type: ignore

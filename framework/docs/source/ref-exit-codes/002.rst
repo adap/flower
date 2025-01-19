@@ -1,7 +1,7 @@
-[2] GRACEFUL_EXIT_SIGINT
-========================
+[2] GRACEFUL_EXIT_SIGQUIT
+=========================
 
 Description
 -----------
 
-The process exited gracefully, triggered by ``SIGINT``.
+The process exited gracefully, triggered by ``SIGQUIT``.
