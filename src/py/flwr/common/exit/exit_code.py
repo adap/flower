@@ -21,8 +21,10 @@ from __future__ import annotations
 class ExitCode:
     """Exit codes for Flower components."""
 
-    # System exit codes
-    GRACEFUL_EXIT = 10  # Graceful exit requested by the user
+    # Success exit codes (0-99)
+    SUCCESS = 0  # Successful exit without any errors or signals
+    GRACEFUL_EXIT_SIGINT = 2  # Graceful exit triggered by SIGINT
+    GRACEFUL_EXIT_SIGTERM = 15  # Graceful exit triggered by SIGTERM
 
     # SuperLink-specific exit codes (100-199)
     SUPERLINK_THREAD_CRASH = 100
@@ -51,8 +53,10 @@ class ExitCode:
 
 # All short help messages for exit codes
 EXIT_CODE_HELP = {
-    # System exit codes
-    ExitCode.GRACEFUL_EXIT: "",
+    # Success exit codes (0-99)
+    ExitCode.SUCCESS: "",
+    ExitCode.GRACEFUL_EXIT_SIGINT: "",
+    ExitCode.GRACEFUL_EXIT_SIGTERM: "",
     # SuperLink-specific exit codes (100-199)
     ExitCode.SUPERLINK_THREAD_CRASH: "An important background thread has crashed.",
     # ServerApp-specific exit codes (200-299)

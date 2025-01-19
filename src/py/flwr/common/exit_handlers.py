@@ -26,6 +26,11 @@ from flwr.common.telemetry import EventType
 
 from .exit import ExitCode, flwr_exit
 
+SIGNAL_TO_EXIT_CODE = {
+    SIGINT: ExitCode.GRACEFUL_EXIT_SIGINT,
+    SIGTERM: ExitCode.GRACEFUL_EXIT_SIGTERM,
+}
+
 
 def register_exit_handlers(
     event_type: EventType,
@@ -75,7 +80,7 @@ def register_exit_handlers(
 
         # Setup things for graceful exit
         flwr_exit(
-            code=ExitCode.GRACEFUL_EXIT,
+            code=SIGNAL_TO_EXIT_CODE[signalnum],
             message=exit_message,
             event_type=event_type,
         )

@@ -51,4 +51,4 @@ def test_exit_code_help_url_exist() -> None:
         # Assert the title is correct
         assert (
             title == f"[{code}] {name}"
-        ), f"Exit code {name} ({code}) help URL has incorrect title: {str(f)}"
+        ), f"Exit code {name} ({code}) help URL has incorrect title in {str(f)}"

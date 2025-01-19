@@ -1,7 +1,0 @@
-[10] GRACEFUL_EXIT
-==================
-
-Description
------------
-
-The process exited gracefully as requested by the user.
