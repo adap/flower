@@ -52,7 +52,6 @@ from flwr.common.constant import (
     FLEET_API_REST_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
-    MISSING_EXTRA_REST,
     SERVER_OCTET,
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
@@ -60,6 +59,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
@@ -345,7 +345,7 @@ def run_superlink() -> None:
                 and importlib.util.find_spec("starlette")
                 and importlib.util.find_spec("uvicorn")
             ) is None:
-                sys.exit(MISSING_EXTRA_REST)
+                flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
             _, ssl_certfile, ssl_keyfile = (
                 certificates if certificates is not None else (None, None, None)
@@ -437,6 +437,7 @@ def run_superlink() -> None:
     # Graceful shutdown
     register_exit_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
+        exit_message="SuperLink terminated gracefully.",
         grpc_servers=grpc_servers,
     )
 
@@ -445,7 +446,8 @@ def run_superlink() -> None:
         sleep(0.1)
 
     # Exit if any thread has exited prematurely
-    sys.exit(1)
+    # This code will not be reached if the SuperLink stops gracefully
+    flwr_exit(ExitCode.SUPERLINK_THREAD_CRASH)
 
 
 def _run_flwr_command(args: list[str], main_pid: int) -> None:
@@ -520,8 +522,9 @@ def _flwr_scheduler(
 def _format_address(address: str) -> tuple[str, str, int]:
     parsed_address = parse_address(address)
     if not parsed_address:
-        sys.exit(
-            f"Address ({address}) cannot be parsed (expected: URL or IPv4 or IPv6)."
+        flwr_exit(
+            ExitCode.COMMON_ADDRESS_INVALID,
+            f"Address ({address}) cannot be parsed.",
         )
     host, port, is_v6 = parsed_address
     return (f"[{host}]:{port}" if is_v6 else f"{host}:{port}", host, port)
@@ -712,7 +715,7 @@ def _run_fleet_api_rest(
 
         from flwr.server.superlink.fleet.rest_rere.rest_api import app as fast_api_app
     except ModuleNotFoundError:
-        sys.exit(MISSING_EXTRA_REST)
+        flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
     log(INFO, "Starting Flower REST server")
 
