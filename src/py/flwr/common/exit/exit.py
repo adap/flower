@@ -50,7 +50,7 @@ def flwr_exit(
     - `<short-help-message>`: A brief explanation for the given exit code.
     - `<help-page-url>`: A URL providing detailed documentation and resolution steps.
     """
-    is_error = not (0 <= code < 100)  # 0-99 are success exit codes
+    is_error = not 0 <= code < 100  # 0-99 are success exit codes
 
     # Construct exit message
     exit_message = f"Exit Code: {code}\n" if is_error else ""
