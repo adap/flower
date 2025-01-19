@@ -22,10 +22,7 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -38,7 +35,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.10.0, <3.11.0"
-flwr = { extras = ["simulation"], version = "1.5.0" }
+flwr = { extras = ["simulation"], version = "1.9.0" }
 hydra-core = "1.3.2" # don't change this
 matplotlib = "3.7.1"
 torch = { url = "https://download.pytorch.org/whl/cu116/torch-1.13.1%2Bcu116-cp310-cp310-linux_x86_64.whl" }
@@ -53,9 +50,8 @@ pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
-ruff = "==0.0.272"
+ruff = "==0.4.5"
 types-requests = "==2.27.7"
-virtualenv = "==20.21.0"
 
 [tool.isort]
 line_length = 88
@@ -108,11 +104,8 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 88
-select = ["D", "E", "F", "W", "B", "ISC", "C4"]
-fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
-ignore = ["B024", "B027"]
 exclude = [
     ".bzr",
     ".direnv",
@@ -136,6 +129,11 @@ exclude = [
     "venv",
     "proto",
 ]
+
+[tool.ruff.lint]
+select = ["D", "E", "F", "W", "B", "ISC", "C4"]
+fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
+ignore = ["B024", "B027"]
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
