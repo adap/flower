@@ -15,9 +15,7 @@ Categories
   (SuperNode) errors.
 - **ClientApp-specific exit codes (400-499)**: Specific to ``flwr-clientapp``
   (ClientApp) errors.
-- **Common exit codes (500-899)**: Shared across multiple components.
-- **Exit codes for deprecated/removed usages (900-)**: Reserved for exit codes related
-  to deprecated or removed functionalities.
+- **Common exit codes (500-)**: Shared across multiple components.
 
 Indices
 -------
