@@ -19,11 +19,12 @@ import os
 import tempfile
 import textwrap
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
-from flwr.common.typing import Any, UserConfig
+from flwr.common.typing import UserConfig
 
 from .config import (
     flatten_dict,
