@@ -243,8 +243,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, PushTaskInsResponse)
         assert grpc.StatusCode.OK == call.code()
 
-    def test_successful_push_ins_message_if_running(self) -> None:
-        """Test `PushInsMessages` success."""
+    def test_successful_push_messages_if_running(self) -> None:
+        """Test `PushMessages` success."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
@@ -344,8 +344,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, PullTaskResResponse)
         assert grpc.StatusCode.OK == call.code()
 
-    def test_successful_pull_res_message_if_running(self) -> None:
-        """Test `PullResMessages` success."""
+    def test_successful_pull_messages_if_running(self) -> None:
+        """Test `PullMessages` success."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
         # Transition status to running. PushTaskRes is only allowed in running status.

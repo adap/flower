@@ -109,7 +109,7 @@ def main(cfg: DictConfig) -> None:
     def client_fn(cid: str, dataset_name: str = dataset_name):
         client = clients[dataset_name][0]
         if dataset_name in ["mnist", "fmnist"]:
-            return client(cid, fed_dir)
+            return client(cid, fed_dir).to_client()
         else:
             raise ValueError("Dataset not supported")
 
