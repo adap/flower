@@ -146,6 +146,7 @@ Information-oriented API reference and other reference material.
     ref-telemetry
     ref-changelog
     ref-flower-network-communication
+    ref-exit-codes-dir
     ref-faq
 
 Contributor docs
