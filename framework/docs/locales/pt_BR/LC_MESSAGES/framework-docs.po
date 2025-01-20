@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-16 00:30+0000\n"
+"POT-Creation-Date: 2025-01-20 00:31+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -288,6 +288,12 @@ msgstr "Argumento de compilação"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:39
 #: ../../source/contributor-how-to-build-docker-images.rst:105
+#: ../../source/ref-exit-codes/000.rst:5 ../../source/ref-exit-codes/001.rst:5
+#: ../../source/ref-exit-codes/002.rst:5 ../../source/ref-exit-codes/003.rst:5
+#: ../../source/ref-exit-codes/100.rst:5 ../../source/ref-exit-codes/300.rst:5
+#: ../../source/ref-exit-codes/301.rst:5 ../../source/ref-exit-codes/302.rst:5
+#: ../../source/ref-exit-codes/500.rst:5 ../../source/ref-exit-codes/501.rst:5
+#: ../../source/ref-exit-codes/502.rst:5
 msgid "Description"
 msgstr "Descrição"
 
@@ -8611,19 +8617,19 @@ msgstr ""
 msgid "Reference docs"
 msgstr ""
 
-#: ../../source/index.rst:157
+#: ../../source/index.rst:158
 msgid "Contributor tutorials"
 msgstr ""
 
-#: ../../source/index.rst:164
+#: ../../source/index.rst:165
 msgid "Contributor how-to guides"
 msgstr ""
 
-#: ../../source/index.rst:176
+#: ../../source/index.rst:177
 msgid "Contributor explanations"
 msgstr ""
 
-#: ../../source/index.rst:182
+#: ../../source/index.rst:183
 msgid "Contributor references"
 msgstr ""
 
@@ -8729,11 +8735,11 @@ msgstr ""
 msgid "Flower main package."
 msgstr ""
 
-#: ../../source/index.rst:152
+#: ../../source/index.rst:153
 msgid "Contributor docs"
 msgstr ""
 
-#: ../../source/index.rst:154
+#: ../../source/index.rst:155
 msgid ""
 "The Flower community welcomes contributions. The following docs are "
 "intended to help along the way."
@@ -22761,6 +22767,309 @@ msgid ""
 "<https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
 msgstr ""
 
+#: ../../source/ref-exit-codes-dir.rst:2
+msgid "Exit Codes"
+msgstr ""
+
+#: ../../source/ref-exit-codes-dir.rst:4
+msgid ""
+"This reference provides an index of all exit codes and recommended "
+"resolutions."
+msgstr ""
+
+#: ../../source/ref-exit-codes-dir.rst:7
+msgid "Categories"
+msgstr ""
+
+#: ../../source/ref-exit-codes-dir.rst:9
+msgid ""
+"**Success exit codes (0-99)**: Indicate successful completion of "
+"processes."
+msgstr ""
+
+#: ../../source/ref-exit-codes-dir.rst:10
+msgid ""
+"**SuperLink-specific exit codes (100-199)**: Specific to ``flower-"
+"superlink`` (SuperLink) errors."
+msgstr ""
+
+#: ../../source/ref-exit-codes-dir.rst:12
+msgid ""
+"**ServerApp-specific exit codes (200-299)**: Specific to ``flwr-"
+"serverapp`` (ServerApp) errors."
+msgstr ""
+
+#: ../../source/ref-exit-codes-dir.rst:14
+msgid ""
+"**SuperNode-specific exit codes (300-399)**: Specific to ``flower-"
+"supernode`` (SuperNode) errors."
+msgstr ""
+
+#: ../../source/ref-exit-codes-dir.rst:16
+msgid ""
+"**ClientApp-specific exit codes (400-499)**: Specific to ``flwr-"
+"clientapp`` (ClientApp) errors."
+msgstr ""
+
+#: ../../source/ref-exit-codes-dir.rst:18
+msgid "**Common exit codes (500-)**: Shared across multiple components."
+msgstr ""
+
+#: ../../source/ref-exit-codes-dir.rst:21
+msgid "Indices"
+msgstr ""
+
+#: ../../source/ref-exit-codes/000.rst:2
+msgid "[0] SUCCESS"
+msgstr ""
+
+#: ../../source/ref-exit-codes/000.rst:7
+msgid "The process completed successfully."
+msgstr ""
+
+#: ../../source/ref-exit-codes/001.rst:2
+msgid "[1] GRACEFUL_EXIT_SIGINT"
+msgstr ""
+
+#: ../../source/ref-exit-codes/001.rst:7
+msgid "The process exited gracefully, triggered by ``SIGINT``."
+msgstr ""
+
+#: ../../source/ref-exit-codes/002.rst:2
+msgid "[2] GRACEFUL_EXIT_SIGQUIT"
+msgstr ""
+
+#: ../../source/ref-exit-codes/002.rst:7
+msgid "The process exited gracefully, triggered by ``SIGQUIT``."
+msgstr ""
+
+#: ../../source/ref-exit-codes/003.rst:2
+msgid "[3] GRACEFUL_EXIT_SIGTERM"
+msgstr ""
+
+#: ../../source/ref-exit-codes/003.rst:7
+msgid "The process exited gracefully, triggered by ``SIGTERM``."
+msgstr ""
+
+#: ../../source/ref-exit-codes/100.rst:2
+msgid "[100] SUPERLINK_THREAD_CRASH"
+msgstr ""
+
+#: ../../source/ref-exit-codes/100.rst:7
+msgid ""
+"A critical background thread has crashed in the SuperLink, causing it to "
+"exit prematurely. This indicates a serious issue with the SuperLink that "
+"requires immediate investigation."
+msgstr ""
+
+#: ../../source/ref-exit-codes/100.rst:11
+msgid "Critical background threads include:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/100.rst:13
+msgid ""
+"**Scheduler**: Schedules the execution of runs. This thread exists only "
+"when the isolation mode is set to ``subprocess`` (default)."
+msgstr ""
+
+#: ../../source/ref-exit-codes/100.rst:15
+msgid ""
+"**REST API server**: Manages the REST API server. This thread exists only"
+" when the Fleet API type is set to ``rest``."
+msgstr ""
+
+#: ../../source/ref-exit-codes/100.rst:19
+#: ../../source/ref-exit-codes/300.rst:11
+#: ../../source/ref-exit-codes/301.rst:16
+#: ../../source/ref-exit-codes/302.rst:16
+#: ../../source/ref-exit-codes/500.rst:11
+#: ../../source/ref-exit-codes/501.rst:10
+#: ../../source/ref-exit-codes/502.rst:14
+msgid "How to Resolve"
+msgstr ""
+
+#: ../../source/ref-exit-codes/100.rst:21
+msgid "Check the logs for any errors that may have caused the thread to crash."
+msgstr ""
+
+#: ../../source/ref-exit-codes/100.rst:22
+msgid "Ensure the SuperLink's configuration is correct."
+msgstr ""
+
+#: ../../source/ref-exit-codes/100.rst:23
+msgid "If the issue persists, please contact support for further assistance."
+msgstr ""
+
+#: ../../source/ref-exit-codes/300.rst:2
+msgid "[300] SUPERNODE_REST_ADDRESS_INVALID"
+msgstr ""
+
+#: ../../source/ref-exit-codes/300.rst:7
+msgid ""
+"The provided SuperLink address for the REST API is invalid. The address "
+"must start with ``http://`` or ``https://`` to be recognized correctly."
+msgstr ""
+
+#: ../../source/ref-exit-codes/300.rst:13
+msgid ""
+"When using the REST API, ensure that the server address starts with "
+"either ``https://`` or ``http://``. For example:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/300.rst:16
+msgid "``http://127.0.0.1:8080``"
+msgstr ""
+
+#: ../../source/ref-exit-codes/300.rst:17
+msgid "``https://example.com:8080``"
+msgstr ""
+
+#: ../../source/ref-exit-codes/300.rst:19
+msgid ""
+"Verify the address in your configuration or command-line arguments and "
+"correct it as needed."
+msgstr ""
+
+#: ../../source/ref-exit-codes/301.rst:2
+msgid "[301] SUPERNODE_NODE_AUTH_KEYS_REQUIRED"
+msgstr ""
+
+#: ../../source/ref-exit-codes/301.rst:7
+msgid ""
+"To run the SuperNode with authentication, file paths for both the private"
+" and public keys must be provided. Specifically, the following options "
+"must be specified:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/301.rst:10
+msgid "``--auth-supernode-private-key``"
+msgstr ""
+
+#: ../../source/ref-exit-codes/301.rst:11
+msgid "``--auth-supernode-public-key``"
+msgstr ""
+
+#: ../../source/ref-exit-codes/301.rst:13
+msgid "Providing only one of these options is insufficient for authentication."
+msgstr ""
+
+#: ../../source/ref-exit-codes/301.rst:18
+msgid ""
+"1. Ensure that the paths to both the private key and public key files are"
+" specified in command-line arguments. For example:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/301.rst:26
+msgid "Verify that the specified file paths are correct and that the files exist."
+msgstr ""
+
+#: ../../source/ref-exit-codes/302.rst:2
+msgid "[302] SUPERNODE_NODE_AUTH_KEYS_INVALID"
+msgstr ""
+
+#: ../../source/ref-exit-codes/302.rst:7
+msgid ""
+"The provided key files are invalid. Authentication requires a valid "
+"elliptic curve private and public key pair. This error occurs when "
+"either:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/302.rst:10
+msgid ""
+"The **private key** file specified in ``--auth-supernode-private-key`` is"
+" invalid or unreadable."
+msgstr ""
+
+#: ../../source/ref-exit-codes/302.rst:12
+msgid ""
+"The **public key** file specified in ``--auth-supernode-public-key`` is "
+"invalid or unreadable."
+msgstr ""
+
+#: ../../source/ref-exit-codes/302.rst:18
+msgid ""
+"Ensure that the file paths provided for the private and public key "
+"options are correct."
+msgstr ""
+
+#: ../../source/ref-exit-codes/302.rst:21
+msgid ""
+"2. Verify that both files exist and contain valid elliptic curve keys. - "
+"The private key file should be in a format compatible with elliptic curve"
+" cryptography. - The public key file should match the private key."
+msgstr ""
+
+#: ../../source/ref-exit-codes/302.rst:25
+msgid ""
+"3. If the files are corrupted or not in the correct format, regenerate "
+"the elliptic curve key pair and update the file paths accordingly. For "
+"example, in Linux/MacOS, **for rapid prototyping only** (not production; "
+"follow company procedures for key management):"
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:2
+msgid "[500] COMMON_ADDRESS_INVALID"
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:7
+msgid ""
+"The provided address is invalid and cannot be parsed. It must be a valid "
+"URL, IPv4, or IPv6 address."
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:15
+msgid "Verify that the address is correctly formatted as one of the following:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:14
+msgid "URL (e.g., ``https://127.0.0.1:8080`` or ``https://example.com:8080``)"
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:15
+msgid "IPv4 (e.g., ``192.168.1.1:9091``)"
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:16
+msgid "IPv6 (e.g., ``[2001:0db8::1]:9092``)"
+msgstr ""
+
+#: ../../source/ref-exit-codes/501.rst:2
+msgid "[501] COMMON_MISSING_EXTRA_REST"
+msgstr ""
+
+#: ../../source/ref-exit-codes/501.rst:7
+msgid ""
+"Extra dependencies required for using the REST-based Fleet API are "
+"missing."
+msgstr ""
+
+#: ../../source/ref-exit-codes/501.rst:12
+msgid ""
+"To enable the REST-based Fleet API, install ``flwr`` with the ``rest`` "
+"extra:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/501.rst:18
+msgid "Ensure that the installation completes successfully, and then retry."
+msgstr ""
+
+#: ../../source/ref-exit-codes/502.rst:2
+msgid "[502] COMMON_TLS_NOT_SUPPORTED"
+msgstr ""
+
+#: ../../source/ref-exit-codes/502.rst:7
+msgid ""
+"The ``flwr-serverapp`` and ``flwr-clientapp`` do not currently support "
+"TLS, as they are assumed to be executed within the same network as their "
+"respective long-running processes: ``flower-superlink`` and ``flower-"
+"supernode``. Please refer to the `Flower Network Communication <../ref-"
+"flower-network-communication.html>`_ guide for further details."
+msgstr ""
+
+#: ../../source/ref-exit-codes/502.rst:16
+msgid "Use the ``--insecure`` flag to proceed without TLS."
+msgstr ""
+
 #: ../../source/ref-faq.rst:2
 msgid "FAQ"
 msgstr ""
@@ -26250,7 +26559,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|bc27456848e64eab91d9c28ac80836f8|"
+msgid "|fb54a2bb9135460a80655c253e9f6180|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -26265,7 +26574,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|af7ab090b8ca4a3ea5f91376cf92f169|"
+msgid "|dbb29ab4fa1c4634b84f10fcf5ddd35e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -26287,7 +26596,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|9081c3b024ae4b729477daa854968460|"
+msgid "|385792b816c5453db447d379d4970aee|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -26303,7 +26612,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|b4783612fdcd4e3590acd2caa9c226a0|"
+msgid "|608cf1b5aad34ed78ae9defeefd9603c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -26319,7 +26628,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|5d4a7868bf284987b4cb8103d2e853d0|"
+msgid "|8d464285997143f8a6d1cff66c67abda|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -26334,7 +26643,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|ac1f30abf656450bbc12430097c8773a|"
+msgid "|d5683c1caa9e42e29b888e3112a90a85|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -26354,7 +26663,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|9e893e9099c04a5fb47ce94203d7b286|"
+msgid "|476afa181eed4ce98a5231f375a61c29|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -26369,7 +26678,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|bf91fef9dd494fa0bfe3334d71af54d0|"
+msgid "|ead51ebc3bc84dde8bdee09ecb7df092|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -26509,7 +26818,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|9e783a90144a43b38e7c6a1326318c0a|"
+msgid "|159e64a77db1476d86c2c39ce4d59023|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -26533,7 +26842,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|90a2cfd3d470407daef02a61de7f551c|"
+msgid "|2063d930771c480fbc09efe29550a35c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -26557,7 +26866,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|a7bbca4dc8f9409c87df77a68dcc85b5|"
+msgid "|cfccf70ecc234e3eafc4b85714f3d369|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -26580,7 +26889,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|565ca369f6d0451e8a8abbda9a93bdd8|"
+msgid "|c853749d35204647bd6a66b4be4ed9dd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -26618,7 +26927,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|c839c0da8e7a4e76ad21c72a5311d2e7|"
+msgid "|424b774c02284dfd97cc6abc2e7e5016|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -26712,7 +27021,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|07d4d06f1bf746989510c85dbe96f4e3|"
+msgid "|01432c2b27de47ab987fef35e497e4d3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -39799,5 +40108,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|6347089b6d794100af39cc2f5efc2a1b|"
+#~ msgstr ""
+
+#~ msgid "|bc27456848e64eab91d9c28ac80836f8|"
+#~ msgstr ""
+
+#~ msgid "|af7ab090b8ca4a3ea5f91376cf92f169|"
+#~ msgstr ""
+
+#~ msgid "|9081c3b024ae4b729477daa854968460|"
+#~ msgstr ""
+
+#~ msgid "|b4783612fdcd4e3590acd2caa9c226a0|"
+#~ msgstr ""
+
+#~ msgid "|5d4a7868bf284987b4cb8103d2e853d0|"
+#~ msgstr ""
+
+#~ msgid "|ac1f30abf656450bbc12430097c8773a|"
+#~ msgstr ""
+
+#~ msgid "|9e893e9099c04a5fb47ce94203d7b286|"
+#~ msgstr ""
+
+#~ msgid "|bf91fef9dd494fa0bfe3334d71af54d0|"
+#~ msgstr ""
+
+#~ msgid "|9e783a90144a43b38e7c6a1326318c0a|"
+#~ msgstr ""
+
+#~ msgid "|90a2cfd3d470407daef02a61de7f551c|"
+#~ msgstr ""
+
+#~ msgid "|a7bbca4dc8f9409c87df77a68dcc85b5|"
+#~ msgstr ""
+
+#~ msgid "|565ca369f6d0451e8a8abbda9a93bdd8|"
+#~ msgstr ""
+
+#~ msgid "|c839c0da8e7a4e76ad21c72a5311d2e7|"
+#~ msgstr ""
+
+#~ msgid "|07d4d06f1bf746989510c85dbe96f4e3|"
 #~ msgstr ""
 
