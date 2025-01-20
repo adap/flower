@@ -57,10 +57,14 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
+    PullResMessagesRequest,
+    PullResMessagesResponse,
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
     PullTaskResRequest,
     PullTaskResResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
     PushTaskInsRequest,
@@ -182,6 +186,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             task_ids=[str(task_id) if task_id else "" for task_id in task_ids]
         )
 
+    def PushMessages(
+        self, request: PushInsMessagesRequest, context: grpc.ServicerContext
+    ) -> PushInsMessagesResponse:
+        """Push a set of Messages."""
+        return PushInsMessagesResponse(message_ids=[])
+
     def PullTaskRes(
         self, request: PullTaskResRequest, context: grpc.ServicerContext
     ) -> PullTaskResResponse:
@@ -220,6 +230,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
 
         return PullTaskResResponse(task_res_list=task_res_list)
+
+    def PullMessages(
+        self, request: PullResMessagesRequest, context: grpc.ServicerContext
+    ) -> PullResMessagesResponse:
+        """Pull a set of Messages."""
+        return PullResMessagesResponse(messages_list=[])
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
