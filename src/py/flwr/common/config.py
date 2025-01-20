@@ -98,7 +98,7 @@ def get_project_config(project_dir: Union[str, Path]) -> dict[str, Any]:
 def fuse_dicts(
     main_dict: T_dict,
     override_dict: T_dict,
-    check_keys: bool = False,
+    check_keys: bool = True,
 ) -> T_dict:
     """Merge a config with the overrides.
 
@@ -117,7 +117,7 @@ def fuse_dicts(
                 fused_dict[key] = fuse_dicts(main_dict[key], value)
             fused_dict[key] = value
         elif check_keys:
-            raise ValueError(f"Key {key} is not present in the main dictionary")
+            raise ValueError(f"Key '{key}' is not present in the main dictionary")
 
     return fused_dict
 
