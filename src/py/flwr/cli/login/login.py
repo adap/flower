@@ -45,6 +45,18 @@ def login(  # pylint: disable=R0914
         Optional[str],
         typer.Argument(help="Name of the federation to login into."),
     ] = None,
+    federation_config_overrides: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--federation-config",
+            "-fc",
+            help="Override federation configuration values in the format:\n\n"
+            "`--federation-config 'key1=value1 key2=value2' --federation-config "
+            "'key3=value3'`\n\nValues can be of any type supported in TOML, such as "
+            "bool, int, float, or string. Ensure the keys (`key1`, `key2`, etc.) exist "
+            "in the federation configuration.",
+        ),
+    ] = None,
 ) -> None:
     """Login to Flower SuperLink."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -54,7 +66,7 @@ def login(  # pylint: disable=R0914
 
     config = process_loaded_project_config(config, errors, warnings)
     federation, federation_config = validate_federation_in_project_config(
-        federation, config
+        federation, config, federation_config_overrides
     )
     exit_if_no_address(federation_config, "login")
     channel = init_channel(app, federation_config, None)

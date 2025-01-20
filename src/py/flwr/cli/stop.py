@@ -50,6 +50,18 @@ def stop(  # pylint: disable=R0914
         Optional[str],
         typer.Argument(help="Name of the federation"),
     ] = None,
+    federation_config_overrides: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--federation-config",
+            "-fc",
+            help="Override federation configuration values in the format:\n\n"
+            "`--federation-config 'key1=value1 key2=value2' --federation-config "
+            "'key3=value3'`\n\nValues can be of any type supported in TOML, such as "
+            "bool, int, float, or string. Ensure the keys (`key1`, `key2`, etc.) exist "
+            "in the federation configuration.",
+        ),
+    ] = None,
     output_format: Annotated[
         str,
         typer.Option(
@@ -73,7 +85,7 @@ def stop(  # pylint: disable=R0914
         config, errors, warnings = load_and_validate(path=pyproject_path)
         config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
-            federation, config
+            federation, config, federation_config_overrides
         )
         exit_if_no_address(federation_config, "stop")
 
