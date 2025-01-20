@@ -227,6 +227,51 @@ def test_validate_federation_in_project_config() -> None:
     assert federation_config == {"new_key": "new_val"}
 
 
+def test_validate_federation_in_project_config_with_overrides() -> None:
+    """Test that validate_federation_in_config works with overrides."""
+    # Prepare - Test federation is None
+    federation_config = {"k1": "v1", "k2": True, "grp": {"k3": 42.8}}
+    config: dict[str, Any] = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+                "federations": {
+                    "default": "default_federation",
+                    "default_federation": federation_config,
+                },
+            },
+        },
+    }
+    overrides = ["k1=false grp.k3=42.9", "k2='hello, world!'"]
+    federation = None
+
+    # Execute
+    federation, federation_config = validate_federation_in_project_config(
+        federation, config, overrides
+    )
+
+    # Assert
+    assert federation == "default_federation"
+    assert federation_config == {
+        "k1": False,
+        "k2": "hello, world!",
+        "grp": {"k3": 42.9},
+    }
+
+
 def test_validate_federation_in_project_config_fail() -> None:
     """Test that validate_federation_in_config fails correctly."""
 

@@ -93,6 +93,23 @@ def test_get_project_config_file_not_found() -> None:
         get_project_config("/invalid/dir")
 
 
+def test_fuse_dicts() -> None:
+    """Test that fuse_dicts works correctly."""
+    dict1 = {"a": 1, "b": 2, "c": 3, "d": {"e": 4}}
+    dict2 = {"b": 4, "c": 5, "d": {"e": 6}}
+    expected = {"a": 1, "b": 4, "c": 5, "d": {"e": 6}}
+    assert fuse_dicts(dict1, dict2) == expected
+
+
+def test_fuse_dicts_key_mismatch() -> None:
+    """Test that fuse_dicts fails with key mismatch."""
+    dict1 = {"a": 1, "b": 2, "c": 3}
+    dict2 = {"b": 4, "c": 5, "d": 6}
+
+    with pytest.raises(ValueError):
+        fuse_dicts(dict1, dict2)
+
+
 def test_get_fused_config_valid(tmp_path: Path) -> None:
     """Test get_project_config when the configuration file is not found."""
     pyproject_toml_content = """

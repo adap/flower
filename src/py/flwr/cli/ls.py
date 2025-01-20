@@ -48,7 +48,7 @@ from .utils import init_channel, try_obtain_cli_auth_plugin, unauthenticated_exc
 _RunListType = tuple[int, str, str, str, str, str, str, str, str]
 
 
-def ls(  # pylint: disable=too-many-locals, too-many-branches
+def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project"),
@@ -56,6 +56,18 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
     federation: Annotated[
         Optional[str],
         typer.Argument(help="Name of the federation"),
+    ] = None,
+    federation_config_overrides: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--federation-config",
+            "-fc",
+            help="Override federation configuration values in the format:\n\n"
+            "`--federation-config 'key1=value1 key2=value2' --federation-config "
+            "'key3=value3'`\n\nValues can be of any type supported in TOML, such as "
+            "bool, int, float, or string. Ensure the keys (`key1`, `key2`, etc.) exist "
+            "in the federation configuration.",
+        ),
     ] = None,
     runs: Annotated[
         bool,
@@ -106,7 +118,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
         config, errors, warnings = load_and_validate(path=pyproject_path)
         config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
-            federation, config
+            federation, config, federation_config_overrides
         )
         exit_if_no_address(federation_config, "ls")
 

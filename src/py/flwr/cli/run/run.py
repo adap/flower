@@ -57,7 +57,7 @@ from ..utils import (
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
-# pylint: disable-next=too-many-locals
+# pylint: disable-next=too-many-locals, R0913, R0917
 def run(
     app: Annotated[
         Path,
@@ -67,26 +67,27 @@ def run(
         Optional[str],
         typer.Argument(help="Name of the federation to run the app on."),
     ] = None,
-    config_overrides: Annotated[
+    run_config_overrides: Annotated[
         Optional[list[str]],
         typer.Option(
             "--run-config",
             "-c",
-            help="Override configuration key-value pairs, should be of the format:\n\n"
-            '`--run-config \'key1="value1" key2="value2"\' '
-            "--run-config 'key3=\"value3\"'`\n\n"
-            "Note that `key1`, `key2`, and `key3` in this example need to exist "
-            "inside the `pyproject.toml` in order to be properly overriden.",
+            help="Override run configuration values in the format:\n\n"
+            "`--run-config 'key1=value1 key2=value2' --run-config 'key3=value3'`\n\n"
+            "Values can be of any type supported in TOML, such as bool, int, "
+            "float, or string. Ensure the keys (`key1`, `key2`, etc.) exist in "
+            "`pyproject.toml` for proper overriding.",
         ),
     ] = None,
     federation_config_overrides: Annotated[
         Optional[list[str]],
         typer.Option(
             "--federation-config",
-            help="Override federation configuration key-value pairs, "
-            'should be of the format:\n\n `--federation-config \'key1="value1"'
-            ' key2="value2"\' --federation-config \'key3="value3"\'`\n\n'
-            "Note that `key1`, `key2`, and `key3` in this example must exist "
+            "-fc",
+            help="Override federation configuration values in the format:\n\n"
+            "`--federation-config 'key1=value1 key2=value2' --federation-config "
+            "'key3=value3'`\n\nValues can be of any type supported in TOML, such as "
+            "bool, int, float, or string. Ensure the keys (`key1`, `key2`, etc.) exist "
             "in the federation configuration.",
         ),
     ] = None,
@@ -108,7 +109,7 @@ def run(
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Run Flower App."""
-    print(config_overrides)
+    print(run_config_overrides)
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
@@ -128,12 +129,14 @@ def run(
                 app,
                 federation,
                 federation_config,
-                config_overrides,
+                run_config_overrides,
                 stream,
                 output_format,
             )
         else:
-            _run_without_exec_api(app, federation_config, config_overrides, federation)
+            _run_without_exec_api(
+                app, federation_config, run_config_overrides, federation
+            )
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()

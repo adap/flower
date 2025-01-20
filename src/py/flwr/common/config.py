@@ -20,7 +20,7 @@ import re
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Any, Optional, Union, cast, get_args, TypeVar
+from typing import IO, Any, Optional, TypeVar, Union, cast, get_args
 
 import tomli
 
@@ -35,8 +35,7 @@ from flwr.common.typing import Run, UserConfig, UserConfigValue
 
 from . import ConfigsRecord, object_ref
 
-
-T_dict = TypeVar("T_dict", bound=dict)
+T_dict = TypeVar("T_dict", bound=dict[str, Any])  # pylint: disable=invalid-name
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
@@ -109,7 +108,7 @@ def fuse_dicts(
     if not isinstance(main_dict, dict) or not isinstance(override_dict, dict):
         raise ValueError("Both dictionaries must be of type dict")
 
-    fused_dict = main_dict.copy()
+    fused_dict = cast(T_dict, main_dict.copy())
 
     for key, value in override_dict.items():
         if key in main_dict:
@@ -207,7 +206,7 @@ def unflatten_dict(flat_dict: dict[str, Any]) -> dict[str, Any]:
 
 def parse_config_args(
     config: Optional[list[str]], flatten: bool = True
-) -> UserConfig:
+) -> dict[str, Any]:
     """Parse separator separated list of key-value pairs separated by '='."""
     overrides: UserConfig = {}
 
