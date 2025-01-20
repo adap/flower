@@ -45,7 +45,6 @@ from flwr.common.constant import (
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MAX_RETRY_DELAY,
-    MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
     SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -55,6 +54,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
     ErrorCode,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
@@ -763,7 +763,10 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     # Parse IP address
     parsed_address = parse_address(server_address)
     if not parsed_address:
-        sys.exit(f"Server address ({server_address}) cannot be parsed.")
+        flwr_exit(
+            ExitCode.COMMON_ADDRESS_INVALID,
+            f"SuperLink address ({server_address}) cannot be parsed.",
+        )
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
@@ -778,12 +781,9 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
 
             from .rest_client.connection import http_request_response
         except ModuleNotFoundError:
-            sys.exit(MISSING_EXTRA_REST)
+            flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
         if server_address[:4] != "http":
-            sys.exit(
-                "When using the REST API, please provide `https://` or "
-                "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
-            )
+            flwr_exit(ExitCode.SUPERNODE_REST_ADDRESS_INVALID)
         connection, error_type = http_request_response, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
         connection, error_type = grpc_request_response, RpcError

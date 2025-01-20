@@ -17,13 +17,12 @@
 
 from __future__ import annotations
 
-import sys
 from collections.abc import Awaitable
 from typing import Callable, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.constant import MISSING_EXTRA_REST
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -55,7 +54,7 @@ try:
     from starlette.responses import Response
     from starlette.routing import Route
 except ModuleNotFoundError:
-    sys.exit(MISSING_EXTRA_REST)
+    flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
 
 GrpcRequest = TypeVar("GrpcRequest", bound=GrpcMessage)
