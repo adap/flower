@@ -267,7 +267,7 @@ def run_superlink() -> None:
 
     # Disable the user auth TLS check if args.disable_oidc_tls_cert_verification is
     # provided
-    verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", True)
+    verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", None)
 
     auth_plugin: Optional[ExecAuthPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
