@@ -75,8 +75,8 @@ def run(
             help="Override run configuration values in the format:\n\n"
             "`--run-config 'key1=value1 key2=value2' --run-config 'key3=value3'`\n\n"
             "Values can be of any type supported in TOML, such as bool, int, "
-            "float, or string. Ensure the keys (`key1`, `key2`, etc.) exist in "
-            "`pyproject.toml` for proper overriding.",
+            "float, or string. Ensure that the keys (`key1`, `key2`, `key3` "
+            "in this example) exist in `pyproject.toml` for proper overriding.",
         ),
     ] = None,
     federation_config_overrides: Annotated[
@@ -87,8 +87,10 @@ def run(
             help="Override federation configuration values in the format:\n\n"
             "`--federation-config 'key1=value1 key2=value2' --federation-config "
             "'key3=value3'`\n\nValues can be of any type supported in TOML, such as "
-            "bool, int, float, or string. Ensure the keys (`key1`, `key2`, etc.) exist "
-            "in the federation configuration.",
+            "bool, int, float, or string. Ensure that the keys (`key1`, `key2`, `key3` "
+            "in this example) exist in the federation configuration under the "
+            "`[tool.flwr.federations.<YOUR_FEDERATION>]` table of the `pyproject.toml` "
+            "for proper overriding.",
         ),
     ] = None,
     stream: Annotated[
