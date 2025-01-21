@@ -26,11 +26,13 @@ from flwr.common.config import get_fab_config, validate_config
 
 def get_fab_metadata(fab_file: Union[Path, bytes]) -> tuple[str, str]:
     """Extract the fab_id and the fab_version from a FAB file or path.
+
     Parameters
     ----------
     fab_file : Union[Path, bytes]
         The Flower App Bundle file to validate and extract the metadata from.
         It can either be a path to the file or the file itself as bytes.
+
     Returns
     -------
     Tuple[str, str]
