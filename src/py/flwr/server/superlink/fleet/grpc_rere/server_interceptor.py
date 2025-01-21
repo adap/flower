@@ -55,9 +55,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     state_factory : LinkStateFactory
         A factory for creating new instances of LinkState.
     auto_auth : bool
-        If True, automatically authenticates nodes without verifying their public keys.
-        If False, only nodes with pre-stored public keys in the LinkState can be
-        authenticated.
+        If True, nodes are authenticated without requiring their public keys to be 
+        pre-stored in the LinkState. If False, only nodes with pre-stored public keys 
+        can be authenticated.
     """
 
     def __init__(self, state_factory: LinkStateFactory, auto_auth: bool = False):
