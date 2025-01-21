@@ -51,15 +51,9 @@ def main(driver: Driver, context: Context) -> None:
         # Create messages
         gmodel_record = pytorch_to_parameter_record(global_model)
         recordset = RecordSet(parameters_records={global_model_key: gmodel_record})
-        messages = []
-        for node_id in node_ids:  # one message for each node
-            message = driver.create_message(
-                content=recordset,
-                message_type=MessageType.TRAIN,  # target `train` method in ClientApp
-                dst_node_id=node_id,
-                group_id=str(server_round),
-            )
-            messages.append(message)
+        messages = construct_messages(
+            node_ids, recordset, MessageType.TRAIN, driver, server_round
+        )
 
         # Send messages and wait for all results
         replies = driver.send_and_receive(messages)
@@ -87,7 +81,54 @@ def main(driver: Driver, context: Context) -> None:
         global_model.load_state_dict(avg_statedict)
 
         # Log average train loss
-        log(INFO, f"Avg train loss: {sum(avg_train_losses)/len(avg_train_losses)}")
+        log(INFO, f"Avg train loss: {sum(avg_train_losses)/len(avg_train_losses):.3f}")
+
+        ## Start evaluate round
+
+        # Sample all nodes
+        all_node_ids = driver.get_node_ids()
+        gmodel_record = pytorch_to_parameter_record(global_model)
+        recordset = RecordSet(parameters_records={global_model_key: gmodel_record})
+        messages = construct_messages(
+            node_ids, recordset, MessageType.EVALUATE, driver, server_round
+        )
+
+        # Send messages and wait for all results
+        replies = driver.send_and_receive(messages)
+        log(INFO, "Received %s/%s results", len(replies), len(messages))
+
+        # Aggregate evaluate losss
+        avg_eval_acc = []
+        for msg in replies:
+            if msg.has_content():
+                avg_eval_acc.append(
+                    msg.content.metrics_records["eval_metrics"]["eval_acc"]
+                )
+            else:
+                log(WARN, f"message {msg.metadata.message_id} as an error.")
+
+        # Log average train loss
+        log(INFO, f"Avg eval acc: {sum(avg_eval_acc)/len(avg_eval_acc):.3f}")
+
+
+def construct_messages(
+    node_ids: list[int],
+    record: RecordSet,
+    message_type: MessageType,
+    driver: Driver,
+    server_round: int,
+) -> list[Message]:
+
+    messages = []
+    for node_id in node_ids:  # one message for each node
+        message = driver.create_message(
+            content=record,
+            message_type=message_type,  # target method in ClientApp
+            dst_node_id=node_id,
+            group_id=str(server_round),
+        )
+        messages.append(message)
+    return messages
 
 
 def average_state_dicts(state_dicts):
