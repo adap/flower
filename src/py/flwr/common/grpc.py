@@ -16,6 +16,7 @@
 
 
 import concurrent.futures
+import os
 import sys
 from collections.abc import Sequence
 from logging import DEBUG, ERROR
@@ -34,6 +35,12 @@ INVALID_CERTIFICATES_ERR_MSG = """
 """
 
 AddServicerToServerFn = Callable[..., Any]
+
+if "GRPC_VERBOSITY" not in os.environ:
+    os.environ["GRPC_VERBOSITY"] = "error"
+# The following flags can be uncommented for debugging. Other possible values:
+# https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
+# os.environ["GRPC_TRACE"] = "tcp,http"
 
 
 def create_channel(

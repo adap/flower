@@ -128,7 +128,7 @@ def main(cfg: DictConfig) -> None:
             args,
             distributed,
             logger,
-        )
+        ).to_client()
 
     # Configure the strategy
     strategy = instantiate(

@@ -1,3 +1,7 @@
+:og:description: Learn how to train an MLP on MNIST using federated learning with Flower and MLX in this step-by-step tutorial.
+.. meta::
+    :description: Learn how to train an MLP on MNIST using federated learning with Flower and MLX in this step-by-step tutorial.
+
 .. _quickstart-mlx:
 
 Quickstart MLX

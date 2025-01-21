@@ -16,7 +16,6 @@
 
 
 import argparse
-import sys
 import time
 from logging import DEBUG, ERROR, INFO
 from typing import Optional
@@ -29,6 +28,7 @@ from flwr.common import Context, Message
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS, ErrorCode
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Error
@@ -61,12 +61,10 @@ def flwr_clientapp() -> None:
     """Run process-isolated Flower ClientApp."""
     args = _parse_args_run_flwr_clientapp().parse_args()
     if not args.insecure:
-        log(
-            ERROR,
-            "flwr-clientapp does not support TLS yet. "
-            "Please use the '--insecure' flag.",
+        flwr_exit(
+            ExitCode.COMMON_TLS_NOT_SUPPORTED,
+            "flwr-clientapp does not support TLS yet.",
         )
-        sys.exit(1)
 
     log(INFO, "Starting Flower ClientApp")
     log(

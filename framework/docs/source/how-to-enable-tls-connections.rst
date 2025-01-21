@@ -1,33 +1,50 @@
+:og:description:  Guide to starting a TLS-secured Flower server (“SuperLink”) and connecting a Flower client (“SuperNode”) with secure connections.
+.. meta::
+    :description: Guide to starting a TLS-secured Flower server (“SuperLink”) and connecting a Flower client (“SuperNode”) with secure connections.
+
 Enable TLS connections
 ======================
 
-This guide describes how to a TLS-enabled secure Flower server (``SuperLink``) can be
-started and how a Flower client (``SuperNode``) can establish a secure connections to
-it.
+Transport Layer Security (TLS) ensures the communication between endpoints is encrypted.
+This guide describes how to establish secure TLS Superlink ↔ SuperNodes as well as User
+↔ SuperLink connections.
 
-A complete code example demonstrating a secure connection can be found `here
-<https://github.com/adap/flower/tree/main/examples/advanced-tensorflow>`_.
+.. note::
 
-The code example comes with a ``README.md`` file which explains how to start it.
-Although it is already TLS-enabled, it might be less descriptive on how it does so.
-Stick to this guide for a deeper introduction to the topic.
+    This guide builds on the Flower App setup presented in
+    :doc:`how-to-run-flower-with-deployment-engine` guide and extends it to replace the
+    use of ``--insecure`` in favour of TLS.
+
+.. tip::
+
+    Checkout the `Flower Authentication
+    <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_ example
+    for a complete self-contained example on how to setup TLS and (optionally) node
+    authentication. Check out the :doc:`how-to-authenticate-supernodes` guide to learn
+    more about adding an authentication layer to SuperLink ↔ SuperNode connections.
 
 Certificates
 ------------
 
-Using TLS-enabled connections requires certificates to be passed to the server and
-client. For the purpose of this guide we are going to generate self-signed certificates.
-As this can become quite complex we are going to ask you to run the script in
-``examples/advanced-tensorflow/certificates/generate.sh`` with the following command
-sequence:
+Using TLS-enabled connections expects some certificates generated and passed when
+launching the SuperLink, the SuperNodes and when a user (e.g. a data scientist that
+wants to submit a ``Run``) interacts with the federation via the `flwr CLI
+<ref-api-cli.html>`_.
+
+We have prepared a script that can be used to generate such set of certificates. While
+using these are fine for prototyping, we advice you to follow the standards set in your
+team/organization and generated the certificates and share them with the corresponding
+parties. Refer to the **Generate TLS certificates** section in the example linked at the
+top of this guide.
 
 .. code-block:: bash
 
-    $ cd examples/advanced-tensorflow/certificates && \
-        ./generate.sh
+    # In the example directory, generate the certificates
+    $ ./generate_cert.sh
 
-This will generate the certificates in
-``examples/advanced-tensorflow/.cache/certificates``.
+This will generate the TLS certificates in a new ``certificates/`` directory. Copy this
+directory into the directory of your app (e.g. a directory generated earlier via ``flwr
+new``).
 
 The approach for generating TLS certificates in the context of this example can serve as
 an inspiration and starting point, but it should not be used as a reference for
@@ -36,69 +53,82 @@ generating certificates for production environments. For non-critical prototypin
 research projects, it might be sufficient to use the self-signed certificates generated
 using the scripts mentioned in this guide.
 
-Server (SuperLink)
-------------------
+Launching the SuperLink with TLS
+--------------------------------
 
-Navigate to the ``examples/advanced-tensorflow`` folder (`here
-<https://github.com/adap/flower/tree/main/examples/advanced-tensorflow>`_) and use the
-following terminal command to start a server (SuperLink) that uses the previously
-generated certificates:
+This section describes how to launch a SuperLink that works on TLS-enabled connections.
+The code snippet below assumes the `certificates/` directory is in the same directory
+where you execute the command from. Edit the paths accordingtly if that is not the case.
+When providing certificates, the SuperLink expects a tuple of three certificates paths:
+CA certificate, server certificate and server private key.
 
 .. code-block:: bash
+    :emphasize-lines: 2,3,4
 
     $ flower-superlink \
-        --ssl-ca-certfile .cache/certificates/ca.crt \
-        --ssl-certfile .cache/certificates/server.pem \
-        --ssl-keyfile .cache/certificates/server.key
+        --ssl-ca-certfile certificates/ca.crt \
+        --ssl-certfile certificates/server.pem \
+        --ssl-keyfile certificates/server.key
 
-When providing certificates, the server expects a tuple of three certificates paths: CA
-certificate, server certificate and server private key.
+.. dropdown:: Understand the command
 
-Clients (SuperNode)
--------------------
+    * ``--ssl-ca-certfile``: Specify the location of the CA certificate file in your file. This file is a certificate that is used to verify the identity of the SuperLink.
+    * | ``--ssl-certfile``: Specify the location of the SuperLink's TLS certificate file. This file is used to identify the SuperLink and to encrypt the packages that are transmitted over the network.
+    * | ``--ssl-keyfile``: Specify the location of the SuperLink's TLS private key file. This file is used to decrypt the packages that are transmitted over the network.
 
-Use the following terminal command to start a client (SuperNode) that uses the
-previously generated certificates:
+Connecting the SuperNodes with TLS
+----------------------------------
+
+This section describes how to launch a SuperNode that works on TLS-enabled connections.
+The code snippet below assumes the `certificates/` directory is in the same directory
+where you execute the command from. To enable TLS, the only change required when
+launching the SuperNode is replacing ``--insecure`` with ``--root-certificates``
 
 .. code-block:: bash
+    :emphasize-lines: 2,2
 
     $ flower-supernode \
-        --root-certificates .cache/certificates/ca.crt \
+        --root-certificates certificates/ca.crt \
+        --superlink 127.0.0.1:9092 \
+        --clientappio-api-address 0.0.0.0:9094 \
+        --node-config="partition-id=0 num-partitions=2"
+
+.. dropdown:: Understand the command
+
+    * ``--root-certificates``:This specifies the location of the CA certificate file. The ``ca.crt`` file is used to verify the identity of the SuperLink.
+
+Follow the same procedure, i.e. replacing ``--insecure`` with ``--root-certificates``,
+to launch the second SuperNode.
+
+.. code-block:: bash
+    :emphasize-lines: 2,2
+
+    $ flower-supernode \
+        --root-certificates certificates/ca.crt \
         --superlink 127.0.0.1:9092 \
         --clientappio-api-address 0.0.0.0:9095 \
-        --node-config="partition-id=0 num-partitions=10"
+        --node-config="partition-id=1 num-partitions=2"
 
-When setting ``root_certificates``, the client expects a file path to PEM-encoded root
-certificates.
+TLS-enabled Flower CLI
+----------------------
 
-In another terminal, start a second SuperNode that uses the same certificates:
-
-.. code-block:: bash
-
-    $ flower-supernode \
-        --root-certificates .cache/certificates/ca.crt \
-        --superlink 127.0.0.1:9092 \
-        --clientappio-api-address 0.0.0.0:9096 \
-        --node-config="partition-id=1 num-partitions=10"
-
-Note that in the second SuperNode, if you run both on the same machine, you must specify
-a different port for the ``ClientAppIO`` API address to avoid clashing with the first
-SuperNode.
-
-Executing ``flwr run`` with TLS
--------------------------------
-
-The root certificates used for executing ``flwr run`` is specified in the
-``pyproject.toml`` of your app.
+The `Flower CLI <ref-api-cli.html>`_ (e.g. ``flwr run`` command) is the way a user (e.g.
+a data scientist) can interact with a deployed federation. The Flower CLI commands are
+processed by the SuperLink and therefore, if it has been configured to only operate on
+TLS conenction, the requests sent by the Flower CLI need to make use of a TLS
+certificate. To do so, replace the ``insecure = true`` field in the ``pyproject.toml``
+with a new field that reads the certificate:
 
 .. code-block:: toml
+    :caption: pyproject.toml
+    :emphasize-lines: 3,3
 
     [tool.flwr.federations.local-deployment]
     address = "127.0.0.1:9093"
-    root-certificates = "./.cache/certificates/ca.crt"
+    root-certificates = "./certificates/ca.crt"
 
 Note that the path to the ``root-certificates`` is relative to the root of the project.
-Now, you can run the example by executing the following:
+Now, you can run the example by executing ``flwr run``:
 
 .. code-block:: bash
 
@@ -110,12 +140,15 @@ Conclusion
 You should now have learned how to generate self-signed certificates using the given
 script, start an TLS-enabled server and have two clients establish secure connections to
 it. You should also have learned how to run your Flower project using ``flwr run`` with
-TLS enabled.
+TLS enabled. All other commands in the `Flower CLI <ref-api-cli.html>`_ will also be
+TLS-enabled.
 
 .. note::
 
-    For running a Docker setup with TLS enabled, please refer to
-    :doc:`docker/enable-tls`.
+    Refer to the :doc:`docker/index` documentation to learn how to setup a federation
+    where each component runs in its own Docker container. You can make use of TLS and
+    other security features in Flower such as implement a SuperNode authentication
+    mechanism.
 
 Additional resources
 --------------------

@@ -16,11 +16,11 @@
 
 
 import multiprocessing
-import signal
+import os
 import sys
+import threading
 import time
 from contextlib import AbstractContextManager
-from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from os import urandom
 from pathlib import Path
@@ -45,7 +45,6 @@ from flwr.common.constant import (
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MAX_RETRY_DELAY,
-    MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
     SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -55,6 +54,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
     ErrorCode,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
@@ -346,10 +346,7 @@ def start_client_internal(
         transport, server_address
     )
 
-    app_state_tracker = _AppStateTracker()
-
     def _on_sucess(retry_state: RetryState) -> None:
-        app_state_tracker.is_connected = True
         if retry_state.tries > 1:
             log(
                 INFO,
@@ -359,7 +356,6 @@ def start_client_internal(
             )
 
     def _on_backoff(retry_state: RetryState) -> None:
-        app_state_tracker.is_connected = False
         if retry_state.tries == 1:
             log(WARN, "Connection attempt failed, retrying...")
         else:
@@ -396,7 +392,7 @@ def start_client_internal(
 
     runs: dict[int, Run] = {}
 
-    while not app_state_tracker.interrupt:
+    while True:
         sleep_duration: int = 0
         with connection(
             address,
@@ -435,9 +431,8 @@ def start_client_internal(
                         node_config=node_config,
                     )
 
-            app_state_tracker.register_signal_handler()
             # pylint: disable=too-many-nested-blocks
-            while not app_state_tracker.interrupt:
+            while True:
                 try:
                     # Receive
                     message = receive()
@@ -553,7 +548,7 @@ def start_client_internal(
 
                                 proc = mp_spawn_context.Process(
                                     target=_run_flwr_clientapp,
-                                    args=(command,),
+                                    args=(command, os.getpid()),
                                     daemon=True,
                                 )
                                 proc.start()
@@ -595,10 +590,7 @@ def start_client_internal(
                             e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
                             exc_entity = "SuperNode"
 
-                        if not app_state_tracker.interrupt:
-                            log(
-                                ERROR, "%s raised an exception", exc_entity, exc_info=ex
-                            )
+                        log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
 
                         # Create error message
                         reply_message = message.create_error_reply(
@@ -624,19 +616,14 @@ def start_client_internal(
                         run_id,
                     )
                     log(INFO, "")
-
-                except StopIteration:
-                    sleep_duration = 0
-                    break
             # pylint: enable=too-many-nested-blocks
 
             # Unregister node
-            if delete_node is not None and app_state_tracker.is_connected:
+            if delete_node is not None:
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
-            del app_state_tracker
             break
 
         # Sleep and reconnect afterwards
@@ -776,7 +763,10 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     # Parse IP address
     parsed_address = parse_address(server_address)
     if not parsed_address:
-        sys.exit(f"Server address ({server_address}) cannot be parsed.")
+        flwr_exit(
+            ExitCode.COMMON_ADDRESS_INVALID,
+            f"SuperLink address ({server_address}) cannot be parsed.",
+        )
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
@@ -791,12 +781,9 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
 
             from .rest_client.connection import http_request_response
         except ModuleNotFoundError:
-            sys.exit(MISSING_EXTRA_REST)
+            flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
         if server_address[:4] != "http":
-            sys.exit(
-                "When using the REST API, please provide `https://` or "
-                "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
-            )
+            flwr_exit(ExitCode.SUPERNODE_REST_ADDRESS_INVALID)
         connection, error_type = http_request_response, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
         connection, error_type = grpc_request_response, RpcError
@@ -812,24 +799,17 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     return connection, address, error_type
 
 
-@dataclass
-class _AppStateTracker:
-    interrupt: bool = False
-    is_connected: bool = False
+def _run_flwr_clientapp(args: list[str], main_pid: int) -> None:
+    # Monitor the main process in case of SIGKILL
+    def main_process_monitor() -> None:
+        while True:
+            time.sleep(1)
+            if os.getppid() != main_pid:
+                os.kill(os.getpid(), 9)
 
-    def register_signal_handler(self) -> None:
-        """Register handlers for exit signals."""
+    threading.Thread(target=main_process_monitor, daemon=True).start()
 
-        def signal_handler(sig, frame):  # type: ignore
-            # pylint: disable=unused-argument
-            self.interrupt = True
-            raise StopIteration from None
-
-        signal.signal(signal.SIGINT, signal_handler)
-        signal.signal(signal.SIGTERM, signal_handler)
-
-
-def _run_flwr_clientapp(args: list[str]) -> None:
+    # Run the command
     sys.argv = args
     flwr_clientapp()
 

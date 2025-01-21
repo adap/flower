@@ -47,12 +47,6 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub  # pylint: disable=E0611
 
-# The following flags can be uncommented for debugging. Other possible values:
-# https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
-# import os
-# os.environ["GRPC_VERBOSITY"] = "debug"
-# os.environ["GRPC_TRACE"] = "tcp,http"
-
 
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
