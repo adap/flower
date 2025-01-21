@@ -229,10 +229,10 @@ def parse_config_args(
 
 
 def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
-    """Extract `fab_id` and `fab_version` from a project config."""
+    """Extract `fab_version` and `fab_id` from a project config."""
     return (
-        f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
         config["project"]["version"],
+        f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
     )
 
 

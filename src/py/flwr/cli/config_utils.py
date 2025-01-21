@@ -21,24 +21,27 @@ from typing import Any, Optional, Union
 import tomli
 import typer
 
-from flwr.common.config import get_fab_config, get_metadata_from_config, validate_config
+from flwr.common.config import get_fab_config, validate_config
 
 
 def get_fab_metadata(fab_file: Union[Path, bytes]) -> tuple[str, str]:
     """Extract the fab_id and the fab_version from a FAB file or path.
-
     Parameters
     ----------
     fab_file : Union[Path, bytes]
         The Flower App Bundle file to validate and extract the metadata from.
         It can either be a path to the file or the file itself as bytes.
-
     Returns
     -------
     Tuple[str, str]
         The `fab_id` and `fab_version` of the given Flower App Bundle.
     """
-    return get_metadata_from_config(get_fab_config(fab_file))
+    conf = get_fab_config(fab_file)
+
+    return (
+        f"{conf['tool']['flwr']['app']['publisher']}/{conf['project']['name']}",
+        conf["project"]["version"],
+    )
 
 
 def load_and_validate(
