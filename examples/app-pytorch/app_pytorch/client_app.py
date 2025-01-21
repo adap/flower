@@ -28,7 +28,7 @@ def evaluate(msg: fl.Message, context: fl.Context):
 
     # Construct reply
     content = fl.RecordSet()
-    content["metrics"] = fl.MetricsRecord(
+    content["eval_metrics"] = fl.MetricsRecord(
         {"eval_loss": eval_loss, "eval_acc": eval_acc}
     )
     return msg.create_reply(content=content)
