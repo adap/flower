@@ -1,4 +1,13 @@
+---
+tags: [basic, vision]
+dataset: [CIFAR-10]
+framework: [torch]
+---
+
 # app-pytorch: A Flower / PyTorch app
+
+> \[!NOTE\]
+> This example is a playground for upcoming features.
 
 ## Install dependencies and project
 
