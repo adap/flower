@@ -15,7 +15,9 @@ Categories
   (SuperNode) errors.
 - **ClientApp-specific exit codes (400-499)**: Specific to ``flwr-clientapp``
   (ClientApp) errors.
-- **Common exit codes (500-)**: Shared across multiple components.
+- **ClientApp-specific exit codes (500-599)**: Specific to ``flwr-simulation``
+  (Simulation Engine) errors.
+- **Common exit codes (600-)**: Shared across multiple components.
 
 Indices
 -------
