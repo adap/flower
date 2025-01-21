@@ -1,0 +1,1 @@
+{"num-server-rounds": 500, "fraction-fit": 0.3, "local-epochs": 5, "tau": 250, "rho": 0.1, "endpoints": 10, "pers-epoch": 0, "num-clients": 100, "seed": 0, "use-wandb": true}

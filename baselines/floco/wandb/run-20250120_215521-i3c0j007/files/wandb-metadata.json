@@ -1,0 +1,49 @@
+{
+  "os":  "macOS-15.2-arm64-arm-64bit",
+  "python":  "CPython 3.11.8",
+  "startedAt":  "2025-01-20T20:55:21.549546Z",
+  "args":  [
+    "--app",
+    ".",
+    "--num-supernodes",
+    "10",
+    "--backend-config",
+    "{\"client-resources\": {\"num-cpus\": 1, \"num-gpus\": 0.0}}"
+  ],
+  "program":  "/Users/dg/.pyenv/versions/floco_flower/bin/flower-simulation",
+  "git":  {
+    "remote":  "git@github.com:dennis-grinwald/floco_flower.git",
+    "commit":  "6f069f16b472e02537633b2df0bc4856de3afc71"
+  },
+  "email":  "grinwald.dennis@gmail.com",
+  "root":  "/Users/dg/Projects/floco_flower/baselines/floco",
+  "host":  "MacBookPro.box",
+  "executable":  "/Users/dg/.pyenv/versions/floco_flower/bin/python",
+  "cpu_count":  8,
+  "cpu_count_logical":  8,
+  "disk":  {
+    "/":  {
+      "total":  "994662584320",
+      "used":  "323694305280"
+    },
+    "/System/Volumes/Data":  {
+      "total":  "994662584320",
+      "used":  "323694305280"
+    }
+  },
+  "memory":  {
+    "total":  "34359738368"
+  },
+  "cpu":  {
+    "count":  8,
+    "countLogical":  8
+  },
+  "apple":  {
+    "name":  "Apple M1 Pro",
+    "ecpuCores":  2,
+    "pcpuCores":  6,
+    "gpuCores":  14,
+    "memoryGb":  32,
+    "ramTotalBytes":  "34359738368"
+  }
+}
