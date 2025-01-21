@@ -15,10 +15,12 @@
 """ParametersRecord and Array."""
 
 
+from __future__ import annotations
+
 from collections import OrderedDict
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Optional, cast
+from typing import Optional, cast, overload, Any
 
 import numpy as np
 
@@ -173,6 +175,18 @@ class ParametersRecord(TypedDict[str, Array]):
     serialization mechanism. Howerver, they often support a conversion to NumPy,
     therefore allowing to use the same or similar steps as in the example above.
     """
+    
+    @overload
+    def __init__(self, state_dict: dict[str, Any]) -> None:
+        ...
+
+    @overload
+    def __init__(self, tf_weights: list[NDArray]) -> None:
+        ...
+
+    @overload
+    def __init__(self, numpy_ndarray_list: list[NDArray]) -> None:
+        ...
 
     def __init__(
         self,
@@ -185,6 +199,27 @@ class ParametersRecord(TypedDict[str, Array]):
                 self[k] = array_dict[k]
                 if not keep_input:
                     del array_dict[k]
+
+    @classmethod
+    def from_state_dict(cls, state_dict: dict[str, Any]) -> ParametersRecord:
+        """Create a ParametersRecord from a PyTorch state_dict."""
+        ...
+    
+    @classmethod
+    def from_tf_weights(cls, weights: list[NDArray]) -> ParametersRecord:
+        """Create a ParametersRecord from TensorFlow weights."""
+        return cls.from_numpy_ndarray_list(weights)
+    
+    @classmethod
+    def from_numpy_ndarray_list(cls, numpy_ndarray_list: list[NDArray]) -> ParametersRecord:
+        """Create a ParametersRecord from a list of NumPy arrays."""
+        ...
+    
+    def to_state_dict(self) -> dict[str, Any]:
+        ...
+    
+    def to_numpy_ndarray_list(self) -> list[NDArray]:
+        ...
 
     def count_bytes(self) -> int:
         """Return number of Bytes stored in this object.

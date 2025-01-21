@@ -18,6 +18,10 @@
 from flwr.common.version import package_version as _package_version
 
 from . import client, common, server, simulation
+# Message API
+from .common import ParametersRecord, MetricsRecord, ConfigsRecord, RecordSet, Message, MessageType, Array, Context
+from .client import ClientApp
+from .server import ServerApp
 
 __all__ = [
     "client",
