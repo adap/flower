@@ -109,7 +109,6 @@ def run(
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Run Flower App."""
-    print(run_config_overrides)
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
