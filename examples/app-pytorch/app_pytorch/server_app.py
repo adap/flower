@@ -41,9 +41,9 @@ def main(driver: fl.Driver, context: fl.Context) -> None:
     )
     eval_aggregator = MetricsAggregator(record_key="eval_metrics")
 
-    for server_round in range(num_rounds):
+    for server_round in range(1, num_rounds + 1):
         log(INFO, "")  # Add newline for log readability
-        log(INFO, "Starting round %s/%s", server_round + 1, num_rounds)
+        log(INFO, "Starting round %s/%s", server_round, num_rounds)
 
         # Loop and wait until enough nodes are available.
         log(INFO, "Waiting for nodes to connect...")
