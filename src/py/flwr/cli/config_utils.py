@@ -21,7 +21,7 @@ from typing import Any, Optional, Union
 import tomli
 import typer
 
-from flwr.common.config import get_fab_config, validate_config
+from flwr.common.config import get_fab_config, get_metadata_from_config, validate_config
 
 
 def get_fab_metadata(fab_file: Union[Path, bytes]) -> tuple[str, str]:
@@ -38,12 +38,7 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> tuple[str, str]:
     Tuple[str, str]
         The `fab_id` and `fab_version` of the given Flower App Bundle.
     """
-    conf = get_fab_config(fab_file)
-
-    return (
-        f"{conf['tool']['flwr']['app']['publisher']}/{conf['project']['name']}",
-        conf["project"]["version"],
-    )
+    return get_metadata_from_config(get_fab_config(fab_file))
 
 
 def load_and_validate(
