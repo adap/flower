@@ -217,9 +217,25 @@ def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
 def try_obtain_cli_auth_plugin(
     root_dir: Path,
     federation: str,
+    federation_config: dict[str, Any],
     auth_type: Optional[str] = None,
 ) -> Optional[CliAuthPlugin]:
     """Load the CLI-side user auth plugin for the given auth type."""
+    # Check if user auth is enabled
+    if not federation_config.get("enable-user-auth", False):
+        return None
+
+    # Check if TLS is enabled. If not, raise an error
+    if federation_config.get("root-certificates") is None:
+        typer.secho(
+            "❌ User authentication requires TLS to be enabled. "
+            "Please provide 'root-certificates' in the federation"
+            " configuration.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
     config_path = get_user_auth_config_path(root_dir, federation)
 
     # Load the config file if it exists
