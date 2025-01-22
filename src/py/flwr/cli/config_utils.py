@@ -93,11 +93,6 @@ def load(toml_path: Path) -> Optional[dict[str, Any]]:
             return tomli.load(toml_file)
         except tomli.TOMLDecodeError:
             return None
-    with toml_path.open("rb") as toml_file:
-        try:
-            return tomli.load(toml_file)
-        except tomli.TOMLDecodeError:
-            return None
 
 
 def process_loaded_project_config(
