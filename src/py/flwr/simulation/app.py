@@ -16,7 +16,6 @@
 
 
 import argparse
-import sys
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
 from time import sleep
@@ -39,6 +38,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -81,12 +81,10 @@ def flwr_simulation() -> None:
     log(INFO, "Starting Flower Simulation")
 
     if not args.insecure:
-        log(
-            ERROR,
-            "`flwr-simulation` does not support TLS yet. "
-            "Please use the '--insecure' flag.",
+        flwr_exit(
+            ExitCode.COMMON_TLS_NOT_SUPPORTED,
+            "`flwr-simulation` does not support TLS yet. ",
         )
-        sys.exit(1)
 
     log(
         DEBUG,
