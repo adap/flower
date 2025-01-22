@@ -21,7 +21,7 @@ from . import client, common, server, simulation
 # Message API
 from .common import ParametersRecord, MetricsRecord, ConfigsRecord, RecordSet, Message, MessageType, Array, Context
 from .client import ClientApp
-from .server import ServerApp
+from .server import ServerApp, Driver
 
 __all__ = [
     "client",

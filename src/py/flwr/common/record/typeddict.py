@@ -15,6 +15,7 @@
 """Typed dict base class for *Records."""
 
 
+from __future__ import annotations
 from collections.abc import ItemsView, Iterator, KeysView, MutableMapping, ValuesView
 from typing import Callable, Generic, TypeVar, cast
 

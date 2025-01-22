@@ -49,7 +49,9 @@ def train(msg: fl.Message, context: fl.Context):
     # Extract state_dict from model and construct reply message
     content = fl.RecordSet()
     content["model"] = fl.ParametersRecord(model.state_dict())
-    content["train_metrics"] = fl.MetricsRecord({"train_loss": train_loss})
+    content["train_metrics"] = fl.MetricsRecord(
+        {"train_loss": train_loss, "num_examples": len(data_loader.dataset)}
+    )
     return msg.create_reply(content=content)
 
 

@@ -72,6 +72,10 @@ class Array:
         ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
         return cast(NDArray, ndarray_deserialized)
 
+    @classmethod
+    def from_numpy(cls, ndarray: NDArray) -> Array:
+        ...
+
 
 def _check_key(key: str) -> None:
     """Check if key is of expected type."""
@@ -237,3 +241,7 @@ class ParametersRecord(TypedDict[str, Array]):
             num_bytes += len(k)
 
         return num_bytes
+
+    def copy(self) -> ParametersRecord:
+        """Return a shallow copy of the record."""
+        return ParametersRecord(dict(self.__dict__["_data"]), keep_input=True)
