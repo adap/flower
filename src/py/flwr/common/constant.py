@@ -112,6 +112,12 @@ AUTH_TYPE = "auth_type"
 ACCESS_TOKEN_KEY = "access_token"
 REFRESH_TOKEN_KEY = "refresh_token"
 
+# Constants for node authentication
+PUBLIC_KEY_HEADER = "public-key-bin"  # Must end with "-bin" for binary data
+SIGNATURE_HEADER = "signature-bin"  # Must end with "-bin" for binary data
+TIMESTAMP_HEADER = "timestamp"
+TIMESTAMP_TOLERANCE = 10  # Tolerance for timestamp verification
+
 
 class MessageType:
     """Message type."""
