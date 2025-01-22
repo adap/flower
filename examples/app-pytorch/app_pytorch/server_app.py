@@ -15,13 +15,12 @@ app = fl.ServerApp()
 
 # Init global model
 global_model = Net()
-global_model_key = "model"
 
 # Init aggregators
 train_aggregator = SequentialAggregator(
     [
         ParametersAggregator(
-            record_key=global_model_key,
+            record_key="model",
             weight_factor_key=lambda rs: rs["train_metrics"]["num_examples"],
         ),
         MetricsAggregator(
@@ -55,7 +54,7 @@ def main(driver: fl.Driver, context: fl.Context) -> None:
 
         # Create messages
         gmodel_record = fl.ParametersRecord(global_model.state_dict())
-        recordset = fl.RecordSet(parameters_records={global_model_key: gmodel_record})
+        recordset = fl.RecordSet(parameters_records={"model": gmodel_record})
         messages = create_broadcast_messages(
             driver, recordset, fl.MessageType.TRAIN, node_ids, str(server_round)
         )
@@ -68,7 +67,7 @@ def main(driver: fl.Driver, context: fl.Context) -> None:
         agg_rs = train_aggregator(replies)
 
         # Materialize global model
-        global_model.load_state_dict(agg_rs[global_model_key].to_state_dict())
+        global_model.load_state_dict(agg_rs["model"].to_state_dict())
 
         # Log average train loss
         log(INFO, f"Avg train loss: {agg_rs['train_metrics']['train_loss']:.3f}")
@@ -78,7 +77,7 @@ def main(driver: fl.Driver, context: fl.Context) -> None:
         # Sample all nodes
         all_node_ids = driver.get_node_ids()
         log(INFO, "Sampled %s nodes (out of %s)", len(all_node_ids), len(all_node_ids))
-        recordset = fl.RecordSet({global_model_key: fl.ParametersRecord(global_model)})
+        recordset = fl.RecordSet({"model": fl.ParametersRecord(global_model)})
         messages = create_broadcast_messages(
             driver, recordset, fl.MessageType.EVALUATE, all_node_ids, str(server_round)
         )
