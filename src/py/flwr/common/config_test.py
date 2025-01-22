@@ -19,6 +19,7 @@ import os
 import tempfile
 import textwrap
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -33,6 +34,8 @@ from .config import (
     get_project_dir,
     parse_config_args,
     unflatten_dict,
+    validate_config,
+    validate_fields_in_config,
 )
 
 # Mock constants
@@ -312,3 +315,181 @@ def test_parse_config_args_passing_toml_and_key_value() -> None:
     config = ["my-other-config.toml", "lr=0.1", "epochs=99"]
     with pytest.raises(ValueError):
         parse_config_args(config)
+
+
+def test_validate_pyproject_toml_fields_empty() -> None:
+    """Test that validate_pyproject_toml_fields fails correctly."""
+    # Prepare
+    config: dict[str, Any] = {}
+
+    # Execute
+    is_valid, errors, warnings = validate_fields_in_config(config)
+
+    # Assert
+    assert not is_valid
+    assert len(errors) == 2
+    assert len(warnings) == 0
+
+
+def test_validate_pyproject_toml_fields_no_flower() -> None:
+    """Test that validate_pyproject_toml_fields fails correctly."""
+    # Prepare
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        }
+    }
+
+    # Execute
+    is_valid, errors, warnings = validate_fields_in_config(config)
+
+    # Assert
+    assert not is_valid
+    assert len(errors) == 1
+    assert len(warnings) == 0
+
+
+def test_validate_pyproject_toml_fields_no_flower_components() -> None:
+    """Test that validate_pyproject_toml_fields fails correctly."""
+    # Prepare
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {"flwr": {"app": {}}},
+    }
+
+    # Execute
+    is_valid, errors, warnings = validate_fields_in_config(config)
+
+    # Assert
+    assert not is_valid
+    assert len(errors) == 2
+    assert len(warnings) == 0
+
+
+def test_validate_pyproject_toml_fields_no_server_and_client_app() -> None:
+    """Test that validate_pyproject_toml_fields fails correctly."""
+    # Prepare
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {"flwr": {"app": {"components": {}}}},
+    }
+
+    # Execute
+    is_valid, errors, warnings = validate_fields_in_config(config)
+
+    # Assert
+    assert not is_valid
+    assert len(errors) == 3
+    assert len(warnings) == 0
+
+
+def test_validate_pyproject_toml_fields() -> None:
+    """Test that validate_pyproject_toml_fields succeeds correctly."""
+    # Prepare
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {"serverapp": "", "clientapp": ""},
+                },
+            },
+        },
+    }
+
+    # Execute
+    is_valid, errors, warnings = validate_fields_in_config(config)
+
+    # Assert
+    assert is_valid
+    assert len(errors) == 0
+    assert len(warnings) == 0
+
+
+def test_validate_pyproject_toml() -> None:
+    """Test that validate_pyproject_toml succeeds correctly."""
+    # Prepare
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    # Execute
+    is_valid, errors, warnings = validate_config(config)
+
+    # Assert
+    assert is_valid
+    assert not errors
+    assert not warnings
+
+
+def test_validate_pyproject_toml_fail() -> None:
+    """Test that validate_pyproject_toml fails correctly."""
+    # Prepare
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:runa",
+                    },
+                },
+            },
+        },
+    }
+
+    # Execute
+    is_valid, errors, warnings = validate_config(config)
+
+    # Assert
+    assert not is_valid
+    assert len(errors) == 1
+    assert len(warnings) == 0
