@@ -55,6 +55,12 @@ def train(msg: fl.Message, context: fl.Context):
     return msg.create_reply(content=content)
 
 
+@app.handle("my_random_task")
+def some_random_task(msg: fl.Message, context: fl.Context):
+    # Do something
+    pass
+
+
 def get_dataloader(split: str, context: fl.Context):
     """Return train or test dataloader."""
     # Load partition
