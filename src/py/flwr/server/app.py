@@ -31,12 +31,8 @@ from typing import Any, Optional
 
 import grpc
 import yaml
-from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.serialization import (
-    load_ssh_private_key,
-    load_ssh_public_key,
-)
+from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -64,7 +60,6 @@ from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    private_key_to_bytes,
     public_key_to_bytes,
 )
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
@@ -378,21 +373,12 @@ def run_superlink() -> None:
             fleet_thread.start()
             bckg_threads.append(fleet_thread)
         elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
-            maybe_keys = _try_setup_node_authentication(args, certificates)
+            node_public_keys = _try_load_public_keys_node_authentication(args)
             interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
-            if maybe_keys is not None:
-                (
-                    node_public_keys,
-                    server_private_key,
-                    server_public_key,
-                ) = maybe_keys
+            if node_public_keys is not None:
                 state = state_factory.state()
                 state.clear_supernode_auth_keys_and_credentials()
                 state.store_node_public_keys(node_public_keys)
-                state.store_server_private_public_key(
-                    private_key_to_bytes(server_private_key),
-                    public_key_to_bytes(server_public_key),
-                )
                 log(
                     INFO,
                     "Node authentication enabled with %d known public keys",
@@ -541,34 +527,20 @@ def _format_address(address: str) -> tuple[str, str, int]:
     return (f"[{host}]:{port}" if is_v6 else f"{host}:{port}", host, port)
 
 
-def _try_setup_node_authentication(
+def _try_load_public_keys_node_authentication(
     args: argparse.Namespace,
-    certificates: Optional[tuple[bytes, bytes, bytes]],
-) -> Optional[tuple[set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
-    if (
-        not args.auth_list_public_keys
-        and not args.auth_superlink_private_key
-        and not args.auth_superlink_public_key
-    ):
+) -> Optional[set[bytes]]:
+    """Return a set of node public keys."""
+    if args.auth_superlink_private_key or args.auth_superlink_public_key:
+        log(
+            WARN,
+            "The `--auth-superlink-private-key` and `--auth-superlink-public-key` "
+            "arguments are deprecated and will be removed in a future release. Node "
+            "authentication no longer requires these arguments.",
+        )
+
+    if not args.auth_list_public_keys:
         return None
-
-    if (
-        not args.auth_list_public_keys
-        or not args.auth_superlink_private_key
-        or not args.auth_superlink_public_key
-    ):
-        sys.exit(
-            "Authentication requires providing file paths for "
-            "'--auth-list-public-keys', '--auth-superlink-private-key' and "
-            "'--auth-superlink-public-key'. Provide all three to enable authentication."
-        )
-
-    if certificates is None:
-        sys.exit(
-            "Authentication requires secure connections. "
-            "Please provide certificate paths to `--ssl-certfile`, "
-            "`--ssl-keyfile`, and `—-ssl-ca-certfile` and try again."
-        )
 
     node_keys_file_path = Path(args.auth_list_public_keys)
     if not node_keys_file_path.exists():
@@ -580,35 +552,6 @@ def _try_setup_node_authentication(
         )
 
     node_public_keys: set[bytes] = set()
-
-    try:
-        ssh_private_key = load_ssh_private_key(
-            Path(args.auth_superlink_private_key).read_bytes(),
-            None,
-        )
-        if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
-            raise ValueError()
-    except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
-            "Error: Unable to parse the private key file in "
-            "'--auth-superlink-private-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid private key file and try again."
-        )
-
-    try:
-        ssh_public_key = load_ssh_public_key(
-            Path(args.auth_superlink_public_key).read_bytes()
-        )
-        if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
-            raise ValueError()
-    except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
-            "Error: Unable to parse the public key file in "
-            "'--auth-superlink-public-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid public key file and try again."
-        )
 
     with open(node_keys_file_path, newline="", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile)
@@ -623,11 +566,7 @@ def _try_setup_node_authentication(
                         "file. Please ensure that the CSV file path points to a valid "
                         "known SSH public keys files and try again."
                     )
-        return (
-            node_public_keys,
-            ssh_private_key,
-            ssh_public_key,
-        )
+    return node_public_keys
 
 
 def _try_obtain_exec_auth_plugin(
@@ -840,12 +779,12 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--auth-superlink-private-key",
         type=str,
-        help="The SuperLink's private key (as a path str) to enable authentication.",
+        help="This argument is deprecated and will be removed in a future release.",
     )
     parser.add_argument(
         "--auth-superlink-public-key",
         type=str,
-        help="The SuperLink's public key (as a path str) to enable authentication.",
+        help="This argument is deprecated and will be removed in a future release.",
     )
 
 
