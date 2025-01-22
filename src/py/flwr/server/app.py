@@ -377,7 +377,7 @@ def run_superlink() -> None:
             interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
             if node_public_keys is not None:
                 state = state_factory.state()
-                state.clear_supernode_auth_keys_and_credentials()
+                state.clear_supernode_auth_keys()
                 state.store_node_public_keys(node_public_keys)
                 log(
                     INFO,
