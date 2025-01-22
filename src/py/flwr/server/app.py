@@ -228,6 +228,13 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
         "enabled" if certificates is not None else "disabled",
     )
 
+    # Graceful shutdown
+    register_exit_handlers(
+        event_type=EventType.START_SERVER_LEAVE,
+        exit_message="Flower server terminated gracefully.",
+        grpc_servers=[grpc_server],
+    )
+
     # Start training
     hist = run_fl(
         server=initialized_server,
