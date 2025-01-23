@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-20 00:31+0000\n"
+"POT-Creation-Date: 2025-01-23 00:30+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -284,8 +284,8 @@ msgstr "构建文档"
 #: ../../source/ref-exit-codes/002.rst:5 ../../source/ref-exit-codes/003.rst:5
 #: ../../source/ref-exit-codes/100.rst:5 ../../source/ref-exit-codes/300.rst:5
 #: ../../source/ref-exit-codes/301.rst:5 ../../source/ref-exit-codes/302.rst:5
-#: ../../source/ref-exit-codes/500.rst:5 ../../source/ref-exit-codes/501.rst:5
-#: ../../source/ref-exit-codes/502.rst:5
+#: ../../source/ref-exit-codes/600.rst:5 ../../source/ref-exit-codes/601.rst:5
+#: ../../source/ref-exit-codes/602.rst:5
 #, fuzzy
 msgid "Description"
 msgstr "停用"
@@ -27515,10 +27515,16 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-exit-codes-dir.rst:18
-msgid "**Common exit codes (500-)**: Shared across multiple components."
+msgid ""
+"**Simulation-specific exit codes (500-599)**: Specific to ``flwr-"
+"simulation`` (Simulation Engine) errors."
 msgstr ""
 
-#: ../../source/ref-exit-codes-dir.rst:21
+#: ../../source/ref-exit-codes-dir.rst:20
+msgid "**Common exit codes (600-)**: Shared across multiple components."
+msgstr ""
+
+#: ../../source/ref-exit-codes-dir.rst:23
 msgid "Indices"
 msgstr ""
 
@@ -27586,9 +27592,9 @@ msgstr ""
 #: ../../source/ref-exit-codes/300.rst:11
 #: ../../source/ref-exit-codes/301.rst:16
 #: ../../source/ref-exit-codes/302.rst:16
-#: ../../source/ref-exit-codes/500.rst:11
-#: ../../source/ref-exit-codes/501.rst:10
-#: ../../source/ref-exit-codes/502.rst:14
+#: ../../source/ref-exit-codes/600.rst:11
+#: ../../source/ref-exit-codes/601.rst:10
+#: ../../source/ref-exit-codes/602.rst:14
 msgid "How to Resolve"
 msgstr ""
 
@@ -27711,57 +27717,57 @@ msgid ""
 "follow company procedures for key management):"
 msgstr ""
 
-#: ../../source/ref-exit-codes/500.rst:2
-msgid "[500] COMMON_ADDRESS_INVALID"
+#: ../../source/ref-exit-codes/600.rst:2
+msgid "[600] COMMON_ADDRESS_INVALID"
 msgstr ""
 
-#: ../../source/ref-exit-codes/500.rst:7
+#: ../../source/ref-exit-codes/600.rst:7
 msgid ""
 "The provided address is invalid and cannot be parsed. It must be a valid "
 "URL, IPv4, or IPv6 address."
 msgstr ""
 
-#: ../../source/ref-exit-codes/500.rst:15
+#: ../../source/ref-exit-codes/600.rst:15
 msgid "Verify that the address is correctly formatted as one of the following:"
 msgstr ""
 
-#: ../../source/ref-exit-codes/500.rst:14
+#: ../../source/ref-exit-codes/600.rst:14
 msgid "URL (e.g., ``https://127.0.0.1:8080`` or ``https://example.com:8080``)"
 msgstr ""
 
-#: ../../source/ref-exit-codes/500.rst:15
+#: ../../source/ref-exit-codes/600.rst:15
 msgid "IPv4 (e.g., ``192.168.1.1:9091``)"
 msgstr ""
 
-#: ../../source/ref-exit-codes/500.rst:16
+#: ../../source/ref-exit-codes/600.rst:16
 msgid "IPv6 (e.g., ``[2001:0db8::1]:9092``)"
 msgstr ""
 
-#: ../../source/ref-exit-codes/501.rst:2
-msgid "[501] COMMON_MISSING_EXTRA_REST"
+#: ../../source/ref-exit-codes/601.rst:2
+msgid "[601] COMMON_MISSING_EXTRA_REST"
 msgstr ""
 
-#: ../../source/ref-exit-codes/501.rst:7
+#: ../../source/ref-exit-codes/601.rst:7
 msgid ""
 "Extra dependencies required for using the REST-based Fleet API are "
 "missing."
 msgstr ""
 
-#: ../../source/ref-exit-codes/501.rst:12
+#: ../../source/ref-exit-codes/601.rst:12
 msgid ""
 "To enable the REST-based Fleet API, install ``flwr`` with the ``rest`` "
 "extra:"
 msgstr ""
 
-#: ../../source/ref-exit-codes/501.rst:18
+#: ../../source/ref-exit-codes/601.rst:18
 msgid "Ensure that the installation completes successfully, and then retry."
 msgstr ""
 
-#: ../../source/ref-exit-codes/502.rst:2
-msgid "[502] COMMON_TLS_NOT_SUPPORTED"
+#: ../../source/ref-exit-codes/602.rst:2
+msgid "[602] COMMON_TLS_NOT_SUPPORTED"
 msgstr ""
 
-#: ../../source/ref-exit-codes/502.rst:7
+#: ../../source/ref-exit-codes/602.rst:7
 msgid ""
 "The ``flwr-serverapp`` and ``flwr-clientapp`` do not currently support "
 "TLS, as they are assumed to be executed within the same network as their "
@@ -27770,7 +27776,7 @@ msgid ""
 "flower-network-communication.html>`_ guide for further details."
 msgstr ""
 
-#: ../../source/ref-exit-codes/502.rst:16
+#: ../../source/ref-exit-codes/602.rst:16
 msgid "Use the ``--insecure`` flag to proceed without TLS."
 msgstr ""
 
@@ -31790,7 +31796,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|fb54a2bb9135460a80655c253e9f6180|"
+msgid "|ad5e283383fd4f1c8a4d51a63ff9cfc6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -31805,7 +31811,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|dbb29ab4fa1c4634b84f10fcf5ddd35e|"
+msgid "|8e9e1155906a4bd095cab209207d698e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -31829,7 +31835,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|385792b816c5453db447d379d4970aee|"
+msgid "|9decc6d7bb0147dcbce540f7332c69c9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -31847,7 +31853,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|608cf1b5aad34ed78ae9defeefd9603c|"
+msgid "|3e476dc22aa4464d802d0d0596cdb3a9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -31864,7 +31870,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|8d464285997143f8a6d1cff66c67abda|"
+msgid "|8e0b4f6256554d57a85d490117e03fb4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -31879,7 +31885,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|d5683c1caa9e42e29b888e3112a90a85|"
+msgid "|895339f112c54ae49bbeb69f01d6bfc6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -31900,7 +31906,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|476afa181eed4ce98a5231f375a61c29|"
+msgid "|563f54e700664e23b33fc7039a380c93|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -31915,7 +31921,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|ead51ebc3bc84dde8bdee09ecb7df092|"
+msgid "|e72c6e0772034e639ff3e8486493f103|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -32075,7 +32081,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|159e64a77db1476d86c2c39ce4d59023|"
+msgid "|42c7784cc4504dfd847f004a6a459918|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -32100,7 +32106,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|2063d930771c480fbc09efe29550a35c|"
+msgid "|2ae00797633e45e7b1753e54356038b4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -32126,7 +32132,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|cfccf70ecc234e3eafc4b85714f3d369|"
+msgid "|1d82ec63ef90404f8c19dc925f757ca4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -32149,7 +32155,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|c853749d35204647bd6a66b4be4ed9dd|"
+msgid "|0fb9c15b018445ce9505737b111255ec|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -32196,7 +32202,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|424b774c02284dfd97cc6abc2e7e5016|"
+msgid "|c1b86d4c1f574731976a92221b9ccbb6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -32304,7 +32310,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|01432c2b27de47ab987fef35e497e4d3|"
+msgid "|19c7a73ef14a43b9bb0ed84011a0367d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -40526,5 +40532,59 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|07d4d06f1bf746989510c85dbe96f4e3|"
+#~ msgstr ""
+
+#~ msgid "**Common exit codes (500-)**: Shared across multiple components."
+#~ msgstr ""
+
+#~ msgid "[500] COMMON_ADDRESS_INVALID"
+#~ msgstr ""
+
+#~ msgid "[501] COMMON_MISSING_EXTRA_REST"
+#~ msgstr ""
+
+#~ msgid "[502] COMMON_TLS_NOT_SUPPORTED"
+#~ msgstr ""
+
+#~ msgid "|fb54a2bb9135460a80655c253e9f6180|"
+#~ msgstr ""
+
+#~ msgid "|dbb29ab4fa1c4634b84f10fcf5ddd35e|"
+#~ msgstr ""
+
+#~ msgid "|385792b816c5453db447d379d4970aee|"
+#~ msgstr ""
+
+#~ msgid "|608cf1b5aad34ed78ae9defeefd9603c|"
+#~ msgstr ""
+
+#~ msgid "|8d464285997143f8a6d1cff66c67abda|"
+#~ msgstr ""
+
+#~ msgid "|d5683c1caa9e42e29b888e3112a90a85|"
+#~ msgstr ""
+
+#~ msgid "|476afa181eed4ce98a5231f375a61c29|"
+#~ msgstr ""
+
+#~ msgid "|ead51ebc3bc84dde8bdee09ecb7df092|"
+#~ msgstr ""
+
+#~ msgid "|159e64a77db1476d86c2c39ce4d59023|"
+#~ msgstr ""
+
+#~ msgid "|2063d930771c480fbc09efe29550a35c|"
+#~ msgstr ""
+
+#~ msgid "|cfccf70ecc234e3eafc4b85714f3d369|"
+#~ msgstr ""
+
+#~ msgid "|c853749d35204647bd6a66b4be4ed9dd|"
+#~ msgstr ""
+
+#~ msgid "|424b774c02284dfd97cc6abc2e7e5016|"
+#~ msgstr ""
+
+#~ msgid "|01432c2b27de47ab987fef35e497e4d3|"
 #~ msgstr ""
 
