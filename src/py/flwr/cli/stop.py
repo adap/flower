@@ -55,7 +55,6 @@ def stop(  # pylint: disable=R0914
         Optional[list[str]],
         typer.Option(
             "--federation-config",
-            "-fc",
             help=FEDERATION_CONFIG_HELP_MESSAGE,
         ),
     ] = None,

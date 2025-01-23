@@ -62,7 +62,6 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         Optional[list[str]],
         typer.Option(
             "--federation-config",
-            "-fc",
             help=FEDERATION_CONFIG_HELP_MESSAGE,
         ),
     ] = None,
