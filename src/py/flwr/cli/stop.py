@@ -29,6 +29,7 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
+from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.exec_pb2 import StopRunRequest, StopRunResponse  # pylint: disable=E0611
@@ -49,6 +50,13 @@ def stop(  # pylint: disable=R0914
     federation: Annotated[
         Optional[str],
         typer.Argument(help="Name of the federation"),
+    ] = None,
+    federation_config_overrides: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--federation-config",
+            help=FEDERATION_CONFIG_HELP_MESSAGE,
+        ),
     ] = None,
     output_format: Annotated[
         str,
@@ -73,7 +81,7 @@ def stop(  # pylint: disable=R0914
         config, errors, warnings = load_and_validate(path=pyproject_path)
         config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
-            federation, config
+            federation, config, federation_config_overrides
         )
         exit_if_no_address(federation_config, "stop")
 
