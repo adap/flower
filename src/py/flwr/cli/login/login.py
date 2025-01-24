@@ -65,6 +65,18 @@ def login(  # pylint: disable=R0914
         federation, config, federation_config_overrides
     )
     exit_if_no_address(federation_config, "login")
+
+    # Check if `enable-user-auth` is set to `true`
+    if not federation_config.get("enable-user-auth", False):
+        typer.secho(
+            f"❌ User authentication is not enabled for the federation '{federation}'. "
+            "To enable it, set `enable-user-auth = true` in the federation "
+            "configuration.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
     channel = init_channel(app, federation_config, None)
     stub = ExecStub(channel)
 
@@ -73,7 +85,9 @@ def login(  # pylint: disable=R0914
 
     # Get the auth plugin
     auth_type = login_response.auth_type
-    auth_plugin = try_obtain_cli_auth_plugin(app, federation, auth_type)
+    auth_plugin = try_obtain_cli_auth_plugin(
+        app, federation, federation_config, auth_type
+    )
     if auth_plugin is None:
         typer.secho(
             f'❌ Authentication type "{auth_type}" not found',

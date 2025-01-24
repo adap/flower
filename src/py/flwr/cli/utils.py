@@ -217,25 +217,42 @@ def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
 def try_obtain_cli_auth_plugin(
     root_dir: Path,
     federation: str,
+    federation_config: dict[str, Any],
     auth_type: Optional[str] = None,
 ) -> Optional[CliAuthPlugin]:
     """Load the CLI-side user auth plugin for the given auth type."""
-    config_path = get_user_auth_config_path(root_dir, federation)
-
-    # Load the config file if it exists
-    json_file: dict[str, Any] = {}
-    if config_path.exists():
-        with config_path.open("r", encoding="utf-8") as file:
-            json_file = json.load(file)
-    # This is the case when the user auth is not enabled
-    elif auth_type is None:
+    # Check if user auth is enabled
+    if not federation_config.get("enable-user-auth", False):
         return None
 
+    # Check if TLS is enabled. If not, raise an error
+    if federation_config.get("root-certificates") is None:
+        typer.secho(
+            "❌ User authentication requires TLS to be enabled. "
+            "Please provide 'root-certificates' in the federation"
+            " configuration.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    config_path = get_user_auth_config_path(root_dir, federation)
+
     # Get the auth type from the config if not provided
+    # auth_type will be None for all CLI commands except login
     if auth_type is None:
-        if AUTH_TYPE not in json_file:
-            return None
-        auth_type = json_file[AUTH_TYPE]
+        try:
+            with config_path.open("r", encoding="utf-8") as file:
+                json_file = json.load(file)
+            auth_type = json_file[AUTH_TYPE]
+        except (FileNotFoundError, KeyError):
+            typer.secho(
+                "❌ Missing or invalid credentials for user authentication. "
+                "Please run `flwr login` to authenticate.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
 
     # Retrieve auth plugin class and instantiate it
     try:
