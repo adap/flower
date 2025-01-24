@@ -182,7 +182,7 @@ def validate_certificate_in_federation_config(
         root_certificates_bytes = (app / root_certificates).read_bytes()
         if insecure := bool(insecure_str):
             typer.secho(
-                "❌ `root_certificates` were provided but the `insecure` parameter "
+                "❌ `root-certificates` were provided but the `insecure` parameter "
                 "is set to `True`.",
                 fg=typer.colors.RED,
                 bold=True,
