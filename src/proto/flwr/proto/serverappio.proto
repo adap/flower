@@ -33,9 +33,11 @@ service ServerAppIo {
 
   // Create one or more tasks
   rpc PushTaskIns(PushTaskInsRequest) returns (PushTaskInsResponse) {}
+  rpc PushMessages(PushInsMessagesRequest) returns (PushInsMessagesResponse) {}
 
   // Get task results
   rpc PullTaskRes(PullTaskResRequest) returns (PullTaskResResponse) {}
+  rpc PullMessages(PullResMessagesRequest) returns (PullResMessagesResponse) {}
 
   // Get run details
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
@@ -81,6 +83,19 @@ message PullTaskResRequest {
 }
 message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
 
+// PushMessages messages
+message PushInsMessagesRequest {
+  repeated Message messages_list = 1;
+  uint64 run_id = 2;
+}
+message PushInsMessagesResponse { repeated string message_ids = 1; }
+
+// PullMessages messages
+message PullResMessagesRequest {
+  repeated string message_ids = 1;
+  uint64 run_id = 2;
+}
+message PullResMessagesResponse { repeated Message messages_list = 1; }
 // PullServerAppInputs messages
 message PullServerAppInputsRequest {}
 message PullServerAppInputsResponse {

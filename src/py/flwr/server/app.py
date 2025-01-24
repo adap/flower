@@ -52,7 +52,6 @@ from flwr.common.constant import (
     FLEET_API_REST_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
-    MISSING_EXTRA_REST,
     SERVER_OCTET,
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
@@ -60,6 +59,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
@@ -228,6 +228,13 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
         "enabled" if certificates is not None else "disabled",
     )
 
+    # Graceful shutdown
+    register_exit_handlers(
+        event_type=EventType.START_SERVER_LEAVE,
+        exit_message="Flower server terminated gracefully.",
+        grpc_servers=[grpc_server],
+    )
+
     # Start training
     hist = run_fl(
         server=initialized_server,
@@ -265,10 +272,14 @@ def run_superlink() -> None:
     # Obtain certificates
     certificates = try_obtain_server_certificates(args, args.fleet_api_type)
 
+    # Disable the user auth TLS check if args.disable_oidc_tls_cert_verification is
+    # provided
+    verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", None)
+
     auth_plugin: Optional[ExecAuthPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
-        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path))
+        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path), verify_tls_cert)
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -345,7 +356,7 @@ def run_superlink() -> None:
                 and importlib.util.find_spec("starlette")
                 and importlib.util.find_spec("uvicorn")
             ) is None:
-                sys.exit(MISSING_EXTRA_REST)
+                flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
             _, ssl_certfile, ssl_keyfile = (
                 certificates if certificates is not None else (None, None, None)
@@ -437,6 +448,7 @@ def run_superlink() -> None:
     # Graceful shutdown
     register_exit_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
+        exit_message="SuperLink terminated gracefully.",
         grpc_servers=grpc_servers,
     )
 
@@ -445,7 +457,8 @@ def run_superlink() -> None:
         sleep(0.1)
 
     # Exit if any thread has exited prematurely
-    sys.exit(1)
+    # This code will not be reached if the SuperLink stops gracefully
+    flwr_exit(ExitCode.SUPERLINK_THREAD_CRASH)
 
 
 def _run_flwr_command(args: list[str], main_pid: int) -> None:
@@ -520,8 +533,9 @@ def _flwr_scheduler(
 def _format_address(address: str) -> tuple[str, str, int]:
     parsed_address = parse_address(address)
     if not parsed_address:
-        sys.exit(
-            f"Address ({address}) cannot be parsed (expected: URL or IPv4 or IPv6)."
+        flwr_exit(
+            ExitCode.COMMON_ADDRESS_INVALID,
+            f"Address ({address}) cannot be parsed.",
         )
     host, port, is_v6 = parsed_address
     return (f"[{host}]:{port}" if is_v6 else f"{host}:{port}", host, port)
@@ -616,7 +630,9 @@ def _try_setup_node_authentication(
         )
 
 
-def _try_obtain_exec_auth_plugin(config_path: Path) -> Optional[ExecAuthPlugin]:
+def _try_obtain_exec_auth_plugin(
+    config_path: Path, verify_tls_cert: bool
+) -> Optional[ExecAuthPlugin]:
     # Load YAML file
     with config_path.open("r", encoding="utf-8") as file:
         config: dict[str, Any] = yaml.safe_load(file)
@@ -629,7 +645,9 @@ def _try_obtain_exec_auth_plugin(config_path: Path) -> Optional[ExecAuthPlugin]:
     try:
         all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
         auth_plugin_class = all_plugins[auth_type]
-        return auth_plugin_class(user_auth_config_path=config_path)
+        return auth_plugin_class(
+            user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
+        )
     except KeyError:
         if auth_type != "":
             sys.exit(
@@ -712,7 +730,7 @@ def _run_fleet_api_rest(
 
         from flwr.server.superlink.fleet.rest_rere.rest_api import app as fast_api_app
     except ModuleNotFoundError:
-        sys.exit(MISSING_EXTRA_REST)
+        flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
     log(INFO, "Starting Flower REST server")
 
