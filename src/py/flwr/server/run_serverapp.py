@@ -64,13 +64,3 @@ def run(
 
     log(DEBUG, "ServerApp finished running.")
     return context
-
-
-def run_server_app() -> None:
-    """Run Flower server app."""
-    event(EventType.RUN_SERVER_APP_ENTER)
-    log(
-        ERROR,
-        "The command `flower-server-app` has been replaced by `flwr run`.",
-    )
-    register_exit_handlers(event_type=EventType.RUN_SERVER_APP_LEAVE)

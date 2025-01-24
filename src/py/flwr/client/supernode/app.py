@@ -111,16 +111,6 @@ def run_supernode() -> None:
     )
 
 
-def run_client_app() -> None:
-    """Run Flower client app."""
-    event(EventType.RUN_CLIENT_APP_ENTER)
-    log(
-        ERROR,
-        "The command `flower-client-app` has been replaced by `flwr run`.",
-    )
-    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
-
-
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
     """Warn about the deprecated argument `--server`."""
     if args.server != FLEET_API_GRPC_RERE_DEFAULT_ADDRESS:
