@@ -40,6 +40,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
@@ -86,6 +87,12 @@ def run_supernode() -> None:
 
     log(DEBUG, "Isolation mode: %s", args.isolation)
 
+    # Register handlers for graceful shutdown
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERNODE_LEAVE,
+        exit_message="SuperNode terminated gracefully.",
+    )
+
     start_client_internal(
         server_address=args.superlink,
         load_client_app_fn=load_fn,
@@ -101,11 +108,6 @@ def run_supernode() -> None:
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
         clientappio_api_address=args.clientappio_api_address,
-    )
-
-    # Graceful shutdown
-    register_exit_handlers(
-        event_type=EventType.RUN_SUPERNODE_LEAVE,
     )
 
 
@@ -280,11 +282,7 @@ def _try_setup_client_authentication(
         return None
 
     if not args.auth_supernode_private_key or not args.auth_supernode_public_key:
-        sys.exit(
-            "Authentication requires file paths to both "
-            "'--auth-supernode-private-key' and '--auth-supernode-public-key'"
-            "to be provided (providing only one of them is not sufficient)."
-        )
+        flwr_exit(ExitCode.SUPERNODE_NODE_AUTH_KEYS_REQUIRED)
 
     try:
         ssh_private_key = load_ssh_private_key(
@@ -294,11 +292,9 @@ def _try_setup_client_authentication(
         if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
-            "Error: Unable to parse the private key file in "
-            "'--auth-supernode-private-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid private key file and try again."
+        flwr_exit(
+            ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
+            "Unable to parse the private key file.",
         )
 
     try:
@@ -308,11 +304,9 @@ def _try_setup_client_authentication(
         if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
-            "Error: Unable to parse the public key file in "
-            "'--auth-supernode-public-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid public key file and try again."
+        flwr_exit(
+            ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
+            "Unable to parse the public key file.",
         )
 
     return (
