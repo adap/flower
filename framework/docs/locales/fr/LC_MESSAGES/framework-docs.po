@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-01-23 00:30+0000\n"
+"POT-Creation-Date: 2025-01-24 00:30+0000\n"
 "PO-Revision-Date: 2023-09-05 17:54+0000\n"
 "Last-Translator: Charles Beauville <charles@flower.ai>\n"
 "Language: fr\n"
@@ -9859,6 +9859,25 @@ msgstr ""
 msgid "Get logs from a Flower project run."
 msgstr ""
 
+#: ../../flwr log:1 login:1 ls:1 run:1 stop:1
+msgid "Override federation configuration values in the format:"
+msgstr ""
+
+#: ../../flwr log:1 login:1 ls:1 run:1 stop:1
+msgid ""
+"`--federation-config 'key1=value1 key2=value2' --federation-config "
+"'key3=value3'`"
+msgstr ""
+
+#: ../../flwr log:1 login:1 ls:1 run:1 stop:1
+msgid ""
+"Values can be of any type supported in TOML, such as bool, int, float, or"
+" string. Ensure that the keys (`key1`, `key2`, `key3` in this example) "
+"exist in the federation configuration under the "
+"`[tool.flwr.federations.<YOUR_FEDERATION>]` table of the `pyproject.toml`"
+" for proper overriding."
+msgstr ""
+
 #: ../../flwr log:1
 msgid "Flag to stream or print logs from the Flower run"
 msgstr ""
@@ -10017,19 +10036,18 @@ msgid "Run Flower App."
 msgstr "Serveur de Flower"
 
 #: ../../flwr run:1
-msgid "Override configuration key-value pairs, should be of the format:"
+msgid "Override run configuration values in the format:"
+msgstr ""
+
+#: ../../flwr run:1
+msgid "`--run-config 'key1=value1 key2=value2' --run-config 'key3=value3'`"
 msgstr ""
 
 #: ../../flwr run:1
 msgid ""
-"`--run-config 'key1=\"value1\" key2=\"value2\"' --run-config "
-"'key3=\"value3\"'`"
-msgstr ""
-
-#: ../../flwr run:1
-msgid ""
-"Note that `key1`, `key2`, and `key3` in this example need to exist inside"
-" the `pyproject.toml` in order to be properly overriden."
+"Values can be of any type supported in TOML, such as bool, int, float, or"
+" string. Ensure that the keys (`key1`, `key2`, `key3` in this example) "
+"exist in `pyproject.toml` for proper overriding."
 msgstr ""
 
 #: ../../flwr run:1
@@ -30895,7 +30913,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|ad5e283383fd4f1c8a4d51a63ff9cfc6|"
+msgid "|d8f98c8f80fc4a7e94e6855ac6fbc7fc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30914,7 +30932,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|8e9e1155906a4bd095cab209207d698e|"
+msgid "|e86d5e237c1840c39e3f41b4ac7b124f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30946,7 +30964,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|9decc6d7bb0147dcbce540f7332c69c9|"
+msgid "|9afc14c1605148018d62740b4ccb5832|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30967,7 +30985,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|3e476dc22aa4464d802d0d0596cdb3a9|"
+msgid "|d3fc35ce213a4e58af6094dc17767eff|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -30989,7 +31007,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|8e0b4f6256554d57a85d490117e03fb4|"
+msgid "|1ea218a90c064790b8c279ad52e125b8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -31010,7 +31028,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|895339f112c54ae49bbeb69f01d6bfc6|"
+msgid "|97cc23c9f87f4a4ea250d9ef18cbf470|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -31036,7 +31054,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|563f54e700664e23b33fc7039a380c93|"
+msgid "|6b93cc04ab444cebbd4ba95eae0b7131|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -31055,7 +31073,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|e72c6e0772034e639ff3e8486493f103|"
+msgid "|9218bb2c309a4954b9dbbf1cbcc378ac|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -31286,7 +31304,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|42c7784cc4504dfd847f004a6a459918|"
+msgid "|69c59d7ad4504b878678896392413bc9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -31321,7 +31339,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|2ae00797633e45e7b1753e54356038b4|"
+msgid "|e8ec4e15c93b410481809047487792ee|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -31354,7 +31372,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|1d82ec63ef90404f8c19dc925f757ca4|"
+msgid "|a0d2236676b34653a63d638648555a8e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -31385,7 +31403,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|0fb9c15b018445ce9505737b111255ec|"
+msgid "|84e52841ac4e47de8bd64e2a36803ce8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -31445,7 +31463,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|c1b86d4c1f574731976a92221b9ccbb6|"
+msgid "|3b94c4986bf7458fbd2c19506712c68e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -31589,7 +31607,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|19c7a73ef14a43b9bb0ed84011a0367d|"
+msgid "|ab451c891332411989c05b3e0ce9e269|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -45814,5 +45832,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|01432c2b27de47ab987fef35e497e4d3|"
+#~ msgstr ""
+
+#~ msgid "|ad5e283383fd4f1c8a4d51a63ff9cfc6|"
+#~ msgstr ""
+
+#~ msgid "|8e9e1155906a4bd095cab209207d698e|"
+#~ msgstr ""
+
+#~ msgid "|9decc6d7bb0147dcbce540f7332c69c9|"
+#~ msgstr ""
+
+#~ msgid "|3e476dc22aa4464d802d0d0596cdb3a9|"
+#~ msgstr ""
+
+#~ msgid "|8e0b4f6256554d57a85d490117e03fb4|"
+#~ msgstr ""
+
+#~ msgid "|895339f112c54ae49bbeb69f01d6bfc6|"
+#~ msgstr ""
+
+#~ msgid "|563f54e700664e23b33fc7039a380c93|"
+#~ msgstr ""
+
+#~ msgid "|e72c6e0772034e639ff3e8486493f103|"
+#~ msgstr ""
+
+#~ msgid "|42c7784cc4504dfd847f004a6a459918|"
+#~ msgstr ""
+
+#~ msgid "|2ae00797633e45e7b1753e54356038b4|"
+#~ msgstr ""
+
+#~ msgid "|1d82ec63ef90404f8c19dc925f757ca4|"
+#~ msgstr ""
+
+#~ msgid "|0fb9c15b018445ce9505737b111255ec|"
+#~ msgstr ""
+
+#~ msgid "|c1b86d4c1f574731976a92221b9ccbb6|"
+#~ msgstr ""
+
+#~ msgid "|19c7a73ef14a43b9bb0ed84011a0367d|"
 #~ msgstr ""
 
