@@ -29,6 +29,7 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
+from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.constant import CONN_RECONNECT_INTERVAL, CONN_REFRESH_PERIOD
 from flwr.common.logger import log as logger
 from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
@@ -150,14 +151,7 @@ def log(
         Optional[list[str]],
         typer.Option(
             "--federation-config",
-            "-fc",
-            help="Override federation configuration values in the format:\n\n"
-            "`--federation-config 'key1=value1 key2=value2' --federation-config "
-            "'key3=value3'`\n\nValues can be of any type supported in TOML, such as "
-            "bool, int, float, or string. Ensure that the keys (`key1`, `key2`, `key3` "
-            "in this example) exist in the federation configuration under the "
-            "`[tool.flwr.federations.<YOUR_FEDERATION>]` table of the `pyproject.toml` "
-            "for proper overriding.",
+            help=FEDERATION_CONFIG_HELP_MESSAGE,
         ),
     ] = None,
     stream: Annotated[
@@ -193,7 +187,7 @@ def _log_with_exec_api(
     run_id: int,
     stream: bool,
 ) -> None:
-    auth_plugin = try_obtain_cli_auth_plugin(app, federation)
+    auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
     channel = init_channel(app, federation_config, auth_plugin)
 
     if stream:
