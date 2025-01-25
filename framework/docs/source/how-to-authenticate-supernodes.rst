@@ -66,7 +66,7 @@ aditional files in addition to the certificates needed for the TLS connections. 
 that the authentication feature can only be enabled in the presence of TLS.
 
 .. code-block:: bash
-    :emphasize-lines: 5,6,7
+    :emphasize-lines: 5
 
     $ flower-superlink \
         --ssl-ca-certfile certificates/ca.crt \
@@ -77,7 +77,7 @@ that the authentication feature can only be enabled in the presence of TLS.
 .. dropdown:: Understand the command
 
     * ``--auth-list-public-keys``: Specify the path to a CSV file storing the public keys of all SuperNodes that should be allowed to connect with the SuperLink.
-      | A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas and without any comments. Refer to the code sample, which contains a CSV file with two known node public keys.
+    A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas and without any comments. Refer to the code sample, which contains a CSV file with two known node public keys.
 
 Enable node authentication in SuperNode
 ---------------------------------------
