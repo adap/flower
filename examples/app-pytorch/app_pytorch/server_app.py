@@ -17,7 +17,7 @@ app = fl.ServerApp()
 global_model = Net()
 
 # Init aggregators
-train_aggregator = SequentialAggregator(
+train_aggregator = MultiAggregator(
     [
         ParametersAggregator(
             record_key="model",

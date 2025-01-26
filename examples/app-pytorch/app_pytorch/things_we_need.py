@@ -41,7 +41,7 @@ class BaseAggregator:
     def aggregate(self, messages: list[fl.Message]) -> fl.RecordSet: ...
 
 
-class SequentialAggregator(BaseAggregator):
+class MultiAggregator(BaseAggregator):
 
     def __init__(
         self,
