@@ -18,16 +18,14 @@ global_model = Net()
 
 # Init aggregators
 train_aggregator = MultiAggregator(
-    [
-        ParametersAggregator(
-            record_key="model",
-            weight_factor_key=lambda rs: rs["train_metrics"]["num_examples"],
-        ),
-        MetricsAggregator(
-            record_key="train_metrics",
-            aggregate_key="train_loss",
-        ),
-    ]
+    ParametersAggregator(
+        record_key="model",
+        weight_factor_key=lambda rs: rs["train_metrics"]["num_examples"],
+    ),
+    MetricsAggregator(
+        record_key="train_metrics",
+        aggregate_key="train_loss",
+    ),
 )
 eval_aggregator = MetricsAggregator(record_key="eval_metrics")
 

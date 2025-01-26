@@ -32,7 +32,7 @@ def create_broadcast_messages(
     return messages
 
 
-class BaseAggregator:
+class Aggregator:
 
     def __call__(self, messages: list[fl.Message]) -> fl.RecordSet:
         return self.aggregate(messages)
@@ -41,15 +41,15 @@ class BaseAggregator:
     def aggregate(self, messages: list[fl.Message]) -> fl.RecordSet: ...
 
 
-class MultiAggregator(BaseAggregator):
+class MultiAggregator(Aggregator):
 
     def __init__(
         self,
-        aggregators: list[BaseAggregator],
+        *aggregators: Aggregator,
     ) -> None: ...
 
 
-class ParametersAggregator(BaseAggregator):
+class ParametersAggregator(Aggregator):
 
     def __init__(
         self,
@@ -62,7 +62,7 @@ class ParametersAggregator(BaseAggregator):
     def aggregate(self, messages: list[fl.Message]) -> fl.RecordSet: ...
 
 
-class MetricsAggregator(BaseAggregator):
+class MetricsAggregator(Aggregator):
 
     def __init__(
         self,
