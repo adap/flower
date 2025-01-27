@@ -318,7 +318,7 @@ def unauthenticated_exc_handler() -> Iterator[None]:
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.UNIMPLEMENTED:
             typer.secho(
-                "❌ SuperLink initialized without user authentication.",
+                "❌ User authentication is not enabled for this SuperLink.",
                 fg=typer.colors.RED,
                 bold=True,
             )
