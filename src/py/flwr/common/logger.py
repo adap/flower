@@ -23,7 +23,7 @@ import sys
 import threading
 import time
 from io import StringIO
-from logging import WARN, LogRecord
+from logging import ERROR, WARN, LogRecord
 from logging.handlers import HTTPHandler
 from queue import Empty, Queue
 from typing import TYPE_CHECKING, Any, Optional, TextIO, Union
@@ -102,7 +102,7 @@ class ConsoleHandler(StreamHandler):
 
 
 def update_console_handler(
-    level: Optional[int] = None,
+    level: Optional[Union[int, str]] = None,
     timestamps: Optional[bool] = None,
     colored: Optional[bool] = None,
 ) -> None:
@@ -128,7 +128,16 @@ FLOWER_LOGGER.addHandler(console_handler)
 
 # Change log level via env (always get timestamp)
 if log_level := os.getenv("PYTHONLOGLEVEL"):
-    update_console_handler(level=log_level, timestamps=True, colored=True)
+    try:
+        update_console_handler(level=log_level, timestamps=True, colored=True)
+    except:
+        # Alert user but don't raise exception
+        FLOWER_LOGGER.log(
+            ERROR,
+            "Failed to set logging level %s. Using default level: %s",
+            log_level,
+            logging.getLevelName(console_handler.level),
+        )
 
 
 class CustomHTTPHandler(HTTPHandler):
