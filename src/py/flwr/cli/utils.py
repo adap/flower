@@ -301,12 +301,19 @@ def unauthenticated_exc_handler() -> Iterator[None]:
     try:
         yield
     except grpc.RpcError as e:
-        if e.code() != grpc.StatusCode.UNAUTHENTICATED:
-            raise
-        typer.secho(
-            "❌ Authentication failed. Please run `flwr login`"
-            " to authenticate and try again.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.UNAUTHENTICATED:
+            typer.secho(
+                "❌ Authentication failed. Please run `flwr login`"
+                " to authenticate and try again.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.UNIMPLEMENTED:
+            typer.secho(
+                "❌ SuperLink initialized without user authentication.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
+        raise
