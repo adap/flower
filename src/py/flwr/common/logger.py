@@ -126,7 +126,7 @@ console_handler = ConsoleHandler(
 console_handler.setLevel(logging.INFO)
 FLOWER_LOGGER.addHandler(console_handler)
 
-# Change log level via env (always get timestamp)
+# Set log level via env var (show timestamps for `DEBUG`)
 if log_level := os.getenv("PYTHONLOGLEVEL"):
     try:
         use_time_stamps = log_level.upper() == "DEBUG"
