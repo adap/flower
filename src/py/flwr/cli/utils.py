@@ -29,19 +29,12 @@ import typer
 
 from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR, FLWR_DIR
+from flwr.common.constant import AUTH_TYPE_KEY, CREDENTIALS_DIR, FLWR_DIR
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 
 from .config_utils import validate_certificate_in_federation_config
-
-try:
-    from flwr.ee import get_cli_auth_plugins
-except ImportError:
-
-    def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
-        """Return all CLI authentication plugins."""
-        raise NotImplementedError("No authentication plugins are currently supported.")
+from .auth_plugin import get_cli_auth_plugins
 
 
 def prompt_text(
@@ -244,7 +237,7 @@ def try_obtain_cli_auth_plugin(
         try:
             with config_path.open("r", encoding="utf-8") as file:
                 json_file = json.load(file)
-            auth_type = json_file[AUTH_TYPE]
+            auth_type = json_file[AUTH_TYPE_KEY]
         except (FileNotFoundError, KeyError):
             typer.secho(
                 "❌ Missing or invalid credentials for user authentication. "
