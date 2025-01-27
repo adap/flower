@@ -129,8 +129,11 @@ FLOWER_LOGGER.addHandler(console_handler)
 # Change log level via env (always get timestamp)
 if log_level := os.getenv("PYTHONLOGLEVEL"):
     try:
-        update_console_handler(level=log_level, timestamps=True, colored=True)
-    except:
+        use_time_stamps = log_level.upper() == "DEBUG"
+        update_console_handler(
+            level=log_level, timestamps=use_time_stamps, colored=True
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
         # Alert user but don't raise exception
         FLOWER_LOGGER.log(
             ERROR,
