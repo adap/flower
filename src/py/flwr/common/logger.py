@@ -136,7 +136,7 @@ if log_level := os.getenv("PYTHONLOGLEVEL"):
         )
     except Exception:  # pylint: disable=broad-exception-caught
         # Alert user but don't raise exception
-        FLOWER_LOGGER.log(
+       log(
             ERROR,
             "Failed to set logging level %s. Using default level: %s",
             log_level,
