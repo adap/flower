@@ -8,7 +8,7 @@ Configure logging
 By default, the Flower logger uses logging level ``INFO``. This can be changed via the
 ``PYTHONLOGLEVEL`` environment variable to any other levels that Python's `logging
 module <https://docs.python.org/3/library/logging.html#logging-levels>`_ supports. For
-example, launch your ``SuperLink`` showing ``DEBUG`` logs:
+example, to launch your ``SuperLink`` showing ``DEBUG`` logs do:
 
 .. code-block:: shell
     :emphasize-lines: 2,11,12
