@@ -17,6 +17,7 @@
 
 import json as _json
 import logging
+import os
 import re
 import sys
 import threading
@@ -124,6 +125,10 @@ console_handler = ConsoleHandler(
 )
 console_handler.setLevel(logging.INFO)
 FLOWER_LOGGER.addHandler(console_handler)
+
+# Change log level via env (always get timestamp)
+if log_level := os.getenv("PYTHONLOGLEVEL"):
+    update_console_handler(level=log_level, timestamps=True, colored=True)
 
 
 class CustomHTTPHandler(HTTPHandler):
