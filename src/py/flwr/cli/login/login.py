@@ -34,7 +34,11 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from ..utils import init_channel, try_obtain_cli_auth_plugin
+from ..utils import (
+    init_channel,
+    try_obtain_cli_auth_plugin,
+    unauthenticated_exc_handler,
+)
 
 
 def login(  # pylint: disable=R0914
@@ -81,7 +85,8 @@ def login(  # pylint: disable=R0914
     stub = ExecStub(channel)
 
     login_request = GetLoginDetailsRequest()
-    login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
+    with unauthenticated_exc_handler():
+        login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
 
     # Get the auth plugin
     auth_type = login_response.auth_type
@@ -104,7 +109,8 @@ def login(  # pylint: disable=R0914
         expires_in=login_response.expires_in,
         interval=login_response.interval,
     )
-    credentials = auth_plugin.login(details, stub)
+    with unauthenticated_exc_handler():
+        credentials = auth_plugin.login(details, stub)
 
     # Store the tokens
     auth_plugin.store_tokens(credentials)
