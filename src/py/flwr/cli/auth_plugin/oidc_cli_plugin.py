@@ -39,7 +39,7 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 
 
 class OidcCliPlugin(CliAuthPlugin):
-    """Flower OIDC Auth Plugin for CLI."""
+    """Flower OIDC auth plugin for CLI."""
 
     def __init__(self, credentials_path: Path):
         self.access_token: Optional[str] = None
