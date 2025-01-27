@@ -43,6 +43,7 @@ from .constant import LOG_UPLOAD_INTERVAL
 LOGGER_NAME = "flwr"
 FLOWER_LOGGER = logging.getLogger(LOGGER_NAME)
 FLOWER_LOGGER.setLevel(logging.DEBUG)
+log = FLOWER_LOGGER.log  # pylint: disable=invalid-name
 
 LOG_COLORS = {
     "DEBUG": "\033[94m",  # Blue
@@ -200,10 +201,6 @@ def configure(
         http_handler.setLevel(logging.DEBUG)
         # Override mapLogRecords as setFormatter has no effect on what is send via http
         FLOWER_LOGGER.addHandler(http_handler)
-
-
-logger = logging.getLogger(LOGGER_NAME)  # pylint: disable=invalid-name
-log = logger.log  # pylint: disable=invalid-name
 
 
 def warn_preview_feature(name: str) -> None:
