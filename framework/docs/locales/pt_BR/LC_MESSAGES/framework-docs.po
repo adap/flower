@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-24 00:30+0000\n"
+"POT-Creation-Date: 2025-01-27 00:31+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -4987,43 +4987,50 @@ msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:8
 msgid ""
-"Flower has built-in support for authenticated SuperNodes that you can use"
-" to verify the identities of each SuperNode connecting to a SuperLink. "
-"For increased security, node authentication can only be used when "
-"encrypted connections (SSL/TLS) are enabled. Flower node authentication "
-"works similar to how GitHub SSH authentication works:"
+"Flower has built-in support for authenticated SuperNodes, allowing you to"
+" verify the identity of each SuperNode connecting to a SuperLink. To "
+"enhance security, node authentication is only available when encrypted "
+"connections (SSL/TLS) are enabled."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:13
+#: ../../source/how-to-authenticate-supernodes.rst:12
 msgid ""
-"SuperLink (server) stores a list of public keys of known SuperNodes "
-"(clients)"
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:14
-msgid ""
-"Using ECDH, both SuperNode and SuperLink independently derive a shared "
-"secret"
+"Flower's node authentication leverages a signature-based mechanism to "
+"verify each node's identity:"
 msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:15
 msgid ""
-"Shared secret is used to compute the HMAC value of the message sent from "
-"SuperNode to SuperLink as a token"
+"Each SuperNode must already possess a unique Elliptic Curve (EC) "
+"public/private key pair."
 msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:17
-msgid "SuperLink verifies the token"
+msgid ""
+"The SuperLink (server) maintains a whitelist of EC public keys for all "
+"trusted SuperNodes (clients)."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:19
+msgid ""
+"A SuperNode signs a timestamp with its private key and sends the signed "
+"timestamp to the SuperLink."
 msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:21
+msgid ""
+"The SuperLink verifies the signature and timestamp using the SuperNode's "
+"public key."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:25
 msgid ""
 "This guide builds on the Flower App setup presented in the :doc:`how-to-"
 "enable-tls-connections` guide and extends it to introduce node "
 "authentication to the SuperLink ↔ SuperNode connection."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:27
+#: ../../source/how-to-authenticate-supernodes.rst:31
 msgid ""
 "Checkout the `Flower Authentication "
 "<https://github.com/adap/flower/tree/main/examples/flower-"
@@ -5031,24 +5038,24 @@ msgid ""
 " setup TLS and node authentication."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:33
+#: ../../source/how-to-authenticate-supernodes.rst:37
 msgid ""
 "This guide covers a preview feature that might change in future versions "
 "of Flower."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:36
+#: ../../source/how-to-authenticate-supernodes.rst:40
 msgid "Generate authentication keys"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:38
+#: ../../source/how-to-authenticate-supernodes.rst:42
 msgid ""
 "To establish an authentication mechanism by which only authorized "
 "SuperNodes can connect to a running SuperLink, a set of key pairs for "
 "both SuperLink and SuperNodes need to be created."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:42
+#: ../../source/how-to-authenticate-supernodes.rst:46
 msgid ""
 "We have prepared a script that can be used to generate such set of keys. "
 "While using these are fine for prototyping, we advice you to follow the "
@@ -5058,7 +5065,7 @@ msgid ""
 " at the top of this guide."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:53
+#: ../../source/how-to-authenticate-supernodes.rst:57
 msgid ""
 "This will generate the keys in a new ``keys/`` directory. By default it "
 "creates a key pair for the SuperLink and one for each SuperNode. Copy "
@@ -5066,11 +5073,11 @@ msgid ""
 " earlier via ``flwr new``)."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:58
+#: ../../source/how-to-authenticate-supernodes.rst:62
 msgid "Enable node authentication in SuperLink"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:60
+#: ../../source/how-to-authenticate-supernodes.rst:64
 msgid ""
 "To launch a SuperLink with SuperNode authentication enabled, you need to "
 "provide three aditional files in addition to the certificates needed for "
@@ -5078,22 +5085,19 @@ msgid ""
 "enabled in the presence of TLS."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:77
+#: ../../source/how-to-authenticate-supernodes.rst:79
 msgid ""
 "``--auth-list-public-keys``: Specify the path to a CSV file storing the "
 "public keys of all SuperNodes that should be allowed to connect with the "
-"SuperLink. | A valid CSV file storing known node public keys should list "
-"the keys in OpenSSH format, separated by commas and without any comments."
-" Refer to the code sample, which contains a CSV file with two known node "
-"public keys."
+"SuperLink."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst
-msgid "``--auth-superlink-private-key``: the private key of the SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst
-msgid "``--auth-superlink-public-key``: the public key of the SuperLink."
+#: ../../source/how-to-authenticate-supernodes.rst:80
+msgid ""
+"A valid CSV file storing known node public keys should list the keys in "
+"OpenSSH format, separated by commas and without any comments. Refer to "
+"the code sample, which contains a CSV file with two known node public "
+"keys."
 msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:83
@@ -26583,7 +26587,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|d8f98c8f80fc4a7e94e6855ac6fbc7fc|"
+msgid "|8a32c27e093c420c9a04f2ccb6411781|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -26598,7 +26602,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|e86d5e237c1840c39e3f41b4ac7b124f|"
+msgid "|c4e577ebf8814c3db899b7859e554ad0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -26620,7 +26624,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|9afc14c1605148018d62740b4ccb5832|"
+msgid "|1ebbc50e7c5b4e43a758e3b27e5f32a4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -26636,7 +26640,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|d3fc35ce213a4e58af6094dc17767eff|"
+msgid "|2751e68c73f84ee8b49205e9b398c029|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -26652,7 +26656,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|1ea218a90c064790b8c279ad52e125b8|"
+msgid "|ba6aa4bb6d144eecbf7b345103976d5d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -26667,7 +26671,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|97cc23c9f87f4a4ea250d9ef18cbf470|"
+msgid "|c232cf09eaf54c11a1e3d0b8ee4f1715|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -26687,7 +26691,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|6b93cc04ab444cebbd4ba95eae0b7131|"
+msgid "|3d7f51fb8a0f492a8e9414382ade7878|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -26702,7 +26706,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|9218bb2c309a4954b9dbbf1cbcc378ac|"
+msgid "|1c475b7b6b3649769f4d234b30c924a6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -26842,7 +26846,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|69c59d7ad4504b878678896392413bc9|"
+msgid "|e64f2b578dd549d9bed0c691dd490c82|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -26866,7 +26870,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|e8ec4e15c93b410481809047487792ee|"
+msgid "|503c43bc67944dfa8325fc729fd43e20|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -26890,7 +26894,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|a0d2236676b34653a63d638648555a8e|"
+msgid "|f347ea4acdce4f48bdaf44e720e66bfe|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -26913,7 +26917,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|84e52841ac4e47de8bd64e2a36803ce8|"
+msgid "|cd91e0ea312f4ff8a571dddd7c25737f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -26951,7 +26955,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|3b94c4986bf7458fbd2c19506712c68e|"
+msgid "|0f02baf4a2594209845b7181381cb0c0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -27045,7 +27049,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|ab451c891332411989c05b3e0ce9e269|"
+msgid "|6c43269d50c448dab831fbd7e4d37a55|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -40270,5 +40274,101 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|19c7a73ef14a43b9bb0ed84011a0367d|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Flower has built-in support for "
+#~ "authenticated SuperNodes that you can "
+#~ "use to verify the identities of "
+#~ "each SuperNode connecting to a "
+#~ "SuperLink. For increased security, node "
+#~ "authentication can only be used when "
+#~ "encrypted connections (SSL/TLS) are enabled."
+#~ " Flower node authentication works similar"
+#~ " to how GitHub SSH authentication "
+#~ "works:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "SuperLink (server) stores a list of "
+#~ "public keys of known SuperNodes "
+#~ "(clients)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Using ECDH, both SuperNode and SuperLink"
+#~ " independently derive a shared secret"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Shared secret is used to compute "
+#~ "the HMAC value of the message sent"
+#~ " from SuperNode to SuperLink as a "
+#~ "token"
+#~ msgstr ""
+
+#~ msgid "SuperLink verifies the token"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--auth-list-public-keys``: Specify the"
+#~ " path to a CSV file storing the"
+#~ " public keys of all SuperNodes that"
+#~ " should be allowed to connect with"
+#~ " the SuperLink. | A valid CSV "
+#~ "file storing known node public keys "
+#~ "should list the keys in OpenSSH "
+#~ "format, separated by commas and without"
+#~ " any comments. Refer to the code "
+#~ "sample, which contains a CSV file "
+#~ "with two known node public keys."
+#~ msgstr ""
+
+#~ msgid "``--auth-superlink-private-key``: the private key of the SuperLink."
+#~ msgstr ""
+
+#~ msgid "``--auth-superlink-public-key``: the public key of the SuperLink."
+#~ msgstr ""
+
+#~ msgid "|d8f98c8f80fc4a7e94e6855ac6fbc7fc|"
+#~ msgstr ""
+
+#~ msgid "|e86d5e237c1840c39e3f41b4ac7b124f|"
+#~ msgstr ""
+
+#~ msgid "|9afc14c1605148018d62740b4ccb5832|"
+#~ msgstr ""
+
+#~ msgid "|d3fc35ce213a4e58af6094dc17767eff|"
+#~ msgstr ""
+
+#~ msgid "|1ea218a90c064790b8c279ad52e125b8|"
+#~ msgstr ""
+
+#~ msgid "|97cc23c9f87f4a4ea250d9ef18cbf470|"
+#~ msgstr ""
+
+#~ msgid "|6b93cc04ab444cebbd4ba95eae0b7131|"
+#~ msgstr ""
+
+#~ msgid "|9218bb2c309a4954b9dbbf1cbcc378ac|"
+#~ msgstr ""
+
+#~ msgid "|69c59d7ad4504b878678896392413bc9|"
+#~ msgstr ""
+
+#~ msgid "|e8ec4e15c93b410481809047487792ee|"
+#~ msgstr ""
+
+#~ msgid "|a0d2236676b34653a63d638648555a8e|"
+#~ msgstr ""
+
+#~ msgid "|84e52841ac4e47de8bd64e2a36803ce8|"
+#~ msgstr ""
+
+#~ msgid "|3b94c4986bf7458fbd2c19506712c68e|"
+#~ msgstr ""
+
+#~ msgid "|ab451c891332411989c05b3e0ce9e269|"
 #~ msgstr ""
 
