@@ -33,8 +33,8 @@ from flwr.common.constant import AUTH_TYPE_KEY, CREDENTIALS_DIR, FLWR_DIR
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 
-from .config_utils import validate_certificate_in_federation_config
 from .auth_plugin import get_cli_auth_plugins
+from .config_utils import validate_certificate_in_federation_config
 
 
 def prompt_text(

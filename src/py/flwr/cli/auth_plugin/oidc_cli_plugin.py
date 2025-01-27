@@ -24,7 +24,12 @@ from typing import Any, Optional, Union
 import typer
 
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.constant import ACCESS_TOKEN_KEY, AUTH_TYPE_KEY, REFRESH_TOKEN_KEY, AuthType
+from flwr.common.constant import (
+    ACCESS_TOKEN_KEY,
+    AUTH_TYPE_KEY,
+    REFRESH_TOKEN_KEY,
+    AuthType,
+)
 from flwr.common.typing import UserAuthCredentials, UserAuthLoginDetails
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -102,7 +107,7 @@ class OidcCliPlugin(CliAuthPlugin):
 
     def load_tokens(self) -> None:
         """Load authentication tokens from the `credentials_path`."""
-        with open(self.credentials_path, "r", encoding="utf-8") as file:
+        with open(self.credentials_path, encoding="utf-8") as file:
             json_dict: dict[str, Any] = json.load(file)
             access_token = json_dict.get(ACCESS_TOKEN_KEY)
             refresh_token = json_dict.get(REFRESH_TOKEN_KEY)
