@@ -97,6 +97,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-run-flower-with-deployment-engine
     how-to-enable-tls-connections
     how-to-authenticate-supernodes
+    how-to-configure-logging
     how-to-use-built-in-mods
     how-to-use-differential-privacy
     how-to-implement-fedbn
