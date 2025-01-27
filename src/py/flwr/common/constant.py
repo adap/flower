@@ -108,7 +108,7 @@ MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 
 # Constants for user authentication
 CREDENTIALS_DIR = ".credentials"
-AUTH_TYPE = "auth_type"
+AUTH_TYPE_KEY = "auth_type"
 ACCESS_TOKEN_KEY = "access_token"
 REFRESH_TOKEN_KEY = "refresh_token"
 
@@ -198,5 +198,15 @@ class CliOutputFormat:
     JSON = "json"
 
     def __new__(cls) -> CliOutputFormat:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class AuthType:
+    """User authentication types."""
+
+    OIDC = "oidc"
+
+    def __new__(cls) -> AuthType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
