@@ -191,11 +191,12 @@ class QFedAvg(FedAvg):
         eval_result = self.evaluate(
             server_round, ndarrays_to_parameters(weights_before)
         )
+        # Ensure `loss` is always defined
         if eval_result is not None:
             loss, _ = eval_result
         else:
             log(WARNING, "Evaluate method returned None, using default loss value")
-            loss = None  # Default value for loss
+            loss = 1.0  # Default value for loss
 
         for _, fit_res in results:
             new_weights = parameters_to_ndarrays(fit_res.parameters)
