@@ -221,7 +221,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         """Test getting a token from SuperNode."""
         # Prepare
         token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
-        mock_response = GetTokenResponse(token=token)
+        mock_response = GetTokenResponse(token=token, ready=True)
         self.mock_stub.GetToken.return_value = mock_response
 
         # Execute
