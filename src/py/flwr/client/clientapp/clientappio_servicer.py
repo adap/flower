@@ -83,10 +83,8 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
 
         # Fail if no ClientAppInputs are available
         if self.clientapp_input is None:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "No inputs available.",
-            )
+            log(DEBUG, "No inputs available.")
+            return GetTokenResponse(ready=False)
         clientapp_input = cast(ClientAppInputs, self.clientapp_input)
 
         # Fail if token was already returned in a previous call

@@ -45,7 +45,10 @@ message ClientAppOutputStatus {
 }
 
 message GetTokenRequest {}
-message GetTokenResponse { uint64 token = 1; }
+message GetTokenResponse {
+  uint64 token = 1;
+  bool ready = 2;
+}
 
 message PullClientAppInputsRequest { uint64 token = 1; }
 message PullClientAppInputsResponse {
