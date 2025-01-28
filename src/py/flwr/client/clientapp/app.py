@@ -188,7 +188,7 @@ def get_token(stub: grpc.Channel) -> Optional[int]:
         res: GetTokenResponse = stub.GetToken(GetTokenRequest())
         if not res.ready:
             log(DEBUG, "[GetToken] Token not available")
-            return
+            return None
         log(DEBUG, "[GetToken] Received token: %s", res.token)
         return res.token
     except grpc.RpcError as e:

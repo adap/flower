@@ -85,7 +85,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         if self.clientapp_input is None:
             log(DEBUG, "No inputs available.")
             return GetTokenResponse(ready=False)
-        clientapp_input = cast(ClientAppInputs, self.clientapp_input)
+        clientapp_input = self.clientapp_input
 
         # Fail if token was already returned in a previous call
         if self.token_returned:
