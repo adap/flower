@@ -20,6 +20,7 @@ from logging import DEBUG, INFO
 import grpc
 
 from flwr.common.logger import log
+from flwr.common.typing import InvalidRunStatusException
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -29,21 +30,28 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushTaskResRequest,
     PushTaskResResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.utils import abort_grpc_context
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
-    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
+    def __init__(
+        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
 
@@ -91,6 +99,17 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state=self.state_factory.state(),
         )
 
+    def PullMessages(
+        self, request: PullMessagesRequest, context: grpc.ServicerContext
+    ) -> PullMessagesResponse:
+        """Pull Messages."""
+        log(INFO, "[Fleet.PullMessages] node_id=%s", request.node.node_id)
+        log(DEBUG, "[Fleet.PullMessages] Request: %s", request)
+        return message_handler.pull_messages(
+            request=request,
+            state=self.state_factory.state(),
+        )
+
     def PushTaskRes(
         self, request: PushTaskResRequest, context: grpc.ServicerContext
     ) -> PushTaskResResponse:
@@ -103,27 +122,68 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             )
         else:
             log(INFO, "[Fleet.PushTaskRes] No task results to push")
-        return message_handler.push_task_res(
-            request=request,
-            state=self.state_factory.state(),
-        )
+
+        try:
+            res = message_handler.push_task_res(
+                request=request,
+                state=self.state_factory.state(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res
+
+    def PushMessages(
+        self, request: PushMessagesRequest, context: grpc.ServicerContext
+    ) -> PushMessagesResponse:
+        """Push Messages."""
+        if request.messages_list:
+            log(
+                INFO,
+                "[Fleet.PushMessages] Push results from node_id=%s",
+                request.messages_list[0].metadata.src_node_id,
+            )
+        else:
+            log(INFO, "[Fleet.PushMessages] No task results to push")
+
+        try:
+            res = message_handler.push_messages(
+                request=request,
+                state=self.state_factory.state(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
     ) -> GetRunResponse:
         """Get run information."""
         log(INFO, "[Fleet.GetRun] Requesting `Run` for run_id=%s", request.run_id)
-        return message_handler.get_run(
-            request=request,
-            state=self.state_factory.state(),
-        )
+
+        try:
+            res = message_handler.get_run(
+                request=request,
+                state=self.state_factory.state(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res
 
     def GetFab(
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
         """Get FAB."""
         log(INFO, "[Fleet.GetFab] Requesting FAB for fab_hash=%s", request.hash_str)
-        return message_handler.get_fab(
-            request=request,
-            ffs=self.ffs_factory.ffs(),
-        )
+        try:
+            res = message_handler.get_fab(
+                request=request,
+                ffs=self.ffs_factory.ffs(),
+                state=self.state_factory.state(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res

@@ -14,6 +14,7 @@
 # ==============================================================================
 """(De-)serialization tests."""
 
+
 import random
 import string
 from collections import OrderedDict
@@ -44,6 +45,7 @@ from . import (
     RecordSet,
     typing,
 )
+from .constant import SUPERLINK_NODE_ID
 from .message import Error, Message, Metadata
 from .serde import (
     array_from_proto,
@@ -80,7 +82,7 @@ from .serde import (
 def test_serialisation_deserialisation() -> None:
     """Test if the np.ndarray is identical after (de-)serialization."""
     # Prepare
-    scalars = [True, b"bytestr", 3.14, 9000, "Hello"]
+    scalars = [True, b"bytestr", 3.14, 9000, "Hello", (1 << 63) + 1]
 
     for scalar in scalars:
         # Execute
@@ -170,7 +172,7 @@ class RecordMaker:
             length = self.rng.randint(1, 10)
         return "".join(self.rng.choices(char_pool, k=length))
 
-    def get_value(self, dtype: type[T]) -> T:
+    def get_value(self, dtype: Union[type[T], str]) -> T:
         """Create a value of a given type."""
         ret: Any = None
         if dtype == bool:
@@ -178,11 +180,13 @@ class RecordMaker:
         elif dtype == str:
             ret = self.get_str(self.rng.randint(10, 100))
         elif dtype == int:
-            ret = self.rng.randint(-1 << 30, 1 << 30)
+            ret = self.rng.randint(-1 << 63, (1 << 63) - 1)
         elif dtype == float:
             ret = (self.rng.random() - 0.5) * (2.0 ** self.rng.randint(0, 50))
         elif dtype == bytes:
             ret = self.randbytes(self.rng.randint(10, 100))
+        elif dtype == "uint":
+            ret = self.rng.randint(0, (1 << 64) - 1)
         else:
             raise NotImplementedError(f"Unsupported dtype: {dtype}")
         return cast(T, ret)
@@ -316,6 +320,8 @@ def test_metrics_record_serialization_deserialization() -> None:
     # Prepare
     maker = RecordMaker()
     original = maker.metrics_record()
+    original["uint64"] = (1 << 63) + 321
+    original["list of uint64"] = [maker.get_value("uint") for _ in range(30)]
 
     # Execute
     proto = metrics_record_to_proto(original)
@@ -331,6 +337,8 @@ def test_configs_record_serialization_deserialization() -> None:
     # Prepare
     maker = RecordMaker()
     original = maker.configs_record()
+    original["uint64"] = (1 << 63) + 101
+    original["list of uint64"] = [maker.get_value("uint") for _ in range(100)]
 
     # Execute
     proto = configs_record_to_proto(original)
@@ -381,7 +389,7 @@ def test_message_to_and_from_taskins(
     maker = RecordMaker(state=1)
     metadata = maker.metadata()
     # pylint: disable-next=protected-access
-    metadata.__dict__["_src_node_id"] = 0  # Assume driver node
+    metadata.__dict__["_src_node_id"] = SUPERLINK_NODE_ID  # Assume driver node
 
     original = Message(
         metadata=metadata,
@@ -425,7 +433,7 @@ def test_message_to_and_from_taskres(
     # Prepare
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
-    metadata.dst_node_id = 0  # Assume driver node
+    metadata.dst_node_id = SUPERLINK_NODE_ID  # Assume driver node
 
     original = Message(
         metadata=metadata,
@@ -497,6 +505,7 @@ def test_context_serialization_deserialization() -> None:
     # Prepare
     maker = RecordMaker()
     original = Context(
+        run_id=0,
         node_id=1,
         node_config=maker.user_config(),
         state=maker.recordset(1, 1, 1),
@@ -522,6 +531,11 @@ def test_run_serialization_deserialization() -> None:
         fab_version="ipsum",
         fab_hash="hash",
         override_config=maker.user_config(),
+        pending_at="2021-01-01T00:00:00Z",
+        starting_at="2021-01-02T23:02:11Z",
+        running_at="2021-01-03T12:00:50Z",
+        finished_at="",
+        status=typing.RunStatus(status="running", sub_status="", details="OK"),
     )
 
     # Execute

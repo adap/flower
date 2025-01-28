@@ -15,7 +15,7 @@
 """Label distribution heatmap plotting."""
 
 
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -29,15 +29,15 @@ from matplotlib.axes import Axes
 def _plot_heatmap(
     dataframe: pd.DataFrame,
     axis: Optional[Axes],
-    figsize: Optional[Tuple[float, float]],
+    figsize: Optional[tuple[float, float]],
     title: str,
     colormap: Optional[Union[str, mcolors.Colormap]],
     partition_id_axis: str,
     size_unit: str,
     legend: bool,
     legend_title: Optional[str],
-    plot_kwargs: Optional[Dict[str, Any]],
-    legend_kwargs: Optional[Dict[str, Any]],
+    plot_kwargs: Optional[dict[str, Any]],
+    legend_kwargs: Optional[dict[str, Any]],
 ) -> Axes:
     if axis is None:
         if figsize is None:
@@ -90,7 +90,7 @@ def _initialize_figsize(
     partition_id_axis: str,
     num_partitions: int,
     num_labels: int,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     figsize = (0.0, 0.0)
     if partition_id_axis == "x":
         figsize = (3 * np.sqrt(num_partitions), np.sqrt(num_labels))

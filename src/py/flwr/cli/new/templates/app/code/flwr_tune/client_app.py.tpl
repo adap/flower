@@ -2,7 +2,6 @@
 
 import os
 import warnings
-from collections import OrderedDict
 from typing import Dict, Tuple
 
 import torch
@@ -11,7 +10,7 @@ from flwr.common import Context
 from flwr.common.config import unflatten_dict
 from flwr.common.typing import NDArrays, Scalar
 from omegaconf import DictConfig
-from peft import get_peft_model_state_dict, set_peft_model_state_dict
+
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
@@ -20,7 +19,12 @@ from $import_name.dataset import (
     load_data,
     replace_keys,
 )
-from $import_name.models import cosine_annealing, get_model
+from $import_name.models import (
+    cosine_annealing,
+    get_model,
+    set_parameters,
+    get_parameters,
+)
 
 # Avoid warnings
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
@@ -90,20 +94,6 @@ class FlowerClient(NumPyClient):
             len(self.trainset),
             {"train_loss": results.training_loss},
         )
-
-
-def set_parameters(model, parameters: NDArrays) -> None:
-    """Change the parameters of the model using the given ones."""
-    peft_state_dict_keys = get_peft_model_state_dict(model).keys()
-    params_dict = zip(peft_state_dict_keys, parameters)
-    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-    set_peft_model_state_dict(model, state_dict)
-
-
-def get_parameters(model) -> NDArrays:
-    """Return the parameters of the current net."""
-    state_dict = get_peft_model_state_dict(model)
-    return [val.cpu().numpy() for _, val in state_dict.items()]
 
 
 def client_fn(context: Context) -> FlowerClient:

@@ -1,7 +1,8 @@
 from typing import List, Tuple, Union
 
 import numpy as np
-import openml
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from sklearn.linear_model import LogisticRegression
 
 XY = Tuple[np.ndarray, np.ndarray]
@@ -50,19 +51,29 @@ def set_initial_params(model: LogisticRegression):
         model.intercept_ = np.zeros((n_classes,))
 
 
-def load_mnist() -> Dataset:
-    """Loads the MNIST dataset using OpenML.
+fds = None  # Cache FederatedDataset
 
-    OpenML dataset link: https://www.openml.org/d/554
-    """
-    mnist_openml = openml.datasets.get_dataset(554)
-    Xy, _, _, _ = mnist_openml.get_data(dataset_format="array")
-    X = Xy[:, :-1]  # the last column contains labels
-    y = Xy[:, -1]
-    # First 60000 samples consist of the train set
-    x_train, y_train = X[:1000], y[:1000]
-    x_test, y_test = X[60000:62000], y[60000:62000]
-    return (x_train, y_train), (x_test, y_test)
+
+def load_data(partition_id: int, num_partitions: int):
+    """Load partition MNIST data."""
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="mnist",
+            partitioners={"train": partitioner},
+        )
+
+    dataset = fds.load_partition(partition_id, "train").with_format("numpy")
+
+    X, y = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
+
+    # Split the on edge data: 80% train, 20% test
+    X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
+    y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
+
+    return X_train, X_test, y_train, y_test
 
 
 def shuffle(X: np.ndarray, y: np.ndarray) -> XY:

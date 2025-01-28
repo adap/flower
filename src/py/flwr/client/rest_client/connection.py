@@ -16,7 +16,6 @@
 
 
 import random
-import sys
 import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -26,26 +25,22 @@ from typing import Callable, Optional, TypeVar, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
-from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import (
-    MISSING_EXTRA_REST,
     PING_BASE_MULTIPLIER,
     PING_CALL_TIMEOUT,
     PING_DEFAULT_INTERVAL,
     PING_RANDOM_RANGE,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import (
-    message_from_taskins,
-    message_to_taskres,
-    user_config_from_proto,
-)
+from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -55,25 +50,26 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 try:
     import requests
 except ModuleNotFoundError:
-    sys.exit(MISSING_EXTRA_REST)
+    flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
 
 PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
 PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
+PATH_PULL_MESSAGES: str = "/api/v0/fleet/pull-messages"
 PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
+PATH_PUSH_MESSAGES: str = "/api/v0/fleet/push-messages"
 PATH_PING: str = "api/v0/fleet/ping"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
 PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
@@ -82,7 +78,7 @@ T = TypeVar("T", bound=GrpcMessage)
 
 
 @contextmanager
-def http_request_response(  # pylint: disable=,R0913, R0914, R0915
+def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     server_address: str,
     insecure: bool,  # pylint: disable=unused-argument
     retry_invoker: RetryInvoker,
@@ -100,7 +96,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
-        Optional[Callable[[str], Fab]],
+        Optional[Callable[[str, int], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -290,29 +286,28 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             log(ERROR, "Node instance missing")
             return None
 
-        # Request instructions (task) from server
-        req = PullTaskInsRequest(node=node)
+        # Request instructions (message) from server
+        req = PullMessagesRequest(node=node)
 
         # Send the request
-        res = _request(req, PullTaskInsResponse, PATH_PULL_TASK_INS)
+        res = _request(req, PullMessagesResponse, PATH_PULL_MESSAGES)
         if res is None:
             return None
 
-        # Get the current TaskIns
-        task_ins: Optional[TaskIns] = get_task_ins(res)
+        # Get the current Messages
+        message_proto = None if len(res.messages_list) == 0 else res.messages_list[0]
 
-        # Discard the current TaskIns if not valid
-        if task_ins is not None and not (
-            task_ins.task.consumer.node_id == node.node_id
-            and validate_task_ins(task_ins)
+        # Discard the current message if not valid
+        if message_proto is not None and not (
+            message_proto.metadata.dst_node_id == node.node_id
         ):
-            task_ins = None
+            message_proto = None
 
         # Return the Message if available
         nonlocal metadata
         message = None
-        if task_ins is not None:
-            message = message_from_taskins(task_ins)
+        if message_proto is not None:
+            message = message_from_proto(message_proto)
             metadata = copy(message.metadata)
             log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
         return message
@@ -336,14 +331,14 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             return
         metadata = None
 
-        # Construct TaskRes
-        task_res = message_to_taskres(message)
+        # Serialize ProtoBuf to bytes
+        message_proto = message_to_proto(message=message)
 
         # Serialize ProtoBuf to bytes
-        req = PushTaskResRequest(task_res_list=[task_res])
+        req = PushMessagesRequest(node=node, messages_list=[message_proto])
 
         # Send the request
-        res = _request(req, PushTaskResResponse, PATH_PUSH_TASK_RES)
+        res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
         if res is None:
             return
 
@@ -356,24 +351,18 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
 
     def get_run(run_id: int) -> Run:
         # Construct the request
-        req = GetRunRequest(run_id=run_id)
+        req = GetRunRequest(node=node, run_id=run_id)
 
         # Send the request
         res = _request(req, GetRunResponse, PATH_GET_RUN)
         if res is None:
-            return Run(run_id, "", "", "", {})
+            return Run.create_empty(run_id)
 
-        return Run(
-            run_id,
-            res.run.fab_id,
-            res.run.fab_version,
-            res.run.fab_hash,
-            user_config_from_proto(res.run.override_config),
-        )
+        return run_from_proto(res.run)
 
-    def get_fab(fab_hash: str) -> Fab:
+    def get_fab(fab_hash: str, run_id: int) -> Fab:
         # Construct the request
-        req = GetFabRequest(hash_str=fab_hash)
+        req = GetFabRequest(node=node, hash_str=fab_hash, run_id=run_id)
 
         # Send the request
         res = _request(req, GetFabResponse, PATH_GET_FAB)
@@ -390,3 +379,12 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         yield (receive, send, create_node, delete_node, get_run, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
+    # Cleanup
+    finally:
+        try:
+            if node is not None:
+                # Disable retrying
+                retry_invoker.max_tries = 1
+                delete_node()
+        except RequestsConnectionError:
+            pass

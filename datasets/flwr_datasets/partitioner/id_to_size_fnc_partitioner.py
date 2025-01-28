@@ -15,7 +15,7 @@
 """IdToSizeFncPartitioner class."""
 
 
-from typing import Callable, Dict, List, Union
+from typing import Callable, Union
 
 import numpy as np
 
@@ -59,8 +59,8 @@ class IdToSizeFncPartitioner(Partitioner):
         self._num_partitions = num_partitions
         self._partition_id_to_size_fn = partition_id_to_size_fn
 
-        self._partition_id_to_size: Dict[int, int] = {}
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
+        self._partition_id_to_size: dict[int, int] = {}
+        self._partition_id_to_indices: dict[int, list[int]] = {}
         # A flag to perform only a single compute to determine the indices
         self._partition_id_to_indices_determined = False
 
@@ -91,12 +91,12 @@ class IdToSizeFncPartitioner(Partitioner):
         return self._num_partitions
 
     @property
-    def partition_id_to_size(self) -> Dict[int, int]:
+    def partition_id_to_size(self) -> dict[int, int]:
         """Node id to the number of samples."""
         return self._partition_id_to_size
 
     @property
-    def partition_id_to_indices(self) -> Dict[int, List[int]]:
+    def partition_id_to_indices(self) -> dict[int, list[int]]:
         """Node id to the list of indices."""
         return self._partition_id_to_indices
 

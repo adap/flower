@@ -22,37 +22,37 @@ from typing import Optional, cast
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 from .driver import Driver
 
 
 class InMemoryDriver(Driver):
-    """`InMemoryDriver` class provides an interface to the Driver API.
+    """`InMemoryDriver` class provides an interface to the ServerAppIo API.
 
     Parameters
     ----------
-    run_id : int
-        The identifier of the run.
     state_factory : StateFactory
         A StateFactory embedding a state that this driver can interface with.
+    pull_interval : float (default=0.1)
+        Sleep duration between calls to `pull_messages`.
     """
 
     def __init__(
         self,
-        run_id: int,
-        state_factory: StateFactory,
+        state_factory: LinkStateFactory,
+        pull_interval: float = 0.1,
     ) -> None:
-        self._run_id = run_id
         self._run: Optional[Run] = None
         self.state = state_factory.state()
-        self.node = Node(node_id=0, anonymous=True)
+        self.pull_interval = pull_interval
+        self.node = Node(node_id=SUPERLINK_NODE_ID)
 
     def _check_message(self, message: Message) -> None:
-        self._init_run()
         # Check if the message is valid
         if not (
             message.metadata.run_id == cast(Run, self._run).run_id
@@ -63,22 +63,19 @@ class InMemoryDriver(Driver):
         ):
             raise ValueError(f"Invalid message: {message}")
 
-    def _init_run(self) -> None:
+    def set_run(self, run_id: int) -> None:
         """Initialize the run."""
-        if self._run is not None:
-            return
-        run = self.state.get_run(self._run_id)
+        run = self.state.get_run(run_id)
         if run is None:
-            raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
+            raise RuntimeError(f"Cannot find the run with ID: {run_id}")
         self._run = run
 
     @property
     def run(self) -> Run:
         """Run ID."""
-        self._init_run()
         return Run(**vars(cast(Run, self._run)))
 
-    def create_message(  # pylint: disable=too-many-arguments
+    def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
         content: RecordSet,
         message_type: str,
@@ -91,7 +88,6 @@ class InMemoryDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        self._init_run()
         if ttl:
             warnings.warn(
                 "A custom TTL was set, but note that the SuperLink does not enforce "
@@ -115,7 +111,6 @@ class InMemoryDriver(Driver):
 
     def get_node_ids(self) -> list[int]:
         """Get node IDs."""
-        self._init_run()
         return list(self.state.get_nodes(cast(Run, self._run).run_id))
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
@@ -146,9 +141,13 @@ class InMemoryDriver(Driver):
         """
         msg_ids = {UUID(msg_id) for msg_id in message_ids}
         # Pull TaskRes
-        task_res_list = self.state.get_task_res(task_ids=msg_ids, limit=len(msg_ids))
+        task_res_list = self.state.get_task_res(task_ids=msg_ids)
         # Delete tasks in state
-        self.state.delete_tasks(msg_ids)
+        # Delete the TaskIns/TaskRes pairs if TaskRes is found
+        task_ins_ids_to_delete = {
+            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
+        }
+        self.state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
         # Convert TaskRes to Message
         msgs = [message_from_taskres(taskres) for taskres in task_res_list]
         return msgs
@@ -180,5 +179,5 @@ class InMemoryDriver(Driver):
             if len(msg_ids) == 0:
                 break
             # Sleep
-            time.sleep(3)
+            time.sleep(self.pull_interval)
         return ret

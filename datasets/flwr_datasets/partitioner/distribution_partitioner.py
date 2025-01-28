@@ -16,7 +16,7 @@
 
 
 from collections import Counter
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 
@@ -36,21 +36,22 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     in a deterministic pathological manner. The 1st dimension is the number of unique
     labels and the 2nd-dimension is the number of buckets into which the samples
     associated with each label will be divided. That is, given a distribution array of
-    shape,
-                           `num_unique_labels_per_partition` x `num_partitions`
-    ( `num_unique_labels`, ---------------------------------------------------- ),
-                                          `num_unique_labels`
-    the label_id at the i'th row is assigned to the partition_id based on the following
-    approach.
+    shape,::
 
-    First, for an i'th row, generate a list of `id`s according to the formula:
-        id = alpha + beta
-    where,
-        alpha = (i - num_unique_labels_per_partition + 1) \
-                 + (j % num_unique_labels_per_partition),
-        alpha = alpha + (alpha >= 0 ? 0 : num_unique_labels),
-        beta = num_unique_labels * (j // num_unique_labels_per_partition)
-    and j in {0, 1, 2, ..., `num_columns`}. Then, sort the list of `id`s in ascending
+                            `num_unique_labels_per_partition` x `num_partitions`
+        ( `num_unique_labels`, ---------------------------------------------------- ),
+                                            `num_unique_labels`
+        the label_id at the i'th row is assigned to the partition_id based on the
+        following approach.
+
+        First, for an i'th row, generate a list of `id`s according to the formula:
+            id = alpha + beta
+        where,
+            alpha = (i - num_unique_labels_per_partition + 1) +
+                    + (j % num_unique_labels_per_partition),
+            alpha = alpha + (alpha >= 0 ? 0 : num_unique_labels),
+            beta = num_unique_labels * (j // num_unique_labels_per_partition)
+    and j in {0, 1, 2, ..., `num_columns`}. Then, sort the list of `id` s in ascending
     order. The j'th index in this sorted list corresponds to the partition_id that the
     i'th unique label (and the underlying distribution array value) will be assigned to.
     So, for a dataset with 10 unique labels and a configuration with 20 partitions and
@@ -182,7 +183,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         self._num_unique_labels: int = 0
         self._num_columns: int = 0
         self._partition_id_to_indices_determined = False
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
+        self._partition_id_to_indices: dict[int, list[int]] = {}
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
         """Load a partition based on the partition index.

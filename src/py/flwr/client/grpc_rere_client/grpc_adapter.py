@@ -24,10 +24,14 @@ from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common import log
 from flwr.common.constant import (
+    GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY,
+    GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY,
     GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY,
+    GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY,
+    GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY,
     GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
 )
-from flwr.common.version import package_version
+from flwr.common.version import package_name, package_version
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -36,8 +40,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushTaskResRequest,
     PushTaskResResponse,
 )
@@ -62,9 +70,16 @@ class GrpcAdapter:
         self, request: GrpcMessage, response_type: type[T], **kwargs: Any
     ) -> T:
         # Serialize request
+        req_cls = request.__class__
         container_req = MessageContainer(
-            metadata={GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY: package_version},
-            grpc_message_name=request.__class__.__qualname__,
+            metadata={
+                GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY: package_name,
+                GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY: package_version,
+                GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY: package_version,
+                GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY: req_cls.__module__,
+                GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY: req_cls.__qualname__,
+            },
+            grpc_message_name=req_cls.__qualname__,
             grpc_message_content=request.SerializeToString(),
         )
 
@@ -121,11 +136,23 @@ class GrpcAdapter:
         """."""
         return self._send_and_receive(request, PullTaskInsResponse, **kwargs)
 
+    def PullMessages(  # pylint: disable=C0103
+        self, request: PullMessagesRequest, **kwargs: Any
+    ) -> PullMessagesResponse:
+        """."""
+        return self._send_and_receive(request, PullMessagesResponse, **kwargs)
+
     def PushTaskRes(  # pylint: disable=C0103
         self, request: PushTaskResRequest, **kwargs: Any
     ) -> PushTaskResResponse:
         """."""
         return self._send_and_receive(request, PushTaskResResponse, **kwargs)
+
+    def PushMessages(  # pylint: disable=C0103
+        self, request: PushMessagesRequest, **kwargs: Any
+    ) -> PushMessagesResponse:
+        """."""
+        return self._send_and_receive(request, PushMessagesResponse, **kwargs)
 
     def GetRun(  # pylint: disable=C0103
         self, request: GetRunRequest, **kwargs: Any

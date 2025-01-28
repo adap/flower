@@ -15,28 +15,38 @@
 """Common function to register exit handlers for server and client."""
 
 
-import sys
-from signal import SIGINT, SIGTERM, signal
+from signal import SIGINT, SIGQUIT, SIGTERM, signal
 from threading import Thread
 from types import FrameType
 from typing import Optional
 
 from grpc import Server
 
-from flwr.common.telemetry import EventType, event
+from flwr.common.telemetry import EventType
+
+from .exit import ExitCode, flwr_exit
+
+SIGNAL_TO_EXIT_CODE = {
+    SIGINT: ExitCode.GRACEFUL_EXIT_SIGINT,
+    SIGQUIT: ExitCode.GRACEFUL_EXIT_SIGQUIT,
+    SIGTERM: ExitCode.GRACEFUL_EXIT_SIGTERM,
+}
 
 
 def register_exit_handlers(
     event_type: EventType,
+    exit_message: Optional[str] = None,
     grpc_servers: Optional[list[Server]] = None,
     bckg_threads: Optional[list[Thread]] = None,
 ) -> None:
-    """Register exit handlers for `SIGINT` and `SIGTERM` signals.
+    """Register exit handlers for `SIGINT`, `SIGTERM` and `SIGQUIT` signals.
 
     Parameters
     ----------
     event_type : EventType
         The telemetry event that should be logged before exit.
+    exit_message : Optional[str] (default: None)
+        The message to be logged before exiting.
     grpc_servers: Optional[List[Server]] (default: None)
         An otpional list of gRPC servers that need to be gracefully
         terminated before exiting.
@@ -46,6 +56,7 @@ def register_exit_handlers(
     """
     default_handlers = {
         SIGINT: None,
+        SIGQUIT: None,
         SIGTERM: None,
     }
 
@@ -61,8 +72,6 @@ def register_exit_handlers(
         # Reset to default handler
         signal(signalnum, default_handlers[signalnum])
 
-        event_res = event(event_type=event_type)
-
         if grpc_servers is not None:
             for grpc_server in grpc_servers:
                 grpc_server.stop(grace=1)
@@ -71,14 +80,19 @@ def register_exit_handlers(
             for bckg_thread in bckg_threads:
                 bckg_thread.join()
 
-        # Ensure event has happend
-        event_res.result()
-
         # Setup things for graceful exit
-        sys.exit(0)
+        flwr_exit(
+            code=SIGNAL_TO_EXIT_CODE[signalnum],
+            message=exit_message,
+            event_type=event_type,
+        )
 
     default_handlers[SIGINT] = signal(  # type: ignore
         SIGINT,
+        graceful_exit_handler,  # type: ignore
+    )
+    default_handlers[SIGQUIT] = signal(  # type: ignore
+        SIGQUIT,
         graceful_exit_handler,  # type: ignore
     )
     default_handlers[SIGTERM] = signal(  # type: ignore

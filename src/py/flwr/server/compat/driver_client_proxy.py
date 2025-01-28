@@ -15,7 +15,6 @@
 """Flower ClientProxy implementation for Driver API."""
 
 
-import time
 from typing import Optional
 
 from flwr import common
@@ -25,18 +24,15 @@ from flwr.server.client_proxy import ClientProxy
 
 from ..driver.driver import Driver
 
-SLEEP_TIME = 1
-
 
 class DriverClientProxy(ClientProxy):
     """Flower client proxy which delegates work using the Driver API."""
 
-    def __init__(self, node_id: int, driver: Driver, anonymous: bool, run_id: int):
+    def __init__(self, node_id: int, driver: Driver, run_id: int):
         super().__init__(str(node_id))
         self.node_id = node_id
         self.driver = driver
         self.run_id = run_id
-        self.anonymous = anonymous
 
     def get_properties(
         self,
@@ -122,29 +118,18 @@ class DriverClientProxy(ClientProxy):
             ttl=timeout,
         )
 
-        # Push message
-        message_ids = list(self.driver.push_messages(messages=[message]))
-        if len(message_ids) != 1:
-            raise ValueError("Unexpected number of message_ids")
+        # Send message and wait for reply
+        messages = list(self.driver.send_and_receive(messages=[message]))
 
-        message_id = message_ids[0]
-        if message_id == "":
-            raise ValueError(f"Failed to send message to node {self.node_id}")
+        # A single reply is expected
+        if len(messages) != 1:
+            raise ValueError(f"Expected one Message but got: {len(messages)}")
 
-        if timeout:
-            start_time = time.time()
-
-        while True:
-            messages = list(self.driver.pull_messages(message_ids))
-            if len(messages) == 1:
-                msg: Message = messages[0]
-                if msg.has_error():
-                    raise ValueError(
-                        f"Message contains an Error (reason: {msg.error.reason}). "
-                        "It originated during client-side execution of a message."
-                    )
-                return msg.content
-
-            if timeout is not None and time.time() > start_time + timeout:
-                raise RuntimeError("Timeout reached")
-            time.sleep(SLEEP_TIME)
+        # Only messages without errors can be handled beyond these point
+        msg: Message = messages[0]
+        if msg.has_error():
+            raise ValueError(
+                f"Message contains an Error (reason: {msg.error.reason}). "
+                "It originated during client-side execution of a message."
+            )
+        return msg.content
