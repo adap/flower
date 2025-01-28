@@ -194,22 +194,24 @@ class QFedAvg(FedAvg):
         # Ensure `loss` is always defined
         # Aggregate fit results
         losses = [
-            fit_res.loss for _, fit_res in results if hasattr(
-                fit_res, "loss"
-            ) and not np.isnan(
-                fit_res.loss
-            )
+            fit_res.loss
+            for _, fit_res in results
+            if hasattr(fit_res, "loss") and not np.isnan(fit_res.loss)
         ]
 
         if eval_result is not None:
             loss, _ = eval_result
         elif losses:
             loss = np.mean(losses)
-            log(WARNING, f"Using dynamic fallback loss based on historical data: {loss}")
+            log(
+                WARNING, f"Using dynamic fallback loss based on historical data: {loss}"
+            )
         else:
             loss = 1.0  # Final fallback default
-            log(WARNING, "No valid historical losses found, using default loss value: 1.0")
-
+            log(
+                WARNING,
+                "No valid historical losses found, using default loss value: 1.0",
+            )
 
         for _, fit_res in results:
             new_weights = parameters_to_ndarrays(fit_res.parameters)
