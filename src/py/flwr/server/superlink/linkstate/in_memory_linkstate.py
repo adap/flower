@@ -74,8 +74,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
 
         self.node_public_keys: set[bytes] = set()
-        self.server_public_key: Optional[bytes] = None
-        self.server_private_key: Optional[bytes] = None
 
         self.lock = threading.RLock()
 
@@ -403,30 +401,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def store_server_private_public_key(
-        self, private_key: bytes, public_key: bytes
-    ) -> None:
-        """Store `server_private_key` and `server_public_key` in the link state."""
+    def clear_supernode_auth_keys(self) -> None:
+        """Clear stored `node_public_keys` in the link state if any."""
         with self.lock:
-            if self.server_private_key is None and self.server_public_key is None:
-                self.server_private_key = private_key
-                self.server_public_key = public_key
-            else:
-                raise RuntimeError("Server private and public key already set")
-
-    def get_server_private_key(self) -> Optional[bytes]:
-        """Retrieve `server_private_key` in urlsafe bytes."""
-        return self.server_private_key
-
-    def get_server_public_key(self) -> Optional[bytes]:
-        """Retrieve `server_public_key` in urlsafe bytes."""
-        return self.server_public_key
-
-    def clear_supernode_auth_keys_and_credentials(self) -> None:
-        """Clear stored `node_public_keys` and credentials in the link state if any."""
-        with self.lock:
-            self.server_private_key = None
-            self.server_public_key = None
             self.node_public_keys.clear()
 
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:

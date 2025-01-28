@@ -52,8 +52,6 @@ mkdir -p $KEY_DIR
 
 rm -f $KEY_DIR/*
 
-ssh-keygen -t ecdsa -b 384 -N "" -f "${KEY_DIR}/server_credentials" -C ""
-
 generate_client_credentials() {
     local num_clients=${1:-2} 
     for ((i=1; i<=num_clients; i++))

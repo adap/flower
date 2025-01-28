@@ -30,7 +30,6 @@ from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, Error, RecordSet, n
 from flwr.common.constant import SUPERLINK_NODE_ID, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
-    private_key_to_bytes,
     public_key_to_bytes,
 )
 from flwr.common.serde import message_from_proto, message_to_proto
@@ -674,56 +673,6 @@ class StateTest(unittest.TestCase):
         # Assert
         assert num == 2
 
-    def test_server_private_public_key(self) -> None:
-        """Test get server private and public key after inserting."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        private_key, public_key = generate_key_pairs()
-        private_key_bytes = private_key_to_bytes(private_key)
-        public_key_bytes = public_key_to_bytes(public_key)
-
-        # Execute
-        state.store_server_private_public_key(private_key_bytes, public_key_bytes)
-        server_private_key = state.get_server_private_key()
-        server_public_key = state.get_server_public_key()
-
-        # Assert
-        assert server_private_key == private_key_bytes
-        assert server_public_key == public_key_bytes
-
-    def test_server_private_public_key_none(self) -> None:
-        """Test get server private and public key without inserting."""
-        # Prepare
-        state: LinkState = self.state_factory()
-
-        # Execute
-        server_private_key = state.get_server_private_key()
-        server_public_key = state.get_server_public_key()
-
-        # Assert
-        assert server_private_key is None
-        assert server_public_key is None
-
-    def test_store_server_private_public_key_twice(self) -> None:
-        """Test inserting private and public key twice."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        private_key, public_key = generate_key_pairs()
-        private_key_bytes = private_key_to_bytes(private_key)
-        public_key_bytes = public_key_to_bytes(public_key)
-        new_private_key, new_public_key = generate_key_pairs()
-        new_private_key_bytes = private_key_to_bytes(new_private_key)
-        new_public_key_bytes = public_key_to_bytes(new_public_key)
-
-        # Execute
-        state.store_server_private_public_key(private_key_bytes, public_key_bytes)
-
-        # Assert
-        with self.assertRaises(RuntimeError):
-            state.store_server_private_public_key(
-                new_private_key_bytes, new_public_key_bytes
-            )
-
     def test_clear_supernode_auth_keys_and_credentials(self) -> None:
         """Test clear_supernode_auth_keys_and_credentials from linkstate."""
         # Prepare
@@ -733,19 +682,13 @@ class StateTest(unittest.TestCase):
 
         # Execute (store)
         state.store_node_public_keys(public_keys)
-        private_key, public_key = generate_key_pairs()
-        private_key_bytes = private_key_to_bytes(private_key)
-        public_key_bytes = public_key_to_bytes(public_key)
-        state.store_server_private_public_key(private_key_bytes, public_key_bytes)
 
         # Execute (clear)
-        state.clear_supernode_auth_keys_and_credentials()
+        state.clear_supernode_auth_keys()
         node_public_keys = state.get_node_public_keys()
 
         # Assert
         assert node_public_keys == set()
-        assert state.get_server_private_key() is None
-        assert state.get_server_public_key() is None
 
     def test_node_public_keys(self) -> None:
         """Test store_node_public_keys and get_node_public_keys from state."""
@@ -1284,7 +1227,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 17
+        assert len(result) == 15
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1309,7 +1252,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 17
+        assert len(result) == 15
 
 
 if __name__ == "__main__":
