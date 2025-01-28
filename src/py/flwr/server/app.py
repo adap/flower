@@ -374,8 +374,9 @@ def run_superlink() -> None:
             bckg_threads.append(fleet_thread)
         elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
             node_public_keys = _try_load_public_keys_node_authentication(args)
-            interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
+            auto_auth = True
             if node_public_keys is not None:
+                auto_auth = False
                 state = state_factory.state()
                 state.clear_supernode_auth_keys()
                 state.store_node_public_keys(node_public_keys)
@@ -384,7 +385,7 @@ def run_superlink() -> None:
                     "Node authentication enabled with %d known public keys",
                     len(node_public_keys),
                 )
-                interceptors = [AuthenticateServerInterceptor(state_factory)]
+            interceptors = [AuthenticateServerInterceptor(state_factory, auto_auth)]
 
             fleet_server = _run_fleet_api_grpc_rere(
                 address=fleet_address,
