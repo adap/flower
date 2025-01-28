@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-01-27 00:31+0000\n"
+"POT-Creation-Date: 2025-01-28 00:30+0000\n"
 "PO-Revision-Date: 2023-09-05 17:54+0000\n"
 "Last-Translator: Charles Beauville <charles@flower.ai>\n"
 "Language: fr\n"
@@ -5906,6 +5906,33 @@ msgid ""
 "``evaluate``."
 msgstr ""
 
+#: ../../source/how-to-configure-logging.rst:-1
+msgid "Configure the logging level for your Flower processes."
+msgstr ""
+
+#: ../../source/how-to-configure-logging.rst:6
+#, fuzzy
+msgid "Configure logging"
+msgstr "Configurer les clients"
+
+#: ../../source/how-to-configure-logging.rst:8
+msgid ""
+"By default, the Flower logger uses logging level ``INFO``. This can be "
+"changed via the ``PYTHONLOGLEVEL`` environment variable to any other "
+"levels that Python's `logging module "
+"<https://docs.python.org/3/library/logging.html#logging-levels>`_ "
+"supports. For example, to launch your ``SuperLink`` showing ``DEBUG`` "
+"logs do:"
+msgstr ""
+
+#: ../../source/how-to-configure-logging.rst:31
+msgid ""
+"You can make use of the ``PYTHONLOGLEVEL`` environment variable when "
+"executing other Flower commands to provision the different components in "
+"a Flower Federation (see :doc:`how-to-run-flower-with-deployment-engine`)"
+" or using the `flwr CLI <ref-api-cli.html>`_."
+msgstr ""
+
 #: ../../source/how-to-design-stateful-clients.rst:-1
 msgid ""
 "Build stateful ClientApps in Flower with context objects, enabling "
@@ -9570,7 +9597,7 @@ msgstr "Quickstart tutorials"
 msgid "How-to guides"
 msgstr "Guides"
 
-#: ../../source/index.rst:110 ../../source/index.rst:115
+#: ../../source/index.rst:111 ../../source/index.rst:116
 msgid "Explanations"
 msgstr "Explications"
 
@@ -9578,26 +9605,26 @@ msgstr "Explications"
 msgid "API reference"
 msgstr "Référence pour l'API"
 
-#: ../../source/index.rst:141
+#: ../../source/index.rst:142
 msgid "Reference docs"
 msgstr "Référence pour la documentation"
 
-#: ../../source/index.rst:158
+#: ../../source/index.rst:159
 #, fuzzy
 msgid "Contributor tutorials"
 msgstr "Configuration du contributeur"
 
-#: ../../source/index.rst:165
+#: ../../source/index.rst:166
 #, fuzzy
 msgid "Contributor how-to guides"
 msgstr "Guide pour les contributeurs"
 
-#: ../../source/index.rst:177
+#: ../../source/index.rst:178
 #, fuzzy
 msgid "Contributor explanations"
 msgstr "Explications"
 
-#: ../../source/index.rst:183
+#: ../../source/index.rst:184
 #, fuzzy
 msgid "Contributor references"
 msgstr "Configuration du contributeur"
@@ -9707,7 +9734,7 @@ msgstr ""
 "Guides orientés sur la résolutions étapes par étapes de problèmes ou "
 "objectifs specifiques."
 
-#: ../../source/index.rst:112
+#: ../../source/index.rst:113
 msgid ""
 "Understanding-oriented concept guides explain and discuss key topics and "
 "underlying ideas behind Flower and collaborative AI."
@@ -9715,29 +9742,29 @@ msgstr ""
 "Guides orientés sur la compréhension et l'explication des sujets et idées"
 " de fonds sur lesquels sont construits Flower et l'IA collaborative."
 
-#: ../../source/index.rst:124
+#: ../../source/index.rst:125
 #, fuzzy
 msgid "References"
 msgstr "Référence"
 
-#: ../../source/index.rst:126
+#: ../../source/index.rst:127
 msgid "Information-oriented API reference and other reference material."
 msgstr "Référence de l'API orientée sur l'information pure."
 
-#: ../../source/index.rst:135:<autosummary>:1
+#: ../../source/index.rst:136:<autosummary>:1
 msgid ":py:obj:`flwr <flwr>`\\"
 msgstr ""
 
-#: ../../source/index.rst:135:<autosummary>:1 flwr:1 of
+#: ../../source/index.rst:136:<autosummary>:1 flwr:1 of
 msgid "Flower main package."
 msgstr ""
 
-#: ../../source/index.rst:153
+#: ../../source/index.rst:154
 #, fuzzy
 msgid "Contributor docs"
 msgstr "Configuration du contributeur"
 
-#: ../../source/index.rst:155
+#: ../../source/index.rst:156
 #, fuzzy
 msgid ""
 "The Flower community welcomes contributions. The following docs are "
@@ -30917,7 +30944,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|8a32c27e093c420c9a04f2ccb6411781|"
+msgid "|e513c53249574a7ab9046cc8352b7510|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30936,7 +30963,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|c4e577ebf8814c3db899b7859e554ad0|"
+msgid "|bd41897cd0074390a236966b3f9f5ee1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30968,7 +30995,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|1ebbc50e7c5b4e43a758e3b27e5f32a4|"
+msgid "|d8abfd5e3ae648d6a62792b75531fb48|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30989,7 +31016,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|2751e68c73f84ee8b49205e9b398c029|"
+msgid "|4df8553bc6d946febceec9b15e1cb03a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -31011,7 +31038,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|ba6aa4bb6d144eecbf7b345103976d5d|"
+msgid "|59158ba420384424bef75993a91b288e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -31032,7 +31059,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|c232cf09eaf54c11a1e3d0b8ee4f1715|"
+msgid "|f0b31eeddd3e4006bd41cd54d8f1c40d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -31058,7 +31085,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|3d7f51fb8a0f492a8e9414382ade7878|"
+msgid "|205ce4de0fa842ba9f5a0d4ad1260023|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -31077,7 +31104,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|1c475b7b6b3649769f4d234b30c924a6|"
+msgid "|b32e2105fba64a9ba185a8b0934329ce|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -31308,7 +31335,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|e64f2b578dd549d9bed0c691dd490c82|"
+msgid "|bb454c69eb16424babce129a30e47271|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -31343,7 +31370,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|503c43bc67944dfa8325fc729fd43e20|"
+msgid "|bdb3c58c93a44794a8d3eff87c254102|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -31376,7 +31403,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|f347ea4acdce4f48bdaf44e720e66bfe|"
+msgid "|0383294bcdce4379adf790497bfe1588|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -31407,7 +31434,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|cd91e0ea312f4ff8a571dddd7c25737f|"
+msgid "|329340ee2de443c78fdcdc4a43a55562|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -31467,7 +31494,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|0f02baf4a2594209845b7181381cb0c0|"
+msgid "|d7d1094c52f741ea830675e877293adb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -31611,7 +31638,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|6c43269d50c448dab831fbd7e4d37a55|"
+msgid "|df3ec0ca8a314f6ea4af3ac23a39ce3c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -45974,5 +46001,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|ab451c891332411989c05b3e0ce9e269|"
+#~ msgstr ""
+
+#~ msgid "|8a32c27e093c420c9a04f2ccb6411781|"
+#~ msgstr ""
+
+#~ msgid "|c4e577ebf8814c3db899b7859e554ad0|"
+#~ msgstr ""
+
+#~ msgid "|1ebbc50e7c5b4e43a758e3b27e5f32a4|"
+#~ msgstr ""
+
+#~ msgid "|2751e68c73f84ee8b49205e9b398c029|"
+#~ msgstr ""
+
+#~ msgid "|ba6aa4bb6d144eecbf7b345103976d5d|"
+#~ msgstr ""
+
+#~ msgid "|c232cf09eaf54c11a1e3d0b8ee4f1715|"
+#~ msgstr ""
+
+#~ msgid "|3d7f51fb8a0f492a8e9414382ade7878|"
+#~ msgstr ""
+
+#~ msgid "|1c475b7b6b3649769f4d234b30c924a6|"
+#~ msgstr ""
+
+#~ msgid "|e64f2b578dd549d9bed0c691dd490c82|"
+#~ msgstr ""
+
+#~ msgid "|503c43bc67944dfa8325fc729fd43e20|"
+#~ msgstr ""
+
+#~ msgid "|f347ea4acdce4f48bdaf44e720e66bfe|"
+#~ msgstr ""
+
+#~ msgid "|cd91e0ea312f4ff8a571dddd7c25737f|"
+#~ msgstr ""
+
+#~ msgid "|0f02baf4a2594209845b7181381cb0c0|"
+#~ msgstr ""
+
+#~ msgid "|6c43269d50c448dab831fbd7e4d37a55|"
 #~ msgstr ""
 
