@@ -5,16 +5,20 @@
 Authenticate SuperNodes
 =======================
 
-Flower has built-in support for authenticated SuperNodes that you can use to verify the
-identities of each SuperNode connecting to a SuperLink. For increased security, node
-authentication can only be used when encrypted connections (SSL/TLS) are enabled. Flower
-node authentication works similar to how GitHub SSH authentication works:
+Flower has built-in support for authenticated SuperNodes, allowing you to verify the
+identity of each SuperNode connecting to a SuperLink. To enhance security, node
+authentication is only available when encrypted connections (SSL/TLS) are enabled.
 
-- SuperLink (server) stores a list of public keys of known SuperNodes (clients)
-- Using ECDH, both SuperNode and SuperLink independently derive a shared secret
-- Shared secret is used to compute the HMAC value of the message sent from SuperNode to
-  SuperLink as a token
-- SuperLink verifies the token
+Flower's node authentication leverages a signature-based mechanism to verify each node's
+identity:
+
+- Each SuperNode must already possess a unique Elliptic Curve (EC) public/private key
+  pair.
+- The SuperLink (server) maintains a whitelist of EC public keys for all trusted
+  SuperNodes (clients).
+- A SuperNode signs a timestamp with its private key and sends the signed timestamp to
+  the SuperLink.
+- The SuperLink verifies the signature and timestamp using the SuperNode's public key.
 
 .. note::
 
@@ -62,22 +66,18 @@ aditional files in addition to the certificates needed for the TLS connections. 
 that the authentication feature can only be enabled in the presence of TLS.
 
 .. code-block:: bash
-    :emphasize-lines: 5,6,7
+    :emphasize-lines: 5
 
     $ flower-superlink \
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
-        --auth-list-public-keys keys/client_public_keys.csv \
-        --auth-superlink-private-key keys/server_credentials \
-        --auth-superlink-public-key keys/server_credentials.pub
+        --auth-list-public-keys keys/client_public_keys.csv
 
 .. dropdown:: Understand the command
 
     * ``--auth-list-public-keys``: Specify the path to a CSV file storing the public keys of all SuperNodes that should be allowed to connect with the SuperLink.
-      | A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas and without any comments. Refer to the code sample, which contains a CSV file with two known node public keys.
-    * | ``--auth-superlink-private-key``: the private key of the SuperLink.
-    * | ``--auth-superlink-public-key``: the public key of the SuperLink.
+    A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas and without any comments. Refer to the code sample, which contains a CSV file with two known node public keys.
 
 Enable node authentication in SuperNode
 ---------------------------------------

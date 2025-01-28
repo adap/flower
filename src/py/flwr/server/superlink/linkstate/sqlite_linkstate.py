@@ -71,13 +71,6 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
-SQL_CREATE_TABLE_CREDENTIAL = """
-CREATE TABLE IF NOT EXISTS credential(
-    private_key     BLOB PRIMARY KEY,
-    public_key      BLOB
-);
-"""
-
 SQL_CREATE_TABLE_PUBLIC_KEY = """
 CREATE TABLE IF NOT EXISTS public_key(
     public_key      BLOB PRIMARY KEY
@@ -208,7 +201,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
-        cur.execute(SQL_CREATE_TABLE_CREDENTIAL)
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
@@ -773,46 +765,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def store_server_private_public_key(
-        self, private_key: bytes, public_key: bytes
-    ) -> None:
-        """Store `server_private_key` and `server_public_key` in the link state."""
-        query = "SELECT COUNT(*) FROM credential"
-        count = self.query(query)[0]["COUNT(*)"]
-        if count < 1:
-            query = (
-                "INSERT OR REPLACE INTO credential (private_key, public_key) "
-                "VALUES (:private_key, :public_key)"
-            )
-            self.query(query, {"private_key": private_key, "public_key": public_key})
-        else:
-            raise RuntimeError("Server private and public key already set")
-
-    def get_server_private_key(self) -> Optional[bytes]:
-        """Retrieve `server_private_key` in urlsafe bytes."""
-        query = "SELECT private_key FROM credential"
-        rows = self.query(query)
-        try:
-            private_key: Optional[bytes] = rows[0]["private_key"]
-        except IndexError:
-            private_key = None
-        return private_key
-
-    def get_server_public_key(self) -> Optional[bytes]:
-        """Retrieve `server_public_key` in urlsafe bytes."""
-        query = "SELECT public_key FROM credential"
-        rows = self.query(query)
-        try:
-            public_key: Optional[bytes] = rows[0]["public_key"]
-        except IndexError:
-            public_key = None
-        return public_key
-
-    def clear_supernode_auth_keys_and_credentials(self) -> None:
-        """Clear stored `node_public_keys` and credentials in the link state if any."""
-        queries = ["DELETE FROM public_key;", "DELETE FROM credential;"]
-        for query in queries:
-            self.query(query)
+    def clear_supernode_auth_keys(self) -> None:
+        """Clear stored `node_public_keys` in the link state if any."""
+        self.query("DELETE FROM public_key;")
 
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
         """Store a set of `node_public_keys` in the link state."""
