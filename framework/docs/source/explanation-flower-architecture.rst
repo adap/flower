@@ -1,3 +1,7 @@
+:og:description: Learn about the architecture of a deployed Flower federated learning system, including SuperLink, SuperNodes, multi-tenancy, and the role of SuperExec for managing concurrent training runs.
+.. meta::
+    :description: Learn about the architecture of a deployed Flower federated learning system, including SuperLink, SuperNodes, multi-tenancy, and the role of SuperExec for managing concurrent training runs.
+
 Flower Architecture
 ===================
 
@@ -135,6 +139,3 @@ and ``ClientApp``) can run on different sets of clients.
 .. _clientapp_link: ref-api/flwr.client.ClientApp.html
 
 .. _serverapp_link: ref-api/flwr.server.ServerApp.html
-
-.. meta::
-    :description: Explore the federated learning architecture of the Flower framework, featuring multi-run, concurrent execution, and scalable, secure machine learning while preserving data privacy.
