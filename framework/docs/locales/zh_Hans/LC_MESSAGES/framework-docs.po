@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 00:31+0000\n"
+"POT-Creation-Date: 2025-01-28 00:30+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -5831,6 +5831,33 @@ msgid ""
 "``evaluate``."
 msgstr ""
 
+#: ../../source/how-to-configure-logging.rst:-1
+msgid "Configure the logging level for your Flower processes."
+msgstr ""
+
+#: ../../source/how-to-configure-logging.rst:6
+#, fuzzy
+msgid "Configure logging"
+msgstr "配置客户端"
+
+#: ../../source/how-to-configure-logging.rst:8
+msgid ""
+"By default, the Flower logger uses logging level ``INFO``. This can be "
+"changed via the ``PYTHONLOGLEVEL`` environment variable to any other "
+"levels that Python's `logging module "
+"<https://docs.python.org/3/library/logging.html#logging-levels>`_ "
+"supports. For example, to launch your ``SuperLink`` showing ``DEBUG`` "
+"logs do:"
+msgstr ""
+
+#: ../../source/how-to-configure-logging.rst:31
+msgid ""
+"You can make use of the ``PYTHONLOGLEVEL`` environment variable when "
+"executing other Flower commands to provision the different components in "
+"a Flower Federation (see :doc:`how-to-run-flower-with-deployment-engine`)"
+" or using the `flwr CLI <ref-api-cli.html>`_."
+msgstr ""
+
 #: ../../source/how-to-design-stateful-clients.rst:-1
 msgid ""
 "Build stateful ClientApps in Flower with context objects, enabling "
@@ -9471,7 +9498,7 @@ msgstr "快速入门教程"
 msgid "How-to guides"
 msgstr "操作指南"
 
-#: ../../source/index.rst:110 ../../source/index.rst:115
+#: ../../source/index.rst:111 ../../source/index.rst:116
 msgid "Explanations"
 msgstr "说明"
 
@@ -9479,23 +9506,23 @@ msgstr "说明"
 msgid "API reference"
 msgstr "应用程序接口参考"
 
-#: ../../source/index.rst:141
+#: ../../source/index.rst:142
 msgid "Reference docs"
 msgstr "参考文档"
 
-#: ../../source/index.rst:158
+#: ../../source/index.rst:159
 msgid "Contributor tutorials"
 msgstr "贡献者教程"
 
-#: ../../source/index.rst:165
+#: ../../source/index.rst:166
 msgid "Contributor how-to guides"
 msgstr "投稿指南"
 
-#: ../../source/index.rst:177
+#: ../../source/index.rst:178
 msgid "Contributor explanations"
 msgstr "贡献者解释"
 
-#: ../../source/index.rst:183
+#: ../../source/index.rst:184
 msgid "Contributor references"
 msgstr "贡献者参考资料"
 
@@ -9592,35 +9619,35 @@ msgid ""
 "specific goal."
 msgstr "以问题为导向的 \"如何做 \"指南逐步展示如何实现特定目标。"
 
-#: ../../source/index.rst:112
+#: ../../source/index.rst:113
 msgid ""
 "Understanding-oriented concept guides explain and discuss key topics and "
 "underlying ideas behind Flower and collaborative AI."
 msgstr "以理解为导向的概念指南解释并讨论了Flower和协作式人工智能背后的关键主题和基本思想。"
 
-#: ../../source/index.rst:124
+#: ../../source/index.rst:125
 msgid "References"
 msgstr "参考资料"
 
-#: ../../source/index.rst:126
+#: ../../source/index.rst:127
 msgid "Information-oriented API reference and other reference material."
 msgstr "以信息为导向的 API 参考资料和其他参考资料。"
 
-#: ../../source/index.rst:135:<autosummary>:1
+#: ../../source/index.rst:136:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`flwr <flwr>`\\"
 msgstr ":py:obj:`flwr <flwr>`\\"
 
-#: ../../source/index.rst:135:<autosummary>:1 flwr:1 of
+#: ../../source/index.rst:136:<autosummary>:1 flwr:1 of
 #, fuzzy
 msgid "Flower main package."
 msgstr "Flower 主包装。"
 
-#: ../../source/index.rst:153
+#: ../../source/index.rst:154
 msgid "Contributor docs"
 msgstr "贡献者文档"
 
-#: ../../source/index.rst:155
+#: ../../source/index.rst:156
 msgid ""
 "The Flower community welcomes contributions. The following docs are "
 "intended to help along the way."
@@ -31815,7 +31842,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|8a32c27e093c420c9a04f2ccb6411781|"
+msgid "|e513c53249574a7ab9046cc8352b7510|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -31830,7 +31857,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|c4e577ebf8814c3db899b7859e554ad0|"
+msgid "|bd41897cd0074390a236966b3f9f5ee1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -31854,7 +31881,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|1ebbc50e7c5b4e43a758e3b27e5f32a4|"
+msgid "|d8abfd5e3ae648d6a62792b75531fb48|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -31872,7 +31899,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|2751e68c73f84ee8b49205e9b398c029|"
+msgid "|4df8553bc6d946febceec9b15e1cb03a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -31889,7 +31916,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|ba6aa4bb6d144eecbf7b345103976d5d|"
+msgid "|59158ba420384424bef75993a91b288e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -31904,7 +31931,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|c232cf09eaf54c11a1e3d0b8ee4f1715|"
+msgid "|f0b31eeddd3e4006bd41cd54d8f1c40d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -31925,7 +31952,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|3d7f51fb8a0f492a8e9414382ade7878|"
+msgid "|205ce4de0fa842ba9f5a0d4ad1260023|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -31940,7 +31967,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|1c475b7b6b3649769f4d234b30c924a6|"
+msgid "|b32e2105fba64a9ba185a8b0934329ce|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -32100,7 +32127,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|e64f2b578dd549d9bed0c691dd490c82|"
+msgid "|bb454c69eb16424babce129a30e47271|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -32125,7 +32152,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|503c43bc67944dfa8325fc729fd43e20|"
+msgid "|bdb3c58c93a44794a8d3eff87c254102|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -32151,7 +32178,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|f347ea4acdce4f48bdaf44e720e66bfe|"
+msgid "|0383294bcdce4379adf790497bfe1588|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -32174,7 +32201,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|cd91e0ea312f4ff8a571dddd7c25737f|"
+msgid "|329340ee2de443c78fdcdc4a43a55562|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -32221,7 +32248,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|0f02baf4a2594209845b7181381cb0c0|"
+msgid "|d7d1094c52f741ea830675e877293adb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -32329,7 +32356,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|6c43269d50c448dab831fbd7e4d37a55|"
+msgid "|df3ec0ca8a314f6ea4af3ac23a39ce3c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -40710,5 +40737,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|ab451c891332411989c05b3e0ce9e269|"
+#~ msgstr ""
+
+#~ msgid "|8a32c27e093c420c9a04f2ccb6411781|"
+#~ msgstr ""
+
+#~ msgid "|c4e577ebf8814c3db899b7859e554ad0|"
+#~ msgstr ""
+
+#~ msgid "|1ebbc50e7c5b4e43a758e3b27e5f32a4|"
+#~ msgstr ""
+
+#~ msgid "|2751e68c73f84ee8b49205e9b398c029|"
+#~ msgstr ""
+
+#~ msgid "|ba6aa4bb6d144eecbf7b345103976d5d|"
+#~ msgstr ""
+
+#~ msgid "|c232cf09eaf54c11a1e3d0b8ee4f1715|"
+#~ msgstr ""
+
+#~ msgid "|3d7f51fb8a0f492a8e9414382ade7878|"
+#~ msgstr ""
+
+#~ msgid "|1c475b7b6b3649769f4d234b30c924a6|"
+#~ msgstr ""
+
+#~ msgid "|e64f2b578dd549d9bed0c691dd490c82|"
+#~ msgstr ""
+
+#~ msgid "|503c43bc67944dfa8325fc729fd43e20|"
+#~ msgstr ""
+
+#~ msgid "|f347ea4acdce4f48bdaf44e720e66bfe|"
+#~ msgstr ""
+
+#~ msgid "|cd91e0ea312f4ff8a571dddd7c25737f|"
+#~ msgstr ""
+
+#~ msgid "|0f02baf4a2594209845b7181381cb0c0|"
+#~ msgstr ""
+
+#~ msgid "|6c43269d50c448dab831fbd7e4d37a55|"
 #~ msgstr ""
 
