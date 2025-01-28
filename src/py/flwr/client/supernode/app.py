@@ -65,17 +65,6 @@ def run_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
-    # Exit if unsupported argument is passed by the user
-    if args.app is not None:
-        log(
-            ERROR,
-            "The `app` argument is deprecated. The SuperNode now automatically "
-            "uses the ClientApp delivered from the SuperLink. Providing the app "
-            "directory manually is no longer supported. Please remove the `app` "
-            "argument from your command.",
-        )
-        sys.exit(1)
-
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     load_fn = get_load_client_app_fn(
         default_app_ref="",
@@ -145,18 +134,6 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     """Parse flower-supernode command line arguments."""
     parser = argparse.ArgumentParser(
         description="Start a Flower SuperNode",
-    )
-
-    parser.add_argument(
-        "app",
-        nargs="?",
-        default=None,
-        help=(
-            "(REMOVED) This argument is removed. The SuperNode now automatically "
-            "uses the ClientApp delivered from the SuperLink, so there is no need to "
-            "provide the app directory manually. This argument will be removed in a "
-            "future version."
-        ),
     )
     _parse_args_common(parser)
     parser.add_argument(
