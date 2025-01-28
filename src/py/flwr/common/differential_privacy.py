@@ -35,6 +35,7 @@ def get_norm(input_arrays: NDArrays) -> float:
     # pylint: disable=consider-using-generator
     return float(np.sqrt(sum([norm**2 for norm in array_norms])))
 
+
 def add_gaussian_noise_inplace(input_arrays: NDArrays, std_dev: float) -> None:
     """Add Gaussian noise to each element of the input arrays."""
     for array in input_arrays:
