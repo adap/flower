@@ -47,11 +47,11 @@ whisper-federated-finetuning
 ```
 
 > \[!NOTE\]
-> This example can be run in different ways, please refer to the corresponding section for further instructions. This example was tested with `PyTorch 2.4.1` for all the different ways of running this example except when running on the Raspberry Pi, which seemed to only work with `PyTorch 1.13.1`. Please note the requirement files do not specify a version of PyTorch, therefore you need to choose one that works for you and your system.
+> This example can be run in different ways, please refer to the corresponding section for further instructions.
 
 ### Install dependencies and project
 
-Install the dependencies defined in `pyproject.toml` as well as the `whisper_example` package.
+In a new Python environment the dependencies defined in `pyproject.toml` as well as the `whisper_example` package.
 
 ```bash
 pip install -e .
@@ -140,7 +140,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 The run is defined in the `pyproject.toml` which: specifies the paths to `ClientApp` and `ServerApp` as well as their parameterization with configs in the `[tool.flwr.app.config]` block.
 
 > \[!NOTE\]
-> By default, it will run on CPU only. On a MacBook Pro M2, running 3 rounds of Flower FL should take ~10 min. Assuming the dataset has already been downloaded. Running on GPU is recommended.
+> By default, it will run on CPU only. On a MacBook Pro M2, running 3 rounds of Flower FL should take ~10 min. Assuming the dataset has already been downloaded. Running on GPU is recommended. Also note that the logs from the `ClientApps` are been silenced. You can disable this by setting to `true` the entry `options.backend.init-args.log-to-driver` in the federation in `pyproject.toml` you are using.
 
 ```shell
 # Run with default settings (21 clients per round out of 422)
@@ -193,14 +193,14 @@ flwr run . local-sim-gpu --run-config "central-eval=true num-server-rounds=10"
 ### Run with the Deployment Engine
 
 > \[!NOTE\]
-> The steps here outline the very few changes you need to make to the code provided in this example to run with the Deployment Engine instead of with the Simulation Engine. For a complete guide on how the Deployment Engine works, please check the [Flower Architecture Overview](https://flower.ai/docs/framework/explanation-flower-architecture.html) and also [how to use Flower with Docker](https://flower.ai/docs/framework/docker/index.html).
+> The steps here outline the very few changes you need to make to the code provided in this example to run with the Deployment Engine instead of with the Simulation Engine. For a beginners guide on how the Deployment Engine works, please check the [Run Flower with the Deployment Engine](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) guide. That guide will introduce how to enable secure TLS and node authentication.
 
-Running the exact same FL pipeline as in the simulation setting can be done wihtout requiring any change to the `ServerApp` design. For the `ClientApp` we need to slightly adjust the logic that loads the dataset. While in simulations we want to dynamically make a Python process to _behave_ like a particular client by loading its corresponding partition, in deployment mode we want the same client process (linked to a single `SuperNode`) to always use its own dataset that lives locally in the machine running the `SuperNode`.
+Running the exact same FL pipeline as in the simulation setting can be done without requiring any change to the `ServerApp` design. For the `ClientApp` we need to slightly adjust the logic that loads the dataset. While in simulations we want to dynamically make a Python process to _behave_ like a particular client by loading its corresponding partition, in deployment mode we want the same client process (linked to a single `SuperNode`) to always use its own dataset that lives locally in the machine running the `SuperNode`.
 
 An obvious first step would be to generate N data partitions and assing each to a different `SuperNode`. Let's start with this step by means of the `preprocess.py` script. These are the steps we'll follow:
 
 1. Extract and save two partitions from the dataset. Each will be assigned to a different `SuperNode`.
-2. Modify the `client_fn` in `client_app.py` so directly loads the partition specified when launching the `SuperNode`.
+2. Modify the `client_fn` in `client_app.py` so it directly loads the partition specified when launching the `SuperNode`.
 3. Copy the generate partition to the machine where the `SuperNode` is going to be executed.
 
 **1. Save a data partition**
@@ -227,14 +227,13 @@ def client_fn(context: Context):
 
     # replace the `load_data` lines with this
     partition = load_data_from_disk(local_data)
-    print(partition)
 ```
 
 **3. Make data available to the SuperNode**
 
-You will need to copy the generated directory in step 1 to the machine that will run the `SuperNode`. You can use `scp` in order to do that.
+You will need to copy the generated directory in step 1 to the machine that will run the `SuperNode`. You can use, for example, the [`scp`](https://linuxize.com/post/how-to-use-scp-command-to-securely-transfer-files/) in order to do that.
 
-With steps 1-3 completed, you are ready to run Federated Wishper finetuning with Flower's Deployment Eninge. To connect a `SuperNode` to an existing federation (i.e. a running `SuperLink`) you'd do it like this assuming all the python dependencies (i.e. `flwr`, `transformers`, `torch` are installed -- see `pyproject.toml`):
+With steps 1-3 completed, you are ready to run Federated Wishper finetuning with Flower's Deployment Eninge. To connect a `SuperNode` to an existing federation (i.e. a running `SuperLink`) you'd do it like this assuming all the python dependencies (i.e. `flwr`, `transformers`, `torch` are installed -- see `pyproject.toml`) in the Python environment of the machine where you are launching the `SuperNode` from:
 
 ```shell
 flower-supernode --superlink="<SUPERLINK-IP>:9092" \
@@ -243,12 +242,7 @@ flower-supernode --superlink="<SUPERLINK-IP>:9092" \
 
 ### Federated Finetuning on Raspberry Pi
 
-To launch a Flower `SuperNode` on a Raspberry Pi you'd typically follow the same steps you do on any other machine you'd like to connect to a federation. Largely speaking there are two ways of doing this:
-
-1. Have a Python environment with Flower and relevant dependencies for your `ClientApp` installed.
-2. If you prefer using Docker, then defining a Dockerfile for your `SuperNode` using the provided based images is sufficient.
-
-This example will use the first approach (i.e. not using Docker).
+To launch a Flower `SuperNode` on a Raspberry Pi you'd typically follow the same steps you do on any other machine you'd like to connect to a federation.
 
 First, ensure your Rasberry Pi has been setup correctly. You'll need either a Rasbperry Pi 4 or 5. Using the code as-is, RAM usage on the Raspberry Pi does not exceed 1.5GB. Note that unlike in the previous sections of this example, clients for Raspberry Pi work better when using PyTorch 1.13.1 (or earlier versions to PyTorch 2.0 in general).
 
@@ -256,10 +250,6 @@ First, ensure your Rasberry Pi has been setup correctly. You'll need either a Ra
 > Follow the `Setup your Pi` section in the [examples/embedded-devices](https://github.com/adap/flower/tree/main/examples/embedded-devices#setting-up-a-raspberry-pi) example to set it up if you haven't done so already.
 
 Second, generate and copy the a single data partition to your raspbery pi. Do so from your development machine (e.g. your laptop) as shown earlier in the [Run with the Deployment Engine](#run-with-the-deployment-engine) section.
-
-```shell
-python preprocess.py --partition-id=5
-```
 
 Finally, assuming you have a `SuperLink` running on a machine (e.g. your laptop) and which can be reached by your Raspberry Pi (e.g. because they are in the same network), launch the `SuperNode` as shown earlier:
 

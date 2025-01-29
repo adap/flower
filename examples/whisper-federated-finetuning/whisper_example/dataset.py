@@ -28,6 +28,7 @@ def load_data(
             dataset="speech_commands",
             subset="v0.02",
             partitioners={"train": partitioner},
+            trust_remote_code=True,
         )
 
     partition = fds.load_partition(partition_id)
