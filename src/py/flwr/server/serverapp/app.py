@@ -122,7 +122,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
         try:
             # Pull ServerAppInputs from LinkState
             req = PullServerAppInputsRequest()
-            log(DEBUG, "[flwr-serverapp]: PullServerAppInputs")
+            log(DEBUG, "[flwr-serverapp]: Will ServerAppInputs")
             res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)
@@ -192,7 +192,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
 
             # Send resulting context
             context_proto = context_to_proto(updated_context)
-            log(DEBUG, "[flwr-serverapp]: PushServerAppOutputs")
+            log(DEBUG, "[flwr-serverapp]: Will push ServerAppOutputs")
             out_req = PushServerAppOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )
