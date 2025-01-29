@@ -155,11 +155,6 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             request_deserializer=PushMessagesRequest.FromString,
             response_serializer=PushMessagesResponse.SerializeToString,
         ),
-        "PushMessages": grpc.unary_unary_rpc_method_handler(
-            servicer.unary_unary,
-            request_deserializer=PushMessagesRequest.FromString,
-            response_serializer=PushMessagesResponse.SerializeToString,
-        ),
         "GetRun": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
             request_deserializer=GetRunRequest.FromString,
