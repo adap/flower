@@ -29,7 +29,7 @@ from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS, ErrorCode
 from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.grpc import create_channel
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.message import Error
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
@@ -81,11 +81,6 @@ def flwr_clientapp() -> None:
         flwr_dir=args.flwr_dir,
         certificates=None,
     )
-
-
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, "[flwr-clientapp] on_channel_state_change: %s ", channel_connectivity)
 
 
 def run_clientapp(  # pylint: disable=R0914

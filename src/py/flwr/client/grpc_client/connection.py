@@ -36,7 +36,7 @@ from flwr.common import (
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.common.constant import MessageType, MessageTypeLegacy
-from flwr.common.grpc import create_channel
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.typing import Fab, Run
@@ -46,11 +46,6 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ServerMessage,
 )
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub  # pylint: disable=E0611
-
-
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
 
 
 @contextmanager
