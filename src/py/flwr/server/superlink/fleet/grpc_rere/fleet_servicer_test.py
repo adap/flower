@@ -32,12 +32,9 @@ from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushMessagesRequest,
     PushMessagesResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
@@ -70,11 +67,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         )
 
         self._channel = grpc.insecure_channel("localhost:9092")
-        self._push_task_res = self._channel.unary_unary(
-            "/flwr.proto.Fleet/PushTaskRes",
-            request_serializer=PushTaskResRequest.SerializeToString,
-            response_deserializer=PushTaskResResponse.FromString,
-        )
         self._push_messages = self._channel.unary_unary(
             "/flwr.proto.Fleet/PushMessages",
             request_serializer=PushMessagesRequest.SerializeToString,
@@ -103,26 +95,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         if num_transitions > 2:
             _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
 
-    def test_successful_push_task_res_if_running(self) -> None:
-        """Test `PushTaskRes` success."""
-        # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        # Transition status to running. PushTaskRes is only allowed in running status.
-        self._transition_run_status(run_id, 2)
-        request = PushTaskResRequest(
-            task_res_list=[
-                TaskRes(task=Task(producer=Node(node_id=node_id)), run_id=run_id)
-            ]
-        )
-
-        # Execute
-        response, call = self._push_task_res.with_call(request=request)
-
-        # Assert
-        assert isinstance(response, PushTaskResResponse)
-        assert grpc.StatusCode.OK == call.code()
-
     def test_successful_push_messages_if_running(self) -> None:
         """Test `PushMessages` success."""
         # Prepare
@@ -144,39 +116,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, PushMessagesResponse)
         assert grpc.StatusCode.OK == call.code()
-
-    def _assert_push_task_res_not_allowed(self, node_id: int, run_id: int) -> None:
-        """Assert `PushTaskRes` not allowed."""
-        run_status = self.state.get_run_status({run_id})[run_id]
-        request = PushTaskResRequest(
-            task_res_list=[
-                TaskRes(task=Task(producer=Node(node_id=node_id)), run_id=run_id)
-            ]
-        )
-
-        with self.assertRaises(grpc.RpcError) as e:
-            self._push_task_res.with_call(request=request)
-        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
-        assert e.exception.details() == self.status_to_msg[run_status.status]
-
-    @parameterized.expand(
-        [
-            (0,),  # Test not successful if RunStatus is pending.
-            (1,),  # Test not successful if RunStatus is starting.
-            (3,),  # Test not successful if RunStatus is finished.
-        ]
-    )  # type: ignore
-    def test_push_task_res_not_successful_if_not_running(
-        self, num_transitions: int
-    ) -> None:
-        """Test `PushTaskRes` not successful if RunStatus is not running."""
-        # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        self._transition_run_status(run_id, num_transitions)
-
-        # Execute & Assert
-        self._assert_push_task_res_not_allowed(node_id, run_id)
 
     def _assert_push_messages_not_allowed(self, node_id: int, run_id: int) -> None:
         """Assert `PushMessages` not allowed."""
