@@ -73,7 +73,7 @@ class _MockServicer:
         ] = None
         self._received_message_bytes: bytes = b""
 
-    def unary_unary(
+    def unary_unary(  # pylint: disable=too-many-return-statements
         self, request: GrpcMessage, context: grpc.ServicerContext
     ) -> GrpcMessage:
         """Handle unary call."""
@@ -102,11 +102,13 @@ class _MockServicer:
                         group_id="",
                         ttl=DEFAULT_TTL,
                         message_type="mock",
-                        created_at=now().timestamp(),
+                        reply_to_message="",
                     ),
                     content=RecordSet(),
                 )
-                return PullMessagesResponse(messages_list=[serde.message_to_proto(msg)])
+                proto_msg = serde.message_to_proto(msg)
+                proto_msg.metadata.created_at = now().timestamp()
+                return PullMessagesResponse(messages_list=[])
 
             return PullTaskInsResponse(
                 task_ins_list=[
