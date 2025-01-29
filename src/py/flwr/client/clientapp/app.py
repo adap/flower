@@ -85,7 +85,7 @@ def flwr_clientapp() -> None:
 
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
+    log(DEBUG, "[flwr-clientapp] on_channel_state_change: %s ", channel_connectivity)
 
 
 def run_clientapp(  # pylint: disable=R0914
@@ -186,6 +186,9 @@ def get_token(stub: grpc.Channel) -> Optional[int]:
     log(DEBUG, "Flower ClientApp process requests token")
     try:
         res: GetTokenResponse = stub.GetToken(GetTokenRequest())
+        if not res.ready:
+            log(DEBUG, "[GetToken] Token not available")
+            return None
         log(DEBUG, "[GetToken] Received token: %s", res.token)
         return res.token
     except grpc.RpcError as e:

@@ -54,12 +54,15 @@ global___GetTokenRequest = GetTokenRequest
 class GetTokenResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TOKEN_FIELD_NUMBER: builtins.int
+    READY_FIELD_NUMBER: builtins.int
     token: builtins.int
+    ready: builtins.bool
     def __init__(self,
         *,
         token: builtins.int = ...,
+        ready: builtins.bool = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ready",b"ready","token",b"token"]) -> None: ...
 global___GetTokenResponse = GetTokenResponse
 
 class PullClientAppInputsRequest(google.protobuf.message.Message):
