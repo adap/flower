@@ -39,12 +39,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PingResponse,
     PullMessagesRequest,
     PullMessagesResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
     PushMessagesRequest,
     PushMessagesResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
     Reconnect,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -53,7 +49,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunResponse,
     Run,
 )
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
@@ -89,21 +85,6 @@ def ping(
     return PingResponse(success=res)
 
 
-def pull_task_ins(request: PullTaskInsRequest, state: LinkState) -> PullTaskInsResponse:
-    """Pull TaskIns handler."""
-    node = request.node  # pylint: disable=no-member
-    node_id: int = node.node_id
-
-    # Retrieve TaskIns from State
-    task_ins_list: list[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
-
-    # Build response
-    response = PullTaskInsResponse(
-        task_ins_list=task_ins_list,
-    )
-    return response
-
-
 def pull_messages(
     request: PullMessagesRequest, state: LinkState
 ) -> PullMessagesResponse:
@@ -122,35 +103,6 @@ def pull_messages(
         msg_proto.append(message_to_proto(msg))
 
     return PullMessagesResponse(messages_list=msg_proto)
-
-
-def push_task_res(request: PushTaskResRequest, state: LinkState) -> PushTaskResResponse:
-    """Push TaskRes handler."""
-    # pylint: disable=no-member
-    task_res: TaskRes = request.task_res_list[0]
-    # pylint: enable=no-member
-
-    # Abort if the run is not running
-    abort_msg = check_abort(
-        task_res.run_id,
-        [Status.PENDING, Status.STARTING, Status.FINISHED],
-        state,
-    )
-    if abort_msg:
-        raise InvalidRunStatusException(abort_msg)
-
-    # Set pushed_at (timestamp in seconds)
-    task_res.task.pushed_at = time.time()
-
-    # Store TaskRes in State
-    task_id: Optional[UUID] = state.store_task_res(task_res=task_res)
-
-    # Build response
-    response = PushTaskResResponse(
-        reconnect=Reconnect(reconnect=5),
-        results={str(task_id): 0},
-    )
-    return response
 
 
 def push_messages(
