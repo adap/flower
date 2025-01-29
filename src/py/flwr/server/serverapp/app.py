@@ -82,7 +82,7 @@ def flwr_serverapp() -> None:
 
     log(
         DEBUG,
-        "Start isolated `flwr-serverapp` connected to SuperLink's "
+        "`flwr-serverapp` will attempt to connect to SuperLink's "
         "ServerAppIo API at %s",
         args.serverappio_api_address,
     )
