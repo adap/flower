@@ -103,6 +103,11 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=PushMessagesRequest.SerializeToString,
             response_deserializer=PushMessagesResponse.FromString,
         )
+        self._push_messages = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PushMessages",
+            request_serializer=PushMessagesRequest.SerializeToString,
+            response_deserializer=PushMessagesResponse.FromString,
+        )
         self._get_run = self._channel.unary_unary(
             "/flwr.proto.Fleet/GetRun",
             request_serializer=GetRunRequest.SerializeToString,
@@ -183,6 +188,19 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         node_id = self._create_node_and_set_public_key()
         req = PullMessagesRequest(node=Node(node_id=node_id))
         return self._pull_messages.with_call(request=req, metadata=metadata)
+
+    def _test_push_messages(self, metadata: list[Any]) -> Any:
+        """Test PushMessages."""
+        node_id = self._create_node_and_set_public_key()
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        # Transition status to running. PushMessages is only allowed in running status.
+        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        msg_proto = create_res_message(
+            src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
+        )
+        req = PushMessagesRequest(node=Node(node_id=node_id), messages_list=[msg_proto])
+        return self._push_messages.with_call(request=req, metadata=metadata)
 
     def _test_push_messages(self, metadata: list[Any]) -> Any:
         """Test PushMessages."""

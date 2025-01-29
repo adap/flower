@@ -84,6 +84,24 @@ class _MockServicer:
                 return PushMessagesResponse()
             if isinstance(request, GetRunRequest):
                 return GetRunResponse()
+            if isinstance(request, PullMessagesRequest):
+
+                msg = Message(
+                    metadata=Metadata(
+                        run_id=1234,
+                        message_id="",
+                        src_node_id=123,
+                        dst_node_id=SUPERLINK_NODE_ID,
+                        group_id="",
+                        ttl=DEFAULT_TTL,
+                        message_type="mock",
+                        reply_to_message="",
+                    ),
+                    content=RecordSet(),
+                )
+                proto_msg = serde.message_to_proto(msg)
+                proto_msg.metadata.created_at = now().timestamp()
+                return PullMessagesResponse(messages_list=[])
 
             msg = Message(
                 metadata=Metadata(
@@ -131,6 +149,11 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             servicer.unary_unary,
             request_deserializer=PullMessagesRequest.FromString,
             response_serializer=PullMessagesResponse.SerializeToString,
+        ),
+        "PushMessages": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=PushMessagesRequest.FromString,
+            response_serializer=PushMessagesResponse.SerializeToString,
         ),
         "PushMessages": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
