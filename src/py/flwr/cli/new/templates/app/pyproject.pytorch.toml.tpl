@@ -9,7 +9,7 @@ description = ""
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.14.0",
-    "flwr-datasets[vision]>=0.3.0",
+    "flwr-datasets[vision]>=0.5.0",
     "torch==2.5.1",
     "torchvision==0.20.1",
 ]
