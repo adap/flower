@@ -40,6 +40,9 @@ from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    generate_key_pairs,
+)
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -125,12 +128,14 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
 
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
-    if authentication_keys is not None:
-        interceptors = AuthenticateClientInterceptor(
-            authentication_keys[0], authentication_keys[1]
-        )
+    # Automatic node auth: generate keys if user didn't provide any
+    if authentication_keys is None:
+        authentication_keys = generate_key_pairs()
 
+    # Always configure auth interceptor, with either user-provided or generated keys
+    interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] = [
+        AuthenticateClientInterceptor(*authentication_keys),
+    ]
     channel = create_channel(
         server_address=server_address,
         insecure=insecure,

@@ -80,7 +80,7 @@ def create_channel(
         log(DEBUG, "Opened secure gRPC connection using certificates")
 
     if interceptors is not None:
-        channel = grpc.intercept_channel(channel, interceptors)
+        channel = grpc.intercept_channel(channel, *interceptors)
 
     return channel
 
