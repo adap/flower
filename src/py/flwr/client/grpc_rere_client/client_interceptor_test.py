@@ -43,8 +43,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushTaskResRequest,
     PushTaskResResponse,
 )
@@ -78,6 +82,8 @@ class _MockServicer:
                 return DeleteNodeResponse()
             if isinstance(request, PushTaskResRequest):
                 return PushTaskResResponse()
+            if isinstance(request, PushMessagesRequest):
+                return PushMessagesResponse()
             if isinstance(request, GetRunRequest):
                 return GetRunResponse()
 
@@ -122,10 +128,20 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             request_deserializer=PullTaskInsRequest.FromString,
             response_serializer=PullTaskInsResponse.SerializeToString,
         ),
+        "PullMessages": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=PullMessagesRequest.FromString,
+            response_serializer=PullMessagesResponse.SerializeToString,
+        ),
         "PushTaskRes": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
             request_deserializer=PushTaskResRequest.FromString,
             response_serializer=PushTaskResResponse.SerializeToString,
+        ),
+        "PushMessages": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=PushMessagesRequest.FromString,
+            response_serializer=PushMessagesResponse.SerializeToString,
         ),
         "GetRun": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
