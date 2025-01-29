@@ -201,7 +201,7 @@ def pull_clientappinputs(
     stub: grpc.Channel, token: int
 ) -> tuple[Message, Context, Run, Optional[Fab]]:
     """Pull ClientAppInputs from SuperNode."""
-    log(INFO, "[flwr-clientapp] Pull ClientAppInputs for token %s", token)
+    log(INFO, "[flwr-clientapp] Pulls ClientAppInputs for token %s", token)
     try:
         res: PullClientAppInputsResponse = stub.PullClientAppInputs(
             PullClientAppInputsRequest(token=token)
@@ -220,7 +220,7 @@ def push_clientappoutputs(
     stub: grpc.Channel, token: int, message: Message, context: Context
 ) -> PushClientAppOutputsResponse:
     """Push ClientAppOutputs to SuperNode."""
-    log(INFO, "[flwr-clientapp] Push ClientAppOutputs for token %s", token)
+    log(INFO, "[flwr-clientapp] Pushes ClientAppOutputs for token %s", token)
     proto_message = message_to_proto(message)
     proto_context = context_to_proto(context)
 
