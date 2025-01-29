@@ -69,7 +69,7 @@ def flwr_clientapp() -> None:
     log(INFO, "Start `flwr-clientapp` process")
     log(
         DEBUG,
-        "Starting `flwr-clientapp` process connected to SuperNode's "
+        "Start `flwr-clientapp` process connected to SuperNode's "
         "ClientAppIo API at %s with token %s",
         args.clientappio_api_address,
         args.token,
