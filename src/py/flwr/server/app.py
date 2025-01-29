@@ -386,7 +386,7 @@ def run_superlink() -> None:
                     len(node_public_keys),
                 )
             else:
-                log(DEBUG, "Using automatic node authentication.")
+                log(DEBUG, "Automatic node authentication enabled")
 
             interceptors = [AuthenticateServerInterceptor(state_factory, auto_auth)]
 
