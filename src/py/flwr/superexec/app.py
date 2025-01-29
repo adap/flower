@@ -16,10 +16,7 @@
 
 
 import argparse
-import sys
-from logging import INFO
 
-from flwr.common import log
 from flwr.common.object_ref import load_app, validate
 
 from .executor import Executor

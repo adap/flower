@@ -16,7 +16,7 @@
 
 
 import argparse
-from logging import DEBUG, ERROR, INFO, WARN
+from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
