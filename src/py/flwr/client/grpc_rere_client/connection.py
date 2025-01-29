@@ -133,11 +133,14 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
 
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
+    # Automatic node auth: generate keys if user didn't provide any
     if authentication_keys is None:
         authentication_keys = generate_key_pairs()
-    interceptors = AuthenticateClientInterceptor(*authentication_keys)
 
+    # Always configure auth interceptor, with either user-provided or generated keys
+    interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] = [
+        AuthenticateClientInterceptor(*authentication_keys),
+    ]
     channel = create_channel(
         server_address=server_address,
         insecure=insecure,
