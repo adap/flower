@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-28 00:30+0000\n"
+"POT-Creation-Date: 2025-01-29 00:30+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -4628,13 +4628,20 @@ msgstr ""
 "서버앱 야간 이미지와 페어링되어야 합니다. 버전이 동기화되도록 하려면 ``nightly`` 대신 "
 "``1.9.0.dev20240501``과 같은 구체적인 태그를 사용하는 것이 좋습니다."
 
-#: ../../source/explanation-differential-privacy.rst:2
-#: ../../source/explanation-differential-privacy.rst:14
+#: ../../source/explanation-differential-privacy.rst:-1
+msgid ""
+"In this Flower explainer, learn how differential privacy ensures data "
+"security in federated learning, with central & local approaches to "
+"prevent leakage of sensitive information during model training."
+msgstr ""
+
+#: ../../source/explanation-differential-privacy.rst:6
+#: ../../source/explanation-differential-privacy.rst:18
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:303
 msgid "Differential Privacy"
 msgstr "차등 프라이버시"
 
-#: ../../source/explanation-differential-privacy.rst:4
+#: ../../source/explanation-differential-privacy.rst:8
 msgid ""
 "The information in datasets like healthcare, financial transactions, user"
 " preferences, etc., is valuable and has the potential for scientific "
@@ -4645,7 +4652,7 @@ msgstr ""
 "의료, 금융 거래, 사용자 선호도 등과 같은 데이터 세트의 정보는 가치 있고 과학적 혁신의 잠재력을 지니고 있으며 중요한 비즈니스 "
 "인사이트를 제공합니다. 그러나 이러한 데이터는 또한 민감한 정보이며 개인의 프라이버시를 침해할 위험이 있습니다."
 
-#: ../../source/explanation-differential-privacy.rst:9
+#: ../../source/explanation-differential-privacy.rst:13
 msgid ""
 "Traditional methods like anonymization alone would not work because of "
 "attacks like Re-identification and Data Linkage. That's where "
@@ -4655,7 +4662,7 @@ msgstr ""
 "익명화와 같은 기존 방법만으로는 재식별 및 데이터 연결과 같은 공격으로 인해 효과가 없습니다. 그래서 차등 프라이버시가 "
 "등장했습니다. 차등 프라이버시는 개인의 개인 정보 보호를 보장하면서 데이터를 분석할 수 있는 가능성을 제공합니다."
 
-#: ../../source/explanation-differential-privacy.rst:16
+#: ../../source/explanation-differential-privacy.rst:20
 msgid ""
 "Imagine two datasets that are identical except for a single record (for "
 "instance, Alice's data). Differential Privacy (DP) guarantees that any "
@@ -4672,7 +4679,7 @@ msgstr ""
 msgid "DP Intro"
 msgstr "DP 소개"
 
-#: ../../source/explanation-differential-privacy.rst:27
+#: ../../source/explanation-differential-privacy.rst:31
 msgid ""
 "One of the most commonly used mechanisms to achieve DP is adding enough "
 "noise to the output of the analysis to mask the contribution of each "
@@ -4682,11 +4689,11 @@ msgstr ""
 "DP를 달성하기 위해 가장 일반적으로 사용되는 메커니즘 중 하나는 분석의 전반적인 정확도를 유지하면서 데이터에서 각 개인의 기여도를"
 " 가릴 수 있도록 분석 결과에 충분한 노이즈를 추가하는 것입니다."
 
-#: ../../source/explanation-differential-privacy.rst:32
+#: ../../source/explanation-differential-privacy.rst:36
 msgid "Formal Definition"
 msgstr "공식 정의"
 
-#: ../../source/explanation-differential-privacy.rst:34
+#: ../../source/explanation-differential-privacy.rst:38
 msgid ""
 "Differential Privacy (DP) provides statistical guarantees against the "
 "information an adversary can infer through the output of a randomized "
@@ -4702,7 +4709,7 @@ msgstr ""
 " 레코드만 다른 두 개의 인접 데이터베이스인 D:sub:`1`과 D:sub:`2`의 경우, 가능한 모든 출력 S ⊆ "
 "Range(A)에 대해 (:math:`\\epsilon`, :math:`\\delta`)-차등 프라이버시를 제공합니다:"
 
-#: ../../source/explanation-differential-privacy.rst:42
+#: ../../source/explanation-differential-privacy.rst:46
 #, fuzzy
 msgid ""
 "\\small\n"
@@ -4711,7 +4718,7 @@ msgstr ""
 "\\small\n"
 "P[M(D_{1} \\in A)] \\leq e^{\\delta} P[M(D_{2} \\in A)] + \\delta"
 
-#: ../../source/explanation-differential-privacy.rst:47
+#: ../../source/explanation-differential-privacy.rst:51
 msgid ""
 "The :math:`\\epsilon` parameter, also known as the privacy budget, is a "
 "metric of privacy loss. It also controls the privacy-utility trade-off; "
@@ -4728,11 +4735,11 @@ msgstr ""
 " 차등 프라이버시를 달성하는 데 필요한 노이즈의 양은 출력의 감도에 비례하며, 이는 단일 레코드의 포함 또는 제거로 인한 출력의 "
 "최대 변화를 측정합니다."
 
-#: ../../source/explanation-differential-privacy.rst:56
+#: ../../source/explanation-differential-privacy.rst:60
 msgid "Differential Privacy in Machine Learning"
 msgstr "머신 러닝의 차등 프라이버시"
 
-#: ../../source/explanation-differential-privacy.rst:58
+#: ../../source/explanation-differential-privacy.rst:62
 msgid ""
 "DP can be utilized in machine learning to preserve the privacy of the "
 "training data. Differentially private machine learning algorithms are "
@@ -4752,11 +4759,11 @@ msgstr ""
 "또는 레이블)에 노이즈를 추가하는 것이고, 다른 방법은 모델 학습 중에 손실 함수의 기울기에 노이즈를 주입하는 것입니다. 또한 "
 "이러한 노이즈를 모델의 출력에 통합할 수도 있습니다."
 
-#: ../../source/explanation-differential-privacy.rst:69
+#: ../../source/explanation-differential-privacy.rst:73
 msgid "Differential Privacy in Federated Learning"
 msgstr "연합 학습의 차등 프라이버시"
 
-#: ../../source/explanation-differential-privacy.rst:71
+#: ../../source/explanation-differential-privacy.rst:75
 msgid ""
 "Federated learning is a data minimization approach that allows multiple "
 "parties to collaboratively train a model without sharing their raw data. "
@@ -4770,13 +4777,13 @@ msgstr ""
 "연합 학습은 새로운 개인정보 보호 문제를 야기하기도 합니다. 당사자와 중앙 서버 간의 모델 업데이트는 로컬 데이터에 대한 정보를 "
 "유출할 수 있습니다. 이러한 유출은 멤버십 추론 및 속성 추론 공격이나 모델 반전 공격과 같은 공격에 악용될 수 있습니다."
 
-#: ../../source/explanation-differential-privacy.rst:78
+#: ../../source/explanation-differential-privacy.rst:82
 msgid ""
 "DP can play a crucial role in federated learning to provide privacy for "
 "the clients' data."
 msgstr "DP는 연합 학습에서 클라이언트의 데이터에 대한 개인 정보 보호를 제공하는 데 중요한 역할을 할 수 있습니다."
 
-#: ../../source/explanation-differential-privacy.rst:81
+#: ../../source/explanation-differential-privacy.rst:85
 msgid ""
 "Depending on the granularity of privacy provision or the location of "
 "noise addition, different forms of DP exist in federated learning. In "
@@ -4788,7 +4795,7 @@ msgstr ""
 "추가되는 위치에 따라 서버(중앙이라고도 함) 또는 클라이언트(로컬이라고도 함)에서의 연합 학습에서 DP를 활용하는 두 가지 접근 "
 "방식에 중점을 둡니다."
 
-#: ../../source/explanation-differential-privacy.rst:86
+#: ../../source/explanation-differential-privacy.rst:90
 msgid ""
 "**Central Differential Privacy**: DP is applied by the server and the "
 "goal is to prevent the aggregated model from leaking information about "
@@ -4797,7 +4804,7 @@ msgstr ""
 "**중앙 차등 프라이버시**: DP는 서버에서 적용되며 집계된 모델이 각 클라이언트의 데이터에 대한 정보를 유출하는 것을 방지하는 "
 "것이 목표입니다."
 
-#: ../../source/explanation-differential-privacy.rst:88
+#: ../../source/explanation-differential-privacy.rst:92
 msgid ""
 "**Local Differential Privacy**: DP is applied on the client side before "
 "sending any information to the server and the goal is to prevent the "
@@ -4808,12 +4815,12 @@ msgstr ""
 "데이터에 대한 정보를 유출하는 것을 방지하는 것이 목표입니다."
 
 #: ../../source/explanation-differential-privacy.rst:-1
-#: ../../source/explanation-differential-privacy.rst:93
+#: ../../source/explanation-differential-privacy.rst:97
 #: ../../source/how-to-use-differential-privacy.rst:19
 msgid "Central Differential Privacy"
 msgstr "중앙 차등 프라이버시"
 
-#: ../../source/explanation-differential-privacy.rst:95
+#: ../../source/explanation-differential-privacy.rst:99
 msgid ""
 "In this approach, which is also known as user-level DP, the central "
 "server is responsible for adding noise to the globally aggregated "
@@ -4822,7 +4829,7 @@ msgstr ""
 "사용자 수준 DP라고도 하는 이 접근 방식에서는 중앙 서버가 전역적으로 집계된 매개변수에 노이즈를 추가하는 역할을 담당합니다. "
 "서버에 대한 신뢰가 필요하다는 점에 유의해야 합니다."
 
-#: ../../source/explanation-differential-privacy.rst:104
+#: ../../source/explanation-differential-privacy.rst:108
 msgid ""
 "While there are various ways to implement central DP in federated "
 "learning, we concentrate on the algorithms proposed by [2] and [3]. The "
@@ -4847,7 +4854,7 @@ msgstr ""
 msgid "clipping"
 msgstr "클리핑"
 
-#: ../../source/explanation-differential-privacy.rst:120
+#: ../../source/explanation-differential-privacy.rst:124
 msgid ""
 "Afterwards, the Gaussian mechanism is used to add noise in order to "
 "distort the sum of all clients' updates. The amount of noise is scaled to"
@@ -4859,17 +4866,17 @@ msgstr ""
 "따라 조정되어 프라이버시 보장을 얻습니다. 가우시안 메커니즘은 `N (0, σ²)`에서 샘플링된 노이즈와 함께 사용됩니다. 여기서 "
 "`σ = (noise_scale * S) / (샘플링된 클라이언트 수)`입니다."
 
-#: ../../source/explanation-differential-privacy.rst:126
+#: ../../source/explanation-differential-privacy.rst:130
 msgid "Clipping"
 msgstr "클리핑"
 
-#: ../../source/explanation-differential-privacy.rst:128
+#: ../../source/explanation-differential-privacy.rst:132
 msgid ""
 "There are two forms of clipping commonly used in Central DP: Fixed "
 "Clipping and Adaptive Clipping."
 msgstr "중앙 DP에서 일반적으로 사용되는 클리핑에는 고정 클리핑과 조정 클리핑의 두 가지 형태가 있습니다."
 
-#: ../../source/explanation-differential-privacy.rst:131
+#: ../../source/explanation-differential-privacy.rst:135
 msgid ""
 "**Fixed Clipping** : A predefined fix threshold is set for the magnitude "
 "of clients' updates. Any update exceeding this threshold is clipped back "
@@ -4878,7 +4885,7 @@ msgstr ""
 "**고정 클리핑** : 클라이언트의 업데이트 크기에 대해 미리 정의된 고정 임계값이 설정됩니다. 이 임계값을 초과하는 모든 "
 "업데이트는 임계값으로 다시 클리핑됩니다."
 
-#: ../../source/explanation-differential-privacy.rst:133
+#: ../../source/explanation-differential-privacy.rst:137
 msgid ""
 "**Adaptive Clipping** : The clipping threshold dynamically adjusts based "
 "on the observed update distribution [4]. It means that the clipping value"
@@ -4888,7 +4895,7 @@ msgstr ""
 "**조정 클리핑** : 클리핑 임계값은 관찰된 업데이트 분포에 따라 동적으로 조정됩니다[4]. 즉, 클리핑 값은 업데이트 표준 "
 "분포의 사분위수에 따라 라운드가 진행되는 동안 조정됩니다."
 
-#: ../../source/explanation-differential-privacy.rst:137
+#: ../../source/explanation-differential-privacy.rst:141
 msgid ""
 "The choice between fixed and adaptive clipping depends on various factors"
 " such as privacy requirements, data distribution, model complexity, and "
@@ -4896,12 +4903,12 @@ msgid ""
 msgstr "고정 클리핑과 조정 클리핑 중 선택은 개인정보 보호 요구 사항, 데이터 배포, 모델 복잡성 등 다양한 요인에 따라 달라집니다."
 
 #: ../../source/explanation-differential-privacy.rst:-1
-#: ../../source/explanation-differential-privacy.rst:141
+#: ../../source/explanation-differential-privacy.rst:145
 #: ../../source/how-to-use-differential-privacy.rst:118
 msgid "Local Differential Privacy"
 msgstr "로컬 차등 프라이버시"
 
-#: ../../source/explanation-differential-privacy.rst:143
+#: ../../source/explanation-differential-privacy.rst:147
 msgid ""
 "In this approach, each client is responsible for performing DP. Local DP "
 "avoids the need for a fully trusted aggregator, but it should be noted "
@@ -4911,11 +4918,11 @@ msgstr ""
 "이 접근 방식에서는 각 클라이언트가 DP를 수행할 책임이 있습니다. 로컬 DP는 완전히 신뢰할 수 있는 애그리게이터가 필요하지 "
 "않지만, 로컬 DP는 중앙 DP에 비해 정확도는 떨어져도 개인 정보 보호는 더 우수하다는 점에 유의해야 합니다."
 
-#: ../../source/explanation-differential-privacy.rst:152
+#: ../../source/explanation-differential-privacy.rst:156
 msgid "In this explainer, we focus on two forms of achieving Local DP:"
 msgstr "이 설명에서는 로컬 DP를 달성하는 두 가지 형태에 중점을 둡니다:"
 
-#: ../../source/explanation-differential-privacy.rst:154
+#: ../../source/explanation-differential-privacy.rst:158
 msgid ""
 "Each client adds noise to the local updates before sending them to the "
 "server. To achieve (:math:`\\epsilon`, :math:`\\delta`)-DP, considering "
@@ -4926,7 +4933,7 @@ msgstr ""
 " 노이즈가 σ의 노이즈 스케일로 적용되어 (:math:`\\epsilon`, :math:`\\delta`)-DP를 달성하기 위해, "
 "여기서 σ는 노이즈 스케일입니다:"
 
-#: ../../source/explanation-differential-privacy.rst:158
+#: ../../source/explanation-differential-privacy.rst:162
 #, fuzzy
 msgid ""
 "\\small\n"
@@ -4938,7 +4945,7 @@ msgstr ""
 "\\log\\left(\\frac{1.25}{\\delta}\\right)}}{\\epsilon}\n"
 "\n"
 
-#: ../../source/explanation-differential-privacy.rst:163
+#: ../../source/explanation-differential-privacy.rst:167
 msgid ""
 "Each client adds noise to the gradients of the model during the local "
 "training (DP-SGD). More specifically, in this approach, gradients are "
@@ -4947,41 +4954,51 @@ msgstr ""
 "각 클라이언트는 로컬 트레이닝(DP-SGD) 중에 모델의 gradient에 노이즈를 추가합니다. 보다 구체적으로, 이 접근 "
 "방식에서는 gradient이 클리핑되고 보정된 노이즈가 gradient에 주입됩니다."
 
-#: ../../source/explanation-differential-privacy.rst:167
+#: ../../source/explanation-differential-privacy.rst:171
 msgid ""
 "Please note that these two approaches are providing privacy at different "
 "levels."
 msgstr "이 두 가지 접근 방식은 서로 다른 수준의 개인정보 보호 기능을 제공한다는 점에 유의하세요."
 
-#: ../../source/explanation-differential-privacy.rst:169
+#: ../../source/explanation-differential-privacy.rst:173
 msgid "**References:**"
 msgstr "**참고:**"
 
-#: ../../source/explanation-differential-privacy.rst:171
+#: ../../source/explanation-differential-privacy.rst:175
 msgid "[1] Dwork et al. The Algorithmic Foundations of Differential Privacy."
 msgstr "[1] Dwork 외. 차등 프라이버시의 알고리즘적 기초."
 
-#: ../../source/explanation-differential-privacy.rst:173
+#: ../../source/explanation-differential-privacy.rst:177
 msgid ""
 "[2] McMahan et al. Learning Differentially Private Recurrent Language "
 "Models."
 msgstr "[2] McMahan 외. 차등적 개인 반복 언어 모델 학습."
 
-#: ../../source/explanation-differential-privacy.rst:175
+#: ../../source/explanation-differential-privacy.rst:179
 msgid ""
 "[3] Geyer et al. Differentially Private Federated Learning: A Client "
 "Level Perspective."
 msgstr "[3] Geyer 외. 차등적 개인 연합 학습: 고객 수준의 관점."
 
-#: ../../source/explanation-differential-privacy.rst:177
+#: ../../source/explanation-differential-privacy.rst:181
 msgid "[4] Galen et al. Differentially Private Learning with Adaptive Clipping."
 msgstr "[4] Galen 외. 조정형 클리핑을 통한 차등적 개인 학습."
 
-#: ../../source/explanation-federated-evaluation.rst:2
+#: ../../source/explanation-federated-evaluation.rst:-1
+#, fuzzy
+msgid ""
+"Learn the two main approaches to evaluating models in Flower: centralized"
+" (server-side) evaluation and federated (client-side) evaluation, with "
+"built-in strategies and configuration options."
+msgstr ""
+"연합 학습 시스템에서 모델을 평가하는 데는 중앙 집중식(또는 서버 측) 평가와 연합(또는 클라이언트 측) 평가라는 두 가지 주요 "
+"접근 방식이 있습니다."
+
+#: ../../source/explanation-federated-evaluation.rst:6
 msgid "Federated evaluation"
 msgstr "연합 평가"
 
-#: ../../source/explanation-federated-evaluation.rst:4
+#: ../../source/explanation-federated-evaluation.rst:8
 msgid ""
 "There are two main approaches to evaluating models in federated learning "
 "systems: centralized (or server-side) evaluation and federated (or "
@@ -4990,15 +5007,15 @@ msgstr ""
 "연합 학습 시스템에서 모델을 평가하는 데는 중앙 집중식(또는 서버 측) 평가와 연합(또는 클라이언트 측) 평가라는 두 가지 주요 "
 "접근 방식이 있습니다."
 
-#: ../../source/explanation-federated-evaluation.rst:8
+#: ../../source/explanation-federated-evaluation.rst:12
 msgid "Centralized Evaluation"
 msgstr "중앙 집중식 평가"
 
-#: ../../source/explanation-federated-evaluation.rst:11
+#: ../../source/explanation-federated-evaluation.rst:15
 msgid "Built-In Strategies"
 msgstr "기본 제공 전략"
 
-#: ../../source/explanation-federated-evaluation.rst:13
+#: ../../source/explanation-federated-evaluation.rst:17
 msgid ""
 "All built-in strategies support centralized evaluation by providing an "
 "evaluation function during initialization. An evaluation function is any "
@@ -5008,11 +5025,11 @@ msgstr ""
 "모든 기본 제공 전략은 초기화 중에 평가 함수를 제공하여 중앙 집중식 평가를 지원합니다. 평가 함수는 현재 글로벌 모델 파라미터를 "
 "입력으로 받아 평가 결과를 반환할 수 있는 모든 함수입니다:"
 
-#: ../../source/explanation-federated-evaluation.rst:70
+#: ../../source/explanation-federated-evaluation.rst:74
 msgid "Custom Strategies"
 msgstr "사용자 정의 전략"
 
-#: ../../source/explanation-federated-evaluation.rst:72
+#: ../../source/explanation-federated-evaluation.rst:76
 #, fuzzy
 msgid ""
 "The ``Strategy`` abstraction provides a method called ``evaluate`` that "
@@ -5023,33 +5040,33 @@ msgstr ""
 "코드:`전략` 추상화는 현재 전역 모델 파라미터를 평가하는 데 직접 사용할 수 있는 :코드:`평가`라는 메서드를 제공합니다. 현재 "
 "서버 구현에서는 매개변수 집계 후와 연합 평가 전에 :code:`evaluate`를 호출합니다(다음 단락 참조)."
 
-#: ../../source/explanation-federated-evaluation.rst:78
+#: ../../source/explanation-federated-evaluation.rst:82
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:292
 msgid "Federated Evaluation"
 msgstr "연합 평가"
 
-#: ../../source/explanation-federated-evaluation.rst:81
+#: ../../source/explanation-federated-evaluation.rst:85
 msgid "Implementing Federated Evaluation"
 msgstr "연합 평가 구현"
 
-#: ../../source/explanation-federated-evaluation.rst:83
+#: ../../source/explanation-federated-evaluation.rst:87
 #, fuzzy
 msgid ""
 "Client-side evaluation happens in the ``Client.evaluate`` method and can "
 "be configured from the server side."
 msgstr "클라이언트 측 평가는 :code:`Client.evaluate` 메서드에서 이루어지며 서버 측에서 구성할 수 있습니다."
 
-#: ../../source/explanation-federated-evaluation.rst:116
+#: ../../source/explanation-federated-evaluation.rst:120
 msgid "Configuring Federated Evaluation"
 msgstr "연합 평가 구성"
 
-#: ../../source/explanation-federated-evaluation.rst:118
+#: ../../source/explanation-federated-evaluation.rst:122
 msgid ""
 "Federated evaluation can be configured from the server side. Built-in "
 "strategies support the following arguments:"
 msgstr "연합 평가는 서버 측에서 구성할 수 있습니다. 기본 제공 전략은 다음 인수를 지원합니다:"
 
-#: ../../source/explanation-federated-evaluation.rst:121
+#: ../../source/explanation-federated-evaluation.rst:125
 #, fuzzy
 msgid ""
 "``fraction_evaluate``: a ``float`` defining the fraction of clients that "
@@ -5063,7 +5080,7 @@ msgstr ""
 "있는 경우 :code:`10`이 평가를 위해 무작위로 선택됩니다. code:`fraction_evaluate`가 "
 ":code:`0.0`으로 설정된 경우 연합 평가가 비활성화됩니다."
 
-#: ../../source/explanation-federated-evaluation.rst:126
+#: ../../source/explanation-federated-evaluation.rst:130
 #, fuzzy
 msgid ""
 "``min_evaluate_clients``: an ``int``: the minimum number of clients to be"
@@ -5076,7 +5093,7 @@ msgstr ""
 "20으로 설정되어 있으며 :code:`100` 클라이언트가 서버에 연결되어 있는 경우 :code:`20` 클라이언트가 평가를 위해 "
 "선택됩니다."
 
-#: ../../source/explanation-federated-evaluation.rst:130
+#: ../../source/explanation-federated-evaluation.rst:134
 #, fuzzy
 msgid ""
 "``min_available_clients``: an ``int`` that defines the minimum number of "
@@ -5090,7 +5107,7 @@ msgstr ""
 ":code:`min_available_clients`보다 적으면 서버는 더 많은 클라이언트가 연결될 때까지 기다렸다가 평가를 위한 "
 "클라이언트 샘플링을 계속합니다."
 
-#: ../../source/explanation-federated-evaluation.rst:135
+#: ../../source/explanation-federated-evaluation.rst:139
 #, fuzzy
 msgid ""
 "``on_evaluate_config_fn``: a function that returns a configuration "
@@ -5103,11 +5120,11 @@ msgstr ""
 "단계 중에 호출되며, 서버 측에서 클라이언트 측 평가를 사용자 지정하는 편리한 방법을 제공합니다(예: 수행되는 유효성 검사 단계 수"
 " 구성)."
 
-#: ../../source/explanation-federated-evaluation.rst:177
+#: ../../source/explanation-federated-evaluation.rst:181
 msgid "Evaluating Local Model Updates During Training"
 msgstr "훈련 중 로컬 모델 업데이트 평가"
 
-#: ../../source/explanation-federated-evaluation.rst:179
+#: ../../source/explanation-federated-evaluation.rst:183
 #, fuzzy
 msgid ""
 "Model parameters can also be evaluated during training. ``Client.fit`` "
@@ -5116,11 +5133,11 @@ msgstr ""
 "모델 파라미터는 훈련 중에도 평가할 수 있습니다. :code:`Client.fit`은 임의의 평가 결과를 dictionary로 "
 "반환할 수 있습니다:"
 
-#: ../../source/explanation-federated-evaluation.rst:220
+#: ../../source/explanation-federated-evaluation.rst:224
 msgid "Full Code Example"
 msgstr "전체 코드 예제"
 
-#: ../../source/explanation-federated-evaluation.rst:222
+#: ../../source/explanation-federated-evaluation.rst:226
 #, fuzzy
 msgid ""
 "For a full code example that uses both centralized and federated "
@@ -5135,51 +5152,51 @@ msgstr ""
 
 #: ../../source/explanation-flower-architecture.rst:-1
 msgid ""
-"Explore the federated learning architecture of the Flower framework, "
-"featuring multi-run, concurrent execution, and scalable, secure machine "
-"learning while preserving data privacy."
+"Learn about the architecture of a deployed Flower federated learning "
+"system, including SuperLink, SuperNodes, multi-tenancy, and the role of "
+"SuperExec for managing concurrent training runs."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:2
+#: ../../source/explanation-flower-architecture.rst:6
 msgid "Flower Architecture"
 msgstr "Flower 아키텍처"
 
-#: ../../source/explanation-flower-architecture.rst:4
+#: ../../source/explanation-flower-architecture.rst:8
 msgid ""
 "This page explains the architecture of deployed Flower federated learning"
 " system."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:6
+#: ../../source/explanation-flower-architecture.rst:10
 msgid ""
 "In federated learning (FL), there is typically one server and a number of"
 " clients that are connected to the server. This is often called a "
 "federation."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:9
+#: ../../source/explanation-flower-architecture.rst:13
 msgid ""
 "The role of the server is to coordinate the training process. The role of"
 " each client is to receive tasks from the server, execute those tasks and"
 " return the results back to the server."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:13
+#: ../../source/explanation-flower-architecture.rst:17
 msgid "This is sometimes called a hub-and-spoke topology:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:21
+#: ../../source/explanation-flower-architecture.rst:25
 #, fuzzy
 msgid "Hub-and-spoke topology in federated learning"
 msgstr "연합 학습이란 무엇입니까?"
 
-#: ../../source/explanation-flower-architecture.rst:21
+#: ../../source/explanation-flower-architecture.rst:25
 msgid ""
 "Hub-and-spoke topology in federated learning (one server, multiple "
 "clients)."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:23
+#: ../../source/explanation-flower-architecture.rst:27
 msgid ""
 "In a real-world deployment, we typically want to run different projects "
 "on such a federation. Each project could use different hyperparameters, "
@@ -5187,7 +5204,7 @@ msgid ""
 "different machine learning frameworks like PyTorch and TensorFlow."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:28
+#: ../../source/explanation-flower-architecture.rst:32
 msgid ""
 "This is why, in Flower, both the server side and the client side are "
 "split into two parts. One part is long-lived and responsible for "
@@ -5195,17 +5212,17 @@ msgid ""
 "executes task-specific code."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:32
+#: ../../source/explanation-flower-architecture.rst:36
 msgid "A Flower `server` consists of **SuperLink** and ``ServerApp``:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:34
+#: ../../source/explanation-flower-architecture.rst:38
 msgid ""
 "**SuperLink**: a long-running process that forwards task instructions to "
 "clients (SuperNodes) and receives task results back."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:36
+#: ../../source/explanation-flower-architecture.rst:40
 msgid ""
 "``ServerApp``: a short-lived process with project-spcific code that "
 "customizes all server-side aspects of federated learning systems (client "
@@ -5213,18 +5230,18 @@ msgid ""
 "researchers and AI engineers write when they build Flower apps."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:41
+#: ../../source/explanation-flower-architecture.rst:45
 msgid "A Flower `client` consists of **SuperNode** and ``ClientApp``:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:43
+#: ../../source/explanation-flower-architecture.rst:47
 msgid ""
 "**SuperNode**: a long-running process that connects to the SuperLink, "
 "asks for tasks, executes tasks (for example, \"train this model on your "
 "local data\") and returns task results back to the SuperLink."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:46
+#: ../../source/explanation-flower-architecture.rst:50
 msgid ""
 "``ClientApp``: a short-lived process with project-specific code that "
 "customizes all client-side aspects of federated learning systems (local "
@@ -5232,7 +5249,7 @@ msgid ""
 " researchers and AI engineers write when they build Flower apps."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:51
+#: ../../source/explanation-flower-architecture.rst:55
 msgid ""
 "Why SuperNode and SuperLink? Well, in federated learning, the clients are"
 " the actual stars of the show. They hold the training data and they run "
@@ -5241,29 +5258,29 @@ msgid ""
 "`missing link` between all those SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:62
+#: ../../source/explanation-flower-architecture.rst:66
 #, fuzzy
 msgid "Basic Flower architecture"
 msgstr "Flower 아키텍처"
 
-#: ../../source/explanation-flower-architecture.rst:62
+#: ../../source/explanation-flower-architecture.rst:66
 msgid "The basic Flower architecture for federated learning."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:64
+#: ../../source/explanation-flower-architecture.rst:68
 msgid ""
 "In a Flower app project, users will typically develop the ``ServerApp`` "
 "and the ``ClientApp``. All the network communication between `server` and"
 " `clients` is taken care of by the SuperLink and SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:70
+#: ../../source/explanation-flower-architecture.rst:74
 msgid ""
 "For more details, please refer to the |serverapp_link|_ and "
 "|clientapp_link|_ documentation."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:73
+#: ../../source/explanation-flower-architecture.rst:77
 msgid ""
 "With *multi-run*, multiple ``ServerApp``\\s and ``ClientApp``\\s are now "
 "capable of running on the same federation consisting of a single long-"
@@ -5271,22 +5288,22 @@ msgid ""
 " referred to as `multi-tenancy` or `multi-job`."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:78
+#: ../../source/explanation-flower-architecture.rst:82
 msgid ""
 "As shown in the figure below, two projects, each consisting of a "
 "``ServerApp`` and a ``ClientApp``, could share the same SuperLink and "
 "SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:87
+#: ../../source/explanation-flower-architecture.rst:91
 msgid "Multi-tenancy federated learning architecture"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:87
+#: ../../source/explanation-flower-architecture.rst:91
 msgid "Multi-tenancy federated learning architecture with Flower"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:89
+#: ../../source/explanation-flower-architecture.rst:93
 msgid ""
 "To illustrate how multi-run works, consider one federated learning "
 "training run where a ``ServerApp`` and a ``ClientApp`` are participating "
@@ -5294,52 +5311,52 @@ msgid ""
 " is selected to participate in the training run."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:94
+#: ../../source/explanation-flower-architecture.rst:98
 msgid ""
 "In ``[run 1]`` below, all the SuperNodes are selected and therefore run "
 "their corresponding ``ClientApp``\\s:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:103
+#: ../../source/explanation-flower-architecture.rst:107
 msgid "Multi-tenancy federated learning architecture - Run 1"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:103
+#: ../../source/explanation-flower-architecture.rst:107
 msgid ""
 "Run 1 in a multi-run federated learning architecture with Flower. All "
 "SuperNodes participate in the training round."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:106
+#: ../../source/explanation-flower-architecture.rst:110
 msgid ""
 "However, in ``[run 2]``, only the first and third SuperNodes are selected"
 " to participate in the training:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:115
+#: ../../source/explanation-flower-architecture.rst:119
 msgid "Multi-tenancy federated learning architecture - Run 2"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:115
+#: ../../source/explanation-flower-architecture.rst:119
 msgid ""
 "Run 2 in a multi-run federated learning architecture with Flower. Only "
 "the first and third SuperNodes are selected to participate in the "
 "training round."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:118
+#: ../../source/explanation-flower-architecture.rst:122
 msgid ""
 "Therefore, with Flower multi-run, different projects (each consisting of "
 "a ``ServerApp`` and ``ClientApp``) can run on different sets of clients."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:123
+#: ../../source/explanation-flower-architecture.rst:127
 msgid ""
 "This explanation covers the Flower Deployment Engine. An explanation "
 "covering the Flower Simulation Engine will follow."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:128
+#: ../../source/explanation-flower-architecture.rst:132
 #, fuzzy
 msgid ""
 "As we continue to enhance Flower at a rapid pace, we'll periodically "
@@ -27942,7 +27959,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|e513c53249574a7ab9046cc8352b7510|"
+msgid "|370ce238c1874c3b86c8a0b031da5535|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -27959,7 +27976,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|bd41897cd0074390a236966b3f9f5ee1|"
+msgid "|33722de695c8489991b0b4c6fd3f1be5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -27985,7 +28002,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|d8abfd5e3ae648d6a62792b75531fb48|"
+msgid "|83f02921297743e2952253541405689a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -28003,7 +28020,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|4df8553bc6d946febceec9b15e1cb03a|"
+msgid "|1d5320cc498f4dfaae37f1fd002f1ff1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -28022,7 +28039,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|59158ba420384424bef75993a91b288e|"
+msgid "|43c990ef195743b0ad59008926404c8f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -28039,7 +28056,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|f0b31eeddd3e4006bd41cd54d8f1c40d|"
+msgid "|9fe8ef4893ab47eebc8f7c8b5af5ef20|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -28062,7 +28079,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|205ce4de0fa842ba9f5a0d4ad1260023|"
+msgid "|2142bba001c14f56b9091dab30f436a0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -28079,7 +28096,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|b32e2105fba64a9ba185a8b0934329ce|"
+msgid "|552b4b06568344e6bbfa2bcc2bb8b751|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -28258,7 +28275,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|bb454c69eb16424babce129a30e47271|"
+msgid "|fe1ddbea96ab4ab7a2ecddba38ef339d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -28286,7 +28303,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|bdb3c58c93a44794a8d3eff87c254102|"
+msgid "|121df5d9556e400c83d37bb9a00a794b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -28313,7 +28330,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|0383294bcdce4379adf790497bfe1588|"
+msgid "|c43e4c175380485d8a38d3d79474084f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -28339,7 +28356,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|329340ee2de443c78fdcdc4a43a55562|"
+msgid "|a041beb26f0747ee9cdb8b0be4b7de73|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -28389,7 +28406,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|d7d1094c52f741ea830675e877293adb|"
+msgid "|80ca4aba84fc4e4ca0212c57304c3d8e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -28509,7 +28526,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|df3ec0ca8a314f6ea4af3ac23a39ce3c|"
+msgid "|eb867687936d4a00b568da114f5ce282|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -36369,5 +36386,55 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|6c43269d50c448dab831fbd7e4d37a55|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Explore the federated learning architecture"
+#~ " of the Flower framework, featuring "
+#~ "multi-run, concurrent execution, and "
+#~ "scalable, secure machine learning while "
+#~ "preserving data privacy."
+#~ msgstr ""
+
+#~ msgid "|e513c53249574a7ab9046cc8352b7510|"
+#~ msgstr ""
+
+#~ msgid "|bd41897cd0074390a236966b3f9f5ee1|"
+#~ msgstr ""
+
+#~ msgid "|d8abfd5e3ae648d6a62792b75531fb48|"
+#~ msgstr ""
+
+#~ msgid "|4df8553bc6d946febceec9b15e1cb03a|"
+#~ msgstr ""
+
+#~ msgid "|59158ba420384424bef75993a91b288e|"
+#~ msgstr ""
+
+#~ msgid "|f0b31eeddd3e4006bd41cd54d8f1c40d|"
+#~ msgstr ""
+
+#~ msgid "|205ce4de0fa842ba9f5a0d4ad1260023|"
+#~ msgstr ""
+
+#~ msgid "|b32e2105fba64a9ba185a8b0934329ce|"
+#~ msgstr ""
+
+#~ msgid "|bb454c69eb16424babce129a30e47271|"
+#~ msgstr ""
+
+#~ msgid "|bdb3c58c93a44794a8d3eff87c254102|"
+#~ msgstr ""
+
+#~ msgid "|0383294bcdce4379adf790497bfe1588|"
+#~ msgstr ""
+
+#~ msgid "|329340ee2de443c78fdcdc4a43a55562|"
+#~ msgstr ""
+
+#~ msgid "|d7d1094c52f741ea830675e877293adb|"
+#~ msgstr ""
+
+#~ msgid "|df3ec0ca8a314f6ea4af3ac23a39ce3c|"
 #~ msgstr ""
 
