@@ -145,7 +145,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                 stub=driver._stub,
             )
 
-            log(DEBUG, "[flwr-serverapp] Starts FAB installation.")
+            log(DEBUG, "[flwr-serverapp] Start FAB installation.")
             install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
             fab_id, fab_version = get_fab_metadata(fab.content)
