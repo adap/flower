@@ -362,9 +362,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PullServerAppInputsResponse:
         """Pull ServerApp process inputs."""
         log(DEBUG, "ServerAppIoServicer.PullServerAppInputs")
-        # Init access to LinkState and Ffs
+        # Init access to LinkState
         state = self.state_factory.state()
-        ffs = self.ffs_factory.ffs()
 
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
@@ -373,6 +372,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             # If there's no pending run, return an empty response
             if run_id is None:
                 return PullServerAppInputsResponse()
+
+            # Init access to Ffs
+            ffs = self.ffs_factory.ffs()
 
             # Retrieve Context, Run and Fab for the run_id
             serverapp_ctxt = state.get_serverapp_context(run_id)
