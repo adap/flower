@@ -20,7 +20,6 @@ package flwr.proto;
 import "flwr/proto/log.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/message.proto";
-import "flwr/proto/task.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
 
@@ -31,12 +30,10 @@ service ServerAppIo {
   // Return a set of nodes
   rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
 
-  // Create one or more tasks
-  rpc PushTaskIns(PushTaskInsRequest) returns (PushTaskInsResponse) {}
+  // Create one or more messages
   rpc PushMessages(PushInsMessagesRequest) returns (PushInsMessagesResponse) {}
 
-  // Get task results
-  rpc PullTaskRes(PullTaskResRequest) returns (PullTaskResResponse) {}
+  // Get message results
   rpc PullMessages(PullResMessagesRequest) returns (PullResMessagesResponse) {}
 
   // Get run details
@@ -67,21 +64,6 @@ service ServerAppIo {
 // GetNodes messages
 message GetNodesRequest { uint64 run_id = 1; }
 message GetNodesResponse { repeated Node nodes = 1; }
-
-// PushTaskIns messages
-message PushTaskInsRequest {
-  repeated TaskIns task_ins_list = 1;
-  uint64 run_id = 2;
-}
-message PushTaskInsResponse { repeated string task_ids = 2; }
-
-// PullTaskRes messages
-message PullTaskResRequest {
-  Node node = 1;
-  repeated string task_ids = 2;
-  uint64 run_id = 3;
-}
-message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
 
 // PushMessages messages
 message PushInsMessagesRequest {
