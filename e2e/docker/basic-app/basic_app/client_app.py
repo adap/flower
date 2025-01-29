@@ -1,8 +1,9 @@
 """basic-app: A Flower / NumPy app."""
 
+from basic_app.task import get_dummy_model
+
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
-from basic_app.task import get_dummy_model
 
 
 class FlowerClient(NumPyClient):
