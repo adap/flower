@@ -27,6 +27,7 @@ from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     PUBLIC_KEY_HEADER,
     SIGNATURE_HEADER,
+    SUPERLINK_NODE_ID,
     TIMESTAMP_HEADER,
     Status,
 )
@@ -44,8 +45,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushTaskResRequest,
     PushTaskResResponse,
 )
@@ -55,6 +60,7 @@ from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
+from flwr.server.superlink.linkstate.linkstate_test import create_res_message
 
 from .server_interceptor import AuthenticateServerInterceptor
 
@@ -97,10 +103,20 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=PullTaskInsRequest.SerializeToString,
             response_deserializer=PullTaskInsResponse.FromString,
         )
+        self._pull_messages = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PullMessages",
+            request_serializer=PullMessagesRequest.SerializeToString,
+            response_deserializer=PullMessagesResponse.FromString,
+        )
         self._push_task_res = self._channel.unary_unary(
             "/flwr.proto.Fleet/PushTaskRes",
             request_serializer=PushTaskResRequest.SerializeToString,
             response_deserializer=PushTaskResResponse.FromString,
+        )
+        self._push_messages = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PushMessages",
+            request_serializer=PushMessagesRequest.SerializeToString,
+            response_deserializer=PushMessagesResponse.FromString,
         )
         self._get_run = self._channel.unary_unary(
             "/flwr.proto.Fleet/GetRun",
@@ -183,6 +199,12 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         req = PullTaskInsRequest(node=Node(node_id=node_id))
         return self._pull_task_ins.with_call(request=req, metadata=metadata)
 
+    def _test_pull_messages(self, metadata: list[Any]) -> Any:
+        """Test PullMessages."""
+        node_id = self._create_node_and_set_public_key()
+        req = PullMessagesRequest(node=Node(node_id=node_id))
+        return self._pull_messages.with_call(request=req, metadata=metadata)
+
     def _test_push_task_res(self, metadata: list[Any]) -> Any:
         """Test PushTaskRes."""
         node_id = self._create_node_and_set_public_key()
@@ -197,6 +219,19 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             ],
         )
         return self._push_task_res.with_call(request=req, metadata=metadata)
+
+    def _test_push_messages(self, metadata: list[Any]) -> Any:
+        """Test PushMessages."""
+        node_id = self._create_node_and_set_public_key()
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        # Transition status to running. PushMessages is only allowed in running status.
+        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        msg_proto = create_res_message(
+            src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
+        )
+        req = PushMessagesRequest(node=Node(node_id=node_id), messages_list=[msg_proto])
+        return self._push_messages.with_call(request=req, metadata=metadata)
 
     def _test_get_run(self, metadata: list[Any]) -> Any:
         """Test GetRun."""
@@ -241,6 +276,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_delete_node,),
             (_test_pull_task_ins,),
             (_test_push_task_res,),
+            (_test_pull_messages,),
+            (_test_push_messages,),
             (_test_get_run,),
             (_test_ping,),
             (_test_get_fab,),
@@ -262,6 +299,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_delete_node,),
             (_test_pull_task_ins,),
             (_test_push_task_res,),
+            (_test_pull_messages,),
+            (_test_push_messages,),
             (_test_get_run,),
             (_test_ping,),
             (_test_get_fab,),
@@ -282,6 +321,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_delete_node,),
             (_test_pull_task_ins,),
             (_test_push_task_res,),
+            (_test_pull_messages,),
+            (_test_push_messages,),
             (_test_get_run,),
             (_test_ping,),
             (_test_get_fab,),
@@ -302,6 +343,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_delete_node,),
             (_test_pull_task_ins,),
             (_test_push_task_res,),
+            (_test_pull_messages,),
+            (_test_push_messages,),
             (_test_get_run,),
             (_test_ping,),
             (_test_get_fab,),

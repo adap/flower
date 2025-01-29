@@ -27,8 +27,13 @@ from google.protobuf.message import Message as GrpcMessage
 from parameterized import parameterized
 
 from flwr.client.grpc_rere_client.connection import grpc_request_response
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, serde
-from flwr.common.constant import PUBLIC_KEY_HEADER, SIGNATURE_HEADER, TIMESTAMP_HEADER
+from flwr.common import DEFAULT_TTL, GRPC_MAX_MESSAGE_LENGTH, now, serde
+from flwr.common.constant import (
+    PUBLIC_KEY_HEADER,
+    SIGNATURE_HEADER,
+    SUPERLINK_NODE_ID,
+    TIMESTAMP_HEADER,
+)
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.record import RecordSet
@@ -43,8 +48,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushTaskResRequest,
     PushTaskResResponse,
 )
@@ -64,7 +73,7 @@ class _MockServicer:
         ] = None
         self._received_message_bytes: bytes = b""
 
-    def unary_unary(
+    def unary_unary(  # pylint: disable=too-many-return-statements
         self, request: GrpcMessage, context: grpc.ServicerContext
     ) -> GrpcMessage:
         """Handle unary call."""
@@ -78,8 +87,28 @@ class _MockServicer:
                 return DeleteNodeResponse()
             if isinstance(request, PushTaskResRequest):
                 return PushTaskResResponse()
+            if isinstance(request, PushMessagesRequest):
+                return PushMessagesResponse()
             if isinstance(request, GetRunRequest):
                 return GetRunResponse()
+            if isinstance(request, PullMessagesRequest):
+
+                msg = Message(
+                    metadata=Metadata(
+                        run_id=1234,
+                        message_id="",
+                        src_node_id=123,
+                        dst_node_id=SUPERLINK_NODE_ID,
+                        group_id="",
+                        ttl=DEFAULT_TTL,
+                        message_type="mock",
+                        reply_to_message="",
+                    ),
+                    content=RecordSet(),
+                )
+                proto_msg = serde.message_to_proto(msg)
+                proto_msg.metadata.created_at = now().timestamp()
+                return PullMessagesResponse(messages_list=[])
 
             return PullTaskInsResponse(
                 task_ins_list=[
@@ -122,10 +151,20 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             request_deserializer=PullTaskInsRequest.FromString,
             response_serializer=PullTaskInsResponse.SerializeToString,
         ),
+        "PullMessages": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=PullMessagesRequest.FromString,
+            response_serializer=PullMessagesResponse.SerializeToString,
+        ),
         "PushTaskRes": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
             request_deserializer=PushTaskResRequest.FromString,
             response_serializer=PushTaskResResponse.SerializeToString,
+        ),
+        "PushMessages": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=PushMessagesRequest.FromString,
+            response_serializer=PushMessagesResponse.SerializeToString,
         ),
         "GetRun": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
