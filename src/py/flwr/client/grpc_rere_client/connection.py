@@ -20,7 +20,7 @@ import threading
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from copy import copy
-from logging import DEBUG, ERROR
+from logging import ERROR
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -36,7 +36,7 @@ from flwr.common.constant import (
     PING_DEFAULT_INTERVAL,
     PING_RANDOM_RANGE,
 )
-from flwr.common.grpc import create_channel
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
@@ -58,11 +58,6 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 
 from .client_interceptor import AuthenticateClientInterceptor
 from .grpc_adapter import GrpcAdapter
-
-
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
 
 
 @contextmanager
