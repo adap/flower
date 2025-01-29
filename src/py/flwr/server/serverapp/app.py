@@ -72,7 +72,7 @@ def flwr_serverapp() -> None:
 
     args = _parse_args_run_flwr_serverapp().parse_args()
 
-    log(INFO, "Starting Flower ServerApp")
+    log(INFO, "Starting flwr-serverapp process")
 
     if not args.insecure:
         flwr_exit(
@@ -82,7 +82,8 @@ def flwr_serverapp() -> None:
 
     log(
         DEBUG,
-        "Starting isolated `ServerApp` connected to SuperLink's ServerAppIo API at %s",
+        "Starting isolated `flwr-serverapp` connected to SuperLink's "
+        "ServerAppIo API at %s",
         args.serverappio_api_address,
     )
     run_serverapp(
@@ -144,7 +145,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                 stub=driver._stub,
             )
 
-            log(DEBUG, "ServerApp process starts FAB installation.")
+            log(DEBUG, "[flwr-serverapp] Starts FAB installation.")
             install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
             fab_id, fab_version = get_fab_metadata(fab.content)
@@ -165,7 +166,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
 
             log(
                 DEBUG,
-                "Flower will load ServerApp `%s` in %s",
+                "[flwr-serverapp] Will load ServerApp `%s` in %s",
                 server_app_attr,
                 app_path,
             )

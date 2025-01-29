@@ -66,11 +66,11 @@ def flwr_clientapp() -> None:
             "flwr-clientapp does not support TLS yet.",
         )
 
-    log(INFO, "Starting Flower ClientApp")
+    log(INFO, "Starting flwr-clientapp process")
     log(
         DEBUG,
-        "Starting isolated `ClientApp` connected to SuperNode's ClientAppIo API at %s "
-        "with token %s",
+        "Starting isolated `flwr-clientapp` process connected to SuperNode's "
+        "ClientAppIo API at %s with token %s",
         args.clientappio_api_address,
         args.token,
     )
@@ -85,7 +85,7 @@ def flwr_clientapp() -> None:
 
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
+    log(DEBUG, "[flwr-clientapp] on_channel_state_change: %s ", channel_connectivity)
 
 
 def run_clientapp(  # pylint: disable=R0914
@@ -116,11 +116,11 @@ def run_clientapp(  # pylint: disable=R0914
                 time.sleep(1)
 
             # Pull Message, Context, Run and (optional) FAB from SuperNode
-            message, context, run, fab = pull_message(stub=stub, token=token)
+            message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
 
             # Install FAB, if provided
             if fab:
-                log(DEBUG, "Flower ClientApp starts FAB installation.")
+                log(DEBUG, "[flwr-clientapp] Starts FAB installation.")
                 install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
             load_client_app_fn = get_load_client_app_fn(
@@ -132,6 +132,7 @@ def run_clientapp(  # pylint: disable=R0914
 
             try:
                 # Load ClientApp
+                log(DEBUG, "[flwr-clientapp] Starts ClientApp Loading.")
                 client_app: ClientApp = load_client_app_fn(
                     run.fab_id, run.fab_version, fab.hash_str if fab else ""
                 )
@@ -160,7 +161,7 @@ def run_clientapp(  # pylint: disable=R0914
                 )
 
             # Push Message and Context to SuperNode
-            _ = push_message(
+            _ = push_clientappoutputs(
                 stub=stub, token=token, message=reply_message, context=context
             )
 
@@ -183,7 +184,7 @@ def run_clientapp(  # pylint: disable=R0914
 
 def get_token(stub: grpc.Channel) -> Optional[int]:
     """Get a token from SuperNode."""
-    log(DEBUG, "Flower ClientApp process requests token")
+    log(DEBUG, "[flwr-clientapp] Requests token")
     try:
         res: GetTokenResponse = stub.GetToken(GetTokenRequest())
         log(DEBUG, "[GetToken] Received token: %s", res.token)
@@ -196,11 +197,11 @@ def get_token(stub: grpc.Channel) -> Optional[int]:
         return None
 
 
-def pull_message(
+def pull_clientappinputs(
     stub: grpc.Channel, token: int
 ) -> tuple[Message, Context, Run, Optional[Fab]]:
-    """Pull message from SuperNode to ClientApp."""
-    log(INFO, "Pulling ClientAppInputs for token %s", token)
+    """Pull ClientAppInputs from SuperNode."""
+    log(INFO, "[flwr-clientapp] Pull ClientAppInputs for token %s", token)
     try:
         res: PullClientAppInputsResponse = stub.PullClientAppInputs(
             PullClientAppInputsRequest(token=token)
@@ -215,11 +216,11 @@ def pull_message(
         raise e
 
 
-def push_message(
+def push_clientappoutputs(
     stub: grpc.Channel, token: int, message: Message, context: Context
 ) -> PushClientAppOutputsResponse:
-    """Push message to SuperNode from ClientApp."""
-    log(INFO, "Pushing ClientAppOutputs for token %s", token)
+    """Push ClientAppOutputs to SuperNode."""
+    log(INFO, "[flwr-clientapp] Push ClientAppOutputs for token %s", token)
     proto_message = message_to_proto(message)
     proto_context = context_to_proto(context)
 
