@@ -122,6 +122,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             # Pull ServerAppInputs from LinkState
             req = PullServerAppInputsRequest()
             res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
+            log(DEBUG, "flwr-serverapp: PullServerAppInputs")
             if not res.HasField("run"):
                 sleep(3)
                 run_status = None
