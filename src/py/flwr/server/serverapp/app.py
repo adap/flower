@@ -72,7 +72,7 @@ def flwr_serverapp() -> None:
 
     args = _parse_args_run_flwr_serverapp().parse_args()
 
-    log(INFO, "Starting Flower ServerApp")
+    log(INFO, "Start `flwr-serverapp` process")
 
     if not args.insecure:
         flwr_exit(
@@ -82,7 +82,8 @@ def flwr_serverapp() -> None:
 
     log(
         DEBUG,
-        "Starting isolated `ServerApp` connected to SuperLink's ServerAppIo API at %s",
+        "`flwr-serverapp` will attempt to connect to SuperLink's "
+        "ServerAppIo API at %s",
         args.serverappio_api_address,
     )
     run_serverapp(
@@ -121,8 +122,8 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
         try:
             # Pull ServerAppInputs from LinkState
             req = PullServerAppInputsRequest()
+            log(DEBUG, "[flwr-serverapp] Pull ServerAppInputs")
             res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
-            log(DEBUG, "flwr-serverapp: PullServerAppInputs")
             if not res.HasField("run"):
                 sleep(3)
                 run_status = None
@@ -144,7 +145,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                 stub=driver._stub,
             )
 
-            log(DEBUG, "ServerApp process starts FAB installation.")
+            log(DEBUG, "[flwr-serverapp] Start FAB installation.")
             install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
             fab_id, fab_version = get_fab_metadata(fab.content)
@@ -165,7 +166,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
 
             log(
                 DEBUG,
-                "Flower will load ServerApp `%s` in %s",
+                "[flwr-serverapp] Will load ServerApp `%s` in %s",
                 server_app_attr,
                 app_path,
             )
@@ -191,6 +192,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
 
             # Send resulting context
             context_proto = context_to_proto(updated_context)
+            log(DEBUG, "[flwr-serverapp] Will push ServerAppOutputs")
             out_req = PushServerAppOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )
