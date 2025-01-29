@@ -18,6 +18,7 @@
 from logging import DEBUG, INFO
 
 import grpc
+from google.protobuf.json_format import MessageToDict
 
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
@@ -60,13 +61,13 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> CreateNodeResponse:
         """."""
         log(INFO, "[Fleet.CreateNode] Request ping_interval=%s", request.ping_interval)
-        log(DEBUG, "[Fleet.CreateNode] Request: %s", request)
+        log(DEBUG, "[Fleet.CreateNode] Request: %s", MessageToDict(request))
         response = message_handler.create_node(
             request=request,
             state=self.state_factory.state(),
         )
         log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
-        log(DEBUG, "[Fleet.CreateNode] Response: %s", response)
+        log(DEBUG, "[Fleet.CreateNode] Response: %s", MessageToDict(response))
         return response
 
     def DeleteNode(
@@ -74,7 +75,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> DeleteNodeResponse:
         """."""
         log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
-        log(DEBUG, "[Fleet.DeleteNode] Request: %s", request)
+        log(DEBUG, "[Fleet.DeleteNode] Request: %s", MessageToDict(request))
         return message_handler.delete_node(
             request=request,
             state=self.state_factory.state(),
@@ -82,7 +83,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
     def Ping(self, request: PingRequest, context: grpc.ServicerContext) -> PingResponse:
         """."""
-        log(DEBUG, "[Fleet.Ping] Request: %s", request)
+        log(DEBUG, "[Fleet.Ping] Request: %s", MessageToDict(request))
         return message_handler.ping(
             request=request,
             state=self.state_factory.state(),
@@ -93,7 +94,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> PullTaskInsResponse:
         """Pull TaskIns."""
         log(INFO, "[Fleet.PullTaskIns] node_id=%s", request.node.node_id)
-        log(DEBUG, "[Fleet.PullTaskIns] Request: %s", request)
+        log(DEBUG, "[Fleet.PullTaskIns] Request: %s", MessageToDict(request))
         return message_handler.pull_task_ins(
             request=request,
             state=self.state_factory.state(),
@@ -104,7 +105,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> PullMessagesResponse:
         """Pull Messages."""
         log(INFO, "[Fleet.PullMessages] node_id=%s", request.node.node_id)
-        log(DEBUG, "[Fleet.PullMessages] Request: %s", request)
+        log(DEBUG, "[Fleet.PullMessages] Request: %s", MessageToDict(request))
         return message_handler.pull_messages(
             request=request,
             state=self.state_factory.state(),
