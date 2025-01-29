@@ -22,10 +22,16 @@ import grpc
 from parameterized import parameterized
 
 from flwr.common import ConfigsRecord
-from flwr.common.constant import FLEET_API_GRPC_RERE_DEFAULT_ADDRESS, Status
+from flwr.common.constant import (
+    FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
+    SUPERLINK_NODE_ID,
+    Status,
+)
 from flwr.common.typing import RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushTaskResRequest,
     PushTaskResResponse,
 )
@@ -35,6 +41,7 @@ from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
+from flwr.server.superlink.linkstate.linkstate_test import create_res_message
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 
 
@@ -67,6 +74,11 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.Fleet/PushTaskRes",
             request_serializer=PushTaskResRequest.SerializeToString,
             response_deserializer=PushTaskResResponse.FromString,
+        )
+        self._push_messages = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PushMessages",
+            request_serializer=PushMessagesRequest.SerializeToString,
+            response_deserializer=PushMessagesResponse.FromString,
         )
         self._get_run = self._channel.unary_unary(
             "/flwr.proto.Fleet/GetRun",
@@ -111,6 +123,28 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, PushTaskResResponse)
         assert grpc.StatusCode.OK == call.code()
 
+    def test_successful_push_messages_if_running(self) -> None:
+        """Test `PushMessages` success."""
+        # Prepare
+        node_id = self.state.create_node(ping_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        # Transition status to running. PushTaskRes is only allowed in running status.
+        self._transition_run_status(run_id, 2)
+
+        msg_proto = create_res_message(
+            src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
+        )
+        request = PushMessagesRequest(
+            node=Node(node_id=node_id), messages_list=[msg_proto]
+        )
+
+        # Execute
+        response, call = self._push_messages.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, PushMessagesResponse)
+        assert grpc.StatusCode.OK == call.code()
+
     def _assert_push_task_res_not_allowed(self, node_id: int, run_id: int) -> None:
         """Assert `PushTaskRes` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
@@ -143,6 +177,41 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Execute & Assert
         self._assert_push_task_res_not_allowed(node_id, run_id)
+
+    def _assert_push_messages_not_allowed(self, node_id: int, run_id: int) -> None:
+        """Assert `PushMessages` not allowed."""
+        run_status = self.state.get_run_status({run_id})[run_id]
+
+        msg_proto = create_res_message(
+            src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
+        )
+        request = PushMessagesRequest(
+            node=Node(node_id=node_id), messages_list=[msg_proto]
+        )
+
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_messages.with_call(request=request)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert e.exception.details() == self.status_to_msg[run_status.status]
+
+    @parameterized.expand(
+        [
+            (0,),  # Test not successful if RunStatus is pending.
+            (1,),  # Test not successful if RunStatus is starting.
+            (3,),  # Test not successful if RunStatus is finished.
+        ]
+    )  # type: ignore
+    def test_push_messages_not_successful_if_not_running(
+        self, num_transitions: int
+    ) -> None:
+        """Test `PushMessages` not successful if RunStatus is not running."""
+        # Prepare
+        node_id = self.state.create_node(ping_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        self._transition_run_status(run_id, num_transitions)
+
+        # Execute & Assert
+        self._assert_push_messages_not_allowed(node_id, run_id)
 
     def test_successful_get_run_if_running(self) -> None:
         """Test `GetRun` success."""
