@@ -385,6 +385,9 @@ def run_superlink() -> None:
                     "Node authentication enabled with %d known public keys",
                     len(node_public_keys),
                 )
+            else:
+                log(DEBUG, "Using automatic node authentication.")
+
             interceptors = [AuthenticateServerInterceptor(state_factory, auto_auth)]
 
             fleet_server = _run_fleet_api_grpc_rere(
