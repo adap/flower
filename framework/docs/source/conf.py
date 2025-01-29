@@ -89,10 +89,10 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version of the next release, including alpha/beta/rc tags
-release = "1.14.0"
+release = "1.15.0"
 # The current released version
 rst_prolog = """
-.. |stable_flwr_version| replace:: 1.13.1
+.. |stable_flwr_version| replace:: 1.14.0
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
 .. |ubuntu_version| replace:: 24.04
 .. |setuptools_version| replace:: 70.3.0
@@ -176,7 +176,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "ref-exit-codes/_template.rst"]
 
 # Sphinx redirects, implemented after the doc filename changes.
 # To prevent 404 errors and redirect to the new pages.
@@ -271,7 +271,6 @@ redirects = {
     "contributor-explanation-architecture": "explanation-flower-architecture.html",
     "example-pytorch-from-centralized-to-federated": "tutorial-quickstart-pytorch.html",
     "example-fedbn-pytorch-from-centralized-to-federated": "how-to-implement-fedbn.html",
-    "how-to-configure-logging": "index.html",
     "how-to-monitor-simulation": "how-to-run-simulations.html",
     "fed/index": "index.html",
     "fed/0000-20200102-fed-template": "index.html",
@@ -296,7 +295,7 @@ html_theme_options = {
     # https://sphinx-book-theme.readthedocs.io/en/latest/configure.html
     # "repository_url": "https://github.com/adap/flower",
     # "repository_branch": "main",
-    # "path_to_docs": "doc/source/",
+    # "path_to_docs": "framework/docs/source/",
     # "home_page_in_toc": True,
     # "use_repository_button": True,
     # "use_issues_button": True,
@@ -338,7 +337,7 @@ _open_in_colab_button = """
 .. raw:: html
 
     <br/>
-    <a href="https://colab.research.google.com/github/adap/flower/blob/main/doc/source/{{ env.doc2path(env.docname, base=None) }}">
+    <a href="https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source/{{ env.doc2path(env.docname, base=None) }}">
         <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"/>
     </a>
 """

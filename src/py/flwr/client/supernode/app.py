@@ -16,7 +16,6 @@
 
 
 import argparse
-import sys
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import Optional
@@ -40,6 +39,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
@@ -64,17 +64,6 @@ def run_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
-    # Exit if unsupported argument is passed by the user
-    if args.app is not None:
-        log(
-            ERROR,
-            "The `app` argument is deprecated. The SuperNode now automatically "
-            "uses the ClientApp delivered from the SuperLink. Providing the app "
-            "directory manually is no longer supported. Please remove the `app` "
-            "argument from your command.",
-        )
-        sys.exit(1)
-
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     load_fn = get_load_client_app_fn(
         default_app_ref="",
@@ -85,6 +74,12 @@ def run_supernode() -> None:
     authentication_keys = _try_setup_client_authentication(args)
 
     log(DEBUG, "Isolation mode: %s", args.isolation)
+
+    # Register handlers for graceful shutdown
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERNODE_LEAVE,
+        exit_message="SuperNode terminated gracefully.",
+    )
 
     start_client_internal(
         server_address=args.superlink,
@@ -103,20 +98,14 @@ def run_supernode() -> None:
         clientappio_api_address=args.clientappio_api_address,
     )
 
-    # Graceful shutdown
-    register_exit_handlers(
-        event_type=EventType.RUN_SUPERNODE_LEAVE,
-    )
-
 
 def run_client_app() -> None:
     """Run Flower client app."""
     event(EventType.RUN_CLIENT_APP_ENTER)
     log(
         ERROR,
-        "The command `flower-client-app` has been replaced by `flower-supernode`.",
+        "The command `flower-client-app` has been replaced by `flwr run`.",
     )
-    log(INFO, "Execute `flower-supernode --help` to learn how to use it.")
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
@@ -144,18 +133,6 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     """Parse flower-supernode command line arguments."""
     parser = argparse.ArgumentParser(
         description="Start a Flower SuperNode",
-    )
-
-    parser.add_argument(
-        "app",
-        nargs="?",
-        default=None,
-        help=(
-            "(REMOVED) This argument is removed. The SuperNode now automatically "
-            "uses the ClientApp delivered from the SuperLink, so there is no need to "
-            "provide the app directory manually. This argument will be removed in a "
-            "future version."
-        ),
     )
     _parse_args_common(parser)
     parser.add_argument(
@@ -281,11 +258,7 @@ def _try_setup_client_authentication(
         return None
 
     if not args.auth_supernode_private_key or not args.auth_supernode_public_key:
-        sys.exit(
-            "Authentication requires file paths to both "
-            "'--auth-supernode-private-key' and '--auth-supernode-public-key'"
-            "to be provided (providing only one of them is not sufficient)."
-        )
+        flwr_exit(ExitCode.SUPERNODE_NODE_AUTH_KEYS_REQUIRED)
 
     try:
         ssh_private_key = load_ssh_private_key(
@@ -295,11 +268,9 @@ def _try_setup_client_authentication(
         if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
-            "Error: Unable to parse the private key file in "
-            "'--auth-supernode-private-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid private key file and try again."
+        flwr_exit(
+            ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
+            "Unable to parse the private key file.",
         )
 
     try:
@@ -309,11 +280,9 @@ def _try_setup_client_authentication(
         if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
-            "Error: Unable to parse the public key file in "
-            "'--auth-supernode-public-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid public key file and try again."
+        flwr_exit(
+            ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
+            "Unable to parse the public key file.",
         )
 
     return (

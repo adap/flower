@@ -20,28 +20,23 @@ import json
 import re
 from collections.abc import Iterator
 from contextlib import contextmanager
-from logging import DEBUG
 from pathlib import Path
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, Optional, Union, cast
 
 import grpc
 import typer
 
 from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR, FLWR_DIR
-from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log
+from flwr.common.constant import AUTH_TYPE_KEY, CREDENTIALS_DIR, FLWR_DIR
+from flwr.common.grpc import (
+    GRPC_MAX_MESSAGE_LENGTH,
+    create_channel,
+    on_channel_state_change,
+)
 
+from .auth_plugin import get_cli_auth_plugins
 from .config_utils import validate_certificate_in_federation_config
-
-try:
-    from flwr.ee import get_cli_auth_plugins
-except ImportError:
-
-    def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
-        """Return all CLI authentication plugins."""
-        raise NotImplementedError("No authentication plugins are currently supported.")
 
 
 def prompt_text(
@@ -148,48 +143,111 @@ def sanitize_project_name(name: str) -> str:
     return sanitized_name
 
 
-def get_sha256_hash(file_path: Path) -> str:
+def get_sha256_hash(file_path_or_int: Union[Path, int]) -> str:
     """Calculate the SHA-256 hash of a file."""
     sha256 = hashlib.sha256()
-    with open(file_path, "rb") as f:
-        while True:
-            data = f.read(65536)  # Read in 64kB blocks
-            if not data:
-                break
-            sha256.update(data)
+    if isinstance(file_path_or_int, Path):
+        with open(file_path_or_int, "rb") as f:
+            while True:
+                data = f.read(65536)  # Read in 64kB blocks
+                if not data:
+                    break
+                sha256.update(data)
+    elif isinstance(file_path_or_int, int):
+        sha256.update(str(file_path_or_int).encode())
     return sha256.hexdigest()
 
 
 def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
-    """Return the path to the user auth config file."""
+    """Return the path to the user auth config file.
+
+    Additionally, a `.gitignore` file will be created in the Flower directory to
+    include the `.credentials` folder to be excluded from git. If the `.gitignore`
+    file already exists, a warning will be displayed if the `.credentials` entry is
+    not found.
+    """
     # Locate the credentials directory
-    credentials_dir = root_dir.absolute() / FLWR_DIR / CREDENTIALS_DIR
+    abs_flwr_dir = root_dir.absolute() / FLWR_DIR
+    credentials_dir = abs_flwr_dir / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
+
+    # Determine the absolute path of the Flower directory for .gitignore
+    gitignore_path = abs_flwr_dir / ".gitignore"
+    credential_entry = CREDENTIALS_DIR
+
+    try:
+        if gitignore_path.exists():
+            with open(gitignore_path, encoding="utf-8") as gitignore_file:
+                lines = gitignore_file.read().splitlines()
+
+            # Warn if .credentials is not already in .gitignore
+            if credential_entry not in lines:
+                typer.secho(
+                    f"`.gitignore` exists, but `{credential_entry}` entry not found. "
+                    "Consider adding it to your `.gitignore` to exclude Flower "
+                    "credentials from git.",
+                    fg=typer.colors.YELLOW,
+                    bold=True,
+                )
+        else:
+            typer.secho(
+                f"Creating a new `.gitignore` with `{credential_entry}` entry...",
+                fg=typer.colors.BLUE,
+            )
+            # Create a new .gitignore with .credentials
+            with open(gitignore_path, "w", encoding="utf-8") as gitignore_file:
+                gitignore_file.write(f"{credential_entry}\n")
+    except Exception as err:
+        typer.secho(
+            "❌ An error occurred while handling `.gitignore.` "
+            f"Please check the permissions of `{gitignore_path}` and try again.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from err
+
     return credentials_dir / f"{federation}.json"
 
 
 def try_obtain_cli_auth_plugin(
     root_dir: Path,
     federation: str,
+    federation_config: dict[str, Any],
     auth_type: Optional[str] = None,
 ) -> Optional[CliAuthPlugin]:
     """Load the CLI-side user auth plugin for the given auth type."""
-    config_path = get_user_auth_config_path(root_dir, federation)
-
-    # Load the config file if it exists
-    config: dict[str, Any] = {}
-    if config_path.exists():
-        with config_path.open("r", encoding="utf-8") as file:
-            config = json.load(file)
-    # This is the case when the user auth is not enabled
-    elif auth_type is None:
+    # Check if user auth is enabled
+    if not federation_config.get("enable-user-auth", False):
         return None
 
+    # Check if TLS is enabled. If not, raise an error
+    if federation_config.get("root-certificates") is None:
+        typer.secho(
+            "❌ User authentication requires TLS to be enabled. "
+            "Please provide 'root-certificates' in the federation"
+            " configuration.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    config_path = get_user_auth_config_path(root_dir, federation)
+
     # Get the auth type from the config if not provided
+    # auth_type will be None for all CLI commands except login
     if auth_type is None:
-        if AUTH_TYPE not in config:
-            return None
-        auth_type = config[AUTH_TYPE]
+        try:
+            with config_path.open("r", encoding="utf-8") as file:
+                json_file = json.load(file)
+            auth_type = json_file[AUTH_TYPE_KEY]
+        except (FileNotFoundError, KeyError):
+            typer.secho(
+                "❌ Missing or invalid credentials for user authentication. "
+                "Please run `flwr login` to authenticate.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
 
     # Retrieve auth plugin class and instantiate it
     try:
@@ -208,11 +266,6 @@ def init_channel(
     app: Path, federation_config: dict[str, Any], auth_plugin: Optional[CliAuthPlugin]
 ) -> grpc.Channel:
     """Initialize gRPC channel to the Exec API."""
-
-    def on_channel_state_change(channel_connectivity: str) -> None:
-        """Log channel connectivity."""
-        log(DEBUG, channel_connectivity)
-
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )
@@ -245,12 +298,19 @@ def unauthenticated_exc_handler() -> Iterator[None]:
     try:
         yield
     except grpc.RpcError as e:
-        if e.code() != grpc.StatusCode.UNAUTHENTICATED:
-            raise
-        typer.secho(
-            "❌ Authentication failed. Please run `flwr login`"
-            " to authenticate and try again.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.UNAUTHENTICATED:
+            typer.secho(
+                "❌ Authentication failed. Please run `flwr login`"
+                " to authenticate and try again.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.UNIMPLEMENTED:
+            typer.secho(
+                "❌ User authentication is not enabled on this SuperLink.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
+        raise

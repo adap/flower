@@ -17,12 +17,13 @@
 
 import json as _json
 import logging
+import os
 import re
 import sys
 import threading
 import time
 from io import StringIO
-from logging import WARN, LogRecord
+from logging import ERROR, WARN, LogRecord
 from logging.handlers import HTTPHandler
 from queue import Empty, Queue
 from typing import TYPE_CHECKING, Any, Optional, TextIO, Union
@@ -42,6 +43,7 @@ from .constant import LOG_UPLOAD_INTERVAL
 LOGGER_NAME = "flwr"
 FLOWER_LOGGER = logging.getLogger(LOGGER_NAME)
 FLOWER_LOGGER.setLevel(logging.DEBUG)
+log = FLOWER_LOGGER.log  # pylint: disable=invalid-name
 
 LOG_COLORS = {
     "DEBUG": "\033[94m",  # Blue
@@ -101,7 +103,7 @@ class ConsoleHandler(StreamHandler):
 
 
 def update_console_handler(
-    level: Optional[int] = None,
+    level: Optional[Union[int, str]] = None,
     timestamps: Optional[bool] = None,
     colored: Optional[bool] = None,
 ) -> None:
@@ -124,6 +126,22 @@ console_handler = ConsoleHandler(
 )
 console_handler.setLevel(logging.INFO)
 FLOWER_LOGGER.addHandler(console_handler)
+
+# Set log level via env var (show timestamps for `DEBUG`)
+if log_level := os.getenv("PYTHONLOGLEVEL"):
+    try:
+        use_time_stamps = log_level.upper() == "DEBUG"
+        update_console_handler(
+            level=log_level, timestamps=use_time_stamps, colored=True
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
+        # Alert user but don't raise exception
+        log(
+            ERROR,
+            "Failed to set logging level %s. Using default level: %s",
+            log_level,
+            logging.getLevelName(console_handler.level),
+        )
 
 
 class CustomHTTPHandler(HTTPHandler):
@@ -183,10 +201,6 @@ def configure(
         http_handler.setLevel(logging.DEBUG)
         # Override mapLogRecords as setFormatter has no effect on what is send via http
         FLOWER_LOGGER.addHandler(http_handler)
-
-
-logger = logging.getLogger(LOGGER_NAME)  # pylint: disable=invalid-name
-log = logger.log  # pylint: disable=invalid-name
 
 
 def warn_preview_feature(name: str) -> None:
@@ -320,7 +334,7 @@ def _log_uploader(
 ) -> None:
     """Upload logs to the SuperLink."""
     exit_flag = False
-    node = Node(node_id=node_id, anonymous=False)
+    node = Node(node_id=node_id)
     msgs: list[str] = []
     while True:
         # Fetch all messages from the queue

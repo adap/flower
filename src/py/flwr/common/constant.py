@@ -17,14 +17,6 @@
 
 from __future__ import annotations
 
-MISSING_EXTRA_REST = """
-Extra dependencies required for using the REST-based Fleet API are missing.
-
-To use the REST API, install `flwr` with the `rest` extra:
-
-    `pip install flwr[rest]`.
-"""
-
 TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
 TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
 TRANSPORT_TYPE_GRPC_ADAPTER = "grpc-adapter"
@@ -83,6 +75,9 @@ FAB_HASH_TRUNCATION = 8
 FLWR_DIR = ".flwr"  # The default Flower directory: ~/.flwr/
 FLWR_HOME = "FLWR_HOME"  # If set, override the default Flower directory
 
+# Constant for SuperLink
+SUPERLINK_NODE_ID = 1
+
 # Constants entries in Node config for Simulation
 PARTITION_ID_KEY = "partition-id"
 NUM_PARTITIONS_KEY = "num-partitions"
@@ -113,7 +108,15 @@ MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 
 # Constants for user authentication
 CREDENTIALS_DIR = ".credentials"
-AUTH_TYPE = "auth_type"
+AUTH_TYPE_KEY = "auth_type"
+ACCESS_TOKEN_KEY = "access_token"
+REFRESH_TOKEN_KEY = "refresh_token"
+
+# Constants for node authentication
+PUBLIC_KEY_HEADER = "public-key-bin"  # Must end with "-bin" for binary data
+SIGNATURE_HEADER = "signature-bin"  # Must end with "-bin" for binary data
+TIMESTAMP_HEADER = "timestamp"
+TIMESTAMP_TOLERANCE = 10  # Tolerance for timestamp verification
 
 
 class MessageType:
@@ -195,5 +198,15 @@ class CliOutputFormat:
     JSON = "json"
 
     def __new__(cls) -> CliOutputFormat:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class AuthType:
+    """User authentication types."""
+
+    OIDC = "oidc"
+
+    def __new__(cls) -> AuthType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")

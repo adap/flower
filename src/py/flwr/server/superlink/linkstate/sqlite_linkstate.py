@@ -31,6 +31,7 @@ from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
     RUN_ID_NUM_BYTES,
+    SUPERLINK_NODE_ID,
     Status,
 )
 from flwr.common.record import ConfigsRecord
@@ -70,16 +71,9 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
-SQL_CREATE_TABLE_CREDENTIAL = """
-CREATE TABLE IF NOT EXISTS credential(
-    private_key BLOB PRIMARY KEY,
-    public_key BLOB
-);
-"""
-
 SQL_CREATE_TABLE_PUBLIC_KEY = """
 CREATE TABLE IF NOT EXISTS public_key(
-    public_key BLOB UNIQUE
+    public_key      BLOB PRIMARY KEY
 );
 """
 
@@ -128,9 +122,7 @@ CREATE TABLE IF NOT EXISTS task_ins(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
     run_id                  INTEGER,
-    producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
-    consumer_anonymous      BOOLEAN,
     consumer_node_id        INTEGER,
     created_at              REAL,
     delivered_at            TEXT,
@@ -148,9 +140,7 @@ CREATE TABLE IF NOT EXISTS task_res(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
     run_id                  INTEGER,
-    producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
-    consumer_anonymous      BOOLEAN,
     consumer_node_id        INTEGER,
     created_at              REAL,
     delivered_at            TEXT,
@@ -211,7 +201,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
-        cur.execute(SQL_CREATE_TABLE_CREDENTIAL)
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
@@ -263,11 +252,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         Constraints
         -----------
-        If `task_ins.task.consumer.anonymous` is `True`, then
-        `task_ins.task.consumer.node_id` MUST NOT be set (equal 0).
 
-        If `task_ins.task.consumer.anonymous` is `False`, then
-        `task_ins.task.consumer.node_id` MUST be set (not 0)
+        `task_ins.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
         """
         # Validate task
         errors = validate_task_ins_or_res(task_ins)
@@ -292,7 +278,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             log(ERROR, "Invalid run ID for TaskIns: %s", task_ins.run_id)
             return None
         # Validate source node ID
-        if task_ins.task.producer.node_id != 0:
+        if task_ins.task.producer.node_id != SUPERLINK_NODE_ID:
             log(
                 ERROR,
                 "Invalid source node ID for TaskIns: %s",
@@ -301,14 +287,13 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
         # Validate destination node ID
         query = "SELECT node_id FROM node WHERE node_id = ?;"
-        if not task_ins.task.consumer.anonymous:
-            if not self.query(query, (data[0]["consumer_node_id"],)):
-                log(
-                    ERROR,
-                    "Invalid destination node ID for TaskIns: %s",
-                    task_ins.task.consumer.node_id,
-                )
-                return None
+        if not self.query(query, (data[0]["consumer_node_id"],)):
+            log(
+                ERROR,
+                "Invalid destination node ID for TaskIns: %s",
+                task_ins.task.consumer.node_id,
+            )
+            return None
 
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
@@ -319,25 +304,18 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return task_id
 
-    def get_task_ins(
-        self, node_id: Optional[int], limit: Optional[int]
-    ) -> list[TaskIns]:
-        """Get undelivered TaskIns for one node (either anonymous or with ID).
+    def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
+        """Get undelivered TaskIns for one node.
 
         Usually, the Fleet API calls this for Nodes planning to work on one or more
         TaskIns.
 
         Constraints
         -----------
-        If `node_id` is not `None`, retrieve all TaskIns where
+        Retrieve all TaskIns where
 
             1. the `task_ins.task.consumer.node_id` equals `node_id` AND
-            2. the `task_ins.task.consumer.anonymous` equals `False` AND
-            3. the `task_ins.task.delivered_at` equals `""`.
-
-        If `node_id` is `None`, retrieve all TaskIns where the
-        `task_ins.task.consumer.node_id` equals `0` and
-        `task_ins.task.consumer.anonymous` is set to `True`.
+            2. the `task_ins.task.delivered_at` equals `""`.
 
         `delivered_at` MUST BE set (i.e., not `""`) otherwise the TaskIns MUST not be in
         the result.
@@ -348,38 +326,23 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
-        if node_id == 0:
-            msg = (
-                "`node_id` must be >= 1"
-                "\n\n For requesting anonymous tasks use `node_id` equal `None`"
-            )
+        if node_id == SUPERLINK_NODE_ID:
+            msg = f"`node_id` must be != {SUPERLINK_NODE_ID}"
             raise AssertionError(msg)
 
         data: dict[str, Union[str, int]] = {}
 
-        if node_id is None:
-            # Retrieve all anonymous Tasks
-            query = """
-                SELECT task_id
-                FROM task_ins
-                WHERE consumer_anonymous == 1
-                AND   consumer_node_id == 0
-                AND   delivered_at = ""
-                AND   (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
-            """
-        else:
-            # Convert the uint64 value to sint64 for SQLite
-            data["node_id"] = convert_uint64_to_sint64(node_id)
+        # Convert the uint64 value to sint64 for SQLite
+        data["node_id"] = convert_uint64_to_sint64(node_id)
 
-            # Retrieve all TaskIns for node_id
-            query = """
-                SELECT task_id
-                FROM task_ins
-                WHERE consumer_anonymous == 0
-                AND   consumer_node_id == :node_id
-                AND   delivered_at = ""
-                AND   (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
-            """
+        # Retrieve all TaskIns for node_id
+        query = """
+            SELECT task_id
+            FROM task_ins
+            WHERE   consumer_node_id == :node_id
+            AND   delivered_at = ""
+            AND   (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
+        """
 
         if limit is not None:
             query += " LIMIT :limit"
@@ -429,11 +392,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         Constraints
         -----------
-        If `task_res.task.consumer.anonymous` is `True`, then
-        `task_res.task.consumer.node_id` MUST NOT be set (equal 0).
-
-        If `task_res.task.consumer.anonymous` is `False`, then
-        `task_res.task.consumer.node_id` MUST be set (not 0)
+        `task_res.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
         """
         # Validate task
         errors = validate_task_ins_or_res(task_res)
@@ -459,7 +418,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if (
             task_ins
             and task_res
-            and not (task_ins["consumer_anonymous"] or task_res.task.producer.anonymous)
             and convert_sint64_to_uint64(task_ins["consumer_node_id"])
             != task_res.task.producer.node_id
         ):
@@ -635,22 +593,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return {UUID(row["task_id"]) for row in rows}
 
-    def create_node(
-        self, ping_interval: float, public_key: Optional[bytes] = None
-    ) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
-        uint64_node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
+        uint64_node_id = generate_rand_int_from_bytes(
+            NODE_ID_NUM_BYTES, exclude=[SUPERLINK_NODE_ID, 0]
+        )
 
         # Convert the uint64 value to sint64 for SQLite
         sint64_node_id = convert_uint64_to_sint64(uint64_node_id)
-
-        query = "SELECT node_id FROM node WHERE public_key = :public_key;"
-        row = self.query(query, {"public_key": public_key})
-
-        if len(row) > 0:
-            log(ERROR, "Unexpected node registration failure.")
-            return 0
 
         query = (
             "INSERT INTO node "
@@ -665,7 +616,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                     sint64_node_id,
                     time.time() + ping_interval,
                     ping_interval,
-                    public_key,
+                    b"",  # Initialize with an empty public key
                 ),
             )
         except sqlite3.IntegrityError:
@@ -675,17 +626,13 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Note: we need to return the uint64 value of the node_id
         return uint64_node_id
 
-    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Delete a node."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
         query = "DELETE FROM node WHERE node_id = ?"
         params = (sint64_node_id,)
-
-        if public_key is not None:
-            query += " AND public_key = ?"
-            params += (public_key,)  # type: ignore
 
         if self.conn is None:
             raise AttributeError("LinkState is not initialized.")
@@ -694,7 +641,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             with self.conn:
                 rows = self.conn.execute(query, params)
                 if rows.rowcount < 1:
-                    raise ValueError("Public key or node_id not found")
+                    raise ValueError(f"Node {node_id} not found")
         except KeyError as exc:
             log(ERROR, {"query": query, "data": params, "exception": exc})
 
@@ -721,6 +668,41 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Convert sint64 node_ids to uint64
         result: set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
         return result
+
+    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Set `public_key` for the specified `node_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_node_id = convert_uint64_to_sint64(node_id)
+
+        # Check if the node exists in the `node` table
+        query = "SELECT 1 FROM node WHERE node_id = ?"
+        if not self.query(query, (sint64_node_id,)):
+            raise ValueError(f"Node {node_id} not found")
+
+        # Check if the public key is already in use in the `node` table
+        query = "SELECT 1 FROM node WHERE public_key = ?"
+        if self.query(query, (public_key,)):
+            raise ValueError("Public key already in use")
+
+        # Update the `node` table to set the public key for the given node ID
+        query = "UPDATE node SET public_key = ? WHERE node_id = ?"
+        self.query(query, (public_key, sint64_node_id))
+
+    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
+        """Get `public_key` for the specified `node_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_node_id = convert_uint64_to_sint64(node_id)
+
+        # Query the public key for the given node_id
+        query = "SELECT public_key FROM node WHERE node_id = ?"
+        rows = self.query(query, (sint64_node_id,))
+
+        # If no result is found, return None
+        if not rows:
+            raise ValueError(f"Node {node_id} not found")
+
+        # Return the public key if it is not empty, otherwise return None
+        return rows[0]["public_key"] or None
 
     def get_node_id(self, node_public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
@@ -783,40 +765,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def store_server_private_public_key(
-        self, private_key: bytes, public_key: bytes
-    ) -> None:
-        """Store `server_private_key` and `server_public_key` in the link state."""
-        query = "SELECT COUNT(*) FROM credential"
-        count = self.query(query)[0]["COUNT(*)"]
-        if count < 1:
-            query = (
-                "INSERT OR REPLACE INTO credential (private_key, public_key) "
-                "VALUES (:private_key, :public_key)"
-            )
-            self.query(query, {"private_key": private_key, "public_key": public_key})
-        else:
-            raise RuntimeError("Server private and public key already set")
-
-    def get_server_private_key(self) -> Optional[bytes]:
-        """Retrieve `server_private_key` in urlsafe bytes."""
-        query = "SELECT private_key FROM credential"
-        rows = self.query(query)
-        try:
-            private_key: Optional[bytes] = rows[0]["private_key"]
-        except IndexError:
-            private_key = None
-        return private_key
-
-    def get_server_public_key(self) -> Optional[bytes]:
-        """Retrieve `server_public_key` in urlsafe bytes."""
-        query = "SELECT public_key FROM credential"
-        rows = self.query(query)
-        try:
-            public_key: Optional[bytes] = rows[0]["public_key"]
-        except IndexError:
-            public_key = None
-        return public_key
+    def clear_supernode_auth_keys(self) -> None:
+        """Clear stored `node_public_keys` in the link state if any."""
+        self.query("DELETE FROM public_key;")
 
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
         """Store a set of `node_public_keys` in the link state."""
@@ -976,16 +927,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
-        # Update `online_until` and `ping_interval` for the given `node_id`
-        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?;"
-        try:
-            self.query(
-                query, (time.time() + ping_interval, ping_interval, sint64_node_id)
-            )
-            return True
-        except sqlite3.IntegrityError:
-            log(ERROR, "`node_id` does not exist.")
+        # Check if the node exists in the `node` table
+        query = "SELECT 1 FROM node WHERE node_id = ?"
+        if not self.query(query, (sint64_node_id,)):
             return False
+
+        # Update `online_until` and `ping_interval` for the given `node_id`
+        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?"
+        self.query(query, (time.time() + ping_interval, ping_interval, sint64_node_id))
+        return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""
@@ -1099,9 +1049,7 @@ def task_ins_to_dict(task_msg: TaskIns) -> dict[str, Any]:
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
         "run_id": task_msg.run_id,
-        "producer_anonymous": task_msg.task.producer.anonymous,
         "producer_node_id": task_msg.task.producer.node_id,
-        "consumer_anonymous": task_msg.task.consumer.anonymous,
         "consumer_node_id": task_msg.task.consumer.node_id,
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
@@ -1120,9 +1068,7 @@ def task_res_to_dict(task_msg: TaskRes) -> dict[str, Any]:
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
         "run_id": task_msg.run_id,
-        "producer_anonymous": task_msg.task.producer.anonymous,
         "producer_node_id": task_msg.task.producer.node_id,
-        "consumer_anonymous": task_msg.task.consumer.anonymous,
         "consumer_node_id": task_msg.task.consumer.node_id,
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
@@ -1147,11 +1093,9 @@ def dict_to_task_ins(task_dict: dict[str, Any]) -> TaskIns:
         task=Task(
             producer=Node(
                 node_id=task_dict["producer_node_id"],
-                anonymous=task_dict["producer_anonymous"],
             ),
             consumer=Node(
                 node_id=task_dict["consumer_node_id"],
-                anonymous=task_dict["consumer_anonymous"],
             ),
             created_at=task_dict["created_at"],
             delivered_at=task_dict["delivered_at"],
@@ -1177,11 +1121,9 @@ def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
         task=Task(
             producer=Node(
                 node_id=task_dict["producer_node_id"],
-                anonymous=task_dict["producer_anonymous"],
             ),
             consumer=Node(
                 node_id=task_dict["consumer_node_id"],
-                anonymous=task_dict["consumer_anonymous"],
             ),
             created_at=task_dict["created_at"],
             delivered_at=task_dict["delivered_at"],

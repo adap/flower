@@ -20,7 +20,14 @@ from typing import Optional
 from uuid import UUID
 
 from flwr.common.constant import Status
-from flwr.common.serde import fab_to_proto, user_config_to_proto
+from flwr.common.serde import (
+    fab_to_proto,
+    message_from_proto,
+    message_from_taskins,
+    message_to_proto,
+    message_to_taskres,
+    user_config_to_proto,
+)
 from flwr.common.typing import Fab, InvalidRunStatusException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -30,10 +37,10 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     Reconnect,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -42,7 +49,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunResponse,
     Run,
 )
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
@@ -55,13 +62,13 @@ def create_node(
     """."""
     # Create node
     node_id = state.create_node(ping_interval=request.ping_interval)
-    return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
+    return CreateNodeResponse(node=Node(node_id=node_id))
 
 
 def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeResponse:
     """."""
     # Validate node_id
-    if request.node.anonymous or request.node.node_id == 0:
+    if request.node.node_id == 0:  # i.e. unset `node_id`
         return DeleteNodeResponse()
 
     # Update state
@@ -78,27 +85,33 @@ def ping(
     return PingResponse(success=res)
 
 
-def pull_task_ins(request: PullTaskInsRequest, state: LinkState) -> PullTaskInsResponse:
-    """Pull TaskIns handler."""
+def pull_messages(
+    request: PullMessagesRequest, state: LinkState
+) -> PullMessagesResponse:
+    """Pull Messages handler."""
     # Get node_id if client node is not anonymous
     node = request.node  # pylint: disable=no-member
-    node_id: Optional[int] = None if node.anonymous else node.node_id
+    node_id: int = node.node_id
 
     # Retrieve TaskIns from State
     task_ins_list: list[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
 
-    # Build response
-    response = PullTaskInsResponse(
-        task_ins_list=task_ins_list,
-    )
-    return response
+    # Convert to Messages
+    msg_proto = []
+    for task_ins in task_ins_list:
+        msg = message_from_taskins(task_ins)
+        msg_proto.append(message_to_proto(msg))
+
+    return PullMessagesResponse(messages_list=msg_proto)
 
 
-def push_task_res(request: PushTaskResRequest, state: LinkState) -> PushTaskResResponse:
-    """Push TaskRes handler."""
-    # pylint: disable=no-member
-    task_res: TaskRes = request.task_res_list[0]
-    # pylint: enable=no-member
+def push_messages(
+    request: PushMessagesRequest, state: LinkState
+) -> PushMessagesResponse:
+    """Push Messages handler."""
+    # Convert Message to TaskRes
+    msg = message_from_proto(message_proto=request.messages_list[0])
+    task_res = message_to_taskres(msg)
 
     # Abort if the run is not running
     abort_msg = check_abort(
@@ -113,12 +126,12 @@ def push_task_res(request: PushTaskResRequest, state: LinkState) -> PushTaskResR
     task_res.task.pushed_at = time.time()
 
     # Store TaskRes in State
-    task_id: Optional[UUID] = state.store_task_res(task_res=task_res)
+    message_id: Optional[UUID] = state.store_task_res(task_res=task_res)
 
     # Build response
-    response = PushTaskResResponse(
+    response = PushMessagesResponse(
         reconnect=Reconnect(reconnect=5),
-        results={str(task_id): 0},
+        results={str(message_id): 0},
     )
     return response
 
