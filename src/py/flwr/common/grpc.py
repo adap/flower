@@ -224,3 +224,8 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments,R0917
         server.add_insecure_port(server_address)
 
     return server
+
+
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)
