@@ -72,7 +72,7 @@ def flwr_serverapp() -> None:
 
     args = _parse_args_run_flwr_serverapp().parse_args()
 
-    log(INFO, "Starting flwr-serverapp process")
+    log(INFO, "Start `flwr-serverapp` process")
 
     if not args.insecure:
         flwr_exit(
@@ -122,7 +122,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
         try:
             # Pull ServerAppInputs from LinkState
             req = PullServerAppInputsRequest()
-            log(DEBUG, "[flwr-serverapp] Will ServerAppInputs")
+            log(DEBUG, "[flwr-serverapp] Pull ServerAppInputs")
             res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)

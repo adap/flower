@@ -66,7 +66,7 @@ def flwr_clientapp() -> None:
             "flwr-clientapp does not support TLS yet.",
         )
 
-    log(INFO, "Starting flwr-clientapp process")
+    log(INFO, "Start `flwr-clientapp` process")
     log(
         DEBUG,
         "Starting `flwr-clientapp` process connected to SuperNode's "
@@ -115,7 +115,7 @@ def run_clientapp(  # pylint: disable=R0914
 
             # Install FAB, if provided
             if fab:
-                log(DEBUG, "[flwr-clientapp] Starts FAB installation.")
+                log(DEBUG, "[flwr-clientapp] Start FAB installation.")
                 install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
             load_client_app_fn = get_load_client_app_fn(
@@ -127,7 +127,7 @@ def run_clientapp(  # pylint: disable=R0914
 
             try:
                 # Load ClientApp
-                log(DEBUG, "[flwr-clientapp] Starts ClientApp Loading.")
+                log(DEBUG, "[flwr-clientapp] Start `ClientApp` Loading.")
                 client_app: ClientApp = load_client_app_fn(
                     run.fab_id, run.fab_version, fab.hash_str if fab else ""
                 )
@@ -179,7 +179,7 @@ def run_clientapp(  # pylint: disable=R0914
 
 def get_token(stub: grpc.Channel) -> Optional[int]:
     """Get a token from SuperNode."""
-    log(DEBUG, "[flwr-clientapp] Requests token")
+    log(DEBUG, "[flwr-clientapp] Request token")
     try:
         res: GetTokenResponse = stub.GetToken(GetTokenRequest())
         log(DEBUG, "[GetToken] Received token: %s", res.token)
@@ -196,7 +196,7 @@ def pull_clientappinputs(
     stub: grpc.Channel, token: int
 ) -> tuple[Message, Context, Run, Optional[Fab]]:
     """Pull ClientAppInputs from SuperNode."""
-    log(INFO, "[flwr-clientapp] Pulls ClientAppInputs for token %s", token)
+    log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", token)
     try:
         res: PullClientAppInputsResponse = stub.PullClientAppInputs(
             PullClientAppInputsRequest(token=token)
@@ -215,7 +215,7 @@ def push_clientappoutputs(
     stub: grpc.Channel, token: int, message: Message, context: Context
 ) -> PushClientAppOutputsResponse:
     """Push ClientAppOutputs to SuperNode."""
-    log(INFO, "[flwr-clientapp] Pushes ClientAppOutputs for token %s", token)
+    log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", token)
     proto_message = message_to_proto(message)
     proto_context = context_to_proto(context)
 
