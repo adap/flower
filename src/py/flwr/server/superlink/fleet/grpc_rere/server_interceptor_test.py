@@ -103,11 +103,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=PushMessagesRequest.SerializeToString,
             response_deserializer=PushMessagesResponse.FromString,
         )
-        self._push_messages = self._channel.unary_unary(
-            "/flwr.proto.Fleet/PushMessages",
-            request_serializer=PushMessagesRequest.SerializeToString,
-            response_deserializer=PushMessagesResponse.FromString,
-        )
         self._get_run = self._channel.unary_unary(
             "/flwr.proto.Fleet/GetRun",
             request_serializer=GetRunRequest.SerializeToString,
