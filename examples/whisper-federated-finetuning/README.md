@@ -140,7 +140,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 The run is defined in the `pyproject.toml` which: specifies the paths to `ClientApp` and `ServerApp` as well as their parameterization with configs in the `[tool.flwr.app.config]` block.
 
 > \[!NOTE\]
-> By default, it will run on CPU only. On a MacBook Pro M2, running 3 rounds of Flower FL should take ~10 min. Assuming the dataset has already been downloaded. Running on GPU is recommended. Also note that the logs from the `ClientApps` are been silenced. You can disable this by setting to `true` the entry `options.backend.init-args.log-to-driver` in the federation in `pyproject.toml` you are using.
+> By default, it will run on CPU only. On a MacBook Pro M2, running 3 rounds of Flower FL should take ~10 min. Assuming the dataset has already been downloaded. Running on GPU is recommended (for this use the `local-sim-gpu` federation, or continue reading). Also note that the logs from the `ClientApps` are been silenced. You can disable this by setting to `true` the entry `options.backend.init-args.log-to-driver` in the federation in `pyproject.toml` you are using. Read more about how Flower Simulations work in [the documentation](https://flower.ai/docs/framework/how-to-run-simulations.html).
 
 ```shell
 # Run with default settings (21 clients per round out of 422)
@@ -238,6 +238,14 @@ With steps 1-3 completed, you are ready to run Federated Wishper finetuning with
 ```shell
 flower-supernode --superlink="<SUPERLINK-IP>:9092" \
                  --node-config="local-data='<path/to/local/partition>'"
+```
+
+**4. Run your whipser app**
+
+Once your `SuperNodes` are connected to the `SuperLink`, start the run via `flwr run`, but this time point it to the `remote` federation. It is defined at the bottom of the `pyproject.toml`. You might want to update the `address` so it matches that of the machine where the `SuperLink` is running from.
+
+```shell
+flwr run . remote
 ```
 
 ### Federated Finetuning on Raspberry Pi
