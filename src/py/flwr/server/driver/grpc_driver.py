@@ -28,7 +28,7 @@ from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
 )
-from flwr.common.grpc import create_channel
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
@@ -100,6 +100,7 @@ class GrpcDriver(Driver):
             insecure=(self._cert is None),
             root_certificates=self._cert,
         )
+        self._channel.subscribe(on_channel_state_change)
         self._grpc_stub = ServerAppIoStub(self._channel)
         _wrap_stub(self._grpc_stub, self._retry_invoker)
         log(DEBUG, "[flwr-serverapp] Connected to %s", self._addr)
