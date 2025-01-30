@@ -106,6 +106,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         # Continue the RPC call
         expected_node_id = state.get_node_id(node_pk_bytes)
         if not handler_call_details.method.endswith("CreateNode"):
+            # All calls, except for `CreateNode`, must provide a public key that is
+            # already mapped to a `node_id` (in `LinkState`)
             if expected_node_id is None:
                 return _unary_unary_rpc_terminator("Invalid node ID")
         # One of the method handlers in

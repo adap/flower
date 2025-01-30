@@ -28,7 +28,7 @@ from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
 )
-from flwr.common.grpc import create_channel
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
@@ -49,7 +49,7 @@ from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E
 from .driver import Driver
 
 ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
-[Driver] Error: Not connected.
+[flwr-serverapp] Error: Not connected.
 
 Call `connect()` on the `GrpcDriverStub` instance before calling any of the other
 `GrpcDriverStub` methods.
@@ -100,9 +100,10 @@ class GrpcDriver(Driver):
             insecure=(self._cert is None),
             root_certificates=self._cert,
         )
+        self._channel.subscribe(on_channel_state_change)
         self._grpc_stub = ServerAppIoStub(self._channel)
         _wrap_stub(self._grpc_stub, self._retry_invoker)
-        log(DEBUG, "[Driver] Connected to %s", self._addr)
+        log(DEBUG, "[flwr-serverapp] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:
         """Disconnect from the ServerAppIo API."""
@@ -113,7 +114,7 @@ class GrpcDriver(Driver):
         self._channel = None
         self._grpc_stub = None
         channel.close()
-        log(DEBUG, "[Driver] Disconnected")
+        log(DEBUG, "[flwr-serverapp] Disconnected")
 
     def set_run(self, run_id: int) -> None:
         """Set the run."""

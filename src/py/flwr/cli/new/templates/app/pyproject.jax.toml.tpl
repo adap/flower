@@ -11,7 +11,7 @@ dependencies = [
     "flwr[simulation]>=1.14.0",
     "jax==0.4.30",
     "jaxlib==0.4.30",
-    "scikit-learn==1.3.2",
+    "scikit-learn==1.6.1",
 ]
 
 [tool.hatch.build.targets.wheel]
