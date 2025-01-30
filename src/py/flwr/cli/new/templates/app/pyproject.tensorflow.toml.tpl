@@ -10,7 +10,7 @@ license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.15.0",
     "flwr-datasets[vision]>=0.5.0",
-    "tensorflow>=2.11.1,<2.18.0",
+    "tensorflow>=2.17.1",
 ]
 
 [tool.hatch.build.targets.wheel]
