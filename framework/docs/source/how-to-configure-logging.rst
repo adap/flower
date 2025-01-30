@@ -36,7 +36,7 @@ example, to launch your ``SuperLink`` showing ``DEBUG`` logs do:
 Configure gRPC logging
 ----------------------
 
-Flower users `gRPC <https://grpc.io/>`_ to communicate between each component (see
-:doc:`ref-flower-network-communication`). You can set the verbositiy level of ``gRPC``
+Flower uses `gRPC <https://grpc.io/>`_ to communicate between each component (see
+:doc:`ref-flower-network-communication`). You can set the verbosity level of ``gRPC``
 logs using `gRPC environment variables
 <https://github.com/grpc/grpc/blob/master/doc/environment_variables.md>`_.
