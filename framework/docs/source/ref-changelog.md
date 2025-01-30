@@ -22,9 +22,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Similar to how the `--run-config` flag allows overriding the run configuration in `flwr run`, the new `--federation-config` flag enables dynamic overrides for federation configurations. This flag is supported in all `flwr` CLI commands except `flwr build`, `flwr install`, and `flwr new`.
 
-- **Allow setting log level via environment variable** ([#4860](https://github.com/adap/flower/pull/4860))
+- **Allow setting log level via environment variable** ([#4860](https://github.com/adap/flower/pull/4860), [#4880](https://github.com/adap/flower/pull/4880))
 
-  Log level can now be configured using the `PYTHONLOGLEVEL` environment variable. For example, running `PYTHONLOGLEVEL=DEBUG flower-superlink --insecure` will set the log level to DEBUG. For more details, see the [guide](https://flower.ai/docs/framework/how-to-configure-logging.html).
+  Log level can now be configured using the `FLWR_LOG_LEVEL` environment variable. For example, running `FLWR_LOG_LEVEL=DEBUG flower-superlink --insecure` will set the log level to DEBUG. For more details, see the [guide](https://flower.ai/docs/framework/how-to-configure-logging.html).
 
 - **Introduce StatAvg baseline** ([#3921](https://github.com/adap/flower/pull/3921))
 
