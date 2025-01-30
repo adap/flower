@@ -129,11 +129,16 @@ FLOWER_LOGGER.addHandler(console_handler)
 
 # Set log level via env var (show timestamps for `DEBUG`)
 if log_level := os.getenv("FLWR_LOG_LEVEL"):
+    log_level = log_level.upper()
     try:
-        use_time_stamps = log_level.upper() == "DEBUG"
-        update_console_handler(
-            level=log_level, timestamps=use_time_stamps, colored=True
-        )
+        is_debug = log_level == "DEBUG"
+        if is_debug:
+            log(
+                WARN,
+                "DEBUG logs enabled. Do not use this in production, as it may expose "
+                "sensitive details.",
+            )
+        update_console_handler(level=log_level, timestamps=is_debug, colored=True)
     except Exception:  # pylint: disable=broad-exception-caught
         # Alert user but don't raise exception
         log(
