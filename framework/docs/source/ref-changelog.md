@@ -6,7 +6,7 @@
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Haoran Jie`, `Heng Pan`, `Ivelin Ivanov`, `Javier`, `Kevin Patel`, `Mohammad Naseri`, `Pavlos Bouzinis`, `Robert Steiner` <!---TOKEN_v1.15.0-->
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Haoran Jie`, `Heng Pan`, `Ivelin Ivanov`, `Javier`, `Kevin Patel`, `Mohammad Naseri`, `Pavlos Bouzinis`, `Robert Steiner` <!---TOKEN_v1.15.0-->
 
 ### What's new?
 
@@ -1747,3 +1747,7 @@ Important changes:
 - Improved `Strategy` docstrings ([#470](https://github.com/adap/flower/pull/470)).
 
 - **fix(framework) Fix graceful exit of SuperLink** ([#4797](https://github.com/adap/flower/pull/4797))
+
+- **fix(framework) Use interceptors as an iterable** ([#4885](https://github.com/adap/flower/pull/4885))
+
+- **refactor(framework) Warn when DEBUG logs are enabled** ([#4886](https://github.com/adap/flower/pull/4886))
