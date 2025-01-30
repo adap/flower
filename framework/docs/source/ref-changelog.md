@@ -62,7 +62,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   User authentication in the CLI is enhanced with better handling, configuration options, and security enforcement.
 
-- **Ensure graceful exit for SuperLink and SuperNode** ([#4829](https://github.com/adap/flower/pull/4829), [#4846](https://github.com/adap/flower/pull/4846), [#4798](https://github.com/adap/flower/pull/4798), [#4826](https://github.com/adap/flower/pull/4826), [#4797](https://github.com/adap/flower/pull/4797))
+- **Ensure graceful exit for SuperLink and SuperNode** ([#4829](https://github.com/adap/flower/pull/4829), [#4846](https://github.com/adap/flower/pull/4846), [#4798](https://github.com/adap/flower/pull/4798), [#4826](https://github.com/adap/flower/pull/4826), [#4881](https://github.com/adap/flower/pull/4881))
 
   Ensures proper resource cleanup and prevents zombie subprocesses during SuperLink and SuperNode shutdown.
 
@@ -1745,3 +1745,5 @@ Important changes:
 - Removed presently unused `on_conclude_round` from strategy interface ([#483](https://github.com/adap/flower/pull/483)).
 - Set minimal Python version to 3.6.1 instead of 3.6.9 ([#471](https://github.com/adap/flower/pull/471)).
 - Improved `Strategy` docstrings ([#470](https://github.com/adap/flower/pull/470)).
+
+- **fix(framework) Fix graceful exit of SuperLink** ([#4797](https://github.com/adap/flower/pull/4797))
