@@ -274,7 +274,7 @@ def init_channel(
     interceptors: list[grpc.UnaryUnaryClientInterceptor] = []
     if auth_plugin is not None:
         auth_plugin.load_tokens()
-        interceptors = CliUserAuthInterceptor(auth_plugin)
+        interceptors.append(CliUserAuthInterceptor(auth_plugin))
 
     # Create the gRPC channel
     channel = create_channel(
