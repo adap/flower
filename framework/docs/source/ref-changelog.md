@@ -50,7 +50,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Introduces the *How to run Flower with Deployment Engine* guide, providing detailed instructions on deploying Flower using the Deployment Engine. The guide is available [here](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) and has been linked in all example READMEs.
 
-- **Update gRPC-related dependencies** ([#4833](https://github.com/adap/flower/pull/4833), [#4836](https://github.com/adap/flower/pull/4836))
+- **Update gRPC-related dependencies** ([#4833](https://github.com/adap/flower/pull/4833), [#4836](https://github.com/adap/flower/pull/4836), [#4887](https://github.com/adap/flower/pull/4887))
 
   Increases the version numbers of gRPC-related dependencies. In rare cases, if you encounter pip warnings about unresolved gRPC dependencies, it may be due to residual dependencies from older Flower versions.
 
@@ -72,7 +72,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Update Docker dependencies and documentation** ([#4763](https://github.com/adap/flower/pull/4763), [#4804](https://github.com/adap/flower/pull/4804), [#4762](https://github.com/adap/flower/pull/4762), [#4803](https://github.com/adap/flower/pull/4803), [#4753](https://github.com/adap/flower/pull/4753))
 
-- **Update CI/CD** ([#4756](https://github.com/adap/flower/pull/4756), [#4834](https://github.com/adap/flower/pull/4834), [#4824](https://github.com/adap/flower/pull/4824), [#3493](https://github.com/adap/flower/pull/3493), [#4096](https://github.com/adap/flower/pull/4096), [#4807](https://github.com/adap/flower/pull/4807), [#3956](https://github.com/adap/flower/pull/3956), [#3168](https://github.com/adap/flower/pull/3168), [#4835](https://github.com/adap/flower/pull/4835))
+- **Update CI/CD** ([#4756](https://github.com/adap/flower/pull/4756), [#4834](https://github.com/adap/flower/pull/4834), [#4824](https://github.com/adap/flower/pull/4824), [#3493](https://github.com/adap/flower/pull/3493), [#4096](https://github.com/adap/flower/pull/4096), [#4807](https://github.com/adap/flower/pull/4807), [#3956](https://github.com/adap/flower/pull/3956), [#3168](https://github.com/adap/flower/pull/3168), [#4835](https://github.com/adap/flower/pull/4835), [#4884](https://github.com/adap/flower/pull/4884))
 
 - **Bugfixes** ([#4766](https://github.com/adap/flower/pull/4766), [#4764](https://github.com/adap/flower/pull/4764), [#4795](https://github.com/adap/flower/pull/4795), [#4840](https://github.com/adap/flower/pull/4840), [#4868](https://github.com/adap/flower/pull/4868), [#4872](https://github.com/adap/flower/pull/4872))
 
