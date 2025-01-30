@@ -24,7 +24,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Allow setting log level via environment variable** ([#4860](https://github.com/adap/flower/pull/4860))
 
-  Log level can now be configured using the `PYTHONLOGLEVEL` environment variable. For example, running `PYTHONLOGLEVEL=DEBUG flower-superlink --insecure` will set the log level to DEBUG.
+  Log level can now be configured using the `PYTHONLOGLEVEL` environment variable. For example, running `PYTHONLOGLEVEL=DEBUG flower-superlink --insecure` will set the log level to DEBUG. For more details, see the [guide](https://flower.ai/docs/framework/how-to-configure-logging.html).
 
 - **Introduce StatAvg baseline** ([#3921](https://github.com/adap/flower/pull/3921))
 
@@ -38,7 +38,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Improves system error and help messages by introducing a dedicated flwr_exit function with standardized exit codes.
 
-- **Improve node authentication** ([#4767](https://github.com/adap/flower/pull/4767), [#4791](https://github.com/adap/flower/pull/4791), [#4765](https://github.com/adap/flower/pull/4765), [#4857](https://github.com/adap/flower/pull/4857), [#4848](https://github.com/adap/flower/pull/4848), [#4867](https://github.com/adap/flower/pull/4867))
+- **Improve node authentication** ([#4767](https://github.com/adap/flower/pull/4767), [#4791](https://github.com/adap/flower/pull/4791), [#4765](https://github.com/adap/flower/pull/4765), [#4857](https://github.com/adap/flower/pull/4857), [#4867](https://github.com/adap/flower/pull/4867))
 
   Enhances the node authentication system, making it more efficient and resilient against replay attacks. There's no longer a need to pass `--auth-superlink-private-key` and `--auth-superlink-public-key` when running the SuperLink. Additionally, Flower now enables automatic node authentication by default, preventing impersonation even when node authentication is not explicitly used. For more details, see the [documentation](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html).
 
@@ -85,6 +85,10 @@ We would like to give our special thanks to all the contributors who made the ne
 - **Remove deprecated `app` argument from `flower-supernode`** ([#4864](https://github.com/adap/flower/pull/4864))
 
   The deprecated `app` argument in `flower-supernode` has been removed.
+
+- **Deprecate `--auth-superlink-private-key`/`--auth-superlink-public-key` arguments from `flower-superlink`** ([#4848](https://github.com/adap/flower/pull/4848))
+
+  The two arguments are no longer necessary for node authentication following the recent improvement mentioned above.
 
 ## v1.14.0 (2024-12-20)
 
