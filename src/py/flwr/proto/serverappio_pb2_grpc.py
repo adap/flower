@@ -47,20 +47,10 @@ class ServerAppIoStub(object):
                 request_serializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesResponse.FromString,
                 _registered_method=True)
-        self.PushTaskIns = channel.unary_unary(
-                '/flwr.proto.ServerAppIo/PushTaskIns',
-                request_serializer=flwr_dot_proto_dot_serverappio__pb2.PushTaskInsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_serverappio__pb2.PushTaskInsResponse.FromString,
-                _registered_method=True)
         self.PushMessages = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/PushMessages',
                 request_serializer=flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesResponse.FromString,
-                _registered_method=True)
-        self.PullTaskRes = channel.unary_unary(
-                '/flwr.proto.ServerAppIo/PullTaskRes',
-                request_serializer=flwr_dot_proto_dot_serverappio__pb2.PullTaskResRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_serverappio__pb2.PullTaskResResponse.FromString,
                 _registered_method=True)
         self.PullMessages = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/PullMessages',
@@ -121,28 +111,16 @@ class ServerAppIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def PushTaskIns(self, request, context):
-        """Create one or more tasks
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     def PushMessages(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def PullTaskRes(self, request, context):
-        """Get task results
+        """Create one or more messages
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def PullMessages(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Get message results
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -209,20 +187,10 @@ def add_ServerAppIoServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesResponse.SerializeToString,
             ),
-            'PushTaskIns': grpc.unary_unary_rpc_method_handler(
-                    servicer.PushTaskIns,
-                    request_deserializer=flwr_dot_proto_dot_serverappio__pb2.PushTaskInsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_serverappio__pb2.PushTaskInsResponse.SerializeToString,
-            ),
             'PushMessages': grpc.unary_unary_rpc_method_handler(
                     servicer.PushMessages,
                     request_deserializer=flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesResponse.SerializeToString,
-            ),
-            'PullTaskRes': grpc.unary_unary_rpc_method_handler(
-                    servicer.PullTaskRes,
-                    request_deserializer=flwr_dot_proto_dot_serverappio__pb2.PullTaskResRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_serverappio__pb2.PullTaskResResponse.SerializeToString,
             ),
             'PullMessages': grpc.unary_unary_rpc_method_handler(
                     servicer.PullMessages,
@@ -330,33 +298,6 @@ class ServerAppIo(object):
             _registered_method=True)
 
     @staticmethod
-    def PushTaskIns(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/flwr.proto.ServerAppIo/PushTaskIns',
-            flwr_dot_proto_dot_serverappio__pb2.PushTaskInsRequest.SerializeToString,
-            flwr_dot_proto_dot_serverappio__pb2.PushTaskInsResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
     def PushMessages(request,
             target,
             options=(),
@@ -373,33 +314,6 @@ class ServerAppIo(object):
             '/flwr.proto.ServerAppIo/PushMessages',
             flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesRequest.SerializeToString,
             flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def PullTaskRes(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/flwr.proto.ServerAppIo/PullTaskRes',
-            flwr_dot_proto_dot_serverappio__pb2.PullTaskResRequest.SerializeToString,
-            flwr_dot_proto_dot_serverappio__pb2.PullTaskResResponse.FromString,
             options,
             channel_credentials,
             insecure,
