@@ -297,6 +297,8 @@ jobs:
         run: |
           flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
           cd tmp-${{ matrix.framework }}
+          sed -i 's/"flwr\[[^]]*\][^"]*", *//g' pyproject.toml
+          pip install flwr[simulation]
           pip install .
       - name: Run project
         run: |
