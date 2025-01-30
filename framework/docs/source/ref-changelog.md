@@ -10,6 +10,18 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### What's new?
 
+- **Enhance SuperNode authentication** ([#4767](https://github.com/adap/flower/pull/4767), [#4791](https://github.com/adap/flower/pull/4791), [#4765](https://github.com/adap/flower/pull/4765), [#4857](https://github.com/adap/flower/pull/4857), [#4867](https://github.com/adap/flower/pull/4867))
+
+  Enhances the SuperNode authentication system, making it more efficient and resilient against replay attacks. There's no longer a need to pass `--auth-superlink-private-key` and `--auth-superlink-public-key` when running the SuperLink. Additionally, Flower now enables automatic node authentication by default, preventing impersonation even when node authentication is not explicitly used. For more details, see the [documentation](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html).
+
+- **Add guide for running Flower with Deployment Engine** ([#4811](https://github.com/adap/flower/pull/4811), [#4733](https://github.com/adap/flower/pull/4733))
+
+  Introduces the [How to run Flower with Deployment Engine](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) guide, providing detailed instructions on deploying Federated Learning in production environments using the Flower Deployment Engine.
+
+- **Add Flower Network Communication reference documentation** ([#4805](https://github.com/adap/flower/pull/4805))
+
+  Introduces the [*Flower Network Communication*](https://flower.ai/docs/framework/ref-flower-network-communication.html) documentation, which details the network connections used in a deployed Flower federated AI system.
+
 - **Add LeRobot quickstart example** ([#4607](https://github.com/adap/flower/pull/4607), [#4816](https://github.com/adap/flower/pull/4816))
 
   Introduces an example demonstrating federated training of a Diffusion policy on the PushT dataset using LeRobot and Flower. The dataset is partitioned with Flower Datasets, and the example runs best with a GPU. More details: [Flower LeRobot Example](https://flower.ai/docs/examples/quickstart-lerobot.html).
@@ -18,17 +30,17 @@ We would like to give our special thanks to all the contributors who made the ne
 
   The *Flower AI Simulation 2025* tutorial series is now available on YouTube. You can watch all the videos [here](https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb) or via the embedded previews in the [documentation](https://flower.ai/docs/framework/how-to-run-simulations.html). The accompanying code for the tutorial can be found in the [Flower GitHub repository](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch).
 
-- **Enable dynamic overrides for federation configuration in CLI** ([#4841](https://github.com/adap/flower/pull/4841), [#4843](https://github.com/adap/flower/pull/4843), [#4838](https://github.com/adap/flower/pull/4838))
+- **Introduce StatAvg baseline** ([#3921](https://github.com/adap/flower/pull/3921))
 
-  Similar to how the `--run-config` flag allows overriding the run configuration in `flwr run`, the new `--federation-config` flag enables dynamic overrides for federation configurations. This flag is supported in all `flwr` CLI commands except `flwr build`, `flwr install`, and `flwr new`.
+  StatAvg mitigates non-IID feature distributions in federated learning by sharing and aggregating data statistics before training. It is compatible with any FL aggregation strategy. More details: [StatAvg baseline](https://flower.ai/docs/baselines/statavg.html).
 
 - **Allow setting log level via environment variable** ([#4860](https://github.com/adap/flower/pull/4860), [#4880](https://github.com/adap/flower/pull/4880), [#4886](https://github.com/adap/flower/pull/4886))
 
   Log level can now be configured using the `FLWR_LOG_LEVEL` environment variable. For example, running `FLWR_LOG_LEVEL=DEBUG flower-superlink --insecure` will set the log level to DEBUG. For more details, see the [guide](https://flower.ai/docs/framework/how-to-configure-logging.html).
 
-- **Introduce StatAvg baseline** ([#3921](https://github.com/adap/flower/pull/3921))
+- **Enable dynamic overrides for federation configuration in CLI** ([#4841](https://github.com/adap/flower/pull/4841), [#4843](https://github.com/adap/flower/pull/4843), [#4838](https://github.com/adap/flower/pull/4838))
 
-  StatAvg mitigates non-IID feature distributions in federated learning by sharing and aggregating data statistics before training. It is compatible with any FL aggregation strategy. More details: [StatAvg baseline](https://flower.ai/docs/baselines/statavg.html).
+  Similar to how the `--run-config` flag allows overriding the run configuration in `flwr run`, the new `--federation-config` flag enables dynamic overrides for federation configurations. This flag is supported in all `flwr` CLI commands except `flwr build`, `flwr install`, and `flwr new`.
 
 - **Migrate TaskIns/TaskRes to Message-based communication** ([#4311](https://github.com/adap/flower/pull/4311), [#4310](https://github.com/adap/flower/pull/4310), [#4849](https://github.com/adap/flower/pull/4849), [#4308](https://github.com/adap/flower/pull/4308), [#4307](https://github.com/adap/flower/pull/4307), [#4800](https://github.com/adap/flower/pull/4800), [#4309](https://github.com/adap/flower/pull/4309), [#4875](https://github.com/adap/flower/pull/4875), [#4874](https://github.com/adap/flower/pull/4874), [#4877](https://github.com/adap/flower/pull/4877), [#4876](https://github.com/adap/flower/pull/4876))
 
@@ -36,19 +48,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Introduce exit codes** ([#4801](https://github.com/adap/flower/pull/4801), [#4845](https://github.com/adap/flower/pull/4845))
 
-  Improves system error and help messages by introducing a dedicated flwr_exit function with standardized exit codes.
-
-- **Improve node authentication** ([#4767](https://github.com/adap/flower/pull/4767), [#4791](https://github.com/adap/flower/pull/4791), [#4765](https://github.com/adap/flower/pull/4765), [#4857](https://github.com/adap/flower/pull/4857), [#4867](https://github.com/adap/flower/pull/4867))
-
-  Enhances the node authentication system, making it more efficient and resilient against replay attacks. There's no longer a need to pass `--auth-superlink-private-key` and `--auth-superlink-public-key` when running the SuperLink. Additionally, Flower now enables automatic node authentication by default, preventing impersonation even when node authentication is not explicitly used. For more details, see the [documentation](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html).
-
-- **Add Flower Network Communication reference documentation** ([#4805](https://github.com/adap/flower/pull/4805))
-
-  Introduces the [*Flower Network Communication*](https://flower.ai/docs/framework/ref-flower-network-communication.html) documentation, which details the network connections used in a deployed Flower federated AI system.
-
-- **Add guide for running Flower with Deployment Engine** ([#4811](https://github.com/adap/flower/pull/4811), [#4733](https://github.com/adap/flower/pull/4733))
-
-  Introduces the *How to run Flower with Deployment Engine* guide, providing detailed instructions on deploying Flower using the Deployment Engine. The guide is available [here](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) and has been linked in all example READMEs.
+  Improves system error and help messages by introducing a dedicated `flwr_exit` function with standardized exit codes.
 
 - **Update gRPC-related dependencies** ([#4833](https://github.com/adap/flower/pull/4833), [#4836](https://github.com/adap/flower/pull/4836), [#4887](https://github.com/adap/flower/pull/4887))
 
@@ -56,7 +56,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Update** `app-pytorch` **example** ([#4842](https://github.com/adap/flower/pull/4842))
 
-  The [app-pytorch example](https://flower.ai/docs/examples/app-pytorch.html) is revamped to use the low-level API
+  The [app-pytorch example](https://flower.ai/docs/examples/app-pytorch.html) is revamped to use the low-level API.
 
 - **Improve CLI-side user authentication** ([#4862](https://github.com/adap/flower/pull/4862), [#4861](https://github.com/adap/flower/pull/4861), [#4832](https://github.com/adap/flower/pull/4832), [#4850](https://github.com/adap/flower/pull/4850), [#4703](https://github.com/adap/flower/pull/4703), [#4885](https://github.com/adap/flower/pull/4885))
 
@@ -88,7 +88,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Deprecate `--auth-superlink-private-key`/`--auth-superlink-public-key` arguments from `flower-superlink`** ([#4848](https://github.com/adap/flower/pull/4848))
 
-  The two arguments are no longer necessary for node authentication following the recent improvement mentioned above.
+  The two arguments are no longer necessary for SuperNode authentication following the recent improvement mentioned above.
 
 ## v1.14.0 (2024-12-20)
 
