@@ -14,7 +14,7 @@ dependencies = [
     "transformers>=4.30.0,<5.0",
     "evaluate>=0.4.0,<1.0",
     "datasets>=2.0.0, <3.0",
-    "scikit-learn>=1.3.1, <2.0",
+    "scikit-learn>=1.6.1, <2.0",
 ]
 
 [tool.hatch.build.targets.wheel]
