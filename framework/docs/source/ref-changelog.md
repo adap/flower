@@ -22,7 +22,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Similar to how the `--run-config` flag allows overriding the run configuration in `flwr run`, the new `--federation-config` flag enables dynamic overrides for federation configurations. This flag is supported in all `flwr` CLI commands except `flwr build`, `flwr install`, and `flwr new`.
 
-- **Allow setting log level via environment variable** ([#4860](https://github.com/adap/flower/pull/4860), [#4880](https://github.com/adap/flower/pull/4880))
+- **Allow setting log level via environment variable** ([#4860](https://github.com/adap/flower/pull/4860), [#4880](https://github.com/adap/flower/pull/4880), [#4886](https://github.com/adap/flower/pull/4886))
 
   Log level can now be configured using the `FLWR_LOG_LEVEL` environment variable. For example, running `FLWR_LOG_LEVEL=DEBUG flower-superlink --insecure` will set the log level to DEBUG. For more details, see the [guide](https://flower.ai/docs/framework/how-to-configure-logging.html).
 
@@ -58,11 +58,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
   The [app-pytorch example](https://flower.ai/docs/examples/app-pytorch.html) is revamped to use the low-level API
 
-- **Improve CLI-side user authentication** ([#4862](https://github.com/adap/flower/pull/4862), [#4861](https://github.com/adap/flower/pull/4861), [#4832](https://github.com/adap/flower/pull/4832), [#4850](https://github.com/adap/flower/pull/4850), [#4703](https://github.com/adap/flower/pull/4703))
+- **Improve CLI-side user authentication** ([#4862](https://github.com/adap/flower/pull/4862), [#4861](https://github.com/adap/flower/pull/4861), [#4832](https://github.com/adap/flower/pull/4832), [#4850](https://github.com/adap/flower/pull/4850), [#4703](https://github.com/adap/flower/pull/4703), [#4885](https://github.com/adap/flower/pull/4885))
 
   User authentication in the CLI is enhanced with better handling, configuration options, and security enforcement.
 
-- **Ensure graceful exit for SuperLink and SuperNode** ([#4829](https://github.com/adap/flower/pull/4829), [#4846](https://github.com/adap/flower/pull/4846), [#4798](https://github.com/adap/flower/pull/4798), [#4826](https://github.com/adap/flower/pull/4826), [#4881](https://github.com/adap/flower/pull/4881))
+- **Ensure graceful exit for SuperLink and SuperNode** ([#4829](https://github.com/adap/flower/pull/4829), [#4846](https://github.com/adap/flower/pull/4846), [#4798](https://github.com/adap/flower/pull/4798), [#4826](https://github.com/adap/flower/pull/4826), [#4881](https://github.com/adap/flower/pull/4881), [#4797](https://github.com/adap/flower/pull/4797))
 
   Ensures proper resource cleanup and prevents zombie subprocesses during SuperLink and SuperNode shutdown.
 
@@ -1745,9 +1745,3 @@ Important changes:
 - Removed presently unused `on_conclude_round` from strategy interface ([#483](https://github.com/adap/flower/pull/483)).
 - Set minimal Python version to 3.6.1 instead of 3.6.9 ([#471](https://github.com/adap/flower/pull/471)).
 - Improved `Strategy` docstrings ([#470](https://github.com/adap/flower/pull/470)).
-
-- **fix(framework) Fix graceful exit of SuperLink** ([#4797](https://github.com/adap/flower/pull/4797))
-
-- **fix(framework) Use interceptors as an iterable** ([#4885](https://github.com/adap/flower/pull/4885))
-
-- **refactor(framework) Warn when DEBUG logs are enabled** ([#4886](https://github.com/adap/flower/pull/4886))
