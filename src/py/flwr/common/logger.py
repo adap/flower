@@ -136,7 +136,7 @@ if log_level := os.getenv("FLWR_LOG_LEVEL"):
             log(
                 WARN,
                 "DEBUG logs enabled. Do not use this in production, as it may expose "
-                "sensitive data.",
+                "sensitive details.",
             )
         update_console_handler(level=log_level, timestamps=is_debug, colored=True)
     except Exception:  # pylint: disable=broad-exception-caught
