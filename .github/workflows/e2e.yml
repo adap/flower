@@ -298,8 +298,8 @@ jobs:
           flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
           cd tmp-${{ matrix.framework }}
           sed -i 's/"flwr\[[^]]*\][^"]*", *//g' pyproject.toml
+          pip install ray==2.10.0
           pip install .
-          pip install ray
       - name: Run project
         run: |
           cd tmp-${{ matrix.framework }}
