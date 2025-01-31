@@ -239,10 +239,11 @@ def parse_config_args(
                 flat_overrides = flatten_dict(overrides) if flatten else overrides
             except tomli.TOMLDecodeError as err:
                 typer.secho(
-                    "❌ Error parsing overrides due to invalid format. Ensure that "
-                    "your overrides uses supported types of bool, int, string, or "
-                    'float, e.g. true/false, "random string", or 123 and is formatted '
-                    "correctly, e.g. 'key1=value1 key2=value2' or 'key3=value3'.",
+                    "❌ The provided configuration string is in an invalid format. "
+                    "The correct format should be, e.g., `'key1=123 key2=false"
+                    "key3=\"string\"'`, where values must be of type bool, int, "
+                    "string, or float. Ensure proper formatting with "
+                    "space-separated key-value pairs.",
                     fg=typer.colors.RED,
                     bold=True,
                 )
