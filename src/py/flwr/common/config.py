@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import IO, Any, Optional, TypeVar, Union, cast, get_args
 
 import tomli
+import typer
 
 from flwr.common.constant import (
     APP_DIR,
@@ -233,8 +234,19 @@ def parse_config_args(
 
             matches = pattern.findall(config_line)
             toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
-            overrides.update(tomli.loads(toml_str))
-            flat_overrides = flatten_dict(overrides) if flatten else overrides
+            try:
+                overrides.update(tomli.loads(toml_str))
+                flat_overrides = flatten_dict(overrides) if flatten else overrides
+            except tomli.TOMLDecodeError as err:
+                typer.secho(
+                    "❌ Error parsing overrides due to invalid format. Ensure that "
+                    "your overrides uses supported types of bool, int, string, or "
+                    'float, e.g. true/false, "random string", or 123 and is formatted '
+                    "correctly, e.g. 'key1=value1 key2=value2' or 'key3=value3'.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1) from err
 
     return flat_overrides
 

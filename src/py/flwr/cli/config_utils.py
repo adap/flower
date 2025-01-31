@@ -167,20 +167,9 @@ def validate_federation_in_project_config(
 
     # Override the federation configuration if provided
     if overrides:
-        try:
-            overrides_dict = parse_config_args(overrides, flatten=False)
-            federation_config = fuse_dicts(federation_config, overrides_dict)
-        except tomli.TOMLDecodeError as e:
-            typer.secho(
-                f"❌ Error parsing overrides due to invalid format. Ensure that "
-                "your overrides uses supported types of bool, int, string, or "
-                "float, e.g. true/false, \"random string\", or 123 and is formatted "
-                "correctly, e.g. 'key1=value1 key2=value2' or 'key3=value3'.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-            
+        overrides_dict = parse_config_args(overrides, flatten=False)
+        federation_config = fuse_dicts(federation_config, overrides_dict)
+
     return federation, federation_config
 
 
