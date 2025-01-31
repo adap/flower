@@ -1,15 +1,19 @@
 # Flower containers testing
 
-This directory is used to test Flower containers in a minimum scenario, that is, with 2 clients and without HTTPS. The FL setup uses PyTorch, the CIFAR10 dataset, and a CNN. This is mainly to test the functionalities of Flower in a containerized architecture. It can be easily extended to test more complex communication set-ups.
-
-It uses a subset of size 1000 for the training data and 10 data points for the testing.
+This directory is used to test Flower containers in a minimum scenario, that is, with two `SuperNodes` connecting to a `SuperLink` without TLS. Both entities run in `isolation=subprocess`. The Flower app exectued is based on the `NumPy` template available via `flwr new`. This is mainly to test the functionalities of Flower in a containerized architecture. It can be easily extended to test more complex communication set-ups.
 
 To execute locally, run the following in CLI:
-``` shell
-# pulls the latest supernode and serverapp nightly
+
+```shell
+# Pull the latest images
 docker compose build --pull 
-# pulls the latest superlink nightly
-docker compose up -d --remove-orphans --force-recreate --pull always 
+# Launch
+docker compose up
+```
+
+Submit a run:. It should take under 30s to complete
+```shell
+flwr run basic-app
 ```
 
 To stop the containers, run:
