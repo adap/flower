@@ -174,8 +174,8 @@ def validate_federation_in_project_config(
             typer.secho(
                 f"❌ Error parsing overrides due to invalid format. Ensure that "
                 "your overrides uses supported types of bool, int, string, or "
-                "float, and is formatted correctly, e.g. \"key1='value1'\" or "
-                "\"'key1=value1 key2=value2'\".",
+                "float, e.g. true/false, \"random string\", or 123 and is formatted "
+                "correctly, e.g. 'key1=value1 key2=value2' or 'key3=value3'.",
                 fg=typer.colors.RED,
                 bold=True,
             )
