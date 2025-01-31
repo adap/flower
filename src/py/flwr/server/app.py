@@ -265,7 +265,7 @@ def run_superlink() -> None:
     simulationio_address, _, _ = _format_address(args.simulationio_api_address)
 
     # Obtain certificates
-    certificates = try_obtain_server_certificates(args, args.fleet_api_type)
+    certificates = try_obtain_server_certificates(args)
 
     # Disable the user auth TLS check if args.disable_oidc_tls_cert_verification is
     # provided
@@ -353,17 +353,13 @@ def run_superlink() -> None:
             ) is None:
                 flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
-            _, ssl_certfile, ssl_keyfile = (
-                certificates if certificates is not None else (None, None, None)
-            )
-
             fleet_thread = threading.Thread(
                 target=_run_fleet_api_rest,
                 args=(
                     host,
                     port,
-                    ssl_keyfile,
-                    ssl_certfile,
+                    args.ssl_keyfile,
+                    args.ssl_certfile,
                     state_factory,
                     ffs_factory,
                     num_workers,
