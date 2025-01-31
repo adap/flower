@@ -35,7 +35,7 @@ batch-size = 32
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
+address = "127.0.0.1:9091"
 
 [tool.flwr.federations.local-simulation-gpu]
 options.num-supernodes = 10
