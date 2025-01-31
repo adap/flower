@@ -240,8 +240,8 @@ def parse_config_args(
             except tomli.TOMLDecodeError as err:
                 typer.secho(
                     "❌ The provided configuration string is in an invalid format. "
-                    'The correct format should be, e.g., "key1=123 key2=false '
-                    "key3='string'\", where values must be of type bool, int, "
+                    "The correct format should be, e.g., 'key1=123 key2=false "
+                    'key3="string"\', where values must be of type bool, int, '
                     "string, or float. Ensure proper formatting with "
                     "space-separated key-value pairs.",
                     fg=typer.colors.RED,
