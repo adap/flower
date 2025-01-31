@@ -41,7 +41,7 @@ from flwr.common.constant import (
 )
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.logger import log
 
 from ..app import start_client_internal
 from ..clientapp.utils import get_load_client_app_fn
@@ -50,7 +50,6 @@ from ..clientapp.utils import get_load_client_app_fn
 def run_supernode() -> None:
     """Run Flower SuperNode."""
     args = _parse_args_run_supernode().parse_args()
-    _warn_deprecated_server_arg(args)
 
     log(INFO, "Starting Flower SuperNode")
 
@@ -107,26 +106,6 @@ def run_client_app() -> None:
         "The command `flower-client-app` has been replaced by `flwr run`.",
     )
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
-
-
-def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
-    """Warn about the deprecated argument `--server`."""
-    if args.server != FLEET_API_GRPC_RERE_DEFAULT_ADDRESS:
-        warn = "Passing flag --server is deprecated. Use --superlink instead."
-        warn_deprecated_feature(warn)
-
-        if args.superlink != FLEET_API_GRPC_RERE_DEFAULT_ADDRESS:
-            # if `--superlink` also passed, then
-            # warn user that this argument overrides what was passed with `--server`
-            log(
-                WARN,
-                "Both `--server` and `--superlink` were passed. "
-                "`--server` will be ignored. Connecting to the Superlink Fleet API "
-                "at %s.",
-                args.superlink,
-            )
-        else:
-            args.superlink = args.server
 
 
 def _parse_args_run_supernode() -> argparse.ArgumentParser:
@@ -207,14 +186,11 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "establishing secure HTTPS connections.",
     )
     parser.add_argument(
-        "--server",
-        default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
-        help="Server address",
-    )
-    parser.add_argument(
         "--superlink",
         default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
-        help="SuperLink Fleet API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
+        help="SuperLink Fleet API address (IPv4, IPv6, or a domain name). If using the "
+        "REST (experimental) transport, ensure your address is in the form "
+        "`http://...` or `https://...` when TLS is enabled.",
     )
     parser.add_argument(
         "--max-retries",
