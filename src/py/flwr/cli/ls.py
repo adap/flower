@@ -117,7 +117,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
             federation, config, federation_config_overrides
         )
         exit_if_no_address(federation_config, "ls")
-
+        channel = None
         try:
             if runs and run_id is not None:
                 raise ValueError(
@@ -148,7 +148,8 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
             )
             raise typer.Exit(code=1) from err
         finally:
-            channel.close()
+            if channel:
+                channel.close()
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
