@@ -84,7 +84,7 @@ def stop(  # pylint: disable=R0914
             federation, config, federation_config_overrides
         )
         exit_if_no_address(federation_config, "stop")
-
+        channel = None
         try:
             auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
             channel = init_channel(app, federation_config, auth_plugin)
@@ -101,7 +101,8 @@ def stop(  # pylint: disable=R0914
             )
             raise typer.Exit(code=1) from err
         finally:
-            channel.close()
+            if channel:
+                channel.close()
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
