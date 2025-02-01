@@ -20,7 +20,6 @@ import json
 import re
 from collections.abc import Iterator
 from contextlib import contextmanager
-from logging import DEBUG
 from pathlib import Path
 from typing import Any, Callable, Optional, Union, cast
 
@@ -29,19 +28,15 @@ import typer
 
 from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR, FLWR_DIR
-from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log
+from flwr.common.constant import AUTH_TYPE_KEY, CREDENTIALS_DIR, FLWR_DIR
+from flwr.common.grpc import (
+    GRPC_MAX_MESSAGE_LENGTH,
+    create_channel,
+    on_channel_state_change,
+)
 
+from .auth_plugin import get_cli_auth_plugins
 from .config_utils import validate_certificate_in_federation_config
-
-try:
-    from flwr.ee import get_cli_auth_plugins
-except ImportError:
-
-    def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
-        """Return all CLI authentication plugins."""
-        raise NotImplementedError("No authentication plugins are currently supported.")
 
 
 def prompt_text(
@@ -217,25 +212,42 @@ def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
 def try_obtain_cli_auth_plugin(
     root_dir: Path,
     federation: str,
+    federation_config: dict[str, Any],
     auth_type: Optional[str] = None,
 ) -> Optional[CliAuthPlugin]:
     """Load the CLI-side user auth plugin for the given auth type."""
-    config_path = get_user_auth_config_path(root_dir, federation)
-
-    # Load the config file if it exists
-    config: dict[str, Any] = {}
-    if config_path.exists():
-        with config_path.open("r", encoding="utf-8") as file:
-            config = json.load(file)
-    # This is the case when the user auth is not enabled
-    elif auth_type is None:
+    # Check if user auth is enabled
+    if not federation_config.get("enable-user-auth", False):
         return None
 
+    # Check if TLS is enabled. If not, raise an error
+    if federation_config.get("root-certificates") is None:
+        typer.secho(
+            "❌ User authentication requires TLS to be enabled. "
+            "Please provide 'root-certificates' in the federation"
+            " configuration.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    config_path = get_user_auth_config_path(root_dir, federation)
+
     # Get the auth type from the config if not provided
+    # auth_type will be None for all CLI commands except login
     if auth_type is None:
-        if AUTH_TYPE not in config:
-            return None
-        auth_type = config[AUTH_TYPE]
+        try:
+            with config_path.open("r", encoding="utf-8") as file:
+                json_file = json.load(file)
+            auth_type = json_file[AUTH_TYPE_KEY]
+        except (FileNotFoundError, KeyError):
+            typer.secho(
+                "❌ Missing or invalid credentials for user authentication. "
+                "Please run `flwr login` to authenticate.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
 
     # Retrieve auth plugin class and instantiate it
     try:
@@ -254,11 +266,6 @@ def init_channel(
     app: Path, federation_config: dict[str, Any], auth_plugin: Optional[CliAuthPlugin]
 ) -> grpc.Channel:
     """Initialize gRPC channel to the Exec API."""
-
-    def on_channel_state_change(channel_connectivity: str) -> None:
-        """Log channel connectivity."""
-        log(DEBUG, channel_connectivity)
-
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )
@@ -267,7 +274,7 @@ def init_channel(
     interceptors: list[grpc.UnaryUnaryClientInterceptor] = []
     if auth_plugin is not None:
         auth_plugin.load_tokens()
-        interceptors = CliUserAuthInterceptor(auth_plugin)
+        interceptors.append(CliUserAuthInterceptor(auth_plugin))
 
     # Create the gRPC channel
     channel = create_channel(
@@ -291,12 +298,19 @@ def unauthenticated_exc_handler() -> Iterator[None]:
     try:
         yield
     except grpc.RpcError as e:
-        if e.code() != grpc.StatusCode.UNAUTHENTICATED:
-            raise
-        typer.secho(
-            "❌ Authentication failed. Please run `flwr login`"
-            " to authenticate and try again.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.UNAUTHENTICATED:
+            typer.secho(
+                "❌ Authentication failed. Please run `flwr login`"
+                " to authenticate and try again.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.UNIMPLEMENTED:
+            typer.secho(
+                "❌ User authentication is not enabled on this SuperLink.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
+        raise

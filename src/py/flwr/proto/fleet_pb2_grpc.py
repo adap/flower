@@ -31,15 +31,15 @@ class FleetStub(object):
                 request_serializer=flwr_dot_proto_dot_fleet__pb2.PingRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_fleet__pb2.PingResponse.FromString,
                 )
-        self.PullTaskIns = channel.unary_unary(
-                '/flwr.proto.Fleet/PullTaskIns',
-                request_serializer=flwr_dot_proto_dot_fleet__pb2.PullTaskInsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_fleet__pb2.PullTaskInsResponse.FromString,
+        self.PullMessages = channel.unary_unary(
+                '/flwr.proto.Fleet/PullMessages',
+                request_serializer=flwr_dot_proto_dot_fleet__pb2.PullMessagesRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_fleet__pb2.PullMessagesResponse.FromString,
                 )
-        self.PushTaskRes = channel.unary_unary(
-                '/flwr.proto.Fleet/PushTaskRes',
-                request_serializer=flwr_dot_proto_dot_fleet__pb2.PushTaskResRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_fleet__pb2.PushTaskResResponse.FromString,
+        self.PushMessages = channel.unary_unary(
+                '/flwr.proto.Fleet/PushMessages',
+                request_serializer=flwr_dot_proto_dot_fleet__pb2.PushMessagesRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_fleet__pb2.PushMessagesResponse.FromString,
                 )
         self.GetRun = channel.unary_unary(
                 '/flwr.proto.Fleet/GetRun',
@@ -74,19 +74,19 @@ class FleetServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def PullTaskIns(self, request, context):
-        """Retrieve one or more tasks, if possible
+    def PullMessages(self, request, context):
+        """Retrieve one or more messages, if possible
 
-        HTTP API path: /api/v1/fleet/pull-task-ins
+        HTTP API path: /api/v1/fleet/pull-messages
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def PushTaskRes(self, request, context):
-        """Complete one or more tasks, if possible
+    def PushMessages(self, request, context):
+        """Complete one or more messages, if possible
 
-        HTTP API path: /api/v1/fleet/push-task-res
+        HTTP API path: /api/v1/fleet/push-messages
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -123,15 +123,15 @@ def add_FleetServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_fleet__pb2.PingRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_fleet__pb2.PingResponse.SerializeToString,
             ),
-            'PullTaskIns': grpc.unary_unary_rpc_method_handler(
-                    servicer.PullTaskIns,
-                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.PullTaskInsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_fleet__pb2.PullTaskInsResponse.SerializeToString,
+            'PullMessages': grpc.unary_unary_rpc_method_handler(
+                    servicer.PullMessages,
+                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.PullMessagesRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_fleet__pb2.PullMessagesResponse.SerializeToString,
             ),
-            'PushTaskRes': grpc.unary_unary_rpc_method_handler(
-                    servicer.PushTaskRes,
-                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.PushTaskResRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_fleet__pb2.PushTaskResResponse.SerializeToString,
+            'PushMessages': grpc.unary_unary_rpc_method_handler(
+                    servicer.PushMessages,
+                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.PushMessagesRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_fleet__pb2.PushMessagesResponse.SerializeToString,
             ),
             'GetRun': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRun,
@@ -205,7 +205,7 @@ class Fleet(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def PullTaskIns(request,
+    def PullMessages(request,
             target,
             options=(),
             channel_credentials=None,
@@ -215,14 +215,14 @@ class Fleet(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/PullTaskIns',
-            flwr_dot_proto_dot_fleet__pb2.PullTaskInsRequest.SerializeToString,
-            flwr_dot_proto_dot_fleet__pb2.PullTaskInsResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/PullMessages',
+            flwr_dot_proto_dot_fleet__pb2.PullMessagesRequest.SerializeToString,
+            flwr_dot_proto_dot_fleet__pb2.PullMessagesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def PushTaskRes(request,
+    def PushMessages(request,
             target,
             options=(),
             channel_credentials=None,
@@ -232,9 +232,9 @@ class Fleet(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/PushTaskRes',
-            flwr_dot_proto_dot_fleet__pb2.PushTaskResRequest.SerializeToString,
-            flwr_dot_proto_dot_fleet__pb2.PushTaskResResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/PushMessages',
+            flwr_dot_proto_dot_fleet__pb2.PushMessagesRequest.SerializeToString,
+            flwr_dot_proto_dot_fleet__pb2.PushMessagesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

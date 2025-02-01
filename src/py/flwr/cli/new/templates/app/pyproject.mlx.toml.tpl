@@ -8,8 +8,8 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.14.0",
-    "flwr-datasets[vision]>=0.3.0",
+    "flwr[simulation]>=1.16.0",
+    "flwr-datasets[vision]>=0.5.0",
     "mlx==0.21.1",
 ]
 

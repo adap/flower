@@ -28,6 +28,7 @@ from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
     RUN_ID_NUM_BYTES,
+    SUPERLINK_NODE_ID,
     Status,
 )
 from flwr.common.record import ConfigsRecord
@@ -62,6 +63,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Map node_id to (online_until, ping_interval)
         self.node_ids: dict[int, tuple[float, float]] = {}
         self.public_key_to_node_id: dict[bytes, int] = {}
+        self.node_id_to_public_key: dict[int, bytes] = {}
 
         # Map run_id to RunRecord
         self.run_ids: dict[int, RunRecord] = {}
@@ -72,8 +74,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
 
         self.node_public_keys: set[bytes] = set()
-        self.server_public_key: Optional[bytes] = None
-        self.server_private_key: Optional[bytes] = None
 
         self.lock = threading.RLock()
 
@@ -89,7 +89,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             log(ERROR, "Invalid run ID for TaskIns: %s", task_ins.run_id)
             return None
         # Validate source node ID
-        if task_ins.task.producer.node_id != 0:
+        if task_ins.task.producer.node_id != SUPERLINK_NODE_ID:
             log(
                 ERROR,
                 "Invalid source node ID for TaskIns: %s",
@@ -97,14 +97,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             )
             return None
         # Validate destination node ID
-        if not task_ins.task.consumer.anonymous:
-            if task_ins.task.consumer.node_id not in self.node_ids:
-                log(
-                    ERROR,
-                    "Invalid destination node ID for TaskIns: %s",
-                    task_ins.task.consumer.node_id,
-                )
-                return None
+        if task_ins.task.consumer.node_id not in self.node_ids:
+            log(
+                ERROR,
+                "Invalid destination node ID for TaskIns: %s",
+                task_ins.task.consumer.node_id,
+            )
+            return None
 
         # Create task_id
         task_id = uuid4()
@@ -117,9 +116,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
-    def get_task_ins(
-        self, node_id: Optional[int], limit: Optional[int]
-    ) -> list[TaskIns]:
+    def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
@@ -129,17 +126,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         current_time = time.time()
         with self.lock:
             for _, task_ins in self.task_ins_store.items():
-                # pylint: disable=too-many-boolean-expressions
                 if (
-                    node_id is not None  # Not anonymous
-                    and task_ins.task.consumer.anonymous is False
-                    and task_ins.task.consumer.node_id == node_id
-                    and task_ins.task.delivered_at == ""
-                    and task_ins.task.created_at + task_ins.task.ttl > current_time
-                ) or (
-                    node_id is None  # Anonymous
-                    and task_ins.task.consumer.anonymous is True
-                    and task_ins.task.consumer.node_id == 0
+                    task_ins.task.consumer.node_id == node_id
                     and task_ins.task.delivered_at == ""
                     and task_ins.task.created_at + task_ins.task.ttl > current_time
                 ):
@@ -173,9 +161,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             if (
                 task_ins
                 and task_res
-                and not (
-                    task_ins.task.consumer.anonymous or task_res.task.producer.anonymous
-                )
                 and task_ins.task.consumer.node_id != task_res.task.producer.node_id
             ):
                 return None
@@ -306,45 +291,30 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.task_res_store)
 
-    def create_node(
-        self, ping_interval: float, public_key: Optional[bytes] = None
-    ) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
-        node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
+        node_id = generate_rand_int_from_bytes(
+            NODE_ID_NUM_BYTES, exclude=[SUPERLINK_NODE_ID, 0]
+        )
 
         with self.lock:
             if node_id in self.node_ids:
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
-            if public_key is not None:
-                if (
-                    public_key in self.public_key_to_node_id
-                    or node_id in self.public_key_to_node_id.values()
-                ):
-                    log(ERROR, "Unexpected node registration failure.")
-                    return 0
-
-                self.public_key_to_node_id[public_key] = node_id
-
             self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
             return node_id
 
-    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Delete a node."""
         with self.lock:
             if node_id not in self.node_ids:
                 raise ValueError(f"Node {node_id} not found")
 
-            if public_key is not None:
-                if (
-                    public_key not in self.public_key_to_node_id
-                    or node_id not in self.public_key_to_node_id.values()
-                ):
-                    raise ValueError("Public key or node_id not found")
-
-                del self.public_key_to_node_id[public_key]
+            # Remove node ID <> public key mappings
+            if pk := self.node_id_to_public_key.pop(node_id, None):
+                del self.public_key_to_node_id[pk]
 
             del self.node_ids[node_id]
 
@@ -365,6 +335,26 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 for node_id, (online_until, _) in self.node_ids.items()
                 if online_until > current_time
             }
+
+    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Set `public_key` for the specified `node_id`."""
+        with self.lock:
+            if node_id not in self.node_ids:
+                raise ValueError(f"Node {node_id} not found")
+
+            if public_key in self.public_key_to_node_id:
+                raise ValueError("Public key already in use")
+
+            self.public_key_to_node_id[public_key] = node_id
+            self.node_id_to_public_key[node_id] = public_key
+
+    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
+        """Get `public_key` for the specified `node_id`."""
+        with self.lock:
+            if node_id not in self.node_ids:
+                raise ValueError(f"Node {node_id} not found")
+
+            return self.node_id_to_public_key.get(node_id)
 
     def get_node_id(self, node_public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
@@ -411,30 +401,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def store_server_private_public_key(
-        self, private_key: bytes, public_key: bytes
-    ) -> None:
-        """Store `server_private_key` and `server_public_key` in the link state."""
+    def clear_supernode_auth_keys(self) -> None:
+        """Clear stored `node_public_keys` in the link state if any."""
         with self.lock:
-            if self.server_private_key is None and self.server_public_key is None:
-                self.server_private_key = private_key
-                self.server_public_key = public_key
-            else:
-                raise RuntimeError("Server private and public key already set")
-
-    def get_server_private_key(self) -> Optional[bytes]:
-        """Retrieve `server_private_key` in urlsafe bytes."""
-        return self.server_private_key
-
-    def get_server_public_key(self) -> Optional[bytes]:
-        """Retrieve `server_public_key` in urlsafe bytes."""
-        return self.server_public_key
-
-    def clear_supernode_auth_keys_and_credentials(self) -> None:
-        """Clear stored `node_public_keys` and credentials in the link state if any."""
-        with self.lock:
-            self.server_private_key = None
-            self.server_public_key = None
             self.node_public_keys.clear()
 
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:

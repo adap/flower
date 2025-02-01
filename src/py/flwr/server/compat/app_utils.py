@@ -95,7 +95,6 @@ def _update_client_manager(
             client_proxy = DriverClientProxy(
                 node_id=node_id,
                 driver=driver,
-                anonymous=False,
                 run_id=driver.run.run_id,
             )
             if client_manager.register(client_proxy):

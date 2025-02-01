@@ -16,14 +16,13 @@
 
 
 import threading
-import time
 from logging import DEBUG, INFO
 from typing import Optional
 from uuid import UUID
 
 import grpc
 
-from flwr.common import ConfigsRecord
+from flwr.common import ConfigsRecord, now
 from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -31,6 +30,10 @@ from flwr.common.serde import (
     context_to_proto,
     fab_from_proto,
     fab_to_proto,
+    message_from_proto,
+    message_from_taskres,
+    message_to_proto,
+    message_to_taskins,
     run_status_from_proto,
     run_status_to_proto,
     run_to_proto,
@@ -57,14 +60,14 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
+    PullResMessagesRequest,
+    PullResMessagesResponse,
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
-    PullTaskResRequest,
-    PullTaskResResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
-    PushTaskInsRequest,
-    PushTaskInsResponse,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
@@ -102,9 +105,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         all_ids: set[int] = state.get_nodes(request.run_id)
-        nodes: list[Node] = [
-            Node(node_id=node_id, anonymous=False) for node_id in all_ids
-        ]
+        nodes: list[Node] = [Node(node_id=node_id) for node_id in all_ids]
         return GetNodesResponse(nodes=nodes)
 
     def CreateRun(
@@ -118,8 +119,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             ffs: Ffs = self.ffs_factory.ffs()
             fab_hash = ffs.put(fab.content, {})
             _raise_if(
-                fab_hash != fab.hash_str,
-                f"FAB ({fab.hash_str}) hash from request doesn't match contents",
+                validation_error=fab_hash != fab.hash_str,
+                request_name="CreateRun",
+                detail=f"FAB ({fab.hash_str}) hash from request doesn't match contents",
             )
         else:
             fab_hash = ""
@@ -132,11 +134,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
         return CreateRunResponse(run_id=run_id)
 
-    def PushTaskIns(
-        self, request: PushTaskInsRequest, context: grpc.ServicerContext
-    ) -> PushTaskInsResponse:
-        """Push a set of TaskIns."""
-        log(DEBUG, "ServerAppIoServicer.PushTaskIns")
+    def PushMessages(
+        self, request: PushInsMessagesRequest, context: grpc.ServicerContext
+    ) -> PushInsMessagesResponse:
+        """Push a set of Messages."""
+        log(DEBUG, "ServerAppIoServicer.PushMessages")
 
         # Init state
         state: LinkState = self.state_factory.state()
@@ -150,34 +152,46 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         # Set pushed_at (timestamp in seconds)
-        pushed_at = time.time()
-        for task_ins in request.task_ins_list:
+        pushed_at = now().timestamp()
+
+        # Validate request and insert in State
+        _raise_if(
+            validation_error=len(request.messages_list) == 0,
+            request_name="PushMessages",
+            detail="`messages_list` must not be empty",
+        )
+        message_ids: list[Optional[UUID]] = []
+        while request.messages_list:
+            message_proto = request.messages_list.pop(0)
+            message = message_from_proto(message_proto=message_proto)
+            task_ins = message_to_taskins(message=message)
             task_ins.task.pushed_at = pushed_at
-
-        # Validate request
-        _raise_if(len(request.task_ins_list) == 0, "`task_ins_list` must not be empty")
-        for task_ins in request.task_ins_list:
             validation_errors = validate_task_ins_or_res(task_ins)
-            _raise_if(bool(validation_errors), ", ".join(validation_errors))
             _raise_if(
-                request.run_id != task_ins.run_id, "`task_ins` has mismatched `run_id`"
+                validation_error=bool(validation_errors),
+                request_name="PushMessages",
+                detail=", ".join(validation_errors),
             )
+            _raise_if(
+                validation_error=request.run_id != task_ins.run_id,
+                request_name="PushMessages",
+                detail="`task_ins` has mismatched `run_id`",
+            )
+            # Store
+            message_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
+            message_ids.append(message_id)
 
-        # Store each TaskIns
-        task_ids: list[Optional[UUID]] = []
-        for task_ins in request.task_ins_list:
-            task_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
-            task_ids.append(task_id)
-
-        return PushTaskInsResponse(
-            task_ids=[str(task_id) if task_id else "" for task_id in task_ids]
+        return PushInsMessagesResponse(
+            message_ids=[
+                str(message_id) if message_id else "" for message_id in message_ids
+            ]
         )
 
-    def PullTaskRes(
-        self, request: PullTaskResRequest, context: grpc.ServicerContext
-    ) -> PullTaskResResponse:
-        """Pull a set of TaskRes."""
-        log(DEBUG, "ServerAppIoServicer.PullTaskRes")
+    def PullMessages(
+        self, request: PullResMessagesRequest, context: grpc.ServicerContext
+    ) -> PullResMessagesResponse:
+        """Pull a set of Messages."""
+        log(DEBUG, "ServerAppIoServicer.PullMessages")
 
         # Init state
         state: LinkState = self.state_factory.state()
@@ -191,24 +205,33 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         # Convert each task_id str to UUID
-        task_ids: set[UUID] = {UUID(task_id) for task_id in request.task_ids}
+        message_ids: set[UUID] = {
+            UUID(message_id) for message_id in request.message_ids
+        }
 
         # Read from state
-        task_res_list: list[TaskRes] = state.get_task_res(task_ids=task_ids)
+        task_res_list: list[TaskRes] = state.get_task_res(task_ids=message_ids)
 
-        # Validate request
-        for task_res in task_res_list:
+        # Convert to Messages
+        messages_list = []
+        while task_res_list:
+            task_res = task_res_list.pop(0)
             _raise_if(
-                request.run_id != task_res.run_id, "`task_res` has mismatched `run_id`"
+                validation_error=request.run_id != task_res.run_id,
+                request_name="PullMessages",
+                detail="`task_res` has mismatched `run_id`",
             )
+            message = message_from_taskres(taskres=task_res)
+            messages_list.append(message_to_proto(message))
 
         # Delete the TaskIns/TaskRes pairs if TaskRes is found
         task_ins_ids_to_delete = {
             UUID(task_res.task.ancestry[0]) for task_res in task_res_list
         }
+
         state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
 
-        return PullTaskResResponse(task_res_list=task_res_list)
+        return PullResMessagesResponse(messages_list=messages_list)
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
@@ -245,9 +268,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PullServerAppInputsResponse:
         """Pull ServerApp process inputs."""
         log(DEBUG, "ServerAppIoServicer.PullServerAppInputs")
-        # Init access to LinkState and Ffs
+        # Init access to LinkState
         state = self.state_factory.state()
-        ffs = self.ffs_factory.ffs()
 
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
@@ -256,6 +278,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             # If there's no pending run, return an empty response
             if run_id is None:
                 return PullServerAppInputsResponse()
+
+            # Init access to Ffs
+            ffs = self.ffs_factory.ffs()
 
             # Retrieve Context, Run and Fab for the run_id
             serverapp_ctxt = state.get_serverapp_context(run_id)
@@ -344,6 +369,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         return GetRunStatusResponse(run_status_dict=run_status_dict)
 
 
-def _raise_if(validation_error: bool, detail: str) -> None:
+def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
+    """Raise a `ValueError` with a detailed message if a validation error occurs."""
     if validation_error:
-        raise ValueError(f"Malformed PushTaskInsRequest: {detail}")
+        raise ValueError(f"Malformed {request_name}: {detail}")

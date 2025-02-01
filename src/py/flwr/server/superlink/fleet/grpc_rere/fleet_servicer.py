@@ -18,6 +18,7 @@
 from logging import DEBUG, INFO
 
 import grpc
+from google.protobuf.json_format import MessageToDict
 
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
@@ -30,10 +31,10 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
@@ -56,13 +57,13 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> CreateNodeResponse:
         """."""
         log(INFO, "[Fleet.CreateNode] Request ping_interval=%s", request.ping_interval)
-        log(DEBUG, "[Fleet.CreateNode] Request: %s", request)
+        log(DEBUG, "[Fleet.CreateNode] Request: %s", MessageToDict(request))
         response = message_handler.create_node(
             request=request,
             state=self.state_factory.state(),
         )
         log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
-        log(DEBUG, "[Fleet.CreateNode] Response: %s", response)
+        log(DEBUG, "[Fleet.CreateNode] Response: %s", MessageToDict(response))
         return response
 
     def DeleteNode(
@@ -70,7 +71,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> DeleteNodeResponse:
         """."""
         log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
-        log(DEBUG, "[Fleet.DeleteNode] Request: %s", request)
+        log(DEBUG, "[Fleet.DeleteNode] Request: %s", MessageToDict(request))
         return message_handler.delete_node(
             request=request,
             state=self.state_factory.state(),
@@ -78,38 +79,38 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
     def Ping(self, request: PingRequest, context: grpc.ServicerContext) -> PingResponse:
         """."""
-        log(DEBUG, "[Fleet.Ping] Request: %s", request)
+        log(DEBUG, "[Fleet.Ping] Request: %s", MessageToDict(request))
         return message_handler.ping(
             request=request,
             state=self.state_factory.state(),
         )
 
-    def PullTaskIns(
-        self, request: PullTaskInsRequest, context: grpc.ServicerContext
-    ) -> PullTaskInsResponse:
-        """Pull TaskIns."""
-        log(INFO, "[Fleet.PullTaskIns] node_id=%s", request.node.node_id)
-        log(DEBUG, "[Fleet.PullTaskIns] Request: %s", request)
-        return message_handler.pull_task_ins(
+    def PullMessages(
+        self, request: PullMessagesRequest, context: grpc.ServicerContext
+    ) -> PullMessagesResponse:
+        """Pull Messages."""
+        log(INFO, "[Fleet.PullMessages] node_id=%s", request.node.node_id)
+        log(DEBUG, "[Fleet.PullMessages] Request: %s", MessageToDict(request))
+        return message_handler.pull_messages(
             request=request,
             state=self.state_factory.state(),
         )
 
-    def PushTaskRes(
-        self, request: PushTaskResRequest, context: grpc.ServicerContext
-    ) -> PushTaskResResponse:
-        """Push TaskRes."""
-        if request.task_res_list:
+    def PushMessages(
+        self, request: PushMessagesRequest, context: grpc.ServicerContext
+    ) -> PushMessagesResponse:
+        """Push Messages."""
+        if request.messages_list:
             log(
                 INFO,
-                "[Fleet.PushTaskRes] Push results from node_id=%s",
-                request.task_res_list[0].task.producer.node_id,
+                "[Fleet.PushMessages] Push results from node_id=%s",
+                request.messages_list[0].metadata.src_node_id,
             )
         else:
-            log(INFO, "[Fleet.PushTaskRes] No task results to push")
+            log(INFO, "[Fleet.PushMessages] No task results to push")
 
         try:
-            res = message_handler.push_task_res(
+            res = message_handler.push_messages(
                 request=request,
                 state=self.state_factory.state(),
             )

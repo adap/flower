@@ -40,20 +40,14 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Constraints
         -----------
-        If `task_ins.task.consumer.anonymous` is `True`, then
-        `task_ins.task.consumer.node_id` MUST NOT be set (equal 0).
-
-        If `task_ins.task.consumer.anonymous` is `False`, then
-        `task_ins.task.consumer.node_id` MUST be set (not 0)
+        `task_ins.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
 
         If `task_ins.run_id` is invalid, then
         storing the `task_ins` MUST fail.
         """
 
     @abc.abstractmethod
-    def get_task_ins(
-        self, node_id: Optional[int], limit: Optional[int]
-    ) -> list[TaskIns]:
+    def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
         """Get TaskIns optionally filtered by node_id.
 
         Usually, the Fleet API calls this for Nodes planning to work on one or more
@@ -61,15 +55,11 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Constraints
         -----------
-        If `node_id` is not `None`, retrieve all TaskIns where
+        Retrieve all TaskIns where
 
             1. the `task_ins.task.consumer.node_id` equals `node_id` AND
-            2. the `task_ins.task.consumer.anonymous` equals `False` AND
-            3. the `task_ins.task.delivered_at` equals `""`.
+            2. the `task_ins.task.delivered_at` equals `""`.
 
-        If `node_id` is `None`, retrieve all TaskIns where the
-        `task_ins.task.consumer.node_id` equals `0` and
-        `task_ins.task.consumer.anonymous` is set to `True`.
 
         If `delivered_at` MUST BE set (not `""`) otherwise the TaskIns MUST not be in
         the result.
@@ -89,11 +79,8 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Constraints
         -----------
-        If `task_res.task.consumer.anonymous` is `True`, then
-        `task_res.task.consumer.node_id` MUST NOT be set (equal 0).
 
-        If `task_res.task.consumer.anonymous` is `False`, then
-        `task_res.task.consumer.node_id` MUST be set (not 0)
+        `task_res.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
 
         If `task_res.run_id` is invalid, then
         storing the `task_res` MUST fail.
@@ -154,13 +141,11 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Get all TaskIns IDs for the given run_id."""
 
     @abc.abstractmethod
-    def create_node(
-        self, ping_interval: float, public_key: Optional[bytes] = None
-    ) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod
-    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Remove `node_id` from the link state."""
 
     @abc.abstractmethod
@@ -172,6 +157,14 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
+
+    @abc.abstractmethod
+    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Set `public_key` for the specified `node_id`."""
+
+    @abc.abstractmethod
+    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
+        """Get `public_key` for the specified `node_id`."""
 
     @abc.abstractmethod
     def get_node_id(self, node_public_key: bytes) -> Optional[int]:
@@ -271,22 +264,8 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def store_server_private_public_key(
-        self, private_key: bytes, public_key: bytes
-    ) -> None:
-        """Store `server_private_key` and `server_public_key` in the link state."""
-
-    @abc.abstractmethod
-    def get_server_private_key(self) -> Optional[bytes]:
-        """Retrieve `server_private_key` in urlsafe bytes."""
-
-    @abc.abstractmethod
-    def get_server_public_key(self) -> Optional[bytes]:
-        """Retrieve `server_public_key` in urlsafe bytes."""
-
-    @abc.abstractmethod
-    def clear_supernode_auth_keys_and_credentials(self) -> None:
-        """Clear stored `node_public_keys` and credentials in the link state if any."""
+    def clear_supernode_auth_keys(self) -> None:
+        """Clear stored `node_public_keys` in the link state if any."""
 
     @abc.abstractmethod
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
