@@ -23,7 +23,6 @@ from pathlib import Path
 from threading import Lock
 from typing import Any, Optional, Union
 
-
 OBJECT_REF_HELP_STR = """
 \n\nThe object reference string should have the form <module>:<attribute>. Valid
 examples include `client:app` and `project.package.module:wrapper.app`. It must
