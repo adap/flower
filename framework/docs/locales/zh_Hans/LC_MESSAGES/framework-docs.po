@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-01 00:32+0000\n"
+"POT-Creation-Date: 2025-02-02 00:32+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.16.0\n"
+"Generated-By: Babel 2.17.0\n"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:2
 msgid "Public and private APIs"
@@ -770,12 +770,14 @@ msgstr ""
 "poetry.lock`))。"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:14
+#, python-brace-format
 msgid ""
 "``flwr = { version = \"1.0.0a0\", allow-prereleases = true }`` (without "
 "extras)"
 msgstr "``flwr = { version = \"1.0.0a0\", allow-prereleases = true }`` （不含额外内容）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:15
+#, python-brace-format
 msgid ""
 "``flwr = { version = \"1.0.0a0\", allow-prereleases = true, extras = "
 "[\"simulation\"] }`` (with extras)"
@@ -790,10 +792,12 @@ msgid ""
 msgstr "通过 ``pyproject.toml`` 从 Flower 源代码的本地副本安装 ``flwr``："
 
 #: ../../source/contributor-how-to-install-development-versions.rst:20
+#, python-brace-format
 msgid "``flwr = { path = \"../../\", develop = true }`` (without extras)"
 msgstr "``flwr = { path = \"../../\", develop = true }`` （不含额外内容）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:21
+#, python-brace-format
 msgid ""
 "``flwr = { path = \"../../\", develop = true, extras = [\"simulation\"] "
 "}`` (with extras)"
@@ -806,14 +810,14 @@ msgid "Install ``flwr`` from a local wheel file via ``pyproject.toml``:"
 msgstr "通过 ``pyproject.toml`` 从本地轮子文件安装 ``flwr``："
 
 #: ../../source/contributor-how-to-install-development-versions.rst:25
-#, fuzzy
+#, fuzzy, python-brace-format
 msgid ""
 "``flwr = { path = \"../../dist/flwr-1.8.0-py3-none-any.whl\" }`` (without"
 " extras)"
 msgstr "``flwr = { path = \"../../dist/flwr-1.0.0-py3-none-any.whl\" }``（无额外内容）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:26
-#, fuzzy
+#, fuzzy, python-brace-format
 msgid ""
 "``flwr = { path = \"../../dist/flwr-1.8.0-py3-none-any.whl\", extras = "
 "[\"simulation\"] }`` (with extras)"
@@ -2137,7 +2141,7 @@ msgid ""
 msgstr "(或 ``<type>(<project>:skip) <subject>`` 忽略更新日志中的 PR）。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:372
-#, fuzzy
+#, fuzzy, python-brace-format
 msgid ""
 "Where ``<type>`` needs to be in ``{ci, fix, feat, docs, refactor, "
 "break}``, ``<project>`` should be in ``{framework, baselines, datasets, "
@@ -3425,7 +3429,7 @@ msgstr "快速入门 fastai"
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:119
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:123
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:125
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:129
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:127
 #: ../../source/ref-changelog.md:397 ../../source/ref-changelog.md:763
 #: ../../source/ref-changelog.md:1040 ../../source/ref-changelog.md:1104
 #: ../../source/ref-changelog.md:1162 ../../source/ref-changelog.md:1231
@@ -3449,7 +3453,6 @@ msgid "quickstart-mlcube"
 msgstr "快速入门 JAX"
 
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:112
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:127
 #, fuzzy
 msgid ""
 "The example has not yet been updated to work with the latest ``flwr`` "
@@ -3499,11 +3502,6 @@ msgid "quickstart-sklearn-tabular"
 msgstr "scikit-learn快速入门"
 
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:126
-#, fuzzy
-msgid "quickstart-tabnet"
-msgstr "快速入门 JAX"
-
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:128
 #, fuzzy
 msgid "quickstart-tensorflow"
 msgstr "快速入门 TensorFlow"
@@ -4722,7 +4720,7 @@ msgstr ""
 "Range(A)，随机化机制M提供（:math:`epsilon`，:math:`\\delta`）差异隐私："
 
 #: ../../source/explanation-differential-privacy.rst:46
-#, fuzzy
+#, fuzzy, python-brace-format
 msgid ""
 "\\small\n"
 "P[M(D_{1} \\in A)] \\leq e^{\\epsilon} P[M(D_{2} \\in A)] + \\delta"
@@ -6958,6 +6956,7 @@ msgid "VM Networking"
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-azure.rst:86
+#, python-brace-format
 msgid ""
 "During the execution of the Flower application, the server VM "
 "(``SuperLink``) will be responsible to orchestrate the execution of the "
@@ -8276,6 +8275,7 @@ msgid "``flwr = \"^1.0.0\"`` (when using ``start_server`` and ``start_client``)"
 msgstr "``flwr = \"^1.0.0\"`` （当使用 ``start_server` 和 ``start_client` 时）"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:37
+#, python-brace-format
 msgid ""
 "``flwr = { version = \"^1.0.0\", extras = [\"simulation\"] }`` (when "
 "using ``start_simulation``)"
@@ -8351,6 +8351,7 @@ msgstr ""
 "dictionary）。下面是一个例子："
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:69
+#, python-brace-format
 msgid ""
 "Flower 0.19: ``start_server(..., config={\"num_rounds\": 3, "
 "\"round_timeout\": 600.0}, ...)``"
@@ -9521,11 +9522,11 @@ msgstr "教程"
 msgid "Quickstart tutorials"
 msgstr "快速入门教程"
 
-#: ../../source/index.rst:81 ../../source/index.rst:85
+#: ../../source/index.rst:71 ../../source/index.rst:75
 msgid "How-to guides"
 msgstr "操作指南"
 
-#: ../../source/index.rst:111 ../../source/index.rst:116
+#: ../../source/index.rst:101 ../../source/index.rst:106
 msgid "Explanations"
 msgstr "说明"
 
@@ -9533,23 +9534,23 @@ msgstr "说明"
 msgid "API reference"
 msgstr "应用程序接口参考"
 
-#: ../../source/index.rst:142
+#: ../../source/index.rst:132
 msgid "Reference docs"
 msgstr "参考文档"
 
-#: ../../source/index.rst:159
+#: ../../source/index.rst:149
 msgid "Contributor tutorials"
 msgstr "贡献者教程"
 
-#: ../../source/index.rst:166
+#: ../../source/index.rst:156
 msgid "Contributor how-to guides"
 msgstr "投稿指南"
 
-#: ../../source/index.rst:178
+#: ../../source/index.rst:168
 msgid "Contributor explanations"
 msgstr "贡献者解释"
 
-#: ../../source/index.rst:184
+#: ../../source/index.rst:174
 msgid "Contributor references"
 msgstr "贡献者参考资料"
 
@@ -9632,49 +9633,41 @@ msgstr ""
 "<tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-"
 "android>` | :doc:`iOS <tutorial-quickstart-ios>`"
 
-#: ../../source/index.rst:70
-msgid "We also made video tutorials for PyTorch:"
-msgstr "我们还为 PyTorch 制作了视频教程："
-
-#: ../../source/index.rst:75
-msgid "And TensorFlow:"
-msgstr "还有 TensorFlow："
-
-#: ../../source/index.rst:83
+#: ../../source/index.rst:73
 msgid ""
 "Problem-oriented how-to guides show step-by-step how to achieve a "
 "specific goal."
 msgstr "以问题为导向的 \"如何做 \"指南逐步展示如何实现特定目标。"
 
-#: ../../source/index.rst:113
+#: ../../source/index.rst:103
 msgid ""
 "Understanding-oriented concept guides explain and discuss key topics and "
 "underlying ideas behind Flower and collaborative AI."
 msgstr "以理解为导向的概念指南解释并讨论了Flower和协作式人工智能背后的关键主题和基本思想。"
 
-#: ../../source/index.rst:125
+#: ../../source/index.rst:115
 msgid "References"
 msgstr "参考资料"
 
-#: ../../source/index.rst:127
+#: ../../source/index.rst:117
 msgid "Information-oriented API reference and other reference material."
 msgstr "以信息为导向的 API 参考资料和其他参考资料。"
 
-#: ../../source/index.rst:136:<autosummary>:1
+#: ../../source/index.rst:126:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`flwr <flwr>`\\"
 msgstr ":py:obj:`flwr <flwr>`\\"
 
-#: ../../source/index.rst:136:<autosummary>:1 flwr:1 of
+#: ../../source/index.rst:126:<autosummary>:1 flwr:1 of
 #, fuzzy
 msgid "Flower main package."
 msgstr "Flower 主包装。"
 
-#: ../../source/index.rst:154
+#: ../../source/index.rst:144
 msgid "Contributor docs"
 msgstr "贡献者文档"
 
-#: ../../source/index.rst:156
+#: ../../source/index.rst:146
 msgid ""
 "The Flower community welcomes contributions. The following docs are "
 "intended to help along the way."
@@ -9876,6 +9869,7 @@ msgid "**Run ID:** Unique identifier for the run."
 msgstr "当前运行的标识符。"
 
 #: ../../flwr ls:1
+#, python-brace-format
 msgid ""
 "**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
 "(v{FAB_VERSION})``)."
@@ -12988,14 +12982,14 @@ msgid "Return -1 on failure."
 msgstr "失败时返回-1。"
 
 #: flwr.common.EventType.format:1 of
-#, fuzzy
+#, fuzzy, python-brace-format
 msgid ""
 "Return a formatted version of S, using substitutions from args and "
 "kwargs. The substitutions are identified by braces ('{' and '}')."
 msgstr "使用来自 args 和 kwargs 的替换，返回 S 的格式化版本。替换用大括号（'{'和'}'）标识。"
 
 #: flwr.common.EventType.format_map:1 of
-#, fuzzy
+#, fuzzy, python-brace-format
 msgid ""
 "Return a formatted version of S, using substitutions from mapping. The "
 "substitutions are identified by braces ('{' and '}')."
@@ -17642,6 +17636,7 @@ msgid ""
 msgstr "策略本身与 FedAvg 并无不同，客户端需要进行调整。在训练过程中，需要在损失函数中添加一个近端项："
 
 #: flwr.server.strategy.fedprox.FedProx:9 of
+#, python-brace-format
 msgid ""
 "\\\\frac{\\\\mu}{2} || w - w^t ||^2\n"
 "\n"
@@ -20391,6 +20386,7 @@ msgstr ""
 "[#2356](https://github.com/adap/flower/pull/2356))"
 
 #: ../../source/ref-changelog.md:217
+#, python-brace-format
 msgid ""
 "SuperExec has been integrated into SuperLink, enabling SuperLink to "
 "directly manage ServerApp processes (`flwr-serverapp`). The `flwr` CLI "
@@ -26311,6 +26307,7 @@ msgstr ""
 "`ServerConfig` ([#1317](https://github.com/adap/flower/pull/1317))"
 
 #: ../../source/ref-changelog.md:1318
+#, python-brace-format
 msgid ""
 "Instead of a config dictionary `{\"num_rounds\": 3, \"round_timeout\": "
 "600.0}`, `start_server` and `start_simulation` now expect a configuration"
@@ -27488,6 +27485,7 @@ msgstr ""
 "指标字典，以便服务器跟踪。"
 
 #: ../../source/ref-changelog.md:1603
+#, python-brace-format
 msgid ""
 "Strategy implementations should migrate their `aggregate_fit` and "
 "`aggregate_evaluate` methods to the new return type (e.g., by simply "
@@ -31875,6 +31873,7 @@ msgid "Where's the accuracy?"
 msgstr "准确度在哪里找？"
 
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.ipynb:707
+#, python-brace-format
 msgid ""
 "You may have noticed that all metrics except for ``losses_distributed`` "
 "are empty. Where did the ``{\"accuracy\": float(accuracy)}`` go?"
@@ -32347,7 +32346,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|2375819ef1ec4145a4c91492343eb475|"
+msgid "|8121c8d231f04cce80d7d4a749d05fad|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -32362,7 +32361,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|ce375b86764b446d8f33a01d32909a4d|"
+msgid "|63d7d57ea2d14e1fa565edc5f8e6d0c3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -32386,7 +32385,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|b2facc1f0966468b962e3d66c1e454f2|"
+msgid "|034829480fa740afbbc7453e5b1fd345|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -32404,7 +32403,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|2361a45884fe41bf8825175b31880a9c|"
+msgid "|525ed0f9bbae4478abd6a50130254461|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -32421,7 +32420,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|d0b86ab6b5cc49e1a3e6b031594bf7fe|"
+msgid "|ad35e1ba0252470fa69bd391f60354b9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -32436,7 +32435,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|c06175382a73496b968d94d01cd9bdd3|"
+msgid "|686da575bf794c5d8609e37d8211329b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -32457,7 +32456,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|80f03044b21b472e866ae9c31202a8ad|"
+msgid "|c58b4e957826408db980c238687ab898|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -32472,7 +32471,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|dfc8acb1c72b4572a3632e2f198da658|"
+msgid "|c081e06494f04261a29467861ad8d746|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -32632,7 +32631,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|4b6dc916acdc499dad963b52d56fd602|"
+msgid "|2ba32b63692d48bb995937727cc3d76f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -32657,7 +32656,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|3efa977622c34263ac76d6d5adcb641c|"
+msgid "|8995fb47885b4240aa063f1c1189d0a6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -32683,7 +32682,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|a2d6ccc96e214863831cb2eff5b6f81a|"
+msgid "|e0f6b07c2a9d47e68041fec453aa5098|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -32706,7 +32705,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|7f089ba5b4c34189b974daf1ce3c3bd0|"
+msgid "|fd69260872954015a8a4b3b7a0a0b27f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -32753,7 +32752,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|7468ad3dbeea44079c56a11d3c741a1b|"
+msgid "|335c4f36d8c64f2eb468a30b4d424b24|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -32861,7 +32860,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|c79e686ab53847f1a476c3d45f574a80|"
+msgid "|0e3cb3b010bd4cea901b3dbd34efa139|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -41441,5 +41440,56 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|1cf0f3d2d44e47c7bfaa71cecf7a0fe4|"
+#~ msgstr ""
+
+#~ msgid "quickstart-tabnet"
+#~ msgstr "快速入门 JAX"
+
+#~ msgid "We also made video tutorials for PyTorch:"
+#~ msgstr "我们还为 PyTorch 制作了视频教程："
+
+#~ msgid "And TensorFlow:"
+#~ msgstr "还有 TensorFlow："
+
+#~ msgid "|2375819ef1ec4145a4c91492343eb475|"
+#~ msgstr ""
+
+#~ msgid "|ce375b86764b446d8f33a01d32909a4d|"
+#~ msgstr ""
+
+#~ msgid "|b2facc1f0966468b962e3d66c1e454f2|"
+#~ msgstr ""
+
+#~ msgid "|2361a45884fe41bf8825175b31880a9c|"
+#~ msgstr ""
+
+#~ msgid "|d0b86ab6b5cc49e1a3e6b031594bf7fe|"
+#~ msgstr ""
+
+#~ msgid "|c06175382a73496b968d94d01cd9bdd3|"
+#~ msgstr ""
+
+#~ msgid "|80f03044b21b472e866ae9c31202a8ad|"
+#~ msgstr ""
+
+#~ msgid "|dfc8acb1c72b4572a3632e2f198da658|"
+#~ msgstr ""
+
+#~ msgid "|4b6dc916acdc499dad963b52d56fd602|"
+#~ msgstr ""
+
+#~ msgid "|3efa977622c34263ac76d6d5adcb641c|"
+#~ msgstr ""
+
+#~ msgid "|a2d6ccc96e214863831cb2eff5b6f81a|"
+#~ msgstr ""
+
+#~ msgid "|7f089ba5b4c34189b974daf1ce3c3bd0|"
+#~ msgstr ""
+
+#~ msgid "|7468ad3dbeea44079c56a11d3c741a1b|"
+#~ msgstr ""
+
+#~ msgid "|c79e686ab53847f1a476c3d45f574a80|"
 #~ msgstr ""
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-01 00:32+0000\n"
+"POT-Creation-Date: 2025-02-02 00:32+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.16.0\n"
+"Generated-By: Babel 2.17.0\n"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:2
 msgid "Public and private APIs"
@@ -779,12 +779,14 @@ msgid ""
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:14
+#, python-brace-format
 msgid ""
 "``flwr = { version = \"1.0.0a0\", allow-prereleases = true }`` (without "
 "extras)"
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:15
+#, python-brace-format
 msgid ""
 "``flwr = { version = \"1.0.0a0\", allow-prereleases = true, extras = "
 "[\"simulation\"] }`` (with extras)"
@@ -797,10 +799,12 @@ msgid ""
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:20
+#, python-brace-format
 msgid "``flwr = { path = \"../../\", develop = true }`` (without extras)"
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:21
+#, python-brace-format
 msgid ""
 "``flwr = { path = \"../../\", develop = true, extras = [\"simulation\"] "
 "}`` (with extras)"
@@ -811,12 +815,14 @@ msgid "Install ``flwr`` from a local wheel file via ``pyproject.toml``:"
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:25
+#, python-brace-format
 msgid ""
 "``flwr = { path = \"../../dist/flwr-1.8.0-py3-none-any.whl\" }`` (without"
 " extras)"
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:26
+#, python-brace-format
 msgid ""
 "``flwr = { path = \"../../dist/flwr-1.8.0-py3-none-any.whl\", extras = "
 "[\"simulation\"] }`` (with extras)"
@@ -1999,6 +2005,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:372
+#, python-brace-format
 msgid ""
 "Where ``<type>`` needs to be in ``{ci, fix, feat, docs, refactor, "
 "break}``, ``<project>`` should be in ``{framework, baselines, datasets, "
@@ -3168,7 +3175,7 @@ msgstr ""
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:119
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:123
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:125
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:129
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:127
 #: ../../source/ref-changelog.md:397 ../../source/ref-changelog.md:763
 #: ../../source/ref-changelog.md:1040 ../../source/ref-changelog.md:1104
 #: ../../source/ref-changelog.md:1162 ../../source/ref-changelog.md:1231
@@ -3189,7 +3196,6 @@ msgid "quickstart-mlcube"
 msgstr ""
 
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:112
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:127
 msgid ""
 "The example has not yet been updated to work with the latest ``flwr`` "
 "version."
@@ -3232,10 +3238,6 @@ msgid "quickstart-sklearn-tabular"
 msgstr ""
 
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:126
-msgid "quickstart-tabnet"
-msgstr ""
-
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:128
 msgid "quickstart-tensorflow"
 msgstr ""
 
@@ -4391,6 +4393,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/explanation-differential-privacy.rst:46
+#, python-brace-format
 msgid ""
 "\\small\n"
 "P[M(D_{1} \\in A)] \\leq e^{\\epsilon} P[M(D_{2} \\in A)] + \\delta"
@@ -6378,6 +6381,7 @@ msgid "VM Networking"
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-azure.rst:86
+#, python-brace-format
 msgid ""
 "During the execution of the Flower application, the server VM "
 "(``SuperLink``) will be responsible to orchestrate the execution of the "
@@ -7600,6 +7604,7 @@ msgid "``flwr = \"^1.0.0\"`` (when using ``start_server`` and ``start_client``)"
 msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:37
+#, python-brace-format
 msgid ""
 "``flwr = { version = \"^1.0.0\", extras = [\"simulation\"] }`` (when "
 "using ``start_simulation``)"
@@ -7665,6 +7670,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:69
+#, python-brace-format
 msgid ""
 "Flower 0.19: ``start_server(..., config={\"num_rounds\": 3, "
 "\"round_timeout\": 600.0}, ...)``"
@@ -8656,11 +8662,11 @@ msgstr ""
 msgid "Quickstart tutorials"
 msgstr ""
 
-#: ../../source/index.rst:81 ../../source/index.rst:85
+#: ../../source/index.rst:71 ../../source/index.rst:75
 msgid "How-to guides"
 msgstr ""
 
-#: ../../source/index.rst:111 ../../source/index.rst:116
+#: ../../source/index.rst:101 ../../source/index.rst:106
 msgid "Explanations"
 msgstr ""
 
@@ -8668,23 +8674,23 @@ msgstr ""
 msgid "API reference"
 msgstr ""
 
-#: ../../source/index.rst:142
+#: ../../source/index.rst:132
 msgid "Reference docs"
 msgstr ""
 
-#: ../../source/index.rst:159
+#: ../../source/index.rst:149
 msgid "Contributor tutorials"
 msgstr ""
 
-#: ../../source/index.rst:166
+#: ../../source/index.rst:156
 msgid "Contributor how-to guides"
 msgstr ""
 
-#: ../../source/index.rst:178
+#: ../../source/index.rst:168
 msgid "Contributor explanations"
 msgstr ""
 
-#: ../../source/index.rst:184
+#: ../../source/index.rst:174
 msgid "Contributor references"
 msgstr ""
 
@@ -8754,47 +8760,39 @@ msgid ""
 "quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`"
 msgstr ""
 
-#: ../../source/index.rst:70
-msgid "We also made video tutorials for PyTorch:"
-msgstr ""
-
-#: ../../source/index.rst:75
-msgid "And TensorFlow:"
-msgstr ""
-
-#: ../../source/index.rst:83
+#: ../../source/index.rst:73
 msgid ""
 "Problem-oriented how-to guides show step-by-step how to achieve a "
 "specific goal."
 msgstr ""
 
-#: ../../source/index.rst:113
+#: ../../source/index.rst:103
 msgid ""
 "Understanding-oriented concept guides explain and discuss key topics and "
 "underlying ideas behind Flower and collaborative AI."
 msgstr ""
 
-#: ../../source/index.rst:125
+#: ../../source/index.rst:115
 msgid "References"
 msgstr ""
 
-#: ../../source/index.rst:127
+#: ../../source/index.rst:117
 msgid "Information-oriented API reference and other reference material."
 msgstr ""
 
-#: ../../source/index.rst:136:<autosummary>:1
+#: ../../source/index.rst:126:<autosummary>:1
 msgid ":py:obj:`flwr <flwr>`\\"
 msgstr ""
 
-#: ../../source/index.rst:136:<autosummary>:1 flwr:1 of
+#: ../../source/index.rst:126:<autosummary>:1 flwr:1 of
 msgid "Flower main package."
 msgstr ""
 
-#: ../../source/index.rst:154
+#: ../../source/index.rst:144
 msgid "Contributor docs"
 msgstr ""
 
-#: ../../source/index.rst:156
+#: ../../source/index.rst:146
 msgid ""
 "The Flower community welcomes contributions. The following docs are "
 "intended to help along the way."
@@ -8988,6 +8986,7 @@ msgid "**Run ID:** Unique identifier for the run."
 msgstr ""
 
 #: ../../flwr ls:1
+#, python-brace-format
 msgid ""
 "**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
 "(v{FAB_VERSION})``)."
@@ -11617,12 +11616,14 @@ msgid "Return -1 on failure."
 msgstr ""
 
 #: flwr.common.EventType.format:1 of
+#, python-brace-format
 msgid ""
 "Return a formatted version of S, using substitutions from args and "
 "kwargs. The substitutions are identified by braces ('{' and '}')."
 msgstr ""
 
 #: flwr.common.EventType.format_map:1 of
+#, python-brace-format
 msgid ""
 "Return a formatted version of S, using substitutions from mapping. The "
 "substitutions are identified by braces ('{' and '}')."
@@ -15301,6 +15302,7 @@ msgid ""
 msgstr ""
 
 #: flwr.server.strategy.fedprox.FedProx:9 of
+#, python-brace-format
 msgid ""
 "\\\\frac{\\\\mu}{2} || w - w^t ||^2\n"
 "\n"
@@ -17387,6 +17389,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-changelog.md:217
+#, python-brace-format
 msgid ""
 "SuperExec has been integrated into SuperLink, enabling SuperLink to "
 "directly manage ServerApp processes (`flwr-serverapp`). The `flwr` CLI "
@@ -21807,6 +21810,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-changelog.md:1318
+#, python-brace-format
 msgid ""
 "Instead of a config dictionary `{\"num_rounds\": 3, \"round_timeout\": "
 "600.0}`, `start_server` and `start_simulation` now expect a configuration"
@@ -22774,6 +22778,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-changelog.md:1603
+#, python-brace-format
 msgid ""
 "Strategy implementations should migrate their `aggregate_fit` and "
 "`aggregate_evaluate` methods to the new return type (e.g., by simply "
@@ -26615,6 +26620,7 @@ msgid "Where's the accuracy?"
 msgstr ""
 
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.ipynb:707
+#, python-brace-format
 msgid ""
 "You may have noticed that all metrics except for ``losses_distributed`` "
 "are empty. Where did the ``{\"accuracy\": float(accuracy)}`` go?"
@@ -27014,7 +27020,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|2375819ef1ec4145a4c91492343eb475|"
+msgid "|8121c8d231f04cce80d7d4a749d05fad|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -27029,7 +27035,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|ce375b86764b446d8f33a01d32909a4d|"
+msgid "|63d7d57ea2d14e1fa565edc5f8e6d0c3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -27051,7 +27057,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|b2facc1f0966468b962e3d66c1e454f2|"
+msgid "|034829480fa740afbbc7453e5b1fd345|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -27067,7 +27073,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|2361a45884fe41bf8825175b31880a9c|"
+msgid "|525ed0f9bbae4478abd6a50130254461|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -27083,7 +27089,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|d0b86ab6b5cc49e1a3e6b031594bf7fe|"
+msgid "|ad35e1ba0252470fa69bd391f60354b9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -27098,7 +27104,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|c06175382a73496b968d94d01cd9bdd3|"
+msgid "|686da575bf794c5d8609e37d8211329b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -27118,7 +27124,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|80f03044b21b472e866ae9c31202a8ad|"
+msgid "|c58b4e957826408db980c238687ab898|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -27133,7 +27139,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|dfc8acb1c72b4572a3632e2f198da658|"
+msgid "|c081e06494f04261a29467861ad8d746|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -27273,7 +27279,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|4b6dc916acdc499dad963b52d56fd602|"
+msgid "|2ba32b63692d48bb995937727cc3d76f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -27297,7 +27303,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|3efa977622c34263ac76d6d5adcb641c|"
+msgid "|8995fb47885b4240aa063f1c1189d0a6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -27321,7 +27327,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|a2d6ccc96e214863831cb2eff5b6f81a|"
+msgid "|e0f6b07c2a9d47e68041fec453aa5098|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -27344,7 +27350,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|7f089ba5b4c34189b974daf1ce3c3bd0|"
+msgid "|fd69260872954015a8a4b3b7a0a0b27f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -27382,7 +27388,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|7468ad3dbeea44079c56a11d3c741a1b|"
+msgid "|335c4f36d8c64f2eb468a30b4d424b24|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -27476,7 +27482,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|c79e686ab53847f1a476c3d45f574a80|"
+msgid "|0e3cb3b010bd4cea901b3dbd34efa139|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -41006,5 +41012,56 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|1cf0f3d2d44e47c7bfaa71cecf7a0fe4|"
+#~ msgstr ""
+
+#~ msgid "quickstart-tabnet"
+#~ msgstr ""
+
+#~ msgid "We also made video tutorials for PyTorch:"
+#~ msgstr ""
+
+#~ msgid "And TensorFlow:"
+#~ msgstr ""
+
+#~ msgid "|2375819ef1ec4145a4c91492343eb475|"
+#~ msgstr ""
+
+#~ msgid "|ce375b86764b446d8f33a01d32909a4d|"
+#~ msgstr ""
+
+#~ msgid "|b2facc1f0966468b962e3d66c1e454f2|"
+#~ msgstr ""
+
+#~ msgid "|2361a45884fe41bf8825175b31880a9c|"
+#~ msgstr ""
+
+#~ msgid "|d0b86ab6b5cc49e1a3e6b031594bf7fe|"
+#~ msgstr ""
+
+#~ msgid "|c06175382a73496b968d94d01cd9bdd3|"
+#~ msgstr ""
+
+#~ msgid "|80f03044b21b472e866ae9c31202a8ad|"
+#~ msgstr ""
+
+#~ msgid "|dfc8acb1c72b4572a3632e2f198da658|"
+#~ msgstr ""
+
+#~ msgid "|4b6dc916acdc499dad963b52d56fd602|"
+#~ msgstr ""
+
+#~ msgid "|3efa977622c34263ac76d6d5adcb641c|"
+#~ msgstr ""
+
+#~ msgid "|a2d6ccc96e214863831cb2eff5b6f81a|"
+#~ msgstr ""
+
+#~ msgid "|7f089ba5b4c34189b974daf1ce3c3bd0|"
+#~ msgstr ""
+
+#~ msgid "|7468ad3dbeea44079c56a11d3c741a1b|"
+#~ msgstr ""
+
+#~ msgid "|c79e686ab53847f1a476c3d45f574a80|"
 #~ msgstr ""
 
