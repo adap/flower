@@ -116,7 +116,8 @@ REFRESH_TOKEN_KEY = "refresh_token"
 PUBLIC_KEY_HEADER = "public-key-bin"  # Must end with "-bin" for binary data
 SIGNATURE_HEADER = "signature-bin"  # Must end with "-bin" for binary data
 TIMESTAMP_HEADER = "timestamp"
-TIMESTAMP_TOLERANCE = 10  # Tolerance for timestamp verification
+TIMESTAMP_TOLERANCE = 10  # General tolerance for timestamp verification
+SYSTEM_TIME_TOLERANCE = 2  # Allowance for system time drift
 
 
 class MessageType:
