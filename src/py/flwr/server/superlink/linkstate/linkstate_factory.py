@@ -49,6 +49,12 @@ class LinkStateFactory:
                 self.state_instance = InMemoryLinkState()
             log(DEBUG, "Using InMemoryLinkState")
             return self.state_instance
+        if self.database == ":memory:":
+            if self.state_instance is None:
+                self.state_instance = SqliteLinkState(self.database)
+                self.state_instance.initialize()
+            log(DEBUG, "Using SqliteLinkState (%s)", self.database)
+            return self.state_instance
 
         # SqliteState
         state = SqliteLinkState(self.database)
