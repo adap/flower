@@ -42,6 +42,7 @@ from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
     AUTH_TYPE_KEY,
     CLIENT_OCTET,
+    DEFAULT_LINKSTATE_TYPE,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
@@ -85,7 +86,6 @@ from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInte
 from .superlink.linkstate import LinkStateFactory
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
-DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
@@ -758,12 +758,11 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--database",
-        help="A string representing the path to the database "
-        "file that will be opened. Note that passing ':memory:' "
-        "will open a connection to a database that is in RAM, "
-        "instead of on disk. If nothing is provided, "
-        "Flower will just create a state in memory.",
-        default=DATABASE,
+        help="LinkState implementation. A string representing the path to the database "
+        "file that will be opened. If nothing is provided, Flower will create an "
+        'in-memory SQLite database. Pass ":flwr-in-memory-state:" to configure an '
+        "in-memory dictionary-based LinkState instead.",
+        default=DEFAULT_LINKSTATE_TYPE,
     )
     parser.add_argument(
         "--storage-dir",

@@ -47,11 +47,11 @@ class LinkStateFactory:
         if self.database == ":flwr-in-memory-state:":
             if self.state_instance is None:
                 self.state_instance = InMemoryLinkState()
-            log(DEBUG, "Using InMemoryState")
+            log(DEBUG, "Using InMemoryLinkState")
             return self.state_instance
 
         # SqliteState
         state = SqliteLinkState(self.database)
         state.initialize()
-        log(DEBUG, "Using SqliteState")
+        log(DEBUG, "Using SqliteLinkState (%s)", self.database)
         return state
