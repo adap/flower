@@ -85,4 +85,5 @@ def register_exit_handlers(
 
     # Register signal handlers
     for sig in SIGNAL_TO_EXIT_CODE:
-        default_handlers[sig] = signal.signal(sig, graceful_exit_handler)  # type: ignore
+        default_handler = signal.signal(sig, graceful_exit_handler)  # type: ignore
+        default_handlers[sig] = default_handler
