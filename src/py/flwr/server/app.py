@@ -40,7 +40,6 @@ from flwr.common.args import try_obtain_server_certificates
 from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
-    AUTH_TYPE_JSON_KEY,
     AUTH_TYPE_YAML_KEY,
     CLIENT_OCTET,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
