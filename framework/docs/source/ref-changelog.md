@@ -1,12 +1,12 @@
 # Changelog
 
-## v1.16.0 (2025-02-04)
+## v1.15.1 (2025-02-04)
 
 ### Thanks to our contributors
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Heng Pan`, `Javier` <!---TOKEN_v1.16.0-->
+`Heng Pan`, `Javier` <!---TOKEN_v1.15.1-->
 
 ### What's new?
 
@@ -31,12 +31,6 @@ The `SIGQUIT` [Python signal](https://docs.python.org/3/library/signal.html) is 
 Examples have been updated to the latest version of Flower. Some examples got their dependencies bumped. The [Federated Finetuning of a Whisper model example](https://github.com/adap/flower/tree/main/examples/whisper-federated-finetuning) has been updated to the new way of using Flower, i.e., `flwr run`.
 
 - **Update Documentation** ([#4897](https://github.com/adap/flower/pull/4897), [#4896](https://github.com/adap/flower/pull/4896), [#4898](https://github.com/adap/flower/pull/4898))
-
-### Incompatible changes
-
-None
-
-### Other changes
 
 ## v1.15.0 (2025-01-31)
 
