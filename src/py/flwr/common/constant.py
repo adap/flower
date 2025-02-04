@@ -108,14 +108,14 @@ MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 
 # Constants for user authentication
 CREDENTIALS_DIR = ".credentials"
-AUTH_TYPE_KEY = "auth_type"
+AUTH_TYPE_KEY = "auth_type"  # For key name in JSON file
 ACCESS_TOKEN_KEY = "flwr-oidc-access-token"
 REFRESH_TOKEN_KEY = "flwr-oidc-refresh-token"
 
 # Constants for node authentication
-PUBLIC_KEY_HEADER = "public-key-bin"  # Must end with "-bin" for binary data
-SIGNATURE_HEADER = "signature-bin"  # Must end with "-bin" for binary data
-TIMESTAMP_HEADER = "timestamp"
+PUBLIC_KEY_HEADER = "flwr-public-key-bin"  # Must end with "-bin" for binary data
+SIGNATURE_HEADER = "flwr-signature-bin"  # Must end with "-bin" for binary data
+TIMESTAMP_HEADER = "flwr-timestamp"
 TIMESTAMP_TOLERANCE = 10  # Tolerance for timestamp verification
 
 
