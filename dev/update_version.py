@@ -130,9 +130,6 @@ if __name__ == "__main__":
     curr_version = _get_next_version(args.old_version, increment)
     next_version = _get_next_version(curr_version, "minor")
 
-    print(args.old_version, curr_version, next_version)
-    sys.exit(0)
-
     wrong = False
 
     # Update files with next version
