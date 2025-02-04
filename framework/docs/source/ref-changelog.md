@@ -26,6 +26,10 @@ All the keys used in the metadata body of gRPC messages that make use of `_` are
 
 The `Fleet API` endpoint will now ingore gRPC requests that are not part of its API.
 
+- **Fix exit handlers mechanism for Windows** ([#4907](https://github.com/adap/flower/pull/4907))
+
+The `SIGQUIT` [Python signal](https://docs.python.org/3/library/signal.html) is not supported on Windows. This signal is now excluded when Flower is executed on Windows.
+
 - **Updated Examples** ([#4895](https://github.com/adap/flower/pull/4895), [#4158](https://github.com/adap/flower/pull/4158), [#4879](https://github.com/adap/flower/pull/4879))
 
 Examples have been updated to the latest version of Flower. Some examples got their dependencies bumped. The [Federated Finetuning of a Whisper model example](https://github.com/adap/flower/tree/main/examples/whisper-federated-finetuning) has been updated to the new way of using Flower, i.e., `flwr run`.
