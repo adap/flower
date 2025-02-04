@@ -1,3 +1,4 @@
+"""cgsv: A Flower Baseline."""
 """Cosine Gradient Shapley Value (CGSV) Strategy implementation for Flower.
 
 This module implements a federated learning strategy that uses cosine similarity between
@@ -6,6 +7,7 @@ for personalized federated learning.
 """
 
 from typing import Callable, Dict, List, Optional, Tuple, Union
+import math  # <-- Add this import at the top with your other imports
 
 import numpy as np
 
@@ -13,6 +15,7 @@ from flwr.common import FitRes, NDArrays, Scalar
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import Strategy
+
 
 
 class CGSVStrategy(Strategy):
@@ -57,6 +60,26 @@ class CGSVStrategy(Strategy):
         self.sparsified_gradients: Dict[str, NDArrays] = (
             {}
         )  # Stores sparsified gradients per client
+
+    def num_fit_clients(self, num_available: int) -> Tuple[int, int]:
+        """Determine the number of clients to sample for training.
+        
+        Uses the fraction_fit and min_fit_clients to compute the sample size.
+        """
+        sample_size = int(math.ceil(num_available * self.fraction_fit))
+        sample_size = max(sample_size, self.min_fit_clients)
+        sample_size = min(sample_size, num_available)
+        return sample_size, self.min_fit_clients
+
+    def num_evaluate_clients(self, num_available: int) -> Tuple[int, int]:
+        """Determine the number of clients to sample for evaluation.
+        
+        Uses the fraction_evaluate and min_evaluate_clients to compute the sample size.
+        """
+        sample_size = int(math.ceil(num_available * self.fraction_evaluate))
+        sample_size = max(sample_size, self.min_evaluate_clients)
+        sample_size = min(sample_size, num_available)
+        return sample_size, self.min_evaluate_clients
 
     def initialize_parameters(
         self, client_manager: ClientManager
@@ -206,3 +229,55 @@ class CGSVStrategy(Strategy):
             )
             pointer += size
         return sparsified
+
+    def configure_evaluate(
+        self, server_round: int, parameters: NDArrays, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, Dict[str, Scalar]]]:
+        """Configure clients for evaluation."""
+        if self.on_evaluate_config_fn is not None:
+            eval_config = self.on_evaluate_config_fn(server_round)
+        else:
+            eval_config = {}
+
+        # Sample clients
+        sample_size, min_num_clients = self.num_evaluate_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+
+        # Return client/config pairs
+        return [(client, eval_config) for client in clients]
+
+    def aggregate_evaluate(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, Dict[str, Scalar]]],
+        failures: List[Union[Tuple[ClientProxy, Dict[str, Scalar]], BaseException]],
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        """Aggregate evaluation results."""
+        if not results:
+            return None, {}
+
+        # Aggregate loss and metrics
+        loss_aggregated = sum(r.metrics["loss"] * r.num_examples for _, r in results) / sum(
+            r.num_examples for _, r in results
+        )
+
+        metrics_aggregated = {}
+        return loss_aggregated, metrics_aggregated
+
+    def evaluate(
+        self, server_round: int, parameters: NDArrays
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate model parameters using an evaluation function."""
+        if self.evaluate_fn is None:
+            return None
+
+        eval_res = self.evaluate_fn(server_round, parameters, {})
+        if eval_res is None:
+            return None
+
+        loss, metrics = eval_res
+        return loss, metrics

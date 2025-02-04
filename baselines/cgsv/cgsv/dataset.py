@@ -1,4 +1,4 @@
-"""cosine-gradient-sv: A Flower Baseline."""
+"""cgsv: A Flower Baseline."""
 
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner

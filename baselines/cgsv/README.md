@@ -18,10 +18,10 @@ dataset: [dataset1, dataset2] # TODO: list of datasets you include in your basel
 
 ```bash
 # Create a python env
-pyenv virtualenv 3.10.14 cosine-gradient-sv
+pyenv virtualenv 3.10.14 cgsv
 
 # Activate it
-pyenv activate cosine-gradient-sv
+pyenv activate cgsv
 
 # Install project including developer packages
 # Note the `-e` this means you install it in editable mode 
@@ -41,10 +41,10 @@ flwr run .
 cd .. # so you are in the `flower/baselines` directory
 
 # Run the formatting script (it will auto-correct issues if possible)
-./dev/format-baseline.sh cosine-gradient-sv
+./dev/format-baseline.sh cgsv
 
 # Then, if the above is all good, run the tests.
-./dev/test-baseline.sh cosine-gradient-sv
+./dev/test-baseline.sh cgsv
 ```
 
 > [!IMPORTANT]

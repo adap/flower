@@ -1,11 +1,11 @@
-"""cosine-gradient-sv: A Flower Baseline."""
+"""cgsv: A Flower Baseline."""
 
 from typing import List, Tuple
 
-from cosine_gradient_sv.model import Net, get_weights
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
+from cgsv.model import Net, get_weights
 
 
 # Define metric aggregation function

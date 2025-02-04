@@ -1,4 +1,4 @@
-"""cosine-gradient-sv: A Flower Baseline."""
+"""cgsv: A Flower Baseline."""
 
 from collections import OrderedDict
 
