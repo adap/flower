@@ -10,10 +10,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### What's new?
 
-- **refactor(framework:skip) Bump Flower development version to 1.16** ([#4892](https://github.com/adap/flower/pull/4892))
-
-- **ci(framework:skip) Add** `## Unreleased` **header to the changelog** ([#4894](https://github.com/adap/flower/pull/4894))
-
 - **Improve time drift accounting in automatic SuperNode authentication** ([#4899](https://github.com/adap/flower/pull/4899))
 
 In addition for allowing for a time delay (positive time difference), the `SuperLink` now also accounts for time drift which might result in negative time differences between timestamps in `SuperLink` vs `SuperNode` attempting to authenticate.
