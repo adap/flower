@@ -116,7 +116,8 @@ REFRESH_TOKEN_KEY = "flwr-oidc-refresh-token"
 PUBLIC_KEY_HEADER = "flwr-public-key-bin"  # Must end with "-bin" for binary data
 SIGNATURE_HEADER = "flwr-signature-bin"  # Must end with "-bin" for binary data
 TIMESTAMP_HEADER = "flwr-timestamp"
-TIMESTAMP_TOLERANCE = 10  # Tolerance for timestamp verification
+TIMESTAMP_TOLERANCE = 10  # General tolerance for timestamp verification
+SYSTEM_TIME_TOLERANCE = 5  # Allowance for system time drift
 
 
 class MessageType:
