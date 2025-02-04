@@ -1,6 +1,28 @@
 # Changelog
 
-## Unreleased
+## v1.16.0 (2025-02-04)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Heng Pan`, `Javier` <!---TOKEN_v1.16.0-->
+
+### What's new?
+
+### Documentation improvements
+
+- **docs(framework:skip) Update source texts for translations (automated)** ([#4898](https://github.com/adap/flower/pull/4898))
+
+- **docs(framework:skip) Update source texts for translations (automated)** ([#4896](https://github.com/adap/flower/pull/4896))
+
+- **docs(framework) Remove reference to deprecated quickstart tutorial videos** ([#4897](https://github.com/adap/flower/pull/4897))
+
+### Incompatible changes
+
+None
+
+### Other changes
 
 ## v1.15.0 (2025-01-31)
 
@@ -1747,3 +1769,13 @@ Important changes:
 - Removed presently unused `on_conclude_round` from strategy interface ([#483](https://github.com/adap/flower/pull/483)).
 - Set minimal Python version to 3.6.1 instead of 3.6.9 ([#471](https://github.com/adap/flower/pull/471)).
 - Improved `Strategy` docstrings ([#470](https://github.com/adap/flower/pull/470)).
+
+- **refactor(examples) Remove** `tabnet` **examples and 2e2** ([#4879](https://github.com/adap/flower/pull/4879))
+
+- **refactor(examples) Update package versions** ([#4895](https://github.com/adap/flower/pull/4895))
+
+- **refactor(examples) Update whisper finetuning example** ([#4158](https://github.com/adap/flower/pull/4158))
+
+- **refactor(framework:skip) Bump Flower development version to 1.16** ([#4892](https://github.com/adap/flower/pull/4892))
+
+- **ci(framework:skip) Add** `## Unreleased` **header to the changelog** ([#4894](https://github.com/adap/flower/pull/4894))
