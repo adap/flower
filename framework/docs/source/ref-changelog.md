@@ -10,13 +10,27 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### What's new?
 
-### Documentation improvements
+- **refactor(framework:skip) Bump Flower development version to 1.16** ([#4892](https://github.com/adap/flower/pull/4892))
 
-- **docs(framework:skip) Update source texts for translations (automated)** ([#4898](https://github.com/adap/flower/pull/4898))
+- **ci(framework:skip) Add** `## Unreleased` **header to the changelog** ([#4894](https://github.com/adap/flower/pull/4894))
 
-- **docs(framework:skip) Update source texts for translations (automated)** ([#4896](https://github.com/adap/flower/pull/4896))
+- **Improve time drift accounting in automatic SuperNode authentication** ([#4899](https://github.com/adap/flower/pull/4899))
 
-- **docs(framework) Remove reference to deprecated quickstart tutorial videos** ([#4897](https://github.com/adap/flower/pull/4897))
+In addition for allowing for a time delay (positive time difference), the `SuperLink` now also accounts for time drift which might result in negative time differences between timestamps in `SuperLink` vs `SuperNode` attempting to authenticate.
+
+- **Rename constants for gRPC metadata** ([#4902](https://github.com/adap/flower/pull/4902))
+
+All the keys used in the metadata body of gRPC messages that make use of `_` are now replaced with `-`. Using underscores is not recommended in setups where the `SuperLink` might be deployed behind load balancers or reverse proxies.
+
+- **Filtering out non-Fleet API requests at the `FleetServicer`** ([#4900](https://github.com/adap/flower/pull/4900))
+
+The `Fleet API` endpoint will now ingore gRPC requests that are not part of its API.
+
+- **Updated Examples** ([#4895](https://github.com/adap/flower/pull/4895), [#4158](https://github.com/adap/flower/pull/4158), [#4879](https://github.com/adap/flower/pull/4879))
+
+Examples have been updated to the latest version of Flower. Some examples got their dependencies bumped. The [Federated Finetuning of a Whisper model example](https://github.com/adap/flower/tree/main/examples/whisper-federated-finetuning) has been updated to the new way of using Flower, i.e., `flwr run`.
+
+- **Update Documentation** ([#4897](https://github.com/adap/flower/pull/4897), [#4896](https://github.com/adap/flower/pull/4896), [#4898](https://github.com/adap/flower/pull/4898))
 
 ### Incompatible changes
 
@@ -1769,13 +1783,3 @@ Important changes:
 - Removed presently unused `on_conclude_round` from strategy interface ([#483](https://github.com/adap/flower/pull/483)).
 - Set minimal Python version to 3.6.1 instead of 3.6.9 ([#471](https://github.com/adap/flower/pull/471)).
 - Improved `Strategy` docstrings ([#470](https://github.com/adap/flower/pull/470)).
-
-- **refactor(examples) Remove** `tabnet` **examples and 2e2** ([#4879](https://github.com/adap/flower/pull/4879))
-
-- **refactor(examples) Update package versions** ([#4895](https://github.com/adap/flower/pull/4895))
-
-- **refactor(examples) Update whisper finetuning example** ([#4158](https://github.com/adap/flower/pull/4158))
-
-- **refactor(framework:skip) Bump Flower development version to 1.16** ([#4892](https://github.com/adap/flower/pull/4892))
-
-- **ci(framework:skip) Add** `## Unreleased` **header to the changelog** ([#4894](https://github.com/adap/flower/pull/4894))
