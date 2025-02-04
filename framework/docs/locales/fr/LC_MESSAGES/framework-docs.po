@@ -1,23 +1,23 @@
-
 msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-02-02 00:32+0000\n"
-"PO-Revision-Date: 2023-09-05 17:54+0000\n"
-"Last-Translator: Charles Beauville <charles@flower.ai>\n"
+"POT-Creation-Date: 2025-01-31 00:30+0000\n"
+"PO-Revision-Date: 2025-02-05 10:02+0000\n"
+"Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
+"Language-Team: French <https://hosted.weblate.org/projects/flower-docs/"
+"framework/fr/>\n"
 "Language: fr\n"
-"Language-Team: French <https://hosted.weblate.org/projects/flower-"
-"docs/framework/fr/>\n"
-"Plural-Forms: nplurals=2; plural=n > 1;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 5.10-dev\n"
+"Generated-By: Babel 2.16.0\n"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:2
 msgid "Public and private APIs"
-msgstr ""
+msgstr "APIs publiques et privées"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:4
 msgid ""
@@ -27,6 +27,11 @@ msgid ""
 " API are announced in the release notes and are subject to deprecation "
 "policies."
 msgstr ""
+"En Python, tout est public. Pour permettre aux développeurs de savoir sur "
+"quels composants ils peuvent compter, Flower déclare une API publique. Les "
+"composants qui font partie de l'API publique peuvent être utilisés. Les "
+"modifications apportées à l'API publique sont annoncées dans les notes de "
+"mise à jour et sont soumises à des politiques de dépréciation."
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:9
 msgid ""
@@ -35,20 +40,28 @@ msgid ""
 "those components. Private APIs can change at any time, even in patch "
 "releases."
 msgstr ""
+"Tout ce qui ne fait pas partie de l'API publique fait partie de l'API "
+"privée. Même si Python permet d'y accéder, le code utilisateur ne doit "
+"jamais utiliser ces composants. Les API privées peuvent être modifiées à "
+"tout moment, même dans les versions de correctifs."
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:13
 msgid ""
 "How can you determine whether a component is part of the public API or "
 "not? Easy:"
 msgstr ""
+"Comment déterminer si un composant fait partie de l'API publique ou non ? "
+"Facile :"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:15
 msgid "`Use the Flower API reference documentation <ref-api/flwr.html>`_"
 msgstr ""
+"Utiliser la documentation de référence de l'API Flower <ref-api/flwr.html>`_"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:16
 msgid "`Use the Flower CLI reference documentation <ref-api-cli.html>`_"
 msgstr ""
+"`Utiliser la documentation de référence du CLI Flower <ref-api-cli.html>`_"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:18
 msgid ""
@@ -57,15 +70,19 @@ msgid ""
 "and how you can determine whether a component is part of the public API "
 "or not by reading the Flower source code."
 msgstr ""
+"Tout ce qui est listé dans la documentation de référence fait partie de "
+"l'API publique. Ce document explique comment les administrateurs de Flower "
+"définissent l'API publique et comment vous pouvez déterminer si un composant "
+"fait partie de l'API publique ou non en lisant le code source de Flower."
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:23
-#, fuzzy
 msgid "Flower public API"
-msgstr "Flower ClientApp."
+msgstr "API publique de Flower"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:25
 msgid "Flower has a well-defined public API. Let's look at this in more detail."
 msgstr ""
+"Flower dispose d'une API publique bien définie. Examinons-la plus en détail."
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:29
 msgid ""
@@ -73,6 +90,8 @@ msgid ""
 "``__init__.__all__`` starting from the root package (``flwr``) is part of"
 " the public API."
 msgstr ""
+"Chaque composant accessible en suivant récursivement ``__init__.__all__`` à "
+"partir du paquet racine (``flwr``) fait partie de l'API publique."
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:32
 msgid ""
@@ -81,12 +100,18 @@ msgid ""
 " to start at the root of the ``flwr`` package. Let's use ``tree -L 1 -d "
 "src/py/flwr`` to look at the Python sub-packages contained ``flwr``:"
 msgstr ""
+"Si vous voulez déterminer si un composant (classe/fonction/générateur/...) "
+"fait partie de l'API publique ou non, vous devez commencer à la racine du "
+"paquet ``flwr``. Utilisons ``tree -L 1 -d src/py/flwr`` pour regarder les "
+"sous-paquets Python contenus dans ``flwr`` :"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:46
 msgid ""
 "Contrast this with the definition of ``__all__`` in the root "
 "``src/py/flwr/__init__.py``:"
 msgstr ""
+"Comparez cela avec la définition de ``all__'' dans la racine ``src/py/flwr/"
+"__init__.py`` :"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:59
 msgid ""
@@ -46689,97 +46714,3 @@ msgstr ""
 
 #~ msgid "|eb867687936d4a00b568da114f5ce282|"
 #~ msgstr ""
-
-#~ msgid "|e90888cebb6d4791b9e2849849c55bd0|"
-#~ msgstr ""
-
-#~ msgid "|2cc316dacb0646df9c06bad17c29696b|"
-#~ msgstr ""
-
-#~ msgid "|d1b819841f6f42da9763a730296431a1|"
-#~ msgstr ""
-
-#~ msgid "|c7ba7c6bbbf346a1b151426b9da1c42a|"
-#~ msgstr ""
-
-#~ msgid "|11e94adb0b2348b394bf6b31c923b7bc|"
-#~ msgstr ""
-
-#~ msgid "|602b293637a04c37a5ec713415c563e7|"
-#~ msgstr ""
-
-#~ msgid "|1a05e52c0dee4820bcbf29e6da96fd63|"
-#~ msgstr ""
-
-#~ msgid "|62364ebe2b86427bb86f7d82325114ea|"
-#~ msgstr ""
-
-#~ msgid "|b622f3cb31a54cc195af90c255277d79|"
-#~ msgstr ""
-
-#~ msgid "|c2609c65a91f4062959125c080d606ad|"
-#~ msgstr ""
-
-#~ msgid "|13c05c70e6e64b4b93686dbc4a4900bc|"
-#~ msgstr ""
-
-#~ msgid "|44aa775e2a604c32932c3e7c05493a1c|"
-#~ msgstr ""
-
-#~ msgid "|4294dbf0796a4fb68ecfe4f89461ed9f|"
-#~ msgstr ""
-
-#~ msgid "|1cf0f3d2d44e47c7bfaa71cecf7a0fe4|"
-#~ msgstr ""
-
-#~ msgid "quickstart-tabnet"
-#~ msgstr "Démarrage rapide de JAX"
-
-#~ msgid "We also made video tutorials for PyTorch:"
-#~ msgstr ""
-
-#~ msgid "And TensorFlow:"
-#~ msgstr "Exemples de TensorFlow"
-
-#~ msgid "|2375819ef1ec4145a4c91492343eb475|"
-#~ msgstr ""
-
-#~ msgid "|ce375b86764b446d8f33a01d32909a4d|"
-#~ msgstr ""
-
-#~ msgid "|b2facc1f0966468b962e3d66c1e454f2|"
-#~ msgstr ""
-
-#~ msgid "|2361a45884fe41bf8825175b31880a9c|"
-#~ msgstr ""
-
-#~ msgid "|d0b86ab6b5cc49e1a3e6b031594bf7fe|"
-#~ msgstr ""
-
-#~ msgid "|c06175382a73496b968d94d01cd9bdd3|"
-#~ msgstr ""
-
-#~ msgid "|80f03044b21b472e866ae9c31202a8ad|"
-#~ msgstr ""
-
-#~ msgid "|dfc8acb1c72b4572a3632e2f198da658|"
-#~ msgstr ""
-
-#~ msgid "|4b6dc916acdc499dad963b52d56fd602|"
-#~ msgstr ""
-
-#~ msgid "|3efa977622c34263ac76d6d5adcb641c|"
-#~ msgstr ""
-
-#~ msgid "|a2d6ccc96e214863831cb2eff5b6f81a|"
-#~ msgstr ""
-
-#~ msgid "|7f089ba5b4c34189b974daf1ce3c3bd0|"
-#~ msgstr ""
-
-#~ msgid "|7468ad3dbeea44079c56a11d3c741a1b|"
-#~ msgstr ""
-
-#~ msgid "|c79e686ab53847f1a476c3d45f574a80|"
-#~ msgstr ""
-
