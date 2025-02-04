@@ -40,7 +40,7 @@ from flwr.common.args import try_obtain_server_certificates
 from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
-    AUTH_TYPE_KEY,
+    AUTH_TYPE_YAML_KEY,
     CLIENT_OCTET,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
@@ -578,7 +578,7 @@ def _try_obtain_exec_auth_plugin(
 
     # Load authentication configuration
     auth_config: dict[str, Any] = config.get("authentication", {})
-    auth_type: str = auth_config.get(AUTH_TYPE_KEY, "")
+    auth_type: str = auth_config.get(AUTH_TYPE_YAML_KEY, "")
 
     # Load authentication plugin
     try:
