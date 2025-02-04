@@ -25,6 +25,7 @@ from flwr.common import now
 from flwr.common.constant import (
     PUBLIC_KEY_HEADER,
     SIGNATURE_HEADER,
+    SYSTEM_TIME_TOLERANCE,
     TIMESTAMP_HEADER,
     TIMESTAMP_TOLERANCE,
 )
@@ -37,6 +38,9 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
+
+MIN_TIMESTAMP_DIFF = -SYSTEM_TIME_TOLERANCE
+MAX_TIMESTAMP_DIFF = TIMESTAMP_TOLERANCE + SYSTEM_TIME_TOLERANCE
 
 
 def _unary_unary_rpc_terminator(
@@ -109,7 +113,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         current = now()
         time_diff = current - datetime.datetime.fromisoformat(timestamp_iso)
         # Abort the RPC call if the timestamp is too old or in the future
-        if not 0 < time_diff.total_seconds() < TIMESTAMP_TOLERANCE:
+        if not MIN_TIMESTAMP_DIFF < time_diff.total_seconds() < MAX_TIMESTAMP_DIFF:
             return _unary_unary_rpc_terminator("Invalid timestamp")
 
         # Continue the RPC call
