@@ -12,27 +12,27 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Improve time drift accounting in automatic SuperNode authentication** ([#4899](https://github.com/adap/flower/pull/4899))
 
-In addition for allowing for a time delay (positive time difference), the `SuperLink` now also accounts for time drift which might result in negative time differences between timestamps in `SuperLink` vs `SuperNode` attempting to authenticate.
+  In addition to allowing for a time delay (positive time difference), SuperLink now also accounts for time drift, which might result in negative time differences between timestamps in SuperLink and SuperNode during authentication.
 
 - **Rename constants for gRPC metadata** ([#4902](https://github.com/adap/flower/pull/4902))
 
-All the keys used in the metadata body of gRPC messages that make use of `_` are now replaced with `-`. Using underscores is not recommended in setups where the `SuperLink` might be deployed behind load balancers or reverse proxies.
+  All metadata keys in gRPC messages that previously used underscores (`_`) have been replaced with hyphens (`-`). Using underscores is not recommended in setups where SuperLink may be deployed behind load balancers or reverse proxies.
 
 - **Filtering out non-Fleet API requests at the `FleetServicer`** ([#4900](https://github.com/adap/flower/pull/4900))
 
-The `Fleet API` endpoint will now ingore gRPC requests that are not part of its API.
+  The Fleet API endpoint will now ignore gRPC requests that are not part of its API.
 
 - **Fix exit handlers mechanism for Windows** ([#4907](https://github.com/adap/flower/pull/4907))
 
-The `SIGQUIT` [Python signal](https://docs.python.org/3/library/signal.html) is not supported on Windows. This signal is now excluded when Flower is executed on Windows.
+  The `SIGQUIT` [Python signal](https://docs.python.org/3/library/signal.html) is not supported on Windows. This signal is now excluded when Flower is executed on Windows.
 
 - **Updated Examples** ([#4895](https://github.com/adap/flower/pull/4895), [#4158](https://github.com/adap/flower/pull/4158), [#4879](https://github.com/adap/flower/pull/4879))
 
-Examples have been updated to the latest version of Flower. Some examples got their dependencies bumped. The [Federated Finetuning of a Whisper model example](https://github.com/adap/flower/tree/main/examples/whisper-federated-finetuning) has been updated to the new way of using Flower, i.e., `flwr run`.
+  Examples have been updated to the latest version of Flower. Some examples have also had their dependencies upgraded. The [Federated Finetuning of a Whisper model example](https://github.com/adap/flower/tree/main/examples/whisper-federated-finetuning) has been updated to use the new Flower execution method: `flwr run`.
 
 - **Update FlowerTuneLLM Leaderboard evaluation scripts** ([#4919](https://github.com/adap/flower/pull/4910))
 
-We have updated the package versions used in the evaluation scripts. There is still time to participate in the [Flower LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard/)!
+  We have updated the package versions used in the evaluation scripts. There is still time to participate in the [Flower LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard/)!
 
 - **Update Documentation** ([#4897](https://github.com/adap/flower/pull/4897), [#4896](https://github.com/adap/flower/pull/4896), [#4898](https://github.com/adap/flower/pull/4898), [#4909](https://github.com/adap/flower/pull/4909))
 
