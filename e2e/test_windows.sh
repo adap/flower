@@ -26,7 +26,8 @@ flwr run --run-config num-server-rounds=1 . e2e
 
 # Trap to clean up on exit
 cleanup() {
-    powershell -Command "Get-Process | Where-Object { $_.ProcessName -match '^flower' } | Stop-Process -Force"
+    echo "Stopping Flower processes..."
+    powershell -Command "& { Get-Process | Where-Object { $_.ProcessName -match '^flower' } | Stop-Process -Force }"
 }
 trap cleanup EXIT
 
@@ -40,7 +41,6 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     if grep -q "Run finished" flwr_output.log; then
         echo "Training worked correctly!"
         found_success=true
-        echo "Stopping Flower processes..."
         exit 0;
     else
         echo "Waiting for training ... ($elapsed seconds elapsed)"
@@ -52,6 +52,5 @@ done
 
 if [ "$found_success" = false ]; then
     echo "Training did not finish within timeout."
-    echo "Stopping Flower processes..."
     exit 1;
 fi
