@@ -27,7 +27,7 @@ flwr run --run-config num-server-rounds=1 . e2e
 # Trap to clean up on exit
 cleanup() {
     echo "Stopping Flower processes..."
-    powershell -Command "& { Get-Process | Where-Object { $_.ProcessName -match '^flower' } | Stop-Process -Force }"
+    taskkill //F //FI "IMAGENAME eq flower*" //T
 }
 trap cleanup EXIT
 
