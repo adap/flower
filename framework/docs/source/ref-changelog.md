@@ -10,7 +10,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### What's new?
 
-- **Improve time drift accounting in automatic SuperNode authentication** ([#4899](https://github.com/adap/flower/pull/4899))
+- **Improve time drift compensation in automatic SuperNode authentication** ([#4899](https://github.com/adap/flower/pull/4899))
 
   In addition to allowing for a time delay (positive time difference), SuperLink now also accounts for time drift, which might result in negative time differences between timestamps in SuperLink and SuperNode during authentication.
 
