@@ -6,17 +6,15 @@ Authenticate SuperNodes
 =======================
 
 When running a Flower Federation (see :doc:`ref-flower-network-communication`) it is
-fundamental that each an authentication mechanism is avaialbe between the SuperLink and
+fundamental that an authentication mechanism is available between the SuperLink and
 the SuperNodes that connect to it. Flower comes with two different mechanisms to
 authenticate SuperNodes that connect to a running SuperLink:
 
-- **Automatic authentication**: In this mode, the SuperLink ... preventing ... . This is
-  the default mode.
-- **CSV-based authentication**: In this mode, the SuperLink is supplied with a list of
-  public keys of the SuperNodes that are allowed to connect.
+- **Automatic authentication**: In this mode, the SuperLink checks the timestamp-based signature in each request from SuperNodes to prevent impersonation and replay attacks.
+- **CSV-based authentication**: This mode functions similarly to automatic authentication but requires the SuperLink to be provided with a list of authorized public keys, allowing only those SuperNodes to connect.
 
-The automatic authentication mechanism works out of the box and therefore no
-configuration is needed. On the other hand CSV-based authentication is more
+The automatic authentication mode works out of the box and therefore 
+requires no configuration. On the other hand, CSV-based authentication mode is more
 sophisticated and how it works and how it can be used is presented reminder of this
 guide. Flower's CSV-based node authentication leverages a signature-based mechanism to
 verify each node's identity and is only available when encrypted connections (SSL/TLS)
