@@ -11,13 +11,13 @@ echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure 
 flower-superlink --insecure 2>&1 | tee flwr_output.log &
 sleep 2
 
-flower-supernode --insecure \
+flower-supernode --insecure --superlink 127.0.0.1:9092 \
     --clientappio-api-address localhost:9094 \
     --node-config "partition-id=0 num-partitions=2" --max-retries 0 &
 cl1_pid=$!
 sleep 2
 
-flower-supernode --insecure \
+flower-supernode --insecure --superlink 127.0.0.1:9092 \
     --clientappio-api-address localhost:9095 \
     --node-config "partition-id=1 num-partitions=2" --max-retries 0 &
 sleep 2
