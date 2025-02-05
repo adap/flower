@@ -20,6 +20,7 @@ import pathlib
 import re
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
 
 try:
     import tomllib
@@ -132,16 +133,19 @@ def _get_contributors_from_commits(api: Github, commits: set[Commit]) -> set[str
     authors: set[NamedUser] = set()
     coauthor_names: set[str] = set()
     coauthor_pattern = r"Co-authored-by:\s*(.+?)\s*<"
+    lock = Lock()
 
     def retrieve(commit: Commit) -> None:
         if commit.author.name is None:
             return
         if "[bot]" in commit.author.name:
             return
-        authors.add(commit.author)
+        with lock:
+            authors.add(commit.author)
         # Find co-authors in the commit message
         if matches := re.findall(coauthor_pattern, commit.commit.message):
-            coauthor_names.update(name for name in matches)
+            with lock:
+                coauthor_names.update(name for name in matches)
 
     with ThreadPoolExecutor(max_workers=15) as executor:
         executor.map(retrieve, commits)
@@ -152,9 +156,16 @@ def _get_contributors_from_commits(api: Github, commits: set[Commit]) -> set[str
     coauthor_names.difference_update(author.login for author in authors)
 
     # Get full names of the GitHub usernames
+    def get_user(username: str) -> None:
+        try:
+            if name := api.get_user(username).name:
+                with lock:
+                    contributors.add(name)
+        except Exception:  # pylint: disable=broad-exception-caught
+            print(f"Failed to get user '{username}'")
+
     with ThreadPoolExecutor(max_workers=5) as executor:
-        names = list(executor.map(lambda x: api.get_user(x).name, coauthor_names))
-    contributors.update(name for name in names if name)
+        executor.map(get_user, coauthor_names)
     return contributors
 
 
