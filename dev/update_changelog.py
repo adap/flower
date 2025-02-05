@@ -20,22 +20,21 @@ import pathlib
 import re
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
-import time
 
 try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib
+
 from datetime import date
 from sys import argv
 from typing import Optional
 
 from github import Github
+from github.Commit import Commit
+from github.NamedUser import NamedUser
 from github.PullRequest import PullRequest
 from github.Repository import Repository
-from github.Commit import Commit
-from github.Tag import Tag
-from github.NamedUser import NamedUser
 
 REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "framework/docs/source/ref-changelog.md"
@@ -44,8 +43,8 @@ CHANGELOG_SECTION_HEADER = "### Changelog entry"
 # Load the TOML configuration
 with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
     "rb"
-) as file:
-    CONFIG = tomllib.load(file)
+) as toml_f:
+    CONFIG = tomllib.load(toml_f)
 
 # Extract types, project, and scope from the config
 TYPES = "|".join(CONFIG["type"])
@@ -64,6 +63,7 @@ PR_TYPE_TO_SECTION = {
     "ci": "### Other changes",
     "fix": "### Other changes",
     "refactor": "### Other changes",
+    "unknown": "### Unknown changes",
 }
 
 
@@ -71,9 +71,10 @@ def _get_latest_tag(gh_api: Github) -> tuple[Repository, Optional[str]]:
     """Retrieve the latest tag from the GitHub repository."""
     repo = gh_api.get_repo(REPO_NAME)
     latest_tag = subprocess.run(
-        ["git", "describe", "--tags", "--abbrev=0"], 
-        stdout=subprocess.PIPE, 
-        text=True
+        ["git", "describe", "--tags", "--abbrev=0"],
+        stdout=subprocess.PIPE,
+        text=True,
+        check=True,
     ).stdout.strip()
     return repo, latest_tag
 
@@ -114,9 +115,10 @@ def _git_commits_since_tag(repo: Repository, tag: str) -> set[Commit]:
         ["git", "log", "--pretty=format:%H", f"{tag}..origin/main"],
         stdout=subprocess.PIPE,
         text=True,
+        check=True,
     )
     shas = set(result.stdout.splitlines())
-    
+
     # Fetch GitHub commits based on the SHA hashes
     with ThreadPoolExecutor(max_workers=15) as executor:
         commits = list(executor.map(repo.get_commit, shas))
@@ -130,8 +132,6 @@ def _get_contributors_from_commits(api: Github, commits: set[Commit]) -> set[str
     authors: set[NamedUser] = set()
     coauthor_names: set[str] = set()
     coauthor_pattern = r"Co-authored-by:\s*(.+?)\s*<"
-    start = time.time()
-    # authors = {author for author in authors if author.name and "[bot]" not in author.name}
 
     def retrieve(commit: Commit) -> None:
         if commit.author.name is None:
@@ -139,24 +139,19 @@ def _get_contributors_from_commits(api: Github, commits: set[Commit]) -> set[str
         if "[bot]" in commit.author.name:
             return
         authors.add(commit.author)
-        print("A: ", time.time() - start)
         # Find co-authors in the commit message
         if matches := re.findall(coauthor_pattern, commit.commit.message):
             coauthor_names.update(name for name in matches)
-        print("B: ", time.time() - start)
 
     with ThreadPoolExecutor(max_workers=15) as executor:
         executor.map(retrieve, commits)
-    
-    print("Get info from commits:", time.time() - start)
 
     # Remove repeated usernames
-    contributors = set(author.name for author in authors if author.name)
-    coauthor_names.difference_update(contributors)
+    contributors = {author.name for author in authors if author.name}
+    coauthor_names -= contributors
     coauthor_names.difference_update(author.login for author in authors)
 
     # Get full names of the GitHub usernames
-    print("Coauthors", coauthor_names)
     with ThreadPoolExecutor(max_workers=5) as executor:
         names = list(executor.map(lambda x: api.get_user(x).name, coauthor_names))
     contributors.update(name for name in names if name)
@@ -169,15 +164,9 @@ def _get_pull_requests_since_tag(
     """Get a list of pull requests merged into the main branch since a given tag."""
     prs = set()
 
-    start = time.time()
     commits = _git_commits_since_tag(repo, tag)
-    print("Time to get commits: ", time.time() - start)
-    
-    start = time.time()
     contributors = _get_contributors_from_commits(api, commits)
-    print("Time to get contributors: ", time.time() - start)
 
-    start = time.time()
     commit_shas = {commit.sha for commit in commits}
     for pr_info in repo.get_pulls(
         state="closed", sort="updated", direction="desc", base="main"
@@ -186,7 +175,6 @@ def _get_pull_requests_since_tag(
             prs.add(pr_info)
         if len(prs) == len(commit_shas):
             break
-    print("Time to get PRs: ", time.time() - start)
 
     shortlog = ", ".join([f"`{name}`" for name in sorted(contributors)])
     return shortlog, prs
@@ -256,7 +244,6 @@ def _update_changelog(prs: set[PullRequest], tag: str) -> bool:
             return False
 
         for pr_info in prs:
-            print("End index", end_index)
             parsed_title = _extract_changelog_entry(pr_info)
 
             # Skip if the PR is already in changelog
@@ -312,7 +299,7 @@ def _bump_minor_version(tag: str) -> Optional[str]:
     match = re.match(r"v(\d+)\.(\d+)\.(\d+)", tag)
     if match is None:
         return None
-    major, minor, _ = [int(x) for x in match.groups()]
+    major, minor, _ = (int(x) for x in match.groups())
     # Increment the minor version and reset patch version
     new_version = f"v{major}.{minor + 1}.0"
     return new_version
@@ -320,25 +307,26 @@ def _bump_minor_version(tag: str) -> Optional[str]:
 
 def _fetch_origin() -> None:
     """Fetch the latest changes from the origin."""
-    subprocess.run(["git", "fetch", "origin"])
+    subprocess.run(["git", "fetch", "origin"], check=True)
 
 
 def main() -> None:
     """Update changelog using the descriptions of PRs since the latest tag."""
     # Initialize GitHub Client with provided token (as argument)
     gh_api = Github(argv[1])
-    
+
     # Fetch the latest changes from the origin
     _fetch_origin()
 
-    start = time.time()
+    # Get the repository and the latest tag
     repo, latest_tag = _get_latest_tag(gh_api)
     if not latest_tag:
         return
 
+    # Get the shortlog and the pull requests since the latest tag
     shortlog, prs = _get_pull_requests_since_tag(gh_api, repo, latest_tag)
 
-    start = time.time()
+    # Update the changelog
     if _update_changelog(prs, latest_tag):
         new_version = _bump_minor_version(latest_tag)
         if not new_version:
