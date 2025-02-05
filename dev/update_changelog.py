@@ -175,9 +175,13 @@ def _get_pull_requests_since_tag(
     """Get a list of pull requests merged into the main branch since a given tag."""
     prs = set()
 
+    print(f"Retrieving commits since tag '{tag}'...")
     commits = _git_commits_since_tag(repo, tag)
+
+    print("Retrieving contributors...")
     contributors = _get_contributors_from_commits(api, commits)
 
+    print("Retrieving pull requests...")
     commit_shas = {commit.sha for commit in commits}
     for pr_info in repo.get_pulls(
         state="closed", sort="updated", direction="desc", base="main"
@@ -327,9 +331,11 @@ def main() -> None:
     gh_api = Github(argv[1])
 
     # Fetch the latest changes from the origin
+    print("Fetching the latest changes from the origin...")
     _fetch_origin()
 
     # Get the repository and the latest tag
+    print("Retrieving the latest tag...")
     repo, latest_tag = _get_latest_tag(gh_api)
     if not latest_tag:
         return
@@ -338,6 +344,7 @@ def main() -> None:
     shortlog, prs = _get_pull_requests_since_tag(gh_api, repo, latest_tag)
 
     # Update the changelog
+    print("Updating the changelog...")
     if _update_changelog(prs, latest_tag):
         new_version = _bump_minor_version(latest_tag)
         if not new_version:
