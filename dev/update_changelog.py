@@ -68,7 +68,7 @@ PR_TYPE_TO_SECTION = {
 }
 
 
-def _get_latest_tag(gh_api: Github) -> tuple[Repository, Optional[str]]:
+def _get_latest_tag(gh_api: Github) -> tuple[Repository, str]:
     """Retrieve the latest tag from the GitHub repository."""
     repo = gh_api.get_repo(REPO_NAME)
     latest_tag = subprocess.run(
@@ -338,6 +338,7 @@ def main() -> None:
     print("Retrieving the latest tag...")
     repo, latest_tag = _get_latest_tag(gh_api)
     if not latest_tag:
+        print("No tags found in the repository.")
         return
 
     # Get the shortlog and the pull requests since the latest tag
