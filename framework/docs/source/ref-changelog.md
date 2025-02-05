@@ -6,7 +6,7 @@
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Dimitris Stripelis`, `Heng Pan`, `Javier` <!---TOKEN_v1.15.1-->
+`Dimitris Stripelis`, `Heng Pan`, `Javier`, `Yan Gao` <!---TOKEN_v1.15.1-->
 
 ### What's new?
 
@@ -29,6 +29,10 @@ The `SIGQUIT` [Python signal](https://docs.python.org/3/library/signal.html) is 
 - **Updated Examples** ([#4895](https://github.com/adap/flower/pull/4895), [#4158](https://github.com/adap/flower/pull/4158), [#4879](https://github.com/adap/flower/pull/4879))
 
 Examples have been updated to the latest version of Flower. Some examples got their dependencies bumped. The [Federated Finetuning of a Whisper model example](https://github.com/adap/flower/tree/main/examples/whisper-federated-finetuning) has been updated to the new way of using Flower, i.e., `flwr run`.
+
+- **Update FlowerTuneLLM Leaderboard evaluation scripts** ([#4919](https://github.com/adap/flower/pull/4910))
+
+We have updated the package versions used in the evaluation scripts. There is still time to participate in the [Flower LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard/)!
 
 - **Update Documentation** ([#4897](https://github.com/adap/flower/pull/4897), [#4896](https://github.com/adap/flower/pull/4896), [#4898](https://github.com/adap/flower/pull/4898), [#4909](https://github.com/adap/flower/pull/4909))
 
