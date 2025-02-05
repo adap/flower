@@ -20,7 +20,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Filtering out non-Fleet API requests at the `FleetServicer`** ([#4900](https://github.com/adap/flower/pull/4900))
 
-  The Fleet API endpoint will now ignore gRPC requests that are not part of its API.
+  The Fleet API endpoint will now reject gRPC requests that are not part of its API.
 
 - **Fix exit handlers mechanism for Windows** ([#4907](https://github.com/adap/flower/pull/4907))
 
