@@ -407,10 +407,6 @@ jobs:
   
     name: Windows compatibility test
 
-    defaults:
-      run:
-        working-directory: e2e
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -422,5 +418,6 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --upgrade .
       - name: Run test
+        working-directory: ./e2e
         run: ./test_windows.sh
         shell: bash
