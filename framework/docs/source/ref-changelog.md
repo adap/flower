@@ -1,12 +1,12 @@
 # Changelog
 
-## v1.15.1 (2025-02-04)
+## v1.15.1 (2025-02-05)
 
 ### Thanks to our contributors
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Heng Pan`, `Javier` <!---TOKEN_v1.15.1-->
+`Dimitris Stripelis`, `Heng Pan`, `Javier` <!---TOKEN_v1.15.1-->
 
 ### What's new?
 
