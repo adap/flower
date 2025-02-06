@@ -453,7 +453,6 @@ def run_superlink() -> None:
             dashboard_address_str,
             state_factory,
             certificates=certificates,
-            interceptors=interceptors,
         )
 
         grpc_servers.append(dashboard_server)
