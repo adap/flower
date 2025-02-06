@@ -18,24 +18,22 @@
 
 import pathlib
 import re
-import subprocess
 from concurrent.futures import ThreadPoolExecutor
-from threading import Lock
+from datetime import date
+from sys import argv
+from typing import Optional
+
+import git
+from git import Commit
+from github import Github
+from github.PullRequest import PullRequest
+from github.Repository import Repository
 
 try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib
 
-from datetime import date
-from sys import argv
-from typing import Optional
-
-from github import Github
-from github.Commit import Commit
-from github.NamedUser import NamedUser
-from github.PullRequest import PullRequest
-from github.Repository import Repository
 
 REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "framework/docs/source/ref-changelog.md"
@@ -57,6 +55,10 @@ ALLOWED_VERBS = CONFIG["allowed_verbs"]
 PATTERN_TEMPLATE = CONFIG["pattern_template"]
 PATTERN = PATTERN_TEMPLATE.format(types=TYPES, projects=PROJECTS, scope=SCOPE)
 
+# Local git repository
+LOCAL_REPO = git.Repo(search_parent_directories=True)
+
+# Map PR types to sections in the changelog
 PR_TYPE_TO_SECTION = {
     "feat": "### New features",
     "docs": "### Documentation improvements",
@@ -67,17 +69,15 @@ PR_TYPE_TO_SECTION = {
     "unknown": "### Unknown changes",
 }
 
+# Maximum number of workers in the thread pool
+MAX_WORKERS = argv[2] if len(argv) > 2 else 10
+
 
 def _get_latest_tag(gh_api: Github) -> tuple[Repository, str]:
     """Retrieve the latest tag from the GitHub repository."""
     repo = gh_api.get_repo(REPO_NAME)
-    latest_tag = subprocess.run(
-        ["git", "describe", "--tags", "--abbrev=0"],
-        stdout=subprocess.PIPE,
-        text=True,
-        check=True,
-    ).stdout.strip()
-    return repo, latest_tag
+    tags = sorted(LOCAL_REPO.tags, key=lambda t: t.commit.committed_datetime)
+    return repo, tags[-1].name
 
 
 def _add_shortlog(new_version: str, shortlog: str) -> None:
@@ -109,63 +109,45 @@ def _add_shortlog(new_version: str, shortlog: str) -> None:
                 file.write(line)
 
 
-def _git_commits_since_tag(repo: Repository, tag: str) -> set[Commit]:
+def _git_commits_since_tag(tag: str) -> list[Commit]:
     """Get a set of commits since a given tag."""
-    # Get SHA hashes of commits since the tag
-    result = subprocess.run(
-        ["git", "log", "--pretty=format:%H", f"{tag}..origin/main"],
-        stdout=subprocess.PIPE,
-        text=True,
-        check=True,
-    )
-    shas = set(result.stdout.splitlines())
-
-    # Fetch GitHub commits based on the SHA hashes
-    with ThreadPoolExecutor(max_workers=15) as executor:
-        commits = list(executor.map(repo.get_commit, shas))
-
-    return commits
+    return list(LOCAL_REPO.iter_commits(f"{tag}..origin/main"))
 
 
-def _get_contributors_from_commits(api: Github, commits: set[Commit]) -> set[str]:
+def _get_contributors_from_commits(api: Github, commits: list[Commit]) -> set[str]:
     """Get a set of contributors from a set of commits."""
     # Get authors and co-authors from the commits
-    authors: set[NamedUser] = set()
-    coauthor_names: set[str] = set()
-    coauthor_pattern = r"Co-authored-by:\s*(.+?)\s*<"
-    lock = Lock()
+    contributors: set[str] = set()
+    coauthor_names_emails: set[tuple[str, str]] = set()
+    coauthor_pattern = r"Co-authored-by:\s*(.+?)\s*<(.+?)>"
 
-    def retrieve(commit: Commit) -> None:
+    for commit in commits:
         if commit.author.name is None:
-            return
+            continue
         if "[bot]" in commit.author.name:
-            return
-        with lock:
-            authors.add(commit.author)
+            continue
         # Find co-authors in the commit message
-        if matches := re.findall(coauthor_pattern, commit.commit.message):
-            with lock:
-                coauthor_names.update(name for name in matches)
+        matches: list[str] = re.findall(coauthor_pattern, commit.message)
 
-    with ThreadPoolExecutor(max_workers=15) as executor:
-        executor.map(retrieve, commits)
-
-    # Remove repeated usernames
-    contributors = {author.name for author in authors if author.name}
-    coauthor_names -= contributors
-    coauthor_names.difference_update(author.login for author in authors)
+        contributors.add(commit.author.name)
+        if matches:
+            coauthor_names_emails.update(matches)
 
     # Get full names of the GitHub usernames
-    def get_user(username: str) -> None:
+    def _get_user(username: str, email: str) -> Optional[str]:
         try:
-            if name := api.get_user(username).name:
-                with lock:
-                    contributors.add(name)
+            if user := api.get_user(username):
+                if user.email == email:
+                    return user.name
         except Exception:  # pylint: disable=broad-exception-caught
-            print(f"Failed to get user '{username}'")
+            pass
+        print(f"FAILED to get user: {username} <{email}>")
+        return None
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        executor.map(get_user, coauthor_names)
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        for name in executor.map(lambda x: _get_user(*x), coauthor_names_emails):
+            if name:
+                contributors.add(name)
     return contributors
 
 
@@ -176,13 +158,13 @@ def _get_pull_requests_since_tag(
     prs = set()
 
     print(f"Retrieving commits since tag '{tag}'...")
-    commits = _git_commits_since_tag(repo, tag)
+    commits = _git_commits_since_tag(tag)
 
     print("Retrieving contributors...")
     contributors = _get_contributors_from_commits(api, commits)
 
     print("Retrieving pull requests...")
-    commit_shas = {commit.sha for commit in commits}
+    commit_shas = {commit.hexsha for commit in commits}
     for pr_info in repo.get_pulls(
         state="closed", sort="updated", direction="desc", base="main"
     ):
@@ -254,6 +236,11 @@ def _update_changelog(prs: set[PullRequest], tag: str) -> bool:
         # Find the end of the Unreleased section
         end_index = content.find(f"## {tag}", unreleased_index + 1)
 
+        for section in PR_TYPE_TO_SECTION.values():
+            if content.find(section, unreleased_index, end_index) == -1:
+                content = content[:end_index] + f"\n{section}\n\n" + content[end_index:]
+                end_index = content.find(f"## {tag}", end_index)
+
         if unreleased_index == -1:
             print("Unreleased header not found in the changelog.")
             return False
@@ -269,15 +256,6 @@ def _update_changelog(prs: set[PullRequest], tag: str) -> bool:
             pr_type = parsed_title.get("type", "unknown")
             section = PR_TYPE_TO_SECTION.get(pr_type, "### Unknown changes")
             insert_index = content.find(section, unreleased_index, end_index)
-
-            # Add section if not exist
-            if insert_index == -1:
-                content = _insert_entry_no_desc(
-                    content,
-                    section,
-                    unreleased_index,
-                )
-                insert_index = content.find(section, unreleased_index, end_index)
 
             pr_reference = _format_pr_reference(
                 pr_info.title, pr_info.number, pr_info.html_url
@@ -322,7 +300,7 @@ def _bump_minor_version(tag: str) -> Optional[str]:
 
 def _fetch_origin() -> None:
     """Fetch the latest changes from the origin."""
-    subprocess.run(["git", "fetch", "origin"], check=True)
+    LOCAL_REPO.remote("origin").fetch()
 
 
 def main() -> None:
