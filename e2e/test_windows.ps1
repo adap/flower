@@ -6,7 +6,7 @@ flwr new e2e-tmp-test --framework numpy --username flwrlabs
 Set-Location e2e-tmp-test
 
 # Modify the config file
-$flwrConfig = "`n[tool.flwr.federations.e2e]`naddress = \"127.0.0.1:9093\"`ninsecure = true"
+$flwrConfig = "`n[tool.flwr.federations.e2e]`naddress = '127.0.0.1:9093'`ninsecure = true"
 [System.IO.File]::AppendAllText("pyproject.toml", $flwrConfig)
 
 # Start Flower processes in the background
