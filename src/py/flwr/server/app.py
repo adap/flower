@@ -90,12 +90,27 @@ BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 try:
-    from flwr.ee import add_ee_args_superlink, get_exec_auth_plugins
-except ImportError:
+    from flwr.ee import (
+        add_ee_args_superlink,
+        get_dashboard_server,
+        get_exec_auth_plugins,
+    )
+except ImportError as ex:
+    print(ex)
 
     # pylint: disable-next=unused-argument
     def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
         """Add EE-specific arguments to the parser."""
+
+    # pylint: disable-next=unused-argument
+    def get_dashboard_server(
+        address: str,
+        state_factory: LinkStateFactory,
+        certificates: Optional[tuple[bytes, bytes, bytes]],
+        interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
+    ) -> Optional[grpc.Server]:
+        """Add Dashboard gRPC server."""
+        return None
 
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
         """Return all Exec API authentication plugins."""
@@ -430,6 +445,18 @@ def run_superlink() -> None:
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
+
+    # Add Dashboard server if available
+    if dashboard_address := getattr(args, "dashboard_address", None):
+        dashboard_address_str, _, _ = _format_address(dashboard_address)
+        dashboard_server = get_dashboard_server(
+            dashboard_address_str,
+            state_factory,
+            certificates=certificates,
+            interceptors=interceptors,
+        )
+
+        grpc_servers.append(dashboard_server)
 
     # Graceful shutdown
     register_exit_handlers(
