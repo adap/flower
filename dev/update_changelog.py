@@ -330,7 +330,7 @@ def main() -> None:
             print("Wrong tag format.")
             return
         _add_shortlog(new_version, shortlog)
-        print("Changelog updated succesfully.")
+        print("Changelog updated successfully.")
 
 
 if __name__ == "__main__":
