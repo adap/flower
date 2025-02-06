@@ -9,7 +9,7 @@ dataset: [MNIST]
 
 > Note: If you use this Flower baseline in your work, please remember to cite the original authors of the paper, as well as Flower.
 
-**Paper:** [https://arxiv.org/abs/2101.00052](https://arxiv.org/abs/2101.00052)
+**Paper:** [https://par.nsf.gov/servlets/purl/10378100](https://par.nsf.gov/servlets/purl/10378100)
 
 **Authors:** Qianqian Tong, Guannan Liang, Tan Zhu, Jinbo Bi
 
@@ -76,5 +76,5 @@ python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_e
   <img src="_static/loss_results_mnist_distributed.png" width="49%" />
 </p>
 
-Based on the centralized and distributed loss shown in the figures above, we see that FedIter-HT is comparable to FedAvg from a performance perspective and, with certain local epoch selection. i.e., one local epoch, Fed-HT outperforms FedAvg. Additionally, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model.
+Based on the centralized and distributed loss shown in the figures above, we see that FedIter-HT is comparable to FedAvg from a performance perspective and, with certain local epoch selection. i.e., one local epoch, Fed-HT outperforms FedAvg. Additionally, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model. Results differ slightly from published work due to differing hyperparameters.
 
