@@ -75,5 +75,5 @@ python -m fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500
 | ![loss_results_mnist.png](_static/loss_results_mnist_centralized.png) | 
 | ![loss_results_mnist.png](_static/loss_results_mnist_distributed.png) | 
 
-Based on the centralized and distributed loss shown in the figures above, we see that FedHT and FedIter-HT are comparable to FedAvg from a performance perspective. However, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model.
+Based on the centralized and distributed loss shown in the figures above, we see that FedIter-HT is comparable to FedAvg from a performance perspective and, with certain local epoch selection. i.e., one local epoch, Fed-HT outperforms FedAvg. Additionally, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model.
 
