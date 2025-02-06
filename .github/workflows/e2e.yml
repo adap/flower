@@ -423,3 +423,21 @@ jobs:
         working-directory: ./e2e
         run: ./test_windows.sh
         shell: bash
+
+  windows-pwsh-compatibility:
+    runs-on: windows-latest
+    env:
+      PYTHONIOENCODING: utf-8
+    timeout-minutes: 10
+    needs: wheel
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+      - name: Run test
+        working-directory: ./e2e
+        run: ./test_windows.ps1
+        shell: powershell
