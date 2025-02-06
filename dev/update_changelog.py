@@ -18,6 +18,7 @@
 
 import pathlib
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from sys import argv
@@ -305,6 +306,8 @@ def _fetch_origin() -> None:
 
 def main() -> None:
     """Update changelog using the descriptions of PRs since the latest tag."""
+    start = time.time()
+
     # Initialize GitHub Client with provided token (as argument)
     gh_api = Github(argv[1])
 
@@ -330,7 +333,7 @@ def main() -> None:
             print("Wrong tag format.")
             return
         _add_shortlog(new_version, shortlog)
-        print("Changelog updated successfully.")
+        print(f"Changelog updated successfully in {time.time() - start:.2f}s.")
 
 
 if __name__ == "__main__":
