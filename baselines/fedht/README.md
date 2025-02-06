@@ -17,7 +17,7 @@ dataset: [MNIST]
 
 # Environment Setup
 
-Once inside the fedht folder (where the pyproject.toml is), you can install the project using [poetry][https://github.com/pyenv/pyenv](https://github.com/python-poetry/poetry), which automatically creates a virtual enviornment.
+Once inside the fedht folder (where the pyproject.toml is), you can install the project using [poetry](https://github.com/python-poetry/poetry), which automatically creates a virtual enviornment.
  
 ```bash
 # Set python version
