@@ -57,7 +57,7 @@ A federated logistic regression classification model is implemented using the we
 | `num_keep`            | `500`                               |
 | `learning_rate`       | `0.0005`                            |
 | `weight_decay`        | `0.000`                             |
-| `client resources`    | `{'num_cpus': 2, 'num_gpus':.5}`    |
+| `client resources`    | `{'num_cpus': 10, 'num_gpus':0}`    |
 | `iterht`              | `False`                             |
 
 We note that in the current implementation, only weights (and not biases) of the model(s) are subject to hardthresholding; this practice aligns with sparse model literature. Additionally, the `num_keep` hardthresholding parameter is enforced at the output layer level, as opposed to constraining the number of parameters across the entire model. Specifically, for a fully connected layer with $i$ inputs and $j$ outputs, the $j$-th output's parameters are constrained by `num_keep`.
