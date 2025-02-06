@@ -15,10 +15,10 @@ Add-Content -Path pyproject.toml -Value "insecure = true"
 Start-Process -NoNewWindow -FilePath flower-superlink -ArgumentList "--insecure" -RedirectStandardOutput flwr_output.log
 Start-Sleep -Seconds 2
 
-$cl1 = Start-Process -NoNewWindow -PassThru -FilePath flower-supernode -ArgumentList "--insecure --superlink 127.0.0.1:9092 --clientappio-api-address localhost:9094 --node-config 'partition-id=0 num-partitions=2' --max-retries 0"
+$cl1 = Start-Process -NoNewWindow -PassThru -FilePath flower-supernode -ArgumentList "--insecure --superlink 127.0.0.1:9092 --clientappio-api-address localhost:9094 --node-config `"partition-id=0 num-partitions=2`" --max-retries 0"
 Start-Sleep -Seconds 2
 
-Start-Process -NoNewWindow -FilePath flower-supernode -ArgumentList "--insecure --superlink 127.0.0.1:9092 --clientappio-api-address localhost:9095 --node-config 'partition-id=1 num-partitions=2' --max-retries 0"
+Start-Process -NoNewWindow -FilePath flower-supernode -ArgumentList "--insecure --superlink 127.0.0.1:9092 --clientappio-api-address localhost:9095 --node-config `"partition-id=1 num-partitions=2`" --max-retries 0"
 Start-Sleep -Seconds 2
 
 # Run the Flower command
