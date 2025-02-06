@@ -38,14 +38,11 @@ poetry shell
 
 The purpose of this baseline is 1) implement the federated aggregation strategies introduced in Tong et. al. 2020, and 2) showcase the aggregation strategies with the datasets included in the paper. The two strategies introduced include Fed-HT and FedIter-HT. Fed-HT and FedIter-HT both apply hardthresholding (restricted by the hardthresholding parameter $\tau$) following the aggregation step. FedIter-HT, additionally, applies hardthresholding to each client model prior to aggregation. We also include results using FedAvg.
 
-Two federated classification models are implemented, the first using the well-known MNIST dataset (with 10 clients) and the second using a simulated dataset (with 25 clients).
+A federated logistic regression classification model is implemented using the well-known MNIST dataset (with 10 clients).
 
 | Dataset           | Model                            | Features | Classes |
 | ------------------| ---------------------------------|----------|---------|
 | `MNIST`           | `Multinomial Regression`         |724       | 10      |
-| `Simulation II`   | `Logistic Regression`            |1000      | 2       |
-
-The data generation procedure for the simulated dataset matches that of Simulation II in Tong et. al. For both datasets, the initial global model parameters are all set to 0. Additionally, the MNIST data is heterogeneous, with only two out of the ten classes included in each client dataset.
 
 **Contributors:** Chancellor Johnstone <chancellor.johnstone@gmail.com>
 
@@ -59,18 +56,6 @@ The data generation procedure for the simulated dataset matches that of Simulati
 | `num_local_epochs`    | `10`                                |
 | `num_keep`            | `500`                               |
 | `learning_rate`       | `0.0005`                            |
-| `weight_decay`        | `0.000`                             |
-| `client resources`    | `{'num_cpus': 2, 'num_gpus':.5}`    |
-| `iterht`              | `False`                             |
-
-| Description           | Default Value (Simulation II)       |
-| --------------------- | ----------------------------------- |
-| `num_clients`         | `25`                                |
-| `num_rounds`          | `100`                               |
-| `batch_size`          | `50`                                |
-| `num_local_epochs`    | `5`                                 |
-| `num_keep`            | `200`                               |
-| `learning_rate`       | `0.0001`                            |
 | `weight_decay`        | `0.000`                             |
 | `client resources`    | `{'num_cpus': 2, 'num_gpus':.5}`    |
 | `iterht`              | `False`                             |
@@ -90,14 +75,3 @@ python -m fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500
 | ![loss_results_mnist.png](_static/loss_results_mnist_centralized.png) | 
 | ![loss_results_mnist.png](_static/loss_results_mnist_distributed.png) | 
 
-### Simulation II (`num_keep` = 200)
-```
-python -m fedht.main --config-name base_simII agg=fedavg num_local_epochs=2 learning_rate=0.0001
-python -m fedht.main --config-name base_simII agg=fedht num_local_epochs=2 learning_rate=0.0001
-python -m fedht.main --config-name base_simII agg=fedht iterht=True num_local_epochs=2 learning_rate=0.0001
-```
-
-| *Experiments: Comparison of Aggregation Approaches to Fed-HT for Simulation II* |
-|:--:| 
-| ![loss_results_simII.png](_static/loss_results_simII_centralized.png) | 
-| ![loss_results_simII.png](_static/loss_results_simII_distributed.png) |
