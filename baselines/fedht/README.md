@@ -68,12 +68,13 @@ We note that in the current implementation, only weights (and not biases) of the
 python -m fedht.main --config-name base_mnist agg=fedavg num_keep=500 num_local_epochs=5 learning_rate=0.00001
 python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=5 learning_rate=0.00001
 python -m fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500 num_local_epochs=5 learning_rate=0.00001
+python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=1 learning_rate=0.00001
 ```
 
-| *Experiments: Comparison of Aggregation Approaches to Fed-HT for MNIST* |
-|:--:| 
-| ![loss_results_mnist.png](_static/loss_results_mnist_centralized.png) | 
-| ![loss_results_mnist.png](_static/loss_results_mnist_distributed.png) | 
+<p float="left">
+  <img src="_static/loss_results_mnist_centralized.png" width="49%" />
+  <img src="_static/loss_results_mnist_distributed.png" width="49%" />
+</p>
 
-Based on the centralized and distributed loss shown in the figures above, we see that FedHT and FedIter-HT are comparable to FedAvg from a performance perspective. However, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model.
+Based on the centralized and distributed loss shown in the figures above, we see that FedIter-HT is comparable to FedAvg from a performance perspective and, with certain local epoch selection. i.e., one local epoch, Fed-HT outperforms FedAvg. Additionally, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model.
 
