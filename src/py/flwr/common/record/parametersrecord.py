@@ -15,16 +15,31 @@
 """ParametersRecord and Array."""
 
 
+from __future__ import annotations
+
+import sys
 from collections import OrderedDict
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Optional, cast
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
 from ..constant import SType
 from ..typing import NDArray
 from .typeddict import TypedDict
+
+if TYPE_CHECKING:
+    import tensorflow as tf
+    import torch
+
+
+def _raise_array_init_error() -> None:
+    raise TypeError(
+        f"Invalid arguments for {Array.__qualname__}. Expected a "
+        "PyTorch tensor, TensorFlow tensor, NumPy ndarray, or explicit"
+        " dtype/shape/stype/data values."
+    )
 
 
 @dataclass
@@ -56,6 +71,136 @@ class Array:
     shape: list[int]
     stype: str
     data: bytes
+
+    @overload
+    def __init__(self, torch_tensor: torch.Tensor) -> None: ...  # noqa: E704
+
+    @overload
+    def __init__(self, tf_tensor: tf.Tensor) -> None: ...  # noqa: E704
+
+    @overload
+    def __init__(self, ndarray: NDArray) -> None: ...  # noqa: E704
+
+    @overload
+    def __init__(  # noqa: E704
+        self, dtype: str, shape: list[int], stype: str, data: bytes
+    ) -> None: ...
+
+    def __init__(  # pylint: disable=too-many-arguments, too-many-locals
+        self,
+        *args: Any,
+        torch_tensor: torch.Tensor | None = None,
+        tf_tensor: tf.Tensor | None = None,
+        ndarray: NDArray | None = None,
+        dtype: str | None = None,
+        shape: list[int] | None = None,
+        stype: str | None = None,
+        data: bytes | None = None,
+    ) -> None:
+        # Init all arguments
+        if len(args) > 4:
+            _raise_array_init_error()
+        all_args = [None] * 4
+        for i, arg in enumerate(args):
+            all_args[i] = arg
+
+        def _try_set_arg(index: int, arg: Any) -> None:
+            if arg is None:
+                return
+            if all_args[index] is not None:
+                _raise_array_init_error()
+            all_args[index] = arg
+
+        # Try to set keyword arguments in all_args
+        _try_set_arg(0, torch_tensor)
+        _try_set_arg(0, tf_tensor)
+        _try_set_arg(0, ndarray)
+        _try_set_arg(0, dtype)
+        _try_set_arg(1, shape)
+        _try_set_arg(2, stype)
+        _try_set_arg(3, data)
+
+        # Check if all arguments are correctly set
+        all_args = [arg for arg in all_args if arg is not None]
+        if len(all_args) not in [1, 4]:
+            _raise_array_init_error()
+
+        # Handle PyTorch tensor
+        if "torch" in sys.modules and isinstance(
+            all_args[0], sys.modules["torch"].Tensor
+        ):
+            self.__dict__.update(self.from_torch_tensor(all_args[0]).__dict__)
+            return
+
+        # Handle TensorFlow tensor
+        if "tensorflow" in sys.modules and isinstance(
+            all_args[0], sys.modules["tensorflow"].Tensor
+        ):
+            self.__dict__.update(self.from_tf_tensor(all_args[0]).__dict__)
+            return
+
+        # Handle NumPy array
+        if isinstance(all_args[0], np.ndarray):
+            self.__dict__.update(self.from_numpy_ndarray(all_args[0]).__dict__)
+            return
+
+        # Handle direct field initialization
+        if (
+            isinstance(all_args[0], str)
+            and isinstance(all_args[1], list)
+            and all(isinstance(i, int) for i in all_args[1])
+            and isinstance(all_args[2], str)
+            and isinstance(all_args[3], bytes)
+        ):
+            self.dtype, self.shape, self.stype, self.data = all_args
+            return
+
+        _raise_array_init_error()
+
+    @classmethod
+    def from_numpy_ndarray(cls, ndarray: NDArray) -> Array:
+        """Create Array from NumPy ndarray."""
+        assert isinstance(
+            ndarray, np.ndarray
+        ), f"Expected NumPy ndarray, got {type(ndarray)}"
+        buffer = BytesIO()
+        # WARNING: NEVER set allow_pickle to true.
+        # Reason: loading pickled data can execute arbitrary code
+        # Source: https://numpy.org/doc/stable/reference/generated/numpy.save.html
+        np.save(buffer, ndarray, allow_pickle=False)
+        data = buffer.getvalue()
+        return Array(
+            dtype=str(ndarray.dtype),
+            shape=list(ndarray.shape),
+            stype=SType.NUMPY,
+            data=data,
+        )
+
+    @classmethod
+    def from_torch_tensor(cls, tensor: torch.Tensor) -> Array:
+        """Create Array from PyTorch tensor."""
+        if not (torch := sys.modules.get("torch")):
+            raise RuntimeError(
+                f"PyTorch is required to use {cls.from_torch_tensor.__name__}"
+            )
+
+        assert isinstance(
+            tensor, torch.Tensor
+        ), f"Expected PyTorch Tensor, got {type(tensor)}"
+        return cls.from_numpy_ndarray(tensor.detach().cpu().numpy())
+
+    @classmethod
+    def from_tf_tensor(cls, tensor: tf.Tensor) -> Array:
+        """Create Array from TensorFlow tensor."""
+        if not (tf := sys.modules.get("tensorflow")):
+            raise RuntimeError(
+                f"TensorFlow is required to use {cls.from_tf_tensor.__name__}"
+            )
+
+        assert isinstance(
+            tensor, tf.Tensor
+        ), f"Expected TensorFlow Tensor, got {type(tensor)}"
+        return cls.from_numpy_ndarray(tensor.numpy())
 
     def numpy(self) -> NDArray:
         """Return the array as a NumPy array."""
@@ -176,7 +321,7 @@ class ParametersRecord(TypedDict[str, Array]):
 
     def __init__(
         self,
-        array_dict: Optional[OrderedDict[str, Array]] = None,
+        array_dict: OrderedDict[str, Array] | None = None,
         keep_input: bool = False,
     ) -> None:
         super().__init__(_check_key, _check_value)

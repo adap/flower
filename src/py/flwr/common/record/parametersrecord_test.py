@@ -15,12 +15,17 @@
 """Unit tests for ParametersRecord and Array."""
 
 
+import sys
 import unittest
 from collections import OrderedDict
 from io import BytesIO
+from types import ModuleType
+from typing import Any
+from unittest.mock import Mock
 
 import numpy as np
 import pytest
+from parameterized import parameterized
 
 from flwr.common import ndarray_to_bytes
 
@@ -36,8 +41,30 @@ def _get_buffer_from_ndarray(array: NDArray) -> bytes:
     return buffer.getvalue()
 
 
+MOCK_TORCH_TENSOR = Mock(detach=Mock(cpu=Mock(numpy=lambda: np.array([[1, 2, 3]]))))
+MOCK_TF_TENSOR = Mock(numpy=lambda: np.array([1, 2, 3]))
+
+
 class TestArray(unittest.TestCase):
     """Unit tests for Array."""
+
+    def setUp(self) -> None:
+        """Set up the test case."""
+        # Patch torch and tensorflow
+        self.torch_mock = Mock(spec=ModuleType, Tensor=Mock)
+        self.tf_mock = Mock(spec=ModuleType, Tensor=Mock)
+        self._original_torch = sys.modules.get("torch")
+        self._original_tf = sys.modules.get("tensorflow")
+        sys.modules["torch"] = self.torch_mock
+        sys.modules["tensorflow"] = self.tf_mock
+
+    def tearDown(self) -> None:
+        """Tear down the test case."""
+        # Unpatch torch and tensorflow
+        if self._original_torch is not None:
+            sys.modules["torch"] = self._original_torch
+        if self._original_tf is not None:
+            sys.modules["tensorflow"] = self._original_tf
 
     def test_numpy_conversion_valid(self) -> None:
         """Test the numpy method with valid Array instance."""
@@ -71,6 +98,100 @@ class TestArray(unittest.TestCase):
         # Execute and assert
         with self.assertRaises(TypeError):
             array_instance.numpy()
+
+    def test_array_from_numpy(self) -> None:
+        """Test the array_from_numpy function."""
+        # Prepare
+        original_array = np.array([1, 2, 3], dtype=np.float32)
+
+        # Execute
+        array_instance = Array.from_numpy_ndarray(original_array)
+        buffer = BytesIO(array_instance.data)
+        deserialized_array = np.load(buffer, allow_pickle=False)
+
+        # Assert
+        self.assertEqual(array_instance.dtype, str(original_array.dtype))
+        self.assertEqual(array_instance.shape, list(original_array.shape))
+        self.assertEqual(array_instance.stype, SType.NUMPY)
+        np.testing.assert_array_equal(deserialized_array, original_array)
+
+    def test_from_torch_tensor_with_torch(self) -> None:
+        """Test creating an Array from a PyTorch tensor (mocked torch)."""
+        # Prepare
+        mock_tensor = Mock()
+
+        # Mock .detach().cpu().numpy() to return a NumPy array
+        mock_tensor.detach.return_value = mock_tensor
+        mock_tensor.cpu.return_value = mock_tensor
+        mock_tensor.numpy.return_value = np.array([[5, 6], [7, 8]], dtype=np.float32)
+
+        # Execute
+        arr = Array.from_torch_tensor(mock_tensor)
+
+        # Assert
+        self.assertEqual(arr.dtype, "float32")
+        self.assertEqual(arr.shape, [2, 2])
+        self.assertEqual(arr.stype, SType.NUMPY)
+
+    def test_from_tf_tensor_with_tf(self) -> None:
+        """Test creating an Array from a TensorFlow tensor (mocked tf)."""
+        # Prepare
+        mock_tensor = Mock()
+
+        # Mock .numpy() to return a NumPy array
+        mock_tensor.numpy.return_value = np.array([[9, 10], [11, 12]], dtype=np.float32)
+
+        # Execute
+        arr = Array.from_tf_tensor(mock_tensor)
+
+        # Assert
+        self.assertEqual(arr.dtype, "float32")
+        self.assertEqual(arr.shape, [2, 2])
+        self.assertEqual(arr.stype, SType.NUMPY)
+
+    @parameterized.expand(  # type: ignore
+        [
+            ("torch_tensor", MOCK_TORCH_TENSOR),
+            ("tf_tensor", MOCK_TF_TENSOR),
+            ("ndarray", np.array([1, 2, 3])),
+            ("explicit_values", "float32", [2, 2], "dense", b"data"),
+        ]
+    )
+    def test_valid_init_overloads_kwargs(self, name: str, *args: Any) -> None:
+        """Ensure valid overloads initialize correctly."""
+        if name == "explicit_values":
+            array = Array(dtype=args[0], shape=args[1], stype=args[2], data=args[3])
+        else:
+            kwargs = {name: args[0]}
+            array = Array(**kwargs)
+        self.assertIsInstance(array, Array)
+
+    @parameterized.expand(  # type: ignore
+        [
+            (MOCK_TORCH_TENSOR,),
+            (MOCK_TF_TENSOR,),
+            (np.array([1, 2, 3]),),
+            ("float32", [2, 2], "dense", b"data"),
+        ]
+    )
+    def test_valid_init_overloads_args(self, *args: Any) -> None:
+        """Ensure valid overloads initialize correctly."""
+        array = Array(*args)
+        self.assertIsInstance(array, Array)
+
+    @parameterized.expand(  # type: ignore
+        [
+            (MOCK_TORCH_TENSOR, MOCK_TF_TENSOR),
+            (MOCK_TORCH_TENSOR, np.array([1])),
+            ("float32", [2, 2], "dense", 213),
+            ([2, 2], "dense", b"data"),
+            (123, "invalid"),
+        ]
+    )
+    def test_invalid_init_combinations(self, *args: Any) -> None:
+        """Ensure invalid combinations raise TypeError."""
+        with self.assertRaises(TypeError):
+            Array(*args)
 
 
 @pytest.mark.parametrize(

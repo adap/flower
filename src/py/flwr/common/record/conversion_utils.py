@@ -15,26 +15,10 @@
 """Conversion utility functions for Records."""
 
 
-from io import BytesIO
-
-import numpy as np
-
-from ..constant import SType
 from ..typing import NDArray
 from .parametersrecord import Array
 
 
 def array_from_numpy(ndarray: NDArray) -> Array:
     """Create Array from NumPy ndarray."""
-    buffer = BytesIO()
-    # WARNING: NEVER set allow_pickle to true.
-    # Reason: loading pickled data can execute arbitrary code
-    # Source: https://numpy.org/doc/stable/reference/generated/numpy.save.html
-    np.save(buffer, ndarray, allow_pickle=False)
-    data = buffer.getvalue()
-    return Array(
-        dtype=str(ndarray.dtype),
-        shape=list(ndarray.shape),
-        stype=SType.NUMPY,
-        data=data,
-    )
+    return Array.from_numpy_ndarray(ndarray)
