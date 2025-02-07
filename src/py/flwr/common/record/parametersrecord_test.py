@@ -15,13 +15,10 @@
 """Unit tests for ParametersRecord and Array."""
 
 
-import sys
 import unittest
 from collections import OrderedDict
 from io import BytesIO
-from types import ModuleType
 from typing import Any
-from unittest.mock import Mock
 
 import numpy as np
 import pytest
@@ -41,42 +38,8 @@ def _get_buffer_from_ndarray(array: NDArray) -> bytes:
     return buffer.getvalue()
 
 
-class TorchTensor(Mock):
-    """Mock Torch tensor class."""
-
-
-class TfTensor(Mock):
-    """Mock TensorFlow tensor class."""
-
-
-MOCK_TORCH_TENSOR = TorchTensor(numpy=lambda: np.array([[1, 2, 3]]))
-MOCK_TF_TENSOR = TfTensor(numpy=lambda: np.array([1, 2, 3]))
-MOCK_TORCH_TENSOR.detach.return_value = MOCK_TORCH_TENSOR
-MOCK_TORCH_TENSOR.cpu.return_value = MOCK_TORCH_TENSOR
-
-
 class TestArray(unittest.TestCase):
     """Unit tests for Array."""
-
-    def setUp(self) -> None:
-        """Set up the test case."""
-        # Patch torch and tensorflow
-        self.torch_mock = Mock(spec=ModuleType, Tensor=TorchTensor)
-        self.tf_mock = Mock(spec=ModuleType, Tensor=TfTensor)
-        self._original_torch = sys.modules.get("torch")
-        self._original_tf = sys.modules.get("tensorflow")
-        sys.modules["torch"] = self.torch_mock
-        sys.modules["tensorflow"] = self.tf_mock
-
-    def tearDown(self) -> None:
-        """Tear down the test case."""
-        # Unpatch torch and tensorflow
-        del sys.modules["torch"]
-        del sys.modules["tensorflow"]
-        if self._original_torch is not None:
-            sys.modules["torch"] = self._original_torch
-        if self._original_tf is not None:
-            sys.modules["tensorflow"] = self._original_tf
 
     def test_numpy_conversion_valid(self) -> None:
         """Test the numpy method with valid Array instance."""
@@ -127,44 +90,8 @@ class TestArray(unittest.TestCase):
         self.assertEqual(array_instance.stype, SType.NUMPY)
         np.testing.assert_array_equal(deserialized_array, original_array)
 
-    def test_from_torch_tensor_with_torch(self) -> None:
-        """Test creating an Array from a PyTorch tensor (mocked torch)."""
-        # Prepare
-        mock_tensor = TorchTensor()
-
-        # Mock .detach().cpu().numpy() to return a NumPy array
-        mock_tensor.detach.return_value = mock_tensor
-        mock_tensor.cpu.return_value = mock_tensor
-        mock_tensor.numpy.return_value = np.array([[5, 6], [7, 8]], dtype=np.float32)
-
-        # Execute
-        arr = Array.from_torch_tensor(mock_tensor)
-
-        # Assert
-        self.assertEqual(arr.dtype, "float32")
-        self.assertEqual(arr.shape, [2, 2])
-        self.assertEqual(arr.stype, SType.NUMPY)
-
-    def test_from_tf_tensor_with_tf(self) -> None:
-        """Test creating an Array from a TensorFlow tensor (mocked tf)."""
-        # Prepare
-        mock_tensor = TfTensor()
-
-        # Mock .numpy() to return a NumPy array
-        mock_tensor.numpy.return_value = np.array([[9, 10], [11, 12]], dtype=np.float32)
-
-        # Execute
-        arr = Array.from_tf_tensor(mock_tensor)
-
-        # Assert
-        self.assertEqual(arr.dtype, "float32")
-        self.assertEqual(arr.shape, [2, 2])
-        self.assertEqual(arr.stype, SType.NUMPY)
-
     @parameterized.expand(  # type: ignore
         [
-            ("torch_tensor", MOCK_TORCH_TENSOR),
-            ("tf_tensor", MOCK_TF_TENSOR),
             ("ndarray", np.array([1, 2, 3])),
             ("explicit_values", "float32", [2, 2], "dense", b"data"),
         ]
@@ -180,8 +107,6 @@ class TestArray(unittest.TestCase):
 
     @parameterized.expand(  # type: ignore
         [
-            (MOCK_TORCH_TENSOR,),
-            (MOCK_TF_TENSOR,),
             (np.array([1, 2, 3]),),
             ("float32", [2, 2], "dense", b"data"),
         ]
@@ -193,8 +118,6 @@ class TestArray(unittest.TestCase):
 
     @parameterized.expand(  # type: ignore
         [
-            (MOCK_TORCH_TENSOR, MOCK_TF_TENSOR),
-            (MOCK_TORCH_TENSOR, np.array([1])),
             ("float32", [2, 2], "dense", 213),
             ([2, 2], "dense", b"data"),
             (123, "invalid"),

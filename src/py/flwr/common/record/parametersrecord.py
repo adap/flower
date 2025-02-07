@@ -17,21 +17,16 @@
 
 from __future__ import annotations
 
-import sys
 from collections import OrderedDict
 from dataclasses import dataclass
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, cast, overload
+from typing import Any, cast, overload
 
 import numpy as np
 
 from ..constant import SType
 from ..typing import NDArray
 from .typeddict import TypedDict
-
-if TYPE_CHECKING:
-    import tensorflow as tf
-    import torch
 
 
 def _raise_array_init_error() -> None:
@@ -73,12 +68,6 @@ class Array:
     data: bytes
 
     @overload
-    def __init__(self, torch_tensor: torch.Tensor) -> None: ...  # noqa: E704
-
-    @overload
-    def __init__(self, tf_tensor: tf.Tensor) -> None: ...  # noqa: E704
-
-    @overload
     def __init__(self, ndarray: NDArray) -> None: ...  # noqa: E704
 
     @overload
@@ -89,8 +78,6 @@ class Array:
     def __init__(  # pylint: disable=too-many-arguments, too-many-locals
         self,
         *args: Any,
-        torch_tensor: torch.Tensor | None = None,
-        tf_tensor: tf.Tensor | None = None,
         ndarray: NDArray | None = None,
         dtype: str | None = None,
         shape: list[int] | None = None,
@@ -112,8 +99,6 @@ class Array:
             all_args[index] = arg
 
         # Try to set keyword arguments in all_args
-        _try_set_arg(0, torch_tensor)
-        _try_set_arg(0, tf_tensor)
         _try_set_arg(0, ndarray)
         _try_set_arg(0, dtype)
         _try_set_arg(1, shape)
@@ -124,20 +109,6 @@ class Array:
         all_args = [arg for arg in all_args if arg is not None]
         if len(all_args) not in [1, 4]:
             _raise_array_init_error()
-
-        # Handle PyTorch tensor
-        if "torch" in sys.modules and isinstance(
-            all_args[0], sys.modules["torch"].Tensor
-        ):
-            self.__dict__.update(self.from_torch_tensor(all_args[0]).__dict__)
-            return
-
-        # Handle TensorFlow tensor
-        if "tensorflow" in sys.modules and isinstance(
-            all_args[0], sys.modules["tensorflow"].Tensor
-        ):
-            self.__dict__.update(self.from_tf_tensor(all_args[0]).__dict__)
-            return
 
         # Handle NumPy array
         if isinstance(all_args[0], np.ndarray):
@@ -175,32 +146,6 @@ class Array:
             stype=SType.NUMPY,
             data=data,
         )
-
-    @classmethod
-    def from_torch_tensor(cls, tensor: torch.Tensor) -> Array:
-        """Create Array from PyTorch tensor."""
-        if not (torch := sys.modules.get("torch")):
-            raise RuntimeError(
-                f"PyTorch is required to use {cls.from_torch_tensor.__name__}"
-            )
-
-        assert isinstance(
-            tensor, torch.Tensor
-        ), f"Expected PyTorch Tensor, got {type(tensor)}"
-        return cls.from_numpy_ndarray(tensor.detach().cpu().numpy())
-
-    @classmethod
-    def from_tf_tensor(cls, tensor: tf.Tensor) -> Array:
-        """Create Array from TensorFlow tensor."""
-        if not (tf := sys.modules.get("tensorflow")):
-            raise RuntimeError(
-                f"TensorFlow is required to use {cls.from_tf_tensor.__name__}"
-            )
-
-        assert isinstance(
-            tensor, tf.Tensor
-        ), f"Expected TensorFlow Tensor, got {type(tensor)}"
-        return cls.from_numpy_ndarray(tensor.numpy())
 
     def numpy(self) -> NDArray:
         """Return the array as a NumPy array."""
@@ -262,7 +207,6 @@ class ParametersRecord(TypedDict[str, Array]):
 
     >>> import numpy as np
     >>> from flwr.common import ParametersRecord
-    >>> from flwr.common import array_from_numpy
     >>>
     >>> # Let's create a simple NumPy array
     >>> arr_np = np.random.randn(3, 3)
@@ -273,7 +217,7 @@ class ParametersRecord(TypedDict[str, Array]):
     >>>      [-0.10758364,  1.97619858, -0.37120501]])
     >>>
     >>> # Let's create an Array out of it
-    >>> arr = array_from_numpy(arr_np)
+    >>> arr = Array(arr_np)
     >>>
     >>> # If we print it you'll see (note the binary data)
     >>> Array(dtype='float64', shape=[3,3], stype='numpy.ndarray', data=b'@\x99\x18...')
