@@ -59,6 +59,23 @@ class Array:
 
     data: bytes
         A buffer of bytes containing the data.
+
+    Examples
+    --------
+    You can create an `Array` object from a NumPy `ndarray`:
+
+    >>> import numpy as np
+    >>>
+    >>> arr = Array(np.random.randn(3, 3))
+
+    Alternatively, you can create an `Array` object by specifying explicit values:
+
+    >>> arr = Array(
+    >>>     dtype="float32",
+    >>>     shape=[3, 3],
+    >>>     stype="numpy.ndarray",
+    >>>     data=b"serialized_data...",
+    >>> )
     """
 
     dtype: str
@@ -83,7 +100,15 @@ class Array:
         stype: str | None = None,
         data: bytes | None = None,
     ) -> None:
+        # Workaround to support multiple initialization signatures.
+        # This method validates and assigns the correct arguments,
+        # including keyword arguments such as dtype and shape.
+        # Supported initialization formats:
+        # 1. Array(dtype: str, shape: list[int], stype: str, data: bytes)
+        # 2. Array(ndarray: NDArray)
+
         # Init all arguments
+        # If more than 4 positional arguments are provided, raise an error.
         if len(args) > 4:
             _raise_array_init_error()
         all_args = [None] * 4
