@@ -41,8 +41,18 @@ def _get_buffer_from_ndarray(array: NDArray) -> bytes:
     return buffer.getvalue()
 
 
-MOCK_TORCH_TENSOR = Mock(detach=Mock(cpu=Mock(numpy=lambda: np.array([[1, 2, 3]]))))
-MOCK_TF_TENSOR = Mock(numpy=lambda: np.array([1, 2, 3]))
+class TorchTensor(Mock):
+    """Mock Torch tensor class."""
+
+
+class TfTensor(Mock):
+    """Mock TensorFlow tensor class."""
+
+
+MOCK_TORCH_TENSOR = TorchTensor(numpy=lambda: np.array([[1, 2, 3]]))
+MOCK_TF_TENSOR = TfTensor(numpy=lambda: np.array([1, 2, 3]))
+MOCK_TORCH_TENSOR.detach.return_value = MOCK_TORCH_TENSOR
+MOCK_TORCH_TENSOR.cpu.return_value = MOCK_TORCH_TENSOR
 
 
 class TestArray(unittest.TestCase):
@@ -51,8 +61,8 @@ class TestArray(unittest.TestCase):
     def setUp(self) -> None:
         """Set up the test case."""
         # Patch torch and tensorflow
-        self.torch_mock = Mock(spec=ModuleType, Tensor=Mock)
-        self.tf_mock = Mock(spec=ModuleType, Tensor=Mock)
+        self.torch_mock = Mock(spec=ModuleType, Tensor=TorchTensor)
+        self.tf_mock = Mock(spec=ModuleType, Tensor=TfTensor)
         self._original_torch = sys.modules.get("torch")
         self._original_tf = sys.modules.get("tensorflow")
         sys.modules["torch"] = self.torch_mock
@@ -61,6 +71,8 @@ class TestArray(unittest.TestCase):
     def tearDown(self) -> None:
         """Tear down the test case."""
         # Unpatch torch and tensorflow
+        del sys.modules["torch"]
+        del sys.modules["tensorflow"]
         if self._original_torch is not None:
             sys.modules["torch"] = self._original_torch
         if self._original_tf is not None:
@@ -118,7 +130,7 @@ class TestArray(unittest.TestCase):
     def test_from_torch_tensor_with_torch(self) -> None:
         """Test creating an Array from a PyTorch tensor (mocked torch)."""
         # Prepare
-        mock_tensor = Mock()
+        mock_tensor = TorchTensor()
 
         # Mock .detach().cpu().numpy() to return a NumPy array
         mock_tensor.detach.return_value = mock_tensor
@@ -136,7 +148,7 @@ class TestArray(unittest.TestCase):
     def test_from_tf_tensor_with_tf(self) -> None:
         """Test creating an Array from a TensorFlow tensor (mocked tf)."""
         # Prepare
-        mock_tensor = Mock()
+        mock_tensor = TfTensor()
 
         # Mock .numpy() to return a NumPy array
         mock_tensor.numpy.return_value = np.array([[9, 10], [11, 12]], dtype=np.float32)
