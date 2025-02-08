@@ -66,9 +66,9 @@ We note that in the current implementation, only weights (and not biases) of the
 ### MNIST (`num_keep` = 500)
 ```
 python -m fedht.main --config-name base_mnist agg=fedavg num_keep=500 num_local_epochs=5 learning_rate=0.00001
+python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=1 learning_rate=0.00001
 python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=5 learning_rate=0.00001
 python -m fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500 num_local_epochs=5 learning_rate=0.00001
-python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=1 learning_rate=0.00001
 ```
 
 <p float="left">
