@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `login` command."""
 
+
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -25,14 +26,19 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.common.constant import AUTH_TYPE
+from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
+from flwr.common.typing import UserAuthLoginDetails
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from ..utils import init_channel, try_obtain_cli_auth_plugin
+from ..utils import (
+    init_channel,
+    try_obtain_cli_auth_plugin,
+    unauthenticated_exc_handler,
+)
 
 
 def login(  # pylint: disable=R0914
@@ -44,6 +50,13 @@ def login(  # pylint: disable=R0914
         Optional[str],
         typer.Argument(help="Name of the federation to login into."),
     ] = None,
+    federation_config_overrides: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--federation-config",
+            help=FEDERATION_CONFIG_HELP_MESSAGE,
+        ),
+    ] = None,
 ) -> None:
     """Login to Flower SuperLink."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -53,17 +66,30 @@ def login(  # pylint: disable=R0914
 
     config = process_loaded_project_config(config, errors, warnings)
     federation, federation_config = validate_federation_in_project_config(
-        federation, config
+        federation, config, federation_config_overrides
     )
     exit_if_no_address(federation_config, "login")
+
+    # Check if `enable-user-auth` is set to `true`
+    if not federation_config.get("enable-user-auth", False):
+        typer.secho(
+            f"❌ User authentication is not enabled for the federation '{federation}'. "
+            "To enable it, set `enable-user-auth = true` in the federation "
+            "configuration.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
     channel = init_channel(app, federation_config, None)
     stub = ExecStub(channel)
 
     login_request = GetLoginDetailsRequest()
-    login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
+    with unauthenticated_exc_handler():
+        login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
 
     # Get the auth plugin
-    auth_type = login_response.login_details.get(AUTH_TYPE)
+    auth_type = login_response.auth_type
     auth_plugin = try_obtain_cli_auth_plugin(
         app, federation, federation_config, auth_type
     )
@@ -76,7 +102,15 @@ def login(  # pylint: disable=R0914
         raise typer.Exit(code=1)
 
     # Login
-    auth_config = auth_plugin.login(dict(login_response.login_details), stub)
+    details = UserAuthLoginDetails(
+        auth_type=login_response.auth_type,
+        device_code=login_response.device_code,
+        verification_uri_complete=login_response.verification_uri_complete,
+        expires_in=login_response.expires_in,
+        interval=login_response.interval,
+    )
+    with unauthenticated_exc_handler():
+        credentials = auth_plugin.login(details, stub)
 
     # Store the tokens
-    auth_plugin.store_tokens(auth_config)
+    auth_plugin.store_tokens(credentials)

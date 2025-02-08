@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `log` command."""
 
+
 import time
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
@@ -28,12 +29,13 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
+from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.constant import CONN_RECONNECT_INTERVAL, CONN_REFRESH_PERIOD
 from flwr.common.logger import log as logger
 from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from .utils import init_channel, try_obtain_cli_auth_plugin
+from .utils import init_channel, try_obtain_cli_auth_plugin, unauthenticated_exc_handler
 
 
 def start_stream(
@@ -56,6 +58,8 @@ def start_stream(
             logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
         if e.code() == grpc.StatusCode.CANCELLED:
             pass
+        else:
+            raise e
     finally:
         channel.close()
 
@@ -87,8 +91,9 @@ def stream_logs(
     latest_timestamp = 0.0
     res = None
     try:
-        for res in stub.StreamLogs(req, timeout=duration):
-            print(res.log_output, end="")
+        with unauthenticated_exc_handler():
+            for res in stub.StreamLogs(req, timeout=duration):
+                print(res.log_output, end="")
     except grpc.RpcError as e:
         # pylint: disable=E1101
         if e.code() != grpc.StatusCode.DEADLINE_EXCEEDED:
@@ -108,9 +113,10 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     try:
         while True:
             try:
-                # Enforce timeout for graceful exit
-                for res in stub.StreamLogs(req, timeout=timeout):
-                    print(res.log_output)
+                with unauthenticated_exc_handler():
+                    # Enforce timeout for graceful exit
+                    for res in stub.StreamLogs(req, timeout=timeout):
+                        print(res.log_output)
             except grpc.RpcError as e:
                 # pylint: disable=E1101
                 if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
@@ -120,6 +126,7 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
                     break
                 if e.code() == grpc.StatusCode.CANCELLED:
                     break
+                raise e
     except KeyboardInterrupt:
         logger(DEBUG, "Stream interrupted by user")
     finally:
@@ -140,6 +147,13 @@ def log(
         Optional[str],
         typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
+    federation_config_overrides: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--federation-config",
+            help=FEDERATION_CONFIG_HELP_MESSAGE,
+        ),
+    ] = None,
     stream: Annotated[
         bool,
         typer.Option(
@@ -155,11 +169,15 @@ def log(
     config, errors, warnings = load_and_validate(path=pyproject_path)
     config = process_loaded_project_config(config, errors, warnings)
     federation, federation_config = validate_federation_in_project_config(
-        federation, config
+        federation, config, federation_config_overrides
     )
     exit_if_no_address(federation_config, "log")
 
-    _log_with_exec_api(app, federation, federation_config, run_id, stream)
+    try:
+        _log_with_exec_api(app, federation, federation_config, run_id, stream)
+    except Exception as err:  # pylint: disable=broad-except
+        typer.secho(str(err), fg=typer.colors.RED, bold=True)
+        raise typer.Exit(code=1) from None
 
 
 def _log_with_exec_api(

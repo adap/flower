@@ -21,7 +21,7 @@ from typing import Optional, Union
 from uuid import UUID, uuid4
 
 from flwr.common import ConfigsRecord, Context, log, now, serde
-from flwr.common.constant import ErrorCode, Status, SubStatus
+from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
@@ -60,9 +60,19 @@ REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON = (
 )
 
 
-def generate_rand_int_from_bytes(num_bytes: int) -> int:
-    """Generate a random unsigned integer from `num_bytes` bytes."""
-    return int.from_bytes(urandom(num_bytes), "little", signed=False)
+def generate_rand_int_from_bytes(
+    num_bytes: int, exclude: Optional[list[int]] = None
+) -> int:
+    """Generate a random unsigned integer from `num_bytes` bytes.
+
+    If `exclude` is set, this function guarantees such number is not returned.
+    """
+    num = int.from_bytes(urandom(num_bytes), "little", signed=False)
+
+    if exclude:
+        while num in exclude:
+            num = int.from_bytes(urandom(num_bytes), "little", signed=False)
+    return num
 
 
 def convert_uint64_to_sint64(u: int) -> int:
@@ -246,8 +256,8 @@ def create_taskres_for_unavailable_taskins(taskins_id: Union[str, UUID]) -> Task
         run_id=0,  # Unknown run ID
         task=Task(
             # This function is only called by SuperLink, and thus it's the producer.
-            producer=Node(node_id=0, anonymous=False),
-            consumer=Node(node_id=0, anonymous=False),
+            producer=Node(node_id=SUPERLINK_NODE_ID),
+            consumer=Node(node_id=SUPERLINK_NODE_ID),
             created_at=current_time,
             ttl=0,
             ancestry=[str(taskins_id)],
@@ -285,8 +295,8 @@ def create_taskres_for_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
         run_id=ref_taskins.run_id,
         task=Task(
             # This function is only called by SuperLink, and thus it's the producer.
-            producer=Node(node_id=0, anonymous=False),
-            consumer=Node(node_id=0, anonymous=False),
+            producer=Node(node_id=SUPERLINK_NODE_ID),
+            consumer=Node(node_id=SUPERLINK_NODE_ID),
             created_at=current_time,
             ttl=ttl,
             ancestry=[ref_taskins.task_id],

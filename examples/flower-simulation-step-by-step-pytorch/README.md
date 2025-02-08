@@ -8,12 +8,14 @@ framework: [torch]
 
 > \[!NOTE\]
 > While this tutorial shows how to extend the functionality of a Flower App that uses PyTorch, there is little specific about PyTorch in the changes described in this tutorial series. This means that you can make use of all the concepts presented even if you decide to use a different ML framework.
+>
+> The previous version of this tutorial from the 2023 video tutorial series can be found here: [c8120f2](https://github.com/adap/flower/tree/c8120f2669fef0f2e6815ab1e957e5366d06d19d/examples/flower-simulation-step-by-step-pytorch). Please note that method of running simulations is no longer recommended and some parts of it, e.g. using `start_simulation`, are deprecated in recent versions of `flwr`.
 
 This directory contains the code to follow along the `Flower AI Simulation 2025` tutorial series on Youtube. You can find all the videos [here](https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb) or clicking on the video previews below.
 
 | [![Image 1](https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg)](https://youtu.be/XK_dRVcSZqg) | [![Image 1](https://img.youtube.com/vi/VwGq16DMx3Q/0.jpg)](https://youtu.be/VwGq16DMx3Q) | [![Image 2](https://img.youtube.com/vi/8Uwsa0x7VJw/0.jpg)](https://youtu.be/8Uwsa0x7VJw) | [![Image 3](https://img.youtube.com/vi/KsMP9dgcLw4/0.jpg)](https://youtu.be/KsMP9dgcLw4) | [![Image 4](https://img.youtube.com/vi/dZRDe1ldy5s/0.jpg)](https://youtu.be/dZRDe1ldy5s) |
 | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| [![Image 5](https://img.youtube.com/vi/udDSIQyYzNM/0.jpg)](https://youtu.be/udDSIQyYzNM) | [![Image 6](https://img.youtube.com/vi/ppYemmT2mOs/0.jpg)](https://youtu.be/ppYemmT2mOs) | [![Image 7](https://img.youtube.com/vi/TAUxb9eEZ3w/0.jpg)](https://youtu.be/TAUxb9eEZ3w) | [![Image 8](https://img.youtube.com/vi/nUUkuqi4Lpo/0.jpg)](https://youtu.be/nUUkuqi4Lpo) |                                                                                          |
+| [![Image 5](https://img.youtube.com/vi/udDSIQyYzNM/0.jpg)](https://youtu.be/udDSIQyYzNM) | [![Image 6](https://img.youtube.com/vi/ir2okeinZ2g/0.jpg)](https://youtu.be/ir2okeinZ2g) | [![Image 7](https://img.youtube.com/vi/TAUxb9eEZ3w/0.jpg)](https://youtu.be/TAUxb9eEZ3w) | [![Image 8](https://img.youtube.com/vi/nUUkuqi4Lpo/0.jpg)](https://youtu.be/nUUkuqi4Lpo) |                                                                                          |
 
 > \[!TIP\]
 > 🙋 Got questions? Something isn't covered or could be improved? **We'd love to hear from you!** Join the [🌼 Flower Workspace](https://flower.ai/join-slack/) and the [Flower Discuss Forum](https://discuss.flower.ai/)!
