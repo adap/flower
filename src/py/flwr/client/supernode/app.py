@@ -29,6 +29,7 @@ from cryptography.hazmat.primitives.serialization import (
 
 from flwr.common import EventType, event
 from flwr.common.args import try_obtain_root_certificates
+from flwr.common.args_utils import SortingHelpFormatter
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
@@ -112,6 +113,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     """Parse flower-supernode command line arguments."""
     parser = argparse.ArgumentParser(
         description="Start a Flower SuperNode",
+        formatter_class=SortingHelpFormatter,
     )
     _parse_args_common(parser)
     parser.add_argument(

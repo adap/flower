@@ -26,6 +26,7 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.cli.utils import get_sha256_hash
 from flwr.common.args import add_args_flwr_app_common
+from flwr.common.args_utils import SortingHelpFormatter
 from flwr.common.config import (
     get_flwr_dir,
     get_fused_config_from_dir,
@@ -240,6 +241,7 @@ def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
     """Parse flwr-serverapp command line arguments."""
     parser = argparse.ArgumentParser(
         description="Run a Flower ServerApp",
+        formatter_class=SortingHelpFormatter,
     )
     parser.add_argument(
         "--serverappio-api-address",

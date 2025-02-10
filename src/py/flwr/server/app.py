@@ -37,6 +37,7 @@ from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
+from flwr.common.args_utils import SortingHelpFormatter
 from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
@@ -691,8 +692,50 @@ def _run_fleet_api_rest(
 
 def _parse_args_run_superlink() -> argparse.ArgumentParser:
     """Parse command line arguments for both ServerAppIo API and Fleet API."""
+
+    # Custom ArgumentParser to sort arguments
+    # class SortingHelpFormatter(argparse.HelpFormatter):
+    #     def add_arguments(self, actions):
+    #         actions = sorted(actions, key=lambda action: action.dest)
+    #         super(SortingHelpFormatter, self).add_arguments(actions)
+    # class SortingHelpFormatter(argparse.HelpFormatter):
+    #     def add_usage(self, usage, actions, groups, prefix=None):
+    #         # Sort all actions (both optionals and positionals) alphabetically.
+    #         # For optionals, sort by their option strings; for positionals, sort by their destination.
+    #         actions = sorted(actions, key=lambda action: action.dest)
+    #         # actions = sorted(
+    #         #     actions,
+    #         #     key=lambda a: a.option_strings if a.option_strings else [a.dest],
+    #         # )
+    #         super(SortingHelpFormatter, self).add_usage(usage, actions, groups, prefix)
+
+    #     def add_arguments(self, actions):
+    #         # Sort the actions the same way for the help text.
+    #         actions = sorted(actions, key=lambda action: action.dest)
+    #         # actions = sorted(
+    #         #     actions,
+    #         #     key=lambda a: a.option_strings if a.option_strings else [a.dest],
+    #         # )
+    #         super(SortingHelpFormatter, self).add_arguments(actions)
+
+    # class SortedUsageFormatter(argparse.HelpFormatter):
+    #     def _format_usage(self, usage, actions, groups, prefix):
+    #         # Sort actions: if option_strings exist, sort by the first one,
+    #         # otherwise (for positionals) sort by the destination name.
+    #         actions = sorted(actions, key=lambda action: action.dest)
+    #         # sorted_actions = sorted(
+    #         #     actions,
+    #         #     key=lambda action: (
+    #         #         action.option_strings[0] if action.option_strings else action.dest
+    #         #     ),
+    #         # )
+    #         return super(SortedUsageFormatter, self)._format_usage(
+    #             usage, actions, groups, prefix
+    #         )
+
     parser = argparse.ArgumentParser(
         description="Start a Flower SuperLink",
+        formatter_class=SortingHelpFormatter,
     )
 
     _add_args_common(parser=parser)

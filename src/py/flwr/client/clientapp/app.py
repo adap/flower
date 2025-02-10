@@ -26,6 +26,7 @@ from flwr.cli.install import install_from_fab
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import Context, Message
 from flwr.common.args import add_args_flwr_app_common
+from flwr.common.args_utils import SortingHelpFormatter
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS, ErrorCode
 from flwr.common.exit import ExitCode, flwr_exit
@@ -235,6 +236,7 @@ def _parse_args_run_flwr_clientapp() -> argparse.ArgumentParser:
     """Parse flwr-clientapp command line arguments."""
     parser = argparse.ArgumentParser(
         description="Run a Flower ClientApp",
+        formatter_class=SortingHelpFormatter,
     )
     parser.add_argument(
         "--clientappio-api-address",
