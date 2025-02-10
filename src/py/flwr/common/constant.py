@@ -17,14 +17,6 @@
 
 from __future__ import annotations
 
-MISSING_EXTRA_REST = """
-Extra dependencies required for using the REST-based Fleet API are missing.
-
-To use the REST API, install `flwr` with the `rest` extra:
-
-    `pip install flwr[rest]`.
-"""
-
 TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
 TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
 TRANSPORT_TYPE_GRPC_ADAPTER = "grpc-adapter"
@@ -80,7 +72,11 @@ FAB_ALLOWED_EXTENSIONS = {".py", ".toml", ".md"}
 FAB_CONFIG_FILE = "pyproject.toml"
 FAB_DATE = (2024, 10, 1, 0, 0, 0)
 FAB_HASH_TRUNCATION = 8
-FLWR_HOME = "FLWR_HOME"
+FLWR_DIR = ".flwr"  # The default Flower directory: ~/.flwr/
+FLWR_HOME = "FLWR_HOME"  # If set, override the default Flower directory
+
+# Constant for SuperLink
+SUPERLINK_NODE_ID = 1
 
 # Constants entries in Node config for Simulation
 PARTITION_ID_KEY = "partition-id"
@@ -109,6 +105,20 @@ LOG_UPLOAD_INTERVAL = 0.2  # Minimum interval between two log uploads
 
 # Retry configurations
 MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
+
+# Constants for user authentication
+CREDENTIALS_DIR = ".credentials"
+AUTH_TYPE_JSON_KEY = "auth-type"  # For key name in JSON file
+AUTH_TYPE_YAML_KEY = "auth_type"  # For key name in YAML file
+ACCESS_TOKEN_KEY = "flwr-oidc-access-token"
+REFRESH_TOKEN_KEY = "flwr-oidc-refresh-token"
+
+# Constants for node authentication
+PUBLIC_KEY_HEADER = "flwr-public-key-bin"  # Must end with "-bin" for binary data
+SIGNATURE_HEADER = "flwr-signature-bin"  # Must end with "-bin" for binary data
+TIMESTAMP_HEADER = "flwr-timestamp"
+TIMESTAMP_TOLERANCE = 10  # General tolerance for timestamp verification
+SYSTEM_TIME_TOLERANCE = 5  # Allowance for system time drift
 
 
 class MessageType:
@@ -179,5 +189,26 @@ class SubStatus:
     STOPPED = "stopped"
 
     def __new__(cls) -> SubStatus:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class CliOutputFormat:
+    """Define output format for `flwr` CLI commands."""
+
+    DEFAULT = "default"
+    JSON = "json"
+
+    def __new__(cls) -> CliOutputFormat:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class AuthType:
+    """User authentication types."""
+
+    OIDC = "oidc"
+
+    def __new__(cls) -> AuthType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")

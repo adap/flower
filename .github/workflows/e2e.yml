@@ -150,15 +150,9 @@ jobs:
 
           - directory: e2e-pytorch-lightning
             e2e: e2e_pytorch_lightning
-            dataset: |
-              from torchvision.datasets import MNIST
-              MNIST('./data', download=True)
 
           - directory: e2e-scikit-learn
             e2e: e2e_scikit_learn
-            dataset: |
-              import openml
-              openml.datasets.get_dataset(554)
 
           - directory: e2e-fastai
             e2e: e2e_fastai
@@ -303,6 +297,8 @@ jobs:
         run: |
           flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
           cd tmp-${{ matrix.framework }}
+          sed -i 's/"flwr\[[^]]*\][^"]*", *//g' pyproject.toml
+          pip install flwr[simulation]
           pip install .
       - name: Run project
         run: |

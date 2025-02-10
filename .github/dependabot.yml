@@ -66,12 +66,6 @@ updates:
     open-pull-requests-limit: 2
 
   - package-ecosystem: "pip"
-    directory: "/e2e/tabnet"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 2
-
-  - package-ecosystem: "pip"
     directory: "/e2e/pytorch-lightning"
     schedule:
       interval: "daily"
