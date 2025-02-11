@@ -1,0 +1,16 @@
+[build-system]
+requires = [
+    "poetry==1.1.13",
+]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "timeout"
+version = "0.1.0"
+description = "Example showing how to use the timeout feature"
+authors = ["The Flower Authors <enquiries@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+# flwr = "^0.18.0"
+flwr = { path = "../../", develop = true }  # Development
