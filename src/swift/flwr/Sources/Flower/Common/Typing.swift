@@ -257,3 +257,261 @@ public struct Reconnect: Equatable {
 public struct Disconnect: Equatable {
     public var reason: String
 }
+
+/// A structure that stores metadata associated with the current message.
+///
+/// - Parameters:
+///   - runID: An identifier for the current run.
+///   - messageID: An identifier for the current message.
+///   - srcNodeID: An identifier for the node sending this message.
+///   - dstNodeID: An identifier for the node receiving this message.
+///   - replyToMessage: An identifier for the message that this message replies to.
+///   - groupID: An identifier for grouping messages. In some settings,
+///     this is used as the federated learning (FL) round.
+///   - ttl: Time-to-live for this message, in seconds.
+///   - messageType: A string that encodes the action to be executed
+///     on the receiving end.
+///   - partitionID: An optional identifier used when loading a particular
+///     data partition for a client application. This is more relevant
+///     when conducting simulations.
+public struct Metadata: Equatable {
+    public var runID: Int
+    public var messageID: String
+    public var srcNodeID: Int
+    public var dstNodeID: Int
+    public var replyToMessage: String
+    public var groupID: String
+    public var ttl: Double
+    public var messageType: String
+    public var partitionID: Int?
+    private var createdAt: TimeInterval // Unix timestamp (in seconds)
+    
+    public init(
+        runID: Int,
+        messageID: String,
+        srcNodeID: Int,
+        dstNodeID: Int,
+        replyToMessage: String,
+        groupID: String,
+        ttl: Double,
+        messageType: String,
+        partitionID: Int? = nil
+    ) {
+        self.runID = runID
+        self.messageID = messageID
+        self.srcNodeID = srcNodeID
+        self.dstNodeID = dstNodeID
+        self.replyToMessage = replyToMessage
+        self.groupID = groupID
+        self.ttl = ttl
+        self.messageType = messageType
+        self.partitionID = partitionID
+        self.createdAt = Date().timeIntervalSince1970
+    }
+}
+
+/// A structure that stores the state of your run.
+///
+/// - Parameters:
+///   - state: An instance of `RecordSet` that holds records added by the entity
+///     in a given run and remains local. The data it holds never leaves the system
+///     it's running on. This can be used as intermediate storage or a scratchpad
+///     when executing modifications. It can also be used as memory to access
+///     at different points during the lifecycle of this entity (e.g., across
+///     multiple rounds).
+public struct Context: Equatable {
+    public var state: RecordSet
+    
+    public init(state: RecordSet) {
+        self.state = state
+    }
+}
+
+/// A structure that contains serialized data from an array-like or tensor-like object,
+/// along with metadata about it.
+///
+/// - Parameters:
+///   - dtype: A string representing the data type of the serialized object (e.g., `np.float32`).
+///   - shape: An array of integers representing the shape of the unserialized array-like object.
+///     This is used to deserialize the data (depending on the serialization method) or
+///     serves as a metadata field.
+///   - stype: A string indicating the type of serialization mechanism used to generate the
+///     bytes in `data` from an array-like or tensor-like object.
+///   - data: A buffer of bytes containing the data.
+public struct MultiArray: Equatable {
+    public var dtype: String
+    public var shape: [Int32]
+    public var stype: String
+    public var data: Data
+    
+    public init(dtype: String, shape: [Int32], stype: String, data: Data) {
+        self.dtype = dtype
+        self.shape = shape
+        self.stype = stype
+        self.data = data
+    }
+}
+
+/// Possible `MetricsRecord`'s value, which can be one of these types.
+///
+/// - Cases:
+///   - double: Represents a `Double` metric value.
+///   - sint64: Represents an `Int64` metric value.
+///   - doubleList: Represents an array of `Double` metric values.
+///   - sint64List: Represents an array of `Int64` metric values.
+public enum MetricsRecordValue: Equatable {
+    case double(Double)
+    case sint64(Int64)
+    case doubleList(Array<Double>)
+    case sint64List(Array<Int64>)
+}
+
+/// Possible `ConfigsRecord`'s value, which can be one of these types.
+///
+/// - Cases:
+///   - double: Represents a `Double` configuration value.
+///   - sint64: Represents an `Int64` configuration value.
+///   - bool: Represents a `Bool` configuration value.
+///   - string: Represents a `String` configuration value.
+///   - bytes: Represents a `Data` configuration value.
+///   - doubleList: Represents an array of `Double` configuration values.
+///   - sint64List: Represents an array of `Int64` configuration values.
+///   - boolList: Represents an array of `Bool` configuration values.
+///   - stringList: Represents an array of `String` configuration values.
+///   - bytesList: Represents an array of `Data` configuration values.
+public enum ConfigsRecordValue: Equatable {
+    case double(Double)
+    case sint64(Int64)
+    case bool(Bool)
+    case string(String)
+    case bytes(Data)
+    case doubleList(Array<Double>)
+    case sint64List(Array<Int64>)
+    case boolList(Array<Bool>)
+    case stringList(Array<String>)
+    case bytesList(Array<Data>)
+}
+
+internal enum Request: Equatable {
+    case createNode(Flwr_Proto_CreateNodeRequest)
+    case deleteNode(Flwr_Proto_DeleteNodeRequest)
+    case pullTaskIns(Flwr_Proto_PullTaskInsRequest)
+    case pushTaskRes(Flwr_Proto_PushTaskResRequest)
+    case getRun(Flwr_Proto_GetRunRequest)
+}
+
+internal enum Response: Equatable {
+    case createNode(Flwr_Proto_CreateNodeResponse)
+    case deleteNode(Flwr_Proto_DeleteNodeResponse)
+    case pullTaskIns(Flwr_Proto_PullTaskInsResponse)
+    case pushTaskRes(Flwr_Proto_PushTaskResResponse)
+    case getRun(Flwr_Proto_GetRunResponse)
+}
+
+/// A structure that stores parameters informations.
+///
+/// - Parameters:
+///   - dataKeys: An array of keys representing the parameter names.
+///   - dataValues: An array of `MultiArray` representing the parameter values.
+public struct ParametersRecord: Equatable {
+    public var dataKeys: [String]
+    public var dataValues: [MultiArray]
+    
+    public init(dataKeys: [String], dataValues: [MultiArray]) {
+        self.dataKeys = dataKeys
+        self.dataValues = dataValues
+    }
+}
+
+/// A structure that stores metric informations.
+///
+/// - Parameters:
+///   - data: A dictionary with string and (`MetricsRecordValue`) pairs.
+public struct MetricsRecord: Equatable {
+    public var data: [String : MetricsRecordValue]
+    
+    public init(data: [String : MetricsRecordValue]) {
+        self.data = data
+    }
+}
+
+/// A structure that stores config informations.
+///
+/// - Parameters:
+///   - data: A dictionary with string and (`ConfigsRecordValue`) pairs.
+public struct ConfigsRecord: Equatable {
+    public var data: [String : ConfigsRecordValue]
+    
+    public init(data: [String : ConfigsRecordValue]) {
+        self.data = data
+    }
+}
+/// Represents a group of parameters, metrics, and configurations.
+///
+/// - Parameters:
+///   - parameters: A dictionary with string and `ParametersRecord` pairs.
+///   - metrics: A dictionary with string and `MetricsRecord` pairs.
+///   - configs: A dictionary with string and`ConfigsRecord` pairs.
+public struct RecordSet: Equatable {
+    public var parameters: [String : ParametersRecord]
+    public var metrics: [String : MetricsRecord]
+    public var configs: [String : ConfigsRecord]
+    
+    public init(
+        parameters: [String : ParametersRecord],
+        metrics: [String : MetricsRecord],
+        configs: [String : ConfigsRecord]
+    ) {
+        self.parameters = parameters
+        self.metrics = metrics
+        self.configs = configs
+    }
+}
+
+/// A structure that stores information about an error that occurred.
+///
+/// - Parameters:
+///   - code: An identifier for the error.
+///   - reason: An optional string that provides a reason for why the error occurred
+///     (e.g., an exception stack trace).
+public struct FlwrError: Equatable {
+    public var code: Int
+    public var reason: String?
+    
+    public init(code: Int, reason: String? = nil) {
+        self.code = code
+        self.reason = reason
+    }
+}
+
+/// Represents the state of your application from the viewpoint of the entity using it.
+///
+/// - Parameters:
+///   - metadata: An instance of `Metadata` containing information
+///     about the message to be executed.
+///   - content: An optional instance of `RecordSet` that holds records
+///     either sent by another entity (e.g., sent by server-side logic
+///     to a client, or vice-versa) or that will be sent to it.
+///   - error: An optional instance of `Error` that captures information
+///     about an error that occurred while processing another message.
+public struct Message: Equatable {
+    public var metadata: Metadata
+    public var content: RecordSet?
+    public var error: FlwrError?
+    
+    public init(
+        metadata: Metadata,
+        content: RecordSet? = nil,
+        error: FlwrError? = nil
+    ) throws {
+        if content != nil && error != nil {
+            throw FlowerException.ValueError(
+                "Either `content` or `error` must be set, but not both."
+            )
+        }
+        let createdAt = Date().timeIntervalSince1970
+        self.metadata = metadata
+        self.content = content
+        self.error = error
+    }
+}
