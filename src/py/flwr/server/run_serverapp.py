@@ -24,7 +24,7 @@ from flwr.common.logger import log
 from flwr.common.object_ref import load_app
 
 from .driver import Driver
-from .server_app import LoadServerAppError, ServerApp
+from .server_app import LoadServerAppError, ServerApp, manage_server_app
 
 
 def run(
@@ -60,7 +60,8 @@ def run(
     server_app = _load()
 
     # Call ServerApp
-    server_app(driver=driver, context=context)
+    with manage_server_app(server_app, driver=driver, context=context):
+        server_app(driver=driver, context=context)
 
     log(DEBUG, "ServerApp finished running.")
     return context

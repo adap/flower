@@ -16,6 +16,8 @@
 
 
 import inspect
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Callable, Optional
 
 from flwr.client.client import Client
@@ -135,6 +137,8 @@ class ClientApp:
         self._train: Optional[ClientAppCallable] = None
         self._evaluate: Optional[ClientAppCallable] = None
         self._query: Optional[ClientAppCallable] = None
+        self._enter: Optional[Callable[[Context], None]] = None
+        self._exit: Optional[Callable[[Context], None]] = None
 
     def __call__(self, message: Message, context: Context) -> Message:
         """Execute `ClientApp`."""
@@ -249,6 +253,58 @@ class ClientApp:
 
         return query_decorator
 
+    def enter(self) -> Callable[[Callable[[Context], None]], Callable[[Context], None]]:
+        """Return a decorator that registers the enter fn with the client app.
+
+        Examples
+        --------
+        >>> app = ClientApp()
+        >>>
+        >>> @app.enter()
+        >>> def enter(context: Context) -> None:
+        >>>    print("ClientApp enter running")
+        """
+
+        def enter_decorator(
+            enter_fn: Callable[[Context], None]
+        ) -> Callable[[Context], None]:
+            """Register the enter fn with the ServerApp object."""
+            warn_preview_feature("ClientApp-register-enter-function")
+
+            # Register provided function with the ClientApp object
+            self._enter = enter_fn
+
+            # Return provided function unmodified
+            return enter_fn
+
+        return enter_decorator
+
+    def exit(self) -> Callable[[Callable[[Context], None]], Callable[[Context], None]]:
+        """Return a decorator that registers the exit fn with the client app.
+
+        Examples
+        --------
+        >>> app = ClientApp()
+        >>>
+        >>> @app.exit()
+        >>> def exit(context: Context) -> None:
+        >>>    print("ClientApp exit running")
+        """
+
+        def exit_decorator(
+            exit_fn: Callable[[Context], None]
+        ) -> Callable[[Context], None]:
+            """Register the exit fn with the ServerApp object."""
+            warn_preview_feature("ClientApp-register-exit-function")
+
+            # Register provided function with the ClientApp object
+            self._exit = exit_fn
+
+            # Return provided function unmodified
+            return exit_fn
+
+        return exit_decorator
+
 
 class LoadClientAppError(Exception):
     """Error when trying to load `ClientApp`."""
@@ -283,3 +339,17 @@ def _registration_error(fn_name: str) -> ValueError:
         >>>    )
         """,
     )
+
+
+@contextmanager
+def manage_client_app(app: ClientApp, context: Context) -> Iterator[None]:
+    """Manage the lifecycle of a ClientApp."""
+    # pylint: disable=protected-access
+    try:
+        if app._enter is not None:
+            app._enter(context)
+        yield
+    finally:
+        if app._exit is not None:
+            app._exit(context)
+    # pylint: enable=protected-access

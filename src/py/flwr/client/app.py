@@ -33,7 +33,7 @@ from grpc import RpcError
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
-from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.client_app import ClientApp, LoadClientAppError, manage_client_app
 from flwr.client.clientapp.app import flwr_clientapp
 from flwr.client.nodestate.nodestate_factory import NodeStateFactory
 from flwr.client.typing import ClientFnExt
@@ -567,7 +567,10 @@ def start_client_internal(
                             )
 
                             # Execute ClientApp
-                            reply_message = client_app(message=message, context=context)
+                            with manage_client_app(client_app, context=context):
+                                reply_message = client_app(
+                                    message=message, context=context
+                                )
                     except Exception as ex:  # pylint: disable=broad-exception-caught
 
                         # Legacy grpc-bidi
