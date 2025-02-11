@@ -68,6 +68,12 @@ public class FlwrGRPC {
     
     let extendedInterceptor: InterceptorExtension?
     
+    private var telemetry = false
+
+    public func setTelemetry(_ telemetryBool: Bool) {
+        telemetry = telemetryBool
+    }
+    
     private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
                                     category: String(describing: FlwrGRPC.self))
     /// Creates the client side communication class towards the server.
@@ -119,6 +125,10 @@ public class FlwrGRPC {
         callOptions.customMetadata.add(name: "maxReceiveMessageLength", value: String(FlwrGRPC.maxMessageLength))
         callOptions.customMetadata.add(name: "maxSendMessageLength", value: String(FlwrGRPC.maxMessageLength))
         
+        if telemetry, #available(iOS 15.0, *) {
+            createEvent(event: .START_CLIENT_ENTER, eventDetails: [:])
+        }
+        
         self.bidirectionalStream = grpcClient.join(callOptions: callOptions, handler: { sm in
             do {
                 let promise = self.eventLoopGroup
@@ -154,6 +164,10 @@ public class FlwrGRPC {
             
             log.info("Closing gRPC event loop group")
             try self.eventLoopGroup.syncShutdownGracefully()
+            
+            if telemetry, #available(iOS 15.0, *) {
+                createEvent(event: .START_CLIENT_LEAVE, eventDetails: [:])
+            }
             
             completion()
             
