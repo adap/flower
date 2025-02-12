@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.15.0"
+version = "1.16.0"
 description = "Flower: A Friendly Federated AI Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -68,8 +68,8 @@ flower-client-app = "flwr.client.supernode:run_client_app" # Deprecated
 python = "^3.9"
 # Mandatory dependencies
 numpy = ">=1.26.0,<3.0.0"
-grpcio = "^1.69.0"
-protobuf = "^5.29.3"
+grpcio = "^1.62.3,!=1.65.0"
+protobuf = "^4.21.6"
 cryptography = "^43.0.1"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
@@ -92,7 +92,7 @@ rest = ["starlette", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.6"
-types-protobuf = "==5.29.1.20241207"
+types-protobuf = "==4.21.0.7"
 types-requests = "==2.31.0.20240125"
 types-setuptools = "==69.0.0.20240125"
 clang-format = "==17.0.6"
@@ -107,7 +107,7 @@ parameterized = "==0.9.0"
 pytest = "==7.4.4"
 pytest-cov = "==4.1.0"
 pytest-watcher = "==0.4.3"
-grpcio-tools = "==1.69.0"
+grpcio-tools = "==1.62.3"
 mypy-protobuf = "==3.2.0"
 jupyterlab = "==4.0.12"
 rope = "==1.13.0"

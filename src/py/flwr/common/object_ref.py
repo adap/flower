@@ -19,12 +19,9 @@ import ast
 import importlib
 import sys
 from importlib.util import find_spec
-from logging import WARN
 from pathlib import Path
 from threading import Lock
 from typing import Any, Optional, Union
-
-from .logger import log
 
 OBJECT_REF_HELP_STR = """
 \n\nThe object reference string should have the form <module>:<attribute>. Valid
@@ -171,17 +168,6 @@ def load_app(  # pylint: disable= too-many-branches
             # Import the module
             if module_str not in sys.modules:
                 module = importlib.import_module(module_str)
-            # Hack: `tabnet` does not work with `importlib.reload`
-            elif "tabnet" in sys.modules:
-                log(
-                    WARN,
-                    "Cannot reload module `%s` from disk due to compatibility issues "
-                    "with the `tabnet` library. The module will be loaded from the "
-                    "cache instead. If you experience issues, consider restarting "
-                    "the application.",
-                    module_str,
-                )
-                module = sys.modules[module_str]
             else:
                 module = sys.modules[module_str]
                 _reload_modules(project_dir)

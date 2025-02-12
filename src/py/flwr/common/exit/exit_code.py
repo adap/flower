@@ -39,10 +39,12 @@ class ExitCode:
 
     # ClientApp-specific exit codes (400-499)
 
-    # Common exit codes (500-)
-    COMMON_ADDRESS_INVALID = 500
-    COMMON_MISSING_EXTRA_REST = 501
-    COMMON_TLS_NOT_SUPPORTED = 502
+    # Simulation-specific exit codes (500-599)
+
+    # Common exit codes (600-)
+    COMMON_ADDRESS_INVALID = 600
+    COMMON_MISSING_EXTRA_REST = 601
+    COMMON_TLS_NOT_SUPPORTED = 602
 
     def __new__(cls) -> ExitCode:
         """Prevent instantiation."""
@@ -75,7 +77,8 @@ EXIT_CODE_HELP = {
         "file and try again."
     ),
     # ClientApp-specific exit codes (400-499)
-    # Common exit codes (500-)
+    # Simulation-specific exit codes (500-599)
+    # Common exit codes (600-)
     ExitCode.COMMON_ADDRESS_INVALID: (
         "Please provide a valid URL, IPv4 or IPv6 address."
     ),

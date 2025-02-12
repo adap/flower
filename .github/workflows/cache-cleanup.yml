@@ -18,7 +18,6 @@ jobs:
           - directory: jax
           - directory: pytorch
           - directory: tensorflow
-          - directory: tabnet
           - directory: opacus
           - directory: pytorch-lightning
           - directory: scikit-learn

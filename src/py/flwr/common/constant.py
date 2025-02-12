@@ -108,9 +108,17 @@ MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 
 # Constants for user authentication
 CREDENTIALS_DIR = ".credentials"
-AUTH_TYPE = "auth_type"
-ACCESS_TOKEN_KEY = "access_token"
-REFRESH_TOKEN_KEY = "refresh_token"
+AUTH_TYPE_JSON_KEY = "auth-type"  # For key name in JSON file
+AUTH_TYPE_YAML_KEY = "auth_type"  # For key name in YAML file
+ACCESS_TOKEN_KEY = "flwr-oidc-access-token"
+REFRESH_TOKEN_KEY = "flwr-oidc-refresh-token"
+
+# Constants for node authentication
+PUBLIC_KEY_HEADER = "flwr-public-key-bin"  # Must end with "-bin" for binary data
+SIGNATURE_HEADER = "flwr-signature-bin"  # Must end with "-bin" for binary data
+TIMESTAMP_HEADER = "flwr-timestamp"
+TIMESTAMP_TOLERANCE = 10  # General tolerance for timestamp verification
+SYSTEM_TIME_TOLERANCE = 5  # Allowance for system time drift
 
 
 class MessageType:
@@ -192,5 +200,15 @@ class CliOutputFormat:
     JSON = "json"
 
     def __new__(cls) -> CliOutputFormat:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class AuthType:
+    """User authentication types."""
+
+    OIDC = "oidc"
+
+    def __new__(cls) -> AuthType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")

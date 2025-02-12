@@ -28,28 +28,28 @@ from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
 )
-from flwr.common.grpc import create_channel
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
-from flwr.common.serde import message_from_taskres, message_to_taskins, run_from_proto
+from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Run
+from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullTaskResRequest,
-    PullTaskResResponse,
-    PushTaskInsRequest,
-    PushTaskInsResponse,
+    PullResMessagesRequest,
+    PullResMessagesResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .driver import Driver
 
 ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
-[Driver] Error: Not connected.
+[flwr-serverapp] Error: Not connected.
 
 Call `connect()` on the `GrpcDriverStub` instance before calling any of the other
 `GrpcDriverStub` methods.
@@ -100,9 +100,10 @@ class GrpcDriver(Driver):
             insecure=(self._cert is None),
             root_certificates=self._cert,
         )
+        self._channel.subscribe(on_channel_state_change)
         self._grpc_stub = ServerAppIoStub(self._channel)
         _wrap_stub(self._grpc_stub, self._retry_invoker)
-        log(DEBUG, "[Driver] Connected to %s", self._addr)
+        log(DEBUG, "[flwr-serverapp] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:
         """Disconnect from the ServerAppIo API."""
@@ -113,7 +114,7 @@ class GrpcDriver(Driver):
         self._channel = None
         self._grpc_stub = None
         channel.close()
-        log(DEBUG, "[Driver] Disconnected")
+        log(DEBUG, "[flwr-serverapp] Disconnected")
 
     def set_run(self, run_id: int) -> None:
         """Set the run."""
@@ -196,22 +197,22 @@ class GrpcDriver(Driver):
         This method takes an iterable of messages and sends each message
         to the node specified in `dst_node_id`.
         """
-        # Construct TaskIns
-        task_ins_list: list[TaskIns] = []
+        # Construct Messages
+        message_proto_list: list[ProtoMessage] = []
         for msg in messages:
             # Check message
             self._check_message(msg)
-            # Convert Message to TaskIns
-            taskins = message_to_taskins(msg)
+            # Convert to proto
+            msg_proto = message_to_proto(msg)
             # Add to list
-            task_ins_list.append(taskins)
+            message_proto_list.append(msg_proto)
         # Call GrpcDriverStub method
-        res: PushTaskInsResponse = self._stub.PushTaskIns(
-            PushTaskInsRequest(
-                task_ins_list=task_ins_list, run_id=cast(Run, self._run).run_id
+        res: PushInsMessagesResponse = self._stub.PushMessages(
+            PushInsMessagesRequest(
+                messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
             )
         )
-        return list(res.task_ids)
+        return list(res.message_ids)
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
@@ -219,14 +220,15 @@ class GrpcDriver(Driver):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        # Pull TaskRes
-        res: PullTaskResResponse = self._stub.PullTaskRes(
-            PullTaskResRequest(
-                node=self.node, task_ids=message_ids, run_id=cast(Run, self._run).run_id
+        # Pull Messages
+        res: PullResMessagesResponse = self._stub.PullMessages(
+            PullResMessagesRequest(
+                message_ids=message_ids,
+                run_id=cast(Run, self._run).run_id,
             )
         )
-        # Convert TaskRes to Message
-        msgs = [message_from_taskres(taskres) for taskres in res.task_res_list]
+        # Convert Message from Protobuf representation
+        msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
         return msgs
 
     def send_and_receive(

@@ -21,23 +21,15 @@ class ServerAppIoStub:
         flwr.proto.serverappio_pb2.GetNodesResponse]
     """Return a set of nodes"""
 
-    PushTaskIns: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.serverappio_pb2.PushTaskInsRequest,
-        flwr.proto.serverappio_pb2.PushTaskInsResponse]
-    """Create one or more tasks"""
-
     PushMessages: grpc.UnaryUnaryMultiCallable[
         flwr.proto.serverappio_pb2.PushInsMessagesRequest,
         flwr.proto.serverappio_pb2.PushInsMessagesResponse]
-
-    PullTaskRes: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.serverappio_pb2.PullTaskResRequest,
-        flwr.proto.serverappio_pb2.PullTaskResResponse]
-    """Get task results"""
+    """Create one or more messages"""
 
     PullMessages: grpc.UnaryUnaryMultiCallable[
         flwr.proto.serverappio_pb2.PullResMessagesRequest,
         flwr.proto.serverappio_pb2.PullResMessagesResponse]
+    """Get message results"""
 
     GetRun: grpc.UnaryUnaryMultiCallable[
         flwr.proto.run_pb2.GetRunRequest,
@@ -93,32 +85,20 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def PushTaskIns(self,
-        request: flwr.proto.serverappio_pb2.PushTaskInsRequest,
-        context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PushTaskInsResponse:
-        """Create one or more tasks"""
-        pass
-
-    @abc.abstractmethod
     def PushMessages(self,
         request: flwr.proto.serverappio_pb2.PushInsMessagesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PushInsMessagesResponse: ...
-
-    @abc.abstractmethod
-    def PullTaskRes(self,
-        request: flwr.proto.serverappio_pb2.PullTaskResRequest,
-        context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PullTaskResResponse:
-        """Get task results"""
+    ) -> flwr.proto.serverappio_pb2.PushInsMessagesResponse:
+        """Create one or more messages"""
         pass
 
     @abc.abstractmethod
     def PullMessages(self,
         request: flwr.proto.serverappio_pb2.PullResMessagesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PullResMessagesResponse: ...
+    ) -> flwr.proto.serverappio_pb2.PullResMessagesResponse:
+        """Get message results"""
+        pass
 
     @abc.abstractmethod
     def GetRun(self,

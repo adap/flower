@@ -15,10 +15,10 @@
 """Common function to register exit handlers for server and client."""
 
 
-from signal import SIGINT, SIGQUIT, SIGTERM, signal
+import signal
 from threading import Thread
 from types import FrameType
-from typing import Optional
+from typing import Callable, Optional
 
 from grpc import Server
 
@@ -26,11 +26,14 @@ from flwr.common.telemetry import EventType
 
 from .exit import ExitCode, flwr_exit
 
-SIGNAL_TO_EXIT_CODE = {
-    SIGINT: ExitCode.GRACEFUL_EXIT_SIGINT,
-    SIGQUIT: ExitCode.GRACEFUL_EXIT_SIGQUIT,
-    SIGTERM: ExitCode.GRACEFUL_EXIT_SIGTERM,
+SIGNAL_TO_EXIT_CODE: dict[int, int] = {
+    signal.SIGINT: ExitCode.GRACEFUL_EXIT_SIGINT,
+    signal.SIGTERM: ExitCode.GRACEFUL_EXIT_SIGTERM,
 }
+
+# SIGQUIT is not available on Windows
+if hasattr(signal, "SIGQUIT"):
+    SIGNAL_TO_EXIT_CODE[signal.SIGQUIT] = ExitCode.GRACEFUL_EXIT_SIGQUIT
 
 
 def register_exit_handlers(
@@ -54,23 +57,16 @@ def register_exit_handlers(
         An optional list of threads that need to be gracefully
         terminated before exiting.
     """
-    default_handlers = {
-        SIGINT: None,
-        SIGQUIT: None,
-        SIGTERM: None,
-    }
+    default_handlers: dict[int, Callable[[int, FrameType], None]] = {}
 
-    def graceful_exit_handler(  # type: ignore
-        signalnum,
-        frame: FrameType,  # pylint: disable=unused-argument
-    ) -> None:
+    def graceful_exit_handler(signalnum: int, _frame: FrameType) -> None:
         """Exit handler to be registered with `signal.signal`.
 
         When called will reset signal handler to original signal handler from
         default_handlers.
         """
         # Reset to default handler
-        signal(signalnum, default_handlers[signalnum])
+        signal.signal(signalnum, default_handlers[signalnum])  # type: ignore
 
         if grpc_servers is not None:
             for grpc_server in grpc_servers:
@@ -87,15 +83,7 @@ def register_exit_handlers(
             event_type=event_type,
         )
 
-    default_handlers[SIGINT] = signal(  # type: ignore
-        SIGINT,
-        graceful_exit_handler,  # type: ignore
-    )
-    default_handlers[SIGQUIT] = signal(  # type: ignore
-        SIGQUIT,
-        graceful_exit_handler,  # type: ignore
-    )
-    default_handlers[SIGTERM] = signal(  # type: ignore
-        SIGTERM,
-        graceful_exit_handler,  # type: ignore
-    )
+    # Register signal handlers
+    for sig in SIGNAL_TO_EXIT_CODE:
+        default_handler = signal.signal(sig, graceful_exit_handler)  # type: ignore
+        default_handlers[sig] = default_handler  # type: ignore

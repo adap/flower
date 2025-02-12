@@ -109,6 +109,12 @@ Tabular Datasets
      - train 8.1k
    * - `scikit-learn/iris <https://huggingface.co/datasets/scikit-learn/iris>`_
      - train 150
+   * - `jiahborcn/chembl_aqsol <https://huggingface.co/datasets/jiahborcn/chembl_aqsol>`_
+     - train 12.9k;
+       test 3.2k
+   * - `jiahborcn/chembl_multiassay_activity <https://huggingface.co/datasets/jiahborcn/chembl_multiassay_activity>`_
+     - train 350k;
+       test 87.5k
 
 Text Datasets
 ~~~~~~~~~~~~~

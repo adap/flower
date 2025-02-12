@@ -31,7 +31,6 @@ from flwr.common.serde import context_to_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
 from flwr.proto.message_pb2 import Message  # pylint: disable=E0611
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
@@ -41,24 +40,16 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesResponse,
     PullResMessagesRequest,
     PullResMessagesResponse,
-    PullTaskResRequest,
-    PullTaskResResponse,
     PushInsMessagesRequest,
     PushInsMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
-    PushTaskInsRequest,
-    PushTaskInsResponse,
 )
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 from flwr.server.superlink.driver.serverappio_grpc import run_serverappio_api_grpc
 from flwr.server.superlink.driver.serverappio_servicer import _raise_if
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
-from flwr.server.superlink.linkstate.linkstate_test import (
-    create_ins_message,
-    create_task_ins,
-)
+from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 
 # pylint: disable=broad-except
@@ -137,20 +128,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=GetNodesRequest.SerializeToString,
             response_deserializer=GetNodesResponse.FromString,
         )
-        self._push_task_ins = self._channel.unary_unary(
-            "/flwr.proto.ServerAppIo/PushTaskIns",
-            request_serializer=PushTaskInsRequest.SerializeToString,
-            response_deserializer=PushTaskInsResponse.FromString,
-        )
         self._push_messages = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PushMessages",
             request_serializer=PushInsMessagesRequest.SerializeToString,
             response_deserializer=PushInsMessagesResponse.FromString,
-        )
-        self._pull_task_res = self._channel.unary_unary(
-            "/flwr.proto.ServerAppIo/PullTaskRes",
-            request_serializer=PullTaskResRequest.SerializeToString,
-            response_deserializer=PullTaskResResponse.FromString,
         )
         self._pull_messages = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PullMessages",
@@ -225,24 +206,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         self._assert_get_nodes_not_allowed(run_id)
 
-    def test_successful_push_task_ins_if_running(self) -> None:
-        """Test `PushTaskIns` success."""
-        # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
-
-        # Transition status to running. PushTaskRes is only allowed in running status.
-        self._transition_run_status(run_id, 2)
-        request = PushTaskInsRequest(task_ins_list=[task_ins], run_id=run_id)
-
-        # Execute
-        response, call = self._push_task_ins.with_call(request=request)
-
-        # Assert
-        assert isinstance(response, PushTaskInsResponse)
-        assert grpc.StatusCode.OK == call.code()
-
     def test_successful_push_messages_if_running(self) -> None:
         """Test `PushMessages` success."""
         # Prepare
@@ -262,37 +225,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, PushInsMessagesResponse)
         assert grpc.StatusCode.OK == call.code()
-
-    def _assert_push_task_ins_not_allowed(self, task_ins: TaskIns, run_id: int) -> None:
-        """Assert `PushTaskIns` not allowed."""
-        run_status = self.state.get_run_status({run_id})[run_id]
-        request = PushTaskInsRequest(task_ins_list=[task_ins], run_id=run_id)
-
-        with self.assertRaises(grpc.RpcError) as e:
-            self._push_task_ins.with_call(request=request)
-        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
-        assert e.exception.details() == self.status_to_msg[run_status.status]
-
-    @parameterized.expand(
-        [
-            (0,),  # Test not successful if RunStatus is pending.
-            (1,),  # Test not successful if RunStatus is starting.
-            (3,),  # Test not successful if RunStatus is finished.
-        ]
-    )  # type: ignore
-    def test_push_task_ins_not_successful_if_not_running(
-        self, num_transitions: int
-    ) -> None:
-        """Test `PushTaskIns` not successful if RunStatus is not running."""
-        # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
-
-        self._transition_run_status(run_id, num_transitions)
-
-        # Execute & Assert
-        self._assert_push_task_ins_not_allowed(task_ins, run_id)
 
     def _assert_push_ins_messages_not_allowed(
         self, message: Message, run_id: int
@@ -329,21 +261,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         self._assert_push_ins_messages_not_allowed(message_ins, run_id)
 
-    def test_pull_task_res_successful_if_running(self) -> None:
-        """Test `PullTaskRes` success."""
-        # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        # Transition status to running. PushTaskRes is only allowed in running status.
-        self._transition_run_status(run_id, 2)
-        request = PullTaskResRequest(task_ids=[], run_id=run_id)
-
-        # Execute
-        response, call = self._pull_task_res.with_call(request=request)
-
-        # Assert
-        assert isinstance(response, PullTaskResResponse)
-        assert grpc.StatusCode.OK == call.code()
-
     def test_successful_pull_messages_if_running(self) -> None:
         """Test `PullMessages` success."""
         # Prepare
@@ -358,35 +275,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, PullResMessagesResponse)
         assert grpc.StatusCode.OK == call.code()
-
-    def _assert_pull_task_res_not_allowed(self, run_id: int) -> None:
-        """Assert `PullTaskRes` not allowed."""
-        run_status = self.state.get_run_status({run_id})[run_id]
-        request = PullTaskResRequest(node=Node(node_id=0), run_id=run_id)
-
-        with self.assertRaises(grpc.RpcError) as e:
-            self._pull_task_res.with_call(request=request)
-        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
-        assert e.exception.details() == self.status_to_msg[run_status.status]
-
-    @parameterized.expand(
-        [
-            (0,),  # Test not successful if RunStatus is pending.
-            (1,),  # Test not successful if RunStatus is starting.
-            (3,),  # Test not successful if RunStatus is finished.
-        ]
-    )  # type: ignore
-    def test_pull_task_res_not_successful_if_not_running(
-        self, num_transitions: int
-    ) -> None:
-        """Test `PullTaskRes` not successful if RunStatus is not running."""
-        # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-
-        self._transition_run_status(run_id, num_transitions)
-
-        # Execute & Assert
-        self._assert_pull_task_res_not_allowed(run_id)
 
     def _assert_pull_messages_not_allowed(self, run_id: int) -> None:
         """Assert `PullMessages` not allowed."""

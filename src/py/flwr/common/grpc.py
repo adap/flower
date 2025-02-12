@@ -80,7 +80,7 @@ def create_channel(
         log(DEBUG, "Opened secure gRPC connection using certificates")
 
     if interceptors is not None:
-        channel = grpc.intercept_channel(channel, interceptors)
+        channel = grpc.intercept_channel(channel, *interceptors)
 
     return channel
 
@@ -224,3 +224,8 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments,R0917
         server.add_insecure_port(server_address)
 
     return server
+
+
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)

@@ -84,6 +84,8 @@ def train(net, trainloader, valloader, epochs, learning_rate, device):
 
 def test(net, testloader, device):
     """Validate the model on the test set."""
+    net.to(device)  # move model to GPU if available
+    net.eval()
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():

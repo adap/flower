@@ -31,6 +31,7 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
+from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.config import (
     flatten_dict,
     parse_config_args,
@@ -57,7 +58,7 @@ from ..utils import (
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
-# pylint: disable-next=too-many-locals
+# pylint: disable-next=too-many-locals, R0913, R0917
 def run(
     app: Annotated[
         Path,
@@ -67,16 +68,23 @@ def run(
         Optional[str],
         typer.Argument(help="Name of the federation to run the app on."),
     ] = None,
-    config_overrides: Annotated[
+    run_config_overrides: Annotated[
         Optional[list[str]],
         typer.Option(
             "--run-config",
             "-c",
-            help="Override configuration key-value pairs, should be of the format:\n\n"
-            '`--run-config \'key1="value1" key2="value2"\' '
-            "--run-config 'key3=\"value3\"'`\n\n"
-            "Note that `key1`, `key2`, and `key3` in this example need to exist "
-            "inside the `pyproject.toml` in order to be properly overriden.",
+            help="Override run configuration values in the format:\n\n"
+            "`--run-config 'key1=value1 key2=value2' --run-config 'key3=value3'`\n\n"
+            "Values can be of any type supported in TOML, such as bool, int, "
+            "float, or string. Ensure that the keys (`key1`, `key2`, `key3` "
+            "in this example) exist in `pyproject.toml` for proper overriding.",
+        ),
+    ] = None,
+    federation_config_overrides: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--federation-config",
+            help=FEDERATION_CONFIG_HELP_MESSAGE,
         ),
     ] = None,
     stream: Annotated[
@@ -108,7 +116,7 @@ def run(
         config, errors, warnings = load_and_validate(path=pyproject_path)
         config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
-            federation, config
+            federation, config, federation_config_overrides
         )
 
         if "address" in federation_config:
@@ -116,12 +124,14 @@ def run(
                 app,
                 federation,
                 federation_config,
-                config_overrides,
+                run_config_overrides,
                 stream,
                 output_format,
             )
         else:
-            _run_without_exec_api(app, federation_config, config_overrides, federation)
+            _run_without_exec_api(
+                app, federation_config, run_config_overrides, federation
+            )
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
@@ -148,7 +158,7 @@ def _run_with_exec_api(
     stream: bool,
     output_format: str,
 ) -> None:
-    auth_plugin = try_obtain_cli_auth_plugin(app, federation)
+    auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
     channel = init_channel(app, federation_config, auth_plugin)
     stub = ExecStub(channel)
 

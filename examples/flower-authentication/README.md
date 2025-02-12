@@ -81,8 +81,7 @@ The script also generates a CSV file that includes each of the generated (client
 ## Start the long-running Flower server (SuperLink)
 
 Starting long-running Flower server component (SuperLink) and enable authentication is very easy; all you need to do is type
-`--auth-list-public-keys` containing file path to the known `client_public_keys.csv`, `--auth-superlink-private-key`
-containing file path to the SuperLink's private key `server_credentials`, and `--auth-superlink-public-key` containing file path to the SuperLink's public key `server_credentials.pub`. Notice that you can only enable authentication with a secure TLS connection.
+`--auth-list-public-keys` containing file path to the known `client_public_keys.csv`. Notice that you can only enable authentication with a secure TLS connection.
 
 Let's first launch the `SuperLink`:
 
@@ -91,9 +90,7 @@ flower-superlink \
     --ssl-ca-certfile certificates/ca.crt \
     --ssl-certfile certificates/server.pem \
     --ssl-keyfile certificates/server.key \
-    --auth-list-public-keys keys/client_public_keys.csv \
-    --auth-superlink-private-key keys/server_credentials \
-    --auth-superlink-public-key keys/server_credentials.pub
+    --auth-list-public-keys keys/client_public_keys.csv
 ```
 
 At this point your server-side is idling. Next, let's connect two `SuperNode`s, and then we'll start a run.

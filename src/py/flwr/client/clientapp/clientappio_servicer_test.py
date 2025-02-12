@@ -19,7 +19,11 @@ import unittest
 from os import urandom
 from unittest.mock import Mock, patch
 
-from flwr.client.clientapp.app import get_token, pull_message, push_message
+from flwr.client.clientapp.app import (
+    get_token,
+    pull_clientappinputs,
+    push_clientappoutputs,
+)
 from flwr.common import Context, Message, typing
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.serde import (
@@ -171,7 +175,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.mock_stub.PullClientAppInputs.return_value = mock_response
 
         # Execute
-        message, context, run, fab = pull_message(self.mock_stub, token=456)
+        message, context, run, fab = pull_clientappinputs(self.mock_stub, token=456)
 
         # Assert
         self.mock_stub.PullClientAppInputs.assert_called_once()
@@ -208,7 +212,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.mock_stub.PushClientAppOutputs.return_value = mock_response
 
         # Execute
-        res = push_message(
+        res = push_clientappoutputs(
             stub=self.mock_stub, token=789, message=message, context=context
         )
         status = clientappstatus_from_proto(res.status)

@@ -64,14 +64,10 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullResMessagesResponse,
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
-    PullTaskResRequest,
-    PullTaskResResponse,
     PushInsMessagesRequest,
     PushInsMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
-    PushTaskInsRequest,
-    PushTaskInsResponse,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
@@ -138,57 +134,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
         return CreateRunResponse(run_id=run_id)
 
-    def PushTaskIns(
-        self, request: PushTaskInsRequest, context: grpc.ServicerContext
-    ) -> PushTaskInsResponse:
-        """Push a set of TaskIns."""
-        log(DEBUG, "ServerAppIoServicer.PushTaskIns")
-
-        # Init state
-        state: LinkState = self.state_factory.state()
-
-        # Abort if the run is not running
-        abort_if(
-            request.run_id,
-            [Status.PENDING, Status.STARTING, Status.FINISHED],
-            state,
-            context,
-        )
-
-        # Set pushed_at (timestamp in seconds)
-        pushed_at = now().timestamp()
-        for task_ins in request.task_ins_list:
-            task_ins.task.pushed_at = pushed_at
-
-        # Validate request
-        _raise_if(
-            validation_error=len(request.task_ins_list) == 0,
-            request_name="PushTaskIns",
-            detail="`task_ins_list` must not be empty",
-        )
-        for task_ins in request.task_ins_list:
-            validation_errors = validate_task_ins_or_res(task_ins)
-            _raise_if(
-                validation_error=bool(validation_errors),
-                request_name="PushTaskIns",
-                detail=", ".join(validation_errors),
-            )
-            _raise_if(
-                validation_error=request.run_id != task_ins.run_id,
-                request_name="PushTaskIns",
-                detail="`task_ins` has mismatched `run_id`",
-            )
-
-        # Store each TaskIns
-        task_ids: list[Optional[UUID]] = []
-        for task_ins in request.task_ins_list:
-            task_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
-            task_ids.append(task_id)
-
-        return PushTaskInsResponse(
-            task_ids=[str(task_id) if task_id else "" for task_id in task_ids]
-        )
-
     def PushMessages(
         self, request: PushInsMessagesRequest, context: grpc.ServicerContext
     ) -> PushInsMessagesResponse:
@@ -241,45 +186,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 str(message_id) if message_id else "" for message_id in message_ids
             ]
         )
-
-    def PullTaskRes(
-        self, request: PullTaskResRequest, context: grpc.ServicerContext
-    ) -> PullTaskResResponse:
-        """Pull a set of TaskRes."""
-        log(DEBUG, "ServerAppIoServicer.PullTaskRes")
-
-        # Init state
-        state: LinkState = self.state_factory.state()
-
-        # Abort if the run is not running
-        abort_if(
-            request.run_id,
-            [Status.PENDING, Status.STARTING, Status.FINISHED],
-            state,
-            context,
-        )
-
-        # Convert each task_id str to UUID
-        task_ids: set[UUID] = {UUID(task_id) for task_id in request.task_ids}
-
-        # Read from state
-        task_res_list: list[TaskRes] = state.get_task_res(task_ids=task_ids)
-
-        # Validate request
-        for task_res in task_res_list:
-            _raise_if(
-                validation_error=request.run_id != task_res.run_id,
-                request_name="PullTaskRes",
-                detail="`task_res` has mismatched `run_id`",
-            )
-
-        # Delete the TaskIns/TaskRes pairs if TaskRes is found
-        task_ins_ids_to_delete = {
-            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
-        }
-        state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
-
-        return PullTaskResResponse(task_res_list=task_res_list)
 
     def PullMessages(
         self, request: PullResMessagesRequest, context: grpc.ServicerContext
@@ -362,9 +268,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PullServerAppInputsResponse:
         """Pull ServerApp process inputs."""
         log(DEBUG, "ServerAppIoServicer.PullServerAppInputs")
-        # Init access to LinkState and Ffs
+        # Init access to LinkState
         state = self.state_factory.state()
-        ffs = self.ffs_factory.ffs()
 
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
@@ -373,6 +278,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             # If there's no pending run, return an empty response
             if run_id is None:
                 return PullServerAppInputsResponse()
+
+            # Init access to Ffs
+            ffs = self.ffs_factory.ffs()
 
             # Retrieve Context, Run and Fab for the run_id
             serverapp_ctxt = state.get_serverapp_context(run_id)

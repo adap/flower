@@ -10,9 +10,6 @@ REPLACE_CURR_VERSION = {
     "framework/docs/source/conf.py": [
         ".. |stable_flwr_version| replace:: {version}",
     ],
-    "src/py/flwr/cli/new/templates/app/pyproject.*.toml.tpl": [
-        "flwr[simulation]>={version}",
-    ],
 }
 
 REPLACE_NEXT_VERSION = {
@@ -25,6 +22,9 @@ REPLACE_NEXT_VERSION = {
     "src/docker/complete/compose.yml": ["FLWR_VERSION:-{version}"],
     "src/docker/distributed/client/compose.yml": ["FLWR_VERSION:-{version}"],
     "src/docker/distributed/server/compose.yml": ["FLWR_VERSION:-{version}"],
+    "src/py/flwr/cli/new/templates/app/pyproject.*.toml.tpl": [
+        "flwr[simulation]>={version}",
+    ],
 }
 
 EXAMPLES = {
