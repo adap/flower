@@ -92,17 +92,13 @@ class TestArray(unittest.TestCase):
 
     @parameterized.expand(  # type: ignore
         [
-            ("ndarray", np.array([1, 2, 3])),
-            ("explicit_values", "float32", [2, 2], "dense", b"data"),
+            ({"ndarray": np.array([1, 2, 3])},),
+            ({"dtype": "float32", "shape": [2, 2], "stype": "dense", "data": b"data"},),
         ]
     )
-    def test_valid_init_overloads_kwargs(self, name: str, *args: Any) -> None:
+    def test_valid_init_overloads_kwargs(self, kwargs: dict[str, Any]) -> None:
         """Ensure valid overloads initialize correctly."""
-        if name == "explicit_values":
-            array = Array(dtype=args[0], shape=args[1], stype=args[2], data=args[3])
-        else:
-            kwargs = {name: args[0]}
-            array = Array(**kwargs)
+        array = Array(**kwargs)
         self.assertIsInstance(array, Array)
 
     @parameterized.expand(  # type: ignore
