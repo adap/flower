@@ -15,10 +15,19 @@
 """Conversion utility functions for Records."""
 
 
+from logging import WARN
+
+from ..logger import log
 from ..typing import NDArray
 from .parametersrecord import Array
+
+WARN_DEPRECATED_MESSAGE = (
+    "This function is deprecated and will be removed in a future release. Use the "
+    "`Array(ndarray)` class directly or `Array.from_numpy_ndarray(ndarray)` instead."
+)
 
 
 def array_from_numpy(ndarray: NDArray) -> Array:
     """Create Array from NumPy ndarray."""
+    log(WARN, WARN_DEPRECATED_MESSAGE)
     return Array.from_numpy_ndarray(ndarray)
