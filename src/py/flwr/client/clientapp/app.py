@@ -23,7 +23,7 @@ from typing import Optional
 import grpc
 
 from flwr.cli.install import install_from_fab
-from flwr.client.client_app import ClientApp, LoadClientAppError, manage_client_app
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import Context, Message
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import get_flwr_dir
@@ -133,8 +133,7 @@ def run_clientapp(  # pylint: disable=R0914
                 )
 
                 # Execute ClientApp
-                with manage_client_app(client_app, context=context):
-                    reply_message = client_app(message=message, context=context)
+                reply_message = client_app(message=message, context=context)
 
             except Exception as ex:  # pylint: disable=broad-exception-caught
                 # Don't update/change NodeState

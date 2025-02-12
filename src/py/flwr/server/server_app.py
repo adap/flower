@@ -15,8 +15,6 @@
 """Flower ServerApp."""
 
 
-from collections.abc import Iterator
-from contextlib import contextmanager
 from typing import Callable, Optional
 
 from flwr.common import Context
@@ -112,26 +110,35 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
     def __call__(self, driver: Driver, context: Context) -> None:
         """Execute `ServerApp`."""
-        # Compatibility mode
-        if not self._main:
-            if self._server_fn:
-                # Execute server_fn()
-                components = self._server_fn(context)
-                self._server = components.server
-                self._config = components.config
-                self._strategy = components.strategy
-                self._client_manager = components.client_manager
-            start_driver(
-                server=self._server,
-                config=self._config,
-                strategy=self._strategy,
-                client_manager=self._client_manager,
-                driver=driver,
-            )
-            return
+        try:
+            # Execute enter function
+            if self._enter:
+                self._enter(driver, context)
 
-        # New execution mode
-        self._main(driver, context)
+            # Compatibility mode
+            if not self._main:
+                if self._server_fn:
+                    # Execute server_fn()
+                    components = self._server_fn(context)
+                    self._server = components.server
+                    self._config = components.config
+                    self._strategy = components.strategy
+                    self._client_manager = components.client_manager
+                start_driver(
+                    server=self._server,
+                    config=self._config,
+                    strategy=self._strategy,
+                    client_manager=self._client_manager,
+                    driver=driver,
+                )
+                return
+
+            # New execution mode
+            self._main(driver, context)
+        finally:
+            # Execute exit function
+            if self._exit:
+                self._exit(driver, context)
 
     def main(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
         """Return a decorator that registers the main fn with the server app.
@@ -232,19 +239,3 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
 class LoadServerAppError(Exception):
     """Error when trying to load `ServerApp`."""
-
-
-@contextmanager
-def manage_server_app(
-    app: ServerApp, driver: Driver, context: Context
-) -> Iterator[None]:
-    """Manage the lifecycle of a ServerApp."""
-    # pylint: disable=protected-access
-    try:
-        if app._enter is not None:
-            app._enter(driver, context)
-        yield
-    finally:
-        if app._exit is not None:
-            app._exit(driver, context)
-    # pylint: enable=protected-access
