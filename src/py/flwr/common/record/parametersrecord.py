@@ -21,11 +21,13 @@ import sys
 from collections import OrderedDict
 from dataclasses import dataclass
 from io import BytesIO
+from logging import WARN
 from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
 from ..constant import SType
+from ..logger import log
 from ..typing import NDArray
 from .typeddict import TypedDict
 
@@ -36,9 +38,19 @@ if TYPE_CHECKING:
 
 def _raise_array_init_error() -> None:
     raise TypeError(
-        f"Invalid arguments for {Array.__qualname__}. Expected a "
+        f"Invalid arguments for {Array.__qualname__}. Expected either a "
         "PyTorch tensor, TensorFlow tensor, NumPy ndarray, or explicit"
         " dtype/shape/stype/data values."
+    )
+
+
+def _raise_parameters_record_init_error() -> None:
+    raise TypeError(
+        f"Invalid arguments for {ParametersRecord.__qualname__}. Expected either "
+        "a list of NumPy ndarrays, a PyTorch state_dict, TensorFlow weights, "
+        "or a dictionary of Arrays. The `keep_input` argument is only supported when "
+        "passing a dictionary of Arrays, and it must be specified as a keyword "
+        "argument."
     )
 
 
@@ -292,103 +304,242 @@ def _check_value(value: Array) -> None:
 class ParametersRecord(TypedDict[str, Array]):
     r"""Parameters record.
 
-    A dataclass storing named Arrays in order. This means that it holds entries as an
-    OrderedDict[str, Array]. ParametersRecord objects can be viewed as an equivalent to
-    PyTorch's state_dict, but holding serialised tensors instead. A
-    :code:`ParametersRecord`  is one of the types of records that a
-    `flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports and
-    can therefore be used to construct :code:`common.Message` objects.
+    A typed dictionary (string to :class:`Array`) that can store named parameters
+    (serialized tensors). Internally, this behaves similarly to an
+    `OrderedDict[str, Array]`. A `ParametersRecord` can be viewed as an
+    equivalent to PyTorch's state_dict, but it holds arrays in serialized form.
+
+    This object is one of the record types supported by :class:`RecordSet` and can
+    therefore be stored in a :class:`Message` or a :class:`Context`.
+
+    This class can be instantiated in multiple ways:
+
+    1. By providing nothing (empty container).
+    2. By providing a PyTorch state_dict (via the `state_dict` argument).
+    3. By providing TensorFlow model.get_weights() (via the `tf_weights` argument).
+    4. By providing a list of NumPy ndarrays (via the `numpy_ndarrays` argument).
+    5. By providing a dictionary of Arrays (via the `array_dict` argument).
+
+    The `keep_input` argument is only supported when passing a dictionary of Arrays.
 
     Parameters
     ----------
-    array_dict : Optional[OrderedDict[str, Array]]
-        A dictionary that stores serialized array-like or tensor-like objects.
-    keep_input : bool (default: False)
-        A boolean indicating whether parameters should be deleted from the input
-        dictionary immediately after adding them to the record. If False, the
-        dictionary passed to `set_parameters()` will be empty once exiting from that
-        function. This is the desired behaviour when working with very large
-        models/tensors/arrays. However, if you plan to continue working with your
-        parameters after adding it to the record, set this flag to True. When set
-        to True, the data is duplicated in memory.
+    numpy_ndarrays : Optional[list[NDArray]] (default: None)
+        A list of NumPy arrays. Each array will be automatically converted
+        into an :class:`Array` and stored in this record with generated keys.
+
+    state_dict : Optional[OrderedDict[str, torch.Tensor]] (default: None)
+        A PyTorch state_dict (str keys to torch.Tensor values). Each
+        tensor will be converted into an :class:`Array` and stored in this record.
+
+    tf_weights : Optional[list[NDArray]] (default: None)
+        TensorFlow model weights (which are typically NumPy ndarrays when
+        accessed via `model.get_weights()`). Each weight will be converted into
+        an :class:`Array` and stored in this record.
+
+    array_dict : Optional[OrderedDict[str, Array]] (default: None)
+        An existing dictionary containing named :class:`Array` objects. If
+        provided, these entries will be used directly to populate the record.
+
+    keep_input : Optional[bool] (default: None)
+        If `False` (default), entries in `array_dict` are removed after being added
+        to this record to free up memory. If `True`, the original `array_dict`
+        remains unchanged, preserving the data in both places at the cost of increased
+        memory usage.
 
     Examples
     --------
-    The usage of :code:`ParametersRecord` is envisioned for storing data arrays (e.g.
-    parameters of a machine learning model). These first need to be serialized into
-    a :code:`flwr.common.Array` data structure.
+    Initializing an empty ParametersRecord:
 
-    Let's see some examples:
+    >>> p_record = ParametersRecord()
+
+    Initializing with a PyTorch model state_dict:
+
+    >>> import torch.nn as nn
+    >>>
+    >>> model = nn.Linear(10, 5)
+    >>> p_record = ParametersRecord(model.state_dict())
+
+    Initializing with a TensorFlow model weights (a list of NumPy arrays):
+
+    >>> import tensorflow as tf
+    >>>
+    >>> model = tf.keras.Sequential([tf.keras.layers.Dense(5, input_shape=(10,))])
+    >>> p_record = ParametersRecord(model.get_weights())
+
+    Initializing with a list of NumPy arrays:
 
     >>> import numpy as np
-    >>> from flwr.common import ParametersRecord
     >>>
-    >>> # Let's create a simple NumPy array
-    >>> arr_np = np.random.randn(3, 3)
-    >>>
-    >>> # If we print it
-    >>> array([[-1.84242409, -1.01539537, -0.46528405],
-    >>>      [ 0.32991896,  0.55540414,  0.44085534],
-    >>>      [-0.10758364,  1.97619858, -0.37120501]])
-    >>>
-    >>> # Let's create an Array out of it
-    >>> arr = Array(arr_np)
-    >>>
-    >>> # If we print it you'll see (note the binary data)
-    >>> Array(dtype='float64', shape=[3,3], stype='numpy.ndarray', data=b'@\x99\x18...')
-    >>>
-    >>> # Adding it to a ParametersRecord:
-    >>> p_record = ParametersRecord({"my_array": arr})
-
-    Now that the NumPy array is embedded into a :code:`ParametersRecord` it could be
-    sent if added as part of a :code:`common.Message` or it could be saved as a
-    persistent state of a :code:`ClientApp` via its context. Regardless of the usecase,
-    we will sooner or later want to recover the array in its original NumPy
-    representation. For the example above, where the array was serialized using the
-    built-in utility function, deserialization can be done as follows:
-
-    >>> # Use the Array's built-in method
-    >>> arr_np_d = arr.numpy()
-    >>>
-    >>> # If printed, it will show the exact same data as above:
-    >>> array([[-1.84242409, -1.01539537, -0.46528405],
-    >>>      [ 0.32991896,  0.55540414,  0.44085534],
-    >>>      [-0.10758364,  1.97619858, -0.37120501]])
-
-    If you need finer control on how your arrays are serialized and deserialized, you
-    can construct :code:`Array` objects directly like this:
-
-    >>> from flwr.common import Array
-    >>> # Serialize your array and construct Array object
-    >>> arr = Array(
-    >>>         data=ndarray.tobytes(),
-    >>>         dtype=str(ndarray.dtype),
-    >>>         stype="",  # Could be used in a deserialization function
-    >>>         shape=list(ndarray.shape),
-    >>>       )
-    >>>
-    >>> # Then you can deserialize it like this
-    >>> arr_np_d = np.frombuffer(
-    >>>             buffer=array.data,
-    >>>             dtype=array.dtype,
-    >>>            ).reshape(array.shape)
-
-    Note that different arrays (e.g. from PyTorch, Tensorflow) might require different
-    serialization mechanism. Howerver, they often support a conversion to NumPy,
-    therefore allowing to use the same or similar steps as in the example above.
+    >>> arr1 = np.random.randn(3, 3)
+    >>> arr2 = np.random.randn(2, 2)
+    >>> p_record = ParametersRecord(numpy_ndarrays=[arr1, arr2])
     """
 
-    def __init__(
+    @overload
+    def __init__(self) -> None: ...  # noqa: E704
+
+    @overload
+    def __init__(self, numpy_ndarrays: list[NDArray]) -> None: ...  # noqa: E704
+
+    @overload
+    def __init__(  # noqa: E704
+        self, state_dict: OrderedDict[str, torch.Tensor]
+    ) -> None: ...
+
+    @overload
+    def __init__(self, tf_weights: list[NDArray]) -> None: ...  # noqa: E704
+
+    @overload
+    def __init__(  # noqa: E704
+        self, array_dict: OrderedDict[str, Array], *, keep_input: bool
+    ) -> None: ...
+
+    def __init__(  # pylint: disable=too-many-arguments
         self,
+        *args: Any,
+        numpy_ndarrays: list[NDArray] | None = None,
+        state_dict: OrderedDict[str, torch.Tensor] | None = None,
+        tf_weights: list[NDArray] | None = None,
         array_dict: OrderedDict[str, Array] | None = None,
-        keep_input: bool = False,
+        keep_input: bool | None = None,
     ) -> None:
         super().__init__(_check_key, _check_value)
-        if array_dict:
+
+        # Workaround to support multiple initialization signatures.
+        # This method validates and assigns the correct arguments,
+        # including keyword arguments such as numpy_ndarrays, state_dict,
+        # tf_weights, and array_dict.
+        # Supported initialization formats:
+        # 1. ParametersRecord(numpy_ndarrays: list[NDArray])
+        # 2. ParametersRecord(state_dict: dict[str, torch.Tensor])
+        # 3. ParametersRecord(tf_weights: list[NDArray])
+        # 4. ParametersRecord(array_dict: OrderedDict[str, Array], keep_input: bool)
+
+        # Init the argument
+        if len(args) > 1:
+            _raise_parameters_record_init_error()
+
+        arg = args[0] if args else None
+
+        def _try_set_arg(_arg_to_set: Any) -> None:
+            nonlocal arg
+            if _arg_to_set is None:
+                return
+            if arg is not None:
+                _raise_parameters_record_init_error()
+            arg = _arg_to_set
+
+        # Try to set keyword arguments
+        _try_set_arg(numpy_ndarrays)
+        _try_set_arg(state_dict)
+        _try_set_arg(tf_weights)
+        _try_set_arg(array_dict)
+
+        # If no arguments are provided, return and keep self empty
+        if arg is None:
+            if keep_input is not None:
+                log(WARN, "`keep_input` will be ignored. No parameters were provided.")
+            return
+
+        # Handle dictionary of Arrays
+        if isinstance(arg, dict) and all(isinstance(v, Array) for v in arg.values()):
+            array_dict = cast(OrderedDict[str, Array], arg)
+            if keep_input is None:
+                keep_input = False
+
             for k in list(array_dict.keys()):
                 self[k] = array_dict[k]
                 if not keep_input:
                     del array_dict[k]
+            return
+
+        # Check if keep_input is set
+        if keep_input is not None:
+            log(
+                WARN,
+                "`keep_input` will be ignored. It is only supported when "
+                "passing a dictionary of Arrays.",
+            )
+
+        # Handle NumPy ndarrays and TensorFlow weights
+        # pylint: disable-next=not-an-iterable
+        if isinstance(arg, list) and all(isinstance(v, np.ndarray) for v in arg):
+            numpy_ndarrays = cast(list[NDArray], arg)
+            # Skip updating if arg is empty
+            if numpy_ndarrays:
+                self.__dict__.update(self.from_numpy_ndarrays(numpy_ndarrays).__dict__)
+            return
+
+        # Handle PyTorch state_dict
+        if (
+            (torch := sys.modules.get("torch")) is not None
+            and isinstance(arg, dict)
+            and all(isinstance(k, str) for k in arg)  # pylint: disable=not-an-iterable
+            and all(isinstance(v, torch.Tensor) for v in arg.values())
+        ):
+            state_dict = cast(OrderedDict[str, torch.Tensor], arg)  # type: ignore
+            # Skip updating if arg is empty
+            if state_dict:
+                self.__dict__.update(self.from_state_dict(state_dict).__dict__)
+            return
+
+        _raise_parameters_record_init_error()
+
+    @classmethod
+    def from_numpy_ndarrays(
+        cls,
+        ndarrays: list[NDArray],
+    ) -> ParametersRecord:
+        """Create ParametersRecord from a list of NumPy arrays."""
+        record = ParametersRecord()
+        for i, arr in enumerate(ndarrays):
+            record[str(i)] = Array.from_numpy_ndarray(arr)
+        return record
+
+    @classmethod
+    def from_state_dict(
+        cls,
+        state_dict: OrderedDict[str, torch.Tensor],
+    ) -> ParametersRecord:
+        """Create ParametersRecord from PyTorch state_dict."""
+        if "torch" not in sys.modules:
+            raise RuntimeError(
+                f"PyTorch is required to use {cls.from_state_dict.__name__}"
+            )
+
+        record = ParametersRecord()
+        for k, v in state_dict.items():
+            record[k] = Array.from_numpy_ndarray(v.detach().cpu().numpy())
+        return record
+
+    @classmethod
+    def from_tf_weights(
+        cls,
+        tf_weights: list[NDArray],
+    ) -> ParametersRecord:
+        """Create ParametersRecord from TensorFlow weights."""
+        return cls.from_numpy_ndarrays(tf_weights)
+
+    def to_numpy_ndarrays(self) -> list[NDArray]:
+        """Return the ParametersRecord as a list of NumPy arrays."""
+        return [v.numpy() for v in self.values()]
+
+    def to_state_dict(self) -> OrderedDict[str, torch.Tensor]:
+        """Return the ParametersRecord as a PyTorch state_dict."""
+        if not (torch := sys.modules.get("torch")):
+            raise RuntimeError(
+                f"PyTorch is required to use {self.to_state_dict.__name__}"
+            )
+
+        state_dict = OrderedDict()
+        for k, v in self.items():
+            state_dict[k] = torch.from_numpy(v.numpy())
+        return state_dict
+
+    def to_tf_weights(self) -> list[NDArray]:
+        """Return the ParametersRecord as a list of TensorFlow weights."""
+        return self.to_numpy_ndarrays()
 
     def count_bytes(self) -> int:
         """Return number of Bytes stored in this object.
