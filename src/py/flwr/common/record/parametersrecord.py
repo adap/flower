@@ -41,36 +41,47 @@ class Array:
     """Array type.
 
     A dataclass containing serialized data from an array-like or tensor-like object
-    along with some metadata about it.
+    along with metadata about it. The class can be initialized in one of two ways:
+
+    1. By providing a NumPy ndarray (via the `ndarray` argument).
+    2. By specifying explicit values for `dtype`, `shape`, `stype`, and `data`.
+
+    In scenarios (1), the `dtype`, `shape`, `stype`, and `data` are automatically
+    derived from the provided ndarray. In scenario (4), these fields must be
+    specified manually.
 
     Parameters
     ----------
-    dtype : str
-        A string representing the data type of the serialised object (e.g. `np.float32`)
+    ndarray : Optional[NDArray] (default: None)
+        A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data`
+        fields are derived automatically from it.
 
-    shape : List[int]
-        A list representing the shape of the unserialized array-like object. This is
-        used to deserialize the data (depending on the serialization method) or simply
-        as a metadata field.
+    dtype : Optional[str] (default: None)
+        A string representing the data type of the serialized object (e.g. `"float32"`).
+        Only required if you are not passing in a ndarray.
 
-    stype : str
-        A string indicating the type of serialisation mechanism used to generate the
-        bytes in `data` from an array-like or tensor-like object.
+    shape : Optional[list[int]] (default: None)
+        A list representing the shape of the unserialized array-like object. Only
+        required if you are not passing in a ndarray.
 
-    data: bytes
-        A buffer of bytes containing the data.
+    stype : Optional[str] (default: None)
+        A string indicating the serialization mechanism used to generate the bytes in
+        `data` from an array-like or tensor-like object. Only required if you are not
+        passing in a ndarray.
+
+    data : Optional[bytes] (default: None)
+        A buffer of bytes containing the data. Only required if you are not passing in
+        a ndarray.
 
     Examples
     --------
-    You can create an `Array` object from a NumPy `ndarray`:
+    Initializing with a NumPy ndarray:
 
-    >>> import numpy as np
-    >>>
-    >>> arr = Array(np.random.randn(3, 3))
+    >>> arr1 = Array(np.random.randn(3, 3))
 
-    Alternatively, you can create an `Array` object by specifying explicit values:
+    Initializing by specifying all fields directly:
 
-    >>> arr = Array(
+    >>> arr2 = Array(
     >>>     dtype="float32",
     >>>     shape=[3, 3],
     >>>     stype="numpy.ndarray",
