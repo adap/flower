@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower command line interface."""
 
-
+from build import __version__
 import typer
 from typer.main import get_command
 
@@ -46,6 +46,29 @@ app.command()(stop)
 app.command()(login)
 
 typer_click_object = get_command(app)
+
+
+def print_version(value: bool) -> None:
+    """Print the version of the app."""
+    if value:
+        typer.secho(f"Flower version: {__version__}", fg="blue")
+        raise typer.Exit()
+
+
+@app.callback()
+def version(
+    version: bool = typer.Option(
+        None,
+        "-V",
+        "--version",
+        is_eager=True,
+        callback=print_version,
+        help="Prints app version.",
+    ),
+) -> None:
+    """Print version."""
+    pass
+
 
 if __name__ == "__main__":
     app()
