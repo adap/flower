@@ -135,29 +135,40 @@ class ClientApp:
         self._train: Optional[ClientAppCallable] = None
         self._evaluate: Optional[ClientAppCallable] = None
         self._query: Optional[ClientAppCallable] = None
+        self._enter: Optional[Callable[[Context], None]] = None
+        self._exit: Optional[Callable[[Context], None]] = None
 
     def __call__(self, message: Message, context: Context) -> Message:
         """Execute `ClientApp`."""
-        # Execute message using `client_fn`
-        if self._call:
-            return self._call(message, context)
+        try:
+            # Execute enter function
+            if self._enter:
+                self._enter(context)
 
-        # Execute message using a new
-        if message.metadata.message_type == MessageType.TRAIN:
-            if self._train:
-                return self._train(message, context)
-            raise ValueError("No `train` function registered")
-        if message.metadata.message_type == MessageType.EVALUATE:
-            if self._evaluate:
-                return self._evaluate(message, context)
-            raise ValueError("No `evaluate` function registered")
-        if message.metadata.message_type == MessageType.QUERY:
-            if self._query:
-                return self._query(message, context)
-            raise ValueError("No `query` function registered")
+            # Execute message using `client_fn`
+            if self._call:
+                return self._call(message, context)
 
-        # Message type did not match one of the known message types abvoe
-        raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
+            # Execute message using a new
+            if message.metadata.message_type == MessageType.TRAIN:
+                if self._train:
+                    return self._train(message, context)
+                raise ValueError("No `train` function registered")
+            if message.metadata.message_type == MessageType.EVALUATE:
+                if self._evaluate:
+                    return self._evaluate(message, context)
+                raise ValueError("No `evaluate` function registered")
+            if message.metadata.message_type == MessageType.QUERY:
+                if self._query:
+                    return self._query(message, context)
+                raise ValueError("No `query` function registered")
+
+            # Message type did not match one of the known message types abvoe
+            raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
+        finally:
+            # Execute exit function
+            if self._exit:
+                self._exit(context)
 
     def train(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Return a decorator that registers the train fn with the client app.
@@ -248,6 +259,58 @@ class ClientApp:
             return query_fn
 
         return query_decorator
+
+    def enter(self) -> Callable[[Callable[[Context], None]], Callable[[Context], None]]:
+        """Return a decorator that registers the enter fn with the client app.
+
+        Examples
+        --------
+        >>> app = ClientApp()
+        >>>
+        >>> @app.enter()
+        >>> def enter(context: Context) -> None:
+        >>>    print("ClientApp enter running")
+        """
+
+        def enter_decorator(
+            enter_fn: Callable[[Context], None]
+        ) -> Callable[[Context], None]:
+            """Register the enter fn with the ServerApp object."""
+            warn_preview_feature("ClientApp-register-enter-function")
+
+            # Register provided function with the ClientApp object
+            self._enter = enter_fn
+
+            # Return provided function unmodified
+            return enter_fn
+
+        return enter_decorator
+
+    def exit(self) -> Callable[[Callable[[Context], None]], Callable[[Context], None]]:
+        """Return a decorator that registers the exit fn with the client app.
+
+        Examples
+        --------
+        >>> app = ClientApp()
+        >>>
+        >>> @app.exit()
+        >>> def exit(context: Context) -> None:
+        >>>    print("ClientApp exit running")
+        """
+
+        def exit_decorator(
+            exit_fn: Callable[[Context], None]
+        ) -> Callable[[Context], None]:
+            """Register the exit fn with the ServerApp object."""
+            warn_preview_feature("ClientApp-register-exit-function")
+
+            # Register provided function with the ClientApp object
+            self._exit = exit_fn
+
+            # Return provided function unmodified
+            return exit_fn
+
+        return exit_decorator
 
 
 class LoadClientAppError(Exception):
