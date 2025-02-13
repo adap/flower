@@ -26,7 +26,6 @@ message Task {
   Node consumer = 2;
   double created_at = 3;
   string delivered_at = 4;
-  double pushed_at = 5;
   double ttl = 6;
   repeated string ancestry = 7;
   string task_type = 8;

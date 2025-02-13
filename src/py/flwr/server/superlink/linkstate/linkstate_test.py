@@ -275,7 +275,6 @@ class StateTest(unittest.TestCase):
 
         assert actual_task.delivered_at != ""
 
-        assert actual_task.created_at < actual_task.pushed_at
         assert datetime.fromisoformat(actual_task.delivered_at) > datetime(
             2020, 1, 1, tzinfo=timezone.utc
         )
@@ -1128,7 +1127,6 @@ def create_task_ins(
             created_at=time.time(),
         ),
     )
-    task.task.pushed_at = time.time()
     return task
 
 
@@ -1193,7 +1191,6 @@ def create_task_res(
             created_at=time.time(),
         ),
     )
-    task_res.task.pushed_at = time.time()
     return task_res
 
 

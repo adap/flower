@@ -15,7 +15,6 @@
 """Fleet API message handlers."""
 
 
-import time
 from typing import Optional
 from uuid import UUID
 
@@ -121,9 +120,6 @@ def push_messages(
     )
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
-
-    # Set pushed_at (timestamp in seconds)
-    task_res.task.pushed_at = time.time()
 
     # Store TaskRes in State
     message_id: Optional[UUID] = state.store_task_res(task_res=task_res)

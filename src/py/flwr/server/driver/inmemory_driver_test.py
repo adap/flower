@@ -65,7 +65,6 @@ def get_replies(
         msg = message_from_taskins(taskin)
         reply_msg = msg.create_reply(RecordSet())
         task_res = message_to_taskres(reply_msg)
-        task_res.task.pushed_at = time.time()
         driver.state.store_task_res(task_res=task_res)
 
     # Execute: Pull messages
