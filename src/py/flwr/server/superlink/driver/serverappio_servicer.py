@@ -22,7 +22,7 @@ from uuid import UUID
 
 import grpc
 
-from flwr.common import ConfigsRecord, now
+from flwr.common import ConfigsRecord
 from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -151,9 +151,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             context,
         )
 
-        # Set pushed_at (timestamp in seconds)
-        pushed_at = now().timestamp()
-
         # Validate request and insert in State
         _raise_if(
             validation_error=len(request.messages_list) == 0,
@@ -165,7 +162,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             message_proto = request.messages_list.pop(0)
             message = message_from_proto(message_proto=message_proto)
             task_ins = message_to_taskins(message=message)
-            task_ins.task.pushed_at = pushed_at
             validation_errors = validate_task_ins_or_res(task_ins)
             _raise_if(
                 validation_error=bool(validation_errors),

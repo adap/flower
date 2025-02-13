@@ -140,7 +140,6 @@ def worker(
                 # Convert to TaskRes
                 task_res = message_to_taskres(out_mssg)
                 # Store TaskRes in state
-                task_res.task.pushed_at = time.time()
                 taskres_queue.put(task_res)
 
 
