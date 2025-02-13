@@ -13,13 +13,13 @@ sleep 2
 
 flower-supernode --insecure --superlink 127.0.0.1:9092 \
     --clientappio-api-address localhost:9094 \
-    --node-config "partition-id=0 num-partitions=2" --max-retries 0 &
+    --max-retries 0 &
 cl1_pid=$!
 sleep 2
 
 flower-supernode --insecure --superlink 127.0.0.1:9092 \
     --clientappio-api-address localhost:9095 \
-    --node-config "partition-id=1 num-partitions=2" --max-retries 0 &
+    --max-retries 0 &
 sleep 2
 
 flwr run --run-config num-server-rounds=1 . e2e
