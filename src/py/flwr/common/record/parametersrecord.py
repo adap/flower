@@ -17,10 +17,11 @@
 
 from __future__ import annotations
 
+import sys
 from collections import OrderedDict
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Any, cast, overload
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
@@ -28,11 +29,16 @@ from ..constant import SType
 from ..typing import NDArray
 from .typeddict import TypedDict
 
+if TYPE_CHECKING:
+    import tensorflow as tf
+    import torch
+
 
 def _raise_array_init_error() -> None:
     raise TypeError(
         f"Invalid arguments for {Array.__qualname__}. Expected a "
-        "NumPy ndarray, or explicit dtype/shape/stype/data values."
+        "PyTorch tensor, TensorFlow tensor, NumPy ndarray, or explicit"
+        " dtype/shape/stype/data values."
     )
 
 
@@ -41,17 +47,28 @@ class Array:
     """Array type.
 
     A dataclass containing serialized data from an array-like or tensor-like object
-    along with metadata about it. The class can be initialized in one of two ways:
+    along with metadata about it. The class can be initialized in one of four ways:
 
-    1. By providing a NumPy ndarray (via the `ndarray` argument).
-    2. By specifying explicit values for `dtype`, `shape`, `stype`, and `data`.
+    1. By providing a PyTorch tensor (via the `torch_tensor` argument).
+    2. By providing a TensorFlow tensor (via the `tf_tensor` argument).
+    3. By providing a NumPy ndarray (via the `ndarray` argument).
+    4. By specifying explicit values for `dtype`, `shape`, `stype`, and `data`.
 
-    In scenarios (1), the `dtype`, `shape`, `stype`, and `data` are automatically
-    derived from the provided ndarray. In scenario (4), these fields must be
+    In scenarios (1)-(3), the `dtype`, `shape`, `stype`, and `data` are automatically
+    derived from the provided tensor or ndarray. In scenario (4), these fields must be
     specified manually.
 
     Parameters
     ----------
+    torch_tensor : Optional[torch.Tensor] (default: None)
+        A PyTorch tensor. If provided, it will be **detached and moved to CPU**
+        before conversion, and the `dtype`, `shape`, `stype`, and `data` fields
+        will be derived automatically from it.
+
+    tf_tensor : Optional[tf.Tensor] (default: None)
+        A TensorFlow tensor. If provided, the `dtype`, `shape`, `stype`, and `data`
+        fields are derived automatically from it.
+
     ndarray : Optional[NDArray] (default: None)
         A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data`
         fields are derived automatically from it.
@@ -77,7 +94,18 @@ class Array:
     --------
     Initializing with a NumPy ndarray:
 
+    >>> import numpy as np
     >>> arr1 = Array(np.random.randn(3, 3))
+
+    Initializing with a PyTorch tensor:
+
+    >>> import torch
+    >>> arr2 = Array(torch.randn(3, 3))
+
+    Initializing with a TensorFlow tensor:
+
+    >>> import tensorflow as tf
+    >>> arr3 = Array(tf.random.normal([3, 3]))
 
     Initializing by specifying all fields directly:
 
@@ -95,6 +123,12 @@ class Array:
     data: bytes
 
     @overload
+    def __init__(self, torch_tensor: torch.Tensor) -> None: ...  # noqa: E704
+
+    @overload
+    def __init__(self, tf_tensor: tf.Tensor) -> None: ...  # noqa: E704
+
+    @overload
     def __init__(self, ndarray: NDArray) -> None: ...  # noqa: E704
 
     @overload
@@ -105,6 +139,8 @@ class Array:
     def __init__(  # pylint: disable=too-many-arguments, too-many-locals
         self,
         *args: Any,
+        torch_tensor: torch.Tensor | None = None,
+        tf_tensor: tf.Tensor | None = None,
         ndarray: NDArray | None = None,
         dtype: str | None = None,
         shape: list[int] | None = None,
@@ -117,6 +153,8 @@ class Array:
         # Supported initialization formats:
         # 1. Array(dtype: str, shape: list[int], stype: str, data: bytes)
         # 2. Array(ndarray: NDArray)
+        # 3. Array(torch_tensor: torch.Tensor)
+        # 4. Array(tf_tensor: tf.Tensor)
 
         # Init all arguments
         # If more than 4 positional arguments are provided, raise an error.
@@ -134,6 +172,8 @@ class Array:
             all_args[index] = arg
 
         # Try to set keyword arguments in all_args
+        _try_set_arg(0, torch_tensor)
+        _try_set_arg(0, tf_tensor)
         _try_set_arg(0, ndarray)
         _try_set_arg(0, dtype)
         _try_set_arg(1, shape)
@@ -144,6 +184,20 @@ class Array:
         all_args = [arg for arg in all_args if arg is not None]
         if len(all_args) not in [1, 4]:
             _raise_array_init_error()
+
+        # Handle PyTorch tensor
+        if "torch" in sys.modules and isinstance(
+            all_args[0], sys.modules["torch"].Tensor
+        ):
+            self.__dict__.update(self.from_torch_tensor(all_args[0]).__dict__)
+            return
+
+        # Handle TensorFlow tensor
+        if "tensorflow" in sys.modules and isinstance(
+            all_args[0], sys.modules["tensorflow"].Tensor
+        ):
+            self.__dict__.update(self.from_tf_tensor(all_args[0]).__dict__)
+            return
 
         # Handle NumPy array
         if isinstance(all_args[0], np.ndarray):
@@ -181,6 +235,32 @@ class Array:
             stype=SType.NUMPY,
             data=data,
         )
+
+    @classmethod
+    def from_torch_tensor(cls, tensor: torch.Tensor) -> Array:
+        """Create Array from PyTorch tensor."""
+        if not (torch := sys.modules.get("torch")):
+            raise RuntimeError(
+                f"PyTorch is required to use {cls.from_torch_tensor.__name__}"
+            )
+
+        assert isinstance(
+            tensor, torch.Tensor
+        ), f"Expected PyTorch Tensor, got {type(tensor)}"
+        return cls.from_numpy_ndarray(tensor.detach().cpu().numpy())
+
+    @classmethod
+    def from_tf_tensor(cls, tensor: tf.Tensor) -> Array:
+        """Create Array from TensorFlow tensor."""
+        if not (tf := sys.modules.get("tensorflow")):
+            raise RuntimeError(
+                f"TensorFlow is required to use {cls.from_tf_tensor.__name__}"
+            )
+
+        assert isinstance(
+            tensor, tf.Tensor
+        ), f"Expected TensorFlow Tensor, got {type(tensor)}"
+        return cls.from_numpy_ndarray(tensor.numpy())
 
     def numpy(self) -> NDArray:
         """Return the array as a NumPy array."""
