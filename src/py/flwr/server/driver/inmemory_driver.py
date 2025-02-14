@@ -126,7 +126,6 @@ class InMemoryDriver(Driver):
             # Convert Message to TaskIns
             taskins = message_to_taskins(msg)
             # Store in state
-            taskins.task.pushed_at = time.time()
             task_id = self.state.store_task_ins(taskins)
             if task_id:
                 task_ids.append(str(task_id))
