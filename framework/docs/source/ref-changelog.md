@@ -10,7 +10,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### What's new?
 
-**Free procesed messages in LinkState** ([???](???))
+**Free procesed messages in LinkState** ([#4934](https://github.com/adap/flower/pull/4934))
 
 When the ServerApp pulls the replies the SuperNodes sent to the SuperLink, these should be removed from the LinkState. In some situations these weren't been erased, which could lead to high memory utilization by the SuperLink.
 
