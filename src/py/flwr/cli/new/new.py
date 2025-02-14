@@ -213,7 +213,7 @@ def new(
         else:
             challenge_name = "Code"
             num_clients = "10"
-            dataset_name = "lucasmccabe-lmi/CodeAlpaca-20k"
+            dataset_name = "sahil2801/CodeAlpaca-20k"
 
         context["llm_challenge_str"] = llm_challenge_str
         context["fraction_fit"] = fraction_fit
