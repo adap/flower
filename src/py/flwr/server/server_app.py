@@ -45,7 +45,7 @@ SERVER_FN_USAGE_EXAMPLE = """
 """
 
 
-class ServerApp:
+class ServerApp:  # pylint: disable=too-many-instance-attributes
     """Flower ServerApp.
 
     Examples
@@ -105,29 +105,40 @@ class ServerApp:
         self._client_manager = client_manager
         self._server_fn = server_fn
         self._main: Optional[ServerAppCallable] = None
+        self._enter: Optional[ServerAppCallable] = None
+        self._exit: Optional[ServerAppCallable] = None
 
     def __call__(self, driver: Driver, context: Context) -> None:
         """Execute `ServerApp`."""
-        # Compatibility mode
-        if not self._main:
-            if self._server_fn:
-                # Execute server_fn()
-                components = self._server_fn(context)
-                self._server = components.server
-                self._config = components.config
-                self._strategy = components.strategy
-                self._client_manager = components.client_manager
-            start_driver(
-                server=self._server,
-                config=self._config,
-                strategy=self._strategy,
-                client_manager=self._client_manager,
-                driver=driver,
-            )
-            return
+        try:
+            # Execute enter function
+            if self._enter:
+                self._enter(driver, context)
 
-        # New execution mode
-        self._main(driver, context)
+            # Compatibility mode
+            if not self._main:
+                if self._server_fn:
+                    # Execute server_fn()
+                    components = self._server_fn(context)
+                    self._server = components.server
+                    self._config = components.config
+                    self._strategy = components.strategy
+                    self._client_manager = components.client_manager
+                start_driver(
+                    server=self._server,
+                    config=self._config,
+                    strategy=self._strategy,
+                    client_manager=self._client_manager,
+                    driver=driver,
+                )
+                return
+
+            # New execution mode
+            self._main(driver, context)
+        finally:
+            # Execute exit function
+            if self._exit:
+                self._exit(driver, context)
 
     def main(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
         """Return a decorator that registers the main fn with the server app.
@@ -176,6 +187,54 @@ class ServerApp:
             return main_fn
 
         return main_decorator
+
+    def enter(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
+        """Return a decorator that registers the enter fn with the server app.
+
+        Examples
+        --------
+        >>> app = ServerApp()
+        >>>
+        >>> @app.enter()
+        >>> def enter(driver: Driver, context: Context) -> None:
+        >>>    print("ServerApp enter running")
+        """
+
+        def enter_decorator(enter_fn: ServerAppCallable) -> ServerAppCallable:
+            """Register the enter fn with the ServerApp object."""
+            warn_preview_feature("ServerApp-register-enter-function")
+
+            # Register provided function with the ServerApp object
+            self._enter = enter_fn
+
+            # Return provided function unmodified
+            return enter_fn
+
+        return enter_decorator
+
+    def exit(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
+        """Return a decorator that registers the exit fn with the server app.
+
+        Examples
+        --------
+        >>> app = ServerApp()
+        >>>
+        >>> @app.exit()
+        >>> def exit(context: Context) -> None:
+        >>>    print("ServerApp exit running")
+        """
+
+        def exit_decorator(exit_fn: ServerAppCallable) -> ServerAppCallable:
+            """Register the exit fn with the ServerApp object."""
+            warn_preview_feature("ServerApp-register-exit-function")
+
+            # Register provided function with the ServerApp object
+            self._exit = exit_fn
+
+            # Return provided function unmodified
+            return exit_fn
+
+        return exit_decorator
 
 
 class LoadServerAppError(Exception):
