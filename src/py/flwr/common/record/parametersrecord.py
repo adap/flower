@@ -15,10 +15,12 @@
 """ParametersRecord and Array."""
 
 
+from __future__ import annotations
+
 from collections import OrderedDict
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Optional, cast
+from typing import Any, cast, overload
 
 import numpy as np
 
@@ -27,35 +29,158 @@ from ..typing import NDArray
 from .typeddict import TypedDict
 
 
+def _raise_array_init_error() -> None:
+    raise TypeError(
+        f"Invalid arguments for {Array.__qualname__}. Expected a "
+        "NumPy ndarray, or explicit dtype/shape/stype/data values."
+    )
+
+
 @dataclass
 class Array:
     """Array type.
 
     A dataclass containing serialized data from an array-like or tensor-like object
-    along with some metadata about it.
+    along with metadata about it. The class can be initialized in one of two ways:
+
+    1. By providing a NumPy ndarray (via the `ndarray` argument).
+    2. By specifying explicit values for `dtype`, `shape`, `stype`, and `data`.
+
+    In scenarios (1), the `dtype`, `shape`, `stype`, and `data` are automatically
+    derived from the provided ndarray. In scenario (4), these fields must be
+    specified manually.
 
     Parameters
     ----------
-    dtype : str
-        A string representing the data type of the serialised object (e.g. `np.float32`)
+    ndarray : Optional[NDArray] (default: None)
+        A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data`
+        fields are derived automatically from it.
 
-    shape : List[int]
-        A list representing the shape of the unserialized array-like object. This is
-        used to deserialize the data (depending on the serialization method) or simply
-        as a metadata field.
+    dtype : Optional[str] (default: None)
+        A string representing the data type of the serialized object (e.g. `"float32"`).
+        Only required if you are not passing in a ndarray.
 
-    stype : str
-        A string indicating the type of serialisation mechanism used to generate the
-        bytes in `data` from an array-like or tensor-like object.
+    shape : Optional[list[int]] (default: None)
+        A list representing the shape of the unserialized array-like object. Only
+        required if you are not passing in a ndarray.
 
-    data: bytes
-        A buffer of bytes containing the data.
+    stype : Optional[str] (default: None)
+        A string indicating the serialization mechanism used to generate the bytes in
+        `data` from an array-like or tensor-like object. Only required if you are not
+        passing in a ndarray.
+
+    data : Optional[bytes] (default: None)
+        A buffer of bytes containing the data. Only required if you are not passing in
+        a ndarray.
+
+    Examples
+    --------
+    Initializing with a NumPy ndarray:
+
+    >>> arr1 = Array(np.random.randn(3, 3))
+
+    Initializing by specifying all fields directly:
+
+    >>> arr2 = Array(
+    >>>     dtype="float32",
+    >>>     shape=[3, 3],
+    >>>     stype="numpy.ndarray",
+    >>>     data=b"serialized_data...",
+    >>> )
     """
 
     dtype: str
     shape: list[int]
     stype: str
     data: bytes
+
+    @overload
+    def __init__(self, ndarray: NDArray) -> None: ...  # noqa: E704
+
+    @overload
+    def __init__(  # noqa: E704
+        self, dtype: str, shape: list[int], stype: str, data: bytes
+    ) -> None: ...
+
+    def __init__(  # pylint: disable=too-many-arguments, too-many-locals
+        self,
+        *args: Any,
+        ndarray: NDArray | None = None,
+        dtype: str | None = None,
+        shape: list[int] | None = None,
+        stype: str | None = None,
+        data: bytes | None = None,
+    ) -> None:
+        # Workaround to support multiple initialization signatures.
+        # This method validates and assigns the correct arguments,
+        # including keyword arguments such as dtype and shape.
+        # Supported initialization formats:
+        # 1. Array(dtype: str, shape: list[int], stype: str, data: bytes)
+        # 2. Array(ndarray: NDArray)
+
+        # Init all arguments
+        # If more than 4 positional arguments are provided, raise an error.
+        if len(args) > 4:
+            _raise_array_init_error()
+        all_args = [None] * 4
+        for i, arg in enumerate(args):
+            all_args[i] = arg
+
+        def _try_set_arg(index: int, arg: Any) -> None:
+            if arg is None:
+                return
+            if all_args[index] is not None:
+                _raise_array_init_error()
+            all_args[index] = arg
+
+        # Try to set keyword arguments in all_args
+        _try_set_arg(0, ndarray)
+        _try_set_arg(0, dtype)
+        _try_set_arg(1, shape)
+        _try_set_arg(2, stype)
+        _try_set_arg(3, data)
+
+        # Check if all arguments are correctly set
+        all_args = [arg for arg in all_args if arg is not None]
+        if len(all_args) not in [1, 4]:
+            _raise_array_init_error()
+
+        # Handle NumPy array
+        if isinstance(all_args[0], np.ndarray):
+            self.__dict__.update(self.from_numpy_ndarray(all_args[0]).__dict__)
+            return
+
+        # Handle direct field initialization
+        if (
+            isinstance(all_args[0], str)
+            and isinstance(all_args[1], list)
+            and all(isinstance(i, int) for i in all_args[1])
+            and isinstance(all_args[2], str)
+            and isinstance(all_args[3], bytes)
+        ):
+            self.dtype, self.shape, self.stype, self.data = all_args
+            return
+
+        _raise_array_init_error()
+
+    @classmethod
+    def from_numpy_ndarray(cls, ndarray: NDArray) -> Array:
+        """Create Array from NumPy ndarray."""
+        assert isinstance(
+            ndarray, np.ndarray
+        ), f"Expected NumPy ndarray, got {type(ndarray)}"
+        buffer = BytesIO()
+        # WARNING: NEVER set allow_pickle to true.
+        # Reason: loading pickled data can execute arbitrary code
+        # Source: https://numpy.org/doc/stable/reference/generated/numpy.save.html
+        np.save(buffer, ndarray, allow_pickle=False)
+        data = buffer.getvalue()
+        return Array(
+            dtype=str(ndarray.dtype),
+            shape=list(ndarray.shape),
+            stype=SType.NUMPY,
+            data=data,
+        )
 
     def numpy(self) -> NDArray:
         """Return the array as a NumPy array."""
@@ -117,7 +242,6 @@ class ParametersRecord(TypedDict[str, Array]):
 
     >>> import numpy as np
     >>> from flwr.common import ParametersRecord
-    >>> from flwr.common import array_from_numpy
     >>>
     >>> # Let's create a simple NumPy array
     >>> arr_np = np.random.randn(3, 3)
@@ -128,7 +252,7 @@ class ParametersRecord(TypedDict[str, Array]):
     >>>      [-0.10758364,  1.97619858, -0.37120501]])
     >>>
     >>> # Let's create an Array out of it
-    >>> arr = array_from_numpy(arr_np)
+    >>> arr = Array(arr_np)
     >>>
     >>> # If we print it you'll see (note the binary data)
     >>> Array(dtype='float64', shape=[3,3], stype='numpy.ndarray', data=b'@\x99\x18...')
@@ -176,7 +300,7 @@ class ParametersRecord(TypedDict[str, Array]):
 
     def __init__(
         self,
-        array_dict: Optional[OrderedDict[str, Array]] = None,
+        array_dict: OrderedDict[str, Array] | None = None,
         keep_input: bool = False,
     ) -> None:
         super().__init__(_check_key, _check_value)
