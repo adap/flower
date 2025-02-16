@@ -78,9 +78,9 @@ flwr run .  # this will run using the default settings in the `pyproject.toml`
 flwr run . --run-config "algorithm.mu=2 dataset.mu=2 algorithm.num_server_rounds=200" # will set proximal mu to 2 and the number of rounds to 200
 
 # if you run this baseline with a larger model, you might want to use the GPU (not used by default).
-# you can enable this by overriding the `server_device` and `client_resources` config. For example
+# you can enable this by overriding the federation config. For example
 # the below will run the server model on the GPU and 4 clients will be allowed to run concurrently on a GPU (assuming you also meet the CPU criteria for clients)
-flwr run . --federation-config "options.backend.client-resources.num-gpus=0.25"
+flwr run . gpu-simulation
 ```
 
 To run using FedAvg:
