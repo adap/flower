@@ -1,0 +1,33 @@
+[algorithm]
+name = "FedProx"
+num_server_rounds = 100
+fraction_fit = 0.01
+fraction_evaluate= 0.0
+min_evaluate_clients= 0
+min_available_clients= 1000
+min_fit_clients= 1000
+local_epochs = 10
+stragglers_fraction = 0.9
+learning_rate = 0.03
+mu = 2.0 # Always 0 when using FedAvg
+num_clients = 1000
+
+[dataset]
+iid = false
+balance = false
+power_law = true
+num_unique_labels_per_partition = 2
+num_unique_labels = 10
+preassigned_num_samples_per_label = 5
+seed=42
+mu = 2.0 # Always 0 when using FedAvg
+sigma = 2.0
+val_ratio = 0.1
+batch_size = 10
+
+[fit]
+drop_client = false # with FedProx, clients shouldn't be dropped even if they are stragglers
+
+[model]
+name = "LogisticRegression"
+num_classes = 10

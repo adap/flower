@@ -1,52 +1,13 @@
-"""CNN model architecture, training, and testing functions for MNIST."""
+"""fedprox: A Flower Baseline."""
 
+from collections import OrderedDict
 from typing import List, Tuple
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
+from easydict import EasyDict
+from torch import nn
 from torch.nn.parameter import Parameter
 from torch.utils.data import DataLoader
-
-
-class Net(nn.Module):
-    """Convolutional Neural Network architecture.
-
-    As described in McMahan 2017 paper :
-
-    [Communication-Efficient Learning of Deep Networks from
-    Decentralized Data] (https://arxiv.org/pdf/1602.05629.pdf)
-    """
-
-    def __init__(self, num_classes: int) -> None:
-        super().__init__()
-        self.conv1 = nn.Conv2d(1, 32, 5, padding=1)
-        self.conv2 = nn.Conv2d(32, 64, 5, padding=1)
-        self.pool = nn.MaxPool2d(kernel_size=(2, 2), padding=1)
-        self.fc1 = nn.Linear(64 * 7 * 7, 512)
-        self.fc2 = nn.Linear(512, num_classes)
-
-    def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
-        """Forward pass of the CNN.
-
-        Parameters
-        ----------
-        x : torch.Tensor
-            Input Tensor that will pass through the network
-
-        Returns
-        -------
-        torch.Tensor
-            The resulting Tensor after it has passed through the network
-        """
-        output_tensor = F.relu(self.conv1(input_tensor))
-        output_tensor = self.pool(output_tensor)
-        output_tensor = F.relu(self.conv2(output_tensor))
-        output_tensor = self.pool(output_tensor)
-        output_tensor = torch.flatten(output_tensor, 1)
-        output_tensor = F.relu(self.fc1(output_tensor))
-        output_tensor = self.fc2(output_tensor)
-        return output_tensor
 
 
 class LogisticRegression(nn.Module):
@@ -148,8 +109,8 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
     nn.Module
         The model that has been trained for one epoch.
     """
-    for images, labels in trainloader:
-        images, labels = images.to(device), labels.to(device)
+    for batch in trainloader:
+        images, labels = batch["image"].to(device), batch["label"].to(device)
         optimizer.zero_grad()
         proximal_term = 0.0
         for local_weights, global_weights in zip(net.parameters(), global_params):
@@ -183,8 +144,8 @@ def test(
     correct, total, loss = 0, 0, 0.0
     net.eval()
     with torch.no_grad():
-        for images, labels in testloader:
-            images, labels = images.to(device), labels.to(device)
+        for batch in testloader:
+            images, labels = batch["image"].to(device), batch["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
@@ -195,3 +156,34 @@ def test(
     loss /= len(testloader.dataset)
     accuracy = correct / total
     return loss, accuracy
+
+
+def get_weights(net):
+    """Extract model parameters as numpy arrays from state_dict."""
+    return [val.cpu().numpy() for _, val in net.state_dict().items()]
+
+
+def set_weights(net, parameters):
+    """Apply parameters to an existing model."""
+    params_dict = zip(net.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    net.load_state_dict(state_dict, strict=True)
+
+
+def instantiate_model(config: EasyDict):
+    """Instantiate the model necessary for the experiment.
+
+    Args:
+        config (dict): The config used to determine the model type.
+
+    Raises
+    ------
+        ValueError: The model type specified by the config is currently not supported
+
+    Returns
+    -------
+        nn.Module: Instantiated model for experimentation.
+    """
+    if config.model.name == "LogisticRegression":
+        return LogisticRegression(num_classes=config.model.num_classes)
+    raise ValueError("This model type is currently not supported.")
