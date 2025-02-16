@@ -50,8 +50,6 @@ def history_saver(history: History, run_config: EasyDict):
     """
     log(INFO, "................")
     file_suffix: str = (
-        f"{'iid' if run_config.dataset.iid else ''}"
-        f"{'balanced' if run_config.dataset.balance else ''}"
         f"{'powerlaw' if run_config.dataset.power_law else ''}"
         f"_C={run_config.algorithm.num_clients}"
         f"_B={run_config.dataset.batch_size}"

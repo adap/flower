@@ -141,8 +141,6 @@ mu = 1.0
 num_clients = 1000
 
 [tool.flwr.app.config.dataset]
-iid = false
-balance = false
 power_law = true
 num_unique_labels_per_partition = 2
 num_unique_labels = 10
