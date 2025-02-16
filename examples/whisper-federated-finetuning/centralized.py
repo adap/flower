@@ -1,26 +1,25 @@
 import argparse
 import random
 
-import numpy as np
 import torch
-from datasets import concatenate_datasets, load_dataset
-from torch.utils.data import DataLoader, WeightedRandomSampler
-from transformers import WhisperForConditionalGeneration, WhisperProcessor
-
-from utils import (
+from torch.utils.data import DataLoader
+from transformers import WhisperProcessor
+from whisper_example.dataset import get_encoding_fn, prepare_silences_dataset
+from whisper_example.model import (
+    construct_balanced_sampler,
     eval_model,
-    get_encoding_fn,
     get_model,
-    prepare_silences_dataset,
-    remove_cols,
     train_one_epoch,
 )
+
+from datasets import concatenate_datasets, load_dataset
 
 random.seed(1989)
 torch.set_float32_matmul_precision(
     "high"
 )  #  If “high” or “medium” are set then the TensorFloat32 is used
 NUM_CLASSES = 12
+REMOVE_COLS = ["file", "audio", "label", "is_unknown", "speaker_id", "utterance_id"]
 parser = argparse.ArgumentParser(description="Whisper centralised")
 
 parser.add_argument("--checkpoint", type=str, help="path to classifier`s checkpoint")
@@ -56,10 +55,10 @@ def main():
     torch.set_num_threads(
         1
     )  # not clear to me why we need this in order to be able to use `num_proc > 1 for .map`
-    train_encoded = sc.map(prepare_dataset_fn, num_proc=4, remove_columns=remove_cols)
-    val_encoded = sc_val.map(prepare_dataset_fn, num_proc=4, remove_columns=remove_cols)
+    train_encoded = sc.map(prepare_dataset_fn, num_proc=4, remove_columns=REMOVE_COLS)
+    val_encoded = sc_val.map(prepare_dataset_fn, num_proc=4, remove_columns=REMOVE_COLS)
     test_encoded = sc_test.map(
-        prepare_dataset_fn, num_proc=4, remove_columns=remove_cols
+        prepare_dataset_fn, num_proc=4, remove_columns=REMOVE_COLS
     )
 
     # create and pre-process the dataset of silences
@@ -68,7 +67,7 @@ def main():
     # ! needed each time you run the code. Alternatively, this silence generation could be
     # ! implemented as part of a `collate_fn` in the standard PyTorch dataloader...
     encoded_silences = silences_dataset.map(
-        prepare_dataset_fn, num_proc=4, remove_columns=remove_cols
+        prepare_dataset_fn, num_proc=4, remove_columns=REMOVE_COLS
     )
     full_train_dataset = concatenate_datasets([train_encoded, encoded_silences])
 
@@ -76,18 +75,11 @@ def main():
 
     lbls = set(full_train_dataset["targets"])
     print(f"{lbls = }")
-    hist = np.histogram(full_train_dataset["targets"], bins=12)
-    print(f"{[int(count) for count in hist[0]]}")
+    # Construct a balanced sampler so batches roughly contain the same number
+    # of samples from each class
+    sampler = construct_balanced_sampler(full_train_dataset)
 
-    # make balanced batches with a WeightedRandomSampler
-    w_per_class = (
-        len(full_train_dataset) / hist[0]
-    )  # doesn't have to add up to 1 (relative is what matters)
-    print(f"{w_per_class = }")
-    w_ss = [w_per_class[t] for t in full_train_dataset["targets"]]
-    sampler = WeightedRandomSampler(w_ss, len(w_ss))
-
-    # prepare dataloaders
+    # Prepare dataloaders
     train_dataset = full_train_dataset.with_format("torch", columns=["data", "targets"])
     train_loader = DataLoader(
         train_dataset, batch_size=64, shuffle=False, num_workers=4, sampler=sampler
@@ -97,7 +89,7 @@ def main():
     test_dataset = test_encoded.with_format("torch", columns=["data", "targets"])
     test_loader = DataLoader(test_dataset, batch_size=64, num_workers=4)
 
-    # model to cuda, set criterion, classification layer to train and optimiser
+    # Model to cuda, set criterion, classification layer to train and optimiser
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     encoder, classifier = get_model(device, num_classes=12)
     criterion = torch.nn.CrossEntropyLoss()
@@ -113,7 +105,7 @@ def main():
     classifier_head_params = sum(p.numel() for p in classifier.parameters())
     print(f"{classifier_head_params = }")
 
-    # eval initial model
+    # Eval initial model
     loss, accuracy = eval_model(encoder, classifier, criterion, val_loader, device)
     print(f"Initial (loss, acc): {loss = }, {accuracy = }")
     best = [-float("inf"), None]

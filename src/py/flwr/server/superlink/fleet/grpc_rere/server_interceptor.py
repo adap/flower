@@ -25,6 +25,7 @@ from flwr.common import now
 from flwr.common.constant import (
     PUBLIC_KEY_HEADER,
     SIGNATURE_HEADER,
+    SYSTEM_TIME_TOLERANCE,
     TIMESTAMP_HEADER,
     TIMESTAMP_TOLERANCE,
 )
@@ -38,10 +39,15 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
 
+MIN_TIMESTAMP_DIFF = -SYSTEM_TIME_TOLERANCE
+MAX_TIMESTAMP_DIFF = TIMESTAMP_TOLERANCE + SYSTEM_TIME_TOLERANCE
 
-def _unary_unary_rpc_terminator(message: str) -> grpc.RpcMethodHandler:
+
+def _unary_unary_rpc_terminator(
+    message: str, code: Any = grpc.StatusCode.UNAUTHENTICATED
+) -> grpc.RpcMethodHandler:
     def terminate(_request: GrpcMessage, context: grpc.ServicerContext) -> GrpcMessage:
-        context.abort(grpc.StatusCode.UNAUTHENTICATED, message)
+        context.abort(code, message)
         raise RuntimeError("Should not reach this point")  # Make mypy happy
 
     return grpc.unary_unary_rpc_method_handler(terminate)
@@ -64,7 +70,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         self.state_factory = state_factory
         self.auto_auth = auto_auth
 
-    def intercept_service(
+    def intercept_service(  # pylint: disable=too-many-return-statements
         self,
         continuation: Callable[[Any], Any],
         handler_call_details: grpc.HandlerCallDetails,
@@ -75,6 +81,13 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         metadata sent by the node. Continue RPC call if node is authenticated, else,
         terminate RPC call by setting context to abort.
         """
+        # Filter out non-Fleet service calls
+        if not handler_call_details.method.startswith("/flwr.proto.Fleet/"):
+            return _unary_unary_rpc_terminator(
+                "This request should be sent to a different service.",
+                grpc.StatusCode.FAILED_PRECONDITION,
+            )
+
         state = self.state_factory.state()
         metadata_dict = dict(handler_call_details.invocation_metadata)
 
@@ -100,7 +113,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         current = now()
         time_diff = current - datetime.datetime.fromisoformat(timestamp_iso)
         # Abort the RPC call if the timestamp is too old or in the future
-        if not 0 < time_diff.total_seconds() < TIMESTAMP_TOLERANCE:
+        if not MIN_TIMESTAMP_DIFF < time_diff.total_seconds() < MAX_TIMESTAMP_DIFF:
             return _unary_unary_rpc_terminator("Invalid timestamp")
 
         # Continue the RPC call

@@ -123,7 +123,5 @@ Limitations
       - None
     - - quickstart-sklearn-tabular
       - None
-    - - quickstart-tabnet
-      - The example has not yet been updated to work with the latest ``flwr`` version.
     - - quickstart-tensorflow
       - None
