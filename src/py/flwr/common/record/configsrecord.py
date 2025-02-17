@@ -15,6 +15,7 @@
 """ConfigsRecord."""
 
 
+from __future__ import annotations
 from typing import Optional, get_args
 
 from flwr.common.typing import ConfigsRecordValues, ConfigsScalar
@@ -161,3 +162,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
             num_bytes += len(k)
 
         return num_bytes
+
+    def copy(self) -> ConfigsRecord:
+        """Return a shallow copy of the record."""
+        return ConfigsRecord(dict(self.__dict__["_data"]), keep_input=True)
