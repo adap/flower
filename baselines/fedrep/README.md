@@ -101,12 +101,12 @@ When the execution completes, a new directory `results` will be created with a j
 ```
 flwr run . --run-config conf/cifar10_2.toml
 ```
-<img src="_static/cifar10_100_2.png" width="400"/> 
+<img src="_static/cifar10_100_2.png" width="400"/>
 
 ### CIFAR-10 (100, 5)
 
 ```
-flwr run . --run-config conf/cifar10_5.toml 
+flwr run . --run-config conf/cifar10_5.toml
 ```
 <img src="_static/cifar10_100_5.png" width="400"/> 
 

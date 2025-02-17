@@ -1,50 +1,140 @@
 """floco: A Flower Baseline."""
-"""floco: A Flower Baseline."""
-"""Optionally define a custom strategy.
-Needed only when the strategy is not yet implemented in Flower or because you want to
-extend or modify the functionality of an existing strategy.
-"""
-from logging import WARNING, INFO
-from typing import Callable, Dict, List, Optional, Tuple, Union
-from datetime import datetime
-from pathlib import Path
 
-import json
 import copy
+from logging import WARNING
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
-import torch
-import wandb
 import numpy as np
+from numpy import ndarray
 from sklearn import decomposition
 
 from flwr.common import (
+    Context,
+    EvaluateIns,
     FitIns,
     FitRes,
+    GetPropertiesIns,
     MetricsAggregationFn,
     NDArrays,
     Parameters,
     Scalar,
+    logger,
     ndarray_to_bytes,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
-
 )
-
-from flwr.common import logger
-from flwr.common.typing import UserConfig
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 from flwr.server.strategy.aggregate import aggregate, aggregate_inplace
 
-from floco.model import SimplexModel, set_weights
 
+class CustomFedAvg(FedAvg):
+    """Custom Federated Averaging strategy that stores and sends context object."""
 
-PROJECT_NAME = "Floco_WandB"
+    def __init__(
+        self,
+        *,
+        fraction_fit: float = 1.0,
+        fraction_evaluate: float = 1.0,
+        min_fit_clients: int = 2,
+        min_evaluate_clients: int = 2,
+        min_available_clients: int = 2,
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar], Context],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
+        ] = None,
+        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        accept_failures: bool = True,
+        initial_parameters: Parameters,
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        context: Context,
+    ) -> None:
+        super().__init__(
+            fraction_fit=fraction_fit,
+            fraction_evaluate=fraction_evaluate,
+            min_fit_clients=min_fit_clients,
+            min_evaluate_clients=min_evaluate_clients,
+            min_available_clients=min_available_clients,
+            on_fit_config_fn=on_fit_config_fn,
+            on_evaluate_config_fn=on_evaluate_config_fn,
+            accept_failures=accept_failures,
+            initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
+        )
+        self.eval_fn = evaluate_fn
+        self.context = context
+
+    def evaluate(
+        self, server_round: int, parameters: Parameters
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate model parameters using an evaluation function."""
+        if self.eval_fn is None:
+            # No evaluation function provided
+            return None
+        parameters_ndarrays = parameters_to_ndarrays(parameters)
+        eval_res = self.eval_fn(server_round, parameters_ndarrays, {}, self.context)
+        if eval_res is None:
+            return None
+
+        return eval_res
 
 
 class Floco(FedAvg):
-    """Configurable FedAvg strategy implementation."""
+    r"""Federated Optimization strategy.
+
+    Implementation based on https://openreview.net/pdf?id=JL2eMCfDW8
+
+    Parameters
+    ----------
+    fraction_fit : float, optional
+        Fraction of clients used during training. In case `min_fit_clients`
+        is larger than `fraction_fit * available_clients`, `min_fit_clients`
+        will still be sampled. Defaults to 1.0.
+    fraction_evaluate : float, optional
+        Fraction of clients used during validation. In case `min_evaluate_clients`
+        is larger than `fraction_evaluate * available_clients`,
+        `min_evaluate_clients` will still be sampled. Defaults to 1.0.
+    min_fit_clients : int, optional
+        Minimum number of clients used during training. Defaults to 2.
+    min_evaluate_clients : int, optional
+        Minimum number of clients used during validation. Defaults to 2.
+    min_available_clients : int, optional
+        Minimum number of total clients in the system. Defaults to 2.
+    evaluate_fn: Optional[
+        Callable[
+            [int, NDArrays, Dict[str, Scalar]],
+            Optional[Tuple[float, Dict[str, Scalar]]],
+        ]
+    ]
+        Optional function used for validation. Defaults to None.
+    on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure training. Defaults to None.
+    on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure validation. Defaults to None.
+    accept_failures : bool, optional
+        Whether or not accept rounds containing failures. Defaults to True.
+    initial_parameters : Parameters, optional
+        Initial global model parameters.
+    fit_metrics_aggregation_fn : Optional[MetricsAggregationFn]
+        Metrics aggregation function, optional.
+    evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn]
+        Metrics aggregation function, optional.
+    tau: int = 0
+        Round at which to start projection.
+    rho: float = 1.0
+        Radius of the ball around each projected client parameters
+        from which models are sampled.
+    endpoints: int = 1
+        Number of endpoints of the solution simplex.
+    num_clients: int = 10
+        Total number of clients that participate in training.
+    """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
@@ -57,7 +147,7 @@ class Floco(FedAvg):
         min_available_clients: int = 2,
         evaluate_fn: Optional[
             Callable[
-                [int, NDArrays, Dict[str, Scalar]],
+                [int, NDArrays, Dict[str, Scalar], Context],
                 Optional[Tuple[float, Dict[str, Scalar]]],
             ]
         ] = None,
@@ -67,13 +157,11 @@ class Floco(FedAvg):
         initial_parameters: Parameters,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        context: Context,
         tau: int = 0,
         rho: float = 1.0,
         endpoints: int = 1,
         num_clients: int = 10,
-        pers_epoch: int = 0,
-        run_config: UserConfig, 
-        use_wandb: bool
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -81,7 +169,6 @@ class Floco(FedAvg):
             min_fit_clients=min_fit_clients,
             min_evaluate_clients=min_evaluate_clients,
             min_available_clients=min_available_clients,
-            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
@@ -89,106 +176,48 @@ class Floco(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
+        self.init_parameters = initial_parameters
         self.tau = tau
         self.rho = rho
         self.endpoints = endpoints
-        self.pers_epoch = pers_epoch
         self.num_clients = num_clients
-        self.client_gradients = {}
+        self.last_selected_partition_ids: List[int] = []
+        self.client_cid_to_partition_id: Dict = {}
+        self.projected_clients: List = [ndarray]
+        self.client_subregion_parameters: Dict = {}
+        self.client_gradients: Dict = {}
+        self.context = context
+        self.eval_fn = evaluate_fn
 
-        # Create a directory where to save results from this run
-        self.save_path, self.run_dir = create_run_dir(run_config)
-        self.use_wandb = use_wandb
-        # Initialise W&B if set
-        if use_wandb:
-            self._init_wandb_project()
-        # Keep track of best acc
-        self.best_acc_so_far = 0.0
-        # A dictionary to store results as they come
-        self.results = {}
-
-    def _init_wandb_project(self):
-        # init W&B
-        wandb.init(project=PROJECT_NAME, name=f"{str(self.run_dir)}-ServerApp")
-
-    def _store_results(self, tag: str, results_dict):
-        """Store results in dictionary, then save as JSON."""
-        # Update results dict
-        if tag in self.results:
-            self.results[tag].append(results_dict)
-        else:
-            self.results[tag] = [results_dict]
-
-        # Save results to disk.
-        # Note we overwrite the same file with each call to this function.
-        # While this works, a more sophisticated approach is preferred
-        # in situations where the contents to be saved are larger.
-        with open(f"{self.save_path}/results.json", "w", encoding="utf-8") as fp:
-            json.dump(self.results, fp)
-
-    def _update_best_acc(self, round, accuracy, parameters):
-        """Determines if a new best global model has been found.
-        If so, the model checkpoint is saved to disk.
-        """
-        if accuracy > self.best_acc_so_far:
-            self.best_acc_so_far = accuracy
-            logger.log(INFO, "💡 New best global model found: %f", accuracy)
-            # You could save the parameters object directly.
-            # Instead we are going to apply them to a PyTorch
-            # model and save the state dict.
-            # Converts flwr.common.Parameters to ndarrays
-            ndarrays = parameters_to_ndarrays(parameters)
-            model = SimplexModel(endpoints=self.endpoints, seed=0)
-            set_weights(model, ndarrays)
-            # Save the PyTorch model
-            file_name = f"model_state_acc_{accuracy}_round_{round}.pth"
-            torch.save(model.state_dict(), self.save_path / file_name)
-
-    def store_results_and_log(self, server_round: int, tag: str, results_dict):
-        """A helper method that stores results and logs them to W&B if enabled."""
-        # Store results
-        self._store_results(
-            tag=tag,
-            results_dict={"round": server_round, **results_dict},
-        )
-        if self.use_wandb:
-            # Log centralized loss and metrics to W&B
-            wandb.log(results_dict, step=server_round)
-
-    def evaluate(self, server_round: int, parameters: Parameters) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    def evaluate(
+        self, server_round: int, parameters: Parameters
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
-        if self.evaluate_fn is None:
+        if self.eval_fn is None:
             # No evaluation function provided
             return None
         parameters_ndarrays = parameters_to_ndarrays(parameters)
-        eval_res = self.evaluate_fn(
-            server_round, 
-            parameters_ndarrays, 
+        eval_res = self.eval_fn(
+            server_round,
+            parameters_ndarrays,
             {
-                "center": tuple([1 / self.endpoints for _ in range(self.endpoints)]), 
-                "radius": self.rho
-                }
-            )
+                "center": ndarray_to_bytes(
+                    np.array([1 / self.endpoints for _ in range(self.endpoints)])
+                ),
+                "radius": self.rho,
+                "endpoints": self.endpoints,
+            },
+            self.context,
+        )
         if eval_res is None:
             return None
-        loss, metrics = eval_res
-        # Save model if new best central accuracy is found
-        self._update_best_acc(server_round, metrics["centralized_accuracy"], parameters)
 
-        # Store and log
-        self.store_results_and_log(
-            server_round=server_round,
-            tag="centralized_evaluate",
-            results_dict={"centralized_loss": loss, **metrics},
-        )
-        return loss, metrics
+        return eval_res
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
-        """
-        Configure the next round of training.
-        """
+        """Configure the next round of training."""
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
@@ -202,34 +231,86 @@ class Floco(FedAvg):
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
-        self.selected_client_cids = [client.cid for client in clients]
-        if (server_round + 1) == self.tau: # Round before projection
-            clients = client_manager.sample( # Sample all clients to get most up to date gradients  
-                num_clients=self.num_clients,
-                min_num_clients=self.num_clients
-                )
-            self.all_client_cids = [client.cid for client in clients]
-        elif server_round == self.tau: # Round of projection
-            self.projected_clients = project_clients(   
-                    self.client_gradients, self.endpoints
-                )
-            self.client_subregion_parameters = {
-                client_id: subregion_parameters
-                for client_id, subregion_parameters in zip(self.all_client_cids, self.projected_clients)
-            }
+        self.last_selected_partition_ids = [
+            int(
+                client.get_properties(
+                    ins=GetPropertiesIns({}), group_id=server_round, timeout=30
+                ).properties["partition-id"]
+            )
+            for client in clients
+        ]
+        if (server_round + 1) == self.tau:  # Round before projection
+            clients = client_manager.sample(  # Sample all clients to get gradients
+                num_clients=self.num_clients, min_num_clients=self.num_clients
+            )
+
+            # Create client cid to partition id mapping
+            for client in clients:
+                self.client_cid_to_partition_id[client.cid] = client.get_properties(
+                    ins=GetPropertiesIns({}), group_id=server_round, timeout=30
+                ).properties["partition-id"]
+
+        elif server_round == self.tau:  # Round of projection
+            # Get client gradients
+            self.projected_clients = project_clients(
+                self.client_gradients, self.endpoints
+            )
+            self.client_subregion_parameters = dict(
+                zip(np.arange(self.num_clients), self.projected_clients)
+            )
         if server_round >= self.tau:
             fit_ins_all_clients = []
             for client in clients:
+                tmp_client_partition_id = self.client_cid_to_partition_id[client.cid]
                 tmp_client_config = copy.deepcopy(config)
-                tmp_client_config["center"] = ndarray_to_bytes(self.client_subregion_parameters[client.cid])
-                tmp_client_config["radius"] = ndarray_to_bytes(self.rho)
+                tmp_client_config["center"] = ndarray_to_bytes(
+                    self.client_subregion_parameters[tmp_client_partition_id]
+                )
+                tmp_client_config["radius"] = self.rho
                 tmp_fit_ins = FitIns(parameters, tmp_client_config)
-                fit_ins_all_clients.append(
-                    (client, tmp_fit_ins)
-                    )
+                fit_ins_all_clients.append((client, tmp_fit_ins))
             return fit_ins_all_clients
         # Return client/config pairs
-        return [(client, fit_ins) for i, client in enumerate(clients)]
+        return [(client, fit_ins) for client in clients]
+
+    def configure_evaluate(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> list[tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation."""
+        # Do not configure federated evaluation if fraction eval is 0.
+        if self.fraction_evaluate == 0.0:
+            return []
+
+        # Parameters and config
+        config = {}
+        if self.on_evaluate_config_fn is not None:
+            # Custom evaluation config function provided
+            config = self.on_evaluate_config_fn(server_round)
+        evaluate_ins = EvaluateIns(parameters, config)
+        config["server_round"] = server_round
+        # Sample clients
+        sample_size, min_num_clients = self.num_evaluation_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+
+        if server_round >= self.tau:
+            eval_ins_all_clients = []
+            for client in clients:
+                tmp_client_partition_id = self.client_cid_to_partition_id[client.cid]
+                tmp_client_config = copy.deepcopy(config)
+                tmp_client_config["center"] = ndarray_to_bytes(
+                    self.client_subregion_parameters[tmp_client_partition_id]
+                )
+                tmp_client_config["radius"] = self.rho
+                tmp_eval_ins = EvaluateIns(parameters, tmp_client_config)
+                eval_ins_all_clients.append((client, tmp_eval_ins))
+            return eval_ins_all_clients
+
+        # Return client/config pairs
+        return [(client, evaluate_ins) for client in clients]
 
     def aggregate_fit(
         self,
@@ -243,16 +324,27 @@ class Floco(FedAvg):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        if self.tau == (server_round + 1): # All clients results are collected
-            # Save client gradients for later projection
-            for cl, fit_res in results:
-                client_id = cl.cid
+        if (server_round + 1) == self.tau:  # All clients results are collected
+            # Save client gradients for projection
+            new_results = []
+            for client, fit_res in results:
+                tmp_client_partition_id = self.client_cid_to_partition_id[client.cid]
                 w = parameters_to_ndarrays(fit_res.parameters)
-                client_grads = [w[-i].flatten() for i in range(1,self.endpoints+1)] # Get gradients for simplex layer(s) only
+                init_ndarrays = parameters_to_ndarrays(self.init_parameters)
+                client_grads = [
+                    init_ndarrays[-i].flatten() - w[-i].flatten()
+                    for i in range(1, self.endpoints + 1)
+                ]  # Get pseudo gradients
                 client_grads = np.concatenate(client_grads)
-                self.client_gradients[client_id] = client_grads
-                self.client_gradients = dict(sorted(self.client_gradients.items())) # Sort gradients by client id for better readability
-            results = [(cl, fit_res) for cl, fit_res in results if cl.cid in self.selected_client_cids] # Only select the clients that were sampled
+                self.client_gradients[tmp_client_partition_id] = client_grads
+                self.client_gradients = {
+                    k: self.client_gradients[k]
+                    for k in sorted(self.client_gradients.keys())
+                }
+                if tmp_client_partition_id in self.last_selected_partition_ids:
+                    # Only select the clients that were sampled
+                    new_results.append((client, fit_res))
+            results = new_results
         if self.inplace:
             # Does in-place weighted average of results
             aggregated_ndarrays = aggregate_inplace(results)
@@ -264,6 +356,7 @@ class Floco(FedAvg):
             ]
             aggregated_ndarrays = aggregate(weights_results)
         parameters_aggregated = ndarrays_to_parameters(aggregated_ndarrays)
+        self.init_parameters = parameters_aggregated
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
@@ -272,27 +365,21 @@ class Floco(FedAvg):
         elif server_round == 1:  # Only log this warning once
             logger.log(WARNING, "No fit_metrics_aggregation_fn provided")
         return parameters_aggregated, metrics_aggregated
-    
+
     def aggregate_evaluate(self, server_round, results, failures):
         """Aggregate results from federated evaluation."""
         loss, metrics = super().aggregate_evaluate(server_round, results, failures)
-
-        # Store and log
-        self.store_results_and_log(
-            server_round=server_round,
-            tag="federated_evaluate",
-            results_dict={"federated_evaluate_loss": loss, **metrics},
-        )
         return loss, metrics
 
 
 def project_clients(client_gradients, endpoints):
+    """Optimize client projection onto a simplex of dimension endpoints-1."""
     client_stats = np.array(list(client_gradients.values()))
     kappas = decomposition.PCA(n_components=endpoints).fit_transform(client_stats)
     # Find optimal projection
     lowest_log_energy = np.inf
     best_beta = None
-    for i, z in enumerate(np.linspace(1e-4, 1, 1000)):
+    for z in np.linspace(1e-4, 1, 1000):
         betas = _project_client_onto_simplex(kappas, z=z)
         betas /= betas.sum(axis=1, keepdims=True)
         log_energy = _riesz_s_energy(betas)
@@ -303,6 +390,7 @@ def project_clients(client_gradients, endpoints):
 
 
 def _project_client_onto_simplex(kappas, z):
+    """Project clients onto a simplex of dimension endpoints-1."""
     sorted_kappas = np.sort(kappas, axis=1)[:, ::-1]
     z = np.ones(len(kappas)) * z
     cssv = np.cumsum(sorted_kappas, axis=1) - z[:, np.newaxis]
@@ -315,10 +403,14 @@ def _project_client_onto_simplex(kappas, z):
 
 
 def _riesz_s_energy(simplex_points):
+    """Compute Riesz s-energy of client projections.
+
+    (https://www.sciencedirect.com/science/article/pii/S0021904503000315)
+    """
     diff = simplex_points[:, None] - simplex_points[None, :]
     distance = np.sqrt((diff**2).sum(axis=2))
     np.fill_diagonal(distance, np.inf)
-    epsilon = 1e-4  # epsilon is the smallest distance possible to avoid overflow during gradient calculation
+    epsilon = 1e-4  # epsilon is the smallest distance possible to avoid overflow
     distance[distance < epsilon] = epsilon
     # select only upper triangular matrix to have each mutual distance once
     mutual_dist = distance[np.triu_indices(len(simplex_points), 1)]
@@ -327,19 +419,3 @@ def _riesz_s_energy(simplex_points):
     energy = energies[~np.isnan(energies)].sum()
     log_energy = -np.log(len(mutual_dist)) + np.log(energy)
     return log_energy
-
-
-def create_run_dir(config: UserConfig) -> Path:
-    """Create a directory where to save results from this run."""
-    # Create output directory given current timestamp
-    current_time = datetime.now()
-    run_dir = current_time.strftime("%Y-%m-%d/%H-%M-%S")
-    # Save path is based on the current directory
-    save_path = Path.cwd() / f"outputs/{run_dir}"
-    save_path.mkdir(parents=True, exist_ok=False)
-
-    # Save run config as json
-    with open(f"{save_path}/run_config.json", "w", encoding="utf-8") as fp:
-        json.dump(config, fp)
-
-    return save_path, run_dir
