@@ -14,17 +14,17 @@ We would like to give our special thanks to all the contributors who made the ne
 
 When the ServerApp pulls the replies the SuperNodes sent to the SuperLink, these should be removed from the LinkState. In some situations these weren't been erased, which could lead to high memory utilization by the SuperLink.
 
-**Introduced Windows CI tests** ([#4908](https://github.com/adap/flower/pull/4908))
+**Introduce Windows CI tests** ([#4908](https://github.com/adap/flower/pull/4908))
 
 We continue improving the experience of running Flower on Windows. Now and automated CI test is run to ensure compatibility.
 
-**Updated Ray version (Simulation Engine)** ([#4926](https://github.com/adap/flower/pull/4926))
+**Update Ray version (Simulation Engine)** ([#4926](https://github.com/adap/flower/pull/4926))
 
 The Simulation Engine has been upgraded to a version of Ray that is compatible with Python 3.12.
 
 - **Update Documentation** ([#4915](https://github.com/adap/flower/pull/4915), [#4914](https://github.com/adap/flower/pull/4914))
 
-- **Other minor quality improvements** ([#4935](https://github.com/adap/flower/pull/4935), [#4936](https://github.com/adap/flower/pull/4936), [#4928](https://github.com/adap/flower/pull/4928), [#4924](https://github.com/adap/flower/pull/4924))
+- **Other quality improvements** ([#4935](https://github.com/adap/flower/pull/4935), [#4936](https://github.com/adap/flower/pull/4936), [#4928](https://github.com/adap/flower/pull/4928), [#4924](https://github.com/adap/flower/pull/4924))
 
 ## v1.15.1 (2025-02-05)
 
