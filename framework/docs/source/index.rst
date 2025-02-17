@@ -11,7 +11,7 @@ Join the Flower Community
 -------------------------
 
 The Flower Community is growing quickly - we're a friendly group of researchers,
-engineers, designers, students, professionals, academics, and other enthusiasts.
+engineers, students, professionals, academics, and other enthusiasts.
 
 .. button-link:: https://flower.ai/join-slack
     :color: primary
