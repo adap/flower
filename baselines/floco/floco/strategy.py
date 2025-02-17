@@ -67,6 +67,7 @@ class CustomFedAvg(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
+        # Custom evaluation function that allows to send context object.
         self.eval_fn = evaluate_fn
         self.context = context
 
@@ -176,7 +177,6 @@ class Floco(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.init_parameters = initial_parameters
         self.tau = tau
         self.rho = rho
         self.endpoints = endpoints
@@ -187,7 +187,16 @@ class Floco(FedAvg):
         self.client_subregion_parameters: Dict = {}
         self.client_gradients: Dict = {}
         self.context = context
+        # Custom evaluation function that allows to send context object.
         self.eval_fn = evaluate_fn
+        # Needed to compute pseudo gradients.
+        self.initial_parameters: Parameters = initial_parameters
+
+    def initialize_parameters(
+        self, client_manager: ClientManager
+    ) -> Optional[Parameters]:
+        """Initialize global model parameters."""
+        return self.initial_parameters
 
     def evaluate(
         self, server_round: int, parameters: Parameters
@@ -330,7 +339,7 @@ class Floco(FedAvg):
             for client, fit_res in results:
                 tmp_client_partition_id = self.client_cid_to_partition_id[client.cid]
                 w = parameters_to_ndarrays(fit_res.parameters)
-                init_ndarrays = parameters_to_ndarrays(self.init_parameters)
+                init_ndarrays = parameters_to_ndarrays(self.initial_parameters)
                 client_grads = [
                     init_ndarrays[-i].flatten() - w[-i].flatten()
                     for i in range(1, self.endpoints + 1)
@@ -356,7 +365,7 @@ class Floco(FedAvg):
             ]
             aggregated_ndarrays = aggregate(weights_results)
         parameters_aggregated = ndarrays_to_parameters(aggregated_ndarrays)
-        self.init_parameters = parameters_aggregated
+        self.initial_parameters = parameters_aggregated
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:

@@ -124,7 +124,6 @@ def get_strategy(context: Context) -> Union[CustomFedAvg, Floco]:
             context=context,
         )
     elif context.run_config["algorithm"] == "Floco":
-        print("HI")
         tau = int(context.run_config["tau"])
         rho = float(context.run_config["rho"])
         endpoints = int(context.run_config["endpoints"])

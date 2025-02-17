@@ -6,6 +6,8 @@ from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 
+COLORS = {"FedAvg": "red", "Floco": "blue", r"Floco$^{+}$": "green"}
+
 # Get the current working directory
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -37,12 +39,14 @@ def read_from_results(path: str) -> Tuple[str, List[float], List[float], str, st
 
 
 def make_plot(dir_path: str, dataset: str, split: str, plt_title: str) -> None:
-    """Given a directory with json files, generated a plot using the provided title."""
+    """Given a directory with json files, generate a plot using the provided title."""
     _, ax = plt.subplots(1, 2, figsize=(8, 3))
+
+    results = {}  # Dictionary to store results based on algorithm
+
     with os.scandir(dir_path) as files:
         for file in files:
             file_name = os.path.join(dir_path, file.name)
-            print(file_name, flush=True)
             (
                 algorithm,
                 federated_accuracies,
@@ -53,12 +57,27 @@ def make_plot(dir_path: str, dataset: str, split: str, plt_title: str) -> None:
             ) = read_from_results(file_name)
             if read_dataset != dataset or read_split != split:
                 continue
-            rounds = [i + 1 for i in range(len(federated_accuracies))]
-            print(f"Max accuracy ({algorithm}): {max(federated_accuracies):.2f}")
             if algorithm == "Floco" and pers_lamda > 0:
                 algorithm = r"Floco$^{+}$"
-            ax[0].plot(rounds, centralized_accuracies[1:], label=f"{algorithm}")
-            ax[1].plot(rounds, federated_accuracies, label=f"{algorithm}")
+            rounds = list(range(1, len(federated_accuracies) + 1))
+            results[algorithm] = (rounds, federated_accuracies, centralized_accuracies)
+    # Plot the algorithms in the order of COLORS keys
+    for algorithm, color in COLORS.items():
+        if algorithm in results:
+            rounds, federated_accuracies, centralized_accuracies = results[algorithm]
+            print(f"Max accuracy ({algorithm}): {max(federated_accuracies):.2f}")
+            ax[0].plot(
+                rounds,
+                centralized_accuracies[1:],  # Skip the first value to match indexing
+                color=color,
+                label=algorithm,
+            )
+            ax[1].plot(
+                rounds,
+                federated_accuracies,
+                color=color,
+                label=algorithm,
+            )
     ax[1].legend()
     ax[0].set_xlabel("Rounds")
     ax[0].set_ylabel("Accuracy")

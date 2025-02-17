@@ -78,7 +78,7 @@ In order to run using the default settings, simply run:
 ```bash
 flwr run .
 ```
-This will run Floco on the Dirichlet(0.5) split. If you want to test other splits, you can specify which config you want to use. For example, if you would like to test Floco<sup>+</sup> on the CIFAR-10 Five Fold split from the paper, simply run:
+This will run Floco on the Dirichlet(0.5) split. If you want to test other splits, you can specify which config you want to use. For example, if you would like to test Floco<sup>+</sup> on the CIFAR-10 Five Fold split from the original paper, simply run:
 ```bash
 flwr run . --run-config conf/cifar10_fold_floco_p.toml
 ```
@@ -86,11 +86,11 @@ If you want to run the benchmark shown int the Figures below, simply run:
 ```bash
 bash ./run.sh
 ```
-This will run FedAvg, Floco and Floco<sup>+</sup> on the CIFAR-10 Five-Fold and Dirichlet split, as used in the paper.
+This will run FedAvg, Floco and Floco<sup>+</sup> on the CIFAR-10 Five-Fold and Dirichlet(0.5) split.
 ## Expected Results
 In order to generate the result plots shown below, run:
 ```
-python floco/utils.py
+python floco/plot_results.py
 ```
 ### CIFAR-10 Five-Fold split
 <img src="_static/CIFAR10_Fold.png" width="400"/> 
