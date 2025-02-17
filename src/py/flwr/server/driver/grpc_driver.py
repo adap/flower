@@ -14,38 +14,42 @@
 # ==============================================================================
 """Flower gRPC Driver."""
 
+
 import time
 import warnings
 from collections.abc import Iterable
-from logging import DEBUG, INFO, WARN, WARNING
-from typing import Any, Optional, cast
+from logging import DEBUG, WARNING
+from typing import Optional, cast
 
 import grpc
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
-from flwr.common.constant import MAX_RETRY_DELAY, SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
-from flwr.common.grpc import create_channel
+from flwr.common.constant import (
+    SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    SUPERLINK_NODE_ID,
+)
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
-from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.serde import message_from_taskres, message_to_taskins, run_from_proto
+from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
+from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Run
+from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullTaskResRequest,
-    PullTaskResResponse,
-    PushTaskInsRequest,
-    PushTaskInsResponse,
+    PullResMessagesRequest,
+    PullResMessagesResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .driver import Driver
 
 ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
-[Driver] Error: Not connected.
+[flwr-serverapp] Error: Not connected.
 
 Call `connect()` on the `GrpcDriverStub` instance before calling any of the other
 `GrpcDriverStub` methods.
@@ -75,7 +79,7 @@ class GrpcDriver(Driver):
         self._run: Optional[Run] = None
         self._grpc_stub: Optional[ServerAppIoStub] = None
         self._channel: Optional[grpc.Channel] = None
-        self.node = Node(node_id=0, anonymous=True)
+        self.node = Node(node_id=SUPERLINK_NODE_ID)
         self._retry_invoker = _make_simple_grpc_retry_invoker()
 
     @property
@@ -96,9 +100,10 @@ class GrpcDriver(Driver):
             insecure=(self._cert is None),
             root_certificates=self._cert,
         )
+        self._channel.subscribe(on_channel_state_change)
         self._grpc_stub = ServerAppIoStub(self._channel)
         _wrap_stub(self._grpc_stub, self._retry_invoker)
-        log(DEBUG, "[Driver] Connected to %s", self._addr)
+        log(DEBUG, "[flwr-serverapp] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:
         """Disconnect from the ServerAppIo API."""
@@ -109,7 +114,7 @@ class GrpcDriver(Driver):
         self._channel = None
         self._grpc_stub = None
         channel.close()
-        log(DEBUG, "[Driver] Disconnected")
+        log(DEBUG, "[flwr-serverapp] Disconnected")
 
     def set_run(self, run_id: int) -> None:
         """Set the run."""
@@ -192,20 +197,22 @@ class GrpcDriver(Driver):
         This method takes an iterable of messages and sends each message
         to the node specified in `dst_node_id`.
         """
-        # Construct TaskIns
-        task_ins_list: list[TaskIns] = []
+        # Construct Messages
+        message_proto_list: list[ProtoMessage] = []
         for msg in messages:
             # Check message
             self._check_message(msg)
-            # Convert Message to TaskIns
-            taskins = message_to_taskins(msg)
+            # Convert to proto
+            msg_proto = message_to_proto(msg)
             # Add to list
-            task_ins_list.append(taskins)
+            message_proto_list.append(msg_proto)
         # Call GrpcDriverStub method
-        res: PushTaskInsResponse = self._stub.PushTaskIns(
-            PushTaskInsRequest(task_ins_list=task_ins_list)
+        res: PushInsMessagesResponse = self._stub.PushMessages(
+            PushInsMessagesRequest(
+                messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
+            )
         )
-        return list(res.task_ids)
+        return list(res.message_ids)
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
@@ -213,12 +220,15 @@ class GrpcDriver(Driver):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        # Pull TaskRes
-        res: PullTaskResResponse = self._stub.PullTaskRes(
-            PullTaskResRequest(node=self.node, task_ids=message_ids)
+        # Pull Messages
+        res: PullResMessagesResponse = self._stub.PullMessages(
+            PullResMessagesRequest(
+                message_ids=message_ids,
+                run_id=cast(Run, self._run).run_id,
+            )
         )
-        # Convert TaskRes to Message
-        msgs = [message_from_taskres(taskres) for taskres in res.task_res_list]
+        # Convert Message from Protobuf representation
+        msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
         return msgs
 
     def send_and_receive(
@@ -258,60 +268,3 @@ class GrpcDriver(Driver):
             return
         # Disconnect
         self._disconnect()
-
-
-def _make_simple_grpc_retry_invoker() -> RetryInvoker:
-    """Create a simple gRPC retry invoker."""
-
-    def _on_sucess(retry_state: RetryState) -> None:
-        if retry_state.tries > 1:
-            log(
-                INFO,
-                "Connection successful after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-
-    def _on_backoff(retry_state: RetryState) -> None:
-        if retry_state.tries == 1:
-            log(WARN, "Connection attempt failed, retrying...")
-        else:
-            log(
-                WARN,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
-
-    def _on_giveup(retry_state: RetryState) -> None:
-        if retry_state.tries > 1:
-            log(
-                WARN,
-                "Giving up reconnection after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-
-    return RetryInvoker(
-        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
-        recoverable_exceptions=grpc.RpcError,
-        max_tries=None,
-        max_time=None,
-        on_success=_on_sucess,
-        on_backoff=_on_backoff,
-        on_giveup=_on_giveup,
-        should_giveup=lambda e: e.code() != grpc.StatusCode.UNAVAILABLE,  # type: ignore
-    )
-
-
-def _wrap_stub(stub: ServerAppIoStub, retry_invoker: RetryInvoker) -> None:
-    """Wrap the gRPC stub with a retry invoker."""
-
-    def make_lambda(original_method: Any) -> Any:
-        return lambda *args, **kwargs: retry_invoker.invoke(
-            original_method, *args, **kwargs
-        )
-
-    for method_name in vars(stub):
-        method = getattr(stub, method_name)
-        if callable(method):
-            setattr(stub, method_name, make_lambda(method))

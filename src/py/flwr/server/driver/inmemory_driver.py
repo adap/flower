@@ -22,6 +22,7 @@ from typing import Optional, cast
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -49,7 +50,7 @@ class InMemoryDriver(Driver):
         self._run: Optional[Run] = None
         self.state = state_factory.state()
         self.pull_interval = pull_interval
-        self.node = Node(node_id=0, anonymous=True)
+        self.node = Node(node_id=SUPERLINK_NODE_ID)
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -125,7 +126,6 @@ class InMemoryDriver(Driver):
             # Convert Message to TaskIns
             taskins = message_to_taskins(msg)
             # Store in state
-            taskins.task.pushed_at = time.time()
             task_id = self.state.store_task_ins(taskins)
             if task_id:
                 task_ids.append(str(task_id))
@@ -142,7 +142,11 @@ class InMemoryDriver(Driver):
         # Pull TaskRes
         task_res_list = self.state.get_task_res(task_ids=msg_ids)
         # Delete tasks in state
-        self.state.delete_tasks(msg_ids)
+        # Delete the TaskIns/TaskRes pairs if TaskRes is found
+        task_ins_ids_to_delete = {
+            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
+        }
+        self.state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
         # Convert TaskRes to Message
         msgs = [message_from_taskres(taskres) for taskres in task_res_list]
         return msgs

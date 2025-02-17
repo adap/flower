@@ -140,7 +140,6 @@ def worker(
                 # Convert to TaskRes
                 task_res = message_to_taskres(out_mssg)
                 # Store TaskRes in state
-                task_res.task.pushed_at = time.time()
                 taskres_queue.put(task_res)
 
 
@@ -182,8 +181,8 @@ def run_api(
     f_stop: threading.Event,
 ) -> None:
     """Run the VCE."""
-    taskins_queue: "Queue[TaskIns]" = Queue()
-    taskres_queue: "Queue[TaskRes]" = Queue()
+    taskins_queue: Queue[TaskIns] = Queue()
+    taskres_queue: Queue[TaskRes] = Queue()
 
     try:
 

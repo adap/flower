@@ -14,8 +14,8 @@
 # ==============================================================================
 """Flower ServerApp process."""
 
+
 import argparse
-import sys
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
@@ -24,6 +24,7 @@ from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
+from flwr.cli.utils import get_sha256_hash
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import (
     get_flwr_dir,
@@ -36,6 +37,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -50,7 +52,8 @@ from flwr.common.serde import (
     run_from_proto,
     run_status_to_proto,
 )
-from flwr.common.typing import RunStatus
+from flwr.common.telemetry import EventType, event
+from flwr.common.typing import RunNotRunningException, RunStatus
 from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
@@ -69,19 +72,18 @@ def flwr_serverapp() -> None:
 
     args = _parse_args_run_flwr_serverapp().parse_args()
 
-    log(INFO, "Starting Flower ServerApp")
+    log(INFO, "Start `flwr-serverapp` process")
 
     if not args.insecure:
-        log(
-            ERROR,
-            "`flwr-serverapp` does not support TLS yet. "
-            "Please use the '--insecure' flag.",
+        flwr_exit(
+            ExitCode.COMMON_TLS_NOT_SUPPORTED,
+            "`flwr-serverapp` does not support TLS yet.",
         )
-        sys.exit(1)
 
     log(
         DEBUG,
-        "Starting isolated `ServerApp` connected to SuperLink's ServerAppIo API at %s",
+        "`flwr-serverapp` will attempt to connect to SuperLink's "
+        "ServerAppIo API at %s",
         args.serverappio_api_address,
     )
     run_serverapp(
@@ -96,7 +98,7 @@ def flwr_serverapp() -> None:
     restore_output()
 
 
-def run_serverapp(  # pylint: disable=R0914, disable=W0212
+def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     serverappio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
@@ -112,12 +114,15 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     # Resolve directory where FABs are installed
     flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
-
+    success = True
+    hash_run_id = None
+    run_status = None
     while True:
 
         try:
             # Pull ServerAppInputs from LinkState
             req = PullServerAppInputsRequest()
+            log(DEBUG, "[flwr-serverapp] Pull ServerAppInputs")
             res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)
@@ -127,6 +132,8 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             context = context_from_proto(res.context)
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
+
+            hash_run_id = get_sha256_hash(run.run_id)
 
             driver.set_run(run.run_id)
 
@@ -138,7 +145,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
                 stub=driver._stub,
             )
 
-            log(DEBUG, "ServerApp process starts FAB installation.")
+            log(DEBUG, "[flwr-serverapp] Start FAB installation.")
             install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
             fab_id, fab_version = get_fab_metadata(fab.content)
@@ -159,7 +166,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
             log(
                 DEBUG,
-                "Flower will load ServerApp `%s` in %s",
+                "[flwr-serverapp] Will load ServerApp `%s` in %s",
                 server_app_attr,
                 app_path,
             )
@@ -168,6 +175,11 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
             driver._stub.UpdateRunStatus(
                 UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
+            )
+
+            event(
+                EventType.FLWR_SERVERAPP_RUN_ENTER,
+                event_details={"run-id-hash": hash_run_id},
             )
 
             # Load and run the ServerApp with the Driver
@@ -180,17 +192,25 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
             # Send resulting context
             context_proto = context_to_proto(updated_context)
+            log(DEBUG, "[flwr-serverapp] Will push ServerAppOutputs")
             out_req = PushServerAppOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )
             _ = driver._stub.PushServerAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+        except RunNotRunningException:
+            log(INFO, "")
+            log(INFO, "Run ID %s stopped.", run.run_id)
+            log(INFO, "")
+            run_status = None
+            success = False
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
             log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
             run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
+            success = False
 
         finally:
             # Stop log uploader for this run and upload final logs
@@ -206,6 +226,10 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
                         run_id=run.run_id, run_status=run_status_proto
                     )
                 )
+            event(
+                EventType.FLWR_SERVERAPP_RUN_LEAVE,
+                event_details={"run-id-hash": hash_run_id, "success": success},
+            )
 
         # Stop the loop if `flwr-serverapp` is expected to process a single run
         if run_once:
@@ -229,13 +253,6 @@ def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
         action="store_true",
         help="When set, this process will start a single ServerApp for a pending Run. "
         "If there is no pending Run, the process will exit.",
-    )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
     )
     add_args_flwr_app_common(parser=parser)
     return parser

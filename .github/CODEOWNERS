@@ -7,7 +7,7 @@
 README.md @jafermarq @tanertopal @danieljanes
 
 # Flower Baselines
-/baselines @jafermarq @tanertopal @danieljanes
+/baselines @chongshenng @jafermarq @tanertopal @danieljanes
 
 # Flower Benchmarks
 /benchmarks @jafermarq @tanertopal @danieljanes
@@ -16,16 +16,16 @@ README.md @jafermarq @tanertopal @danieljanes
 /datasets @jafermarq @tanertopal @danieljanes
 
 # Flower Examples
-/examples @jafermarq @tanertopal @danieljanes
+/examples @chongshenng @jafermarq @tanertopal @danieljanes
 
 # Flower Templates
 /src/py/flwr/cli/new/templates @jafermarq @tanertopal @danieljanes
 
 # Changelog
-/doc/source/ref-changelog.md @jafermarq @tanertopal @danieljanes
+/framework/docs/source/ref-changelog.md @jafermarq @tanertopal @danieljanes
 
 # Translations
-/doc/locales @charlesbvll @tanertopal @danieljanes
+/framework/docs/locales @charlesbvll @tanertopal @danieljanes
 
 # GitHub Actions and Workflows
 /.github/workflows @Robert-Steiner @tanertopal @danieljanes

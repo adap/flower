@@ -57,9 +57,11 @@ class StartRunResponse(google.protobuf.message.Message):
     run_id: builtins.int
     def __init__(self,
         *,
-        run_id: builtins.int = ...,
+        run_id: typing.Optional[builtins.int] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["_run_id",b"_run_id","run_id",b"run_id"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_run_id",b"_run_id","run_id",b"run_id"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_run_id",b"_run_id"]) -> typing.Optional[typing_extensions.Literal["run_id"]]: ...
 global___StartRunResponse = StartRunResponse
 
 class StreamLogsRequest(google.protobuf.message.Message):
@@ -132,3 +134,79 @@ class ListRunsResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["now",b"now","run_dict",b"run_dict"]) -> None: ...
 global___ListRunsResponse = ListRunsResponse
+
+class GetLoginDetailsRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___GetLoginDetailsRequest = GetLoginDetailsRequest
+
+class GetLoginDetailsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    AUTH_TYPE_FIELD_NUMBER: builtins.int
+    DEVICE_CODE_FIELD_NUMBER: builtins.int
+    VERIFICATION_URI_COMPLETE_FIELD_NUMBER: builtins.int
+    EXPIRES_IN_FIELD_NUMBER: builtins.int
+    INTERVAL_FIELD_NUMBER: builtins.int
+    auth_type: typing.Text
+    device_code: typing.Text
+    verification_uri_complete: typing.Text
+    expires_in: builtins.int
+    interval: builtins.int
+    def __init__(self,
+        *,
+        auth_type: typing.Text = ...,
+        device_code: typing.Text = ...,
+        verification_uri_complete: typing.Text = ...,
+        expires_in: builtins.int = ...,
+        interval: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["auth_type",b"auth_type","device_code",b"device_code","expires_in",b"expires_in","interval",b"interval","verification_uri_complete",b"verification_uri_complete"]) -> None: ...
+global___GetLoginDetailsResponse = GetLoginDetailsResponse
+
+class GetAuthTokensRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    DEVICE_CODE_FIELD_NUMBER: builtins.int
+    device_code: typing.Text
+    def __init__(self,
+        *,
+        device_code: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["device_code",b"device_code"]) -> None: ...
+global___GetAuthTokensRequest = GetAuthTokensRequest
+
+class GetAuthTokensResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    ACCESS_TOKEN_FIELD_NUMBER: builtins.int
+    REFRESH_TOKEN_FIELD_NUMBER: builtins.int
+    access_token: typing.Text
+    refresh_token: typing.Text
+    def __init__(self,
+        *,
+        access_token: typing.Text = ...,
+        refresh_token: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["access_token",b"access_token","refresh_token",b"refresh_token"]) -> None: ...
+global___GetAuthTokensResponse = GetAuthTokensResponse
+
+class StopRunRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+global___StopRunRequest = StopRunRequest
+
+class StopRunResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    SUCCESS_FIELD_NUMBER: builtins.int
+    success: builtins.bool
+    def __init__(self,
+        *,
+        success: builtins.bool = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["success",b"success"]) -> None: ...
+global___StopRunResponse = StopRunResponse

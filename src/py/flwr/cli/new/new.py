@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `new` command."""
 
+
 import re
 from enum import Enum
 from pathlib import Path
@@ -81,7 +82,7 @@ def render_template(template: str, data: dict[str, str]) -> str:
 def create_file(file_path: Path, content: str) -> None:
     """Create file including all nessecary directories and write content into file."""
     file_path.parent.mkdir(exist_ok=True)
-    file_path.write_text(content)
+    file_path.write_text(content, encoding="utf-8")
 
 
 def render_and_create(file_path: Path, template: str, context: dict[str, str]) -> None:
@@ -212,7 +213,7 @@ def new(
         else:
             challenge_name = "Code"
             num_clients = "10"
-            dataset_name = "lucasmccabe-lmi/CodeAlpaca-20k"
+            dataset_name = "flwrlabs/code-alpaca-20k"
 
         context["llm_challenge_str"] = llm_challenge_str
         context["fraction_fit"] = fraction_fit
@@ -268,20 +269,30 @@ def new(
             context=context,
         )
 
-    print(
-        typer.style(
-            "🎊 Flower App creation successful.\n\n"
-            "Use the following command to run your Flower App:\n",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
+    prompt = typer.style(
+        "🎊 Flower App creation successful.\n\n"
+        "To run your Flower App, use the following command:\n\n",
+        fg=typer.colors.GREEN,
+        bold=True,
     )
 
     _add = "	huggingface-cli login\n" if llm_challenge_str else ""
-    print(
-        typer.style(
-            f"	cd {package_name}\n" + "	pip install -e .\n" + _add + "	flwr run\n",
-            fg=typer.colors.BRIGHT_CYAN,
-            bold=True,
-        )
+    prompt += typer.style(
+        _add + f"	flwr run {package_name}\n\n",
+        fg=typer.colors.BRIGHT_CYAN,
+        bold=True,
     )
+
+    prompt += typer.style(
+        "If you haven't installed all dependencies yet, follow these steps:\n\n",
+        fg=typer.colors.GREEN,
+        bold=True,
+    )
+
+    prompt += typer.style(
+        f"	cd {package_name}\n" + "	pip install -e .\n" + _add + "	flwr run .\n",
+        fg=typer.colors.BRIGHT_CYAN,
+        bold=True,
+    )
+
+    print(prompt)
