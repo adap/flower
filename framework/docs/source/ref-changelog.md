@@ -12,11 +12,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
 **Free processed messages in LinkState** ([#4934](https://github.com/adap/flower/pull/4934))
 
-When the ServerApp pulls the replies the SuperNodes sent to the SuperLink, these should be removed from the LinkState. In some situations these weren't been erased, which could lead to high memory utilization by the SuperLink.
+When the ServerApp pulls the replies the SuperNodes sent to the SuperLink, these should be removed from the LinkState. In some situations, these weren't erased, which could lead to high memory utilization by the SuperLink.
 
 **Introduce Windows CI tests** ([#4908](https://github.com/adap/flower/pull/4908))
 
-We continue improving the experience of running Flower on Windows. Now and automated CI test is run to ensure compatibility.
+We continue improving the experience of running Flower on Windows. Now, an automated CI test is run to ensure compatibility.
 
 **Update Ray version (Simulation Engine)** ([#4926](https://github.com/adap/flower/pull/4926))
 
