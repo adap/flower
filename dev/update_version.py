@@ -94,9 +94,12 @@ if __name__ == "__main__":
         description="Utility used to bump the version of the package."
     )
     parser.add_argument(
-        "--old_version",
-        help="Current (non-updated) version of the package, soon to be the old version.",
-        default=match.group(1) if match else None,
+        "latest_stable_version",
+        help="The most recent stable version of Flower."
+    )
+    parser.add_argument(
+        "next_version",
+        help="The next version of Flower to be released. This is the version to be worked on."
     )
     parser.add_argument(
         "--check", action="store_true", help="Fails if any file would be modified."
@@ -107,28 +110,10 @@ if __name__ == "__main__":
         help="Also modify flwr version in examples.",
     )
 
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
-        "--patch", action="store_true", help="Increment the patch version."
-    )
-    group.add_argument(
-        "--major", action="store_true", help="Increment the major version."
-    )
     args = parser.parse_args()
 
-    if not args.old_version:
-        raise ValueError("Version not found in conf.py, please provide current version")
-
-    # Determine the type of version increment
-    if args.major:
-        increment = "major"
-    elif args.patch:
-        increment = "patch"
-    else:
-        increment = "minor"
-
-    curr_version = _get_next_version(args.old_version, increment)
-    next_version = _get_next_version(curr_version, "minor")
+    curr_version = args.latest_stable_version
+    next_version = args.next_version
 
     wrong = False
 
