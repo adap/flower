@@ -11,7 +11,7 @@ Join the Flower Community
 -------------------------
 
 The Flower Community is growing quickly - we're a friendly group of researchers,
-engineers, students, professionals, academics, and other enthusiasts.
+engineers, designers, students, professionals, academics, and other enthusiasts.
 
 .. button-link:: https://flower.ai/join-slack
     :color: primary
@@ -24,7 +24,7 @@ Flower Framework
 
 The user guide is targeted at researchers and developers who want to use Flower to bring
 existing machine learning workloads into a federated setting. One of Flower's design
-goals was to make this simple. Read on to learn more.
+goals was to make this simple. Read on to learn more!
 
 Tutorials
 ~~~~~~~~~
