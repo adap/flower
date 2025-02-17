@@ -6,7 +6,7 @@
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Charles Beauville`, `Heng Pan`, `Javier`, `Leandro Collier`, `Yan Gao` <!---TOKEN_v1.15.2-->
+`Charles Beauville`, `Heng Pan`, `Javier`, `Leandro Collier`, `Stephane Moroso`, `Yan Gao` <!---TOKEN_v1.15.2-->
 
 ### What's new?
 
@@ -24,7 +24,7 @@ The Simulation Engine has been upgraded to a version of Ray that is compatible w
 
 - **Update Documentation** ([#4915](https://github.com/adap/flower/pull/4915), [#4914](https://github.com/adap/flower/pull/4914))
 
-- **Other quality improvements** ([#4935](https://github.com/adap/flower/pull/4935), [#4936](https://github.com/adap/flower/pull/4936), [#4928](https://github.com/adap/flower/pull/4928), [#4924](https://github.com/adap/flower/pull/4924))
+- **Other quality improvements** ([#4935](https://github.com/adap/flower/pull/4935), [#4936](https://github.com/adap/flower/pull/4936), [#4928](https://github.com/adap/flower/pull/4928), [#4924](https://github.com/adap/flower/pull/4924), [#4939](https://github.com/adap/flower/pull/4939))
 
 ## v1.15.1 (2025-02-05)
 
