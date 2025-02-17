@@ -1,1 +1,1 @@
-"""FedProx package."""
+"""fedprox: A Flower Baseline."""
