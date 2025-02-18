@@ -27,12 +27,12 @@ from parameterized import parameterized, parameterized_class
 import datasets
 from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.federated_dataset import FederatedDataset
-from flwr_datasets.mock_utils_test import (
+from flwr_datasets.partitioner import IidPartitioner, NaturalIdPartitioner, Partitioner
+from flwr_datasets.preprocessor.divider import Divider
+from tests.mock_utils_test import (
     _load_mocked_dataset,
     _load_mocked_dataset_dict_by_partial_download,
 )
-from flwr_datasets.partitioner import IidPartitioner, NaturalIdPartitioner, Partitioner
-from flwr_datasets.preprocessor.divider import Divider
 
 mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
 
