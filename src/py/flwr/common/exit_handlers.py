@@ -19,6 +19,7 @@ import signal
 from threading import Thread
 from types import FrameType
 from typing import Callable, Optional
+from uuid import uuid4
 
 from grpc import Server
 
@@ -30,6 +31,7 @@ SIGNAL_TO_EXIT_CODE: dict[int, int] = {
     signal.SIGINT: ExitCode.GRACEFUL_EXIT_SIGINT,
     signal.SIGTERM: ExitCode.GRACEFUL_EXIT_SIGTERM,
 }
+_handlers: dict[str, Callable[[], None]] = {}
 
 # SIGQUIT is not available on Windows
 if hasattr(signal, "SIGQUIT"):
@@ -38,6 +40,7 @@ if hasattr(signal, "SIGQUIT"):
 
 def register_exit_handlers(
     event_type: EventType,
+    handlers: Optional[list[Callable[[], None]]] = None,
     exit_message: Optional[str] = None,
     grpc_servers: Optional[list[Server]] = None,
     bckg_threads: Optional[list[Thread]] = None,
@@ -48,6 +51,8 @@ def register_exit_handlers(
     ----------
     event_type : EventType
         The telemetry event that should be logged before exit.
+    handlers : Optional[List[Callable[[], None]]] (default: None)
+        An optional list of handlers to be called before exiting.
     exit_message : Optional[str] (default: None)
         The message to be logged before exiting.
     grpc_servers: Optional[List[Server]] (default: None)
@@ -68,6 +73,9 @@ def register_exit_handlers(
         # Reset to default handler
         signal.signal(signalnum, default_handlers[signalnum])  # type: ignore
 
+        for handler in _handlers.values():
+            handler()
+
         if grpc_servers is not None:
             for grpc_server in grpc_servers:
                 grpc_server.stop(grace=1)
@@ -83,7 +91,28 @@ def register_exit_handlers(
             event_type=event_type,
         )
 
+    # Register exit handlers
+    if handlers:
+        for handler in handlers:
+            _handlers[str(uuid4())] = handler
+
     # Register signal handlers
     for sig in SIGNAL_TO_EXIT_CODE:
         default_handler = signal.signal(sig, graceful_exit_handler)  # type: ignore
         default_handlers[sig] = default_handler  # type: ignore
+
+
+def add_exit_handler(handler: Callable[[], None], name: Optional[str] = None) -> None:
+    """Add an exit handler."""
+    if name is None:
+        name = str(uuid4())
+
+    _handlers[name] = handler
+
+
+def remove_exit_handler(name: str) -> None:
+    """Remove an exit handler."""
+    if name in _handlers:
+        del _handlers[name]
+    else:
+        raise KeyError(f"Handler with name '{name}' not found.")
