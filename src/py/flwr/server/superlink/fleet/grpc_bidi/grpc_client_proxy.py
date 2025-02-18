@@ -15,7 +15,7 @@
 """Flower ClientProxy implementation using gRPC bidirectional streaming."""
 
 
-from typing import Optional
+from typing import Optional, Sequence, Union
 
 from flwr import common
 from flwr.common import serde
@@ -38,9 +38,11 @@ class GrpcClientProxy(ClientProxy):
         self,
         cid: str,
         bridge: GrpcBridge,
+        client_metadata: Sequence[tuple[str, Union[str, bytes]]],
     ):
         super().__init__(cid)
         self.bridge = bridge
+        self.client_metadata = client_metadata
 
     def get_properties(
         self,
