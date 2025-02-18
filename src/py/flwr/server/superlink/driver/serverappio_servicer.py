@@ -208,6 +208,13 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Read from state
         task_res_list: list[TaskRes] = state.get_task_res(task_ids=message_ids)
 
+        # Delete the TaskIns/TaskRes pairs if TaskRes is found
+        task_ins_ids_to_delete = {
+            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
+        }
+
+        state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
+
         # Convert to Messages
         messages_list = []
         while task_res_list:
@@ -219,13 +226,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             )
             message = message_from_taskres(taskres=task_res)
             messages_list.append(message_to_proto(message))
-
-        # Delete the TaskIns/TaskRes pairs if TaskRes is found
-        task_ins_ids_to_delete = {
-            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
-        }
-
-        state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
 
         return PullResMessagesResponse(messages_list=messages_list)
 
