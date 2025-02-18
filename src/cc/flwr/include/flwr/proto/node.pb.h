@@ -190,13 +190,13 @@ class Node final :
     kNodeIdFieldNumber = 1,
     kAnonymousFieldNumber = 2,
   };
-  // sint64 node_id = 1;
+  // uint64 node_id = 1;
   void clear_node_id();
-  ::PROTOBUF_NAMESPACE_ID::int64 node_id() const;
-  void set_node_id(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 node_id() const;
+  void set_node_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_node_id() const;
-  void _internal_set_node_id(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_node_id() const;
+  void _internal_set_node_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // bool anonymous = 2;
@@ -215,7 +215,7 @@ class Node final :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::int64 node_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 node_id_;
   bool anonymous_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_flwr_2fproto_2fnode_2eproto;
@@ -231,22 +231,22 @@ class Node final :
 #endif  // __GNUC__
 // Node
 
-// sint64 node_id = 1;
+// uint64 node_id = 1;
 inline void Node::clear_node_id() {
-  node_id_ = int64_t{0};
+  node_id_ = uint64_t{0u};
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 Node::_internal_node_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 Node::_internal_node_id() const {
   return node_id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 Node::node_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 Node::node_id() const {
   // @@protoc_insertion_point(field_get:flwr.proto.Node.node_id)
   return _internal_node_id();
 }
-inline void Node::_internal_set_node_id(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void Node::_internal_set_node_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
   node_id_ = value;
 }
-inline void Node::set_node_id(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void Node::set_node_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_node_id(value);
   // @@protoc_insertion_point(field_set:flwr.proto.Node.node_id)
 }
