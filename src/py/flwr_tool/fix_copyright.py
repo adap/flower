@@ -5,11 +5,9 @@ Example:
     python -m flwr_tool.fix_copyright src/py/flwr
 """
 
-
 import os
 import sys
 from pathlib import Path
-from typing import List
 
 from flwr_tool.check_copyright import COPYRIGHT_FORMAT, _get_file_creation_year
 from flwr_tool.init_py_check import get_init_dir_list_and_warnings
@@ -37,7 +35,7 @@ def _insert_or_edit_copyright(py_file: Path) -> None:
         py_file.write_text("\n".join(lines) + "\n")
 
 
-def _fix_copyright(dir_list: List[str]) -> None:
+def _fix_copyright(dir_list: list[str]) -> None:
     for valid_dir in dir_list:
         if "proto" in valid_dir:
             continue
