@@ -1,2 +1,3 @@
 *.md
+!ref-changelog.md
 index.rst
