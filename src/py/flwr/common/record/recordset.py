@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import cast
+from typing import cast, overload
 
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
@@ -157,6 +157,10 @@ class RecordSet:
     above, please refer to the documentation for :code:`ConfigsRecord`,
     :code:`MetricsRecord` and :code:`ParametersRecord`.
     """
+    
+    @overload
+    def __init__(self, records: dict[str, ParametersRecord | MetricsRecord | ConfigsRecord]) -> None:
+        ...
 
     def __init__(
         self,
@@ -188,6 +192,27 @@ class RecordSet:
         """Dictionary holding ConfigsRecord instances."""
         data = cast(RecordSetData, self.__dict__["_data"])
         return data.configs_records
+    
+    def __getitem__(self, key: str) -> ParametersRecord | MetricsRecord | ConfigsRecord:
+        """Get a record by key."""
+        if key in self.parameters_records:
+            return self.parameters_records[key]
+        if key in self.metrics_records:
+            return self.metrics_records[key]
+        if key in self.configs_records:
+            return self.configs_records[key]
+        raise KeyError(f"Key {key!r} not found in RecordSet.")
+    
+    def __setitem__(self, key: str, value: ParametersRecord | MetricsRecord | ConfigsRecord) -> None:
+        """Set a record by key."""
+        if isinstance(value, ParametersRecord):
+            self.parameters_records[key] = value
+        elif isinstance(value, MetricsRecord):
+            self.metrics_records[key] = value
+        elif isinstance(value, ConfigsRecord):
+            self.configs_records[key] = value
+        else:
+            raise ValueError(f"Value {value!r} is not a valid record.")
 
     def __repr__(self) -> str:
         """Return a string representation of this instance."""

@@ -15,7 +15,8 @@
 """MetricsRecord."""
 
 
-from typing import Optional, get_args
+from __future__ import annotations
+from typing import Optional, get_args, cast
 
 from flwr.common.typing import MetricsRecordValues, MetricsScalar
 
@@ -140,3 +141,7 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
             # We also count the bytes footprint of the keys
             num_bytes += len(k)
         return num_bytes
+
+    def copy(self) -> MetricsRecord:
+        """Return a shallow copy of the record."""
+        return MetricsRecord(dict(self.__dict__["_data"]), keep_input=True)
