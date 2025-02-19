@@ -46,8 +46,8 @@ class Array:
     1. By providing a NumPy ndarray (via the `ndarray` argument).
     2. By specifying explicit values for `dtype`, `shape`, `stype`, and `data`.
 
-    In scenarios (1), the `dtype`, `shape`, `stype`, and `data` are automatically
-    derived from the provided ndarray. In scenario (4), these fields must be
+    In scenario (1), the `dtype`, `shape`, `stype`, and `data` are automatically
+    derived from the provided ndarray. In scenario (2), these fields must be
     specified manually.
 
     Parameters
