@@ -24,7 +24,7 @@ Flower Framework
 
 The user guide is targeted at researchers and developers who want to use Flower to bring
 existing machine learning workloads into a federated setting. One of Flower's design
-goals was to make this simple. Read on to learn more.
+goals was to make this simple. Read on to learn more!
 
 Tutorials
 ~~~~~~~~~
