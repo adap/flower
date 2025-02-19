@@ -35,13 +35,6 @@ def test_version_args() -> None:
     assert f"Flower version: {package_version}\n" in result.output
 
 
-def test_version_command() -> None:
-    """Add appropriate assertions for the version command."""
-    result = runner.invoke(app, ["version"])
-    assert result.exit_code == 0
-    assert f"Flower version: {package_version}\n" in result.output
-
-
 def test_help_command() -> None:
     """Test the -h flag."""
     result = runner.invoke(app, ["-h"])
@@ -121,15 +114,3 @@ def test_invalid_command() -> None:
     result = runner.invoke(app, ["nonexistent-command"])
     assert result.exit_code != 0
     assert "No such command" in result.output
-
-    # Test invalid argument for existing command
-    result = runner.invoke(app, ["version", "--nonexistent-flag"])
-    assert result.exit_code != 0
-    assert "Error" in result.output
-    assert "No such option" in result.output
-
-    # Test invalid extra argument for existing command
-    result = runner.invoke(app, ["version", "nonexistent-arg"])
-    assert result.exit_code != 0
-    assert "Error" in result.output
-    assert "Got unexpected extra argument" in result.output

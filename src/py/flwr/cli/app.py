@@ -66,11 +66,5 @@ def version_callback(
         raise typer.Exit()
 
 
-@app.command()
-def version() -> None:
-    """Show the version and exit."""
-    typer.secho(f"Flower version: {package_version}", fg="blue")
-
-
 if __name__ == "__main__":
     app()
