@@ -309,6 +309,10 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
+    "announcement": (
+        "Flower AI Summit 2025 "
+        '<a href="https://flower.ai/events/flower-ai-summit-2025/">register now!</a>',
+    )
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
