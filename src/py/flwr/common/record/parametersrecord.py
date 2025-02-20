@@ -111,10 +111,8 @@ class Array:
         stype: str | None = None,
         data: bytes | None = None,
     ) -> None:
-        # Workaround to support multiple initialization signatures.
-        # This method validates and assigns the correct arguments,
-        # including keyword arguments such as dtype and shape.
-        # Supported initialization formats:
+        # Determines the initialization method and validates input arguments.
+        # Supports two initialization formats:
         # 1. Array(dtype: str, shape: list[int], stype: str, data: bytes)
         # 2. Array(ndarray: NDArray)
 
@@ -125,17 +123,23 @@ class Array:
         all_args = [None] * 4
         for i, arg in enumerate(args):
             all_args[i] = arg
+        init_method: str | None = None  # Track which init method is being used
 
-        def _try_set_arg(index: int, arg: Any) -> None:
+        # Try to assign a value to all_args[index] if it's not already set.
+        # If an initialization method is provided, update init_method.
+        def _try_set_arg(index: int, arg: Any, method: str | None = None) -> None:
             if arg is None:
                 return
             if all_args[index] is not None:
                 _raise_array_init_error()
+            if method:
+                nonlocal init_method
+                init_method = method
             all_args[index] = arg
 
         # Try to set keyword arguments in all_args
-        _try_set_arg(0, ndarray)
-        _try_set_arg(0, dtype)
+        _try_set_arg(0, ndarray, "ndarray")
+        _try_set_arg(0, dtype, "direct")
         _try_set_arg(1, shape)
         _try_set_arg(2, stype)
         _try_set_arg(3, data)
@@ -146,20 +150,22 @@ class Array:
             _raise_array_init_error()
 
         # Handle NumPy array
-        if isinstance(all_args[0], np.ndarray):
-            self.__dict__.update(self.from_numpy_ndarray(all_args[0]).__dict__)
-            return
+        if not init_method or init_method == "ndarray":
+            if isinstance(all_args[0], np.ndarray):
+                self.__dict__.update(self.from_numpy_ndarray(all_args[0]).__dict__)
+                return
 
         # Handle direct field initialization
-        if (
-            isinstance(all_args[0], str)
-            and isinstance(all_args[1], list)
-            and all(isinstance(i, int) for i in all_args[1])
-            and isinstance(all_args[2], str)
-            and isinstance(all_args[3], bytes)
-        ):
-            self.dtype, self.shape, self.stype, self.data = all_args
-            return
+        if not init_method or init_method == "direct":
+            if (
+                isinstance(all_args[0], str)
+                and isinstance(all_args[1], list)
+                and all(isinstance(i, int) for i in all_args[1])
+                and isinstance(all_args[2], str)
+                and isinstance(all_args[3], bytes)
+            ):
+                self.dtype, self.shape, self.stype, self.data = all_args
+                return
 
         _raise_array_init_error()
 
