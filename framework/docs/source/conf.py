@@ -312,14 +312,14 @@ html_theme_options = {
     "announcement": "Flower AI Summit 2025, March 26-27 "
     "(🇬🇧 London & Online) "
     "<a href='https://flower.ai/events/flower-ai-summit-2025/'>"
-    "<strong>Register now!</strong></a>",
+    "<strong style='color: #f2b705;'>👉 Register Now!</strong></a>",
     "light_css_variables": {
         "color-announcement-background": "#292f36",
-        "color-announcement-text": "#f2b705",
+        "color-announcement-text": "#ffffff",
     },
     "dark_css_variables": {
         "color-announcement-background": "#292f36",
-        "color-announcement-text": "#f2b705",
+        "color-announcement-text": "#ffffff",
     },
 }
 
