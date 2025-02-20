@@ -47,8 +47,7 @@ class Array:
     2. By providing a NumPy ndarray (via the `ndarray` argument).
 
     In scenario (2), the `dtype`, `shape`, `stype`, and `data` are automatically
-    derived from the provided ndarray. In scenario (1), these fields must be
-    specified manually.
+    derived from the input. In scenario (1), these fields must be specified manually.
 
     Parameters
     ----------
@@ -75,18 +74,18 @@ class Array:
 
     Examples
     --------
-    Initializing with a NumPy ndarray:
-
-    >>> arr1 = Array(np.random.randn(3, 3))
-
     Initializing by specifying all fields directly:
 
-    >>> arr2 = Array(
+    >>> arr1 = Array(
     >>>     dtype="float32",
     >>>     shape=[3, 3],
     >>>     stype="numpy.ndarray",
     >>>     data=b"serialized_data...",
     >>> )
+
+    Initializing with a NumPy ndarray:
+
+    >>> arr2 = Array(np.random.randn(3, 3))
     """
 
     dtype: str
