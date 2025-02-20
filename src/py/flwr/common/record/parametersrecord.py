@@ -43,11 +43,11 @@ class Array:
     A dataclass containing serialized data from an array-like or tensor-like object
     along with metadata about it. The class can be initialized in one of two ways:
 
-    1. By providing a NumPy ndarray (via the `ndarray` argument).
-    2. By specifying explicit values for `dtype`, `shape`, `stype`, and `data`.
+    1. By specifying explicit values for `dtype`, `shape`, `stype`, and `data`.
+    2. By providing a NumPy ndarray (via the `ndarray` argument).
 
-    In scenario (1), the `dtype`, `shape`, `stype`, and `data` are automatically
-    derived from the provided ndarray. In scenario (2), these fields must be
+    In scenario (2), the `dtype`, `shape`, `stype`, and `data` are automatically
+    derived from the provided ndarray. In scenario (1), these fields must be
     specified manually.
 
     Parameters
