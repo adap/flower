@@ -309,10 +309,18 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": (
-        "Flower AI Summit 2025 "
-        '<a href="https://flower.ai/events/flower-ai-summit-2025/">register now!</a>',
-    )
+    "announcement": "Flower AI Summit 2025, March 26-27 "
+    "(🇬🇧 London & Online) "
+    "<a href='https://flower.ai/events/flower-ai-summit-2025/'>"
+    "<strong>Register now!</strong></a>",
+    "light_css_variables": {
+        "color-announcement-background": "#292f36",
+        "color-announcement-text": "#f2b705",
+    },
+    "dark_css_variables": {
+        "color-announcement-background": "#292f36",
+        "color-announcement-text": "#f2b705",
+    },
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
