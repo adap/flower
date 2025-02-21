@@ -31,7 +31,7 @@ from .typeddict import TypedDict
 
 def _raise_array_init_error() -> None:
     raise TypeError(
-        f"Invalid arguments for {Array.__qualname__}. Expected a "
+        f"Invalid arguments for {Array.__qualname__}. Expected either a"
         "NumPy ndarray, or explicit dtype/shape/stype/data values."
     )
 
@@ -85,6 +85,7 @@ class Array:
 
     Initializing with a NumPy ndarray:
 
+    >>> import numpy as np
     >>> arr2 = Array(np.random.randn(3, 3))
     """
 
@@ -126,21 +127,27 @@ class Array:
 
         # Try to assign a value to all_args[index] if it's not already set.
         # If an initialization method is provided, update init_method.
-        def _try_set_arg(index: int, arg: Any, method: str | None = None) -> None:
+        def _try_set_arg(index: int, arg: Any, method: str) -> None:
+            # Skip if arg is None
             if arg is None:
                 return
+            # Raise an error if all_args[index] is already set
             if all_args[index] is not None:
                 _raise_array_init_error()
-            if method:
+            # Raise an error if a different initialization method is already set
+            if init_method is not None and init_method != method:
+                _raise_array_init_error()
+            # Set init_method and all_args[index]
+            if init_method is None:
                 nonlocal init_method
                 init_method = method
             all_args[index] = arg
 
         # Try to set keyword arguments in all_args
         _try_set_arg(0, dtype, "direct")
-        _try_set_arg(1, shape)
-        _try_set_arg(2, stype)
-        _try_set_arg(3, data)
+        _try_set_arg(1, shape, "direct")
+        _try_set_arg(2, stype, "direct")
+        _try_set_arg(3, data, "direct")
         _try_set_arg(0, ndarray, "ndarray")
 
         # Check if all arguments are correctly set
