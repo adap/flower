@@ -58,10 +58,10 @@ To construct the Python environment, simply run:
 
 ```bash
 # Set directory to use python 3.10 (install with `pyenv install <version>` if you don't have it)
-pyenv virtualenv 3.10.14 <name-of-your-baseline-env>
+pyenv virtualenv 3.10.14 fedprox
 
 # Tell poetry to use python3.10
-pyenv activate <name-of-your-baseline-env>
+pyenv activate fedprox
 
 # Install
 pip install -e .

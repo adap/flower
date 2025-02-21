@@ -8,7 +8,7 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.15.0",
+    "flwr[simulation]>=1.15.2",
     "flwr-datasets[vision]>=0.5.0",
     "torch==2.5.1",
     "torchvision==0.20.1",
@@ -138,7 +138,7 @@ local_epochs = 10
 stragglers_fraction = 0.9
 learning_rate = 0.03
 mu = 1.0
-num_clients = 1000
+num_clients = 1000 # This parameter is used by the Server only, and does not change the size of the federation.
 
 [tool.flwr.app.config.dataset]
 power_law = true

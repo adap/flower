@@ -66,7 +66,10 @@ def load_data(
             batch_size=dataset_config.batch_size,
             shuffle=True,
         ),
-        None,
+        DataLoader(
+            partition_train_test["test"],
+            batch_size=dataset_config.batch_size,
+        ),
     )
 
 
