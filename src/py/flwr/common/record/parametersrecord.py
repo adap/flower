@@ -135,11 +135,11 @@ class Array:
             if all_args[index] is not None:
                 _raise_array_init_error()
             # Raise an error if a different initialization method is already set
+            nonlocal init_method
             if init_method is not None and init_method != method:
                 _raise_array_init_error()
             # Set init_method and all_args[index]
             if init_method is None:
-                nonlocal init_method
                 init_method = method
             all_args[index] = arg
 
