@@ -51,10 +51,6 @@ class Array:
 
     Parameters
     ----------
-    ndarray : Optional[NDArray] (default: None)
-        A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data`
-        fields are derived automatically from it.
-
     dtype : Optional[str] (default: None)
         A string representing the data type of the serialized object (e.g. `"float32"`).
         Only required if you are not passing in a ndarray.
@@ -71,6 +67,10 @@ class Array:
     data : Optional[bytes] (default: None)
         A buffer of bytes containing the data. Only required if you are not passing in
         a ndarray.
+
+    ndarray : Optional[NDArray] (default: None)
+        A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data`
+        fields are derived automatically from it.
 
     Examples
     --------
@@ -94,21 +94,21 @@ class Array:
     data: bytes
 
     @overload
-    def __init__(self, ndarray: NDArray) -> None: ...  # noqa: E704
-
-    @overload
     def __init__(  # noqa: E704
         self, dtype: str, shape: list[int], stype: str, data: bytes
     ) -> None: ...
 
+    @overload
+    def __init__(self, ndarray: NDArray) -> None: ...  # noqa: E704
+
     def __init__(  # pylint: disable=too-many-arguments, too-many-locals
         self,
         *args: Any,
-        ndarray: NDArray | None = None,
         dtype: str | None = None,
         shape: list[int] | None = None,
         stype: str | None = None,
         data: bytes | None = None,
+        ndarray: NDArray | None = None,
     ) -> None:
         # Determines the initialization method and validates input arguments.
         # Supports two initialization formats:
@@ -137,33 +137,32 @@ class Array:
             all_args[index] = arg
 
         # Try to set keyword arguments in all_args
-        _try_set_arg(0, ndarray, "ndarray")
         _try_set_arg(0, dtype, "direct")
         _try_set_arg(1, shape)
         _try_set_arg(2, stype)
         _try_set_arg(3, data)
+        _try_set_arg(0, ndarray, "ndarray")
 
         # Check if all arguments are correctly set
         all_args = [arg for arg in all_args if arg is not None]
-        if len(all_args) not in [1, 4]:
-            _raise_array_init_error()
-
-        # Handle NumPy array
-        if not init_method or init_method == "ndarray":
-            if isinstance(all_args[0], np.ndarray):
-                self.__dict__.update(self.from_numpy_ndarray(all_args[0]).__dict__)
-                return
 
         # Handle direct field initialization
         if not init_method or init_method == "direct":
             if (
-                isinstance(all_args[0], str)
+                len(all_args) == 4  # pylint: disable=too-many-boolean-expressions
+                and isinstance(all_args[0], str)
                 and isinstance(all_args[1], list)
                 and all(isinstance(i, int) for i in all_args[1])
                 and isinstance(all_args[2], str)
                 and isinstance(all_args[3], bytes)
             ):
                 self.dtype, self.shape, self.stype, self.data = all_args
+                return
+
+        # Handle NumPy array
+        if not init_method or init_method == "ndarray":
+            if len(all_args) == 1 and isinstance(all_args[0], np.ndarray):
+                self.__dict__.update(self.from_numpy_ndarray(all_args[0]).__dict__)
                 return
 
         _raise_array_init_error()
