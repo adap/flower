@@ -31,7 +31,7 @@ from .typeddict import TypedDict
 
 def _raise_array_init_error() -> None:
     raise TypeError(
-        f"Invalid arguments for {Array.__qualname__}. Expected either a"
+        f"Invalid arguments for {Array.__qualname__}. Expected either a "
         "NumPy ndarray, or explicit dtype/shape/stype/data values."
     )
 
