@@ -1,1 +1,1 @@
-"""Template baseline package."""
+"""statavg: A Flower Baseline."""
