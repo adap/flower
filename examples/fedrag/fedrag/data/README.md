@@ -20,9 +20,9 @@ To download the data and prepare the retrieval indices, please run:
 bash ./prepare.sh
 ```
 
-By default, the bash script will download the `StatePearls` and `Textbooks` corpus and create an index using up to the 
-first `100` downloaded chunks. The bash script calls the `prepare.py` script for download and indexing. If you would 
-like to **download all four corpora** and **prepare the index using all files** of each corpus, please run the bash script 
+By default, the bash script will download the `StatePearls` and `Textbooks` corpus and create an index using up to the
+first `100` downloaded chunks. The bash script calls the `prepare.py` script for download and indexing. If you would
+like to **download all four corpora** and **prepare the index using all files** of each corpus, please run the bash script
 as follows:
 
 ```bash

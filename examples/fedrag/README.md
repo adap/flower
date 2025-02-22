@@ -82,14 +82,14 @@ flwr run .
 
 # Expected Results
 
-At the end of execution you should see a message in the console that will show the name of 
+At the end of execution you should see a message in the console that will show the name of
 each QA dataset (`pubmedqa`, `bioasq`), the total number of evaluated questions, total number
 of answered questions, accuracy, and the mean wall-clock execution time for all answered questions.
 
 For instance, the returned result would look like follows:
 
 | **QA Dataset** | **#Questions** | **#Answered** | **Accuracy** | **Time (secs)** |
-|:--------------:|:--------------:|:-------------:|:------------:|:---------------:|
+| :------------: | :------------: | :-----------: | :----------: | :-------------: |
 |    PubMedQA    |       10       |       8       |     0.53     |      6.03       |
 |     BioASQ     |       10       |       9       |     0.61     |      5.83       |
 
