@@ -111,12 +111,12 @@ class Array:
         data: bytes | None = None,
         ndarray: NDArray | None = None,
     ) -> None:
-        # Determines the initialization method and validates input arguments.
-        # Supports two initialization formats:
+        # Determine the initialization method and validate input arguments.
+        # Support two initialization formats:
         # 1. Array(dtype: str, shape: list[int], stype: str, data: bytes)
         # 2. Array(ndarray: NDArray)
 
-        # Init all arguments
+        # Initialize all arguments
         # If more than 4 positional arguments are provided, raise an error.
         if len(args) > 4:
             _raise_array_init_error()
