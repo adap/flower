@@ -212,13 +212,3 @@ class AuthType:
     def __new__(cls) -> AuthType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
-
-
-class EventLogWriterType:
-    """Event log writer types."""
-
-    DEFAULT = "default"
-
-    def __new__(cls) -> EventLogWriterType:
-        """Prevent instantiation."""
-        raise TypeError(f"{cls.__name__} cannot be instantiated.")
