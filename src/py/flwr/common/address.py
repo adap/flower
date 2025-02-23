@@ -112,10 +112,8 @@ def get_ip_address_from_servicer_context(context: grpc.ServicerContext) -> str:
     Parameters
     ----------
     context : grpc.ServicerContext
-        The gRPC ServicerContext object. The context.peer() returns a string like:
-
-          - "ipv4:127.0.0.1:56789" for IPv4
-          - "ipv6:[2001:db8::1]:54321" for IPv6
+        The gRPC ServicerContext object. The context.peer() returns a string like
+        "ipv4:127.0.0.1:56789" for IPv4 and "ipv6:[2001:db8::1]:54321" for IPv6.
 
     Returns
     -------
