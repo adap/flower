@@ -18,7 +18,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 
 from flwr.common.typing import UserInfo
 from flwr.proto.exec_pb2_grpc import ExecStub
@@ -50,7 +50,7 @@ class ExecAuthPlugin(ABC):
     @abstractmethod
     def validate_tokens_in_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Tuple[bool, Optional[UserInfo]]:
+    ) -> tuple[bool, Optional[UserInfo]]:
         """Validate authentication tokens in the provided metadata."""
 
     @abstractmethod
