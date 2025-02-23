@@ -143,6 +143,8 @@ sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
 docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2" }
 docsig = "==0.64.0"
+tensorflow = "^2.18.0"
+keras-cv = "^0.9.0"
 
 [tool.docstrfmt]
 extend_exclude = [
