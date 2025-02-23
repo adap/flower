@@ -69,7 +69,7 @@ class EventLogWriterPlugin(ABC):
         """Compose pre-event log entry from the provided request and context."""
 
     @abstractmethod
-    def compose_log_after_event(  # pylint: disable=too-many-arguments
+    def compose_log_after_event(  # pylint: disable=too-many-arguments,R0917
         self,
         request: EventLogRequest,
         context: grpc.ServicerContext,
