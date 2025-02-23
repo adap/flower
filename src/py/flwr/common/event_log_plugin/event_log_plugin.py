@@ -52,11 +52,7 @@ EventLogResponse = Union[
 
 
 class EventLogWriterPlugin(ABC):
-    """Abstract Flower Event Logger Plugin class for ExecServicer.
-
-    Parameters
-    ----------
-    """
+    """Abstract Flower Event Logger Plugin class for ExecServicer."""
 
     @abstractmethod
     def __init__(self) -> None:
