@@ -67,8 +67,6 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             )
             self.log_plugin.write_log(log_entry)
 
-            # response: EventLogResponse = call(request, context)
-
             # For unary-unary calls, log after the call immediately.
             if method_handler.unary_unary:
                 response = method_handler.unary_unary(request, context)
@@ -82,8 +80,9 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                 self.log_plugin.write_log(log_entry)
                 return cast(EventLogResponse, response)
 
-            # For unary-stream calls, wrap the response iterator to log after iteration completes.
-            elif method_handler.unary_stream:
+            # For unary-stream calls, wrap the response iterator write the event log
+            # after iteration completes.
+            if method_handler.unary_stream:
                 response = cast(
                     Iterator[EventLogResponse],
                     method_handler.unary_stream(request, context),
@@ -94,8 +93,8 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                         for item in response:
                             yield item
                     finally:
-                        # This block is executed after the client has consumed the entire stream,
-                        # or if iteration is interrupted.
+                        # This block is executed after the client has consumed
+                        # the entire stream, or if iteration is interrupted.
                         log_entry = self.log_plugin.compose_log_after_event(
                             request,
                             context,
@@ -107,8 +106,8 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
 
                 return response_wrapper()
 
-            else:
-                raise NotImplementedError("This RPC method type is not supported.")
+            # If the method type is not `unary_unary` or `unary_stream`, raise an error.
+            raise NotImplementedError("This RPC method type is not supported.")
 
         if method_handler.unary_unary:
             message_handler = grpc.unary_unary_rpc_method_handler
