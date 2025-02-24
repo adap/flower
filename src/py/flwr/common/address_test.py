@@ -15,6 +15,8 @@
 """Flower IP address utils."""
 
 
+import pytest
+
 from .address import get_ip_address_from_servicer_context, parse_address
 
 
@@ -202,6 +204,7 @@ def test_servicer_incorrect_format() -> None:
         "ipv6:2001:db8::1",  # missing brackets and port
         "ipv6:[2001:db8::1]56789",  # missing colon after the bracket
         "ipv6:2001:db8::1:54321",  # missing brackets
+        "unix:/tmp/grpc.sock",  # unix domain socket
         "",
     ]
 
@@ -209,8 +212,7 @@ def test_servicer_incorrect_format() -> None:
         # Prepare dummy context with the given peer string.
         context = DummyContext(peer_str)
 
-        # Execute
-        actual = get_ip_address_from_servicer_context(context)
-
-        # Assert
-        assert actual == ""
+        # Execute and assert
+        # Execute and Assert
+        with pytest.raises(ValueError):
+            get_ip_address_from_servicer_context(context)
