@@ -159,7 +159,9 @@ class ClientApp:
         # Message type did not match one of the known message types abvoe
         raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
 
-    def train(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
+    def train(
+        self, mods: Optional[list[Mod]] = None
+    ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Return a decorator that registers the train fn with the client app.
 
         Examples
@@ -182,14 +184,16 @@ class ClientApp:
 
             # Register provided function with the ClientApp object
             # Wrap mods around the wrapped step function
-            self._train = make_ffn(train_fn, self._mods)
+            self._train = make_ffn(train_fn, self._mods + (mods or []))
 
             # Return provided function unmodified
             return train_fn
 
         return train_decorator
 
-    def evaluate(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
+    def evaluate(
+        self, mods: Optional[list[Mod]] = None
+    ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Return a decorator that registers the evaluate fn with the client app.
 
         Examples
@@ -212,14 +216,16 @@ class ClientApp:
 
             # Register provided function with the ClientApp object
             # Wrap mods around the wrapped step function
-            self._evaluate = make_ffn(evaluate_fn, self._mods)
+            self._evaluate = make_ffn(evaluate_fn, self._mods + (mods or []))
 
             # Return provided function unmodified
             return evaluate_fn
 
         return evaluate_decorator
 
-    def query(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
+    def query(
+        self, mods: Optional[list[Mod]] = None
+    ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Return a decorator that registers the query fn with the client app.
 
         Examples
@@ -242,7 +248,7 @@ class ClientApp:
 
             # Register provided function with the ClientApp object
             # Wrap mods around the wrapped step function
-            self._query = make_ffn(query_fn, self._mods)
+            self._query = make_ffn(query_fn, self._mods + (mods or []))
 
             # Return provided function unmodified
             return query_fn
