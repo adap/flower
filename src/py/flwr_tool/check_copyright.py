@@ -6,6 +6,7 @@ Example:
 """
 
 
+import argparse
 import os
 import subprocess
 import sys
@@ -30,6 +31,22 @@ COPYRIGHT_FORMAT = """# Copyright {} Flower Labs GmbH. All Rights Reserved.
 # =============================================================================="""
 
 
+parser = argparse.ArgumentParser(description="Copyright Checker")
+parser.add_argument(
+    "--include",
+    nargs="+",
+    type=str,
+    help="List of directories to include in license check.",
+)
+parser.add_argument(
+    "--exclude",
+    nargs="+",
+    type=str,
+    default=[],
+    help="List of directories to exclude from lincense check.",
+)
+
+
 def _get_file_creation_year(filepath: str) -> str:
     result = subprocess.run(
         ["git", "log", "--diff-filter=A", "--format=%ai", "--", filepath],
@@ -42,7 +59,7 @@ def _get_file_creation_year(filepath: str) -> str:
     return creation_year
 
 
-def _check_copyright(dir_list: List[str]) -> None:
+def _check_copyright(dir_list: List[str], exclude_dirs: List[str]) -> None:
     warning_list = []
     for valid_dir in dir_list:
         if "proto" in valid_dir:
@@ -50,6 +67,9 @@ def _check_copyright(dir_list: List[str]) -> None:
 
         dir_path = Path(valid_dir)
         for py_file in dir_path.glob("*.py"):
+            if any(ex_dir in str(py_file.absolute()) for ex_dir in exclude_dirs):
+                # Exclude from check if file in `exclude_dir`
+                continue
             creation_year = _get_file_creation_year(str(py_file.absolute()))
             expected_copyright = COPYRIGHT_FORMAT.format(creation_year)
 
@@ -65,12 +85,19 @@ def _check_copyright(dir_list: List[str]) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 0:
+
+    args = parser.parse_args()
+
+    if args.include is None:
         raise Exception(  # pylint: disable=W0719
             "Please provide at least one directory path relative "
             "to your current working directory."
         )
-    for i, _ in enumerate(sys.argv):
-        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
+
+    # Ensure dirs end with "/"
+    exc_dirs = [ex_dir.rstrip("/") + "/" for ex_dir in args.exclude]
+
+    for include_path in args.include:
+        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), include_path))
         __, init_dirs = get_init_dir_list_and_warnings(abs_path)
-        _check_copyright(init_dirs)
+        _check_copyright(init_dirs, exc_dirs)
