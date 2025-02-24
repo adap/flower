@@ -22,7 +22,7 @@ from uuid import UUID
 
 import grpc
 
-from flwr.common import ConfigsRecord, now
+from flwr.common import ConfigsRecord
 from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -151,9 +151,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             context,
         )
 
-        # Set pushed_at (timestamp in seconds)
-        pushed_at = now().timestamp()
-
         # Validate request and insert in State
         _raise_if(
             validation_error=len(request.messages_list) == 0,
@@ -165,7 +162,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             message_proto = request.messages_list.pop(0)
             message = message_from_proto(message_proto=message_proto)
             task_ins = message_to_taskins(message=message)
-            task_ins.task.pushed_at = pushed_at
             validation_errors = validate_task_ins_or_res(task_ins)
             _raise_if(
                 validation_error=bool(validation_errors),
@@ -212,6 +208,13 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Read from state
         task_res_list: list[TaskRes] = state.get_task_res(task_ids=message_ids)
 
+        # Delete the TaskIns/TaskRes pairs if TaskRes is found
+        task_ins_ids_to_delete = {
+            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
+        }
+
+        state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
+
         # Convert to Messages
         messages_list = []
         while task_res_list:
@@ -223,13 +226,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             )
             message = message_from_taskres(taskres=task_res)
             messages_list.append(message_to_proto(message))
-
-        # Delete the TaskIns/TaskRes pairs if TaskRes is found
-        task_ins_ids_to_delete = {
-            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
-        }
-
-        state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
 
         return PullResMessagesResponse(messages_list=messages_list)
 
