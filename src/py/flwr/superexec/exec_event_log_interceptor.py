@@ -1,0 +1,119 @@
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Flower Exec API event log interceptor."""
+
+
+from collections.abc import Generator, Iterator
+from typing import Any, Callable, Union, cast
+
+import grpc
+
+from flwr.common.event_log_plugin import EventLogRequest, EventLogResponse
+from flwr.common.event_log_plugin.event_log_plugin import EventLogWriterPlugin
+from flwr.common.typing import LogEntry
+
+from .exec_user_auth_interceptor import shared_user_info
+
+
+class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
+    """Exec API interceptor for logging events."""
+
+    def __init__(self, log_plugin: EventLogWriterPlugin) -> None:
+        self.log_plugin = log_plugin
+
+    def intercept_service(
+        self,
+        continuation: Callable[[Any], Any],
+        handler_call_details: grpc.HandlerCallDetails,
+    ) -> grpc.RpcMethodHandler:
+        """Flower server interceptor logging logic.
+
+        Intercept all unary-unary/unary-stream calls from users and log the event.
+        Continue RPC call if event logger is enabled on the SuperLink, else, terminate
+        RPC call by setting context to abort.
+        """
+        # One of the method handlers in
+        # `flwr.superexec.exec_servicer.ExecServicer`
+        method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
+        method_name: str = handler_call_details.method
+        return self._generic_auth_unary_method_handler(method_handler, method_name)
+
+    def _generic_auth_unary_method_handler(
+        self, method_handler: grpc.RpcMethodHandler, method_name: str
+    ) -> grpc.RpcMethodHandler:
+        def _generic_method_handler(
+            request: EventLogRequest,
+            context: grpc.ServicerContext,
+        ) -> Union[EventLogResponse, Generator[Any, Any, None]]:
+            log_entry: LogEntry
+            # Log before call
+            log_entry = self.log_plugin.compose_log_before_event(
+                request,
+                context,
+                shared_user_info.get(),
+                method_name,
+            )
+            self.log_plugin.write_log(log_entry)
+
+            # For unary-unary calls, log after the call immediately.
+            if method_handler.unary_unary:
+                response = method_handler.unary_unary(request, context)
+                log_entry = self.log_plugin.compose_log_after_event(
+                    request,
+                    context,
+                    response,
+                    shared_user_info.get(),
+                    method_name,
+                )
+                self.log_plugin.write_log(log_entry)
+                return cast(EventLogResponse, response)
+
+            # For unary-stream calls, wrap the response iterator write the event log
+            # after iteration completes.
+            if method_handler.unary_stream:
+                response = cast(
+                    Iterator[EventLogResponse],
+                    method_handler.unary_stream(request, context),
+                )
+
+                def response_wrapper() -> Generator[Any, Any, None]:
+                    try:
+                        yield from response
+                    finally:
+                        # This block is executed after the client has consumed
+                        # the entire stream, or if iteration is interrupted.
+                        log_entry = self.log_plugin.compose_log_after_event(
+                            request,
+                            context,
+                            response,
+                            shared_user_info.get(),
+                            method_name,
+                        )
+                        self.log_plugin.write_log(log_entry)
+
+                return response_wrapper()
+
+            # If the method type is not `unary_unary` or `unary_stream`, raise an error.
+            raise NotImplementedError("This RPC method type is not supported.")
+
+        if method_handler.unary_unary:
+            message_handler = grpc.unary_unary_rpc_method_handler
+        else:
+            message_handler = grpc.unary_stream_rpc_method_handler
+        return message_handler(
+            _generic_method_handler,
+            request_deserializer=method_handler.request_deserializer,
+            response_serializer=method_handler.response_serializer,
+        )

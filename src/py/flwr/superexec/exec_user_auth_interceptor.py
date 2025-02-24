@@ -15,11 +15,13 @@
 """Flower Exec API interceptor."""
 
 
-from typing import Any, Callable, Union
+import contextvars
+from typing import Any, Callable, Optional, Union, cast
 
 import grpc
 
 from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.typing import UserInfo
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetAuthTokensResponse,
@@ -41,6 +43,11 @@ Request = Union[
 Response = Union[
     StartRunResponse, StreamLogsResponse, GetLoginDetailsResponse, GetAuthTokensResponse
 ]
+
+
+shared_user_info: contextvars.ContextVar[UserInfo] = contextvars.ContextVar(
+    "user_info", default={"user_id": None, "user_name": None}
+)
 
 
 class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
@@ -77,15 +84,20 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
         ) -> Response:
             call = method_handler.unary_unary or method_handler.unary_stream
             metadata = context.invocation_metadata()
-            if isinstance(
-                request, (GetLoginDetailsRequest, GetAuthTokensRequest)
-            ) or self.auth_plugin.validate_tokens_in_metadata(metadata):
+            res: tuple[bool, Optional[UserInfo]] = (False, None)
+            if (
+                isinstance(request, (GetLoginDetailsRequest, GetAuthTokensRequest))
+                or (res := self.auth_plugin.validate_tokens_in_metadata(metadata))[0]
+            ):
+                # Store user info in contextvars if token is valid
+                if res[0]:
+                    shared_user_info.set(cast(UserInfo, res[1]))
                 return call(request, context)  # type: ignore
 
             tokens = self.auth_plugin.refresh_tokens(context.invocation_metadata())
             if tokens is not None:
                 context.send_initial_metadata(tokens)
-                return call(request, context)
+                return call(request, context)  # type: ignore
 
             context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
             raise grpc.RpcError()  # This line is unreachable
