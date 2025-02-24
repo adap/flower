@@ -15,8 +15,8 @@
 """Flower Exec API event log interceptor."""
 
 
-from collections.abc import Generator
-from typing import Any, Callable, Iterator, Union, cast
+from collections.abc import Generator, Iterator
+from typing import Any, Callable, Union, cast
 
 import grpc
 
@@ -90,8 +90,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
 
                 def response_wrapper() -> Generator[Any, Any, None]:
                     try:
-                        for item in response:
-                            yield item
+                        yield from response
                     finally:
                         # This block is executed after the client has consumed
                         # the entire stream, or if iteration is interrupted.
