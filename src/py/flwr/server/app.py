@@ -105,7 +105,6 @@ except ImportError:
     def get_dashboard_server(
         address: str,
         state_factory: LinkStateFactory,
-        certificates: Optional[tuple[bytes, bytes, bytes]],
     ) -> Optional[grpc.Server]:
         """Add Dashboard gRPC server."""
         return None
@@ -450,7 +449,6 @@ def run_superlink() -> None:
         dashboard_server = get_dashboard_server(
             address=dashboard_address_str,
             state_factory=state_factory,
-            certificates=certificates,
         )
 
         grpc_servers.append(dashboard_server)
