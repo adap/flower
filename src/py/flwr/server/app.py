@@ -95,19 +95,17 @@ try:
         get_dashboard_server,
         get_exec_auth_plugins,
     )
-except ImportError as ex:
-    print(ex)
+except ImportError:
 
     # pylint: disable-next=unused-argument
     def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
         """Add EE-specific arguments to the parser."""
 
-    # pylint: disable-next=unused-argument
+    # pylint: disable=unused-argument
     def get_dashboard_server(
         address: str,
         state_factory: LinkStateFactory,
         certificates: Optional[tuple[bytes, bytes, bytes]],
-        interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
     ) -> Optional[grpc.Server]:
         """Add Dashboard gRPC server."""
         return None
@@ -450,8 +448,8 @@ def run_superlink() -> None:
     if dashboard_address := getattr(args, "dashboard_address", None):
         dashboard_address_str, _, _ = _format_address(dashboard_address)
         dashboard_server = get_dashboard_server(
-            dashboard_address_str,
-            state_factory,
+            address=dashboard_address_str,
+            state_factory=state_factory,
             certificates=certificates,
         )
 
