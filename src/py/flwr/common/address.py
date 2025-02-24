@@ -132,4 +132,7 @@ def get_ip_address_from_servicer_context(context: grpc.ServicerContext) -> str:
     if ipv6_match:
         return ipv6_match.group("ip")
 
-    return ""
+    raise ValueError(
+        f"Unsupported peer address format: {peer} for the transport protocol. "
+        "The supported formats are ipv4:IP:port and ipv6:[IP]:port."
+    )
