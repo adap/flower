@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract classes for Flower Event Logger Plugin."""
+"""Abstract class for Flower Event Log Writer Plugin."""
 
 
 from abc import ABC, abstractmethod
@@ -52,7 +52,7 @@ EventLogResponse = Union[
 
 
 class EventLogWriterPlugin(ABC):
-    """Abstract Flower Event Logger Plugin class for ExecServicer."""
+    """Abstract Flower Event Log Writer Plugin class for ExecServicer."""
 
     @abstractmethod
     def __init__(self) -> None:
