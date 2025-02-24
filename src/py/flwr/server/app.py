@@ -105,9 +105,8 @@ except ImportError:
     def get_dashboard_server(
         address: str,
         state_factory: LinkStateFactory,
-    ) -> Optional[grpc.Server]:
+    ) -> grpc.Server:
         """Add Dashboard gRPC server."""
-        return None
 
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
         """Return all Exec API authentication plugins."""
