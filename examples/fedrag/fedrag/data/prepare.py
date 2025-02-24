@@ -54,9 +54,8 @@ if __name__ == "__main__":
 
         print(f"Building FAISS indexer for corpus: {dataset_name}")
         faiss_indexer.build_faiss_index(
-            dataset_name=dataset_name,
-            batch_size=32,
-            num_chunks=num_chunks)
+            dataset_name=dataset_name, batch_size=32, num_chunks=num_chunks
+        )
         print(f"Built FAISS indexer for corpus: {dataset_name}")
 
         print(f"Querying FAISS indexer of corpus: {dataset_name}")

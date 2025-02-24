@@ -21,7 +21,9 @@ class LLMQuerier:
         prompt = self.__format_prompt(
             question, documents, formatted_options, dataset_name
         )
-        inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True)
+        inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True).to(
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
 
         outputs = self.model.generate(
             inputs.input_ids,

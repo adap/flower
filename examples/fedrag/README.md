@@ -1,6 +1,6 @@
 ---
 title: Federated RAG (FedRAG)
-tags: [fedrag, llm, Llama]
+tags: [fedrag, llm]
 dataset: [PubMed, StatPearls, Textbooks, Wikipedia, PubMedQA, BioASQ]
 framework: [FAISS, transformers]
 ---
@@ -175,8 +175,8 @@ server-llm-hfpath = ... # the HuggingFace name/path of the LLM model used by the
 By default, the current example uses the following two corpora `Textbooks, StatPearls` distributed
 across 2 clients, with each client holding one corpus (out of the two). For QA evaluation, the server submits
 questions from the following two benchmark QA datasets: `PubMedQA, BioASQ`. For the values
-of k-rrf and k-nn, we use `60` and `8` respectively and for the LLM hosted at the server we use the
-`meta-llama/Llama-3.2-1B-Instruct` model.
+of k-rrf and k-nn, we use `60` and `8` respectively and for the LLM hosted at the server we use HF's
+SmolLM model (`HuggingFaceTB/SmolLM2-1.7B-Instruct`) because for Llama models, we need first to accept the terms.
 
 Specifically, the default values are set as:
 
@@ -186,7 +186,7 @@ server-qa-num = 10
 clients-corpus-names = "Textbooks|StatPearls"
 k-rrf = 60
 k-nn = 8
-server-llm-hfpath = "meta-llama/Llama-3.2-1B-Instruct"
+server-llm-hfpath = "HuggingFaceTB/SmolLM2-1.7B-Instruct"
 ```
 
 > \[!NOTE\] The vertical bar in the value of the `server-qa-datasets` is used to pass the name of multiple benchmark
