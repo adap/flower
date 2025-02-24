@@ -24,7 +24,7 @@ def _extract_run_configs_per_type(config):
     for key, value in config.items():
         if "." in key:
             category, name = key.split(".")
-            parsed_configs[category][name] = value
+            parsed_configs[category][name.replace("-", "_")] = value
         else:
             parsed_configs[key.replace("-", "_")] = value
     return parsed_configs

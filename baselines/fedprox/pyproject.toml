@@ -128,35 +128,35 @@ clientapp = "fedprox.client_app:app"
 [tool.flwr.app.config]
 [tool.flwr.app.config.algorithm]
 name = "FedProx"
-num_server_rounds = 100
-fraction_fit = 0.01
-fraction_evaluate= 0.0
-min_evaluate_clients= 0
-min_available_clients= 1000
-min_fit_clients= 1000
-local_epochs = 10
-stragglers_fraction = 0.9
-learning_rate = 0.03
+num-server-rounds = 100
+fraction-fit = 0.01
+fraction-evaluate= 0.0
+min-evaluate-clients= 0
+min-available-clients= 1000
+min-fit-clients= 1000
+local-epochs = 10
+stragglers-fraction = 0.9
+learning-rate = 0.03
 mu = 1.0
-num_clients = 1000 # This parameter is used by the Server only, and does not change the size of the federation.
+num-clients = 1000 # This parameter is used by the Server only, and does not change the size of the federation.
 
 [tool.flwr.app.config.dataset]
-power_law = true
-num_unique_labels_per_partition = 2
-num_unique_labels = 10
-preassigned_num_samples_per_label = 5
+power-law = true
+num-unique-labels-per-partition = 2
+num-unique-labels = 10
+preassigned-num-samples-per-label = 5
 seed=42
 mu = 1.0
 sigma = 2.0
-val_ratio = 0.1
-batch_size = 10
+val-ratio = 0.1
+batch-size = 10
 
 [tool.flwr.app.config.fit]
-drop_client = true # with FedProx, clients shouldn't be dropped even if they are stragglers
+drop-client = false # with FedProx, clients shouldn't be dropped even if they are stragglers
 
 [tool.flwr.app.config.model]
 name = "LogisticRegression"
-num_classes = 10
+num-classes = 10
 
 [tool.flwr.federations]
 default = "local-simulation"
