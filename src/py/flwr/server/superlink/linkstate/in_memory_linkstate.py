@@ -23,7 +23,7 @@ from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import Context, log, now
+from flwr.common import Context, Metadata, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -72,6 +72,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
         self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
+        self.in_processing_messages: dict[UUID, Metadata] = {}
 
         self.node_public_keys: set[bytes] = set()
 
