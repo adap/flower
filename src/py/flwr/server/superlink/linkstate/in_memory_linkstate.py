@@ -23,7 +23,7 @@ from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import Context, Metadata, log, now
+from flwr.common import Context, Metadata, log, now, Message
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -35,7 +35,7 @@ from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
-from flwr.server.utils import validate_task_ins_or_res
+from flwr.server.utils import validate_task_ins_or_res, validate_message
 
 from .utils import (
     generate_rand_int_from_bytes,
@@ -70,6 +70,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.contexts: dict[int, Context] = {}
         self.federation_options: dict[int, ConfigsRecord] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
+        self.message_ins_store: dict[UUID, Message] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
         self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
         self.in_processing_messages: dict[UUID, Metadata] = {}
@@ -116,6 +117,47 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Return the new task_id
         return task_id
+
+    def store_message_fleet(self, message: Message) -> Optional[UUID]:
+        """Store one Message."""
+        # Validate task
+        errors = validate_message(message)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+        metadata = message.metadata
+        # Validate run_id
+        if metadata.run_id not in self.run_ids:
+            log(ERROR, "Invalid run ID for Message: %s", metadata.run_id)
+            return None
+        # Validate source node ID
+        if metadata.src_node_id != SUPERLINK_NODE_ID:
+            log(
+                ERROR,
+                "Invalid source node ID for Message: %s",
+                metadata.src_node_id
+            )
+            return None
+        # Validate destination node ID
+        if metadata.dst_node_id not in self.node_ids:
+            log(
+                ERROR,
+                "Invalid destination node ID for TaskIns: %s",
+                metadata.dst_node_id,
+            )
+            return None
+
+        # Create message_id
+        message_id = uuid4()
+
+        # Store Message
+        message.metadata.message_id = str(message_id)
+        with self.lock:
+            self.message_ins_store[message_id] = message
+
+        # Return the new message_id
+        return message_id
+
 
     def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""

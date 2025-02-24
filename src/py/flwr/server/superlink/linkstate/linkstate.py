@@ -19,7 +19,7 @@ import abc
 from typing import Optional
 from uuid import UUID
 
-from flwr.common import Context
+from flwr.common import Context, Message
 from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
@@ -44,6 +44,24 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         If `task_ins.run_id` is invalid, then
         storing the `task_ins` MUST fail.
+        """
+    
+    @abc.abstractmethod
+    def store_message_fleet(self, message: Message) -> Optional[UUID]:
+        """Store one Message.
+
+        Usually, the ServerAppIo API calls this to schedule instructions.
+
+        Stores the value of the `message` in the link state and, if successful,
+        returns the `message_id` (UUID) of the `message`. If, for any reason,
+        storing the `message` fails, `None` is returned.
+
+        Constraints
+        -----------
+        `message.metadata.dst_node_id` MUST be set (not constant.DRIVER_NODE_ID)
+
+        If `message.metadata.run_id` is invalid, then
+        storing the `message` MUST fail.
         """
 
     @abc.abstractmethod
