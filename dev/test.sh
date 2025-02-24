@@ -79,7 +79,7 @@ echo "- All rST checks passed"
 echo "- Start license checks"
 
 echo "- copyright: start"
-python -m flwr_tool.check_copyright --include src/py/flwr
+python -m flwr_tool.check_copyright --include src/py/flwr --exclude src/py/flwr/ee
 echo "- copyright: done"
 
 echo "- licensecheck: start"
