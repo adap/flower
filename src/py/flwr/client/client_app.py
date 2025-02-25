@@ -184,7 +184,7 @@ class ClientApp:
         >>>
         >>> @app.train(mods=[message_size_mod])
         >>> def train(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp training running with message size modification")
+        >>>    print("ClientApp training running with message size mod")
         >>>    return message.create_reply(content=message.content())
         """
 
@@ -228,7 +228,7 @@ class ClientApp:
         >>>
         >>> @app.evaluate(mods=[message_size_mod])
         >>> def evaluate(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp evaluation running")
+        >>>    print("ClientApp evaluation running with message size mod")
         >>>    # Create and return an echo reply message
         >>>    return message.create_reply(content=message.content())
         """
@@ -273,7 +273,7 @@ class ClientApp:
         >>>
         >>> @app.query(mods=[message_size_mod])
         >>> def query(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp query running")
+        >>>    print("ClientApp query running with message size mod")
         >>>    # Create and return an echo reply message
         >>>    return message.create_reply(content=message.content())
         """
