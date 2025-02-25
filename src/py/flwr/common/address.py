@@ -119,7 +119,7 @@ def get_ip_address_from_servicer_context(context: grpc.ServicerContext) -> str:
     -------
     str
         If one of the format matches, the function will return the client's IP address,
-        otherwise, it will return an empty string.
+        otherwise, it will raise a ValueError.
     """
     peer: str = context.peer()
     # Match IPv4: "ipv4:IP:port"
