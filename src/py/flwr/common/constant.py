@@ -217,7 +217,7 @@ class AuthType:
 class EventLogWriterType:
     """Event log writer types."""
 
-    DEFAULT = "default"
+    STDOUT = "stdout"
 
     def __new__(cls) -> EventLogWriterType:
         """Prevent instantiation."""
