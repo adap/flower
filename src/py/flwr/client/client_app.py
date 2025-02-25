@@ -28,7 +28,6 @@ from flwr.common import Context, Message, MessageType
 from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
 
 from .typing import ClientAppCallable
-from flwr.client.mod import message_size_mod
 
 
 def _alert_erroneous_client_fn() -> None:
