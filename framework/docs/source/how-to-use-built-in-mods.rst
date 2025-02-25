@@ -30,6 +30,9 @@ A typical mod function might look something like this:
 
 .. code-block:: python
 
+    from flwr.client.typing import ClientAppCallable
+    from flwr.common import Context, Message
+    
     def example_mod(msg: Message, ctx: Context, call_next: ClientAppCallable) -> Message:
         # Do something with incoming Message (or Context)
         # before passing it to the next layer in the chain.
@@ -95,6 +98,11 @@ Instead of applying mods globally, you can specify them for a particular handler
     @app.train(mods=[example_mod_3, example_mod_4])
     def train(msg, ctx):
         # Training logic here
+        return reply_msg
+ 
+    @app.evaluate()
+    def evalutate(msg, ctx):
+        # Evaluate logic here
         return reply_msg
 
 In this case, ``example_mod_3`` and ``example_mod_4`` are only applied to the ``train``
