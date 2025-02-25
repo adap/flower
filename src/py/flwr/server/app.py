@@ -59,7 +59,7 @@ from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     public_key_to_bytes,
 )
@@ -289,8 +289,6 @@ def run_superlink() -> None:
         auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path), verify_tls_cert)
         # Enable event logging if the args.enable_event_log is True
         if args.enable_event_log:
-            # Switch off colored logging to allow easier parsing of logs
-            update_console_handler(colored=False)
             event_log_plugin = _try_obtain_exec_event_log_writer_plugin()
 
     # Initialize StateFactory
@@ -622,7 +620,7 @@ def _try_obtain_exec_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]
         all_plugins: dict[str, type[EventLogWriterPlugin]] = (
             get_exec_event_log_writer_plugins()
         )
-        plugin_class = all_plugins["default"]
+        plugin_class = all_plugins["stdout"]
         return plugin_class()
     except KeyError:
         sys.exit("No event log writer plugin is provided.")
