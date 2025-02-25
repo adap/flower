@@ -18,6 +18,7 @@
 import time
 from typing import Union
 
+from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
@@ -104,5 +105,63 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> list[str
         # Ancestors
         if len(tasks_ins_res.task.ancestry) == 0:
             validation_errors.append("`ancestry` is empty")
+
+    return validation_errors
+
+
+# pylint: disable-next=too-many-branches
+def validate_message(message: Message, is_reply_message: bool) -> list[str]:
+    """Validate a Message."""
+    validation_errors = []
+    metadata = message.metadata
+
+    if metadata.message_id != "":
+        validation_errors.append("non-empty `message_id`")
+
+    # Created/delivered/TTL/Pushed
+    if (
+        metadata.created_at < 1711497600.0
+    ):  # unix timestamp of 27 March 2024 00h:00m:00s UTC
+        validation_errors.append(
+            "`created_at` must be a float that records the unix timestamp "
+            "in seconds when the message was created."
+        )
+    if metadata.ttl <= 0:
+        validation_errors.append("`ttl` must be higher than zero")
+
+    # Verify TTL and created_at time
+    current_time = time.time()
+    if metadata.created_at + metadata.ttl <= current_time:
+        validation_errors.append("Task TTL has expired")
+
+    # Source node
+    if not metadata.src_node_id:
+        validation_errors.append("`metadata.src_node_id` is not set.")
+    if metadata.src_node_id == SUPERLINK_NODE_ID:
+        validation_errors.append(f"`metadata.src_node_id` is not {SUPERLINK_NODE_ID}")
+
+    # Destination node
+    if not metadata.dst_node_id:
+        validation_errors.append("`metadata.dst_node_id` is not set.")
+    if metadata.dst_node_id == SUPERLINK_NODE_ID:
+        validation_errors.append(f"`metadata.dst_node_id` is not {SUPERLINK_NODE_ID}")
+
+    # Message type
+    if metadata.message_type == "":
+        validation_errors.append("`metadata.message_type` MUST be set")
+
+    # Content
+    if not message.has_content() != message.has_error():
+        validation_errors.append(
+            "Either message `content` or `error` MUST be set (but not both)"
+        )
+
+    # Link respose to original message
+    if not is_reply_message:
+        if metadata.reply_to_message != "":
+            validation_errors.append("metadata.reply_to_message MUST not be set.")
+    else:
+        if metadata.reply_to_message == "":
+            validation_errors.append("metadata.reply_to_message MUST be set.")
 
     return validation_errors

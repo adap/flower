@@ -17,14 +17,17 @@
 
 import time
 import unittest
+from typing import Optional
 
-from flwr.common import DEFAULT_TTL
+from parameterized import parameterized
+
+from flwr.common import DEFAULT_TTL, Error, Message, Metadata, RecordSet
 from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.proto import recordset_pb2
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
-from .validator import validate_task_ins_or_res
+from .validator import validate_message, validate_task_ins_or_res
 
 
 class ValidatorTest(unittest.TestCase):
@@ -91,6 +94,211 @@ class ValidatorTest(unittest.TestCase):
         val_errors_res = validate_task_ins_or_res(expired_task_res)
         self.assertIn("Task TTL has expired", val_errors_res)
 
+    @parameterized.expand(  # type: ignore
+        [
+            (
+                "",
+                123,
+                456,
+                DEFAULT_TTL,
+                "",
+                RecordSet(),
+                None,
+                "mock",
+                False,
+                False,
+            ),  # Should pass
+            (
+                "",
+                123,
+                456,
+                DEFAULT_TTL,
+                "",
+                None,
+                Error(0),
+                "mock",
+                False,
+                False,
+            ),  # Should pass
+            (
+                "123",
+                123,
+                456,
+                DEFAULT_TTL,
+                "",
+                RecordSet(),
+                None,
+                "mock",
+                False,
+                True,
+            ),  # message_id is set
+            (
+                "",
+                123,
+                456,
+                0,
+                "",
+                RecordSet(),
+                None,
+                "mock",
+                False,
+                True,
+            ),  # ttl is zero
+            (
+                "",
+                None,
+                456,
+                DEFAULT_TTL,
+                "",
+                RecordSet(),
+                None,
+                "mock",
+                False,
+                True,
+            ),  # unset src_node_id
+            (
+                "",
+                SUPERLINK_NODE_ID,
+                456,
+                DEFAULT_TTL,
+                "",
+                RecordSet(),
+                None,
+                "mock",
+                False,
+                True,
+            ),  # src_node_id is SUPERLINK
+            (
+                "",
+                123,
+                None,
+                DEFAULT_TTL,
+                "",
+                RecordSet(),
+                None,
+                "mock",
+                False,
+                True,
+            ),  # unset dst_node_id
+            (
+                "",
+                123,
+                SUPERLINK_NODE_ID,
+                DEFAULT_TTL,
+                "",
+                RecordSet(),
+                None,
+                "mock",
+                False,
+                True,
+            ),  # dst_node_id is SUPERLINK
+            (
+                "",
+                123,
+                456,
+                DEFAULT_TTL,
+                "",
+                RecordSet(),
+                None,
+                "",
+                False,
+                True,
+            ),  # message_type unset
+            (
+                "",
+                123,
+                456,
+                DEFAULT_TTL,
+                "",
+                None,
+                None,
+                "mock",
+                False,
+                True,
+            ),  # message has both content and error unset
+            (
+                "",
+                123,
+                456,
+                DEFAULT_TTL,
+                "",
+                RecordSet(),
+                Error(0),
+                "mock",
+                False,
+                True,
+            ),  # message has both content and error set
+            (
+                "",
+                123,
+                456,
+                DEFAULT_TTL,
+                "789",
+                RecordSet(),
+                None,
+                "mock",
+                False,
+                True,
+            ),  # reply_to_message is set it's not a reply message
+            (
+                "",
+                123,
+                456,
+                DEFAULT_TTL,
+                "",
+                RecordSet(),
+                None,
+                "mock",
+                True,
+                True,
+            ),  # reply_to_message isn't set in reply message
+        ]
+    )
+    # pylint: disable-next=too-many-arguments,too-many-positional-arguments
+    def test_message(
+        self,
+        message_id: str,
+        src_node_id: Optional[int],
+        dst_node_id: Optional[int],
+        ttl: int,
+        reply_to_message: str,
+        content: Optional[RecordSet],
+        error: Optional[Error],
+        msg_type: str,
+        is_reply: bool,
+        should_fail: bool,
+    ) -> None:
+        """Test is_valid message."""
+        metadata = Metadata(
+            run_id=0,
+            message_id=message_id,
+            src_node_id=src_node_id,  # type: ignore
+            dst_node_id=dst_node_id,  # type: ignore
+            reply_to_message=reply_to_message,
+            group_id="",
+            ttl=ttl,
+            message_type=msg_type,
+        )
+
+        if content is None and error is None:
+            message = Message(metadata=metadata, content=RecordSet())
+            # pylint: disable-next=protected-access
+            message._content = None  # type: ignore
+        elif content is not None and error is not None:
+            message = Message(metadata=metadata, content=content)
+            # pylint: disable-next=protected-access
+            message._error = error  # type: ignore
+        else:
+            # Normal creation
+            message = Message(metadata=metadata, content=content, error=error)
+
+        # Execute & Assert
+        val_errors = validate_message(message, is_reply_message=is_reply)
+        if should_fail:
+            self.assertTrue(val_errors)
+        else:
+            self.assertFalse(val_errors)
+
 
 def create_task_ins(
     consumer_node_id: int,
@@ -109,7 +317,9 @@ def create_task_ins(
             producer=Node(node_id=SUPERLINK_NODE_ID),
             consumer=consumer,
             task_type="mock",
-            recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            recordset=recordset_pb2.RecordSet(  # pylint: disable=E1101
+                parameters={}, metrics={}, configs={}
+            ),
             ttl=DEFAULT_TTL,
             created_at=time.time(),
         ),
@@ -132,7 +342,9 @@ def create_task_res(
             consumer=Node(node_id=SUPERLINK_NODE_ID),
             ancestry=ancestry,
             task_type="mock",
-            recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            recordset=recordset_pb2.RecordSet(  # pylint: disable=E1101
+                parameters={}, metrics={}, configs={}
+            ),
             ttl=DEFAULT_TTL,
             created_at=time.time(),
         ),
