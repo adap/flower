@@ -45,9 +45,9 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         If `task_ins.run_id` is invalid, then
         storing the `task_ins` MUST fail.
         """
-    
+
     @abc.abstractmethod
-    def store_message_fleet(self, message: Message) -> Optional[UUID]:
+    def store_message_ins(self, message: Message) -> Optional[UUID]:
         """Store one Message.
 
         Usually, the ServerAppIo API calls this to schedule instructions.
@@ -83,6 +83,21 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         the result.
 
         If `limit` is not `None`, return, at most, `limit` number of `task_ins`. If
+        `limit` is set, it has to be greater zero.
+        """
+
+    @abc.abstractmethod
+    def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
+        """Get Message optionally filtered by node_id.
+
+        Usually, the Fleet API calls this for Nodes planning to work on one or more
+        Message.
+
+        Constraints
+        -----------
+        Retrieve all Message where the `message.metadata.dst_node_id` equals `node_id`.
+
+        If `limit` is not `None`, return, at most, `limit` number of `message`. If
         `limit` is set, it has to be greater zero.
         """
 

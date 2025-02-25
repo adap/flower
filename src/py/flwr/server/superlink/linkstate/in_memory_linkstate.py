@@ -23,7 +23,7 @@ from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import Context, Metadata, log, now, Message
+from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -35,7 +35,7 @@ from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
-from flwr.server.utils import validate_task_ins_or_res, validate_message
+from flwr.server.utils import validate_message, validate_task_ins_or_res
 
 from .utils import (
     generate_rand_int_from_bytes,
@@ -71,6 +71,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.federation_options: dict[int, ConfigsRecord] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.message_ins_store: dict[UUID, Message] = {}
+        # node-id to message-id mapping (for fast `get_message_ins` processing)
+        self.dst_node_id_to_message_id_mapping: dict[int, list[UUID]] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
         self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
         self.in_processing_messages: dict[UUID, Metadata] = {}
@@ -118,10 +120,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
-    def store_message_fleet(self, message: Message) -> Optional[UUID]:
-        """Store one Message."""
+    def store_message_ins(self, message: Message) -> Optional[UUID]:
+        """Store one Message from ServerAppIo."""
         # Validate task
-        errors = validate_message(message)
+        errors = validate_message(message, is_reply_message=False)
         if any(errors):
             log(ERROR, errors)
             return None
@@ -132,11 +134,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return None
         # Validate source node ID
         if metadata.src_node_id != SUPERLINK_NODE_ID:
-            log(
-                ERROR,
-                "Invalid source node ID for Message: %s",
-                metadata.src_node_id
-            )
+            log(ERROR, "Invalid source node ID for Message: %s", metadata.src_node_id)
             return None
         # Validate destination node ID
         if metadata.dst_node_id not in self.node_ids:
@@ -155,9 +153,16 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             self.message_ins_store[message_id] = message
 
+        # Record in mapping
+        if metadata.dst_node_id in self.dst_node_id_to_message_id_mapping:
+            self.dst_node_id_to_message_id_mapping[metadata.dst_node_id].append(
+                message_id
+            )
+        else:
+            self.dst_node_id_to_message_id_mapping[metadata.dst_node_id] = [message_id]
+
         # Return the new message_id
         return message_id
-
 
     def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
@@ -185,6 +190,34 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Return TaskIns
         return task_ins_list
+
+    def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
+        """Get all Messages that have not been delivered yet."""
+        if limit is not None and limit < 1:
+            raise AssertionError("`limit` must be >= 1")
+
+        # Find Messages for node_id
+        message_list: list[Message] = []
+        with self.lock:
+            # Get all UUIDs of messages to be pulled by `node_id` node
+            all_message_ids = self.dst_node_id_to_message_id_mapping.get(node_id, [])
+
+            # If there are Messages associated to this node
+            if all_message_ids:
+                # Take at most `limit` message ids
+                message_ids = all_message_ids[:limit] if limit else all_message_ids
+
+                # Extract from Message store
+                message_list = [
+                    self.message_ins_store.pop(msg_id) for msg_id in message_ids
+                ]
+
+                # Record metadata of extracted messages
+                for msg in message_list:
+                    self.in_processing_messages[msg.metadata.message_id] = msg.metadata
+
+        # Return Messages
+        return message_list
 
     # pylint: disable=R0911
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
