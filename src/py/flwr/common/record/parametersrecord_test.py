@@ -20,8 +20,8 @@ import unittest
 from collections import OrderedDict
 from io import BytesIO
 from types import ModuleType
-from typing import Any
-from unittest.mock import Mock
+from typing import Any, Optional
+from unittest.mock import Mock, call, patch
 
 import numpy as np
 import pytest
@@ -170,6 +170,315 @@ class TestArray(unittest.TestCase):
         """Ensure invalid combinations raise TypeError."""
         with self.assertRaises(TypeError):
             Array(*args)
+
+
+class TestParametersRecord(unittest.TestCase):
+    """Unit tests for ParametersRecord."""
+
+    def setUp(self) -> None:
+        """Set up the test case."""
+        # Patch torch
+        self.torch_mock = Mock(spec=ModuleType, Tensor=TorchTensor)
+        self._original_torch = sys.modules.get("torch")
+        sys.modules["torch"] = self.torch_mock
+
+    def tearDown(self) -> None:
+        """Tear down the test case."""
+        # Unpatch torch
+        del sys.modules["torch"]
+        if self._original_torch is not None:
+            sys.modules["torch"] = self._original_torch
+
+    @parameterized.expand(  # type: ignore
+        [
+            ([np.array([1, 2]), np.array([3, 4])],),  # Two arrays
+            ([np.array(5)],),  # Single array
+            ([],),  # Empty list
+        ]
+    )
+    def test_from_numpy_ndarrays(self, ndarrays: list[NDArray]) -> None:
+        """Test creating a ParametersRecord from a list of NumPy arrays."""
+        with patch.object(Array, "from_numpy_ndarray") as mock_from_numpy:
+            # Prepare
+            mock_arrays = [Mock(spec=Array) for _ in ndarrays]
+            mock_from_numpy.side_effect = mock_arrays
+            expected_keys = [str(i) for i in range(len(ndarrays))]
+
+            # Execute
+            record = ParametersRecord.from_numpy_ndarrays(ndarrays)
+
+            # Assert
+            self.assertEqual(list(record.keys()), expected_keys)
+            self.assertEqual(list(record.values()), mock_arrays)
+            mock_from_numpy.assert_has_calls(
+                [call(arr) for arr in ndarrays], any_order=False
+            )
+
+    def test_from_state_dict_with_torch(self) -> None:
+        """Test creating a ParametersRecord from a PyTorch state_dict."""
+        # Prepare
+        # Mock state_dict with tensor mocks
+        state_dict = OrderedDict(
+            [
+                ("weight", TorchTensor()),
+                ("bias", TorchTensor()),
+            ]
+        )
+        ndarrays = [np.array([1, 2]), np.array([3, 4])]
+        for tensor_mock, numpy_array in zip(state_dict.values(), ndarrays):
+            tensor_mock.detach.return_value = tensor_mock
+            tensor_mock.cpu.return_value = tensor_mock
+            tensor_mock.numpy.return_value = numpy_array
+
+        # Mock Array.from_numpy_ndarray to return mock arrays
+        mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
+        with patch.object(Array, "from_numpy_ndarray") as mock_from_numpy:
+            mock_from_numpy.side_effect = mock_arrays
+
+            # Execute
+            record = ParametersRecord.from_state_dict(state_dict)
+
+            # Assert
+            self.assertEqual(list(record.keys()), list(state_dict.keys()))
+            for tensor_mock in state_dict.values():
+                tensor_mock.detach.assert_called_once()
+                tensor_mock.cpu.assert_called_once()
+                tensor_mock.numpy.assert_called_once()
+            mock_from_numpy.assert_has_calls(
+                [call(arr) for arr in ndarrays], any_order=False
+            )
+            self.assertEqual(list(record.values()), mock_arrays)
+
+    def test_from_state_dict_without_torch(self) -> None:
+        """Test `ParametersRecord.from_state_dict` without PyTorch."""
+        with patch.dict("sys.modules", {}, clear=True):
+            with self.assertRaises(RuntimeError) as cm:
+                ParametersRecord.from_state_dict(OrderedDict())
+            self.assertIn("PyTorch is required", str(cm.exception))
+
+    @parameterized.expand(  # type: ignore
+        [
+            ([np.array([1, 2]), np.array([3, 4])],),  # Two arrays
+            ([np.array(5)],),  # Single array
+            ([],),  # Empty list
+        ]
+    )
+    def test_from_tf_weights(self, tf_weights: list[NDArray]) -> None:
+        """Test creating a ParametersRecord from a list of TensorFlow weights."""
+        with patch.object(Array, "from_numpy_ndarray") as mock_from_numpy:
+            mock_from_numpy.return_value = Mock(spec=Array)
+            ParametersRecord.from_tf_weights(tf_weights)
+            mock_from_numpy.assert_has_calls(
+                [call(w) for w in tf_weights], any_order=False
+            )
+
+    def test_to_numpy_ndarrays(self) -> None:
+        """Test converting a ParametersRecord to a list of NumPy arrays."""
+        # Prepare
+        record = ParametersRecord()
+        numpy_arrays = [np.array([1, 2]), np.array([3, 4])]
+        mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
+        for mock_arr, arr in zip(mock_arrays, numpy_arrays):
+            mock_arr.numpy.return_value = arr
+        record["0"] = mock_arrays[0]
+        record["1"] = mock_arrays[1]
+
+        # Execute
+        result = record.to_numpy_ndarrays()
+
+        # Assert
+        self.assertEqual(result, numpy_arrays)
+        for mock_arr in mock_arrays:
+            mock_arr.numpy.assert_called_once()
+
+    def test_to_state_dict_with_torch(self) -> None:
+        """Test converting a ParametersRecord to a PyTorch state_dict."""
+        # Prepare
+        # Mock torch.from_numpy method
+        tensors = [TorchTensor(), TorchTensor()]
+        self.torch_mock.from_numpy = Mock(side_effect=tensors)
+        record = ParametersRecord()
+        ndarrays = [np.array([1, 2]), np.array([3, 4])]
+        mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
+        for mock_arr, arr in zip(mock_arrays, ndarrays):
+            mock_arr.numpy.return_value = arr
+        record["weight"] = mock_arrays[0]
+        record["bias"] = mock_arrays[1]
+
+        # Execute
+        state_dict = record.to_state_dict()
+
+        # Assert
+        self.assertIsInstance(state_dict, OrderedDict)
+        self.assertEqual(list(state_dict.keys()), ["weight", "bias"])
+        self.torch_mock.from_numpy.assert_has_calls(
+            [call(arr) for arr in ndarrays], any_order=False
+        )
+        self.assertEqual(list(state_dict.values()), tensors)
+
+    def test_to_state_dict_without_torch(self) -> None:
+        """Test `ParametersRecord.to_state_dict` without PyTorch."""
+        with patch.dict("sys.modules", {}, clear=True):
+            record = ParametersRecord()
+            with self.assertRaises(RuntimeError) as cm:
+                record.to_state_dict()
+            self.assertIn("PyTorch is required", str(cm.exception))
+
+    def test_to_tf_weights(self) -> None:
+        """Test converting a ParametersRecord to a list of TensorFlow weights."""
+        # Prepare
+        record = ParametersRecord()
+        numpy_arrays = [np.array([1, 2]), np.array([3, 4])]
+        mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
+        for mock_arr, arr in zip(mock_arrays, numpy_arrays):
+            mock_arr.numpy.return_value = arr
+        record["0"] = mock_arrays[0]
+        record["1"] = mock_arrays[1]
+
+        # Execute
+        result = record.to_tf_weights()
+
+        # Assert
+        self.assertEqual(result, numpy_arrays)
+        for mock_arr in mock_arrays:
+            mock_arr.numpy.assert_called_once()
+
+    def test_init_no_args(self) -> None:
+        """Test initializing with no arguments."""
+        _ = ParametersRecord()
+
+    @parameterized.expand(  # type: ignore
+        [
+            ([np.array([1, 2, 3])], True),
+            ([np.array([1, 2, 3])], False),
+            ([np.array([4, 5, 6]), np.array([1, 2, 3])], True),
+            ([np.array([4, 5, 6]), np.array([1, 2, 3])], False),
+        ]
+    )
+    def test_init_ndarrays_calls_method(
+        self, ndarrays: list[NDArray], use_keyword: bool
+    ) -> None:
+        """Test initializing with NumPy arrays."""
+        with patch.object(
+            ParametersRecord,
+            "from_numpy_ndarrays",
+            return_value=Mock(spec=ParametersRecord),
+        ) as mock_from_numpy:
+            if use_keyword:
+                _ = ParametersRecord(numpy_ndarrays=ndarrays)
+            else:
+                _ = ParametersRecord(ndarrays)
+            mock_from_numpy.assert_called_once_with(ndarrays, keep_input=True)
+
+    @parameterized.expand([(True,), (False,)])  # type: ignore
+    def test_init_array_dict_keep_input_false(self, use_keyword: bool) -> None:
+        """Test initializing with an array_dict and keep_input=False."""
+        # Prepare
+        arr = Array(dtype="float32", shape=[2, 2], stype=SType.NUMPY, data=b"data")
+        arr_dict: OrderedDict[str, Array] = OrderedDict({"x": arr})
+
+        # Execute
+        if use_keyword:
+            record = ParametersRecord(array_dict=arr_dict, keep_input=False)
+        else:
+            record = ParametersRecord(arr_dict, keep_input=False)
+
+        # Assert
+        self.assertEqual(record["x"], arr)
+        self.assertEqual(len(arr_dict), 0)
+
+    @parameterized.expand(  # type: ignore
+        [
+            ("array_dict", OrderedDict({"x": Array("mock", [1], "np", b"data")})),
+            (None, OrderedDict({"x": Array("mock", [1], "np", b"data")})),
+            ("state_dict", OrderedDict({"x": MOCK_TORCH_TENSOR})),
+            (None, OrderedDict({"x": MOCK_TORCH_TENSOR})),
+            ("numpy_ndarrays", [np.array([1, 2, 3])]),
+            (None, [np.array([1, 2, 3])]),
+            ("tf_weights", [np.array([1, 2, 3])]),
+        ]
+    )
+    def test_init_keep_input_true_and_false(
+        self, keyword: Optional[str], input_arg: Any
+    ) -> None:
+        """Test initializing with keep_input=True/False."""
+        # Prepare
+        input_size_original = len(input_arg)
+
+        # Execute
+        # Keep input=True
+        if keyword:
+            _ = ParametersRecord(**{keyword: input_arg}, keep_input=True)
+        else:
+            _ = ParametersRecord(input_arg, keep_input=True)
+        input_size_after1 = len(input_arg)
+        # Keep input=False
+        if keyword:
+            _ = ParametersRecord(**{keyword: input_arg}, keep_input=False)
+        else:
+            _ = ParametersRecord(input_arg, keep_input=False)
+        input_size_after2 = len(input_arg)
+
+        # Assert
+        self.assertEqual(input_size_after1, input_size_original)
+        self.assertEqual(input_size_after2, 0)
+
+    @parameterized.expand([(True,), (False,)])  # type: ignore
+    def test_init_array_dict_keep_input_true(self, use_keyword: bool) -> None:
+        """Test initializing with an array_dict and keep_input=True."""
+        # Prepare
+        arr = Array(dtype="float32", shape=[2, 2], stype=SType.NUMPY, data=b"data")
+        arr_dict: OrderedDict[str, Array] = OrderedDict({"x": arr})
+
+        # Execute
+        if use_keyword:
+            record = ParametersRecord(array_dict=arr_dict, keep_input=True)
+        else:
+            record = ParametersRecord(arr_dict, keep_input=True)
+
+        # Assert
+        self.assertEqual(record["x"], arr_dict["x"])
+        self.assertEqual(len(arr_dict), 1)
+
+    @parameterized.expand([(True,), (False,)])  # type: ignore
+    def test_init_state_dict_calls_from_state_dict(self, use_keyword: bool) -> None:
+        """Test initializing with a state_dict."""
+        state_dict = OrderedDict({"layer.weight": MOCK_TORCH_TENSOR})
+        with patch.object(
+            ParametersRecord,
+            "from_state_dict",
+            return_value=Mock(spec=ParametersRecord),
+        ) as mock_from_state_dict:
+            if use_keyword:
+                _ = ParametersRecord(state_dict=state_dict)
+            else:
+                _ = ParametersRecord(state_dict)
+
+            # from_state_dict() should be called exactly once with the provided dict
+            mock_from_state_dict.assert_called_once_with(state_dict, keep_input=True)
+
+    @parameterized.expand(  # type: ignore
+        [
+            ((42,), {}),
+            (("invalid",), {}),
+            (
+                (),
+                {"numpy_ndarrays": [np.array([2])], "tf_weights": [np.array([2])]},
+            ),
+            (([np.array([1])],), {"array_dict": {"x": Mock(spec=Array)}}),
+            (([np.array([1])],), {"numpy_ndarrays": [np.array([2])]}),
+            (([np.array([1])],), {"state_dict": {"layer.weight": MOCK_TORCH_TENSOR}}),
+            (([np.array([1])],), {"tf_weights": [np.array([2])]}),
+        ]
+    )
+    def test_init_unrecognized_arg_raises_error(
+        self, args: tuple[Any, ...], kwargs: dict[str, Any]
+    ) -> None:
+        """Test initializing with unrecognized arguments."""
+        with self.assertRaisesRegex(
+            TypeError, "Invalid arguments for ParametersRecord.*"
+        ):
+            ParametersRecord(*args, **kwargs)
 
 
 @pytest.mark.parametrize(
