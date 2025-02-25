@@ -59,9 +59,10 @@ def run_exec_api_grpc(
     interceptors: list[grpc.ServerInterceptor] = []
     if auth_plugin is not None:
         interceptors.append(ExecUserAuthInterceptor(auth_plugin))
+    # Event log interceptor must be added after user auth interceptor
     if event_log_plugin is not None:
         interceptors.append(ExecEventLogInterceptor(event_log_plugin))
-        log(INFO, "Flower Deployment Engine: Event logging enabled")
+        log(INFO, "Flower event logging enabled")
     exec_add_servicer_to_server_fn = add_ExecServicer_to_server
     exec_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(exec_servicer, exec_add_servicer_to_server_fn),
