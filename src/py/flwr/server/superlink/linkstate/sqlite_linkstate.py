@@ -151,8 +151,8 @@ CREATE TABLE IF NOT EXISTS task_res(
 );
 """
 
-SQL_CREATE_TABLE_IN_PROCESSING_MESSAGES = """
-CREATE TABLE IF NOT EXISTS in_processing_messages(
+SQL_CREATE_TABLE_DELIVERED_MESSAGES = """
+CREATE TABLE IF NOT EXISTS delivered_messages(
     message_id              TEXT UNIQUE,
     run_id                  INTEGER,
     src_node_id             INTEGER,
@@ -212,7 +212,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_CONTEXT)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
-        cur.execute(SQL_CREATE_TABLE_IN_PROCESSING_MESSAGES)
+        cur.execute(SQL_CREATE_TABLE_DELIVERED_MESSAGES)
         cur.execute(SQL_CREATE_TABLE_NODE)
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
