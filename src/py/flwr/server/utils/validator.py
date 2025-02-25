@@ -134,17 +134,13 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     if metadata.created_at + metadata.ttl <= current_time:
         validation_errors.append("Task TTL has expired")
 
-    # Source node
+    # Source node is set and is not zero
     if not metadata.src_node_id:
         validation_errors.append("`metadata.src_node_id` is not set.")
-    if metadata.src_node_id == SUPERLINK_NODE_ID:
-        validation_errors.append(f"`metadata.src_node_id` is not {SUPERLINK_NODE_ID}")
 
-    # Destination node
+    # Destination node is set and is not zero
     if not metadata.dst_node_id:
         validation_errors.append("`metadata.dst_node_id` is not set.")
-    if metadata.dst_node_id == SUPERLINK_NODE_ID:
-        validation_errors.append(f"`metadata.dst_node_id` is not {SUPERLINK_NODE_ID}")
 
     # Message type
     if metadata.message_type == "":
@@ -160,8 +156,20 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     if not is_reply_message:
         if metadata.reply_to_message != "":
             validation_errors.append("metadata.reply_to_message MUST not be set.")
+        if metadata.src_node_id != SUPERLINK_NODE_ID:
+            validation_errors.append(
+                f"`metadata.src_node_id` is not {SUPERLINK_NODE_ID}"
+            )
+        if metadata.dst_node_id == SUPERLINK_NODE_ID:
+            validation_errors.append(f"`metadata.dst_node_id` is {SUPERLINK_NODE_ID}")
     else:
         if metadata.reply_to_message == "":
             validation_errors.append("metadata.reply_to_message MUST be set.")
+        if metadata.src_node_id == SUPERLINK_NODE_ID:
+            validation_errors.append(f"`metadata.src_node_id` is {SUPERLINK_NODE_ID}")
+        if metadata.dst_node_id != SUPERLINK_NODE_ID:
+            validation_errors.append(
+                f"`metadata.dst_node_id` is not {SUPERLINK_NODE_ID}"
+            )
 
     return validation_errors

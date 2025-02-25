@@ -98,7 +98,7 @@ class ValidatorTest(unittest.TestCase):
         [
             (
                 "",
-                123,
+                SUPERLINK_NODE_ID,
                 456,
                 DEFAULT_TTL,
                 "",
@@ -110,7 +110,7 @@ class ValidatorTest(unittest.TestCase):
             ),  # Should pass
             (
                 "",
-                123,
+                SUPERLINK_NODE_ID,
                 456,
                 DEFAULT_TTL,
                 "",
@@ -122,7 +122,7 @@ class ValidatorTest(unittest.TestCase):
             ),  # Should pass
             (
                 "123",
-                123,
+                SUPERLINK_NODE_ID,
                 456,
                 DEFAULT_TTL,
                 "",
@@ -134,7 +134,7 @@ class ValidatorTest(unittest.TestCase):
             ),  # message_id is set
             (
                 "",
-                123,
+                SUPERLINK_NODE_ID,
                 456,
                 0,
                 "",
@@ -159,18 +159,6 @@ class ValidatorTest(unittest.TestCase):
             (
                 "",
                 SUPERLINK_NODE_ID,
-                456,
-                DEFAULT_TTL,
-                "",
-                RecordSet(),
-                None,
-                "mock",
-                False,
-                True,
-            ),  # src_node_id is SUPERLINK
-            (
-                "",
-                123,
                 None,
                 DEFAULT_TTL,
                 "",
@@ -182,7 +170,7 @@ class ValidatorTest(unittest.TestCase):
             ),  # unset dst_node_id
             (
                 "",
-                123,
+                SUPERLINK_NODE_ID,
                 SUPERLINK_NODE_ID,
                 DEFAULT_TTL,
                 "",
@@ -194,7 +182,7 @@ class ValidatorTest(unittest.TestCase):
             ),  # dst_node_id is SUPERLINK
             (
                 "",
-                123,
+                SUPERLINK_NODE_ID,
                 456,
                 DEFAULT_TTL,
                 "",
@@ -206,7 +194,7 @@ class ValidatorTest(unittest.TestCase):
             ),  # message_type unset
             (
                 "",
-                123,
+                SUPERLINK_NODE_ID,
                 456,
                 DEFAULT_TTL,
                 "",
@@ -218,7 +206,7 @@ class ValidatorTest(unittest.TestCase):
             ),  # message has both content and error unset
             (
                 "",
-                123,
+                SUPERLINK_NODE_ID,
                 456,
                 DEFAULT_TTL,
                 "",
@@ -230,7 +218,7 @@ class ValidatorTest(unittest.TestCase):
             ),  # message has both content and error set
             (
                 "",
-                123,
+                SUPERLINK_NODE_ID,
                 456,
                 DEFAULT_TTL,
                 "789",
@@ -242,7 +230,7 @@ class ValidatorTest(unittest.TestCase):
             ),  # reply_to_message is set it's not a reply message
             (
                 "",
-                123,
+                SUPERLINK_NODE_ID,
                 456,
                 DEFAULT_TTL,
                 "",
@@ -252,6 +240,18 @@ class ValidatorTest(unittest.TestCase):
                 True,
                 True,
             ),  # reply_to_message isn't set in reply message
+            (
+                "",
+                123,
+                456,
+                DEFAULT_TTL,
+                "blabla",
+                RecordSet(),
+                None,
+                "mock",
+                True,
+                True,
+            ),  # is reply message but dst_node_id isn't superlink
         ]
     )
     # pylint: disable-next=too-many-arguments,too-many-positional-arguments
