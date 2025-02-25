@@ -15,7 +15,7 @@
 """Flower Exec API event log interceptor."""
 
 
-from collections.abc import Generator, Iterator
+from collections.abc import Iterator
 from typing import Any, Callable, Union, cast
 
 import grpc
@@ -48,15 +48,15 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         # `flwr.superexec.exec_servicer.ExecServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
         method_name: str = handler_call_details.method
-        return self._generic_auth_unary_method_handler(method_handler, method_name)
+        return self._generic_event_log_unary_method_handler(method_handler, method_name)
 
-    def _generic_auth_unary_method_handler(
+    def _generic_event_log_unary_method_handler(
         self, method_handler: grpc.RpcMethodHandler, method_name: str
     ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
             request: EventLogRequest,
             context: grpc.ServicerContext,
-        ) -> Union[EventLogResponse, Generator[Any, Any, None]]:
+        ) -> Union[EventLogResponse, Iterator[EventLogResponse]]:
             log_entry: LogEntry
             # Log before call
             log_entry = self.log_plugin.compose_log_before_event(
@@ -80,7 +80,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                 self.log_plugin.write_log(log_entry)
                 return cast(EventLogResponse, response)
 
-            # For unary-stream calls, wrap the response iterator write the event log
+            # For unary-stream calls, wrap the response iterator and write the event log
             # after iteration completes.
             if method_handler.unary_stream:
                 response = cast(
@@ -88,7 +88,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                     method_handler.unary_stream(request, context),
                 )
 
-                def response_wrapper() -> Generator[Any, Any, None]:
+                def response_wrapper() -> Iterator[EventLogResponse]:
                     try:
                         yield from response
                     finally:
@@ -105,13 +105,15 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
 
                 return response_wrapper()
 
-            # If the method type is not `unary_unary` or `unary_stream`, raise an error.
-            raise NotImplementedError("This RPC method type is not supported.")
+            raise RuntimeError()  # This line is unreachable
 
         if method_handler.unary_unary:
             message_handler = grpc.unary_unary_rpc_method_handler
-        else:
+        elif method_handler.unary_stream:
             message_handler = grpc.unary_stream_rpc_method_handler
+        else:
+            # If the method type is not `unary_unary` or `unary_stream`, raise an error.
+            raise NotImplementedError("This RPC method type is not supported.")
         return message_handler(
             _generic_method_handler,
             request_deserializer=method_handler.request_deserializer,
