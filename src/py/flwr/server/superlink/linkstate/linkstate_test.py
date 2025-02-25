@@ -1252,7 +1252,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 20
+        assert len(result) == 19
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1277,7 +1277,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 20
+        assert len(result) == 19
 
 
 if __name__ == "__main__":

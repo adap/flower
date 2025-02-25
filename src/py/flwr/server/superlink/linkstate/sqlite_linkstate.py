@@ -185,9 +185,9 @@ CREATE TABLE IF NOT EXISTS in_processing_messages(
     dst_node_id             INTEGER,
     reply_to_message        TEXT,
     group_id                TEXT,
+    created_at              REAL,
     ttl                     REAL,
-    message_type            TEXT,
-    FOREIGN KEY(run_id) REFERENCES run(run_id)
+    message_type            TEXT
 );
 """
 
@@ -537,6 +537,24 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """
         data = tuple(message.metadata.message_id for message in messages)
         self.query(query, data)
+
+        # Record metadata of messages being pulled
+        for row in rows:
+            # Convert back values from uint64 to sint64
+            convert_uint64_values_in_dict_to_sint64(
+                row, ["run_id", "src_node_id", "dst_node_id"]
+            )
+            # remove elements that are not part of metadata
+            _ = row.pop("content", None)
+            _ = row.pop("error", None)
+
+        if rows:
+            columns = ", ".join([f":{key}" for key in rows[0]])
+            query = f"INSERT INTO in_processing_messages VALUES({columns});"
+            for row in rows:
+                # Only invalid run_id can trigger IntegrityError.
+                # This may need to be changed in the future version with more integrity checks.
+                self.query(query, row)
 
         return messages
 
@@ -1265,11 +1283,11 @@ def message_from_dict(message_dict: dict[str, Any]) -> Message:
     """Transform dict to Message."""
     content: Optional[RecordSet] = message_dict.pop("content", None)
     error: Optional[Error] = message_dict.pop("error", None)
-    created_at = message_dict.pop("created_at")
-    metadata = Metadata(**message_dict)
-    metadata._created_at = created_at  # type: ignore
-
-    return Message(metadata=metadata, content=content, error=error)
+    # Metadata constructor doesn't allow passing created_at. We set it later
+    metadata = Metadata(**{k: v for k, v in message_dict.items() if k != "created_at"})
+    msg = Message(metadata=metadata, content=content, error=error)
+    msg.metadata._created_at = message_dict["created_at"]  # type: ignore
+    return msg
 
 
 def dict_to_task_ins(task_dict: dict[str, Any]) -> TaskIns:
