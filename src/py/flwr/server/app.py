@@ -101,13 +101,6 @@ except ImportError:
     def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
         """Add EE-specific arguments to the parser."""
 
-    # pylint: disable=unused-argument
-    def get_dashboard_server(
-        address: str,
-        state_factory: LinkStateFactory,
-    ) -> grpc.Server:
-        """Add Dashboard gRPC server."""
-
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
         """Return all Exec API authentication plugins."""
         raise NotImplementedError("No authentication plugins are currently supported.")
@@ -448,6 +441,7 @@ def run_superlink() -> None:
         dashboard_server = get_dashboard_server(
             address=dashboard_address_str,
             state_factory=state_factory,
+            certificates=None,
         )
 
         grpc_servers.append(dashboard_server)
