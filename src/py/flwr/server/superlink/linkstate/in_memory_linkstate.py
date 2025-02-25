@@ -122,7 +122,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def store_message_ins(self, message: Message) -> Optional[UUID]:
         """Store one Message from ServerAppIo."""
-        # Validate task
+        # Validate message
         errors = validate_message(message, is_reply_message=False)
         if any(errors):
             log(ERROR, errors)
@@ -153,13 +153,15 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             self.message_ins_store[message_id] = message
 
-        # Record in mapping
-        if metadata.dst_node_id in self.dst_node_id_to_message_id_mapping:
-            self.dst_node_id_to_message_id_mapping[metadata.dst_node_id].append(
-                message_id
-            )
-        else:
-            self.dst_node_id_to_message_id_mapping[metadata.dst_node_id] = [message_id]
+            # Record in mapping
+            if metadata.dst_node_id in self.dst_node_id_to_message_id_mapping:
+                self.dst_node_id_to_message_id_mapping[metadata.dst_node_id].append(
+                    message_id
+                )
+            else:
+                self.dst_node_id_to_message_id_mapping[metadata.dst_node_id] = [
+                    message_id
+                ]
 
         # Return the new message_id
         return message_id
