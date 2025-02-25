@@ -287,23 +287,26 @@ class StateTest(unittest.TestCase):
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         # task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
-        msg_proto = create_ins_message(src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id)
+        msg_proto = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+        )
         msg = message_from_proto(msg_proto)
 
         # Execute
-        print(msg)
         state.store_message_ins(message=msg)
         message_ins_list = state.get_message_ins(node_id=node_id, limit=10)
 
         # Assert
-        print(message_ins_list)
+        # One returned Message
         assert len(message_ins_list) == 1
+        # Attempt to fetch a second time returns empty Message list
+        assert len(state.get_message_ins(node_id=node_id, limit=10)) == 0
 
         actual_message_ins = message_ins_list[0]
 
-        assert actual_message_ins.metadata.message_id == msg.metadata.message_id  # pylint: disable=no-member
-
-        assert msg.metadata.ttl > 0
+        assert (
+            actual_message_ins.metadata.message_id == msg.metadata.message_id
+        )  # pylint: disable=no-member
 
     def test_store_task_ins_invalid_node_id(self) -> None:
         """Test store_task_ins with invalid node_id."""
@@ -1229,52 +1232,52 @@ class InMemoryStateTest(StateTest):
         return InMemoryLinkState()
 
 
-# class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
-#     """Test SqliteState implemenation with in-memory database."""
+class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
+    """Test SqliteState implemenation with in-memory database."""
 
-#     __test__ = True
+    __test__ = True
 
-#     def state_factory(self) -> SqliteLinkState:
-#         """Return SqliteState with in-memory database."""
-#         state = SqliteLinkState(":memory:")
-#         state.initialize()
-#         return state
+    def state_factory(self) -> SqliteLinkState:
+        """Return SqliteState with in-memory database."""
+        state = SqliteLinkState(":memory:")
+        state.initialize()
+        return state
 
-#     def test_initialize(self) -> None:
-#         """Test initialization."""
-#         # Prepare
-#         state = self.state_factory()
+    def test_initialize(self) -> None:
+        """Test initialization."""
+        # Prepare
+        state = self.state_factory()
 
-#         # Execute
-#         result = state.query("SELECT name FROM sqlite_schema;")
+        # Execute
+        result = state.query("SELECT name FROM sqlite_schema;")
 
-#         # Assert
-#         assert len(result) == 17
+        # Assert
+        assert len(result) == 20
 
 
-# class SqliteFileBasedTest(StateTest, unittest.TestCase):
-#     """Test SqliteState implemenation with file-based database."""
+class SqliteFileBasedTest(StateTest, unittest.TestCase):
+    """Test SqliteState implemenation with file-based database."""
 
-#     __test__ = True
+    __test__ = True
 
-#     def state_factory(self) -> SqliteLinkState:
-#         """Return SqliteState with file-based database."""
-#         # pylint: disable-next=consider-using-with,attribute-defined-outside-init
-#         self.tmp_file = tempfile.NamedTemporaryFile()
-#         state = SqliteLinkState(database_path=self.tmp_file.name)
-#         state.initialize()
-#         return state
+    def state_factory(self) -> SqliteLinkState:
+        """Return SqliteState with file-based database."""
+        # pylint: disable-next=consider-using-with,attribute-defined-outside-init
+        self.tmp_file = tempfile.NamedTemporaryFile()
+        state = SqliteLinkState(database_path=self.tmp_file.name)
+        state.initialize()
+        return state
 
-#     def test_initialize(self) -> None:
-#         """Test initialization."""
-#         # Prepare
-#         state = self.state_factory()
+    def test_initialize(self) -> None:
+        """Test initialization."""
+        # Prepare
+        state = self.state_factory()
 
-#         # Execute
-#         result = state.query("SELECT name FROM sqlite_schema;")
+        # Execute
+        result = state.query("SELECT name FROM sqlite_schema;")
 
-#         # Assert
-#         assert len(result) == 17
+        # Assert
+        assert len(result) == 20
 
 
 if __name__ == "__main__":

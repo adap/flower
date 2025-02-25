@@ -26,7 +26,7 @@ from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
-from flwr.common import Context, log, now
+from flwr.common import Context, Error, Message, Metadata, RecordSet, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -35,6 +35,7 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.record import ConfigsRecord
+from flwr.common.serde import error_to_proto, recordset_to_proto
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
@@ -43,7 +44,7 @@ from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 
 # pylint: enable=E0611
-from flwr.server.utils.validator import validate_task_ins_or_res
+from flwr.server.utils import validate_message, validate_task_ins_or_res
 
 from .linkstate import LinkState
 from .utils import (
@@ -134,6 +135,31 @@ CREATE TABLE IF NOT EXISTS task_ins(
 );
 """
 
+SQL_CREATE_TABLE_MESSAGE_INS = """
+CREATE TABLE IF NOT EXISTS message_ins(
+    message_id              TEXT UNIQUE,
+    group_id                TEXT,
+    run_id                  INTEGER,
+    src_node_id             INTEGER,
+    dst_node_id             INTEGER,
+    created_at              REAL,
+    ttl                     REAL,
+    reply_to_message        TEXT,
+    message_type            TEXT,
+    content                 BLOB NULL,
+    error                   BLOB NULL,
+    FOREIGN KEY(run_id) REFERENCES run(run_id)
+);
+"""
+
+# TODO: do we need this extra mapping for this linkstate?
+# SQL_CREATE_TABLE_DST_NODE_ID_TO_MESSAGE_ID = """
+# CREATE TABLE IF NOT EXISTS dst_node_id_to_message_id_mapping(
+#     dst_node_id             INTEGER UNIQE,
+#     message_ids             BLOB
+# );
+# """
+
 SQL_CREATE_TABLE_TASK_RES = """
 CREATE TABLE IF NOT EXISTS task_res(
     task_id                 TEXT UNIQUE,
@@ -211,6 +237,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_LOGS)
         cur.execute(SQL_CREATE_TABLE_CONTEXT)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
+        cur.execute(SQL_CREATE_TABLE_MESSAGE_INS)
+        # TODO: do we need this extra mapping for this linkstate?
+        # cur.execute(SQL_CREATE_TABLE_DST_NODE_ID_TO_MESSAGE_ID)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_IN_PROCESSING_MESSAGES)
         cur.execute(SQL_CREATE_TABLE_NODE)
@@ -317,6 +346,71 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return task_id
 
+    def store_message_ins(self, message: Message) -> Optional[UUID]:
+        """Store one Message from ServerAppIo."""
+        # Validate message
+        errors = validate_message(message=message, is_reply_message=False)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+        # Create message_id
+        message_id = uuid4()
+
+        # Store Message
+        message.metadata._message_id = str(message_id)  # type: ignore
+        data = (message_to_dict(message),)
+
+        # Convert values from uint64 to sint64 for SQLite
+        convert_uint64_values_in_dict_to_sint64(
+            data[0], ["run_id", "src_node_id", "dst_node_id"]
+        )
+
+        # Validate run_id
+        query = "SELECT run_id FROM run WHERE run_id = ?;"
+        if not self.query(query, (data[0]["run_id"],)):
+            log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
+            return None
+
+        # Validate destination node ID
+        query = "SELECT node_id FROM node WHERE node_id = ?;"
+        if not self.query(query, (data[0]["dst_node_id"],)):
+            log(
+                ERROR,
+                "Invalid destination node ID for Message: %s",
+                message.metadata.dst_node_id,
+            )
+            return None
+
+        columns = ", ".join([f":{key}" for key in data[0]])
+        query = f"INSERT INTO message_ins VALUES({columns});"
+
+        # Only invalid run_id can trigger IntegrityError.
+        # This may need to be changed in the future version with more integrity checks.
+        self.query(query, data)
+
+        # TODO: do we need this extra mapping for this linkstate?
+        # Now that the message is stored in the DB, let's update the message_id to dst_node_id mapping
+        # dst_node_id = convert_uint64_to_sint64(message.metadata.dst_node_id)
+        # query = "SELECT * FROM dst_node_id_to_message_id_mapping WHERE dst_node_id = ?;"
+        # rows = self.query(query, (dst_node_id,))
+        # if len(rows) > 1:
+        #     log(ERROR,
+        #         "Inconsistent `dst_node_id_to_message_id_mapping`")
+        #     return None
+
+        # columns = ":dst_node_id, :message_ids"
+        # if not rows:
+        #     # There is no entry in dst_node_id_to_message_id_mapping
+        #     query = f"INSERT INTO dst_node_id_to_message_id_mapping VALUES({columns});"
+        #     self.query(query, data=({'dst_node_id': dst_node_id, "message_ids": pickle.dumps([message_id])},))
+        # else:
+        #     # There is already a mapping: append
+        #     message_ids = pickle.loads(rows[0][message_ids]).append(message_id)
+        #     query = "UPDATE dst_node_id_to_message_id_mapping SET message_ids = '%s' WHERE dst_node_id = '%s';"
+        #     self.query(query, data=({"message_ids": pickle.dumps([message_id]), 'dst_node_id': dst_node_id},))
+
+        return message_id
+
     def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
         """Get undelivered TaskIns for one node.
 
@@ -394,6 +488,57 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result = [dict_to_task_ins(row) for row in rows]
 
         return result
+
+    def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
+        """Get all Messages that have not been delivered yet."""
+        if limit is not None and limit < 1:
+            raise AssertionError("`limit` must be >= 1")
+
+        if node_id == SUPERLINK_NODE_ID:
+            msg = f"`node_id` must be != {SUPERLINK_NODE_ID}"
+            raise AssertionError(msg)
+
+        data: dict[str, Union[str, int]] = {}
+
+        # Convert the uint64 value to sint64 for SQLite
+        data["node_id"] = convert_uint64_to_sint64(node_id)
+
+        # Retrieve all Messages for node_id
+        query = """
+            SELECT *
+            FROM message_ins
+            WHERE   dst_node_id == :node_id
+            AND   (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
+        """
+
+        if limit is not None:
+            query += " LIMIT :limit"
+            data["limit"] = limit
+
+        query += ";"
+
+        rows = self.query(query, data)
+
+        for row in rows:
+            # Convert values from sint64 to uint64
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "src_node_id", "dst_node_id"]
+            )
+
+        # Messages to return
+        messages = [message_from_dict(row) for row in rows]
+
+        # Delete Messages for DB
+        placeholders = ",".join(["?"] * len(messages))
+        query = f"""
+            DELETE
+            FROM message_ins
+            WHERE   message_id IN ({placeholders});
+        """
+        data = tuple(message.metadata.message_id for message in messages)
+        self.query(query, data)
+
+        return messages
 
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes.
@@ -1090,6 +1235,41 @@ def task_res_to_dict(task_msg: TaskRes) -> dict[str, Any]:
         "recordset": task_msg.task.recordset.SerializeToString(),
     }
     return result
+
+
+def message_to_dict(message: Message) -> dict[str, Any]:
+    """Transform Message to dict."""
+    result = {
+        "message_id": message.metadata.message_id,
+        "group_id": message.metadata.group_id,
+        "run_id": message.metadata.run_id,
+        "src_node_id": message.metadata.src_node_id,
+        "dst_node_id": message.metadata.dst_node_id,
+        "reply_to_message": message.metadata.reply_to_message,
+        "created_at": message.metadata.created_at,
+        "ttl": message.metadata.ttl,
+        "message_type": message.metadata.message_type,
+        "content": None,
+        "error": None,
+    }
+
+    if message.has_content():
+        result["content"] = recordset_to_proto(message.content).SerializeToString()
+    else:
+        result["error"] = error_to_proto(message.error).SerializeToString()
+
+    return result
+
+
+def message_from_dict(message_dict: dict[str, Any]) -> Message:
+    """Transform dict to Message."""
+    content: Optional[RecordSet] = message_dict.pop("content", None)
+    error: Optional[Error] = message_dict.pop("error", None)
+    created_at = message_dict.pop("created_at")
+    metadata = Metadata(**message_dict)
+    metadata._created_at = created_at  # type: ignore
+
+    return Message(metadata=metadata, content=content, error=error)
 
 
 def dict_to_task_ins(task_dict: dict[str, Any]) -> TaskIns:

@@ -149,7 +149,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         message_id = uuid4()
 
         # Store Message
-        message.metadata.message_id = str(message_id)
+        message.metadata._message_id = str(message_id)  # type: ignore
         with self.lock:
             self.message_ins_store[message_id] = message
 
@@ -196,6 +196,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
+        if node_id == SUPERLINK_NODE_ID:
+            msg = f"`node_id` must be != {SUPERLINK_NODE_ID}"
+            raise AssertionError(msg)
+
         # Find Messages for node_id
         message_list: list[Message] = []
         with self.lock:
@@ -212,9 +216,19 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     self.message_ins_store.pop(msg_id) for msg_id in message_ids
                 ]
 
+                # Remove message_ids from mapping
+                self.dst_node_id_to_message_id_mapping[node_id] = all_message_ids[
+                    limit:
+                ]
+                if len(self.dst_node_id_to_message_id_mapping[node_id]) == 0:
+                    # Remove node entry if no message_ids left
+                    del self.dst_node_id_to_message_id_mapping[node_id]
+
                 # Record metadata of extracted messages
                 for msg in message_list:
-                    self.in_processing_messages[msg.metadata.message_id] = msg.metadata
+                    self.in_processing_messages[UUID(msg.metadata.message_id)] = (
+                        msg.metadata
+                    )
 
         # Return Messages
         return message_list
