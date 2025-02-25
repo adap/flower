@@ -28,6 +28,7 @@ from flwr.common import Context, Message, MessageType
 from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
 
 from .typing import ClientAppCallable
+from flwr.client.mod import message_size_mod
 
 
 def _alert_erroneous_client_fn() -> None:
@@ -166,12 +167,24 @@ class ClientApp:
 
         Examples
         --------
+        Registering a train function:
+
         >>> app = ClientApp()
         >>>
         >>> @app.train()
         >>> def train(message: Message, context: Context) -> Message:
         >>>    print("ClientApp training running")
         >>>    # Create and return an echo reply message
+        >>>    return message.create_reply(content=message.content())
+
+        Registering a train function with a handler-specific modifier:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>> app = ClientApp()
+        >>>
+        >>> @app.train(mods=[message_size_mod])
+        >>> def train(message: Message, context: Context) -> Message:
+        >>>    print("ClientApp training running with message size modification")
         >>>    return message.create_reply(content=message.content())
         """
 
@@ -198,9 +211,22 @@ class ClientApp:
 
         Examples
         --------
+        Registering an evaluate function:
+
         >>> app = ClientApp()
         >>>
         >>> @app.evaluate()
+        >>> def evaluate(message: Message, context: Context) -> Message:
+        >>>    print("ClientApp evaluation running")
+        >>>    # Create and return an echo reply message
+        >>>    return message.create_reply(content=message.content())
+
+        Registering an evaluate function with a handler-specific modifier:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>> app = ClientApp()
+        >>>
+        >>> @app.evaluate(mods=[message_size_mod])
         >>> def evaluate(message: Message, context: Context) -> Message:
         >>>    print("ClientApp evaluation running")
         >>>    # Create and return an echo reply message
@@ -230,9 +256,22 @@ class ClientApp:
 
         Examples
         --------
+        Registering a query function:
+
         >>> app = ClientApp()
         >>>
         >>> @app.query()
+        >>> def query(message: Message, context: Context) -> Message:
+        >>>    print("ClientApp query running")
+        >>>    # Create and return an echo reply message
+        >>>    return message.create_reply(content=message.content())
+
+        Registering a query function with a handler-specific modifier:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>> app = ClientApp()
+        >>>
+        >>> @app.query(mods=[message_size_mod])
         >>> def query(message: Message, context: Context) -> Message:
         >>>    print("ClientApp query running")
         >>>    # Create and return an echo reply message
