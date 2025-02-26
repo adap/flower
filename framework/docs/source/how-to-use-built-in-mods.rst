@@ -7,7 +7,7 @@ Use Built-in Mods
 
 .. note::
 
-    This tutorial covers experimental features. The functionality and interfaces may
+    This tutorial covers preview features. The functionality and interfaces may
     change in future versions.
 
 In this tutorial, we will learn how to utilize built-in mods to augment the behavior of
