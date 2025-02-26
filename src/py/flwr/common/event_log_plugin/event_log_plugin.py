@@ -16,7 +16,7 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Optional, Union
+from typing import Union
 
 import grpc
 
@@ -63,8 +63,8 @@ class EventLogWriterPlugin(ABC):
         self,
         request: EventLogRequest,
         context: grpc.ServicerContext,
-        user_info: Optional[UserInfo] = None,
-        method_name: Optional[str] = None,
+        user_info: UserInfo,
+        method_name: str,
     ) -> LogEntry:
         """Compose pre-event log entry from the provided request and context."""
 
@@ -74,8 +74,8 @@ class EventLogWriterPlugin(ABC):
         request: EventLogRequest,
         context: grpc.ServicerContext,
         response: EventLogResponse,
-        user_info: Optional[UserInfo] = None,
-        method_name: Optional[str] = None,
+        user_info: UserInfo,
+        method_name: str,
     ) -> LogEntry:
         """Compose post-event log entry from the provided response and context."""
 
