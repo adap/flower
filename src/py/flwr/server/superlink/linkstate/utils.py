@@ -397,3 +397,72 @@ def verify_found_taskres(
             taskres.task.delivered_at = now().isoformat()
         ret_dict[taskins_id] = taskres
     return ret_dict
+
+
+def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
+    """Generate a TaskRes with a node unavailable error from a TaskIns."""
+    current_time = now().timestamp()
+    ttl = ref_taskins.task.ttl - (current_time - ref_taskins.task.created_at)
+    if ttl < 0:
+        log(ERROR, "Creating TaskRes for TaskIns that exceeds its TTL.")
+        ttl = 0
+    return TaskRes(
+        task_id=str(uuid4()),
+        group_id=ref_taskins.group_id,
+        run_id=ref_taskins.run_id,
+        task=Task(
+            producer=Node(node_id=ref_taskins.task.consumer.node_id, anonymous=False),
+            consumer=Node(node_id=ref_taskins.task.producer.node_id, anonymous=False),
+            created_at=current_time,
+            ttl=ttl,
+            ancestry=[ref_taskins.task_id],
+            task_type=ref_taskins.task.task_type,
+            error=Error(
+                code=ErrorCode.NODE_UNAVAILABLE, reason=NODE_UNAVAILABLE_ERROR_REASON
+            ),
+        ),
+    )
+
+
+def check_node_availability_for_taskins(
+    inquired_taskins_ids: set[UUID],
+    found_taskins_dict: dict[UUID, TaskIns],
+    node_id_to_online_until: dict[int, float],
+    current_time: Optional[float] = None,
+    update_set: bool = True,
+) -> dict[UUID, TaskRes]:
+    """Check node availability for TaskIns and generate error TaskRes if unavailable.
+
+    Parameters
+    ----------
+    inquired_taskins_ids : set[UUID]
+        Set of TaskIns IDs for which to check destination node availability.
+    found_taskins_dict : dict[UUID, TaskIns]
+        Dictionary containing all found TaskIns indexed by their IDs.
+    node_id_to_online_until : dict[int, float]
+        Dictionary mapping node IDs to their online-until timestamps.
+    current_time : Optional[float] (default: None)
+        The current time to check for expiration. If set to `None`, the current time
+        will automatically be set to the current timestamp using `now().timestamp()`.
+    update_set : bool (default: True)
+        If True, the `inquired_taskins_ids` will be updated to remove invalid ones,
+        by default True.
+
+    Returns
+    -------
+    dict[UUID, TaskRes]
+        A dictionary of error TaskRes indexed by the corresponding TaskIns ID.
+    """
+    ret_dict = {}
+    current = current_time if current_time else now().timestamp()
+    for taskins_id in list(inquired_taskins_ids):
+        task_ins = found_taskins_dict[taskins_id]
+        node_id = task_ins.task.consumer.node_id
+        online_until = node_id_to_online_until[node_id]
+        # Generate a TaskRes containing an error reply if the node is offline.
+        if online_until < current:
+            if update_set:
+                inquired_taskins_ids.remove(taskins_id)
+            task_res = make_node_unavailable_taskres(task_ins)
+            ret_dict[taskins_id] = task_res
+    return ret_dict

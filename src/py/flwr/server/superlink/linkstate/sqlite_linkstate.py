@@ -47,6 +47,7 @@ from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .linkstate import LinkState
 from .utils import (
+    check_node_availability_for_taskins,
     configsrecord_from_bytes,
     configsrecord_to_bytes,
     context_from_bytes,
@@ -510,6 +511,29 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         )
         ret.update(tmp_ret_dict)
 
+        # Check node availability
+        dst_node_ids: set[int] = set()
+        for task_ins_id in task_ids:
+            task_ins = found_task_ins_dict[task_ins_id]
+            sint_node_id = convert_uint64_to_sint64(task_ins.task.consumer.node_id)
+            dst_node_ids.add(sint_node_id)
+        query = f"""
+                    SELECT node_id, online_until
+                    FROM node
+                    WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))});
+                """
+        rows = self.query(query, tuple(dst_node_ids))
+        tmp_ret_dict = check_node_availability_for_taskins(
+            inquired_taskins_ids=task_ids,
+            found_taskins_dict=found_task_ins_dict,
+            node_id_to_online_until={
+                convert_sint64_to_uint64(row["node_id"]): row["online_until"]
+                for row in rows
+            },
+            current_time=current,
+        )
+        ret.update(tmp_ret_dict)
+
         # Mark existing TaskRes to be returned as delivered
         delivered_at = now().isoformat()
         for task_res in ret.values():
@@ -932,7 +956,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Update `online_until` and `ping_interval` for the given `node_id`
         query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?"
-        self.query(query, (time.time() + ping_interval, ping_interval, sint64_node_id))
+        self.query(query, (time.time() + 2 * ping_interval, ping_interval, sint64_node_id))
         return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:

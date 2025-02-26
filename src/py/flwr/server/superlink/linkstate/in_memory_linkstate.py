@@ -38,6 +38,7 @@ from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_task_ins_or_res
 
 from .utils import (
+    check_node_availability_for_taskins,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
@@ -241,6 +242,21 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 inquired_taskins_ids=task_ids,
                 found_taskins_dict=self.task_ins_store,
                 found_taskres_list=task_res_found,
+                current_time=current,
+            )
+            ret.update(tmp_ret_dict)
+
+            # Check node availability
+            dst_node_ids = {
+                self.task_ins_store[task_id].task.consumer.node_id
+                for task_id in task_ids
+            }
+            tmp_ret_dict = check_node_availability_for_taskins(
+                inquired_taskins_ids=task_ids,
+                found_taskins_dict=self.task_ins_store,
+                node_id_to_online_until={
+                    node_id: self.node_ids[node_id][0] for node_id in dst_node_ids
+                },
                 current_time=current,
             )
             ret.update(tmp_ret_dict)
@@ -508,7 +524,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         with self.lock:
             if node_id in self.node_ids:
-                self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+                self.node_ids[node_id] = (time.time() + 2 * ping_interval, ping_interval)
                 return True
         return False
 
