@@ -54,6 +54,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
+    EventLogWriterType,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit
@@ -288,7 +289,7 @@ def run_superlink() -> None:
     if cfg_path := getattr(args, "user_auth_config", None):
         auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path), verify_tls_cert)
         # Enable event logging if the args.enable_event_log is True
-        if args.enable_event_log:
+        if args.enable_event_log == EventLogWriterType.STDOUT:
             event_log_plugin = _try_obtain_exec_event_log_writer_plugin()
 
     # Initialize StateFactory
