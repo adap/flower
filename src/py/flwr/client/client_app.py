@@ -223,6 +223,7 @@ class ClientApp:
         Registering an evaluate function with a function-specific modifier:
 
         >>> from flwr.client.mod import message_size_mod
+        >>>
         >>> app = ClientApp()
         >>>
         >>> @app.evaluate(mods=[message_size_mod])
