@@ -7,8 +7,8 @@ Use Built-in Mods
 
 .. note::
 
-    This tutorial covers preview features. The functionality and interfaces may
-    change in future versions.
+    This tutorial covers preview features. The functionality and interfaces may change
+    in future versions.
 
 In this tutorial, we will learn how to utilize built-in mods to augment the behavior of
 a ``ClientApp``. Mods (sometimes also called Modifiers) allow us to perform operations
@@ -145,7 +145,12 @@ Assuming the following registration:
     def train(msg, ctx):
         return msg.create_reply(fl.common.RecordSet())
 
-The execution order would be:
+
+    @app.evaluate()
+    def evaluate(msg, ctx):
+        return msg.create_reply(fl.common.RecordSet())
+
+The execution order for an incoming **train** message is as follows:
 
 1. ``example_mod_1`` (before handling)
 2. ``example_mod_2`` (before handling)
@@ -156,6 +161,14 @@ The execution order would be:
 7. ``example_mod_3`` (after handling)
 8. ``example_mod_2`` (after handling)
 9. ``example_mod_1`` (after handling)
+
+The execution order for an incoming **evaluate** message is as follows:
+
+1. ``example_mod_1`` (before handling)
+2. ``example_mod_2`` (before handling)
+3. ``evaluate`` (handling message)
+4. ``example_mod_2`` (after handling)
+5. ``example_mod_1`` (after handling)
 
 Conclusion
 ----------
