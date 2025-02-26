@@ -270,6 +270,7 @@ class ClientApp:
         Registering a query function with a function-specific modifier:
 
         >>> from flwr.client.mod import message_size_mod
+        >>>
         >>> app = ClientApp()
         >>>
         >>> @app.query(mods=[message_size_mod])
