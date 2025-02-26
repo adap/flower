@@ -16,7 +16,7 @@
 
 
 import pickle
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
 from copy import deepcopy
 from typing import Callable, Union
 
@@ -421,13 +421,18 @@ def test_record_is_picklable() -> None:
 def test_recordset_repr() -> None:
     """Test the string representation of RecordSet."""
     # Prepare
-    kwargs = {
-        "parameters_records": {"params": ParametersRecord()},
-        "metrics_records": {"metrics": MetricsRecord({"aa": 123})},
-        "configs_records": {"configs": ConfigsRecord({"cc": bytes(9)})},
-    }
-    rs = RecordSet(**kwargs)  # type: ignore
-    expected = namedtuple("RecordSet", kwargs.keys())(**kwargs)
+    rs = RecordSet(
+        parameters_records={"params": ParametersRecord()},
+        metrics_records={"metrics": MetricsRecord({"aa": 123})},
+        configs_records={"configs": ConfigsRecord({"cc": bytes(5)})},
+    )
+    expected = """RecordSet(
+  parameters_records={'params': {}},
+  metrics_records={'metrics': {'aa': 123}},
+  configs_records={'configs': {'cc': b'\\x00\\x00\\x00\\x00\\x00'}}
+)"""
+    print(str(rs))
+    print(expected)
 
     # Assert
-    assert str(rs) == str(expected)
+    assert str(rs) == expected
