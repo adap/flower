@@ -45,15 +45,16 @@ A typical mod function might look something like this:
 Using Mods
 ----------
 
-Mods can be registered in two ways: **Global mods** and **Handler-specific mods**.
+Mods can be registered in two ways: **Application-wide mods** and **Function-specific mods**.
 
-1. **Global mods**: These mods apply to all message handlers within the ``ClientApp``.
-2. **Handler-specific mods**: These mods apply only to a specific message handler.
+1. **Application-wide mods**: These mods apply to all functions within the ``ClientApp``.
+2. **Function-specific mods**: These mods apply only to a specific `message-handling function`
+— a function that processes incoming messages in the ``ClientApp`` (e.g., a function decorated by ``@app.train()``).
 
-1. Registering Global Mods
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. Registering Application-wide Mods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To use global mods in your ``ClientApp``, follow these steps:
+To use application-wide mods in your ``ClientApp``, follow these steps:
 
 Import the required mods
 ++++++++++++++++++++++++
@@ -63,8 +64,8 @@ Import the required mods
     import flwr as fl
     from flwr.client.mod import example_mod_1, example_mod_2
 
-Create the ``ClientApp`` with global mods
-+++++++++++++++++++++++++++++++++++++++++
+Create the ``ClientApp`` with application-wide mods
++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Create your ``ClientApp`` and pass the mods as a list to the ``mods`` argument. The
 order in which you provide the mods matters:
@@ -74,18 +75,18 @@ order in which you provide the mods matters:
     app = fl.client.ClientApp(
         client_fn=client_fn,  # Not needed if using decorators
         mods=[
-            example_mod_1,  # Global Mod 1
-            example_mod_2,  # Global Mod 2
+            example_mod_1,  # Application-wide Mod 1
+            example_mod_2,  # Application-wide Mod 2
         ],
     )
 
-If you define message handlers using decorators instead of ``client_fn``, e.g.,
+If you define message-handling functions using decorators instead of ``client_fn``, e.g.,
 ``@app.train()``, you do not need to pass the ``client_fn`` argument.
 
-2. Registering Handler-specific Mods
+2. Registering Function-specific Mods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Instead of applying mods globally, you can specify them for a particular handler:
+Instead of applying mods to the entire ``ClientApp``, you can specify them for a particular function:
 
 .. code-block:: python
 
@@ -94,32 +95,31 @@ Instead of applying mods globally, you can specify them for a particular handler
 
     app = fl.client.ClientApp()
 
-
     @app.train(mods=[example_mod_3, example_mod_4])
     def train(msg, ctx):
         # Training logic here
         return reply_msg
- 
+
     @app.evaluate()
-    def evalutate(msg, ctx):
-        # Evaluate logic here
+    def evaluate(msg, ctx):
+        # Evaluation logic here
         return reply_msg
 
 In this case, ``example_mod_3`` and ``example_mod_4`` are only applied to the ``train``
-handler.
+function.
 
 Order of execution
 ------------------
 
 When the ``ClientApp`` runs, the mods execute in the following order:
 
-1. **Global mods** (executed first, in the order they are provided)
-2. **Handler-specific mods** (executed after global mods, in the order they are
+1. **Application-wide mods** (executed first, in the order they are provided)
+2. **Function-specific mods** (executed after application-wide mods, in the order they are
    provided)
-3. **Message handler** (core function that handles the incoming ``Message`` and returns
+3. **Message-handling function** (core function that handles the incoming ``Message`` and returns
    the outgoing ``Message``)
-4. **Handler-specific mods** (on the way back, in reverse order)
-5. **Global mods** (on the way back, in reverse order)
+4. **Function-specific mods** (on the way back, in reverse order)
+5. **Application-wide mods** (on the way back, in reverse order)
 
 Each mod has a chance to inspect and modify the incoming ``Message`` before passing it
 to the next mod, and likewise with the outgoing ``Message`` before returning it up the
@@ -132,24 +132,24 @@ Assuming the following registration:
 
 .. code-block:: python
 
-    app = fl.client.ClientApp(mods=[global_mod_1, global_mod_2])
+    app = fl.client.ClientApp(mods=[example_mod_1, example_mod_2])
 
 
-    @app.train(mods=[handler_mod_1, handler_mod_2])
+    @app.train(mods=[example_mod_3, example_mod_4])
     def train(msg, ctx):
         return msg.create_reply(fl.common.RecordSet())
 
 The execution order would be:
 
-1. ``global_mod_1`` (before handling)
-2. ``global_mod_2`` (before handling)
-3. ``handler_mod_1`` (before handling)
-4. ``handler_mod_2`` (before handling)
-5. ``train`` (message handler execution)
-6. ``handler_mod_2`` (after handling)
-7. ``handler_mod_1`` (after handling)
-8. ``global_mod_2`` (after handling)
-9. ``global_mod_1`` (after handling)
+1. ``example_mod_1`` (before handling)
+2. ``example_mod_2`` (before handling)
+3. ``example_mod_3`` (before handling)
+4. ``example_mod_4`` (before handling)
+5. ``train`` (handling message)
+6. ``example_mod_4`` (after handling)
+7. ``example_mod_3`` (after handling)
+8. ``example_mod_2`` (after handling)
+9. ``example_mod_1`` (after handling)
 
 Conclusion
 ----------
