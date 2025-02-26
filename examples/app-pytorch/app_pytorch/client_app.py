@@ -1,89 +1,75 @@
 """app-pytorch: A Flower / PyTorch app."""
 
 import torch
-
-from flwr.client import ClientApp
-from flwr.common import Context
 from app_pytorch.task import Net, load_data
-from app_pytorch.task import train as train_fn
 from app_pytorch.task import test as test_fn
+from app_pytorch.task import train as train_fn
 
-
-from flwr.client import ClientApp
-from flwr.common import Context, Message, MetricsRecord, RecordSet
-from app_pytorch.task import (
-    Net,
-    pytorch_to_parameter_record,
-    parameters_to_pytorch_state_dict,
-)
-
+import flwr as fl
 
 # Flower ClientApp
-app = ClientApp()
+app = fl.ClientApp()
+
+# Instantiate model
+model = Net()
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 @app.evaluate()
-def evaluate(msg: Message, context: Context):
+def evaluate(msg: fl.Message, context: fl.Context):
 
     # Prepare
-    model, device, data_loader = setup_client(msg, context, is_train=False)
+    model.load_state_dict(msg.content["model"].to_state_dict())
+    model.to(device)
+    data_loader = get_dataloader("test", context)
 
     # Local evaluation
-    _, eval_acc = test_fn(
-        model,
-        data_loader,
-        device,
-    )
+    eval_loss, eval_acc = test_fn(model, data_loader, device)
 
     # Construct reply
-    metrics_record = MetricsRecord({"eval_acc": eval_acc})
-    content = RecordSet(
-        metrics_records={"eval_metrics": metrics_record},
+    content = fl.RecordSet()
+    content["eval_metrics"] = fl.MetricsRecord(
+        {"eval_loss": eval_loss, "eval_acc": eval_acc}
     )
     return msg.create_reply(content=content)
 
 
 @app.train()
-def train(msg: Message, context: Context):
+def train(msg: fl.Message, context: fl.Context):
 
     # Prepare
-    model, device, data_loader = setup_client(msg, context, is_train=True)
+    model.load_state_dict(msg.content["model"].to_state_dict())
+    model.to(device)
+    data_loader = get_dataloader("train", context)
 
     # Local training
     local_epochs = context.run_config["local-epochs"]
-    train_loss = train_fn(
-        model,
-        data_loader,
-        local_epochs,
-        device,
-    )
+    train_loss = train_fn(model, data_loader, local_epochs, device)
 
     # Extract state_dict from model and construct reply message
-    model_record = pytorch_to_parameter_record(model)
-    metrics_record = MetricsRecord({"train_loss": train_loss})
-    content = RecordSet(
-        parameters_records={"model": model_record},
-        metrics_records={"train_metrics": metrics_record},
+    content = fl.RecordSet()
+    content["model"] = fl.ParametersRecord(model.state_dict())
+    content["train_metrics"] = fl.MetricsRecord(
+        {"train_loss": train_loss, "num_examples": len(data_loader.dataset)}
     )
     return msg.create_reply(content=content)
 
 
-def setup_client(msg: Message, context: Context, is_train: bool):
+@app.handle("my_random_task")
+def some_random_task(msg: fl.Message, context: fl.Context):
+    # Do something
+    pass
 
-    # Instantiate model
-    model = Net()
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    # Apply global model weights from message
-    state_dict = parameters_to_pytorch_state_dict(
-        msg.content.parameters_records["model"]
-    )
-    model.load_state_dict(state_dict)
-    model.to(device)
-
+def get_dataloader(split: str, context: fl.Context):
+    """Return train or test dataloader."""
     # Load partition
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    trainloader, valloader = load_data(partition_id, num_partitions)
+    trainloader, testloader = load_data(partition_id, num_partitions)
 
-    return model, device, trainloader if is_train else valloader
+    if split == "train":
+        return trainloader
+    if split == "test":
+        return testloader
+    raise ValueError(f"Invalid split: {split}")
