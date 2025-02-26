@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from logging import WARN
 from textwrap import indent
-from typing import TypeVar, cast
+from typing import TypeVar, Union, cast
 
 from ..logger import log
 from .configsrecord import ConfigsRecord
@@ -27,7 +27,7 @@ from .metricsrecord import MetricsRecord
 from .parametersrecord import ParametersRecord
 from .typeddict import TypedDict
 
-RecordType = ParametersRecord | MetricsRecord | ConfigsRecord
+RecordType = Union[ParametersRecord, MetricsRecord, ConfigsRecord]
 
 T = TypeVar("T")
 
