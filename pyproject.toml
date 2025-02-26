@@ -65,12 +65,12 @@ flwr-clientapp = "flwr.client.clientapp:flwr_clientapp"
 flower-client-app = "flwr.client.supernode:run_client_app" # Deprecated
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.9.2"
 # Mandatory dependencies
 numpy = ">=1.26.0,<3.0.0"
 grpcio = "^1.62.3,!=1.65.0"
 protobuf = "^4.21.6"
-cryptography = "^43.0.1"
+cryptography = "^44.0.1"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
 typer = "^0.12.5"
