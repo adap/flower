@@ -179,6 +179,7 @@ class ClientApp:
         Registering a train function with a function-specific modifier:
 
         >>> from flwr.client.mod import message_size_mod
+        >>>
         >>> app = ClientApp()
         >>>
         >>> @app.train(mods=[message_size_mod])
