@@ -15,8 +15,6 @@
 """Conversion utility functions for Records."""
 
 
-from logging import WARN
-
 from ..logger import warn_deprecated_feature
 from ..typing import NDArray
 from .parametersrecord import Array
