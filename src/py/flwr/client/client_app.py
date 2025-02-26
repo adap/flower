@@ -159,17 +159,32 @@ class ClientApp:
         # Message type did not match one of the known message types abvoe
         raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
 
-    def train(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
+    def train(
+        self, mods: Optional[list[Mod]] = None
+    ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Return a decorator that registers the train fn with the client app.
 
         Examples
         --------
+        Registering a train function:
+
         >>> app = ClientApp()
         >>>
         >>> @app.train()
         >>> def train(message: Message, context: Context) -> Message:
         >>>    print("ClientApp training running")
         >>>    # Create and return an echo reply message
+        >>>    return message.create_reply(content=message.content())
+
+        Registering a train function with a function-specific modifier:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>>
+        >>> app = ClientApp()
+        >>>
+        >>> @app.train(mods=[message_size_mod])
+        >>> def train(message: Message, context: Context) -> Message:
+        >>>    print("ClientApp training running with message size mod")
         >>>    return message.create_reply(content=message.content())
         """
 
@@ -182,23 +197,39 @@ class ClientApp:
 
             # Register provided function with the ClientApp object
             # Wrap mods around the wrapped step function
-            self._train = make_ffn(train_fn, self._mods)
+            self._train = make_ffn(train_fn, self._mods + (mods or []))
 
             # Return provided function unmodified
             return train_fn
 
         return train_decorator
 
-    def evaluate(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
+    def evaluate(
+        self, mods: Optional[list[Mod]] = None
+    ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Return a decorator that registers the evaluate fn with the client app.
 
         Examples
         --------
+        Registering an evaluate function:
+
         >>> app = ClientApp()
         >>>
         >>> @app.evaluate()
         >>> def evaluate(message: Message, context: Context) -> Message:
         >>>    print("ClientApp evaluation running")
+        >>>    # Create and return an echo reply message
+        >>>    return message.create_reply(content=message.content())
+
+        Registering an evaluate function with a function-specific modifier:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>>
+        >>> app = ClientApp()
+        >>>
+        >>> @app.evaluate(mods=[message_size_mod])
+        >>> def evaluate(message: Message, context: Context) -> Message:
+        >>>    print("ClientApp evaluation running with message size mod")
         >>>    # Create and return an echo reply message
         >>>    return message.create_reply(content=message.content())
         """
@@ -212,23 +243,39 @@ class ClientApp:
 
             # Register provided function with the ClientApp object
             # Wrap mods around the wrapped step function
-            self._evaluate = make_ffn(evaluate_fn, self._mods)
+            self._evaluate = make_ffn(evaluate_fn, self._mods + (mods or []))
 
             # Return provided function unmodified
             return evaluate_fn
 
         return evaluate_decorator
 
-    def query(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
+    def query(
+        self, mods: Optional[list[Mod]] = None
+    ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Return a decorator that registers the query fn with the client app.
 
         Examples
         --------
+        Registering a query function:
+
         >>> app = ClientApp()
         >>>
         >>> @app.query()
         >>> def query(message: Message, context: Context) -> Message:
         >>>    print("ClientApp query running")
+        >>>    # Create and return an echo reply message
+        >>>    return message.create_reply(content=message.content())
+
+        Registering a query function with a function-specific modifier:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>>
+        >>> app = ClientApp()
+        >>>
+        >>> @app.query(mods=[message_size_mod])
+        >>> def query(message: Message, context: Context) -> Message:
+        >>>    print("ClientApp query running with message size mod")
         >>>    # Create and return an echo reply message
         >>>    return message.create_reply(content=message.content())
         """
@@ -242,7 +289,7 @@ class ClientApp:
 
             # Register provided function with the ClientApp object
             # Wrap mods around the wrapped step function
-            self._query = make_ffn(query_fn, self._mods)
+            self._query = make_ffn(query_fn, self._mods + (mods or []))
 
             # Return provided function unmodified
             return query_fn
