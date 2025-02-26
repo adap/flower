@@ -16,6 +16,8 @@
 
 
 import inspect
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Callable, Optional
 
 from flwr.client.client import Client
@@ -69,6 +71,11 @@ def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFn
         return adaptor_fn
 
     return client_fn
+
+
+@contextmanager
+def _empty_lifecycle(_: Context) -> Iterator[None]:
+    yield
 
 
 class ClientAppException(Exception):
@@ -135,16 +142,11 @@ class ClientApp:
         self._train: Optional[ClientAppCallable] = None
         self._evaluate: Optional[ClientAppCallable] = None
         self._query: Optional[ClientAppCallable] = None
-        self._enter: Optional[Callable[[Context], None]] = None
-        self._exit: Optional[Callable[[Context], None]] = None
+        self._lifecycle = _empty_lifecycle
 
     def __call__(self, message: Message, context: Context) -> Message:
         """Execute `ClientApp`."""
-        try:
-            # Execute enter function
-            if self._enter:
-                self._enter(context)
-
+        with self._lifecycle(context):
             # Execute message using `client_fn`
             if self._call:
                 return self._call(message, context)
@@ -165,10 +167,6 @@ class ClientApp:
 
             # Message type did not match one of the known message types abvoe
             raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
-        finally:
-            # Execute exit function
-            if self._exit:
-                self._exit(context)
 
     def train(
         self, mods: Optional[list[Mod]] = None
@@ -307,57 +305,53 @@ class ClientApp:
 
         return query_decorator
 
-    def enter(self) -> Callable[[Callable[[Context], None]], Callable[[Context], None]]:
-        """Return a decorator that registers the enter fn with the client app.
+    def lifecycle(self):
+        """Return a decorator that registers the lifecycle fn with the client app.
+
+        The decorated function should accept a `Context` object and use `yield`
+        to define enter and exit behavior.
 
         Examples
         --------
         >>> app = ClientApp()
         >>>
-        >>> @app.enter()
-        >>> def enter(context: Context) -> None:
-        >>>    print("ClientApp enter running")
+        >>> @app.lifecycle()
+        >>> def lifecycle(context: Context) -> None:
+        >>>     print("Initializing ClientApp")
+        >>>     yield
+        >>>     print("Cleaning up ClientApp")
         """
 
-        def enter_decorator(
-            enter_fn: Callable[[Context], None]
-        ) -> Callable[[Context], None]:
-            """Register the enter fn with the ServerApp object."""
-            warn_preview_feature("ClientApp-register-enter-function")
+        def lifecycle_decorator(
+            lifecycle_fn: Callable[[Context], Iterator[None]]
+        ) -> Callable[[Context], Iterator[None]]:
+            """Register the lifecycle fn with the ServerApp object."""
+            warn_preview_feature("ClientApp-register-lifecycle-function")
+
+            @contextmanager
+            def decorated_lifecycle(context: Context) -> Iterator[None]:
+                it = lifecycle_fn(context)
+                try:
+                    # Execute the code before `yield` in lifecycle_fn
+                    next(it)
+                    # Enter the context
+                    yield
+                finally:
+                    try:
+                        # Execute the code after `yield` in lifecycle_fn
+                        next(it)
+                    except StopIteration:
+                        pass
+                    else:
+                        raise RuntimeError("Lifecycle function should only yield once.")
 
             # Register provided function with the ClientApp object
-            self._enter = enter_fn
+            self._lifecycle = decorated_lifecycle
 
             # Return provided function unmodified
-            return enter_fn
+            return lifecycle_fn
 
-        return enter_decorator
-
-    def exit(self) -> Callable[[Callable[[Context], None]], Callable[[Context], None]]:
-        """Return a decorator that registers the exit fn with the client app.
-
-        Examples
-        --------
-        >>> app = ClientApp()
-        >>>
-        >>> @app.exit()
-        >>> def exit(context: Context) -> None:
-        >>>    print("ClientApp exit running")
-        """
-
-        def exit_decorator(
-            exit_fn: Callable[[Context], None]
-        ) -> Callable[[Context], None]:
-            """Register the exit fn with the ServerApp object."""
-            warn_preview_feature("ClientApp-register-exit-function")
-
-            # Register provided function with the ClientApp object
-            self._exit = exit_fn
-
-            # Return provided function unmodified
-            return exit_fn
-
-        return exit_decorator
+        return lifecycle_decorator
 
 
 class LoadClientAppError(Exception):

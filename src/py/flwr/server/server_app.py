@@ -15,6 +15,8 @@
 """Flower ServerApp."""
 
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Callable, Optional
 
 from flwr.common import Context
@@ -43,6 +45,11 @@ SERVER_FN_USAGE_EXAMPLE = """
 
         app = ServerApp(server_fn=server_fn)
 """
+
+
+@contextmanager
+def _empty_lifecycle(_: Context) -> Iterator[None]:
+    yield
 
 
 class ServerApp:  # pylint: disable=too-many-instance-attributes
@@ -107,14 +114,11 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         self._main: Optional[ServerAppCallable] = None
         self._enter: Optional[ServerAppCallable] = None
         self._exit: Optional[ServerAppCallable] = None
+        self._lifecycle = _empty_lifecycle
 
     def __call__(self, driver: Driver, context: Context) -> None:
         """Execute `ServerApp`."""
-        try:
-            # Execute enter function
-            if self._enter:
-                self._enter(driver, context)
-
+        with self._lifecycle(context):
             # Compatibility mode
             if not self._main:
                 if self._server_fn:
@@ -135,10 +139,6 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
             # New execution mode
             self._main(driver, context)
-        finally:
-            # Execute exit function
-            if self._exit:
-                self._exit(driver, context)
 
     def main(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
         """Return a decorator that registers the main fn with the server app.
@@ -188,53 +188,53 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
         return main_decorator
 
-    def enter(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
-        """Return a decorator that registers the enter fn with the server app.
+    def lifecycle(self):
+        """Return a decorator that registers the lifecycle fn with the server app.
+
+        The decorated function should accept a `Context` object and use `yield`
+        to define enter and exit behavior.
 
         Examples
         --------
         >>> app = ServerApp()
         >>>
-        >>> @app.enter()
-        >>> def enter(driver: Driver, context: Context) -> None:
-        >>>    print("ServerApp enter running")
+        >>> @app.lifecycle()
+        >>> def lifecycle(context: Context) -> None:
+        >>>     print("Initializing ServerApp")
+        >>>     yield
+        >>>     print("Cleaning up ServerApp")
         """
 
-        def enter_decorator(enter_fn: ServerAppCallable) -> ServerAppCallable:
-            """Register the enter fn with the ServerApp object."""
-            warn_preview_feature("ServerApp-register-enter-function")
+        def lifecycle_decorator(
+            lifecycle_fn: Callable[[Context], Iterator[None]]
+        ) -> Callable[[Context], Iterator[None]]:
+            """Register the lifecycle fn with the ServerApp object."""
+            warn_preview_feature("ServerApp-register-lifecycle-function")
+
+            @contextmanager
+            def decorated_lifecycle(context: Context) -> Iterator[None]:
+                it = lifecycle_fn(context)
+                try:
+                    # Execute the code before `yield` in lifecycle_fn
+                    next(it)
+                    # Enter the context
+                    yield
+                finally:
+                    try:
+                        # Execute the code after `yield` in lifecycle_fn
+                        next(it)
+                    except StopIteration:
+                        pass
+                    else:
+                        raise RuntimeError("Lifecycle function should only yield once.")
 
             # Register provided function with the ServerApp object
-            self._enter = enter_fn
+            self._lifecycle = decorated_lifecycle
 
             # Return provided function unmodified
-            return enter_fn
+            return lifecycle_fn
 
-        return enter_decorator
-
-    def exit(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
-        """Return a decorator that registers the exit fn with the server app.
-
-        Examples
-        --------
-        >>> app = ServerApp()
-        >>>
-        >>> @app.exit()
-        >>> def exit(context: Context) -> None:
-        >>>    print("ServerApp exit running")
-        """
-
-        def exit_decorator(exit_fn: ServerAppCallable) -> ServerAppCallable:
-            """Register the exit fn with the ServerApp object."""
-            warn_preview_feature("ServerApp-register-exit-function")
-
-            # Register provided function with the ServerApp object
-            self._exit = exit_fn
-
-            # Return provided function unmodified
-            return exit_fn
-
-        return exit_decorator
+        return lifecycle_decorator
 
 
 class LoadServerAppError(Exception):
