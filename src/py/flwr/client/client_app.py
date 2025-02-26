@@ -176,7 +176,7 @@ class ClientApp:
         >>>    # Create and return an echo reply message
         >>>    return message.create_reply(content=message.content())
 
-        Registering a train function with a handler-specific modifier:
+        Registering a train function with a function-specific modifier:
 
         >>> from flwr.client.mod import message_size_mod
         >>> app = ClientApp()
@@ -220,7 +220,7 @@ class ClientApp:
         >>>    # Create and return an echo reply message
         >>>    return message.create_reply(content=message.content())
 
-        Registering an evaluate function with a handler-specific modifier:
+        Registering an evaluate function with a function-specific modifier:
 
         >>> from flwr.client.mod import message_size_mod
         >>> app = ClientApp()
@@ -265,7 +265,7 @@ class ClientApp:
         >>>    # Create and return an echo reply message
         >>>    return message.create_reply(content=message.content())
 
-        Registering a query function with a handler-specific modifier:
+        Registering a query function with a function-specific modifier:
 
         >>> from flwr.client.mod import message_size_mod
         >>> app = ClientApp()
