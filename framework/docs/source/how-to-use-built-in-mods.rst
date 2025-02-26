@@ -32,7 +32,8 @@ A typical mod function might look something like this:
 
     from flwr.client.typing import ClientAppCallable
     from flwr.common import Context, Message
-    
+
+
     def example_mod(msg: Message, ctx: Context, call_next: ClientAppCallable) -> Message:
         # Do something with incoming Message (or Context)
         # before passing it to the next layer in the chain.
@@ -45,11 +46,13 @@ A typical mod function might look something like this:
 Using Mods
 ----------
 
-Mods can be registered in two ways: **Application-wide mods** and **Function-specific mods**.
+Mods can be registered in two ways: **Application-wide mods** and **Function-specific
+mods**.
 
-1. **Application-wide mods**: These mods apply to all functions within the ``ClientApp``.
-2. **Function-specific mods**: These mods apply only to a specific `message-handling function`
-— a function that processes incoming messages in the ``ClientApp`` (e.g., a function decorated by ``@app.train()``).
+1. **Application-wide mods**: These mods apply to all functions within the
+   ``ClientApp``.
+2. **Function-specific mods**: These mods apply only to a specific function (e.g, the
+   function decorated by ``@app.train()``)
 
 1. Registering Application-wide Mods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,13 +83,14 @@ order in which you provide the mods matters:
         ],
     )
 
-If you define message-handling functions using decorators instead of ``client_fn``, e.g.,
-``@app.train()``, you do not need to pass the ``client_fn`` argument.
+If you define functions to handle messages using decorators instead of ``client_fn``,
+e.g., ``@app.train()``, you do not need to pass the ``client_fn`` argument.
 
 2. Registering Function-specific Mods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Instead of applying mods to the entire ``ClientApp``, you can specify them for a particular function:
+Instead of applying mods to the entire ``ClientApp``, you can specify them for a
+particular function:
 
 .. code-block:: python
 
@@ -95,10 +99,12 @@ Instead of applying mods to the entire ``ClientApp``, you can specify them for a
 
     app = fl.client.ClientApp()
 
+
     @app.train(mods=[example_mod_3, example_mod_4])
     def train(msg, ctx):
         # Training logic here
         return reply_msg
+
 
     @app.evaluate()
     def evaluate(msg, ctx):
@@ -108,16 +114,16 @@ Instead of applying mods to the entire ``ClientApp``, you can specify them for a
 In this case, ``example_mod_3`` and ``example_mod_4`` are only applied to the ``train``
 function.
 
-Order of execution
+Order of Execution
 ------------------
 
 When the ``ClientApp`` runs, the mods execute in the following order:
 
 1. **Application-wide mods** (executed first, in the order they are provided)
-2. **Function-specific mods** (executed after application-wide mods, in the order they are
-   provided)
-3. **Message-handling function** (core function that handles the incoming ``Message`` and returns
-   the outgoing ``Message``)
+2. **Function-specific mods** (executed after application-wide mods, in the order they
+   are provided)
+3. **ClientApp** (core function that handles the incoming ``Message`` and returns the
+   outgoing ``Message``)
 4. **Function-specific mods** (on the way back, in reverse order)
 5. **Application-wide mods** (on the way back, in reverse order)
 
