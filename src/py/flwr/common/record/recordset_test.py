@@ -431,8 +431,35 @@ def test_recordset_repr() -> None:
   metrics_records={'metrics': {'aa': 123}},
   configs_records={'configs': {'cc': b'\\x00\\x00\\x00\\x00\\x00'}}
 )"""
-    print(str(rs))
-    print(expected)
 
     # Assert
     assert str(rs) == expected
+
+
+def test_recordset_set_get_del_item() -> None:
+    """Test setting, getting, and deleting items in RecordSet."""
+    # Prepare
+    rs = RecordSet()
+    p_record = ParametersRecord()
+    m_record = MetricsRecord({"aa": 123})
+    c_record = ConfigsRecord({"cc": bytes(5)})
+
+    # Execute
+    rs["params"] = p_record
+    rs["metrics"] = m_record
+    rs["configs"] = c_record
+
+    # Assert
+    assert rs["params"] == p_record
+    assert rs["metrics"] == m_record
+    assert rs["configs"] == c_record
+
+    # Execute
+    del rs["params"]
+    del rs["metrics"]
+    del rs["configs"]
+
+    # Assert
+    assert "params" not in rs
+    assert "metrics" not in rs
+    assert "configs" not in rs
