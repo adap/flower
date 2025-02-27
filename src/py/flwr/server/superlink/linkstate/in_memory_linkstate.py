@@ -153,7 +153,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         message_id = uuid4()
 
         # Store Message
-        message.metadata._message_id = str(message_id)  # type: ignore
+        message.metadata._message_id = str(message_id)  # type: ignore  # pylint: disable=W0212
         with self.lock:
             self.message_ins_store[message_id] = message
 
@@ -358,7 +358,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         message_id = uuid4()
 
         # Store Message
-        message.metadata._message_id = str(message_id)  # type: ignore
+        message.metadata._message_id = str(message_id)  # type: ignore   # pylint: disable=W0212
         with self.lock:
             self.message_res_store[message_id] = message
             self.message_ins_to_message_res[UUID(ins_metadata.message_id)] = message_id

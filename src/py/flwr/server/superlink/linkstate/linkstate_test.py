@@ -1143,7 +1143,7 @@ class StateTest(unittest.TestCase):
 
         # Create reply, modify node_ids and insert
         res_msg = ins_msg[0].create_reply(content=RecordSet())
-        res_msg.metadata._src_node_id = node_id + 1  # type: ignore
+        res_msg.metadata._src_node_id = node_id + 1  # type: ignore   # pylint: disable=W0212
         msg_res_id = state.store_message_res(res_msg)
 
         # Assert
