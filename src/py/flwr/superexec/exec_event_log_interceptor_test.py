@@ -55,8 +55,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
             status="before",
         )
 
-    # pylint: disable=too-many-arguments
-    def compose_log_after_event(
+    def compose_log_after_event(  # pylint: disable=too-many-arguments,R0917
         self,
         request: EventLogRequest,
         context: grpc.ServicerContext,
