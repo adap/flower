@@ -112,8 +112,6 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         self._client_manager = client_manager
         self._server_fn = server_fn
         self._main: Optional[ServerAppCallable] = None
-        self._enter: Optional[ServerAppCallable] = None
-        self._exit: Optional[ServerAppCallable] = None
         self._lifecycle = _empty_lifecycle
 
     def __call__(self, driver: Driver, context: Context) -> None:
