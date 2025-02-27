@@ -58,7 +58,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Constraints
         -----------
-        `message.metadata.dst_node_id` MUST be set (not constant.DRIVER_NODE_ID)
+        `message.metadata.dst_node_id` MUST be set (not constant.SUPERLINK_NODE_ID)
 
         If `message.metadata.run_id` is invalid, then
         storing the `message` MUST fail.
@@ -117,6 +117,24 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         If `task_res.run_id` is invalid, then
         storing the `task_res` MUST fail.
+        """
+
+    @abc.abstractmethod
+    def store_message_res(self, message: Message) -> Optional[UUID]:
+        """Store one Message.
+
+        Usually, the Fleet API calls this for Nodes returning results.
+
+        Stores the Message and, if successful, returns the `message_id` (UUID) of
+        the `message`. If storing the `message` fails, `None` is returned.
+
+        Constraints
+        -----------
+
+        `message.metadata.dst_node_id` MUST be set (not constant.SUPERLINK_NODE_ID)
+
+        If `message.metadata.run_id` is invalid, then
+        storing the `message` MUST fail.
         """
 
     @abc.abstractmethod

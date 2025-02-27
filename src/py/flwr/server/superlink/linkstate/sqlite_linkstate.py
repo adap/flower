@@ -48,6 +48,7 @@ from flwr.server.utils import validate_message, validate_task_ins_or_res
 
 from .linkstate import LinkState
 from .utils import (
+    check_ttl_exceeded,
     configsrecord_from_bytes,
     configsrecord_to_bytes,
     context_from_bytes,
@@ -142,9 +143,9 @@ CREATE TABLE IF NOT EXISTS message_ins(
     run_id                  INTEGER,
     src_node_id             INTEGER,
     dst_node_id             INTEGER,
+    reply_to_message        TEXT,
     created_at              REAL,
     ttl                     REAL,
-    reply_to_message        TEXT,
     message_type            TEXT,
     content                 BLOB NULL,
     error                   BLOB NULL,
@@ -169,14 +170,31 @@ CREATE TABLE IF NOT EXISTS task_res(
 );
 """
 
-SQL_CREATE_TABLE_IN_PROCESSING_MESSAGES = """
-CREATE TABLE IF NOT EXISTS in_processing_messages(
+SQL_CREATE_TABLE_MESSAGE_RES = """
+CREATE TABLE IF NOT EXISTS message_res(
     message_id              TEXT UNIQUE,
+    group_id                TEXT,
     run_id                  INTEGER,
     src_node_id             INTEGER,
     dst_node_id             INTEGER,
     reply_to_message        TEXT,
+    created_at              REAL,
+    ttl                     REAL,
+    message_type            TEXT,
+    content                 BLOB NULL,
+    error                   BLOB NULL,
+    FOREIGN KEY(run_id) REFERENCES run(run_id)
+);
+"""
+
+SQL_CREATE_TABLE_DELIVERED_MESSAGES = """
+CREATE TABLE IF NOT EXISTS delivered_messages(
+    message_id              TEXT UNIQUE,
     group_id                TEXT,
+    run_id                  INTEGER,
+    src_node_id             INTEGER,
+    dst_node_id             INTEGER,
+    reply_to_message        TEXT,
     created_at              REAL,
     ttl                     REAL,
     message_type            TEXT
@@ -229,9 +247,10 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_LOGS)
         cur.execute(SQL_CREATE_TABLE_CONTEXT)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
-        cur.execute(SQL_CREATE_TABLE_MESSAGE_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
-        cur.execute(SQL_CREATE_TABLE_IN_PROCESSING_MESSAGES)
+        cur.execute(SQL_CREATE_TABLE_MESSAGE_INS)
+        cur.execute(SQL_CREATE_TABLE_MESSAGE_RES)
+        cur.execute(SQL_CREATE_TABLE_DELIVERED_MESSAGES)
         cur.execute(SQL_CREATE_TABLE_NODE)
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
@@ -504,8 +523,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             FROM message_ins
             WHERE   message_id IN ({placeholders});
         """
-        data = tuple(message.metadata.message_id for message in messages)
-        self.query(query, data)
+        delete_ids = tuple(message.metadata.message_id for message in messages)
+        self.query(query, delete_ids)
 
         # Record metadata of messages being pulled
         for row in rows:
@@ -519,7 +538,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         if rows:
             columns = ", ".join([f":{key}" for key in rows[0]])
-            query = f"INSERT INTO in_processing_messages VALUES({columns});"
+            query = f"INSERT INTO delivered_messages VALUES({columns});"
             for row in rows:
                 # Only invalid run_id can trigger IntegrityError.
                 # This may need to be changed in the future version
@@ -611,6 +630,68 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         return task_id
+
+    def store_message_res(self, message: Message) -> Optional[UUID]:
+        """Store one Message."""
+        # Validate message
+        errors = validate_message(message=message, is_reply_message=True)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+
+        res_metadata = message.metadata
+        # Check if message it is replying to exists and is valid
+        # Find metadata of Message the `message` is the reply of
+        ins_message_id = message.metadata.reply_to_message
+        ins_metadata = self.get_valid_message_metadata(ins_message_id)
+        if ins_metadata is None:
+            log(
+                ERROR,
+                "Failed to store Message: "
+                "Record of a message_id %s does not exist or has expired.",
+                ins_message_id,
+            )
+            return None
+
+        # Ensure the received Message comes from the right node_id
+        if (
+            convert_sint64_to_uint64(ins_metadata.dst_node_id)
+            != res_metadata.src_node_id
+        ):
+            log(
+                WARNING,
+                "Mismatch between source and destination node_ids in "
+                "received reply Message.",
+            )
+            return None
+
+        if check_ttl_exceeded(ins_metadata, res_metadata):
+            return None
+
+        # Create message_id
+        message_id = uuid4()
+
+        # Store Message
+        message.metadata._message_id = str(message_id)  # type: ignore
+        data = (message_to_dict(message),)
+
+        # Convert values from uint64 to sint64 for SQLite
+        convert_uint64_values_in_dict_to_sint64(
+            data[0], ["run_id", "src_node_id", "dst_node_id"]
+        )
+
+        columns = ", ".join([f":{key}" for key in data[0]])
+        query = f"INSERT INTO message_res VALUES({columns});"
+
+        # Only invalid run_id can trigger IntegrityError.
+        # This may need to be changed in the future version with more integrity checks.
+        try:
+            self.query(query, data)
+        except sqlite3.IntegrityError:
+            log(ERROR, "`run` is invalid")
+            return None
+
+        return message_id
 
     # pylint: disable-next=R0912,R0915,R0914
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
@@ -1175,6 +1256,39 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         return task_ins
+
+    def get_valid_message_metadata(self, message_id: str) -> Optional[Metadata]:
+        """Check if the metadata associated with a message_id exists and is valid.
+
+        Return metadata if valid (i.e. TTL hasn't expired).
+        """
+        query = """
+            SELECT *
+            FROM delivered_messages
+            WHERE message_id = :message_id
+        """
+        data = {"message_id": message_id}
+        rows = self.query(query, data)
+        if not rows:
+            # TaskIns does not exist
+            return None
+
+        metadata_dict = rows[0]
+        created_at = metadata_dict["created_at"]
+        ttl = metadata_dict["ttl"]
+        current_time = time.time()
+
+        # Check if Message is expired
+        if ttl is not None and created_at + ttl <= current_time:
+            return None
+
+        # Construct Metadata
+        metadata = Metadata(
+            **{k: v for k, v in metadata_dict.items() if k != "created_at"}
+        )
+        metadata._created_at = metadata_dict["created_at"]  # type: ignore
+
+        return metadata
 
 
 def dict_factory(

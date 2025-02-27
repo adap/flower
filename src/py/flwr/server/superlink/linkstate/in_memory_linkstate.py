@@ -38,6 +38,7 @@ from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message, validate_task_ins_or_res
 
 from .utils import (
+    check_ttl_exceeded,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
@@ -70,12 +71,15 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.contexts: dict[int, Context] = {}
         self.federation_options: dict[int, ConfigsRecord] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
-        self.message_ins_store: dict[UUID, Message] = {}
-        # node-id to message-id mapping (for fast `get_message_ins` processing)
-        self.dst_node_id_to_message_id_mapping: dict[int, list[UUID]] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
         self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
-        self.in_processing_messages: dict[UUID, Metadata] = {}
+
+        self.message_ins_store: dict[UUID, Message] = {}
+        self.message_res_store: dict[UUID, Message] = {}
+        self.message_ins_to_message_res: dict[UUID, UUID] = {}
+        self.delivered_messages: dict[UUID, Metadata] = {}
+        # node-id to message-id mapping (for fast `get_message_ins` processing)
+        self.dst_node_id_to_message_id_mapping: dict[int, list[UUID]] = {}
 
         self.node_public_keys: set[bytes] = set()
 
@@ -199,8 +203,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             raise AssertionError("`limit` must be >= 1")
 
         if node_id == SUPERLINK_NODE_ID:
-            msg = f"`node_id` must be != {SUPERLINK_NODE_ID}"
-            raise AssertionError(msg)
+            raise AssertionError(f"`node_id` must be != {SUPERLINK_NODE_ID}")
 
         # Find Messages for node_id
         message_list: list[Message] = []
@@ -228,7 +231,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
                 # Record metadata of extracted messages
                 for msg in message_list:
-                    self.in_processing_messages[UUID(msg.metadata.message_id)] = (
+                    self.delivered_messages[UUID(msg.metadata.message_id)] = (
                         msg.metadata
                     )
 
@@ -306,6 +309,62 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Return the new task_id
         return task_id
+
+    def store_message_res(self, message: Message) -> Optional[UUID]:
+        """Store one Message."""
+        # Validate message
+        errors = validate_message(message=message, is_reply_message=True)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+
+        # Validate run_id
+        if message.metadata.run_id not in self.run_ids:
+            log(ERROR, "`run_id` is invalid")
+            return None
+
+        with self.lock:
+            res_metadata = message.metadata
+            # Check if message it is replying to exists and is valid
+            # Find metadata of Message the `message` is the reply of
+            if ins_metadata := self.delivered_messages.get(
+                UUID(res_metadata.reply_to_message)
+            ):
+                # Ensure destination and source node_ids match
+                if ins_metadata.dst_node_id != res_metadata.src_node_id:
+                    log(
+                        WARNING,
+                        "Mismatch between source and destination node_ids in "
+                        "received reply Message.",
+                    )
+                    return None
+            else:
+                # ins_metadata not found
+                return None
+
+        if ins_metadata.created_at + ins_metadata.ttl <= time.time():
+            log(
+                ERROR,
+                "Failed to store Message reply: Original Message with message_id %s "
+                " has expired.",
+                ins_metadata.message_id,
+            )
+            return None
+
+        if check_ttl_exceeded(ins_metadata, res_metadata):
+            return None
+
+        # Create message_id
+        message_id = uuid4()
+
+        # Store Message
+        message.metadata._message_id = str(message_id)  # type: ignore
+        with self.lock:
+            self.message_res_store[message_id] = message
+            self.message_ins_to_message_res[UUID(ins_metadata.message_id)] = message_id
+
+        # Return the new message_id
+        return message_id
 
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for the given TaskIns IDs."""

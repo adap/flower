@@ -15,13 +15,19 @@
 """Utility functions for State."""
 
 
-from logging import ERROR
+from logging import ERROR, WARNING
 from os import urandom
 from typing import Optional, Union
 from uuid import UUID, uuid4
 
-from flwr.common import ConfigsRecord, Context, log, now, serde
-from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
+from flwr.common import ConfigsRecord, Context, Metadata, log, now, serde
+from flwr.common.constant import (
+    MESSAGE_TTL_TOLERANCE,
+    SUPERLINK_NODE_ID,
+    ErrorCode,
+    Status,
+    SubStatus,
+)
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
@@ -397,3 +403,28 @@ def verify_found_taskres(
             taskres.task.delivered_at = now().isoformat()
         ret_dict[taskins_id] = taskres
     return ret_dict
+
+
+def check_ttl_exceeded(ins_metadata: Metadata, res_metadata: Metadata) -> bool:
+    """Check if TTL has been reached."""
+    # Fail if the Message TTL exceeds the
+    # expiration time of the Message it replies to.
+    # Condition: ins_metadata.created_at + ins_metadata.ttl ≥
+    #            res_metadata.created_at + res_metadata.ttl
+    # A small tolerance is introduced to account
+    # for floating-point precision issues.
+    max_allowed_ttl = (
+        ins_metadata.created_at + ins_metadata.ttl - res_metadata.created_at
+    )
+    if res_metadata.ttl and (
+        res_metadata.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
+    ):
+        log(
+            WARNING,
+            "Received Message with TTL %.2f exceeding the allowed maximum TTL %.2f.",
+            res_metadata.ttl,
+            max_allowed_ttl,
+        )
+        return True
+
+    return False
