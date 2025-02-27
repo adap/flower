@@ -215,15 +215,17 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
             @contextmanager
             def decorated_lifecycle(context: Context) -> Iterator[None]:
-                it = lifecycle_fn(context)
+                # Execute the code before `yield` in lifecycle_fn
                 try:
-                    # Execute the code before `yield` in lifecycle_fn
-                    try:
-                        next(it)
-                    except StopIteration:
-                        raise RuntimeError(
-                            "Lifecycle function should yield at least once."
-                        ) from None
+                    if not isinstance(it := lifecycle_fn(context), Iterator):
+                        raise StopIteration
+                    next(it)
+                except StopIteration:
+                    raise RuntimeError(
+                        "Lifecycle function should yield at least once."
+                    ) from None
+
+                try:
                     # Enter the context
                     yield
                 finally:
