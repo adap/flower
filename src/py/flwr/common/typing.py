@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Optional, TypedDict, Union
+from typing import Any, Callable, Optional, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -288,14 +288,16 @@ class UserAuthCredentials:
     refresh_token: str
 
 
-class UserInfo(TypedDict):
+@dataclass
+class UserInfo:
     """User information for event log."""
 
     user_id: Optional[str]
     user_name: Optional[str]
 
 
-class Actor(TypedDict):
+@dataclass
+class Actor:
     """Event log actor."""
 
     id: Optional[str]
@@ -303,7 +305,8 @@ class Actor(TypedDict):
     ip_address: str
 
 
-class Event(TypedDict):
+@dataclass
+class Event:
     """Event log description."""
 
     action: str
@@ -311,7 +314,8 @@ class Event(TypedDict):
     fab_hash: Optional[str]
 
 
-class LogEntry(TypedDict):
+@dataclass
+class LogEntry:
     """Event log record."""
 
     timestamp: str

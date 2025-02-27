@@ -67,7 +67,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             )
             self.log_plugin.write_log(log_entry)
 
-            # For unary-unary calls, log after the call immediately.
+            # For unary-unary calls, log after the call immediately
             if method_handler.unary_unary:
                 response = method_handler.unary_unary(request, context)
                 log_entry = self.log_plugin.compose_log_after_event(
@@ -81,7 +81,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                 return cast(EventLogResponse, response)
 
             # For unary-stream calls, wrap the response iterator and write the event log
-            # after iteration completes.
+            # after iteration completes
             if method_handler.unary_stream:
                 response = cast(
                     Iterator[EventLogResponse],
@@ -93,7 +93,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                         yield from response
                     finally:
                         # This block is executed after the client has consumed
-                        # the entire stream, or if iteration is interrupted.
+                        # the entire stream, or if iteration is interrupted
                         log_entry = self.log_plugin.compose_log_after_event(
                             request,
                             context,
@@ -112,7 +112,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         elif method_handler.unary_stream:
             message_handler = grpc.unary_stream_rpc_method_handler
         else:
-            # If the method type is not `unary_unary` or `unary_stream`, raise an error.
+            # If the method type is not `unary_unary` or `unary_stream`, raise an error
             raise NotImplementedError("This RPC method type is not supported.")
         return message_handler(
             _generic_method_handler,
