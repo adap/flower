@@ -35,7 +35,7 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.record import ConfigsRecord
-from flwr.common.serde import error_to_proto, recordset_to_proto
+from flwr.common.serde import error_to_proto, recordset_to_proto, recordset_from_proto
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
@@ -1365,7 +1365,10 @@ def message_to_dict(message: Message) -> dict[str, Any]:
 
 def message_from_dict(message_dict: dict[str, Any]) -> Message:
     """Transform dict to Message."""
-    content: Optional[RecordSet] = message_dict.pop("content", None)
+
+    content_proto = ProtoRecordSet()
+    content_proto.ParseFromString(message_dict.pop("content"))
+    content = recordset_from_proto(content_proto)
     error: Optional[Error] = message_dict.pop("error", None)
     # Metadata constructor doesn't allow passing created_at. We set it later
     metadata = Metadata(**{k: v for k, v in message_dict.items() if k != "created_at"})
