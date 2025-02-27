@@ -9,7 +9,7 @@ Code example
 .. tab-set::
     :sync-group: category
 
-    .. tab-item:: JavaScript/TypeScript
+    .. tab-item:: TypeScript
         :sync: js
 
         .. code-block:: typescript
