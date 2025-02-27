@@ -152,14 +152,6 @@ CREATE TABLE IF NOT EXISTS message_ins(
 );
 """
 
-# TODO: do we need this extra mapping for this linkstate?
-# SQL_CREATE_TABLE_DST_NODE_ID_TO_MESSAGE_ID = """
-# CREATE TABLE IF NOT EXISTS dst_node_id_to_message_id_mapping(
-#     dst_node_id             INTEGER UNIQE,
-#     message_ids             BLOB
-# );
-# """
-
 SQL_CREATE_TABLE_TASK_RES = """
 CREATE TABLE IF NOT EXISTS task_res(
     task_id                 TEXT UNIQUE,
@@ -238,8 +230,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_CONTEXT)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_MESSAGE_INS)
-        # TODO: do we need this extra mapping for this linkstate?
-        # cur.execute(SQL_CREATE_TABLE_DST_NODE_ID_TO_MESSAGE_ID)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_IN_PROCESSING_MESSAGES)
         cur.execute(SQL_CREATE_TABLE_NODE)
@@ -388,27 +378,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # This may need to be changed in the future version with more integrity checks.
         self.query(query, data)
 
-        # TODO: do we need this extra mapping for this linkstate?
-        # Now that the message is stored in the DB, let's update the message_id to dst_node_id mapping
-        # dst_node_id = convert_uint64_to_sint64(message.metadata.dst_node_id)
-        # query = "SELECT * FROM dst_node_id_to_message_id_mapping WHERE dst_node_id = ?;"
-        # rows = self.query(query, (dst_node_id,))
-        # if len(rows) > 1:
-        #     log(ERROR,
-        #         "Inconsistent `dst_node_id_to_message_id_mapping`")
-        #     return None
-
-        # columns = ":dst_node_id, :message_ids"
-        # if not rows:
-        #     # There is no entry in dst_node_id_to_message_id_mapping
-        #     query = f"INSERT INTO dst_node_id_to_message_id_mapping VALUES({columns});"
-        #     self.query(query, data=({'dst_node_id': dst_node_id, "message_ids": pickle.dumps([message_id])},))
-        # else:
-        #     # There is already a mapping: append
-        #     message_ids = pickle.loads(rows[0][message_ids]).append(message_id)
-        #     query = "UPDATE dst_node_id_to_message_id_mapping SET message_ids = '%s' WHERE dst_node_id = '%s';"
-        #     self.query(query, data=({"message_ids": pickle.dumps([message_id]), 'dst_node_id': dst_node_id},))
-
         return message_id
 
     def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
@@ -553,7 +522,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             query = f"INSERT INTO in_processing_messages VALUES({columns});"
             for row in rows:
                 # Only invalid run_id can trigger IntegrityError.
-                # This may need to be changed in the future version with more integrity checks.
+                # This may need to be changed in the future version
+                # with more integrity checks.
                 self.query(query, row)
 
         return messages
