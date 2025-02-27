@@ -286,11 +286,11 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        # task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
-        msg_proto = create_ins_message(
-            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
         )
-        msg = message_from_proto(msg_proto)
 
         # Execute
         state.store_message_ins(message=msg)
@@ -322,6 +322,30 @@ class StateTest(unittest.TestCase):
         # Execute and assert
         assert state.store_task_ins(task_ins) is None
         assert state.store_task_ins(task_ins2) is None
+
+    def test_store_message_ins_invalid_node_id(self) -> None:
+        """Test store_message_ins with invalid node_id."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        invalid_node_id = 61016 if node_id != 61016 else 61017
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        # A message for a node that doesn't exist
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=invalid_node_id,
+                run_id=run_id,
+            )
+        )
+        # A message with src_node_id that's not that of the SuperLink
+        msg2 = message_from_proto(
+            create_ins_message(src_node_id=61016, dst_node_id=node_id, run_id=run_id)
+        )
+
+        # Execute and assert
+        assert state.store_message_ins(msg) is None
+        assert state.store_message_ins(msg2) is None
 
     def test_store_and_delete_tasks(self) -> None:
         """Test delete_tasks."""
@@ -439,6 +463,10 @@ class StateTest(unittest.TestCase):
         retrieved_task_ins = task_ins_list[0]
         assert retrieved_task_ins.task_id == str(task_ins_uuid)
 
+    def test_message_ins_store_identity_and_retrieve_identity(self) -> None:
+        """Store identity Message and retrieve it."""
+        # TODO: this test is already conducted in test_store_message_ins_one, do we still need a separate test?
+
     def test_task_ins_store_delivered_and_fail_retrieving(self) -> None:
         """Fail retrieving delivered task."""
         # Prepare
@@ -461,6 +489,10 @@ class StateTest(unittest.TestCase):
         # Assert
         assert len(task_ins_list) == 0
 
+    def test_message_ins_store_delivered_and_fail_retrieving(self) -> None:
+        """Fail retrieving delivered task."""
+        # TODO: this test is already conducted in test_store_message_ins_one, do we still need a separate test?
+
     def test_get_task_ins_limit_throws_for_limit_zero(self) -> None:
         """Fail call with limit=0."""
         # Prepare
@@ -470,6 +502,15 @@ class StateTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             state.get_task_ins(node_id=2, limit=0)
 
+    def test_get_task_message_limit_throws_for_limit_zero(self) -> None:
+        """Fail call with limit=0."""
+        # Prepare
+        state: LinkState = self.state_factory()
+
+        # Execute & Assert
+        with self.assertRaises(AssertionError):
+            state.get_message_ins(node_id=2, limit=0)
+
     def test_task_ins_store_invalid_run_id_and_fail(self) -> None:
         """Store TaskIns with invalid run_id and fail."""
         # Prepare
@@ -478,6 +519,24 @@ class StateTest(unittest.TestCase):
 
         # Execute
         task_id = state.store_task_ins(task_ins)
+
+        # Assert
+        assert task_id is None
+
+    def test_message_ins_store_invalid_run_id_and_fail(self) -> None:
+        """Store Message with invalid run_id and fail."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=1234,
+                run_id=61016,
+            )
+        )
+
+        # Execute
+        task_id = state.store_message_ins(msg)
 
         # Assert
         assert task_id is None
