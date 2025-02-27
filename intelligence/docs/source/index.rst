@@ -9,14 +9,6 @@ Code example
 .. tab-set::
     :sync-group: category
 
-    .. tab-item:: Python
-        :sync: python
-
-        .. code-block:: python
-
-          # Here is some Python code
-          print("Hello, World!")
-
     .. tab-item:: JavaScript/TypeScript
         :sync: js
 
