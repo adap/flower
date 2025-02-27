@@ -524,7 +524,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         with self.lock:
             if node_id in self.node_ids:
-                self.node_ids[node_id] = (time.time() + 2 * ping_interval, ping_interval)
+                self.node_ids[node_id] = (
+                    time.time() + 2 * ping_interval,
+                    ping_interval,
+                )
                 return True
         return False
 

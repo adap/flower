@@ -27,7 +27,7 @@ from uuid import UUID
 from parameterized import parameterized
 
 from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, Error, RecordSet, now
-from flwr.common.constant import ErrorCode, SUPERLINK_NODE_ID, Status, SubStatus
+from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     public_key_to_bytes,

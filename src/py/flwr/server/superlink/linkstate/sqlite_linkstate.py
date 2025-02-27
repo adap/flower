@@ -956,7 +956,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Update `online_until` and `ping_interval` for the given `node_id`
         query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?"
-        self.query(query, (time.time() + 2 * ping_interval, ping_interval, sint64_node_id))
+        self.query(
+            query, (time.time() + 2 * ping_interval, ping_interval, sint64_node_id)
+        )
         return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
