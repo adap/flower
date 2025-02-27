@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-18 00:30+0000\n"
+"POT-Creation-Date: 2025-02-27 00:31+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -5603,7 +5603,7 @@ msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:139
 #: ../../source/how-to-enable-tls-connections.rst:138
-#: ../../source/how-to-use-built-in-mods.rst:99
+#: ../../source/how-to-use-built-in-mods.rst:174
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:287
 msgid "Conclusion"
 msgstr "결론"
@@ -8912,13 +8912,14 @@ msgstr ""
 msgid "Use Built-in Mods"
 msgstr "기본 제공 모드 사용"
 
-#: ../../source/how-to-use-built-in-mods.rst:8
+#: ../../source/how-to-use-built-in-mods.rst:10
+#, fuzzy
 msgid ""
-"**Note: This tutorial covers experimental features. The functionality and"
-" interfaces may change in future versions.**"
+"This tutorial covers preview features. The functionality and interfaces "
+"may change in future versions."
 msgstr "**참고: 이 튜토리얼은 실험적인 기능을 다룹니다. 기능 및 인터페이스는 향후 버전에서 변경될 수 있습니다.**"
 
-#: ../../source/how-to-use-built-in-mods.rst:11
+#: ../../source/how-to-use-built-in-mods.rst:13
 msgid ""
 "In this tutorial, we will learn how to utilize built-in mods to augment "
 "the behavior of a ``ClientApp``. Mods (sometimes also called Modifiers) "
@@ -8928,11 +8929,11 @@ msgstr ""
 "이 튜토리얼에서는 내장 모드를 활용하여 ``ClientApp``의 동작을 보강하는 방법을 배우겠습니다. "
 "Mods(Modifiers라고도 함)를 사용하면 ``ClientApp``에서 작업이 처리되기 전과 후에 작업을 수행할 수 있습니다."
 
-#: ../../source/how-to-use-built-in-mods.rst:16
+#: ../../source/how-to-use-built-in-mods.rst:18
 msgid "What are Mods?"
 msgstr "Mods란 무엇인가요?"
 
-#: ../../source/how-to-use-built-in-mods.rst:18
+#: ../../source/how-to-use-built-in-mods.rst:20
 msgid ""
 "A Mod is a callable that wraps around a ``ClientApp``. It can manipulate "
 "or inspect the incoming ``Message`` and the resulting outgoing "
@@ -8941,41 +8942,52 @@ msgstr ""
 "Mod는 ``ClientApp``을 감싸는 콜러블입니다. 들어오는 ``Message``와 그 결과로 나가는 ``Message``를 "
 "조작하거나 검사할 수 있습니다. ``Mod``의 시그니처는 다음과 같습니다:"
 
-#: ../../source/how-to-use-built-in-mods.rst:27
+#: ../../source/how-to-use-built-in-mods.rst:29
 msgid "A typical mod function might look something like this:"
 msgstr "일반적인 mod 함수는 다음과 같은 모습일 수 있습니다:"
 
-#: ../../source/how-to-use-built-in-mods.rst:40
+#: ../../source/how-to-use-built-in-mods.rst:47
 msgid "Using Mods"
 msgstr "Mods 사용"
 
-#: ../../source/how-to-use-built-in-mods.rst:42
-msgid "To use mods in your ``ClientApp``, you can follow these steps:"
+#: ../../source/how-to-use-built-in-mods.rst:49
+msgid ""
+"Mods can be registered in two ways: **Application-wide mods** and "
+"**Function-specific mods**."
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:52
+msgid ""
+"**Application-wide mods**: These mods apply to all functions within the "
+"``ClientApp``."
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:54
+msgid ""
+"**Function-specific mods**: These mods apply only to a specific function "
+"(e.g, the function decorated by ``@app.train()``)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:58
+msgid "1. Registering Application-wide Mods"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:60
+#, fuzzy
+msgid "To use application-wide mods in your ``ClientApp``, follow these steps:"
 msgstr "``ClientApp``에서 mods를 사용하려면 다음 단계를 따르세요:"
 
-#: ../../source/how-to-use-built-in-mods.rst:45
-msgid "1. Import the required mods"
+#: ../../source/how-to-use-built-in-mods.rst:63
+#, fuzzy
+msgid "Import the required mods"
 msgstr "1. 필요한 mods를 가져옵니다"
 
-#: ../../source/how-to-use-built-in-mods.rst:47
-msgid "First, import the built-in mod you intend to use:"
-msgstr "먼저 사용하려는 기본 제공 mod를 가져옵니다:"
-
-#: ../../source/how-to-use-built-in-mods.rst:55
-msgid "2. Define your client function"
-msgstr "2. 클라이언트 기능 정의"
-
-#: ../../source/how-to-use-built-in-mods.rst:57
-msgid ""
-"Define your client function (``client_fn``) that will be wrapped by the "
-"mod(s):"
-msgstr "mod(s)로 래핑할 클라이언트 함수('``client_fn``)를 정의합니다:"
-
-#: ../../source/how-to-use-built-in-mods.rst:66
-msgid "3. Create the ``ClientApp`` with mods"
+#: ../../source/how-to-use-built-in-mods.rst:71
+#, fuzzy
+msgid "Create the ``ClientApp`` with application-wide mods"
 msgstr "3. mods로 ``ClientApp``을 생성합니다"
 
-#: ../../source/how-to-use-built-in-mods.rst:68
+#: ../../source/how-to-use-built-in-mods.rst:73
 msgid ""
 "Create your ``ClientApp`` and pass the mods as a list to the ``mods`` "
 "argument. The order in which you provide the mods matters:"
@@ -8983,39 +8995,65 @@ msgstr ""
 "``ClientApp``을 생성하고 mods를 ``mods`` argument에 목록으로 전달합니다. mods를 제공하는 순서가 "
 "중요합니다:"
 
-#: ../../source/how-to-use-built-in-mods.rst:82
-msgid "Order of execution"
+#: ../../source/how-to-use-built-in-mods.rst:86
+msgid ""
+"If you define functions to handle messages using decorators instead of "
+"``client_fn``, e.g., ``@app.train()``, you do not need to pass the "
+"``client_fn`` argument."
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:90
+msgid "2. Registering Function-specific Mods"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:92
+msgid ""
+"Instead of applying mods to the entire ``ClientApp``, you can specify "
+"them for a particular function:"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:114
+msgid ""
+"In this case, ``example_mod_3`` and ``example_mod_4`` are only applied to"
+" the ``train`` function."
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:118
+#, fuzzy
+msgid "Order of Execution"
 msgstr "실행 순서"
 
-#: ../../source/how-to-use-built-in-mods.rst:84
-msgid ""
-"When the ``ClientApp`` runs, the mods are executed in the order they are "
-"provided in the list:"
+#: ../../source/how-to-use-built-in-mods.rst:120
+#, fuzzy
+msgid "When the ``ClientApp`` runs, the mods execute in the following order:"
 msgstr "``ClientApp``이 실행되면 목록에 제공된 순서대로 모드가 실행됩니다:"
 
-#: ../../source/how-to-use-built-in-mods.rst:87
-msgid "``example_mod_1`` (outermost mod)"
-msgstr "``example_mod_1``(가장 바깥쪽 mod)"
+#: ../../source/how-to-use-built-in-mods.rst:122
+msgid "**Application-wide mods** (executed first, in the order they are provided)"
+msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:88
-msgid "``example_mod_2`` (next mod)"
-msgstr "``example_mod_2`` (다음 mod)"
-
-#: ../../source/how-to-use-built-in-mods.rst:89
+#: ../../source/how-to-use-built-in-mods.rst:123
 msgid ""
-"Message handler (core function that handles the incoming ``Message`` and "
+"**Function-specific mods** (executed after application-wide mods, in the "
+"order they are provided)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:125
+#, fuzzy
+msgid ""
+"**ClientApp** (core function that handles the incoming ``Message`` and "
 "returns the outgoing ``Message``)"
 msgstr "Message handler(들어오는 ``Message``를 처리하고 나가는 ``Message``를 반환하는 핵심 함수)"
 
-#: ../../source/how-to-use-built-in-mods.rst:91
-msgid "``example_mod_2`` (on the way back)"
-msgstr "``example_mod_2``(돌아가는 방법)"
+#: ../../source/how-to-use-built-in-mods.rst:127
+msgid "**Function-specific mods** (on the way back, in reverse order)"
+msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:92
-msgid "``example_mod_1`` (outermost mod on the way back)"
-msgstr "``example_mod_1``(돌아가는 방법에 가장 바깥쪽 모드)"
+#: ../../source/how-to-use-built-in-mods.rst:128
+msgid "**Application-wide mods** (on the way back, in reverse order)"
+msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:94
+#: ../../source/how-to-use-built-in-mods.rst:130
 msgid ""
 "Each mod has a chance to inspect and modify the incoming ``Message`` "
 "before passing it to the next mod, and likewise with the outgoing "
@@ -9024,7 +9062,76 @@ msgstr ""
 "각 mod는 다음 mod로 전달하기 전에 들어오는 ``Message``를 검사하고 수정할 기회가 있으며, 스택 위로 반환하기 전에 "
 "나가는 ``Message``도 마찬가지로 검사하고 수정할 수 있습니다."
 
-#: ../../source/how-to-use-built-in-mods.rst:101
+#: ../../source/how-to-use-built-in-mods.rst:135
+#, fuzzy
+msgid "Example Execution Flow"
+msgstr "예시: 아래를 참조하세요."
+
+#: ../../source/how-to-use-built-in-mods.rst:137
+msgid "Assuming the following registration:"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:153
+msgid "The execution order for an incoming **train** message is as follows:"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:155
+#: ../../source/how-to-use-built-in-mods.rst:167
+#, fuzzy
+msgid "``example_mod_1`` (before handling)"
+msgstr "``example_mod_1``(가장 바깥쪽 mod)"
+
+#: ../../source/how-to-use-built-in-mods.rst:156
+#: ../../source/how-to-use-built-in-mods.rst:168
+#, fuzzy
+msgid "``example_mod_2`` (before handling)"
+msgstr "``example_mod_2`` (다음 mod)"
+
+#: ../../source/how-to-use-built-in-mods.rst:157
+#, fuzzy
+msgid "``example_mod_3`` (before handling)"
+msgstr "``example_mod_1``(가장 바깥쪽 mod)"
+
+#: ../../source/how-to-use-built-in-mods.rst:158
+#, fuzzy
+msgid "``example_mod_4`` (before handling)"
+msgstr "``example_mod_1``(가장 바깥쪽 mod)"
+
+#: ../../source/how-to-use-built-in-mods.rst:159
+msgid "``train`` (handling message)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:160
+#, fuzzy
+msgid "``example_mod_4`` (after handling)"
+msgstr "``example_mod_1``(가장 바깥쪽 mod)"
+
+#: ../../source/how-to-use-built-in-mods.rst:161
+#, fuzzy
+msgid "``example_mod_3`` (after handling)"
+msgstr "``example_mod_1``(가장 바깥쪽 mod)"
+
+#: ../../source/how-to-use-built-in-mods.rst:162
+#: ../../source/how-to-use-built-in-mods.rst:170
+#, fuzzy
+msgid "``example_mod_2`` (after handling)"
+msgstr "``example_mod_1``(가장 바깥쪽 mod)"
+
+#: ../../source/how-to-use-built-in-mods.rst:163
+#: ../../source/how-to-use-built-in-mods.rst:171
+#, fuzzy
+msgid "``example_mod_1`` (after handling)"
+msgstr "``example_mod_1``(가장 바깥쪽 mod)"
+
+#: ../../source/how-to-use-built-in-mods.rst:165
+msgid "The execution order for an incoming **evaluate** message is as follows:"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:169
+msgid "``evaluate`` (handling message)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:176
 msgid ""
 "By following this guide, you have learned how to effectively use mods to "
 "enhance your ``ClientApp``'s functionality. Remember that the order of "
@@ -9033,7 +9140,7 @@ msgstr ""
 "이 가이드를 따라 mods를 효과적으로 사용하여 ``ClientApp``의 기능을 향상시키는 방법을 배웠습니다. mods 순서는 "
 "매우 중요하며 입력과 출력이 처리되는 방식에 영향을 미친다는 점을 기억하세요."
 
-#: ../../source/how-to-use-built-in-mods.rst:105
+#: ../../source/how-to-use-built-in-mods.rst:180
 msgid "Enjoy building a more robust and flexible ``ClientApp`` with mods!"
 msgstr "Mods를 통해 더욱 강력하고 유연한 ``ClientApp``을 구축해 보세요!"
 
@@ -10558,6 +10665,7 @@ msgstr "Bases: :py:class:`object`"
 #: flwr.client.mod.localdp_mod.LocalDpMod:22
 #: flwr.common.record.configsrecord.ConfigsRecord:20
 #: flwr.common.record.metricsrecord.MetricsRecord:19
+#: flwr.common.record.parametersrecord.Array:30
 #: flwr.common.record.parametersrecord.ParametersRecord:22
 #: flwr.common.record.recordset.RecordSet:23 flwr.server.app.start_server:46
 #: flwr.server.server_app.ServerApp:4 flwr.server.server_app.ServerApp.main:4
@@ -10593,7 +10701,8 @@ msgstr ""
 "`app`는 `ClientApp` 유형의 객체를 가리키는 전역 속성 `app`을 가리킵니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
-msgid ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
+#, fuzzy
+msgid ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\[mods\\]\\)"
 msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
 
 #: flwr.client.client_app.ClientApp.evaluate:1
@@ -10602,7 +10711,8 @@ msgid "Return a decorator that registers the evaluate fn with the client app."
 msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
-msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\)"
+#, fuzzy
+msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\[mods\\]\\)"
 msgstr ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\)"
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
@@ -10611,13 +10721,38 @@ msgid "Return a decorator that registers the query fn with the client app."
 msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
-msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\)"
+#, fuzzy
+msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\[mods\\]\\)"
 msgstr ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\)"
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
 #: flwr.client.client_app.ClientApp.train:1 of
 msgid "Return a decorator that registers the train fn with the client app."
 msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
+
+#: flwr.client.client_app.ClientApp.evaluate:5 of
+msgid "Registering an evaluate function:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.evaluate:15 of
+msgid "Registering an evaluate function with a function-specific modifier:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.query:5 of
+msgid "Registering a query function:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.query:15 of
+msgid "Registering a query function with a function-specific modifier:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.train:5 of
+msgid "Registering a train function:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.train:15 of
+msgid "Registering a train function with a function-specific modifier:"
+msgstr ""
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:2
 msgid "NumPyClient"
@@ -11168,8 +11303,10 @@ msgstr "공통"
 msgid ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 
+#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
-#: flwr.common.record.conversion_utils.array_from_numpy:1 of
+#: flwr.common.record.conversion_utils.array_from_numpy:1
+#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1 of
 msgid "Create Array from NumPy ndarray."
 msgstr "NumPy에서 배열을 만듭니다."
 
@@ -11269,12 +11406,9 @@ msgid "Convert parameters object to NumPy ndarrays."
 msgstr "매개변수 객체를 NumPy 배열로 변환합니다."
 
 #: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-msgid ""
-":py:obj:`Array <flwr.common.Array>`\\ \\(dtype\\, shape\\, stype\\, "
-"data\\)"
-msgstr ""
-":py:obj:`Array <flwr.common.Array>`\\ \\(dtype\\, shape\\, stype\\, "
-"data\\)"
+#, fuzzy
+msgid ":py:obj:`Array <flwr.common.Array>`\\ \\(\\)"
+msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
 #: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
 #: flwr.common.record.parametersrecord.Array:1 of
@@ -11635,46 +11769,89 @@ msgid "Array"
 msgstr "배열"
 
 #: flwr.common.record.parametersrecord.Array:3 of
+#, fuzzy
 msgid ""
 "A dataclass containing serialized data from an array-like or tensor-like "
-"object along with some metadata about it."
+"object along with metadata about it. The class can be initialized in one "
+"of two ways:"
 msgstr "배열형 또는 텐서형 객체의 직렬화된 데이터와 그에 대한 일부 메타데이터를 포함하는 데이터 클래스입니다."
 
 #: flwr.common.record.parametersrecord.Array:6 of
+msgid "By specifying explicit values for `dtype`, `shape`, `stype`, and `data`."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:7 of
+msgid "By providing a NumPy ndarray (via the `ndarray` argument)."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:9 of
 msgid ""
-"A string representing the data type of the serialised object (e.g. "
-"`np.float32`)"
+"In scenario (2), the `dtype`, `shape`, `stype`, and `data` are "
+"automatically derived from the input. In scenario (1), these fields must "
+"be specified manually."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:12 of
+#, fuzzy
+msgid ""
+"A string representing the data type of the serialized object (e.g. "
+"`\"float32\"`). Only required if you are not passing in a ndarray."
 msgstr "직렬화된 객체의 데이터 유형을 나타내는 문자열(예: `np.float32`)"
 
-#: flwr.common.record.parametersrecord.Array:8 of
+#: flwr.common.record.parametersrecord.Array:15 of
+#, fuzzy
 msgid ""
-"A list representing the shape of the unserialized array-like object. This"
-" is used to deserialize the data (depending on the serialization method) "
-"or simply as a metadata field."
+"A list representing the shape of the unserialized array-like object. Only"
+" required if you are not passing in a ndarray."
 msgstr ""
 "직렬화되지 않은 배열과 같은 객체의 모양을 나타내는 목록입니다. 직렬화 방법에 따라 데이터를 역직렬화하는 데 사용되거나 단순히 "
 "메타데이터 필드로 사용됩니다."
 
-#: flwr.common.record.parametersrecord.Array:12 of
+#: flwr.common.record.parametersrecord.Array:18 of
+#, fuzzy
 msgid ""
-"A string indicating the type of serialisation mechanism used to generate "
-"the bytes in `data` from an array-like or tensor-like object."
+"A string indicating the serialization mechanism used to generate the "
+"bytes in `data` from an array-like or tensor-like object. Only required "
+"if you are not passing in a ndarray."
 msgstr "배열형 또는 텐서형 객체에서 `데이터`의 바이트를 생성하는 데 사용되는 직렬화 메커니즘의 유형을 나타내는 문자열입니다."
 
-#: flwr.common.record.parametersrecord.Array:15 of
-msgid "A buffer of bytes containing the data."
-msgstr "데이터를 포함하는 바이트 버퍼입니다."
+#: flwr.common.record.parametersrecord.Array:22 of
+msgid ""
+"A buffer of bytes containing the data. Only required if you are not "
+"passing in a ndarray."
+msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:26:<autosummary>:1
+#: flwr.common.record.parametersrecord.Array:25 of
+msgid ""
+"A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data` "
+"fields are derived automatically from it."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:31 of
+msgid "Initializing by specifying all fields directly:"
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:40 of
+msgid "Initializing with a NumPy ndarray:"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`from_numpy_ndarray <flwr.common.Array.from_numpy_ndarray>`\\ "
+"\\(ndarray\\)"
+msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
+
+#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
 msgid ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 msgstr ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
 #: flwr.common.record.parametersrecord.Array.numpy:1 of
 msgid "Return the array as a NumPy array."
 msgstr "배열을 NumPy 배열로 반환합니다."
 
-#: ../../source/ref-api/flwr.common.Array.rst:28
+#: ../../source/ref-api/flwr.common.Array.rst:31
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:25
 #: ../../source/ref-api/flwr.common.Code.rst:19
 #: ../../source/ref-api/flwr.common.Context.rst:25
@@ -11705,19 +11882,23 @@ msgstr "배열을 NumPy 배열로 반환합니다."
 msgid "Attributes"
 msgstr "속성"
 
-#: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
+#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
+#: of
 msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 msgstr ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 
-#: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
+#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
+#: of
 msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
 msgstr ":py:obj:`shape <flwr.common.Array.shape>`\\"
 
-#: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
+#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
+#: of
 msgid ":py:obj:`stype <flwr.common.Array.stype>`\\"
 msgstr ":py:obj:`stype <flwr.common.Array.stype>`\\"
 
-#: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
+#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
+#: of
 msgid ":py:obj:`data <flwr.common.Array.data>`\\"
 msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
 
@@ -13622,7 +13803,7 @@ msgstr ""
 msgid "Let's see some examples:"
 msgstr "몇 가지 예를 살펴보겠습니다:"
 
-#: flwr.common.record.parametersrecord.ParametersRecord:50 of
+#: flwr.common.record.parametersrecord.ParametersRecord:49 of
 msgid ""
 "Now that the NumPy array is embedded into a :code:`ParametersRecord` it "
 "could be sent if added as part of a :code:`common.Message` or it could be"
@@ -13633,13 +13814,13 @@ msgid ""
 "deserialization can be done as follows:"
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:65 of
+#: flwr.common.record.parametersrecord.ParametersRecord:64 of
 msgid ""
 "If you need finer control on how your arrays are serialized and "
 "deserialized, you can construct :code:`Array` objects directly like this:"
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:83 of
+#: flwr.common.record.parametersrecord.ParametersRecord:82 of
 msgid ""
 "Note that different arrays (e.g. from PyTorch, Tensorflow) might require "
 "different serialization mechanism. Howerver, they often support a "
@@ -28539,7 +28720,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|83b0823dc3de42c897cc17d10e35d858|"
+msgid "|31e8ed7261994dc881557612e85f8207|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -28556,7 +28737,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|5523523e553a40149b559312b19058b3|"
+msgid "|19a2a648692846e39c942ac51bf40ea3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -28582,7 +28763,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|99c6daf1b1264db1915f77c494e5a220|"
+msgid "|33b0c37f798e427583aef4032aa52e39|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -28600,7 +28781,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|224b064fc6b344deb1bd4a7f09708ddb|"
+msgid "|e15ce114533941a4be540d7e6cfa7531|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -28619,7 +28800,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|69898d2bd8ee4ca9a3f0847bc2b433d5|"
+msgid "|0c7f996837384b739f7a761e54da3c31|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -28636,7 +28817,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|4f1ee0c35efc43e5914d46e3f57cdb5b|"
+msgid "|963ded2b6c194e5d9b28667ff6989a2c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -28659,7 +28840,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|3535418499ce4fd7852299a0d1287623|"
+msgid "|39256fb2dcbd41ad9b03ab30028277ab|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -28676,7 +28857,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|fd28b8249fc245dfa7410a0c99352eb9|"
+msgid "|ba8f9208c62d43cf9b5f00d9c723794b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -28855,7 +29036,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|5a1283ee62f84abc967590cbf70c37c6|"
+msgid "|6208b7b5deda468e8bed9ba7b5e569f7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -28883,7 +29064,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|e5a54625939c4cfc85f3be7bfa2ebf88|"
+msgid "|04b3276cbc9f40baa7ea5340e024352c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -28910,7 +29091,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|a98b576927e3442a8c988fa23470a3ed|"
+msgid "|7eec24b6ad9049c198e268cbd4c02b95|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -28936,7 +29117,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|45a4a0072a9940d5b8ca10364f1adfbe|"
+msgid "|3492030ff2c94181baf7d0e3623f5d73|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -28986,7 +29167,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|55e61b1632c94257b9b992c329802a58|"
+msgid "|17add690b1504dc7bbd26f01dc778a68|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -29106,7 +29287,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|5e21d585962646039c8e8dcd2f87a642|"
+msgid "|5a87ee8d448a47018603ade607cb1c95|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -37279,5 +37460,75 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|1e958be1c6084878b6428ba77df935d9|"
+#~ msgstr ""
+
+#~ msgid "First, import the built-in mod you intend to use:"
+#~ msgstr "먼저 사용하려는 기본 제공 mod를 가져옵니다:"
+
+#~ msgid "2. Define your client function"
+#~ msgstr "2. 클라이언트 기능 정의"
+
+#~ msgid ""
+#~ "Define your client function (``client_fn``)"
+#~ " that will be wrapped by the "
+#~ "mod(s):"
+#~ msgstr "mod(s)로 래핑할 클라이언트 함수('``client_fn``)를 정의합니다:"
+
+#~ msgid "``example_mod_2`` (on the way back)"
+#~ msgstr "``example_mod_2``(돌아가는 방법)"
+
+#~ msgid "``example_mod_1`` (outermost mod on the way back)"
+#~ msgstr "``example_mod_1``(돌아가는 방법에 가장 바깥쪽 모드)"
+
+#~ msgid ""
+#~ ":py:obj:`Array <flwr.common.Array>`\\ \\(dtype\\, "
+#~ "shape\\, stype\\, data\\)"
+#~ msgstr ""
+#~ ":py:obj:`Array <flwr.common.Array>`\\ \\(dtype\\, "
+#~ "shape\\, stype\\, data\\)"
+
+#~ msgid "A buffer of bytes containing the data."
+#~ msgstr "데이터를 포함하는 바이트 버퍼입니다."
+
+#~ msgid "|83b0823dc3de42c897cc17d10e35d858|"
+#~ msgstr ""
+
+#~ msgid "|5523523e553a40149b559312b19058b3|"
+#~ msgstr ""
+
+#~ msgid "|99c6daf1b1264db1915f77c494e5a220|"
+#~ msgstr ""
+
+#~ msgid "|224b064fc6b344deb1bd4a7f09708ddb|"
+#~ msgstr ""
+
+#~ msgid "|69898d2bd8ee4ca9a3f0847bc2b433d5|"
+#~ msgstr ""
+
+#~ msgid "|4f1ee0c35efc43e5914d46e3f57cdb5b|"
+#~ msgstr ""
+
+#~ msgid "|3535418499ce4fd7852299a0d1287623|"
+#~ msgstr ""
+
+#~ msgid "|fd28b8249fc245dfa7410a0c99352eb9|"
+#~ msgstr ""
+
+#~ msgid "|5a1283ee62f84abc967590cbf70c37c6|"
+#~ msgstr ""
+
+#~ msgid "|e5a54625939c4cfc85f3be7bfa2ebf88|"
+#~ msgstr ""
+
+#~ msgid "|a98b576927e3442a8c988fa23470a3ed|"
+#~ msgstr ""
+
+#~ msgid "|45a4a0072a9940d5b8ca10364f1adfbe|"
+#~ msgstr ""
+
+#~ msgid "|55e61b1632c94257b9b992c329802a58|"
+#~ msgstr ""
+
+#~ msgid "|5e21d585962646039c8e8dcd2f87a642|"
 #~ msgstr ""
 
