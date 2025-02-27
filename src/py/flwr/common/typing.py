@@ -300,7 +300,7 @@ class UserInfo:
 class Actor:
     """Event log actor."""
 
-    id: Optional[str]
+    actor_id: Optional[str]
     description: Optional[str]
     ip_address: str
 
