@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Conversion utility functions for Records."""
+"""Event log plugin components."""
 
 
-from ..logger import warn_deprecated_feature
-from ..typing import NDArray
-from .parametersrecord import Array
+from .event_log_plugin import EventLogRequest as EventLogRequest
+from .event_log_plugin import EventLogResponse as EventLogResponse
+from .event_log_plugin import EventLogWriterPlugin as EventLogWriterPlugin
 
-WARN_DEPRECATED_MESSAGE = (
-    "`array_from_numpy` is deprecated. Instead, use the `Array(ndarray)` class "
-    "directly or `Array.from_numpy_ndarray(ndarray)`."
-)
-
-
-def array_from_numpy(ndarray: NDArray) -> Array:
-    """Create Array from NumPy ndarray."""
-    warn_deprecated_feature(WARN_DEPRECATED_MESSAGE)
-    return Array.from_numpy_ndarray(ndarray)
+__all__ = [
+    "EventLogRequest",
+    "EventLogResponse",
+    "EventLogWriterPlugin",
+]
