@@ -68,7 +68,7 @@ def test_server_app_exception_when_both_modes() -> None:
 def test_lifecycle_success() -> None:
     """Test the lifecycle decorator with success."""
     # Prepare
-    app = ClientApp()
+    app = ServerApp()
     enter_code = Mock()
     exit_code = Mock()
 
@@ -90,7 +90,7 @@ def test_lifecycle_success() -> None:
 def test_lifecycle_failure() -> None:
     """Test the lifecycle decorator with failure."""
     # Prepare
-    app = ClientApp()
+    app = ServerApp()
     enter_code = Mock()
     exit_code = Mock()
 
@@ -117,7 +117,7 @@ def test_lifecycle_failure() -> None:
 def test_lifecycle_no_yield() -> None:
     """Test the lifecycle decorator with no yield."""
     # Prepare
-    app = ClientApp()
+    app = ServerApp()
     enter_code = Mock()
 
     @app.lifecycle()
@@ -140,7 +140,7 @@ def test_lifecycle_no_yield() -> None:
 def test_lifecycle_multiple_yields() -> None:
     """Test the lifecycle decorator with multiple yields."""
     # Prepare
-    app = ClientApp()
+    app = ServerApp()
     enter_code = Mock()
     middle_code = Mock()
     exit_code = Mock()
