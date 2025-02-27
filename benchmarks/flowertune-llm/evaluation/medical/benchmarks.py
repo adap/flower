@@ -91,7 +91,8 @@ def infer_medmcqa(model, tokenizer, batch_size, run_name):
         row["prompt"] = f"{instruction}\n{row['prompt']}\nThe answer is:\n"
         return row
 
-    dataset = dataset.map(post_process)    
+    dataset = dataset.map(post_process) 
+       
     # Generate results
     generate_results(name, run_name, dataset, model, tokenizer, batch_size, answer_type)
 
