@@ -60,10 +60,10 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             log_entry: LogEntry
             # Log before call
             log_entry = self.log_plugin.compose_log_before_event(
-                request,
-                context,
-                shared_user_info.get(),
-                method_name,
+                request=request,
+                context=context,
+                user_info=shared_user_info.get(),
+                method_name=method_name,
             )
             self.log_plugin.write_log(log_entry)
 
@@ -71,11 +71,11 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             if method_handler.unary_unary:
                 response = method_handler.unary_unary(request, context)
                 log_entry = self.log_plugin.compose_log_after_event(
-                    request,
-                    context,
-                    response,
-                    shared_user_info.get(),
-                    method_name,
+                    request=request,
+                    context=context,
+                    user_info=shared_user_info.get(),
+                    method_name=method_name,
+                    response=response,
                 )
                 self.log_plugin.write_log(log_entry)
                 return cast(EventLogResponse, response)
@@ -95,11 +95,11 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                         # This block is executed after the client has consumed
                         # the entire stream, or if iteration is interrupted
                         log_entry = self.log_plugin.compose_log_after_event(
-                            request,
-                            context,
-                            response,
-                            shared_user_info.get(),
-                            method_name,
+                            request=request,
+                            context=context,
+                            user_info=shared_user_info.get(),
+                            method_name=method_name,
+                            response=response,
                         )
                         self.log_plugin.write_log(log_entry)
 
