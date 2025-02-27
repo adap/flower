@@ -6,8 +6,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 from benchmarks import infer_medmcqa, infer_medqa, infer_pubmedqa, infer_careqa
 
-print("HI")
-
 # Fixed seed
 torch.manual_seed(2024)
 
@@ -20,7 +18,7 @@ parser.add_argument("--peft-path", type=str, default=None)
 parser.add_argument(
     "--datasets",
     type=str,
-    default="medmcqa",
+    default="pubmedqa",
     help="The dataset to infer on: [pubmedqa, medqa, medmcqa]",
 )
 parser.add_argument("--batch-size", type=int, default=16)
@@ -28,7 +26,6 @@ parser.add_argument("--quantization", type=int, default=4)
 args = parser.parse_args()
 
 
-print("Pre-quantitazion...")
 # Load model and tokenizer
 if args.quantization == 4:
     quantization_config = BitsAndBytesConfig(load_in_4bit=True)
@@ -41,13 +38,11 @@ else:
         f"Use 4-bit or 8-bit quantization. You passed: {args.quantization}/"
     )
 
-print("Loading model...")
 model = AutoModelForCausalLM.from_pretrained(
     args.base_model_name_path,
     quantization_config=quantization_config,
     torch_dtype=torch_dtype,
 )
-print("Loading PEFT...")
 if args.peft_path is not None:
     model = PeftModel.from_pretrained(
         model, args.peft_path, torch_dtype=torch_dtype
@@ -55,7 +50,6 @@ if args.peft_path is not None:
 
 tokenizer = AutoTokenizer.from_pretrained(args.base_model_name_path)
 
-print("Starting Evaluation...")
 # Evaluate
 for dataset in args.datasets.split(","):
     if dataset == "pubmedqa":
