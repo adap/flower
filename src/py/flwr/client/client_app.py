@@ -337,7 +337,12 @@ class ClientApp:
                 it = lifecycle_fn(context)
                 try:
                     # Execute the code before `yield` in lifecycle_fn
-                    next(it)
+                    try:
+                        next(it)
+                    except StopIteration:
+                        raise RuntimeError(
+                            "Lifecycle function should yield at least once."
+                        ) from None
                     # Enter the context
                     yield
                 finally:
