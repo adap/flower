@@ -305,7 +305,11 @@ class ClientApp:
 
         return query_decorator
 
-    def lifecycle(self):
+    def lifecycle(
+        self,
+    ) -> Callable[
+        [Callable[[Context], Iterator[None]]], Callable[[Context], Iterator[None]]
+    ]:
         """Return a decorator that registers the lifecycle fn with the client app.
 
         The decorated function should accept a `Context` object and use `yield`
@@ -346,7 +350,8 @@ class ClientApp:
                         raise RuntimeError("Lifecycle function should only yield once.")
 
             # Register provided function with the ClientApp object
-            self._lifecycle = decorated_lifecycle
+            # Ignore mypy error because of different argument names (`_` vs `context`)
+            self._lifecycle = decorated_lifecycle  # type: ignore
 
             # Return provided function unmodified
             return lifecycle_fn
