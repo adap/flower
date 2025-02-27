@@ -43,6 +43,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         user_info: UserInfo,
         method_name: str,
     ) -> LogEntry:
+        """."""
         return LogEntry(
             timestamp="before_timestamp",
             actor=Actor(
@@ -63,6 +64,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         method_name: str,
         response: EventLogResponse,
     ) -> LogEntry:
+        """."""
         return LogEntry(
             timestamp="after_timestamp",
             actor=Actor(
@@ -75,6 +77,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         )
 
     def write_log(self, log_entry: LogEntry) -> None:
+        """."""
         self.logs.append(log_entry)
 
 
