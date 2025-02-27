@@ -34,7 +34,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsResponse,
 )
 
-# Type variables for request and response messages.
+# Type variables for request and response messages
 EventLogRequest = Union[
     StartRunRequest,
     ListRunsRequest,
@@ -73,9 +73,9 @@ class EventLogWriterPlugin(ABC):
         self,
         request: EventLogRequest,
         context: grpc.ServicerContext,
-        response: EventLogResponse,
         user_info: UserInfo,
         method_name: str,
+        response: EventLogResponse,
     ) -> LogEntry:
         """Compose post-event log entry from the provided response and context."""
 
