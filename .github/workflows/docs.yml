@@ -50,3 +50,4 @@ jobs:
           aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./baselines/docs/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/baselines
           aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./examples/docs/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/examples
           aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./datasets/docs/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/datasets
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./intelligence/docs/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/intelligence
