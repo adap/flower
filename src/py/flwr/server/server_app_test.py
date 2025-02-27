@@ -15,8 +15,9 @@
 """Tests for ServerApp."""
 
 
-from unittest.mock import MagicMock, Mock
 from collections.abc import Iterator
+from unittest.mock import MagicMock, Mock
+
 import pytest
 
 from flwr.common import Context, RecordSet
@@ -62,6 +63,7 @@ def test_server_app_exception_when_both_modes() -> None:
             pass
 
         # pylint: enable=unused-argument
+
 
 def test_lifecycle_success() -> None:
     """Test the lifecycle decorator with success."""
