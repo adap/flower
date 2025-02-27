@@ -97,7 +97,7 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
             tokens = self.auth_plugin.refresh_tokens(context.invocation_metadata())
             if tokens is not None:
                 context.send_initial_metadata(tokens)
-                return call(request, context)  # type: ignore
+                return call(request, context)
 
             context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
             raise grpc.RpcError()  # This line is unreachable
