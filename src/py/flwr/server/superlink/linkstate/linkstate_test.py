@@ -1112,7 +1112,7 @@ class StateTest(unittest.TestCase):
             assert state.num_message_res() == 0
 
     def test_get_message_res_reply_not_ready(self) -> None:
-        """Test get_task_res to return error TaskRes if its TaskIns has expired."""
+        """Test get_message_res to return error since reply Message isn't present."""
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
@@ -1126,7 +1126,7 @@ class StateTest(unittest.TestCase):
         ins_msg_id = state.store_message_ins(msg)
 
         reply = state.get_message_res([ins_msg_id])[0]
-
+        # Check message contains error informing replpy message hasn't arrived
         assert reply.has_error()
         assert reply.error.reason == REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON
         assert state.num_message_ins() == 1
