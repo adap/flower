@@ -16,7 +16,7 @@
 
 
 import contextvars
-from typing import Any, Callable, Optional, Union, cast
+from typing import Any, Callable, Union, cast
 
 import grpc
 
@@ -84,16 +84,22 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
         ) -> Response:
             call = method_handler.unary_unary or method_handler.unary_stream
             metadata = context.invocation_metadata()
-            res: tuple[bool, Optional[UserInfo]] = (False, None)
-            if (
-                isinstance(request, (GetLoginDetailsRequest, GetAuthTokensRequest))
-                or (res := self.auth_plugin.validate_tokens_in_metadata(metadata))[0]
-            ):
-                # Store user info in contextvars if token is valid
-                if res[0]:
-                    shared_user_info.set(cast(UserInfo, res[1]))
+
+            # Intercept GetLoginDetails and GetAuthTokens requests, and return
+            # the response without authentication
+            if isinstance(request, (GetLoginDetailsRequest, GetAuthTokensRequest)):
                 return call(request, context)  # type: ignore
 
+            # For other requests, check if the user is authenticated
+            valid_tokens, user_info = self.auth_plugin.validate_tokens_in_metadata(
+                metadata
+            )
+            if valid_tokens:
+                # Store user info in contextvars for authenticated users
+                shared_user_info.set(cast(UserInfo, user_info))
+                return call(request, context)  # type: ignore
+
+            # If the user is not authenticated, refresh tokens
             tokens = self.auth_plugin.refresh_tokens(context.invocation_metadata())
             if tokens is not None:
                 context.send_initial_metadata(tokens)
