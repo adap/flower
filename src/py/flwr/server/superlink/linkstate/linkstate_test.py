@@ -50,6 +50,12 @@ from flwr.server.superlink.linkstate import (
     SqliteLinkState,
 )
 
+from .utils import (
+    MESSAGE_UNAVAILABLE_ERROR_REASON,
+    REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON,
+    REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
+)
+
 
 class StateTest(unittest.TestCase):
     """Test all state implementations."""
@@ -1071,6 +1077,7 @@ class StateTest(unittest.TestCase):
 
             res_msg = state.get_message_res([ins_msg1_id])[0]
             assert res_msg.has_error()
+            assert res_msg.error.reason == MESSAGE_UNAVAILABLE_ERROR_REASON
             # Ensure Message has been deleted
             assert state.num_message_ins() == 0
 
@@ -1097,9 +1104,33 @@ class StateTest(unittest.TestCase):
 
             res_msg2_pulled = state.get_message_res([ins_msg2_id])[0]
             assert res_msg2_pulled.has_error()
+            assert (
+                res_msg2_pulled.error.reason == REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON
+            )
             # Ensure Message has been deleted
             assert state.num_message_ins() == 0
             assert state.num_message_res() == 0
+
+    def test_get_message_res_reply_not_ready(self) -> None:
+        """Test get_task_res to return error TaskRes if its TaskIns has expired."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg_id = state.store_message_ins(msg)
+
+        reply = state.get_message_res([ins_msg_id])[0]
+
+        assert reply.has_error()
+        assert reply.error.reason == REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON
+        assert state.num_message_ins() == 1
+        assert state.num_message_res() == 0
 
     def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
         """Test that get_task_res returns an empty result when the corresponding TaskIns
@@ -1138,6 +1169,7 @@ class StateTest(unittest.TestCase):
         # Assert
         assert len(message_res_list) == 1
         assert message_res_list[0].has_error()
+        assert message_res_list[0].error.reason == MESSAGE_UNAVAILABLE_ERROR_REASON
 
     def test_get_task_res_return_if_not_expired(self) -> None:
         """Test get_task_res to return TaskRes if its TaskIns exists and is not

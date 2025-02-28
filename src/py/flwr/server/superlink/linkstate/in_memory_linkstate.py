@@ -214,7 +214,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             # Get all UUIDs of messages to be pulled by `node_id` node
             all_message_ids = self.dst_node_id_to_message_id_mapping.get(node_id, [])
-            print(f"{ all_message_ids = }")
 
             # If there are Messages associated to this node
             if all_message_ids:
@@ -467,7 +466,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                         if message_ttl_has_expired(
                             msg_ins_metadata, current_time=current_time
                         ):
-                            # Remove message and its reference in node-to-message mapping
+                            # Remove message and reference in node-to-message mapping
                             msg_ins = self.message_ins_store.pop(msg_id)
                             self.dst_node_id_to_message_id_mapping[
                                 msg_ins.metadata.dst_node_id
