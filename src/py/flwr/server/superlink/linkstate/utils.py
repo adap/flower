@@ -20,7 +20,7 @@ from os import urandom
 from typing import Optional, Union
 from uuid import UUID, uuid4
 
-from flwr.common import ConfigsRecord, Context, Metadata, log, now, serde
+from flwr.common import ConfigsRecord, Context, Message, Metadata, log, now, serde
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     SUPERLINK_NODE_ID,
@@ -57,6 +57,9 @@ VALID_RUN_SUB_STATUSES = {
     SubStatus.FAILED,
     SubStatus.STOPPED,
 }
+REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON = (
+    "Error: Message Unavailable - The reply message hasn't been processed."
+)
 MESSAGE_UNAVAILABLE_ERROR_REASON = (
     "Error: Message Unavailable - The requested message could not be found in the "
     "database. It may have expired due to its TTL or never existed."
@@ -320,6 +323,11 @@ def has_expired(task_ins_or_res: Union[TaskIns, TaskRes], current_time: float) -
     return task_ins_or_res.task.ttl + task_ins_or_res.task.created_at < current_time
 
 
+def message_ttl_has_expired(message_metadata: Metadata, current_time: float) -> bool:
+    """Check if the Message has expired."""
+    return message_metadata.ttl + message_metadata.created_at < current_time
+
+
 def verify_taskins_ids(
     inquired_taskins_ids: set[UUID],
     found_taskins_dict: dict[UUID, TaskIns],
@@ -357,6 +365,59 @@ def verify_taskins_ids(
             taskres = create_taskres_for_unavailable_taskins(taskins_id)
             ret_dict[taskins_id] = taskres
     return ret_dict
+
+
+def create_message_error_expired_result_message(ins_metadata: Metadata) -> Message:
+    """Error to indicate that a reply Message had expired."""
+    return create_error_reply_with_reason(
+        ins_metadata,
+        error=Error(
+            code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
+            reason=REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
+        ),
+    )
+
+
+def create_message_error_pending_result_message(ins_metadata: Metadata) -> Message:
+    """Error to indicate that a reply Message isn't available yet."""
+    return create_error_reply_with_reason(
+        ins_metadata,
+        error=Error(
+            code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
+            reason=REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON,
+        ),
+    )
+
+
+def create_message_error_unavailable_ins_message(ins_metadata: Metadata) -> Message:
+    """Error to indicate that the enquired Message had expired before reply arrived or
+    that it isn't found."""
+    return create_error_reply_with_reason(
+        ins_metadata,
+        error=Error(
+            code=ErrorCode.MESSAGE_UNAVAILABLE,
+            reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
+        ),
+    )
+
+
+def create_error_reply_with_reason(ins_metadata: Metadata, error: Error) -> Message:
+    """Generate an error Message that the SuperLink returns carrying the specified
+    error."""
+    current_time = now().timestamp()
+    ttl = ins_metadata.ttl - (current_time - ins_metadata.created_at)
+    metadata = Metadata(
+        run_id=ins_metadata.run_id,
+        message_id=str(uuid4()),
+        src_node_id=SUPERLINK_NODE_ID,
+        dst_node_id=SUPERLINK_NODE_ID,
+        reply_to_message=ins_metadata.message_id,
+        group_id=ins_metadata.group_id,
+        message_type=ins_metadata.message_type,
+        ttl=ttl,
+    )
+
+    return Message(metadata=metadata, error=error)
 
 
 def verify_found_taskres(

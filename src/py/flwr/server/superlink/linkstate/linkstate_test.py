@@ -1050,6 +1050,57 @@ class StateTest(unittest.TestCase):
             assert state.num_task_ins() == 0
             assert state.num_task_res() == 0
 
+    def test_get_message_res_expired_task_ins(self) -> None:
+        """Test get_task_res to return error TaskRes if its TaskIns has expired."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+
+        # A message that will expire before it gets pulled
+        msg1 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg1_id = state.store_message_ins(msg1)
+        with patch(
+            "time.time",
+            side_effect=lambda: msg1.metadata.created_at + msg1.metadata.ttl + 0.1,
+        ):  # over TTL limit
+
+            res_msg = state.get_message_res([ins_msg1_id])[0]
+            assert res_msg.has_error()
+            # Ensure Message has been deleted
+            assert state.num_message_ins() == 0
+
+        # A message that will expire before its reply is pulled
+        msg2 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg2_id = state.store_message_ins(msg2)
+        print(state.dst_node_id_to_message_id_mapping.keys())
+        assert state.num_message_ins() == 1
+        # Get message
+        msg2_ins = state.get_message_ins(node_id=node_id, limit=1)
+        assert state.num_message_ins() == 1
+        # Store reply in time
+        res_msg2 = msg2_ins[0].create_reply(content=RecordSet())
+        state.store_message_res(res_msg2)
+
+        with patch(
+            "time.time",
+            side_effect=lambda: msg2.metadata.created_at + msg2.metadata.ttl + 0.1,
+        ):  # over TTL limit
+
+            res_msg2_pulled = state.get_message_res([ins_msg2_id])[0]
+            assert res_msg2_pulled.has_error()
+            # Ensure Message has been deleted
+            assert state.num_message_ins() == 0
+            assert state.num_message_res() == 0
+
     def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
         """Test that get_task_res returns an empty result when the corresponding TaskIns
         does not exist."""
@@ -1074,6 +1125,19 @@ class StateTest(unittest.TestCase):
         assert len(task_res_list) == 1
         assert task_res_list[0].task.HasField("error")
         assert state.num_task_ins() == state.num_task_res() == 0
+
+    def test_get_message_res_returns_empty_for_missing_message_ins(self) -> None:
+        """Test that get_message_res returns an empty result when the corresponding
+        Message does not exist."""
+        # Prepare
+        state = self.state_factory()
+        message_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
+        # Execute
+        message_res_list = state.get_message_res(message_ids={UUID(message_ins_id)})
+
+        # Assert
+        assert len(message_res_list) == 1
+        assert message_res_list[0].has_error()
 
     def test_get_task_res_return_if_not_expired(self) -> None:
         """Test get_task_res to return TaskRes if its TaskIns exists and is not
@@ -1103,6 +1167,34 @@ class StateTest(unittest.TestCase):
 
             # Assert
             assert len(task_res_list) != 0
+
+    def test_get_message_res_return_successful(self) -> None:
+        """Test get_message_res returns correct Message."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg_id = state.store_message_ins(msg)
+        assert ins_msg_id
+        # Fetch ins message
+        ins_msg = state.get_message_ins(node_id=node_id, limit=1)
+        # Create reply and insert
+        res_msg = ins_msg[0].create_reply(content=RecordSet())
+        state.store_message_res(res_msg)
+
+        # Fetch reply
+        reply_msg = state.get_message_res([ins_msg_id])
+
+        # assert
+        assert reply_msg[0].content == res_msg.content
+        assert reply_msg[0].metadata == res_msg.metadata
+        assert reply_msg[0].metadata.dst_node_id == msg.metadata.src_node_id
 
     def test_store_task_res_fail_if_consumer_producer_id_mismatch(self) -> None:
         """Test store_task_res to fail if there is a mismatch between the
@@ -1389,37 +1481,37 @@ def create_task_res(
     return task_res
 
 
-# class InMemoryStateTest(StateTest):
-#     """Test InMemoryState implementation."""
+class InMemoryStateTest(StateTest):
+    """Test InMemoryState implementation."""
 
-#     __test__ = True
+    __test__ = True
 
-#     def state_factory(self) -> LinkState:
-#         """Return InMemoryState."""
-#         return InMemoryLinkState()
+    def state_factory(self) -> LinkState:
+        """Return InMemoryState."""
+        return InMemoryLinkState()
 
 
-# class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
-#     """Test SqliteState implemenation with in-memory database."""
+class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
+    """Test SqliteState implemenation with in-memory database."""
 
-#     __test__ = True
+    __test__ = True
 
-#     def state_factory(self) -> SqliteLinkState:
-#         """Return SqliteState with in-memory database."""
-#         state = SqliteLinkState(":memory:")
-#         state.initialize()
-#         return state
+    def state_factory(self) -> SqliteLinkState:
+        """Return SqliteState with in-memory database."""
+        state = SqliteLinkState(":memory:")
+        state.initialize()
+        return state
 
-#     def test_initialize(self) -> None:
-#         """Test initialization."""
-#         # Prepare
-#         state = self.state_factory()
+    def test_initialize(self) -> None:
+        """Test initialization."""
+        # Prepare
+        state = self.state_factory()
 
-#         # Execute
-#         result = state.query("SELECT name FROM sqlite_schema;")
+        # Execute
+        result = state.query("SELECT name FROM sqlite_schema;")
 
-#         # Assert
-#         assert len(result) == 21
+        # Assert
+        assert len(result) == 21
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
