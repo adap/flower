@@ -458,9 +458,9 @@ def check_node_availability_for_taskins(
     for taskins_id in list(inquired_taskins_ids):
         task_ins = found_taskins_dict[taskins_id]
         node_id = task_ins.task.consumer.node_id
-        online_until = node_id_to_online_until[node_id]
-        # Generate a TaskRes containing an error reply if the node is offline.
-        if online_until < current:
+        online_until = node_id_to_online_until.get(node_id)
+        # Generate a TaskRes containing an error reply if the node is offline or doesn't exist.
+        if online_until is None or online_until < current:
             if update_set:
                 inquired_taskins_ids.remove(taskins_id)
             task_res = make_node_unavailable_taskres(task_ins)
