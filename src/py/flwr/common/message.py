@@ -25,7 +25,7 @@ from .constant import MESSAGE_TTL_TOLERANCE
 from .logger import log
 from .record import RecordSet
 
-DEFAULT_TTL = 3600 * 3
+DEFAULT_TTL = 10800  # This is 3 hours
 
 
 class Metadata:  # pylint: disable=too-many-instance-attributes
