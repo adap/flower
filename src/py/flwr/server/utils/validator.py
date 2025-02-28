@@ -132,7 +132,7 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     # Verify TTL and created_at time
     current_time = time.time()
     if metadata.created_at + metadata.ttl <= current_time:
-        validation_errors.append("Task TTL has expired")
+        validation_errors.append("Message TTL has expired")
 
     # Source node is set and is not zero
     if not metadata.src_node_id:
@@ -155,21 +155,21 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     # Link respose to original message
     if not is_reply_message:
         if metadata.reply_to_message != "":
-            validation_errors.append("metadata.reply_to_message MUST not be set.")
+            validation_errors.append("`metadata.reply_to_message` MUST not be set.")
         if metadata.src_node_id != SUPERLINK_NODE_ID:
             validation_errors.append(
-                f"`metadata.src_node_id` is not {SUPERLINK_NODE_ID}"
+                f"`metadata.src_node_id` is not {SUPERLINK_NODE_ID} (SuperLink node ID)"
             )
         if metadata.dst_node_id == SUPERLINK_NODE_ID:
-            validation_errors.append(f"`metadata.dst_node_id` is {SUPERLINK_NODE_ID}")
+            validation_errors.append(f"`metadata.dst_node_id` is {SUPERLINK_NODE_ID} (SuperLink node ID)")
     else:
         if metadata.reply_to_message == "":
-            validation_errors.append("metadata.reply_to_message MUST be set.")
+            validation_errors.append("`metadata.reply_to_message` MUST be set.")
         if metadata.src_node_id == SUPERLINK_NODE_ID:
-            validation_errors.append(f"`metadata.src_node_id` is {SUPERLINK_NODE_ID}")
+            validation_errors.append(f"`metadata.src_node_id` is {SUPERLINK_NODE_ID} (SuperLink node ID)")
         if metadata.dst_node_id != SUPERLINK_NODE_ID:
             validation_errors.append(
-                f"`metadata.dst_node_id` is not {SUPERLINK_NODE_ID}"
+                f"`metadata.dst_node_id` is not {SUPERLINK_NODE_ID} (SuperLink node ID)"
             )
 
     return validation_errors
