@@ -56,7 +56,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         def _generic_method_handler(
             request: EventLogRequest,
             context: grpc.ServicerContext,
-        ) -> Union[EventLogResponse, Iterator[EventLogResponse]]:
+        ) -> Union[EventLogResponse, Iterator[EventLogResponse], Exception]:
             log_entry: LogEntry
             # Log before call
             log_entry = self.log_plugin.compose_log_before_event(
@@ -69,28 +69,40 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
 
             # For unary-unary calls, log after the call immediately
             if method_handler.unary_unary:
-                response = method_handler.unary_unary(request, context)
-                log_entry = self.log_plugin.compose_log_after_event(
-                    request=request,
-                    context=context,
-                    user_info=shared_user_info.get(),
-                    method_name=method_name,
-                    response=response,
-                )
-                self.log_plugin.write_log(log_entry)
-                return cast(EventLogResponse, response)
+                unary_response: Union[EventLogResponse, Exception]
+                try:
+                    unary_response = cast(
+                        EventLogResponse, method_handler.unary_unary(request, context)
+                    )
+                except Exception as e:  # pylint: disable=broad-except
+                    unary_response = e
+                finally:
+                    log_entry = self.log_plugin.compose_log_after_event(
+                        request=request,
+                        context=context,
+                        user_info=shared_user_info.get(),
+                        method_name=method_name,
+                        response=unary_response,
+                    )
+                    self.log_plugin.write_log(log_entry)
+                return unary_response  # cast(EventLogResponse, response)
 
             # For unary-stream calls, wrap the response iterator and write the event log
             # after iteration completes
             if method_handler.unary_stream:
-                response = cast(
+                response_iterator = cast(
                     Iterator[EventLogResponse],
                     method_handler.unary_stream(request, context),
                 )
 
                 def response_wrapper() -> Iterator[EventLogResponse]:
+                    stream_response: Union[EventLogResponse, Exception]
                     try:
-                        yield from response
+                        # pylint: disable=use-yield-from
+                        for stream_response in response_iterator:
+                            yield stream_response
+                    except Exception as e:  # pylint: disable=broad-except
+                        stream_response = e
                     finally:
                         # This block is executed after the client has consumed
                         # the entire stream, or if iteration is interrupted
@@ -99,7 +111,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                             context=context,
                             user_info=shared_user_info.get(),
                             method_name=method_name,
-                            response=response,
+                            response=stream_response,
                         )
                         self.log_plugin.write_log(log_entry)
 
