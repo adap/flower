@@ -120,10 +120,10 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
 
     # Created/delivered/TTL/Pushed
     if (
-        metadata.created_at < 1711497600.0
-    ):  # unix timestamp of 27 March 2024 00h:00m:00s UTC
+        metadata.created_at < 1740700800.0
+    ):  # unix timestamp of 28 February 2025 00h:00m:00s UTC
         validation_errors.append(
-            "`created_at` must be a float that records the unix timestamp "
+            "`metadata.created_at` must be a float that records the unix timestamp "
             "in seconds when the message was created."
         )
     if metadata.ttl <= 0:
