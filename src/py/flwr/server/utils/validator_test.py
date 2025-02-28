@@ -146,7 +146,7 @@ class ValidatorTest(unittest.TestCase):
             ),  # ttl is zero
             (
                 "",
-                None,
+                0,
                 456,
                 DEFAULT_TTL,
                 "",
@@ -159,7 +159,7 @@ class ValidatorTest(unittest.TestCase):
             (
                 "",
                 SUPERLINK_NODE_ID,
-                None,
+                0,
                 DEFAULT_TTL,
                 "",
                 RecordSet(),
@@ -317,9 +317,7 @@ def create_task_ins(
             producer=Node(node_id=SUPERLINK_NODE_ID),
             consumer=consumer,
             task_type="mock",
-            recordset=recordset_pb2.RecordSet(  # pylint: disable=E1101
-                parameters={}, metrics={}, configs={}
-            ),
+            recordset=recordset_pb2.RecordSet(),  # pylint: disable=E1101
             ttl=DEFAULT_TTL,
             created_at=time.time(),
         ),
@@ -342,9 +340,7 @@ def create_task_res(
             consumer=Node(node_id=SUPERLINK_NODE_ID),
             ancestry=ancestry,
             task_type="mock",
-            recordset=recordset_pb2.RecordSet(  # pylint: disable=E1101
-                parameters={}, metrics={}, configs={}
-            ),
+            recordset=recordset_pb2.RecordSet(),  # pylint: disable=E1101
             ttl=DEFAULT_TTL,
             created_at=time.time(),
         ),

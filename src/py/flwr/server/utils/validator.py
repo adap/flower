@@ -116,7 +116,7 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     metadata = message.metadata
 
     if metadata.message_id != "":
-        validation_errors.append("non-empty `message_id`")
+        validation_errors.append("non-empty `metadata.message_id`")
 
     # Created/delivered/TTL/Pushed
     if (
@@ -127,7 +127,7 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
             "in seconds when the message was created."
         )
     if metadata.ttl <= 0:
-        validation_errors.append("`ttl` must be higher than zero")
+        validation_errors.append("`metadata.ttl` must be higher than zero")
 
     # Verify TTL and created_at time
     current_time = time.time()
@@ -161,12 +161,16 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
                 f"`metadata.src_node_id` is not {SUPERLINK_NODE_ID} (SuperLink node ID)"
             )
         if metadata.dst_node_id == SUPERLINK_NODE_ID:
-            validation_errors.append(f"`metadata.dst_node_id` is {SUPERLINK_NODE_ID} (SuperLink node ID)")
+            validation_errors.append(
+                f"`metadata.dst_node_id` is {SUPERLINK_NODE_ID} (SuperLink node ID)"
+            )
     else:
         if metadata.reply_to_message == "":
             validation_errors.append("`metadata.reply_to_message` MUST be set.")
         if metadata.src_node_id == SUPERLINK_NODE_ID:
-            validation_errors.append(f"`metadata.src_node_id` is {SUPERLINK_NODE_ID} (SuperLink node ID)")
+            validation_errors.append(
+                f"`metadata.src_node_id` is {SUPERLINK_NODE_ID} (SuperLink node ID)"
+            )
         if metadata.dst_node_id != SUPERLINK_NODE_ID:
             validation_errors.append(
                 f"`metadata.dst_node_id` is not {SUPERLINK_NODE_ID} (SuperLink node ID)"
