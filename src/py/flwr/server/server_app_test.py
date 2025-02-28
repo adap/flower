@@ -121,7 +121,7 @@ def test_lifecycle_no_yield() -> None:
     enter_code = Mock()
 
     @app.lifecycle()
-    def test_fn(_: Context) -> Iterator[None]:
+    def test_fn(_: Context) -> Iterator[None]:  # type: ignore
         enter_code()
 
     # Execute
