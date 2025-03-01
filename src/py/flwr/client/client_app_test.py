@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,63 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for ServerApp."""
+"""Tests for Flower ClientApp."""
 
 
 from collections.abc import Iterator
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
-import pytest
+from flwr.common.context import Context
 
-from flwr.common import Context, RecordSet
-from flwr.server import ServerApp, ServerConfig
-from flwr.server.driver import Driver
-
-
-def test_server_app_custom_mode() -> None:
-    """Test sampling w/o criterion."""
-    # Prepare
-    app = ServerApp()
-    driver = MagicMock()
-    context = Context(
-        run_id=1, node_id=0, node_config={}, state=RecordSet(), run_config={}
-    )
-
-    called = {"called": False}
-
-    # pylint: disable=unused-argument
-    @app.main()
-    def custom_main(driver: Driver, context: Context) -> None:
-        called["called"] = True
-
-    # pylint: enable=unused-argument
-
-    # Execute
-    app(driver, context)
-
-    # Assert
-    assert called["called"]
-
-
-def test_server_app_exception_when_both_modes() -> None:
-    """Test ServerApp error when both compat mode and custom fns are used."""
-    # Prepare
-    app = ServerApp(config=ServerConfig(num_rounds=3))
-
-    # Execute and assert
-    with pytest.raises(ValueError):
-        # pylint: disable=unused-argument
-        @app.main()
-        def custom_main(driver: Driver, context: Context) -> None:
-            pass
-
-        # pylint: enable=unused-argument
+from .client_app import ClientApp
 
 
 def test_lifecycle_success() -> None:
     """Test the lifecycle decorator with success."""
     # Prepare
-    app = ServerApp()
+    app = ClientApp()
     enter_code = Mock()
     exit_code = Mock()
 
@@ -90,7 +48,7 @@ def test_lifecycle_success() -> None:
 def test_lifecycle_failure() -> None:
     """Test the lifecycle decorator with failure."""
     # Prepare
-    app = ServerApp()
+    app = ClientApp()
     enter_code = Mock()
     exit_code = Mock()
 
@@ -117,7 +75,7 @@ def test_lifecycle_failure() -> None:
 def test_lifecycle_no_yield() -> None:
     """Test the lifecycle decorator with no yield."""
     # Prepare
-    app = ServerApp()
+    app = ClientApp()
     enter_code = Mock()
 
     @app.lifecycle()
@@ -140,7 +98,7 @@ def test_lifecycle_no_yield() -> None:
 def test_lifecycle_multiple_yields() -> None:
     """Test the lifecycle decorator with multiple yields."""
     # Prepare
-    app = ServerApp()
+    app = ClientApp()
     enter_code = Mock()
     middle_code = Mock()
     exit_code = Mock()
