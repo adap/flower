@@ -1,32 +1,10 @@
-"""Flower strategy."""
+"""fedprox: A Flower Baseline."""
 
 from typing import List, Tuple, Union
 
-from flwr.common import Metrics
 from flwr.common.typing import FitRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
-
-
-def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    """Aggregate with weighted average during evaluation.
-
-    Parameters
-    ----------
-    metrics : List[Tuple[int, Metrics]]
-        The list of metrics to aggregate.
-
-    Returns
-    -------
-    Metrics
-        The weighted average metric.
-    """
-    # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * float(m["accuracy"]) for num_examples, m in metrics]
-    examples = [num_examples for num_examples, _ in metrics]
-
-    # Aggregate and return custom metric (weighted average)
-    return {"accuracy": int(sum(accuracies)) / int(sum(examples))}
 
 
 class FedAvgWithStragglerDrop(FedAvg):

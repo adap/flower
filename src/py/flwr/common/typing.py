@@ -254,3 +254,71 @@ class Fab:
 
     hash_str: str
     content: bytes
+
+
+class RunNotRunningException(BaseException):
+    """Raised when a run is not running."""
+
+
+class InvalidRunStatusException(BaseException):
+    """Raised when an RPC is invalidated by the RunStatus."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.message = message
+
+
+# OIDC user authentication types
+@dataclass
+class UserAuthLoginDetails:
+    """User authentication login details."""
+
+    auth_type: str
+    device_code: str
+    verification_uri_complete: str
+    expires_in: int
+    interval: int
+
+
+@dataclass
+class UserAuthCredentials:
+    """User authentication tokens."""
+
+    access_token: str
+    refresh_token: str
+
+
+@dataclass
+class UserInfo:
+    """User information for event log."""
+
+    user_id: Optional[str]
+    user_name: Optional[str]
+
+
+@dataclass
+class Actor:
+    """Event log actor."""
+
+    actor_id: Optional[str]
+    description: Optional[str]
+    ip_address: str
+
+
+@dataclass
+class Event:
+    """Event log description."""
+
+    action: str
+    run_id: Optional[int]
+    fab_hash: Optional[str]
+
+
+@dataclass
+class LogEntry:
+    """Event log record."""
+
+    timestamp: str
+    actor: Actor
+    event: Event
+    status: str

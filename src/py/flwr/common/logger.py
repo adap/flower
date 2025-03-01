@@ -15,16 +15,22 @@
 """Flower Logger."""
 
 
+import json as _json
 import logging
+import os
+import re
 import sys
 import threading
 import time
-from logging import WARN, LogRecord
+from io import StringIO
+from logging import ERROR, WARN, LogRecord
 from logging.handlers import HTTPHandler
 from queue import Empty, Queue
 from typing import TYPE_CHECKING, Any, Optional, TextIO, Union
 
 import grpc
+import typer
+from rich.console import Console
 
 from flwr.proto.log_pb2 import PushLogsRequest  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -37,6 +43,7 @@ from .constant import LOG_UPLOAD_INTERVAL
 LOGGER_NAME = "flwr"
 FLOWER_LOGGER = logging.getLogger(LOGGER_NAME)
 FLOWER_LOGGER.setLevel(logging.DEBUG)
+log = FLOWER_LOGGER.log  # pylint: disable=invalid-name
 
 LOG_COLORS = {
     "DEBUG": "\033[94m",  # Blue
@@ -96,7 +103,7 @@ class ConsoleHandler(StreamHandler):
 
 
 def update_console_handler(
-    level: Optional[int] = None,
+    level: Optional[Union[int, str]] = None,
     timestamps: Optional[bool] = None,
     colored: Optional[bool] = None,
 ) -> None:
@@ -119,6 +126,27 @@ console_handler = ConsoleHandler(
 )
 console_handler.setLevel(logging.INFO)
 FLOWER_LOGGER.addHandler(console_handler)
+
+# Set log level via env var (show timestamps for `DEBUG`)
+if log_level := os.getenv("FLWR_LOG_LEVEL"):
+    log_level = log_level.upper()
+    try:
+        is_debug = log_level == "DEBUG"
+        if is_debug:
+            log(
+                WARN,
+                "DEBUG logs enabled. Do not use this in production, as it may expose "
+                "sensitive details.",
+            )
+        update_console_handler(level=log_level, timestamps=is_debug, colored=True)
+    except Exception:  # pylint: disable=broad-exception-caught
+        # Alert user but don't raise exception
+        log(
+            ERROR,
+            "Failed to set logging level %s. Using default level: %s",
+            log_level,
+            logging.getLevelName(console_handler.level),
+        )
 
 
 class CustomHTTPHandler(HTTPHandler):
@@ -178,10 +206,6 @@ def configure(
         http_handler.setLevel(logging.DEBUG)
         # Override mapLogRecords as setFormatter has no effect on what is send via http
         FLOWER_LOGGER.addHandler(http_handler)
-
-
-logger = logging.getLogger(LOGGER_NAME)  # pylint: disable=invalid-name
-log = logger.log  # pylint: disable=invalid-name
 
 
 def warn_preview_feature(name: str) -> None:
@@ -303,12 +327,19 @@ def restore_output() -> None:
     console_handler.stream = sys.stdout
 
 
+def redirect_output(output_buffer: StringIO) -> None:
+    """Redirect stdout and stderr to text I/O buffer."""
+    sys.stdout = output_buffer
+    sys.stderr = output_buffer
+    console_handler.stream = sys.stdout
+
+
 def _log_uploader(
     log_queue: Queue[Optional[str]], node_id: int, run_id: int, stub: ServerAppIoStub
 ) -> None:
     """Upload logs to the SuperLink."""
     exit_flag = False
-    node = Node(node_id=node_id, anonymous=False)
+    node = Node(node_id=node_id)
     msgs: list[str] = []
     while True:
         # Fetch all messages from the queue
@@ -366,3 +397,31 @@ def stop_log_uploader(
     """Stop the log uploader thread."""
     log_queue.put(None)
     log_uploader.join()
+
+
+def _remove_emojis(text: str) -> str:
+    """Remove emojis from the provided text."""
+    emoji_pattern = re.compile(
+        "["
+        "\U0001F600-\U0001F64F"  # Emoticons
+        "\U0001F300-\U0001F5FF"  # Symbols & Pictographs
+        "\U0001F680-\U0001F6FF"  # Transport & Map Symbols
+        "\U0001F1E0-\U0001F1FF"  # Flags
+        "\U00002702-\U000027B0"  # Dingbats
+        "\U000024C2-\U0001F251"
+        "]+",
+        flags=re.UNICODE,
+    )
+    return emoji_pattern.sub(r"", text)
+
+
+def print_json_error(msg: str, e: Union[typer.Exit, Exception]) -> None:
+    """Print error message as JSON."""
+    Console().print_json(
+        _json.dumps(
+            {
+                "success": False,
+                "error-message": _remove_emojis(str(msg) + "\n" + str(e)),
+            }
+        )
+    )

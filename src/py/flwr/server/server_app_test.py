@@ -15,7 +15,8 @@
 """Tests for ServerApp."""
 
 
-from unittest.mock import MagicMock
+from collections.abc import Iterator
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
@@ -62,3 +63,106 @@ def test_server_app_exception_when_both_modes() -> None:
             pass
 
         # pylint: enable=unused-argument
+
+
+def test_lifecycle_success() -> None:
+    """Test the lifecycle decorator with success."""
+    # Prepare
+    app = ServerApp()
+    enter_code = Mock()
+    exit_code = Mock()
+
+    @app.lifecycle()
+    def test_fn(_: Context) -> Iterator[None]:
+        enter_code()
+        yield
+        exit_code()
+
+    # Execute
+    with app._lifecycle(Mock(spec=Context)):  # pylint: disable=W0212
+        pass
+
+    # Assert
+    enter_code.assert_called_once()
+    exit_code.assert_called_once()
+
+
+def test_lifecycle_failure() -> None:
+    """Test the lifecycle decorator with failure."""
+    # Prepare
+    app = ServerApp()
+    enter_code = Mock()
+    exit_code = Mock()
+
+    @app.lifecycle()
+    def test_fn(_: Context) -> Iterator[None]:
+        enter_code()
+        yield
+        exit_code()
+
+    # Execute
+    try:
+        with app._lifecycle(Mock(spec=Context)):  # pylint: disable=W0212
+            raise RuntimeError("Test exception")
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("Expected RuntimeError")
+
+    # Assert
+    enter_code.assert_called_once()
+    exit_code.assert_called_once()
+
+
+def test_lifecycle_no_yield() -> None:
+    """Test the lifecycle decorator with no yield."""
+    # Prepare
+    app = ServerApp()
+    enter_code = Mock()
+
+    @app.lifecycle()
+    def test_fn(_: Context) -> Iterator[None]:  # type: ignore
+        enter_code()
+
+    # Execute
+    try:
+        with app._lifecycle(Mock(spec=Context)):  # pylint: disable=W0212
+            pass
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("Expected RuntimeError")
+
+    # Assert
+    enter_code.assert_called_once()
+
+
+def test_lifecycle_multiple_yields() -> None:
+    """Test the lifecycle decorator with multiple yields."""
+    # Prepare
+    app = ServerApp()
+    enter_code = Mock()
+    middle_code = Mock()
+    exit_code = Mock()
+
+    @app.lifecycle()
+    def test_fn(_: Context) -> Iterator[None]:
+        enter_code()
+        yield
+        middle_code()
+        yield
+        exit_code()
+
+    # Execute
+    try:
+        with app._lifecycle(Mock(spec=Context)):  # pylint: disable=W0212
+            pass
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("Expected RuntimeError")
+
+    # Assert
+    enter_code.assert_called_once()
+    middle_code.assert_called_once()
+    exit_code.assert_not_called()

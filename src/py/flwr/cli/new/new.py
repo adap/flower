@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `new` command."""
 
+
 import re
 from enum import Enum
 from pathlib import Path
@@ -81,7 +82,7 @@ def render_template(template: str, data: dict[str, str]) -> str:
 def create_file(file_path: Path, content: str) -> None:
     """Create file including all nessecary directories and write content into file."""
     file_path.parent.mkdir(exist_ok=True)
-    file_path.write_text(content)
+    file_path.write_text(content, encoding="utf-8")
 
 
 def render_and_create(file_path: Path, template: str, context: dict[str, str]) -> None:
@@ -212,7 +213,7 @@ def new(
         else:
             challenge_name = "Code"
             num_clients = "10"
-            dataset_name = "lucasmccabe-lmi/CodeAlpaca-20k"
+            dataset_name = "flwrlabs/code-alpaca-20k"
 
         context["llm_challenge_str"] = llm_challenge_str
         context["fraction_fit"] = fraction_fit
