@@ -1075,12 +1075,14 @@ class StateTest(unittest.TestCase):
             )
         )
         ins_msg1_id = state.store_message_ins(msg1)
+        assert ins_msg1_id
+        assert state.num_message_ins() == 1
         with patch(
             "time.time",
             side_effect=lambda: msg1.metadata.created_at + msg1.metadata.ttl + 0.1,
         ):  # over TTL limit
 
-            res_msg = state.get_message_res([ins_msg1_id])[0]
+            res_msg = state.get_message_res({ins_msg1_id})[0]
             assert res_msg.has_error()
             assert res_msg.error.reason == MESSAGE_UNAVAILABLE_ERROR_REASON
             # Ensure Message has been deleted
@@ -1093,7 +1095,7 @@ class StateTest(unittest.TestCase):
             )
         )
         ins_msg2_id = state.store_message_ins(msg2)
-        print(state.dst_node_id_to_message_id_mapping.keys())
+        assert ins_msg2_id
         assert state.num_message_ins() == 1
         # Get message
         msg2_ins = state.get_message_ins(node_id=node_id, limit=1)
@@ -1107,7 +1109,7 @@ class StateTest(unittest.TestCase):
             side_effect=lambda: msg2.metadata.created_at + msg2.metadata.ttl + 0.1,
         ):  # over TTL limit
 
-            res_msg2_pulled = state.get_message_res([ins_msg2_id])[0]
+            res_msg2_pulled = state.get_message_res({ins_msg2_id})[0]
             assert res_msg2_pulled.has_error()
             assert (
                 res_msg2_pulled.error.reason == REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON
@@ -1129,8 +1131,9 @@ class StateTest(unittest.TestCase):
             )
         )
         ins_msg_id = state.store_message_ins(msg)
+        assert ins_msg_id
 
-        reply = state.get_message_res([ins_msg_id])[0]
+        reply = state.get_message_res({ins_msg_id})[0]
         # Check message contains error informing replpy message hasn't arrived
         assert reply.has_error()
         assert reply.error.reason == REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON
@@ -1224,11 +1227,14 @@ class StateTest(unittest.TestCase):
         # Create reply and insert
         res_msg = ins_msg[0].create_reply(content=RecordSet())
         state.store_message_res(res_msg)
+        assert state.num_message_ins() == 0
+        assert state.num_message_res() == 1
 
         # Fetch reply
-        reply_msg = state.get_message_res([ins_msg_id])
+        reply_msg = state.get_message_res({ins_msg_id})
 
         # assert
+        assert state.num_message_res() == 0
         assert reply_msg[0].content == res_msg.content
         assert reply_msg[0].metadata == res_msg.metadata
         assert reply_msg[0].metadata.dst_node_id == msg.metadata.src_node_id

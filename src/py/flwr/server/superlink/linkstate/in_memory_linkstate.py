@@ -364,7 +364,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 # the mapping would have been removed when the message_ins was pulled
                 # (hence the check with the if above)
                 self.dst_node_id_to_message_id_mapping[ins_meta.dst_node_id].remove(
-                    ins_meta.message_id
+                    UUID(ins_meta.message_id)
                 )
             return None
 
@@ -443,19 +443,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     if message_ttl_has_expired(
                         msg_res.metadata, current_time=current_time
                     ):
-                        meta = Metadata(
-                            run_id=msg_res.metadata.run_id,
-                            message_id=msg_res.metadata.reply_to_message,
-                            src_node_id=SUPERLINK_NODE_ID,
-                            dst_node_id=SUPERLINK_NODE_ID,
-                            reply_to_message="",
-                            group_id="",
-                            ttl=SUPERLINK_NODE_ID,
-                            message_type="",
-                        )
-                        meta._created_at = current_time  # type: ignore
                         reply_list.append(
-                            create_message_error_expired_result_message(meta)
+                            create_message_error_expired_result_message(
+                                msg_res.metadata
+                            )
                         )
                     else:
                         reply_list.append(msg_res)
@@ -518,7 +509,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             ttl=SUPERLINK_NODE_ID,
                             message_type="",
                         )
-                        meta._created_at = current_time  # type: ignore
+                        meta._created_at = current_time  # type: ignore   # pylint: disable=W0212
                         reply_list.append(
                             create_message_error_unavailable_ins_message(meta)
                         )

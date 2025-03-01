@@ -26,7 +26,7 @@ from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
-from flwr.common import Context, Error, Message, Metadata, RecordSet, log, now
+from flwr.common import Context, Error, Message, Metadata, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -35,7 +35,7 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.record import ConfigsRecord
-from flwr.common.serde import error_to_proto, recordset_to_proto, recordset_from_proto
+from flwr.common.serde import error_to_proto, recordset_from_proto, recordset_to_proto
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
@@ -57,9 +57,13 @@ from .utils import (
     convert_sint64_values_in_dict_to_uint64,
     convert_uint64_to_sint64,
     convert_uint64_values_in_dict_to_sint64,
+    create_message_error_expired_result_message,
+    create_message_error_pending_result_message,
+    create_message_error_unavailable_ins_message,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
+    message_ttl_has_expired,
     verify_found_taskres,
     verify_taskins_ids,
 )
@@ -651,6 +655,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 "Record of a message_id %s does not exist or has expired.",
                 ins_message_id,
             )
+            # Erase entry
+            query = """
+                DELETE FROM delivered_messages
+                WHERE message_id = :message_id;
+            """
+            self.query(query, {"message_id": str(res_metadata.reply_to_message)})
             return None
 
         # Ensure the received Message comes from the right node_id
@@ -687,6 +697,14 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # This may need to be changed in the future version with more integrity checks.
         try:
             self.query(query, data)
+
+            # Erase entry from delivered_messages table
+            query = """
+                DELETE FROM delivered_messages
+                WHERE message_id == :message_id;
+            """
+            self.query(query, {"message_id": str(res_metadata.reply_to_message)})
+
         except sqlite3.IntegrityError:
             log(ERROR, "`run` is invalid")
             return None
@@ -754,6 +772,111 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return list(ret.values())
 
+    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+        """Get reply Message for the given Message IDs."""
+        # List of reply messages. We will sort its content at the end
+        # so it matches that of the enquired `message_ids`
+        reply_list: list[Message] = []
+
+        current_time = time.time()
+
+        # Fetch reply messages (delete them)
+        query = f"""
+            DELETE FROM message_res
+            WHERE reply_to_message IN ({",".join(["?"] * len(message_ids))})
+            RETURNING *;
+        """
+        rows = self.query(query, tuple(str(msg_id) for msg_id in message_ids))
+        for row in rows:
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "src_node_id", "dst_node_id"]
+            )
+            msg_res = message_from_dict(row)
+            #   expired TTL ? -> return Error Message
+            #   else -> Return actual Reply Message
+            if message_ttl_has_expired(msg_res.metadata, current_time=current_time):
+                reply_list.append(
+                    create_message_error_expired_result_message(msg_res.metadata)
+                )
+            else:
+                reply_list.append(msg_res)
+
+        # Return if all processed
+        if len(reply_list) == len(message_ids):
+            return reply_list
+
+        # Fetch expired delivered_messages or messages_ins (delete them)
+        self.num_message_ins()
+        query_ins = f"""
+                DELETE FROM delivered_messages
+                WHERE message_id IN ({",".join(["?"] * len(message_ids))})
+                AND (created_at + ttl) < ?
+                RETURNING *;
+            """
+        data = tuple(str(msg_id) for msg_id in message_ids) + (current_time,)
+        rows = self.query(query_ins, data)
+        query_delivered = f"""
+                DELETE FROM message_ins
+                WHERE message_id IN ({",".join(["?"] * len(message_ids))})
+                AND (created_at + ttl) < ?
+                RETURNING *;
+        """
+        rows.extend(self.query(query_delivered, data))
+        # Return TTL expired Error Message
+        for row in rows:
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "src_node_id", "dst_node_id"]
+            )
+            msg_ins_metadata = message_from_dict(row).metadata
+            reply_list.append(
+                create_message_error_unavailable_ins_message(msg_ins_metadata)
+            )
+
+        # Return if all processed
+        if len(reply_list) == len(message_ids):
+            return reply_list
+
+        # Fetch unexpired delivered and undelivered messages (keep them)
+        query_ins = f"""
+            SELECT *
+            FROM message_ins
+            WHERE message_id IN ({",".join(["?"] * len(message_ids))})
+        """
+        rows = self.query(query_ins, tuple(str(msg_id) for msg_id in message_ids))
+        query_delivered = f"""
+            SELECT *
+            FROM delivered_messages
+            WHERE message_id IN ({",".join(["?"] * len(message_ids))})
+        """
+        rows.extend(
+            self.query(query_delivered, tuple(str(msg_id) for msg_id in message_ids))
+        )
+        for row in rows:
+            # Return Error Message (awaiting reply)
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "src_node_id", "dst_node_id"]
+            )
+            msg_ins_metadata = message_from_dict(row).metadata
+            reply_list.append(
+                create_message_error_pending_result_message(msg_ins_metadata)
+            )
+
+        # msg_id isn't recognized
+        meta = Metadata(
+            run_id=0,
+            message_id="",
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=SUPERLINK_NODE_ID,
+            reply_to_message="",
+            group_id="",
+            ttl=SUPERLINK_NODE_ID,
+            message_type="",
+        )
+        meta._created_at = current_time  # type: ignore   # pylint: disable=W0212
+        reply_list.append(create_message_error_unavailable_ins_message(meta))
+
+        return reply_list
+
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.
 
@@ -765,12 +888,27 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         num = cast(int, result["num"])
         return num
 
+    def num_message_ins(self) -> int:
+        """Calculate the number of Messages awaiting a reply."""
+        query = "SELECT count(*) AS num FROM message_ins;"
+        num_message_ins: int = self.query(query)[0]["num"]
+        query = "SELECT count(*) AS num FROM delivered_messages;"
+        num_delivered: int = self.query(query)[0]["num"]
+        return num_message_ins + num_delivered
+
     def num_task_res(self) -> int:
         """Calculate the number of task_res in store.
 
         This includes delivered but not yet deleted task_res.
         """
         query = "SELECT count(*) AS num FROM task_res;"
+        rows = self.query(query)
+        result: dict[str, int] = rows[0]
+        return result["num"]
+
+    def num_message_res(self) -> int:
+        """Calculate the number of reply Messages in store."""
+        query = "SELECT count(*) AS num FROM message_res;"
         rows = self.query(query)
         result: dict[str, int] = rows[0]
         return result["num"]
@@ -1365,7 +1503,6 @@ def message_to_dict(message: Message) -> dict[str, Any]:
 
 def message_from_dict(message_dict: dict[str, Any]) -> Message:
     """Transform dict to Message."""
-
     content_proto = ProtoRecordSet()
     content_proto.ParseFromString(message_dict.pop("content"))
     content = recordset_from_proto(content_proto)
