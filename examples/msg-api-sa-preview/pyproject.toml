@@ -7,9 +7,7 @@ name = "secaggexample"
 version = "1.0.0"
 description = "Secure Aggregation in Flower"
 license = "Apache-2.0"
-dependencies = [
-    "flwr[simulation]>=1.15.2",
-]
+dependencies = ["flwr[simulation]>=1.15.2"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
