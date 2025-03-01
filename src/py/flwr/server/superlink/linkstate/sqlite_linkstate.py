@@ -370,7 +370,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         message_id = uuid4()
 
         # Store Message
-        message.metadata._message_id = str(message_id)  # type: ignore   # pylint: disable=W0212
+        # pylint: disable=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
         data = (message_to_dict(message),)
 
         # Convert values from uint64 to sint64 for SQLite
@@ -682,7 +683,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         message_id = uuid4()
 
         # Store Message
-        message.metadata._message_id = str(message_id)  # type: ignore   # pylint: disable=W0212
+        # pylint: disable=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
         data = (message_to_dict(message),)
 
         # Convert values from uint64 to sint64 for SQLite
@@ -1424,7 +1426,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         metadata = Metadata(
             **{k: v for k, v in metadata_dict.items() if k != "created_at"}
         )
-        metadata._created_at = metadata_dict["created_at"]  # type: ignore   # pylint: disable=W0212
+        # pylint: disable=W0212
+        metadata._created_at = metadata_dict["created_at"]  # type: ignore
 
         return metadata
 
@@ -1510,7 +1513,8 @@ def message_from_dict(message_dict: dict[str, Any]) -> Message:
     # Metadata constructor doesn't allow passing created_at. We set it later
     metadata = Metadata(**{k: v for k, v in message_dict.items() if k != "created_at"})
     msg = Message(metadata=metadata, content=content, error=error)
-    msg.metadata._created_at = message_dict["created_at"]  # type: ignore   # pylint: disable=W0212
+    # pylint: disable=W0212
+    msg.metadata._created_at = message_dict["created_at"]  # type: ignore
     return msg
 
 

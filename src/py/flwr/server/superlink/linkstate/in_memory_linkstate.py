@@ -157,7 +157,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         message_id = uuid4()
 
         # Store Message
-        message.metadata._message_id = str(message_id)  # type: ignore  # pylint: disable=W0212
+        # pylint: disable=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
         with self.lock:
             self.message_ins_store[message_id] = message
 
@@ -316,9 +317,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def store_message_res(self, message: Message) -> Optional[UUID]:
         """Store one Message."""
-        # TODO: Decide if storing message reply fails we also delete the
-        # TODO: entry in `delivered_messages` and `message_id_node_id` mapping.
-        # TODO: some asserts in tests will need adjustments
         # Validate message
         errors = validate_message(message=message, is_reply_message=True)
         if any(errors):
@@ -344,7 +342,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                         "Mismatch between source and destination node_ids in "
                         "received reply Message.",
                     )
-                    # TODO: delete orignal message references ?
                     return None
             else:
                 # ins_metadata not found
@@ -375,7 +372,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         message_id = uuid4()
 
         # Store Message
-        message.metadata._message_id = str(message_id)  # type: ignore   # pylint: disable=W0212
+        # pylint: disable=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
         with self.lock:
             self.message_res_store[message_id] = message
             ins_msg_id = UUID(ins_metadata.message_id)
@@ -509,7 +507,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             ttl=SUPERLINK_NODE_ID,
                             message_type="",
                         )
-                        meta._created_at = current_time  # type: ignore   # pylint: disable=W0212
+                        # pylint: disable=W0212
+                        meta._created_at = current_time  # type: ignore
                         reply_list.append(
                             create_message_error_unavailable_ins_message(meta)
                         )

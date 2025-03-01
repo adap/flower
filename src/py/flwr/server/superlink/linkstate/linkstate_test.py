@@ -474,10 +474,6 @@ class StateTest(unittest.TestCase):
         retrieved_task_ins = task_ins_list[0]
         assert retrieved_task_ins.task_id == str(task_ins_uuid)
 
-    def test_message_ins_store_identity_and_retrieve_identity(self) -> None:
-        """Store identity Message and retrieve it."""
-        # TODO:already in test_store_message_ins_one, do we still need a separate test?
-
     def test_task_ins_store_delivered_and_fail_retrieving(self) -> None:
         """Fail retrieving delivered task."""
         # Prepare
@@ -499,10 +495,6 @@ class StateTest(unittest.TestCase):
 
         # Assert
         assert len(task_ins_list) == 0
-
-    def test_message_ins_store_delivered_and_fail_retrieving(self) -> None:
-        """Fail retrieving delivered task."""
-        # TODO:already in test_store_message_ins_one, do we still need a separate test?
 
     def test_get_task_ins_limit_throws_for_limit_zero(self) -> None:
         """Fail call with limit=0."""
@@ -1285,7 +1277,8 @@ class StateTest(unittest.TestCase):
 
         # Create reply, modify node_ids and insert
         res_msg = ins_msg[0].create_reply(content=RecordSet())
-        res_msg.metadata._src_node_id = node_id + 1  # type: ignore   # pylint: disable=W0212
+        # pylint: disable=W0212
+        res_msg.metadata._src_node_id = node_id + 1  # type: ignore
         msg_res_id = state.store_message_res(res_msg)
 
         # Assert

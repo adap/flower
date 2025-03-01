@@ -18,13 +18,12 @@
 from typing import Optional
 from uuid import UUID
 
+from flwr.common import Message
 from flwr.common.constant import Status
 from flwr.common.serde import (
     fab_to_proto,
     message_from_proto,
-    message_from_taskins,
     message_to_proto,
-    message_to_taskres,
     user_config_to_proto,
 )
 from flwr.common.typing import Fab, InvalidRunStatusException
@@ -48,7 +47,6 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunResponse,
     Run,
 )
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
@@ -92,13 +90,12 @@ def pull_messages(
     node = request.node  # pylint: disable=no-member
     node_id: int = node.node_id
 
-    # Retrieve TaskIns from State
-    task_ins_list: list[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
+    # Retrieve Message from State
+    message_list: list[Message] = state.get_message_ins(node_id=node_id, limit=1)
 
     # Convert to Messages
     msg_proto = []
-    for task_ins in task_ins_list:
-        msg = message_from_taskins(task_ins)
+    for msg in message_list:
         msg_proto.append(message_to_proto(msg))
 
     return PullMessagesResponse(messages_list=msg_proto)
@@ -108,21 +105,20 @@ def push_messages(
     request: PushMessagesRequest, state: LinkState
 ) -> PushMessagesResponse:
     """Push Messages handler."""
-    # Convert Message to TaskRes
+    # Convert Message to Message
     msg = message_from_proto(message_proto=request.messages_list[0])
-    task_res = message_to_taskres(msg)
 
     # Abort if the run is not running
     abort_msg = check_abort(
-        task_res.run_id,
+        msg.metadata.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
     )
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
 
-    # Store TaskRes in State
-    message_id: Optional[UUID] = state.store_task_res(task_res=task_res)
+    # Store Message in State
+    message_id: Optional[UUID] = state.store_message_res(message=msg)
 
     # Build response
     response = PushMessagesResponse(
