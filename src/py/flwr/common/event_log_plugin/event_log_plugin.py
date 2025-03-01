@@ -75,7 +75,7 @@ class EventLogWriterPlugin(ABC):
         context: grpc.ServicerContext,
         user_info: UserInfo,
         method_name: str,
-        response: EventLogResponse,
+        response: Union[EventLogResponse, Exception],
     ) -> LogEntry:
         """Compose post-event log entry from the provided response and context."""
 
