@@ -170,7 +170,6 @@ def load_app(  # pylint: disable= too-many-branches
                 module = importlib.import_module(module_str)
             else:
                 module = sys.modules[module_str]
-                _reload_modules(project_dir)
 
         except ModuleNotFoundError as err:
             raise error_type(
@@ -198,15 +197,6 @@ def _unload_modules(project_dir: Path) -> None:
         path: Optional[str] = getattr(m, "__file__", None)
         if path is not None and path.startswith(dir_str):
             del sys.modules[name]
-
-
-def _reload_modules(project_dir: Path) -> None:
-    """Reload modules from the project directory."""
-    dir_str = str(project_dir.absolute())
-    for m in list(sys.modules.values()):
-        path: Optional[str] = getattr(m, "__file__", None)
-        if path is not None and path.startswith(dir_str):
-            importlib.reload(m)
 
 
 def _set_sys_path(directory: Optional[Union[str, Path]]) -> None:

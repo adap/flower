@@ -67,25 +67,26 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             )
             self.log_plugin.write_log(log_entry)
 
+            response, error = None, None
             # For unary-unary calls, log after the call immediately
             if method_handler.unary_unary:
-                unary_response: Union[EventLogResponse, Exception]
                 try:
-                    unary_response = cast(
+                    response = cast(
                         EventLogResponse, method_handler.unary_unary(request, context)
                     )
                 except Exception as e:  # pylint: disable=broad-except
-                    unary_response = e
+                    error = e
+                    raise
                 finally:
                     log_entry = self.log_plugin.compose_log_after_event(
                         request=request,
                         context=context,
                         user_info=shared_user_info.get(),
                         method_name=method_name,
-                        response=unary_response,
+                        response=response or cast(Exception, error),
                     )
                     self.log_plugin.write_log(log_entry)
-                return unary_response  # cast(EventLogResponse, response)
+                return response
 
             # For unary-stream calls, wrap the response iterator and write the event log
             # after iteration completes
@@ -96,13 +97,13 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                 )
 
                 def response_wrapper() -> Iterator[EventLogResponse]:
-                    stream_response: Union[EventLogResponse, Exception]
                     try:
                         # pylint: disable=use-yield-from
-                        for stream_response in response_iterator:
-                            yield stream_response
+                        for response in response_iterator:
+                            yield response
                     except Exception as e:  # pylint: disable=broad-except
-                        stream_response = e
+                        error = e
+                        raise
                     finally:
                         # This block is executed after the client has consumed
                         # the entire stream, or if iteration is interrupted
@@ -111,7 +112,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                             context=context,
                             user_info=shared_user_info.get(),
                             method_name=method_name,
-                            response=stream_response,
+                            response=response or cast(Exception, error),
                         )
                         self.log_plugin.write_log(log_entry)
 

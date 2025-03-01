@@ -16,6 +16,7 @@
 
 
 import unittest
+from typing import Union
 from unittest.mock import MagicMock
 
 import grpc
@@ -61,7 +62,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         context: grpc.ServicerContext,
         user_info: UserInfo,
         method_name: str,
-        response: EventLogResponse,
+        response: Union[EventLogResponse, Exception],
     ) -> LogEntry:
         """."""
         return LogEntry(

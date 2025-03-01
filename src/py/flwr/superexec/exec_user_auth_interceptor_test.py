@@ -122,7 +122,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
 
         Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
         """
-        # Prepare: use a non-login request.
+        # Prepare
         dummy_request = request_class
         dummy_context = MagicMock()
         dummy_auth_plugin = MagicMock()
@@ -136,7 +136,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             self.dummy_unary_unary_continuation, handler_call_details
         )
 
-        # Execute & Assert: interceptor should abort with UNAUTHENTICATED.
+        # Execute & Assert: interceptor should abort with UNAUTHENTICATED
         with self.assertRaises(grpc.RpcError):
             intercepted_handler.unary_unary(dummy_request, dummy_context)
 
@@ -153,7 +153,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
 
         Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
         """
-        # Prepare: use a non-login request (e.g. StartRunRequest).
+        # Prepare
         dummy_request = request_class
         dummy_context = MagicMock()
         dummy_auth_plugin = MagicMock()
@@ -181,4 +181,44 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         )
         self.assertEqual(
             user_info_from_context.user_name, self.expected_user_info.user_name
+        )
+
+    @parameterized.expand(
+        [
+            (ListRunsRequest()),
+            (StartRunRequest()),
+            (StopRunRequest()),
+            (StreamLogsRequest()),
+        ]
+    )  # type: ignore
+    def test_unary_unary_refresh_tokens_successful(self, request_class) -> None:
+        """Test unary-unary RPC call when tokens are refreshed successfully.
+
+        Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
+        """
+        # Prepare
+        dummy_request = request_class
+        dummy_context = MagicMock()
+        dummy_auth_plugin = MagicMock()
+        handler_call_details = MagicMock()
+
+        # Set up validate_tokens_in_metadata to return a tuple indicating invalid tokens
+        dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
+        # Set up refresh tokens
+        expected_refresh_tokens_value = [("new-token", "value")]
+        dummy_auth_plugin.refresh_tokens.return_value = expected_refresh_tokens_value
+
+        interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
+        intercepted_handler = interceptor.intercept_service(
+            self.dummy_unary_unary_continuation, handler_call_details
+        )
+
+        # Execute
+        response = intercepted_handler.unary_unary(dummy_request, dummy_context)
+
+        # Assert response is as expected and initial metadata was sent
+        self.assertEqual(response, "dummy_response")
+        # Assert refresh tokens were sent in initial metadata
+        dummy_context.send_initial_metadata.assert_called_once_with(
+            expected_refresh_tokens_value
         )
