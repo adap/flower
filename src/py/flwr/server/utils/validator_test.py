@@ -17,7 +17,6 @@
 
 import time
 import unittest
-from typing import Optional
 
 from parameterized import parameterized
 
@@ -28,6 +27,38 @@ from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
 from .validator import validate_message, validate_task_ins_or_res
+
+
+def create_message(  # pylint: disable=R0913, R0917
+    message_id: str = "",
+    src_node_id: int = SUPERLINK_NODE_ID,
+    dst_node_id: int = 456,
+    ttl: int = DEFAULT_TTL,
+    reply_to_message: str = "",
+    has_content: bool = True,
+    has_error: bool = False,
+    msg_type: str = "mock",
+) -> Message:
+    """Create a Message for testing.
+
+    By default, it creates a valid instruction message containing a RecordSet.
+    """
+    metadata = Metadata(
+        run_id=0,
+        message_id=message_id,
+        src_node_id=src_node_id,
+        dst_node_id=dst_node_id,
+        reply_to_message=reply_to_message,
+        group_id="",
+        ttl=ttl,
+        message_type=msg_type,
+    )
+    ret = Message(metadata=metadata, content=RecordSet())
+    if not has_content:
+        ret.__dict__["_content"] = None
+    if has_error:
+        ret.__dict__["_error"] = Error(0)
+    return ret
 
 
 class ValidatorTest(unittest.TestCase):
@@ -96,204 +127,39 @@ class ValidatorTest(unittest.TestCase):
 
     @parameterized.expand(  # type: ignore
         [
-            (
-                "",
-                SUPERLINK_NODE_ID,
-                456,
-                DEFAULT_TTL,
-                "",
-                RecordSet(),
-                None,
-                "mock",
-                False,
-                False,
-            ),  # Should pass
-            (
-                "",
-                SUPERLINK_NODE_ID,
-                456,
-                DEFAULT_TTL,
-                "",
-                None,
-                Error(0),
-                "mock",
-                False,
-                False,
-            ),  # Should pass
-            (
-                "123",
-                SUPERLINK_NODE_ID,
-                456,
-                DEFAULT_TTL,
-                "",
-                RecordSet(),
-                None,
-                "mock",
-                False,
-                True,
-            ),  # message_id is set
-            (
-                "",
-                SUPERLINK_NODE_ID,
-                456,
-                0,
-                "",
-                RecordSet(),
-                None,
-                "mock",
-                False,
-                True,
-            ),  # ttl is zero
-            (
-                "",
-                0,
-                456,
-                DEFAULT_TTL,
-                "",
-                RecordSet(),
-                None,
-                "mock",
-                False,
-                True,
-            ),  # unset src_node_id
-            (
-                "",
-                SUPERLINK_NODE_ID,
-                0,
-                DEFAULT_TTL,
-                "",
-                RecordSet(),
-                None,
-                "mock",
-                False,
-                True,
-            ),  # unset dst_node_id
-            (
-                "",
-                SUPERLINK_NODE_ID,
-                SUPERLINK_NODE_ID,
-                DEFAULT_TTL,
-                "",
-                RecordSet(),
-                None,
-                "mock",
-                False,
-                True,
-            ),  # dst_node_id is SUPERLINK
-            (
-                "",
-                SUPERLINK_NODE_ID,
-                456,
-                DEFAULT_TTL,
-                "",
-                RecordSet(),
-                None,
-                "",
-                False,
-                True,
-            ),  # message_type unset
-            (
-                "",
-                SUPERLINK_NODE_ID,
-                456,
-                DEFAULT_TTL,
-                "",
-                None,
-                None,
-                "mock",
-                False,
-                True,
-            ),  # message has both content and error unset
-            (
-                "",
-                SUPERLINK_NODE_ID,
-                456,
-                DEFAULT_TTL,
-                "",
-                RecordSet(),
-                Error(0),
-                "mock",
-                False,
-                True,
-            ),  # message has both content and error set
-            (
-                "",
-                SUPERLINK_NODE_ID,
-                456,
-                DEFAULT_TTL,
-                "789",
-                RecordSet(),
-                None,
-                "mock",
-                False,
-                True,
-            ),  # reply_to_message is set it's not a reply message
-            (
-                "",
-                SUPERLINK_NODE_ID,
-                456,
-                DEFAULT_TTL,
-                "",
-                RecordSet(),
-                None,
-                "mock",
-                True,
-                True,
-            ),  # reply_to_message isn't set in reply message
-            (
-                "",
-                123,
-                456,
-                DEFAULT_TTL,
-                "blabla",
-                RecordSet(),
-                None,
-                "mock",
-                True,
-                True,
-            ),  # is reply message but dst_node_id isn't superlink
+            # Valid messages
+            (create_message(), False, False),
+            (create_message(has_content=False, has_error=True), False, False),
+            # `message_id` is set
+            (create_message(message_id="123"), False, True),
+            # `ttl` is zero
+            (create_message(ttl=0), False, True),
+            # `src_node_id` is not set
+            (create_message(src_node_id=0), False, True),
+            # `dst_node_id` is not set
+            (create_message(dst_node_id=0), False, True),
+            # `dst_node_id` is SUPERLINK
+            (create_message(dst_node_id=SUPERLINK_NODE_ID), False, True),
+            # `message_type` is not set
+            (create_message(msg_type=""), False, True),
+            # Both `content` and `error` are not set
+            (create_message(has_content=False), False, True),
+            # Both `content` and `error` are set
+            (create_message(has_error=True), False, True),
+            # `reply_to_message` is set in a non-reply message
+            (create_message(reply_to_message="789"), False, True),
+            # `reply_to_message` is not set in reply message
+            (create_message(), True, True),
+            # `dst_node_id` is not SuperLink in reply message
+            (create_message(src_node_id=123, reply_to_message="blabla"), True, True),
         ]
     )
-    # pylint: disable-next=too-many-arguments,too-many-positional-arguments
-    def test_message(
-        self,
-        message_id: str,
-        src_node_id: Optional[int],
-        dst_node_id: Optional[int],
-        ttl: int,
-        reply_to_message: str,
-        content: Optional[RecordSet],
-        error: Optional[Error],
-        msg_type: str,
-        is_reply: bool,
-        should_fail: bool,
-    ) -> None:
+    def test_message(self, message: Message, is_reply: bool, should_fail: bool) -> None:
         """Test is_valid message."""
-        metadata = Metadata(
-            run_id=0,
-            message_id=message_id,
-            src_node_id=src_node_id,  # type: ignore
-            dst_node_id=dst_node_id,  # type: ignore
-            reply_to_message=reply_to_message,
-            group_id="",
-            ttl=ttl,
-            message_type=msg_type,
-        )
-
-        if content is None and error is None:
-            message = Message(metadata=metadata, content=RecordSet())
-            # pylint: disable-next=protected-access
-            message._content = None  # type: ignore
-        elif content is not None and error is not None:
-            message = Message(metadata=metadata, content=content)
-            # pylint: disable-next=protected-access
-            message._error = error  # type: ignore
-        else:
-            # Normal creation
-            message = Message(metadata=metadata, content=content, error=error)
-
-        # Execute & Assert
+        # Execute
         val_errors = validate_message(message, is_reply_message=is_reply)
+
+        # Assert
         if should_fail:
             self.assertTrue(val_errors)
         else:
