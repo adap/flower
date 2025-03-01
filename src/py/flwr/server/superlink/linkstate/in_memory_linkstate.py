@@ -378,7 +378,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         message.metadata._message_id = str(message_id)  # type: ignore   # pylint: disable=W0212
         with self.lock:
             self.message_res_store[message_id] = message
-            self.message_ins_to_message_res[UUID(ins_metadata.message_id)] = message_id
+            ins_msg_id = UUID(ins_metadata.message_id)
+            self.message_ins_to_message_res[ins_msg_id] = message_id
+            del self.delivered_messages[ins_msg_id]
 
         # Return the new message_id
         return message_id
@@ -441,12 +443,21 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     if message_ttl_has_expired(
                         msg_res.metadata, current_time=current_time
                     ):
-                        in_metadata = self.delivered_messages.pop(msg_id)
+                        meta = Metadata(
+                            run_id=msg_res.metadata.run_id,
+                            message_id=msg_res.metadata.reply_to_message,
+                            src_node_id=SUPERLINK_NODE_ID,
+                            dst_node_id=SUPERLINK_NODE_ID,
+                            reply_to_message="",
+                            group_id="",
+                            ttl=SUPERLINK_NODE_ID,
+                            message_type="",
+                        )
+                        meta._created_at = current_time  # type: ignore
                         reply_list.append(
-                            create_message_error_expired_result_message(in_metadata)
+                            create_message_error_expired_result_message(meta)
                         )
                     else:
-                        del self.delivered_messages[msg_id]
                         reply_list.append(msg_res)
 
                 else:
