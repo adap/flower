@@ -18,13 +18,47 @@
 import time
 import unittest
 
-from flwr.common import DEFAULT_TTL
+from parameterized import parameterized
+
+from flwr.common import DEFAULT_TTL, Error, Message, Metadata, RecordSet
 from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.proto import recordset_pb2
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
-from .validator import validate_task_ins_or_res
+from .validator import validate_message, validate_task_ins_or_res
+
+
+def create_message(  # pylint: disable=R0913, R0917
+    message_id: str = "",
+    src_node_id: int = SUPERLINK_NODE_ID,
+    dst_node_id: int = 456,
+    ttl: int = DEFAULT_TTL,
+    reply_to_message: str = "",
+    has_content: bool = True,
+    has_error: bool = False,
+    msg_type: str = "mock",
+) -> Message:
+    """Create a Message for testing.
+
+    By default, it creates a valid instruction message containing a RecordSet.
+    """
+    metadata = Metadata(
+        run_id=0,
+        message_id=message_id,
+        src_node_id=src_node_id,
+        dst_node_id=dst_node_id,
+        reply_to_message=reply_to_message,
+        group_id="",
+        ttl=ttl,
+        message_type=msg_type,
+    )
+    ret = Message(metadata=metadata, content=RecordSet())
+    if not has_content:
+        ret.__dict__["_content"] = None
+    if has_error:
+        ret.__dict__["_error"] = Error(0)
+    return ret
 
 
 class ValidatorTest(unittest.TestCase):
@@ -91,6 +125,46 @@ class ValidatorTest(unittest.TestCase):
         val_errors_res = validate_task_ins_or_res(expired_task_res)
         self.assertIn("Task TTL has expired", val_errors_res)
 
+    @parameterized.expand(  # type: ignore
+        [
+            # Valid messages
+            (create_message(), False, False),
+            (create_message(has_content=False, has_error=True), False, False),
+            # `message_id` is set
+            (create_message(message_id="123"), False, True),
+            # `ttl` is zero
+            (create_message(ttl=0), False, True),
+            # `src_node_id` is not set
+            (create_message(src_node_id=0), False, True),
+            # `dst_node_id` is not set
+            (create_message(dst_node_id=0), False, True),
+            # `dst_node_id` is SUPERLINK
+            (create_message(dst_node_id=SUPERLINK_NODE_ID), False, True),
+            # `message_type` is not set
+            (create_message(msg_type=""), False, True),
+            # Both `content` and `error` are not set
+            (create_message(has_content=False), False, True),
+            # Both `content` and `error` are set
+            (create_message(has_error=True), False, True),
+            # `reply_to_message` is set in a non-reply message
+            (create_message(reply_to_message="789"), False, True),
+            # `reply_to_message` is not set in reply message
+            (create_message(), True, True),
+            # `dst_node_id` is not SuperLink in reply message
+            (create_message(src_node_id=123, reply_to_message="blabla"), True, True),
+        ]
+    )
+    def test_message(self, message: Message, is_reply: bool, should_fail: bool) -> None:
+        """Test is_valid message."""
+        # Execute
+        val_errors = validate_message(message, is_reply_message=is_reply)
+
+        # Assert
+        if should_fail:
+            self.assertTrue(val_errors)
+        else:
+            self.assertFalse(val_errors)
+
 
 def create_task_ins(
     consumer_node_id: int,
@@ -109,7 +183,7 @@ def create_task_ins(
             producer=Node(node_id=SUPERLINK_NODE_ID),
             consumer=consumer,
             task_type="mock",
-            recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            recordset=recordset_pb2.RecordSet(),  # pylint: disable=E1101
             ttl=DEFAULT_TTL,
             created_at=time.time(),
         ),
@@ -132,7 +206,7 @@ def create_task_res(
             consumer=Node(node_id=SUPERLINK_NODE_ID),
             ancestry=ancestry,
             task_type="mock",
-            recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            recordset=recordset_pb2.RecordSet(),  # pylint: disable=E1101
             ttl=DEFAULT_TTL,
             created_at=time.time(),
         ),
