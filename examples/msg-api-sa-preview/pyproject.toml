@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "secaggexample"
+version = "1.0.0"
+description = "Secure Aggregation in Flower"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.15.2",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "secaggexample.server_app:app"
+clientapp = "secaggexample.client_app:app"
+
+
+[tool.flwr.app.config]
+min-clients = 10
+# Parameters for the SecAgg+ protocol
+num-shares = 5
+reconstruction-threshold = 3
+timeout = 15.0
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
