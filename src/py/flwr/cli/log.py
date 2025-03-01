@@ -38,6 +38,10 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 from .utils import init_channel, try_obtain_cli_auth_plugin, unauthenticated_exc_handler
 
 
+class AllLogsRetrieved(BaseException):
+    """Raised when all logs are retrieved."""
+
+
 def start_stream(
     run_id: int, channel: grpc.Channel, refresh_period: int = CONN_REFRESH_PERIOD
 ) -> None:
@@ -56,10 +60,10 @@ def start_stream(
         # pylint: disable=E1101
         if e.code() == grpc.StatusCode.NOT_FOUND:
             logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
-        if e.code() == grpc.StatusCode.CANCELLED:
-            pass
         else:
             raise e
+    except AllLogsRetrieved:
+        pass
     finally:
         channel.close()
 
@@ -94,6 +98,7 @@ def stream_logs(
         with unauthenticated_exc_handler():
             for res in stub.StreamLogs(req, timeout=duration):
                 print(res.log_output, end="")
+        raise AllLogsRetrieved()
     except grpc.RpcError as e:
         # pylint: disable=E1101
         if e.code() != grpc.StatusCode.DEADLINE_EXCEEDED:
@@ -108,27 +113,21 @@ def stream_logs(
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     """Print logs from the beginning of a run."""
     stub = ExecStub(channel)
-    req = StreamLogsRequest(run_id=run_id)
+    req = StreamLogsRequest(run_id=run_id, after_timestamp=0.0)
 
     try:
-        while True:
-            try:
-                with unauthenticated_exc_handler():
-                    # Enforce timeout for graceful exit
-                    for res in stub.StreamLogs(req, timeout=timeout):
-                        print(res.log_output)
-            except grpc.RpcError as e:
-                # pylint: disable=E1101
-                if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
-                    break
-                if e.code() == grpc.StatusCode.NOT_FOUND:
-                    logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
-                    break
-                if e.code() == grpc.StatusCode.CANCELLED:
-                    break
-                raise e
-    except KeyboardInterrupt:
-        logger(DEBUG, "Stream interrupted by user")
+        with unauthenticated_exc_handler():
+            # Enforce timeout for graceful exit
+            for res in stub.StreamLogs(req, timeout=timeout):
+                print(res.log_output)
+                break
+    except grpc.RpcError as e:
+        if e.code() == grpc.StatusCode.NOT_FOUND:  # pylint: disable=E1101
+            logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
+        elif e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:  # pylint: disable=E1101
+            pass
+        else:
+            raise e
     finally:
         channel.close()
         logger(DEBUG, "Channel closed")
