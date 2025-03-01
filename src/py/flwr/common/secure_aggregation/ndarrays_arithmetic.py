@@ -21,7 +21,9 @@ import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 
-def factor_combine(factor: int, parameters: list[NDArray[Any]]) -> list[NDArray[Any]]:
+def factor_combine(
+    factor: Union[int, float], parameters: list[NDArray[Any]]
+) -> list[NDArray[Any]]:
     """Combine factor with parameters."""
     return [np.array([factor])] + parameters
 

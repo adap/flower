@@ -23,6 +23,8 @@ from .secaggplus_workflow import SecAggPlusWorkflow
 class SecAggWorkflow(SecAggPlusWorkflow):
     """The workflow for the SecAgg protocol.
 
+    Please use with the `secagg_mod` modifier on the ClientApp side.
+
     The SecAgg protocol ensures the secure summation of integer vectors owned by
     multiple parties, without accessing any individual integer vector. This workflow
     allows the server to compute the weighted average of model parameters across all
