@@ -50,6 +50,12 @@ from flwr.server.superlink.linkstate import (
     SqliteLinkState,
 )
 
+from .utils import (
+    MESSAGE_UNAVAILABLE_ERROR_REASON,
+    REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON,
+    REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
+)
+
 
 class StateTest(unittest.TestCase):
     """Test all state implementations."""
@@ -280,6 +286,39 @@ class StateTest(unittest.TestCase):
         )
         assert actual_task.ttl > 0
 
+    def test_store_message_ins_one(self) -> None:
+        """Test store_message_ins."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+
+        # Execute
+        state.store_message_ins(message=msg)
+        message_ins_list = state.get_message_ins(node_id=node_id, limit=10)
+
+        # Assert
+        # One returned Message
+        assert len(message_ins_list) == 1
+
+        # Check messages are identical
+        assert msg.content == message_ins_list[0].content
+        assert msg.metadata == message_ins_list[0].metadata
+
+        # Attempt to fetch a second time returns empty Message list
+        assert len(state.get_message_ins(node_id=node_id, limit=10)) == 0
+
+        actual_message_ins = message_ins_list[0]
+
+        assert (
+            actual_message_ins.metadata.message_id == msg.metadata.message_id
+        )  # pylint: disable=no-member
+
     def test_store_task_ins_invalid_node_id(self) -> None:
         """Test store_task_ins with invalid node_id."""
         # Prepare
@@ -294,6 +333,30 @@ class StateTest(unittest.TestCase):
         # Execute and assert
         assert state.store_task_ins(task_ins) is None
         assert state.store_task_ins(task_ins2) is None
+
+    def test_store_message_ins_invalid_node_id(self) -> None:
+        """Test store_message_ins with invalid node_id."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        invalid_node_id = 61016 if node_id != 61016 else 61017
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        # A message for a node that doesn't exist
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=invalid_node_id,
+                run_id=run_id,
+            )
+        )
+        # A message with src_node_id that's not that of the SuperLink
+        msg2 = message_from_proto(
+            create_ins_message(src_node_id=61016, dst_node_id=node_id, run_id=run_id)
+        )
+
+        # Execute and assert
+        assert state.store_message_ins(msg) is None
+        assert state.store_message_ins(msg2) is None
 
     def test_store_and_delete_tasks(self) -> None:
         """Test delete_tasks."""
@@ -411,6 +474,10 @@ class StateTest(unittest.TestCase):
         retrieved_task_ins = task_ins_list[0]
         assert retrieved_task_ins.task_id == str(task_ins_uuid)
 
+    def test_message_ins_store_identity_and_retrieve_identity(self) -> None:
+        """Store identity Message and retrieve it."""
+        # TODO:already in test_store_message_ins_one, do we still need a separate test?
+
     def test_task_ins_store_delivered_and_fail_retrieving(self) -> None:
         """Fail retrieving delivered task."""
         # Prepare
@@ -433,6 +500,10 @@ class StateTest(unittest.TestCase):
         # Assert
         assert len(task_ins_list) == 0
 
+    def test_message_ins_store_delivered_and_fail_retrieving(self) -> None:
+        """Fail retrieving delivered task."""
+        # TODO:already in test_store_message_ins_one, do we still need a separate test?
+
     def test_get_task_ins_limit_throws_for_limit_zero(self) -> None:
         """Fail call with limit=0."""
         # Prepare
@@ -442,6 +513,15 @@ class StateTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             state.get_task_ins(node_id=2, limit=0)
 
+    def test_get_message_ins_limit_throws_for_limit_zero(self) -> None:
+        """Fail call with limit=0."""
+        # Prepare
+        state: LinkState = self.state_factory()
+
+        # Execute & Assert
+        with self.assertRaises(AssertionError):
+            state.get_message_ins(node_id=2, limit=0)
+
     def test_task_ins_store_invalid_run_id_and_fail(self) -> None:
         """Store TaskIns with invalid run_id and fail."""
         # Prepare
@@ -450,6 +530,24 @@ class StateTest(unittest.TestCase):
 
         # Execute
         task_id = state.store_task_ins(task_ins)
+
+        # Assert
+        assert task_id is None
+
+    def test_message_ins_store_invalid_run_id_and_fail(self) -> None:
+        """Store Message with invalid run_id and fail."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=1234,
+                run_id=61016,
+            )
+        )
+
+        # Execute
+        task_id = state.store_message_ins(msg)
 
         # Assert
         assert task_id is None
@@ -775,6 +873,38 @@ class StateTest(unittest.TestCase):
         # Assert
         assert result is None
 
+    def test_store_message_res_task_ins_expired(self) -> None:
+        """Test behavior of store_message_res when the Message it replies to is
+        expired."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        node_id = state.create_node(1e3)
+        # Create message, tweak created_at and store
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        # msg.metadata.created_at = time.time() - msg.metadata.ttl + 0.5
+        state.store_message_ins(message=msg)
+
+        msg_to_reply_to = state.get_message_ins(node_id=node_id, limit=2)[0]
+        reply_msg = msg_to_reply_to.create_reply(content=RecordSet())
+
+        # This patch respresents a very slow communication that triggers TTL
+        with patch(
+            "time.time",
+            side_effect=lambda: msg.metadata.created_at + msg.metadata.ttl + 0.1,
+        ):  # Expired by 0.1 seconds
+            # Execute
+            result = state.store_message_res(reply_msg)
+
+        # Assert
+        assert result is None
+        assert state.num_message_ins() == 0
+        assert state.num_message_res() == 0
+
     def test_store_task_res_limit_ttl(self) -> None:
         """Test the behavior of store_task_res regarding the TTL limit of TaskRes."""
         current_time = time.time()
@@ -831,6 +961,33 @@ class StateTest(unittest.TestCase):
             else:
                 assert res is None
 
+    def test_store_message_res_is_not_allowed_with_extended_ttl(self) -> None:
+        """Test the behavior of store_message_res with Message that modifies the TTL
+        limit."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        node_id = state.create_node(1e3)
+
+        # Create message and store
+        ins_msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg.metadata.ttl = 5
+        state.store_message_ins(message=ins_msg)
+
+        # Get message, create reply, extend TTL and store
+        msg = state.get_message_ins(node_id, limit=1)[0]
+        reply_msg = msg.create_reply(content=RecordSet())
+        reply_msg.metadata.ttl = 20
+
+        # Shouldn't be allowed since it's modifying remaining TTL
+        res = state.store_message_res(reply_msg)
+        assert res is None
+        assert state.num_message_res() == 0
+
     def test_get_task_ins_not_return_expired(self) -> None:
         """Test get_task_ins not to return expired tasks."""
         # Prepare
@@ -848,6 +1005,29 @@ class StateTest(unittest.TestCase):
         with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
             task_ins_list = state.get_task_ins(node_id=2, limit=None)
             assert len(task_ins_list) == 0
+
+    def test_get_message_ins_not_return_expired(self) -> None:
+        """Test get_message_ins not to return expired tasks."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        # Create message, tweak created_at, ttl and store
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        msg.metadata.created_at = time.time() - 5
+        msg.metadata.ttl = 5.1
+
+        # Execute
+        state.store_message_ins(message=msg)
+
+        # Assert
+        with patch("time.time", side_effect=lambda: msg.metadata.created_at + 6.1):
+            message_list = state.get_message_ins(node_id=2, limit=None)
+            assert len(message_list) == 0
 
     def test_get_task_res_expired_task_ins(self) -> None:
         """Test get_task_res to return error TaskRes if its TaskIns has expired."""
@@ -881,6 +1061,85 @@ class StateTest(unittest.TestCase):
             assert state.num_task_ins() == 0
             assert state.num_task_res() == 0
 
+    def test_get_message_res_expired_task_ins(self) -> None:
+        """Test get_task_res to return error TaskRes if its TaskIns has expired."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+
+        # A message that will expire before it gets pulled
+        msg1 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg1_id = state.store_message_ins(msg1)
+        assert ins_msg1_id
+        assert state.num_message_ins() == 1
+        with patch(
+            "time.time",
+            side_effect=lambda: msg1.metadata.created_at + msg1.metadata.ttl + 0.1,
+        ):  # over TTL limit
+
+            res_msg = state.get_message_res({ins_msg1_id})[0]
+            assert res_msg.has_error()
+            assert res_msg.error.reason == MESSAGE_UNAVAILABLE_ERROR_REASON
+            # Ensure Message has been deleted
+            assert state.num_message_ins() == 0
+
+        # A message that will expire before its reply is pulled
+        msg2 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg2_id = state.store_message_ins(msg2)
+        assert ins_msg2_id
+        assert state.num_message_ins() == 1
+        # Get message
+        msg2_ins = state.get_message_ins(node_id=node_id, limit=1)
+        assert state.num_message_ins() == 1
+        # Store reply in time
+        res_msg2 = msg2_ins[0].create_reply(content=RecordSet())
+        state.store_message_res(res_msg2)
+
+        with patch(
+            "time.time",
+            side_effect=lambda: msg2.metadata.created_at + msg2.metadata.ttl + 0.1,
+        ):  # over TTL limit
+
+            res_msg2_pulled = state.get_message_res({ins_msg2_id})[0]
+            assert res_msg2_pulled.has_error()
+            assert (
+                res_msg2_pulled.error.reason == REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON
+            )
+            # Ensure Message has been deleted
+            assert state.num_message_ins() == 0
+            assert state.num_message_res() == 0
+
+    def test_get_message_res_reply_not_ready(self) -> None:
+        """Test get_message_res to return error since reply Message isn't present."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg_id = state.store_message_ins(msg)
+        assert ins_msg_id
+
+        reply = state.get_message_res({ins_msg_id})[0]
+        # Check message contains error informing replpy message hasn't arrived
+        assert reply.has_error()
+        assert reply.error.reason == REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON
+        assert state.num_message_ins() == 1
+        assert state.num_message_res() == 0
+
     def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
         """Test that get_task_res returns an empty result when the corresponding TaskIns
         does not exist."""
@@ -905,6 +1164,20 @@ class StateTest(unittest.TestCase):
         assert len(task_res_list) == 1
         assert task_res_list[0].task.HasField("error")
         assert state.num_task_ins() == state.num_task_res() == 0
+
+    def test_get_message_res_returns_empty_for_missing_message_ins(self) -> None:
+        """Test that get_message_res returns an empty result when the corresponding
+        Message does not exist."""
+        # Prepare
+        state = self.state_factory()
+        message_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
+        # Execute
+        message_res_list = state.get_message_res(message_ids={UUID(message_ins_id)})
+
+        # Assert
+        assert len(message_res_list) == 1
+        assert message_res_list[0].has_error()
+        assert message_res_list[0].error.reason == MESSAGE_UNAVAILABLE_ERROR_REASON
 
     def test_get_task_res_return_if_not_expired(self) -> None:
         """Test get_task_res to return TaskRes if its TaskIns exists and is not
@@ -935,6 +1208,37 @@ class StateTest(unittest.TestCase):
             # Assert
             assert len(task_res_list) != 0
 
+    def test_get_message_res_return_successful(self) -> None:
+        """Test get_message_res returns correct Message."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg_id = state.store_message_ins(msg)
+        assert ins_msg_id
+        # Fetch ins message
+        ins_msg = state.get_message_ins(node_id=node_id, limit=1)
+        # Create reply and insert
+        res_msg = ins_msg[0].create_reply(content=RecordSet())
+        state.store_message_res(res_msg)
+        assert state.num_message_ins() == 0
+        assert state.num_message_res() == 1
+
+        # Fetch reply
+        reply_msg = state.get_message_res({ins_msg_id})
+
+        # assert
+        assert state.num_message_res() == 0
+        assert reply_msg[0].content == res_msg.content
+        assert reply_msg[0].metadata == res_msg.metadata
+        assert reply_msg[0].metadata.dst_node_id == msg.metadata.src_node_id
+
     def test_store_task_res_fail_if_consumer_producer_id_mismatch(self) -> None:
         """Test store_task_res to fail if there is a mismatch between the
         consumer_node_id of taskIns and the producer_node_id of taskRes."""
@@ -958,6 +1262,36 @@ class StateTest(unittest.TestCase):
 
         # Assert
         assert task_res_uuid is None
+
+    def test_store_message_res_fail_if_dst_src_node_id_mismatch(self) -> None:
+        """Test store_message_res to fail if there is a mismatch between the dst_node_id
+        of orginal Message and the src_node_id of the reply Message."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        state.store_message_ins(msg)
+        assert state.num_message_ins() == 1
+
+        # Fetch ins message
+        ins_msg = state.get_message_ins(node_id=node_id, limit=1)
+        assert state.num_message_ins() == 1
+
+        # Create reply, modify node_ids and insert
+        res_msg = ins_msg[0].create_reply(content=RecordSet())
+        res_msg.metadata._src_node_id = node_id + 1  # type: ignore   # pylint: disable=W0212
+        msg_res_id = state.store_message_res(res_msg)
+
+        # Assert
+        assert msg_res_id is None
+        assert state.num_message_ins() == 1
+        assert state.num_message_res() == 0
 
     def test_get_set_serverapp_context(self) -> None:
         """Test get and set serverapp context."""
@@ -1224,7 +1558,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 15
+        assert len(result) == 21
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1249,7 +1583,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 15
+        assert len(result) == 21
 
 
 if __name__ == "__main__":
