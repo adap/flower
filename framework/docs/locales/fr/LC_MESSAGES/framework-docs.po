@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-02-18 00:30+0000\n"
+"POT-Creation-Date: 2025-02-28 00:31+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -5716,7 +5716,7 @@ msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:139
 #: ../../source/how-to-enable-tls-connections.rst:138
-#: ../../source/how-to-use-built-in-mods.rst:99
+#: ../../source/how-to-use-built-in-mods.rst:174
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:287
 msgid "Conclusion"
 msgstr "Conclusion"
@@ -9049,13 +9049,13 @@ msgstr ""
 msgid "Use Built-in Mods"
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:8
+#: ../../source/how-to-use-built-in-mods.rst:10
 msgid ""
-"**Note: This tutorial covers experimental features. The functionality and"
-" interfaces may change in future versions.**"
+"This tutorial covers preview features. The functionality and interfaces "
+"may change in future versions."
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:11
+#: ../../source/how-to-use-built-in-mods.rst:13
 msgid ""
 "In this tutorial, we will learn how to utilize built-in mods to augment "
 "the behavior of a ``ClientApp``. Mods (sometimes also called Modifiers) "
@@ -9063,105 +9063,198 @@ msgid ""
 "the ``ClientApp``."
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:16
+#: ../../source/how-to-use-built-in-mods.rst:18
 msgid "What are Mods?"
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:18
+#: ../../source/how-to-use-built-in-mods.rst:20
 msgid ""
 "A Mod is a callable that wraps around a ``ClientApp``. It can manipulate "
 "or inspect the incoming ``Message`` and the resulting outgoing "
 "``Message``. The signature for a ``Mod`` is as follows:"
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:27
+#: ../../source/how-to-use-built-in-mods.rst:29
 msgid "A typical mod function might look something like this:"
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:40
+#: ../../source/how-to-use-built-in-mods.rst:47
 msgid "Using Mods"
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:42
-msgid "To use mods in your ``ClientApp``, you can follow these steps:"
-msgstr ""
-
-#: ../../source/how-to-use-built-in-mods.rst:45
-msgid "1. Import the required mods"
-msgstr ""
-
-#: ../../source/how-to-use-built-in-mods.rst:47
-msgid "First, import the built-in mod you intend to use:"
-msgstr ""
-
-#: ../../source/how-to-use-built-in-mods.rst:55
-msgid "2. Define your client function"
-msgstr ""
-
-#: ../../source/how-to-use-built-in-mods.rst:57
+#: ../../source/how-to-use-built-in-mods.rst:49
 msgid ""
-"Define your client function (``client_fn``) that will be wrapped by the "
-"mod(s):"
+"Mods can be registered in two ways: **Application-wide mods** and "
+"**Function-specific mods**."
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:66
-msgid "3. Create the ``ClientApp`` with mods"
+#: ../../source/how-to-use-built-in-mods.rst:52
+msgid ""
+"**Application-wide mods**: These mods apply to all functions within the "
+"``ClientApp``."
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:68
+#: ../../source/how-to-use-built-in-mods.rst:54
+msgid ""
+"**Function-specific mods**: These mods apply only to a specific function "
+"(e.g, the function decorated by ``@app.train()``)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:58
+msgid "1. Registering Application-wide Mods"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:60
+msgid "To use application-wide mods in your ``ClientApp``, follow these steps:"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:63
+msgid "Import the required mods"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:71
+msgid "Create the ``ClientApp`` with application-wide mods"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:73
 msgid ""
 "Create your ``ClientApp`` and pass the mods as a list to the ``mods`` "
 "argument. The order in which you provide the mods matters:"
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:82
-#, fuzzy
-msgid "Order of execution"
-msgstr "Dépréciations"
-
-#: ../../source/how-to-use-built-in-mods.rst:84
+#: ../../source/how-to-use-built-in-mods.rst:86
 msgid ""
-"When the ``ClientApp`` runs, the mods are executed in the order they are "
-"provided in the list:"
+"If you define functions to handle messages using decorators instead of "
+"``client_fn``, e.g., ``@app.train()``, you do not need to pass the "
+"``client_fn`` argument."
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:87
-msgid "``example_mod_1`` (outermost mod)"
-msgstr ""
-
-#: ../../source/how-to-use-built-in-mods.rst:88
-msgid "``example_mod_2`` (next mod)"
-msgstr ""
-
-#: ../../source/how-to-use-built-in-mods.rst:89
-msgid ""
-"Message handler (core function that handles the incoming ``Message`` and "
-"returns the outgoing ``Message``)"
-msgstr ""
-
-#: ../../source/how-to-use-built-in-mods.rst:91
-msgid "``example_mod_2`` (on the way back)"
+#: ../../source/how-to-use-built-in-mods.rst:90
+msgid "2. Registering Function-specific Mods"
 msgstr ""
 
 #: ../../source/how-to-use-built-in-mods.rst:92
-msgid "``example_mod_1`` (outermost mod on the way back)"
+msgid ""
+"Instead of applying mods to the entire ``ClientApp``, you can specify "
+"them for a particular function:"
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:94
+#: ../../source/how-to-use-built-in-mods.rst:114
+msgid ""
+"In this case, ``example_mod_3`` and ``example_mod_4`` are only applied to"
+" the ``train`` function."
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:118
+#, fuzzy
+msgid "Order of Execution"
+msgstr "Dépréciations"
+
+#: ../../source/how-to-use-built-in-mods.rst:120
+#, fuzzy
+msgid "When the ``ClientApp`` runs, the mods execute in the following order:"
+msgstr "Le serveur Flower appelle ces méthodes dans l'ordre suivant :"
+
+#: ../../source/how-to-use-built-in-mods.rst:122
+msgid "**Application-wide mods** (executed first, in the order they are provided)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:123
+msgid ""
+"**Function-specific mods** (executed after application-wide mods, in the "
+"order they are provided)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:125
+msgid ""
+"**ClientApp** (core function that handles the incoming ``Message`` and "
+"returns the outgoing ``Message``)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:127
+msgid "**Function-specific mods** (on the way back, in reverse order)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:128
+msgid "**Application-wide mods** (on the way back, in reverse order)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:130
 msgid ""
 "Each mod has a chance to inspect and modify the incoming ``Message`` "
 "before passing it to the next mod, and likewise with the outgoing "
 "``Message`` before returning it up the stack."
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:101
+#: ../../source/how-to-use-built-in-mods.rst:135
+#, fuzzy
+msgid "Example Execution Flow"
+msgstr "Exemples : voir ci-dessous."
+
+#: ../../source/how-to-use-built-in-mods.rst:137
+msgid "Assuming the following registration:"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:153
+msgid "The execution order for an incoming **train** message is as follows:"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:155
+#: ../../source/how-to-use-built-in-mods.rst:167
+msgid "``example_mod_1`` (before handling)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:156
+#: ../../source/how-to-use-built-in-mods.rst:168
+msgid "``example_mod_2`` (before handling)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:157
+msgid "``example_mod_3`` (before handling)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:158
+msgid "``example_mod_4`` (before handling)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:159
+msgid "``train`` (handling message)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:160
+msgid "``example_mod_4`` (after handling)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:161
+msgid "``example_mod_3`` (after handling)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:162
+#: ../../source/how-to-use-built-in-mods.rst:170
+msgid "``example_mod_2`` (after handling)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:163
+#: ../../source/how-to-use-built-in-mods.rst:171
+msgid "``example_mod_1`` (after handling)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:165
+msgid "The execution order for an incoming **evaluate** message is as follows:"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:169
+msgid "``evaluate`` (handling message)"
+msgstr ""
+
+#: ../../source/how-to-use-built-in-mods.rst:176
 msgid ""
 "By following this guide, you have learned how to effectively use mods to "
 "enhance your ``ClientApp``'s functionality. Remember that the order of "
 "mods is crucial and affects how the input and output are processed."
 msgstr ""
 
-#: ../../source/how-to-use-built-in-mods.rst:105
+#: ../../source/how-to-use-built-in-mods.rst:180
 msgid "Enjoy building a more robust and flexible ``ClientApp`` with mods!"
 msgstr ""
 
@@ -10665,16 +10758,15 @@ msgstr ""
 #: flwr.common.context.Context:1 flwr.common.message.Error:1
 #: flwr.common.message.Message:1 flwr.common.message.Metadata:1
 #: flwr.common.record.parametersrecord.Array:1
-#: flwr.common.record.recordset.RecordSet:1 flwr.common.typing.ClientMessage:1
-#: flwr.common.typing.DisconnectRes:1 flwr.common.typing.EvaluateIns:1
-#: flwr.common.typing.EvaluateRes:1 flwr.common.typing.FitIns:1
-#: flwr.common.typing.FitRes:1 flwr.common.typing.GetParametersIns:1
-#: flwr.common.typing.GetParametersRes:1 flwr.common.typing.GetPropertiesIns:1
-#: flwr.common.typing.GetPropertiesRes:1 flwr.common.typing.Parameters:1
-#: flwr.common.typing.ReconnectIns:1 flwr.common.typing.ServerMessage:1
-#: flwr.common.typing.Status:1 flwr.server.history.History:1
-#: flwr.server.server.Server:1 flwr.server.server_app.ServerApp:1
-#: flwr.server.server_config.ServerConfig:1
+#: flwr.common.typing.ClientMessage:1 flwr.common.typing.DisconnectRes:1
+#: flwr.common.typing.EvaluateIns:1 flwr.common.typing.EvaluateRes:1
+#: flwr.common.typing.FitIns:1 flwr.common.typing.FitRes:1
+#: flwr.common.typing.GetParametersIns:1 flwr.common.typing.GetParametersRes:1
+#: flwr.common.typing.GetPropertiesIns:1 flwr.common.typing.GetPropertiesRes:1
+#: flwr.common.typing.Parameters:1 flwr.common.typing.ReconnectIns:1
+#: flwr.common.typing.ServerMessage:1 flwr.common.typing.Status:1
+#: flwr.server.history.History:1 flwr.server.server.Server:1
+#: flwr.server.server_app.ServerApp:1 flwr.server.server_config.ServerConfig:1
 #: flwr.server.serverapp_components.ServerAppComponents:1
 #: flwr.server.workflow.default_workflows.DefaultWorkflow:1
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:1
@@ -10690,8 +10782,9 @@ msgstr ""
 #: flwr.client.mod.localdp_mod.LocalDpMod:22
 #: flwr.common.record.configsrecord.ConfigsRecord:20
 #: flwr.common.record.metricsrecord.MetricsRecord:19
+#: flwr.common.record.parametersrecord.Array:30
 #: flwr.common.record.parametersrecord.ParametersRecord:22
-#: flwr.common.record.recordset.RecordSet:23 flwr.server.app.start_server:46
+#: flwr.common.record.recordset.RecordSet:22 flwr.server.app.start_server:46
 #: flwr.server.server_app.ServerApp:4 flwr.server.server_app.ServerApp.main:4
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:29
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:22
@@ -10722,8 +10815,9 @@ msgid ""
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
-msgid ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
-msgstr ""
+#, fuzzy
+msgid ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\[mods\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
 
 #: flwr.client.client_app.ClientApp.evaluate:1
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
@@ -10731,8 +10825,9 @@ msgid "Return a decorator that registers the evaluate fn with the client app."
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
-msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\)"
-msgstr ""
+#, fuzzy
+msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\[mods\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
 #: flwr.client.client_app.ClientApp.query:1 of
@@ -10741,12 +10836,36 @@ msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
-msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\)"
+msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\[mods\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
 #: flwr.client.client_app.ClientApp.train:1 of
 msgid "Return a decorator that registers the train fn with the client app."
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.evaluate:5 of
+msgid "Registering an evaluate function:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.evaluate:15 of
+msgid "Registering an evaluate function with a function-specific modifier:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.query:5 of
+msgid "Registering a query function:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.query:15 of
+msgid "Registering a query function with a function-specific modifier:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.train:5 of
+msgid "Registering a train function:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.train:15 of
+msgid "Registering a train function with a function-specific modifier:"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:2
@@ -11251,8 +11370,10 @@ msgstr "commun"
 msgid ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 msgstr ""
 
+#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
-#: flwr.common.record.conversion_utils.array_from_numpy:1 of
+#: flwr.common.record.conversion_utils.array_from_numpy:1
+#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1 of
 #, fuzzy
 msgid "Create Array from NumPy ndarray."
 msgstr "Convertit l'objet des paramètres en ndarrays NumPy."
@@ -11347,10 +11468,9 @@ msgid "Convert parameters object to NumPy ndarrays."
 msgstr "Convertit l'objet des paramètres en ndarrays NumPy."
 
 #: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-msgid ""
-":py:obj:`Array <flwr.common.Array>`\\ \\(dtype\\, shape\\, stype\\, "
-"data\\)"
-msgstr ""
+#, fuzzy
+msgid ":py:obj:`Array <flwr.common.Array>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
 
 #: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
 #: flwr.common.record.parametersrecord.Array:1 of
@@ -11684,44 +11804,83 @@ msgstr ""
 #: flwr.common.record.parametersrecord.Array:3 of
 msgid ""
 "A dataclass containing serialized data from an array-like or tensor-like "
-"object along with some metadata about it."
+"object along with metadata about it. The class can be initialized in one "
+"of two ways:"
 msgstr ""
 
 #: flwr.common.record.parametersrecord.Array:6 of
-msgid ""
-"A string representing the data type of the serialised object (e.g. "
-"`np.float32`)"
+msgid "By specifying explicit values for `dtype`, `shape`, `stype`, and `data`."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:8 of
+#: flwr.common.record.parametersrecord.Array:7 of
+msgid "By providing a NumPy ndarray (via the `ndarray` argument)."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:9 of
 msgid ""
-"A list representing the shape of the unserialized array-like object. This"
-" is used to deserialize the data (depending on the serialization method) "
-"or simply as a metadata field."
+"In scenario (2), the `dtype`, `shape`, `stype`, and `data` are "
+"automatically derived from the input. In scenario (1), these fields must "
+"be specified manually."
 msgstr ""
 
 #: flwr.common.record.parametersrecord.Array:12 of
 msgid ""
-"A string indicating the type of serialisation mechanism used to generate "
-"the bytes in `data` from an array-like or tensor-like object."
+"A string representing the data type of the serialized object (e.g. "
+"`\"float32\"`). Only required if you are not passing in a ndarray."
 msgstr ""
 
 #: flwr.common.record.parametersrecord.Array:15 of
-msgid "A buffer of bytes containing the data."
+msgid ""
+"A list representing the shape of the unserialized array-like object. Only"
+" required if you are not passing in a ndarray."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:26:<autosummary>:1
+#: flwr.common.record.parametersrecord.Array:18 of
+msgid ""
+"A string indicating the serialization mechanism used to generate the "
+"bytes in `data` from an array-like or tensor-like object. Only required "
+"if you are not passing in a ndarray."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:22 of
+msgid ""
+"A buffer of bytes containing the data. Only required if you are not "
+"passing in a ndarray."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:25 of
+msgid ""
+"A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data` "
+"fields are derived automatically from it."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:31 of
+msgid "Initializing by specifying all fields directly:"
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:40 of
+msgid "Initializing with a NumPy ndarray:"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`from_numpy_ndarray <flwr.common.Array.from_numpy_ndarray>`\\ "
+"\\(ndarray\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.Array.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
 #: flwr.common.record.parametersrecord.Array.numpy:1 of
 #, fuzzy
 msgid "Return the array as a NumPy array."
 msgstr "renvoie le poids du modèle sous la forme d'une liste de ndarrays NumPy"
 
-#: ../../source/ref-api/flwr.common.Array.rst:28
+#: ../../source/ref-api/flwr.common.Array.rst:31
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:25
 #: ../../source/ref-api/flwr.common.Code.rst:19
 #: ../../source/ref-api/flwr.common.Context.rst:25
@@ -11742,7 +11901,7 @@ msgstr "renvoie le poids du modèle sous la forme d'une liste de ndarrays NumPy"
 #: ../../source/ref-api/flwr.common.Metadata.rst:25
 #: ../../source/ref-api/flwr.common.Parameters.rst:25
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
-#: ../../source/ref-api/flwr.common.RecordSet.rst:25
+#: ../../source/ref-api/flwr.common.RecordSet.rst:52
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:25
 #: ../../source/ref-api/flwr.common.Status.rst:25
 #: ../../source/ref-api/flwr.server.Driver.rst:43
@@ -11752,21 +11911,25 @@ msgstr "renvoie le poids du modèle sous la forme d'une liste de ndarrays NumPy"
 msgid "Attributes"
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
+#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
+#: of
 msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
+#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
+#: of
 #, fuzzy
 msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
+#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
+#: of
 #, fuzzy
 msgid ":py:obj:`stype <flwr.common.Array.stype>`\\"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
+#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
+#: of
 msgid ":py:obj:`data <flwr.common.Array.data>`\\"
 msgstr ""
 
@@ -11933,6 +12096,7 @@ msgstr ""
 msgid ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: collections.abc.MutableMapping.pop:1 of
 msgid "If key is not found, d is returned if given, otherwise KeyError is raised."
@@ -11943,6 +12107,7 @@ msgstr ""
 msgid ":py:obj:`popitem <flwr.common.ConfigsRecord.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: collections.abc.MutableMapping.popitem:1 of
 msgid "as a 2-tuple; but raise KeyError if D is empty."
@@ -11961,6 +12126,7 @@ msgid ""
 "\\]\\*\\*F\\)"
 msgstr ""
 
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: collections.abc.MutableMapping.update:1 of
 msgid ""
@@ -13560,7 +13726,7 @@ msgstr ""
 msgid "Let's see some examples:"
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:50 of
+#: flwr.common.record.parametersrecord.ParametersRecord:49 of
 msgid ""
 "Now that the NumPy array is embedded into a :code:`ParametersRecord` it "
 "could be sent if added as part of a :code:`common.Message` or it could be"
@@ -13571,13 +13737,13 @@ msgid ""
 "deserialization can be done as follows:"
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:65 of
+#: flwr.common.record.parametersrecord.ParametersRecord:64 of
 msgid ""
 "If you need finer control on how your arrays are serialized and "
 "deserialized, you can construct :code:`Array` objects directly like this:"
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:83 of
+#: flwr.common.record.parametersrecord.ParametersRecord:82 of
 msgid ""
 "Note that different arrays (e.g. from PyTorch, Tensorflow) might require "
 "different serialization mechanism. Howerver, they often support a "
@@ -13657,35 +13823,44 @@ msgstr ""
 msgid "RecordSet"
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:3 of
+#: flwr.common.record.recordset.RecordSet:1 of
 msgid ""
-"A :code:`RecordSet` is the unified mechanism by which parameters, metrics"
-" and configs can be either stored as part of a `flwr.common.Context "
-"<flwr.common.Context.html>`_ in your apps or communicated as part of a "
-"`flwr.common.Message <flwr.common.Message.html>`_ between your apps."
+"Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
+"[:py:class:`str`, "
+":py:class:`~flwr.common.record.parametersrecord.ParametersRecord` | "
+":py:class:`~flwr.common.record.metricsrecord.MetricsRecord` | "
+":py:class:`~flwr.common.record.configsrecord.ConfigsRecord`]"
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:9 of
+#: flwr.common.record.recordset.RecordSet:3 of
+msgid ""
+"A :class:`RecordSet` is the unified mechanism by which parameters, "
+"metrics and configs can be either stored as part of a :class:`Context` in"
+" your apps or communicated as part of a :class:`Message` between your "
+"apps."
+msgstr ""
+
+#: flwr.common.record.recordset.RecordSet:8 of
 msgid ""
 "A dictionary of :code:`ParametersRecords` that can be used to record and "
 "communicate model parameters and high-dimensional arrays."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:12 of
+#: flwr.common.record.recordset.RecordSet:11 of
 msgid ""
 "A dictionary of :code:`MetricsRecord` that can be used to record and "
 "communicate scalar-valued metrics that are the result of performing and "
 "action, for example, by a :code:`ClientApp`."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:16 of
+#: flwr.common.record.recordset.RecordSet:15 of
 msgid ""
 "A dictionary of :code:`ConfigsRecord` that can be used to record and "
 "communicate configuration values to an entity (e.g. to a "
 ":code:`ClientApp`) for it to adjust how an action is performed."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:24 of
+#: flwr.common.record.recordset.RecordSet:23 of
 msgid ""
 "A :code:`RecordSet` can hold three types of records, each designed with "
 "an specific purpose. What is common to all of them is that they are "
@@ -13693,11 +13868,11 @@ msgid ""
 "to specified data types."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:29 of
+#: flwr.common.record.recordset.RecordSet:28 of
 msgid "Let's see an example."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:47 of
+#: flwr.common.record.recordset.RecordSet:46 of
 msgid ""
 "Adding a :code:`ParametersRecord` follows the same steps as above but "
 "first, the array needs to be serialized and represented as a "
@@ -13707,38 +13882,85 @@ msgid ""
 " array first to :code:`NumPy` and then use the aforementioned function."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:66 of
+#: flwr.common.record.recordset.RecordSet:65 of
 msgid ""
 "For additional examples on how to construct each of the records types "
 "shown above, please refer to the documentation for :code:`ConfigsRecord`,"
 " :code:`MetricsRecord` and :code:`ParametersRecord`."
 msgstr ""
 
-#: flwr.common.RecordSet.configs_records:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`clear <flwr.common.RecordSet.clear>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`get <flwr.common.RecordSet.get>`\\ \\(k\\[\\,d\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`items <flwr.common.RecordSet.items>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`keys <flwr.common.RecordSet.keys>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`pop <flwr.common.RecordSet.pop>`\\ \\(k\\[\\,d\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`popitem <flwr.common.RecordSet.popitem>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`setdefault <flwr.common.RecordSet.setdefault>`\\ "
+"\\(k\\[\\,d\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`update <flwr.common.RecordSet.update>`\\ \\(\\[E\\, \\]\\*\\*F\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`values <flwr.common.RecordSet.values>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 msgid ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
 msgstr ""
 
-#: flwr.common.RecordSet.configs_records:1
-#: flwr.common.RecordSet.configs_records:1:<autosummary>:1 of
-msgid "Dictionary holding ConfigsRecord instances."
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.RecordSet.configs_records:1 of
+msgid "Dictionary holding only ConfigsRecord instances."
 msgstr ""
 
-#: flwr.common.RecordSet.configs_records:1:<autosummary>:1 of
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 msgid ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
 msgstr ""
 
-#: flwr.common.RecordSet.configs_records:1:<autosummary>:1
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: flwr.common.RecordSet.metrics_records:1 of
-msgid "Dictionary holding MetricsRecord instances."
+msgid "Dictionary holding only MetricsRecord instances."
 msgstr ""
 
-#: flwr.common.RecordSet.configs_records:1:<autosummary>:1 of
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 msgid ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
 msgstr ""
 
-#: flwr.common.RecordSet.configs_records:1:<autosummary>:1
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: flwr.common.RecordSet.parameters_records:1 of
-msgid "Dictionary holding ParametersRecord instances."
+msgid "Dictionary holding only ParametersRecord instances."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:2
@@ -31731,7 +31953,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|83b0823dc3de42c897cc17d10e35d858|"
+msgid "|171c61e7972b4a4e8bf29e1bb5186428|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -31750,7 +31972,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|5523523e553a40149b559312b19058b3|"
+msgid "|2ad37ed4d2e4435f997d6e0196404cdb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -31782,7 +32004,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|99c6daf1b1264db1915f77c494e5a220|"
+msgid "|7d8f84e49846404dbd031d31be28a908|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -31803,7 +32025,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|224b064fc6b344deb1bd4a7f09708ddb|"
+msgid "|dd633a0ddc4149699845c709c1ca6f55|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -31825,7 +32047,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|69898d2bd8ee4ca9a3f0847bc2b433d5|"
+msgid "|c4de77415dbc48fca2ef85f2e4f00e6a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -31846,7 +32068,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|4f1ee0c35efc43e5914d46e3f57cdb5b|"
+msgid "|7d662652f5c54d1f8cf5f7283b044a88|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -31872,7 +32094,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|3535418499ce4fd7852299a0d1287623|"
+msgid "|0468e2e3dc3a4c06a4e544f6be325593|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -31891,7 +32113,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|fd28b8249fc245dfa7410a0c99352eb9|"
+msgid "|88ff3aefb4d543558980da26dac15835|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -32122,7 +32344,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|5a1283ee62f84abc967590cbf70c37c6|"
+msgid "|f3bd4694ab25446fa5a506732b926ccb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -32157,7 +32379,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|e5a54625939c4cfc85f3be7bfa2ebf88|"
+msgid "|4233ea0666684e888eb0636880ab73eb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -32190,7 +32412,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|a98b576927e3442a8c988fa23470a3ed|"
+msgid "|fbeab078b0ec4e4fb765fb73e4457dbc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -32221,7 +32443,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|45a4a0072a9940d5b8ca10364f1adfbe|"
+msgid "|499447d6d69b43c0a78185cb20a42e28|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -32281,7 +32503,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|55e61b1632c94257b9b992c329802a58|"
+msgid "|293685098e6d49e0b548285cff9f90d4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -32425,7 +32647,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|5e21d585962646039c8e8dcd2f87a642|"
+msgid "|4bf48bb217bd4d8b991bd8e17125c86c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -47055,5 +47277,202 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|1e958be1c6084878b6428ba77df935d9|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Note: This tutorial covers experimental "
+#~ "features. The functionality and interfaces "
+#~ "may change in future versions.**"
+#~ msgstr ""
+
+#~ msgid "To use mods in your ``ClientApp``, you can follow these steps:"
+#~ msgstr ""
+
+#~ msgid "1. Import the required mods"
+#~ msgstr ""
+
+#~ msgid "First, import the built-in mod you intend to use:"
+#~ msgstr ""
+
+#~ msgid "2. Define your client function"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Define your client function (``client_fn``)"
+#~ " that will be wrapped by the "
+#~ "mod(s):"
+#~ msgstr ""
+
+#~ msgid "3. Create the ``ClientApp`` with mods"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When the ``ClientApp`` runs, the mods"
+#~ " are executed in the order they "
+#~ "are provided in the list:"
+#~ msgstr ""
+
+#~ msgid "``example_mod_1`` (outermost mod)"
+#~ msgstr ""
+
+#~ msgid "``example_mod_2`` (next mod)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Message handler (core function that "
+#~ "handles the incoming ``Message`` and "
+#~ "returns the outgoing ``Message``)"
+#~ msgstr ""
+
+#~ msgid "``example_mod_2`` (on the way back)"
+#~ msgstr ""
+
+#~ msgid "``example_mod_1`` (outermost mod on the way back)"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`Array <flwr.common.Array>`\\ \\(dtype\\, "
+#~ "shape\\, stype\\, data\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A dataclass containing serialized data "
+#~ "from an array-like or tensor-like"
+#~ " object along with some metadata "
+#~ "about it."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A string representing the data type "
+#~ "of the serialised object (e.g. "
+#~ "`np.float32`)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A list representing the shape of "
+#~ "the unserialized array-like object. This"
+#~ " is used to deserialize the data "
+#~ "(depending on the serialization method) "
+#~ "or simply as a metadata field."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A string indicating the type of "
+#~ "serialisation mechanism used to generate "
+#~ "the bytes in `data` from an "
+#~ "array-like or tensor-like object."
+#~ msgstr ""
+
+#~ msgid "A buffer of bytes containing the data."
+#~ msgstr ""
+
+#~ msgid "|83b0823dc3de42c897cc17d10e35d858|"
+#~ msgstr ""
+
+#~ msgid "|5523523e553a40149b559312b19058b3|"
+#~ msgstr ""
+
+#~ msgid "|99c6daf1b1264db1915f77c494e5a220|"
+#~ msgstr ""
+
+#~ msgid "|224b064fc6b344deb1bd4a7f09708ddb|"
+#~ msgstr ""
+
+#~ msgid "|69898d2bd8ee4ca9a3f0847bc2b433d5|"
+#~ msgstr ""
+
+#~ msgid "|4f1ee0c35efc43e5914d46e3f57cdb5b|"
+#~ msgstr ""
+
+#~ msgid "|3535418499ce4fd7852299a0d1287623|"
+#~ msgstr ""
+
+#~ msgid "|fd28b8249fc245dfa7410a0c99352eb9|"
+#~ msgstr ""
+
+#~ msgid "|5a1283ee62f84abc967590cbf70c37c6|"
+#~ msgstr ""
+
+#~ msgid "|e5a54625939c4cfc85f3be7bfa2ebf88|"
+#~ msgstr ""
+
+#~ msgid "|a98b576927e3442a8c988fa23470a3ed|"
+#~ msgstr ""
+
+#~ msgid "|45a4a0072a9940d5b8ca10364f1adfbe|"
+#~ msgstr ""
+
+#~ msgid "|55e61b1632c94257b9b992c329802a58|"
+#~ msgstr ""
+
+#~ msgid "|5e21d585962646039c8e8dcd2f87a642|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :code:`RecordSet` is the unified "
+#~ "mechanism by which parameters, metrics "
+#~ "and configs can be either stored "
+#~ "as part of a `flwr.common.Context "
+#~ "<flwr.common.Context.html>`_ in your apps or"
+#~ " communicated as part of a "
+#~ "`flwr.common.Message <flwr.common.Message.html>`_ between"
+#~ " your apps."
+#~ msgstr ""
+
+#~ msgid "Dictionary holding ConfigsRecord instances."
+#~ msgstr ""
+
+#~ msgid "Dictionary holding MetricsRecord instances."
+#~ msgstr ""
+
+#~ msgid "Dictionary holding ParametersRecord instances."
+#~ msgstr ""
+
+#~ msgid "|31e8ed7261994dc881557612e85f8207|"
+#~ msgstr ""
+
+#~ msgid "|19a2a648692846e39c942ac51bf40ea3|"
+#~ msgstr ""
+
+#~ msgid "|33b0c37f798e427583aef4032aa52e39|"
+#~ msgstr ""
+
+#~ msgid "|e15ce114533941a4be540d7e6cfa7531|"
+#~ msgstr ""
+
+#~ msgid "|0c7f996837384b739f7a761e54da3c31|"
+#~ msgstr ""
+
+#~ msgid "|963ded2b6c194e5d9b28667ff6989a2c|"
+#~ msgstr ""
+
+#~ msgid "|39256fb2dcbd41ad9b03ab30028277ab|"
+#~ msgstr ""
+
+#~ msgid "|ba8f9208c62d43cf9b5f00d9c723794b|"
+#~ msgstr ""
+
+#~ msgid "|6208b7b5deda468e8bed9ba7b5e569f7|"
+#~ msgstr ""
+
+#~ msgid "|04b3276cbc9f40baa7ea5340e024352c|"
+#~ msgstr ""
+
+#~ msgid "|7eec24b6ad9049c198e268cbd4c02b95|"
+#~ msgstr ""
+
+#~ msgid "|3492030ff2c94181baf7d0e3623f5d73|"
+#~ msgstr ""
+
+#~ msgid "|17add690b1504dc7bbd26f01dc778a68|"
+#~ msgstr ""
+
+#~ msgid "|5a87ee8d448a47018603ade607cb1c95|"
 #~ msgstr ""
 
