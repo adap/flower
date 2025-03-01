@@ -114,6 +114,7 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     """Validate a Message."""
     validation_errors = []
     metadata = message.metadata
+    print(f"{metadata = }")
 
     if metadata.message_id != "":
         validation_errors.append("non-empty `message_id`")
@@ -129,10 +130,11 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     if metadata.ttl <= 0:
         validation_errors.append("`ttl` must be higher than zero")
 
+    # TODO: removed since this check is better to do in the method itself
     # Verify TTL and created_at time
-    current_time = time.time()
-    if metadata.created_at + metadata.ttl <= current_time:
-        validation_errors.append("Task TTL has expired")
+    # current_time = time.time()
+    # if metadata.created_at + metadata.ttl <= current_time:
+    #     validation_errors.append("Task TTL has expired")
 
     # Source node is set and is not zero
     if not metadata.src_node_id:

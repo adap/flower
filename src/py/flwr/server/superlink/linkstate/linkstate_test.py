@@ -886,20 +886,24 @@ class StateTest(unittest.TestCase):
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
             )
         )
-        msg.metadata.created_at = time.time() - msg.metadata.ttl + 0.5
+        # msg.metadata.created_at = time.time() - msg.metadata.ttl + 0.5
         state.store_message_ins(message=msg)
 
+        msg_to_reply_to = state.get_message_ins(node_id=node_id, limit=2)[0]
+        reply_msg = msg_to_reply_to.create_reply(content=RecordSet())
+
+        # This patch respresents a very slow communication that triggers TTL
         with patch(
             "time.time",
             side_effect=lambda: msg.metadata.created_at + msg.metadata.ttl + 0.1,
         ):  # Expired by 0.1 seconds
-            reply_msg = msg.create_reply(content=RecordSet())
-
             # Execute
             result = state.store_message_res(reply_msg)
 
         # Assert
         assert result is None
+        assert state.num_message_ins() == 0
+        assert state.num_message_res() == 0
 
     def test_store_task_res_limit_ttl(self) -> None:
         """Test the behavior of store_task_res regarding the TTL limit of TaskRes."""
@@ -982,6 +986,7 @@ class StateTest(unittest.TestCase):
         # Shouldn't be allowed since it's modifying remaining TTL
         res = state.store_message_res(reply_msg)
         assert res is None
+        assert state.num_message_res() == 0
 
     def test_get_task_ins_not_return_expired(self) -> None:
         """Test get_task_ins not to return expired tasks."""
@@ -1266,9 +1271,11 @@ class StateTest(unittest.TestCase):
             )
         )
         state.store_message_ins(msg)
+        assert state.num_message_ins() == 1
 
         # Fetch ins message
         ins_msg = state.get_message_ins(node_id=node_id, limit=1)
+        assert state.num_message_ins() == 1
 
         # Create reply, modify node_ids and insert
         res_msg = ins_msg[0].create_reply(content=RecordSet())
@@ -1277,6 +1284,8 @@ class StateTest(unittest.TestCase):
 
         # Assert
         assert msg_res_id is None
+        assert state.num_message_ins() == 1
+        assert state.num_message_res() == 0
 
     def test_get_set_serverapp_context(self) -> None:
         """Test get and set serverapp context."""

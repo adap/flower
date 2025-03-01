@@ -316,6 +316,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def store_message_res(self, message: Message) -> Optional[UUID]:
         """Store one Message."""
+        # TODO: Decide if storing message reply fails we also delete the
+        # TODO: entry in `delivered_messages` and `message_id_node_id` mapping.
+        # TODO: some asserts in tests will need adjustments
         # Validate message
         errors = validate_message(message=message, is_reply_message=True)
         if any(errors):
@@ -341,6 +344,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                         "Mismatch between source and destination node_ids in "
                         "received reply Message.",
                     )
+                    # TODO: delete orignal message references ?
                     return None
             else:
                 # ins_metadata not found
@@ -353,6 +357,15 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 " has expired.",
                 ins_metadata.message_id,
             )
+            # Remove all traces of original message
+            ins_meta = self.delivered_messages.pop(UUID(res_metadata.reply_to_message))
+            if ins_meta.dst_node_id in self.dst_node_id_to_message_id_mapping:
+                # If it was the only message recorded for this dst_node, it's entry in
+                # the mapping would have been removed when the message_ins was pulled
+                # (hence the check with the if above)
+                self.dst_node_id_to_message_id_mapping[ins_meta.dst_node_id].remove(
+                    ins_meta.message_id
+                )
             return None
 
         if check_ttl_exceeded(ins_metadata, res_metadata):
