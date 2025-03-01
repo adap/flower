@@ -15,17 +15,32 @@
 """Utility functions for State."""
 
 
-from logging import ERROR
+from logging import ERROR, WARNING
 from os import urandom
 from typing import Optional, Union
 from uuid import UUID, uuid4
 
-from flwr.common import ConfigsRecord, Context, log, now, serde
-from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
+from flwr.common import (
+    ConfigsRecord,
+    Context,
+    Error,
+    Message,
+    Metadata,
+    log,
+    now,
+    serde,
+)
+from flwr.common.constant import (
+    MESSAGE_TTL_TOLERANCE,
+    SUPERLINK_NODE_ID,
+    ErrorCode,
+    Status,
+    SubStatus,
+)
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
-from flwr.proto.error_pb2 import Error
+from flwr.proto import error_pb2
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
@@ -51,6 +66,9 @@ VALID_RUN_SUB_STATUSES = {
     SubStatus.FAILED,
     SubStatus.STOPPED,
 }
+REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON = (
+    "Error: Message Unavailable - The reply message hasn't been processed."
+)
 MESSAGE_UNAVAILABLE_ERROR_REASON = (
     "Error: Message Unavailable - The requested message could not be found in the "
     "database. It may have expired due to its TTL or never existed."
@@ -262,7 +280,7 @@ def create_taskres_for_unavailable_taskins(taskins_id: Union[str, UUID]) -> Task
             ttl=0,
             ancestry=[str(taskins_id)],
             task_type="",  # Unknown message type
-            error=Error(
+            error=error_pb2.Error(  # pylint: disable=E1101
                 code=ErrorCode.MESSAGE_UNAVAILABLE,
                 reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
             ),
@@ -301,7 +319,7 @@ def create_taskres_for_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
             ttl=ttl,
             ancestry=[ref_taskins.task_id],
             task_type=ref_taskins.task.task_type,
-            error=Error(
+            error=error_pb2.Error(  # pylint: disable=E1101
                 code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
                 reason=REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
             ),
@@ -312,6 +330,11 @@ def create_taskres_for_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
 def has_expired(task_ins_or_res: Union[TaskIns, TaskRes], current_time: float) -> bool:
     """Check if the TaskIns/TaskRes has expired."""
     return task_ins_or_res.task.ttl + task_ins_or_res.task.created_at < current_time
+
+
+def message_ttl_has_expired(message_metadata: Metadata, current_time: float) -> bool:
+    """Check if the Message has expired."""
+    return message_metadata.ttl + message_metadata.created_at < current_time
 
 
 def verify_taskins_ids(
@@ -351,6 +374,59 @@ def verify_taskins_ids(
             taskres = create_taskres_for_unavailable_taskins(taskins_id)
             ret_dict[taskins_id] = taskres
     return ret_dict
+
+
+def create_message_error_expired_result_message(ins_metadata: Metadata) -> Message:
+    """Error to indicate that a reply Message had expired."""
+    return create_error_reply_with_reason(
+        ins_metadata,
+        error=Error(
+            code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
+            reason=REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
+        ),
+    )
+
+
+def create_message_error_pending_result_message(ins_metadata: Metadata) -> Message:
+    """Error to indicate that a reply Message isn't available yet."""
+    return create_error_reply_with_reason(
+        ins_metadata,
+        error=Error(
+            code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
+            reason=REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON,
+        ),
+    )
+
+
+def create_message_error_unavailable_ins_message(ins_metadata: Metadata) -> Message:
+    """Error to indicate that the enquired Message had expired before reply arrived or
+    that it isn't found."""
+    return create_error_reply_with_reason(
+        ins_metadata,
+        error=Error(
+            code=ErrorCode.MESSAGE_UNAVAILABLE,
+            reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
+        ),
+    )
+
+
+def create_error_reply_with_reason(ins_metadata: Metadata, error: Error) -> Message:
+    """Generate an error Message that the SuperLink returns carrying the specified
+    error."""
+    current_time = now().timestamp()
+    ttl = ins_metadata.ttl - (current_time - ins_metadata.created_at)
+    metadata = Metadata(
+        run_id=ins_metadata.run_id,
+        message_id=str(uuid4()),
+        src_node_id=SUPERLINK_NODE_ID,
+        dst_node_id=SUPERLINK_NODE_ID,
+        reply_to_message=ins_metadata.message_id,
+        group_id=ins_metadata.group_id,
+        message_type=ins_metadata.message_type,
+        ttl=ttl,
+    )
+
+    return Message(metadata=metadata, error=error)
 
 
 def verify_found_taskres(
@@ -397,3 +473,28 @@ def verify_found_taskres(
             taskres.task.delivered_at = now().isoformat()
         ret_dict[taskins_id] = taskres
     return ret_dict
+
+
+def check_ttl_exceeded(ins_metadata: Metadata, res_metadata: Metadata) -> bool:
+    """Check if TTL has been reached."""
+    # Fail if the Message TTL exceeds the
+    # expiration time of the Message it replies to.
+    # Condition: ins_metadata.created_at + ins_metadata.ttl ≥
+    #            res_metadata.created_at + res_metadata.ttl
+    # A small tolerance is introduced to account
+    # for floating-point precision issues.
+    max_allowed_ttl = (
+        ins_metadata.created_at + ins_metadata.ttl - res_metadata.created_at
+    )
+    if res_metadata.ttl and (
+        res_metadata.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
+    ):
+        log(
+            WARNING,
+            "Received Message with TTL %.2f exceeding the allowed maximum TTL %.2f.",
+            res_metadata.ttl,
+            max_allowed_ttl,
+        )
+        return True
+
+    return False

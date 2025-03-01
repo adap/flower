@@ -22,8 +22,7 @@ from typing import Optional, cast
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
-from flwr.common.constant import SUPERLINK_NODE_ID
-from flwr.common.serde import message_from_taskres, message_to_taskins
+from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
@@ -119,18 +118,16 @@ class InMemoryDriver(Driver):
         This method takes an iterable of messages and sends each message
         to the node specified in `dst_node_id`.
         """
-        task_ids: list[str] = []
+        msg_ids: list[str] = []
         for msg in messages:
             # Check message
             self._check_message(msg)
-            # Convert Message to TaskIns
-            taskins = message_to_taskins(msg)
             # Store in state
-            task_id = self.state.store_task_ins(taskins)
-            if task_id:
-                task_ids.append(str(task_id))
+            msg_id = self.state.store_message_ins(msg)
+            if msg_id:
+                msg_ids.append(str(msg_id))
 
-        return task_ids
+        return msg_ids
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
@@ -139,17 +136,8 @@ class InMemoryDriver(Driver):
         set of given message IDs.
         """
         msg_ids = {UUID(msg_id) for msg_id in message_ids}
-        # Pull TaskRes
-        task_res_list = self.state.get_task_res(task_ids=msg_ids)
-        # Delete tasks in state
-        # Delete the TaskIns/TaskRes pairs if TaskRes is found
-        task_ins_ids_to_delete = {
-            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
-        }
-        self.state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
-        # Convert TaskRes to Message
-        msgs = [message_from_taskres(taskres) for taskres in task_res_list]
-        return msgs
+        # Pull Messages
+        return self.state.get_message_res(message_ids=msg_ids)
 
     def send_and_receive(
         self,
@@ -171,9 +159,26 @@ class InMemoryDriver(Driver):
         ret: list[Message] = []
         while timeout is None or time.time() < end_time:
             res_msgs = self.pull_messages(msg_ids)
-            ret.extend(res_msgs)
+
+            ret.extend(
+                [
+                    msg
+                    for msg in res_msgs
+                    if not (
+                        msg.has_error()
+                        and msg.error.code == ErrorCode.REPLY_MESSAGE_UNAVAILABLE
+                    )
+                ]
+            )
             msg_ids.difference_update(
-                {msg.metadata.reply_to_message for msg in res_msgs}
+                {
+                    msg.metadata.reply_to_message
+                    for msg in res_msgs
+                    if not (
+                        msg.has_error()
+                        and msg.error.code == ErrorCode.REPLY_MESSAGE_UNAVAILABLE
+                    )
+                }
             )
             if len(msg_ids) == 0:
                 break

@@ -23,7 +23,7 @@ from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import Context, log, now
+from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -35,12 +35,17 @@ from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
-from flwr.server.utils import validate_task_ins_or_res
+from flwr.server.utils import validate_message, validate_task_ins_or_res
 
 from .utils import (
+    check_ttl_exceeded,
+    create_message_error_expired_result_message,
+    create_message_error_pending_result_message,
+    create_message_error_unavailable_ins_message,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
+    message_ttl_has_expired,
     verify_found_taskres,
     verify_taskins_ids,
 )
@@ -72,6 +77,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
         self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
+
+        self.message_ins_store: dict[UUID, Message] = {}
+        self.message_res_store: dict[UUID, Message] = {}
+        self.message_ins_to_message_res: dict[UUID, UUID] = {}
+        self.delivered_messages: dict[UUID, Metadata] = {}
+        # node-id to message-id mapping (for fast `get_message_ins` processing)
+        self.dst_node_id_to_message_id_mapping: dict[int, list[UUID]] = {}
 
         self.node_public_keys: set[bytes] = set()
 
@@ -116,6 +128,53 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
+    def store_message_ins(self, message: Message) -> Optional[UUID]:
+        """Store one Message from ServerAppIo."""
+        # Validate message
+        errors = validate_message(message, is_reply_message=False)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+        metadata = message.metadata
+        # Validate run_id
+        if metadata.run_id not in self.run_ids:
+            log(ERROR, "Invalid run ID for Message: %s", metadata.run_id)
+            return None
+        # Validate source node ID
+        if metadata.src_node_id != SUPERLINK_NODE_ID:
+            log(ERROR, "Invalid source node ID for Message: %s", metadata.src_node_id)
+            return None
+        # Validate destination node ID
+        if metadata.dst_node_id not in self.node_ids:
+            log(
+                ERROR,
+                "Invalid destination node ID for TaskIns: %s",
+                metadata.dst_node_id,
+            )
+            return None
+
+        # Create message_id
+        message_id = uuid4()
+
+        # Store Message
+        # pylint: disable=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
+        with self.lock:
+            self.message_ins_store[message_id] = message
+
+            # Record in mapping
+            if metadata.dst_node_id in self.dst_node_id_to_message_id_mapping:
+                self.dst_node_id_to_message_id_mapping[metadata.dst_node_id].append(
+                    message_id
+                )
+            else:
+                self.dst_node_id_to_message_id_mapping[metadata.dst_node_id] = [
+                    message_id
+                ]
+
+        # Return the new message_id
+        return message_id
+
     def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
         if limit is not None and limit < 1:
@@ -142,6 +201,47 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Return TaskIns
         return task_ins_list
+
+    def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
+        """Get all Messages that have not been delivered yet."""
+        if limit is not None and limit < 1:
+            raise AssertionError("`limit` must be >= 1")
+
+        if node_id == SUPERLINK_NODE_ID:
+            raise AssertionError(f"`node_id` must be != {SUPERLINK_NODE_ID}")
+
+        # Find Messages for node_id
+        message_list: list[Message] = []
+        with self.lock:
+            # Get all UUIDs of messages to be pulled by `node_id` node
+            all_message_ids = self.dst_node_id_to_message_id_mapping.get(node_id, [])
+
+            # If there are Messages associated to this node
+            if all_message_ids:
+                # Take at most `limit` message ids
+                message_ids = all_message_ids[:limit] if limit else all_message_ids
+
+                # Extract from Message store
+                message_list = [
+                    self.message_ins_store.pop(msg_id) for msg_id in message_ids
+                ]
+
+                # Remove message_ids from mapping
+                self.dst_node_id_to_message_id_mapping[node_id] = all_message_ids[
+                    limit:
+                ]
+                if len(self.dst_node_id_to_message_id_mapping[node_id]) == 0:
+                    # Remove node entry if no message_ids left
+                    del self.dst_node_id_to_message_id_mapping[node_id]
+
+                # Record metadata of extracted messages
+                for msg in message_list:
+                    self.delivered_messages[UUID(msg.metadata.message_id)] = (
+                        msg.metadata
+                    )
+
+        # Return Messages
+        return message_list
 
     # pylint: disable=R0911
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
@@ -215,6 +315,74 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
+    def store_message_res(self, message: Message) -> Optional[UUID]:
+        """Store one Message."""
+        # Validate message
+        errors = validate_message(message=message, is_reply_message=True)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+
+        # Validate run_id
+        if message.metadata.run_id not in self.run_ids:
+            log(ERROR, "`run_id` is invalid")
+            return None
+
+        with self.lock:
+            res_metadata = message.metadata
+            # Check if message it is replying to exists and is valid
+            # Find metadata of Message the `message` is the reply of
+            if ins_metadata := self.delivered_messages.get(
+                UUID(res_metadata.reply_to_message)
+            ):
+                # Ensure destination and source node_ids match
+                if ins_metadata.dst_node_id != res_metadata.src_node_id:
+                    log(
+                        WARNING,
+                        "Mismatch between source and destination node_ids in "
+                        "received reply Message.",
+                    )
+                    return None
+            else:
+                # ins_metadata not found
+                return None
+
+        if ins_metadata.created_at + ins_metadata.ttl <= time.time():
+            log(
+                ERROR,
+                "Failed to store Message reply: Original Message with message_id %s "
+                " has expired.",
+                ins_metadata.message_id,
+            )
+            # Remove all traces of original message
+            ins_meta = self.delivered_messages.pop(UUID(res_metadata.reply_to_message))
+            if ins_meta.dst_node_id in self.dst_node_id_to_message_id_mapping:
+                # If it was the only message recorded for this dst_node, it's entry in
+                # the mapping would have been removed when the message_ins was pulled
+                # (hence the check with the if above)
+                self.dst_node_id_to_message_id_mapping[ins_meta.dst_node_id].remove(
+                    UUID(ins_meta.message_id)
+                )
+            return None
+
+        if check_ttl_exceeded(ins_metadata, res_metadata):
+            return None
+
+        # Create message_id
+        message_id = uuid4()
+
+        # Store Message
+        # pylint: disable=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
+        with self.lock:
+            self.message_res_store[message_id] = message
+            ins_msg_id = UUID(ins_metadata.message_id)
+            self.message_ins_to_message_res[ins_msg_id] = message_id
+            del self.delivered_messages[ins_msg_id]
+
+        # Return the new message_id
+        return message_id
+
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for the given TaskIns IDs."""
         ret: dict[UUID, TaskRes] = {}
@@ -252,6 +420,101 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         return list(ret.values())
 
+    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+        """Get reply Message for the given Message IDs."""
+        reply_list: list[Message] = []
+
+        with self.lock:
+
+            current_time = time.time()
+
+            # Check first if reply Message arrived
+            # If not, check if original Message had been pulled
+            # If not, check if the original Message was ever recorded
+            for msg_id in message_ids:
+
+                # Has the reply message arrived ?
+                if msg_res_id := self.message_ins_to_message_res.pop(msg_id, None):
+                    #   expired TTL ? -> return Error Message
+                    #   else -> Return actual Reply Message
+                    msg_res = self.message_res_store.pop(msg_res_id)
+                    if message_ttl_has_expired(
+                        msg_res.metadata, current_time=current_time
+                    ):
+                        reply_list.append(
+                            create_message_error_expired_result_message(
+                                msg_res.metadata
+                            )
+                        )
+                    else:
+                        reply_list.append(msg_res)
+
+                else:
+                    # Has the message being pulled by a SuperNode?
+                    if msg_id in self.delivered_messages:
+                        # if TTL expired -> Return TTL expired Error Message
+                        # if TTL is still valid -> Return Error Message (awaiting reply)
+                        msg_ins_metadata = self.delivered_messages[msg_id]
+                        if message_ttl_has_expired(
+                            msg_ins_metadata, current_time=current_time
+                        ):
+                            del self.delivered_messages[msg_id]
+                            reply_list.append(
+                                create_message_error_unavailable_ins_message(
+                                    msg_ins_metadata
+                                )
+                            )
+                        else:
+                            reply_list.append(
+                                create_message_error_pending_result_message(
+                                    msg_ins_metadata
+                                )
+                            )
+
+                    # Was the message ever pushed to the SuperLink by the ServerAppIO?
+                    elif msg_id in self.message_ins_store:
+                        # if TTL expired -> Return TTL expired Error Message
+                        # if TTL valid -> Return Error Message (message not yet pulled)
+                        msg_ins_metadata = self.message_ins_store[msg_id].metadata
+                        if message_ttl_has_expired(
+                            msg_ins_metadata, current_time=current_time
+                        ):
+                            # Remove message and reference in node-to-message mapping
+                            msg_ins = self.message_ins_store.pop(msg_id)
+                            self.dst_node_id_to_message_id_mapping[
+                                msg_ins.metadata.dst_node_id
+                            ].remove(msg_id)
+                            reply_list.append(
+                                create_message_error_unavailable_ins_message(
+                                    msg_ins_metadata
+                                )
+                            )
+                        else:
+                            reply_list.append(
+                                create_message_error_pending_result_message(
+                                    msg_ins_metadata
+                                )
+                            )
+                    else:
+                        # msg_id isn't recognized
+                        meta = Metadata(
+                            run_id=0,
+                            message_id="",
+                            src_node_id=SUPERLINK_NODE_ID,
+                            dst_node_id=SUPERLINK_NODE_ID,
+                            reply_to_message="",
+                            group_id="",
+                            ttl=SUPERLINK_NODE_ID,
+                            message_type="",
+                        )
+                        # pylint: disable=W0212
+                        meta._created_at = current_time  # type: ignore
+                        reply_list.append(
+                            create_message_error_unavailable_ins_message(meta)
+                        )
+
+        return reply_list
+
     def delete_tasks(self, task_ins_ids: set[UUID]) -> None:
         """Delete TaskIns/TaskRes pairs based on provided TaskIns IDs."""
         if not task_ins_ids:
@@ -284,12 +547,20 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.task_ins_store)
 
+    def num_message_ins(self) -> int:
+        """Calculate the number of Messages awaiting a reply."""
+        return len(self.message_ins_store) + len(self.delivered_messages)
+
     def num_task_res(self) -> int:
         """Calculate the number of task_res in store.
 
         This includes delivered but not yet deleted task_res.
         """
         return len(self.task_res_store)
+
+    def num_message_res(self) -> int:
+        """Calculate the number of reply Messages in store."""
+        return len(self.message_res_store)
 
     def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""

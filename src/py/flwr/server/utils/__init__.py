@@ -16,9 +16,11 @@
 
 
 from .tensorboard import tensorboard as tensorboard
+from .validator import validate_message as validate_message
 from .validator import validate_task_ins_or_res as validate_task_ins_or_res
 
 __all__ = [
     "tensorboard",
+    "validate_message",
     "validate_task_ins_or_res",
 ]
