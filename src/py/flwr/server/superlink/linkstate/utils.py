@@ -66,9 +66,6 @@ VALID_RUN_SUB_STATUSES = {
     SubStatus.FAILED,
     SubStatus.STOPPED,
 }
-REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON = (
-    "Error: Message Unavailable - The reply message hasn't been processed."
-)
 MESSAGE_UNAVAILABLE_ERROR_REASON = (
     "Error: Message Unavailable - The requested message could not be found in the "
     "database. It may have expired due to its TTL or never existed."
@@ -383,17 +380,6 @@ def create_message_error_expired_result_message(ins_metadata: Metadata) -> Messa
         error=Error(
             code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
             reason=REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
-        ),
-    )
-
-
-def create_message_error_pending_result_message(ins_metadata: Metadata) -> Message:
-    """Error to indicate that a reply Message isn't available yet."""
-    return create_error_reply_with_reason(
-        ins_metadata,
-        error=Error(
-            code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
-            reason=REPLY_MESSAGE_PENDING_UNAVAILABLE_ERROR_REASON,
         ),
     )
 
