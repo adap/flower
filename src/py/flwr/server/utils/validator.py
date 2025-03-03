@@ -116,18 +116,18 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     metadata = message.metadata
 
     if metadata.message_id != "":
-        validation_errors.append("non-empty `message_id`")
+        validation_errors.append("non-empty `metadata.message_id`")
 
     # Created/delivered/TTL/Pushed
     if (
-        metadata.created_at < 1711497600.0
-    ):  # unix timestamp of 27 March 2024 00h:00m:00s UTC
+        metadata.created_at < 1740700800.0
+    ):  # unix timestamp of 28 February 2025 00h:00m:00s UTC
         validation_errors.append(
-            "`created_at` must be a float that records the unix timestamp "
+            "`metadata.created_at` must be a float that records the unix timestamp "
             "in seconds when the message was created."
         )
     if metadata.ttl <= 0:
-        validation_errors.append("`ttl` must be higher than zero")
+        validation_errors.append("`metadata.ttl` must be higher than zero")
 
     # TODO: removed since this check is better to do in the method itself
     # Verify TTL and created_at time
@@ -156,21 +156,25 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     # Link respose to original message
     if not is_reply_message:
         if metadata.reply_to_message != "":
-            validation_errors.append("metadata.reply_to_message MUST not be set.")
+            validation_errors.append("`metadata.reply_to_message` MUST not be set.")
         if metadata.src_node_id != SUPERLINK_NODE_ID:
             validation_errors.append(
-                f"`metadata.src_node_id` is not {SUPERLINK_NODE_ID}"
+                f"`metadata.src_node_id` is not {SUPERLINK_NODE_ID} (SuperLink node ID)"
             )
         if metadata.dst_node_id == SUPERLINK_NODE_ID:
-            validation_errors.append(f"`metadata.dst_node_id` is {SUPERLINK_NODE_ID}")
+            validation_errors.append(
+                f"`metadata.dst_node_id` is {SUPERLINK_NODE_ID} (SuperLink node ID)"
+            )
     else:
         if metadata.reply_to_message == "":
-            validation_errors.append("metadata.reply_to_message MUST be set.")
+            validation_errors.append("`metadata.reply_to_message` MUST be set.")
         if metadata.src_node_id == SUPERLINK_NODE_ID:
-            validation_errors.append(f"`metadata.src_node_id` is {SUPERLINK_NODE_ID}")
+            validation_errors.append(
+                f"`metadata.src_node_id` is {SUPERLINK_NODE_ID} (SuperLink node ID)"
+            )
         if metadata.dst_node_id != SUPERLINK_NODE_ID:
             validation_errors.append(
-                f"`metadata.dst_node_id` is not {SUPERLINK_NODE_ID}"
+                f"`metadata.dst_node_id` is not {SUPERLINK_NODE_ID} (SuperLink node ID)"
             )
 
     return validation_errors

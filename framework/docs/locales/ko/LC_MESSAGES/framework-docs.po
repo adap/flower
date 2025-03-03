@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-28 00:31+0000\n"
+"POT-Creation-Date: 2025-03-01 00:34+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -10659,6 +10659,7 @@ msgstr "Bases: :py:class:`object`"
 #: flwr.client.app.start_client:51 flwr.client.app.start_numpy_client:36
 #: flwr.client.client_app.ClientApp:4
 #: flwr.client.client_app.ClientApp.evaluate:4
+#: flwr.client.client_app.ClientApp.lifecycle:7
 #: flwr.client.client_app.ClientApp.query:4
 #: flwr.client.client_app.ClientApp.train:4
 #: flwr.client.mod.localdp_mod.LocalDpMod:22
@@ -10667,7 +10668,9 @@ msgstr "Bases: :py:class:`object`"
 #: flwr.common.record.parametersrecord.Array:30
 #: flwr.common.record.parametersrecord.ParametersRecord:22
 #: flwr.common.record.recordset.RecordSet:22 flwr.server.app.start_server:46
-#: flwr.server.server_app.ServerApp:4 flwr.server.server_app.ServerApp.main:4
+#: flwr.server.server_app.ServerApp:4
+#: flwr.server.server_app.ServerApp.lifecycle:7
+#: flwr.server.server_app.ServerApp.main:4
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:29
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:22
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:21
@@ -10711,6 +10714,17 @@ msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 �
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
+msgid ":py:obj:`lifecycle <flwr.client.ClientApp.lifecycle>`\\ \\(\\)"
+msgstr ":py:obj:`Client <flwr.client.Client>`\\ \\(\\)"
+
+#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.client.client_app.ClientApp.lifecycle:1 of
+#, fuzzy
+msgid "Return a decorator that registers the lifecycle fn with the client app."
+msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
+
+#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\[mods\\]\\)"
 msgstr ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\)"
 
@@ -10735,6 +10749,13 @@ msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:15 of
 msgid "Registering an evaluate function with a function-specific modifier:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.lifecycle:3
+#: flwr.server.server_app.ServerApp.lifecycle:3 of
+msgid ""
+"The decorated function should accept a `Context` object and use `yield` "
+"to define enter and exit behavior."
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.query:5 of
@@ -14753,12 +14774,23 @@ msgstr ""
 msgid "Use the `ServerApp` with a custom main function:"
 msgstr ""
 
-#: flwr.server.server_app.ServerApp.main:1:<autosummary>:1 of
+#: flwr.server.server_app.ServerApp.lifecycle:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`lifecycle <flwr.server.ServerApp.lifecycle>`\\ \\(\\)"
+msgstr ":py:obj:`flwr.server <flwr.server>`\\"
+
+#: flwr.server.server_app.ServerApp.lifecycle:1
+#: flwr.server.server_app.ServerApp.lifecycle:1:<autosummary>:1 of
+#, fuzzy
+msgid "Return a decorator that registers the lifecycle fn with the server app."
+msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
+
+#: flwr.server.server_app.ServerApp.lifecycle:1:<autosummary>:1 of
 msgid ":py:obj:`main <flwr.server.ServerApp.main>`\\ \\(\\)"
 msgstr ""
 
-#: flwr.server.server_app.ServerApp.main:1
-#: flwr.server.server_app.ServerApp.main:1:<autosummary>:1 of
+#: flwr.server.server_app.ServerApp.lifecycle:1:<autosummary>:1
+#: flwr.server.server_app.ServerApp.main:1 of
 msgid "Return a decorator that registers the main fn with the server app."
 msgstr ""
 
@@ -28788,7 +28820,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|171c61e7972b4a4e8bf29e1bb5186428|"
+msgid "|2329735928e24e6997b66d00a6673dfb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -28805,7 +28837,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|2ad37ed4d2e4435f997d6e0196404cdb|"
+msgid "|1ce02c827fbe4f238d75159b6f159375|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -28831,7 +28863,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|7d8f84e49846404dbd031d31be28a908|"
+msgid "|bed4f0981cd44ea2a6eea6acf524e69e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -28849,7 +28881,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|dd633a0ddc4149699845c709c1ca6f55|"
+msgid "|ebf695cdcdfb43da9c516b6cb86944cb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -28868,7 +28900,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|c4de77415dbc48fca2ef85f2e4f00e6a|"
+msgid "|5108d9207a6c41d9ae4cf5347681ef8c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -28885,7 +28917,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|7d662652f5c54d1f8cf5f7283b044a88|"
+msgid "|1deed7f68aa346fda00eb9513879f18d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -28908,7 +28940,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|0468e2e3dc3a4c06a4e544f6be325593|"
+msgid "|a1a83e4ae4c94cbab322d89d1e67ecc0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -28925,7 +28957,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|88ff3aefb4d543558980da26dac15835|"
+msgid "|4c5cef91dc0e43e0baee7cd21c651254|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -29104,7 +29136,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|f3bd4694ab25446fa5a506732b926ccb|"
+msgid "|e4378c950685478eac99bdfe68ee2e3a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -29132,7 +29164,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|4233ea0666684e888eb0636880ab73eb|"
+msgid "|66542e737de949dba5f38aeb40912994|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -29159,7 +29191,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|fbeab078b0ec4e4fb765fb73e4457dbc|"
+msgid "|3ebdb53b040745f8bb9864baadbd70f5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -29185,7 +29217,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|499447d6d69b43c0a78185cb20a42e28|"
+msgid "|8ea2d19a54794c21aaeb6defd31f8a9c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -29235,7 +29267,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|293685098e6d49e0b548285cff9f90d4|"
+msgid "|fa008e80b8a94d2b988d76b67cdb2b36|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -29355,7 +29387,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|4bf48bb217bd4d8b991bd8e17125c86c|"
+msgid "|32a58c35a9e24a499343f38bbdef365f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -37651,5 +37683,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|5a87ee8d448a47018603ade607cb1c95|"
+#~ msgstr ""
+
+#~ msgid "|171c61e7972b4a4e8bf29e1bb5186428|"
+#~ msgstr ""
+
+#~ msgid "|2ad37ed4d2e4435f997d6e0196404cdb|"
+#~ msgstr ""
+
+#~ msgid "|7d8f84e49846404dbd031d31be28a908|"
+#~ msgstr ""
+
+#~ msgid "|dd633a0ddc4149699845c709c1ca6f55|"
+#~ msgstr ""
+
+#~ msgid "|c4de77415dbc48fca2ef85f2e4f00e6a|"
+#~ msgstr ""
+
+#~ msgid "|7d662652f5c54d1f8cf5f7283b044a88|"
+#~ msgstr ""
+
+#~ msgid "|0468e2e3dc3a4c06a4e544f6be325593|"
+#~ msgstr ""
+
+#~ msgid "|88ff3aefb4d543558980da26dac15835|"
+#~ msgstr ""
+
+#~ msgid "|f3bd4694ab25446fa5a506732b926ccb|"
+#~ msgstr ""
+
+#~ msgid "|4233ea0666684e888eb0636880ab73eb|"
+#~ msgstr ""
+
+#~ msgid "|fbeab078b0ec4e4fb765fb73e4457dbc|"
+#~ msgstr ""
+
+#~ msgid "|499447d6d69b43c0a78185cb20a42e28|"
+#~ msgstr ""
+
+#~ msgid "|293685098e6d49e0b548285cff9f90d4|"
+#~ msgstr ""
+
+#~ msgid "|4bf48bb217bd4d8b991bd8e17125c86c|"
 #~ msgstr ""
 
