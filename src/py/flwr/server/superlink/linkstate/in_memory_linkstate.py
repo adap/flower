@@ -203,7 +203,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
         """Get all Messages that have not been delivered yet."""
         if limit is not None and limit < 1:
-            raise AssertionError("`limit` must be >= 1")
+            raise AssertionError("`limit` must be at least 1")
 
         if node_id == SUPERLINK_NODE_ID:
             raise AssertionError(f"`node_id` must be != {SUPERLINK_NODE_ID}")
