@@ -324,31 +324,47 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             log(ERROR, errors)
             return None
 
-        # Validate run_id
-        if message.metadata.run_id not in self.run_ids:
-            log(ERROR, "`run_id` is invalid")
-            return None
-
         with self.lock:
             res_metadata = message.metadata
-            # Check if message it is replying to exists and is valid
             # Find metadata of Message the `message` is the reply of
-            if ins_metadata := self.delivered_messages.get(
+            ins_metadata = self.delivered_messages.get(
                 UUID(res_metadata.reply_to_message)
-            ):
-                # Ensure destination and source node_ids match
-                if ins_metadata.dst_node_id != res_metadata.src_node_id:
-                    log(
-                        ERROR,
-                        "Mismatch between source and destination node_ids in "
-                        "received reply Message.",
-                    )
-                    # TODO: delete orignal message references ?
-                    return None
-            else:
+            )
+            if ins_metadata is None:
                 # ins_metadata not found
                 return None
 
+        # Ensure destination and source node_ids match
+        if ins_metadata.dst_node_id != res_metadata.src_node_id:
+            log(
+                ERROR,
+                "Mismatch between source and destination node_ids in "
+                "received reply Message.",
+            )
+            # TODO: delete orignal message references ?
+            return None
+
+        # Ensure both are from the same run
+        if ins_metadata.run_id != res_metadata.run_id:
+            log(
+                ERROR,
+                "Reply message replied to a message from a different run.",
+            )
+            return None
+
+        def rm_message_traces(reply_metadata: Metadata) -> None:
+            ins_meta = self.delivered_messages.pop(
+                UUID(reply_metadata.reply_to_message)
+            )
+            if ins_meta.dst_node_id in self.dst_node_id_to_message_id_mapping:
+                # If it was the only message recorded for this dst_node, it's entry in
+                # the mapping would have been removed when the message_ins was pulled
+                # (hence the check with the if above)
+                self.dst_node_id_to_message_id_mapping[ins_meta.dst_node_id].remove(
+                    UUID(ins_meta.message_id)
+                )
+
+        # Original message expired ?
         if ins_metadata.created_at + ins_metadata.ttl <= time.time():
             log(
                 ERROR,
@@ -357,17 +373,14 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 ins_metadata.message_id,
             )
             # Remove all traces of original message
-            ins_meta = self.delivered_messages.pop(UUID(res_metadata.reply_to_message))
-            if ins_meta.dst_node_id in self.dst_node_id_to_message_id_mapping:
-                # If it was the only message recorded for this dst_node, it's entry in
-                # the mapping would have been removed when the message_ins was pulled
-                # (hence the check with the if above)
-                self.dst_node_id_to_message_id_mapping[ins_meta.dst_node_id].remove(
-                    UUID(ins_meta.message_id)
-                )
+            with self.lock:
+                rm_message_traces(res_metadata)
             return None
 
         if check_ttl_exceeded(ins_metadata, res_metadata):
+            # Remove all traces of original message
+            with self.lock:
+                rm_message_traces(res_metadata)
             return None
 
         # Create message_id
