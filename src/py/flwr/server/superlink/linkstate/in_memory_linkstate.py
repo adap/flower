@@ -206,13 +206,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             raise AssertionError("`limit` must be at least 1")
 
         if node_id == SUPERLINK_NODE_ID:
-            raise AssertionError(f"`node_id` must be != {SUPERLINK_NODE_ID}")
+            raise AssertionError(f"`node_id` must not be {SUPERLINK_NODE_ID} (SuperLink node ID)")
 
         # Find Messages for node_id
         message_list: list[Message] = []
         with self.lock:
             # Get all UUIDs of messages to be pulled by `node_id` node
-            all_message_ids = self.dst_node_id_to_message_id_mapping.get(node_id, [])
+            all_message_ids = self.dst_node_id_to_message_id_mapping.get(node_id)
 
             # If there are Messages associated to this node
             if all_message_ids:
