@@ -161,14 +161,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             self.message_ins_store[message_id] = message
 
             # Record in mapping
-            if metadata.dst_node_id in self.dst_node_id_to_message_id_mapping:
-                self.dst_node_id_to_message_id_mapping[metadata.dst_node_id].append(
-                    message_id
-                )
-            else:
-                self.dst_node_id_to_message_id_mapping[metadata.dst_node_id] = [
-                    message_id
-                ]
+            if metadata.dst_node_id not in self.dst_node_id_to_message_id_mapping:
+                self.dst_node_id_to_message_id_mapping[metadata.dst_node_id] = []
+
+            self.dst_node_id_to_message_id_mapping[metadata.dst_node_id].append(
+                message_id
+            )
 
         # Return the new message_id
         return message_id
@@ -206,7 +204,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             raise AssertionError("`limit` must be at least 1")
 
         if node_id == SUPERLINK_NODE_ID:
-            raise AssertionError(f"`node_id` must not be {SUPERLINK_NODE_ID} (SuperLink node ID)")
+            raise AssertionError(
+                f"`node_id` must not be {SUPERLINK_NODE_ID} (SuperLink node ID)"
+            )
 
         # Find Messages for node_id
         message_list: list[Message] = []
@@ -339,7 +339,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 # Ensure destination and source node_ids match
                 if ins_metadata.dst_node_id != res_metadata.src_node_id:
                     log(
-                        WARNING,
+                        ERROR,
                         "Mismatch between source and destination node_ids in "
                         "received reply Message.",
                     )
