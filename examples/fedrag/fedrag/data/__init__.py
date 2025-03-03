@@ -1,1 +1,0 @@
-"""fedrag: A Flower app."""

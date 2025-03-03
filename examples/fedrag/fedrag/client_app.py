@@ -5,9 +5,7 @@ import os
 from flwr.client import ClientApp
 from flwr.common import ConfigsRecord, Context, Message, RecordSet
 
-from .data.faiss_indexer import Retriever
-
-DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+from fedrag.retriever import Retriever
 
 # Flower ClientApp
 app = ClientApp()
@@ -25,12 +23,6 @@ def query(msg: Message, context: Context):
     # Extract corpus name
     corpus_name = str(msg.content.configs_records["config"]["corpus_name"])
 
-    print(
-        "ClientApp: {} - Question ID: {} - Using Corpus: {}.".format(
-            node_id, question_id, corpus_name
-        )
-    )
-
     # Initialize retrieval system
     retriever = Retriever()
     # Use the knn value for retrieving the closest-k documents to the query
@@ -40,7 +32,11 @@ def query(msg: Message, context: Context):
     # Create lists with the computed scores and documents
     scores = [doc["score"] for doc_id, doc in retrieved_docs.items()]
     documents = [doc["content"] for doc_id, doc in retrieved_docs.items()]
-    print("ClientApp: {} - Retrieved: {} documents.".format(node_id, len(documents)))
+    print(
+        "ClientApp: {} - Question ID: {} - Retrieved: {} documents.".format(
+            node_id, question_id, len(documents)
+        )
+    )
 
     # Create reply record with retrieved documents.
     docs_n_scores = ConfigsRecord(

@@ -3,7 +3,7 @@
 from typing import List
 
 from flwr.common.typing import Parameters
-from .data.faiss_indexer import Retriever
+from fedrag.retriever import Retriever
 
 
 def str_to_parameters(text: List[str]) -> Parameters:
@@ -17,9 +17,11 @@ def parameters_to_str(parameters: Parameters) -> List[str]:
 
 
 def index_exists(corpus_names):
-    retriever = Retriever()
     for corpus_name in corpus_names:
-        if not retriever.index_exists(corpus_name):
+        # no need to initialize a Retriever object,
+        # just call the class method.
+        if not Retriever.index_exists(corpus_name):
             raise RuntimeError(
-                f"Please first download the corpus and create the corresponding index for {corpus_name}."
+                f"Please first download the corpus and "
+                f"create the corresponding index for {corpus_name}."
             )

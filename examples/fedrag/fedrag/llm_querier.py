@@ -8,10 +8,12 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 class LLMQuerier:
 
-    def __init__(self, model_name):
-        self.model = AutoModelForCausalLM.from_pretrained(model_name).to(
-            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        )
+    def __init__(self, model_name, use_gpu=False):
+        if use_gpu and torch.cuda.is_available():
+            self.device = torch.device("cuda")
+        else:
+            self.device = torch.device("cpu")
+        self.model = AutoModelForCausalLM.from_pretrained(model_name).to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def answer(self, question, documents, options, dataset_name, max_new_tokens=10):
@@ -22,7 +24,7 @@ class LLMQuerier:
             question, documents, formatted_options, dataset_name
         )
         inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True).to(
-            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+            self.device
         )
 
         outputs = self.model.generate(

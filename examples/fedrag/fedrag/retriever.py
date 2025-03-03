@@ -1,5 +1,10 @@
 """fedrag: A Flower app."""
 
+import warnings
+
+# Suppress FAISS-specific warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="faiss")
+
 import os
 import json
 import faiss
@@ -10,23 +15,27 @@ import numpy as np
 from collections import OrderedDict
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
+from sentence_transformers import util as st_util
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
-CORPUS_DIR = os.path.join(DIR_PATH, "corpus")
+FAISS_DEFAULT_CONFIG = os.path.join(DIR_PATH, "retriever.yaml")
+CORPUS_DIR = os.path.join(DIR_PATH, "../data/corpus")
 
 
 class Retriever:
 
     def __init__(self, config_file=None):
         if not config_file:
-            config = yaml.safe_load(
-                open(os.path.join(DIR_PATH, "faiss_indexer.yaml"), "r")
-            )
+            self.config = yaml.safe_load(open(FAISS_DEFAULT_CONFIG, "r"))
         else:
-            config = yaml.safe_load(open(config_file, "r"))
+            self.config = yaml.safe_load(open(config_file, "r"))
+        device = st_util.get_device_name()
         # load the embedding model and define the embeddings dimensions
-        self.emb_model = SentenceTransformer(config["embedding_model"])
-        self.emb_dim = config["embedding_dimension"]
+        # for the device placement of the SentenceTransformers model we resort
+        # to use the device name returned by `sentence_transformers.util.get_device_name()`
+        # which will be called by the SentenceTransformer constructor when creating the model
+        self.emb_model = SentenceTransformer(self.config["embedding_model"])
+        self.emb_dim = self.config["embedding_dimension"]
 
     def build_faiss_index(self, dataset_name, batch_size=32, num_chunks=None):
         dataset_dir = os.path.join(CORPUS_DIR, f"{dataset_name}")
@@ -58,14 +67,13 @@ class Retriever:
                     doc = json.loads(line)
                     doc_id = doc.get("id", "")
                     content = doc.get("content", "")
-
                     batch_ids.append(doc_id)
                     batch_content.append(content)
 
                     if len(batch_ids) > batch_size:
                         # Generate embeddings for the batch
                         batch_embeddings = self.emb_model.encode(
-                            content, convert_to_numpy=True
+                            batch_content, convert_to_numpy=True
                         )
                         all_embeddings.extend(batch_embeddings)
                         all_doc_ids.extend(batch_ids)
@@ -73,7 +81,9 @@ class Retriever:
 
                 # Process last batch
                 if batch_content:
-                    batch_embeddings = self.emb_model.encode(batch_content)
+                    batch_embeddings = self.emb_model.encode(
+                        batch_content, convert_to_numpy=True
+                    )
                     all_embeddings.extend(batch_embeddings)
                     all_doc_ids.extend(batch_ids)
 

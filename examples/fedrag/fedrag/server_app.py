@@ -15,9 +15,9 @@ from time import sleep
 from flwr.common import ConfigsRecord, Context, MessageType, RecordSet
 from flwr.server import Driver, ServerApp
 
-from .data.mirage_qa import MirageQA
-from .llm_querier import LLMQuerier
-from .task import index_exists
+from fedrag.mirage_qa import MirageQA
+from fedrag.llm_querier import LLMQuerier
+from fedrag.task import index_exists
 
 
 def node_online_loop(driver: Driver) -> list[int]:
@@ -141,15 +141,13 @@ def main(driver: Driver, context: Context) -> None:
     qa_datasets = [qa_d.lower() for qa_d in qa_datasets]  # make them lower case
     qa_num = context.run_config.get("server-qa-num", None)
     model_name = context.run_config["server-llm-hfpath"]
+    use_gpu = context.run_config.get("server-llm-use-gpu", False)
+    use_gpu = True if use_gpu.lower() == "true" else False
 
-    mirage_file = os.path.join(os.path.dirname(__file__), "data/mirage.json")
-    if not os.path.exists(mirage_file):
-        print("Downloading MIRAGE QA benchmark data.")
-        MirageQA.download(mirage_file)
-        print("Downloaded MIRAGE QA benchmark data.")
+    mirage_file = os.path.join(os.path.dirname(__file__), "../data/mirage.json")
     datasets = {key: MirageQA(key, mirage_file) for key in qa_datasets}
 
-    prompt = LLMQuerier(model_name)
+    llm_querier = LLMQuerier(model_name, use_gpu)
     expected_answers, predicted_answers, question_times, unanswered_questions = (
         defaultdict(list),
         defaultdict(list),
@@ -174,7 +172,7 @@ def main(driver: Driver, context: Context) -> None:
             options = q["options"]
             answer = q["answer"]
 
-            response, predicted_answer = prompt.answer(
+            response, predicted_answer = llm_querier.answer(
                 question, merged_docs, options, dataset_name
             )
 
@@ -190,6 +188,14 @@ def main(driver: Driver, context: Context) -> None:
             else:
                 unanswered_questions[dataset_name] += 1
 
+    print(
+        "Below, for each benchmark dataset (QA Dataset), we show: \n"
+        "(1) the evaluation results in terms of the total number of Federated RAG queries executed (Total Questions). \n"
+        "(2) the total number of queries answered by the LLM when prompted with the retrieved documents from the federation clients (Answered Questions). \n"
+        "(3) the overall performance of the Federated RAG pipeline (Accuracy), i.e., expected answer vs. predicted answer by the LLM. \n"
+        "(4) the mean wall-clock time (Mean Querying Time) for executing all Federated RAG queries; from the time the server submits the query to "
+        "the clients to the time the server receives the final prediction result from the LLM model when prompted with the retrieved documents.\n"
+    )
     for dataset_name in qa_datasets:
         exp_ans = expected_answers[dataset_name]
         pred_ans = predicted_answers[dataset_name]
@@ -204,5 +210,5 @@ def main(driver: Driver, context: Context) -> None:
             f"Total Questions: {total_questions} \n"
             f"Answered Questions: {len(pred_ans)} \n"
             f"Accuracy: {accuracy} \n"
-            f"Mean Querying Time: {elapsed_time} \n\n\n"
+            f"Mean Querying Time: {elapsed_time} \n"
         )
