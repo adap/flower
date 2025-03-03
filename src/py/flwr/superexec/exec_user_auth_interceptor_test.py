@@ -19,6 +19,7 @@ import unittest
 from unittest.mock import MagicMock
 
 import grpc
+from google.protobuf.message import Message as GrpcMessage
 from parameterized import parameterized
 
 from flwr.common.typing import UserInfo
@@ -81,13 +82,13 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             (GetLoginDetailsRequest(),),
         ]
     )  # type: ignore
-    def test_unary_unary_login_request_successful(self, request_class) -> None:
+    def test_unary_unary_login_request_successful(self, request: GrpcMessage) -> None:
         """Test unary-unary RPC call for a login request.
 
         Occurs for requests that are GetLoginDetailsRequest or GetAuthTokensRequest.
         """
         # Prepare
-        dummy_request = request_class
+        dummy_request = request
         dummy_context = MagicMock()
         dummy_auth_plugin = MagicMock()
         handler_call_details = MagicMock()
@@ -117,13 +118,13 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             (StreamLogsRequest()),
         ]
     )  # type: ignore
-    def test_unary_unary_login_request_unsuccessful(self, request_class) -> None:
+    def test_unary_unary_login_request_unsuccessful(self, request: GrpcMessage) -> None:
         """Test unary-unary RPC call not successful when authentication fails.
 
         Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
         """
         # Prepare
-        dummy_request = request_class
+        dummy_request = request
         dummy_context = MagicMock()
         dummy_auth_plugin = MagicMock()
         handler_call_details = MagicMock()
@@ -148,13 +149,13 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             (StreamLogsRequest()),
         ]
     )  # type: ignore
-    def test_unary_unary_validate_tokens_successful(self, request_class) -> None:
+    def test_unary_unary_validate_tokens_successful(self, request) -> None:
         """Test unary-unary RPC call when token is valid.
 
         Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
         """
         # Prepare
-        dummy_request = request_class
+        dummy_request = request
         dummy_context = MagicMock()
         dummy_auth_plugin = MagicMock()
         handler_call_details = MagicMock()
@@ -191,13 +192,13 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             (StreamLogsRequest()),
         ]
     )  # type: ignore
-    def test_unary_unary_refresh_tokens_successful(self, request_class) -> None:
+    def test_unary_unary_refresh_tokens_successful(self, request) -> None:
         """Test unary-unary RPC call when tokens are refreshed successfully.
 
         Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
         """
         # Prepare
-        dummy_request = request_class
+        dummy_request = request
         dummy_context = MagicMock()
         dummy_auth_plugin = MagicMock()
         handler_call_details = MagicMock()

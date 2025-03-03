@@ -67,11 +67,11 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             )
             self.log_plugin.write_log(log_entry)
 
-            response, error = None, None
             # For unary-unary calls, log after the call immediately
             if method_handler.unary_unary:
+                unary_response, error = None, None
                 try:
-                    response = cast(
+                    unary_response = cast(
                         EventLogResponse, method_handler.unary_unary(request, context)
                     )
                 except Exception as e:  # pylint: disable=broad-except
@@ -83,10 +83,10 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                         context=context,
                         user_info=shared_user_info.get(),
                         method_name=method_name,
-                        response=response or cast(Exception, error),
+                        response=unary_response or error,
                     )
                     self.log_plugin.write_log(log_entry)
-                return response
+                return unary_response
 
             # For unary-stream calls, wrap the response iterator and write the event log
             # after iteration completes
@@ -97,10 +97,11 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                 )
 
                 def response_wrapper() -> Iterator[EventLogResponse]:
+                    stream_response, error = None, None
                     try:
                         # pylint: disable=use-yield-from
-                        for response in response_iterator:
-                            yield response
+                        for stream_response in response_iterator:
+                            yield stream_response
                     except Exception as e:  # pylint: disable=broad-except
                         error = e
                         raise
@@ -112,7 +113,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                             context=context,
                             user_info=shared_user_info.get(),
                             method_name=method_name,
-                            response=response or cast(Exception, error),
+                            response=stream_response or error,
                         )
                         self.log_plugin.write_log(log_entry)
 
