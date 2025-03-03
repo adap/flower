@@ -114,7 +114,6 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     """Validate a Message."""
     validation_errors = []
     metadata = message.metadata
-    print(f"{metadata = }")
 
     if metadata.message_id != "":
         validation_errors.append("non-empty `message_id`")
