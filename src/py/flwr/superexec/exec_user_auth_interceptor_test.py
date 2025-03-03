@@ -16,6 +16,7 @@
 
 
 import unittest
+from typing import Any, Callable, Union
 from unittest.mock import MagicMock
 
 import grpc
@@ -38,10 +39,21 @@ from flwr.superexec.exec_user_auth_interceptor import (
 
 
 class DummyUnaryUnaryHandler:
-    """Dummy handler for unary-unary RPCs."""
+    """Dummy unary-unary handler for testing."""
 
     unary_unary = staticmethod(lambda request, context: "dummy_response")
     unary_stream = None
+    request_deserializer = None
+    response_serializer = None
+
+
+class DummyUnaryStreamHandler:
+    """Dummy unary-stream handler for testing."""
+
+    unary_unary = None
+    unary_stream = staticmethod(
+        lambda request, context: iter(["stream response 1", "stream response 2"])
+    )
     request_deserializer = None
     response_serializer = None
 
@@ -53,6 +65,22 @@ class DummyUnsupportedHandler:
     unary_stream = None
     request_deserializer = None
     response_serializer = None
+
+
+# pylint: disable=unused-argument
+def get_dummy_unary_unary_handler(
+    handler_call_details: grpc.HandlerCallDetails,
+) -> DummyUnaryUnaryHandler:
+    """."""
+    return DummyUnaryUnaryHandler()
+
+
+# pylint: disable=unused-argument
+def get_dummy_unary_stream_handler(
+    handler_call_details: grpc.HandlerCallDetails,
+) -> DummyUnaryStreamHandler:
+    """."""
+    return DummyUnaryStreamHandler()
 
 
 class TestExecUserAuthInterceptor(unittest.TestCase):
@@ -69,21 +97,14 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         """Reset shared_user_info to its previous state."""
         shared_user_info.reset(self.token)
 
-    # pylint: disable=unused-argument
-    def dummy_unary_unary_continuation(
-        self, handler_call_details: grpc.HandlerCallDetails
-    ) -> DummyUnaryUnaryHandler:
-        """."""
-        return DummyUnaryUnaryHandler()
-
     @parameterized.expand(
         [
             (GetAuthTokensRequest()),
             (GetLoginDetailsRequest(),),
         ]
     )  # type: ignore
-    def test_unary_unary_login_request_successful(self, request: GrpcMessage) -> None:
-        """Test unary-unary RPC call for a login request.
+    def test_unary_unary_authentication_successful(self, request: GrpcMessage) -> None:
+        """Test unary-unary RPC call successful for a login request.
 
         Occurs for requests that are GetLoginDetailsRequest or GetAuthTokensRequest.
         """
@@ -97,7 +118,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
         interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
         intercepted_handler = interceptor.intercept_service(
-            self.dummy_unary_unary_continuation, handler_call_details
+            get_dummy_unary_unary_handler, handler_call_details
         )
 
         # Execute
@@ -118,8 +139,8 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             (StreamLogsRequest()),
         ]
     )  # type: ignore
-    def test_unary_unary_login_request_unsuccessful(self, request: GrpcMessage) -> None:
-        """Test unary-unary RPC call not successful when authentication fails.
+    def test_unary_rpc_authentication_unsuccessful(self, request: GrpcMessage) -> None:
+        """Test unary-unary/stream RPC call not successful when authentication fails.
 
         Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
         """
@@ -133,13 +154,24 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
         dummy_auth_plugin.refresh_tokens.return_value = None
         interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
+        continuation: Union[
+            Callable[[Any], DummyUnaryUnaryHandler],
+            Callable[[Any], DummyUnaryStreamHandler],
+        ] = get_dummy_unary_unary_handler
+        # Set up unary-stream case for StreamLogsRequest
+        if isinstance(request, StreamLogsRequest):
+            continuation = get_dummy_unary_stream_handler
         intercepted_handler = interceptor.intercept_service(
-            self.dummy_unary_unary_continuation, handler_call_details
+            continuation, handler_call_details
         )
 
         # Execute & Assert: interceptor should abort with UNAUTHENTICATED
-        with self.assertRaises(grpc.RpcError):
-            intercepted_handler.unary_unary(dummy_request, dummy_context)
+        if isinstance(request, StreamLogsRequest):
+            with self.assertRaises(grpc.RpcError):
+                _ = intercepted_handler.unary_stream(dummy_request, dummy_context)
+        else:
+            with self.assertRaises(grpc.RpcError):
+                intercepted_handler.unary_unary(dummy_request, dummy_context)
 
     @parameterized.expand(
         [
@@ -149,8 +181,8 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             (StreamLogsRequest()),
         ]
     )  # type: ignore
-    def test_unary_unary_validate_tokens_successful(self, request) -> None:
-        """Test unary-unary RPC call when token is valid.
+    def test_unary_validate_tokens_successful(self, request) -> None:
+        """Test unary-unary/stream RPC call is successful when token is valid.
 
         Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
         """
@@ -166,15 +198,27 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             self.expected_user_info,
         )
         interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
+        continuation: Union[
+            Callable[[Any], DummyUnaryUnaryHandler],
+            Callable[[Any], DummyUnaryStreamHandler],
+        ] = get_dummy_unary_unary_handler
+        # Set up unary-stream case for StreamLogsRequest
+        if isinstance(request, StreamLogsRequest):
+            continuation = get_dummy_unary_stream_handler
         intercepted_handler = interceptor.intercept_service(
-            self.dummy_unary_unary_continuation, handler_call_details
+            continuation, handler_call_details
         )
 
-        # Execute
-        response = intercepted_handler.unary_unary(dummy_request, dummy_context)
+        # Execute & Assert
+        if isinstance(request, StreamLogsRequest):
+            response = intercepted_handler.unary_stream(dummy_request, dummy_context)
+            # Assert response is as expected
+            self.assertEqual(list(response), ["stream response 1", "stream response 2"])
+        else:
+            response = intercepted_handler.unary_unary(dummy_request, dummy_context)
+            # Assert response is as expected
+            self.assertEqual(response, "dummy_response")
 
-        # Assert response is as expected
-        self.assertEqual(response, "dummy_response")
         # Assert `shared_user_info` is set
         user_info_from_context = shared_user_info.get()
         self.assertEqual(
@@ -192,8 +236,8 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             (StreamLogsRequest()),
         ]
     )  # type: ignore
-    def test_unary_unary_refresh_tokens_successful(self, request) -> None:
-        """Test unary-unary RPC call when tokens are refreshed successfully.
+    def test_unary_refresh_tokens_successful(self, request) -> None:
+        """Test unary-unary/stream RPC call is successful when tokens are refreshed.
 
         Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
         """
@@ -210,15 +254,29 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         dummy_auth_plugin.refresh_tokens.return_value = expected_refresh_tokens_value
 
         interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
+        continuation: Union[
+            Callable[[Any], DummyUnaryUnaryHandler],
+            Callable[[Any], DummyUnaryStreamHandler],
+        ] = get_dummy_unary_unary_handler
+        # Set up unary-stream case for StreamLogsRequest
+        if isinstance(request, StreamLogsRequest):
+            continuation = get_dummy_unary_stream_handler
         intercepted_handler = interceptor.intercept_service(
-            self.dummy_unary_unary_continuation, handler_call_details
+            continuation, handler_call_details
         )
 
-        # Execute
-        response = intercepted_handler.unary_unary(dummy_request, dummy_context)
-
-        # Assert response is as expected and initial metadata was sent
-        self.assertEqual(response, "dummy_response")
+        # Execute & Assert
+        if isinstance(request, StreamLogsRequest):
+            response_iterator = intercepted_handler.unary_stream(
+                dummy_request, dummy_context
+            )
+            responses = list(response_iterator)
+            # Assert responses are as expected
+            self.assertEqual(responses, ["stream response 1", "stream response 2"])
+        else:
+            response = intercepted_handler.unary_unary(dummy_request, dummy_context)
+            # Assert response is as expected and initial metadata was sent
+            self.assertEqual(response, "dummy_response")
         # Assert refresh tokens were sent in initial metadata
         dummy_context.send_initial_metadata.assert_called_once_with(
             expected_refresh_tokens_value

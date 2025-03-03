@@ -16,7 +16,7 @@
 
 
 import unittest
-from typing import Union
+from typing import Optional, Union
 from unittest.mock import MagicMock
 
 import grpc
@@ -29,6 +29,11 @@ from flwr.common.event_log_plugin.event_log_plugin import (
 from flwr.common.typing import Actor, Event, LogEntry, UserInfo
 from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
 from flwr.superexec.exec_user_auth_interceptor import shared_user_info
+
+from .exec_user_auth_interceptor_test import (
+    DummyUnaryStreamHandler,
+    DummyUnaryUnaryHandler,
+)
 
 
 class DummyLogPlugin(EventLogWriterPlugin):
@@ -62,7 +67,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         context: grpc.ServicerContext,
         user_info: UserInfo,
         method_name: str,
-        response: Union[EventLogResponse, Exception],
+        response: Optional[Union[EventLogResponse, Exception]],
     ) -> LogEntry:
         """."""
         return LogEntry(
@@ -81,24 +86,24 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self.logs.append(log_entry)
 
 
-class DummyUnaryUnaryHandler:
-    """Dummy unary-unary handler for testing."""
-
-    unary_unary = staticmethod(lambda request, context: "dummy_response")
-    unary_stream = None
-    request_deserializer = None
-    response_serializer = None
-
-
-class DummyUnaryStreamHandler:
-    """Dummy unary-stream handler for testing."""
-
-    unary_unary = None
-    unary_stream = staticmethod(
-        lambda request, context: iter(["stream response 1", "stream response 2"])
-    )
-    request_deserializer = None
-    response_serializer = None
+# class DummyUnaryUnaryHandler:
+#     """Dummy unary-unary handler for testing."""
+#
+#     unary_unary = staticmethod(lambda request, context: "dummy_response")
+#     unary_stream = None
+#     request_deserializer = None
+#     response_serializer = None
+#
+#
+# class DummyUnaryStreamHandler:
+#     """Dummy unary-stream handler for testing."""
+#
+#     unary_unary = None
+#     unary_stream = staticmethod(
+#         lambda request, context: iter(["stream response 1", "stream response 2"])
+#     )
+#     request_deserializer = None
+#     response_serializer = None
 
 
 class DummyUnsupportedHandler:
