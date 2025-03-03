@@ -133,7 +133,7 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     # Verify TTL and created_at time
     # current_time = time.time()
     # if metadata.created_at + metadata.ttl <= current_time:
-    #     validation_errors.append("Task TTL has expired")
+    #     validation_errors.append("Message TTL has expired")
 
     # Source node is set and is not zero
     if not metadata.src_node_id:

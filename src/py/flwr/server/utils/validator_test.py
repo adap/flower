@@ -17,7 +17,6 @@
 
 import time
 import unittest
-from typing import Optional
 
 from parameterized import parameterized
 
