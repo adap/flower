@@ -16,7 +16,7 @@
 
 
 import unittest
-from typing import Union
+from typing import Optional, Union
 from unittest.mock import MagicMock
 
 import grpc
@@ -29,6 +29,11 @@ from flwr.common.event_log_plugin.event_log_plugin import (
 from flwr.common.typing import Actor, Event, LogEntry, UserInfo
 from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
 from flwr.superexec.exec_user_auth_interceptor import shared_user_info
+
+from .exec_user_auth_interceptor_test import (
+    get_dummy_unary_stream_handler,
+    get_dummy_unary_unary_handler,
+)
 
 
 class DummyLogPlugin(EventLogWriterPlugin):
@@ -62,7 +67,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         context: grpc.ServicerContext,
         user_info: UserInfo,
         method_name: str,
-        response: Union[EventLogResponse, Exception],
+        response: Optional[Union[EventLogResponse, Exception]],
     ) -> LogEntry:
         """."""
         return LogEntry(
@@ -81,30 +86,21 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self.logs.append(log_entry)
 
 
-class DummyUnaryUnaryHandler:
-    """Dummy unary-unary handler for testing."""
+class DummyUnsupportedHandler:
+    """Dummy handler for unsupported RPC types."""
 
-    unary_unary = staticmethod(lambda request, context: "dummy_response")
+    unary_unary = None
     unary_stream = None
     request_deserializer = None
     response_serializer = None
 
 
-class DummyUnaryStreamHandler:
-    """Dummy unary-stream handler for testing."""
+class DummyUnaryUnaryHandlerException:
+    """Dummy handler for unary-unary RPC calls that raises an Exception."""
 
-    unary_unary = None
-    unary_stream = staticmethod(
-        lambda request, context: iter(["stream response 1", "stream response 2"])
+    unary_unary = staticmethod(
+        lambda request, context: (_ for _ in ()).throw(Exception("Test error"))
     )
-    request_deserializer = None
-    response_serializer = None
-
-
-class DummyUnsupportedHandler:
-    """Dummy handler for unsupported RPC types."""
-
-    unary_unary = None
     unary_stream = None
     request_deserializer = None
     response_serializer = None
@@ -155,17 +151,10 @@ class TestExecEventLogInterceptor(unittest.TestCase):
 
     def test_unary_unary_interceptor(self) -> None:
         """Test unary-unary RPC call logging."""
-
-        # Prepare: Create a dummy continuation that returns a unary-unary handler
-        # pylint: disable=unused-argument
-        def continuation(
-            handler_call_details: grpc.HandlerCallDetails,
-        ) -> DummyUnaryUnaryHandler:
-            return DummyUnaryUnaryHandler()
-
         handler_call_details = MagicMock()
         handler_call_details.method = "dummy_method"
         expected_method_name = handler_call_details.method
+        continuation = get_dummy_unary_unary_handler
         intercepted_handler = self.interceptor.intercept_service(
             continuation, handler_call_details
         )
@@ -180,19 +169,41 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         self.assertEqual(response, "dummy_response")
         self.assertEqual(self.log_plugin.logs, expected_logs)
 
-    def test_unary_stream_interceptor(self) -> None:
-        """Test unary-stream RPC call logging."""
+    def test_unary_unary_interceptor_exception(self) -> None:
+        """Test unary-unary RPC call logging when the handler raises an Exception."""
+        handler_call_details = MagicMock()
+        handler_call_details.method = "exception_method"
+        expected_method_name = handler_call_details.method
 
-        # Prepare: Create a dummy continuation that returns a unary-stream handler
         # pylint: disable=unused-argument
         def continuation(
             handler_call_details: grpc.HandlerCallDetails,
-        ) -> DummyUnaryStreamHandler:
-            return DummyUnaryStreamHandler()
+        ) -> DummyUnaryUnaryHandlerException:
+            return DummyUnaryUnaryHandlerException()
 
+        intercepted_handler = self.interceptor.intercept_service(
+            continuation, handler_call_details
+        )
+        dummy_request = MagicMock()
+        dummy_context = MagicMock()
+
+        # Execute & Assert
+        # Invoking the unary_unary method raises an Exception with the expected message
+        with self.assertRaises(Exception) as context_manager:
+            intercepted_handler.unary_unary(dummy_request, dummy_context)
+        self.assertEqual(str(context_manager.exception), "Test error")
+
+        # Assert that the expected logs should include the before log and the after
+        # log (even though an exception occurred)
+        expected_logs = self.get_expected_logs(expected_method_name)
+        self.assertEqual(self.log_plugin.logs, expected_logs)
+
+    def test_unary_stream_interceptor(self) -> None:
+        """Test unary-stream RPC call logging."""
         handler_call_details = MagicMock()
         handler_call_details.method = "stream_method"
         expected_method_name = handler_call_details.method
+        continuation = get_dummy_unary_stream_handler
         intercepted_handler = self.interceptor.intercept_service(
             continuation, handler_call_details
         )
