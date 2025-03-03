@@ -876,7 +876,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                     ttl=SUPERLINK_NODE_ID,
                     message_type="",
                 )
-                meta._created_at = current_time  # type: ignore   # pylint: disable=W0212
+                # pylint: disable=W0212
+                meta._created_at = current_time  # type: ignore
                 reply_list.append(create_message_error_unavailable_ins_message(meta))
 
         return reply_list

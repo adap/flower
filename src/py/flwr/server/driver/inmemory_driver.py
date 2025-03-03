@@ -22,7 +22,7 @@ from typing import Optional, cast
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
-from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode
+from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
@@ -160,25 +160,9 @@ class InMemoryDriver(Driver):
         while timeout is None or time.time() < end_time:
             res_msgs = self.pull_messages(msg_ids)
 
-            ret.extend(
-                [
-                    msg
-                    for msg in res_msgs
-                    if not (
-                        msg.has_error()
-                        and msg.error.code == ErrorCode.REPLY_MESSAGE_UNAVAILABLE
-                    )
-                ]
-            )
+            ret.extend(res_msgs)
             msg_ids.difference_update(
-                {
-                    msg.metadata.reply_to_message
-                    for msg in res_msgs
-                    if not (
-                        msg.has_error()
-                        and msg.error.code == ErrorCode.REPLY_MESSAGE_UNAVAILABLE
-                    )
-                }
+                {msg.metadata.reply_to_message for msg in res_msgs}
             )
             if len(msg_ids) == 0:
                 break
