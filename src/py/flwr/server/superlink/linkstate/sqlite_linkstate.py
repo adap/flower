@@ -58,7 +58,6 @@ from .utils import (
     convert_uint64_to_sint64,
     convert_uint64_values_in_dict_to_sint64,
     create_message_error_expired_result_message,
-    create_message_error_pending_result_message,
     create_message_error_unavailable_ins_message,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
@@ -779,6 +778,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # List of reply messages. We will sort its content at the end
         # so it matches that of the enquired `message_ids`
         reply_list: list[Message] = []
+        recognized_message_ids: list[UUID] = []
 
         current_time = time.time()
 
@@ -794,6 +794,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 row, ["run_id", "src_node_id", "dst_node_id"]
             )
             msg_res = message_from_dict(row)
+            recognized_message_ids.append(UUID(msg_res.metadata.reply_to_message))
             #   expired TTL ? -> return Error Message
             #   else -> Return actual Reply Message
             if message_ttl_has_expired(msg_res.metadata, current_time=current_time):
@@ -830,6 +831,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 row, ["run_id", "src_node_id", "dst_node_id"]
             )
             msg_ins_metadata = message_from_dict(row).metadata
+            recognized_message_ids.append(UUID(msg_ins_metadata.message_id))
             reply_list.append(
                 create_message_error_unavailable_ins_message(msg_ins_metadata)
             )
@@ -859,23 +861,23 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 row, ["run_id", "src_node_id", "dst_node_id"]
             )
             msg_ins_metadata = message_from_dict(row).metadata
-            reply_list.append(
-                create_message_error_pending_result_message(msg_ins_metadata)
-            )
+            recognized_message_ids.append(UUID(msg_ins_metadata.message_id))
 
         # msg_id isn't recognized
-        meta = Metadata(
-            run_id=0,
-            message_id="",
-            src_node_id=SUPERLINK_NODE_ID,
-            dst_node_id=SUPERLINK_NODE_ID,
-            reply_to_message="",
-            group_id="",
-            ttl=SUPERLINK_NODE_ID,
-            message_type="",
-        )
-        meta._created_at = current_time  # type: ignore   # pylint: disable=W0212
-        reply_list.append(create_message_error_unavailable_ins_message(meta))
+        for msg_id in message_ids:
+            if msg_id not in recognized_message_ids:
+                meta = Metadata(
+                    run_id=0,
+                    message_id="",
+                    src_node_id=SUPERLINK_NODE_ID,
+                    dst_node_id=SUPERLINK_NODE_ID,
+                    reply_to_message="",
+                    group_id="",
+                    ttl=SUPERLINK_NODE_ID,
+                    message_type="",
+                )
+                meta._created_at = current_time  # type: ignore   # pylint: disable=W0212
+                reply_list.append(create_message_error_unavailable_ins_message(meta))
 
         return reply_list
 

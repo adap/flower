@@ -40,7 +40,6 @@ from flwr.server.utils import validate_message, validate_task_ins_or_res
 from .utils import (
     check_ttl_exceeded,
     create_message_error_expired_result_message,
-    create_message_error_pending_result_message,
     create_message_error_unavailable_ins_message,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
@@ -453,7 +452,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     # Has the message being pulled by a SuperNode?
                     if msg_id in self.delivered_messages:
                         # if TTL expired -> Return TTL expired Error Message
-                        # if TTL is still valid -> Return Error Message (awaiting reply)
+                        # if TTL is still valid -> do nothing
                         msg_ins_metadata = self.delivered_messages[msg_id]
                         if message_ttl_has_expired(
                             msg_ins_metadata, current_time=current_time
@@ -464,17 +463,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                                     msg_ins_metadata
                                 )
                             )
-                        else:
-                            reply_list.append(
-                                create_message_error_pending_result_message(
-                                    msg_ins_metadata
-                                )
-                            )
 
                     # Was the message ever pushed to the SuperLink by the ServerAppIO?
                     elif msg_id in self.message_ins_store:
                         # if TTL expired -> Return TTL expired Error Message
-                        # if TTL valid -> Return Error Message (message not yet pulled)
+                        # if TTL valid -> do nothing
                         msg_ins_metadata = self.message_ins_store[msg_id].metadata
                         if message_ttl_has_expired(
                             msg_ins_metadata, current_time=current_time
@@ -486,12 +479,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             ].remove(msg_id)
                             reply_list.append(
                                 create_message_error_unavailable_ins_message(
-                                    msg_ins_metadata
-                                )
-                            )
-                        else:
-                            reply_list.append(
-                                create_message_error_pending_result_message(
                                     msg_ins_metadata
                                 )
                             )
