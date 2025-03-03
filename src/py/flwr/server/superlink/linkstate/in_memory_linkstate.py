@@ -319,6 +319,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
+            # Mark the node online util time.time() + ping_interval
             self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
             return node_id
 
@@ -521,7 +522,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return self.federation_options[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        """Acknowledge a ping received from a node, serving as a heartbeat.
+
+        It allows for one missed ping (2 * ping_interval) before marking the node as
+        offline.
+        """
         with self.lock:
             if node_id in self.node_ids:
                 self.node_ids[node_id] = (

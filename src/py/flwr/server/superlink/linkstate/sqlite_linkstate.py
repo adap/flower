@@ -631,6 +631,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             "VALUES (?, ?, ?, ?)"
         )
 
+        # Mark the node online util time.time() + ping_interval
         try:
             self.query(
                 query,
@@ -946,7 +947,11 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         return configsrecord_from_bytes(row["federation_options"])
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        """Acknowledge a ping received from a node, serving as a heartbeat.
+
+        It allows for one missed ping (2 * ping_interval) before marking the node as
+        offline.
+        """
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
         # Check if the node exists in the `node` table

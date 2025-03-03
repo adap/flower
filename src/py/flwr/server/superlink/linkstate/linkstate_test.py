@@ -719,7 +719,10 @@ class StateTest(unittest.TestCase):
         assert node_public_keys == public_keys
 
     def test_acknowledge_ping(self) -> None:
-        """Test if acknowledge_ping works and if get_nodes return online nodes."""
+        """Test if acknowledge_ping works and get_nodes return online nodes.
+
+        We permit one missed ping (2 × ping_interval) before marking the node offline.
+        """
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
@@ -731,7 +734,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         current_time = time.time()
-        with patch("time.time", side_effect=lambda: current_time + 50):
+        with patch("time.time", side_effect=lambda: current_time + 70):
             actual_node_ids = state.get_nodes(run_id)
 
         # Assert
@@ -752,16 +755,17 @@ class StateTest(unittest.TestCase):
         """Test if get_task_res return TaskRes containing node unavailable error."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
-        node_id_0 = state.create_node(ping_interval=90)
-        node_id_1 = state.create_node(ping_interval=30)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        node_id_0 = state.create_node(ping_interval=10)
+        node_id_1 = state.create_node(ping_interval=10)
+
+        # Run acknowledge ping
+        state.acknowledge_ping(node_id_0, ping_interval=90)
+        state.acknowledge_ping(node_id_1, ping_interval=30)
+
         # Create and store TaskIns
-        task_ins_0 = create_task_ins(
-            consumer_node_id=node_id_0, anonymous=False, run_id=run_id
-        )
-        task_ins_1 = create_task_ins(
-            consumer_node_id=node_id_1, anonymous=False, run_id=run_id
-        )
+        task_ins_0 = create_task_ins(consumer_node_id=node_id_0, run_id=run_id)
+        task_ins_1 = create_task_ins(consumer_node_id=node_id_1, run_id=run_id)
         task_id_0 = state.store_task_ins(task_ins=task_ins_0)
         task_id_1 = state.store_task_ins(task_ins=task_ins_1)
         assert task_id_0 is not None and task_id_1 is not None
@@ -772,7 +776,6 @@ class StateTest(unittest.TestCase):
         # Create and store TaskRes
         task_res_0 = create_task_res(
             producer_node_id=node_id_0,
-            anonymous=False,
             ancestry=[str(task_id_0)],
             run_id=run_id,
         )
@@ -781,7 +784,7 @@ class StateTest(unittest.TestCase):
         # Execute
         current_time = time.time()
         task_res_list: list[TaskRes] = []
-        with patch("time.time", side_effect=lambda: current_time + 50):
+        with patch("time.time", side_effect=lambda: current_time + 100):
             task_res_list = state.get_task_res({task_id_0, task_id_1})
 
         # Assert

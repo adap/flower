@@ -35,7 +35,7 @@ from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 
 NODE_UNAVAILABLE_ERROR_REASON = (
     "Error: Node Unavailable - The destination node is currently unavailable. "
-    "It exceeds the time limit specified in its last ping."
+    "It exceeds twice the time limit specified in its last ping."
 )
 
 VALID_RUN_STATUS_TRANSITIONS = {
@@ -411,8 +411,8 @@ def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
         group_id=ref_taskins.group_id,
         run_id=ref_taskins.run_id,
         task=Task(
-            producer=Node(node_id=ref_taskins.task.consumer.node_id, anonymous=False),
-            consumer=Node(node_id=ref_taskins.task.producer.node_id, anonymous=False),
+            producer=Node(node_id=ref_taskins.task.consumer.node_id),
+            consumer=Node(node_id=ref_taskins.task.producer.node_id),
             created_at=current_time,
             ttl=ttl,
             ancestry=[ref_taskins.task_id],
@@ -431,7 +431,9 @@ def check_node_availability_for_taskins(
     current_time: Optional[float] = None,
     update_set: bool = True,
 ) -> dict[UUID, TaskRes]:
-    """Check node availability for TaskIns and generate error TaskRes if unavailable.
+    """Check node availability for TaskIns and generate error TaskRes if unavailable. A
+    TaskRes error indicating node unavailability will be generated for each TaskIns
+    whose destination node is offline or non-existent.
 
     Parameters
     ----------
@@ -459,7 +461,8 @@ def check_node_availability_for_taskins(
         task_ins = found_taskins_dict[taskins_id]
         node_id = task_ins.task.consumer.node_id
         online_until = node_id_to_online_until.get(node_id)
-        # Generate a TaskRes containing an error reply if the node is offline or doesn't exist.
+        # Generate a TaskRes containing an error reply
+        # if the node is offline or doesn't exist.
         if online_until is None or online_until < current:
             if update_set:
                 inquired_taskins_ids.remove(taskins_id)
