@@ -16,10 +16,12 @@
 
 
 import unittest
-from typing import Optional, Union
+from collections.abc import Iterator
+from typing import Any, Optional, Union
 from unittest.mock import MagicMock
 
 import grpc
+from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.event_log_plugin.event_log_plugin import (
@@ -106,6 +108,28 @@ class DummyUnaryUnaryHandlerException:
     response_serializer = None
 
 
+def dummy_unary_stream_exception(
+    request: GrpcMessage, context: grpc.ServicerContext  # pylint: disable=W0613
+) -> Iterator[Any]:
+    """Raise an Exception upon iteration for unary-stream RPC call."""
+
+    def generator() -> Iterator[Any]:
+        raise Exception("Test stream error")  # pylint: disable=W0719
+        yield  # This yield is never reached. pylint: disable=W0101
+
+    return generator()
+
+
+# Dummy handler for unary_stream that uses the above function.
+class DummyUnaryStreamHandlerException:
+    """Dummy handler for unary-stream RPC calls that raises an Exception."""
+
+    unary_unary = None
+    unary_stream = staticmethod(dummy_unary_stream_exception)
+    request_deserializer = None
+    response_serializer = None
+
+
 class TestExecEventLogInterceptor(unittest.TestCase):
     """Test the ExecEventLogInterceptor logging for different RPC call types."""
 
@@ -170,7 +194,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         self.assertEqual(self.log_plugin.logs, expected_logs)
 
     def test_unary_unary_interceptor_exception(self) -> None:
-        """Test unary-unary RPC call logging when the handler raises an Exception."""
+        """Test unary-unary RPC call when the handler raises an Exception."""
         handler_call_details = MagicMock()
         handler_call_details.method = "exception_method"
         expected_method_name = handler_call_details.method
@@ -219,6 +243,35 @@ class TestExecEventLogInterceptor(unittest.TestCase):
 
         # Assert: Verify the stream responses and that logs were written.
         self.assertEqual(responses, ["stream response 1", "stream response 2"])
+        self.assertEqual(self.log_plugin.logs, expected_logs)
+
+    def test_unary_stream_interceptor_exception(self) -> None:
+        """Test unary-stream RPC call when the stream handler raises an Exception."""
+        handler_call_details = MagicMock()
+        handler_call_details.method = "stream_exception_method"
+        expected_method_name = handler_call_details.method
+
+        # pylint: disable=unused-argument
+        def continuation(
+            handler_call_details: grpc.HandlerCallDetails,
+        ) -> DummyUnaryStreamHandlerException:
+            return DummyUnaryStreamHandlerException()
+
+        intercepted_handler = self.interceptor.intercept_service(
+            continuation, handler_call_details
+        )
+        dummy_request = MagicMock()
+        dummy_context = MagicMock()
+
+        # Execute & Assert
+        # Ierating the response iterator raises the expected exception.
+        with self.assertRaises(Exception) as context_manager:
+            list(intercepted_handler.unary_stream(dummy_request, dummy_context))
+        self.assertEqual(str(context_manager.exception), "Test stream error")
+
+        # Assert that the expected logs should include the before log and the after
+        # log (even though an exception occurred)
+        expected_logs = self.get_expected_logs(expected_method_name)
         self.assertEqual(self.log_plugin.logs, expected_logs)
 
     def test_unsupported_rpc_method(self) -> None:
