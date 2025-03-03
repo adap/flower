@@ -58,15 +58,6 @@ class DummyUnaryStreamHandler:
     response_serializer = None
 
 
-class DummyUnsupportedHandler:
-    """Dummy handler for unsupported RPC types."""
-
-    unary_unary = None
-    unary_stream = None
-    request_deserializer = None
-    response_serializer = None
-
-
 # pylint: disable=unused-argument
 def get_dummy_unary_unary_handler(
     handler_call_details: grpc.HandlerCallDetails,
@@ -94,7 +85,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         self.expected_user_info = UserInfo(user_id="user_id", user_name="user_name")
 
     def tearDown(self) -> None:
-        """Reset shared_user_info to its previous state."""
+        """Reset shared_user_info to its previous state to prevent state leakage."""
         shared_user_info.reset(self.token)
 
     @parameterized.expand(
