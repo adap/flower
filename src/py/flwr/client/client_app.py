@@ -74,7 +74,7 @@ def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFn
 
 
 @contextmanager
-def _empty_lifecycle(_: Context) -> Iterator[None]:
+def _empty_lifespan(_: Context) -> Iterator[None]:
     yield
 
 
@@ -142,11 +142,11 @@ class ClientApp:
         self._train: Optional[ClientAppCallable] = None
         self._evaluate: Optional[ClientAppCallable] = None
         self._query: Optional[ClientAppCallable] = None
-        self._lifecycle = _empty_lifecycle
+        self._lifespan = _empty_lifespan
 
     def __call__(self, message: Message, context: Context) -> Message:
         """Execute `ClientApp`."""
-        with self._lifecycle(context):
+        with self._lifespan(context):
             # Execute message using `client_fn`
             if self._call:
                 return self._call(message, context)
@@ -305,12 +305,12 @@ class ClientApp:
 
         return query_decorator
 
-    def lifecycle(
+    def lifespan(
         self,
     ) -> Callable[
         [Callable[[Context], Iterator[None]]], Callable[[Context], Iterator[None]]
     ]:
-        """Return a decorator that registers the lifecycle fn with the client app.
+        """Return a decorator that registers the lifespan fn with the client app.
 
         The decorated function should accept a `Context` object and use `yield`
         to define enter and exit behavior.
@@ -319,29 +319,33 @@ class ClientApp:
         --------
         >>> app = ClientApp()
         >>>
-        >>> @app.lifecycle()
-        >>> def lifecycle(context: Context) -> None:
+        >>> @app.lifespan()
+        >>> def lifespan(context: Context) -> None:
+        >>>     # Perform initialization tasks before the app starts
         >>>     print("Initializing ClientApp")
-        >>>     yield
+        >>>
+        >>>     yield  # ClientApp is running
+        >>>
+        >>>     # Perform cleanup tasks after the app stops
         >>>     print("Cleaning up ClientApp")
         """
 
-        def lifecycle_decorator(
-            lifecycle_fn: Callable[[Context], Iterator[None]]
+        def lifespan_decorator(
+            lifespan_fn: Callable[[Context], Iterator[None]]
         ) -> Callable[[Context], Iterator[None]]:
-            """Register the lifecycle fn with the ServerApp object."""
-            warn_preview_feature("ClientApp-register-lifecycle-function")
+            """Register the lifespan fn with the ServerApp object."""
+            warn_preview_feature("ClientApp-register-lifespan-function")
 
             @contextmanager
-            def decorated_lifecycle(context: Context) -> Iterator[None]:
-                # Execute the code before `yield` in lifecycle_fn
+            def decorated_lifespan(context: Context) -> Iterator[None]:
+                # Execute the code before `yield` in lifespan_fn
                 try:
-                    if not isinstance(it := lifecycle_fn(context), Iterator):
+                    if not isinstance(it := lifespan_fn(context), Iterator):
                         raise StopIteration
                     next(it)
                 except StopIteration:
                     raise RuntimeError(
-                        "Lifecycle function should yield at least once."
+                        "lifespan function should yield at least once."
                     ) from None
 
                 try:
@@ -349,21 +353,21 @@ class ClientApp:
                     yield
                 finally:
                     try:
-                        # Execute the code after `yield` in lifecycle_fn
+                        # Execute the code after `yield` in lifespan_fn
                         next(it)
                     except StopIteration:
                         pass
                     else:
-                        raise RuntimeError("Lifecycle function should only yield once.")
+                        raise RuntimeError("lifespan function should only yield once.")
 
             # Register provided function with the ClientApp object
             # Ignore mypy error because of different argument names (`_` vs `context`)
-            self._lifecycle = decorated_lifecycle  # type: ignore
+            self._lifespan = decorated_lifespan  # type: ignore
 
             # Return provided function unmodified
-            return lifecycle_fn
+            return lifespan_fn
 
-        return lifecycle_decorator
+        return lifespan_decorator
 
 
 class LoadClientAppError(Exception):
