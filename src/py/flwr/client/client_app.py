@@ -345,7 +345,7 @@ class ClientApp:
                     next(it)
                 except StopIteration:
                     raise RuntimeError(
-                        "lifespan function should yield at least once."
+                        "The lifespan function should yield at least once."
                     ) from None
 
                 try:
