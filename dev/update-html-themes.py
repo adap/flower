@@ -18,12 +18,14 @@
 import json
 import re
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 # Change this if you want to search a different directory.
 ROOT_DIR = Path(".")
 
-NEW_FIELDS: dict[str, Union[dict[str, str], str]] = {
+# Define new fields to be added to the `html_theme_options` dictionary in `conf.py`.
+# If no fields are needed, set to an empty dictionary.
+NEW_FIELDS: dict[str, Optional[Union[dict[str, str], str]]] = {
     "announcement": (
         "<a href='https://flower.ai/events/flower-ai-summit-2025/'>"
         "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
@@ -41,7 +43,7 @@ NEW_FIELDS: dict[str, Union[dict[str, str], str]] = {
 }
 
 
-def dict_to_fields_str(fields: dict[str, Union[dict[str, str], str]]) -> str:
+def dict_to_fields_str(fields: dict[str, Optional[Union[dict[str, str], str]]]) -> str:
     """
     Convert a dictionary to a formatted string suitable for insertion
     into a Python dictionary literal (without the outer braces).
