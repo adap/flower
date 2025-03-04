@@ -291,7 +291,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     # pylint: disable=R0911
     def store_message_res(self, message: Message) -> Optional[UUID]:
         """Store one Message."""
-        # Validate task
+        # Validate message
         errors = validate_message(message, is_reply_message=True)
         if any(errors):
             log(ERROR, errors)
@@ -315,7 +315,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             if msg_ins is None:
                 log(
                     ERROR,
-                    "Message with `metadata.message_id` %s does not exist.",
+                    "Message with ID %s does not exist.",
                     msg_ins_id,
                 )
                 return None
@@ -325,7 +325,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(
                     ERROR,
                     "Failed to store Message: the message it is replying to "
-                    "(with id %s) has expired",
+                    "(with ID %s) has expired",
                     msg_ins_id,
                 )
                 return None
@@ -352,7 +352,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return None
 
         # Validate run_id
-        if res_metadata.run_id not in self.run_ids:
+        if res_metadata.run_id != ins_metadata.run_id:
             log(ERROR, "`metadata.run_id` is invalid")
             return None
 
