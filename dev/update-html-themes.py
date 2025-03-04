@@ -15,39 +15,58 @@
 """Update HTML themes in Flower docs."""
 
 
+import json
 import re
 from pathlib import Path
 
 # Change this if you want to search a different directory.
 ROOT_DIR = Path(".")
 
-# New fields to be added to html_theme_options.
-# If empty, no changes will be made.
-NEW_FIELDS = """
-    "announcement": "Flower AI Summit 2025, March 26-27 "
-    "(🇬🇧 London & Online) <br />"
-    "<a href='https://flower.ai/events/flower-ai-summit-2025/'>"
-    "<strong style='color: #f2b705;'>👉 Register Now!</strong></a>",
+NEW_FIELDS = {
+    "announcement": (
+        "Flower AI Summit 2025, March 26-27 (🇬🇧 London & Online) <br />"
+        "<a href='https://flower.ai/events/flower-ai-summit-2025/'>"
+        "<strong style='color: #f2b705;'>👉 Register Now!</strong></a>"
+    ),
     "light_css_variables": {
         "color-announcement-background": "#292f36",
-        "color-announcement-text": "#ffffff"
+        "color-announcement-text": "#ffffff",
     },
     "dark_css_variables": {
         "color-announcement-background": "#292f36",
-        "color-announcement-text": "#ffffff"
+        "color-announcement-text": "#ffffff",
     },
-"""
+}
 
 
-def find_conf_files(root_dir: Path):
-    """Recursively find all conf.py files under root_dir."""
+def dict_to_fields_str(fields: dict) -> str:
+    """
+    Convert a dictionary to a formatted string suitable for insertion
+    into a Python dictionary literal (without the outer braces).
+    """
+    if not fields:
+        return ""
+    # Use json.dumps for a clean, indented format with double quotes.
+    s = json.dumps(fields, indent=4, ensure_ascii=False)
+    s_lines = s.splitlines()
+    # Remove the first and last lines (the outer braces).
+    if len(s_lines) >= 2 and s_lines[0].strip() == "{" and s_lines[-1].strip() == "}":
+        s = "\n".join(s_lines[1:-1])
+    return s
+
+
+def find_conf_files(root_dir: Path) -> list[Path]:
+    """Recursively find all conf.py files under the given directory."""
     return list(root_dir.rglob("conf.py"))
 
 
-def update_conf_file(file_path: Path, new_fields: str):
-    """Insert new_fields into the html_theme_options block of file_path."""
-    if not new_fields.strip():
-        print(f"Skipping {file_path} (NEW_FIELDS is empty)")
+def update_conf_file(file_path: Path, new_fields_str: str) -> None:
+    """
+    Insert new_fields_str into the html_theme_options block of file_path.
+    The new fields are inserted just before the closing brace.
+    """
+    if not new_fields_str.strip():
+        print(f"Skipping {file_path} (no new fields to insert)")
         return
 
     content = file_path.read_text(encoding="utf-8").splitlines()
@@ -57,12 +76,20 @@ def update_conf_file(file_path: Path, new_fields: str):
 
     for line in content:
         updated_content.append(line)
-        # Check for the start of the html_theme_options block.
+        # Look for the start of html_theme_options.
         if re.match(r"^\s*html_theme_options\s*=\s*{", line):
             inside_options = True
-        # When encountering the closing brace, insert new_fields before it.
+        # When inside html_theme_options, insert new fields before the closing brace.
         if inside_options and re.match(r"^\s*}", line):
-            updated_content.insert(-1, new_fields.rstrip() + "\n")
+            # Determine the indentation from the closing brace line.
+            indent_match = re.match(r"^(\s*)}", line)
+            indent = indent_match.group(1) if indent_match else ""
+            # Indent each line of the new fields.
+            new_fields_indented = "\n".join(
+                indent + "    " + l for l in new_fields_str.splitlines()
+            )
+            # Insert before the closing brace.
+            updated_content.insert(-1, new_fields_indented + ",")
             inside_options = False
             modified = True
 
@@ -73,14 +100,16 @@ def update_conf_file(file_path: Path, new_fields: str):
         print(f"No html_theme_options block found in: {file_path}")
 
 
-def main():
+def main() -> None:
+    """."""
+    new_fields_str = dict_to_fields_str(NEW_FIELDS)
     conf_files = find_conf_files(ROOT_DIR)
     if not conf_files:
         print("No conf.py files found.")
         return
 
     for conf_file in conf_files:
-        update_conf_file(conf_file, NEW_FIELDS)
+        update_conf_file(conf_file, new_fields_str)
 
 
 if __name__ == "__main__":
