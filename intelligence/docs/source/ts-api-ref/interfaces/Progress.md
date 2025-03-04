@@ -2,7 +2,7 @@
 
 # Interface: Progress
 
-Defined in: [typing.ts:231](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L231)
+Defined in: [typing.ts:231](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L231)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: [typing.ts:231](https://github.com/adap/flower/blob/0a8a2219007e2bbf
 
 > `optional` **description**: `string`
 
-Defined in: [typing.ts:235](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L235)
+Defined in: [typing.ts:235](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L235)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [typing.ts:235](https://github.com/adap/flower/blob/0a8a2219007e2bbf
 
 > `optional` **loadedBytes**: `number`
 
-Defined in: [typing.ts:233](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L233)
+Defined in: [typing.ts:233](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L233)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [typing.ts:233](https://github.com/adap/flower/blob/0a8a2219007e2bbf
 
 > `optional` **percentage**: `number`
 
-Defined in: [typing.ts:234](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L234)
+Defined in: [typing.ts:234](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L234)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [typing.ts:234](https://github.com/adap/flower/blob/0a8a2219007e2bbf
 
 > `optional` **totalBytes**: `number`
 
-Defined in: [typing.ts:232](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L232)
+Defined in: [typing.ts:232](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L232)

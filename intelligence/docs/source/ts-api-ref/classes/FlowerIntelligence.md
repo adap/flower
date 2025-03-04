@@ -2,7 +2,7 @@
 
 # Class: FlowerIntelligence
 
-Defined in: [flowerintelligence.ts:28](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/flowerintelligence.ts#L28)
+Defined in: [flowerintelligence.ts:28](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/flowerintelligence.ts#L28)
 
 Class representing the core intelligence service for Flower Labs.
 It facilitates chat, generation, and summarization tasks, with the option of using a
@@ -46,7 +46,7 @@ An optional [ChatOptions](../interfaces/ChatOptions.md) object (used only when t
 
 > **chat**(`input`, `options`?): `Promise`\<[`ChatResponseResult`](../type-aliases/ChatResponseResult.md)\>
 
-Defined in: [flowerintelligence.ts:92](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/flowerintelligence.ts#L92)
+Defined in: [flowerintelligence.ts:92](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/flowerintelligence.ts#L92)
 
 ##### Parameters
 
@@ -66,7 +66,7 @@ Defined in: [flowerintelligence.ts:92](https://github.com/adap/flower/blob/0a8a2
 
 > **chat**(`options`): `Promise`\<[`ChatResponseResult`](../type-aliases/ChatResponseResult.md)\>
 
-Defined in: [flowerintelligence.ts:95](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/flowerintelligence.ts#L95)
+Defined in: [flowerintelligence.ts:95](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/flowerintelligence.ts#L95)
 
 ##### Parameters
 
@@ -84,7 +84,7 @@ Defined in: [flowerintelligence.ts:95](https://github.com/adap/flower/blob/0a8a2
 
 > **fetchModel**(`model`, `callback`): `Promise`\<[`Result`](../type-aliases/Result.md)\<`void`\>\>
 
-Defined in: [flowerintelligence.ts:81](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/flowerintelligence.ts#L81)
+Defined in: [flowerintelligence.ts:81](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/flowerintelligence.ts#L81)
 
 Downloads and loads a model into memory.
 
@@ -116,7 +116,7 @@ A [Result](../type-aliases/Result.md) containing either a [Failure](../interface
 
 > **set** **apiKey**(`apiKey`): `void`
 
-Defined in: [flowerintelligence.ts:71](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/flowerintelligence.ts#L71)
+Defined in: [flowerintelligence.ts:71](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/flowerintelligence.ts#L71)
 
 Set apiKey for FlowerIntelligence.
 
@@ -138,7 +138,7 @@ Set apiKey for FlowerIntelligence.
 
 > **get** **remoteHandoff**(): `boolean`
 
-Defined in: [flowerintelligence.ts:64](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/flowerintelligence.ts#L64)
+Defined in: [flowerintelligence.ts:64](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/flowerintelligence.ts#L64)
 
 Gets the current remote handoff status.
 
@@ -152,7 +152,7 @@ boolean - the value of the remote handoff variable
 
 > **set** **remoteHandoff**(`remoteHandoffValue`): `void`
 
-Defined in: [flowerintelligence.ts:56](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/flowerintelligence.ts#L56)
+Defined in: [flowerintelligence.ts:56](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/flowerintelligence.ts#L56)
 
 Sets the remote handoff boolean.
 
@@ -177,7 +177,7 @@ remote server instead of locally (if resources are lacking).
 
 > **get** `static` **instance**(): [`FlowerIntelligence`](FlowerIntelligence.md)
 
-Defined in: [flowerintelligence.ts:45](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/flowerintelligence.ts#L45)
+Defined in: [flowerintelligence.ts:45](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/flowerintelligence.ts#L45)
 
 Get the initialized FlowerIntelligence instance.
 Initializes the instance if it doesn't exist.

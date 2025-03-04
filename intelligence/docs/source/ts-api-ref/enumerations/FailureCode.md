@@ -2,7 +2,7 @@
 
 # Enumeration: FailureCode
 
-Defined in: [typing.ts:129](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L129)
+Defined in: [typing.ts:129](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L129)
 
 Enum representing failure codes for different error scenarios.
 
@@ -12,7 +12,7 @@ Enum representing failure codes for different error scenarios.
 
 > **AuthenticationError**: `201`
 
-Defined in: [typing.ts:158](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L158)
+Defined in: [typing.ts:158](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L158)
 
 Indicates an authentication error (e.g., HTTP 401, 403, 407).
 
@@ -22,7 +22,7 @@ Indicates an authentication error (e.g., HTTP 401, 403, 407).
 
 > **ConfigError**: `400`
 
-Defined in: [typing.ts:188](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L188)
+Defined in: [typing.ts:188](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L188)
 
 Indicates an error caused by a misconfigured state.
 
@@ -32,7 +32,7 @@ Indicates an error caused by a misconfigured state.
 
 > **ConnectionError**: `204`
 
-Defined in: [typing.ts:173](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L173)
+Defined in: [typing.ts:173](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L173)
 
 Indicates a connection error (e.g., network issues).
 
@@ -42,7 +42,7 @@ Indicates a connection error (e.g., network issues).
 
 > **EncryptionError**: `301`
 
-Defined in: [typing.ts:183](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L183)
+Defined in: [typing.ts:183](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L183)
 
 Indicates a error related to the encryption protocol for remote inference.
 
@@ -52,7 +52,7 @@ Indicates a error related to the encryption protocol for remote inference.
 
 > **EngineSpecificError**: `300`
 
-Defined in: [typing.ts:178](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L178)
+Defined in: [typing.ts:178](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L178)
 
 Indicates an engine-specific error.
 
@@ -62,7 +62,7 @@ Indicates an engine-specific error.
 
 > **InvalidArgumentsError**: `401`
 
-Defined in: [typing.ts:193](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L193)
+Defined in: [typing.ts:193](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L193)
 
 Indicates that invalid arguments were provided.
 
@@ -72,7 +72,7 @@ Indicates that invalid arguments were provided.
 
 > **InvalidRemoteConfigError**: `402`
 
-Defined in: [typing.ts:198](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L198)
+Defined in: [typing.ts:198](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L198)
 
 Indicates misconfigured config options for remote inference.
 
@@ -82,7 +82,7 @@ Indicates misconfigured config options for remote inference.
 
 > **LocalEngineChatError**: `101`
 
-Defined in: [typing.ts:138](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L138)
+Defined in: [typing.ts:138](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L138)
 
 Indicates a chat error coming from a local engine.
 
@@ -92,7 +92,7 @@ Indicates a chat error coming from a local engine.
 
 > **LocalEngineFetchError**: `102`
 
-Defined in: [typing.ts:143](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L143)
+Defined in: [typing.ts:143](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L143)
 
 Indicates a fetch error coming from a local engine.
 
@@ -102,7 +102,7 @@ Indicates a fetch error coming from a local engine.
 
 > **LocalError**: `100`
 
-Defined in: [typing.ts:133](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L133)
+Defined in: [typing.ts:133](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L133)
 
 Indicates a local error (e.g., client-side issues).
 
@@ -112,7 +112,7 @@ Indicates a local error (e.g., client-side issues).
 
 > **NoLocalProviderError**: `103`
 
-Defined in: [typing.ts:148](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L148)
+Defined in: [typing.ts:148](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L148)
 
 Indicates an missing provider for a local model.
 
@@ -122,7 +122,7 @@ Indicates an missing provider for a local model.
 
 > **NotImplementedError**: `404`
 
-Defined in: [typing.ts:208](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L208)
+Defined in: [typing.ts:208](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L208)
 
 Indicates that the requested feature is not implemented.
 
@@ -132,7 +132,7 @@ Indicates that the requested feature is not implemented.
 
 > **RemoteError**: `200`
 
-Defined in: [typing.ts:153](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L153)
+Defined in: [typing.ts:153](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L153)
 
 Indicates a remote error (e.g., server-side issues).
 
@@ -142,7 +142,7 @@ Indicates a remote error (e.g., server-side issues).
 
 > **TimeoutError**: `203`
 
-Defined in: [typing.ts:168](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L168)
+Defined in: [typing.ts:168](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L168)
 
 Indicates a timeout error (e.g., HTTP 408, 504).
 
@@ -152,7 +152,7 @@ Indicates a timeout error (e.g., HTTP 408, 504).
 
 > **UnavailableError**: `202`
 
-Defined in: [typing.ts:163](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L163)
+Defined in: [typing.ts:163](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L163)
 
 Indicates that the service is unavailable (e.g., HTTP 404, 502, 503).
 
@@ -162,6 +162,6 @@ Indicates that the service is unavailable (e.g., HTTP 404, 502, 503).
 
 > **UnknownModelError**: `403`
 
-Defined in: [typing.ts:203](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L203)
+Defined in: [typing.ts:203](https://github.com/adap/flower/blob/0f847b5db7209b5c41b08d1c3aa630bfc89621fb/intelligence/ts/src/typing.ts#L203)
 
 Indicates an unknown model error (e.g., unavailable or invalid model).

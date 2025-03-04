@@ -25,3 +25,11 @@
 - [ChatResponseResult](type-aliases/ChatResponseResult.md)
 - [Result](type-aliases/Result.md)
 - [ToolCall](type-aliases/ToolCall.md)
+
+```{toctree}
+:hidden:
+:maxdepth: 2
+:glob:
+
+*/*
+```
