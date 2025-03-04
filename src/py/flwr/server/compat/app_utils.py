@@ -27,7 +27,7 @@ from ..driver import Driver
 def start_update_client_manager_thread(
     driver: Driver,
     client_manager: ClientManager,
-) -> tuple[threading.Thread, threading.Event]:
+) -> tuple[threading.Thread, threading.Event, threading.Event]:
     """Periodically update the nodes list in the client manager in a thread.
 
     This function starts a thread that periodically uses the associated driver to
@@ -51,26 +51,31 @@ def start_update_client_manager_thread(
         A thread that updates the ClientManager and handles the stop event.
     threading.Event
         An event that, when set, signals the thread to stop.
+    threading.Event
+        An event that, when set, signals the node registration done.
     """
     f_stop = threading.Event()
+    c_done = threading.Event()
     thread = threading.Thread(
         target=_update_client_manager,
         args=(
             driver,
             client_manager,
             f_stop,
+            c_done,
         ),
         daemon=True,
     )
     thread.start()
 
-    return thread, f_stop
+    return thread, f_stop, c_done
 
 
 def _update_client_manager(
     driver: Driver,
     client_manager: ClientManager,
     f_stop: threading.Event,
+    c_done: threading.Event,
 ) -> None:
     """Update the nodes list in the client manager."""
     # Loop until the driver is disconnected
@@ -101,6 +106,9 @@ def _update_client_manager(
                 registered_nodes[node_id] = client_proxy
             else:
                 raise RuntimeError("Could not register node.")
+
+        # Finish nodes registration
+        c_done.set()
 
         # Sleep for 3 seconds
         if not f_stop.is_set():

@@ -79,9 +79,13 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     log(INFO, "")
 
     # Start the thread updating nodes
-    thread, f_stop = start_update_client_manager_thread(
+    thread, f_stop, c_done = start_update_client_manager_thread(
         driver, initialized_server.client_manager()
     )
+
+    # Wait for 1 second until the node registration done
+    if not c_done.is_set():
+        c_done.wait(1)
 
     # Start training
     hist = run_fl(
