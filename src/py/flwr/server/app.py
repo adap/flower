@@ -290,7 +290,7 @@ def run_superlink() -> None:
     if cfg_path := getattr(args, "user_auth_config", None):
         auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path), verify_tls_cert)
         # Enable event logging if the args.enable_event_log is True
-        if args.enable_event_log == EventLogWriterType.STDOUT:
+        if args.enable_event_log:
             event_log_plugin = _try_obtain_exec_event_log_writer_plugin()
 
     # Initialize StateFactory
@@ -633,7 +633,7 @@ def _try_obtain_exec_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]
         all_plugins: dict[str, type[EventLogWriterPlugin]] = (
             get_exec_event_log_writer_plugins()
         )
-        plugin_class = all_plugins["stdout"]
+        plugin_class = all_plugins[EventLogWriterType.STDOUT]
         return plugin_class()
     except KeyError:
         sys.exit("No event log writer plugin is provided.")
