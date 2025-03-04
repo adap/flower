@@ -719,10 +719,10 @@ class StateTest(unittest.TestCase):
         )
 
         # Execute
-        task_id = state.store_message_ins(msg)
+        message_id = state.store_message_ins(msg)
 
         # Assert
-        assert task_id is None
+        assert message_id is None
 
     # TaskRes tests
     def test_task_res_store_and_retrieve_by_task_ins_id(self) -> None:
