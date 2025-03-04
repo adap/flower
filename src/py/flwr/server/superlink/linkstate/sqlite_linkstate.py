@@ -891,6 +891,32 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             self.conn.execute(query_1, data)
             self.conn.execute(query_2, data)
 
+    def delete_messages(self, message_ins_ids: set[UUID]) -> None:
+        """Delete a Message and its reply based on provided Message IDs."""
+        if not message_ins_ids:
+            return
+        if self.conn is None:
+            raise AttributeError("LinkState not initialized")
+
+        placeholders = ",".join(["?"] * len(message_ins_ids))
+        data = tuple(str(message_id) for message_id in message_ins_ids)
+
+        # Delete Message
+        query_1 = f"""
+            DELETE FROM message_ins
+            WHERE message_id IN ({placeholders});
+        """
+
+        # Delete reply Message
+        query_2 = f"""
+            DELETE FROM message_res
+            WHERE reply_to_message IN ({placeholders});
+        """
+
+        with self.conn:
+            self.conn.execute(query_1, data)
+            self.conn.execute(query_2, data)
+
     def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
         """Get all TaskIns IDs for the given run_id."""
         if self.conn is None:

@@ -461,6 +461,23 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     task_res_id = self.task_ins_id_to_task_res_id.pop(task_id)
                     del self.task_res_store[task_res_id]
 
+    def delete_messages(self, message_ins_ids: set[UUID]) -> None:
+        """Delete a Message and its reply based on provided Message IDs."""
+        if not message_ins_ids:
+            return
+
+        with self.lock:
+            for message_id in message_ins_ids:
+                # Delete Messages
+                if message_id in self.message_ins_store:
+                    del self.message_ins_store[message_id]
+                # Delete Message replies
+                if message_id in self.message_ins_id_to_message_res_id:
+                    message_res_id = self.message_ins_id_to_message_res_id.pop(
+                        message_id
+                    )
+                    del self.message_res_store[message_res_id]
+
     def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
         """Get all TaskIns IDs for the given run_id."""
         task_id_list: set[UUID] = set()

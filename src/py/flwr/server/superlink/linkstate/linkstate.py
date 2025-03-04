@@ -225,6 +225,17 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def delete_messages(self, message_ins_ids: set[UUID]) -> None:
+        """Delete a Message and its reply based on provided Message IDs.
+
+        Parameters
+        ----------
+        message_ins_ids : set[UUID]
+            A set of Message IDs. For each ID in the set, the corresponding
+            Message and its associated reply Message will be deleted.
+        """
+
+    @abc.abstractmethod
     def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
         """Get all TaskIns IDs for the given run_id."""
 

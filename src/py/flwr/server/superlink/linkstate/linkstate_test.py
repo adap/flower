@@ -424,6 +424,76 @@ class StateTest(unittest.TestCase):
         assert state.num_task_ins() == 0
         assert state.num_task_res() == 0
 
+    def test_store_and_delete_messages(self) -> None:
+        """Test delete_message."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        msg0 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id,
+                run_id=run_id,
+            )
+        )
+        msg1 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id,
+                run_id=run_id,
+            )
+        )
+        msg2 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id,
+                run_id=run_id,
+            )
+        )
+
+        # Insert three Messages
+        msg_id_0 = state.store_message_ins(message=msg0)
+        msg_id_1 = state.store_message_ins(message=msg1)
+        msg_id_2 = state.store_message_ins(message=msg2)
+
+        assert msg_id_0
+        assert msg_id_1
+        assert msg_id_2
+
+        # Get Message to mark them delivered
+        msg_ins_list = state.get_message_ins(node_id=node_id, limit=None)
+
+        # Insert one TaskRes and retrive it to mark it as delivered
+        msg_res_0 = msg_ins_list[0].create_reply(content=RecordSet())
+
+        _ = state.store_message_res(message=msg_res_0)
+        _ = state.get_message_res(
+            message_ids={UUID(msg_res_0.metadata.reply_to_message)}
+        )
+
+        # Insert one reply Message, but don't retrive it
+        msg_res_1 = msg_ins_list[1].create_reply(content=RecordSet())
+        _ = state.store_message_res(message=msg_res_1)
+
+        # Situation now:
+        # - State has three Message, all of them delivered
+        # - State has two Message replies, one of the delivered, the other not
+        assert state.num_message_ins() == 3
+        assert state.num_message_res() == 2
+
+        state.delete_messages({msg_id_0})
+        assert state.num_message_ins() == 2
+        assert state.num_message_res() == 1
+
+        state.delete_messages({msg_id_1})
+        assert state.num_message_ins() == 1
+        assert state.num_message_res() == 0
+
+        state.delete_messages({msg_id_2})
+        assert state.num_message_ins() == 0
+        assert state.num_message_res() == 0
+
     def test_get_task_ids_from_run_id(self) -> None:
         """Test get_task_ids_from_run_id."""
         # Prepare
@@ -487,7 +557,7 @@ class StateTest(unittest.TestCase):
             )
         )
 
-        # Insert three TaskIns
+        # Insert three Messages
         msg_id_0 = state.store_message_ins(message=msg0)
         msg_id_1 = state.store_message_ins(message=msg1)
         msg_id_2 = state.store_message_ins(message=msg2)
