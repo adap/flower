@@ -48,7 +48,7 @@ SERVER_FN_USAGE_EXAMPLE = """
 
 
 @contextmanager
-def _empty_lifecycle(_: Context) -> Iterator[None]:
+def _empty_lifespan(_: Context) -> Iterator[None]:
     yield
 
 
@@ -112,11 +112,11 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         self._client_manager = client_manager
         self._server_fn = server_fn
         self._main: Optional[ServerAppCallable] = None
-        self._lifecycle = _empty_lifecycle
+        self._lifespan = _empty_lifespan
 
     def __call__(self, driver: Driver, context: Context) -> None:
         """Execute `ServerApp`."""
-        with self._lifecycle(context):
+        with self._lifespan(context):
             # Compatibility mode
             if not self._main:
                 if self._server_fn:
@@ -186,12 +186,12 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
         return main_decorator
 
-    def lifecycle(
+    def lifespan(
         self,
     ) -> Callable[
         [Callable[[Context], Iterator[None]]], Callable[[Context], Iterator[None]]
     ]:
-        """Return a decorator that registers the lifecycle fn with the server app.
+        """Return a decorator that registers the lifespan fn with the server app.
 
         The decorated function should accept a `Context` object and use `yield`
         to define enter and exit behavior.
@@ -200,29 +200,33 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         --------
         >>> app = ServerApp()
         >>>
-        >>> @app.lifecycle()
-        >>> def lifecycle(context: Context) -> None:
+        >>> @app.lifespan()
+        >>> def lifespan(context: Context) -> None:
+        >>>     # Perform initialization tasks before the app starts
         >>>     print("Initializing ServerApp")
-        >>>     yield
+        >>>
+        >>>     yield  # ServerApp is running
+        >>>
+        >>>     # Perform cleanup tasks after the app stops
         >>>     print("Cleaning up ServerApp")
         """
 
-        def lifecycle_decorator(
-            lifecycle_fn: Callable[[Context], Iterator[None]]
+        def lifespan_decorator(
+            lifespan_fn: Callable[[Context], Iterator[None]]
         ) -> Callable[[Context], Iterator[None]]:
-            """Register the lifecycle fn with the ServerApp object."""
-            warn_preview_feature("ServerApp-register-lifecycle-function")
+            """Register the lifespan fn with the ServerApp object."""
+            warn_preview_feature("ServerApp-register-lifespan-function")
 
             @contextmanager
-            def decorated_lifecycle(context: Context) -> Iterator[None]:
-                # Execute the code before `yield` in lifecycle_fn
+            def decorated_lifespan(context: Context) -> Iterator[None]:
+                # Execute the code before `yield` in lifespan_fn
                 try:
-                    if not isinstance(it := lifecycle_fn(context), Iterator):
+                    if not isinstance(it := lifespan_fn(context), Iterator):
                         raise StopIteration
                     next(it)
                 except StopIteration:
                     raise RuntimeError(
-                        "Lifecycle function should yield at least once."
+                        "lifespan function should yield at least once."
                     ) from None
 
                 try:
@@ -230,21 +234,21 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                     yield
                 finally:
                     try:
-                        # Execute the code after `yield` in lifecycle_fn
+                        # Execute the code after `yield` in lifespan_fn
                         next(it)
                     except StopIteration:
                         pass
                     else:
-                        raise RuntimeError("Lifecycle function should only yield once.")
+                        raise RuntimeError("lifespan function should only yield once.")
 
             # Register provided function with the ServerApp object
             # Ignore mypy error because of different argument names (`_` vs `context`)
-            self._lifecycle = decorated_lifecycle  # type: ignore
+            self._lifespan = decorated_lifespan  # type: ignore
 
             # Return provided function unmodified
-            return lifecycle_fn
+            return lifespan_fn
 
-        return lifecycle_decorator
+        return lifespan_decorator
 
 
 class LoadServerAppError(Exception):

@@ -18,8 +18,6 @@ import datetime
 import os
 import sys
 
-from sphinx.application import ConfigError
-
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -140,6 +138,18 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
+    "announcement": "Flower AI Summit 2025, March 26-27 "
+    "(🇬🇧 London & Online) "
+    "<a href='https://flower.ai/events/flower-ai-summit-2025/'>"
+    "<strong style='color: #f2b705;'>👉 Register Now!</strong></a>",
+    "light_css_variables": {
+        "color-announcement-background": "#292f36",
+        "color-announcement-text": "#ffffff",
+    },
+    "dark_css_variables": {
+        "color-announcement-background": "#292f36",
+        "color-announcement-text": "#ffffff",
+    },
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
