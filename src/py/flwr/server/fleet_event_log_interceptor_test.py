@@ -1,0 +1,179 @@
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Flower Fleet API event log interceptor tests."""
+
+
+import unittest
+from typing import Optional, Union
+from unittest.mock import MagicMock
+
+import grpc
+
+from flwr.common.event_log_plugin import EventLogWriterPlugin
+from flwr.common.event_log_plugin.event_log_plugin import (
+    EventLogRequest,
+    EventLogResponse,
+)
+from flwr.common.typing import Actor, Event, LogEntry, UserInfo
+from flwr.superexec.exec_event_log_interceptor_test import (
+    DummyUnaryUnaryHandlerException,
+    DummyUnsupportedHandler,
+)
+from flwr.superexec.exec_user_auth_interceptor_test import get_dummy_unary_unary_handler
+
+from .fleet_event_log_interceptor import FleetEventLogInterceptor
+
+
+class DummyFleetLogPlugin(EventLogWriterPlugin):
+    """Dummy log plugin for testing."""
+
+    def __init__(self) -> None:
+        self.logs: list[LogEntry] = []
+
+    def compose_log_before_event(
+        self,
+        request: EventLogRequest,
+        context: grpc.ServicerContext,
+        user_info: Optional[UserInfo],
+        method_name: str,
+    ) -> LogEntry:
+        return LogEntry(
+            timestamp="before_timestamp",
+            actor=Actor(
+                actor_id="none",
+                description="none",
+                ip_address="1.2.3.4",
+            ),
+            event=Event(action=method_name, run_id=None, fab_hash=None),
+            status="before",
+        )
+
+    def compose_log_after_event(  # pylint: disable=too-many-arguments,R0917
+        self,
+        request: EventLogRequest,
+        context: grpc.ServicerContext,
+        user_info: Optional[UserInfo],
+        method_name: str,
+        response: Optional[Union[EventLogResponse, Exception]],
+    ) -> LogEntry:
+        return LogEntry(
+            timestamp="after_timestamp",
+            actor=Actor(
+                actor_id="none",
+                description="none",
+                ip_address="5.6.7.8",
+            ),
+            event=Event(action=method_name, run_id=None, fab_hash=None),
+            status="after",
+        )
+
+    def write_log(self, log_entry: LogEntry) -> None:
+        self.logs.append(log_entry)
+
+
+class TestFleetEventLogInterceptor(unittest.TestCase):
+    """Test the FleetEventLogInterceptor logging for unary-unary RPC calls."""
+
+    def setUp(self) -> None:
+        self.log_plugin = DummyFleetLogPlugin()
+        self.interceptor = FleetEventLogInterceptor(log_plugin=self.log_plugin)
+        # For the Fleet interceptor, user_info is always passed as None.
+
+    def get_expected_logs(self, method_name: str) -> list[LogEntry]:
+        """Return the expected before/after log entries."""
+        return [
+            LogEntry(
+                timestamp="before_timestamp",
+                actor=Actor(
+                    actor_id="none",
+                    description="none",
+                    ip_address="1.2.3.4",
+                ),
+                event=Event(action=method_name, run_id=None, fab_hash=None),
+                status="before",
+            ),
+            LogEntry(
+                timestamp="after_timestamp",
+                actor=Actor(
+                    actor_id="none",
+                    description="none",
+                    ip_address="5.6.7.8",
+                ),
+                event=Event(action=method_name, run_id=None, fab_hash=None),
+                status="after",
+            ),
+        ]
+
+    def test_unary_unary_interceptor(self) -> None:
+        """Test unary-unary RPC call logging."""
+        handler_call_details = MagicMock()
+        handler_call_details.method = "dummy_method"
+        expected_method_name = handler_call_details.method
+        continuation = get_dummy_unary_unary_handler
+        intercepted_handler = self.interceptor.intercept_service(
+            continuation, handler_call_details
+        )
+        expected_logs = self.get_expected_logs(expected_method_name)
+
+        # Execute: Invoke the intercepted unary_unary method
+        dummy_request = MagicMock()
+        dummy_context = MagicMock()
+        response = intercepted_handler.unary_unary(dummy_request, dummy_context)
+
+        # Assert: Verify response and that logs were written before and after
+        self.assertEqual(response, "dummy_response")
+        self.assertEqual(self.log_plugin.logs, expected_logs)
+
+    def test_unary_unary_interceptor_exception(self) -> None:
+        """Test unary-unary RPC call logging when the handler raises an Exception."""
+        handler_call_details = MagicMock()
+        handler_call_details.method = "exception_method"
+        expected_method_name = handler_call_details.method
+
+        # pylint: disable=unused-argument
+        def continuation(
+            handler_call_details: grpc.HandlerCallDetails,
+        ) -> DummyUnaryUnaryHandlerException:
+            return DummyUnaryUnaryHandlerException()
+
+        intercepted_handler = self.interceptor.intercept_service(
+            continuation, handler_call_details
+        )
+        dummy_request = MagicMock()
+        dummy_context = MagicMock()
+
+        # Execute & Assert
+        # Invoking the unary_unary method raises an Exception with the expected message
+        with self.assertRaises(Exception) as context_manager:
+            intercepted_handler.unary_unary(dummy_request, dummy_context)
+        self.assertEqual(str(context_manager.exception), "Test error")
+
+        # Assert that the expected logs should include the before log and the after
+        # log (even though an exception occurred)
+        expected_logs = self.get_expected_logs(expected_method_name)
+        self.assertEqual(self.log_plugin.logs, expected_logs)
+
+    def test_unsupported_rpc_method(self) -> None:
+        """Test that unsupported RPC method types raise NotImplementedError."""
+
+        # pylint: disable=unused-argument
+        def continuation(
+            handler_call_details: grpc.HandlerCallDetails,
+        ) -> DummyUnsupportedHandler:
+            return DummyUnsupportedHandler()
+
+        handler_call_details = MagicMock()
+        with self.assertRaises(NotImplementedError):
+            self.interceptor.intercept_service(continuation, handler_call_details)
