@@ -68,6 +68,7 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
+from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.server.serverapp.app import flwr_serverapp
 from flwr.simulation.app import flwr_simulation
 from flwr.superexec.app import load_executor
@@ -97,6 +98,7 @@ try:
         get_dashboard_server,
         get_exec_auth_plugins,
         get_exec_event_log_writer_plugins,
+        get_fleet_event_log_writer_plugins,
     )
 except ImportError:
 
@@ -110,6 +112,12 @@ except ImportError:
 
     def get_exec_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
         """Return all Exec API event log writer plugins."""
+        raise NotImplementedError(
+            "No event log writer plugins are currently supported."
+        )
+
+    def get_fleet_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
+        """Return all FLeet API event log writer plugins."""
         raise NotImplementedError(
             "No event log writer plugins are currently supported."
         )
@@ -403,6 +411,11 @@ def run_superlink() -> None:
                 log(DEBUG, "Automatic node authentication enabled")
 
             interceptors = [AuthenticateServerInterceptor(state_factory, auto_auth)]
+            if args.enable_event_log:
+                fleet_log_plugin = _try_obtain_fleet_event_log_writer_plugin()
+                if fleet_log_plugin is not None:
+                    interceptors.append(FleetEventLogInterceptor(fleet_log_plugin))
+                    log(INFO, "Flower Fleet event logging enabled")
 
             fleet_server = _run_fleet_api_grpc_rere(
                 address=fleet_address,
@@ -639,6 +652,20 @@ def _try_obtain_exec_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]
         sys.exit("No event log writer plugin is provided.")
     except NotImplementedError:
         sys.exit("No event log writer plugins are currently supported.")
+
+
+def _try_obtain_fleet_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]:
+    """Return an instance of the Fleet Servicer event log writer plugin."""
+    try:
+        all_plugins: dict[str, type[EventLogWriterPlugin]] = (
+            get_fleet_event_log_writer_plugins()
+        )
+        plugin_class = all_plugins[EventLogWriterType.STDOUT]
+        return plugin_class()
+    except KeyError:
+        sys.exit("No Fleet API event log writer plugin is provided.")
+    except NotImplementedError:
+        sys.exit("No Fleet API event log writer plugins are currently supported.")
 
 
 def _run_fleet_api_grpc_rere(
