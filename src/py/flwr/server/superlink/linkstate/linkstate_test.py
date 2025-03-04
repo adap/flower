@@ -27,7 +27,7 @@ from uuid import UUID
 from parameterized import parameterized
 
 from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, Error, RecordSet, now
-from flwr.common.constant import SUPERLINK_NODE_ID, Status, SubStatus
+from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     public_key_to_bytes,
@@ -1038,6 +1038,77 @@ class StateTest(unittest.TestCase):
             assert state.num_task_ins() == 0
             assert state.num_task_res() == 0
 
+    def test_get_message_res_expired_message_ins(self) -> None:
+        """Test get_message_res to return error Message if the Message it was a replied
+        of has expired."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+
+        # A message that will expire before it gets pulled
+        msg1 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg1_id = state.store_message_ins(msg1)
+        assert ins_msg1_id
+        assert state.num_message_ins() == 1
+        with patch(
+            "time.time",
+            side_effect=lambda: msg1.metadata.created_at + msg1.metadata.ttl + 0.1,
+        ):  # over TTL limit
+
+            res_msg = state.get_message_res({ins_msg1_id})[0]
+            assert res_msg.has_error()
+            assert res_msg.error.code == ErrorCode.MESSAGE_UNAVAILABLE
+
+        # A message that will expire before its reply is pulled
+        msg2 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg2_id = state.store_message_ins(msg2)
+        assert ins_msg2_id
+        assert state.num_message_ins() == 2
+        # Get message
+        msg2_ins = state.get_message_ins(node_id=node_id, limit=1)
+        # Store reply in time
+        res_msg2 = msg2_ins[0].create_reply(content=RecordSet())
+        state.store_message_res(res_msg2)
+
+        with patch(
+            "time.time",
+            side_effect=lambda: msg2.metadata.created_at + msg2.metadata.ttl + 0.1,
+        ):  # over TTL limit
+
+            res_msg2_pulled = state.get_message_res({ins_msg2_id})[0]
+            assert res_msg2_pulled.has_error()
+            assert res_msg2_pulled.error.code == ErrorCode.MESSAGE_UNAVAILABLE
+
+    def test_get_message_res_reply_not_ready(self) -> None:
+        """Test get_message_res to return error since reply Message isn't present."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg_id = state.store_message_ins(msg)
+        assert ins_msg_id
+
+        reply = state.get_message_res({ins_msg_id})
+        assert len(reply) == 0
+        # Check message contains error informing replpy message hasn't arrived
+        assert state.num_message_ins() == 1
+        assert state.num_message_res() == 0
+
     def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
         """Test that get_task_res returns an empty result when the corresponding TaskIns
         does not exist."""
@@ -1062,6 +1133,20 @@ class StateTest(unittest.TestCase):
         assert len(task_res_list) == 1
         assert task_res_list[0].task.HasField("error")
         assert state.num_task_ins() == state.num_task_res() == 0
+
+    def test_get_message_res_returns_empty_for_missing_message_ins(self) -> None:
+        """Test that get_message_res returns an empty result when the corresponding
+        Message does not exist."""
+        # Prepare
+        state = self.state_factory()
+        message_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
+        # Execute
+        message_res_list = state.get_message_res(message_ids={UUID(message_ins_id)})
+
+        # Assert
+        assert len(message_res_list) == 1
+        assert message_res_list[0].has_error()
+        assert message_res_list[0].error.code == ErrorCode.MESSAGE_UNAVAILABLE
 
     def test_get_task_res_return_if_not_expired(self) -> None:
         """Test get_task_res to return TaskRes if its TaskIns exists and is not
@@ -1091,6 +1176,38 @@ class StateTest(unittest.TestCase):
 
             # Assert
             assert len(task_res_list) != 0
+
+    def test_get_message_res_return_successful(self) -> None:
+        """Test get_message_res returns correct Message."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg_id = state.store_message_ins(msg)
+        assert state.num_message_ins() == 1
+        assert ins_msg_id
+        # Fetch ins message
+        ins_msg = state.get_message_ins(node_id=node_id, limit=1)
+        # Create reply and insert
+        res_msg = ins_msg[0].create_reply(content=RecordSet())
+        state.store_message_res(res_msg)
+        assert state.num_message_res() == 1
+
+        # Fetch reply
+        reply_msg = state.get_message_res({ins_msg_id})
+
+        # assert
+        assert reply_msg[0].metadata.dst_node_id == msg.metadata.src_node_id
+
+        # We haven't called deletion of messages
+        assert state.num_message_ins() == 1
+        assert state.num_message_res() == 1
 
     def test_store_task_res_fail_if_consumer_producer_id_mismatch(self) -> None:
         """Test store_task_res to fail if there is a mismatch between the

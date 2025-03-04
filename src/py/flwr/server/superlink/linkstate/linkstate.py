@@ -163,6 +163,35 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+        """Get reply Messages for the given Message IDs.
+
+        This method is typically called by the ServerAppIo API to obtain
+        results (type Message) for previously scheduled instructions (type Message).
+        For each message_id passed, this method returns one of the following responses:
+
+        - An error Message if there was no message registered with such message IDs
+        or has expired.
+        - An error Message if the reply Message with one of the message IDs passed
+        exists but has expired.
+        - An error Message if the reply Message hasn't arrived yet.
+        - The reply Message.
+        - Nothing if the Message with the passed message IDs is still valid and waiting
+        for a reply Message.
+
+        Parameters
+        ----------
+        message_ids : set[UUID]
+            A set of Message IDs for which to retrieve results (Message).
+
+        Returns
+        -------
+        list[Message]
+            A list of reply Message corresponding to the given message IDs or Messages
+            carrying an Error.
+        """
+
+    @abc.abstractmethod
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.
 

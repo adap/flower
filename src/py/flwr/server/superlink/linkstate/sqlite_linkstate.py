@@ -59,7 +59,9 @@ from .utils import (
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
+    verify_found_message_replies,
     verify_found_taskres,
+    verify_message_ids,
     verify_taskins_ids,
 )
 
@@ -754,6 +756,69 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             WHERE task_id IN ({",".join(["?"] * len(task_res_ids))});
         """
         data: list[Any] = [delivered_at] + task_res_ids
+        self.query(query, data)
+
+        return list(ret.values())
+
+    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+        """Get reply Messages for the given Message IDs."""
+        ret: dict[UUID, Message] = {}
+
+        # Verify Message IDs
+        current = time.time()
+        query = f"""
+            SELECT *
+            FROM message_ins
+            WHERE message_id IN ({",".join(["?"] * len(message_ids))});
+        """
+        rows = self.query(query, tuple(str(message_id) for message_id in message_ids))
+        found_message_ins_dict: dict[UUID, Message] = {}
+        for row in rows:
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "src_node_id", "dst_node_id"]
+            )
+            found_message_ins_dict[UUID(row["message_id"])] = dict_to_message(row)
+
+        ret = verify_message_ids(
+            inquired_message_ids=message_ids,
+            found_message_ins_dict=found_message_ins_dict,
+            current_time=current,
+        )
+
+        # Find all reply Messages
+        query = f"""
+            SELECT *
+            FROM message_res
+            WHERE reply_to_message IN ({",".join(["?"] * len(message_ids))})
+            AND delivered_at = "";
+        """
+        rows = self.query(query, tuple(str(message_id) for message_id in message_ids))
+        for row in rows:
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "src_node_id", "dst_node_id"]
+            )
+        tmp_ret_dict = verify_found_message_replies(
+            inquired_message_ids=message_ids,
+            found_message_ins_dict=found_message_ins_dict,
+            found_message_res_list=[dict_to_message(row) for row in rows],
+            current_time=current,
+        )
+        ret.update(tmp_ret_dict)
+
+        # Mark existing reply Messages to be returned as delivered
+        delivered_at = now().isoformat()
+        for message_res in ret.values():
+            # pylint: disable=W0212
+            message_res.metadata._delivered_at = delivered_at  # type: ignore
+        message_res_ids = [
+            message_res.metadata.message_id for message_res in ret.values()
+        ]
+        query = f"""
+            UPDATE message_res
+            SET delivered_at = ?
+            WHERE message_id IN ({",".join(["?"] * len(message_res_ids))});
+        """
+        data: list[Any] = [delivered_at] + message_res_ids
         self.query(query, data)
 
         return list(ret.values())

@@ -41,7 +41,9 @@ from .utils import (
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
+    verify_found_message_replies,
     verify_found_taskres,
+    verify_message_ids,
     verify_taskins_ids,
 )
 
@@ -401,6 +403,46 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             delivered_at = now().isoformat()
             for task_res in task_res_found:
                 task_res.task.delivered_at = delivered_at
+
+        return list(ret.values())
+
+    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+        """Get reply Messages for the given Message IDs."""
+        ret: dict[UUID, Message] = {}
+
+        with self.lock:
+            current = time.time()
+
+            # Verify Messge IDs
+            ret = verify_message_ids(
+                inquired_message_ids=message_ids,
+                found_message_ins_dict=self.message_ins_store,
+                current_time=current,
+            )
+
+            # Find all reply Messages
+            message_res_found: list[Message] = []
+            for message_id in message_ids:
+                # If TaskRes exists and is not delivered, add it to the list
+                if message_res_id := self.message_ins_id_to_message_res_id.get(
+                    message_id
+                ):
+                    message_res = self.message_res_store[message_res_id]
+                    if message_res.metadata.delivered_at == "":
+                        message_res_found.append(message_res)
+            tmp_ret_dict = verify_found_message_replies(
+                inquired_message_ids=message_ids,
+                found_message_ins_dict=self.message_ins_store,
+                found_message_res_list=message_res_found,
+                current_time=current,
+            )
+            ret.update(tmp_ret_dict)
+
+            # Mark existing reply Messages to be returned as delivered
+            delivered_at = now().isoformat()
+            for message_res in message_res_found:
+                # pylint: disable=W0212
+                message_res.metadata._delivered_at = delivered_at  # type: ignore
 
         return list(ret.values())
 
