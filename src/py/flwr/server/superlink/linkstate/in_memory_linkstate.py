@@ -23,7 +23,7 @@ from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import Context, log, now
+from flwr.common import Context, log, now, Message, Metadata
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -35,7 +35,7 @@ from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
-from flwr.server.utils import validate_task_ins_or_res
+from flwr.server.utils import validate_task_ins_or_res, validate_message
 
 from .utils import (
     generate_rand_int_from_bytes,
@@ -72,6 +72,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
         self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
+        self.message_ins_store: dict[UUID, Message] = {}
+        self.message_res_store: dict[UUID, Message] = {}
+        self.message_ins_id_to_message_res_id: dict[UUID, UUID] = {}
 
         self.node_public_keys: set[bytes] = set()
 
@@ -116,6 +119,45 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
+    def store_message_ins(self, message: Message) -> Optional[UUID]:
+        """Store one Message."""
+        # Validate message
+        errors = validate_message(message, is_reply_message=False)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+        # Validate run_id
+        if message.metadata.run_id not in self.run_ids:
+            log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
+            return None
+        # Validate source node ID
+        if message.metadata.src_node_id != SUPERLINK_NODE_ID:
+            log(
+                ERROR,
+                "Invalid source node ID for Message: %s",
+                message.metadata.src_node_id,
+            )
+            return None
+        # Validate destination node ID
+        if message.metadata.dst_node_id not in self.node_ids:
+            log(
+                ERROR,
+                "Invalid destination node ID for Message: %s",
+                message.metadata.dst_node_id,
+            )
+            return None
+
+        # Create message_id
+        message_id = uuid4()
+
+        # Store Message
+        message.metadata._message_id = str(message_id)  # type: ignore  # pylint: disable=W0212
+        with self.lock:
+            self.message_ins_store[message_id] = message
+
+        # Return the new message_id
+        return message_id
+
     def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
         if limit is not None and limit < 1:
@@ -123,6 +165,33 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Find TaskIns for node_id that were not delivered yet
         task_ins_list: list[TaskIns] = []
+        current_time = time.time()
+        with self.lock:
+            for _, task_ins in self.task_ins_store.items():
+                if (
+                    task_ins.task.consumer.node_id == node_id
+                    and task_ins.task.delivered_at == ""
+                    and task_ins.task.created_at + task_ins.task.ttl > current_time
+                ):
+                    task_ins_list.append(task_ins)
+                if limit and len(task_ins_list) == limit:
+                    break
+
+        # Mark all of them as delivered
+        delivered_at = now().isoformat()
+        for task_ins in task_ins_list:
+            task_ins.task.delivered_at = delivered_at
+
+        # Return TaskIns
+        return task_ins_list
+
+    def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
+        """Get all Messages that have not been delivered yet."""
+        if limit is not None and limit < 1:
+            raise AssertionError("`limit` must be >= 1")
+
+        # Find Message for node_id that were not delivered yet
+        message_ins_list: list[Message] = []
         current_time = time.time()
         with self.lock:
             for _, task_ins in self.task_ins_store.items():
