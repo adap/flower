@@ -8,4 +8,15 @@ cd ts && \
 
 cd docs
 
+{
+  echo ''
+  echo '```{toctree}'
+  echo ':hidden:'
+  echo ':maxdepth: 2'
+  echo ':glob:'
+  echo ''
+  echo '*/*'
+  echo '```'
+} | tee -a source/ts-api-ref/index.md
+
 make html

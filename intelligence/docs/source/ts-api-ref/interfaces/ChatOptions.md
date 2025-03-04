@@ -2,7 +2,7 @@
 
 # Interface: ChatOptions
 
-Defined in: [typing.ts:242](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L242)
+Defined in: [typing.ts:241](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L241)
 
 Options to configure the chat interaction.
 
@@ -12,7 +12,7 @@ Options to configure the chat interaction.
 
 > `optional` **encrypt**: `boolean`
 
-Defined in: [typing.ts:287](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L287)
+Defined in: [typing.ts:286](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L286)
 
 If true, enables end-to-end encryption for processing the request.
 
@@ -22,7 +22,7 @@ If true, enables end-to-end encryption for processing the request.
 
 > `optional` **forceLocal**: `boolean`
 
-Defined in: [typing.ts:282](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L282)
+Defined in: [typing.ts:281](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L281)
 
 If true, forces the use of a local engine.
 
@@ -32,7 +32,7 @@ If true, forces the use of a local engine.
 
 > `optional` **forceRemote**: `boolean`
 
-Defined in: [typing.ts:277](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L277)
+Defined in: [typing.ts:276](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L276)
 
 If true and remote handoff is enabled, forces the use of a remote engine.
 
@@ -42,7 +42,7 @@ If true and remote handoff is enabled, forces the use of a remote engine.
 
 > `optional` **maxCompletionTokens**: `number`
 
-Defined in: [typing.ts:256](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L256)
+Defined in: [typing.ts:255](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L255)
 
 Maximum number of tokens to generate in the response.
 
@@ -52,7 +52,7 @@ Maximum number of tokens to generate in the response.
 
 > `optional` **model**: `string`
 
-Defined in: [typing.ts:246](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L246)
+Defined in: [typing.ts:245](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L245)
 
 The model name to use for the chat. Defaults to a predefined model if not specified.
 
@@ -62,7 +62,7 @@ The model name to use for the chat. Defaults to a predefined model if not specif
 
 > `optional` **onStreamEvent**: (`event`) => `void`
 
-Defined in: [typing.ts:267](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L267)
+Defined in: [typing.ts:266](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L266)
 
 Optional callback invoked when a stream event occurs.
 
@@ -84,7 +84,7 @@ The [StreamEvent](StreamEvent.md) data from the stream.
 
 > `optional` **stream**: `boolean`
 
-Defined in: [typing.ts:261](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L261)
+Defined in: [typing.ts:260](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L260)
 
 If true, the response will be streamed.
 
@@ -94,7 +94,7 @@ If true, the response will be streamed.
 
 > `optional` **temperature**: `number`
 
-Defined in: [typing.ts:251](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L251)
+Defined in: [typing.ts:250](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L250)
 
 Controls the creativity of the response. Typically a value between 0 and 1.
 
@@ -104,6 +104,6 @@ Controls the creativity of the response. Typically a value between 0 and 1.
 
 > `optional` **tools**: [`Tool`](Tool.md)[]
 
-Defined in: [typing.ts:272](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L272)
+Defined in: [typing.ts:271](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L271)
 
 Optional array of tools available for the chat.

@@ -2,7 +2,7 @@
 
 # Interface: Tool
 
-Defined in: [typing.ts:104](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L104)
+Defined in: [typing.ts:104](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L104)
 
 Represents a tool with details about its type, function, and parameters.
 
@@ -12,7 +12,7 @@ Represents a tool with details about its type, function, and parameters.
 
 > **function**: [`ToolFunction`](ToolFunction.md)
 
-Defined in: [typing.ts:113](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L113)
+Defined in: [typing.ts:113](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L113)
 
 Details about the function provided by the tool.
 
@@ -22,6 +22,6 @@ Details about the function provided by the tool.
 
 > **type**: `string`
 
-Defined in: [typing.ts:108](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L108)
+Defined in: [typing.ts:108](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L108)
 
 The type of the tool (e.g., "function" or "plugin").

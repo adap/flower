@@ -2,7 +2,7 @@
 
 # Interface: Failure
 
-Defined in: [typing.ts:214](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L214)
+Defined in: [typing.ts:214](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L214)
 
 Represents a failure response with a code and description.
 
@@ -12,7 +12,7 @@ Represents a failure response with a code and description.
 
 > **code**: [`FailureCode`](../enumerations/FailureCode.md)
 
-Defined in: [typing.ts:218](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L218)
+Defined in: [typing.ts:218](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L218)
 
 The failure code indicating the type of error.
 
@@ -22,6 +22,6 @@ The failure code indicating the type of error.
 
 > **description**: `string`
 
-Defined in: [typing.ts:223](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L223)
+Defined in: [typing.ts:223](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L223)
 
 A description of the failure.

@@ -2,7 +2,7 @@
 
 # Interface: ToolFunctionParameters
 
-Defined in: [typing.ts:64](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L64)
+Defined in: [typing.ts:64](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L64)
 
 Represents the parameters required for a tool's function.
 
@@ -12,7 +12,7 @@ Represents the parameters required for a tool's function.
 
 > **properties**: `Record`\<`string`, [`ToolParameterProperty`](ToolParameterProperty.md)\>
 
-Defined in: [typing.ts:73](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L73)
+Defined in: [typing.ts:73](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L73)
 
 A record defining the properties of each parameter.
 
@@ -22,7 +22,7 @@ A record defining the properties of each parameter.
 
 > **required**: `string`[]
 
-Defined in: [typing.ts:78](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L78)
+Defined in: [typing.ts:78](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L78)
 
 A list of parameter names that are required.
 
@@ -32,6 +32,6 @@ A list of parameter names that are required.
 
 > **type**: `string`
 
-Defined in: [typing.ts:68](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L68)
+Defined in: [typing.ts:68](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L68)
 
 The data type of the parameters (e.g., "object").

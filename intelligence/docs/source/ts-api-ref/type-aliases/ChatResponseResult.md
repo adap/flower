@@ -4,7 +4,7 @@
 
 > **ChatResponseResult**: \{ `message`: [`Message`](../interfaces/Message.md); `ok`: `true`; \} \| \{ `failure`: [`Failure`](../interfaces/Failure.md); `ok`: `false`; \}
 
-Defined in: [typing.ts:307](https://github.com/adap/internal-intelligence/blob/a1d0007cc0e87e7d01df20a73581c407b63dc7ff/intelligence/ts/src/typing.ts#L307)
+Defined in: [typing.ts:306](https://github.com/adap/flower/blob/0a8a2219007e2bbfc1082df3392f666e281d1516/intelligence/ts/src/typing.ts#L306)
 
 Represents the result of a chat operation.
 
