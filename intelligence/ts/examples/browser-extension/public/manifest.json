@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "version": "0.0.1",
+  "name": "Firefox Intelligence",
+  "description": "Firefox Intelligence - Powered by Flower Labs",
+  "permissions": ["activeTab", "history", "storage"],
+  "host_permissions": ["*://api.flower.ai/*", "*://*/*"],
+  "background": {
+    "scripts": ["background.js"],
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png",
+    "default_title": "AI Chat"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}
