@@ -59,6 +59,7 @@ class InMemoryDriver(Driver):
             and message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""
             and message.metadata.ttl > 0
+            and message.metadata.delivered_at == ""
         ):
             raise ValueError(f"Invalid message: {message}")
 
@@ -137,7 +138,15 @@ class InMemoryDriver(Driver):
         """
         msg_ids = {UUID(msg_id) for msg_id in message_ids}
         # Pull Messages
-        return self.state.get_message_res(message_ids=msg_ids)
+        message_res_list = self.state.get_message_res(message_ids=msg_ids)
+        # Get IDs of Messages these replies are for
+        message_ins_ids_to_delete = {
+            UUID(msg_res.metadata.reply_to_message) for msg_res in message_res_list
+        }
+        # Delete
+        self.state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
+
+        return message_res_list
 
     def send_and_receive(
         self,
@@ -159,7 +168,6 @@ class InMemoryDriver(Driver):
         ret: list[Message] = []
         while timeout is None or time.time() < end_time:
             res_msgs = self.pull_messages(msg_ids)
-
             ret.extend(res_msgs)
             msg_ids.difference_update(
                 {msg.metadata.reply_to_message for msg in res_msgs}
