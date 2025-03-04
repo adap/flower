@@ -83,9 +83,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         driver, initialized_server.client_manager()
     )
 
-    # Wait for 1 second until the node registration done
+    # Wait until the node registration done
     if not c_done.is_set():
-        c_done.wait(1)
+        c_done.wait()
 
     # Start training
     hist = run_fl(
