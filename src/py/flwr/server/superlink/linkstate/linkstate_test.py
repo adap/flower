@@ -623,8 +623,8 @@ class StateTest(unittest.TestCase):
         # Assert
         assert len(message_ins_list) == 1
 
-        retrieved_task_ins = message_ins_list[0]
-        assert retrieved_task_ins.metadata.message_id == str(message_ins_uuid)
+        retrieved_message_ins = message_ins_list[0]
+        assert retrieved_message_ins.metadata.message_id == str(message_ins_uuid)
 
     def test_task_ins_store_delivered_and_fail_retrieving(self) -> None:
         """Fail retrieving delivered task."""
