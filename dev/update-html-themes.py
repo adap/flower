@@ -18,11 +18,12 @@
 import json
 import re
 from pathlib import Path
+from typing import Union
 
 # Change this if you want to search a different directory.
 ROOT_DIR = Path(".")
 
-NEW_FIELDS = {
+NEW_FIELDS: dict[str, Union[dict[str, str], str]] = {
     "announcement": (
         "Flower AI Summit 2025, March 26-27 (🇬🇧 London & Online) <br />"
         "<a href='https://flower.ai/events/flower-ai-summit-2025/'>"
@@ -39,7 +40,7 @@ NEW_FIELDS = {
 }
 
 
-def dict_to_fields_str(fields: dict) -> str:
+def dict_to_fields_str(fields: dict[str, Union[dict[str, str], str]]) -> str:
     """
     Convert a dictionary to a formatted string suitable for insertion
     into a Python dictionary literal (without the outer braces).
