@@ -151,7 +151,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         message_id = uuid4()
 
         # Store Message
-        message.metadata._message_id = str(message_id)  # type: ignore  # pylint: disable=W0212
+        # pylint: disable=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
         with self.lock:
             self.message_ins_store[message_id] = message
 
@@ -299,14 +300,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             # Check if the Message it is replying to exists and is valid
             msg_ins_id = res_metadata.reply_to_message
             msg_ins = self.message_ins_store.get(UUID(msg_ins_id))
-            ins_metadata = msg_ins.metadata
 
             # Ensure that dst_node_id of original Message matches the src_node_id of
             # reply Message.
             if (
                 msg_ins
                 and message
-                and ins_metadata.dst_node_id != res_metadata.src_node_id
+                and msg_ins.metadata.dst_node_id != res_metadata.src_node_id
             ):
                 return None
 
@@ -318,6 +318,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 )
                 return None
 
+            ins_metadata = msg_ins.metadata
             if ins_metadata.created_at + ins_metadata.ttl <= time.time():
                 log(
                     ERROR,
@@ -357,7 +358,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         message_id = uuid4()
 
         # Store Message
-        message.metadata._message_id = str(message_id)  # type: ignore  # pylint: disable=W0212
+        # pylint: disable=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
         with self.lock:
             self.message_res_store[message_id] = message
             self.message_ins_id_to_message_res_id[UUID(msg_ins_id)] = message_id
@@ -434,12 +436,26 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.task_ins_store)
 
+    def num_message_ins(self) -> int:
+        """Calculate the number of instruction Messages in store.
+
+        This includes delivered but not yet deleted.
+        """
+        return len(self.message_ins_store)
+
     def num_task_res(self) -> int:
         """Calculate the number of task_res in store.
 
         This includes delivered but not yet deleted task_res.
         """
         return len(self.task_res_store)
+
+    def num_message_res(self) -> int:
+        """Calculate the number of reply Messages in store.
+
+        This includes delivered but not yet deleted.
+        """
+        return len(self.message_res_store)
 
     def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""

@@ -353,7 +353,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         message_id = uuid4()
 
         # Store Message
-        message.metadata._message_id = str(message_id)  # type: ignore   # pylint: disable=W0212
+        # pylint: disable=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
         data = (message_to_dict(message),)
 
         # Convert values from uint64 to sint64 for SQLite
@@ -530,7 +531,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 row, ["run_id", "src_node_id", "dst_node_id"]
             )
 
-        result = [dict_to_task_ins(row) for row in rows]
+        result = [dict_to_message(row) for row in rows]
 
         return result
 
@@ -674,7 +675,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         message_id = uuid4()
 
         # Store Message
-        message.metadata.task_id = str(message_id)
+        # pylint: disable=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
         data = (message_to_dict(message),)
 
         # Convert values from uint64 to sint64 for SQLite
@@ -767,12 +769,33 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         num = cast(int, result["num"])
         return num
 
+    def num_message_ins(self) -> int:
+        """Calculate the number of instruction Messages in store.
+
+        This includes delivered but not yet deleted.
+        """
+        query = "SELECT count(*) AS num FROM message_ins;"
+        rows = self.query(query)
+        result = rows[0]
+        num = cast(int, result["num"])
+        return num
+
     def num_task_res(self) -> int:
         """Calculate the number of task_res in store.
 
         This includes delivered but not yet deleted task_res.
         """
         query = "SELECT count(*) AS num FROM task_res;"
+        rows = self.query(query)
+        result: dict[str, int] = rows[0]
+        return result["num"]
+
+    def num_message_res(self) -> int:
+        """Calculate the number of reply Messages in store.
+
+        This includes delivered but not yet deleted.
+        """
+        query = "SELECT count(*) AS num FROM message_res;"
         rows = self.query(query)
         result: dict[str, int] = rows[0]
         return result["num"]
@@ -1421,9 +1444,18 @@ def dict_to_message(message_dict: dict[str, Any]) -> Message:
     content = recordset_from_proto(content_proto)
     error: Optional[Error] = message_dict.pop("error", None)
     # Metadata constructor doesn't allow passing created_at. We set it later
-    metadata = Metadata(**{k: v for k, v in message_dict.items() if k != "created_at"})
+    metadata = Metadata(
+        **{
+            k: v
+            for k, v in message_dict.items()
+            if k not in ["created_at", "delivered_at"]
+        }
+    )
     msg = Message(metadata=metadata, content=content, error=error)
-    msg.metadata._created_at = message_dict["created_at"]  # type: ignore   # pylint: disable=W0212
+    # pylint: disable=W0212
+    msg.metadata._created_at = message_dict["created_at"]  # type: ignore
+    # pylint: disable=W0212
+    msg.metadata._delivered_at = message_dict["delivered_at"]  # type: ignore
     return msg
 
 
