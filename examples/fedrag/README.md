@@ -36,7 +36,10 @@ documents and passes the re-ranked documents as context to the augmented query p
 ## System Prerequisites
 
 Depending on whether you are running on macOS, RHEL, Debian please make sure
-that the following packages are already installed in your system `wget, git-lfs`:
+that the following packages are already installed in your system `wget`, `git-lfs`.
+
+<details>
+<summary> Installation instructions for different OS </summary>
 
 ```
 # wget is used to download .tar files from the Web
@@ -62,6 +65,8 @@ scoop install git-lfs
 # (holds for all systems)
 git lfs install
 ```
+
+</details>
 
 ## Install Dependencies
 
@@ -101,7 +106,7 @@ corpus, please refer to the [README.md](data/README.md) file under the `data` di
 For more details regarding how each corpus is downloaded and how the corresponding index is created,
 please read the section below as well the previously referenced [README.md](data/README.md).
 
-All corpora used in this work were derived from the MedRAG toolkit \[1\].
+All corpora used in this work were derived from the MedRAG toolkit [\[1\]](#ref1).
 
 ## Run with Simulation Engine
 
@@ -180,7 +185,7 @@ the score of a retrieved document the better, since L2 Distance measures dissimi
 **Merge.** Once documents and their associated retrieval scores are received by the server, the server merges the retrieved
 documents into a single ranked list, either by sorting the documents based on the retrieval score; the lower the score the
 more relevant the document is to the query, since we are using the `L2` Euclidean distance. Alternatively, you can use
-the simple yet effective Reciprocal Rank Fusion (RRF) method. To smooth ranking differences during merging, using RRF,
+the simple yet effective Reciprocal Rank Fusion (RRF) method [\[2\]](#ref2). To smooth ranking differences during merging, using RRF,
 you can change the `k-rrf`value defined in the `[tool.flwr.app.config]` section of the `pyproject.yaml` file. Even though
 this is a simple merging technique, you should feel free to extend this and define other merging approaches,
 such as using a Re-Ranker model.
@@ -209,7 +214,7 @@ server-llm-hfpath = ... # the Hugging Face name/path of the LLM model used by th
 By default, the current example uses the following two corpora `Textbooks, StatPearls` distributed
 across 2 clients, with each client holding one corpus (out of the two). For QA evaluation, the server submits
 questions from the following two benchmark QA datasets: `PubMedQA, BioASQ`. For the values
-of k-rrf and k-nn, we use `60` and `8` respectively and for the LLM hosted at the server we use HF's
+of `k-rrf` and `k-nn`, we use `60` and `8` respectively and for the LLM hosted at the server we use HF's
 SmolLM model (`HuggingFaceTB/SmolLM2-1.7B-Instruct`) because for Llama models, we need first to accept the terms.
 
 Specifically, the default values are set as:
@@ -251,4 +256,6 @@ options.backend.client-resources.num-gpus = 0.1
 
 # References
 
-\[1\] Xiong, G., Jin, Q., Lu, Z. and Zhang, A., 2024, August. Benchmarking retrieval-augmented generation for medicine. In Findings of the Association for Computational Linguistics ACL 2024 (pp. 6233-6251).
+1. <a id="ref1"></a> Xiong, G., Jin, Q., Lu, Z. and Zhang, A., 2024, August. Benchmarking retrieval-augmented generation for medicine. In Findings of the Association for Computational Linguistics ACL 2024 (pp. 6233-6251).
+
+2. <a id="ref2"></a> Cormack, G.V., Clarke, C.L. and Buettcher, S., 2009, July. Reciprocal rank fusion outperforms condorcet and individual rank learning methods. In Proceedings of the 32nd international ACM SIGIR conference on Research and development in information retrieval (pp. 758-759).

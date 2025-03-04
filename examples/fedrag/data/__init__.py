@@ -1,1 +1,1 @@
-"""fedrag: A Flower app."""
+"""fedrag: A Flower Federated RAG app."""

@@ -1,4 +1,4 @@
-"""fedrag: A Flower app."""
+"""fedrag: A Flower Federated RAG app."""
 
 """
 This file is a slightly modified version of the statpearls.py script provided by the MedRAG toolkit

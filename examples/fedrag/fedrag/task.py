@@ -1,4 +1,4 @@
-"""fedrag: A Flower app."""
+"""fedrag: A Flower Federated RAG app."""
 
 from typing import List
 

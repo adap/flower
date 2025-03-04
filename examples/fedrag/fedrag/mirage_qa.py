@@ -1,4 +1,4 @@
-"""fedrag: A Flower app."""
+"""fedrag: A Flower Federated RAG app."""
 
 """ 
 This file is a modified copy of the https://github.com/Teddy-XiongGZ/MIRAGE/blob/main/src/utils.py 
