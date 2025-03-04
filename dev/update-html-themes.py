@@ -25,9 +25,10 @@ ROOT_DIR = Path(".")
 
 NEW_FIELDS: dict[str, Union[dict[str, str], str]] = {
     "announcement": (
-        "Flower AI Summit 2025, March 26-27 (🇬🇧 London & Online) <br />"
+        "Flower AI Summit 2025"
         "<a href='https://flower.ai/events/flower-ai-summit-2025/'>"
-        "<strong style='color: #f2b705;'>👉 Register Now!</strong></a>"
+        "<strong style='color: #f2b705;'>👉 Register Now!</strong></a><br />"
+        "March 26-27 (🇬🇧 London & Online)"
     ),
     "light_css_variables": {
         "color-announcement-background": "#292f36",
