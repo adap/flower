@@ -262,7 +262,7 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
 
         # Assert
-        assert state.num_task_res() == 0
+        assert state.num_message_res() == 0
 
     def test_store_task_ins_one(self) -> None:
         """Test store_task_ins."""
