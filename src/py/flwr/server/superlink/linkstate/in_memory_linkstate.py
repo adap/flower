@@ -423,7 +423,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             # Find all reply Messages
             message_res_found: list[Message] = []
             for message_id in message_ids:
-                # If TaskRes exists and is not delivered, add it to the list
+                # If Message exists and is not delivered, add it to the list
                 if message_res_id := self.message_ins_id_to_message_res_id.get(
                     message_id
                 ):
