@@ -351,7 +351,7 @@ def create_message_error_unavailable_ins_message(reply_to_message: UUID) -> Mess
         message_id=str(uuid4()),
         src_node_id=SUPERLINK_NODE_ID,
         dst_node_id=SUPERLINK_NODE_ID,
-        reply_to_message=reply_to_message,
+        reply_to_message=str(reply_to_message),
         group_id="",  # Unknown
         message_type="",  # Unknown
         ttl=0,
