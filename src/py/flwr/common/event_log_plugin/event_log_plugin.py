@@ -33,6 +33,18 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
     StreamLogsResponse,
 )
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    CreateNodeRequest,
+    CreateNodeResponse,
+    DeleteNodeRequest,
+    DeleteNodeResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
+)
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
 # Type variables for request and response messages
 EventLogRequest = Union[
@@ -41,6 +53,12 @@ EventLogRequest = Union[
     StreamLogsRequest,
     StopRunRequest,
     GetLoginDetailsRequest,
+    CreateNodeRequest,
+    DeleteNodeRequest,
+    PullMessagesRequest,
+    PushMessagesRequest,
+    GetFabRequest,
+    GetRunRequest,
 ]
 EventLogResponse = Union[
     StartRunResponse,
@@ -48,6 +66,12 @@ EventLogResponse = Union[
     StreamLogsResponse,
     StopRunResponse,
     GetLoginDetailsResponse,
+    CreateNodeResponse,
+    DeleteNodeResponse,
+    PullMessagesResponse,
+    PushMessagesResponse,
+    GetFabResponse,
+    GetRunResponse,
 ]
 
 
@@ -63,7 +87,7 @@ class EventLogWriterPlugin(ABC):
         self,
         request: EventLogRequest,
         context: grpc.ServicerContext,
-        user_info: UserInfo,
+        user_info: Optional[UserInfo],
         method_name: str,
     ) -> LogEntry:
         """Compose pre-event log entry from the provided request and context."""
@@ -73,7 +97,7 @@ class EventLogWriterPlugin(ABC):
         self,
         request: EventLogRequest,
         context: grpc.ServicerContext,
-        user_info: UserInfo,
+        user_info: Optional[UserInfo],
         method_name: str,
         response: Optional[Union[EventLogResponse, Exception]],
     ) -> LogEntry:
