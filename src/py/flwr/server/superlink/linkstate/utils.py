@@ -15,7 +15,7 @@
 """Utility functions for State."""
 
 
-from logging import ERROR, WARNING
+from logging import ERROR
 from os import urandom
 from typing import Optional, Union
 from uuid import UUID, uuid4
@@ -30,13 +30,7 @@ from flwr.common import (
     now,
     serde,
 )
-from flwr.common.constant import (
-    MESSAGE_TTL_TOLERANCE,
-    SUPERLINK_NODE_ID,
-    ErrorCode,
-    Status,
-    SubStatus,
-)
+from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
@@ -324,6 +318,54 @@ def create_taskres_for_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
     )
 
 
+def create_message_error_unavailable_res_message(ins_metadata: Metadata) -> Message:
+    """Generate an error Message that the SuperLink returns carrying the specified
+    error."""
+    current_time = now().timestamp()
+    ttl = ins_metadata.ttl - (current_time - ins_metadata.created_at)
+    metadata = Metadata(
+        run_id=ins_metadata.run_id,
+        message_id=str(uuid4()),
+        src_node_id=SUPERLINK_NODE_ID,
+        dst_node_id=SUPERLINK_NODE_ID,
+        reply_to_message=ins_metadata.message_id,
+        group_id=ins_metadata.group_id,
+        message_type=ins_metadata.message_type,
+        ttl=ttl,
+    )
+
+    return Message(
+        metadata=metadata,
+        error=Error(
+            code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
+            reason=REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
+        ),
+    )
+
+
+def create_message_error_unavailable_ins_message(reply_to_message: UUID) -> Message:
+    """Error to indicate that the enquired Message had expired before reply arrived or
+    that it isn't found."""
+    metadata = Metadata(
+        run_id=0,  # Unknown
+        message_id=str(uuid4()),
+        src_node_id=SUPERLINK_NODE_ID,
+        dst_node_id=SUPERLINK_NODE_ID,
+        reply_to_message=str(reply_to_message),
+        group_id="",  # Unknown
+        message_type="",  # Unknown
+        ttl=0,
+    )
+
+    return Message(
+        metadata=metadata,
+        error=Error(
+            code=ErrorCode.MESSAGE_UNAVAILABLE,
+            reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
+        ),
+    )
+
+
 def has_expired(task_ins_or_res: Union[TaskIns, TaskRes], current_time: float) -> bool:
     """Check if the TaskIns/TaskRes has expired."""
     return task_ins_or_res.task.ttl + task_ins_or_res.task.created_at < current_time
@@ -373,46 +415,46 @@ def verify_taskins_ids(
     return ret_dict
 
 
-def create_message_error_expired_result_message(ins_metadata: Metadata) -> Message:
-    """Error to indicate that a reply Message had expired."""
-    return create_error_reply_with_reason(
-        ins_metadata,
-        error=Error(
-            code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
-            reason=REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
-        ),
-    )
+def verify_message_ids(
+    inquired_message_ids: set[UUID],
+    found_message_ins_dict: dict[UUID, Message],
+    current_time: Optional[float] = None,
+    update_set: bool = True,
+) -> dict[UUID, Message]:
+    """Verify found Messages and generate error Messages for invalid ones.
 
+    Parameters
+    ----------
+    inquired_message_ids : set[UUID]
+        Set of Message IDs for which to generate error Message if invalid.
+    found_message_ins_dict : dict[UUID, Message]
+        Dictionary containing all found Message indexed by their IDs.
+    current_time : Optional[float] (default: None)
+        The current time to check for expiration. If set to `None`, the current time
+        will automatically be set to the current timestamp using `now().timestamp()`.
+    update_set : bool (default: True)
+        If True, the `inquired_message_ids` will be updated to remove invalid ones,
+        by default True.
 
-def create_message_error_unavailable_ins_message(ins_metadata: Metadata) -> Message:
-    """Error to indicate that the enquired Message had expired before reply arrived or
-    that it isn't found."""
-    return create_error_reply_with_reason(
-        ins_metadata,
-        error=Error(
-            code=ErrorCode.MESSAGE_UNAVAILABLE,
-            reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
-        ),
-    )
-
-
-def create_error_reply_with_reason(ins_metadata: Metadata, error: Error) -> Message:
-    """Generate an error Message that the SuperLink returns carrying the specified
-    error."""
-    current_time = now().timestamp()
-    ttl = ins_metadata.ttl - (current_time - ins_metadata.created_at)
-    metadata = Metadata(
-        run_id=ins_metadata.run_id,
-        message_id=str(uuid4()),
-        src_node_id=SUPERLINK_NODE_ID,
-        dst_node_id=SUPERLINK_NODE_ID,
-        reply_to_message=ins_metadata.message_id,
-        group_id=ins_metadata.group_id,
-        message_type=ins_metadata.message_type,
-        ttl=ttl,
-    )
-
-    return Message(metadata=metadata, error=error)
+    Returns
+    -------
+    dict[UUID, Message]
+        A dictionary of error Message indexed by the corresponding ID of the message
+        they are a reply of.
+    """
+    ret_dict = {}
+    current = current_time if current_time else now().timestamp()
+    for message_id in list(inquired_message_ids):
+        # Generate error TaskRes if the task_ins doesn't exist or has expired
+        message_ins = found_message_ins_dict.get(message_id)
+        if message_ins is None or message_ttl_has_expired(
+            message_ins.metadata, current
+        ):
+            if update_set:
+                inquired_message_ids.remove(message_id)
+            message_res = create_message_error_unavailable_ins_message(message_id)
+            ret_dict[message_id] = message_res
+    return ret_dict
 
 
 def verify_found_taskres(
@@ -461,26 +503,48 @@ def verify_found_taskres(
     return ret_dict
 
 
-def check_ttl_exceeded(ins_metadata: Metadata, res_metadata: Metadata) -> bool:
-    """Check if TTL has been reached."""
-    # Fail if the Message TTL exceeds the
-    # expiration time of the Message it replies to.
-    # Condition: ins_metadata.created_at + ins_metadata.ttl ≥
-    #            res_metadata.created_at + res_metadata.ttl
-    # A small tolerance is introduced to account
-    # for floating-point precision issues.
-    max_allowed_ttl = (
-        ins_metadata.created_at + ins_metadata.ttl - res_metadata.created_at
-    )
-    if res_metadata.ttl and (
-        res_metadata.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
-    ):
-        log(
-            WARNING,
-            "Received Message with TTL %.2f exceeding the allowed maximum TTL %.2f.",
-            res_metadata.ttl,
-            max_allowed_ttl,
-        )
-        return True
+def verify_found_message_replies(
+    inquired_message_ids: set[UUID],
+    found_message_ins_dict: dict[UUID, Message],
+    found_message_res_list: list[Message],
+    current_time: Optional[float] = None,
+    update_set: bool = True,
+) -> dict[UUID, Message]:
+    """Verify found Message replies and generate error Message for invalid ones.
 
-    return False
+    Parameters
+    ----------
+    inquired_message_ids : set[UUID]
+        Set of Message IDs for which to generate error Message if invalid.
+    found_message_ins_dict : dict[UUID, Message]
+        Dictionary containing all found TaskIns indexed by their IDs.
+    found_message_res_list : dict[Message, Message]
+        List of found Message to be verified.
+    current_time : Optional[float] (default: None)
+        The current time to check for expiration. If set to `None`, the current time
+        will automatically be set to the current timestamp using `now().timestamp()`.
+    update_set : bool (default: True)
+        If True, the `inquired_message_ids` will be updated to remove ones
+        that have a reply Message, by default True.
+
+    Returns
+    -------
+    dict[UUID, Message]
+        A dictionary of Message indexed by the corresponding Message ID.
+    """
+    ret_dict: dict[UUID, Message] = {}
+    current = current_time if current_time else now().timestamp()
+    for message_res in found_message_res_list:
+        message_ins_id = UUID(message_res.metadata.reply_to_message)
+        if update_set:
+            inquired_message_ids.remove(message_ins_id)
+        # Check if the reply Message has expired
+        if message_ttl_has_expired(message_res.metadata, current):
+            # No need to insert the error Message
+            message_res = create_message_error_unavailable_res_message(
+                found_message_ins_dict[message_ins_id].metadata
+            )
+            # pylint: disable=W0212
+            message_res.metadata._delivered_at = now().isoformat()  # type: ignore
+        ret_dict[message_ins_id] = message_res
+    return ret_dict

@@ -44,11 +44,10 @@ from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 
 # pylint: enable=E0611
-from flwr.server.utils import validate_message, validate_task_ins_or_res
+from flwr.server.utils.validator import validate_message, validate_task_ins_or_res
 
 from .linkstate import LinkState
 from .utils import (
-    check_ttl_exceeded,
     configsrecord_from_bytes,
     configsrecord_to_bytes,
     context_from_bytes,
@@ -57,13 +56,12 @@ from .utils import (
     convert_sint64_values_in_dict_to_uint64,
     convert_uint64_to_sint64,
     convert_uint64_values_in_dict_to_sint64,
-    create_message_error_expired_result_message,
-    create_message_error_unavailable_ins_message,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
-    message_ttl_has_expired,
+    verify_found_message_replies,
     verify_found_taskres,
+    verify_message_ids,
     verify_taskins_ids,
 )
 
@@ -148,6 +146,7 @@ CREATE TABLE IF NOT EXISTS message_ins(
     dst_node_id             INTEGER,
     reply_to_message        TEXT,
     created_at              REAL,
+    delivered_at            TEXT,
     ttl                     REAL,
     message_type            TEXT,
     content                 BLOB NULL,
@@ -173,6 +172,7 @@ CREATE TABLE IF NOT EXISTS task_res(
 );
 """
 
+
 SQL_CREATE_TABLE_MESSAGE_RES = """
 CREATE TABLE IF NOT EXISTS message_res(
     message_id              TEXT UNIQUE,
@@ -182,25 +182,12 @@ CREATE TABLE IF NOT EXISTS message_res(
     dst_node_id             INTEGER,
     reply_to_message        TEXT,
     created_at              REAL,
+    delivered_at            TEXT,
     ttl                     REAL,
     message_type            TEXT,
     content                 BLOB NULL,
     error                   BLOB NULL,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
-);
-"""
-
-SQL_CREATE_TABLE_DELIVERED_MESSAGES = """
-CREATE TABLE IF NOT EXISTS delivered_messages(
-    message_id              TEXT UNIQUE,
-    group_id                TEXT,
-    run_id                  INTEGER,
-    src_node_id             INTEGER,
-    dst_node_id             INTEGER,
-    reply_to_message        TEXT,
-    created_at              REAL,
-    ttl                     REAL,
-    message_type            TEXT
 );
 """
 
@@ -253,7 +240,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_MESSAGE_INS)
         cur.execute(SQL_CREATE_TABLE_MESSAGE_RES)
-        cur.execute(SQL_CREATE_TABLE_DELIVERED_MESSAGES)
         cur.execute(SQL_CREATE_TABLE_NODE)
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
@@ -359,7 +345,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         return task_id
 
     def store_message_ins(self, message: Message) -> Optional[UUID]:
-        """Store one Message from ServerAppIo."""
+        """Store one Message."""
         # Validate message
         errors = validate_message(message=message, is_reply_message=False)
         if any(errors):
@@ -382,6 +368,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         query = "SELECT run_id FROM run WHERE run_id = ?;"
         if not self.query(query, (data[0]["run_id"],)):
             log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
+            return None
+
+        # Validate source node ID
+        if message.metadata.src_node_id != SUPERLINK_NODE_ID:
+            log(
+                ERROR,
+                "Invalid source node ID for Message: %s",
+                message.metadata.src_node_id,
+            )
             return None
 
         # Validate destination node ID
@@ -497,9 +492,10 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Retrieve all Messages for node_id
         query = """
-            SELECT *
+            SELECT message_id
             FROM message_ins
             WHERE   dst_node_id == :node_id
+            AND   delivered_at = ""
             AND   (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
         """
 
@@ -511,45 +507,35 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         rows = self.query(query, data)
 
+        if rows:
+            # Prepare query
+            message_ids = [row["message_id"] for row in rows]
+            placeholders: str = ",".join([f":id_{i}" for i in range(len(message_ids))])
+            query = f"""
+                UPDATE message_ins
+                SET delivered_at = :delivered_at
+                WHERE message_id IN ({placeholders})
+                RETURNING *;
+            """
+
+            # Prepare data for query
+            delivered_at = now().isoformat()
+            data = {"delivered_at": delivered_at}
+            for index, msg_id in enumerate(message_ids):
+                data[f"id_{index}"] = str(msg_id)
+
+            # Run query
+            rows = self.query(query, data)
+
         for row in rows:
             # Convert values from sint64 to uint64
             convert_sint64_values_in_dict_to_uint64(
                 row, ["run_id", "src_node_id", "dst_node_id"]
             )
 
-        # Messages to return
-        messages = [message_from_dict(row) for row in rows]
+        result = [dict_to_message(row) for row in rows]
 
-        # Delete Messages for DB
-        placeholders = ",".join(["?"] * len(messages))
-        query = f"""
-            DELETE
-            FROM message_ins
-            WHERE   message_id IN ({placeholders});
-        """
-        delete_ids = tuple(message.metadata.message_id for message in messages)
-        self.query(query, delete_ids)
-
-        # Record metadata of messages being pulled
-        for row in rows:
-            # Convert back values from uint64 to sint64
-            convert_uint64_values_in_dict_to_sint64(
-                row, ["run_id", "src_node_id", "dst_node_id"]
-            )
-            # remove elements that are not part of metadata
-            _ = row.pop("content", None)
-            _ = row.pop("error", None)
-
-        if rows:
-            columns = ", ".join([f":{key}" for key in rows[0]])
-            query = f"INSERT INTO delivered_messages VALUES({columns});"
-            for row in rows:
-                # Only invalid run_id can trigger IntegrityError.
-                # This may need to be changed in the future version
-                # with more integrity checks.
-                self.query(query, row)
-
-        return messages
+        return result
 
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes.
@@ -644,38 +630,47 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         res_metadata = message.metadata
-        # Check if message it is replying to exists and is valid
-        # Find metadata of Message the `message` is the reply of
-        ins_message_id = message.metadata.reply_to_message
-        ins_metadata = self.get_valid_message_metadata(ins_message_id)
-        if ins_metadata is None:
+        msg_ins_id = res_metadata.reply_to_message
+        msg_ins = self.get_valid_message_ins(msg_ins_id)
+        if msg_ins is None:
             log(
                 ERROR,
-                "Failed to store Message: "
-                "Record of a message_id %s does not exist or has expired.",
-                ins_message_id,
+                "Failed to store Message reply: "
+                "The message it replies to with message_id %s does not exist or "
+                "has expired.",
+                msg_ins_id,
             )
-            # Erase entry
-            query = """
-                DELETE FROM delivered_messages
-                WHERE message_id = :message_id;
-            """
-            self.query(query, {"message_id": str(res_metadata.reply_to_message)})
             return None
 
-        # Ensure the received Message comes from the right node_id
+        # Ensure that the dst_node_id of the original message matches the src_node_id of
+        # reply being processed.
         if (
-            convert_sint64_to_uint64(ins_metadata.dst_node_id)
+            msg_ins
+            and message
+            and convert_sint64_to_uint64(msg_ins["dst_node_id"])
             != res_metadata.src_node_id
+        ):
+            return None
+
+        # Fail if the Message TTL exceeds the
+        # expiration time of the Message it replies to.
+        # Condition: ins_metadata.created_at + ins_metadata.ttl ≥
+        #            res_metadata.created_at + res_metadata.ttl
+        # A small tolerance is introduced to account
+        # for floating-point precision issues.
+        max_allowed_ttl = (
+            msg_ins["created_at"] + msg_ins["ttl"] - res_metadata.created_at
+        )
+        if res_metadata.ttl and (
+            res_metadata.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
         ):
             log(
                 WARNING,
-                "Mismatch between source and destination node_ids in "
-                "received reply Message.",
+                "Received Message with TTL %.2f exceeding the allowed maximum "
+                "TTL %.2f.",
+                res_metadata.ttl,
+                max_allowed_ttl,
             )
-            return None
-
-        if check_ttl_exceeded(ins_metadata, res_metadata):
             return None
 
         # Create message_id
@@ -698,14 +693,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # This may need to be changed in the future version with more integrity checks.
         try:
             self.query(query, data)
-
-            # Erase entry from delivered_messages table
-            query = """
-                DELETE FROM delivered_messages
-                WHERE message_id == :message_id;
-            """
-            self.query(query, {"message_id": str(res_metadata.reply_to_message)})
-
         except sqlite3.IntegrityError:
             log(ERROR, "`run` is invalid")
             return None
@@ -774,113 +761,67 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         return list(ret.values())
 
     def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
-        """Get reply Message for the given Message IDs."""
-        # List of reply messages. We will sort its content at the end
-        # so it matches that of the enquired `message_ids`
-        reply_list: list[Message] = []
-        recognized_message_ids: list[UUID] = []
+        """Get reply Messages for the given Message IDs."""
+        ret: dict[UUID, Message] = {}
 
-        current_time = time.time()
-
-        # Fetch reply messages (delete them)
+        # Verify Message IDs
+        current = time.time()
         query = f"""
-            DELETE FROM message_res
-            WHERE reply_to_message IN ({",".join(["?"] * len(message_ids))})
-            RETURNING *;
-        """
-        rows = self.query(query, tuple(str(msg_id) for msg_id in message_ids))
-        for row in rows:
-            convert_sint64_values_in_dict_to_uint64(
-                row, ["run_id", "src_node_id", "dst_node_id"]
-            )
-            msg_res = message_from_dict(row)
-            recognized_message_ids.append(UUID(msg_res.metadata.reply_to_message))
-            #   expired TTL ? -> return Error Message
-            #   else -> Return actual Reply Message
-            if message_ttl_has_expired(msg_res.metadata, current_time=current_time):
-                reply_list.append(
-                    create_message_error_expired_result_message(msg_res.metadata)
-                )
-            else:
-                reply_list.append(msg_res)
-
-        # Return if all processed
-        if len(reply_list) == len(message_ids):
-            return reply_list
-
-        # Fetch expired delivered_messages or messages_ins (delete them)
-        self.num_message_ins()
-        query_ins = f"""
-                DELETE FROM delivered_messages
-                WHERE message_id IN ({",".join(["?"] * len(message_ids))})
-                AND (created_at + ttl) < ?
-                RETURNING *;
-            """
-        data = tuple(str(msg_id) for msg_id in message_ids) + (current_time,)
-        rows = self.query(query_ins, data)
-        query_delivered = f"""
-                DELETE FROM message_ins
-                WHERE message_id IN ({",".join(["?"] * len(message_ids))})
-                AND (created_at + ttl) < ?
-                RETURNING *;
-        """
-        rows.extend(self.query(query_delivered, data))
-        # Return TTL expired Error Message
-        for row in rows:
-            convert_sint64_values_in_dict_to_uint64(
-                row, ["run_id", "src_node_id", "dst_node_id"]
-            )
-            msg_ins_metadata = message_from_dict(row).metadata
-            recognized_message_ids.append(UUID(msg_ins_metadata.message_id))
-            reply_list.append(
-                create_message_error_unavailable_ins_message(msg_ins_metadata)
-            )
-
-        # Return if all processed
-        if len(reply_list) == len(message_ids):
-            return reply_list
-
-        # Fetch unexpired delivered and undelivered messages (keep them)
-        query_ins = f"""
             SELECT *
             FROM message_ins
-            WHERE message_id IN ({",".join(["?"] * len(message_ids))})
+            WHERE message_id IN ({",".join(["?"] * len(message_ids))});
         """
-        rows = self.query(query_ins, tuple(str(msg_id) for msg_id in message_ids))
-        query_delivered = f"""
-            SELECT *
-            FROM delivered_messages
-            WHERE message_id IN ({",".join(["?"] * len(message_ids))})
-        """
-        rows.extend(
-            self.query(query_delivered, tuple(str(msg_id) for msg_id in message_ids))
-        )
+        rows = self.query(query, tuple(str(message_id) for message_id in message_ids))
+        found_message_ins_dict: dict[UUID, Message] = {}
         for row in rows:
-            # Return Error Message (awaiting reply)
             convert_sint64_values_in_dict_to_uint64(
                 row, ["run_id", "src_node_id", "dst_node_id"]
             )
-            msg_ins_metadata = message_from_dict(row).metadata
-            recognized_message_ids.append(UUID(msg_ins_metadata.message_id))
+            found_message_ins_dict[UUID(row["message_id"])] = dict_to_message(row)
 
-        # msg_id isn't recognized
-        for msg_id in message_ids:
-            if msg_id not in recognized_message_ids:
-                meta = Metadata(
-                    run_id=0,
-                    message_id="",
-                    src_node_id=SUPERLINK_NODE_ID,
-                    dst_node_id=SUPERLINK_NODE_ID,
-                    reply_to_message="",
-                    group_id="",
-                    ttl=SUPERLINK_NODE_ID,
-                    message_type="",
-                )
-                # pylint: disable=W0212
-                meta._created_at = current_time  # type: ignore
-                reply_list.append(create_message_error_unavailable_ins_message(meta))
+        ret = verify_message_ids(
+            inquired_message_ids=message_ids,
+            found_message_ins_dict=found_message_ins_dict,
+            current_time=current,
+        )
 
-        return reply_list
+        # Find all reply Messages
+        query = f"""
+            SELECT *
+            FROM message_res
+            WHERE reply_to_message IN ({",".join(["?"] * len(message_ids))})
+            AND delivered_at = "";
+        """
+        rows = self.query(query, tuple(str(message_id) for message_id in message_ids))
+        for row in rows:
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "src_node_id", "dst_node_id"]
+            )
+        tmp_ret_dict = verify_found_message_replies(
+            inquired_message_ids=message_ids,
+            found_message_ins_dict=found_message_ins_dict,
+            found_message_res_list=[dict_to_message(row) for row in rows],
+            current_time=current,
+        )
+        ret.update(tmp_ret_dict)
+
+        # Mark existing reply Messages to be returned as delivered
+        delivered_at = now().isoformat()
+        for message_res in ret.values():
+            # pylint: disable=W0212
+            message_res.metadata._delivered_at = delivered_at  # type: ignore
+        message_res_ids = [
+            message_res.metadata.message_id for message_res in ret.values()
+        ]
+        query = f"""
+            UPDATE message_res
+            SET delivered_at = ?
+            WHERE message_id IN ({",".join(["?"] * len(message_res_ids))});
+        """
+        data: list[Any] = [delivered_at] + message_res_ids
+        self.query(query, data)
+
+        return list(ret.values())
 
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.
@@ -894,12 +835,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         return num
 
     def num_message_ins(self) -> int:
-        """Calculate the number of Messages awaiting a reply."""
+        """Calculate the number of instruction Messages in store.
+
+        This includes delivered but not yet deleted.
+        """
         query = "SELECT count(*) AS num FROM message_ins;"
-        num_message_ins: int = self.query(query)[0]["num"]
-        query = "SELECT count(*) AS num FROM delivered_messages;"
-        num_delivered: int = self.query(query)[0]["num"]
-        return num_message_ins + num_delivered
+        rows = self.query(query)
+        result = rows[0]
+        num = cast(int, result["num"])
+        return num
 
     def num_task_res(self) -> int:
         """Calculate the number of task_res in store.
@@ -912,7 +856,10 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         return result["num"]
 
     def num_message_res(self) -> int:
-        """Calculate the number of reply Messages in store."""
+        """Calculate the number of reply Messages in store.
+
+        This includes delivered but not yet deleted.
+        """
         query = "SELECT count(*) AS num FROM message_res;"
         rows = self.query(query)
         result: dict[str, int] = rows[0]
@@ -962,6 +909,25 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             rows = self.conn.execute(query, data).fetchall()
 
         return {UUID(row["task_id"]) for row in rows}
+
+    def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all input Message IDs for the given run_id."""
+        if self.conn is None:
+            raise AttributeError("LinkState not initialized")
+
+        query = """
+            SELECT message_id
+            FROM message_ins
+            WHERE run_id = :run_id;
+        """
+
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+        data = {"run_id": sint64_run_id}
+
+        with self.conn:
+            rows = self.conn.execute(query, data).fetchall()
+
+        return {UUID(row["message_id"]) for row in rows}
 
     def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
@@ -1400,39 +1366,32 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return task_ins
 
-    def get_valid_message_metadata(self, message_id: str) -> Optional[Metadata]:
-        """Check if the metadata associated with a message_id exists and is valid.
+    def get_valid_message_ins(self, message_id: str) -> Optional[dict[str, Any]]:
+        """Check if the Message exists and is valid (not expired).
 
-        Return metadata if valid (i.e. TTL hasn't expired).
+        Return Message if valid.
         """
         query = """
             SELECT *
-            FROM delivered_messages
+            FROM message_ins
             WHERE message_id = :message_id
         """
         data = {"message_id": message_id}
         rows = self.query(query, data)
         if not rows:
-            # TaskIns does not exist
+            # Message does not exist
             return None
 
-        metadata_dict = rows[0]
-        created_at = metadata_dict["created_at"]
-        ttl = metadata_dict["ttl"]
+        message_ins = rows[0]
+        created_at = message_ins["created_at"]
+        ttl = message_ins["ttl"]
         current_time = time.time()
 
-        # Check if Message is expired
+        # Check if TaskIns is expired
         if ttl is not None and created_at + ttl <= current_time:
             return None
 
-        # Construct Metadata
-        metadata = Metadata(
-            **{k: v for k, v in metadata_dict.items() if k != "created_at"}
-        )
-        # pylint: disable=W0212
-        metadata._created_at = metadata_dict["created_at"]  # type: ignore
-
-        return metadata
+        return message_ins
 
 
 def dict_factory(
@@ -1493,6 +1452,7 @@ def message_to_dict(message: Message) -> dict[str, Any]:
         "dst_node_id": message.metadata.dst_node_id,
         "reply_to_message": message.metadata.reply_to_message,
         "created_at": message.metadata.created_at,
+        "delivered_at": message.metadata.delivered_at,
         "ttl": message.metadata.ttl,
         "message_type": message.metadata.message_type,
         "content": None,
@@ -1505,20 +1465,6 @@ def message_to_dict(message: Message) -> dict[str, Any]:
         result["error"] = error_to_proto(message.error).SerializeToString()
 
     return result
-
-
-def message_from_dict(message_dict: dict[str, Any]) -> Message:
-    """Transform dict to Message."""
-    content_proto = ProtoRecordSet()
-    content_proto.ParseFromString(message_dict.pop("content"))
-    content = recordset_from_proto(content_proto)
-    error: Optional[Error] = message_dict.pop("error", None)
-    # Metadata constructor doesn't allow passing created_at. We set it later
-    metadata = Metadata(**{k: v for k, v in message_dict.items() if k != "created_at"})
-    msg = Message(metadata=metadata, content=content, error=error)
-    # pylint: disable=W0212
-    msg.metadata._created_at = message_dict["created_at"]  # type: ignore
-    return msg
 
 
 def dict_to_task_ins(task_dict: dict[str, Any]) -> TaskIns:
@@ -1573,6 +1519,28 @@ def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
         ),
     )
     return result
+
+
+def dict_to_message(message_dict: dict[str, Any]) -> Message:
+    """Transform dict to Message."""
+    content_proto = ProtoRecordSet()
+    content_proto.ParseFromString(message_dict.pop("content"))
+    content = recordset_from_proto(content_proto)
+    error: Optional[Error] = message_dict.pop("error", None)
+    # Metadata constructor doesn't allow passing created_at. We set it later
+    metadata = Metadata(
+        **{
+            k: v
+            for k, v in message_dict.items()
+            if k not in ["created_at", "delivered_at"]
+        }
+    )
+    msg = Message(metadata=metadata, content=content, error=error)
+    # pylint: disable=W0212
+    msg.metadata._created_at = message_dict["created_at"]  # type: ignore
+    # pylint: disable=W0212
+    msg.metadata._delivered_at = message_dict["delivered_at"]  # type: ignore
+    return msg
 
 
 def determine_run_status(row: dict[str, Any]) -> str:

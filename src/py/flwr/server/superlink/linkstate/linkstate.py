@@ -164,7 +164,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
-        """Get Message for the given Message IDs.
+        """Get reply Messages for the given Message IDs.
 
         This method is typically called by the ServerAppIo API to obtain
         results (type Message) for previously scheduled instructions (type Message).
@@ -227,6 +227,10 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
     @abc.abstractmethod
     def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
         """Get all TaskIns IDs for the given run_id."""
+
+    @abc.abstractmethod
+    def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all input Message IDs for the given run_id."""
 
     @abc.abstractmethod
     def create_node(self, ping_interval: float) -> int:
