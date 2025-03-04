@@ -23,7 +23,7 @@ from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import Context, log, now, Message, Metadata
+from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -35,7 +35,7 @@ from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
-from flwr.server.utils import validate_task_ins_or_res, validate_message
+from flwr.server.utils import validate_message, validate_task_ins_or_res
 
 from .utils import (
     generate_rand_int_from_bytes,
@@ -198,7 +198,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 if (
                     msg_ins.metadata.dst_node_id == node_id
                     and msg_ins.metadata.delivered_at == ""
-                    and msg_ins.metadata.created_at + msg_ins.metadata.ttl > current_time
+                    and msg_ins.metadata.created_at + msg_ins.metadata.ttl
+                    > current_time
                 ):
                     message_ins_list.append(msg_ins)
                 if limit and len(message_ins_list) == limit:
@@ -284,7 +285,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
-
     # pylint: disable=R0911
     def store_message_res(self, message: Message) -> Optional[UUID]:
         """Store one Message."""
@@ -301,7 +301,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             msg_ins = self.message_ins_store.get(UUID(msg_ins_id))
             ins_metadata = msg_ins.metadata
 
-            # Ensure that dst_node_id of original Message matches the src_node_id of reply Message.
+            # Ensure that dst_node_id of original Message matches the src_node_id of
+            # reply Message.
             if (
                 msg_ins
                 and message
@@ -310,17 +311,21 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return None
 
             if msg_ins is None:
-                log(ERROR, "Message with `metadata.message_id` %s does not exist.", msg_ins_id)
+                log(
+                    ERROR,
+                    "Message with `metadata.message_id` %s does not exist.",
+                    msg_ins_id,
+                )
                 return None
 
             if ins_metadata.created_at + ins_metadata.ttl <= time.time():
                 log(
                     ERROR,
-                    "Failed to store Message: the message it is replying to (with id %s) has expired",
+                    "Failed to store Message: the message it is replying to "
+                    "(with id %s) has expired",
                     msg_ins_id,
                 )
                 return None
-
 
             # Fail if the Message TTL exceeds the
             # expiration time of the Message it replies to.
@@ -336,12 +341,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             ):
                 log(
                     WARNING,
-                    "Received Message with TTL %.2f exceeding the allowed maximum TTL %.2f.",
+                    "Received Message with TTL %.2f exceeding the allowed maximum "
+                    "TTL %.2f.",
                     res_metadata.ttl,
                     max_allowed_ttl,
                 )
-                return True
-
+                return None
 
         # Validate run_id
         if res_metadata.run_id not in self.run_ids:
@@ -359,7 +364,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Return the new message_id
         return message_id
-
 
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for the given TaskIns IDs."""
