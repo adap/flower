@@ -237,6 +237,14 @@ class StateTest(unittest.TestCase):
         # Assert
         assert num_task_ins == 0
 
+    def test_get_message_ins_empty(self) -> None:
+        """Validate that a new state has no input Messages."""
+        # Prepare
+        state = self.state_factory()
+
+        # Assert
+        assert state.num_message_ins() == 0
+
     def test_get_task_res_empty(self) -> None:
         """Validate that a new state has no TaskRes."""
         # Prepare
@@ -247,6 +255,14 @@ class StateTest(unittest.TestCase):
 
         # Assert
         assert num_tasks_res == 0
+
+    def test_get_message_res_empty(self) -> None:
+        """Validate that a new state has no reply Messages."""
+        # Prepare
+        state = self.state_factory()
+
+        # Assert
+        assert state.num_task_res() == 0
 
     def test_store_task_ins_one(self) -> None:
         """Test store_task_ins."""
@@ -438,6 +454,56 @@ class StateTest(unittest.TestCase):
 
         self.assertEqual(len(bad_result), 0)
         self.assertSetEqual(result, expected_task_ids)
+
+    def test_get_message_ids_from_run_id(self) -> None:
+        """Test get_message_ids_from_run_id."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id_0 = state.create_run(None, None, "8g13kl7", {}, ConfigsRecord())
+        # Insert Message with the same run_id
+        msg0 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id,
+                run_id=run_id_0,
+            )
+        )
+        msg1 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id,
+                run_id=run_id_0,
+            )
+        )
+        # Insert a Message with a different run_id
+        # then, ensure it does not appear in result
+        run_id_1 = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        msg2 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id,
+                run_id=run_id_1,
+            )
+        )
+
+        # Insert three TaskIns
+        msg_id_0 = state.store_message_ins(message=msg0)
+        msg_id_1 = state.store_message_ins(message=msg1)
+        msg_id_2 = state.store_message_ins(message=msg2)
+
+        assert msg_id_0
+        assert msg_id_1
+        assert msg_id_2
+
+        expected_message_ids = {msg_id_0, msg_id_1}
+
+        # Execute
+        result = state.get_message_ids_from_run_id(run_id_0)
+        bad_result = state.get_message_ids_from_run_id(15)
+
+        self.assertEqual(len(bad_result), 0)
+        self.assertSetEqual(result, expected_message_ids)
 
     # Init tests
     def test_init_state(self) -> None:

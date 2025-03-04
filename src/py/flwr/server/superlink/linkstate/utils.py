@@ -20,12 +20,21 @@ from os import urandom
 from typing import Optional, Union
 from uuid import UUID, uuid4
 
-from flwr.common import ConfigsRecord, Context, Message, Metadata, log, now, serde
+from flwr.common import (
+    ConfigsRecord,
+    Context,
+    Error,
+    Message,
+    Metadata,
+    log,
+    now,
+    serde,
+)
 from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
-from flwr.proto.error_pb2 import Error
+from flwr.proto import error_pb2
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
@@ -262,7 +271,7 @@ def create_taskres_for_unavailable_taskins(taskins_id: Union[str, UUID]) -> Task
             ttl=0,
             ancestry=[str(taskins_id)],
             task_type="",  # Unknown message type
-            error=Error(
+            error=error_pb2.Error(  # pylint: disable=E1101
                 code=ErrorCode.MESSAGE_UNAVAILABLE,
                 reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
             ),
@@ -301,7 +310,7 @@ def create_taskres_for_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
             ttl=ttl,
             ancestry=[ref_taskins.task_id],
             task_type=ref_taskins.task.task_type,
-            error=Error(
+            error=error_pb2.Error(  # pylint: disable=E1101
                 code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
                 reason=REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
             ),

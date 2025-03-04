@@ -910,6 +910,25 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return {UUID(row["task_id"]) for row in rows}
 
+    def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all input Message IDs for the given run_id."""
+        if self.conn is None:
+            raise AttributeError("LinkState not initialized")
+
+        query = """
+            SELECT message_id
+            FROM message_ins
+            WHERE run_id = :run_id;
+        """
+
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+        data = {"run_id": sint64_run_id}
+
+        with self.conn:
+            rows = self.conn.execute(query, data).fetchall()
+
+        return {UUID(row["message_id"]) for row in rows}
+
     def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
