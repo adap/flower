@@ -18,8 +18,6 @@ import datetime
 import os
 import sys
 
-from sphinx.application import ConfigError
-
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
