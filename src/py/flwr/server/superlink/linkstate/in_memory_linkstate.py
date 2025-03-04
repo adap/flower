@@ -217,6 +217,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             # If there are Messages associated to this node
             if all_message_ids:
                 # Take at most `limit` message ids
+                limit = limit or len(all_message_ids)
                 message_ids = all_message_ids[:limit] if limit else all_message_ids
 
                 # Extract from Message store
