@@ -16,7 +16,7 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Optional, Union
 
 import grpc
 
@@ -75,7 +75,7 @@ class EventLogWriterPlugin(ABC):
         context: grpc.ServicerContext,
         user_info: UserInfo,
         method_name: str,
-        response: EventLogResponse,
+        response: Optional[Union[EventLogResponse, Exception]],
     ) -> LogEntry:
         """Compose post-event log entry from the provided response and context."""
 
