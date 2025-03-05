@@ -327,3 +327,41 @@ class TestFleetSimulationEngineRayBackend(TestCase):
                 content.configs_records["getpropertiesres.properties"]["result"]
                 == expected_results[UUID(task_res.task.ancestry[0])]
             )
+
+    # pylint: disable=too-many-locals
+    def test_start_and_shutdown_with_message_in_state(self) -> None:
+        """Run Simulation Engine with some Message in State.
+
+        This test creates a few nodes and submits a few messages that need to be
+        executed by the Backend. In order for that to happen the asyncio
+        producer/consumer logic must function. This also severs to evaluate a valid
+        ClientApp.
+        """
+        num_messages = 229
+        num_nodes = 59
+
+        state_factory, nodes_mapping, expected_results = (
+            init_state_factory_nodes_mapping(
+                num_nodes=num_nodes, num_messages=num_messages
+            )
+        )
+
+        # Run
+        start_and_shutdown(
+            state_factory=state_factory, nodes_mapping=nodes_mapping, duration=10
+        )
+
+        # Get all Message replies
+        state = state_factory.state()
+        message_ids = set(expected_results.keys())
+        message_res_list = state.get_message_res(message_ids=message_ids)
+
+        # Check results by first converting to Message
+        for message_res in message_res_list:
+
+            # Verify message content is as expected
+            content = message_res.content
+            assert (
+                content.configs_records["getpropertiesres.properties"]["result"]
+                == expected_results[UUID(message_res.metadata.reply_to_message)]
+            )
