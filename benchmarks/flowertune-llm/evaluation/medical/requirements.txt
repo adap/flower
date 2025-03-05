@@ -1,0 +1,8 @@
+peft==0.14.0
+pandas==2.2.2
+scikit-learn==1.5.0
+datasets==2.20.0
+sentencepiece==0.2.0
+protobuf==5.27.1
+bitsandbytes==0.45.1
+hf_transfer==0.1.8

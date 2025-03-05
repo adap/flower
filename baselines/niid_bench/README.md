@@ -21,7 +21,7 @@ algorithms: [FedAvg, SCAFFOLD, FedProx, FedNova]
 
 **Datasets:** MNIST, CIFAR10, and Fashion-mnist from PyTorch's Torchvision
 
-**Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 250 GB Ram. There are 105 configurations to run per seed and at any time 7 configurations have been run parallely. The experiments required close to 12 hrs to finish for one seed. Nevertheless, to run a subset of configurations, such as only one FL protocol across all datasets and splits, a machine with 4-8 threads and 16 GB memory can run in reasonable time.
+**Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 250 GB Ram. There are 105 configurations to run per seed and at any time 7 configurations have been run parallelly. The experiments required close to 12 hrs to finish for one seed. Nevertheless, to run a subset of configurations, such as only one FL protocol across all datasets and splits, a machine with 4-8 threads and 16 GB memory can run in reasonable time.
 
 **Contributors:** Aashish Kolluri, PhD Candidate, National University of Singapore
 
@@ -59,7 +59,7 @@ For FedProx algorithm the proximal parameter is tuned from values {0.001, 0.01, 
 ## Environment Setup
 
 ```bash
-# Setup the base poetry enviroment from the niid_bench directory
+# Setup the base poetry environment from the niid_bench directory
 # Set python version
 pyenv local 3.10.6
 # Tell poetry to use python 3.10

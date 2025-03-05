@@ -1,0 +1,15 @@
+---
+
+num_clients: 50
+dirichlet_alpha: 0.1
+num_rounds: 1
+num_cpus: 1
+num_gpus: 1
+batch_size: 64
+device: cuda
+
+defaults:
+  - strategy: fedpft
+  - client: fedpft
+  - model: resnet50
+  - dataset: CIFAR100

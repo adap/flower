@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 
 import base64
-from typing import Tuple, cast
+from typing import cast
 
+from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives import hashes, hmac, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 
 def generate_key_pairs() -> (
-    Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
 ):
     """Generate private and public key pairs with Cryptography."""
     private_key = ec.generate_private_key(ec.SECP384R1())
@@ -98,3 +99,66 @@ def decrypt(key: bytes, ciphertext: bytes) -> bytes:
     # The input key must be url safe
     fernet = Fernet(key)
     return fernet.decrypt(ciphertext)
+
+
+def compute_hmac(key: bytes, message: bytes) -> bytes:
+    """Compute hmac of a message using key as hash."""
+    computed_hmac = hmac.HMAC(key, hashes.SHA256())
+    computed_hmac.update(message)
+    return computed_hmac.finalize()
+
+
+def verify_hmac(key: bytes, message: bytes, hmac_value: bytes) -> bool:
+    """Verify hmac of a message using key as hash."""
+    computed_hmac = hmac.HMAC(key, hashes.SHA256())
+    computed_hmac.update(message)
+    try:
+        computed_hmac.verify(hmac_value)
+        return True
+    except InvalidSignature:
+        return False
+
+
+def sign_message(private_key: ec.EllipticCurvePrivateKey, message: bytes) -> bytes:
+    """Sign a message using the provided EC private key.
+
+    Parameters
+    ----------
+    private_key : ec.EllipticCurvePrivateKey
+        The EC private key to sign the message with.
+    message : bytes
+        The message to be signed.
+
+    Returns
+    -------
+    bytes
+        The signature of the message.
+    """
+    signature = private_key.sign(message, ec.ECDSA(hashes.SHA256()))
+    return signature
+
+
+def verify_signature(
+    public_key: ec.EllipticCurvePublicKey, message: bytes, signature: bytes
+) -> bool:
+    """Verify a signature against a message using the provided EC public key.
+
+    Parameters
+    ----------
+    public_key : ec.EllipticCurvePublicKey
+        The EC public key to verify the signature.
+    message : bytes
+        The original message.
+    signature : bytes
+        The signature to verify.
+
+    Returns
+    -------
+    bool
+        True if the signature is valid, False otherwise.
+    """
+    try:
+        public_key.verify(signature, message, ec.ECDSA(hashes.SHA256()))
+        return True
+    except InvalidSignature:
+        return False

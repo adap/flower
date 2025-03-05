@@ -1,0 +1,12 @@
+---
+_target_: fedpft.strategy.FedAvg
+fraction_fit: 1
+fraction_evaluate: 1
+accept_failures: False
+on_fit_config_fn:
+  _target_: fedpft.server.fedavg_get_on_fit_config_fn
+  learning_rate: 0.01
+  num_epochs: 10
+evaluate_metrics_aggregation_fn:
+  _target_: fedpft.server.weighted_average
+  _partial_: true 

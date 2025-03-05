@@ -4,7 +4,6 @@ It includes processioning the dataset, instantiate strategy, specify how the glo
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
-
 import flwr as fl
 import hydra
 from hydra.core.hydra_config import HydraConfig

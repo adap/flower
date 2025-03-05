@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ Paper: arxiv.org/abs/1802.07927
 
 
 from logging import WARNING
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Optional, Union
 
 from flwr.common import (
     FitRes,
@@ -38,10 +38,43 @@ from .fedavg import FedAvg
 
 
 # flake8: noqa: E501
+# pylint: disable=line-too-long
 class Bulyan(FedAvg):
-    """Bulyan strategy implementation."""
+    """Bulyan strategy.
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long, too-many-locals
+    Implementation based on https://arxiv.org/abs/1802.07927.
+
+    Parameters
+    ----------
+    fraction_fit : float, optional
+        Fraction of clients used during training. Defaults to 1.0.
+    fraction_evaluate : float, optional
+        Fraction of clients used during validation. Defaults to 1.0.
+    min_fit_clients : int, optional
+        Minimum number of clients used during training. Defaults to 2.
+    min_evaluate_clients : int, optional
+        Minimum number of clients used during validation. Defaults to 2.
+    min_available_clients : int, optional
+        Minimum number of total clients in the system. Defaults to 2.
+    num_malicious_clients : int, optional
+        Number of malicious clients in the system. Defaults to 0.
+    evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
+        Optional function used for validation. Defaults to None.
+    on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure training. Defaults to None.
+    on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure validation. Defaults to None.
+    accept_failures : bool, optional
+        Whether or not accept rounds containing failures. Defaults to True.
+    initial_parameters : Parameters, optional
+        Initial global model parameters.
+    first_aggregation_rule: Callable
+        Byzantine resilient aggregation rule that is used as the first step of the Bulyan (e.g., Krum)
+    **aggregation_rule_kwargs: Any
+        arguments to the first_aggregation rule
+    """
+
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         *,
@@ -53,12 +86,12 @@ class Bulyan(FedAvg):
         num_malicious_clients: int = 0,
         evaluate_fn: Optional[
             Callable[
-                [int, NDArrays, Dict[str, Scalar]],
-                Optional[Tuple[float, Dict[str, Scalar]]],
+                [int, NDArrays, dict[str, Scalar]],
+                Optional[tuple[float, dict[str, Scalar]]],
             ]
         ] = None,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        on_fit_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
+        on_evaluate_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
@@ -66,39 +99,6 @@ class Bulyan(FedAvg):
         first_aggregation_rule: Callable = aggregate_krum,  # type: ignore
         **aggregation_rule_kwargs: Any,
     ) -> None:
-        """Bulyan strategy.
-
-        Implementation based on https://arxiv.org/abs/1802.07927.
-
-        Parameters
-        ----------
-        fraction_fit : float, optional
-            Fraction of clients used during training. Defaults to 1.0.
-        fraction_evaluate : float, optional
-            Fraction of clients used during validation. Defaults to 1.0.
-        min_fit_clients : int, optional
-            Minimum number of clients used during training. Defaults to 2.
-        min_evaluate_clients : int, optional
-            Minimum number of clients used during validation. Defaults to 2.
-        min_available_clients : int, optional
-            Minimum number of total clients in the system. Defaults to 2.
-        num_malicious_clients : int, optional
-            Number of malicious clients in the system. Defaults to 0.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
-            Optional function used for validation. Defaults to None.
-        on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure training. Defaults to None.
-        on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure validation. Defaults to None.
-        accept_failures : bool, optional
-            Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters, optional
-            Initial global model parameters.
-        first_aggregation_rule: Callable
-            Byzantine resilient aggregation rule that is used as the first step of the Bulyan (e.g., Krum)
-        **aggregation_rule_kwargs: Any
-            arguments to the first_aggregation rule
-        """
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -125,9 +125,9 @@ class Bulyan(FedAvg):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
         """Aggregate fit results using Bulyan."""
         if not results:
             return None, {}

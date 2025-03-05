@@ -1,4 +1,5 @@
 """Utility functions for FedPer."""
+
 import os
 import pickle
 import time
@@ -8,10 +9,11 @@ from typing import Callable, Optional, Type, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+from flwr.client import Client
 from flwr.server.history import History
 from omegaconf import DictConfig
 
-from fedper.client import BaseClient, FedPerClient, get_client_fn_simulation
+from fedper.client import get_client_fn_simulation
 from fedper.implemented_models.mobile_model import MobileNet, MobileNetModelSplit
 from fedper.implemented_models.resnet_model import ResNet, ResNetModelSplit
 
@@ -70,7 +72,7 @@ def set_client_state_save_path() -> str:
 
 def get_client_fn(
     config: DictConfig, client_state_save_path: str = ""
-) -> Callable[[str], Union[FedPerClient, BaseClient]]:
+) -> Callable[[str], Client]:
     """Get client function."""
     # Get algorithm
     algorithm = config.algorithm.lower()
@@ -97,9 +99,9 @@ def get_create_model_fn(
 ]:
     """Get create model function."""
     device = config.server_device
-    split: Union[
-        Type[MobileNetModelSplit], Type[ResNetModelSplit]
-    ] = MobileNetModelSplit
+    split: Union[Type[MobileNetModelSplit], Type[ResNetModelSplit]] = (
+        MobileNetModelSplit
+    )
     if config.model_name.lower() == "mobile":
 
         def create_model() -> Union[Type[MobileNet], Type[ResNet]]:

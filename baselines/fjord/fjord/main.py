@@ -1,4 +1,5 @@
 """Main script for FjORD."""
+
 import math
 import os
 import random

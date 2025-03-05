@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,23 +16,29 @@
 
 
 import copy
-from typing import Dict, Tuple
 
 import numpy as np
 
 from flwr.client.numpy_client import NumPyClient
 from flwr.common.dp import add_gaussian_noise, clip_by_l2
+from flwr.common.logger import warn_deprecated_feature
 from flwr.common.typing import Config, NDArrays, Scalar
 
 
 class DPFedAvgNumPyClient(NumPyClient):
-    """Wrapper for configuring a Flower client for DP."""
+    """Wrapper for configuring a Flower client for DP.
+
+    Warning
+    -------
+    This class is deprecated and will be removed in a future release.
+    """
 
     def __init__(self, client: NumPyClient) -> None:
+        warn_deprecated_feature("`DPFedAvgNumPyClient` wrapper")
         super().__init__()
         self.client = client
 
-    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+    def get_properties(self, config: Config) -> dict[str, Scalar]:
         """Get client properties using the given Numpy client.
 
         Parameters
@@ -51,7 +57,7 @@ class DPFedAvgNumPyClient(NumPyClient):
         """
         return self.client.get_properties(config)
 
-    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
+    def get_parameters(self, config: dict[str, Scalar]) -> NDArrays:
         """Return the current local model parameters.
 
         Parameters
@@ -69,8 +75,8 @@ class DPFedAvgNumPyClient(NumPyClient):
         return self.client.get_parameters(config)
 
     def fit(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[NDArrays, int, dict[str, Scalar]]:
         """Train the provided parameters using the locally held dataset.
 
         This method first updates the local model using the original parameters
@@ -117,16 +123,16 @@ class DPFedAvgNumPyClient(NumPyClient):
         update = [np.subtract(x, y) for (x, y) in zip(updated_params, original_params)]
 
         if "dpfedavg_clip_norm" not in config:
-            raise Exception("Clipping threshold not supplied by the server.")
+            raise KeyError("Clipping threshold not supplied by the server.")
         if not isinstance(config["dpfedavg_clip_norm"], float):
-            raise Exception("Clipping threshold should be a floating point value.")
+            raise TypeError("Clipping threshold should be a floating point value.")
 
         # Clipping
         update, clipped = clip_by_l2(update, config["dpfedavg_clip_norm"])
 
         if "dpfedavg_noise_stddev" in config:
             if not isinstance(config["dpfedavg_noise_stddev"], float):
-                raise Exception(
+                raise TypeError(
                     "Scale of noise to be added should be a floating point value."
                 )
             # Noising
@@ -138,7 +144,7 @@ class DPFedAvgNumPyClient(NumPyClient):
         # Calculating value of norm indicator bit, required for adaptive clipping
         if "dpfedavg_adaptive_clip_enabled" in config:
             if not isinstance(config["dpfedavg_adaptive_clip_enabled"], bool):
-                raise Exception(
+                raise TypeError(
                     "dpfedavg_adaptive_clip_enabled should be a boolean-valued flag."
                 )
             metrics["dpfedavg_norm_bit"] = not clipped
@@ -146,8 +152,8 @@ class DPFedAvgNumPyClient(NumPyClient):
         return updated_params, num_examples, metrics
 
     def evaluate(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[float, int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[float, int, dict[str, Scalar]]:
         """Evaluate the provided parameters using the locally held dataset.
 
         Parameters

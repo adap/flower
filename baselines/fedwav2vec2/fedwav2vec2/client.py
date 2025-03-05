@@ -4,7 +4,6 @@ Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a 
 to instantiate your client.
 """
 
-
 import gc
 import logging
 from math import exp

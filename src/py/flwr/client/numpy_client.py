@@ -16,7 +16,7 @@
 
 
 from abc import ABC
-from typing import Callable, Dict, Tuple
+from typing import Callable
 
 from flwr.client.client import Client
 from flwr.common import (
@@ -69,7 +69,7 @@ Example
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+    def get_properties(self, config: Config) -> dict[str, Scalar]:
         """Return a client's set of properties.
 
         Parameters
@@ -89,7 +89,7 @@ class NumPyClient(ABC):
         _ = (self, config)
         return {}
 
-    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
+    def get_parameters(self, config: dict[str, Scalar]) -> NDArrays:
         """Return the current local model parameters.
 
         Parameters
@@ -108,8 +108,8 @@ class NumPyClient(ABC):
         return []
 
     def fit(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[NDArrays, int, dict[str, Scalar]]:
         """Train the provided parameters using the locally held dataset.
 
         Parameters
@@ -137,8 +137,8 @@ class NumPyClient(ABC):
         return [], 0, {}
 
     def evaluate(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[float, int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[float, int, dict[str, Scalar]]:
         """Evaluate the provided parameters using the locally held dataset.
 
         Parameters
@@ -231,7 +231,7 @@ def _fit(self: Client, ins: FitIns) -> FitRes:
         and isinstance(results[1], int)
         and isinstance(results[2], dict)
     ):
-        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
+        raise TypeError(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
 
     # Return FitRes
     parameters_prime, num_examples, metrics = results
@@ -255,7 +255,7 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
         and isinstance(results[1], int)
         and isinstance(results[2], dict)
     ):
-        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
+        raise TypeError(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
 
     # Return EvaluateRes
     loss, num_examples, metrics = results
@@ -268,7 +268,7 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
 
 
 def _wrap_numpy_client(client: NumPyClient) -> Client:
-    member_dict: Dict[str, Callable] = {  # type: ignore
+    member_dict: dict[str, Callable] = {  # type: ignore
         "__init__": _constructor,
     }
 

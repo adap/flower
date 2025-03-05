@@ -1,4 +1,5 @@
 """Utility functions for fjord."""
+
 import os
 from typing import List, Optional, OrderedDict
 

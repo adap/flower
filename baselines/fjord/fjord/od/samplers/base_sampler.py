@@ -1,4 +1,5 @@
 """Base sampler class."""
+
 from collections.abc import Generator
 
 from torch.nn import Module

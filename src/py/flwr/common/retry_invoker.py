@@ -18,20 +18,19 @@
 import itertools
 import random
 import time
+from collections.abc import Generator, Iterable
 from dataclasses import dataclass
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from logging import INFO, WARN
+from typing import Any, Callable, Optional, Union, cast
+
+import grpc
+
+from flwr.common.constant import MAX_RETRY_DELAY
+from flwr.common.logger import log
+from flwr.common.typing import RunNotRunningException
+from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 
 
 def exponential(
@@ -49,6 +48,11 @@ def exponential(
         Factor by which the delay is multiplied after each retry.
     max_delay: Optional[float] (default: None)
         The maximum delay duration between two consecutive retries.
+
+    Returns
+    -------
+    Generator[float, None, None]
+        A generator for the delay between 2 retries.
     """
     delay = base_delay if max_delay is None else min(base_delay, max_delay)
     while True:
@@ -67,6 +71,11 @@ def constant(
     ----------
     interval: Union[float, Iterable[float]] (default: 1)
         A constant value to yield or an iterable of such values.
+
+    Returns
+    -------
+    Generator[float, None, None]
+        A generator for the delay between 2 retries.
     """
     if not isinstance(interval, Iterable):
         interval = itertools.repeat(interval)
@@ -84,6 +93,11 @@ def full_jitter(max_value: float) -> float:
     ----------
     max_value : float
         The upper limit for the randomized value.
+
+    Returns
+    -------
+    float
+        A random float that is less than max_value.
     """
     return random.uniform(0, max_value)
 
@@ -93,8 +107,8 @@ class RetryState:
     """State for callbacks in RetryInvoker."""
 
     target: Callable[..., Any]
-    args: Tuple[Any, ...]
-    kwargs: Dict[str, Any]
+    args: tuple[Any, ...]
+    kwargs: dict[str, Any]
     tries: int
     elapsed_time: float
     exception: Optional[Exception] = None
@@ -107,7 +121,7 @@ class RetryInvoker:
 
     Parameters
     ----------
-    wait_factory: Callable[[], Generator[float, None, None]]
+    wait_gen_factory: Callable[[], Generator[float, None, None]]
         A generator yielding successive wait times in seconds. If the generator
         is finite, the giveup event will be triggered when the generator raises
         `StopIteration`.
@@ -129,12 +143,12 @@ class RetryInvoker:
         data class object detailing the invocation.
     on_giveup: Optional[Callable[[RetryState], None]] (default: None)
         A callable to be executed in the event that `max_tries` or `max_time` is
-        exceeded, `should_giveup` returns True, or `wait_factory()` generator raises
+        exceeded, `should_giveup` returns True, or `wait_gen_factory()` generator raises
         `StopInteration`. The parameter is a data class object detailing the
         invocation.
     jitter: Optional[Callable[[float], float]] (default: full_jitter)
-        A function of the value yielded by `wait_factory()` returning the actual time
-        to wait. This function helps distribute wait times stochastically to avoid
+        A function of the value yielded by `wait_gen_factory()` returning the actual
+        time to wait. This function helps distribute wait times stochastically to avoid
         timing collisions across concurrent clients. Wait times are jittered by
         default using the `full_jitter` function. To disable jittering, pass
         `jitter=None`.
@@ -142,6 +156,13 @@ class RetryInvoker:
         A function accepting an exception instance, returning whether or not
         to give up prematurely before other give-up conditions are evaluated.
         If set to None, the strategy is to never give up prematurely.
+    wait_function: Optional[Callable[[float], None]] (default: None)
+        A function that defines how to wait between retry attempts. It accepts
+        one argument, the wait time in seconds, allowing the use of various waiting
+        mechanisms (e.g., asynchronous waits or event-based synchronization) suitable
+        for different execution environments. If set to `None`, the `wait_function`
+        defaults to `time.sleep`, which is ideal for synchronous operations. Custom
+        functions should manage execution flow to prevent blocking or interference.
 
     Examples
     --------
@@ -156,10 +177,11 @@ class RetryInvoker:
     >>> invoker.invoke(my_func, arg1, arg2, kw1=kwarg1)
     """
 
+    # pylint: disable-next=too-many-arguments
     def __init__(
         self,
-        wait_factory: Callable[[], Generator[float, None, None]],
-        recoverable_exceptions: Union[Type[Exception], Tuple[Type[Exception], ...]],
+        wait_gen_factory: Callable[[], Generator[float, None, None]],
+        recoverable_exceptions: Union[type[Exception], tuple[type[Exception], ...]],
         max_tries: Optional[int],
         max_time: Optional[float],
         *,
@@ -168,8 +190,9 @@ class RetryInvoker:
         on_giveup: Optional[Callable[[RetryState], None]] = None,
         jitter: Optional[Callable[[float], float]] = full_jitter,
         should_giveup: Optional[Callable[[Exception], bool]] = None,
+        wait_function: Optional[Callable[[float], None]] = None,
     ) -> None:
-        self.wait_factory = wait_factory
+        self.wait_gen_factory = wait_gen_factory
         self.recoverable_exceptions = recoverable_exceptions
         self.max_tries = max_tries
         self.max_time = max_time
@@ -178,6 +201,9 @@ class RetryInvoker:
         self.on_giveup = on_giveup
         self.jitter = jitter
         self.should_giveup = should_giveup
+        if wait_function is None:
+            wait_function = time.sleep
+        self.wait_function = wait_function
 
     # pylint: disable-next=too-many-locals
     def invoke(
@@ -211,13 +237,13 @@ class RetryInvoker:
         Raises
         ------
         Exception
-            If the number of tries exceeds `max_tries`, if the total time
-            exceeds `max_time`, if `wait_factory()` generator raises `StopInteration`,
+            If the number of tries exceeds `max_tries`, if the total time exceeds
+            `max_time`, if `wait_gen_factory()` generator raises `StopInteration`,
             or if the `should_giveup` returns True for a raised exception.
 
         Notes
         -----
-        The time between retries is determined by the provided `wait_factory()`
+        The time between retries is determined by the provided `wait_gen_factory()`
         generator and can optionally be jittered using the `jitter` function.
         The recoverable exceptions that trigger a retry, as well as conditions to
         stop retries, are also determined by the class's initialization parameters.
@@ -230,13 +256,13 @@ class RetryInvoker:
                 handler(cast(RetryState, ref_state[0]))
 
         try_cnt = 0
-        wait_generator = self.wait_factory()
-        start = time.time()
-        ref_state: List[Optional[RetryState]] = [None]
+        wait_generator = self.wait_gen_factory()
+        start = time.monotonic()
+        ref_state: list[Optional[RetryState]] = [None]
 
         while True:
             try_cnt += 1
-            elapsed_time = time.time() - start
+            elapsed_time = time.monotonic() - start
             state = RetryState(
                 target=target,
                 args=args,
@@ -249,6 +275,7 @@ class RetryInvoker:
             try:
                 ret = target(*args, **kwargs)
             except self.recoverable_exceptions as err:
+                state.exception = err
                 # Check if giveup event should be triggered
                 max_tries_exceeded = try_cnt == self.max_tries
                 max_time_exceeded = (
@@ -281,8 +308,75 @@ class RetryInvoker:
                 try_call_event_handler(self.on_backoff)
 
                 # Sleep
-                time.sleep(wait_time)
+                self.wait_function(state.actual_wait)
             else:
                 # Trigger success event
                 try_call_event_handler(self.on_success)
                 return ret
+
+
+def _make_simple_grpc_retry_invoker() -> RetryInvoker:
+    """Create a simple gRPC retry invoker."""
+
+    def _on_sucess(retry_state: RetryState) -> None:
+        if retry_state.tries > 1:
+            log(
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+
+    def _on_backoff(retry_state: RetryState) -> None:
+        if retry_state.tries == 1:
+            log(WARN, "Connection attempt failed, retrying...")
+        else:
+            log(
+                WARN,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
+
+    def _on_giveup(retry_state: RetryState) -> None:
+        if retry_state.tries > 1:
+            log(
+                WARN,
+                "Giving up reconnection after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+
+    def _should_giveup_fn(e: Exception) -> bool:
+        if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
+            raise RunNotRunningException
+        if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
+            return False
+        return True
+
+    return RetryInvoker(
+        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
+        recoverable_exceptions=grpc.RpcError,
+        max_tries=None,
+        max_time=None,
+        on_success=_on_sucess,
+        on_backoff=_on_backoff,
+        on_giveup=_on_giveup,
+        should_giveup=_should_giveup_fn,
+    )
+
+
+def _wrap_stub(
+    stub: Union[ServerAppIoStub, ClientAppIoStub, SimulationIoStub],
+    retry_invoker: RetryInvoker,
+) -> None:
+    """Wrap a gRPC stub with a retry invoker."""
+
+    def make_lambda(original_method: Any) -> Any:
+        return lambda *args, **kwargs: retry_invoker.invoke(
+            original_method, *args, **kwargs
+        )
+
+    for method_name in vars(stub):
+        method = getattr(stub, method_name)
+        if callable(method):
+            setattr(stub, method_name, make_lambda(method))

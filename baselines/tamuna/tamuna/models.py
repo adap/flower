@@ -1,4 +1,5 @@
 """CNN model architecture, training, and testing functions for MNIST."""
+
 # pylint: disable=too-many-arguments
 
 import copy

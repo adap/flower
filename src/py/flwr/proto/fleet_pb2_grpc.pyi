@@ -3,7 +3,9 @@
 isort:skip_file
 """
 import abc
+import flwr.proto.fab_pb2
 import flwr.proto.fleet_pb2
+import flwr.proto.run_pb2
 import grpc
 
 class FleetStub:
@@ -16,21 +18,34 @@ class FleetStub:
         flwr.proto.fleet_pb2.DeleteNodeRequest,
         flwr.proto.fleet_pb2.DeleteNodeResponse]
 
-    PullTaskIns: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fleet_pb2.PullTaskInsRequest,
-        flwr.proto.fleet_pb2.PullTaskInsResponse]
-    """Retrieve one or more tasks, if possible
+    Ping: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.PingRequest,
+        flwr.proto.fleet_pb2.PingResponse]
 
-    HTTP API path: /api/v1/fleet/pull-task-ins
+    PullMessages: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.PullMessagesRequest,
+        flwr.proto.fleet_pb2.PullMessagesResponse]
+    """Retrieve one or more messages, if possible
+
+    HTTP API path: /api/v1/fleet/pull-messages
     """
 
-    PushTaskRes: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fleet_pb2.PushTaskResRequest,
-        flwr.proto.fleet_pb2.PushTaskResResponse]
-    """Complete one or more tasks, if possible
+    PushMessages: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.PushMessagesRequest,
+        flwr.proto.fleet_pb2.PushMessagesResponse]
+    """Complete one or more messages, if possible
 
-    HTTP API path: /api/v1/fleet/push-task-res
+    HTTP API path: /api/v1/fleet/push-messages
     """
+
+    GetRun: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunRequest,
+        flwr.proto.run_pb2.GetRunResponse]
+
+    GetFab: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fab_pb2.GetFabRequest,
+        flwr.proto.fab_pb2.GetFabResponse]
+    """Get FAB"""
 
 
 class FleetServicer(metaclass=abc.ABCMeta):
@@ -47,25 +62,45 @@ class FleetServicer(metaclass=abc.ABCMeta):
     ) -> flwr.proto.fleet_pb2.DeleteNodeResponse: ...
 
     @abc.abstractmethod
-    def PullTaskIns(self,
-        request: flwr.proto.fleet_pb2.PullTaskInsRequest,
+    def Ping(self,
+        request: flwr.proto.fleet_pb2.PingRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.fleet_pb2.PullTaskInsResponse:
-        """Retrieve one or more tasks, if possible
+    ) -> flwr.proto.fleet_pb2.PingResponse: ...
 
-        HTTP API path: /api/v1/fleet/pull-task-ins
+    @abc.abstractmethod
+    def PullMessages(self,
+        request: flwr.proto.fleet_pb2.PullMessagesRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.PullMessagesResponse:
+        """Retrieve one or more messages, if possible
+
+        HTTP API path: /api/v1/fleet/pull-messages
         """
         pass
 
     @abc.abstractmethod
-    def PushTaskRes(self,
-        request: flwr.proto.fleet_pb2.PushTaskResRequest,
+    def PushMessages(self,
+        request: flwr.proto.fleet_pb2.PushMessagesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.fleet_pb2.PushTaskResResponse:
-        """Complete one or more tasks, if possible
+    ) -> flwr.proto.fleet_pb2.PushMessagesResponse:
+        """Complete one or more messages, if possible
 
-        HTTP API path: /api/v1/fleet/push-task-res
+        HTTP API path: /api/v1/fleet/push-messages
         """
+        pass
+
+    @abc.abstractmethod
+    def GetRun(self,
+        request: flwr.proto.run_pb2.GetRunRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetRunResponse: ...
+
+    @abc.abstractmethod
+    def GetFab(self,
+        request: flwr.proto.fab_pb2.GetFabRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fab_pb2.GetFabResponse:
+        """Get FAB"""
         pass
 
 

@@ -1,73 +1,79 @@
-# Flower Example using PyTorch
+---
+tags: [quickstart, vision, fds]
+dataset: [CIFAR-10]
+framework: [torch, torchvision]
+---
 
-This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
-Running this example in itself is quite easy.
+# Federated Learning with PyTorch and Flower (Quickstart Example)
 
-## Project Setup
+This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the CIFAR-10 dataset.
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+## Set up the project
 
-```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-pytorch . && rm -rf flower && cd quickstart-pytorch
-```
+### Clone the project
 
-This will create a new directory called `quickstart-pytorch` containing the following files:
-
-```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- README.md
-```
-
-### Installing Dependencies
-
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
+Start by cloning the example project:
 
 ```shell
-poetry install
-poetry shell
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+        && mv _tmp/examples/quickstart-pytorch . \
+        && rm -rf _tmp \
+        && cd quickstart-pytorch
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+This will create a new directory called `quickstart-pytorch` with the following structure:
 
 ```shell
-poetry run python3 -c "import flwr"
+quickstart-pytorch
+├── pytorchexample
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-If you don't see any errors you're good to go!
+### Install dependencies and project
 
-#### pip
+Install the dependencies defined in `pyproject.toml` as well as the `pytorchexample` package.
 
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
+```bash
+pip install -e .
 ```
 
-## Run Federated Learning with PyTorch and Flower
+## Run the project
 
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
-```shell
-python3 server.py
+### Run with the Simulation Engine
+
+> \[!TIP\]
+> This example might run faster when the `ClientApp`s have access to a GPU. If your system has one, you can make use of it by configuring the `backend.client-resources` component in `pyproject.toml`. If you want to try running the example with GPU right away, use the `local-simulation-gpu` federation as shown below. Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more.
+
+```bash
+# Run with the default federation (CPU only)
+flwr run .
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
-Start client 1 in the first terminal:
-
-```shell
-python3 client.py
+```bash
+flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
 ```
 
-Start client 2 in the second terminal:
+Run the project in the `local-simulation-gpu` federation that gives CPU and GPU resources to each `ClientApp`. By default, at most 5x`ClientApp` will run in parallel in the available GPU. You can tweak the degree of parallelism by adjusting the settings of this federation in the `pyproject.toml`.
 
-```shell
-python3 client.py
+```bash
+# Run with the `local-simulation-gpu` federation
+flwr run . local-simulation-gpu
 ```
 
-You will see that PyTorch is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) for a detailed explanation.
+> \[!TIP\]
+> For a more detailed walk-through check our [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html)
+
+### Run with the Deployment Engine
+
+Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
+
+If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.

@@ -1,4 +1,5 @@
 """MobileNet-v1 model, model manager and model split."""
+
 from typing import Dict, List, Optional, Tuple, Union
 
 import torch

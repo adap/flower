@@ -1,14 +1,14 @@
 blank_issues_enabled: false
 contact_links:
   - name: Slack Channel
-    url: https://flower.dev/join-slack
+    url: https://flower.ai/join-slack
     about: Connect with other Flower users and contributors and discuss with them or ask them questions.
   - name: Discussion
     url: https://github.com/adap/flower/discussions
-    about: Ask about new features or general questions. Please use the discussion area in most of the cases instead of the issues. 
+    about: Ask about new features or general questions. Please use the discussion area in most of the cases instead of the issues.
   - name: Flower Issues
     url: https://github.com/adap/flower/issues
     about: Contribute new features/enhancements, report bugs, or improve the documentation.
   - name: Flower Mail
-    url: https://flower.dev/
-    about: If your project needs professional support please contact the Flower team (hello@flower.dev).
+    url: https://flower.ai/
+    about: If your project needs professional support please contact the Flower team (hello@flower.ai).

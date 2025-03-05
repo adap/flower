@@ -1,0 +1,5 @@
+flwr==1.8.0
+tensorflow==2.13.1
+numpy==1.24.3
+prometheus_client == 0.19.0
+flwr_datasets[vision] == 0.0.2

@@ -1,4 +1,5 @@
 """ResNet model for Fjord."""
+
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
 

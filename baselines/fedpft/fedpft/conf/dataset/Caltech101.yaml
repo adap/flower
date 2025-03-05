@@ -1,0 +1,10 @@
+---
+_target_: fedpft.dataset.Dataset
+name: caltech101
+dataset: clip-benchmark/wds_vtab-caltech101
+num_classes: 102
+image_column_name: webp
+partition_by: cls
+num_clients: ${num_clients}
+dirichlet_alpha: ${dirichlet_alpha}
+batch_size: ${batch_size}

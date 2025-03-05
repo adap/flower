@@ -1,0 +1,18 @@
+services:
+  superlink:
+    command:
+      - --insecure
+      - --isolation
+      - process
+      - --database=state/state.db
+    # To toggle TLS encryption and persisting state for the SuperLink, comment the key `command`
+    # above and uncomment the lines below:
+    # command:
+    # - --isolation
+    # - process
+    # - --ssl-ca-certfile=certificates/ca.crt
+    # - --ssl-certfile=certificates/server.pem
+    # - --ssl-keyfile=certificates/server.key
+    # - --database=state/state.db
+    volumes:
+      - ./state/:/app/state/:rw

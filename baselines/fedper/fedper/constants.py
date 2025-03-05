@@ -1,4 +1,5 @@
 """Constants used in machine learning pipeline."""
+
 from enum import Enum
 
 

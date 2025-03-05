@@ -1,0 +1,39 @@
+---
+# this is the config that will be loaded as default by main.py
+# Please follow the provided structure (this will ensuring all baseline follow
+# a similar configuration structure and hence be easy to customise)
+
+dataset_name: ambient_context # or speech_commands
+num_clients: 10
+
+server:
+  server_address: "localhost:8080"
+  rounds: 100
+  num_clients: ${num_clients}
+  fraction_fit: 0.8
+  gpu_memory: 2048
+  eval_step: 1
+  train_epochs: 1
+  batch_size: 64
+  dataset_name: ${dataset_name}
+  seed: 2021
+  verbose: 1
+
+client:
+  server_address: "localhost:8080"
+  num_clients: ${num_clients}
+  gpu_memory: 1024
+  dataset_name: ${dataset_name}
+  seed: 2021
+  batch_size: 64
+  learning_rate: 0.001
+  l_per: 1.00
+  u_per: 0.00
+  fedstar: false
+  class_distribute: false
+  verbose: 0
+
+hydra:
+  sweep:
+    dir: multirun
+    subdir: Table3/${dataset_name}/N_${num_clients}/${now:%Y-%m-%d}/${now:%H-%M-%S}

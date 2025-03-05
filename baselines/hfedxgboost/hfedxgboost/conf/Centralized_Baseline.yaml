@@ -1,0 +1,22 @@
+centralized: True
+defaults: 
+  - dataset: abalone
+  - xgboost_params_centralized: abalone_xgboost_centralized
+
+n_estimators_client: ${xgboost_params_centralized.n_estimators}
+task_type: ${dataset.task.task_type}
+
+XGBoost:
+  _target_:  ${dataset.task.xgb._target_}
+  objective: ${dataset.task.xgb.objective}
+  learning_rate: ${xgboost_params_centralized.learning_rate}
+  max_depth: ${xgboost_params_centralized.max_depth}
+  n_estimators: ${xgboost_params_centralized.n_estimators}
+  subsample: ${xgboost_params_centralized.subsample}
+  colsample_bylevel: ${xgboost_params_centralized.colsample_bylevel}
+  colsample_bynode: ${xgboost_params_centralized.colsample_bynode}
+  colsample_bytree: ${xgboost_params_centralized.colsample_bytree}
+  alpha: ${xgboost_params_centralized.alpha}
+  gamma: ${xgboost_params_centralized.gamma}
+  num_parallel_tree: ${xgboost_params_centralized.num_parallel_tree}
+  min_child_weight: ${xgboost_params_centralized.min_child_weight}
