@@ -1382,7 +1382,7 @@ class StateTest(unittest.TestCase):
             assert res_msg2_pulled.error.code == ErrorCode.MESSAGE_UNAVAILABLE
 
     def test_get_message_res_reply_not_ready(self) -> None:
-        """Test get_message_res to return error since reply Message isn't present."""
+        """Test get_message_res to return nothing since reply Message isn't present."""
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
