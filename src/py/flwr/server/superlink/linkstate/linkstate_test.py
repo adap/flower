@@ -300,6 +300,7 @@ class StateTest(unittest.TestCase):
         """Test store_message_ins."""
         # Prepare
         state = self.state_factory()
+        dt = datetime.now(tz=timezone.utc)
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         msg = message_from_proto(
