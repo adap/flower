@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""SQLite based implemenation of the link state."""
+"""SQLite based implementation of the link state."""
 
 
 # pylint: disable=too-many-lines
