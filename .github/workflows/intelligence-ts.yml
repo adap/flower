@@ -126,12 +126,10 @@ jobs:
         run: |
           # Extract the hostname from FI_DEV_REMOTE_URL (removes protocol and any trailing path)
           HOST=$(echo $FI_DEV_REMOTE_URL | sed -E 's|https?://([^/:]+).*|\1|')
-          echo "Using host: $HOST"
 
           # Resolve the IP address of the extracted hostname.
           # 'getent hosts' is available on Ubuntu and returns the IP in the first column.
           IP=$(getent hosts $HOST | awk '{ print $1 }')
-          echo "Resolved IP: $IP"
 
           # Append a new hosts entry mapping api.flower.ai to the resolved IP.
           echo "$IP api.flower.ai" | sudo tee -a /etc/hosts
