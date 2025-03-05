@@ -37,6 +37,7 @@ from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
+from flwr.common.args_utils import SortingHelpFormatter
 from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
@@ -706,8 +707,10 @@ def _run_fleet_api_rest(
 
 def _parse_args_run_superlink() -> argparse.ArgumentParser:
     """Parse command line arguments for both ServerAppIo API and Fleet API."""
+
     parser = argparse.ArgumentParser(
         description="Start a Flower SuperLink",
+        formatter_class=SortingHelpFormatter,
     )
 
     _add_args_common(parser=parser)
