@@ -172,7 +172,7 @@ Below are a few more examples to illustrate different ways to interact with the 
             .. code-block:: ts
 
                 // Initialize history with a system message.
-                let history: Message[] = [
+                const history: Message[] = [
                   { role: "system", content: "You are a friendly assistant that loves using emojis." }
                 ];
 
@@ -202,7 +202,7 @@ Below are a few more examples to illustrate different ways to interact with the 
             .. code-block:: js
 
                 // Initialize history with a system message.
-                let history = [
+                const history = [
                   { role: "system", content: "You are a friendly assistant that loves using emojis." }
                 ];
 
