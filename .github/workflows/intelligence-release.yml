@@ -1,8 +1,9 @@
 name: Publish `@flwr/flwr` release on NPM
 
 on:
-  release:
-    types: [released]
+  push:
+    tags:
+      - "intelligence/v*.*.*"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
@@ -10,7 +11,7 @@ concurrency:
 
 jobs:
   publish:
-    if: ${{ github.repository == 'adap/flower' && startsWith(github.event.release.tag_name, 'intelligence/') }}
+    if: ${{ github.repository == 'adap/flower' }}
     name: Publish release
     runs-on: ubuntu-latest
     steps:

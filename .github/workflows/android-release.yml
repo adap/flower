@@ -15,7 +15,7 @@ jobs:
         run:
             working-directory: src/kotlin
     name: Release build and publish
-    if: ${{ github.repository == 'adap/flower' && !startsWith(github.event.release.tag_name, 'intelligence/') }}
+    if: github.repository == 'adap/flower'
     runs-on: ubuntu-22.04
     steps:
       - name: Check out code
