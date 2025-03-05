@@ -14,6 +14,7 @@ async function main() {
   });
   if (!response.ok) {
     console.error(`${response.failure.code}: ${response.failure.description}`);
+    process.exit(1);
   } else {
     console.log(response.message.content);
   }

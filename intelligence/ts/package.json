@@ -18,8 +18,7 @@
     "url": "git+https://github.com/adap/flower.git"
   },
   "author": "The Flower Authors <hello@flower.ai>",
-  "private": true,
-  "version": "0.139.0",
+  "version": "0.1.0",
   "type": "module",
   "main": "./flowerintelligence.cjs.js",
   "module": "./flowerintelligence.es.js",
@@ -50,8 +49,7 @@
     "serve:cov": "http-server ./coverage/lcov-report",
     "serve:docs": "pnpm build:docs && http-server ./docs",
     "test": "NODE_PATH=./src NODE_ENV=test vitest",
-    "test:cov": "NODE_PATH=./src NODE_ENV=test vitest run --coverage",
-    "update-remote": "pnpm version minor && ./scripts/update.sh"
+    "test:cov": "NODE_PATH=./src NODE_ENV=test vitest run --coverage"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.0",
