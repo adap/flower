@@ -1,3 +1,5 @@
+// Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+
 import { assert, describe, it, expect, beforeEach, vi } from 'vitest';
 
 const API_KEY = process.env.FI_API_KEY ?? '';
