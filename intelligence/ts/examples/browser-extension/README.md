@@ -1,4 +1,4 @@
-# Flower Intelligence Firefox Extension Example
+# Flower Intelligence Flower Extension Example
 
 ## Dev Notes
 

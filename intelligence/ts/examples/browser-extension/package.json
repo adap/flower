@@ -1,7 +1,7 @@
 {
-  "name": "flowerintelligence-firefox-extension",
+  "name": "flowerintelligence-browser-extension",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "watch": "./scripts/watch.sh",
@@ -11,7 +11,7 @@
     "lint": "eslint --fix src",
     "lint:check": "eslint src",
     "ibuild": "pnpm i && pnpm build",
-    "build:extension": "pnpm ibuild && cd dist && zip -r -FS ./flower-intelligence-firefox-assistant.xpi * && cd .."
+    "build:extension": "pnpm ibuild && cd dist && zip -r -FS ./flower-intelligence-browser-assistant.xpi * && cd .."
   },
   "dependencies": {
     "@flwr/flwr": "file:../../dist",
