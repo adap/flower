@@ -322,7 +322,7 @@ def create_message_error_unavailable_res_message(ins_metadata: Metadata) -> Mess
     """Generate an error Message that the SuperLink returns carrying the specified
     error."""
     current_time = now().timestamp()
-    ttl = ins_metadata.ttl - (current_time - ins_metadata.created_at)
+    ttl = max(ins_metadata.ttl - (current_time - ins_metadata.created_at), 0)
     metadata = Metadata(
         run_id=ins_metadata.run_id,
         message_id=str(uuid4()),
