@@ -300,7 +300,8 @@ class TestFleetSimulationEngineRayBackend(TestCase):
 
         state_factory, nodes_mapping, expected_results = (
             init_state_factory_nodes_mapping(
-                num_nodes=num_nodes, num_messages=num_messages
+                num_nodes=num_nodes,
+                num_messages=num_messages,
             )
         )
 
