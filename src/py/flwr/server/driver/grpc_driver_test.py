@@ -23,6 +23,7 @@ import grpc
 
 from flwr.common import DEFAULT_TTL, RecordSet
 from flwr.common.message import Error
+from flwr.common.serde import message_to_proto
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
@@ -33,7 +34,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullResMessagesRequest,
     PushInsMessagesRequest,
 )
-from flwr.common.serde import message_to_proto
+
 from ..superlink.linkstate.linkstate_test import create_res_message
 from .grpc_driver import GrpcDriver
 
@@ -145,7 +146,10 @@ class TestGrpcDriver(unittest.TestCase):
         # pylint: disable-next=W0212
         error_message.metadata._reply_to_message = "id3"  # type: ignore
         # The the response from the DriverServicer is in the form of Protbuf Messages
-        mock_response.messages_list = [message_to_proto(ok_message), message_to_proto(error_message)]
+        mock_response.messages_list = [
+            message_to_proto(ok_message),
+            message_to_proto(error_message),
+        ]
         self.mock_stub.PullMessages.return_value = mock_response
         msg_ids = ["id1", "id2", "id3"]
 
@@ -175,7 +179,7 @@ class TestGrpcDriver(unittest.TestCase):
         )
         # pylint: disable-next=W0212
         mssg.metadata._reply_to_message = "id1"  # type: ignore
-        message_res_list = [ message_to_proto(mssg)]
+        message_res_list = [message_to_proto(mssg)]
 
         mock_response.messages_list = message_res_list
         self.mock_stub.PullMessages.return_value = mock_response
