@@ -147,8 +147,8 @@ def client_fn(context: Context):
     else:
         raise ValueError("Algorithm not implemented")
 
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
     trainloader, valloader, _ = load_dataloaders(partition_id, num_partitions, context)
 
     # Return Client instance
