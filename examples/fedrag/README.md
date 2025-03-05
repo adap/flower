@@ -20,6 +20,7 @@ data across distributed silos without the need to centrally aggregate data, whil
 ## FedRAG Pipeline Overview
 
 The figure below demonstrates an overview of the Federated RAG pipeline.
+
 ![image info](_static/FedRAG.png)
 
 Given a user query, the server broadcasts the query to each client. Every client retrieves the relevant (top-k)
@@ -58,8 +59,9 @@ apt install wget
 apt install git-lfs
  
 # Windows
-scoop install wget
-scoop install git-lfs
+# If you are on Windows, it is highly recommended to make use of WSL with Ubuntu to run your Flower apps. 
+# Then, you can install the packages using the above Ubuntu commands.
+# Extra tip: with WSL you can also make use of the NVIDIA GPU in your Windows host.
  
 # enable Git LFS in your Git environment
 # (holds for all systems)
