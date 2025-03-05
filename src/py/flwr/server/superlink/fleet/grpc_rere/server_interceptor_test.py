@@ -36,6 +36,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     public_key_to_bytes,
     sign_message,
 )
+from flwr.common.serde import message_to_proto
 from flwr.common.typing import RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -191,8 +192,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Transition status to running. PushMessages is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        msg_proto = create_res_message(
-            src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
+        msg_proto = message_to_proto(
+            create_res_message(
+                src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
+            )
         )
         req = PushMessagesRequest(node=Node(node_id=node_id), messages_list=[msg_proto])
         return self._push_messages.with_call(request=req, metadata=metadata)

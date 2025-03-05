@@ -19,7 +19,6 @@ import unittest
 from copy import deepcopy
 
 from flwr.common.constant import SUPERLINK_NODE_ID
-from flwr.common.serde import message_from_proto
 from flwr.server.superlink.linkstate.linkstate_test import (
     create_ins_message,
     create_task_ins,
@@ -62,10 +61,8 @@ class SqliteStateTest(unittest.TestCase):
     def test_message_to_dict_and_back(self) -> None:
         """Check if all required keys are included in return value."""
         # Prepare
-        msg = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID, dst_node_id=123, run_id=456
-            )
+        msg = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=123, run_id=456
         )
         expected_keys = [
             "message_id",

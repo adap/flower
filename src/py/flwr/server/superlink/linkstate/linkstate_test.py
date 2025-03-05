@@ -26,17 +26,22 @@ from uuid import UUID
 
 from parameterized import parameterized
 
-from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, Error, RecordSet, now
+from flwr.common import (
+    DEFAULT_TTL,
+    ConfigsRecord,
+    Context,
+    Error,
+    Message,
+    Metadata,
+    RecordSet,
+    now,
+)
 from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     public_key_to_bytes,
 )
-from flwr.common.serde import message_from_proto, message_to_proto
 from flwr.common.typing import RunStatus
-
-# pylint: disable=E0611
-from flwr.proto.message_pb2 import Message, Metadata
 
 # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node
@@ -303,10 +308,8 @@ class StateTest(unittest.TestCase):
         dt = datetime.now(tz=timezone.utc)
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        msg = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-            )
+        msg = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
 
         # Execute
@@ -349,17 +352,14 @@ class StateTest(unittest.TestCase):
         invalid_node_id = 61016 if node_id != 61016 else 61017
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         # A message for a node that doesn't exist
-        msg = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=invalid_node_id,
-                run_id=run_id,
-            )
+        msg = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=invalid_node_id,
+            run_id=run_id,
         )
+
         # A message with src_node_id that's not that of the SuperLink
-        msg2 = message_from_proto(
-            create_ins_message(src_node_id=61016, dst_node_id=node_id, run_id=run_id)
-        )
+        msg2 = create_ins_message(src_node_id=61016, dst_node_id=node_id, run_id=run_id)
 
         # Execute and assert
         assert state.store_message_ins(msg) is None
@@ -429,26 +429,22 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        msg0 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id,
-            )
+        msg0 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id,
         )
-        msg1 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id,
-            )
+
+        msg1 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id,
         )
-        msg2 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id,
-            )
+
+        msg2 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id,
         )
 
         # Insert three Messages
@@ -531,29 +527,25 @@ class StateTest(unittest.TestCase):
         node_id = state.create_node(1e3)
         run_id_0 = state.create_run(None, None, "8g13kl7", {}, ConfigsRecord())
         # Insert Message with the same run_id
-        msg0 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id_0,
-            )
+        msg0 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id_0,
         )
-        msg1 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id_0,
-            )
+
+        msg1 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id_0,
         )
+
         # Insert a Message with a different run_id
         # then, ensure it does not appear in result
         run_id_1 = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        msg2 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id_1,
-            )
+        msg2 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id_1,
         )
 
         # Insert three Messages
@@ -607,12 +599,10 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        msg = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id,
-            )
+        msg = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id,
         )
         # Execute
         message_ins_uuid = state.store_message_ins(msg)
@@ -652,13 +642,12 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        msg = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id,
-            )
+        msg = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id,
         )
+
         # Execute
         _ = state.store_message_ins(msg)
 
@@ -707,12 +696,10 @@ class StateTest(unittest.TestCase):
         """Store Message with invalid run_id and fail."""
         # Prepare
         state: LinkState = self.state_factory()
-        msg = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=1234,
-                run_id=61016,
-            )
+        msg = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=1234,
+            run_id=61016,
         )
 
         # Execute
@@ -912,19 +899,16 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        msg0 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id,
-            )
+        msg0 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id,
         )
-        msg1 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id,
-            )
+
+        msg1 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id,
         )
 
         # Insert Messages
@@ -978,19 +962,16 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         node_id = state.create_node(1e3)
 
-        msg0 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id,
-            )
+        msg0 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id,
         )
-        msg1 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID,
-                dst_node_id=node_id,
-                run_id=run_id,
-            )
+
+        msg1 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID,
+            dst_node_id=node_id,
+            run_id=run_id,
         )
 
         # Insert Messages
@@ -1118,17 +1099,17 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         node_id = state.create_node(1e3)
         # Create and store a message
-        msg = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-            )
+        msg = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
+
         state.store_message_ins(message=msg)
 
         msg_to_reply_to = state.get_message_ins(node_id=node_id, limit=2)[0]
         reply_msg = msg_to_reply_to.create_reply(content=RecordSet())
 
-        # This patch respresents a very slow communication/ClientApp execution that triggers TTL
+        # This patch respresents a very slow communication/ClientApp execution that
+        # triggers TTL
         with patch(
             "time.time",
             side_effect=lambda: msg.metadata.created_at + msg.metadata.ttl + 0.1,
@@ -1233,19 +1214,17 @@ class StateTest(unittest.TestCase):
             node_id = state.create_node(1e3)
 
             # Create message, tweak created_at and store
-            msg = message_from_proto(
-                create_ins_message(
-                    src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-                )
+            msg = create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
             )
 
-            msg.metadata.created_at = msg_ins_created_at  # type: ignore
-            msg.metadata.ttl = msg_ins_ttl  # type: ignore
+            msg.metadata.created_at = msg_ins_created_at
+            msg.metadata.ttl = msg_ins_ttl
             state.store_message_ins(message=msg)
 
             reply_msg = msg.create_reply(content=RecordSet())
-            reply_msg.metadata.created_at = msg_res_created_at  # type: ignore
-            reply_msg.metadata.ttl = msg_res_ttl  # type: ignore
+            reply_msg.metadata.created_at = msg_res_created_at
+            reply_msg.metadata.ttl = msg_res_ttl
 
             # Execute
             res = state.store_message_res(reply_msg)
@@ -1281,11 +1260,10 @@ class StateTest(unittest.TestCase):
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         # Create message, tweak created_at, ttl and store
-        msg = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-            )
+        msg = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
+
         msg.metadata.created_at = time.time() - 5
         msg.metadata.ttl = 5.1
 
@@ -1338,11 +1316,10 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
         # A message that will expire before it gets pulled
-        msg1 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-            )
+        msg1 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
+
         ins_msg1_id = state.store_message_ins(msg1)
         assert ins_msg1_id
         assert state.num_message_ins() == 1
@@ -1356,11 +1333,10 @@ class StateTest(unittest.TestCase):
             assert res_msg.error.code == ErrorCode.MESSAGE_UNAVAILABLE
 
         # A message that will expire before its reply is pulled
-        msg2 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-            )
+        msg2 = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
+
         ins_msg2_id = state.store_message_ins(msg2)
         assert ins_msg2_id
         assert state.num_message_ins() == 2
@@ -1386,11 +1362,10 @@ class StateTest(unittest.TestCase):
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
-        msg = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-            )
+        msg = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
+
         ins_msg_id = state.store_message_ins(msg)
         assert ins_msg_id
 
@@ -1475,11 +1450,10 @@ class StateTest(unittest.TestCase):
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
-        msg = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-            )
+        msg = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
+
         ins_msg_id = state.store_message_ins(msg)
         assert state.num_message_ins() == 1
         assert ins_msg_id
@@ -1532,11 +1506,10 @@ class StateTest(unittest.TestCase):
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
-        msg = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-            )
+        msg = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
+
         state.store_message_ins(msg)
         assert state.num_message_ins() == 1
 
@@ -1741,9 +1714,9 @@ def create_ins_message(
             group_id="",
             ttl=DEFAULT_TTL,
             message_type="mock",
-            created_at=now().timestamp(),
+            reply_to_message="",
         ),
-        content=ProtoRecordSet(parameters={}, metrics={}, configs={}),
+        content=RecordSet(),
     )
 
 
@@ -1754,17 +1727,15 @@ def create_res_message(
     error: Optional[Error] = None,
 ) -> Message:
     """Create a (reply) Message for testing."""
-    in_msg_proto = create_ins_message(
+    in_msg = create_ins_message(
         src_node_id=dst_node_id, dst_node_id=src_node_id, run_id=run_id
     )
-    in_msg = message_from_proto(in_msg_proto)
-
     if error:
         out_msg = in_msg.create_error_reply(error=error)
     else:
         out_msg = in_msg.create_reply(content=RecordSet(parameters_records={}))
 
-    return message_to_proto(out_msg)
+    return out_msg
 
 
 def create_task_res(

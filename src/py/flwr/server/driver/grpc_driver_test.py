@@ -33,7 +33,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullResMessagesRequest,
     PushInsMessagesRequest,
 )
-
+from flwr.common.serde import message_to_proto
 from ..superlink.linkstate.linkstate_test import create_res_message
 from .grpc_driver import GrpcDriver
 
@@ -136,14 +136,16 @@ class TestGrpcDriver(unittest.TestCase):
         # A Message must have either content or error set so we prepare
         run_id = 12345
         ok_message = create_res_message(src_node_id=123, dst_node_id=456, run_id=run_id)
-        ok_message.metadata.reply_to_message = "id2"
+        # pylint: disable-next=W0212
+        ok_message.metadata._reply_to_message = "id2"  # type: ignore
 
         error_message = create_res_message(
             src_node_id=123, dst_node_id=789, run_id=run_id, error=Error(code=0)
         )
-        error_message.metadata.reply_to_message = "id3"
+        # pylint: disable-next=W0212
+        error_message.metadata._reply_to_message = "id3"  # type: ignore
         # The the response from the DriverServicer is in the form of Protbuf Messages
-        mock_response.messages_list = [ok_message, error_message]
+        mock_response.messages_list = [message_to_proto(ok_message), message_to_proto(error_message)]
         self.mock_stub.PullMessages.return_value = mock_response
         msg_ids = ["id1", "id2", "id3"]
 
@@ -171,8 +173,9 @@ class TestGrpcDriver(unittest.TestCase):
         mssg = create_res_message(
             src_node_id=123, dst_node_id=456, run_id=run_id, error=Error(code=0)
         )
-        mssg.metadata.reply_to_message = "id1"
-        message_res_list = [mssg]
+        # pylint: disable-next=W0212
+        mssg.metadata._reply_to_message = "id1"  # type: ignore
+        message_res_list = [ message_to_proto(mssg)]
 
         mock_response.messages_list = message_res_list
         self.mock_stub.PullMessages.return_value = mock_response
