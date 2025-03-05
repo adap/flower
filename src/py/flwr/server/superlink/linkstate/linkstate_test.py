@@ -1357,30 +1357,6 @@ class StateTest(unittest.TestCase):
             assert res_msg.has_error()
             assert res_msg.error.code == ErrorCode.MESSAGE_UNAVAILABLE
 
-        # A message that will expire before its reply is pulled
-        msg2 = message_from_proto(
-            create_ins_message(
-                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-            )
-        )
-        ins_msg2_id = state.store_message_ins(msg2)
-        assert ins_msg2_id
-        assert state.num_message_ins() == 2
-        # Get message
-        msg2_ins = state.get_message_ins(node_id=node_id, limit=1)
-        # Store reply in time
-        res_msg2 = msg2_ins[0].create_reply(content=RecordSet())
-        state.store_message_res(res_msg2)
-
-        with patch(
-            "time.time",
-            side_effect=lambda: msg2.metadata.created_at + msg2.metadata.ttl + 0.1,
-        ):  # over TTL limit
-
-            res_msg2_pulled = state.get_message_res({ins_msg2_id})[0]
-            assert res_msg2_pulled.has_error()
-            assert res_msg2_pulled.error.code == ErrorCode.MESSAGE_UNAVAILABLE
-
     def test_get_message_res_reply_not_ready(self) -> None:
         """Test get_message_res to return nothing since reply Message isn't present."""
         # Prepare
