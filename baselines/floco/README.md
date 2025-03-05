@@ -93,7 +93,7 @@ In order to generate the result plots shown below, run:
 python floco/plot_results.py
 ```
 ### CIFAR-10 Five-Fold split
-<img src="_static/CIFAR10_Fold.png" width="400"/> 
+<img src="_static/CIFAR10_Fold.png" width="600"/> 
 
 ### CIFAR-10 Dirichlet split
 <img src="_static/CIFAR10_Dirichlet.png" width="400"/> 
