@@ -209,7 +209,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             UUID(msg_res.metadata.reply_to_message) for msg_res in messages_res
         }
 
-        state.delete_messages(message_ids=message_ins_res_to_delete)
+        state.delete_messages(message_ins_ids=message_ins_res_to_delete)
 
         # Convert to proto Messages
         messages_list = []
