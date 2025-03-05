@@ -300,7 +300,7 @@ class TestMessageValidation(unittest.TestCase):
         invalid_metadata_list: list[Metadata] = []
         attrs = list(vars(self.valid_out_metadata).keys())
         for attr in attrs:
-            if attr == "_partition_id":
+            if attr == "_delivered_at":
                 continue
             if attr == "_ttl":  # Skip configurable ttl
                 continue
