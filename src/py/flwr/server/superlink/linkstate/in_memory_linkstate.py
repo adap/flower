@@ -153,7 +153,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         message_id = uuid4()
 
         # Store Message
-        # pylint: disable=W0212
+        # pylint: disable-next=W0212
         message.metadata._message_id = str(message_id)  # type: ignore
         with self.lock:
             self.message_ins_store[message_id] = message
@@ -360,7 +360,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         message_id = uuid4()
 
         # Store Message
-        # pylint: disable=W0212
+        # pylint: disable-next=W0212
         message.metadata._message_id = str(message_id)  # type: ignore
         with self.lock:
             self.message_res_store[message_id] = message
@@ -441,7 +441,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             # Mark existing reply Messages to be returned as delivered
             delivered_at = now().isoformat()
             for message_res in message_res_found:
-                # pylint: disable=W0212
+                # pylint: disable-next=W0212
                 message_res.metadata._delivered_at = delivered_at  # type: ignore
 
         return list(ret.values())

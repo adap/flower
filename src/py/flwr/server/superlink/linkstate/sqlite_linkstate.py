@@ -355,7 +355,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         message_id = uuid4()
 
         # Store Message
-        # pylint: disable=W0212
+        # pylint: disable-next=W0212
         message.metadata._message_id = str(message_id)  # type: ignore
         data = (message_to_dict(message),)
 
@@ -677,7 +677,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         message_id = uuid4()
 
         # Store Message
-        # pylint: disable=W0212
+        # pylint: disable-next=W0212
         message.metadata._message_id = str(message_id)  # type: ignore
         data = (message_to_dict(message),)
 
@@ -808,7 +808,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Mark existing reply Messages to be returned as delivered
         delivered_at = now().isoformat()
         for message_res in ret.values():
-            # pylint: disable=W0212
+            # pylint: disable-next=W0212
             message_res.metadata._delivered_at = delivered_at  # type: ignore
         message_res_ids = [
             message_res.metadata.message_id for message_res in ret.values()
@@ -1564,7 +1564,6 @@ def dict_to_message(message_dict: dict[str, Any]) -> Message:
     msg = Message(metadata=metadata, content=content, error=error)
     # pylint: disable=W0212
     msg.metadata._created_at = message_dict["created_at"]  # type: ignore
-    # pylint: disable=W0212
     msg.metadata._delivered_at = message_dict["delivered_at"]  # type: ignore
     return msg
 
