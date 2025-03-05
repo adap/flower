@@ -23,44 +23,15 @@ from parameterized import parameterized
 from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.message import Error
 from flwr.common.serde import message_from_proto
-from flwr.server.superlink.linkstate.linkstate_test import (
-    create_ins_message,
-    create_task_ins,
-)
+from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.linkstate.sqlite_linkstate import (
     dict_to_message,
     message_to_dict,
-    task_ins_to_dict,
 )
 
 
 class SqliteStateTest(unittest.TestCase):
     """Test utilitiy functions."""
-
-    def test_ins_res_to_dict(self) -> None:
-        """Check if all required keys are included in return value."""
-        # Prepare
-        ins_res = create_task_ins(consumer_node_id=1, run_id=0)
-        expected_keys = [
-            "task_id",
-            "group_id",
-            "run_id",
-            "producer_node_id",
-            "consumer_node_id",
-            "created_at",
-            "delivered_at",
-            "ttl",
-            "ancestry",
-            "task_type",
-            "recordset",
-        ]
-
-        # Execute
-        result = task_ins_to_dict(ins_res)
-
-        # Assert
-        for key in expected_keys:
-            assert key in result
 
     @parameterized.expand([(False,), (True,)])  # type: ignore
     def test_message_to_dict_and_back(self, has_error: bool) -> None:
