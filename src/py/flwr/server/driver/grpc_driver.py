@@ -212,6 +212,12 @@ class GrpcDriver(Driver):
                 messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
             )
         )
+        if len([id for id in list(res.message_ids) if id]) != len(list(messages)):
+            log(
+                WARNING,
+                "Not all messages could be pushed to the SuperLink. "
+                "This could be due to a malformed message.",
+            )
         return list(res.message_ids)
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
