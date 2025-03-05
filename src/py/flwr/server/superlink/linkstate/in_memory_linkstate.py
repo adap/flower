@@ -260,8 +260,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             # Mark existing reply Messages to be returned as delivered
             delivered_at = now().isoformat()
             for message_res in message_res_found:
-                # pylint: disable-next=W0212
-                message_res.metadata._delivered_at = delivered_at  # type: ignore
+                message_res.metadata.delivered_at = delivered_at
 
         return list(ret.values())
 
@@ -283,7 +282,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     del self.message_res_store[message_res_id]
 
     def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
-        """Get all input Message IDs for the given run_id."""
+        """Get all instruction Message IDs for the given run_id."""
         message_id_list: set[UUID] = set()
         with self.lock:
             for message_id, message in self.message_ins_store.items():

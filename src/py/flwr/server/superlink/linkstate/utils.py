@@ -235,7 +235,7 @@ def create_message_error_unavailable_res_message(ins_metadata: Metadata) -> Mess
     """Generate an error Message that the SuperLink returns carrying the specified
     error."""
     current_time = now().timestamp()
-    ttl = ins_metadata.ttl - (current_time - ins_metadata.created_at)
+    ttl = max(ins_metadata.ttl - (current_time - ins_metadata.created_at), 0)
     metadata = Metadata(
         run_id=ins_metadata.run_id,
         message_id=str(uuid4()),
@@ -314,7 +314,7 @@ def verify_message_ids(
     ret_dict = {}
     current = current_time if current_time else now().timestamp()
     for message_id in list(inquired_message_ids):
-        # Generate error TaskRes if the task_ins doesn't exist or has expired
+        # Generate error message if the inquired message doesn't exist or has expired
         message_ins = found_message_ins_dict.get(message_id)
         if message_ins is None or message_ttl_has_expired(
             message_ins.metadata, current
@@ -340,7 +340,7 @@ def verify_found_message_replies(
     inquired_message_ids : set[UUID]
         Set of Message IDs for which to generate error Message if invalid.
     found_message_ins_dict : dict[UUID, Message]
-        Dictionary containing all found TaskIns indexed by their IDs.
+        Dictionary containing all found instruction Messages indexed by their IDs.
     found_message_res_list : dict[Message, Message]
         List of found Message to be verified.
     current_time : Optional[float] (default: None)
@@ -367,7 +367,5 @@ def verify_found_message_replies(
             message_res = create_message_error_unavailable_res_message(
                 found_message_ins_dict[message_ins_id].metadata
             )
-            # pylint: disable=W0212
-            message_res.metadata._delivered_at = now().isoformat()  # type: ignore
         ret_dict[message_ins_id] = message_res
     return ret_dict

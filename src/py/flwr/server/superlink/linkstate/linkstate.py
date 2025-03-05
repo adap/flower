@@ -47,7 +47,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
-        """Get Message optionally filtered by node_id.
+        """Get zero or more `Message` objects for the provided `node_id`.
 
         Usually, the Fleet API calls this for Nodes planning to work on one or more
         Message.
@@ -71,7 +71,6 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Constraints
         -----------
-
         `message.metadata.dst_node_id` MUST be set (not constant.SUPERLINK_NODE_ID)
 
         If `message.metadata.run_id` is invalid, then
@@ -88,22 +87,20 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         - An error Message if there was no message registered with such message IDs
         or has expired.
-        - An error Message if the reply Message with one of the message IDs passed
-        exists but has expired.
-        - An error Message if the reply Message hasn't arrived yet.
+        - An error Message if the reply Message exists but has expired.
         - The reply Message.
-        - Nothing if the Message with the passed message IDs is still valid and waiting
+        - Nothing if the Message with the passed message_id is still valid and waiting
         for a reply Message.
 
         Parameters
         ----------
         message_ids : set[UUID]
-            A set of Message IDs for which to retrieve results (Message).
+            A set of Message IDs used to retrieve reply Messages responding to them.
 
         Returns
         -------
         list[Message]
-            A list of reply Message corresponding to the given message IDs or Messages
+            A list of reply Message responding to the given message IDs or Messages
             carrying an Error.
         """
 
@@ -128,7 +125,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
-        """Get all input Message IDs for the given run_id."""
+        """Get all instruction Message IDs for the given run_id."""
 
     @abc.abstractmethod
     def create_node(self, ping_interval: float) -> int:
