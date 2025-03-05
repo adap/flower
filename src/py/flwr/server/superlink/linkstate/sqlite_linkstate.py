@@ -936,7 +936,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         return {UUID(row["task_id"]) for row in rows}
 
     def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
-        """Get all input Message IDs for the given run_id."""
+        """Get all instruction Message IDs for the given run_id."""
         if self.conn is None:
             raise AttributeError("LinkState not initialized")
 
