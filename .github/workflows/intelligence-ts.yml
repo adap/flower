@@ -175,6 +175,7 @@ jobs:
       - name: Run tests
         working-directory: intelligence/ts
         env:
+          FI_DEV_REMOTE_URL: ${{ secrets.FI_DEV_REMOTE_URL }}
           FI_API_KEY: ${{ steps.get_api_key.outputs.api_key }}
         run: pnpm test
 
