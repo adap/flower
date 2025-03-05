@@ -441,8 +441,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             # Mark existing reply Messages to be returned as delivered
             delivered_at = now().isoformat()
             for message_res in message_res_found:
-                # pylint: disable-next=W0212
-                message_res.metadata._delivered_at = delivered_at  # type: ignore
+                message_res.metadata.delivered_at = delivered_at
 
         return list(ret.values())
 

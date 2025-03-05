@@ -808,8 +808,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Mark existing reply Messages to be returned as delivered
         delivered_at = now().isoformat()
         for message_res in ret.values():
-            # pylint: disable-next=W0212
-            message_res.metadata._delivered_at = delivered_at  # type: ignore
+            message_res.metadata.delivered_at = delivered_at
         message_res_ids = [
             message_res.metadata.message_id for message_res in ret.values()
         ]
@@ -1564,7 +1563,7 @@ def dict_to_message(message_dict: dict[str, Any]) -> Message:
     msg = Message(metadata=metadata, content=content, error=error)
     # pylint: disable=W0212
     msg.metadata._created_at = message_dict["created_at"]  # type: ignore
-    msg.metadata._delivered_at = message_dict["delivered_at"]  # type: ignore
+    msg.metadata.delivered_at = message_dict["delivered_at"]
     return msg
 
 
