@@ -42,7 +42,6 @@ from flwr.common import (
 )
 from flwr.common.constant import Status
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
-from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
