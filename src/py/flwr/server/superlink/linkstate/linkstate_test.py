@@ -1543,11 +1543,11 @@ class StateTest(unittest.TestCase):
         assert state.num_message_ins() == 1
 
         # Fetch ins message
-        ins_msg = state.get_message_ins(node_id=node_id, limit=1)
+        ins_msg = state.get_message_ins(node_id=node_id, limit=1)[0]
         assert state.num_message_ins() == 1
 
-        # Create reply, modify node_ids and insert
-        res_msg = ins_msg[0].create_reply(content=RecordSet())
+        # Create reply, modify src_node_id and insert
+        res_msg = ins_msg.create_reply(content=RecordSet())
         # pylint: disable=W0212
         res_msg.metadata._src_node_id = node_id + 1  # type: ignore
         msg_res_id = state.store_message_res(res_msg)
