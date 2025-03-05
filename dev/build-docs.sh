@@ -19,7 +19,8 @@ cd "$ROOT"
 ./datasets/dev/build-flwr-datasets-docs.sh
 
 cd "$ROOT"
-cd intelligence/docs
+cd intelligence
+./dev/build_docs.sh
 make html
 
 cd "$ROOT"
