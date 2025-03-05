@@ -34,7 +34,7 @@ from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
-from flwr.proto import error_pb2
+from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
@@ -271,7 +271,7 @@ def create_taskres_for_unavailable_taskins(taskins_id: Union[str, UUID]) -> Task
             ttl=0,
             ancestry=[str(taskins_id)],
             task_type="",  # Unknown message type
-            error=error_pb2.Error(  # pylint: disable=E1101
+            error=ProtoError(
                 code=ErrorCode.MESSAGE_UNAVAILABLE,
                 reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
             ),
@@ -310,7 +310,7 @@ def create_taskres_for_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
             ttl=ttl,
             ancestry=[ref_taskins.task_id],
             task_type=ref_taskins.task.task_type,
-            error=error_pb2.Error(  # pylint: disable=E1101
+            error=ProtoError(
                 code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
                 reason=REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
             ),
@@ -322,7 +322,7 @@ def create_message_error_unavailable_res_message(ins_metadata: Metadata) -> Mess
     """Generate an error Message that the SuperLink returns carrying the specified
     error."""
     current_time = now().timestamp()
-    ttl = ins_metadata.ttl - (current_time - ins_metadata.created_at)
+    ttl = max(ins_metadata.ttl - (current_time - ins_metadata.created_at), 0)
     metadata = Metadata(
         run_id=ins_metadata.run_id,
         message_id=str(uuid4()),
@@ -445,7 +445,7 @@ def verify_message_ids(
     ret_dict = {}
     current = current_time if current_time else now().timestamp()
     for message_id in list(inquired_message_ids):
-        # Generate error TaskRes if the task_ins doesn't exist or has expired
+        # Generate error message if the inquired message doesn't exist or has expired
         message_ins = found_message_ins_dict.get(message_id)
         if message_ins is None or message_ttl_has_expired(
             message_ins.metadata, current
@@ -517,7 +517,7 @@ def verify_found_message_replies(
     inquired_message_ids : set[UUID]
         Set of Message IDs for which to generate error Message if invalid.
     found_message_ins_dict : dict[UUID, Message]
-        Dictionary containing all found TaskIns indexed by their IDs.
+        Dictionary containing all found instruction Messages indexed by their IDs.
     found_message_res_list : dict[Message, Message]
         List of found Message to be verified.
     current_time : Optional[float] (default: None)
@@ -544,7 +544,5 @@ def verify_found_message_replies(
             message_res = create_message_error_unavailable_res_message(
                 found_message_ins_dict[message_ins_id].metadata
             )
-            # pylint: disable=W0212
-            message_res.metadata._delivered_at = now().isoformat()  # type: ignore
         ret_dict[message_ins_id] = message_res
     return ret_dict

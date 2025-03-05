@@ -26,7 +26,7 @@ from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
-from flwr.common import Context, Error, Message, Metadata, log, now
+from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -35,10 +35,16 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.record import ConfigsRecord
-from flwr.common.serde import error_to_proto, recordset_from_proto, recordset_to_proto
+from flwr.common.serde import (
+    error_from_proto,
+    error_to_proto,
+    recordset_from_proto,
+    recordset_to_proto,
+)
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
+from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
@@ -1548,10 +1554,12 @@ def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
 
 def dict_to_message(message_dict: dict[str, Any]) -> Message:
     """Transform dict to Message."""
-    content_proto = ProtoRecordSet()
-    content_proto.ParseFromString(message_dict.pop("content"))
-    content = recordset_from_proto(content_proto)
-    error: Optional[Error] = message_dict.pop("error", None)
+    content, error = None, None
+    if (b_content := message_dict.pop("content")) is not None:
+        content = recordset_from_proto(ProtoRecordSet.FromString(b_content))
+    if (b_error := message_dict.pop("error")) is not None:
+        error = error_from_proto(ProtoError.FromString(b_error))
+
     # Metadata constructor doesn't allow passing created_at. We set it later
     metadata = Metadata(
         **{
@@ -1561,8 +1569,7 @@ def dict_to_message(message_dict: dict[str, Any]) -> Message:
         }
     )
     msg = Message(metadata=metadata, content=content, error=error)
-    # pylint: disable=W0212
-    msg.metadata._created_at = message_dict["created_at"]  # type: ignore
+    msg.metadata.__dict__["_created_at"] = message_dict["created_at"]
     msg.metadata.delivered_at = message_dict["delivered_at"]
     return msg
 

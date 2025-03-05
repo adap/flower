@@ -18,7 +18,10 @@
 import unittest
 from copy import deepcopy
 
+from parameterized import parameterized
+
 from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.common.message import Error
 from flwr.common.serde import message_from_proto
 from flwr.server.superlink.linkstate.linkstate_test import (
     create_ins_message,
@@ -59,7 +62,8 @@ class SqliteStateTest(unittest.TestCase):
         for key in expected_keys:
             assert key in result
 
-    def test_message_to_dict_and_back(self) -> None:
+    @parameterized.expand([(False,), (True,)])  # type: ignore
+    def test_message_to_dict_and_back(self, has_error: bool) -> None:
         """Check if all required keys are included in return value."""
         # Prepare
         msg = message_from_proto(
@@ -67,6 +71,10 @@ class SqliteStateTest(unittest.TestCase):
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=123, run_id=456
             )
         )
+        if has_error:
+            msg.__dict__["_content"] = None
+            msg.__dict__["_error"] = Error(0)
+
         expected_keys = [
             "message_id",
             "group_id",
@@ -93,8 +101,11 @@ class SqliteStateTest(unittest.TestCase):
         res_msg = dict_to_message(result)
 
         # Assert
-        assert msg.content == res_msg.content
-        assert msg.metadata == res_msg.metadata
+        if has_error:
+            assert res_msg.error.code == msg.error.code
+        else:
+            assert res_msg.content == msg.content
+        assert res_msg.metadata == msg.metadata
 
 
 if __name__ == "__main__":
