@@ -179,12 +179,12 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         Parameters
         ----------
         message_ids : set[UUID]
-            A set of Message IDs for which to retrieve results (Message).
+            A set of Message IDs used to retrieve reply Messages responding to them.
 
         Returns
         -------
         list[Message]
-            A list of reply Message corresponding to the given message IDs or Messages
+            A list of reply Message responding to the given message IDs or Messages
             carrying an Error.
         """
 
