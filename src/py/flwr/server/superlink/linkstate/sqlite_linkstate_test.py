@@ -16,6 +16,7 @@
 # pylint: disable=invalid-name, disable=R0904
 
 import unittest
+from copy import deepcopy
 
 from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.serde import message_from_proto
@@ -24,6 +25,7 @@ from flwr.server.superlink.linkstate.linkstate_test import (
     create_task_ins,
 )
 from flwr.server.superlink.linkstate.sqlite_linkstate import (
+    dict_to_message,
     message_to_dict,
     task_ins_to_dict,
 )
@@ -57,7 +59,7 @@ class SqliteStateTest(unittest.TestCase):
         for key in expected_keys:
             assert key in result
 
-    def test_message_to_dict(self) -> None:
+    def test_message_to_dict_and_back(self) -> None:
         """Check if all required keys are included in return value."""
         # Prepare
         msg = message_from_proto(
@@ -81,11 +83,18 @@ class SqliteStateTest(unittest.TestCase):
         ]
 
         # Execute
-        result = message_to_dict(msg)
+        result = message_to_dict(deepcopy(msg))
 
         # Assert
         for key in expected_keys:
             assert key in result
+
+        # Execute
+        res_msg = dict_to_message(result)
+
+        # Assert
+        assert msg.content == res_msg.content
+        assert msg.metadata == res_msg.metadata
 
 
 if __name__ == "__main__":
