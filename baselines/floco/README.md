@@ -22,6 +22,7 @@ dataset: [CIFAR10]
 
 **Hardware Setup:** We trained the models used for the plots below on a M1X chip.
 
+**Contributors:** <add here your names (or github tags, emails are fine too if you'd like)> 
 
 ## Experimental Setup
 
