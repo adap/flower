@@ -517,7 +517,7 @@ def verify_found_message_replies(
     inquired_message_ids : set[UUID]
         Set of Message IDs for which to generate error Message if invalid.
     found_message_ins_dict : dict[UUID, Message]
-        Dictionary containing all found TaskIns indexed by their IDs.
+        Dictionary containing all found instruction Messages indexed by their IDs.
     found_message_res_list : dict[Message, Message]
         List of found Message to be verified.
     current_time : Optional[float] (default: None)
