@@ -45,7 +45,6 @@ from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
 from flwr.proto.error_pb2 import Error as ProtoError
-from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 
 # pylint: enable=E0611
