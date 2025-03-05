@@ -126,6 +126,8 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
             "`metadata.created_at` must be a float that records the unix timestamp "
             "in seconds when the message was created."
         )
+    if metadata.delivered_at != "":
+        validation_errors.append("`metadata.delivered_at` must be an empty str")
     if metadata.ttl <= 0:
         validation_errors.append("`metadata.ttl` must be higher than zero")
 
