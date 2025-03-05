@@ -325,7 +325,7 @@ class StateTest(unittest.TestCase):
 
         assert datetime.fromisoformat(
             actual_message_ins.metadata.delivered_at
-        ) > datetime(2020, 1, 1, tzinfo=timezone.utc)
+        ) > dt
         assert actual_message_ins.metadata.ttl > 0
 
     def test_store_task_ins_invalid_node_id(self) -> None:
