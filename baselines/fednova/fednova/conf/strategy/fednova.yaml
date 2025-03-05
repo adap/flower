@@ -1,0 +1,10 @@
+---
+name: fednova
+strategy:
+  _target_: fednova.strategy.FedNova
+  _recursive_: false
+    
+
+client_fn:
+  _target_: fednova.client.gen_clients_fednova
+  _recursive_: false

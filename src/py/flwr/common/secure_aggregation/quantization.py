@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 """Utility functions for model quantization."""
 
 
-from typing import List, cast
+from typing import cast
 
 import numpy as np
 
@@ -25,15 +25,19 @@ from flwr.common.typing import NDArrayFloat, NDArrayInt
 def _stochastic_round(arr: NDArrayFloat) -> NDArrayInt:
     ret: NDArrayInt = np.ceil(arr).astype(np.int32)
     rand_arr = np.random.rand(*ret.shape)
-    ret[rand_arr < ret - arr] -= 1
+    if len(ret.shape) == 0:
+        if rand_arr < ret - arr:
+            ret -= 1
+    else:
+        ret[rand_arr < ret - arr] -= 1
     return ret
 
 
 def quantize(
-    parameters: List[NDArrayFloat], clipping_range: float, target_range: int
-) -> List[NDArrayInt]:
+    parameters: list[NDArrayFloat], clipping_range: float, target_range: int
+) -> list[NDArrayInt]:
     """Quantize float Numpy arrays to integer Numpy arrays."""
-    quantized_list: List[NDArrayInt] = []
+    quantized_list: list[NDArrayInt] = []
     quantizer = target_range / (2 * clipping_range)
     for arr in parameters:
         # Stochastic quantization
@@ -49,12 +53,12 @@ def quantize(
 
 # Dequantize parameters to range [-clipping_range, clipping_range]
 def dequantize(
-    quantized_parameters: List[NDArrayInt],
+    quantized_parameters: list[NDArrayInt],
     clipping_range: float,
     target_range: int,
-) -> List[NDArrayFloat]:
+) -> list[NDArrayFloat]:
     """Dequantize integer Numpy arrays to float Numpy arrays."""
-    reverse_quantized_list: List[NDArrayFloat] = []
+    reverse_quantized_list: list[NDArrayFloat] = []
     quantizer = (2 * clipping_range) / target_range
     shift = -clipping_range
     for arr in quantized_parameters:

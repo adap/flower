@@ -1,6 +1,5 @@
 """Main module for running FEMNIST experiments."""
 
-
 import pathlib
 from functools import partial
 from typing import Type, Union

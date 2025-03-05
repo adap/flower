@@ -1,0 +1,18 @@
+---
+title: "Aggregation"
+description: "Combine model weights from sampled clients to update the global model. This process enables the global model to learn from each client's data."
+date: "2024-05-23"
+author:
+  name: "Charles Beauville"
+  position: "Machine Learning Engineer"
+  website: "https://www.linkedin.com/in/charles-beauville/"
+  github: "github.com/charlesbvll"
+related: 
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+  - text: "Tutorial: What is Federated Learning?"
+    link: "/docs/framework/tutorial-series-what-is-federated-learning.html"
+---
+
+During each Federated Learning round, the server will receive model weights from sampled clients and needs a function to improve its global model using those weights. This is what is called `aggregation`. It can be a simple weighted average function (like `FedAvg`), or can be more complex (e.g. incorporating optimization techniques). The aggregation is where FL's magic happens, it allows the global model to learn and improve from each client's particular data distribution with only their trained weights.
+

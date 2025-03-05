@@ -1,4 +1,5 @@
 """Convolutional layer using Ordered Dropout."""
+
 from typing import Optional, Tuple, Union
 
 import numpy as np

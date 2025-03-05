@@ -1,4 +1,5 @@
 """Client implementation - can call FedPer and FedAvg clients."""
+
 import pickle
 from collections import OrderedDict, defaultdict
 from pathlib import Path
@@ -6,7 +7,7 @@ from typing import Any, Callable, Dict, List, Tuple, Type, Union
 
 import numpy as np
 import torch
-from flwr.client import NumPyClient
+from flwr.client import Client, NumPyClient
 from flwr.common import NDArrays, Scalar
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, Subset, random_split
@@ -238,7 +239,7 @@ class FedPerClient(BaseClient):
 def get_client_fn_simulation(
     config: DictConfig,
     client_state_save_path: str = "",
-) -> Callable[[str], Union[FedPerClient, BaseClient]]:
+) -> Callable[[str], Client]:
     """Generate the client function that creates the Flower Clients.
 
     Parameters
@@ -250,7 +251,7 @@ def get_client_fn_simulation(
 
     Returns
     -------
-    Tuple[Callable[[str], FlowerClient], DataLoader]
+    Tuple[Callable[[str], Client], DataLoader]
         A tuple containing the client function that creates Flower Clients and
         the DataLoader that will be used for testing
     """
@@ -287,7 +288,7 @@ def get_client_fn_simulation(
         )
         # ------------------------------------------------------------
 
-    def client_fn(cid: str) -> BaseClient:
+    def client_fn(cid: str) -> Client:
         """Create a Flower client representing a single organization."""
         cid_use = int(cid)
         if config.dataset.name.lower() == "flickr":
@@ -322,9 +323,9 @@ def get_client_fn_simulation(
         # Create the test loader
         testloader = DataLoader(testset, config.batch_size)
 
-        manager: Union[
-            Type[MobileNetModelManager], Type[ResNetModelManager]
-        ] = MobileNetModelManager
+        manager: Union[Type[MobileNetModelManager], Type[ResNetModelManager]] = (
+            MobileNetModelManager
+        )
         if config.model_name.lower() == "resnet":
             manager = ResNetModelManager
         elif config.model_name.lower() == "mobile":
@@ -342,12 +343,12 @@ def get_client_fn_simulation(
                 client_essentials=client_essentials,
                 config=config,
                 model_manager_class=manager,
-            )
+            ).to_client()
         return BaseClient(
             data_loaders=client_data_loaders,
             client_essentials=client_essentials,
             config=config,
             model_manager_class=manager,
-        )
+        ).to_client()
 
     return client_fn

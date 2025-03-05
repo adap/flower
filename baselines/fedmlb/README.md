@@ -222,7 +222,7 @@ You can override settings directly from the command line in this way:
 ```bash
 python -m fedmlb.main clients_per_round=10 # this will run using 10 clients per round instead of 5 clients as the default config 
 
-# this will select the dataset partitioned with 0.6 concentration paramater instead of 0.3 as the default config
+# this will select the dataset partitioned with 0.6 concentration parameter instead of 0.3 as the default config
 python -m fedmlb.main dataset_config.alpha_dirichlet=0.6
 ```
 
@@ -249,7 +249,7 @@ python -m fedmlb.main dataset_config.alpha_dirichlet=0.6 total_clients=500 clien
 ```
 
 #### Tiny-Imagenet
-For Tiny-ImageNet, as in the orginal paper, batch size of local updates should be set 
+For Tiny-ImageNet, as in the original paper, batch size of local updates should be set 
 to 100 in settings with 100 clients and to 20 in settings with 500 clients;
 this is equal to set the amount of local_updates to 50 (as the default) -- 
 so no change to batch size is required --, in fact

@@ -1,4 +1,5 @@
 """ResNet model, model manager and split."""
+
 from typing import Dict, List, Optional, Tuple, Union
 
 import torch

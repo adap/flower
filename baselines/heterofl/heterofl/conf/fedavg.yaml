@@ -1,0 +1,41 @@
+num_clients: 100
+num_epochs: 1
+num_rounds: 800
+seed: 0
+clip: False
+enable_train_on_train_data_while_testing: False
+client_resources:
+    num_cpus: 1
+    num_gpus: 0.4
+
+dataset:
+  dataset_name: 'MNIST'
+  iid: False
+  shard_per_user : 2
+  balance: False
+  batch_size:
+    train: 10
+    test: 10
+  shuffle:
+    train: true
+    test: false
+
+
+model:
+  model_name: MLP #use CNNCifar for CIFAR10
+
+optim_scheduler:
+  optimizer: SGD
+  lr: 0.05
+  lr_decay_rate: 1.0
+  momentum: 0.5
+  weight_decay: 0
+  scheduler: MultiStepLR
+  milestones: []
+
+strategy:
+  _target_: flwr.server.strategy.FedAvg
+  fraction_fit: 0.1
+  fraction_evaluate: 0.1
+  min_fit_clients: 10
+  min_evaluate_clients: 10

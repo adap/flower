@@ -17,7 +17,4 @@ syntax = "proto3";
 
 package flwr.proto;
 
-message Node {
-  sint64 node_id = 1;
-  bool anonymous = 2;
-}
+message Node { uint64 node_id = 1; }

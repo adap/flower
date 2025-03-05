@@ -29,7 +29,7 @@ class FdsWithSKLearn(unittest.TestCase):
         fds = FederatedDataset(dataset=self.dataset_name, partitioners={"train": 10})
         partition = fds.load_partition(partition_id, "train")
         partition.set_format("numpy")
-        partition_train_test = partition.train_test_split(test_size=0.2)
+        partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
         X_train, y_train = partition_train_test["train"]["image"], partition_train_test[
             "train"]["label"]
         X_test, y_test = partition_train_test["test"]["image"], partition_train_test[

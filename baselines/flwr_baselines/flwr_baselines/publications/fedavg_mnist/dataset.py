@@ -1,6 +1,5 @@
 """MNIST dataset utilities for federated learning."""
 
-
 from typing import List, Optional, Tuple
 
 import numpy as np

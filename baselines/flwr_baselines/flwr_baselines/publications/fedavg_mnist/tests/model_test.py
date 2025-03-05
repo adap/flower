@@ -1,6 +1,5 @@
 """Used to test the model and the data partitionning."""
 
-
 from flwr_baselines.publications.fedavg_mnist import model
 
 

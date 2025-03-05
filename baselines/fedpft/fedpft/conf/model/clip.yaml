@@ -1,0 +1,9 @@
+feature_extractor:
+  _target_: fedpft.models.clip_vit
+  name: openai/clip-vit-base-patch32
+transform: 
+  _target_: fedpft.models.transform
+  mean: [0.48145466, 0.4578275, 0.40821073]
+  std: [0.26862954, 0.26130258, 0.27577711]
+image_input_size: 224
+hidden_dimension: 768

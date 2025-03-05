@@ -1,6 +1,5 @@
 """Module to preprocess the NIST Special Database 19 into FeMNIST/FEMNIST."""
 
-
 import pathlib
 from logging import DEBUG, WARN
 from typing import Dict, Union
@@ -21,10 +20,12 @@ class NISTPreprocessor:
     """Preprocess NIST images from two directories divided by class and by
     writer.
 
-    The preprocessing procedure include different step for FEMNIST and FeMNIST.
+    The preprocessing procedure include different step for FEMNIST and
+    FeMNIST.
 
-    Using two datasets (by_class and by_write, actually one dataset but divided differently) is
-    required to merge information about the writer_id and label.
+    Using two datasets (by_class and by_write, actually one dataset but
+    divided differently) is required to merge information about the
+    writer_id and label.
     """
 
     def __init__(
