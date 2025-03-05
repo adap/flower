@@ -445,7 +445,7 @@ def verify_message_ids(
     ret_dict = {}
     current = current_time if current_time else now().timestamp()
     for message_id in list(inquired_message_ids):
-        # Generate error TaskRes if the task_ins doesn't exist or has expired
+        # Generate error message if the inquired message doesn't exist or has expired
         message_ins = found_message_ins_dict.get(message_id)
         if message_ins is None or message_ttl_has_expired(
             message_ins.metadata, current
