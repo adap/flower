@@ -204,6 +204,13 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Read from state
         messages_res: list[Message] = state.get_message_res(message_ids=message_ids)
 
+        # Delete the instruction Messages and responses if response Message is found
+        message_ins_res_to_delete = {
+            UUID(msg_res.metadata.reply_to_message) for msg_res in messages_res
+        }
+
+        state.delete_messages(message_ids=message_ins_res_to_delete)
+
         # Convert to proto Messages
         messages_list = []
         while messages_res:
