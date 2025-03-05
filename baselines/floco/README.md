@@ -20,7 +20,7 @@ dataset: [CIFAR10]
 
 **Datasets:** CIFAR-10
 
-**Hardware Setup:** We trained the models used for the plots below on a M1X chip.
+**Hardware Setup:** We trained the models used for the plots below on an Apple M1 Pro chip.
 
 **Contributors:** <add here your names (or github tags, emails are fine too if you'd like)> 
 
