@@ -789,7 +789,7 @@ class StateTest(unittest.TestCase):
 
         # Assert
         assert len(task_res_list) == 2
-        err_taskres = task_res_list[1]
+        err_taskres = task_res_list[0]
         assert err_taskres.task.HasField("error")
         assert err_taskres.task.error.code == ErrorCode.NODE_UNAVAILABLE
 
