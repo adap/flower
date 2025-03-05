@@ -1,5 +1,12 @@
 // Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 
+import { vi } from 'vitest';
+
+vi.mock('./constants', () => ({
+  DEFAULT_MODEL: 'meta/llama3.2-1b/instruct-fp16',
+  REMOTE_URL: process.env.FI_DEV_REMOTE_URL,
+}));
+
 import emojiRegex from 'emoji-regex';
 import { describe, expect, it, beforeEach, assert } from 'vitest';
 import { FlowerIntelligence, getModels } from './flowerintelligence';

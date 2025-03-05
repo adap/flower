@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-curl -s -X POST https://api.flower.blue/v1/organization/projects/1/api_keys \
+curl -s -X POST $FI_DEV_REMOTE_URL/v1/organization/projects/1/api_keys \
 -H "Authorization: Bearer $FI_MGMT_API_KEY" \
 -H "Content-Type: application/json" \
 -d '{
