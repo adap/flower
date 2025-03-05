@@ -464,12 +464,13 @@ class StateTest(unittest.TestCase):
         msg_ins_list = state.get_message_ins(node_id=node_id, limit=None)
 
         # Insert one TaskRes and retrive it to mark it as delivered
-        msg_res_0 = msg_ins_list[0].create_reply(content=RecordSet())
+        msg_res_0 = msg_ins_list[0].create_error_reply(Error(0))
 
         _ = state.store_message_res(message=msg_res_0)
-        _ = state.get_message_res(
+        retrieved_msg_res_0 = state.get_message_res(
             message_ids={UUID(msg_res_0.metadata.reply_to_message)}
-        )
+        )[0]
+        assert retrieved_msg_res_0.error.code == 0
 
         # Insert one reply Message, but don't retrieve it
         msg_res_1 = msg_ins_list[1].create_reply(content=RecordSet())
@@ -1128,7 +1129,8 @@ class StateTest(unittest.TestCase):
         msg_to_reply_to = state.get_message_ins(node_id=node_id, limit=2)[0]
         reply_msg = msg_to_reply_to.create_reply(content=RecordSet())
 
-        # This patch respresents a very slow communication/ClientApp execution that triggers TTL
+        # This patch respresents a very slow communication/ClientApp execution
+        # that triggers TTL
         with patch(
             "time.time",
             side_effect=lambda: msg.metadata.created_at + msg.metadata.ttl + 0.1,
@@ -1239,13 +1241,13 @@ class StateTest(unittest.TestCase):
                 )
             )
 
-            msg.metadata.created_at = msg_ins_created_at  # type: ignore
-            msg.metadata.ttl = msg_ins_ttl  # type: ignore
+            msg.metadata.created_at = msg_ins_created_at
+            msg.metadata.ttl = msg_ins_ttl
             state.store_message_ins(message=msg)
 
             reply_msg = msg.create_reply(content=RecordSet())
-            reply_msg.metadata.created_at = msg_res_created_at  # type: ignore
-            reply_msg.metadata.ttl = msg_res_ttl  # type: ignore
+            reply_msg.metadata.created_at = msg_res_created_at
+            reply_msg.metadata.ttl = msg_res_ttl
 
             # Execute
             res = state.store_message_res(reply_msg)
