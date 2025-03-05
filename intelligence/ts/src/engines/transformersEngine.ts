@@ -1,4 +1,4 @@
-// Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+// Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 
 import {
   InterruptableStoppingCriteria,
