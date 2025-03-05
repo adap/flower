@@ -3,19 +3,10 @@
   "version": "0.0.1",
   "name": "Flower Intelligence",
   "description": "Flower Intelligence - Powered by Flower Labs",
-  "permissions": [
-    "activeTab",
-    "history",
-    "storage"
-  ],
-  "host_permissions": [
-    "*://api.flower.ai/*",
-    "*://*/*"
-  ],
+  "permissions": ["activeTab", "history", "storage"],
+  "host_permissions": ["*://api.flower.ai/*", "*://*/*"],
   "background": {
-    "scripts": [
-      "background.js"
-    ],
+    "scripts": ["background.js"],
     "type": "module"
   },
   "action": {
