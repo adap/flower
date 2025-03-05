@@ -20,8 +20,7 @@ cd "$ROOT"
 
 cd "$ROOT"
 cd intelligence
-./dev/build_docs.sh
-make html
+./dev/build-docs.sh
 
 cd "$ROOT"
 cd framework/docs 
