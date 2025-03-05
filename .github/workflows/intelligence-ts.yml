@@ -24,7 +24,7 @@ env:
 jobs:
   fi_ts_build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -47,7 +47,7 @@ jobs:
 
   fi_ts_format:
     name: Format Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -70,7 +70,7 @@ jobs:
 
   fi_ts_lint:
     name: Lint Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -93,7 +93,7 @@ jobs:
 
   fi_ts_demos:
     name: Demos
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -138,6 +138,7 @@ jobs:
         working-directory: intelligence/ts
         env:
           FI_API_KEY: ${{ steps.get_api_key.outputs.api_key }}
+          NODE_TLS_REJECT_UNAUTHORIZED: "0"
         run: |
           pnpm demo
           pnpm demo:js-proj
@@ -145,7 +146,7 @@ jobs:
 
   fi_ts_tests:
     name: Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -181,7 +182,7 @@ jobs:
 
   fi_ts_docs:
     name: Docs build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -201,3 +202,29 @@ jobs:
       - name: Build docs
         working-directory: intelligence/ts
         run: pnpm build:docs
+
+  fi_ts_release_dry_run:
+    name: Release dry-run
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.14.0'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        working-directory: intelligence/ts
+        run: pnpm install
+
+      - name: Run build
+        working-directory: intelligence/ts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish . --access public --no-git-checks --dry-run
