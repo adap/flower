@@ -323,9 +323,7 @@ class StateTest(unittest.TestCase):
 
         actual_message_ins = message_ins_list[0]
 
-        assert datetime.fromisoformat(
-            actual_message_ins.metadata.delivered_at
-        ) > dt
+        assert datetime.fromisoformat(actual_message_ins.metadata.delivered_at) > dt
         assert actual_message_ins.metadata.ttl > 0
 
     def test_store_task_ins_invalid_node_id(self) -> None:
@@ -643,7 +641,7 @@ class StateTest(unittest.TestCase):
         assert len(task_ins_list) == 1
 
         # 2nd get: no TaskIns because it was already delivered before
-        task_ins_list = state.get_task_ins(node_id, limit=None)
+        task_ins_list = state.get_task_ins(2, limit=None)
 
         # Assert
         assert len(task_ins_list) == 0
@@ -1332,7 +1330,8 @@ class StateTest(unittest.TestCase):
             assert state.num_task_res() == 0
 
     def test_get_message_res_expired_message_ins(self) -> None:
-        """Test get_message_res to return error Message if the inquired message has expired."""
+        """Test get_message_res to return error Message if the inquired message has
+        expired."""
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
