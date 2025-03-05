@@ -238,7 +238,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
-        """Get all input Message IDs for the given run_id."""
+        """Get all instruction Message IDs for the given run_id."""
 
     @abc.abstractmethod
     def create_node(self, ping_interval: float) -> int:

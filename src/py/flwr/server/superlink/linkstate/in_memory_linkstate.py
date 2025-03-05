@@ -488,7 +488,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         return task_id_list
 
     def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
-        """Get all input Message IDs for the given run_id."""
+        """Get all instruction Message IDs for the given run_id."""
         message_id_list: set[UUID] = set()
         with self.lock:
             for message_id, message in self.message_ins_store.items():
