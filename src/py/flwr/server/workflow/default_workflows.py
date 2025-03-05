@@ -64,9 +64,13 @@ class DefaultWorkflow:
             )
 
         # Start the thread updating nodes
-        thread, f_stop = start_update_client_manager_thread(
+        thread, f_stop, c_done = start_update_client_manager_thread(
             driver, context.client_manager
         )
+
+        # Wait until the node registration done
+        if not c_done.is_set():
+            c_done.wait()
 
         # Initialize parameters
         log(INFO, "[INIT]")

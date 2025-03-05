@@ -48,8 +48,13 @@ class TestUtils(unittest.TestCase):
         # Execute
         # Patching Event.wait with our custom function
         with patch.object(Event, "wait", new=custom_wait):
-            thread, f_stop = start_update_client_manager_thread(driver, client_manager)
-            # Wait until all nodes are registered via `client_manager.sample()`
+            thread, f_stop, c_done = start_update_client_manager_thread(
+                driver, client_manager
+            )
+            # Wait until the node registration done
+            if not c_done.is_set():
+                c_done.wait()
+            # Wait until nodes are sampled via `client_manager.sample()`
             client_manager.sample(len(expected_node_ids))
             # Retrieve all nodes in `client_manager`
             node_ids = {proxy.node_id for proxy in client_manager.all().values()}
