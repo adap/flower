@@ -609,7 +609,6 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        # A message for a node that doesn't exist
         msg = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -655,7 +654,6 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        # A message for a node that doesn't exist
         msg = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -1121,7 +1119,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         node_id = state.create_node(1e3)
-        # Create message, tweak created_at and store
+        # Create and store a message
         msg = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
@@ -1132,7 +1130,7 @@ class StateTest(unittest.TestCase):
         msg_to_reply_to = state.get_message_ins(node_id=node_id, limit=2)[0]
         reply_msg = msg_to_reply_to.create_reply(content=RecordSet())
 
-        # This patch respresents a very slow communication that triggers TTL
+        # This patch respresents a very slow communication/ClientApp execution that triggers TTL
         with patch(
             "time.time",
             side_effect=lambda: msg.metadata.created_at + msg.metadata.ttl + 0.1,
@@ -1334,8 +1332,7 @@ class StateTest(unittest.TestCase):
             assert state.num_task_res() == 0
 
     def test_get_message_res_expired_message_ins(self) -> None:
-        """Test get_message_res to return error Message if the Message it was a replied
-        of has expired."""
+        """Test get_message_res to return error Message if the inquired message has expired."""
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
