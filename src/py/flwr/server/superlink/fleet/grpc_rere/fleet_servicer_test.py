@@ -27,6 +27,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.serde import message_to_proto
 from flwr.common.typing import RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -103,8 +104,10 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Transition status to running. PushTaskRes is only allowed in running status.
         self._transition_run_status(run_id, 2)
 
-        msg_proto = create_res_message(
-            src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
+        msg_proto = message_to_proto(
+            create_res_message(
+                src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
+            )
         )
         request = PushMessagesRequest(
             node=Node(node_id=node_id), messages_list=[msg_proto]
@@ -121,8 +124,10 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Assert `PushMessages` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
 
-        msg_proto = create_res_message(
-            src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
+        msg_proto = message_to_proto(
+            create_res_message(
+                src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
+            )
         )
         request = PushMessagesRequest(
             node=Node(node_id=node_id), messages_list=[msg_proto]

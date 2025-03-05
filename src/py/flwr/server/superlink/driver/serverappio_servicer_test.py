@@ -27,7 +27,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.serde import context_to_proto, run_status_to_proto
+from flwr.common.serde import context_to_proto, message_to_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
 from flwr.proto.message_pb2 import Message  # pylint: disable=E0611
@@ -211,8 +211,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        message_ins = create_ins_message(
-            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+        message_ins = message_to_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
         )
 
         # Transition status to running. PushTaskRes is only allowed in running status.
@@ -252,8 +254,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        message_ins = create_ins_message(
-            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+        message_ins = message_to_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
         )
 
         self._transition_run_status(run_id, num_transitions)
