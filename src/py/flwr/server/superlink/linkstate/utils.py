@@ -544,7 +544,5 @@ def verify_found_message_replies(
             message_res = create_message_error_unavailable_res_message(
                 found_message_ins_dict[message_ins_id].metadata
             )
-            # pylint: disable=W0212
-            message_res.metadata._delivered_at = now().isoformat()  # type: ignore
         ret_dict[message_ins_id] = message_res
     return ret_dict
