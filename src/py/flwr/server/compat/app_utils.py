@@ -107,7 +107,7 @@ def _update_client_manager(
             else:
                 raise RuntimeError("Could not register node.")
 
-        # Finish nodes registration
+        # Flag first pass for nodes registration is completed
         c_done.set()
 
         # Sleep for 3 seconds
