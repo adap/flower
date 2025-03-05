@@ -52,8 +52,7 @@ class TestUtils(unittest.TestCase):
                 driver, client_manager
             )
             # Wait until the node registration done
-            if not c_done.is_set():
-                c_done.wait()
+            c_done.wait()
             # Wait until nodes are sampled via `client_manager.sample()`
             client_manager.sample(len(expected_node_ids))
             # Retrieve all nodes in `client_manager`

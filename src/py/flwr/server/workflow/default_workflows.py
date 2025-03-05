@@ -69,8 +69,7 @@ class DefaultWorkflow:
         )
 
         # Wait until the node registration done
-        if not c_done.is_set():
-            c_done.wait()
+        c_done.wait()
 
         # Initialize parameters
         log(INFO, "[INIT]")
