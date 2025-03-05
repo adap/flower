@@ -1484,9 +1484,9 @@ class StateTest(unittest.TestCase):
         assert state.num_message_ins() == 1
         assert ins_msg_id
         # Fetch ins message
-        ins_msg = state.get_message_ins(node_id=node_id, limit=1)
+        ins_msg = state.get_message_ins(node_id=node_id, limit=1)[0]
         # Create reply and insert
-        res_msg = ins_msg[0].create_reply(content=RecordSet())
+        res_msg = ins_msg.create_reply(content=RecordSet())
         state.store_message_res(res_msg)
         assert state.num_message_res() == 1
 
