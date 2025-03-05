@@ -422,9 +422,11 @@ def test_recordset_repr() -> None:
     """Test the string representation of RecordSet."""
     # Prepare
     rs = RecordSet(
-        parameters_records={"params": ParametersRecord()},
-        metrics_records={"metrics": MetricsRecord({"aa": 123})},
-        configs_records={"configs": ConfigsRecord({"cc": bytes(5)})},
+        {
+            "params": ParametersRecord(),
+            "metrics": MetricsRecord({"aa": 123}),
+            "configs": ConfigsRecord({"cc": bytes(5)}),
+        },
     )
     expected = """RecordSet(
   parameters_records={'params': {}},

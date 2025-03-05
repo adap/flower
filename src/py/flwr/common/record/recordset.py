@@ -155,19 +155,11 @@ class RecordSet(TypedDict[str, RecordType]):
     :code:`MetricsRecord` and :code:`ParametersRecord`.
     """
 
-    def __init__(
-        self,
-        parameters_records: dict[str, ParametersRecord] | None = None,
-        metrics_records: dict[str, MetricsRecord] | None = None,
-        configs_records: dict[str, ConfigsRecord] | None = None,
-    ) -> None:
+    def __init__(self, records: dict[str, RecordType] | None = None) -> None:
         super().__init__(_check_key, _check_value)
-        for key, p_record in (parameters_records or {}).items():
-            self[key] = p_record
-        for key, m_record in (metrics_records or {}).items():
-            self[key] = m_record
-        for key, c_record in (configs_records or {}).items():
-            self[key] = c_record
+        if records is not None:
+            for key, record in records.items():
+                self[key] = record
 
     @property
     def parameters_records(self) -> TypedDict[str, ParametersRecord]:

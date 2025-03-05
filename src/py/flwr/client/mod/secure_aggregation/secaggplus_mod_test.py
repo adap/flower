@@ -62,9 +62,7 @@ def get_test_handler(
                 ttl=DEFAULT_TTL,
                 message_type=MessageType.TRAIN,
             ),
-            content=RecordSet(
-                configs_records={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}
-            ),
+            content=RecordSet({RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
         )
         out_msg = app(in_msg, ctxt)
         return out_msg.content.configs_records[RECORD_KEY_CONFIGS]
@@ -78,7 +76,7 @@ def _make_ctxt() -> Context:
         run_id=234,
         node_id=123,
         node_config={},
-        state=RecordSet(configs_records={RECORD_KEY_STATE: cfg}),
+        state=RecordSet({RECORD_KEY_STATE: cfg}),
         run_config={},
     )
 

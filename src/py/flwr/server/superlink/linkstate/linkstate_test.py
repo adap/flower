@@ -1740,7 +1740,7 @@ def create_res_message(
     if error:
         out_msg = in_msg.create_error_reply(error=error)
     else:
-        out_msg = in_msg.create_reply(content=RecordSet(parameters_records={}))
+        out_msg = in_msg.create_reply(content=RecordSet())
 
     return message_to_proto(out_msg)
 
