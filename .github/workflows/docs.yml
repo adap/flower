@@ -36,7 +36,12 @@ jobs:
         with:
           node-version: '22.14.0'
       - name: Install pnpm
-        run: npm install -g pnpm
+        run: |
+          npm install -g pnpm
+      - name: Install Flower Intelligence
+        run: |
+          cd intelligence/ts
+          pnpm i
       - name: Install Flower Datasets
         run: |
           cd datasets
