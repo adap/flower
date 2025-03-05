@@ -15,11 +15,13 @@
 """Flower Exec API interceptor."""
 
 
-from typing import Any, Callable, Union
+import contextvars
+from typing import Any, Callable, Union, cast
 
 import grpc
 
 from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.typing import UserInfo
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetAuthTokensResponse,
@@ -41,6 +43,11 @@ Request = Union[
 Response = Union[
     StartRunResponse, StreamLogsResponse, GetLoginDetailsResponse, GetAuthTokensResponse
 ]
+
+
+shared_user_info: contextvars.ContextVar[UserInfo] = contextvars.ContextVar(
+    "user_info", default=UserInfo(user_id=None, user_name=None)
+)
 
 
 class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
@@ -77,13 +84,22 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
         ) -> Response:
             call = method_handler.unary_unary or method_handler.unary_stream
             metadata = context.invocation_metadata()
+
+            # Intercept GetLoginDetails and GetAuthTokens requests, and return
+            # the response without authentication
             if isinstance(request, (GetLoginDetailsRequest, GetAuthTokensRequest)):
                 return call(request, context)  # type: ignore
 
-            valid_tokens, _ = self.auth_plugin.validate_tokens_in_metadata(metadata)
+            # For other requests, check if the user is authenticated
+            valid_tokens, user_info = self.auth_plugin.validate_tokens_in_metadata(
+                metadata
+            )
             if valid_tokens:
+                # Store user info in contextvars for authenticated users
+                shared_user_info.set(cast(UserInfo, user_info))
                 return call(request, context)  # type: ignore
 
+            # If the user is not authenticated, refresh tokens
             tokens = self.auth_plugin.refresh_tokens(context.invocation_metadata())
             if tokens is not None:
                 context.send_initial_metadata(tokens)
