@@ -1,6 +1,12 @@
-import { assert, describe, it, expect, beforeEach } from 'vitest';
-import { DEV_REMOTE_URL } from '../constants';
+import { assert, describe, it, expect, beforeEach, vi } from 'vitest';
 import { getTimestamp, CryptographyHandler, KeyManager, NetworkService } from './remoteEngine';
+
+vi.mock('./constants', () => ({
+  DEFAULT_MODEL: 'meta/llama3.2-1b/instruct-fp16',
+  REMOTE_URL: process.env.FI_DEV_REMOTE_URL,
+}));
+
+import { REMOTE_URL } from '../constants';
 
 const API_KEY = process.env.FI_API_KEY ?? '';
 const STRING_TIMESTAMP = '2025-03-06T13:19:47.353034';
@@ -10,7 +16,7 @@ describe('CryptographyHandler', () => {
   let cryptographyHandler: CryptographyHandler;
 
   beforeEach(async () => {
-    cryptographyHandler = new CryptographyHandler(DEV_REMOTE_URL, API_KEY);
+    cryptographyHandler = new CryptographyHandler(REMOTE_URL, API_KEY);
     await cryptographyHandler.initializeKeysAndExchange();
   });
 
@@ -64,7 +70,7 @@ describe('CryptographyHandler', () => {
     expect(encryptedRes.ok).toBe(true);
 
     // Create a new instance with a different key by performing a separate key exchange
-    const newHandler = new CryptographyHandler(DEV_REMOTE_URL, API_KEY);
+    const newHandler = new CryptographyHandler(REMOTE_URL, API_KEY);
     await newHandler.initializeKeysAndExchange();
 
     const decryptRes = await newHandler.decryptMessage(encryptedRes.value);
@@ -175,7 +181,7 @@ describe('NetworkService', () => {
   let networkService: NetworkService;
 
   beforeEach(() => {
-    networkService = new NetworkService(DEV_REMOTE_URL, API_KEY);
+    networkService = new NetworkService(REMOTE_URL, API_KEY);
   });
 
   it('should fetch and return the server public key', async () => {

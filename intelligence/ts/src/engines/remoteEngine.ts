@@ -2,7 +2,7 @@
 
 import nodeCrypto from 'crypto';
 import getRandomValues from 'get-random-values';
-import { DEV_REMOTE_URL, PROD_REMOTE_URL } from '../constants';
+import { REMOTE_URL } from '../constants';
 import {
   ChatResponseResult,
   FailureCode,
@@ -87,7 +87,7 @@ export class RemoteEngine extends BaseEngine {
 
   constructor(apiKey: string) {
     super();
-    this.baseUrl = process.env.FI_ENV === 'development' ? DEV_REMOTE_URL : PROD_REMOTE_URL;
+    this.baseUrl = REMOTE_URL;
     this.apiKey = apiKey;
     this.cryptoHandler = new CryptographyHandler(this.baseUrl, this.apiKey);
   }
