@@ -174,7 +174,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         - An error Message if the reply Message exists but has expired.
         - An error Message if the reply Message hasn't arrived yet.
         - The reply Message.
-        - Nothing if the Message with the passed message IDs is still valid and waiting
+        - Nothing if the Message with the passed message_id is still valid and waiting
         for a reply Message.
 
         Parameters
