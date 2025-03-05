@@ -343,13 +343,13 @@ class StateTest(unittest.TestCase):
             message_ids={UUID(msg_res_0.metadata.reply_to_message)}
         )
 
-        # Insert one reply Message, but don't retrive it
+        # Insert one reply Message, but don't retrieve it
         msg_res_1 = msg_ins_list[1].create_reply(content=RecordSet())
         _ = state.store_message_res(message=msg_res_1)
 
         # Situation now:
         # - State has three Message, all of them delivered
-        # - State has two Message replies, one of the delivered, the other not
+        # - State has two Message replies, one of them delivered, the other not
         assert state.num_message_ins() == 3
         assert state.num_message_res() == 2
 
@@ -965,7 +965,7 @@ class StateTest(unittest.TestCase):
 
         reply = state.get_message_res({ins_msg_id})
         assert len(reply) == 0
-        # Check message contains error informing replpy message hasn't arrived
+        # Check message contains error informing reply message hasn't arrived
         assert state.num_message_ins() == 1
         assert state.num_message_res() == 0
 
@@ -1008,7 +1008,7 @@ class StateTest(unittest.TestCase):
         # Fetch reply
         reply_msg = state.get_message_res({ins_msg_id})
 
-        # assert
+        # Assert
         assert reply_msg[0].metadata.dst_node_id == msg.metadata.src_node_id
 
         # We haven't called deletion of messages
