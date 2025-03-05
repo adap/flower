@@ -1,5 +1,4 @@
 import { assert, describe, it, expect, beforeEach, vi } from 'vitest';
-import { getTimestamp, CryptographyHandler, KeyManager, NetworkService } from './remoteEngine';
 
 vi.mock('./constants', () => ({
   DEFAULT_MODEL: 'meta/llama3.2-1b/instruct-fp16',
@@ -7,6 +6,7 @@ vi.mock('./constants', () => ({
 }));
 
 import { REMOTE_URL } from '../constants';
+import { getTimestamp, CryptographyHandler, KeyManager, NetworkService } from './remoteEngine';
 
 const API_KEY = process.env.FI_API_KEY ?? '';
 const STRING_TIMESTAMP = '2025-03-06T13:19:47.353034';
