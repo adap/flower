@@ -183,7 +183,7 @@ class GrpcDriver(Driver):
         )
         return Message(metadata=metadata, content=content)
 
-    def get_node_ids(self) -> list[int]:
+    def get_node_ids(self) -> Iterable[int]:
         """Get node IDs."""
         # Call GrpcDriverStub method
         res: GetNodesResponse = self._stub.GetNodes(

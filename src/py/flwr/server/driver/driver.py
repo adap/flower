@@ -85,7 +85,7 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def get_node_ids(self) -> list[int]:
+    def get_node_ids(self) -> Iterable[int]:
         """Get node IDs."""
 
     @abstractmethod

@@ -109,9 +109,9 @@ class InMemoryDriver(Driver):
         )
         return Message(metadata=metadata, content=content)
 
-    def get_node_ids(self) -> list[int]:
+    def get_node_ids(self) -> Iterable[int]:
         """Get node IDs."""
-        return list(self.state.get_nodes(cast(Run, self._run).run_id))
+        return self.state.get_nodes(cast(Run, self._run).run_id)
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.
