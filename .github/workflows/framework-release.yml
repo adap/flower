@@ -13,7 +13,7 @@ env:
 
 jobs:
   publish:
-    if: ${{ github.repository == 'adap/flower' && !startsWith(github.event.release.tag_name, 'intelligence-v') }}
+    if: ${{ github.repository == 'adap/flower' && !startsWith(github.event.release.tag_name, 'intelligence/') }}
     name: Publish release
     runs-on: ubuntu-22.04
     outputs:
@@ -49,7 +49,7 @@ jobs:
         python -m poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN_RELEASE_FLWR }}
 
   parameters:
-    if: ${{ github.repository == 'adap/flower' && !startsWith(github.event.release.tag_name, 'intelligence-v') }}
+    if: ${{ github.repository == 'adap/flower' && !startsWith(github.event.release.tag_name, 'intelligence/') }}
     name: Collect docker build parameters
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -75,7 +75,7 @@ jobs:
            echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 
   build-base-images:
-    if: ${{ github.repository == 'adap/flower' && !startsWith(github.event.release.tag_name, 'intelligence-v') }}
+    if: ${{ github.repository == 'adap/flower' && !startsWith(github.event.release.tag_name, 'intelligence/') }}
     name: Build base images
     uses: ./.github/workflows/_docker-build.yml
     needs: parameters
@@ -95,7 +95,7 @@ jobs:
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
 
   build-binary-images:
-    if: ${{ github.repository == 'adap/flower' && !startsWith(github.event.release.tag_name, 'intelligence-v') }}
+    if: ${{ github.repository == 'adap/flower' && !startsWith(github.event.release.tag_name, 'intelligence/') }}
     name: Build binary images
     uses: ./.github/workflows/_docker-build.yml
     needs: [parameters, build-base-images]

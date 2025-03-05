@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   publish:
-    if: ${{ github.repository == 'adap/flower' && startsWith(github.event.release.tag_name, 'intelligence-v') }}
+    if: ${{ github.repository == 'adap/flower' && startsWith(github.event.release.tag_name, 'intelligence/') }}
     name: Publish release
     runs-on: ubuntu-latest
     steps:
