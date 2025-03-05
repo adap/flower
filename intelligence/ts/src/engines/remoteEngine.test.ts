@@ -1,16 +1,16 @@
 import { assert, describe, it, expect, beforeEach, vi } from 'vitest';
 
-vi.mock('./constants', () => ({
-  DEFAULT_MODEL: 'meta/llama3.2-1b/instruct-fp16',
-  REMOTE_URL: process.env.FI_DEV_REMOTE_URL,
-}));
-
-import { REMOTE_URL } from '../constants';
-import { getTimestamp, CryptographyHandler, KeyManager, NetworkService } from './remoteEngine';
-
 const API_KEY = process.env.FI_API_KEY ?? '';
+const REMOTE_URL = process.env.FI_DEV_REMOTE_URL ?? '';
 const STRING_TIMESTAMP = '2025-03-06T13:19:47.353034';
 const INT_TIMESTAMP = 1741267187353;
+
+vi.mock('./constants', () => ({
+  DEFAULT_MODEL: 'meta/llama3.2-1b/instruct-fp16',
+  REMOTE_URL: REMOTE_URL,
+}));
+
+import { getTimestamp, CryptographyHandler, KeyManager, NetworkService } from './remoteEngine';
 
 describe('CryptographyHandler', () => {
   let cryptographyHandler: CryptographyHandler;
