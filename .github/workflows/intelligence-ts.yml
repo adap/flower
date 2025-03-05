@@ -198,16 +198,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22.14.0'
-          cache: pnpm
           registry-url: https://registry.npmjs.org
+
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Install dependencies
         working-directory: intelligence/ts
