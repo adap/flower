@@ -1243,13 +1243,13 @@ class StateTest(unittest.TestCase):
                 )
             )
 
-            msg.metadata._created_at = msg_ins_created_at  # type: ignore
-            msg.metadata._ttl = msg_ins_ttl  # type: ignore
+            msg.metadata.created_at = msg_ins_created_at  # type: ignore
+            msg.metadata.ttl = msg_ins_ttl  # type: ignore
             state.store_message_ins(message=msg)
 
             reply_msg = msg.create_reply(content=RecordSet())
-            reply_msg.metadata._created_at = msg_res_created_at  # type: ignore
-            reply_msg.metadata._ttl = msg_res_ttl  # type: ignore
+            reply_msg.metadata.created_at = msg_res_created_at  # type: ignore
+            reply_msg.metadata.ttl = msg_res_ttl  # type: ignore
 
             # Execute
             res = state.store_message_res(reply_msg)
