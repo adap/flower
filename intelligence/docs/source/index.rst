@@ -158,6 +158,74 @@ Below are a few more examples to illustrate different ways to interact with the 
                 });
                 console.log(reply.content);
 
+3. **Handling history**
+
+   Using this array of messages, you can easily create context-aware conversation.
+   Here is a simple example:
+
+    .. tab-set::
+        :sync-group: category
+
+        .. tab-item:: TypeScript
+            :sync: ts
+
+            .. code-block:: ts
+
+                // Initialize history with a system message.
+                const history: Message[] = [
+                  { role: "system", content: "You are a friendly assistant that loves using emojis." }
+                ];
+
+                // Function to chat while preserving conversation history.
+                async function chatWithHistory(userInput: string): Promise<void> {
+                  // Append user input to the history.
+                  history.push({ role: "user", content: userInput });
+
+                  // Send the entire history to the chat method.
+                  const reply: ChatResponseResult = await fi.chat({ messages: history });
+
+                  if (reply.ok) {
+                    // Append the assistant's reply to the history.
+                    history.push(reply.message);
+                    console.log("Assistant:", reply.message.content);
+                  } else {
+                    console.error("Chat error:", reply.failure);
+                  }
+                }
+
+                // Example usage:
+                chatWithHistory("Why is the sky blue?");
+
+        .. tab-item:: JavaScript
+            :sync: js
+
+            .. code-block:: js
+
+                // Initialize history with a system message.
+                const history = [
+                  { role: "system", content: "You are a friendly assistant that loves using emojis." }
+                ];
+
+                // Function to chat while preserving conversation history.
+                async function chatWithHistory(userInput) {
+                  // Append user input to the history.
+                  history.push({ role: "user", content: userInput });
+
+                  // Send the entire history to the chat method.
+                  const reply = await fi.chat({ messages: history });
+
+                  if (reply.ok) {
+                    // Append the assistant's reply to the history.
+                    history.push(reply.message);
+                    console.log("Assistant:", reply.message.content);
+                  } else {
+                    console.error("Chat error:", reply.failure);
+                  }
+                }
+
+                // Example usage:
+                chatWithHistory("Why is the sky blue?");
+
 .. note::
    Checkout out full examples over on GitHub for more information!
 
