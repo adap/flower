@@ -16,6 +16,7 @@
 
 
 from abc import ABC, abstractmethod
+from typing import Optional, Union
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -47,7 +48,7 @@ class EventLogWriterPlugin(ABC):
         context: grpc.ServicerContext,
         user_info: UserInfo,
         method_name: str,
-        response: GrpcMessage,
+        response: Optional[Union[GrpcMessage, Exception]],
     ) -> LogEntry:
         """Compose post-event log entry from the provided response and context."""
 
