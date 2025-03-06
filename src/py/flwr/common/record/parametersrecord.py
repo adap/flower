@@ -600,8 +600,9 @@ class ParametersRecord(TypedDict[str, Array]):
                 total_serialized_bytes = 0
                 gc.collect()
 
-        # Force GC
-        gc.collect()
+        if not keep_input:
+            # Force GC
+            gc.collect()
         return ret
 
     def to_state_dict(
@@ -633,7 +634,6 @@ class ParametersRecord(TypedDict[str, Array]):
         if not keep_input:
             # Force GC
             gc.collect()
-
         return state_dict
 
     def to_tf_weights(self, *, keep_input: bool = True) -> list[NDArray]:
