@@ -312,9 +312,11 @@ class ParametersRecord(TypedDict[str, Array]):
         tensor will be converted into an :class:`Array` and stored in this record.
 
     tf_weights : Optional[list[NDArray]] (default: None)
-        A list of TensorFlow weights (NumPy arrays). Each array will be
-        automatically converted into an :class:`Array` and stored in this record
-        with generated keys.
+        A list of TensorFlow weights (NumPy arrays) obtained from ``get_weights`` method,
+        see the `documentation
+        <https://www.tensorflow.org/api_docs/python/tf/keras/Layer#get_weights>`_.
+        Each array will be automatically converted into an :class:`Array` and stored in
+        this record with generated keys.
 
     keep_input : bool (default: True)
         If `False`, entries from the input are removed after being added to
