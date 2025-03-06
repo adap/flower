@@ -19,8 +19,8 @@ from collections.abc import Iterator
 from typing import Any, Callable, Union, cast
 
 import grpc
+from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.event_log_plugin import EventLogRequest, EventLogResponse
 from flwr.common.event_log_plugin.event_log_plugin import EventLogWriterPlugin
 from flwr.common.typing import LogEntry
 
@@ -54,9 +54,9 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         self, method_handler: grpc.RpcMethodHandler, method_name: str
     ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
-            request: EventLogRequest,
+            request: GrpcMessage,
             context: grpc.ServicerContext,
-        ) -> Union[EventLogResponse, Iterator[EventLogResponse], Exception]:
+        ) -> Union[GrpcMessage, Iterator[GrpcMessage], Exception]:
             log_entry: LogEntry
             # Log before call
             log_entry = self.log_plugin.compose_log_before_event(
@@ -72,7 +72,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                 unary_response, error = None, None
                 try:
                     unary_response = cast(
-                        EventLogResponse, method_handler.unary_unary(request, context)
+                        GrpcMessage, method_handler.unary_unary(request, context)
                     )
                 except Exception as e:  # pylint: disable=broad-except
                     error = e
@@ -92,11 +92,11 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             # after iteration completes
             if method_handler.unary_stream:
                 response_iterator = cast(
-                    Iterator[EventLogResponse],
+                    Iterator[GrpcMessage],
                     method_handler.unary_stream(request, context),
                 )
 
-                def response_wrapper() -> Iterator[EventLogResponse]:
+                def response_wrapper() -> Iterator[GrpcMessage]:
                     stream_response, error = None, None
                     try:
                         # pylint: disable=use-yield-from

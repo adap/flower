@@ -19,60 +19,9 @@ from abc import ABC, abstractmethod
 from typing import Optional, Union
 
 import grpc
+from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.typing import LogEntry, UserInfo
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    GetLoginDetailsRequest,
-    GetLoginDetailsResponse,
-    ListRunsRequest,
-    ListRunsResponse,
-    StartRunRequest,
-    StartRunResponse,
-    StopRunRequest,
-    StopRunResponse,
-    StreamLogsRequest,
-    StreamLogsResponse,
-)
-from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
-from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    CreateNodeResponse,
-    DeleteNodeRequest,
-    DeleteNodeResponse,
-    PullMessagesRequest,
-    PullMessagesResponse,
-    PushMessagesRequest,
-    PushMessagesResponse,
-)
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-
-# Type variables for request and response messages
-EventLogRequest = Union[
-    StartRunRequest,
-    ListRunsRequest,
-    StreamLogsRequest,
-    StopRunRequest,
-    GetLoginDetailsRequest,
-    CreateNodeRequest,
-    DeleteNodeRequest,
-    PullMessagesRequest,
-    PushMessagesRequest,
-    GetFabRequest,
-    GetRunRequest,
-]
-EventLogResponse = Union[
-    StartRunResponse,
-    ListRunsResponse,
-    StreamLogsResponse,
-    StopRunResponse,
-    GetLoginDetailsResponse,
-    CreateNodeResponse,
-    DeleteNodeResponse,
-    PullMessagesResponse,
-    PushMessagesResponse,
-    GetFabResponse,
-    GetRunResponse,
-]
 
 
 class EventLogWriterPlugin(ABC):
@@ -85,7 +34,7 @@ class EventLogWriterPlugin(ABC):
     @abstractmethod
     def compose_log_before_event(  # pylint: disable=too-many-arguments
         self,
-        request: EventLogRequest,
+        request: GrpcMessage,
         context: grpc.ServicerContext,
         user_info: Optional[UserInfo],
         method_name: str,
@@ -95,11 +44,11 @@ class EventLogWriterPlugin(ABC):
     @abstractmethod
     def compose_log_after_event(  # pylint: disable=too-many-arguments,R0917
         self,
-        request: EventLogRequest,
+        request: GrpcMessage,
         context: grpc.ServicerContext,
         user_info: Optional[UserInfo],
         method_name: str,
-        response: Optional[Union[EventLogResponse, Exception]],
+        response: Optional[Union[GrpcMessage, Exception]],
     ) -> LogEntry:
         """Compose post-event log entry from the provided response and context."""
 
