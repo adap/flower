@@ -103,7 +103,8 @@ def try_obtain_server_certificates(
         log(
             WARN,
             "Option `--insecure` was set. Starting insecure HTTP server with "
-            "unencrypted communication (TLS disabled). Proceed only if you understand the risks.",
+            "unencrypted communication (TLS disabled). Proceed only if you understand "
+            "the risks.",
         )
         return None
     # Check if certificates are provided
