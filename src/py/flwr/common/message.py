@@ -127,6 +127,16 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         self.__dict__["_created_at"] = value
 
     @property
+    def delivered_at(self) -> str:
+        """Unix timestamp when the message was delivered."""
+        return cast(str, self.__dict__["_delivered_at"])
+
+    @delivered_at.setter
+    def delivered_at(self, value: str) -> None:
+        """Set delivery timestamp of this message."""
+        self.__dict__["_delivered_at"] = value
+
+    @property
     def ttl(self) -> float:
         """Time-to-live for this message."""
         return cast(float, self.__dict__["_ttl"])
@@ -223,6 +233,7 @@ class Message:
             raise ValueError("Either `content` or `error` must be set, but not both.")
 
         metadata.created_at = time.time()  # Set the message creation timestamp
+        metadata.delivered_at = ""
         var_dict = {
             "_metadata": metadata,
             "_content": content,
