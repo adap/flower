@@ -43,7 +43,8 @@ def add_args_flwr_app_common(parser: argparse.ArgumentParser) -> None:
         "--insecure",
         action="store_true",
         help="Run the server without HTTPS, regardless of whether certificate "
-        "paths are provided. By default, the server runs with HTTPS enabled. "
+        "paths are provided. Data transmitted between the gRPC client and server "
+        "is not encrypted. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
     )
 
@@ -99,7 +100,12 @@ def try_obtain_server_certificates(
 ) -> Optional[tuple[bytes, bytes, bytes]]:
     """Validate and return the CA cert, server cert, and server private key."""
     if args.insecure:
-        log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
+        log(
+            WARN,
+            "Option `--insecure` was set. Starting insecure HTTP server. Data "
+            "transmitted between the gRPC client and server will not be encrypted. "
+            "Proceed only if you understand the risks.",
+        )
         return None
     # Check if certificates are provided
     if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_certfile:
