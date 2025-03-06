@@ -278,7 +278,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         node = None
 
     def receive() -> Optional[Message]:
-        """Receive next task from server."""
+        """Receive next Message from server."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
@@ -311,7 +311,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         return message
 
     def send(message: Message) -> None:
-        """Send task result back to server."""
+        """Send Message result back to server."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
