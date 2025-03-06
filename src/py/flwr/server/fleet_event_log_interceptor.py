@@ -15,11 +15,11 @@
 """Flower Fleet API event log interceptor."""
 
 
-from typing import Any, Callable, Union, cast
+from typing import Any, Callable, cast
 
 import grpc
+from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.event_log_plugin import EventLogRequest, EventLogResponse
 from flwr.common.event_log_plugin.event_log_plugin import EventLogWriterPlugin
 from flwr.common.typing import LogEntry
 
@@ -35,14 +35,14 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         continuation: Callable[[Any], Any],
         handler_call_details: grpc.HandlerCallDetails,
     ) -> grpc.RpcMethodHandler:
-        """Flower server interceptor logging logic.
+        """Flower Fleet API server interceptor logging logic.
 
         Intercept all unary-unary calls from users and log the event. Continue RPC call
         if event logger is enabled on the SuperLink, else, terminate RPC call by setting
         context to abort.
         """
         # One of the method handlers in
-        # `flwr.superexec.exec_servicer.ExecServicer`
+        # `flwr.server.superlink.fleet.grpc_rere.fleet_servicer.FleetServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
         method_name: str = handler_call_details.method
         return self._generic_event_log_unary_method_handler(method_handler, method_name)
@@ -51,9 +51,9 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         self, method_handler: grpc.RpcMethodHandler, method_name: str
     ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
-            request: EventLogRequest,
+            request: GrpcMessage,
             context: grpc.ServicerContext,
-        ) -> Union[EventLogResponse, Exception]:
+        ) -> GrpcMessage:
             log_entry: LogEntry
             # Log before call
             log_entry = self.log_plugin.compose_log_before_event(
@@ -67,7 +67,7 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             call = method_handler.unary_unary
             unary_response, error = None, None
             try:
-                unary_response = cast(EventLogResponse, call(request, context))
+                unary_response = cast(GrpcMessage, call(request, context))
             except Exception as e:  # pylint: disable=broad-except
                 error = e
                 raise

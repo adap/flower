@@ -23,6 +23,12 @@ import grpc
 from google.protobuf.message import Message as GrpcMessage
 from parameterized import parameterized
 
+from flwr.common.dummy_grpc_handlers import (
+    DummyUnaryStreamHandler,
+    DummyUnaryUnaryHandler,
+    get_dummy_unary_stream_handler,
+    get_dummy_unary_unary_handler,
+)
 from flwr.common.typing import UserInfo
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -36,42 +42,6 @@ from flwr.superexec.exec_user_auth_interceptor import (
     ExecUserAuthInterceptor,
     shared_user_info,
 )
-
-
-class DummyUnaryUnaryHandler:
-    """Dummy unary-unary handler for testing."""
-
-    unary_unary = staticmethod(lambda request, context: "dummy_response")
-    unary_stream = None
-    request_deserializer = None
-    response_serializer = None
-
-
-class DummyUnaryStreamHandler:
-    """Dummy unary-stream handler for testing."""
-
-    unary_unary = None
-    unary_stream = staticmethod(
-        lambda request, context: iter(["stream response 1", "stream response 2"])
-    )
-    request_deserializer = None
-    response_serializer = None
-
-
-# pylint: disable=unused-argument
-def get_dummy_unary_unary_handler(
-    handler_call_details: grpc.HandlerCallDetails,
-) -> DummyUnaryUnaryHandler:
-    """."""
-    return DummyUnaryUnaryHandler()
-
-
-# pylint: disable=unused-argument
-def get_dummy_unary_stream_handler(
-    handler_call_details: grpc.HandlerCallDetails,
-) -> DummyUnaryStreamHandler:
-    """."""
-    return DummyUnaryStreamHandler()
 
 
 class TestExecUserAuthInterceptor(unittest.TestCase):
@@ -172,7 +142,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             (StreamLogsRequest()),
         ]
     )  # type: ignore
-    def test_unary_validate_tokens_successful(self, request) -> None:
+    def test_unary_validate_tokens_successful(self, request: GrpcMessage) -> None:
         """Test unary-unary/stream RPC call is successful when token is valid.
 
         Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
@@ -227,7 +197,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             (StreamLogsRequest()),
         ]
     )  # type: ignore
-    def test_unary_refresh_tokens_successful(self, request) -> None:
+    def test_unary_refresh_tokens_successful(self, request: GrpcMessage) -> None:
         """Test unary-unary/stream RPC call is successful when tokens are refreshed.
 
         Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.

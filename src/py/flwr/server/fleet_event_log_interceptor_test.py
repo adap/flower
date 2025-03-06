@@ -20,18 +20,15 @@ from typing import Optional, Union
 from unittest.mock import MagicMock
 
 import grpc
+from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.event_log_plugin import EventLogWriterPlugin
-from flwr.common.event_log_plugin.event_log_plugin import (
-    EventLogRequest,
-    EventLogResponse,
-)
-from flwr.common.typing import Actor, Event, LogEntry, UserInfo
-from flwr.superexec.exec_event_log_interceptor_test import (
+from flwr.common.dummy_grpc_handlers import (
     DummyUnaryUnaryHandlerException,
     DummyUnsupportedHandler,
+    get_dummy_unary_unary_handler,
 )
-from flwr.superexec.exec_user_auth_interceptor_test import get_dummy_unary_unary_handler
+from flwr.common.event_log_plugin import EventLogWriterPlugin
+from flwr.common.typing import Actor, Event, LogEntry, UserInfo
 
 from .fleet_event_log_interceptor import FleetEventLogInterceptor
 
@@ -44,7 +41,7 @@ class DummyFleetLogPlugin(EventLogWriterPlugin):
 
     def compose_log_before_event(
         self,
-        request: EventLogRequest,
+        request: GrpcMessage,
         context: grpc.ServicerContext,
         user_info: Optional[UserInfo],
         method_name: str,
@@ -62,11 +59,11 @@ class DummyFleetLogPlugin(EventLogWriterPlugin):
 
     def compose_log_after_event(  # pylint: disable=too-many-arguments,R0917
         self,
-        request: EventLogRequest,
+        request: GrpcMessage,
         context: grpc.ServicerContext,
         user_info: Optional[UserInfo],
         method_name: str,
-        response: Optional[Union[EventLogResponse, Exception]],
+        response: Optional[Union[GrpcMessage, Exception]],
     ) -> LogEntry:
         return LogEntry(
             timestamp="after_timestamp",
