@@ -81,5 +81,21 @@ python -m fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500
   <img src="_static/acc_results_mnist_centralized_5.png" width="49%" />
 </p>
 
+Weight Decay exploration:
+
+<p float="left">
+  <img src="_static/wd_0.01.png" width="49%" />
+  <img src="_static/wd_0.001.png" width="49%" />
+</p>
+
+<p float="left">
+  <img src="_static/wd_0.0001.png" width="49%" />
+  <img src="_static/wd_0.00001.png" width="49%" />
+</p>
+
+<p float="left">
+  <img src="_static/wd_accuracy.png" width="49%" />
+</p>
+
 Based on the loss and accuracy results shown in the figures above, we see that FedIter-HT is comparable to FedAvg from a performance perspective and, with certain local epoch selection. i.e., one local epoch, Fed-HT outperforms FedAvg. Additionally, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model. Results differ slightly from published work due to differing hyperparameters.
 
