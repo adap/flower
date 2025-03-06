@@ -43,41 +43,6 @@ from flwr.superexec.exec_user_auth_interceptor import (
     shared_user_info,
 )
 
-# class DummyUnaryUnaryHandler:
-#     """Dummy unary-unary handler for testing."""
-#
-#     unary_unary = staticmethod(lambda request, context: "dummy_response")
-#     unary_stream = None
-#     request_deserializer = None
-#     response_serializer = None
-#
-#
-# class DummyUnaryStreamHandler:
-#     """Dummy unary-stream handler for testing."""
-#
-#     unary_unary = None
-#     unary_stream = staticmethod(
-#         lambda request, context: iter(["stream response 1", "stream response 2"])
-#     )
-#     request_deserializer = None
-#     response_serializer = None
-#
-#
-# # pylint: disable=unused-argument
-# def get_dummy_unary_unary_handler(
-#     handler_call_details: grpc.HandlerCallDetails,
-# ) -> DummyUnaryUnaryHandler:
-#     """."""
-#     return DummyUnaryUnaryHandler()
-#
-#
-# # pylint: disable=unused-argument
-# def get_dummy_unary_stream_handler(
-#     handler_call_details: grpc.HandlerCallDetails,
-# ) -> DummyUnaryStreamHandler:
-#     """."""
-#     return DummyUnaryStreamHandler()
-
 
 class TestExecUserAuthInterceptor(unittest.TestCase):
     """Test the ExecUserAuthInterceptor authentication logic."""

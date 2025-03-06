@@ -88,48 +88,6 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self.logs.append(log_entry)
 
 
-# class DummyUnsupportedHandler:
-#     """Dummy handler for unsupported RPC types."""
-#
-#     unary_unary = None
-#     unary_stream = None
-#     request_deserializer = None
-#     response_serializer = None
-#
-#
-# class DummyUnaryUnaryHandlerException:
-#     """Dummy handler for unary-unary RPC calls that raises an Exception."""
-#
-#     unary_unary = staticmethod(
-#         lambda request, context: (_ for _ in ()).throw(Exception("Test error"))
-#     )
-#     unary_stream = None
-#     request_deserializer = None
-#     response_serializer = None
-#
-#
-# def dummy_unary_stream_exception(
-#     request: GrpcMessage, context: grpc.ServicerContext  # pylint: disable=W0613
-# ) -> Iterator[Any]:
-#     """Raise an Exception upon iteration for unary-stream RPC call."""
-#
-#     def generator() -> Iterator[Any]:
-#         raise Exception("Test stream error")  # pylint: disable=W0719
-#         yield  # This yield is never reached. pylint: disable=W0101
-#
-#     return generator()
-#
-#
-# # Dummy handler for unary_stream that uses the above function.
-# class DummyUnaryStreamHandlerException:
-#     """Dummy handler for unary-stream RPC calls that raises an Exception."""
-#
-#     unary_unary = None
-#     unary_stream = staticmethod(dummy_unary_stream_exception)
-#     request_deserializer = None
-#     response_serializer = None
-
-
 class TestExecEventLogInterceptor(unittest.TestCase):
     """Test the ExecEventLogInterceptor logging for different RPC call types."""
 
