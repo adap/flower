@@ -321,7 +321,7 @@ class Message:
             )
             message.metadata.ttl = ttl
 
-        self._limit_reply_ttl(message)
+        self._limit_message_res_ttl(message)
 
         return message
 
@@ -364,7 +364,7 @@ class Message:
             )
             message.metadata.ttl = ttl
 
-        self._limit_reply_ttl(message)
+        self._limit_message_res_ttl(message)
 
         return message
 
@@ -379,7 +379,7 @@ class Message:
         )
         return f"{self.__class__.__qualname__}({view})"
 
-    def _limit_reply_ttl(self, message: Message) -> None:
+    def _limit_message_res_ttl(self, message: Message) -> None:
         """Limit the TTL of the provided Message to not exceed the expiration time of
         this Message it replies to.
 

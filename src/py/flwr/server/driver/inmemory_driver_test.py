@@ -19,7 +19,7 @@ import time
 import unittest
 from collections.abc import Iterable
 from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from flwr.common import ConfigsRecord, Message, RecordSet, now
 from flwr.common.constant import (
@@ -113,7 +113,7 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
         # Execute
-        node_ids = self.driver.get_node_ids()
+        node_ids = list(self.driver.get_node_ids())
 
         # Assert
         self.assertEqual(len(node_ids), self.num_nodes)
@@ -131,11 +131,11 @@ class TestInMemoryDriver(unittest.TestCase):
         self.state.store_message_ins.side_effect = msg_ids
 
         # Execute
-        msg_ids = list(self.driver.push_messages(msgs))
+        msg_res_ids = list(self.driver.push_messages(msgs))
 
         # Assert
-        self.assertEqual(len(msg_ids), 2)
-        self.assertEqual(msg_ids, [str(ids) for ids in msg_ids])
+        self.assertEqual(len(msg_res_ids), 2)
+        self.assertEqual(msg_res_ids, [str(ids) for ids in msg_ids])
 
     def test_push_messages_invalid(self) -> None:
         """Test pushing invalid messages."""
@@ -165,6 +165,10 @@ class TestInMemoryDriver(unittest.TestCase):
         # Assert
         self.assertEqual(len(pulled_msgs), 2)
         self.assertEqual(reply_tos, msg_ids)
+        # Ensure messages are deleted
+        self.state.delete_messages.assert_called_once_with(
+            message_ins_ids={UUID(m_id) for m_id in msg_ids}
+        )
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
@@ -202,7 +206,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.assertLess(time.time() - start_time, 0.2)
         self.assertEqual(len(ret_msgs), 0)
 
-    def test_messages_store_consistency_after_push_pull_sqlitestate(self) -> None:
+    def test_message_store_consistency_after_push_pull_sqlitestate(self) -> None:
         """Test messages are deleted in sqlite state once messages are pulled."""
         # Prepare
         state = LinkStateFactory("").state()
