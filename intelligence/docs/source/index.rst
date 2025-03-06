@@ -50,6 +50,10 @@ Flower Intelligence is built around the Singleton design pattern, meaning you on
             async function main() {
               // Perform the inference
               const response: ChatResponseResult = await fi.chat("Why is the sky blue?");
+
+              if (response.ok) {
+                console.log(response.message.content);
+              }
             }
 
             await main().then().catch();
@@ -67,6 +71,8 @@ Flower Intelligence is built around the Singleton design pattern, meaning you on
             async function main() {
               // Perform the inference
               const response = await fi.chat("Why is the sky blue?");
+
+              console.log(response.message.content);
             }
 
             await main().then().catch();
@@ -95,6 +101,10 @@ By specifying a model in the chat options, you can easily switch between differe
               const response: ChatResponseResult = await fi.chat('Why is the sky blue?', {
                 model: 'meta/llama3.2-1b/instruct-fp16',
               });
+
+              if (response.ok) {
+                console.log(response.message.content);
+              }
             }
 
             await main().then().catch();
@@ -114,6 +124,8 @@ By specifying a model in the chat options, you can easily switch between differe
               const response = await fi.chat('Why is the sky blue?', {
                 model: 'meta/llama3.2-1b/instruct-fp16',
               });
+
+              console.log(response.message.content);
             }
 
             await main().then().catch();
