@@ -16,39 +16,11 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Union
 
 import grpc
+from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.typing import LogEntry, UserInfo
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    GetLoginDetailsRequest,
-    GetLoginDetailsResponse,
-    ListRunsRequest,
-    ListRunsResponse,
-    StartRunRequest,
-    StartRunResponse,
-    StopRunRequest,
-    StopRunResponse,
-    StreamLogsRequest,
-    StreamLogsResponse,
-)
-
-# Type variables for request and response messages
-EventLogRequest = Union[
-    StartRunRequest,
-    ListRunsRequest,
-    StreamLogsRequest,
-    StopRunRequest,
-    GetLoginDetailsRequest,
-]
-EventLogResponse = Union[
-    StartRunResponse,
-    ListRunsResponse,
-    StreamLogsResponse,
-    StopRunResponse,
-    GetLoginDetailsResponse,
-]
 
 
 class EventLogWriterPlugin(ABC):
@@ -61,7 +33,7 @@ class EventLogWriterPlugin(ABC):
     @abstractmethod
     def compose_log_before_event(  # pylint: disable=too-many-arguments
         self,
-        request: EventLogRequest,
+        request: GrpcMessage,
         context: grpc.ServicerContext,
         user_info: UserInfo,
         method_name: str,
@@ -71,11 +43,11 @@ class EventLogWriterPlugin(ABC):
     @abstractmethod
     def compose_log_after_event(  # pylint: disable=too-many-arguments,R0917
         self,
-        request: EventLogRequest,
+        request: GrpcMessage,
         context: grpc.ServicerContext,
         user_info: UserInfo,
         method_name: str,
-        response: EventLogResponse,
+        response: GrpcMessage,
     ) -> LogEntry:
         """Compose post-event log entry from the provided response and context."""
 
