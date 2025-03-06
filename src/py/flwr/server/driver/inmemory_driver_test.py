@@ -19,7 +19,7 @@ import time
 import unittest
 from collections.abc import Iterable
 from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from flwr.common import ConfigsRecord, Message, RecordSet, now
 from flwr.common.constant import (
@@ -165,6 +165,10 @@ class TestInMemoryDriver(unittest.TestCase):
         # Assert
         self.assertEqual(len(pulled_msgs), 2)
         self.assertEqual(reply_tos, msg_ids)
+        # Ensure messages are deleted
+        self.state.delete_messages.assert_called_once_with(
+            message_ins_ids={UUID(m_id) for m_id in msg_ids}
+        )
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
