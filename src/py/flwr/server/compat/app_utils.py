@@ -82,12 +82,12 @@ def _update_client_manager(
     registered_nodes: dict[int, DriverClientProxy] = {}
     while not f_stop.is_set():
         try:
-            all_node_ids = driver.get_node_ids()
+            all_node_ids = set(driver.get_node_ids())
         except RunNotRunningException:
             f_stop.set()
             break
         dead_nodes = set(registered_nodes).difference(all_node_ids)
-        new_nodes = set(all_node_ids).difference(registered_nodes)
+        new_nodes = all_node_ids.difference(registered_nodes)
 
         # Unregister dead nodes
         for node_id in dead_nodes:
