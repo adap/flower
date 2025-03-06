@@ -54,6 +54,7 @@ from flwr.server.utils.validator import validate_message, validate_task_ins_or_r
 
 from .linkstate import LinkState
 from .utils import (
+    check_node_availability_for_in_message,
     check_node_availability_for_taskins,
     configsrecord_from_bytes,
     configsrecord_to_bytes,
@@ -792,6 +793,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
     def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
         """Get reply Messages for the given Message IDs."""
+        # pylint: disable-msg=too-many-locals
         ret: dict[UUID, Message] = {}
 
         # Verify Message IDs
@@ -814,6 +816,29 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             found_message_ins_dict=found_message_ins_dict,
             current_time=current,
         )
+
+        # Check node availability
+        dst_node_ids: set[int] = set()
+        for message_id in message_ids:
+            in_message = found_message_ins_dict[message_id]
+            sint_node_id = convert_uint64_to_sint64(in_message.metadata.dst_node_id)
+            dst_node_ids.add(sint_node_id)
+        query = f"""
+                    SELECT node_id, online_until
+                    FROM node
+                    WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))});
+                """
+        rows = self.query(query, tuple(dst_node_ids))
+        tmp_ret_dict = check_node_availability_for_in_message(
+            inquired_in_message_ids=message_ids,
+            found_in_message_dict=found_message_ins_dict,
+            node_id_to_online_until={
+                convert_sint64_to_uint64(row["node_id"]): row["online_until"]
+                for row in rows
+            },
+            current_time=current,
+        )
+        ret.update(tmp_ret_dict)
 
         # Find all reply Messages
         query = f"""

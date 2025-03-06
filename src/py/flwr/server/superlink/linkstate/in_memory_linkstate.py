@@ -38,6 +38,7 @@ from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message, validate_task_ins_or_res
 
 from .utils import (
+    check_node_availability_for_in_message,
     check_node_availability_for_taskins,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
@@ -429,12 +430,27 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             current = time.time()
 
-            # Verify Messge IDs
+            # Verify Message IDs
             ret = verify_message_ids(
                 inquired_message_ids=message_ids,
                 found_message_ins_dict=self.message_ins_store,
                 current_time=current,
             )
+
+            # Check node availability
+            dst_node_ids = {
+                self.message_ins_store[message_id].metadata.dst_node_id
+                for message_id in message_ids
+            }
+            tmp_ret_dict = check_node_availability_for_in_message(
+                inquired_in_message_ids=message_ids,
+                found_in_message_dict=self.message_ins_store,
+                node_id_to_online_until={
+                    node_id: self.node_ids[node_id][0] for node_id in dst_node_ids
+                },
+                current_time=current,
+            )
+            ret.update(tmp_ret_dict)
 
             # Find all reply Messages
             message_res_found: list[Message] = []

@@ -1070,6 +1070,10 @@ class StateTest(unittest.TestCase):
 
         # Execute
         current_time = time.time()
+        # Test with current_time + 70s
+        # node_ids[:70] remain online until current_time + 60s,
+        # node_ids[70:] remain online until current_time + 180s.
+        # As a result, only node_ids[70:] will be returned by get_nodes().
         with patch("time.time", side_effect=lambda: current_time + 70):
             actual_node_ids = state.get_nodes(run_id)
 
@@ -1088,7 +1092,7 @@ class StateTest(unittest.TestCase):
         assert not is_successful
 
     def test_node_unavailable_error(self) -> None:
-        """Test if get_task_res return TaskRes containing node unavailable error."""
+        """Test if get_message_res return Message containing node unavailable error."""
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
@@ -1099,35 +1103,50 @@ class StateTest(unittest.TestCase):
         state.acknowledge_ping(node_id_0, ping_interval=90)
         state.acknowledge_ping(node_id_1, ping_interval=30)
 
-        # Create and store TaskIns
-        task_ins_0 = create_task_ins(consumer_node_id=node_id_0, run_id=run_id)
-        task_ins_1 = create_task_ins(consumer_node_id=node_id_1, run_id=run_id)
-        task_id_0 = state.store_task_ins(task_ins=task_ins_0)
-        task_id_1 = state.store_task_ins(task_ins=task_ins_1)
-        assert task_id_0 is not None and task_id_1 is not None
-
-        # Get TaskIns to mark them delivered
-        state.get_task_ins(node_id=node_id_0, limit=None)
-
-        # Create and store TaskRes
-        task_res_0 = create_task_res(
-            producer_node_id=node_id_0,
-            ancestry=[str(task_id_0)],
-            run_id=run_id,
+        # Create and store Messages
+        in_message_0 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id_0,
+                run_id=run_id,
+            )
         )
-        state.store_task_res(task_res_0)
+        in_message_1 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id_1,
+                run_id=run_id,
+            )
+        )
+        message_id_0 = state.store_message_ins(in_message_0)
+        message_id_1 = state.store_message_ins(in_message_1)
+        assert message_id_0 is not None and message_id_1 is not None
+
+        # Get Message to mark them delivered
+        state.get_message_ins(node_id=node_id_0, limit=None)
+        state.get_message_ins(node_id=node_id_1, limit=None)
+
+        # Create and store reply Messages
+        res_message_0 = in_message_0.create_reply(content=RecordSet())
+        state.store_message_res(res_message_0)
 
         # Execute
         current_time = time.time()
-        task_res_list: list[TaskRes] = []
+        # Test with current_time + 100s
+        # node_id_0 remain online until current_time + 180s,
+        # node_id_1 remain online until current_time + 60s.
+        # As a result, a reply message with NODE_UNAVAILABLE
+        # error will generate for node_id_1.
         with patch("time.time", side_effect=lambda: current_time + 100):
-            task_res_list = state.get_task_res({task_id_0, task_id_1})
+            res_message_list = state.get_message_res({message_id_0, message_id_1})
 
         # Assert
-        assert len(task_res_list) == 2
-        err_taskres = task_res_list[0]
-        assert err_taskres.task.HasField("error")
-        assert err_taskres.task.error.code == ErrorCode.NODE_UNAVAILABLE
+        assert len(res_message_list) == 2
+        # Note: res_message_list[0] corresponds to node_id_1
+        # due to the order change from get_message_res()
+        err_message = res_message_list[0]
+        assert err_message.has_error()
+        assert err_message.error.code == ErrorCode.NODE_UNAVAILABLE
 
     def test_store_task_res_task_ins_expired(self) -> None:
         """Test behavior of store_task_res when the TaskIns it references is expired."""
