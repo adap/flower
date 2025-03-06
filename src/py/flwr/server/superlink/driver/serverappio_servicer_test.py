@@ -21,7 +21,7 @@ import unittest
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigsRecord, Context, RecordSet
+from flwr.common import ConfigsRecord, Context, Error, RecordSet
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SUPERLINK_NODE_ID,
@@ -276,7 +276,18 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, PullResMessagesResponse)
         assert grpc.StatusCode.OK == call.code()
 
-    def test_successful_pull_messages_deletes_messages_in_linkstate(self) -> None:
+    @parameterized.expand(
+        [
+            (
+                RecordSet(),
+                None,
+            ),  # Reply with Message
+            (None, Error(code=0)),  # Reply with Error
+        ]
+    )  # type: ignore
+    def test_successful_pull_messages_deletes_messages_in_linkstate(
+        self, content: RecordSet | None, error: Error | None
+    ) -> None:
         """Test `PullMessages` deletes messages from LinkState."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
@@ -291,12 +302,18 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
             )
         )
-        msg_ids = self.state.store_message_ins(message=message_ins)
+        msg_id = self.state.store_message_ins(message=message_ins)
         msg_ = self.state.get_message_ins(node_id=node_id, limit=1)[0]
-        reply_msg = msg_.create_reply(content=RecordSet())
+
+        if content is not None:
+            reply_msg = msg_.create_reply(content=content)
+        else:
+            assert error is not None
+            reply_msg = msg_.create_error_reply(error=error)
+
         self.state.store_message_res(message=reply_msg)
 
-        request = PullResMessagesRequest(message_ids=[str(msg_ids)], run_id=run_id)
+        request = PullResMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
 
         # Execute
         response, call = self._pull_messages.with_call(request=request)
