@@ -88,6 +88,7 @@ def terminate_simulation(f_stop: threading.Event, sleep_duration: int) -> None:
 def init_state_factory_nodes_mapping(
     num_nodes: int,
     num_messages: int,
+    use_message_throughout: bool = False,
 ) -> tuple[LinkStateFactory, NodeToPartitionMapping, dict[UUID, float]]:
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
@@ -102,6 +103,7 @@ def init_state_factory_nodes_mapping(
         nodes_mapping=nodes_mapping,
         run_id=run_id,
         num_messages=num_messages,
+        use_message_throughout=use_message_throughout,
     )
     return state_factory, nodes_mapping, expected_results
 
@@ -112,6 +114,7 @@ def register_messages_into_state(
     nodes_mapping: NodeToPartitionMapping,
     run_id: int,
     num_messages: int,
+    use_message_throughout: bool,
 ) -> dict[UUID, float]:
     """Register `num_messages` into the state factory."""
     state: InMemoryLinkState = state_factory.state()  # type: ignore
@@ -157,15 +160,20 @@ def register_messages_into_state(
                 message_type=MessageTypeLegacy.GET_PROPERTIES,
             ),
         )
-        # Convert Message to TaskIns
-        taskins = message_to_taskins(message)
-        # Instert in state
-        task_id = state.store_task_ins(taskins)
-        if task_id:
+
+        msg_or_task_id = None
+        if use_message_throughout:
+            msg_or_task_id = state.store_message_ins(message)
+        else:
+            # Convert Message to TaskIns
+            taskins = message_to_taskins(message)
+            # Instert in state
+            msg_or_task_id = state.store_task_ins(taskins)
+        if msg_or_task_id:
             # Add to UUID set
-            task_ids.add(task_id)
+            task_ids.add(msg_or_task_id)
             # Store expected output for check later on
-            expected_results[task_id] = mult_factor * pi
+            expected_results[msg_or_task_id] = mult_factor * pi
 
     return expected_results
 
@@ -326,4 +334,44 @@ class TestFleetSimulationEngineRayBackend(TestCase):
             assert (
                 content.configs_records["getpropertiesres.properties"]["result"]
                 == expected_results[UUID(task_res.task.ancestry[0])]
+            )
+
+    # pylint: disable=too-many-locals
+    def test_start_and_shutdown_with_message_in_state(self) -> None:
+        """Run Simulation Engine with some Message in State.
+
+        This test creates a few nodes and submits a few messages that need to be
+        executed by the Backend. In order for that to happen the asyncio
+        producer/consumer logic must function. This also severs to evaluate a valid
+        ClientApp.
+        """
+        num_messages = 229
+        num_nodes = 59
+
+        state_factory, nodes_mapping, expected_results = (
+            init_state_factory_nodes_mapping(
+                num_nodes=num_nodes,
+                num_messages=num_messages,
+                use_message_throughout=True,
+            )
+        )
+
+        # Run
+        start_and_shutdown(
+            state_factory=state_factory, nodes_mapping=nodes_mapping, duration=10
+        )
+
+        # Get all Message replies
+        state = state_factory.state()
+        message_ids = set(expected_results.keys())
+        message_res_list = state.get_message_res(message_ids=message_ids)
+
+        # Check results by first converting to Message
+        for message_res in message_res_list:
+
+            # Verify message content is as expected
+            content = message_res.content
+            assert (
+                content.configs_records["getpropertiesres.properties"]["result"]
+                == expected_results[UUID(message_res.metadata.reply_to_message)]
             )
