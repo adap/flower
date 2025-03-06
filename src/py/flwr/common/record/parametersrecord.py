@@ -281,7 +281,7 @@ class ParametersRecord(TypedDict[str, Array]):
     r"""Parameters record.
 
     A typed dictionary (string to :class:`Array`) that can store named parameters
-    (serialized tensors). Internally, this behaves similarly to an
+    as serialized tensors. Internally, this behaves similarly to an
     `OrderedDict[str, Array]`. A `ParametersRecord` can be viewed as an
     equivalent to PyTorch's state_dict, but it holds arrays in serialized form.
 
