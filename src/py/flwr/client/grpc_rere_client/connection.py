@@ -20,7 +20,7 @@ import threading
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from copy import copy
-from logging import DEBUG, ERROR
+from logging import ERROR
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -36,10 +36,13 @@ from flwr.common.constant import (
     PING_DEFAULT_INTERVAL,
     PING_RANDOM_RANGE,
 )
-from flwr.common.grpc import create_channel
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    generate_key_pairs,
+)
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -58,11 +61,6 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 
 from .client_interceptor import AuthenticateClientInterceptor
 from .grpc_adapter import GrpcAdapter
-
-
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
 
 
 @contextmanager
@@ -130,12 +128,14 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
 
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
-    if authentication_keys is not None:
-        interceptors = AuthenticateClientInterceptor(
-            authentication_keys[0], authentication_keys[1]
-        )
+    # Automatic node auth: generate keys if user didn't provide any
+    if authentication_keys is None:
+        authentication_keys = generate_key_pairs()
 
+    # Always configure auth interceptor, with either user-provided or generated keys
+    interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] = [
+        AuthenticateClientInterceptor(*authentication_keys),
+    ]
     channel = create_channel(
         server_address=server_address,
         insecure=insecure,
@@ -311,3 +311,13 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         yield (receive, send, create_node, delete_node, get_run, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
+    # Cleanup
+    finally:
+        try:
+            if node is not None:
+                # Disable retrying
+                retry_invoker.max_tries = 1
+                delete_node()
+        except grpc.RpcError:
+            pass
+        channel.close()

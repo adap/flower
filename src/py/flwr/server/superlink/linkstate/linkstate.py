@@ -19,7 +19,7 @@ import abc
 from typing import Optional
 from uuid import UUID
 
-from flwr.common import Context
+from flwr.common import Context, Message
 from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
@@ -47,6 +47,24 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def store_message_ins(self, message: Message) -> Optional[UUID]:
+        """Store one Message.
+
+        Usually, the ServerAppIo API calls this to schedule instructions.
+
+        Stores the value of the `message` in the link state and, if successful,
+        returns the `message_id` (UUID) of the `message`. If, for any reason,
+        storing the `message` fails, `None` is returned.
+
+        Constraints
+        -----------
+        `message.metadata.dst_node_id` MUST be set (not constant.SUPERLINK_NODE_ID)
+
+        If `message.metadata.run_id` is invalid, then
+        storing the `message` MUST fail.
+        """
+
+    @abc.abstractmethod
     def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
         """Get TaskIns optionally filtered by node_id.
 
@@ -69,6 +87,21 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
+        """Get zero or more `Message` objects for the provided `node_id`.
+
+        Usually, the Fleet API calls this for Nodes planning to work on one or more
+        Message.
+
+        Constraints
+        -----------
+        Retrieve all Message where the `message.metadata.dst_node_id` equals `node_id`.
+
+        If `limit` is not `None`, return, at most, `limit` number of `message`. If
+        `limit` is set, it has to be greater zero.
+        """
+
+    @abc.abstractmethod
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes.
 
@@ -84,6 +117,23 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         If `task_res.run_id` is invalid, then
         storing the `task_res` MUST fail.
+        """
+
+    @abc.abstractmethod
+    def store_message_res(self, message: Message) -> Optional[UUID]:
+        """Store one Message.
+
+        Usually, the Fleet API calls this for Nodes returning results.
+
+        Stores the Message and, if successful, returns the `message_id` (UUID) of
+        the `message`. If storing the `message` fails, `None` is returned.
+
+        Constraints
+        -----------
+        `message.metadata.dst_node_id` MUST be set (not constant.SUPERLINK_NODE_ID)
+
+        If `message.metadata.run_id` is invalid, then
+        storing the `message` MUST fail.
         """
 
     @abc.abstractmethod
@@ -112,6 +162,33 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+        """Get reply Messages for the given Message IDs.
+
+        This method is typically called by the ServerAppIo API to obtain
+        results (type Message) for previously scheduled instructions (type Message).
+        For each message_id passed, this method returns one of the following responses:
+
+        - An error Message if there was no message registered with such message IDs
+        or has expired.
+        - An error Message if the reply Message exists but has expired.
+        - The reply Message.
+        - Nothing if the Message with the passed message_id is still valid and waiting
+        for a reply Message.
+
+        Parameters
+        ----------
+        message_ids : set[UUID]
+            A set of Message IDs used to retrieve reply Messages responding to them.
+
+        Returns
+        -------
+        list[Message]
+            A list of reply Message responding to the given message IDs or Messages
+            carrying an Error.
+        """
+
+    @abc.abstractmethod
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.
 
@@ -119,11 +196,19 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def num_message_ins(self) -> int:
+        """Calculate the number of Messages awaiting a reply."""
+
+    @abc.abstractmethod
     def num_task_res(self) -> int:
         """Calculate the number of task_res in store.
 
         This includes delivered but not yet deleted task_res.
         """
+
+    @abc.abstractmethod
+    def num_message_res(self) -> int:
+        """Calculate the number of reply Messages in store."""
 
     @abc.abstractmethod
     def delete_tasks(self, task_ins_ids: set[UUID]) -> None:
@@ -137,8 +222,23 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def delete_messages(self, message_ins_ids: set[UUID]) -> None:
+        """Delete a Message and its reply based on provided Message IDs.
+
+        Parameters
+        ----------
+        message_ins_ids : set[UUID]
+            A set of Message IDs. For each ID in the set, the corresponding
+            Message and its associated reply Message will be deleted.
+        """
+
+    @abc.abstractmethod
     def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
         """Get all TaskIns IDs for the given run_id."""
+
+    @abc.abstractmethod
+    def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all instruction Message IDs for the given run_id."""
 
     @abc.abstractmethod
     def create_node(self, ping_interval: float) -> int:
@@ -264,22 +364,8 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def store_server_private_public_key(
-        self, private_key: bytes, public_key: bytes
-    ) -> None:
-        """Store `server_private_key` and `server_public_key` in the link state."""
-
-    @abc.abstractmethod
-    def get_server_private_key(self) -> Optional[bytes]:
-        """Retrieve `server_private_key` in urlsafe bytes."""
-
-    @abc.abstractmethod
-    def get_server_public_key(self) -> Optional[bytes]:
-        """Retrieve `server_public_key` in urlsafe bytes."""
-
-    @abc.abstractmethod
-    def clear_supernode_auth_keys_and_credentials(self) -> None:
-        """Clear stored `node_public_keys` and credentials in the link state if any."""
+    def clear_supernode_auth_keys(self) -> None:
+        """Clear stored `node_public_keys` in the link state if any."""
 
     @abc.abstractmethod
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:

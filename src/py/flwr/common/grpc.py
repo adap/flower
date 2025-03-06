@@ -16,6 +16,7 @@
 
 
 import concurrent.futures
+import os
 import sys
 from collections.abc import Sequence
 from logging import DEBUG, ERROR
@@ -34,6 +35,12 @@ INVALID_CERTIFICATES_ERR_MSG = """
 """
 
 AddServicerToServerFn = Callable[..., Any]
+
+if "GRPC_VERBOSITY" not in os.environ:
+    os.environ["GRPC_VERBOSITY"] = "error"
+# The following flags can be uncommented for debugging. Other possible values:
+# https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
+# os.environ["GRPC_TRACE"] = "tcp,http"
 
 
 def create_channel(
@@ -73,7 +80,7 @@ def create_channel(
         log(DEBUG, "Opened secure gRPC connection using certificates")
 
     if interceptors is not None:
-        channel = grpc.intercept_channel(channel, interceptors)
+        channel = grpc.intercept_channel(channel, *interceptors)
 
     return channel
 
@@ -217,3 +224,8 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments,R0917
         server.add_insecure_port(server_address)
 
     return server
+
+
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)
