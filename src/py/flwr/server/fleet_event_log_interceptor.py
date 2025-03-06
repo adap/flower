@@ -18,8 +18,8 @@
 from typing import Any, Callable, cast
 
 import grpc
+from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.event_log_plugin import EventLogRequest, EventLogResponse
 from flwr.common.event_log_plugin.event_log_plugin import EventLogWriterPlugin
 from flwr.common.typing import LogEntry
 
@@ -51,9 +51,9 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         self, method_handler: grpc.RpcMethodHandler, method_name: str
     ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
-            request: EventLogRequest,
+            request: GrpcMessage,
             context: grpc.ServicerContext,
-        ) -> EventLogResponse:
+        ) -> GrpcMessage:
             log_entry: LogEntry
             # Log before call
             log_entry = self.log_plugin.compose_log_before_event(
@@ -67,7 +67,7 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             call = method_handler.unary_unary
             unary_response, error = None, None
             try:
-                unary_response = cast(EventLogResponse, call(request, context))
+                unary_response = cast(GrpcMessage, call(request, context))
             except Exception as e:  # pylint: disable=broad-except
                 error = e
                 raise
