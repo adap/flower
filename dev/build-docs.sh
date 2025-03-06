@@ -19,8 +19,8 @@ cd "$ROOT"
 ./datasets/dev/build-flwr-datasets-docs.sh
 
 cd "$ROOT"
-cd intelligence/docs
-make html
+cd intelligence
+./dev/build-docs.sh
 
 cd "$ROOT"
 cd framework/docs 
