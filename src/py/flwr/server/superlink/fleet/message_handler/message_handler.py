@@ -105,7 +105,7 @@ def push_messages(
     request: PushMessagesRequest, state: LinkState
 ) -> PushMessagesResponse:
     """Push Messages handler."""
-    # Convert Message to Message
+    # Convert Message from proto
     msg = message_from_proto(message_proto=request.messages_list[0])
 
     # Abort if the run is not running
