@@ -216,11 +216,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         while messages_res:
             msg = messages_res.pop(0)
             _raise_if(
-                validation_error=request.run_id != mgs.metadata.run_id,
+                validation_error=request.run_id != msg.metadata.run_id,
                 request_name="PullMessages",
                 detail="`message.metadata` has mismatched `run_id`",
             )
-            messages_list.append(message_to_proto(mgs))
+            messages_list.append(message_to_proto(msg))
 
         return PullResMessagesResponse(messages_list=messages_list)
 
