@@ -29,12 +29,10 @@ Install
           npm i "@flwr/flwr"
 
 
-Basic usage
------------
+Hello, Flower Intelligence!
+---------------------------
 
-This guide will help you get started quickly with Flower Intelligence. The library is designed to be easy to set up and use – even if you’re just starting out.
-
-Flower Intelligence uses the Singleton design pattern. This means that you only have to create and configure one instance, which you can then use anywhere in your project. There's no need to worry about managing multiple copies of the library.
+Flower Intelligence is built around the Singleton design pattern, meaning you only need to configure a single instance that can be reused throughout your project. This simple setup helps you integrate powerful AI capabilities with minimal overhead.
 
 .. tab-set::
     :sync-group: category
@@ -43,23 +41,41 @@ Flower Intelligence uses the Singleton design pattern. This means that you only 
         :sync: ts
 
         .. code-block:: ts
+
+            import { ChatResponseResult, FlowerIntelligence } from '@flwr/flwr';
 
             // Access the singleton instance
             const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
+            async function main() {
+              // Perform the inference
+              const response: ChatResponseResult = await fi.chat("Why is the sky blue?");
+            }
+
+            await main().then().catch();
+
     .. tab-item:: JavaScript
         :sync: js
 
         .. code-block:: js
 
+            import { FlowerIntelligence } from '@flwr/flwr';
+
             // Access the singleton instance
             const fi = FlowerIntelligence.instance;
 
+            async function main() {
+              // Perform the inference
+              const response = await fi.chat("Why is the sky blue?");
+            }
 
-Chatting with Flower Intelligence
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            await main().then().catch();
 
-Once your instance is set up, you can start chatting! Here’s a basic example:
+
+Specify the model
+-----------------
+
+By specifying a model in the chat options, you can easily switch between different AI models available in the ecosystem. For a full list of supported models, please refer to the :doc:`available models list <ref-models>`.
 
 .. tab-set::
     :sync-group: category
@@ -69,168 +85,329 @@ Once your instance is set up, you can start chatting! Here’s a basic example:
 
         .. code-block:: ts
 
-            const reply: ChatResponseResult = await fi.chat("Why is the sky blue?");
-            if (reply.ok){
-                console.log(reply.message.content);
+            import { ChatResponseResult, FlowerIntelligence } from '@flwr/flwr';
+
+            // Access the singleton instance
+            const fi: FlowerIntelligence = FlowerIntelligence.instance;
+
+            async function main() {
+              // Perform the inference
+              const response: ChatResponseResult = await fi.chat('Why is the sky blue?', {
+                model: 'meta/llama3.2-1b/instruct-fp16',
+              });
             }
+
+            await main().then().catch();
 
     .. tab-item:: JavaScript
         :sync: js
 
         .. code-block:: js
 
-            const reply = await fi.chat("Why is the sky blue?");
-            console.log(reply.message.content);
+            import { FlowerIntelligence } from '@flwr/flwr';
 
+            // Access the singleton instance
+            const fi = FlowerIntelligence.instance;
 
-That’s it – your message is sent, and the AI responds!
+            async function main() {
+              // Perform the inference
+              const response = await fi.chat('Why is the sky blue?', {
+                model: 'meta/llama3.2-1b/instruct-fp16',
+              });
+            }
 
-Examples
-~~~~~~~~
+            await main().then().catch();
 
-Below are a few more examples to illustrate different ways to interact with the chat:
+Check for errors
+----------------
 
-1. **Streaming Responses**
+Instead of throwing exceptions that might crash your application, Flower Intelligence returns a response object that includes a dedicated :doc:`Failure <ts-api-ref/interfaces/Failure>` property, enabling graceful error handling and improved application stability.
 
-   Watch the response as it is being generated.
+.. tab-set::
+    :sync-group: category
 
-    .. tab-set::
-        :sync-group: category
+    .. tab-item:: TypeScript
+        :sync: ts
 
-        .. tab-item:: TypeScript
-            :sync: ts
+        .. code-block:: ts
 
-            .. code-block:: ts
+            import { ChatResponseResult, FlowerIntelligence } from '@flwr/flwr';
 
-                const reply: ChatResponseResult = await fi.chat("Why is the sky blue?", {
-                  stream: true,
-                  onStreamEvent: (event: StreamEvent) => console.log(event.chunk)
-                });
-                if (reply.ok){
-                  console.log("Full response:", reply.message.content);
-                }
+            // Access the singleton instance
+            const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
-        .. tab-item:: JavaScript
-            :sync: js
+            async function main() {
+              // Perform the inference
+              const response: ChatResponseResult = await fi.chat('Why is the sky blue?', {
+                model: 'meta/llama3.2-1b/instruct-fp16',
+              });
 
-            .. code-block:: js
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log(response.message.content);
+              }
+            }
 
-                const reply = await fi.chat("Why is the sky blue?", {
-                  stream: true,
-                  onStreamEvent: (event) => console.log(event.chunk)
-                });
-                console.log("Full response:", reply.message.content);
+            await main().then().catch();
 
-2. **Using Roles**
+    .. tab-item:: JavaScript
+        :sync: js
 
-   Provide an array of messages to maintain conversation context. Instead of
-   just passing a string to the ``chat`` method, you can use ``Message`` or an array
-   of ``Message``. This lets you use different roles like system messages:
+        .. code-block:: js
 
-    .. tab-set::
-        :sync-group: category
+            import { FlowerIntelligence } from '@flwr/flwr';
 
-        .. tab-item:: TypeScript
-            :sync: ts
+            // Access the singleton instance
+            const fi = FlowerIntelligence.instance;
 
-            .. code-block:: ts
+            async function main() {
+              // Perform the inference
+              const response = await fi.chat('Why is the sky blue?', {
+                model: 'meta/llama3.2-1b/instruct-fp16',
+              });
 
-                const reply: ChatResponseResult = await fi.chat({
-                  messages: [
-                    { role: "system", content: "You are a friendly assistant that loves using emojies." }
-                    { role: "user", content: "Why is the sky blue?" }
-                  ]
-                });
-                if (reply.ok){
-                  console.log(reply.message.content);
-                }
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log(response.message.content);
+              }
+            }
 
-        .. tab-item:: JavaScript
-            :sync: js
+            await main().then().catch();
 
-            .. code-block:: js
+Stream Responses
+----------------
 
-                const reply = await fi.chat({
-                  messages: [
-                    { role: "system", content: "You are a friendly assistant that loves using emojies." }
-                    { role: "user", content: "Why is the sky blue?" }
-                  ]
-                });
-                console.log(reply.content);
+By enabling the stream option and providing a callback function, you can watch the AI’s response as it is being generated. This approach is ideal for interactive applications, as it lets you process partial responses immediately before the full answer is available.
+The callback function must accept an argument of type :doc:`StreamEvent <ts-api-ref/interfaces/StreamEvent>`.
 
-3. **Handling history**
+.. tab-set::
+    :sync-group: category
 
-   Using this array of messages, you can easily create context-aware conversation.
-   Here is a simple example:
+    .. tab-item:: TypeScript
+        :sync: ts
 
-    .. tab-set::
-        :sync-group: category
+        .. code-block:: ts
 
-        .. tab-item:: TypeScript
-            :sync: ts
+            import { ChatResponseResult, FlowerIntelligence, type StreamEvent } from '@flwr/flwr';
 
-            .. code-block:: ts
+            // Access the singleton instance
+            const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
-                // Initialize history with a system message.
-                const history: Message[] = [
-                  { role: "system", content: "You are a friendly assistant that loves using emojis." }
-                ];
+            async function main() {
+              // Perform the inference
+              const response: ChatResponseResult = await fi.chat('Why is the sky blue?', {
+                model: 'meta/llama3.2-1b/instruct-fp16',
+                stream: true,
+                onStreamEvent: (event: StreamEvent) => console.log(event.chunk)
+              });
 
-                // Function to chat while preserving conversation history.
-                async function chatWithHistory(userInput: string): Promise<void> {
-                  // Append user input to the history.
-                  history.push({ role: "user", content: userInput });
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log('Full response:', response.message.content);
+              }
+            }
 
-                  // Send the entire history to the chat method.
-                  const reply: ChatResponseResult = await fi.chat({ messages: history });
+            await main().then().catch();
 
-                  if (reply.ok) {
-                    // Append the assistant's reply to the history.
-                    history.push(reply.message);
-                    console.log("Assistant:", reply.message.content);
-                  } else {
-                    console.error("Chat error:", reply.failure);
-                  }
-                }
+    .. tab-item:: JavaScript
+        :sync: js
 
-                // Example usage:
-                chatWithHistory("Why is the sky blue?");
+        .. code-block:: js
 
-        .. tab-item:: JavaScript
-            :sync: js
+            import { FlowerIntelligence } from '@flwr/flwr';
 
-            .. code-block:: js
+            // Access the singleton instance
+            const fi = FlowerIntelligence.instance;
 
-                // Initialize history with a system message.
-                const history = [
-                  { role: "system", content: "You are a friendly assistant that loves using emojis." }
-                ];
+            async function main() {
+              // Perform the inference
+              const response = await fi.chat('Why is the sky blue?', {
+                model: 'meta/llama3.2-1b/instruct-fp16',
+                stream: true,
+                onStreamEvent: (event) => console.log(event.chunk)
+              });
 
-                // Function to chat while preserving conversation history.
-                async function chatWithHistory(userInput) {
-                  // Append user input to the history.
-                  history.push({ role: "user", content: userInput });
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log(response.message.content);
+              }
+            }
 
-                  // Send the entire history to the chat method.
-                  const reply = await fi.chat({ messages: history });
+            await main().then().catch();
 
-                  if (reply.ok) {
-                    // Append the assistant's reply to the history.
-                    history.push(reply.message);
-                    console.log("Assistant:", reply.message.content);
-                  } else {
-                    console.error("Chat error:", reply.failure);
-                  }
-                }
+Use Roles
+---------
 
-                // Example usage:
-                chatWithHistory("Why is the sky blue?");
+Instead of simply sending a single string, you can provide an array of :doc:`messages <ts-api-ref/interfaces/Message>` with designated roles such as ``system`` and ``user``. This allows you to define the behavior and context of the conversation more clearly, ensuring that the assistant responds in a way that’s tailored to the scenario.
+
+.. tab-set::
+    :sync-group: category
+
+    .. tab-item:: TypeScript
+        :sync: ts
+
+        .. code-block:: ts
+
+            import { ChatResponseResult, FlowerIntelligence, type StreamEvent } from '@flwr/flwr';
+
+            // Access the singleton instance
+            const fi: FlowerIntelligence = FlowerIntelligence.instance;
+
+            async function main() {
+              // Perform the inference
+              const response: ChatResponseResult = await fi.chat({
+                messages: [
+                  { role: "system", content: "You are a friendly assistant that loves using emojies." }
+                  { role: "user", content: "Why is the sky blue?" }
+                ],
+                model: 'meta/llama3.2-1b/instruct-fp16',
+                stream: true,
+                onStreamEvent: (event: StreamEvent) => console.log(event.chunk)
+              });
+
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log('Full response:', response.message.content);
+              }
+            }
+
+            await main().then().catch();
+
+    .. tab-item:: JavaScript
+        :sync: js
+
+        .. code-block:: js
+
+            import { FlowerIntelligence } from '@flwr/flwr';
+
+            // Access the singleton instance
+            const fi = FlowerIntelligence.instance;
+
+            async function main() {
+              // Perform the inference
+              const response = await fi.chat({
+                messages: [
+                  { role: "system", content: "You are a friendly assistant that loves using emojies." }
+                  { role: "user", content: "Why is the sky blue?" }
+                ],
+                model: 'meta/llama3.2-1b/instruct-fp16',
+                stream: true,
+                onStreamEvent: (event) => console.log(event.chunk)
+              });
+
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log(response.message.content);
+              }
+            }
+
+            await main().then().catch();
+
+Handle history
+--------------
+
+In this example, the conversation history is maintained in an array that includes both system and user messages. Each time a new message is sent, it is appended to the history, ensuring that the assistant has access to the full dialogue context. This method allows Flower Intelligence to generate responses that are informed by previous interactions, resulting in a more coherent and dynamic conversation.
+
+.. tab-set::
+    :sync-group: category
+
+    .. tab-item:: TypeScript
+        :sync: ts
+
+        .. code-block:: ts
+
+            import { ChatResponseResult, FlowerIntelligence, type StreamEvent } from '@flwr/flwr';
+
+            // Access the singleton instance
+            const fi: FlowerIntelligence = FlowerIntelligence.instance;
+
+            // Initialize history with a system message.
+            const history: Message[] = [
+              { role: "system", content: "You are a friendly assistant that loves using emojis." }
+            ];
+
+            // Function to chat while preserving conversation history.
+            async function chatWithHistory(userInput: string): Promise<void> {
+              // Append user input to the history.
+              history.push({ role: "user", content: userInput });
+
+              // Send the entire history to the chat method.
+              const response: ChatResponseResult = await fi.chat({
+                messages: history,
+                model: 'meta/llama3.2-1b/instruct-fp16',
+                stream: true,
+                onStreamEvent: (event: StreamEvent) => console.log(event.chunk)
+              });
+
+              if (response.ok) {
+                // Append the assistant's response to the history.
+                history.push(response.message);
+                console.log("Assistant's full response:", response.message.content);
+              } else {
+                console.error("Chat error:", response.failure.description);
+              }
+            }
+
+            async function main() {
+              chatWithHistory("Why is the sky blue?");
+            }
+
+            await main().then().catch();
+
+    .. tab-item:: JavaScript
+        :sync: js
+
+        .. code-block:: js
+
+            import { FlowerIntelligence } from '@flwr/flwr';
+
+            // Access the singleton instance
+            const fi = FlowerIntelligence.instance;
+
+            // Initialize history with a system message.
+            const history = [
+              { role: "system", content: "You are a friendly assistant that loves using emojis." }
+            ];
+
+            // Function to chat while preserving conversation history.
+            async function chatWithHistory(userInput) {
+              // Append user input to the history.
+              history.push({ role: "user", content: userInput });
+
+              // Send the entire history to the chat method.
+              const response = await fi.chat({
+                messages: history,
+                model: 'meta/llama3.2-1b/instruct-fp16',
+                stream: true,
+                onStreamEvent: (event) => console.log(event.chunk)
+              });
+
+              if (response.ok) {
+                // Append the assistant's response to the history.
+                history.push(response.message);
+                console.log("Assistant's full response:", response.message.content);
+              } else {
+                console.error("Chat error:", response.failure.description);
+              }
+            }
+
+            async function main() {
+              chatWithHistory("Why is the sky blue?");
+            }
+
+            await main().then().catch();
 
 .. note::
-   Checkout out full examples over on GitHub for more information!
+   Checkout out full examples over on `GitHub <https://github.com/adap/flower/tree/main/intelligence/ts/examples>`_ for more information!
 
 Flower Confidential Remote Compute
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------
 
 .. warning::
    Flower Confidential Remote Compute is available in private beta. If you are interested in using Confidential Remote Compute, please apply for Early Access via the `Flower Intelligence Pilot Program <https://forms.gle/J8pFpMrsmek2VFKq8>`_.
@@ -252,6 +429,8 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
 
         .. code-block:: ts
 
+            import { ChatResponseResult, FlowerIntelligence, type StreamEvent } from '@flwr/flwr';
+
             // Access the singleton instance
             const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
@@ -259,10 +438,32 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
             fi.remoteHandoff = true;
             fi.apiKey = "YOUR_API_KEY";
 
+            async function main() {
+              const response: ChatResponseResult = await fi.chat({
+                messages: [
+                  { role: "system", content: "You are a friendly assistant that loves using emojies." }
+                  { role: "user", content: "Why is the sky blue?" }
+                ],
+                model: 'meta/llama3.2-1b/instruct-fp16',
+                stream: true,
+                onStreamEvent: (event: StreamEvent) => console.log(event.chunk)
+              });
+
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log('Full response:', response.message.content);
+              }
+            }
+
+            await main().then().catch();
+
     .. tab-item:: JavaScript
         :sync: js
 
         .. code-block:: js
+
+            import { FlowerIntelligence } from '@flwr/flwr';
 
             // Access the singleton instance
             const fi = FlowerIntelligence.instance;
@@ -270,6 +471,26 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
             // Enable remote processing and provide your API key
             fi.remoteHandoff = true;
             fi.apiKey = "YOUR_API_KEY";
+
+            async function main() {
+              const response = await fi.chat({
+                messages: [
+                  { role: "system", content: "You are a friendly assistant that loves using emojies." }
+                  { role: "user", content: "Why is the sky blue?" }
+                ],
+                model: 'meta/llama3.2-1b/instruct-fp16',
+                stream: true,
+                onStreamEvent: (event) => console.log(event.chunk)
+              });
+
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log(response.message.content);
+              }
+            }
+
+            await main().then().catch();
 
 References
 ----------
