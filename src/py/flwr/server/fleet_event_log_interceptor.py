@@ -15,7 +15,7 @@
 """Flower Fleet API event log interceptor."""
 
 
-from typing import Any, Callable, Union, cast
+from typing import Any, Callable, cast
 
 import grpc
 
@@ -35,14 +35,14 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         continuation: Callable[[Any], Any],
         handler_call_details: grpc.HandlerCallDetails,
     ) -> grpc.RpcMethodHandler:
-        """Flower server interceptor logging logic.
+        """Flower Fleet API server interceptor logging logic.
 
         Intercept all unary-unary calls from users and log the event. Continue RPC call
         if event logger is enabled on the SuperLink, else, terminate RPC call by setting
         context to abort.
         """
         # One of the method handlers in
-        # `flwr.superexec.exec_servicer.ExecServicer`
+        # `flwr.server.superlink.fleet.grpc_rere.fleet_servicer.FleetServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
         method_name: str = handler_call_details.method
         return self._generic_event_log_unary_method_handler(method_handler, method_name)
@@ -53,7 +53,7 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         def _generic_method_handler(
             request: EventLogRequest,
             context: grpc.ServicerContext,
-        ) -> Union[EventLogResponse, Exception]:
+        ) -> EventLogResponse:
             log_entry: LogEntry
             # Log before call
             log_entry = self.log_plugin.compose_log_before_event(
