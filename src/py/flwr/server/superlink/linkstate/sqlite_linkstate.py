@@ -1418,7 +1418,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         ttl = message_ins["ttl"]
         current_time = time.time()
 
-        # Check if TaskIns is expired
+        # Check if Message is expired
         if ttl is not None and created_at + ttl <= current_time:
             return None
 
