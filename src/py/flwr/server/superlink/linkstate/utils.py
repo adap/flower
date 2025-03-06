@@ -573,9 +573,9 @@ def check_node_availability_for_taskins(
             task_res = make_node_unavailable_taskres(task_ins)
             ret_dict[taskins_id] = task_res
     return ret_dict
-  
-  
-  def verify_found_message_replies(
+
+
+def verify_found_message_replies(
     inquired_message_ids: set[UUID],
     found_message_ins_dict: dict[UUID, Message],
     found_message_res_list: list[Message],
