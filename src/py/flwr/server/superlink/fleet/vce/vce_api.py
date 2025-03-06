@@ -92,7 +92,7 @@ def worker(
     backend: Backend,
     f_stop: threading.Event,
 ) -> None:
-    """Get Messages from queue and pass it to an actor in the pool to execute it."""
+    """Process messages from the queue, execute them, update context, and enqueue replies."""
     while not f_stop.is_set():
         out_mssg = None
         try:
@@ -145,7 +145,7 @@ def add_messages_to_queue(
     nodes_mapping: NodeToPartitionMapping,
     f_stop: threading.Event,
 ) -> None:
-    """Put Messages in a queue from State."""
+    """Put Messages in the queue from the LinkState."""
     while not f_stop.is_set():
         for node_id in nodes_mapping.keys():
             message_ins_list = state.get_message_ins(node_id=node_id, limit=1)
@@ -157,7 +157,7 @@ def add_messages_to_queue(
 def put_message_into_state(
     state: LinkState, queue: "Queue[Message]", f_stop: threading.Event
 ) -> None:
-    """Put reply Messages into State from a queue."""
+    """Store reply Messages into the LinkState from the queue."""
     while not f_stop.is_set():
         try:
             message_reply = queue.get(timeout=1.0)
