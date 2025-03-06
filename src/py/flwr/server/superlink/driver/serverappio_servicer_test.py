@@ -17,6 +17,7 @@
 
 import tempfile
 import unittest
+from typing import Optional
 
 import grpc
 from parameterized import parameterized
@@ -285,7 +286,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         ]
     )  # type: ignore
     def test_successful_pull_messages_deletes_messages_in_linkstate(
-        self, content: RecordSet | None, error: Error | None
+        self, content: Optional[RecordSet], error: Optional[Error]
     ) -> None:
         """Test `PullMessages` deletes messages from LinkState."""
         # Prepare
