@@ -86,8 +86,8 @@ def _register_node_info_stores(
 
 # pylint: disable=too-many-arguments,too-many-locals
 def worker(
-    messageins_queue: "Queue[Message]",
-    messageres_queue: "Queue[Message]",
+    messageins_queue: Queue[Message],
+    messageres_queue: Queue[Message],
     node_info_store: dict[int, DeprecatedRunInfoStore],
     backend: Backend,
     f_stop: threading.Event,
@@ -142,7 +142,7 @@ def worker(
 
 def add_messages_to_queue(
     state: LinkState,
-    queue: "Queue[Message]",
+    queue: Queue[Message],
     nodes_mapping: NodeToPartitionMapping,
     f_stop: threading.Event,
 ) -> None:
@@ -156,7 +156,7 @@ def add_messages_to_queue(
 
 
 def put_message_into_state(
-    state: LinkState, queue: "Queue[Message]", f_stop: threading.Event
+    state: LinkState, queue: Queue[Message], f_stop: threading.Event
 ) -> None:
     """Store reply Messages into the LinkState from the queue."""
     while not f_stop.is_set():
