@@ -45,7 +45,7 @@ class Backend(ABC):
     def num_workers(self) -> int:
         """Return number of workers in the backend.
 
-        This is the number of TaskIns that can be processed concurrently.
+        This is the number of Messages that can be processed concurrently.
         """
         return 0
 
