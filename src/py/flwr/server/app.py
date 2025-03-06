@@ -90,7 +90,11 @@ BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 try:
-    from flwr.ee import add_ee_args_superlink, get_exec_auth_plugins
+    from flwr.ee import (
+        add_ee_args_superlink,
+        get_dashboard_server,
+        get_exec_auth_plugins,
+    )
 except ImportError:
 
     # pylint: disable-next=unused-argument
@@ -430,6 +434,17 @@ def run_superlink() -> None:
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
+
+    # Add Dashboard server if available
+    if dashboard_address := getattr(args, "dashboard_address", None):
+        dashboard_address_str, _, _ = _format_address(dashboard_address)
+        dashboard_server = get_dashboard_server(
+            address=dashboard_address_str,
+            state_factory=state_factory,
+            certificates=None,
+        )
+
+        grpc_servers.append(dashboard_server)
 
     # Graceful shutdown
     register_exit_handlers(

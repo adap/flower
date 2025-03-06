@@ -120,7 +120,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             run_status = state.get_run_status({run_id})[run_id]
             if run_status.status == Status.FINISHED:
                 log(INFO, "All logs for run ID `%s` returned", request.run_id)
-                context.cancel()
+                break
 
             time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
 
