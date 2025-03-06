@@ -66,9 +66,7 @@ except ModuleNotFoundError:
 
 PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
-PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
 PATH_PULL_MESSAGES: str = "/api/v0/fleet/pull-messages"
-PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 PATH_PUSH_MESSAGES: str = "/api/v0/fleet/push-messages"
 PATH_PING: str = "api/v0/fleet/ping"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
