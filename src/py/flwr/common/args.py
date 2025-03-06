@@ -102,9 +102,8 @@ def try_obtain_server_certificates(
     if args.insecure:
         log(
             WARN,
-            "Option `--insecure` was set. Starting insecure HTTP server. Data "
-            "transmitted between the gRPC client and server will not be encrypted. "
-            "Proceed only if you understand the risks.",
+            "Option `--insecure` was set. Starting insecure HTTP server with "
+            "unencrypted communication. Proceed only if you understand the risks.",
         )
         return None
     # Check if certificates are provided
