@@ -278,11 +278,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
     @parameterized.expand(
         [
-            (
-                RecordSet(),
-                None,
-            ),  # Reply with Message
-            (None, Error(code=0)),  # Reply with Error
+            # Reply with Message
+            (RecordSet(), None),
+            # Reply with Error
+            (None, Error(code=0)),
         ]
     )  # type: ignore
     def test_successful_pull_messages_deletes_messages_in_linkstate(
