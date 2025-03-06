@@ -16,13 +16,18 @@
 
 
 import unittest
-from collections.abc import Iterator
-from typing import Any, Optional, Union
+from typing import Optional, Union
 from unittest.mock import MagicMock
 
 import grpc
-from google.protobuf.message import Message as GrpcMessage
 
+from flwr.common.dummy_grpc_handlers import (
+    DummyUnaryStreamHandlerException,
+    DummyUnaryUnaryHandlerException,
+    DummyUnsupportedHandler,
+    get_dummy_unary_stream_handler,
+    get_dummy_unary_unary_handler,
+)
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.event_log_plugin.event_log_plugin import (
     EventLogRequest,
@@ -31,11 +36,6 @@ from flwr.common.event_log_plugin.event_log_plugin import (
 from flwr.common.typing import Actor, Event, LogEntry, UserInfo
 from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
 from flwr.superexec.exec_user_auth_interceptor import shared_user_info
-
-from .exec_user_auth_interceptor_test import (
-    get_dummy_unary_stream_handler,
-    get_dummy_unary_unary_handler,
-)
 
 
 class DummyLogPlugin(EventLogWriterPlugin):
@@ -88,46 +88,46 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self.logs.append(log_entry)
 
 
-class DummyUnsupportedHandler:
-    """Dummy handler for unsupported RPC types."""
-
-    unary_unary = None
-    unary_stream = None
-    request_deserializer = None
-    response_serializer = None
-
-
-class DummyUnaryUnaryHandlerException:
-    """Dummy handler for unary-unary RPC calls that raises an Exception."""
-
-    unary_unary = staticmethod(
-        lambda request, context: (_ for _ in ()).throw(Exception("Test error"))
-    )
-    unary_stream = None
-    request_deserializer = None
-    response_serializer = None
-
-
-def dummy_unary_stream_exception(
-    request: GrpcMessage, context: grpc.ServicerContext  # pylint: disable=W0613
-) -> Iterator[Any]:
-    """Raise an Exception upon iteration for unary-stream RPC call."""
-
-    def generator() -> Iterator[Any]:
-        raise Exception("Test stream error")  # pylint: disable=W0719
-        yield  # This yield is never reached. pylint: disable=W0101
-
-    return generator()
-
-
-# Dummy handler for unary_stream that uses the above function.
-class DummyUnaryStreamHandlerException:
-    """Dummy handler for unary-stream RPC calls that raises an Exception."""
-
-    unary_unary = None
-    unary_stream = staticmethod(dummy_unary_stream_exception)
-    request_deserializer = None
-    response_serializer = None
+# class DummyUnsupportedHandler:
+#     """Dummy handler for unsupported RPC types."""
+#
+#     unary_unary = None
+#     unary_stream = None
+#     request_deserializer = None
+#     response_serializer = None
+#
+#
+# class DummyUnaryUnaryHandlerException:
+#     """Dummy handler for unary-unary RPC calls that raises an Exception."""
+#
+#     unary_unary = staticmethod(
+#         lambda request, context: (_ for _ in ()).throw(Exception("Test error"))
+#     )
+#     unary_stream = None
+#     request_deserializer = None
+#     response_serializer = None
+#
+#
+# def dummy_unary_stream_exception(
+#     request: GrpcMessage, context: grpc.ServicerContext  # pylint: disable=W0613
+# ) -> Iterator[Any]:
+#     """Raise an Exception upon iteration for unary-stream RPC call."""
+#
+#     def generator() -> Iterator[Any]:
+#         raise Exception("Test stream error")  # pylint: disable=W0719
+#         yield  # This yield is never reached. pylint: disable=W0101
+#
+#     return generator()
+#
+#
+# # Dummy handler for unary_stream that uses the above function.
+# class DummyUnaryStreamHandlerException:
+#     """Dummy handler for unary-stream RPC calls that raises an Exception."""
+#
+#     unary_unary = None
+#     unary_stream = staticmethod(dummy_unary_stream_exception)
+#     request_deserializer = None
+#     response_serializer = None
 
 
 class TestExecEventLogInterceptor(unittest.TestCase):
