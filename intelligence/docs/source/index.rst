@@ -32,7 +32,7 @@ Install
 Hello, Flower Intelligence!
 ---------------------------
 
-In this introductory example, you learn how to quickly get started with the library. Flower Intelligence is built around the Singleton design pattern, meaning you only need to configure a single instance that can be reused throughout your project. This simple setup helps you integrate powerful AI capabilities with minimal overhead.
+Flower Intelligence is built around the Singleton design pattern, meaning you only need to configure a single instance that can be reused throughout your project. This simple setup helps you integrate powerful AI capabilities with minimal overhead.
 
 .. tab-set::
     :sync-group: category
@@ -48,6 +48,7 @@ In this introductory example, you learn how to quickly get started with the libr
             const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
             async function main() {
+              // Perform the inference
               const response: ChatResponseResult = await fi.chat("Why is the sky blue?");
             }
 
@@ -64,6 +65,7 @@ In this introductory example, you learn how to quickly get started with the libr
             const fi = FlowerIntelligence.instance;
 
             async function main() {
+              // Perform the inference
               const response = await fi.chat("Why is the sky blue?");
             }
 
@@ -73,7 +75,7 @@ In this introductory example, you learn how to quickly get started with the libr
 Specify the model
 -----------------
 
-Flower Intelligence gives you the flexibility to choose the language model that best suits your application. By specifying a model in the chat options, you can easily switch between different AI models available in the ecosystem. For a full list of supported models, please refer to the :doc:`available models list <ref-models>`.
+By specifying a model in the chat options, you can easily switch between different AI models available in the ecosystem. For a full list of supported models, please refer to the :doc:`available models list <ref-models>`.
 
 .. tab-set::
     :sync-group: category
@@ -89,6 +91,7 @@ Flower Intelligence gives you the flexibility to choose the language model that 
             const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
             async function main() {
+              // Perform the inference
               const response: ChatResponseResult = await fi.chat('Why is the sky blue?', {
                 model: 'meta/llama3.2-1b/instruct-fp16',
               });
@@ -107,6 +110,7 @@ Flower Intelligence gives you the flexibility to choose the language model that 
             const fi = FlowerIntelligence.instance;
 
             async function main() {
+              // Perform the inference
               const response = await fi.chat('Why is the sky blue?', {
                 model: 'meta/llama3.2-1b/instruct-fp16',
               });
@@ -117,7 +121,7 @@ Flower Intelligence gives you the flexibility to choose the language model that 
 Check for errors
 ----------------
 
-Robust error handling is a key feature of Flower Intelligence. Instead of throwing exceptions that might crash your application, the library returns a response object that includes a dedicated failure property. This design allows you to inspect any issues via a structured failure object (as defined in :doc:`Failure <ts-api-ref/interfaces/Failure>`), enabling graceful error handling and improved application stability.
+Instead of throwing exceptions that might crash your application, Flower Intelligence returns a response object that includes a dedicated :doc:`Failure <ts-api-ref/interfaces/Failure>` property, enabling graceful error handling and improved application stability.
 
 .. tab-set::
     :sync-group: category
@@ -133,6 +137,7 @@ Robust error handling is a key feature of Flower Intelligence. Instead of throwi
             const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
             async function main() {
+              // Perform the inference
               const response: ChatResponseResult = await fi.chat('Why is the sky blue?', {
                 model: 'meta/llama3.2-1b/instruct-fp16',
               });
@@ -157,6 +162,7 @@ Robust error handling is a key feature of Flower Intelligence. Instead of throwi
             const fi = FlowerIntelligence.instance;
 
             async function main() {
+              // Perform the inference
               const response = await fi.chat('Why is the sky blue?', {
                 model: 'meta/llama3.2-1b/instruct-fp16',
               });
@@ -173,7 +179,8 @@ Robust error handling is a key feature of Flower Intelligence. Instead of throwi
 Stream Responses
 ----------------
 
-For applications that benefit from real-time feedback, Flower Intelligence supports response streaming. By enabling the stream option and providing a callback function, you can watch the AI’s response as it is being generated. This approach is ideal for interactive applications, as it lets you process partial responses immediately before the full answer is available.
+By enabling the stream option and providing a callback function, you can watch the AI’s response as it is being generated. This approach is ideal for interactive applications, as it lets you process partial responses immediately before the full answer is available.
+The callback function must accept an argument of type :doc:`StreamEvent <ts-api-ref/interfaces/StreamEvent>`.
 
 .. tab-set::
     :sync-group: category
@@ -189,6 +196,7 @@ For applications that benefit from real-time feedback, Flower Intelligence suppo
             const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
             async function main() {
+              // Perform the inference
               const response: ChatResponseResult = await fi.chat('Why is the sky blue?', {
                 model: 'meta/llama3.2-1b/instruct-fp16',
                 stream: true,
@@ -215,6 +223,7 @@ For applications that benefit from real-time feedback, Flower Intelligence suppo
             const fi = FlowerIntelligence.instance;
 
             async function main() {
+              // Perform the inference
               const response = await fi.chat('Why is the sky blue?', {
                 model: 'meta/llama3.2-1b/instruct-fp16',
                 stream: true,
@@ -233,7 +242,7 @@ For applications that benefit from real-time feedback, Flower Intelligence suppo
 Use Roles
 ---------
 
-To enhance conversation context, Flower Intelligence supports the use of different message roles. Instead of simply sending a single string, you can provide an array of :doc:`messages <ts-api-ref/interfaces/Message>` with designated roles such as “system” and “user.” This allows you to define the behavior and context of the conversation more clearly, ensuring that the assistant responds in a way that’s tailored to the scenario.
+Instead of simply sending a single string, you can provide an array of :doc:`messages <ts-api-ref/interfaces/Message>` with designated roles such as ``system`` and ``user``. This allows you to define the behavior and context of the conversation more clearly, ensuring that the assistant responds in a way that’s tailored to the scenario.
 
 .. tab-set::
     :sync-group: category
@@ -249,6 +258,7 @@ To enhance conversation context, Flower Intelligence supports the use of differe
             const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
             async function main() {
+              // Perform the inference
               const response: ChatResponseResult = await fi.chat({
                 messages: [
                   { role: "system", content: "You are a friendly assistant that loves using emojies." }
@@ -279,6 +289,7 @@ To enhance conversation context, Flower Intelligence supports the use of differe
             const fi = FlowerIntelligence.instance;
 
             async function main() {
+              // Perform the inference
               const response = await fi.chat({
                 messages: [
                   { role: "system", content: "You are a friendly assistant that loves using emojies." }
@@ -301,7 +312,7 @@ To enhance conversation context, Flower Intelligence supports the use of differe
 Handle history
 --------------
 
-For context-aware conversations, managing a history of messages is essential. In this example, the conversation history is maintained in an array that includes both system and user messages. Each time a new message is sent, it is appended to the history, ensuring that the assistant has access to the full dialogue context. This method allows Flower Intelligence to generate responses that are informed by previous interactions, resulting in a more coherent and dynamic conversation.
+In this example, the conversation history is maintained in an array that includes both system and user messages. Each time a new message is sent, it is appended to the history, ensuring that the assistant has access to the full dialogue context. This method allows Flower Intelligence to generate responses that are informed by previous interactions, resulting in a more coherent and dynamic conversation.
 
 .. tab-set::
     :sync-group: category
