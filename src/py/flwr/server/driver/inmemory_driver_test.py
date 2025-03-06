@@ -228,7 +228,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.assertEqual(len(message_res), 0)
         self.assertEqual(len(message_ins), 0)
 
-    def test_task_store_consistency_after_push_pull_inmemory_state(self) -> None:
+    def test_message_store_consistency_after_push_pull_inmemory_state(self) -> None:
         """Test tasks are deleted in in-memory state once messages are pulled."""
         # Prepare
         state_factory = LinkStateFactory(":flwr-in-memory-state:")
@@ -244,9 +244,6 @@ class TestInMemoryDriver(unittest.TestCase):
 
         # Prepare: create replies
         reply_tos = get_replies(self.driver, msg_ids, node_id)
-
-        print(f"{reply_tos = }")
-        print(f"{msg_ids = }")
 
         # Assert
         self.assertEqual(set(reply_tos), set(msg_ids))
