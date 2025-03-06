@@ -32,9 +32,9 @@ documents and passes the re-ranked documents as context to the augmented query p
 > through [secure layers](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and all server operations
 > (e.g., document merge, RAG query execution) need to run inside a Confidential Compute environment.
 
-# Run Example
+## Setup the Example
 
-## System Prerequisites
+### System Prerequisites
 
 Depending on whether you are running on macOS, RHEL, Debian please make sure
 that the following packages are already installed in your system `wget`, `git-lfs`.
@@ -70,15 +70,28 @@ git lfs install
 
 </details>
 
-## Install Dependencies
+### Clone the Example
 
-To install all dependencies required to run the example, please execute the following command inside the current directory:
+Start by cloning the example project:
+
+```shell
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+        && mv _tmp/examples/fedrag . \
+        && rm -rf _tmp \
+        && cd fedrag
+```
+
+This will create a new directory called `fedrag`.
+
+### Install Dependencies
+
+To install all dependencies required to run the example, from the top-level `fedrag` directory execute the following command:
 
 ```bash
 pip install -e .
 ```
 
-## Download & Index Corpus
+### Download & Index Corpus
 
 Before you run the Flower engine, please make sure you have downloaded the corpus we need for document retrieval
 and created the respective document indices. To accomplish this, run the following helper bash script:
@@ -112,7 +125,7 @@ All corpora used in this work were derived from the MedRAG toolkit [\[1\]](#ref1
 
 ## Run with Simulation Engine
 
-Once inside the `fedrag` directory, please use `flwr run .` to run a local simulation:
+From the top-level directory for this example, launch the simulation:
 
 ```bash
 flwr run .
