@@ -783,7 +783,7 @@ class StateTest(unittest.TestCase):
         # Assert
         assert not is_successful
 
-    def test_store_message_res_task_ins_expired(self) -> None:
+    def test_store_message_res_message_ins_expired(self) -> None:
         """Test behavior of store_message_res when the Message it replies to is
         expired."""
         # Prepare
@@ -875,7 +875,7 @@ class StateTest(unittest.TestCase):
                 assert res is None
 
     def test_get_message_ins_not_return_expired(self) -> None:
-        """Test get_message_ins not to return expired tasks."""
+        """Test get_message_ins not to return expired replies."""
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
