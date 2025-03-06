@@ -113,7 +113,7 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
         # Execute
-        node_ids = self.driver.get_node_ids()
+        node_ids = list(self.driver.get_node_ids())
 
         # Assert
         self.assertEqual(len(node_ids), self.num_nodes)
