@@ -4,9 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'intelligence/**/*'
+      - '.github/workflows/intelligence-*.yml'
   pull_request:
     branches:
       - main
+    paths:
+      - 'intelligence/**/*'
+      - '.github/workflows/intelligence-*.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
