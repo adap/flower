@@ -101,7 +101,8 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
             run_config=maker.user_config(),
         )
 
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running.
+        # PushSimulationOutputsRequest is only allowed in running status.
         self._transition_run_status(run_id, 2)
         request = PushSimulationOutputsRequest(
             run_id=run_id, context=context_to_proto(context)
