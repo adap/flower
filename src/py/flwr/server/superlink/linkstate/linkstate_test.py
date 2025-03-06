@@ -1111,7 +1111,7 @@ class StateTest(unittest.TestCase):
         # Assert
         assert result is None
 
-    def test_store_message_res_task_ins_expired(self) -> None:
+    def test_store_message_res_message_ins_expired(self) -> None:
         """Test behavior of store_message_res when the Message it replies to is
         expired."""
         # Prepare

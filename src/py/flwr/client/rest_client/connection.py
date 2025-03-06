@@ -309,7 +309,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         if message_proto is not None:
             message = message_from_proto(message_proto)
             metadata = copy(message.metadata)
-            log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
+            log(INFO, "[Node] POST /%s: success", PATH_PULL_MESSAGES)
         return message
 
     def send(message: Message) -> None:
@@ -345,7 +345,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         log(
             INFO,
             "[Node] POST /%s: success, created result %s",
-            PATH_PUSH_TASK_RES,
+            PATH_PUSH_MESSAGES,
             res.results,  # pylint: disable=no-member
         )
 

@@ -167,7 +167,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
 
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. GetNodesRequest is only allowed
+        # in running status.
         self._transition_run_status(run_id, 2)
         request = GetNodesRequest(run_id=run_id)
 
@@ -216,7 +217,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
 
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. PushInsMessagesRequest is only
+        # allowed in running status.
         self._transition_run_status(run_id, 2)
         request = PushInsMessagesRequest(messages_list=[message_ins], run_id=run_id)
 
@@ -266,7 +268,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PullMessages` success."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. PullResMessagesRequest is only
+        # allowed in running status.
         self._transition_run_status(run_id, 2)
         request = PullResMessagesRequest(message_ids=[], run_id=run_id)
 
@@ -367,7 +370,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             run_config=maker.user_config(),
         )
 
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. PushServerAppOutputsRequest is only
+        # allowed in running status.
         self._transition_run_status(run_id, 2)
         request = PushServerAppOutputsRequest(
             run_id=run_id, context=context_to_proto(context)
