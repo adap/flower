@@ -96,6 +96,7 @@ def _add_shortlog(new_version: str, shortlog: str) -> None:
         content = file.readlines()
 
     token_exists = any(token in line for line in content)
+    shortlog_exists = True
 
     with open(CHANGELOG_FILE, "w", encoding="utf-8") as file:
         for line in content:
@@ -105,9 +106,15 @@ def _add_shortlog(new_version: str, shortlog: str) -> None:
             elif "## Unreleased" in line and not token_exists:
                 # Add the new entry under "## Unreleased"
                 file.write(f"## {new_version} ({current_date})\n{entry}\n")
+                shortlog_exists = False
                 token_exists = True
             else:
                 file.write(line)
+
+    if shortlog_exists:
+        print("Shortlog already exists in the changelog, skipping addition.")
+    else:
+        print("Shortlog added to the changelog.")
 
 
 def _git_commits_since_tag(tag: str) -> list[Commit]:
@@ -228,11 +235,19 @@ def _extract_changelog_entry(
     }
 
 
-def _update_changelog(prs: set[PullRequest], tag: str) -> bool:
+def _update_changelog(prs: set[PullRequest], tag: str, new_tag: str) -> bool:
     """Update the changelog file with entries from provided pull requests."""
     with open(CHANGELOG_FILE, "r+", encoding="utf-8") as file:
         content = file.read()
-        unreleased_index = content.find("## Unreleased")
+        unreleased_index = content.find(
+            "\n## Unreleased\n"
+        )  # Avoid finding `## Unreleased` in other text
+        if unreleased_index == -1:
+            unreleased_index = content.find(
+                f"## {new_tag}"
+            )  # Try to find the new tag if Unreleased not found
+        else:
+            unreleased_index += 1  # Skip the newline (\n) character
 
         # Find the end of the Unreleased section
         end_index = content.find(f"## {tag}", unreleased_index + 1)
@@ -327,8 +342,9 @@ def main() -> None:
 
     # Update the changelog
     print("Updating the changelog...")
-    if _update_changelog(prs, latest_tag):
-        new_version = _bump_minor_version(latest_tag)
+    new_version = _bump_minor_version(latest_tag)
+    if _update_changelog(prs, latest_tag, new_version):
+
         if not new_version:
             print("Wrong tag format.")
             return
