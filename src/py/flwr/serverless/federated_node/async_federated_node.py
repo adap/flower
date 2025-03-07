@@ -161,9 +161,11 @@ class AsyncFederatedNode:
         epoch: int = None,
         upload_only=False,
     ) -> Tuple[Parameters, dict]:
-        LOGGER.info(f"node {self.node_id}: in update_parameters")
-        assert isinstance(num_examples, int)
-        assert num_examples >= 1
+        LOGGER.info(f"node {self.node_id} @ epoch {epoch}: updating model weights using federated learning.")
+        if num_examples is not None:
+            assert isinstance(num_examples, int)
+            assert num_examples >= 1
+            LOGGER.info(f"node {self.node_id} @ epoch {epoch}: {num_examples} local examples contributed to the last model update.")
         self_aggregatable = Aggregatable(
             parameters=local_parameters,
             num_examples=num_examples,
@@ -176,10 +178,11 @@ class AsyncFederatedNode:
             node_id=self.node_id,
         )
         if upload_only:
+            LOGGER.info(f"node {self.node_id} @ epoch {epoch}: uploading local parameters without aggregation, because upload_only is True")
             return local_parameters, metrics
         (aggregatables_from_other_nodes) = self._get_aggregatables_from_other_nodes()
         LOGGER.info(
-            f"node {self.node_id}: {len(aggregatables_from_other_nodes or [])} aggregatables_from_other_nodes"
+            f"node {self.node_id} @ epoch {epoch}: found {len(aggregatables_from_other_nodes or [])} models from other nodes"
         )
         if len(aggregatables_from_other_nodes) == 0:
             # No other nodes, so just return the local parameters
@@ -198,17 +201,13 @@ class AsyncFederatedNode:
             #     model_hash=self.node_id + str(time.time()),
             #     num_examples=num_examples,
             # )
-            # TODO: fill in aggregated_metrics
             aggregated_parameters = updated_aggregatable.parameters
             aggregated_metrics = updated_aggregatable.metrics
 
             # print the weight delta
             LOGGER.info(
-                f"Finished weight aggregation for epoch {epoch} at node {self.node_id}"
-            )
-            self._print_weight_delta(
-                previous_weights=local_parameters,
-                new_weights=aggregated_parameters,
+                f"Finished weight aggregation for epoch {epoch} at node {self.node_id}. "
+                f"The weight delta is {self._print_weight_delta(previous_weights=local_parameters, new_weights=aggregated_parameters)}"
             )
 
             return aggregated_parameters, aggregated_metrics

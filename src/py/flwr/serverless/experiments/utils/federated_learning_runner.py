@@ -32,6 +32,7 @@ class FederatedLearningRunner(BaseExperimentRunner):
         self.storage_backend: Any = InMemoryFolder()
         # In one round, each node trains on its local data for one epoch.
         self.num_rounds = self.epochs  # number of federated rounds (similar to epochs)
+        self.lag = 0.1  # lag between nodes in pseudo-concurrent mode
 
     def run(self):
         config: Config = self.config
@@ -205,7 +206,6 @@ class FederatedLearningRunner(BaseExperimentRunner):
     def _train_federated_models_pseudo_concurrently(
         self, model_federated: List[keras.Model]
     ) -> List[keras.Model]:
-        self.lag = 0.1
         nodes = self.create_nodes()
         num_partitions = self.num_nodes
         if self.test_steps is None:
@@ -221,8 +221,6 @@ class FederatedLearningRunner(BaseExperimentRunner):
                 num_examples_per_epoch=self.steps_per_epoch * self.batch_size,
                 x_test=x_test,
                 y_test=y_test,
-                # x_test=self.x_test[: self.test_steps * self.batch_size, ...],
-                # y_test=self.y_test[: self.test_steps * self.batch_size, ...],
             )
             for i in range(num_partitions)
         ]
@@ -253,7 +251,7 @@ class FederatedLearningRunner(BaseExperimentRunner):
             x_test = self.x_test[: self.test_steps * self.batch_size, ...]
             y_test = self.y_test[: self.test_steps * self.batch_size, ...]
         for i_node in execution_sequence:
-            print("Training node", i_node)
+            print("Training node", i_node, "is running...")
             model_federated[i_node].fit(
                 x=train_loaders[i_node],
                 epochs=num_epochs_per_round,

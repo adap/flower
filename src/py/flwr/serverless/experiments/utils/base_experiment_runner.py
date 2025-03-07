@@ -246,9 +246,6 @@ class BaseExperimentRunner:
                     partitioned_x_train[partition_idx][i : i + self.batch_size],
                     partitioned_y_train[partition_idx][i : i + self.batch_size],
                 )
-                # print("x_train_batch.shape", x_train_batch.shape)
-                # print("y_train_batch.shape", y_train_batch.shape)
-                # raise Exception("stop")
                 yield x_train_batch, y_train_batch
 
     # ***currently this only works for mnist*** and for num_nodes = 2, 10
