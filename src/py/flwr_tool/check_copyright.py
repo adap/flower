@@ -10,7 +10,6 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
 
 from flwr_tool.init_py_check import get_init_dir_list_and_warnings
 
@@ -42,7 +41,7 @@ def _get_file_creation_year(filepath: str) -> str:
     return creation_year
 
 
-def _check_copyright(dir_list: List[str]) -> None:
+def _check_copyright(dir_list: list[str]) -> None:
     warning_list = []
     for valid_dir in dir_list:
         if "proto" in valid_dir:
