@@ -5,10 +5,10 @@ Example:
     python -m flwr_tool.check_copyright src/py/flwr
 """
 
-
 import os
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
 from flwr_tool.init_py_check import get_init_dir_list_and_warnings
@@ -36,6 +36,11 @@ def _get_file_creation_year(filepath: str) -> str:
         text=True,
         check=True,
     )
+    # Check if result.stdout is empty
+    if not result.stdout:
+        # Since the file is not in Git history, consider the current year
+        return str(datetime.now().year)
+
     date_str = result.stdout.splitlines()[-1]  # Get the first commit date
     creation_year = date_str.split("-")[0]  # Extract the year
     return creation_year

@@ -5,7 +5,6 @@ Example:
     python -m flwr_tool.fix_copyright src/py/flwr
 """
 
-
 import os
 import sys
 from pathlib import Path
