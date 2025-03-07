@@ -579,18 +579,14 @@ def recordset_to_proto(recordset: RecordSet) -> ProtoRecordSet:
 
 def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordSet:
     """Deserialize RecordSet from ProtoBuf."""
-    return RecordSet(
-        parameters_records={
-            k: parameters_record_from_proto(v)
-            for k, v in recordset_proto.parameters.items()
-        },
-        metrics_records={
-            k: metrics_record_from_proto(v) for k, v in recordset_proto.metrics.items()
-        },
-        configs_records={
-            k: configs_record_from_proto(v) for k, v in recordset_proto.configs.items()
-        },
-    )
+    ret = RecordSet()
+    for k, p_record_proto in recordset_proto.parameters.items():
+        ret[k] = parameters_record_from_proto(p_record_proto)
+    for k, m_record_proto in recordset_proto.metrics.items():
+        ret[k] = metrics_record_from_proto(m_record_proto)
+    for k, c_record_proto in recordset_proto.configs.items():
+        ret[k] = configs_record_from_proto(c_record_proto)
+    return ret
 
 
 # === FAB ===
