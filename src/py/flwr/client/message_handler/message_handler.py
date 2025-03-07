@@ -82,7 +82,7 @@ def handle_control_message(message: Message) -> tuple[Optional[Message], int]:
         recordset = RecordSet()
         recordset.configs_records["config"] = ConfigsRecord({"reason": reason})
         out_message = message.create_reply(recordset)
-        # Return TaskRes and sleep duration
+        # Return Message and sleep duration
         return out_message, sleep_duration
 
     # Any other message
