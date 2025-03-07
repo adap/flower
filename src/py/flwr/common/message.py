@@ -25,7 +25,7 @@ from .constant import MESSAGE_TTL_TOLERANCE
 from .logger import log
 from .record import RecordSet
 
-DEFAULT_TTL = 3600
+DEFAULT_TTL = 43200  # This is 12 hours
 
 
 class Metadata:  # pylint: disable=too-many-instance-attributes
@@ -380,13 +380,13 @@ class Message:
         return f"{self.__class__.__qualname__}({view})"
 
     def _limit_message_res_ttl(self, message: Message) -> None:
-        """Limit the message relpy TTL to not exceed the expiration time of the Message
-        it replies to.
+        """Limit the TTL of the provided Message to not exceed the expiration time of
+        this Message it replies to.
 
         Parameters
         ----------
         message : Message
-            The reply Message.
+            The reply Message to limit the TTL for.
         """
         # Calculate the maximum allowed TTL
         max_allowed_ttl = (
