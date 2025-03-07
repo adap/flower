@@ -463,7 +463,7 @@ class StateTest(unittest.TestCase):
         # Get Message to mark them delivered
         msg_ins_list = state.get_message_ins(node_id=node_id, limit=None)
 
-        # Insert one TaskRes and retrive it to mark it as delivered
+        # Insert one reply Message and retrive it to mark it as delivered
         msg_res_0 = msg_ins_list[0].create_error_reply(Error(0))
 
         _ = state.store_message_res(message=msg_res_0)
@@ -1111,7 +1111,7 @@ class StateTest(unittest.TestCase):
         # Assert
         assert result is None
 
-    def test_store_message_res_task_ins_expired(self) -> None:
+    def test_store_message_res_message_ins_expired(self) -> None:
         """Test behavior of store_message_res when the Message it replies to is
         expired."""
         # Prepare
