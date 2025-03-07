@@ -100,7 +100,8 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        # Transition status to running. PushMessages RPC is only allowed in running status.
+        # Transition status to running. PushMessages RPC is only allowed in
+        # running status.
         self._transition_run_status(run_id, 2)
 
         msg_proto = create_res_message(
