@@ -875,7 +875,7 @@ class StateTest(unittest.TestCase):
                 assert res is None
 
     def test_get_message_ins_not_return_expired(self) -> None:
-        """Test get_message_ins not to return expired replies."""
+        """Test get_message_ins not to return expired Messages."""
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
