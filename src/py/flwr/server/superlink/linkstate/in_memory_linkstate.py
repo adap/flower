@@ -38,6 +38,8 @@ from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message, validate_task_ins_or_res
 
 from .utils import (
+    check_node_availability_for_in_message,
+    check_node_availability_for_taskins,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
@@ -383,6 +385,21 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 current_time=current,
             )
 
+            # Check node availability
+            dst_node_ids = {
+                self.task_ins_store[task_id].task.consumer.node_id
+                for task_id in task_ids
+            }
+            tmp_ret_dict = check_node_availability_for_taskins(
+                inquired_taskins_ids=task_ids,
+                found_taskins_dict=self.task_ins_store,
+                node_id_to_online_until={
+                    node_id: self.node_ids[node_id][0] for node_id in dst_node_ids
+                },
+                current_time=current,
+            )
+            ret.update(tmp_ret_dict)
+
             # Find all TaskRes
             task_res_found: list[TaskRes] = []
             for task_id in task_ids:
@@ -413,12 +430,27 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             current = time.time()
 
-            # Verify Messge IDs
+            # Verify Message IDs
             ret = verify_message_ids(
                 inquired_message_ids=message_ids,
                 found_message_ins_dict=self.message_ins_store,
                 current_time=current,
             )
+
+            # Check node availability
+            dst_node_ids = {
+                self.message_ins_store[message_id].metadata.dst_node_id
+                for message_id in message_ids
+            }
+            tmp_ret_dict = check_node_availability_for_in_message(
+                inquired_in_message_ids=message_ids,
+                found_in_message_dict=self.message_ins_store,
+                node_id_to_online_until={
+                    node_id: self.node_ids[node_id][0] for node_id in dst_node_ids
+                },
+                current_time=current,
+            )
+            ret.update(tmp_ret_dict)
 
             # Find all reply Messages
             message_res_found: list[Message] = []
@@ -537,6 +569,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
+            # Mark the node online util time.time() + ping_interval
             self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
             return node_id
 
@@ -739,10 +772,17 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return self.federation_options[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        """Acknowledge a ping received from a node, serving as a heartbeat.
+
+        It allows for one missed ping (2 * ping_interval) before marking the node as
+        offline.
+        """
         with self.lock:
             if node_id in self.node_ids:
-                self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+                self.node_ids[node_id] = (
+                    time.time() + 2 * ping_interval,
+                    ping_interval,
+                )
                 return True
         return False
 

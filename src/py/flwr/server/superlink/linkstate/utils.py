@@ -44,7 +44,7 @@ from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 
 NODE_UNAVAILABLE_ERROR_REASON = (
     "Error: Node Unavailable - The destination node is currently unavailable. "
-    "It exceeds the time limit specified in its last ping."
+    "It exceeds twice the time limit specified in its last ping."
 )
 
 VALID_RUN_STATUS_TRANSITIONS = {
@@ -545,4 +545,147 @@ def verify_found_message_replies(
                 found_message_ins_dict[message_ins_id].metadata
             )
         ret_dict[message_ins_id] = message_res
+    return ret_dict
+
+
+def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
+    """Generate a TaskRes with a node unavailable error from a TaskIns."""
+    current_time = now().timestamp()
+    ttl = ref_taskins.task.ttl - (current_time - ref_taskins.task.created_at)
+    if ttl < 0:
+        log(ERROR, "Creating TaskRes for TaskIns that exceeds its TTL.")
+        ttl = 0
+    return TaskRes(
+        task_id=str(uuid4()),
+        group_id=ref_taskins.group_id,
+        run_id=ref_taskins.run_id,
+        task=Task(
+            producer=Node(node_id=ref_taskins.task.consumer.node_id),
+            consumer=Node(node_id=ref_taskins.task.producer.node_id),
+            created_at=current_time,
+            ttl=ttl,
+            ancestry=[ref_taskins.task_id],
+            task_type=ref_taskins.task.task_type,
+            error=ProtoError(
+                code=ErrorCode.NODE_UNAVAILABLE, reason=NODE_UNAVAILABLE_ERROR_REASON
+            ),
+        ),
+    )
+
+
+def make_node_unavailable_res_message(ins_metadata: Metadata) -> Message:
+    """Generate a Message with a node unavailable error."""
+    current_time = now().timestamp()
+    ttl = max(ins_metadata.ttl - (current_time - ins_metadata.created_at), 0)
+    metadata = Metadata(
+        run_id=ins_metadata.run_id,
+        message_id=str(uuid4()),
+        src_node_id=SUPERLINK_NODE_ID,
+        dst_node_id=SUPERLINK_NODE_ID,
+        reply_to_message=ins_metadata.message_id,
+        group_id=ins_metadata.group_id,
+        message_type=ins_metadata.message_type,
+        ttl=ttl,
+    )
+
+    return Message(
+        metadata=metadata,
+        error=Error(
+            code=ErrorCode.NODE_UNAVAILABLE,
+            reason=NODE_UNAVAILABLE_ERROR_REASON,
+        ),
+    )
+
+
+def check_node_availability_for_taskins(
+    inquired_taskins_ids: set[UUID],
+    found_taskins_dict: dict[UUID, TaskIns],
+    node_id_to_online_until: dict[int, float],
+    current_time: Optional[float] = None,
+    update_set: bool = True,
+) -> dict[UUID, TaskRes]:
+    """Check node availability for TaskIns and generate error TaskRes if unavailable. A
+    TaskRes error indicating node unavailability will be generated for each TaskIns
+    whose destination node is offline or non-existent.
+
+    Parameters
+    ----------
+    inquired_taskins_ids : set[UUID]
+        Set of TaskIns IDs for which to check destination node availability.
+    found_taskins_dict : dict[UUID, TaskIns]
+        Dictionary containing all found TaskIns indexed by their IDs.
+    node_id_to_online_until : dict[int, float]
+        Dictionary mapping node IDs to their online-until timestamps.
+    current_time : Optional[float] (default: None)
+        The current time to check for expiration. If set to `None`, the current time
+        will automatically be set to the current timestamp using `now().timestamp()`.
+    update_set : bool (default: True)
+        If True, the `inquired_taskins_ids` will be updated to remove invalid ones,
+        by default True.
+
+    Returns
+    -------
+    dict[UUID, TaskRes]
+        A dictionary of error TaskRes indexed by the corresponding TaskIns ID.
+    """
+    ret_dict = {}
+    current = current_time if current_time else now().timestamp()
+    for taskins_id in list(inquired_taskins_ids):
+        task_ins = found_taskins_dict[taskins_id]
+        node_id = task_ins.task.consumer.node_id
+        online_until = node_id_to_online_until.get(node_id)
+        # Generate a TaskRes containing an error reply
+        # if the node is offline or doesn't exist.
+        if online_until is None or online_until < current:
+            if update_set:
+                inquired_taskins_ids.remove(taskins_id)
+            task_res = make_node_unavailable_taskres(task_ins)
+            ret_dict[taskins_id] = task_res
+    return ret_dict
+
+
+def check_node_availability_for_in_message(
+    inquired_in_message_ids: set[UUID],
+    found_in_message_dict: dict[UUID, Message],
+    node_id_to_online_until: dict[int, float],
+    current_time: Optional[float] = None,
+    update_set: bool = True,
+) -> dict[UUID, Message]:
+    """Check node availability for given Message and generate error reply Message if
+    unavailable. A Message error indicating node unavailability will be generated for
+    each given Message whose destination node is offline or non-existent.
+
+    Parameters
+    ----------
+    inquired_in_message_ids : set[UUID]
+        Set of Message IDs for which to check destination node availability.
+    found_in_message_dict : dict[UUID, Message]
+        Dictionary containing all found Message indexed by their IDs.
+    node_id_to_online_until : dict[int, float]
+        Dictionary mapping node IDs to their online-until timestamps.
+    current_time : Optional[float] (default: None)
+        The current time to check for expiration. If set to `None`, the current time
+        will automatically be set to the current timestamp using `now().timestamp()`.
+    update_set : bool (default: True)
+        If True, the `inquired_in_message_ids` will be updated to remove invalid ones,
+        by default True.
+
+    Returns
+    -------
+    dict[UUID, Message]
+        A dictionary of error Message indexed by the corresponding Message ID.
+    """
+    ret_dict = {}
+    current = current_time if current_time else now().timestamp()
+    for in_message_id in list(inquired_in_message_ids):
+        in_message = found_in_message_dict[in_message_id]
+        node_id = in_message.metadata.dst_node_id
+        online_until = node_id_to_online_until.get(node_id)
+        # Generate a reply message containing an error reply
+        # if the node is offline or doesn't exist.
+        if online_until is None or online_until < current:
+            if update_set:
+                inquired_in_message_ids.remove(in_message_id)
+            reply_message = make_node_unavailable_res_message(in_message.metadata)
+            ret_dict[in_message_id] = reply_message
     return ret_dict
