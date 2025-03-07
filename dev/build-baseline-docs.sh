@@ -2,7 +2,7 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-ROOT=`pwd`
+ROOT=$(pwd)
 INDEX=$ROOT/baselines/docs/source/index.rst
 
 initial_text=$(cat <<-END
