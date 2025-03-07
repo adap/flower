@@ -312,8 +312,8 @@ class ParametersRecord(TypedDict[str, Array]):
         tensor will be converted into an :class:`Array` and stored in this record.
 
     tf_weights : Optional[list[NDArray]] (default: None)
-        A list of TensorFlow weights (NumPy arrays) obtained from ``get_weights`` method,
-        see the `documentation
+        A list of TensorFlow weights (NumPy arrays) obtained from ``get_weights``
+        method, see the `TensorFlow documentation
         <https://www.tensorflow.org/api_docs/python/tf/keras/Layer#get_weights>`_.
         Each array will be automatically converted into an :class:`Array` and stored in
         this record with generated keys.
@@ -542,25 +542,11 @@ class ParametersRecord(TypedDict[str, Array]):
             )
 
         record = ParametersRecord()
-        total_serialized_bytes = 0
 
         for k in list(state_dict.keys()):
             v = state_dict[k] if keep_input else state_dict.pop(k)
             record[k] = Array.from_numpy_ndarray(v.detach().cpu().numpy())
 
-            if not keep_input:
-                # Remove the reference
-                del v
-                total_serialized_bytes += len(record[k].data)
-
-                # If total serialized data exceeds the threshold, trigger GC
-                if total_serialized_bytes > GC_THRESHOLD:
-                    total_serialized_bytes = 0
-                    gc.collect()
-
-        if not keep_input:
-            # Force GC
-            gc.collect()
         return record
 
     @classmethod
@@ -615,25 +601,11 @@ class ParametersRecord(TypedDict[str, Array]):
             )
 
         state_dict = OrderedDict()
-        total_serialized_bytes = 0
 
         for k in list(self.keys()):
             arr = self[k] if keep_input else self.pop(k)
             state_dict[k] = torch.from_numpy(arr.numpy())
 
-            if not keep_input:
-                # Remove the reference
-                total_serialized_bytes += len(arr.data)
-                del arr
-
-                # If total serialized data exceeds the threshold, trigger GC
-                if total_serialized_bytes > GC_THRESHOLD:
-                    total_serialized_bytes = 0
-                    gc.collect()
-
-        if not keep_input:
-            # Force GC
-            gc.collect()
         return state_dict
 
     def to_tf_weights(self, *, keep_input: bool = True) -> list[NDArray]:
