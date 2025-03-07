@@ -37,6 +37,7 @@ def main(cfg: DictConfig):
     if cfg.data == "mnist":
         # set up mnist data
         # set partitioner
+        np.random.seed(cfg.dataset.seed)
         partitioner = PathologicalPartitioner(
             num_partitions=cfg.num_clients,
             partition_by="label",
@@ -109,7 +110,7 @@ def main(cfg: DictConfig):
         raise ValueError("Must select either fedht or fedavg for the aggregation strategy in this baseline.")
 
     # start simulation
-    np.random.seed(2025)
+    np.random.seed(cfg.dataset.seed)
     hist_mnist = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=cfg.num_clients,
@@ -135,8 +136,12 @@ def main(cfg: DictConfig):
         + str(cfg.num_local_epochs)
         + "_lr"
         + str(cfg.learning_rate)
+        + "_wd"
+        + str(cfg.weight_decay)
         + "_numkeep"
         + str(cfg.num_keep)
+        + "_fold"
+        + str(cfg.dataset.seed)
         + ".pkl"
     )
 
