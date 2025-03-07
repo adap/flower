@@ -137,12 +137,12 @@ def _get_contributors_from_commits(api: Github, commits: list[Commit]) -> set[st
     # Get full names of the GitHub usernames
     def _get_user(username: str, email: str) -> Optional[str]:
         try:
-            if user := api.get_user(username):
-                if user.email == email:
-                    return user.name
+            user = api.get_user(username)
+            if user.email == email:
+                return user.name
+            print(f"Email mismatch for user {username}: {email} != {user.email}")
         except Exception:  # pylint: disable=broad-exception-caught
-            pass
-        print(f"FAILED to get user: {username} <{email}>")
+            print(f"FAILED to get user profile from GitHub: {username} <{email}>")
         return None
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
