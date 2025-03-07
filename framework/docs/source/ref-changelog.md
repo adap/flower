@@ -1,6 +1,131 @@
 # Changelog
 
-## Unreleased
+## v1.16.0 (2025-03-07)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Andrej Jovanović`, `Charles Beauville`, `Chong Shen Ng`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Kevin Ta`, `Li Shaoyu`, `Mohammad Naseri`, `Yan Gao` <!---TOKEN_v1.16.0-->
+
+
+### New features
+
+- **feat(framework) Add validator functions for** `Message` ([#4959](https://github.com/adap/flower/pull/4959))
+
+- **feat(framework) Add try-obtain dashboard plugin** ([#4960](https://github.com/adap/flower/pull/4960))
+
+- **feat(framework) Bring back load Dashboard server** ([#4976](https://github.com/adap/flower/pull/4976))
+
+- **feat(framework) Add event log plugin ABC and appropriate types** ([#4948](https://github.com/adap/flower/pull/4948))
+
+- **feat(framework) Allow passing** `NDArray` **to** `Array` **constructor** ([#4918](https://github.com/adap/flower/pull/4918))
+
+- **feat(intelligence) Add initial TypeScript SDK code** ([#4996](https://github.com/adap/flower/pull/4996))
+
+- **feat(framework) Allow function-specific modifiers for** `ClientApp` ([#4954](https://github.com/adap/flower/pull/4954))
+
+- **feat(examples) Add FedRAG example** ([#4955](https://github.com/adap/flower/pull/4955))
+
+- **feat(framework) Add utility function to parse IP address from** `grpc.ServicerContext` ([#4947](https://github.com/adap/flower/pull/4947))
+
+- **feat(framework) Allow dict-like access for** `RecordSet` **while maintaining the original APIs** ([#4963](https://github.com/adap/flower/pull/4963))
+
+- **feat(framework) Introduce** `@app.lifecycle()` ([#4929](https://github.com/adap/flower/pull/4929))
+
+
+### Documentation improvements
+
+- **docs(framework) Add Flower AI Summit 2025 announcement to docs** ([#4945](https://github.com/adap/flower/pull/4945))
+
+- **docs(:skip) Fix favicons** ([#5007](https://github.com/adap/flower/pull/5007))
+
+- **docs(:skip) Add Flower AI Summit 2025 banner to all docs** ([#4988](https://github.com/adap/flower/pull/4988))
+
+- **docs(framework:skip) Update source texts for translations (automated)** ([#4944](https://github.com/adap/flower/pull/4944))
+
+- **docs(:skip) Add hello world example** ([#4965](https://github.com/adap/flower/pull/4965))
+
+- **docs(framework:skip) Update source texts for translations (automated)** ([#4978](https://github.com/adap/flower/pull/4978))
+
+- **docs(framework:skip) Update source texts for translations (automated)** ([#4990](https://github.com/adap/flower/pull/4990))
+
+- **docs(:skip) Separate workflows for deployment** ([#5014](https://github.com/adap/flower/pull/5014))
+
+- **docs(intelligence) Add console logs to examples** ([#5015](https://github.com/adap/flower/pull/5015))
+
+- **docs(intelligence) Add deployment to CI** ([#5006](https://github.com/adap/flower/pull/5006))
+
+- **docs(framework:skip) Update source texts for translations (automated)** ([#4964](https://github.com/adap/flower/pull/4964))
+
+- **docs(intelligence) Fix models list** ([#5009](https://github.com/adap/flower/pull/5009))
+
+- **docs(framework) Update the** `How to Use Built-in Mods` **guide** ([#4962](https://github.com/adap/flower/pull/4962))
+
+- **docs(intelligence) Update main page** ([#5008](https://github.com/adap/flower/pull/5008))
+
+- **docs(:skip) Add simpler theme update** ([#4991](https://github.com/adap/flower/pull/4991))
+
+- **docs(framework:skip) Update source texts for translations (automated)** ([#4970](https://github.com/adap/flower/pull/4970))
+
+- **docs(intelligence) Add initial doc page** ([#5005](https://github.com/adap/flower/pull/5005))
+
+- **docs(framework:skip) Set banner for framework docs** ([#4994](https://github.com/adap/flower/pull/4994))
+
+
+### Incompatible changes
+
+- **break(framework) Bump** `cryptography` **version and min Python version** ([#4946](https://github.com/adap/flower/pull/4946))
+
+
+### Other changes
+
+- **refactor(framework) Change return type for** `get_node_ids` **to** `Iterable[int]` ([#5000](https://github.com/adap/flower/pull/5000))
+
+- **refactor(examples) Fix typo in** `flower-authentication` **example** ([#5020](https://github.com/adap/flower/pull/5020))
+
+- **refactor(framework) Rename** `lifecycle` **to** `lifespan` ([#4986](https://github.com/adap/flower/pull/4986))
+
+- **fix(framework) Fix** `flwr log --show` **and replace** `context.cancel()` **with** `break` **in** `ExecServicer.StreamLogs` ([#4971](https://github.com/adap/flower/pull/4971))
+
+- **fix(framework) Fix copyright checker** ([#5017](https://github.com/adap/flower/pull/5017))
+
+- **refactor(framework) Sort files in** `flwrcli.build` **before adding to zip to ensure consistent order** ([#4989](https://github.com/adap/flower/pull/4989))
+
+- **fix(framework) Split validate tokens logic for auth plugin** ([#4972](https://github.com/adap/flower/pull/4972))
+
+- **fix(framework:skip) Update list in flwr tools** ([#5018](https://github.com/adap/flower/pull/5018))
+
+- **refactor(framework) Enable flag to skip certain tests** ([#4957](https://github.com/adap/flower/pull/4957))
+
+- **ci(framework:skip) Add** `## Unreleased` **header to the changelog** ([#4943](https://github.com/adap/flower/pull/4943))
+
+- **refactor(baselines) Upgrade FedProx Baselne to new flwr format** ([#4937](https://github.com/adap/flower/pull/4937))
+
+- **fix(framework) Fix node registration issue** ([#4995](https://github.com/adap/flower/pull/4995))
+
+- **fix(framework) Fix bug preventing _stochastic_round from processing NumPy scalars** ([#4969](https://github.com/adap/flower/pull/4969))
+
+- **fix(framework) Remove dashboard plugin** ([#4973](https://github.com/adap/flower/pull/4973))
+
+- **refactor(framework:skip) Bump Flower development version to** `1.16.0` **from** `1.15.2` ([#4942](https://github.com/adap/flower/pull/4942))
+
+- **ci(:skip) Add new project for PR title check** ([#4987](https://github.com/adap/flower/pull/4987))
+
+- **refactor(framework) Avoid reloading modules when an already imported module is imported again in the** `load_app` **function** ([#4974](https://github.com/adap/flower/pull/4974))
+
+- **refactor(framework) Introduce** `delivered_at` **in** `Message` **metadata** ([#4992](https://github.com/adap/flower/pull/4992))
+
+- **refactor(framework) Introduce** `LinkState` **methods that operate on** `Messages` ([#4993](https://github.com/adap/flower/pull/4993))
+
+
+### Unknown changes
+
+- **build(deps): bump docker/metadata-action from 5.6.1 to 5.7.0** ([#4985](https://github.com/adap/flower/pull/4985))
+
+- **build(deps): bump actions/upload-artifact from 4.6.0 to 4.6.1** ([#4953](https://github.com/adap/flower/pull/4953))
+
+- **build(deps): bump docker/setup-buildx-action from 3.9.0 to 3.10.0** ([#4984](https://github.com/adap/flower/pull/4984))
 
 ## v1.15.2 (2025-02-17)
 
