@@ -132,7 +132,7 @@ def register_messages_into_state(
             ),
         ),
     )
-    # Artificially add Message to state so they can be processed
+    # Artificially add Messages to state so they can be processed
     # by the Simulation Engine logic
     nodes_cycle = cycle(nodes_mapping.keys())  # we have more messages than supernodes
     message_ids: set[UUID] = set()  # so we can retrieve them later
@@ -157,7 +157,7 @@ def register_messages_into_state(
             ),
         )
 
-        # Instert in state
+        # Insert in state
         message_id = state.store_message_res(message)
         if message_id:
             # Add to UUID set
