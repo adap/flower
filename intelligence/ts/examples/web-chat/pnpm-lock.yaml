@@ -10,7 +10,10 @@ importers:
     dependencies:
       '@flwr/flwr':
         specifier: file:../../dist
-        version: '@flwr/intelligence@file:../../dist'
+        version: file:../../dist
+      cross-spawn:
+        specifier: ^7.0.5
+        version: 7.0.6
     devDependencies:
       typescript:
         specifier: ^5.6.3
@@ -174,7 +177,7 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@flwr/intelligence@file:../../dist':
+  '@flwr/flwr@file:../../dist':
     resolution: {directory: ../../dist, type: directory}
 
   '@huggingface/jinja@0.3.3':
@@ -823,7 +826,7 @@ snapshots:
   '@esbuild/win32-x64@0.25.0':
     optional: true
 
-  '@flwr/intelligence@file:../../dist':
+  '@flwr/flwr@file:../../dist':
     dependencies:
       '@huggingface/transformers': 3.3.3
       '@mlc-ai/web-llm': 0.2.78
