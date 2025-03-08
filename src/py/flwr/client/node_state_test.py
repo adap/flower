@@ -19,7 +19,6 @@ from typing import cast
 
 from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import ConfigsRecord, Context
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 
 def _run_dummy_task(context: Context) -> Context:
@@ -36,14 +35,13 @@ def _run_dummy_task(context: Context) -> Context:
 def test_multirun_in_node_state() -> None:
     """Test basic DeprecatedRunInfoStore logic."""
     # Tasks to perform
-    tasks = [TaskIns(run_id=run_id) for run_id in [0, 1, 1, 2, 3, 2, 1, 5]]
-    # the "tasks" is to count how many times each run is executed
+    run_ids = [0, 1, 1, 2, 3, 2, 1, 5]
+    # the "task" is to count how many times each run is executed
     expected_values = {0: "1", 1: "1" * 3, 2: "1" * 2, 3: "1", 5: "1"}
 
     node_info_store = DeprecatedRunInfoStore(node_id=0, node_config={})
 
-    for task in tasks:
-        run_id = task.run_id
+    for run_id in run_ids:
 
         # Register
         node_info_store.register_context(run_id=run_id)
