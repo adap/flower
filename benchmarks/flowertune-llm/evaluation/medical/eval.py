@@ -4,7 +4,7 @@ import torch
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
-from benchmarks import infer_medmcqa, infer_medqa, infer_pubmedqa
+from benchmarks import infer_careqa, infer_medmcqa, infer_medqa, infer_pubmedqa
 
 # Fixed seed
 torch.manual_seed(2024)
@@ -58,5 +58,7 @@ for dataset in args.datasets.split(","):
         infer_medqa(model, tokenizer, args.batch_size, args.run_name)
     elif dataset == "medmcqa":
         infer_medmcqa(model, tokenizer, args.batch_size, args.run_name)
+    elif dataset == "careqa":
+        infer_careqa(model, tokenizer, args.batch_size, args.run_name)
     else:
         raise ValueError("Undefined Dataset.")
