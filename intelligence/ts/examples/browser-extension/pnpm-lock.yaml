@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@flwr/flwr':
         specifier: file:../../dist
-        version: '@flwr/intelligence@file:../../dist'
+        version: file:../../dist
       '@mozilla/readability':
         specifier: ^0.5.0
         version: 0.5.0
@@ -61,8 +61,8 @@ importers:
         specifier: ^8.12.2
         version: 8.15.0(eslint@9.15.0)(typescript@5.6.3)
       vite:
-        specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.6)
+        specifier: ^5.4.12
+        version: 5.4.14(@types/node@22.8.6)
 
 packages:
 
@@ -241,7 +241,7 @@ packages:
     resolution: {integrity: sha512-2b/g5hRmpbb1o4GnTZax9N9m0FXzz9OV42ZzI4rDDMDuHUqigAiQCEWChBWCY4ztAGVRjoWT19v0yMmc5/L5kA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@flwr/intelligence@file:../../dist':
+  '@flwr/flwr@file:../../dist':
     resolution: {directory: ../../dist, type: directory}
 
   '@huggingface/jinja@0.3.3':
@@ -1557,8 +1557,8 @@ packages:
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
-  vite@5.4.10:
-    resolution: {integrity: sha512-1hvaPshuPUtxeQ0hsVH3Mud0ZanOLwVTneA1EgbAM5LhaZEqyPWGRQ7BtaMvUrTDeEaC8pxtj6a6jku3x4z6SQ==}
+  vite@5.4.14:
+    resolution: {integrity: sha512-EK5cY7Q1D8JNhSaPKVK4pwBFvaTmZxEnoKXLG/U9gmdDcihQGNzFlgIvaxezFR4glP1LsuiedwMBqCXH3wZccA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -1738,7 +1738,7 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@flwr/intelligence@file:../../dist':
+  '@flwr/flwr@file:../../dist':
     dependencies:
       '@huggingface/transformers': 3.3.3
       '@mlc-ai/web-llm': 0.2.78
@@ -3198,7 +3198,7 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  vite@5.4.10(@types/node@22.8.6):
+  vite@5.4.14(@types/node@22.8.6):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.47

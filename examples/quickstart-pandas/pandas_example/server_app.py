@@ -6,7 +6,7 @@ from logging import INFO
 
 import numpy as np
 
-from flwr.common import Context, MessageType, RecordSet, Message
+from flwr.common import Context, Message, MessageType, RecordSet
 from flwr.common.logger import log
 from flwr.server import Driver, ServerApp
 
@@ -27,9 +27,9 @@ def main(driver: Driver, context: Context) -> None:
         log(INFO, "Starting round %s/%s", server_round + 1, num_rounds)
 
         # Loop and wait until enough nodes are available.
-        all_node_ids = []
+        all_node_ids: list[int] = []
         while len(all_node_ids) < min_nodes:
-            all_node_ids = driver.get_node_ids()
+            all_node_ids = list(driver.get_node_ids())
             if len(all_node_ids) >= min_nodes:
                 # Sample nodes
                 num_to_sample = int(len(all_node_ids) * fraction_sample)

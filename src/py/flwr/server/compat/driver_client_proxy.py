@@ -104,7 +104,7 @@ class DriverClientProxy(ClientProxy):
     def _send_receive_recordset(
         self,
         recordset: RecordSet,
-        task_type: str,
+        message_type: str,
         timeout: Optional[float],
         group_id: Optional[int],
     ) -> RecordSet:
@@ -112,7 +112,7 @@ class DriverClientProxy(ClientProxy):
         # Create message
         message = self.driver.create_message(
             content=recordset,
-            message_type=task_type,
+            message_type=message_type,
             dst_node_id=self.node_id,
             group_id=str(group_id) if group_id else "",
             ttl=timeout,
