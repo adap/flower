@@ -60,7 +60,9 @@ class DummyClient(NumPyClient):
 
     def get_properties(self, config: Config) -> dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
-        result = float(config["factor"]) * pi
+        factor = config["factor"]
+        assert isinstance(factor, float)
+        result = factor * pi
 
         # store something in context
         self.client_state.configs_records["result"] = ConfigsRecord({"result": result})
@@ -140,7 +142,7 @@ def register_messages_into_state(
     for i in range(num_messages):
         dst_node_id = next(nodes_cycle)
         # Construct a Message
-        mult_factor = 2024 + i
+        mult_factor = 2024.0 + i
         getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
         recordset = getpropertiesins_to_recordset(getproperties_ins)
         message = Message(

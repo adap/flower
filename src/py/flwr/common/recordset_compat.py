@@ -35,6 +35,7 @@ from .typing import (
     Parameters,
     Scalar,
     Status,
+    Value,
 )
 
 EMPTY_TENSOR_KEY = "_empty"
@@ -129,15 +130,33 @@ def _check_mapping_from_recordscalartype_to_scalar(
     record_data: Mapping[str, Union[ConfigsRecordValues, MetricsRecordValues]]
 ) -> dict[str, Scalar]:
     """Check mapping `common.*RecordValues` into `common.Scalar` is possible."""
-    for value in record_data.values():
-        if not isinstance(value, get_args(Scalar)):
+
+    # Filter out any list types
+    def is_valid(__v: Value) -> None:
+        """Check if value is of expected type."""
+        if not isinstance(__v, get_args(Value)):
             raise TypeError(
-                "There is not a 1:1 mapping between `common.Scalar` types and those "
-                "supported in `common.ConfigsRecordValues` or "
-                "`common.ConfigsRecordValues`. Consider casting your values to a type "
-                "supported by the `common.RecordSet` infrastructure. "
-                f"You used type: {type(value)}"
+                "Not all values are of valid type."
+                f" Expected `{Value}` but `{type(__v)}` was passed."
             )
+
+    for value in record_data.values():
+
+        if isinstance(value, list):
+
+            if len(value) > 0:
+                is_valid(value[0])
+                # all elements in the list must be of the same valid type
+                # this is needed for protobuf
+                value_type = type(value[0])
+                if not all(isinstance(v, value_type) for v in value):
+                    raise TypeError(
+                        "All values in a list must be of the same valid type. "
+                        f"One of {Value}."
+                    )
+        else:
+            is_valid(value)
+
     return cast(dict[str, Scalar], record_data)
 
 
@@ -171,9 +190,7 @@ def _fit_or_evaluate_ins_to_recordset(
     parametersrecord = parameters_to_parametersrecord(ins.parameters, keep_input)
     recordset.parameters_records[f"{ins_str}.parameters"] = parametersrecord
 
-    recordset.configs_records[f"{ins_str}.config"] = ConfigsRecord(
-        ins.config  # type: ignore
-    )
+    recordset.configs_records[f"{ins_str}.config"] = ConfigsRecord(ins.config)
 
     return recordset
 
@@ -239,9 +256,7 @@ def fitres_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
 
     res_str = "fitres"
 
-    recordset.configs_records[f"{res_str}.metrics"] = ConfigsRecord(
-        fitres.metrics  # type: ignore
-    )
+    recordset.configs_records[f"{res_str}.metrics"] = ConfigsRecord(fitres.metrics)
     recordset.metrics_records[f"{res_str}.num_examples"] = MetricsRecord(
         {"num_examples": fitres.num_examples},
     )
@@ -311,7 +326,7 @@ def evaluateres_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
 
     # metrics
     recordset.configs_records[f"{res_str}.metrics"] = ConfigsRecord(
-        evaluateres.metrics,  # type: ignore
+        evaluateres.metrics,
     )
 
     # status
@@ -336,7 +351,7 @@ def getparametersins_to_recordset(getparameters_ins: GetParametersIns) -> Record
     recordset = RecordSet()
 
     recordset.configs_records["getparametersins.config"] = ConfigsRecord(
-        getparameters_ins.config,  # type: ignore
+        getparameters_ins.config,
     )
     return recordset
 
@@ -386,7 +401,7 @@ def getpropertiesins_to_recordset(getpropertiesins: GetPropertiesIns) -> RecordS
     """Construct a RecordSet from a GetPropertiesRes object."""
     recordset = RecordSet()
     recordset.configs_records["getpropertiesins.config"] = ConfigsRecord(
-        getpropertiesins.config,  # type: ignore
+        getpropertiesins.config,
     )
     return recordset
 
@@ -408,7 +423,7 @@ def getpropertiesres_to_recordset(getpropertiesres: GetPropertiesRes) -> RecordS
     recordset = RecordSet()
     res_str = "getpropertiesres"
     recordset.configs_records[f"{res_str}.properties"] = ConfigsRecord(
-        getpropertiesres.properties,  # type: ignore
+        getpropertiesres.properties,
     )
     # status
     recordset = _embed_status_into_recordset(
