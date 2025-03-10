@@ -22,29 +22,10 @@ from uuid import UUID
 from flwr.common import Context, Message
 from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
 class LinkState(abc.ABC):  # pylint: disable=R0904
     """Abstract LinkState."""
-
-    @abc.abstractmethod
-    def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
-        """Store one TaskIns.
-
-        Usually, the ServerAppIo API calls this to schedule instructions.
-
-        Stores the value of the `task_ins` in the link state and, if successful,
-        returns the `task_id` (UUID) of the `task_ins`. If, for any reason,
-        storing the `task_ins` fails, `None` is returned.
-
-        Constraints
-        -----------
-        `task_ins.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
-
-        If `task_ins.run_id` is invalid, then
-        storing the `task_ins` MUST fail.
-        """
 
     @abc.abstractmethod
     def store_message_ins(self, message: Message) -> Optional[UUID]:
@@ -65,28 +46,6 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
-        """Get TaskIns optionally filtered by node_id.
-
-        Usually, the Fleet API calls this for Nodes planning to work on one or more
-        TaskIns.
-
-        Constraints
-        -----------
-        Retrieve all TaskIns where
-
-            1. the `task_ins.task.consumer.node_id` equals `node_id` AND
-            2. the `task_ins.task.delivered_at` equals `""`.
-
-
-        If `delivered_at` MUST BE set (not `""`) otherwise the TaskIns MUST not be in
-        the result.
-
-        If `limit` is not `None`, return, at most, `limit` number of `task_ins`. If
-        `limit` is set, it has to be greater zero.
-        """
-
-    @abc.abstractmethod
     def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
         """Get zero or more `Message` objects for the provided `node_id`.
 
@@ -99,24 +58,6 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         If `limit` is not `None`, return, at most, `limit` number of `message`. If
         `limit` is set, it has to be greater zero.
-        """
-
-    @abc.abstractmethod
-    def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
-        """Store one TaskRes.
-
-        Usually, the Fleet API calls this for Nodes returning results.
-
-        Stores the TaskRes and, if successful, returns the `task_id` (UUID) of
-        the `task_res`. If storing the `task_res` fails, `None` is returned.
-
-        Constraints
-        -----------
-
-        `task_res.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
-
-        If `task_res.run_id` is invalid, then
-        storing the `task_res` MUST fail.
         """
 
     @abc.abstractmethod
@@ -134,31 +75,6 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         If `message.metadata.run_id` is invalid, then
         storing the `message` MUST fail.
-        """
-
-    @abc.abstractmethod
-    def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
-        """Get TaskRes for the given TaskIns IDs.
-
-        This method is typically called by the ServerAppIo API to obtain
-        results (TaskRes) for previously scheduled instructions (TaskIns).
-        For each task_id provided, this method returns one of the following responses:
-
-        - An error TaskRes if the corresponding TaskIns does not exist or has expired.
-        - An error TaskRes if the corresponding TaskRes exists but has expired.
-        - The valid TaskRes if the TaskIns has a corresponding valid TaskRes.
-        - Nothing if the TaskIns is still valid and waiting for a TaskRes.
-
-        Parameters
-        ----------
-        task_ids : set[UUID]
-            A set of TaskIns IDs for which to retrieve results (TaskRes).
-
-        Returns
-        -------
-        list[TaskRes]
-            A list of TaskRes corresponding to the given task IDs. If no
-            TaskRes could be found for any of the task IDs, an empty list is returned.
         """
 
     @abc.abstractmethod
@@ -189,37 +105,12 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def num_task_ins(self) -> int:
-        """Calculate the number of task_ins in store.
-
-        This includes delivered but not yet deleted task_ins.
-        """
-
-    @abc.abstractmethod
     def num_message_ins(self) -> int:
         """Calculate the number of Messages awaiting a reply."""
 
     @abc.abstractmethod
-    def num_task_res(self) -> int:
-        """Calculate the number of task_res in store.
-
-        This includes delivered but not yet deleted task_res.
-        """
-
-    @abc.abstractmethod
     def num_message_res(self) -> int:
         """Calculate the number of reply Messages in store."""
-
-    @abc.abstractmethod
-    def delete_tasks(self, task_ins_ids: set[UUID]) -> None:
-        """Delete TaskIns/TaskRes pairs based on provided TaskIns IDs.
-
-        Parameters
-        ----------
-        task_ins_ids : set[UUID]
-            A set of TaskIns IDs. For each ID in the set, the corresponding
-            TaskIns and its associated TaskRes will be deleted.
-        """
 
     @abc.abstractmethod
     def delete_messages(self, message_ins_ids: set[UUID]) -> None:
@@ -231,10 +122,6 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
             A set of Message IDs. For each ID in the set, the corresponding
             Message and its associated reply Message will be deleted.
         """
-
-    @abc.abstractmethod
-    def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
-        """Get all TaskIns IDs for the given run_id."""
 
     @abc.abstractmethod
     def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:

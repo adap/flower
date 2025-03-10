@@ -22,7 +22,7 @@ import grpc
 from google.protobuf.message import Message as GrpcMessage
 
 
-class DummyUnaryUnaryHandler:
+class NoOpUnaryUnaryHandler:
     """Dummy unary-unary handler for testing."""
 
     unary_unary = staticmethod(lambda request, context: "dummy_response")
@@ -31,7 +31,7 @@ class DummyUnaryUnaryHandler:
     response_serializer = None
 
 
-class DummyUnaryStreamHandler:
+class NoOpUnaryStreamHandler:
     """Dummy unary-stream handler for testing."""
 
     unary_unary = None
@@ -42,7 +42,7 @@ class DummyUnaryStreamHandler:
     response_serializer = None
 
 
-class DummyUnsupportedHandler:
+class NoOpUnsupportedHandler:
     """Dummy handler for unsupported RPC types."""
 
     unary_unary = None
@@ -51,7 +51,7 @@ class DummyUnsupportedHandler:
     response_serializer = None
 
 
-class DummyUnaryUnaryHandlerException:
+class NoOpUnaryUnaryHandlerException:
     """Dummy handler for unary-unary RPC calls that raises an Exception."""
 
     unary_unary = staticmethod(
@@ -62,23 +62,21 @@ class DummyUnaryUnaryHandlerException:
     response_serializer = None
 
 
-# pylint: disable=unused-argument
-def get_dummy_unary_unary_handler(
-    handler_call_details: grpc.HandlerCallDetails,
-) -> DummyUnaryUnaryHandler:
+def get_noop_unary_unary_handler(
+    handler_call_details: grpc.HandlerCallDetails,  # pylint: disable=unused-argument
+) -> NoOpUnaryUnaryHandler:
     """."""
-    return DummyUnaryUnaryHandler()
+    return NoOpUnaryUnaryHandler()
 
 
-# pylint: disable=unused-argument
-def get_dummy_unary_stream_handler(
-    handler_call_details: grpc.HandlerCallDetails,
-) -> DummyUnaryStreamHandler:
+def get_noop_unary_stream_handler(
+    handler_call_details: grpc.HandlerCallDetails,  # pylint: disable=unused-argument
+) -> NoOpUnaryStreamHandler:
     """."""
-    return DummyUnaryStreamHandler()
+    return NoOpUnaryStreamHandler()
 
 
-def dummy_unary_stream_exception(
+def _noop_unary_stream_exception(
     request: GrpcMessage, context: grpc.ServicerContext  # pylint: disable=W0613
 ) -> Iterator[Any]:
     """Raise an Exception upon iteration for unary-stream RPC call."""
@@ -90,11 +88,10 @@ def dummy_unary_stream_exception(
     return generator()
 
 
-# Dummy handler for unary_stream that uses the above function.
-class DummyUnaryStreamHandlerException:
+class NoOpUnaryStreamHandlerException:
     """Dummy handler for unary-stream RPC calls that raises an Exception."""
 
     unary_unary = None
-    unary_stream = staticmethod(dummy_unary_stream_exception)
+    unary_stream = staticmethod(_noop_unary_stream_exception)
     request_deserializer = None
     response_serializer = None

@@ -367,7 +367,7 @@ class SecAggPlusWorkflow:
 
         # Send setup configuration to clients
         cfgs_record = ConfigsRecord(sa_params_dict)  # type: ignore
-        content = RecordSet(configs_records={RECORD_KEY_CONFIGS: cfgs_record})
+        content = RecordSet({RECORD_KEY_CONFIGS: cfgs_record})
 
         def make(nid: int) -> Message:
             return driver.create_message(
@@ -417,7 +417,7 @@ class SecAggPlusWorkflow:
                 {str(nid): state.nid_to_publickeys[nid] for nid in neighbours}
             )
             cfgs_record[Key.STAGE] = Stage.SHARE_KEYS
-            content = RecordSet(configs_records={RECORD_KEY_CONFIGS: cfgs_record})
+            content = RecordSet({RECORD_KEY_CONFIGS: cfgs_record})
             return driver.create_message(
                 content=content,
                 message_type=MessageType.TRAIN,
@@ -566,7 +566,7 @@ class SecAggPlusWorkflow:
                 Key.DEAD_NODE_ID_LIST: list(neighbours & dead_nids),
             }
             cfgs_record = ConfigsRecord(cfgs_dict)  # type: ignore
-            content = RecordSet(configs_records={RECORD_KEY_CONFIGS: cfgs_record})
+            content = RecordSet({RECORD_KEY_CONFIGS: cfgs_record})
             return driver.create_message(
                 content=content,
                 message_type=MessageType.TRAIN,
