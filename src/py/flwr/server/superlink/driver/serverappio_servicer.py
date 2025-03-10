@@ -216,17 +216,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         while messages_res:
             msg = messages_res.pop(0)
 
-            # Set the `run_id` of the Run if the message was created
-            # by the SuperLink itself as a reply Message that expired
-            if (
-                msg.metadata.src_node_id == SUPERLINK_NODE_ID
-                and msg.metadata.dst_node_id == SUPERLINK_NODE_ID
-            ):
-                msg.metadata._run_id = request.run_id
-
-            _raise_if(
-                validation_error=request.run_id != msg.metadata.run_id,
-                request_name="PullMessages",
+            # Skip `run_id` check for SuperLink generated replies
+            if msg.metadata.src_node_id != SUPERLINK_NODE_ID:
+                _raise_if(
+                    validation_error=request.run_id != msg.metadata.run_id,
+                    request_name="PullMessages",
                 detail="`message.metadata` has mismatched `run_id`",
             )
             messages_list.append(message_to_proto(msg))
