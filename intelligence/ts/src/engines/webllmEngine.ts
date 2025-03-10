@@ -16,6 +16,7 @@ import {
   Tool,
 } from '../typing';
 import { BaseEngine } from './engine';
+import { checkSupport } from './common';
 
 async function runQuery(
   engine: MLCEngineInterface,
@@ -116,5 +117,9 @@ export class WebllmEngine extends BaseEngine {
         failure: { code: FailureCode.LocalEngineFetchError, description: String(error) },
       };
     }
+  }
+
+  async isSupported(model: string): Promise<Result<string>> {
+    return await checkSupport(model, 'webllm');
   }
 }

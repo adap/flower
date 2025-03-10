@@ -13,6 +13,7 @@ import type { ProgressInfo, TextGenerationConfig } from '@huggingface/transforme
 import { FailureCode, Message, Result, Progress, ChatResponseResult } from '../typing';
 
 import { BaseEngine } from './engine';
+import { checkSupport } from './common';
 
 const stoppingCriteria = new InterruptableStoppingCriteria();
 const choice = 0;
@@ -153,5 +154,9 @@ export class TransformersEngine extends BaseEngine {
         failure: { code: FailureCode.LocalEngineFetchError, description: String(error) },
       };
     }
+  }
+
+  async isSupported(model: string): Promise<Result<string>> {
+    return await checkSupport(model, 'onnx');
   }
 }
