@@ -165,6 +165,7 @@ export class TransformersEngine extends BaseEngine {
   }
 
   async isSupported(model: string): Promise<Result<string>> {
+    await Promise.resolve();
     if (model in this.models) {
       return { ok: true, value: this.models[model] };
     }
