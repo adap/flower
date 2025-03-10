@@ -150,7 +150,7 @@ export class RemoteEngine extends BaseEngine {
     };
   }
 
-  private async chatStream(
+  async chatStream(
     messages: Message[],
     model: string,
     encrypt: boolean,
