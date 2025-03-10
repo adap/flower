@@ -100,7 +100,8 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. PushMessages RPC is only allowed in
+        # running status.
         self._transition_run_status(run_id, 2)
 
         msg_proto = create_res_message(
@@ -157,7 +158,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. GetRun RPC is only allowed in running status.
         self._transition_run_status(run_id, 2)
         request = GetRunRequest(run_id=run_id)
 
@@ -202,7 +203,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
         run_id = self.state.create_run("", "", fab_hash, {}, ConfigsRecord())
 
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. GetFab RPC is only allowed in running status.
         self._transition_run_status(run_id, 2)
         request = GetFabRequest(
             node=Node(node_id=node_id), hash_str=fab_hash, run_id=run_id

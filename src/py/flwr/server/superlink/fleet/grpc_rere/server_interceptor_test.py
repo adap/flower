@@ -218,7 +218,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         fab_hash = self.ffs.put(b"mock fab content", {})
         node_id = self._create_node_and_set_public_key()
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. GetFabRequest is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
         req = GetFabRequest(
