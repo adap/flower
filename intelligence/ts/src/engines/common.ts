@@ -3,6 +3,12 @@
 import { REMOTE_URL, VERSION } from '../constants';
 import { FailureCode, Result } from '../typing';
 
+interface ModelResponse {
+  is_supported: boolean;
+  engine_model: string;
+  model: string;
+}
+
 export async function checkSupport(model: string, engine: string): Promise<Result<string>> {
   try {
     const response = await fetch(REMOTE_URL, {
@@ -20,13 +26,13 @@ export async function checkSupport(model: string, engine: string): Promise<Resul
       return {
         ok: false,
         failure: {
-          code: FailureCode.UnsupportedModelError,
+          code: FailureCode.RemoteError,
           description: `Remote call failed: ${response.statusText}`,
         },
       };
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as ModelResponse;
 
     if (data.is_supported) {
       return { ok: true, value: data.engine_model };
@@ -43,8 +49,8 @@ export async function checkSupport(model: string, engine: string): Promise<Resul
     return {
       ok: false,
       failure: {
-        code: FailureCode.UnsupportedModelError,
-        description: `Error calling remote endpoint: ${error}`,
+        code: FailureCode.ConnectionError,
+        description: `Error calling remote endpoint: ${String(error)}`,
       },
     };
   }
