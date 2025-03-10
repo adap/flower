@@ -221,8 +221,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 _raise_if(
                     validation_error=request.run_id != msg.metadata.run_id,
                     request_name="PullMessages",
-                detail="`message.metadata` has mismatched `run_id`",
-            )
+                    detail="`message.metadata` has mismatched `run_id`",
+                )
             messages_list.append(message_to_proto(msg))
 
         return PullResMessagesResponse(messages_list=messages_list)
