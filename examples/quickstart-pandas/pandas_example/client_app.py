@@ -54,6 +54,6 @@ def query(msg: Message, context: Context):
         metrics[f"{feature_name}_avg"] = dataset[feature_name].mean() * len(dataset)
         metrics[f"{feature_name}_count"] = len(dataset)
 
-    reply_content = RecordSet(metrics_records={"query_results": MetricsRecord(metrics)})
+    reply_content = RecordSet({"query_results": MetricsRecord(metrics)})
 
     return msg.create_reply(reply_content)

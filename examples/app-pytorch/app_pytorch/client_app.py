@@ -37,9 +37,7 @@ def evaluate(msg: Message, context: Context):
 
     # Construct reply
     metrics_record = MetricsRecord({"eval_acc": eval_acc})
-    content = RecordSet(
-        metrics_records={"eval_metrics": metrics_record},
-    )
+    content = RecordSet({"eval_metrics": metrics_record})
     return msg.create_reply(content=content)
 
 
@@ -61,10 +59,7 @@ def train(msg: Message, context: Context):
     # Extract state_dict from model and construct reply message
     model_record = pytorch_to_parameter_record(model)
     metrics_record = MetricsRecord({"train_loss": train_loss})
-    content = RecordSet(
-        parameters_records={"model": model_record},
-        metrics_records={"train_metrics": metrics_record},
-    )
+    content = RecordSet({"model": model_record, "train_metrics": metrics_record})
     return msg.create_reply(content=content)
 
 
@@ -75,9 +70,7 @@ def setup_client(msg: Message, context: Context, is_train: bool):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Apply global model weights from message
-    state_dict = parameters_to_pytorch_state_dict(
-        msg.content.parameters_records["model"]
-    )
+    state_dict = parameters_to_pytorch_state_dict(msg.content["model"])
     model.load_state_dict(state_dict)
     model.to(device)
 

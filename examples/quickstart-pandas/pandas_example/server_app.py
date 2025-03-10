@@ -2,6 +2,7 @@
 
 import random
 import time
+from collections.abc import Iterable
 from logging import INFO
 
 import numpy as np
@@ -63,7 +64,7 @@ def main(driver: Driver, context: Context) -> None:
         log(INFO, "Aggregated histogram: %s", aggregated_hist)
 
 
-def aggregate_partial_histograms(messages: Message):
+def aggregate_partial_histograms(messages: Iterable[Message]):
     """Aggregate partial histograms."""
 
     aggregated_hist = {}
@@ -71,7 +72,7 @@ def aggregate_partial_histograms(messages: Message):
     for rep in messages:
         if rep.has_error():
             continue
-        query_results = rep.content.metrics_records["query_results"]
+        query_results = rep.content["query_results"]
         # Sum metrics
         for k, v in query_results.items():
             if k in ["SepalLengthCm", "SepalWidthCm"]:

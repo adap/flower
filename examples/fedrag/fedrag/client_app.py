@@ -17,16 +17,16 @@ def query(msg: Message, context: Context):
     node_id = context.node_id
 
     # Extract question
-    question = str(msg.content.configs_records["config"]["question"])
-    question_id = str(msg.content.configs_records["config"]["question_id"])
+    question = str(msg.content["config"]["question"])
+    question_id = str(msg.content["config"]["question_id"])
 
     # Extract corpus name
-    corpus_name = str(msg.content.configs_records["config"]["corpus_name"])
+    corpus_name = str(msg.content["config"]["corpus_name"])
 
     # Initialize retrieval system
     retriever = Retriever()
     # Use the knn value for retrieving the closest-k documents to the query
-    knn = int(msg.content.configs_records["config"]["knn"])
+    knn = int(msg.content["config"]["knn"])
     retrieved_docs = retriever.query_faiss_index(corpus_name, question, knn)
 
     # Create lists with the computed scores and documents
@@ -45,7 +45,7 @@ def query(msg: Message, context: Context):
             "scores": scores,
         }
     )
-    reply_record = RecordSet(configs_records={"docs_n_scores": docs_n_scores})
+    reply_record = RecordSet({"docs_n_scores": docs_n_scores})
 
     # Return message
     return msg.create_reply(reply_record)

@@ -93,7 +93,7 @@ def submit_question(
         # by infinitely looping over the corpus names.
         config_record["corpus_name"] = next(corpus_names_iter)
 
-        task_record = RecordSet(configs_records={"config": config_record})
+        task_record = RecordSet({"config": config_record})
         message = driver.create_message(
             content=task_record,
             message_type=MessageType.QUERY,  # target `query` method in ClientApp
@@ -109,10 +109,8 @@ def submit_question(
     documents, scores = [], []
     for reply in replies:
         if reply.has_content():
-            documents.extend(
-                reply.content.configs_records["docs_n_scores"]["documents"]
-            )
-            scores.extend(reply.content.configs_records["docs_n_scores"]["scores"])
+            documents.extend(reply.content["docs_n_scores"]["documents"])
+            scores.extend(reply.content["docs_n_scores"]["scores"])
 
     return documents, scores
 
