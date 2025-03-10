@@ -23,7 +23,7 @@ from uuid import UUID
 import grpc
 
 from flwr.common import ConfigsRecord, Message
-from flwr.common.constant import Status
+from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -215,6 +215,15 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         messages_list = []
         while messages_res:
             msg = messages_res.pop(0)
+
+            # Set the `run_id` of the Run if the message was created
+            # by the SuperLink itself as a reply Message that expired
+            if (
+                msg.metadata.src_node_id == SUPERLINK_NODE_ID
+                and msg.metadata.dst_node_id == SUPERLINK_NODE_ID
+            ):
+                msg.metadata._run_id = request.run_id
+
             _raise_if(
                 validation_error=request.run_id != msg.metadata.run_id,
                 request_name="PullMessages",
