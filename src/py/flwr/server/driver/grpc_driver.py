@@ -213,7 +213,7 @@ class GrpcDriver(Driver):
             )
         )
         if len([msg_id for msg_id in list(res.message_ids) if msg_id]) != len(
-            list(messages)
+            list(message_proto_list)
         ):
             log(
                 WARNING,
