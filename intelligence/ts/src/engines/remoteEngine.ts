@@ -113,6 +113,14 @@ export class RemoteEngine extends BaseEngine {
     };
   }
 
+  async isSupported(model: string): Promise<Result<string>> {
+    await Promise.resolve();
+    return {
+      ok: true,
+      value: model,
+    };
+  }
+
   private createRequestData(
     messages: Message[],
     model: string,
