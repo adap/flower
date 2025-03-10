@@ -212,7 +212,9 @@ class GrpcDriver(Driver):
                 messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
             )
         )
-        if len([id for id in list(res.message_ids) if id]) != len(list(messages)):
+        if len([msg_id for msg_id in list(res.message_ids) if msg_id]) != len(
+            list(messages)
+        ):
             log(
                 WARNING,
                 "Not all messages could be pushed to the SuperLink. The returned "
