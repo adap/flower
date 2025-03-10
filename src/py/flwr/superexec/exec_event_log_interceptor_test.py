@@ -22,14 +22,14 @@ from unittest.mock import MagicMock
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.event_log_plugin import EventLogWriterPlugin
-from flwr.common.noop_grpc_handlers_test import (
+from flwr.common.dummy_grpc_handlers_test import (
     NoOpUnaryStreamHandlerException,
     NoOpUnaryUnaryHandlerException,
     NoOpUnsupportedHandler,
     get_noop_unary_stream_handler,
     get_noop_unary_unary_handler,
 )
+from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.typing import Actor, Event, LogEntry, UserInfo
 from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
 from flwr.superexec.exec_user_auth_interceptor import shared_user_info

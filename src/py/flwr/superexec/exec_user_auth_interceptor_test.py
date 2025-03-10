@@ -23,7 +23,7 @@ import grpc
 from google.protobuf.message import Message as GrpcMessage
 from parameterized import parameterized
 
-from flwr.common.noop_grpc_handlers_test import (
+from flwr.common.dummy_grpc_handlers_test import (
     NoOpUnaryStreamHandler,
     NoOpUnaryUnaryHandler,
     get_noop_unary_stream_handler,
