@@ -1,6 +1,6 @@
 // Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 
-import { REMOTE_URL, VERSION } from '../constants';
+import { REMOTE_URL, SDK, VERSION } from '../constants';
 import { FailureCode, Result } from '../typing';
 
 interface ModelResponse {
@@ -17,8 +17,8 @@ export async function checkSupport(model: string, engine: string): Promise<Resul
       body: JSON.stringify({
         model,
         engine_name: engine,
-        version: VERSION,
-        sdk: 'typescript',
+        sdk_version: VERSION,
+        sdk: SDK,
       }),
     });
 
