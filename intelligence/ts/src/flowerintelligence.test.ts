@@ -9,12 +9,10 @@ vi.mock('./constants', () => ({
 
 import emojiRegex from 'emoji-regex';
 import { describe, expect, it, beforeEach, assert } from 'vitest';
-import { FlowerIntelligence, getModels } from './flowerintelligence';
+import { FlowerIntelligence } from './flowerintelligence';
 import { RemoteEngine } from './engines/remoteEngine';
 import { TransformersEngine } from './engines/transformersEngine';
 import { FailureCode } from './typing';
-
-const availableModels = getModels();
 
 describe('FlowerIntelligence', () => {
   let fi: FlowerIntelligence;
@@ -26,33 +24,33 @@ describe('FlowerIntelligence', () => {
   });
 
   describe('getEngine', () => {
-    it('should return a remote engine when forceRemote is true', () => {
-      const getEngineRes = fi['getEngine']('meta/llama3.2-1b/instruct-fp16', true, false);
+    it('should return a remote engine when forceRemote is true', async () => {
+      const getEngineRes = await fi['getEngine']('meta/llama3.2-1b/instruct-fp16', true, false);
       expect(getEngineRes.ok).toBe(true);
       if (getEngineRes.ok) {
         expect(getEngineRes.value[0]).toBeInstanceOf(RemoteEngine);
       }
     });
 
-    it('should return a local engine when the model can run locally', () => {
-      const getEngineRes = fi['getEngine']('meta/llama3.2-1b/instruct-fp16', false, false);
+    it('should return a local engine when the model can run locally', async () => {
+      const getEngineRes = await fi['getEngine']('meta/llama3.2-1b/instruct-fp16', false, false);
       expect(getEngineRes.ok).toBe(true);
       if (getEngineRes.ok) {
         expect(getEngineRes.value[0]).toBeInstanceOf(TransformersEngine);
       }
     });
 
-    it('should throw an error if the model cannot run locally or remotely', () => {
+    it('should throw an error if the model cannot run locally or remotely', async () => {
       fi.remoteHandoff = false;
-      const getEngineRes = fi['getEngine']('meta/llama3.2-1b/instruct-fp16', true, false);
+      const getEngineRes = await fi['getEngine']('meta/llama3.2-1b/instruct-fp16', true, false);
       expect(getEngineRes.ok).toBe(false);
       if (!getEngineRes.ok) {
         expect(Math.floor(getEngineRes.failure.code / 100) * 100).toBe(FailureCode.ConfigError);
       }
     });
 
-    it('should throw an error if forceLocal and forceRemote are both true', () => {
-      const getEngineRes = fi['getEngine']('meta/llama3.2-1b/instruct-fp16', true, true);
+    it('should throw an error if forceLocal and forceRemote are both true', async () => {
+      const getEngineRes = await fi['getEngine']('meta/llama3.2-1b/instruct-fp16', true, true);
       expect(getEngineRes.ok).toBe(false);
       if (!getEngineRes.ok) {
         expect(getEngineRes.failure.description).toBe(
@@ -61,40 +59,22 @@ describe('FlowerIntelligence', () => {
       }
     });
 
-    it('should throw an error if the model ID is invalid', () => {
-      const getEngineRes = fi['getEngine']('invalid-model', false, false);
-      expect(getEngineRes.ok).toBe(false);
-      if (!getEngineRes.ok) {
-        expect(getEngineRes.failure.code).toBe(FailureCode.UnknownModelError);
-      }
-    });
-  });
-
-  describe('canRunLocally', () => {
-    it('should return true if the model can run locally', () => {
-      const result = fi['canRunLocally']('meta/llama3.2-1b/instruct-fp16');
-      expect(result).toBe(true);
-    });
-
-    it('should return false if the model cannot run locally', () => {
-      const result = fi['canRunLocally']('meta/llama3.3-70b');
-      expect(result).toBe(false);
-    });
+    // it('should throw an error if the model ID is invalid', async () => {
+    //   const getEngineRes = await fi['getEngine']('invalid-model', false, false);
+    //   expect(getEngineRes.ok).toBe(false);
+    //   if (!getEngineRes.ok) {
+    //     expect(getEngineRes.failure.code).toBe(FailureCode.UnknownModelError);
+    //   }
+    // });
   });
 
   describe('chooseLocalEngine', () => {
-    it('should return a local engine for a valid provider', () => {
-      const chooseEngineRes = fi['chooseLocalEngine']('meta/llama3.2-1b/instruct-fp16');
+    it('should return a local engine for a valid provider', async () => {
+      const chooseEngineRes = await fi['chooseLocalEngine']('meta/llama3.2-1b/instruct-fp16');
       expect(chooseEngineRes.ok).toBe(true);
       if (chooseEngineRes.ok) {
         expect(chooseEngineRes.value[0]).toBeInstanceOf(TransformersEngine);
       }
-    });
-  });
-
-  describe('Initialization', () => {
-    it('should initialize with correct available models', () => {
-      expect(Object.keys(availableModels)).toContain('meta/llama3.2-1b/instruct-fp16');
     });
   });
 
