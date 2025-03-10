@@ -1,15 +1,61 @@
 // Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 
 import { REMOTE_URL, SDK, VERSION } from '../constants';
+import { isNode } from '../env';
 import { FailureCode, Result } from '../typing';
 
-interface ModelResponse {
-  is_supported: boolean;
-  engine_model: string | undefined;
-  model: string | undefined;
+const STALE_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours.
+const CACHE_KEY = 'engineModelsCache'; // For browser localStorage.
+const CACHE_FILE = 'engineModelsCache.json'; // For Node filesystem.
+
+// Types: each model mapping now has its own timestamp.
+interface CachedEntry {
+  engineModel: string;
+  timestamp: number;
 }
 
-export async function checkSupport(model: string, engine: string): Promise<Result<string>> {
+interface CachedMapping {
+  mapping: Record<string, CachedEntry>;
+}
+
+/**
+ * Loads the cached mapping from persistent storage.
+ */
+async function loadCache(): Promise<CachedMapping | null> {
+  if (isNode) {
+    try {
+      const fs = await import('fs/promises');
+      const data = await fs.readFile(CACHE_FILE, 'utf-8');
+      return JSON.parse(data) as CachedMapping;
+    } catch (err) {
+      return null;
+    }
+  } else {
+    const data = localStorage.getItem(CACHE_KEY);
+    if (data) {
+      try {
+        return JSON.parse(data) as CachedMapping;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+}
+
+/**
+ * Saves the cache to persistent storage.
+ */
+async function saveCache(cache: CachedMapping): Promise<void> {
+  if (isNode) {
+    const fs = await import('fs/promises');
+    await fs.writeFile(CACHE_FILE, JSON.stringify(cache), 'utf-8');
+  } else {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  }
+}
+
+async function updateModel(model: string, engine: string): Promise<Result<string>> {
   try {
     const response = await fetch(REMOTE_URL, {
       method: 'POST',
@@ -35,8 +81,10 @@ export async function checkSupport(model: string, engine: string): Promise<Resul
     const data = (await response.json()) as ModelResponse;
 
     if (data.is_supported && data.engine_model) {
+      await addOrUpdateCache(model, data.engine_model);
       return { ok: true, value: data.engine_model };
     } else {
+      await removeFromCache(model);
       return {
         ok: false,
         failure: {
@@ -54,4 +102,64 @@ export async function checkSupport(model: string, engine: string): Promise<Resul
       },
     };
   }
+}
+
+/**
+ * Adds or updates a model mapping in the cache with the current timestamp.
+ */
+async function addOrUpdateCache(model: string, engineModel: string): Promise<void> {
+  const now = Date.now();
+  let cache = await loadCache();
+  if (!cache) {
+    cache = { mapping: {} };
+  }
+  cache.mapping[model] = { engineModel, timestamp: now };
+  await saveCache(cache);
+}
+
+/**
+ * Removes a model from the cache.
+ */
+async function removeFromCache(model: string): Promise<void> {
+  const cache = await loadCache();
+  if (cache && cache.mapping[model]) {
+    delete cache.mapping[model];
+    await saveCache(cache);
+  }
+}
+
+/**
+ * Checks if a model is supported.
+ * - If the model exists in the cache and its timestamp is fresh, return it.
+ * - If it exists but is stale (older than 24 hours), trigger a background update (and return the stale mapping).
+ * - If it does not exist, update synchronously.
+ */
+export async function checkSupport(model: string, engine: string): Promise<Result<string>> {
+  const now = Date.now();
+  let cache = await loadCache();
+  if (!cache) {
+    cache = { mapping: {} };
+  }
+
+  const cachedEntry = cache.mapping[model];
+
+  if (cachedEntry !== undefined) {
+    // If the cached entry is stale, trigger a background update.
+    if (now - cachedEntry.timestamp > STALE_TIMEOUT_MS) {
+      updateModel(model, engine).catch((err) =>
+        console.warn(`Background update failed for model ${model}:`, err)
+      );
+    }
+    // Return the (possibly stale) cached result.
+    return { ok: true, value: cachedEntry.engineModel };
+  } else {
+    // Not in cache, call updateModel synchronously.
+    return await updateModel(model, engine);
+  }
+}
+
+interface ModelResponse {
+  is_supported: boolean;
+  engine_model: string | undefined;
+  model: string | undefined;
 }
