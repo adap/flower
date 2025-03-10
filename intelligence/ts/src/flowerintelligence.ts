@@ -196,7 +196,7 @@ export class FlowerIntelligence {
       }
     }
 
-    if (compatibleEngines.length > 1) {
+    if (compatibleEngines.length > 0) {
       // Currently we just select the first compatible localEngine without further check
       return { ok: true, value: compatibleEngines[0] };
     } else {

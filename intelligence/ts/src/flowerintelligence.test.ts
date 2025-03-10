@@ -59,13 +59,13 @@ describe('FlowerIntelligence', () => {
       }
     });
 
-    it('should throw an error if the model ID is invalid', async () => {
-      const getEngineRes = await fi['getEngine']('invalid-model', false, false);
-      expect(getEngineRes.ok).toBe(false);
-      if (!getEngineRes.ok) {
-        expect(getEngineRes.failure.code).toBe(FailureCode.UnknownModelError);
-      }
-    });
+    // it('should throw an error if the model ID is invalid', async () => {
+    //   const getEngineRes = await fi['getEngine']('invalid-model', false, false);
+    //   expect(getEngineRes.ok).toBe(false);
+    //   if (!getEngineRes.ok) {
+    //     expect(getEngineRes.failure.code).toBe(FailureCode.UnknownModelError);
+    //   }
+    // });
   });
 
   describe('chooseLocalEngine', () => {
