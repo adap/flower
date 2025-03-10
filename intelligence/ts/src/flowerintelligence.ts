@@ -35,6 +35,7 @@ export class FlowerIntelligence {
     onnx: isNode ? [new TransformersEngine()] : [],
     webllm: isNode ? [] : [new WebllmEngine()],
   };
+  #availableLocalEngines: Engine[] = isNode ? [new TransformersEngine()] : [new WebllmEngine()];
   #availableModels: Record<string, ProviderMapping> = getModels();
 
   /**
@@ -79,7 +80,7 @@ export class FlowerIntelligence {
    * @returns A {@link Result} containing either a {@link Failure} (containing `code: number` and `description: string`) if `ok` is false or a value of `void`, if `ok` is true (meaning the loading was successful).
    */
   async fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>> {
-    const engineResult = this.getEngine(model, false, false);
+    const engineResult = await this.getEngine(model, false, false);
     if (!engineResult.ok) {
       return engineResult;
     } else {
@@ -153,7 +154,7 @@ export class FlowerIntelligence {
       ({ messages, ...options } = inputOrOptions);
     }
 
-    const engineResult = this.getEngine(
+    const engineResult = await this.getEngine(
       options.model ?? DEFAULT_MODEL,
       options.forceRemote ?? false,
       options.forceLocal ?? false
@@ -176,11 +177,11 @@ export class FlowerIntelligence {
     );
   }
 
-  private getEngine(
+  private async getEngine(
     modelId: string,
     forceRemote: boolean,
     forceLocal: boolean
-  ): Result<[Engine, string]> {
+  ): Promise<Result<[Engine, string]>> {
     const canonicalModelId = resolveModelAlias(modelId);
     const argsResult = this.validateArgs(canonicalModelId, forceRemote, forceLocal);
     if (!argsResult.ok) {
@@ -192,43 +193,23 @@ export class FlowerIntelligence {
     }
 
     if (this.canRunLocally(canonicalModelId)) {
-      return this.chooseLocalEngine(canonicalModelId);
+      return await this.chooseLocalEngine(canonicalModelId);
     }
 
     return this.getOrCreateRemoteEngine(canonicalModelId);
   }
 
-  private chooseLocalEngine(modelId: string): Result<[Engine, string]> {
-    const localProvider = Object.keys(this.#localEngines).find(
-      (provider) =>
-        this.#localEngines[provider].length > 0 && // check if the local engine exists
-        provider in this.#availableModels[modelId]
-    );
-
-    if (!localProvider) {
-      return {
-        ok: false,
-        failure: {
-          description: `The model "${modelId}" is not available for local inference.`,
-          code: FailureCode.NoLocalProviderError,
-        },
-      };
-    }
-
-    const translatedModelId = this.#availableModels[modelId][localProvider as 'onnx' | 'webllm'];
-
-    if (!translatedModelId) {
-      return {
-        ok: false,
-        failure: {
-          description: `No match for "${modelId}" with provider "${localProvider}".`,
-          code: FailureCode.NoLocalProviderError,
-        },
-      };
+  private async chooseLocalEngine(modelId: string): Promise<Result<[Engine, string]>> {
+    const compatibleEngines = [];
+    for (const engine of this.#availableLocalEngines) {
+      const supportedResult = await engine.isSupported(modelId);
+      if (supportedResult.ok) {
+        compatibleEngines.push([engine, supportedResult.value] as [Engine, string]);
+      }
     }
 
     // Currently we just select the first compatible localEngine without further check
-    return { ok: true, value: [this.#localEngines[localProvider][0], translatedModelId] };
+    return { ok: true, value: compatibleEngines[0] };
   }
 
   private canRunLocally(modelId: string): boolean {
