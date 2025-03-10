@@ -11,7 +11,7 @@ interface ModelResponse {
 
 export async function checkSupport(model: string, engine: string): Promise<Result<string>> {
   try {
-    const response = await fetch(REMOTE_URL, {
+    const response = await fetch(`${REMOTE_URL}/v1/fetch-model-config`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
