@@ -188,13 +188,14 @@ export class FlowerIntelligence {
   }
 
   private async chooseLocalEngine(modelId: string): Promise<Result<[Engine, string]>> {
-    const compatibleEngines = [];
-    for (const engine of this.#availableLocalEngines) {
-      const supportedResult = await engine.isSupported(modelId);
-      if (supportedResult.ok) {
-        compatibleEngines.push([engine, supportedResult.value] as [Engine, string]);
-      }
-    }
+    const compatibleEngines = (
+      await Promise.all(
+        this.#availableLocalEngines.map(async (engine) => {
+          const supportedResult = await engine.isSupported(modelId);
+          return supportedResult.ok ? [engine, supportedResult.value] : null;
+        })
+      )
+    ).filter((item): item is [Engine, string] => item !== null);
 
     if (compatibleEngines.length > 0) {
       // Currently we just select the first compatible localEngine without further check
