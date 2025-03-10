@@ -16,38 +16,67 @@
 # pylint: disable=invalid-name, disable=R0904
 
 import unittest
+from copy import deepcopy
 
-from flwr.server.superlink.linkstate.linkstate_test import create_task_ins
-from flwr.server.superlink.linkstate.sqlite_linkstate import task_ins_to_dict
+from parameterized import parameterized
+
+from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.common.message import Error
+from flwr.common.serde import message_from_proto
+from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
+from flwr.server.superlink.linkstate.sqlite_linkstate import (
+    dict_to_message,
+    message_to_dict,
+)
 
 
 class SqliteStateTest(unittest.TestCase):
     """Test utilitiy functions."""
 
-    def test_ins_res_to_dict(self) -> None:
+    @parameterized.expand([(False,), (True,)])  # type: ignore
+    def test_message_to_dict_and_back(self, has_error: bool) -> None:
         """Check if all required keys are included in return value."""
         # Prepare
-        ins_res = create_task_ins(consumer_node_id=1, run_id=0)
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=123, run_id=456
+            )
+        )
+        if has_error:
+            msg.__dict__["_content"] = None
+            msg.__dict__["_error"] = Error(0)
+
         expected_keys = [
-            "task_id",
+            "message_id",
             "group_id",
             "run_id",
-            "producer_node_id",
-            "consumer_node_id",
+            "src_node_id",
+            "dst_node_id",
+            "reply_to_message",
             "created_at",
             "delivered_at",
             "ttl",
-            "ancestry",
-            "task_type",
-            "recordset",
+            "message_type",
+            "content",
+            "error",
         ]
 
         # Execute
-        result = task_ins_to_dict(ins_res)
+        result = message_to_dict(deepcopy(msg))
 
         # Assert
         for key in expected_keys:
             assert key in result
+
+        # Execute
+        res_msg = dict_to_message(result)
+
+        # Assert
+        if has_error:
+            assert res_msg.error.code == msg.error.code
+        else:
+            assert res_msg.content == msg.content
+        assert res_msg.metadata == msg.metadata
 
 
 if __name__ == "__main__":

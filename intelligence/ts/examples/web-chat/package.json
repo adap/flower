@@ -1,0 +1,21 @@
+{
+  "name": "web-chat",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc",
+    "start": "cd ../.. && pnpm build && cd examples/web-chat && pnpm i && pnpm build && http-server ."
+  },
+  "keywords": [],
+  "author": "",
+  "dependencies": {
+    "@flwr/flwr": "file:../../dist",
+    "cross-spawn": "^7.0.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^6.2.0"
+  }
+}

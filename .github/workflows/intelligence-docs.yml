@@ -1,0 +1,58 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'intelligence/**/*'
+      - '.github/workflows/intelligence-*.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'intelligence/**/*'
+      - '.github/workflows/intelligence-*.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-22.04
+    name: Build and deploy
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install pandoc
+        run: sudo apt install pandoc
+      - name: Install Flower dependencies (mandatory only)
+        run: python -m poetry install --extras "simulation"
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.14.0'
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm
+      - name: Install Flower Intelligence
+        run: |
+          cd intelligence/ts
+          pnpm i
+      - name: Build docs
+        run: |
+          ./intelligence/dev/build-docs.sh
+      - name: Deploy docs
+        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+          DOCS_BUCKET: flower.ai
+        run: |
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./intelligence/docs/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/intelligence
