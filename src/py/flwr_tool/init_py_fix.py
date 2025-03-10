@@ -8,14 +8,13 @@ Example:
 
 import os
 import sys
-from typing import List
 
 import black
 
 from flwr_tool.init_py_check import get_all_var_list, get_init_dir_list_and_warnings
 
 
-def fix_all_init_files(dir_list: List[str]) -> None:
+def fix_all_init_files(dir_list: list[str]) -> None:
     """Sort the __all__ variables that are in __init__.py files."""
     warning_list = []
 

@@ -178,6 +178,11 @@ export enum FailureCode {
   EngineSpecificError = 300,
 
   /**
+   * Indicates that a model is not supported by a given engine.
+   */
+  UnsupportedModelError,
+
+  /**
    * Indicates a error related to the encryption protocol for remote inference.
    */
   EncryptionError,
