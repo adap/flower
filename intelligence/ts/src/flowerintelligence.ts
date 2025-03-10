@@ -4,15 +4,7 @@ import MODELS from './models.json';
 import { Engine } from './engines/engine';
 import { RemoteEngine } from './engines/remoteEngine';
 import { TransformersEngine } from './engines/transformersEngine';
-import {
-  ChatOptions,
-  ChatResponseResult,
-  FailureCode,
-  Message,
-  Progress,
-  ProviderMapping,
-  Result,
-} from './typing';
+import { ChatOptions, ChatResponseResult, FailureCode, Message, Progress, Result } from './typing';
 import { WebllmEngine } from './engines/webllmEngine';
 import { DEFAULT_MODEL } from './constants';
 
@@ -30,13 +22,8 @@ export class FlowerIntelligence {
   static #remoteHandoff = false;
   static #apiKey?: string;
 
-  #remoteEngine?: Engine;
-  #localEngines: Record<string, Engine[]> = {
-    onnx: isNode ? [new TransformersEngine()] : [],
-    webllm: isNode ? [] : [new WebllmEngine()],
-  };
+  #remoteEngine?: RemoteEngine;
   #availableLocalEngines: Engine[] = isNode ? [new TransformersEngine()] : [new WebllmEngine()];
-  #availableModels: Record<string, ProviderMapping> = getModels();
 
   /**
    * Get the initialized FlowerIntelligence instance.
@@ -183,7 +170,7 @@ export class FlowerIntelligence {
     forceLocal: boolean
   ): Promise<Result<[Engine, string]>> {
     const canonicalModelId = resolveModelAlias(modelId);
-    const argsResult = this.validateArgs(canonicalModelId, forceRemote, forceLocal);
+    const argsResult = this.validateArgs(forceRemote, forceLocal);
     if (!argsResult.ok) {
       return argsResult;
     }
@@ -192,8 +179,9 @@ export class FlowerIntelligence {
       return this.getOrCreateRemoteEngine(canonicalModelId);
     }
 
-    if (this.canRunLocally(canonicalModelId)) {
-      return await this.chooseLocalEngine(canonicalModelId);
+    const localEngineResult = await this.chooseLocalEngine(canonicalModelId);
+    if (localEngineResult.ok) {
+      return localEngineResult;
     }
 
     return this.getOrCreateRemoteEngine(canonicalModelId);
@@ -208,28 +196,18 @@ export class FlowerIntelligence {
       }
     }
 
-    // Currently we just select the first compatible localEngine without further check
-    return { ok: true, value: compatibleEngines[0] };
-  }
-
-  private canRunLocally(modelId: string): boolean {
-    if (!(modelId in this.#availableModels)) {
-      return false;
+    if (compatibleEngines.length > 1) {
+      // Currently we just select the first compatible localEngine without further check
+      return { ok: true, value: compatibleEngines[0] };
+    } else {
+      return {
+        ok: false,
+        failure: {
+          code: FailureCode.NoLocalProviderError,
+          description: `No available local engine for ${modelId}.`,
+        },
+      };
     }
-
-    const modelProviders = this.#availableModels[modelId];
-
-    // Check if the model has any listed local providers
-    const hasLocalProvider = Object.keys(this.#localEngines).some(
-      (provider) => provider in modelProviders
-    );
-
-    // Placeholder for extra logic, e.g., hardware checks, resource availability
-    // const hardwareCompatible = this.checkHardwareCompatibility(modelId);
-    // const resourcesAvailable = this.isInferenceSlotAvailable();
-    const extraLogic = true;
-
-    return hasLocalProvider && extraLogic;
   }
 
   private getOrCreateRemoteEngine(modelId: string): Result<[Engine, string]> {
@@ -255,7 +233,7 @@ export class FlowerIntelligence {
     return { ok: true, value: [this.#remoteEngine, modelId] };
   }
 
-  private validateArgs(modelId: string, forceRemote: boolean, forceLocal: boolean): Result<void> {
+  private validateArgs(forceRemote: boolean, forceLocal: boolean): Result<void> {
     if (forceLocal && forceRemote) {
       return {
         ok: false,
@@ -266,42 +244,8 @@ export class FlowerIntelligence {
         },
       };
     }
-    if (!Object.keys(this.#availableModels).includes(modelId)) {
-      return {
-        ok: false,
-        failure: {
-          description: `Only the following models are currently available: ${Object.keys(this.#availableModels).join(',')}.\nYou provided ${modelId}, which is not supported.`,
-          code: FailureCode.UnknownModelError,
-        },
-      };
-    }
     return { ok: true, value: undefined };
   }
-}
-
-export function getModels(): Record<string, ProviderMapping> {
-  const relevantProviders = MODELS.languages.typescript;
-
-  return Object.entries(MODELS.models).reduce<Record<string, ProviderMapping>>(
-    (relevantModels, [modelId, modelData]) => {
-      // Ensure modelData has a "providers" property; default to an empty object if not.
-      const providersObj = modelData.providers;
-
-      // Filter the providers to include only those that are relevant for TypeScript.
-      const filteredProviders = Object.entries(providersObj).reduce<Partial<ProviderMapping>>(
-        (acc, [provider, modelValue]) => {
-          if (relevantProviders.includes(provider)) {
-            acc[provider as keyof ProviderMapping] = modelValue;
-          }
-          return acc;
-        },
-        {}
-      );
-      relevantModels[modelId] = filteredProviders as ProviderMapping;
-      return relevantModels;
-    },
-    {}
-  );
 }
 
 /**
