@@ -10,15 +10,7 @@ import {
 } from '@huggingface/transformers';
 
 import type { ProgressInfo, TextGenerationConfig } from '@huggingface/transformers';
-import {
-  FailureCode,
-  Message,
-  Result,
-  Progress,
-  ProviderMapping,
-  ChatResponseResult,
-} from '../typing';
-import MODELS from '../models.json';
+import { FailureCode, Message, Result, Progress, ChatResponseResult } from '../typing';
 
 import { BaseEngine } from './engine';
 import { checkSupport } from './common';
@@ -28,7 +20,6 @@ const choice = 0;
 
 export class TransformersEngine extends BaseEngine {
   private generationPipelines: Record<string, TextGenerationPipeline> = {};
-  private models = this.getModels();
 
   async chat(
     messages: Message[],

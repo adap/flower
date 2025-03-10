@@ -11,12 +11,10 @@ import {
   FailureCode,
   Message,
   Progress,
-  ProviderMapping,
   Result,
   StreamEvent,
   Tool,
 } from '../typing';
-import MODELS from '../models.json';
 import { BaseEngine } from './engine';
 import { checkSupport } from './common';
 
@@ -51,7 +49,6 @@ async function runQuery(
 
 export class WebllmEngine extends BaseEngine {
   #loadedEngines: Record<string, MLCEngineInterface> = {};
-  private models = this.getModels();
 
   async chat(
     messages: Message[],
