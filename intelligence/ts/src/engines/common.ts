@@ -5,8 +5,8 @@ import { FailureCode, Result } from '../typing';
 
 interface ModelResponse {
   is_supported: boolean;
-  engine_model: string;
-  model: string;
+  engine_model: string | undefined;
+  model: string | undefined;
 }
 
 export async function checkSupport(model: string, engine: string): Promise<Result<string>> {
@@ -34,7 +34,7 @@ export async function checkSupport(model: string, engine: string): Promise<Resul
 
     const data = (await response.json()) as ModelResponse;
 
-    if (data.is_supported) {
+    if (data.is_supported && data.engine_model) {
       return { ok: true, value: data.engine_model };
     } else {
       return {
