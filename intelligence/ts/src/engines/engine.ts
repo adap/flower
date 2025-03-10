@@ -22,6 +22,7 @@ export interface Engine {
     encrypt?: boolean
   ): Promise<ChatResponseResult>;
   fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>>;
+  isSupported(model: string): Promise<Result<string | undefined>>;
 }
 
 export abstract class BaseEngine implements Engine {
@@ -43,6 +44,14 @@ export abstract class BaseEngine implements Engine {
   }
 
   async fetchModel(_model: string, _callback: (progress: Progress) => void): Promise<Result<void>> {
+    await Promise.resolve();
+    return {
+      ok: false,
+      failure: { code: FailureCode.NotImplementedError, description: 'Method not implemented.' },
+    };
+  }
+
+  async isSupported(_model: string): Promise<Result<string | undefined>> {
     await Promise.resolve();
     return {
       ok: false,
