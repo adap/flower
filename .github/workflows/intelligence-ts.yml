@@ -127,8 +127,7 @@ jobs:
           FI_API_KEY: ${{ steps.get_api_key.outputs.api_key }}
         run: |
           sed -i "s|https://api.flower.ai|${FI_DEV_REMOTE_URL}|g" src/constants.ts
-          pnpm demo
-          pnpm demo:js-proj
+          pnpm demo:ee
           pnpm demo:ts-proj
 
   fi_ts_tests:

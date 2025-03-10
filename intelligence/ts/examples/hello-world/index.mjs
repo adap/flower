@@ -1,8 +1,6 @@
 import { FlowerIntelligence } from '../../dist/flowerintelligence.es.js';
 
 const fi = FlowerIntelligence.instance;
-fi.remoteHandoff = true;
-fi.apiKey = process.env.FI_API_KEY ?? 'REPLACE_HERE';
 
 async function main() {
   const response = await fi.chat({
@@ -10,7 +8,6 @@ async function main() {
       { role: 'system', content: 'You are a helpful assistant' },
       { role: 'user', content: 'How are you?' },
     ],
-    forceRemote: true,
   });
   if (!response.ok) {
     console.error(`${response.failure.code}: ${response.failure.description}`);
