@@ -123,6 +123,6 @@ export class WebllmEngine extends BaseEngine {
   }
 
   async isSupported(model: string): Promise<Result<string>> {
-    return await checkSupport(model, 'onnx');
+    return await checkSupport(model, 'webllm');
   }
 }
