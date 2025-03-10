@@ -215,8 +215,9 @@ class GrpcDriver(Driver):
         if len([id for id in list(res.message_ids) if id]) != len(list(messages)):
             log(
                 WARNING,
-                "Not all messages could be pushed to the SuperLink. "
-                "This could be due to a malformed message.",
+                "Not all messages could be pushed to the SuperLink. The returned "
+                "list has `None` for those messages (the order is preserved as passed "
+                "to `push_messages`). This could be due to a malformed message.",
             )
         return list(res.message_ids)
 
