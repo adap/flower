@@ -10,24 +10,16 @@ import {
 } from '@huggingface/transformers';
 
 import type { ProgressInfo, TextGenerationConfig } from '@huggingface/transformers';
-import {
-  FailureCode,
-  Message,
-  Result,
-  Progress,
-  ProviderMapping,
-  ChatResponseResult,
-} from '../typing';
-import MODELS from '../models.json';
+import { FailureCode, Message, Result, Progress, ChatResponseResult } from '../typing';
 
 import { BaseEngine } from './engine';
+import { checkSupport } from './common';
 
 const stoppingCriteria = new InterruptableStoppingCriteria();
 const choice = 0;
 
 export class TransformersEngine extends BaseEngine {
   private generationPipelines: Record<string, TextGenerationPipeline> = {};
-  private models = this.getModels();
 
   async chat(
     messages: Message[],
@@ -165,30 +157,6 @@ export class TransformersEngine extends BaseEngine {
   }
 
   async isSupported(model: string): Promise<Result<string>> {
-    await Promise.resolve();
-    if (model in this.models) {
-      return { ok: true, value: this.models[model] };
-    }
-    return {
-      ok: false,
-      failure: {
-        code: FailureCode.UnsupportedModelError,
-        description: `Model '${model}' is not supported on the Transformers.js engine.`,
-      },
-    };
-  }
-
-  private getModels(): Record<string, string> {
-    return Object.entries(MODELS.models).reduce<Record<string, string>>(
-      (acc, [modelId, modelData]) => {
-        // Cast modelData to an object with a "providers" property.
-        const providers = (modelData as { providers?: ProviderMapping }).providers;
-        if (providers?.onnx) {
-          acc[modelId] = providers.onnx;
-        }
-        return acc;
-      },
-      {}
-    );
+    return await checkSupport(model, 'onnx');
   }
 }

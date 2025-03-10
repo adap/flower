@@ -1,6 +1,5 @@
 // Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 
-import MODELS from './models.json';
 import { Engine } from './engines/engine';
 import { RemoteEngine } from './engines/remoteEngine';
 import { TransformersEngine } from './engines/transformersEngine';
@@ -169,22 +168,21 @@ export class FlowerIntelligence {
     forceRemote: boolean,
     forceLocal: boolean
   ): Promise<Result<[Engine, string]>> {
-    const canonicalModelId = resolveModelAlias(modelId);
     const argsResult = this.validateArgs(forceRemote, forceLocal);
     if (!argsResult.ok) {
       return argsResult;
     }
 
     if (forceRemote) {
-      return this.getOrCreateRemoteEngine(canonicalModelId);
+      return this.getOrCreateRemoteEngine(modelId);
     }
 
-    const localEngineResult = await this.chooseLocalEngine(canonicalModelId);
+    const localEngineResult = await this.chooseLocalEngine(modelId);
     if (localEngineResult.ok) {
       return localEngineResult;
     }
 
-    return this.getOrCreateRemoteEngine(canonicalModelId);
+    return this.getOrCreateRemoteEngine(modelId);
   }
 
   private async chooseLocalEngine(modelId: string): Promise<Result<[Engine, string]>> {
@@ -247,20 +245,4 @@ export class FlowerIntelligence {
     }
     return { ok: true, value: undefined };
   }
-}
-
-/**
- * Resolves a user-provided model ID (or alias) into a canonical model ID.
- * If the alias doesn't exist and the model ID isn't found in the canonical list,
- * an error is thrown.
- */
-function resolveModelAlias(inputModelId: string): string {
-  // Cast aliases to a record so we can index it with an arbitrary string.
-  const aliases = MODELS.aliases as Record<string, string>;
-
-  if (inputModelId in aliases) {
-    return aliases[inputModelId];
-  }
-
-  return inputModelId;
 }
