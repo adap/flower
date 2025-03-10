@@ -22,14 +22,14 @@ from unittest.mock import MagicMock
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.dummy_grpc_handlers import (
-    DummyUnaryStreamHandlerException,
-    DummyUnaryUnaryHandlerException,
-    DummyUnsupportedHandler,
-    get_dummy_unary_stream_handler,
-    get_dummy_unary_unary_handler,
-)
 from flwr.common.event_log_plugin import EventLogWriterPlugin
+from flwr.common.noop_grpc_handlers_test import (
+    NoOpUnaryStreamHandlerException,
+    NoOpUnaryUnaryHandlerException,
+    NoOpUnsupportedHandler,
+    get_noop_unary_stream_handler,
+    get_noop_unary_unary_handler,
+)
 from flwr.common.typing import Actor, Event, LogEntry, UserInfo
 from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
 from flwr.superexec.exec_user_auth_interceptor import shared_user_info
@@ -133,7 +133,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         handler_call_details = MagicMock()
         handler_call_details.method = "dummy_method"
         expected_method_name = handler_call_details.method
-        continuation = get_dummy_unary_unary_handler
+        continuation = get_noop_unary_unary_handler
         intercepted_handler = self.interceptor.intercept_service(
             continuation, handler_call_details
         )
@@ -157,8 +157,8 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         # pylint: disable=unused-argument
         def continuation(
             handler_call_details: grpc.HandlerCallDetails,
-        ) -> DummyUnaryUnaryHandlerException:
-            return DummyUnaryUnaryHandlerException()
+        ) -> NoOpUnaryUnaryHandlerException:
+            return NoOpUnaryUnaryHandlerException()
 
         intercepted_handler = self.interceptor.intercept_service(
             continuation, handler_call_details
@@ -182,7 +182,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         handler_call_details = MagicMock()
         handler_call_details.method = "stream_method"
         expected_method_name = handler_call_details.method
-        continuation = get_dummy_unary_stream_handler
+        continuation = get_noop_unary_stream_handler
         intercepted_handler = self.interceptor.intercept_service(
             continuation, handler_call_details
         )
@@ -209,8 +209,8 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         # pylint: disable=unused-argument
         def continuation(
             handler_call_details: grpc.HandlerCallDetails,
-        ) -> DummyUnaryStreamHandlerException:
-            return DummyUnaryStreamHandlerException()
+        ) -> NoOpUnaryStreamHandlerException:
+            return NoOpUnaryStreamHandlerException()
 
         intercepted_handler = self.interceptor.intercept_service(
             continuation, handler_call_details
@@ -235,8 +235,8 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         # pylint: disable=unused-argument
         def continuation(
             handler_call_details: grpc.HandlerCallDetails,
-        ) -> DummyUnsupportedHandler:
-            return DummyUnsupportedHandler()
+        ) -> NoOpUnsupportedHandler:
+            return NoOpUnsupportedHandler()
 
         handler_call_details = MagicMock()
         with self.assertRaises(NotImplementedError):

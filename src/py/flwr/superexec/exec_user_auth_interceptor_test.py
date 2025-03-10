@@ -23,11 +23,11 @@ import grpc
 from google.protobuf.message import Message as GrpcMessage
 from parameterized import parameterized
 
-from flwr.common.dummy_grpc_handlers import (
-    DummyUnaryStreamHandler,
-    DummyUnaryUnaryHandler,
-    get_dummy_unary_stream_handler,
-    get_dummy_unary_unary_handler,
+from flwr.common.noop_grpc_handlers_test import (
+    NoOpUnaryStreamHandler,
+    NoOpUnaryUnaryHandler,
+    get_noop_unary_stream_handler,
+    get_noop_unary_unary_handler,
 )
 from flwr.common.typing import UserInfo
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -79,7 +79,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
         interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
         intercepted_handler = interceptor.intercept_service(
-            get_dummy_unary_unary_handler, handler_call_details
+            get_noop_unary_unary_handler, handler_call_details
         )
 
         # Execute
@@ -116,12 +116,12 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         dummy_auth_plugin.refresh_tokens.return_value = None
         interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
         continuation: Union[
-            Callable[[Any], DummyUnaryUnaryHandler],
-            Callable[[Any], DummyUnaryStreamHandler],
-        ] = get_dummy_unary_unary_handler
+            Callable[[Any], NoOpUnaryUnaryHandler],
+            Callable[[Any], NoOpUnaryStreamHandler],
+        ] = get_noop_unary_unary_handler
         # Set up unary-stream case for StreamLogsRequest
         if isinstance(request, StreamLogsRequest):
-            continuation = get_dummy_unary_stream_handler
+            continuation = get_noop_unary_stream_handler
         intercepted_handler = interceptor.intercept_service(
             continuation, handler_call_details
         )
@@ -160,12 +160,12 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         )
         interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
         continuation: Union[
-            Callable[[Any], DummyUnaryUnaryHandler],
-            Callable[[Any], DummyUnaryStreamHandler],
-        ] = get_dummy_unary_unary_handler
+            Callable[[Any], NoOpUnaryUnaryHandler],
+            Callable[[Any], NoOpUnaryStreamHandler],
+        ] = get_noop_unary_unary_handler
         # Set up unary-stream case for StreamLogsRequest
         if isinstance(request, StreamLogsRequest):
-            continuation = get_dummy_unary_stream_handler
+            continuation = get_noop_unary_stream_handler
         intercepted_handler = interceptor.intercept_service(
             continuation, handler_call_details
         )
@@ -216,12 +216,12 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
 
         interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
         continuation: Union[
-            Callable[[Any], DummyUnaryUnaryHandler],
-            Callable[[Any], DummyUnaryStreamHandler],
-        ] = get_dummy_unary_unary_handler
+            Callable[[Any], NoOpUnaryUnaryHandler],
+            Callable[[Any], NoOpUnaryStreamHandler],
+        ] = get_noop_unary_unary_handler
         # Set up unary-stream case for StreamLogsRequest
         if isinstance(request, StreamLogsRequest):
-            continuation = get_dummy_unary_stream_handler
+            continuation = get_noop_unary_stream_handler
         intercepted_handler = interceptor.intercept_service(
             continuation, handler_call_details
         )
