@@ -11,13 +11,12 @@ import {
   FailureCode,
   Message,
   Progress,
-  ProviderMapping,
   Result,
   StreamEvent,
   Tool,
 } from '../typing';
-import MODELS from '../models.json';
 import { BaseEngine } from './engine';
+import { checkSupport } from './common';
 
 async function runQuery(
   engine: MLCEngineInterface,
@@ -50,7 +49,6 @@ async function runQuery(
 
 export class WebllmEngine extends BaseEngine {
   #loadedEngines: Record<string, MLCEngineInterface> = {};
-  private models = this.getModels();
 
   async chat(
     messages: Message[],
@@ -122,30 +120,6 @@ export class WebllmEngine extends BaseEngine {
   }
 
   async isSupported(model: string): Promise<Result<string>> {
-    await Promise.resolve();
-    if (model in this.models) {
-      return { ok: true, value: this.models[model] };
-    }
-    return {
-      ok: false,
-      failure: {
-        code: FailureCode.UnsupportedModelError,
-        description: `Model '${model}' is not supported on the WebLLM engine.`,
-      },
-    };
-  }
-
-  private getModels(): Record<string, string> {
-    return Object.entries(MODELS.models).reduce<Record<string, string>>(
-      (acc, [modelId, modelData]) => {
-        // Cast modelData to an object with a "providers" property.
-        const providers = (modelData as { providers?: ProviderMapping }).providers;
-        if (providers?.webllm) {
-          acc[modelId] = providers.webllm;
-        }
-        return acc;
-      },
-      {}
-    );
+    return await checkSupport(model, 'onnx');
   }
 }
