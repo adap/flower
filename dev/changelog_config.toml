@@ -980,3 +980,15 @@ allowed_verbs = [
     "Wrap",
     "Write",
 ]
+
+[projects.framework]
+path = "doc/source/ref-changelog.md"
+
+[projects.datasets]
+path = "datasets/doc/source/ref-changelog.md"
+
+[projects.examples]
+path = "examples/doc/source/ref-changelog.md"
+
+[projects.baselines]
+path = "baselines/doc/source/ref-changelog.md"
