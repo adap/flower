@@ -94,6 +94,35 @@ END
       )
       echo "$corrected_versions" >> source/conf.py
     fi
+
+    if [[ "$current_version" > "v1.5.0" && "$current_version" < "v1.6.0" ]]; then
+      awk '
+        # when we see the start of the old block, switch mode
+        /html_context\["versions"\] = list\(\)/ {
+          print "html_context[\"versions\"] = list()"
+          print "versions = sorted("
+          print "    ["
+          print "        tag.name"
+          print "        for tag in repo.tags"
+          print "        if not tag.name.startswith(\"intelligence/\")"
+          print "        and tag.name[0] == \"v\""
+          print "        and int(tag.name[1]) > 0"
+          print "        and int(tag.name.split(\".\")[1]) >= 8"
+          print "    ],"
+          print "    key=lambda x: [int(part) for part in x[1:].split(\".\")]"
+          print ")"
+          print "versions.append(\"main\")"
+          print "for version in versions:"
+          print "    html_context[\"versions\"].append({\"name\": version})"
+          skip=1
+          next
+        }
+        # skip lines until we reach a blank line (or some other heuristic)
+        skip && /^$/ { skip=0 }
+        skip { next }
+        { print }
+      ' source/conf.py > source/conf_new.py && mv source/conf_new.py source/conf.py
+    fi
     
     # Copy updated version of html files
     cp -r ${tmp_dir}/_templates source
