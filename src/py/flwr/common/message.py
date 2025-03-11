@@ -25,7 +25,6 @@ from .constant import MESSAGE_TTL_TOLERANCE
 from .logger import log
 from .record import RecordSet
 
-
 DEFAULT_TTL = 43200  # This is 12 hours
 
 

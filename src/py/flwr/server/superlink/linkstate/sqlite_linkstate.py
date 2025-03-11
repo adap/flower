@@ -53,7 +53,6 @@ from flwr.server.utils.validator import validate_message
 from .linkstate import LinkState
 from .utils import (
     check_node_availability_for_in_message,
-    check_node_availability_for_taskins,
     configsrecord_from_bytes,
     configsrecord_to_bytes,
     context_from_bytes,

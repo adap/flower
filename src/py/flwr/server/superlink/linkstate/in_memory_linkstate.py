@@ -38,7 +38,6 @@ from flwr.server.utils import validate_message
 
 from .utils import (
     check_node_availability_for_in_message,
-    check_node_availability_for_taskins,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
