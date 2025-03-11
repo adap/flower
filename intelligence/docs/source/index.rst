@@ -5,7 +5,7 @@ Flower Intelligence is a cross-platform inference library that let's user
 seamlessly interact with Large-Language Models both locally and remotely in a
 secure and private way. The library was created by the ``Flower Labs`` team that also created `Flower: A Friendly Federated AI Framework <https://flower.ai>`_.
 
-We currently only provide a SDK for TypeScript/JavaScript.
+We currently provide SDKs for TypeScript/JavaScript and Swift.
 
 
 Install
@@ -27,6 +27,13 @@ Install
         .. code-block:: bash
 
           npm i "@flwr/flwr"
+      
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: bash
+
+          swift package add https://github.com/adap/flower.git
 
 
 Hello, Flower Intelligence!
@@ -76,6 +83,23 @@ Flower Intelligence is built around the Singleton design pattern, meaning you on
             }
 
             await main().then().catch();
+
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            let result = await fi.chat("Why is the sky blue?")
+            switch result {
+            case .success(let message):
+              print(message.content)
+            case .failure(let error):
+              print(error.localizedDescription)
+            }
 
 
 Specify the model
@@ -129,6 +153,26 @@ By specifying a model in the chat options, you can easily switch between differe
             }
 
             await main().then().catch();
+    
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            let options = ChatOptions(model: "meta/llama3.2-1b/instruct-fp16")
+            let result = await fi.chat("Why is the sky blue?", maybeOptions: options)
+            
+            switch result {
+            case .success(let message):
+                print(message.content)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+
 
 Check for errors
 ----------------
@@ -187,6 +231,26 @@ Instead of throwing exceptions that might crash your application, Flower Intelli
             }
 
             await main().then().catch();
+
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            let options = ChatOptions(model: "meta/llama3.2-1b/instruct-fp16")
+            let result = await fi.chat("Why is the sky blue?", maybeOptions: options)
+
+            switch result {
+            case .success(let message):
+                print(message.content)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+
 
 Stream Responses
 ----------------
@@ -250,6 +314,29 @@ The callback function must accept an argument of type :doc:`StreamEvent <ts-api-
             }
 
             await main().then().catch();
+
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            let options = ChatOptions(
+              model: "meta/llama3.2-1b/instruct-fp16",
+              stream: true,
+              onStreamEvent: { event in
+                  print(event.chunk)
+              }
+            )
+
+            let result = await fi.chat("Why is the sky blue?", maybeOptions: options)
+
+            if case .failure(let error) = result {
+                print(error.localizedDescription)
+            }
 
 Use Roles
 ---------
