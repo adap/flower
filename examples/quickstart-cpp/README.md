@@ -8,7 +8,7 @@ framework: [C++]
 
 > **⚠️ WARNING:** This example is currently unavailable.
 >
-> We are actively working to restore functionality and will bring it back soon. In the meantime, you can use this example with `flwr<1.13.0`.
+> You can use this example with `flwr<1.13.0`. We are working towards updating it to the newer `flwr run` way of running Flower Apps
 
 In this example you will train a linear model on synthetic data using C++ clients.
 
