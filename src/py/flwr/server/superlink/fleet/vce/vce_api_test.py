@@ -16,7 +16,6 @@
 
 
 import threading
-import time
 from itertools import cycle
 from json import JSONDecodeError
 from math import pi
@@ -43,7 +42,6 @@ from flwr.common import (
 )
 from flwr.common.constant import Status
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
-from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
@@ -134,10 +132,10 @@ def register_messages_into_state(
             ),
         ),
     )
-    # Artificially add TaskIns to state so they can be processed
+    # Artificially add Messages to state so they can be processed
     # by the Simulation Engine logic
     nodes_cycle = cycle(nodes_mapping.keys())  # we have more messages than supernodes
-    task_ids: set[UUID] = set()  # so we can retrieve them later
+    message_ids: set[UUID] = set()  # so we can retrieve them later
     expected_results = {}
     for i in range(num_messages):
         dst_node_id = next(nodes_cycle)
@@ -158,18 +156,14 @@ def register_messages_into_state(
                 message_type=MessageTypeLegacy.GET_PROPERTIES,
             ),
         )
-        # Convert Message to TaskIns
-        taskins = message_to_taskins(message)
-        # Normally recorded by the driver servicer
-        # but since we don't have one in this test, we do this manually
-        taskins.task.pushed_at = time.time()
-        # Instert in state
-        task_id = state.store_task_ins(taskins)
-        if task_id:
+
+        # Insert in state
+        message_id = state.store_message_res(message)
+        if message_id:
             # Add to UUID set
-            task_ids.add(task_id)
+            message_ids.add(message_id)
             # Store expected output for check later on
-            expected_results[task_id] = mult_factor * pi
+            expected_results[message_id] = mult_factor * pi
 
     return expected_results
 
@@ -293,8 +287,8 @@ class TestFleetSimulationEngineRayBackend(TestCase):
         start_and_shutdown(num_supernodes=50, duration=10)
 
     # pylint: disable=too-many-locals
-    def test_start_and_shutdown_with_tasks_in_state(self) -> None:
-        """Run Simulation Engine with some TasksIns in State.
+    def test_start_and_shutdown_with_message_in_state(self) -> None:
+        """Run Simulation Engine with some Message in State.
 
         This test creates a few nodes and submits a few messages that need to be
         executed by the Backend. In order for that to happen the asyncio
@@ -306,7 +300,8 @@ class TestFleetSimulationEngineRayBackend(TestCase):
 
         state_factory, nodes_mapping, expected_results = (
             init_state_factory_nodes_mapping(
-                num_nodes=num_nodes, num_messages=num_messages
+                num_nodes=num_nodes,
+                num_messages=num_messages,
             )
         )
 
@@ -315,19 +310,17 @@ class TestFleetSimulationEngineRayBackend(TestCase):
             state_factory=state_factory, nodes_mapping=nodes_mapping, duration=10
         )
 
-        # Get all TaskRes
+        # Get all Message replies
         state = state_factory.state()
-        task_ids = set(expected_results.keys())
-        task_res_list = state.get_task_res(task_ids=task_ids)
+        message_ids = set(expected_results.keys())
+        message_res_list = state.get_message_res(message_ids=message_ids)
 
         # Check results by first converting to Message
-        for task_res in task_res_list:
-
-            message = message_from_taskres(task_res)
+        for message_res in message_res_list:
 
             # Verify message content is as expected
-            content = message.content
+            content = message_res.content
             assert (
                 content.configs_records["getpropertiesres.properties"]["result"]
-                == expected_results[UUID(task_res.task.ancestry[0])]
+                == expected_results[UUID(message_res.metadata.reply_to_message)]
             )

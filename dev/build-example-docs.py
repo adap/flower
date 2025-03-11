@@ -83,7 +83,6 @@ urls = {
     "opacus": "https://opacus.ai/",
     "pandas": "https://pandas.pydata.org/",
     "scikit-learn": "https://scikit-learn.org/",
-    "tabnet": "https://github.com/titu1994/tf-TabNet",
     "tensorboard": "https://www.tensorflow.org/tensorboard",
     "tensorflow": "https://www.tensorflow.org/",
     "torch": "https://pytorch.org/",

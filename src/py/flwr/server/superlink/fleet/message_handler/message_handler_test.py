@@ -23,21 +23,11 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
     PullMessagesRequest,
-    PullTaskInsRequest,
     PushMessagesRequest,
-    PushTaskResRequest,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
-from .message_handler import (
-    create_node,
-    delete_node,
-    pull_messages,
-    pull_task_ins,
-    push_messages,
-    push_task_res,
-)
+from .message_handler import create_node, delete_node, pull_messages, push_messages
 
 
 def test_create_node() -> None:
@@ -52,10 +42,10 @@ def test_create_node() -> None:
     # Assert
     state.create_node.assert_called_once()
     state.delete_node.assert_not_called()
-    state.store_task_ins.assert_not_called()
-    state.get_task_ins.assert_not_called()
-    state.store_task_res.assert_not_called()
-    state.get_task_res.assert_not_called()
+    state.store_message_ins.assert_not_called()
+    state.get_message_ins.assert_not_called()
+    state.store_message_res.assert_not_called()
+    state.get_message_res.assert_not_called()
 
 
 def test_delete_node_failure() -> None:
@@ -70,10 +60,10 @@ def test_delete_node_failure() -> None:
     # Assert
     state.create_node.assert_not_called()
     state.delete_node.assert_not_called()
-    state.store_task_ins.assert_not_called()
-    state.get_task_ins.assert_not_called()
-    state.store_task_res.assert_not_called()
-    state.get_task_res.assert_not_called()
+    state.store_message_ins.assert_not_called()
+    state.get_message_ins.assert_not_called()
+    state.store_message_res.assert_not_called()
+    state.get_message_res.assert_not_called()
 
 
 def test_delete_node_success() -> None:
@@ -88,28 +78,10 @@ def test_delete_node_success() -> None:
     # Assert
     state.create_node.assert_not_called()
     state.delete_node.assert_called_once()
-    state.store_task_ins.assert_not_called()
-    state.get_task_ins.assert_not_called()
-    state.store_task_res.assert_not_called()
-    state.get_task_res.assert_not_called()
-
-
-def test_pull_task_ins() -> None:
-    """Test pull_task_ins."""
-    # Prepare
-    request = PullTaskInsRequest(node=Node(node_id=123))
-    state = MagicMock()
-
-    # Execute
-    pull_task_ins(request=request, state=state)
-
-    # Assert
-    state.create_node.assert_not_called()
-    state.delete_node.assert_not_called()
-    state.store_task_ins.assert_not_called()
-    state.get_task_ins.assert_called_once()
-    state.store_task_res.assert_not_called()
-    state.get_task_res.assert_not_called()
+    state.store_message_ins.assert_not_called()
+    state.get_message_ins.assert_not_called()
+    state.store_message_res.assert_not_called()
+    state.get_message_res.assert_not_called()
 
 
 def test_pull_messages() -> None:
@@ -124,37 +96,10 @@ def test_pull_messages() -> None:
     # Assert
     state.create_node.assert_not_called()
     state.delete_node.assert_not_called()
-    state.store_task_ins.assert_not_called()
-    state.get_task_ins.assert_called_once()
-    state.store_task_res.assert_not_called()
-    state.get_task_res.assert_not_called()
-
-
-def test_push_task_res() -> None:
-    """Test push_task_res."""
-    # Prepare
-    request = PushTaskResRequest(
-        task_res_list=[
-            TaskRes(
-                task_id="",
-                group_id="",
-                run_id=0,
-                task=Task(),
-            ),
-        ],
-    )
-    state = MagicMock()
-
-    # Execute
-    push_task_res(request=request, state=state)
-
-    # Assert
-    state.create_node.assert_not_called()
-    state.delete_node.assert_not_called()
-    state.store_task_ins.assert_not_called()
-    state.get_task_ins.assert_not_called()
-    state.store_task_res.assert_called_once()
-    state.get_task_res.assert_not_called()
+    state.store_message_ins.assert_not_called()
+    state.get_message_ins.assert_called_once()
+    state.store_message_res.assert_not_called()
+    state.get_message_res.assert_not_called()
 
 
 def test_push_messages() -> None:
@@ -183,7 +128,7 @@ def test_push_messages() -> None:
     # Assert
     state.create_node.assert_not_called()
     state.delete_node.assert_not_called()
-    state.store_task_ins.assert_not_called()
-    state.get_task_ins.assert_not_called()
-    state.store_task_res.assert_called_once()
-    state.get_task_res.assert_not_called()
+    state.store_message_ins.assert_not_called()
+    state.get_message_ins.assert_not_called()
+    state.store_message_res.assert_called_once()
+    state.get_message_res.assert_not_called()

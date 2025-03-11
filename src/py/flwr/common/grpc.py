@@ -27,7 +27,7 @@ import grpc
 from .address import is_port_in_use
 from .logger import log
 
-GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912  # == 512 * 1024 * 1024
+GRPC_MAX_MESSAGE_LENGTH: int = 2_147_483_647  # == 2048 * 1024 * 1024 -1 (2GB)
 
 INVALID_CERTIFICATES_ERR_MSG = """
     When setting any of root_certificate, certificate, or private_key,
@@ -80,7 +80,7 @@ def create_channel(
         log(DEBUG, "Opened secure gRPC connection using certificates")
 
     if interceptors is not None:
-        channel = grpc.intercept_channel(channel, interceptors)
+        channel = grpc.intercept_channel(channel, *interceptors)
 
     return channel
 
@@ -224,3 +224,8 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments,R0917
         server.add_insecure_port(server_address)
 
     return server
+
+
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)

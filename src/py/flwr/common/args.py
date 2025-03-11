@@ -20,13 +20,9 @@ import sys
 from logging import DEBUG, ERROR, WARN
 from os.path import isfile
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
-from flwr.common.constant import (
-    TRANSPORT_TYPE_GRPC_ADAPTER,
-    TRANSPORT_TYPE_GRPC_RERE,
-    TRANSPORT_TYPE_REST,
-)
+from flwr.common.constant import TRANSPORT_TYPE_REST
 from flwr.common.logger import log
 
 
@@ -47,7 +43,8 @@ def add_args_flwr_app_common(parser: argparse.ArgumentParser) -> None:
         "--insecure",
         action="store_true",
         help="Run the server without HTTPS, regardless of whether certificate "
-        "paths are provided. By default, the server runs with HTTPS enabled. "
+        "paths are provided. Data transmitted between the gRPC client and server "
+        "is not encrypted. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
     )
 
@@ -55,9 +52,9 @@ def add_args_flwr_app_common(parser: argparse.ArgumentParser) -> None:
 def try_obtain_root_certificates(
     args: argparse.Namespace,
     grpc_server_address: str,
-) -> Optional[bytes]:
+) -> Optional[Union[bytes, str]]:
     """Validate and return the root certificates."""
-    root_cert_path = args.root_certificates
+    root_cert_path: Optional[str] = args.root_certificates
     if args.insecure:
         if root_cert_path is not None:
             sys.exit(
@@ -93,56 +90,43 @@ def try_obtain_root_certificates(
             grpc_server_address,
             root_cert_path,
         )
+    if args.transport == TRANSPORT_TYPE_REST:
+        return root_cert_path
     return root_certificates
 
 
 def try_obtain_server_certificates(
     args: argparse.Namespace,
-    transport_type: str,
 ) -> Optional[tuple[bytes, bytes, bytes]]:
     """Validate and return the CA cert, server cert, and server private key."""
     if args.insecure:
-        log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
+        log(
+            WARN,
+            "Option `--insecure` was set. Starting insecure HTTP server with "
+            "unencrypted communication (TLS disabled). Proceed only if you understand "
+            "the risks.",
+        )
         return None
     # Check if certificates are provided
-    if transport_type in [TRANSPORT_TYPE_GRPC_RERE, TRANSPORT_TYPE_GRPC_ADAPTER]:
-        if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_certfile:
-            if not isfile(args.ssl_ca_certfile):
-                sys.exit("Path argument `--ssl-ca-certfile` does not point to a file.")
-            if not isfile(args.ssl_certfile):
-                sys.exit("Path argument `--ssl-certfile` does not point to a file.")
-            if not isfile(args.ssl_keyfile):
-                sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
-            certificates = (
-                Path(args.ssl_ca_certfile).read_bytes(),  # CA certificate
-                Path(args.ssl_certfile).read_bytes(),  # server certificate
-                Path(args.ssl_keyfile).read_bytes(),  # server private key
-            )
-            return certificates
-        if args.ssl_certfile or args.ssl_keyfile or args.ssl_ca_certfile:
-            sys.exit(
-                "You need to provide valid file paths to `--ssl-certfile`, "
-                "`--ssl-keyfile`, and `—-ssl-ca-certfile` to create a secure "
-                "connection in Fleet API server (gRPC-rere)."
-            )
-    if transport_type == TRANSPORT_TYPE_REST:
-        if args.ssl_certfile and args.ssl_keyfile:
-            if not isfile(args.ssl_certfile):
-                sys.exit("Path argument `--ssl-certfile` does not point to a file.")
-            if not isfile(args.ssl_keyfile):
-                sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
-            certificates = (
-                b"",
-                Path(args.ssl_certfile).read_bytes(),  # server certificate
-                Path(args.ssl_keyfile).read_bytes(),  # server private key
-            )
-            return certificates
-        if args.ssl_certfile or args.ssl_keyfile:
-            sys.exit(
-                "You need to provide valid file paths to `--ssl-certfile` "
-                "and `--ssl-keyfile` to create a secure connection "
-                "in Fleet API server (REST, experimental)."
-            )
+    if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_certfile:
+        if not isfile(args.ssl_ca_certfile):
+            sys.exit("Path argument `--ssl-ca-certfile` does not point to a file.")
+        if not isfile(args.ssl_certfile):
+            sys.exit("Path argument `--ssl-certfile` does not point to a file.")
+        if not isfile(args.ssl_keyfile):
+            sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
+        certificates = (
+            Path(args.ssl_ca_certfile).read_bytes(),  # CA certificate
+            Path(args.ssl_certfile).read_bytes(),  # server certificate
+            Path(args.ssl_keyfile).read_bytes(),  # server private key
+        )
+        return certificates
+    if args.ssl_certfile or args.ssl_keyfile or args.ssl_ca_certfile:
+        sys.exit(
+            "You need to provide valid file paths to `--ssl-certfile`, "
+            "`--ssl-keyfile`, and `—-ssl-ca-certfile` to create a secure "
+            "connection in Fleet API server (gRPC-rere)."
+        )
     log(
         ERROR,
         "Certificates are required unless running in insecure mode. "

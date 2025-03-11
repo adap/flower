@@ -23,7 +23,6 @@ from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.constant import SUPERLINK_NODE_ID
-from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
@@ -60,6 +59,7 @@ class InMemoryDriver(Driver):
             and message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""
             and message.metadata.ttl > 0
+            and message.metadata.delivered_at == ""
         ):
             raise ValueError(f"Invalid message: {message}")
 
@@ -109,9 +109,9 @@ class InMemoryDriver(Driver):
         )
         return Message(metadata=metadata, content=content)
 
-    def get_node_ids(self) -> list[int]:
+    def get_node_ids(self) -> Iterable[int]:
         """Get node IDs."""
-        return list(self.state.get_nodes(cast(Run, self._run).run_id))
+        return self.state.get_nodes(cast(Run, self._run).run_id)
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.
@@ -119,19 +119,16 @@ class InMemoryDriver(Driver):
         This method takes an iterable of messages and sends each message
         to the node specified in `dst_node_id`.
         """
-        task_ids: list[str] = []
+        msg_ids: list[str] = []
         for msg in messages:
             # Check message
             self._check_message(msg)
-            # Convert Message to TaskIns
-            taskins = message_to_taskins(msg)
             # Store in state
-            taskins.task.pushed_at = time.time()
-            task_id = self.state.store_task_ins(taskins)
-            if task_id:
-                task_ids.append(str(task_id))
+            msg_id = self.state.store_message_ins(msg)
+            if msg_id:
+                msg_ids.append(str(msg_id))
 
-        return task_ids
+        return msg_ids
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
@@ -140,17 +137,16 @@ class InMemoryDriver(Driver):
         set of given message IDs.
         """
         msg_ids = {UUID(msg_id) for msg_id in message_ids}
-        # Pull TaskRes
-        task_res_list = self.state.get_task_res(task_ids=msg_ids)
-        # Delete tasks in state
-        # Delete the TaskIns/TaskRes pairs if TaskRes is found
-        task_ins_ids_to_delete = {
-            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
+        # Pull Messages
+        message_res_list = self.state.get_message_res(message_ids=msg_ids)
+        # Get IDs of Messages these replies are for
+        message_ins_ids_to_delete = {
+            UUID(msg_res.metadata.reply_to_message) for msg_res in message_res_list
         }
-        self.state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
-        # Convert TaskRes to Message
-        msgs = [message_from_taskres(taskres) for taskres in task_res_list]
-        return msgs
+        # Delete
+        self.state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
+
+        return message_res_list
 
     def send_and_receive(
         self,
