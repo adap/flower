@@ -61,7 +61,7 @@ while IFS= read -r -d '' file; do
       # right after the first line.
       missing_notice=$(echo "$EXPECTED_NOTICE" | tail -n +2)
       rest=$(tail -n +2 "$file")
-      new_content="${first_line}"$'\n'"${missing_notice}"$'\n\n'"${rest}"
+      new_content="${first_line}"$'\n'"${missing_notice}"$'\n'"${rest}"
     fi
 
     echo "$new_content" > "$file"
