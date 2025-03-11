@@ -1,4 +1,17 @@
 // Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// =============================================================================
 
 import {
   type ChatCompletionMessageParam,
@@ -11,13 +24,12 @@ import {
   FailureCode,
   Message,
   Progress,
-  ProviderMapping,
   Result,
   StreamEvent,
   Tool,
 } from '../typing';
-import MODELS from '../models.json';
 import { BaseEngine } from './engine';
+import { checkSupport } from './common';
 
 async function runQuery(
   engine: MLCEngineInterface,
@@ -50,7 +62,6 @@ async function runQuery(
 
 export class WebllmEngine extends BaseEngine {
   #loadedEngines: Record<string, MLCEngineInterface> = {};
-  private models = this.getModels();
 
   async chat(
     messages: Message[],
@@ -122,30 +133,6 @@ export class WebllmEngine extends BaseEngine {
   }
 
   async isSupported(model: string): Promise<Result<string>> {
-    await Promise.resolve();
-    if (model in this.models) {
-      return { ok: true, value: this.models[model] };
-    }
-    return {
-      ok: false,
-      failure: {
-        code: FailureCode.UnsupportedModelError,
-        description: `Model '${model}' is not supported on the WebLLM engine.`,
-      },
-    };
-  }
-
-  private getModels(): Record<string, string> {
-    return Object.entries(MODELS.models).reduce<Record<string, string>>(
-      (acc, [modelId, modelData]) => {
-        // Cast modelData to an object with a "providers" property.
-        const providers = (modelData as { providers?: ProviderMapping }).providers;
-        if (providers?.webllm) {
-          acc[modelId] = providers.webllm;
-        }
-        return acc;
-      },
-      {}
-    );
+    return await checkSupport(model, 'webllm');
   }
 }
