@@ -16,7 +16,7 @@
 
 
 import argparse
-from logging import DEBUG, ERROR, INFO, WARN
+from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
@@ -96,16 +96,6 @@ def run_supernode() -> None:
         isolation=args.isolation,
         clientappio_api_address=args.clientappio_api_address,
     )
-
-
-def run_client_app() -> None:
-    """Run Flower client app."""
-    event(EventType.RUN_CLIENT_APP_ENTER)
-    log(
-        ERROR,
-        "The command `flower-client-app` has been replaced by `flwr run`.",
-    )
-    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
 def _parse_args_run_supernode() -> argparse.ArgumentParser:
