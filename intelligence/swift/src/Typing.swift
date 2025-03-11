@@ -9,7 +9,7 @@ public struct Progress: Codable {
 }
 
 /// Represents a message in a chat session.
-public struct Message: Codable {
+public struct Message: Codable, Sendable {
   /// The role of the sender (e.g., "user", "system", "assistant").
   public let role: String
 
@@ -30,7 +30,7 @@ public struct Message: Codable {
 public typealias ToolCall = [String: ToolCallDetails]
 
 /// Represents the details of a tool call.
-public struct ToolCallDetails: Codable {
+public struct ToolCallDetails: Codable, Sendable {
   /// The name of the tool being called.
   public let name: String
 
@@ -39,7 +39,7 @@ public struct ToolCallDetails: Codable {
 }
 
 /// Represents a property of a tool's function parameter.
-public struct ToolParameterProperty: Codable {
+public struct ToolParameterProperty: Codable, Sendable {
   /// The data type of the property (e.g., "string", "number").
   public let type: String
 
@@ -51,7 +51,7 @@ public struct ToolParameterProperty: Codable {
 }
 
 /// Represents the parameters required for a tool's function.
-public struct ToolFunctionParameters: Codable {
+public struct ToolFunctionParameters: Codable, Sendable {
   /// The data type of the parameters (e.g., "object").
   public let type: String
 
@@ -63,7 +63,7 @@ public struct ToolFunctionParameters: Codable {
 }
 
 /// Represents the function provided by a tool.
-public struct ToolFunction: Codable {
+public struct ToolFunction: Codable, Sendable {
   /// The name of the function provided by the tool.
   public let name: String
 
@@ -75,7 +75,7 @@ public struct ToolFunction: Codable {
 }
 
 /// Represents a tool with details about its type, function, and parameters.
-public struct Tool: Codable {
+public struct Tool: Codable, Sendable {
   /// The type of the tool (e.g., "function" or "plugin").
   public let type: String
 
@@ -84,7 +84,7 @@ public struct Tool: Codable {
 }
 
 /// Represents a single event in a streaming response.
-public struct StreamEvent: Codable {
+public struct StreamEvent: Codable, Sendable {
   /// The chunk of text data received in the stream event.
   public let chunk: String
 }

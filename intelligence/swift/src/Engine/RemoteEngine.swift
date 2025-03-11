@@ -8,9 +8,7 @@ protocol RemoteEngineProtocol: Engine {
 }
 
 class RemoteEngine: RemoteEngineProtocol {
-  private let baseURL: String = REMOTE_URL
-  private let chatCompletionPath = CHAT_COMPLETION_PATH
-  private let modelMapping = MODEL_MAPPING
+  private let baseURL: String = remoteUrl
   var apiKey: String = ""
   var authorization: String {
     "Bearer \(apiKey)"
@@ -26,7 +24,7 @@ class RemoteEngine: RemoteEngineProtocol {
     tools: [Tool]?
   ) async throws -> Message {
     let model = model ?? "meta/llama3.2-1b"
-    guard let modelConfig = MODEL_MAPPING[model] else {
+    guard modelMapping[model] != nil else {
       throw Failure(
         code: .configError,
         message: "Model \(model) is not supported"

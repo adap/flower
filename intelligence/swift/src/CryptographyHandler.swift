@@ -114,10 +114,10 @@ class CryptographyHandler {
     let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: publicKey)
 
     let derivedKey = sharedSecret.hkdfDerivedSymmetricKey(
-      using: HASH_ALGORITHM,
+      using: hashAlgorithm,
       salt: Data(),
-      sharedInfo: HKDF_INFO,
-      outputByteCount: AES_KEY_LENGTH
+      sharedInfo: hkdfInfo,
+      outputByteCount: aesKeyLength
     )
 
     return derivedKey
