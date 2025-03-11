@@ -6,6 +6,11 @@ framework: [C++]
 
 # Flower Clients in C++ (under development)
 
+> **⚠️ WARNING:** This example is currently unavailable.
+>
+> We are actively working to restore functionality and will bring it back soon.\
+> In the meantime, you can use this example with `flwr<1.13.0`.
+
 In this example you will train a linear model on synthetic data using C++ clients.
 
 ## Acknowledgements
