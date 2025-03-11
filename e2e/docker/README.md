@@ -7,8 +7,8 @@ To execute locally, run the following in CLI:
 ```shell
 # Pull the latest images
 docker compose build --pull 
-# Launch
-docker compose up
+# Launch containers in the background
+docker compose up -d
 ```
 
 Submit a run:. It should take under 30s to complete
