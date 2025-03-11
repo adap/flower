@@ -23,7 +23,7 @@ env:
 
 jobs:
   build_and_deploy:
-    runs-on: ubuntu-22.04
+    runs-on: macos-14
     name: Build and deploy
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +33,9 @@ jobs:
         run: sudo apt install pandoc
       - name: Install Flower dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
+      - uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0.0"
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
