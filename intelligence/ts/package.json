@@ -25,9 +25,9 @@
   "types": "./index.d.ts",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "import": "./flowerintelligence.es.js",
-      "require": "./flowerintelligence.cjs.js",
-      "types": "./index.d.ts"
+      "require": "./flowerintelligence.cjs.js"
     }
   },
   "scripts": {
