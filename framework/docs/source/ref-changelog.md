@@ -60,9 +60,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### Incompatible changes
 
-- **Bump minimum Python and cryptography versions** ([#4946](https://github.com/adap/flower/pull/4946))
+- **Bump minimum Python and `cryptography` versions** ([#4946](https://github.com/adap/flower/pull/4946))
 
-  Bumps the minimum Python version from 3.9 to 3.9.2 and updats the `cryptography` package from 43.0.1 to 44.0.1. This change ensures compatibility with the latest security updates and features.
+  Bumps the minimum Python version from 3.9 to 3.9.2 and updates the `cryptography` package from 43.0.1 to 44.0.1. This change ensures compatibility with the latest security updates and features.
 
 ## TODO: DELETE FI PR
 
