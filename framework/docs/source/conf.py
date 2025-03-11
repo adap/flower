@@ -67,7 +67,10 @@ versions = sorted(
     [
         tag.name
         for tag in repo.tags
-        if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 8
+        if not tag.name.startswith("intelligence/")
+        and tag.name[0] == "v"
+        and int(tag.name[1]) > 0
+        and int(tag.name.split(".")[1]) >= 8
     ],
     key=lambda x: [int(part) for part in x[1:].split(".")],
 )
