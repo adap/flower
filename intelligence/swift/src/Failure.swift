@@ -5,7 +5,7 @@ import Foundation
 /// Represents a failure response with a code and description.
 public struct Failure: Error {
     /// Enum representing failure codes for different error scenarios.
-    public enum FailureCode: Int {
+    public enum FailureCode: Int, Sendable {
          /// Indicates a local error (e.g., client-side issues).
          case localError = 100
          

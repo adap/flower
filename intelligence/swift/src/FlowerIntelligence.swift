@@ -34,7 +34,7 @@ public class FlowerIntelligence {
     }
     
     /// Singleton instance of FlowerIntelligence.
-    public static let instance = FlowerIntelligence()
+    @MainActor public static let instance = FlowerIntelligence()
     
     /// Conducts a chat interaction using a string input.
     ///

@@ -79,8 +79,6 @@ class RemoteEngine: RemoteEngineProtocol {
 }
 
 enum NetworkService {
-    static var authorization: String?
-    
     private static func parseJson<T: Decodable>(
         from data: Data,
         as type: T.Type
@@ -92,7 +90,7 @@ enum NetworkService {
     
     static func urlRequest(_ method: String,
                            url: URL,
-                           authorization: String? = authorization,
+                           authorization: String? = nil,
                            body: Data? = nil) -> URLRequest {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = method
@@ -156,18 +154,18 @@ enum NetworkService {
     }
     
     static func getElement<Element: Decodable>(on route: URL,
-                                               authorization: String? = authorization) async throws -> Element {
+                                               authorization: String? = nil) async throws -> Element {
         try await sendRequest(urlRequest("GET", url: route, authorization: authorization))
     }
     
     static func getElements<Element: Decodable>(on route: URL,
-                                                authorization: String? = authorization) async throws -> [Element] {
+                                                authorization: String? = nil) async throws -> [Element] {
         try await getElement(on: route, authorization: authorization)
     }
     
     static func postElement<RequestElement: Encodable, ResponseElement: Decodable>(
         _ element: RequestElement,
-        authorization: String? = authorization,
+        authorization: String? = nil,
         on route: URL
     ) async throws -> ResponseElement {
         let encoder = JSONEncoder()
@@ -183,7 +181,7 @@ enum NetworkService {
     
     static func streamElement<RequestElement: Encodable, StreamElement: Decodable>(
         _ element: RequestElement,
-        authorization: String? = authorization,
+        authorization: String? = nil,
         on route: URL,
         onStreamEvent:  @escaping (StreamElement) -> Void
     ) async throws {

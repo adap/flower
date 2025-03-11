@@ -10,15 +10,11 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "Flwr",
-            targets: ["flwr", "FlowerIntelligence"]),
+            targets: ["FlowerIntelligence"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/pvieito/PythonKit.git", branch: "master"),
-        .package(url: "https://github.com/kewlbear/NumPy-iOS.git", branch: "main"),
-        .package(url: "https://github.com/grpc/grpc-swift.git", from: "1.22.0"),
-        .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.26.0"),
         .package(url: "https://github.com/ml-explore/mlx-swift", from: "0.12.1"),
         .package(url: "https://github.com/huggingface/swift-transformers", from: "0.1.8"),
         .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0"),
@@ -28,15 +24,6 @@ let package = Package(
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
-        .target(
-            name: "flwr",
-            dependencies: [
-                .product(name: "GRPC", package: "grpc-swift"),
-                .product(name: "NumPy-iOS", package: "NumPy-iOS"),
-                .product(name: "PythonKit", package: "PythonKit"),
-                .product(name: "SwiftProtobuf", package: "swift-protobuf")],
-            path: "src/swift"
-        ),
         .target(
             name: "FlowerIntelligence",
             dependencies: [
