@@ -1,20 +1,9 @@
-import logging
-
 import torch
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 
 from custom_mods.task import Net, get_weights, load_data, set_weights, test, train
 from custom_mods.mods import get_wandb_mod, get_tensorboard_mod
-
-
-class WBLoggingFilter(logging.Filter):
-    def filter(self, record):
-        return (
-            "login" in record.getMessage()
-            or "View project at" in record.getMessage()
-            or "View run at" in record.getMessage()
-        )
 
 
 # Define Flower client
@@ -64,16 +53,9 @@ def client_fn(context: Context):
     return FlowerClient(trainloader, valloader, local_epochs, learning_rate).to_client()
 
 
-wandb_app = ClientApp(
+app = ClientApp(
     client_fn=client_fn,
     mods=[
-        get_wandb_mod("Custom mods example"),
-    ],
-)
-
-tb_app = ClientApp(
-    client_fn=client_fn,
-    mods=[
-        get_tensorboard_mod(".runs_history/"),
-    ],
+        get_tensorboard_mod(".runs_history/")
+    ],  # or get_wandb_mod("Custom mods example")
 )

@@ -11,6 +11,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 def get_wandb_mod(name: str) -> Mod:
+    """Return a mod that logs metrics to W&B."""
+
     def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
         """Flower Mod that logs the metrics dictionary returned by the client's fit
         function to Weights & Biases."""
@@ -23,6 +25,13 @@ def get_wandb_mod(name: str) -> Mod:
             node_id = str(msg.metadata.dst_node_id)
             run_name = f"Node ID: {node_id}"
 
+            # To keep things self contained, and because the processes running the ClientApps
+            # in simuilation will effectively _simulate_ different nodes (each with their id)
+            # we need to re-init wandb each time the mod is exectued. For this to work we must
+            # set `reinit=True` and pass to the `id` argument an identifier that's unique to
+            # the actual ClientApp being executed (the best identifier is the `node_id`).
+            # You can learn more about how simulations work in the documentation:
+            # https://flower.ai/docs/framework/how-to-run-simulations.html
             wandb.init(
                 project=name,
                 group=group_name,
@@ -61,6 +70,7 @@ def get_wandb_mod(name: str) -> Mod:
 
 
 def get_tensorboard_mod(logdir) -> Mod:
+    """Return a mod that logs metrics to Tensorboard."""
     os.makedirs(logdir, exist_ok=True)
 
     def tensorboard_mod(
@@ -71,23 +81,25 @@ def get_tensorboard_mod(logdir) -> Mod:
         logdir_run = os.path.join(logdir, str(msg.metadata.run_id))
 
         node_id = str(msg.metadata.dst_node_id)
-
         server_round = int(msg.metadata.group_id)
 
+        # Let's say we want to measure the time takeng to exectue the app.
+        # We can easily do this in the mod but measuring the time difference as shown below
         start_time = time.time()
 
+        # Run the app
         reply = app(msg, context)
-
+        # Compute the time difference
         time_diff = time.time() - start_time
 
         # if the `ClientApp` just processed a "fit" message, let's log some metrics to TensorBoard
         if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
             writer = SummaryWriter(os.path.join(logdir_run, node_id))
 
+            # Write metrics
             metrics = dict(
                 reply.content.configs_records.get("fitres.metrics", ConfigsRecord())
             )
-
             writer.add_scalar(f"fit_time", time_diff, global_step=server_round)
             for metric in metrics:
                 writer.add_scalar(

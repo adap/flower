@@ -23,7 +23,7 @@ publisher = "flwrlabs"
 
 [tool.flwr.app.components]
 serverapp = "custom_mods.server_app:app"
-clientapp = "custom_mods.client_app:wandb_app"
+clientapp = "custom_mods.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
