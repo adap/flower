@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@flwr/flwr':
-        specifier: file:../..
-        version: file:../..
+        specifier: ^0.1.2
+        version: 0.1.2
       '@mozilla/readability':
         specifier: ^0.5.0
         version: 0.5.0
@@ -241,8 +241,8 @@ packages:
     resolution: {integrity: sha512-2b/g5hRmpbb1o4GnTZax9N9m0FXzz9OV42ZzI4rDDMDuHUqigAiQCEWChBWCY4ztAGVRjoWT19v0yMmc5/L5kA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@flwr/flwr@file:../..':
-    resolution: {directory: ../.., type: directory}
+  '@flwr/flwr@0.1.2':
+    resolution: {integrity: sha512-pxiQrpQbWzgHlS1RegT0fRR8Ixi9TVwC83pjUtGhxVpPK0QGv81+nD3LDdDAiNREB5fmijxz4MeLXki5WQ9O4A==}
 
   '@huggingface/jinja@0.3.3':
     resolution: {integrity: sha512-vQQr2JyWvVFba3Lj9es4q9vCl1sAc74fdgnEMoX8qHrXtswap9ge9uO3ONDzQB0cQ0PUyaKY2N6HaVbTBvSXvw==}
@@ -1738,7 +1738,7 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@flwr/flwr@file:../..':
+  '@flwr/flwr@0.1.2':
     dependencies:
       '@huggingface/transformers': 3.4.0
       '@mlc-ai/web-llm': 0.2.78
