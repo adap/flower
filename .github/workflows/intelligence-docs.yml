@@ -37,6 +37,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '22.14.0'
+      - name: Install SourceDocs
+        run: brew install sourcedocs
       - name: Install pnpm
         run: |
           npm install -g pnpm
