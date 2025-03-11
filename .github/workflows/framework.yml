@@ -55,12 +55,16 @@ jobs:
         with:
           fetch-depth: 0
       - name: Bootstrap
+        if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python }}
       - name: Install dependencies (mandatory only)
+        if: ${{ needs.changes.outputs.framework == 'true' }}
         run: python -m poetry install --all-extras
       - name: Check if protos need recompilation
+        if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./dev/check-protos.sh
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
+        if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./dev/test.sh
