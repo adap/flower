@@ -1,67 +1,38 @@
 # Flower Intelligence
 
+Check out the full documentation [here](https://flower.ai/docs/intelligence), and the project website [here](https://flower.ai/intelligence).
+
 You can use `npm` or `pnpm` (or probably `yarn`), but this `README.md` shows examples using `pnpm`
 
 ## Install
 
-Install dependencies with:
+To install via NPM, run:
 
 ```sh
-pnpm i
+pnpm i @flwr/flwr
 ```
 
-## Guide
+Alternatively, you can use it in vanilla JS, without any bundler, by using a CDN or static hosting. For example, using ES Modules, you can import the library with:
 
-### Instantiation
-
-The `FlowerIntelligence` package uses the singleton pattern. It can be instanciated with:
-
-```typescript
-const fi = FlowerIntelligence.instance;
+```html
+<script type="module">
+  import { FlowerIntelligence } from 'https://cdn.jsdelivr.net/npm/@flwr/flwr';
+</script>
 ```
 
-### Simple chat
-
-The simplest way to use `FlowerIntelligence` is to pass a simple string to the `chat` method:
-
-```typescript
-const response = await fi.chat('How are you?');
-```
-
-Or, a list of `Message`:
-
-```typescript
-const response = await fi.chat({
-  messages: [
-    { role: 'system', content: 'You are a helpful assistant' },
-    { role: 'user', content: 'How are you?' },
-  ],
-});
-```
-
-The `response` that we get from the `chat` method is either a `Failure` (containing 2 attributes, `code`, a number, and `description`, a string), or
-a `ChatResponseResult`, containing `message`, the `Message` object returned by the assistant (of the form
-`{role: string, content: string, toolCalls?: ToolCall[]}`).
-
-Note, we can use the `ok` attribute to differentiate between `ChatResponse` and `Failure`.
-
-```typescript
-if (!response.ok) {
-  console.error(response.failure.code);
-} else {
-  console.log(response.message.content);
-}
-```
-
-### Complete code
+## Hello, Flower Intelligence!
 
 ```javascript
-import { FlowerIntelligence } from 'https://unpkg.com/@flwr/flwr';
+// If installed with NPM
+// import { FlowerIntelligence } from '@flwr/flwr';
+
+import { FlowerIntelligence } from 'https://cdn.jsdelivr.net/npm/@flwr/flwr';
 
 const fi = FlowerIntelligence.instance;
 
 async function main() {
   const response = await fi.chat({
+    model: 'meta/llama3.2-1b/instruct-fp16',
     messages: [
       { role: 'system', content: 'You are a helpful assistant' },
       { role: 'user', content: 'How are you?' },
@@ -80,7 +51,7 @@ await main().then().catch();
 
 ## Demo
 
-You can quickly try out the library with the `examples/hello-world` example:
+You can also quickly try out the library with the `examples/hello-world` example:
 
 ```sh
 pnpm demo
@@ -89,46 +60,8 @@ pnpm demo
 This script will build the library and run the example demo. You can modify the
 prompt used inside `examples/hello-world/index.mjs`.
 
-You can also use `pnpm demo:js-proj` and `pnpm demo:ts-proj` to respectively
-run a simple JavaScript project example and a simple TypeScript project example.
+You can also use `pnpm demo:js-proj` or `pnpm demo:ts-proj` to respectively
+run a simple JavaScript project example or a simple TypeScript project example.
 Those projects can be found respectively in `examples/simple-js-project` and
 `examples/simple-ts-project`. Note that, contrary to `examples/hello-world`,
 those project are valid `pnpm`/`npm` projects.
-
-## Build
-
-Compile the library with:
-
-```sh
-pnpm build
-```
-
-This will compile the TypeScript files to JS, run `vite build`, and compile types.
-
-If you only want to compile types, you can use:
-
-```sh
-pnpm build:types
-```
-
-## Test
-
-You can run unit tests with:
-
-```sh
-pnpm test
-```
-
-## Format
-
-You can format the code using:
-
-```sh
-pnpm format
-```
-
-And check for proper formatting with:
-
-```sh
-pnpm format:check
-```
