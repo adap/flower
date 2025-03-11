@@ -48,7 +48,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   The default TTL for messages is now 12 hours (up from 1 hour), and the gRPC message size limit has increased from 512MB to 2GB. TTL sets a hard limit on the time between the `ServerApp` sending an instruction and receiving a reply from the `ClientApp`.
 
-- **Improve documentation** ([#4945](https://github.com/adap/flower/pull/4945), [#4965](https://github.com/adap/flower/pull/4965), [#4994](https://github.com/adap/flower/pull/4994), [#4964](https://github.com/adap/flower/pull/4964), [#4991](https://github.com/adap/flower/pull/4991), [#5014](https://github.com/adap/flower/pull/5014), [#4970](https://github.com/adap/flower/pull/4970), [#4990](https://github.com/adap/flower/pull/4990), [#4978](https://github.com/adap/flower/pull/4978), [#4944](https://github.com/adap/flower/pull/4944), [#5022](https://github.com/adap/flower/pull/5022), [#5007](https://github.com/adap/flower/pull/5007), [#4988](https://github.com/adap/flower/pull/4988))
+- **Improve documentation** ([#4945](https://github.com/adap/flower/pull/4945), [#4965](https://github.com/adap/flower/pull/4965), [#4994](https://github.com/adap/flower/pull/4994), [#4964](https://github.com/adap/flower/pull/4964), [#4991](https://github.com/adap/flower/pull/4991), [#5014](https://github.com/adap/flower/pull/5014), [#4970](https://github.com/adap/flower/pull/4970), [#4990](https://github.com/adap/flower/pull/4990), [#4978](https://github.com/adap/flower/pull/4978), [#4944](https://github.com/adap/flower/pull/4944), [#5022](https://github.com/adap/flower/pull/5022), [#5007](https://github.com/adap/flower/pull/5007), [#4988](https://github.com/adap/flower/pull/4988), [#5053](https://github.com/adap/flower/pull/5053))
 
 - **Update CI/CD** ([#4943](https://github.com/adap/flower/pull/4943), [#4942](https://github.com/adap/flower/pull/4942), [#4953](https://github.com/adap/flower/pull/4953), [#4985](https://github.com/adap/flower/pull/4985), [#4984](https://github.com/adap/flower/pull/4984), [#5025](https://github.com/adap/flower/pull/5025), [#4987](https://github.com/adap/flower/pull/4987), [#4912](https://github.com/adap/flower/pull/4912))
 
@@ -59,6 +59,10 @@ We would like to give our special thanks to all the contributors who made the ne
   As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
 ### Incompatible changes
+
+- **Remove deprecated CLI commands** ([#4855](https://github.com/adap/flower/pull/4855))
+
+  Removed deprecated CLI commands: `flower-server-app`, `flower-superexec`, and `flower-client-app`. These commands are no longer available in the framework.
 
 - **Bump minimum Python and `cryptography` versions** ([#4946](https://github.com/adap/flower/pull/4946))
 

@@ -77,8 +77,8 @@ MAX_WORKERS = argv[2] if len(argv) > 2 else 10
 def _get_latest_tag(gh_api: Github) -> tuple[Repository, str]:
     """Retrieve the latest tag from the GitHub repository."""
     repo = gh_api.get_repo(REPO_NAME)
-    tags = sorted(LOCAL_REPO.tags, key=lambda t: t.commit.committed_datetime)
-    return repo, tags[-1].name
+    tag = max((t for t in LOCAL_REPO.tags if t.name.startswith("v")), key=lambda t: t.commit.committed_datetime)
+    return repo, tag.name
 
 
 def _add_shortlog(new_version: str, shortlog: str) -> None:
