@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## v1.16.0 (2025-03-11)
 
 ### Thanks to our contributors
