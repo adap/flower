@@ -1,9 +1,5 @@
-import logging
 import os
 import time
-
-import flwr as fl
-import tensorflow as tf
 import wandb
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common import ConfigsRecord
@@ -11,41 +7,7 @@ from flwr.common.constant import MessageType
 from flwr.common.context import Context
 from flwr.common.message import Message
 
-from task import DEVICE, Net, get_parameters, load_data, set_parameters, test, train
-
-
-class WBLoggingFilter(logging.Filter):
-    def filter(self, record):
-        return (
-            "login" in record.getMessage()
-            or "View project at" in record.getMessage()
-            or "View run at" in record.getMessage()
-        )
-
-
-# Load model and data (simple CNN, CIFAR-10)
-net = Net().to(DEVICE)
-trainloader, testloader = load_data()
-
-
-# Define Flower client
-class FlowerClient(fl.client.NumPyClient):
-    def get_parameters(self, config):
-        return get_parameters(net)
-
-    def fit(self, parameters, config):
-        set_parameters(net, parameters)
-        results = train(net, trainloader, testloader, epochs=1, device=DEVICE)
-        return get_parameters(net), len(trainloader.dataset), results
-
-    def evaluate(self, parameters, config):
-        set_parameters(net, parameters)
-        loss, accuracy = test(net, testloader)
-        return loss, len(testloader.dataset), {"accuracy": accuracy}
-
-
-def client_fn(cid: str):
-    return FlowerClient().to_client()
+from torch.utils.tensorboard import SummaryWriter
 
 
 def get_wandb_mod(name: str) -> Mod:
@@ -69,6 +31,10 @@ def get_wandb_mod(name: str) -> Mod:
                 resume="allow",
                 reinit=True,
             )
+            # We'll use a custom metric as x-axis step
+            # This is needed if not all clients participate in all rounds
+            # W&B doesn't allow logging at step 1,2,4 (i.e. skipping 3)
+            wandb.define_metric("server-round")
 
         start_time = time.time()
 
@@ -81,10 +47,13 @@ def get_wandb_mod(name: str) -> Mod:
             metrics = reply.content.configs_records
 
             results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
-
             results_to_log["fit_time"] = time_diff
 
-            wandb.log(results_to_log, step=int(server_round), commit=True)
+            # Ensure all metrics to log use the custom step
+            wandb.define_metric("*", step_metric="server-round")
+            results_to_log["server-round"] = server_round
+            # Log as usual
+            wandb.log(results_to_log, commit=True)
 
         return reply
 
@@ -113,39 +82,21 @@ def get_tensorboard_mod(logdir) -> Mod:
 
         # if the `ClientApp` just processed a "fit" message, let's log some metrics to TensorBoard
         if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
-            writer = tf.summary.create_file_writer(os.path.join(logdir_run, node_id))
+            writer = SummaryWriter(os.path.join(logdir_run, node_id))
 
             metrics = dict(
                 reply.content.configs_records.get("fitres.metrics", ConfigsRecord())
             )
 
-            with writer.as_default(step=server_round):
-                tf.summary.scalar(f"fit_time", time_diff, step=server_round)
-                for metric in metrics:
-                    tf.summary.scalar(
-                        f"{metric}",
-                        metrics[metric],
-                        step=server_round,
-                    )
-                writer.flush()
+            writer.add_scalar(f"fit_time", time_diff, global_step=server_round)
+            for metric in metrics:
+                writer.add_scalar(
+                    f"{metric}",
+                    metrics[metric],
+                    global_step=server_round,
+                )
+            writer.flush()
 
         return reply
 
     return tensorboard_mod
-
-
-# Run via `flower-client-app client:wandb_app`
-wandb_app = fl.client.ClientApp(
-    client_fn=client_fn,
-    mods=[
-        get_wandb_mod("Custom mods example"),
-    ],
-)
-
-# Run via `flower-client-app client:tb_app`
-tb_app = fl.client.ClientApp(
-    client_fn=client_fn,
-    mods=[
-        get_tensorboard_mod(".runs_history/"),
-    ],
-)
