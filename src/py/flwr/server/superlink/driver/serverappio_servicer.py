@@ -22,7 +22,7 @@ from uuid import UUID
 
 import grpc
 
-from flwr.common import ConfigsRecord, now
+from flwr.common import ConfigsRecord, Message
 from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -31,9 +31,7 @@ from flwr.common.serde import (
     fab_from_proto,
     fab_to_proto,
     message_from_proto,
-    message_from_taskres,
     message_to_proto,
-    message_to_taskins,
     run_status_from_proto,
     run_status_to_proto,
     run_to_proto,
@@ -64,21 +62,16 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullResMessagesResponse,
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
-    PullTaskResRequest,
-    PullTaskResResponse,
     PushInsMessagesRequest,
     PushInsMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
-    PushTaskInsRequest,
-    PushTaskInsResponse,
 )
-from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
-from flwr.server.utils.validator import validate_task_ins_or_res
+from flwr.server.utils.validator import validate_message
 
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
@@ -138,57 +131,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
         return CreateRunResponse(run_id=run_id)
 
-    def PushTaskIns(
-        self, request: PushTaskInsRequest, context: grpc.ServicerContext
-    ) -> PushTaskInsResponse:
-        """Push a set of TaskIns."""
-        log(DEBUG, "ServerAppIoServicer.PushTaskIns")
-
-        # Init state
-        state: LinkState = self.state_factory.state()
-
-        # Abort if the run is not running
-        abort_if(
-            request.run_id,
-            [Status.PENDING, Status.STARTING, Status.FINISHED],
-            state,
-            context,
-        )
-
-        # Set pushed_at (timestamp in seconds)
-        pushed_at = now().timestamp()
-        for task_ins in request.task_ins_list:
-            task_ins.task.pushed_at = pushed_at
-
-        # Validate request
-        _raise_if(
-            validation_error=len(request.task_ins_list) == 0,
-            request_name="PushTaskIns",
-            detail="`task_ins_list` must not be empty",
-        )
-        for task_ins in request.task_ins_list:
-            validation_errors = validate_task_ins_or_res(task_ins)
-            _raise_if(
-                validation_error=bool(validation_errors),
-                request_name="PushTaskIns",
-                detail=", ".join(validation_errors),
-            )
-            _raise_if(
-                validation_error=request.run_id != task_ins.run_id,
-                request_name="PushTaskIns",
-                detail="`task_ins` has mismatched `run_id`",
-            )
-
-        # Store each TaskIns
-        task_ids: list[Optional[UUID]] = []
-        for task_ins in request.task_ins_list:
-            task_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
-            task_ids.append(task_id)
-
-        return PushTaskInsResponse(
-            task_ids=[str(task_id) if task_id else "" for task_id in task_ids]
-        )
-
     def PushMessages(
         self, request: PushInsMessagesRequest, context: grpc.ServicerContext
     ) -> PushInsMessagesResponse:
@@ -206,9 +148,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             context,
         )
 
-        # Set pushed_at (timestamp in seconds)
-        pushed_at = now().timestamp()
-
         # Validate request and insert in State
         _raise_if(
             validation_error=len(request.messages_list) == 0,
@@ -219,21 +158,19 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         while request.messages_list:
             message_proto = request.messages_list.pop(0)
             message = message_from_proto(message_proto=message_proto)
-            task_ins = message_to_taskins(message=message)
-            task_ins.task.pushed_at = pushed_at
-            validation_errors = validate_task_ins_or_res(task_ins)
+            validation_errors = validate_message(message, is_reply_message=False)
             _raise_if(
                 validation_error=bool(validation_errors),
                 request_name="PushMessages",
                 detail=", ".join(validation_errors),
             )
             _raise_if(
-                validation_error=request.run_id != task_ins.run_id,
+                validation_error=request.run_id != message.metadata.run_id,
                 request_name="PushMessages",
-                detail="`task_ins` has mismatched `run_id`",
+                detail="`Message.metadata` has mismatched `run_id`",
             )
             # Store
-            message_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
+            message_id: Optional[UUID] = state.store_message_ins(message=message)
             message_ids.append(message_id)
 
         return PushInsMessagesResponse(
@@ -241,45 +178,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 str(message_id) if message_id else "" for message_id in message_ids
             ]
         )
-
-    def PullTaskRes(
-        self, request: PullTaskResRequest, context: grpc.ServicerContext
-    ) -> PullTaskResResponse:
-        """Pull a set of TaskRes."""
-        log(DEBUG, "ServerAppIoServicer.PullTaskRes")
-
-        # Init state
-        state: LinkState = self.state_factory.state()
-
-        # Abort if the run is not running
-        abort_if(
-            request.run_id,
-            [Status.PENDING, Status.STARTING, Status.FINISHED],
-            state,
-            context,
-        )
-
-        # Convert each task_id str to UUID
-        task_ids: set[UUID] = {UUID(task_id) for task_id in request.task_ids}
-
-        # Read from state
-        task_res_list: list[TaskRes] = state.get_task_res(task_ids=task_ids)
-
-        # Validate request
-        for task_res in task_res_list:
-            _raise_if(
-                validation_error=request.run_id != task_res.run_id,
-                request_name="PullTaskRes",
-                detail="`task_res` has mismatched `run_id`",
-            )
-
-        # Delete the TaskIns/TaskRes pairs if TaskRes is found
-        task_ins_ids_to_delete = {
-            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
-        }
-        state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
-
-        return PullTaskResResponse(task_res_list=task_res_list)
 
     def PullMessages(
         self, request: PullResMessagesRequest, context: grpc.ServicerContext
@@ -298,32 +196,31 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             context,
         )
 
-        # Convert each task_id str to UUID
+        # Convert each message_id str to UUID
         message_ids: set[UUID] = {
             UUID(message_id) for message_id in request.message_ids
         }
 
         # Read from state
-        task_res_list: list[TaskRes] = state.get_task_res(task_ids=message_ids)
+        messages_res: list[Message] = state.get_message_res(message_ids=message_ids)
 
-        # Convert to Messages
-        messages_list = []
-        while task_res_list:
-            task_res = task_res_list.pop(0)
-            _raise_if(
-                validation_error=request.run_id != task_res.run_id,
-                request_name="PullMessages",
-                detail="`task_res` has mismatched `run_id`",
-            )
-            message = message_from_taskres(taskres=task_res)
-            messages_list.append(message_to_proto(message))
-
-        # Delete the TaskIns/TaskRes pairs if TaskRes is found
-        task_ins_ids_to_delete = {
-            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
+        # Delete the instruction Messages and their replies if found
+        message_ins_ids_to_delete = {
+            UUID(msg_res.metadata.reply_to_message) for msg_res in messages_res
         }
 
-        state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
+        state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
+
+        # Convert Messages to proto
+        messages_list = []
+        while messages_res:
+            msg = messages_res.pop(0)
+            _raise_if(
+                validation_error=request.run_id != msg.metadata.run_id,
+                request_name="PullMessages",
+                detail="`message.metadata` has mismatched `run_id`",
+            )
+            messages_list.append(message_to_proto(msg))
 
         return PullResMessagesResponse(messages_list=messages_list)
 

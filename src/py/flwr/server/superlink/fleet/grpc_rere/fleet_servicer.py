@@ -33,12 +33,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PingResponse,
     PullMessagesRequest,
     PullMessagesResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
     PushMessagesRequest,
     PushMessagesResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
@@ -89,17 +85,6 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state=self.state_factory.state(),
         )
 
-    def PullTaskIns(
-        self, request: PullTaskInsRequest, context: grpc.ServicerContext
-    ) -> PullTaskInsResponse:
-        """Pull TaskIns."""
-        log(INFO, "[Fleet.PullTaskIns] node_id=%s", request.node.node_id)
-        log(DEBUG, "[Fleet.PullTaskIns] Request: %s", MessageToDict(request))
-        return message_handler.pull_task_ins(
-            request=request,
-            state=self.state_factory.state(),
-        )
-
     def PullMessages(
         self, request: PullMessagesRequest, context: grpc.ServicerContext
     ) -> PullMessagesResponse:
@@ -111,29 +96,6 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state=self.state_factory.state(),
         )
 
-    def PushTaskRes(
-        self, request: PushTaskResRequest, context: grpc.ServicerContext
-    ) -> PushTaskResResponse:
-        """Push TaskRes."""
-        if request.task_res_list:
-            log(
-                INFO,
-                "[Fleet.PushTaskRes] Push results from node_id=%s",
-                request.task_res_list[0].task.producer.node_id,
-            )
-        else:
-            log(INFO, "[Fleet.PushTaskRes] No task results to push")
-
-        try:
-            res = message_handler.push_task_res(
-                request=request,
-                state=self.state_factory.state(),
-            )
-        except InvalidRunStatusException as e:
-            abort_grpc_context(e.message, context)
-
-        return res
-
     def PushMessages(
         self, request: PushMessagesRequest, context: grpc.ServicerContext
     ) -> PushMessagesResponse:
@@ -141,11 +103,11 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         if request.messages_list:
             log(
                 INFO,
-                "[Fleet.PushMessages] Push results from node_id=%s",
+                "[Fleet.PushMessages] Push replies from node_id=%s",
                 request.messages_list[0].metadata.src_node_id,
             )
         else:
-            log(INFO, "[Fleet.PushMessages] No task results to push")
+            log(INFO, "[Fleet.PushMessages] No replies to push")
 
         try:
             res = message_handler.push_messages(

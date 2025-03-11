@@ -1,0 +1,80 @@
+{
+  "name": "@flwr/flwr",
+  "keywords": [
+    "AI",
+    "Artificial Intelligence",
+    "LLM",
+    "GenAI",
+    "secure",
+    "privacy",
+    "inference",
+    "chat"
+  ],
+  "description": "Flower Intelligence: Open-Source On-Device AI with optional Confidential Remote Compute.",
+  "homepage": "https://flower.ai",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adap/flower.git"
+  },
+  "author": "The Flower Authors <hello@flower.ai>",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./flowerintelligence.cjs.js",
+  "module": "./flowerintelligence.es.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./flowerintelligence.es.js",
+      "require": "./flowerintelligence.cjs.js",
+      "types": "./index.d.ts"
+    }
+  },
+  "scripts": {
+    "build:docs": "typedoc",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:watch": "tsc --watch && vite build",
+    "build": "tsc && vite build && pnpm build:types && cp package.json dist",
+    "demo": "pnpm build && node examples/hello-world/index.mjs",
+    "demo:js-proj": "cd examples/simple-js-project && pnpm start && cd ../..",
+    "demo:ts-proj": "cd examples/simple-ts-project && pnpm start && cd ../..",
+    "demo:tool": "cd examples/tool-calling && pnpm start && cd ../..",
+    "demo:tool-ts": "cd examples/tool-calling-ts && pnpm start && cd ../..",
+    "demo:stream-ts": "cd examples/streaming-ts && pnpm start && cd ../..",
+    "demo:ee": "cd examples/encrypted && pnpm start && cd ../..",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint --fix src",
+    "lint:check": "eslint src",
+    "serve:cov": "http-server ./coverage/lcov-report",
+    "serve:docs": "pnpm build:docs && http-server ./docs",
+    "test": "NODE_PATH=./src NODE_ENV=test vitest",
+    "test:cov": "NODE_PATH=./src NODE_ENV=test vitest run --coverage"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.0",
+    "@eslint/js": "^9.21.0",
+    "@types/eslint__js": "^8.42.3",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "@vitest/coverage-v8": "2.1.4",
+    "emoji-regex": "^10.4.0",
+    "eslint": "^9.21.0",
+    "eslint-import-resolver-typescript": "^3.8.3",
+    "eslint-plugin-import": "^2.31.0",
+    "globals": "^15.15.0",
+    "http-server": "^14.1.1",
+    "prettier": "^3.5.3",
+    "typedoc": "^0.27.9",
+    "typedoc-plugin-markdown": "^4.4.2",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.0",
+    "vite": "^5.4.14",
+    "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.3.3",
+    "@mlc-ai/web-llm": "^0.2.78",
+    "get-random-values": "^3.0.0"
+  }
+}

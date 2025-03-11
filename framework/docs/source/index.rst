@@ -24,7 +24,7 @@ Flower Framework
 
 The user guide is targeted at researchers and developers who want to use Flower to bring
 existing machine learning workloads into a federated setting. One of Flower's design
-goals was to make this simple. Read on to learn more.
+goals was to make this simple. Read on to learn more!
 
 Tutorials
 ~~~~~~~~~
@@ -66,16 +66,6 @@ Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart
 | :doc:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :doc:`scikit-learn
 <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` |
 :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
-
-We also made video tutorials for PyTorch:
-
-.. youtube:: jOmmuzMIQ4c
-    :width: 80%
-
-And TensorFlow:
-
-.. youtube:: FGTc2TQq7VM
-    :width: 80%
 
 How-to guides
 ~~~~~~~~~~~~~

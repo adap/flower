@@ -5,12 +5,22 @@
 Authenticate SuperNodes
 =======================
 
-Flower has built-in support for authenticated SuperNodes, allowing you to verify the
-identity of each SuperNode connecting to a SuperLink. To enhance security, node
-authentication is only available when encrypted connections (SSL/TLS) are enabled.
+When running a Flower Federation (see :doc:`ref-flower-network-communication`) it is
+fundamental that an authentication mechanism is available between the SuperLink and the
+SuperNodes that connect to it. Flower comes with two different mechanisms to
+authenticate SuperNodes that connect to a running SuperLink:
 
-Flower's node authentication leverages a signature-based mechanism to verify each node's
-identity:
+- **Automatic authentication**: In this mode, the SuperLink checks the timestamp-based
+  signature in each request from SuperNodes to prevent impersonation and replay attacks.
+- **CSV-based authentication**: This mode functions similarly to automatic
+  authentication but requires the SuperLink to be provided with a list of authorized
+  public keys, allowing only those SuperNodes to connect.
+
+The automatic authentication mode works out of the box and therefore requires no
+configuration. On the other hand, CSV-based authentication mode is more sophisticated
+and how it works and how it can be used is presented reminder of this guide. Flower's
+CSV-based node authentication leverages a signature-based mechanism to verify each
+node's identity and is only available when encrypted connections (SSL/TLS) are enabled:
 
 - Each SuperNode must already possess a unique Elliptic Curve (EC) public/private key
   pair.
@@ -77,7 +87,7 @@ that the authentication feature can only be enabled in the presence of TLS.
 .. dropdown:: Understand the command
 
     * ``--auth-list-public-keys``: Specify the path to a CSV file storing the public keys of all SuperNodes that should be allowed to connect with the SuperLink.
-    A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas and without any comments. Refer to the code sample, which contains a CSV file with two known node public keys.
+    A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas. Refer to the code sample, which contains a CSV file with two known node public keys.
 
 Enable node authentication in SuperNode
 ---------------------------------------

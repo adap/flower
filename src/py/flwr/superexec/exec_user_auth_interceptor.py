@@ -77,9 +77,11 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
         ) -> Response:
             call = method_handler.unary_unary or method_handler.unary_stream
             metadata = context.invocation_metadata()
-            if isinstance(
-                request, (GetLoginDetailsRequest, GetAuthTokensRequest)
-            ) or self.auth_plugin.validate_tokens_in_metadata(metadata):
+            if isinstance(request, (GetLoginDetailsRequest, GetAuthTokensRequest)):
+                return call(request, context)  # type: ignore
+
+            valid_tokens, _ = self.auth_plugin.validate_tokens_in_metadata(metadata)
+            if valid_tokens:
                 return call(request, context)  # type: ignore
 
             tokens = self.auth_plugin.refresh_tokens(context.invocation_metadata())

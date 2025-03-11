@@ -28,7 +28,7 @@ import typer
 
 from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.constant import AUTH_TYPE_KEY, CREDENTIALS_DIR, FLWR_DIR
+from flwr.common.constant import AUTH_TYPE_JSON_KEY, CREDENTIALS_DIR, FLWR_DIR
 from flwr.common.grpc import (
     GRPC_MAX_MESSAGE_LENGTH,
     create_channel,
@@ -239,7 +239,7 @@ def try_obtain_cli_auth_plugin(
         try:
             with config_path.open("r", encoding="utf-8") as file:
                 json_file = json.load(file)
-            auth_type = json_file[AUTH_TYPE_KEY]
+            auth_type = json_file[AUTH_TYPE_JSON_KEY]
         except (FileNotFoundError, KeyError):
             typer.secho(
                 "❌ Missing or invalid credentials for user authentication. "
@@ -274,7 +274,7 @@ def init_channel(
     interceptors: list[grpc.UnaryUnaryClientInterceptor] = []
     if auth_plugin is not None:
         auth_plugin.load_tokens()
-        interceptors = CliUserAuthInterceptor(auth_plugin)
+        interceptors.append(CliUserAuthInterceptor(auth_plugin))
 
     # Create the gRPC channel
     channel = create_channel(

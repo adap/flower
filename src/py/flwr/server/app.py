@@ -40,7 +40,7 @@ from flwr.common.args import try_obtain_server_certificates
 from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
-    AUTH_TYPE_KEY,
+    AUTH_TYPE_YAML_KEY,
     CLIENT_OCTET,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
@@ -90,7 +90,11 @@ BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 try:
-    from flwr.ee import add_ee_args_superlink, get_exec_auth_plugins
+    from flwr.ee import (
+        add_ee_args_superlink,
+        get_dashboard_server,
+        get_exec_auth_plugins,
+    )
 except ImportError:
 
     # pylint: disable-next=unused-argument
@@ -265,7 +269,7 @@ def run_superlink() -> None:
     simulationio_address, _, _ = _format_address(args.simulationio_api_address)
 
     # Obtain certificates
-    certificates = try_obtain_server_certificates(args, args.fleet_api_type)
+    certificates = try_obtain_server_certificates(args)
 
     # Disable the user auth TLS check if args.disable_oidc_tls_cert_verification is
     # provided
@@ -353,17 +357,13 @@ def run_superlink() -> None:
             ) is None:
                 flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
-            _, ssl_certfile, ssl_keyfile = (
-                certificates if certificates is not None else (None, None, None)
-            )
-
             fleet_thread = threading.Thread(
                 target=_run_fleet_api_rest,
                 args=(
                     host,
                     port,
-                    ssl_keyfile,
-                    ssl_certfile,
+                    args.ssl_keyfile,
+                    args.ssl_certfile,
                     state_factory,
                     ffs_factory,
                     num_workers,
@@ -434,6 +434,17 @@ def run_superlink() -> None:
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
+
+    # Add Dashboard server if available
+    if dashboard_address := getattr(args, "dashboard_address", None):
+        dashboard_address_str, _, _ = _format_address(dashboard_address)
+        dashboard_server = get_dashboard_server(
+            address=dashboard_address_str,
+            state_factory=state_factory,
+            certificates=None,
+        )
+
+        grpc_servers.append(dashboard_server)
 
     # Graceful shutdown
     register_exit_handlers(
@@ -582,7 +593,7 @@ def _try_obtain_exec_auth_plugin(
 
     # Load authentication configuration
     auth_config: dict[str, Any] = config.get("authentication", {})
-    auth_type: str = auth_config.get(AUTH_TYPE_KEY, "")
+    auth_type: str = auth_config.get(AUTH_TYPE_YAML_KEY, "")
 
     # Load authentication plugin
     try:
