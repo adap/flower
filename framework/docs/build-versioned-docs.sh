@@ -95,7 +95,7 @@ END
       echo "$corrected_versions" >> source/conf.py
     fi
 
-    if [[ "$current_version" > "v1.5.0" && "$current_version" < "v1.6.0" ]]; then
+    if [[ "$current_version" > "v1.5.0" && "$current_version" < "v1.16.0" ]]; then
       awk '
         # when we see the start of the old block, switch mode
         /html_context\["versions"\] = list\(\)/ {
