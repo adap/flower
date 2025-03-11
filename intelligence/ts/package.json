@@ -18,7 +18,7 @@
     "url": "git+https://github.com/adap/flower.git"
   },
   "author": "The Flower Authors <hello@flower.ai>",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "main": "./flowerintelligence.cjs.js",
   "module": "./flowerintelligence.es.js",
@@ -76,5 +76,7 @@
     "@huggingface/transformers": "^3.3.3",
     "@mlc-ai/web-llm": "^0.2.78",
     "get-random-values": "^3.0.0"
-  }
+  },
+  "jsdelivr": "./dist/flowerintelligence.cjs.js",
+  "unpkg": "./dist/flowerintelligence.cjs.js"
 }
