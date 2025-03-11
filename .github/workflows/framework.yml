@@ -20,8 +20,6 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       framework: ${{ steps.filter.outputs.framework }}
-      src: ${{ steps.filter.outputs.src }}
-      workflow: ${{ steps.filter.outputs.workflow }}
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +36,6 @@ jobs:
   test_core:
     runs-on: ubuntu-22.04
     needs: changes
-    if: ${{ needs.changes.outputs.framework == 'true' }}
     strategy:
       matrix:
         # Latest version which comes cached in the host image can be found here:
@@ -55,12 +52,16 @@ jobs:
         with:
           fetch-depth: 0
       - name: Bootstrap
+        if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python }}
       - name: Install dependencies (mandatory only)
+        if: ${{ needs.changes.outputs.framework == 'true' }}
         run: python -m poetry install --all-extras
       - name: Check if protos need recompilation
+        if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./dev/check-protos.sh
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
+        if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./dev/test.sh
