@@ -1,4 +1,4 @@
-import { FlowerIntelligence } from '../../dist/flowerintelligence.es.js';
+import { FlowerIntelligence } from 'https://cdn.jsdelivr.net/npm/@flwr/flwr';
 
 const fi = FlowerIntelligence.instance;
 
