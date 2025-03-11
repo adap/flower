@@ -30,7 +30,7 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
-        run: sudo apt install pandoc
+        run: brew install pandoc
       - name: Install Flower dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
       - uses: swift-actions/setup-swift@v2
