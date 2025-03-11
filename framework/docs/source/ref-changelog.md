@@ -14,7 +14,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   `RecordSet` now supports dictionary-like access, allowing interactions similar to built-in Python dictionaries. For example, instead of `recordset.parameters_records["model"]`, users can simply use `recordset["model"]`. This enhancement maintains backward compatibility with existing `recordset.*_records` properties.
 
-  Additionally, the `Array` class now accepts `numpy.ndarray` instances directly in its constructor, enabling instantiation with a NumPy array via `Array(np_arr)`.
+  Additionally, the `Array` class now accepts `numpy.ndarray` instances directly in its constructor, enabling instantiation with a NumPy array via `Array(your_numpy_ndarray)`.
 
 - **Support function-specific modifiers for `ClientApp`** ([#4954](https://github.com/adap/flower/pull/4954), [#4962](https://github.com/adap/flower/pull/4962))
 
