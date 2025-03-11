@@ -123,7 +123,7 @@ END
         { print }
       ' source/conf.py > source/conf_new.py && mv source/conf_new.py source/conf.py
     fi
-    
+
     # Copy updated version of html files
     cp -r ${tmp_dir}/_templates source
  
