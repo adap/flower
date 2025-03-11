@@ -134,7 +134,7 @@ def get_tensorboard_mod(logdir) -> Mod:
     return tensorboard_mod
 
 
-# Run via `flower-client-app client:wandb_app`
+# Define ClientApp with W&B mod
 wandb_app = fl.client.ClientApp(
     client_fn=client_fn,
     mods=[
@@ -142,7 +142,7 @@ wandb_app = fl.client.ClientApp(
     ],
 )
 
-# Run via `flower-client-app client:tb_app`
+# Define ClientApp with TensorBoard mod
 tb_app = fl.client.ClientApp(
     client_fn=client_fn,
     mods=[
