@@ -16,9 +16,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Additionally, the `Array` class now accepts `numpy.ndarray` instances directly in its constructor, enabling instantiation with a NumPy array via `Array(your_numpy_ndarray)`.
 
-- **Support function-specific modifiers for `ClientApp`** ([#4954](https://github.com/adap/flower/pull/4954), [#4962](https://github.com/adap/flower/pull/4962))
+- **Support function-specific Flower Mods for `ClientApp`** ([#4954](https://github.com/adap/flower/pull/4954), [#4962](https://github.com/adap/flower/pull/4962))
 
-  Modifiers can now be applied to individual functions within the `ClientApp` rather than affecting the entire application. This allows for more granular control. The documentation has been updated to reflect these changes — please refer to [How to Use Built-in Mods](https://flower.ai/docs/framework/how-to-use-built-in-mods.html#registering-function-specific-mods) for details.
+  Flower Mods can now be applied to individual functions within the `ClientApp` rather than affecting the entire application. This allows for more granular control. The documentation has been updated to reflect these changes — please refer to [How to Use Built-in Mods](https://flower.ai/docs/framework/how-to-use-built-in-mods.html#registering-function-specific-mods) for details.
 
 - **Introduce `@app.lifespan()` for lifecycle management** ([#4929](https://github.com/adap/flower/pull/4929), [#4986](https://github.com/adap/flower/pull/4986))
 
@@ -30,7 +30,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Upgrade FedProx baseline to a Flower App** ([#4937](https://github.com/adap/flower/pull/4937))
 
-  Updates FedProx to the a Flower App by removing Hydra, migrating configs to `pyproject.toml`, using `ClientApp` and `ServerApp`, integrating `flwr-datasets` with `DistributionPartitioner`, enabling result saving, and updating `README.md`.
+  Updates FedProx to the a Flower App by removing Hydra, migrating configs to `pyproject.toml`, using `ClientApp` and `ServerApp`, integrating `flwr-datasets` with `DistributionPartitioner`, enabling result saving, and updating `README.md`. This baseline now supports `flwr run`.
 
 - **Migrate framework to Message-based system** ([#4959](https://github.com/adap/flower/pull/4959), [#4993](https://github.com/adap/flower/pull/4993), [#4979](https://github.com/adap/flower/pull/4979), [#4999](https://github.com/adap/flower/pull/4999))
 
