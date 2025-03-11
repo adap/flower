@@ -1,7 +1,5 @@
 """app-pytorch: A Flower / PyTorch app."""
 
-from collections import OrderedDict
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,9 +8,7 @@ from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
-from flwr.common.typing import NDArray
 from flwr.common.record import Array, ParametersRecord
-from flwr.common import array_from_numpy
 
 
 class Net(nn.Module):
@@ -110,7 +106,7 @@ def pytorch_to_parameter_record(pytorch_module: torch.nn.Module):
     state_dict = pytorch_module.state_dict()
 
     for k, v in state_dict.items():
-        state_dict[k] = array_from_numpy(v.numpy())
+        state_dict[k] = Array.from_numpy_ndarray(v.numpy())
 
     return ParametersRecord(state_dict)
 
