@@ -16,6 +16,7 @@
 
 
 import argparse
+import gc
 import time
 from logging import DEBUG, ERROR, INFO
 from typing import Optional
@@ -159,6 +160,9 @@ def run_clientapp(  # pylint: disable=R0914
             _ = push_clientappoutputs(
                 stub=stub, token=token, message=reply_message, context=context
             )
+
+            del client_app, message, context, run, fab, reply_message
+            gc.collect()
 
             # Reset token to `None` to prevent flwr-clientapp from trying to pull the
             # same inputs again
