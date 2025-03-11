@@ -66,9 +66,7 @@ except ModuleNotFoundError:
 
 PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
-PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
 PATH_PULL_MESSAGES: str = "/api/v0/fleet/pull-messages"
-PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 PATH_PUSH_MESSAGES: str = "/api/v0/fleet/push-messages"
 PATH_PING: str = "api/v0/fleet/ping"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
@@ -280,7 +278,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         node = None
 
     def receive() -> Optional[Message]:
-        """Receive next task from server."""
+        """Receive next Message from server."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
@@ -309,11 +307,11 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         if message_proto is not None:
             message = message_from_proto(message_proto)
             metadata = copy(message.metadata)
-            log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
+            log(INFO, "[Node] POST /%s: success", PATH_PULL_MESSAGES)
         return message
 
     def send(message: Message) -> None:
-        """Send task result back to server."""
+        """Send Message result back to server."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
@@ -345,7 +343,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         log(
             INFO,
             "[Node] POST /%s: success, created result %s",
-            PATH_PUSH_TASK_RES,
+            PATH_PUSH_MESSAGES,
             res.results,  # pylint: disable=no-member
         )
 

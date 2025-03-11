@@ -1,8 +1,6 @@
 import { FlowerIntelligence, type StreamEvent } from '@flwr/flwr';
 
 const fi = FlowerIntelligence.instance;
-fi.remoteHandoff = true;
-fi.apiKey = process.env.FI_API_KEY ?? 'REPLACE_HERE';
 
 async function main() {
   const response = await fi.chat({
@@ -14,8 +12,6 @@ async function main() {
     onStreamEvent: (event: StreamEvent) => {
       process.stdout.write(event.chunk);
     },
-    encrypt: true,
-    forceRemote: true,
   });
 
   if (!response.ok) {

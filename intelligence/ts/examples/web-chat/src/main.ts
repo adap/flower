@@ -12,7 +12,6 @@ async function sendChat(message: string): Promise<string> {
     // model: 'meta/llama3.2-3b/instruct-q4',
     // model: 'meta/llama3.1-8b/instruct-q4',
     // model: 'deepseek/r1',
-    forceLocal: true,
   });
   if (!response.ok) {
     console.error(`${response.failure.code}: ${response.failure.description}`);

@@ -1,4 +1,17 @@
 // Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// =============================================================================
 
 import {
   ChatResponseResult,
@@ -22,6 +35,7 @@ export interface Engine {
     encrypt?: boolean
   ): Promise<ChatResponseResult>;
   fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>>;
+  isSupported(model: string): Promise<Result<string>>;
 }
 
 export abstract class BaseEngine implements Engine {
@@ -43,6 +57,14 @@ export abstract class BaseEngine implements Engine {
   }
 
   async fetchModel(_model: string, _callback: (progress: Progress) => void): Promise<Result<void>> {
+    await Promise.resolve();
+    return {
+      ok: false,
+      failure: { code: FailureCode.NotImplementedError, description: 'Method not implemented.' },
+    };
+  }
+
+  async isSupported(_model: string): Promise<Result<string>> {
     await Promise.resolve();
     return {
       ok: false,

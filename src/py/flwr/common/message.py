@@ -25,7 +25,8 @@ from .constant import MESSAGE_TTL_TOLERANCE
 from .logger import log
 from .record import RecordSet
 
-DEFAULT_TTL = 10800  # This is 3 hours
+
+DEFAULT_TTL = 43200  # This is 12 hours
 
 
 class Metadata:  # pylint: disable=too-many-instance-attributes
@@ -321,7 +322,7 @@ class Message:
             )
             message.metadata.ttl = ttl
 
-        self._limit_task_res_ttl(message)
+        self._limit_message_res_ttl(message)
 
         return message
 
@@ -364,7 +365,7 @@ class Message:
             )
             message.metadata.ttl = ttl
 
-        self._limit_task_res_ttl(message)
+        self._limit_message_res_ttl(message)
 
         return message
 
@@ -379,14 +380,14 @@ class Message:
         )
         return f"{self.__class__.__qualname__}({view})"
 
-    def _limit_task_res_ttl(self, message: Message) -> None:
-        """Limit the TaskRes TTL to not exceed the expiration time of the TaskIns it
-        replies to.
+    def _limit_message_res_ttl(self, message: Message) -> None:
+        """Limit the TTL of the provided Message to not exceed the expiration time of
+        this Message it replies to.
 
         Parameters
         ----------
         message : Message
-            The message to which the TaskRes is replying.
+            The reply Message to limit the TTL for.
         """
         # Calculate the maximum allowed TTL
         max_allowed_ttl = (
