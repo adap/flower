@@ -89,7 +89,7 @@ class Driver(ABC):
         """Get node IDs."""
 
     @abstractmethod
-    def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
+    def push_messages(self, messages: Iterable[Message]) -> None:
         """Push messages to specified node IDs.
 
         This method takes an iterable of messages and sends each message
@@ -108,16 +108,21 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
-        """Pull messages based on message IDs.
+    def pull_messages(
+        self, message_ids: Optional[Iterable[str]] = None
+    ) -> Iterable[Message]:
+        """Pull messages from the SuperLink.
 
-        This method is used to collect messages from the SuperLink
-        that correspond to a set of given message IDs.
+        This method is used to collect all available messages from the SuperLink.
+        If provided, it will only pull messages that correspond to a set of given
+        message IDs.
 
         Parameters
         ----------
-        message_ids : Iterable[str]
+        message_ids : Optional[Iterable[str]]
             An iterable of message IDs for which reply messages are to be retrieved.
+            If specified, the method will only pull messages that correspond to these
+            IDs. If `None`, all messages will be retrieved.
 
         Returns
         -------

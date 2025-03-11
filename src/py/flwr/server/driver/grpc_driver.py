@@ -81,6 +81,7 @@ class GrpcDriver(Driver):
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
         self._retry_invoker = _make_simple_grpc_retry_invoker()
+        self._pending_messages: set[str] = set()
 
     @property
     def _is_connected(self) -> bool:
@@ -191,7 +192,7 @@ class GrpcDriver(Driver):
         )
         return [node.node_id for node in res.nodes]
 
-    def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
+    def push_messages(self, messages: Iterable[Message]) -> None:
         """Push messages to specified node IDs.
 
         This method takes an iterable of messages and sends each message
@@ -221,18 +222,24 @@ class GrpcDriver(Driver):
                 "list has `None` for those messages (the order is preserved as passed "
                 "to `push_messages`). This could be due to a malformed message.",
             )
-        return list(res.message_ids)
+        self._pending_messages.update(res.message_ids)
 
-    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
+    def pull_messages(
+        self, message_ids: Optional[Iterable[str]] = None
+    ) -> Iterable[Message]:
         """Pull messages based on message IDs.
 
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
+        # Allow an override but default to the stored pending IDs.
+        message_ids_to_pull = (
+            message_ids if message_ids is not None else self._pending_messages
+        )
         # Pull Messages
         res: PullResMessagesResponse = self._stub.PullMessages(
             PullResMessagesRequest(
-                message_ids=message_ids,
+                message_ids=message_ids_to_pull,
                 run_id=cast(Run, self._run).run_id,
             )
         )
