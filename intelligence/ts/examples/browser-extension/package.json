@@ -14,7 +14,7 @@
     "build:extension": "pnpm ibuild && cd dist && zip -r -FS ./flower-intelligence-browser-assistant.xpi * && cd .."
   },
   "dependencies": {
-    "@flwr/flwr": "file:../../dist",
+    "@flwr/flwr": "file:../..",
     "@mozilla/readability": "^0.5.0",
     "webextension-polyfill": "^0.12.0"
   },

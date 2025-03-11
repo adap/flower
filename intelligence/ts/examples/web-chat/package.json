@@ -11,7 +11,7 @@
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@flwr/flwr": "file:../../dist",
+    "@flwr/flwr": "file:../..",
     "cross-spawn": "^7.0.5"
   },
   "devDependencies": {
