@@ -76,14 +76,20 @@ for current_version in ${versions}; do
     if [ "$current_version" = "v1.5.0" ]; then
       corrected_versions=$(cat <<-END
 html_context['versions'] = list()
-versions = [
-    tag.name
-    for tag in repo.tags
-    if int(tag.name[1]) > 0 and int(tag.name.split('.')[1]) >= 5
-]
-versions.append('main')
+versions = sorted(
+    [
+        tag.name
+        for tag in repo.tags
+        if not tag.name.startswith("intelligence/")
+        and tag.name[0] == "v"
+        and int(tag.name[1]) > 0
+        and int(tag.name.split(".")[1]) >= 8
+    ],
+    key=lambda x: [int(part) for part in x[1:].split(".")],
+)
+versions.append("main")
 for version in versions:
-    html_context['versions'].append({'name': version})
+    html_context["versions"].append({"name": version})
 END
       )
       echo "$corrected_versions" >> source/conf.py
