@@ -106,7 +106,7 @@ def pytorch_to_parameter_record(pytorch_module: torch.nn.Module):
     state_dict = pytorch_module.state_dict()
 
     for k, v in state_dict.items():
-        state_dict[k] = Array.from_numpy_ndarray(v.numpy())
+        state_dict[k] = Array(v.numpy())
 
     return ParametersRecord(state_dict)
 
