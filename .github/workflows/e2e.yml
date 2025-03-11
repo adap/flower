@@ -17,8 +17,30 @@ env:
   ARTIFACT_BUCKET: artifact.flower.ai
 
 jobs:
+  changes:
+    runs-on: ubuntu-22.04
+    outputs:
+      framework: ${{ steps.filter.outputs.framework }}
+      src: ${{ steps.filter.outputs.src }}
+      workflow: ${{ steps.filter.outputs.workflow }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Filter changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            framework:
+              - 'framework/**/*'
+              - 'src/**/*'
+              - '.github/workflows/framework.yml'
+              - '.github/workflows/e2e.yml'
+
   wheel:
     runs-on: ubuntu-22.04
+    needs: changes
+    if: ${{ needs.changes.outputs.framework == 'true' }}
     name: Build, test and upload wheel
     steps:
       - uses: actions/checkout@v4
