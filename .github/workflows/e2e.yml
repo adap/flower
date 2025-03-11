@@ -4,9 +4,19 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'framework/**/*'
+      - 'src/**/*'
+      - '.github/workflows/framework.yml'
+      - '.github/workflows/e2e.yml'
   pull_request:
     branches:
       - main
+    paths:
+      - 'framework/**/*'
+      - 'src/**/*'
+      - '.github/workflows/framework.yml'
+      - '.github/workflows/e2e.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
