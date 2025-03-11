@@ -17,13 +17,12 @@
 
 from __future__ import annotations
 
-import sys
 from collections.abc import Awaitable
-from typing import Callable, TypeVar
+from typing import Callable, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.constant import MISSING_EXTRA_REST
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -32,15 +31,16 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
-from flwr.server.superlink.state import State
+from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
 try:
     from starlette.applications import Starlette
@@ -50,7 +50,7 @@ try:
     from starlette.responses import Response
     from starlette.routing import Route
 except ModuleNotFoundError:
-    sys.exit(MISSING_EXTRA_REST)
+    flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
 
 GrpcRequest = TypeVar("GrpcRequest", bound=GrpcMessage)
@@ -90,7 +90,7 @@ def rest_request_response(
 async def create_node(request: CreateNodeRequest) -> CreateNodeResponse:
     """Create Node."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
 
     # Handle message
     return message_handler.create_node(request=request, state=state)
@@ -100,38 +100,37 @@ async def create_node(request: CreateNodeRequest) -> CreateNodeResponse:
 async def delete_node(request: DeleteNodeRequest) -> DeleteNodeResponse:
     """Delete Node Id."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
 
     # Handle message
     return message_handler.delete_node(request=request, state=state)
 
 
-@rest_request_response(PullTaskInsRequest)
-async def pull_task_ins(request: PullTaskInsRequest) -> PullTaskInsResponse:
-    """Pull TaskIns."""
+@rest_request_response(PullMessagesRequest)
+async def pull_message(request: PullMessagesRequest) -> PullMessagesResponse:
+    """Pull PullMessages."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
 
     # Handle message
-    return message_handler.pull_task_ins(request=request, state=state)
+    return message_handler.pull_messages(request=request, state=state)
 
 
-# Check if token is needed here
-@rest_request_response(PushTaskResRequest)
-async def push_task_res(request: PushTaskResRequest) -> PushTaskResResponse:
-    """Push TaskRes."""
+@rest_request_response(PushMessagesRequest)
+async def push_message(request: PushMessagesRequest) -> PushMessagesResponse:
+    """Pull PushMessages."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
 
     # Handle message
-    return message_handler.push_task_res(request=request, state=state)
+    return message_handler.push_messages(request=request, state=state)
 
 
 @rest_request_response(PingRequest)
 async def ping(request: PingRequest) -> PingResponse:
     """Ping."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
 
     # Handle message
     return message_handler.ping(request=request, state=state)
@@ -141,7 +140,7 @@ async def ping(request: PingRequest) -> PingResponse:
 async def get_run(request: GetRunRequest) -> GetRunResponse:
     """GetRun."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
 
     # Handle message
     return message_handler.get_run(request=request, state=state)
@@ -151,17 +150,20 @@ async def get_run(request: GetRunRequest) -> GetRunResponse:
 async def get_fab(request: GetFabRequest) -> GetFabResponse:
     """GetRun."""
     # Get ffs from app
-    ffs: Ffs = app.state.FFS_FACTORY.state()
+    ffs: Ffs = cast(FfsFactory, app.state.FFS_FACTORY).ffs()
+
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
 
     # Handle message
-    return message_handler.get_fab(request=request, ffs=ffs)
+    return message_handler.get_fab(request=request, ffs=ffs, state=state)
 
 
 routes = [
     Route("/api/v0/fleet/create-node", create_node, methods=["POST"]),
     Route("/api/v0/fleet/delete-node", delete_node, methods=["POST"]),
-    Route("/api/v0/fleet/pull-task-ins", pull_task_ins, methods=["POST"]),
-    Route("/api/v0/fleet/push-task-res", push_task_res, methods=["POST"]),
+    Route("/api/v0/fleet/pull-messages", pull_message, methods=["POST"]),
+    Route("/api/v0/fleet/push-messages", push_message, methods=["POST"]),
     Route("/api/v0/fleet/ping", ping, methods=["POST"]),
     Route("/api/v0/fleet/get-run", get_run, methods=["POST"]),
     Route("/api/v0/fleet/get-fab", get_fab, methods=["POST"]),

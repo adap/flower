@@ -180,6 +180,7 @@ class ServerFedDyn(Server):
             client_instructions=client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
+            group_id=server_round,
         )
         log(
             DEBUG,

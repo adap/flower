@@ -32,17 +32,23 @@ class InterruptedStreamLogsResponse:
         """Raise KeyboardInterrupt to exit logstream test gracefully."""
         raise KeyboardInterrupt
 
+    @property
+    def latest_timestamp(self) -> NoReturn:
+        """Raise KeyboardInterrupt to exit logstream test gracefully."""
+        raise KeyboardInterrupt
+
 
 class TestFlwrLog(unittest.TestCase):
     """Unit tests for `flwr log` CLI functions."""
 
     def setUp(self) -> None:
         """Initialize mock ExecStub before each test."""
-        self.expected_calls = [
+        self.expected_stream_call = [
             call("log_output_1"),
             call("log_output_2"),
             call("log_output_3"),
         ]
+        self.expected_print_call = [call("log_output_1")]
         mock_response_iterator = [
             iter(
                 [StreamLogsResponse(log_output=f"log_output_{i}") for i in range(1, 4)]
@@ -66,13 +72,15 @@ class TestFlwrLog(unittest.TestCase):
         """Test stream_logs."""
         with patch("builtins.print") as mock_print:
             with self.assertRaises(KeyboardInterrupt):
-                stream_logs(run_id=123, channel=self.mock_channel, duration=1)
+                stream_logs(
+                    run_id=123, stub=self.mock_stub, duration=1, after_timestamp=0.0
+                )
                 # Assert that mock print was called with the expected arguments
-                mock_print.assert_has_calls(self.expected_calls)
+                mock_print.assert_has_calls(self.expected_stream_call)
 
     def test_flwr_log_print_method(self) -> None:
         """Test print_logs."""
         with patch("builtins.print") as mock_print:
             print_logs(run_id=123, channel=self.mock_channel, timeout=0)
             # Assert that mock print was called with the expected arguments
-            mock_print.assert_has_calls(self.expected_calls)
+            mock_print.assert_has_calls(self.expected_print_call)

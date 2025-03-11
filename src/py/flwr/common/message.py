@@ -14,6 +14,7 @@
 # ==============================================================================
 """Message."""
 
+
 from __future__ import annotations
 
 import time
@@ -24,7 +25,7 @@ from .constant import MESSAGE_TTL_TOLERANCE
 from .logger import log
 from .record import RecordSet
 
-DEFAULT_TTL = 3600
+DEFAULT_TTL = 43200  # This is 12 hours
 
 
 class Metadata:  # pylint: disable=too-many-instance-attributes
@@ -52,7 +53,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         the receiving end.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         run_id: int,
         message_id: str,
@@ -124,6 +125,16 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     def created_at(self, value: float) -> None:
         """Set creation timestamp for this message."""
         self.__dict__["_created_at"] = value
+
+    @property
+    def delivered_at(self) -> str:
+        """Unix timestamp when the message was delivered."""
+        return cast(str, self.__dict__["_delivered_at"])
+
+    @delivered_at.setter
+    def delivered_at(self, value: str) -> None:
+        """Set delivery timestamp of this message."""
+        self.__dict__["_delivered_at"] = value
 
     @property
     def ttl(self) -> float:
@@ -222,6 +233,7 @@ class Message:
             raise ValueError("Either `content` or `error` must be set, but not both.")
 
         metadata.created_at = time.time()  # Set the message creation timestamp
+        metadata.delivered_at = ""
         var_dict = {
             "_metadata": metadata,
             "_content": content,
@@ -290,6 +302,11 @@ class Message:
             follows the equation:
 
             ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)
+
+        Returns
+        -------
+        message : Message
+            A Message containing only the relevant error and metadata.
         """
         # If no TTL passed, use default for message creation (will update after
         # message creation)
@@ -304,7 +321,7 @@ class Message:
             )
             message.metadata.ttl = ttl
 
-        self._limit_task_res_ttl(message)
+        self._limit_message_res_ttl(message)
 
         return message
 
@@ -347,7 +364,7 @@ class Message:
             )
             message.metadata.ttl = ttl
 
-        self._limit_task_res_ttl(message)
+        self._limit_message_res_ttl(message)
 
         return message
 
@@ -362,14 +379,14 @@ class Message:
         )
         return f"{self.__class__.__qualname__}({view})"
 
-    def _limit_task_res_ttl(self, message: Message) -> None:
-        """Limit the TaskRes TTL to not exceed the expiration time of the TaskIns it
-        replies to.
+    def _limit_message_res_ttl(self, message: Message) -> None:
+        """Limit the TTL of the provided Message to not exceed the expiration time of
+        this Message it replies to.
 
         Parameters
         ----------
         message : Message
-            The message to which the TaskRes is replying.
+            The reply Message to limit the TTL for.
         """
         # Calculate the maximum allowed TTL
         max_allowed_ttl = (

@@ -23,7 +23,7 @@ def _bin_age(age_series):
 
 
 def _extract_title(name_series):
-    titles = name_series.str.extract(" ([A-Za-z]+)\.", expand=False)
+    titles = name_series.str.extract(r" ([A-Za-z]+)\.", expand=False)
     rare_titles = {
         "Lady",
         "Countess",

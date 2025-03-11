@@ -24,7 +24,7 @@ jobs:
             list-files: "json"
             filters: |
               readme:
-                - 'src/docker/**/README.md'
+                - added|modified: 'src/docker/**/README.md'
 
     update:
       if: ${{ needs.collect.outputs.readme_files != '' && toJson(fromJson(needs.collect.outputs.readme_files)) != '[]' }}

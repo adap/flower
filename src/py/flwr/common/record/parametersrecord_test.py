@@ -14,12 +14,15 @@
 # ==============================================================================
 """Unit tests for ParametersRecord and Array."""
 
+
 import unittest
 from collections import OrderedDict
 from io import BytesIO
+from typing import Any
 
 import numpy as np
 import pytest
+from parameterized import parameterized
 
 from flwr.common import ndarray_to_bytes
 
@@ -70,6 +73,56 @@ class TestArray(unittest.TestCase):
         # Execute and assert
         with self.assertRaises(TypeError):
             array_instance.numpy()
+
+    def test_array_from_numpy(self) -> None:
+        """Test the array_from_numpy function."""
+        # Prepare
+        original_array = np.array([1, 2, 3], dtype=np.float32)
+
+        # Execute
+        array_instance = Array.from_numpy_ndarray(original_array)
+        buffer = BytesIO(array_instance.data)
+        deserialized_array = np.load(buffer, allow_pickle=False)
+
+        # Assert
+        self.assertEqual(array_instance.dtype, str(original_array.dtype))
+        self.assertEqual(array_instance.shape, list(original_array.shape))
+        self.assertEqual(array_instance.stype, SType.NUMPY)
+        np.testing.assert_array_equal(deserialized_array, original_array)
+
+    @parameterized.expand(  # type: ignore
+        [
+            ({"ndarray": np.array([1, 2, 3])},),
+            ({"dtype": "float32", "shape": [2, 2], "stype": "dense", "data": b"data"},),
+        ]
+    )
+    def test_valid_init_overloads_kwargs(self, kwargs: dict[str, Any]) -> None:
+        """Ensure valid overloads initialize correctly."""
+        array = Array(**kwargs)
+        self.assertIsInstance(array, Array)
+
+    @parameterized.expand(  # type: ignore
+        [
+            (np.array([1, 2, 3]),),
+            ("float32", [2, 2], "dense", b"data"),
+        ]
+    )
+    def test_valid_init_overloads_args(self, *args: Any) -> None:
+        """Ensure valid overloads initialize correctly."""
+        array = Array(*args)
+        self.assertIsInstance(array, Array)
+
+    @parameterized.expand(  # type: ignore
+        [
+            ("float32", [2, 2], "dense", 213),
+            ([2, 2], "dense", b"data"),
+            (123, "invalid"),
+        ]
+    )
+    def test_invalid_init_combinations(self, *args: Any) -> None:
+        """Ensure invalid combinations raise TypeError."""
+        with self.assertRaises(TypeError):
+            Array(*args)
 
 
 @pytest.mark.parametrize(

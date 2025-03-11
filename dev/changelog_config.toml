@@ -10,6 +10,7 @@ project = [
     "examples",
     "benchmarks",
     "glossary",
+    "intelligence",
 ]
 
 scope = "skip"

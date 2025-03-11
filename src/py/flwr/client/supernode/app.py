@@ -14,8 +14,8 @@
 # ==============================================================================
 """Flower SuperNode."""
 
+
 import argparse
-import sys
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import Optional
@@ -28,44 +28,57 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from flwr.common import EventType, event
+from flwr.common.args import try_obtain_root_certificates
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
+    CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
+    ISOLATION_MODE_PROCESS,
+    ISOLATION_MODE_SUBPROCESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.logger import log
 
-from ..app import (
-    ISOLATION_MODE_PROCESS,
-    ISOLATION_MODE_SUBPROCESS,
-    start_client_internal,
-)
+from ..app import start_client_internal
 from ..clientapp.utils import get_load_client_app_fn
 
 
 def run_supernode() -> None:
     """Run Flower SuperNode."""
+    args = _parse_args_run_supernode().parse_args()
+
     log(INFO, "Starting Flower SuperNode")
 
     event(EventType.RUN_SUPERNODE_ENTER)
 
-    args = _parse_args_run_supernode().parse_args()
+    # Check if both `--flwr-dir` and `--isolation` were set
+    if args.flwr_dir is not None and args.isolation is not None:
+        log(
+            WARN,
+            "Both `--flwr-dir` and `--isolation` were specified. "
+            "Ignoring `--flwr-dir`.",
+        )
 
-    _warn_deprecated_server_arg(args)
-
-    root_certificates = _get_certificates(args)
+    root_certificates = try_obtain_root_certificates(args, args.superlink)
     load_fn = get_load_client_app_fn(
         default_app_ref="",
-        app_path=args.app,
+        app_path=None,
         flwr_dir=args.flwr_dir,
         multi_app=True,
     )
     authentication_keys = _try_setup_client_authentication(args)
 
     log(DEBUG, "Isolation mode: %s", args.isolation)
+
+    # Register handlers for graceful shutdown
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERNODE_LEAVE,
+        exit_message="SuperNode terminated gracefully.",
+    )
 
     start_client_internal(
         server_address=args.superlink,
@@ -81,12 +94,7 @@ def run_supernode() -> None:
         ),
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
-        supernode_address=args.supernode_address,
-    )
-
-    # Graceful shutdown
-    register_exit_handlers(
-        event_type=EventType.RUN_SUPERNODE_LEAVE,
+        clientappio_api_address=args.clientappio_api_address,
     )
 
 
@@ -95,65 +103,9 @@ def run_client_app() -> None:
     event(EventType.RUN_CLIENT_APP_ENTER)
     log(
         ERROR,
-        "The command `flower-client-app` has been replaced by `flower-supernode`.",
+        "The command `flower-client-app` has been replaced by `flwr run`.",
     )
-    log(INFO, "Execute `flower-supernode --help` to learn how to use it.")
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
-
-
-def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
-    """Warn about the deprecated argument `--server`."""
-    if args.server != FLEET_API_GRPC_RERE_DEFAULT_ADDRESS:
-        warn = "Passing flag --server is deprecated. Use --superlink instead."
-        warn_deprecated_feature(warn)
-
-        if args.superlink != FLEET_API_GRPC_RERE_DEFAULT_ADDRESS:
-            # if `--superlink` also passed, then
-            # warn user that this argument overrides what was passed with `--server`
-            log(
-                WARN,
-                "Both `--server` and `--superlink` were passed. "
-                "`--server` will be ignored. Connecting to the Superlink Fleet API "
-                "at %s.",
-                args.superlink,
-            )
-        else:
-            args.superlink = args.server
-
-
-def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
-    """Load certificates if specified in args."""
-    # Obtain certificates
-    if args.insecure:
-        if args.root_certificates is not None:
-            sys.exit(
-                "Conflicting options: The '--insecure' flag disables HTTPS, "
-                "but '--root-certificates' was also specified. Please remove "
-                "the '--root-certificates' option when running in insecure mode, "
-                "or omit '--insecure' to use HTTPS."
-            )
-        log(
-            WARN,
-            "Option `--insecure` was set. "
-            "Starting insecure HTTP client connected to %s.",
-            args.superlink,
-        )
-        root_certificates = None
-    else:
-        # Load the certificates if provided, or load the system certificates
-        cert_path = args.root_certificates
-        if cert_path is None:
-            root_certificates = None
-        else:
-            root_certificates = Path(cert_path).read_bytes()
-        log(
-            DEBUG,
-            "Starting secure HTTPS client connected to %s "
-            "with the following certificates: %s.",
-            args.superlink,
-            cert_path,
-        )
-    return root_certificates
 
 
 def _parse_args_run_supernode() -> argparse.ArgumentParser:
@@ -161,48 +113,36 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Start a Flower SuperNode",
     )
-
-    parser.add_argument(
-        "app",
-        nargs="?",
-        default=None,
-        help="Specify the path of the Flower App to load and run the `ClientApp`. "
-        "The `pyproject.toml` file must be located in the root of this path. "
-        "When this argument is provided, the SuperNode will exclusively respond to "
-        "messages from the corresponding `ServerApp` by matching the FAB ID and FAB "
-        "version. An error will be raised if a message is received from any other "
-        "`ServerApp`.",
-    )
     _parse_args_common(parser)
     parser.add_argument(
         "--flwr-dir",
         default=None,
         help="""The path containing installed Flower Apps.
-    By default, this value is equal to:
+        The default directory is:
 
         - `$FLWR_HOME/` if `$FLWR_HOME` is defined
         - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
         - `$HOME/.flwr/` in all other cases
-    """,
+        """,
     )
     parser.add_argument(
         "--isolation",
-        default=None,
+        default=ISOLATION_MODE_SUBPROCESS,
         required=False,
         choices=[
             ISOLATION_MODE_SUBPROCESS,
             ISOLATION_MODE_PROCESS,
         ],
-        help="Isolation mode when running `ClientApp` (optional, possible values: "
-        "`subprocess`, `process`). By default, `ClientApp` runs in the same process "
-        "that executes the SuperNode. Use `subprocess` to configure SuperNode to run "
-        "`ClientApp` in a subprocess. Use `process` to indicate that a separate "
-        "independent process gets created outside of SuperNode.",
+        help="Isolation mode when running a `ClientApp` (`subprocess` by default, "
+        "possible values: `subprocess`, `process`). Use `subprocess` to configure "
+        "SuperNode to run a `ClientApp` in a subprocess. Use `process` to indicate "
+        "that a separate independent process gets created outside of SuperNode.",
     )
     parser.add_argument(
-        "--supernode-address",
-        default="0.0.0.0:9094",
-        help="Set the SuperNode gRPC server address. Defaults to `0.0.0.0:9094`.",
+        "--clientappio-api-address",
+        default=CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
+        help="ClientAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
+        f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
 
     return parser
@@ -246,14 +186,11 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "establishing secure HTTPS connections.",
     )
     parser.add_argument(
-        "--server",
-        default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
-        help="Server address",
-    )
-    parser.add_argument(
         "--superlink",
         default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
-        help="SuperLink Fleet API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
+        help="SuperLink Fleet API address (IPv4, IPv6, or a domain name). If using the "
+        "REST (experimental) transport, ensure your address is in the form "
+        "`http://...` or `https://...` when TLS is enabled.",
     )
     parser.add_argument(
         "--max-retries",
@@ -297,11 +234,7 @@ def _try_setup_client_authentication(
         return None
 
     if not args.auth_supernode_private_key or not args.auth_supernode_public_key:
-        sys.exit(
-            "Authentication requires file paths to both "
-            "'--auth-supernode-private-key' and '--auth-supernode-public-key'"
-            "to be provided (providing only one of them is not sufficient)."
-        )
+        flwr_exit(ExitCode.SUPERNODE_NODE_AUTH_KEYS_REQUIRED)
 
     try:
         ssh_private_key = load_ssh_private_key(
@@ -311,11 +244,9 @@ def _try_setup_client_authentication(
         if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
-            "Error: Unable to parse the private key file in "
-            "'--auth-supernode-private-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid private key file and try again."
+        flwr_exit(
+            ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
+            "Unable to parse the private key file.",
         )
 
     try:
@@ -325,11 +256,9 @@ def _try_setup_client_authentication(
         if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
-            "Error: Unable to parse the public key file in "
-            "'--auth-supernode-public-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid public key file and try again."
+        flwr_exit(
+            ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
+            "Unable to parse the public key file.",
         )
 
     return (

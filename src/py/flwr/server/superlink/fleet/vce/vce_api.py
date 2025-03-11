@@ -28,7 +28,8 @@ from typing import Callable, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.clientapp.utils import get_load_client_app_fn
-from flwr.client.node_state import NodeState
+from flwr.client.run_info_store import DeprecatedRunInfoStore
+from flwr.common import Message
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -37,10 +38,8 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log
 from flwr.common.message import Error
-from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.common.typing import Run
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.state import State, StateFactory
+from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
 from .backend import Backend, error_messages_backends, supported_backends
 
@@ -48,7 +47,7 @@ NodeToPartitionMapping = dict[int, int]
 
 
 def _register_nodes(
-    num_nodes: int, state_factory: StateFactory
+    num_nodes: int, state_factory: LinkStateFactory
 ) -> NodeToPartitionMapping:
     """Register nodes with the StateFactory and create node-id:partition-id mapping."""
     nodes_mapping: NodeToPartitionMapping = {}
@@ -60,16 +59,16 @@ def _register_nodes(
     return nodes_mapping
 
 
-def _register_node_states(
+def _register_node_info_stores(
     nodes_mapping: NodeToPartitionMapping,
     run: Run,
     app_dir: Optional[str] = None,
-) -> dict[int, NodeState]:
-    """Create NodeState objects and pre-register the context for the run."""
-    node_states: dict[int, NodeState] = {}
+) -> dict[int, DeprecatedRunInfoStore]:
+    """Create DeprecatedRunInfoStore objects and register the context for the run."""
+    node_info_store: dict[int, DeprecatedRunInfoStore] = {}
     num_partitions = len(set(nodes_mapping.values()))
     for node_id, partition_id in nodes_mapping.items():
-        node_states[node_id] = NodeState(
+        node_info_store[node_id] = DeprecatedRunInfoStore(
             node_id=node_id,
             node_config={
                 PARTITION_ID_KEY: partition_id,
@@ -78,42 +77,42 @@ def _register_node_states(
         )
 
         # Pre-register Context objects
-        node_states[node_id].register_context(
+        node_info_store[node_id].register_context(
             run_id=run.run_id, run=run, app_dir=app_dir
         )
 
-    return node_states
+    return node_info_store
 
 
 # pylint: disable=too-many-arguments,too-many-locals
 def worker(
-    taskins_queue: "Queue[TaskIns]",
-    taskres_queue: "Queue[TaskRes]",
-    node_states: dict[int, NodeState],
+    messageins_queue: Queue[Message],
+    messageres_queue: Queue[Message],
+    node_info_store: dict[int, DeprecatedRunInfoStore],
     backend: Backend,
     f_stop: threading.Event,
 ) -> None:
-    """Get TaskIns from queue and pass it to an actor in the pool to execute it."""
+    """Process messages from the queue, execute them, update context, and enqueue
+    replies."""
     while not f_stop.is_set():
         out_mssg = None
         try:
             # Fetch from queue with timeout. We use a timeout so
             # the stopping event can be evaluated even when the queue is empty.
-            task_ins: TaskIns = taskins_queue.get(timeout=1.0)
-            node_id = task_ins.task.consumer.node_id
+            message: Message = messageins_queue.get(timeout=1.0)
+            node_id = message.metadata.dst_node_id
 
             # Retrieve context
-            context = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
-
-            # Convert TaskIns to Message
-            message = message_from_taskins(task_ins)
+            context = node_info_store[node_id].retrieve_context(
+                run_id=message.metadata.run_id
+            )
 
             # Let backend process message
             out_mssg, updated_context = backend.process_message(message, context)
 
             # Update Context
-            node_states[node_id].update_context(
-                task_ins.run_id, context=updated_context
+            node_info_store[node_id].update_context(
+                message.metadata.run_id, context=updated_context
             )
         except Empty:
             # An exception raised if queue.get times out
@@ -137,52 +136,50 @@ def worker(
 
         finally:
             if out_mssg:
-                # Convert to TaskRes
-                task_res = message_to_taskres(out_mssg)
-                # Store TaskRes in state
-                task_res.task.pushed_at = time.time()
-                taskres_queue.put(task_res)
+                # Store reply Messages in state
+                messageres_queue.put(out_mssg)
 
 
-def add_taskins_to_queue(
-    state: State,
-    queue: "Queue[TaskIns]",
+def add_messages_to_queue(
+    state: LinkState,
+    queue: Queue[Message],
     nodes_mapping: NodeToPartitionMapping,
     f_stop: threading.Event,
 ) -> None:
-    """Put TaskIns in a queue from State."""
+    """Put Messages in the queue from the LinkState."""
     while not f_stop.is_set():
         for node_id in nodes_mapping.keys():
-            task_ins_list = state.get_task_ins(node_id=node_id, limit=1)
-            for task_ins in task_ins_list:
-                queue.put(task_ins)
+            message_ins_list = state.get_message_ins(node_id=node_id, limit=1)
+            for msg in message_ins_list:
+                queue.put(msg)
         sleep(0.1)
 
 
-def put_taskres_into_state(
-    state: State, queue: "Queue[TaskRes]", f_stop: threading.Event
+def put_message_into_state(
+    state: LinkState, queue: Queue[Message], f_stop: threading.Event
 ) -> None:
-    """Put TaskRes into State from a queue."""
+    """Store reply Messages into the LinkState from the queue."""
     while not f_stop.is_set():
         try:
-            taskres = queue.get(timeout=1.0)
-            state.store_task_res(taskres)
+            message_reply = queue.get(timeout=1.0)
+            state.store_message_res(message_reply)
         except Empty:
             # queue is empty when timeout was triggered
             pass
 
 
+# pylint: disable=too-many-positional-arguments
 def run_api(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
-    state_factory: StateFactory,
-    node_states: dict[int, NodeState],
+    state_factory: LinkStateFactory,
+    node_info_stores: dict[int, DeprecatedRunInfoStore],
     f_stop: threading.Event,
 ) -> None:
     """Run the VCE."""
-    taskins_queue: "Queue[TaskIns]" = Queue()
-    taskres_queue: "Queue[TaskRes]" = Queue()
+    messageins_queue: Queue[Message] = Queue()
+    messageres_queue: Queue[Message] = Queue()
 
     try:
 
@@ -196,10 +193,10 @@ def run_api(
         state = state_factory.state()
 
         extractor_th = threading.Thread(
-            target=add_taskins_to_queue,
+            target=add_messages_to_queue,
             args=(
                 state,
-                taskins_queue,
+                messageins_queue,
                 nodes_mapping,
                 f_stop,
             ),
@@ -207,10 +204,10 @@ def run_api(
         extractor_th.start()
 
         injector_th = threading.Thread(
-            target=put_taskres_into_state,
+            target=put_message_into_state,
             args=(
                 state,
-                taskres_queue,
+                messageres_queue,
                 f_stop,
             ),
         )
@@ -220,9 +217,9 @@ def run_api(
             _ = [
                 executor.submit(
                     worker,
-                    taskins_queue,
-                    taskres_queue,
-                    node_states,
+                    messageins_queue,
+                    messageres_queue,
+                    node_info_stores,
                     backend,
                     f_stop,
                 )
@@ -251,7 +248,7 @@ def run_api(
 
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements,too-many-positional-arguments
 def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
@@ -263,10 +260,12 @@ def start_vce(
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
-    state_factory: Optional[StateFactory] = None,
+    state_factory: Optional[LinkStateFactory] = None,
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
+    nodes_mapping = {}
+
     if client_app_attr is not None and client_app is not None:
         raise ValueError(
             "Both `client_app_attr` and `client_app` are provided, "
@@ -300,7 +299,7 @@ def start_vce(
     if not state_factory:
         log(INFO, "A StateFactory was not supplied to the SimulationEngine.")
         # Create an empty in-memory state factory
-        state_factory = StateFactory(":flwr-in-memory-state:")
+        state_factory = LinkStateFactory(":flwr-in-memory-state:")
         log(INFO, "Created new %s.", state_factory.__class__.__name__)
 
     if num_supernodes:
@@ -309,8 +308,8 @@ def start_vce(
             num_nodes=num_supernodes, state_factory=state_factory
         )
 
-    # Construct mapping of NodeStates
-    node_states = _register_node_states(
+    # Construct mapping of DeprecatedRunInfoStore
+    node_info_stores = _register_node_info_stores(
         nodes_mapping=nodes_mapping, run=run, app_dir=app_dir if is_app else None
     )
 
@@ -340,17 +339,17 @@ def start_vce(
     # Load ClientApp if needed
     def _load() -> ClientApp:
 
+        if client_app:
+            return client_app
         if client_app_attr:
-            app = get_load_client_app_fn(
+            return get_load_client_app_fn(
                 default_app_ref=client_app_attr,
                 app_path=app_dir,
                 flwr_dir=flwr_dir,
                 multi_app=False,
-            )(run.fab_id, run.fab_version)
+            )(run.fab_id, run.fab_version, run.fab_hash)
 
-        if client_app:
-            app = client_app
-        return app
+        raise ValueError("Either `client_app_attr` or `client_app` must be provided")
 
     app_fn = _load
 
@@ -373,7 +372,7 @@ def start_vce(
             backend_fn,
             nodes_mapping,
             state_factory,
-            node_states,
+            node_info_stores,
             f_stop,
         )
     except LoadClientAppError as loadapp_ex:

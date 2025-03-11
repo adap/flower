@@ -18,24 +18,24 @@ syntax = "proto3";
 package flwr.proto;
 
 import "flwr/proto/node.proto";
-import "flwr/proto/task.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
+import "flwr/proto/message.proto";
 
 service Fleet {
   rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
   rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse) {}
   rpc Ping(PingRequest) returns (PingResponse) {}
 
-  // Retrieve one or more tasks, if possible
+  // Retrieve one or more messages, if possible
   //
-  // HTTP API path: /api/v1/fleet/pull-task-ins
-  rpc PullTaskIns(PullTaskInsRequest) returns (PullTaskInsResponse) {}
+  // HTTP API path: /api/v1/fleet/pull-messages
+  rpc PullMessages(PullMessagesRequest) returns (PullMessagesResponse) {}
 
-  // Complete one or more tasks, if possible
+  // Complete one or more messages, if possible
   //
-  // HTTP API path: /api/v1/fleet/push-task-res
-  rpc PushTaskRes(PushTaskResRequest) returns (PushTaskResResponse) {}
+  // HTTP API path: /api/v1/fleet/push-messages
+  rpc PushMessages(PushMessagesRequest) returns (PushMessagesResponse) {}
 
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
 
@@ -58,22 +58,22 @@ message PingRequest {
 }
 message PingResponse { bool success = 1; }
 
-// PullTaskIns messages
-message PullTaskInsRequest {
+// PullMessages messages
+message PullMessagesRequest {
   Node node = 1;
-  repeated string task_ids = 2;
+  repeated string message_ids = 2;
 }
-message PullTaskInsResponse {
+message PullMessagesResponse {
   Reconnect reconnect = 1;
-  repeated TaskIns task_ins_list = 2;
+  repeated Message messages_list = 2;
 }
 
-// PushTaskRes messages
-message PushTaskResRequest {
+// PushMessages messages
+message PushMessagesRequest {
   Node node = 1;
-  repeated TaskRes task_res_list = 2;
+  repeated Message messages_list = 2;
 }
-message PushTaskResResponse {
+message PushMessagesResponse {
   Reconnect reconnect = 1;
   map<string, uint32> results = 2;
 }

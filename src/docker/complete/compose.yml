@@ -1,16 +1,20 @@
 services:
   # create a SuperLink service
   superlink:
-    image: flwr/superlink:${FLWR_VERSION:-1.11.1}
+    image: flwr/superlink:${FLWR_VERSION:-1.16.0}
     command:
       - --insecure
+      - --isolation
+      - process
+    ports:
+      - 9093:9093
 
-  # create a SuperExec service
-  superexec:
+  # create a ServerApp service
+  serverapp:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/superexec:${FLWR_VERSION:-1.11.1}
+        FROM flwr/serverapp:${FLWR_VERSION:-1.16.0}
 
         # gcc is required for the fastai quickstart example
         USER root
@@ -25,26 +29,23 @@ services:
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
-        ENTRYPOINT ["flower-superexec"]
-    ports:
-      - 9093:9093
+        ENTRYPOINT ["flwr-serverapp"]
     command:
-      - --executor
-      - flwr.superexec.deployment:executor
       - --insecure
-      - --executor-config
-      - superlink="superlink:9091"
+      - --serverappio-api-address
+      - superlink:9091
+    restart: on-failure:3
     depends_on:
       - superlink
 
-  # create a two SuperNode service with different node configs
+  # create two SuperNode services with different node configs
   supernode-1:
-    image: flwr/supernode:${FLWR_VERSION:-1.11.1}
+    image: flwr/supernode:${FLWR_VERSION:-1.16.0}
     command:
       - --insecure
       - --superlink
       - superlink:9092
-      - --supernode-address
+      - --clientappio-api-address
       - 0.0.0.0:9094
       - --isolation
       - process
@@ -54,12 +55,12 @@ services:
       - superlink
 
   supernode-2:
-    image: flwr/supernode:${FLWR_VERSION:-1.11.1}
+    image: flwr/supernode:${FLWR_VERSION:-1.16.0}
     command:
       - --insecure
       - --superlink
       - superlink:9092
-      - --supernode-address
+      - --clientappio-api-address
       - 0.0.0.0:9095
       - --isolation
       - process
@@ -71,12 +72,12 @@ services:
   # uncomment to add another SuperNode
   #
   # supernode-3:
-  #   image: flwr/supernode:${FLWR_VERSION:-1.11.1}
+  #   image: flwr/supernode:${FLWR_VERSION:-1.16.0}
   #   command:
   #     - --insecure
   #     - --superlink
   #     - superlink:9092
-  #     - --supernode-address
+  #     - --clientappio-api-address
   #     - 0.0.0.0:9096
   #     - --isolation
   #     - process
@@ -85,11 +86,12 @@ services:
   #   depends_on:
   #     - superlink
 
+  # create two ClientApp services
   clientapp-1:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-1.11.1}
+        FROM flwr/clientapp:${FLWR_VERSION:-1.16.0}
 
         # gcc is required for the fastai quickstart example
         USER root
@@ -106,7 +108,8 @@ services:
 
         ENTRYPOINT ["flwr-clientapp"]
     command:
-      - --supernode
+      - --insecure
+      - --clientappio-api-address
       - supernode-1:9094
     deploy:
       resources:
@@ -120,7 +123,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-1.11.1}
+        FROM flwr/clientapp:${FLWR_VERSION:-1.16.0}
 
         # gcc is required for the fastai quickstart example
         USER root
@@ -137,7 +140,8 @@ services:
 
         ENTRYPOINT ["flwr-clientapp"]
     command:
-      - --supernode
+      - --insecure
+      - --clientappio-api-address
       - supernode-2:9095
     deploy:
       resources:
@@ -146,14 +150,13 @@ services:
     stop_signal: SIGINT
     depends_on:
       - supernode-2
-
   # uncomment to add another ClientApp
   #
   # clientapp-3:
   #   build:
   #     context: ${PROJECT_DIR:-.}
   #     dockerfile_inline: |
-  #       FROM flwr/clientapp:${FLWR_VERSION:-1.11.1}
+  #       FROM flwr/clientapp:${FLWR_VERSION:-1.16.0}
 
   #       # gcc is required for the fastai quickstart example
   #       USER root
@@ -170,7 +173,8 @@ services:
 
   #       ENTRYPOINT ["flwr-clientapp"]
   #   command:
-  #     - --supernode
+  #     - --insecure
+  #     - --clientappio-api-address
   #     - supernode-3:9096
   #   deploy:
   #     resources:

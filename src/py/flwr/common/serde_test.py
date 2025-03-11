@@ -14,6 +14,7 @@
 # ==============================================================================
 """(De-)serialization tests."""
 
+
 import random
 import string
 from collections import OrderedDict
@@ -57,11 +58,7 @@ from .serde import (
     fab_from_proto,
     fab_to_proto,
     message_from_proto,
-    message_from_taskins,
-    message_from_taskres,
     message_to_proto,
-    message_to_taskins,
-    message_to_taskres,
     metrics_record_from_proto,
     metrics_record_to_proto,
     parameters_record_from_proto,
@@ -245,20 +242,14 @@ class RecordMaker:
         num_configs_records: int,
     ) -> RecordSet:
         """Create a RecordSet."""
-        return RecordSet(
-            parameters_records={
-                self.get_str(): self.parameters_record()
-                for _ in range(num_params_records)
-            },
-            metrics_records={
-                self.get_str(): self.metrics_record()
-                for _ in range(num_metrics_records)
-            },
-            configs_records={
-                self.get_str(): self.configs_record()
-                for _ in range(num_configs_records)
-            },
-        )
+        ret = RecordSet()
+        for _ in range(num_params_records):
+            ret[self.get_str()] = self.parameters_record()
+        for _ in range(num_metrics_records):
+            ret[self.get_str()] = self.metrics_record()
+        for _ in range(num_configs_records):
+            ret[self.get_str()] = self.configs_record()
+        return ret
 
     def metadata(self) -> Metadata:
         """Create a Metadata."""
@@ -372,96 +363,6 @@ def test_recordset_serialization_deserialization() -> None:
         (None, lambda code: Error(code=code)),  # check when only error is set
     ],
 )
-def test_message_to_and_from_taskins(
-    content_fn: Callable[
-        [
-            RecordMaker,
-        ],
-        RecordSet,
-    ],
-    error_fn: Callable[[int], Error],
-) -> None:
-    """Test Message to and from TaskIns."""
-    # Prepare
-
-    maker = RecordMaker(state=1)
-    metadata = maker.metadata()
-    # pylint: disable-next=protected-access
-    metadata.__dict__["_src_node_id"] = 0  # Assume driver node
-
-    original = Message(
-        metadata=metadata,
-        content=None if content_fn is None else content_fn(maker),
-        error=None if error_fn is None else error_fn(0),
-    )
-
-    # Execute
-    taskins = message_to_taskins(original)
-    taskins.task_id = metadata.message_id
-    deserialized = message_from_taskins(taskins)
-
-    # Assert
-    if original.has_content():
-        assert original.content == deserialized.content
-    if original.has_error():
-        assert original.error == deserialized.error
-    assert metadata == deserialized.metadata
-
-
-@pytest.mark.parametrize(
-    "content_fn, error_fn",
-    [
-        (
-            lambda maker: maker.recordset(1, 1, 1),
-            None,
-        ),  # check when only content is set
-        (None, lambda code: Error(code=code)),  # check when only error is set
-    ],
-)
-def test_message_to_and_from_taskres(
-    content_fn: Callable[
-        [
-            RecordMaker,
-        ],
-        RecordSet,
-    ],
-    error_fn: Callable[[int], Error],
-) -> None:
-    """Test Message to and from TaskRes."""
-    # Prepare
-    maker = RecordMaker(state=2)
-    metadata = maker.metadata()
-    metadata.dst_node_id = 0  # Assume driver node
-
-    original = Message(
-        metadata=metadata,
-        content=None if content_fn is None else content_fn(maker),
-        error=None if error_fn is None else error_fn(0),
-    )
-
-    # Execute
-    taskres = message_to_taskres(original)
-    taskres.task_id = metadata.message_id
-    deserialized = message_from_taskres(taskres)
-
-    # Assert
-    if original.has_content():
-        assert original.content == deserialized.content
-    if original.has_error():
-        assert original.error == deserialized.error
-    assert metadata == deserialized.metadata
-
-
-@pytest.mark.parametrize(
-    "content_fn, error_fn",
-    [
-        (
-            lambda maker: maker.recordset(1, 1, 1),
-            None,
-        ),  # check when only content is set
-        (None, lambda code: Error(code=code)),  # check when only error is set
-    ],
-)
 def test_message_serialization_deserialization(
     content_fn: Callable[
         [
@@ -503,6 +404,7 @@ def test_context_serialization_deserialization() -> None:
     # Prepare
     maker = RecordMaker()
     original = Context(
+        run_id=0,
         node_id=1,
         node_config=maker.user_config(),
         state=maker.recordset(1, 1, 1),
@@ -528,6 +430,11 @@ def test_run_serialization_deserialization() -> None:
         fab_version="ipsum",
         fab_hash="hash",
         override_config=maker.user_config(),
+        pending_at="2021-01-01T00:00:00Z",
+        starting_at="2021-01-02T23:02:11Z",
+        running_at="2021-01-03T12:00:50Z",
+        finished_at="",
+        status=typing.RunStatus(status="running", sub_status="", details="OK"),
     )
 
     # Execute

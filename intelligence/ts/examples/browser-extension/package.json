@@ -1,0 +1,40 @@
+{
+  "name": "flowerintelligence-browser-extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "watch": "./scripts/watch.sh",
+    "build": "./scripts/build.sh",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint --fix src",
+    "lint:check": "eslint src",
+    "ibuild": "pnpm i && pnpm build",
+    "build:extension": "pnpm ibuild && cd dist && zip -r -FS ./flower-intelligence-browser-assistant.xpi * && cd .."
+  },
+  "dependencies": {
+    "@flwr/flwr": "file:../../dist",
+    "@mozilla/readability": "^0.5.0",
+    "webextension-polyfill": "^0.12.0"
+  },
+  "types": "../../dist/index.d.ts",
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.13.0",
+    "@types/eslint__js": "^8.42.3",
+    "@typescript-eslint/eslint-plugin": "^8.12.2",
+    "@typescript-eslint/parser": "^8.12.2",
+    "@types/mozilla-readability": "^0.2.1",
+    "@types/webextension-polyfill": "^0.12.1",
+    "eslint": "^9.13.0",
+    "eslint-import-resolver-typescript": "^3.6.3",
+    "eslint-plugin-import": "^2.31.0",
+    "globals": "^15.11.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.12.2",
+    "vite": "^5.4.12"
+  },
+  "packageManager": "pnpm@9.3.0+sha512.ee7b93e0c2bd11409c6424f92b866f31d3ea1bef5fbe47d3c7500cdc3c9668833d2e55681ad66df5b640c61fa9dc25d546efa54d76d7f8bf54b13614ac293631"
+}

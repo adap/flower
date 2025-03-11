@@ -14,6 +14,7 @@
 # ==============================================================================
 """Client-side message handler."""
 
+
 from logging import WARN
 from typing import Optional, cast
 
@@ -81,7 +82,7 @@ def handle_control_message(message: Message) -> tuple[Optional[Message], int]:
         recordset = RecordSet()
         recordset.configs_records["config"] = ConfigsRecord({"reason": reason})
         out_message = message.create_reply(recordset)
-        # Return TaskRes and sleep duration
+        # Return Message and sleep duration
         return out_message, sleep_duration
 
     # Any other message
@@ -103,8 +104,6 @@ def handle_legacy_message_from_msgtype(
             "of `Client`, but an instance of `NumpyClient` was returned. "
             "Please use `NumPyClient.to_client()` method to convert it to `Client`.",
         )
-
-    client.set_context(context)
 
     message_type = message.metadata.message_type
 

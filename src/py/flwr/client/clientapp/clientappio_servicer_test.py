@@ -14,10 +14,16 @@
 # ==============================================================================
 """Test the ClientAppIo API servicer."""
 
+
 import unittest
+from os import urandom
 from unittest.mock import Mock, patch
 
-from flwr.client.clientapp.app import get_token, pull_message, push_message
+from flwr.client.clientapp.app import (
+    get_token,
+    pull_clientappinputs,
+    push_clientappoutputs,
+)
 from flwr.common import Context, Message, typing
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.serde import (
@@ -36,7 +42,6 @@ from flwr.proto.clientappio_pb2 import (
 )
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.run_pb2 import Run as ProtoRun
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
 from .clientappio_servicer import ClientAppInputs, ClientAppIoServicer, ClientAppOutputs
 
@@ -66,6 +71,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             content=self.maker.recordset(2, 2, 1),
         )
         context = Context(
+            run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
             state=self.maker.recordset(2, 2, 1),
@@ -77,6 +83,11 @@ class TestClientAppIoServicer(unittest.TestCase):
             fab_version="ipsum",
             fab_hash="dolor",
             override_config=self.maker.user_config(),
+            pending_at="2021-01-01T00:00:00Z",
+            starting_at="",
+            running_at="",
+            finished_at="",
+            status=typing.RunStatus(status="pending", sub_status="", details=""),
         )
         fab = typing.Fab(
             hash_str="abc123#$%",
@@ -122,6 +133,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             content=self.maker.recordset(2, 2, 1),
         )
         context = Context(
+            run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
             state=self.maker.recordset(2, 2, 1),
@@ -163,7 +175,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.mock_stub.PullClientAppInputs.return_value = mock_response
 
         # Execute
-        message, context, run, fab = pull_message(self.mock_stub, token=456)
+        message, context, run, fab = pull_clientappinputs(self.mock_stub, token=456)
 
         # Assert
         self.mock_stub.PullClientAppInputs.assert_called_once()
@@ -186,6 +198,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             content=self.maker.recordset(2, 2, 1),
         )
         context = Context(
+            run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
             state=self.maker.recordset(2, 2, 1),
@@ -199,7 +212,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.mock_stub.PushClientAppOutputs.return_value = mock_response
 
         # Execute
-        res = push_message(
+        res = push_clientappoutputs(
             stub=self.mock_stub, token=789, message=message, context=context
         )
         status = clientappstatus_from_proto(res.status)
@@ -211,7 +224,7 @@ class TestClientAppIoServicer(unittest.TestCase):
     def test_get_token(self) -> None:
         """Test getting a token from SuperNode."""
         # Prepare
-        token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+        token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
         mock_response = GetTokenResponse(token=token)
         self.mock_stub.GetToken.return_value = mock_response
 

@@ -15,92 +15,62 @@
 """Flower server interceptor."""
 
 
-import base64
-from collections.abc import Sequence
-from logging import INFO, WARNING
-from typing import Any, Callable, Optional, Union
+import datetime
+from typing import Any, Callable, Optional, cast
 
 import grpc
-from cryptography.hazmat.primitives.asymmetric import ec
+from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.logger import log
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    bytes_to_private_key,
-    bytes_to_public_key,
-    generate_shared_key,
-    verify_hmac,
+from flwr.common import now
+from flwr.common.constant import (
+    PUBLIC_KEY_HEADER,
+    SIGNATURE_HEADER,
+    SYSTEM_TIME_TOLERANCE,
+    TIMESTAMP_HEADER,
+    TIMESTAMP_TOLERANCE,
 )
-from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    bytes_to_public_key,
+    verify_signature,
+)
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
-    DeleteNodeRequest,
-    DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
 )
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.server.superlink.state import State
+from flwr.server.superlink.linkstate import LinkStateFactory
 
-_PUBLIC_KEY_HEADER = "public-key"
-_AUTH_TOKEN_HEADER = "auth-token"
-
-Request = Union[
-    CreateNodeRequest,
-    DeleteNodeRequest,
-    PullTaskInsRequest,
-    PushTaskResRequest,
-    GetRunRequest,
-    PingRequest,
-    GetFabRequest,
-]
-
-Response = Union[
-    CreateNodeResponse,
-    DeleteNodeResponse,
-    PullTaskInsResponse,
-    PushTaskResResponse,
-    GetRunResponse,
-    PingResponse,
-    GetFabResponse,
-]
+MIN_TIMESTAMP_DIFF = -SYSTEM_TIME_TOLERANCE
+MAX_TIMESTAMP_DIFF = TIMESTAMP_TOLERANCE + SYSTEM_TIME_TOLERANCE
 
 
-def _get_value_from_tuples(
-    key_string: str, tuples: Sequence[tuple[str, Union[str, bytes]]]
-) -> bytes:
-    value = next((value for key, value in tuples if key == key_string), "")
-    if isinstance(value, str):
-        return value.encode()
+def _unary_unary_rpc_terminator(
+    message: str, code: Any = grpc.StatusCode.UNAUTHENTICATED
+) -> grpc.RpcMethodHandler:
+    def terminate(_request: GrpcMessage, context: grpc.ServicerContext) -> GrpcMessage:
+        context.abort(code, message)
+        raise RuntimeError("Should not reach this point")  # Make mypy happy
 
-    return value
+    return grpc.unary_unary_rpc_method_handler(terminate)
 
 
 class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
-    """Server interceptor for node authentication."""
+    """Server interceptor for node authentication.
 
-    def __init__(self, state: State):
-        self.state = state
+    Parameters
+    ----------
+    state_factory : LinkStateFactory
+        A factory for creating new instances of LinkState.
+    auto_auth : bool (default: False)
+        If True, nodes are authenticated without requiring their public keys to be
+        pre-stored in the LinkState. If False, only nodes with pre-stored public keys
+        can be authenticated.
+    """
 
-        self.node_public_keys = state.get_node_public_keys()
-        if len(self.node_public_keys) == 0:
-            log(WARNING, "Authentication enabled, but no known public keys configured")
+    def __init__(self, state_factory: LinkStateFactory, auto_auth: bool = False):
+        self.state_factory = state_factory
+        self.auto_auth = auto_auth
 
-        private_key = self.state.get_server_private_key()
-        public_key = self.state.get_server_public_key()
-
-        if private_key is None or public_key is None:
-            raise ValueError("Error loading authentication keys")
-
-        self.server_private_key = bytes_to_private_key(private_key)
-        self.encoded_server_public_key = base64.urlsafe_b64encode(public_key)
-
-    def intercept_service(
+    def intercept_service(  # pylint: disable=too-many-return-statements
         self,
         continuation: Callable[[Any], Any],
         handler_call_details: grpc.HandlerCallDetails,
@@ -111,116 +81,89 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         metadata sent by the node. Continue RPC call if node is authenticated, else,
         terminate RPC call by setting context to abort.
         """
+        # Filter out non-Fleet service calls
+        if not handler_call_details.method.startswith("/flwr.proto.Fleet/"):
+            return _unary_unary_rpc_terminator(
+                "This request should be sent to a different service.",
+                grpc.StatusCode.FAILED_PRECONDITION,
+            )
+
+        state = self.state_factory.state()
+        metadata_dict = dict(handler_call_details.invocation_metadata)
+
+        # Retrieve info from the metadata
+        try:
+            node_pk_bytes = cast(bytes, metadata_dict[PUBLIC_KEY_HEADER])
+            timestamp_iso = cast(str, metadata_dict[TIMESTAMP_HEADER])
+            signature = cast(bytes, metadata_dict[SIGNATURE_HEADER])
+        except KeyError:
+            return _unary_unary_rpc_terminator("Missing authentication metadata")
+
+        if not self.auto_auth:
+            # Abort the RPC call if the node public key is not found
+            if node_pk_bytes not in state.get_node_public_keys():
+                return _unary_unary_rpc_terminator("Public key not recognized")
+
+        # Verify the signature
+        node_pk = bytes_to_public_key(node_pk_bytes)
+        if not verify_signature(node_pk, timestamp_iso.encode("ascii"), signature):
+            return _unary_unary_rpc_terminator("Invalid signature")
+
+        # Verify the timestamp
+        current = now()
+        time_diff = current - datetime.datetime.fromisoformat(timestamp_iso)
+        # Abort the RPC call if the timestamp is too old or in the future
+        if not MIN_TIMESTAMP_DIFF < time_diff.total_seconds() < MAX_TIMESTAMP_DIFF:
+            return _unary_unary_rpc_terminator("Invalid timestamp")
+
+        # Continue the RPC call
+        expected_node_id = state.get_node_id(node_pk_bytes)
+        if not handler_call_details.method.endswith("CreateNode"):
+            # All calls, except for `CreateNode`, must provide a public key that is
+            # already mapped to a `node_id` (in `LinkState`)
+            if expected_node_id is None:
+                return _unary_unary_rpc_terminator("Invalid node ID")
         # One of the method handlers in
         # `flwr.server.superlink.fleet.grpc_rere.fleet_server.FleetServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
-        return self._generic_auth_unary_method_handler(method_handler)
+        return self._wrap_method_handler(
+            method_handler, expected_node_id, node_pk_bytes
+        )
 
-    def _generic_auth_unary_method_handler(
-        self, method_handler: grpc.RpcMethodHandler
+    def _wrap_method_handler(
+        self,
+        method_handler: grpc.RpcMethodHandler,
+        expected_node_id: Optional[int],
+        node_public_key: bytes,
     ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
-            request: Request,
+            request: GrpcMessage,
             context: grpc.ServicerContext,
-        ) -> Response:
-            node_public_key_bytes = base64.urlsafe_b64decode(
-                _get_value_from_tuples(
-                    _PUBLIC_KEY_HEADER, context.invocation_metadata()
-                )
-            )
-            if node_public_key_bytes not in self.node_public_keys:
-                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
+        ) -> GrpcMessage:
+            # Verify the node ID
+            if not isinstance(request, CreateNodeRequest):
+                try:
+                    if request.node.node_id != expected_node_id:  # type: ignore
+                        raise ValueError
+                except (AttributeError, ValueError):
+                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid node ID")
 
-            if isinstance(request, CreateNodeRequest):
-                response = self._create_authenticated_node(
-                    node_public_key_bytes, request, context
-                )
-                log(
-                    INFO,
-                    "AuthenticateServerInterceptor: Created node_id=%s",
-                    response.node.node_id,
-                )
-                return response
+            response: GrpcMessage = method_handler.unary_unary(request, context)
 
-            # Verify hmac value
-            hmac_value = base64.urlsafe_b64decode(
-                _get_value_from_tuples(
-                    _AUTH_TOKEN_HEADER, context.invocation_metadata()
-                )
-            )
-            public_key = bytes_to_public_key(node_public_key_bytes)
+            # Set the public key after a successful CreateNode request
+            if isinstance(response, CreateNodeResponse):
+                state = self.state_factory.state()
+                try:
+                    state.set_node_public_key(response.node.node_id, node_public_key)
+                except ValueError as e:
+                    # Remove newly created node if setting the public key fails
+                    state.delete_node(response.node.node_id)
+                    context.abort(grpc.StatusCode.UNAUTHENTICATED, str(e))
 
-            if not self._verify_hmac(public_key, request, hmac_value):
-                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
-
-            # Verify node_id
-            node_id = self.state.get_node_id(node_public_key_bytes)
-
-            if not self._verify_node_id(node_id, request):
-                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
-
-            return method_handler.unary_unary(request, context)  # type: ignore
+            return response
 
         return grpc.unary_unary_rpc_method_handler(
             _generic_method_handler,
             request_deserializer=method_handler.request_deserializer,
             response_serializer=method_handler.response_serializer,
         )
-
-    def _verify_node_id(
-        self,
-        node_id: Optional[int],
-        request: Union[
-            DeleteNodeRequest,
-            PullTaskInsRequest,
-            PushTaskResRequest,
-            GetRunRequest,
-            PingRequest,
-            GetFabRequest,
-        ],
-    ) -> bool:
-        if node_id is None:
-            return False
-        if isinstance(request, PushTaskResRequest):
-            if len(request.task_res_list) == 0:
-                return False
-            return request.task_res_list[0].task.producer.node_id == node_id
-        if isinstance(request, GetRunRequest):
-            return node_id in self.state.get_nodes(request.run_id)
-        return request.node.node_id == node_id
-
-    def _verify_hmac(
-        self, public_key: ec.EllipticCurvePublicKey, request: Request, hmac_value: bytes
-    ) -> bool:
-        shared_secret = generate_shared_key(self.server_private_key, public_key)
-        message_bytes = request.SerializeToString(deterministic=True)
-        return verify_hmac(shared_secret, message_bytes, hmac_value)
-
-    def _create_authenticated_node(
-        self,
-        public_key_bytes: bytes,
-        request: CreateNodeRequest,
-        context: grpc.ServicerContext,
-    ) -> CreateNodeResponse:
-        context.send_initial_metadata(
-            (
-                (
-                    _PUBLIC_KEY_HEADER,
-                    self.encoded_server_public_key,
-                ),
-            )
-        )
-
-        node_id = self.state.get_node_id(public_key_bytes)
-
-        # Handle `CreateNode` here instead of calling the default method handler
-        # Return previously assigned `node_id` for the provided `public_key`
-        if node_id is not None:
-            self.state.acknowledge_ping(node_id, request.ping_interval)
-            return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
-
-        # No `node_id` exists for the provided `public_key`
-        # Handle `CreateNode` here instead of calling the default method handler
-        # Note: the innermost `CreateNode` method will never be called
-        node_id = self.state.create_node(request.ping_interval, public_key_bytes)
-        return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))

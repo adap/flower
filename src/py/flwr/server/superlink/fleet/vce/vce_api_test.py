@@ -16,7 +16,6 @@
 
 
 import threading
-import time
 from itertools import cycle
 from json import JSONDecodeError
 from math import pi
@@ -39,16 +38,18 @@ from flwr.common import (
     Metadata,
     RecordSet,
     Scalar,
+    now,
 )
+from flwr.common.constant import Status
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
-from flwr.common.serde import message_from_taskres, message_to_taskins
-from flwr.common.typing import Run
+from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
     _register_nodes,
     start_vce,
 )
-from flwr.server.superlink.state import InMemoryState, StateFactory
+from flwr.server.superlink.linkstate import InMemoryLinkState, LinkStateFactory
+from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
 
 
 class DummyClient(NumPyClient):
@@ -86,11 +87,11 @@ def terminate_simulation(f_stop: threading.Event, sleep_duration: int) -> None:
 def init_state_factory_nodes_mapping(
     num_nodes: int,
     num_messages: int,
-) -> tuple[StateFactory, NodeToPartitionMapping, dict[UUID, float]]:
+) -> tuple[LinkStateFactory, NodeToPartitionMapping, dict[UUID, float]]:
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
     run_id = 1234
-    state_factory = StateFactory(":flwr-in-memory-state:")
+    state_factory = LinkStateFactory(":flwr-in-memory-state:")
 
     # Register a few nodes
     nodes_mapping = _register_nodes(num_nodes=num_nodes, state_factory=state_factory)
@@ -106,24 +107,35 @@ def init_state_factory_nodes_mapping(
 
 # pylint: disable=too-many-locals
 def register_messages_into_state(
-    state_factory: StateFactory,
+    state_factory: LinkStateFactory,
     nodes_mapping: NodeToPartitionMapping,
     run_id: int,
     num_messages: int,
 ) -> dict[UUID, float]:
     """Register `num_messages` into the state factory."""
-    state: InMemoryState = state_factory.state()  # type: ignore
-    state.run_ids[run_id] = Run(
-        run_id=run_id,
-        fab_id="Mock/mock",
-        fab_version="v1.0.0",
-        fab_hash="hash",
-        override_config={},
+    state: InMemoryLinkState = state_factory.state()  # type: ignore
+    state.run_ids[run_id] = RunRecord(
+        Run(
+            run_id=run_id,
+            fab_id="Mock/mock",
+            fab_version="v1.0.0",
+            fab_hash="hash",
+            override_config={},
+            pending_at=now().isoformat(),
+            starting_at="",
+            running_at="",
+            finished_at="",
+            status=RunStatus(
+                status=Status.PENDING,
+                sub_status="",
+                details="",
+            ),
+        ),
     )
-    # Artificially add TaskIns to state so they can be processed
+    # Artificially add Messages to state so they can be processed
     # by the Simulation Engine logic
     nodes_cycle = cycle(nodes_mapping.keys())  # we have more messages than supernodes
-    task_ids: set[UUID] = set()  # so we can retrieve them later
+    message_ids: set[UUID] = set()  # so we can retrieve them later
     expected_results = {}
     for i in range(num_messages):
         dst_node_id = next(nodes_cycle)
@@ -144,18 +156,14 @@ def register_messages_into_state(
                 message_type=MessageTypeLegacy.GET_PROPERTIES,
             ),
         )
-        # Convert Message to TaskIns
-        taskins = message_to_taskins(message)
-        # Normally recorded by the driver servicer
-        # but since we don't have one in this test, we do this manually
-        taskins.task.pushed_at = time.time()
-        # Instert in state
-        task_id = state.store_task_ins(taskins)
-        if task_id:
+
+        # Insert in state
+        message_id = state.store_message_res(message)
+        if message_id:
             # Add to UUID set
-            task_ids.add(task_id)
+            message_ids.add(message_id)
             # Store expected output for check later on
-            expected_results[task_id] = mult_factor * pi
+            expected_results[message_id] = mult_factor * pi
 
     return expected_results
 
@@ -170,13 +178,13 @@ def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
     return str(rel_app_dir.parent / rel_client_app_dir)
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def start_and_shutdown(
     backend: str = "ray",
     client_app_attr: Optional[str] = None,
     app_dir: str = "",
     num_supernodes: Optional[int] = None,
-    state_factory: Optional[StateFactory] = None,
+    state_factory: Optional[LinkStateFactory] = None,
     nodes_mapping: Optional[NodeToPartitionMapping] = None,
     duration: int = 0,
     backend_config: str = "{}",
@@ -201,7 +209,7 @@ def start_and_shutdown(
     if not app_dir:
         app_dir = _autoresolve_app_dir()
 
-    run = Run(run_id=1234, fab_id="", fab_version="", fab_hash="", override_config={})
+    run = Run.create_empty(run_id=1234)
 
     start_vce(
         num_supernodes=num_supernodes,
@@ -279,8 +287,8 @@ class TestFleetSimulationEngineRayBackend(TestCase):
         start_and_shutdown(num_supernodes=50, duration=10)
 
     # pylint: disable=too-many-locals
-    def test_start_and_shutdown_with_tasks_in_state(self) -> None:
-        """Run Simulation Engine with some TasksIns in State.
+    def test_start_and_shutdown_with_message_in_state(self) -> None:
+        """Run Simulation Engine with some Message in State.
 
         This test creates a few nodes and submits a few messages that need to be
         executed by the Backend. In order for that to happen the asyncio
@@ -292,7 +300,8 @@ class TestFleetSimulationEngineRayBackend(TestCase):
 
         state_factory, nodes_mapping, expected_results = (
             init_state_factory_nodes_mapping(
-                num_nodes=num_nodes, num_messages=num_messages
+                num_nodes=num_nodes,
+                num_messages=num_messages,
             )
         )
 
@@ -301,19 +310,17 @@ class TestFleetSimulationEngineRayBackend(TestCase):
             state_factory=state_factory, nodes_mapping=nodes_mapping, duration=10
         )
 
-        # Get all TaskRes
+        # Get all Message replies
         state = state_factory.state()
-        task_ids = set(expected_results.keys())
-        task_res_list = state.get_task_res(task_ids=task_ids, limit=len(task_ids))
+        message_ids = set(expected_results.keys())
+        message_res_list = state.get_message_res(message_ids=message_ids)
 
         # Check results by first converting to Message
-        for task_res in task_res_list:
-
-            message = message_from_taskres(task_res)
+        for message_res in message_res_list:
 
             # Verify message content is as expected
-            content = message.content
+            content = message_res.content
             assert (
                 content.configs_records["getpropertiesres.properties"]["result"]
-                == expected_results[UUID(task_res.task.ancestry[0])]
+                == expected_results[UUID(message_res.metadata.reply_to_message)]
             )
