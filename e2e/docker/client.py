@@ -18,7 +18,7 @@ from flwr.common import Context
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-SUBSET_SIZE = 1_000
+SUBSET_SIZE = 1_024
 
 
 class Net(nn.Module):
@@ -88,7 +88,7 @@ def load_data(partition_id):
     partition_train_test = partition_train_test.with_transform(apply_transforms)
     trainset = Subset(partition_train_test["train"], range(SUBSET_SIZE))
     testset = Subset(partition_train_test["test"], range(10))
-    trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
+    trainloader = DataLoader(trainset, batch_size=256, shuffle=True)
     testloader = DataLoader(testset, batch_size=32)
     return trainloader, testloader
 
