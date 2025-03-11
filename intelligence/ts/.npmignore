@@ -25,6 +25,7 @@ pnpm-lock.yaml
 
 docs
 examples
+e2e
 coverage
 .env
 .prettierignore
