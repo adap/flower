@@ -1,12 +1,12 @@
 # Changelog
 
-## v1.16.0 (2025-03-10)
+## v1.16.0 (2025-03-11)
 
 ### Thanks to our contributors
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Andrej Jovanović`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Kevin Ta`, `Li Shaoyu`, `Mohammad Naseri`, `Taner Topal`, `Yan Gao` <!---TOKEN_v1.16.0-->
+`Alan Silva`, `Andrej Jovanović`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Kevin Ta`, `Li Shaoyu`, `Mohammad Naseri`, `Taner Topal`, `Yan Gao` <!---TOKEN_v1.16.0-->
 
 ### What's new?
 
@@ -18,7 +18,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Support function-specific modifiers for `ClientApp`** ([#4954](https://github.com/adap/flower/pull/4954), [#4962](https://github.com/adap/flower/pull/4962))
 
-  Modifiers can now be applied to individual functions within `ClientApp` rather than affecting the entire application. This allows for more granular control. The documentation has been updated to reflect these changes—see [How to Use Built-in Mods](https://flower.ai/docs/framework/how-to-use-built-in-mods.html) for details.
+  Modifiers can now be applied to individual functions within the `ClientApp` rather than affecting the entire application. This allows for more granular control. The documentation has been updated to reflect these changes — please refer to [How to Use Built-in Mods](https://flower.ai/docs/framework/how-to-use-built-in-mods.html#registering-function-specific-mods) for details.
 
 - **Introduce `@app.lifespan()` for lifecycle management** ([#4929](https://github.com/adap/flower/pull/4929), [#4986](https://github.com/adap/flower/pull/4986))
 
@@ -26,7 +26,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Add FedRAG example** ([#4955](https://github.com/adap/flower/pull/4955), [#5036](https://github.com/adap/flower/pull/5036))
 
-  Adds a [FedRAG example](https://flower.ai/docs/examples/fedrag.html), integrating Federated Learning with Retrieval Augmented Generation (RAG). This approach allows Large Language Models (LLMs) to query distributed data silos without central aggregation, enhancing performance while preserving data privacy.
+  Adds a [FedRAG example](https://flower.ai/docs/examples/fedrag.html), integrating Federated Learning with Retrieval Augmented Generation (RAG). This approach allows Large Language Models (LLMs) to query distributed data silos without centrally aggregating the corpora, enhancing performance while preserving data privacy.
 
 - **Upgrade FedProx baseline to new Flower format** ([#4937](https://github.com/adap/flower/pull/4937))
 
@@ -46,9 +46,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Increase default TTL and message size** ([#5011](https://github.com/adap/flower/pull/5011), [#5028](https://github.com/adap/flower/pull/5028))
 
-  The default TTL for messages is now 12 hours (up from 1 hour), and the gRPC message size limit has increased from 512MB to 2GB. TTL sets a hard limit on the time between the ServerApp sending an instruction and receiving a reply from the ClientApp.
+  The default TTL for messages is now 12 hours (up from 1 hour), and the gRPC message size limit has increased from 512MB to 2GB. TTL sets a hard limit on the time between the `ServerApp` sending an instruction and receiving a reply from the `ClientApp`.
 
-- **Improve documentation** ([#4945](https://github.com/adap/flower/pull/4945), [#4965](https://github.com/adap/flower/pull/4965), [#4994](https://github.com/adap/flower/pull/4994), [#4964](https://github.com/adap/flower/pull/4964), [#4991](https://github.com/adap/flower/pull/4991), [#5014](https://github.com/adap/flower/pull/5014), [#4970](https://github.com/adap/flower/pull/4970), [#4990](https://github.com/adap/flower/pull/4990), [#4978](https://github.com/adap/flower/pull/4978), [#4944](https://github.com/adap/flower/pull/4944), [#5022](https://github.com/adap/flower/pull/5022), [#5007](https://github.com/adap/flower/pull/5007), [#4988](https://github.com/adap/flower/pull/4988))
+- **Improve documentation** ([#4945](https://github.com/adap/flower/pull/4945), [#4965](https://github.com/adap/flower/pull/4965), [#4994](https://github.com/adap/flower/pull/4994), [#4964](https://github.com/adap/flower/pull/4964), [#4991](https://github.com/adap/flower/pull/4991), [#5014](https://github.com/adap/flower/pull/5014), [#4970](https://github.com/adap/flower/pull/4970), [#4990](https://github.com/adap/flower/pull/4990), [#4978](https://github.com/adap/flower/pull/4978), [#4944](https://github.com/adap/flower/pull/4944), [#5022](https://github.com/adap/flower/pull/5022), [#5007](https://github.com/adap/flower/pull/5007), [#4988](https://github.com/adap/flower/pull/4988), [#5042] (https://github.com/adap/flower/pull/5042)),
 
 - **Update CI/CD** ([#4943](https://github.com/adap/flower/pull/4943), [#4942](https://github.com/adap/flower/pull/4942), [#4953](https://github.com/adap/flower/pull/4953), [#4985](https://github.com/adap/flower/pull/4985), [#4984](https://github.com/adap/flower/pull/4984), [#5025](https://github.com/adap/flower/pull/5025), [#4987](https://github.com/adap/flower/pull/4987), [#4912](https://github.com/adap/flower/pull/4912))
 
