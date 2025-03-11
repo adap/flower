@@ -76,5 +76,13 @@
     "@huggingface/transformers": "^3.3.3",
     "@mlc-ai/web-llm": "^0.2.78",
     "get-random-values": "^3.0.0"
-  }
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "jsdelivr": "./dist/flowerintelligence.cjs.js",
+  "unpkg": "./dist/flowerintelligence.cjs.js"
 }
