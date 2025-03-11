@@ -1,17 +1,17 @@
 """app-pytorch: A Flower / PyTorch app."""
 
-from flwr.common import Context
-from flwr.server import ServerApp
-from app_pytorch.task import (
-    Net,
-    pytorch_to_parameter_record,
-    parameters_to_pytorch_state_dict,
-)
-import torch
-from time import sleep
 import random
 from logging import INFO, WARN
-from flwr.common import Context, MessageType, RecordSet, Message, ParametersRecord
+from time import sleep
+
+import torch
+from app_pytorch.task import (
+    Net,
+    parameters_to_pytorch_state_dict,
+    pytorch_to_parameter_record,
+)
+
+from flwr.common import Context, Message, MessageType, RecordSet
 from flwr.common.logger import log
 from flwr.server import Driver, ServerApp
 
@@ -35,9 +35,9 @@ def main(driver: Driver, context: Context) -> None:
         log(INFO, "Starting round %s/%s", server_round + 1, num_rounds)
 
         # Loop and wait until enough nodes are available.
-        all_node_ids = []
+        all_node_ids: list[int] = []
         while len(all_node_ids) < min_nodes:
-            all_node_ids = driver.get_node_ids()
+            all_node_ids = list(driver.get_node_ids())
             if len(all_node_ids) >= min_nodes:
                 # Sample nodes
                 num_to_sample = int(len(all_node_ids) * fraction_sample)
@@ -50,7 +50,7 @@ def main(driver: Driver, context: Context) -> None:
 
         # Create messages
         gmodel_record = pytorch_to_parameter_record(global_model)
-        recordset = RecordSet(parameters_records={global_model_key: gmodel_record})
+        recordset = RecordSet({global_model_key: gmodel_record})
         messages = construct_messages(
             node_ids, recordset, MessageType.TRAIN, driver, server_round
         )
@@ -65,13 +65,9 @@ def main(driver: Driver, context: Context) -> None:
         for msg in replies:
             if msg.has_content():
                 state_dicts.append(
-                    parameters_to_pytorch_state_dict(
-                        msg.content.parameters_records[global_model_key]
-                    )
+                    parameters_to_pytorch_state_dict(msg.content[global_model_key])
                 )
-                avg_train_losses.append(
-                    msg.content.metrics_records["train_metrics"]["train_loss"]
-                )
+                avg_train_losses.append(msg.content["train_metrics"]["train_loss"])
             else:
                 log(WARN, f"message {msg.metadata.message_id} as an error.")
 
@@ -88,7 +84,7 @@ def main(driver: Driver, context: Context) -> None:
         # Sample all nodes
         all_node_ids = driver.get_node_ids()
         gmodel_record = pytorch_to_parameter_record(global_model)
-        recordset = RecordSet(parameters_records={global_model_key: gmodel_record})
+        recordset = RecordSet({global_model_key: gmodel_record})
         messages = construct_messages(
             node_ids, recordset, MessageType.EVALUATE, driver, server_round
         )
@@ -101,9 +97,7 @@ def main(driver: Driver, context: Context) -> None:
         avg_eval_acc = []
         for msg in replies:
             if msg.has_content():
-                avg_eval_acc.append(
-                    msg.content.metrics_records["eval_metrics"]["eval_acc"]
-                )
+                avg_eval_acc.append(msg.content["eval_metrics"]["eval_acc"])
             else:
                 log(WARN, f"message {msg.metadata.message_id} as an error.")
 

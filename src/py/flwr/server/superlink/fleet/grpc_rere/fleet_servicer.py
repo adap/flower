@@ -103,11 +103,11 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         if request.messages_list:
             log(
                 INFO,
-                "[Fleet.PushMessages] Push results from node_id=%s",
+                "[Fleet.PushMessages] Push replies from node_id=%s",
                 request.messages_list[0].metadata.src_node_id,
             )
         else:
-            log(INFO, "[Fleet.PushMessages] No task results to push")
+            log(INFO, "[Fleet.PushMessages] No replies to push")
 
         try:
             res = message_handler.push_messages(

@@ -183,7 +183,7 @@ class GrpcDriver(Driver):
         )
         return Message(metadata=metadata, content=content)
 
-    def get_node_ids(self) -> list[int]:
+    def get_node_ids(self) -> Iterable[int]:
         """Get node IDs."""
         # Call GrpcDriverStub method
         res: GetNodesResponse = self._stub.GetNodes(
@@ -212,6 +212,15 @@ class GrpcDriver(Driver):
                 messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
             )
         )
+        if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
+            list(message_proto_list)
+        ):
+            log(
+                WARNING,
+                "Not all messages could be pushed to the SuperLink. The returned "
+                "list has `None` for those messages (the order is preserved as passed "
+                "to `push_messages`). This could be due to a malformed message.",
+            )
         return list(res.message_ids)
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
