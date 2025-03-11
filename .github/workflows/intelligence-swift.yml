@@ -46,6 +46,9 @@ jobs:
       - uses: swift-actions/setup-swift@v2
         with:
           swift-version: "6.0.0"
+          
+      - name: Verify Swift Version
+        run: swift --version
 
       - name: Run tests
         run: xcodebuild test -scheme flower -destination 'platform=macOS'
