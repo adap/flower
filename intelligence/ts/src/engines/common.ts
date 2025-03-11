@@ -13,7 +13,6 @@
 // limitations under the License.
 // =============================================================================
 
-
 import { REMOTE_URL, SDK, VERSION } from '../constants';
 import { FailureCode, Result } from '../typing';
 

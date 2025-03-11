@@ -13,7 +13,6 @@
 // limitations under the License.
 // =============================================================================
 
-
 import { BaseEngine } from './engine';
 
 export class FlwrWasmEngine extends BaseEngine {}

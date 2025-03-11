@@ -13,7 +13,6 @@
 // limitations under the License.
 // =============================================================================
 
-
 /**
  * Represents a message in a chat session.
  */

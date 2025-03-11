@@ -13,7 +13,6 @@
 // limitations under the License.
 // =============================================================================
 
-
 export const DEFAULT_MODEL = 'meta/llama3.2-1b/instruct-fp16';
 export const REMOTE_URL = 'https://api.flower.ai';
 export const VERSION = '0.1.0';

@@ -13,7 +13,6 @@
 // limitations under the License.
 // =============================================================================
 
-
 import { assert, describe, it, expect, beforeEach, vi } from 'vitest';
 
 const API_KEY = process.env.FI_API_KEY ?? '';
