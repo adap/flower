@@ -38,7 +38,7 @@ jobs:
 
   fi_swift_tests:
     name: Tests
-    runs-on: macos-14
+    runs-on: macos-14-arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -46,9 +46,10 @@ jobs:
       - uses: swift-actions/setup-swift@v2
         with:
           swift-version: "6.0.0"
-          
-      - name: Verify Swift Version
-        run: swift --version
+    
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+            xcode-version: 16.2
 
       - name: Run tests
         run: xcodebuild test -scheme flower -destination 'platform=macOS'
