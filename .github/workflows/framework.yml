@@ -36,7 +36,6 @@ jobs:
   test_core:
     runs-on: ubuntu-22.04
     needs: changes
-    if: ${{ needs.changes.outputs.framework == 'true' }}
     strategy:
       matrix:
         # Latest version which comes cached in the host image can be found here:
