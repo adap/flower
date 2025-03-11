@@ -49,7 +49,7 @@ jobs:
     
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-            xcode-version: 16.2
+            xcode-version: "16.2"
 
       - name: Run tests
         run: xcodebuild test -scheme flower -destination 'platform=macOS'
