@@ -16,24 +16,10 @@
 
 
 import argparse
-import sys
-from logging import INFO
 
-from flwr.common import log
 from flwr.common.object_ref import load_app, validate
 
 from .executor import Executor
-
-
-def run_superexec() -> None:
-    """Run Flower SuperExec."""
-    log(INFO, "Starting Flower SuperExec")
-
-    sys.exit(
-        "Manually launching the SuperExec is deprecated. Since `flwr 1.13.0` "
-        "the executor service runs in the SuperLink. Launching it manually is not "
-        "recommended."
-    )
 
 
 def load_executor(
