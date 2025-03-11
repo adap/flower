@@ -16,7 +16,7 @@ Alternatively, you can use it in vanilla JS, without any bundler, by using a CDN
 
 ```html
 <script type="module">
-    import { FlowerIntelligence } from 'https://cdn.jsdelivr.net/npm/@flwr/flwr';
+  import { FlowerIntelligence } from 'https://cdn.jsdelivr.net/npm/@flwr/flwr';
 </script>
 ```
 
