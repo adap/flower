@@ -1,5 +1,7 @@
 # Flower Intelligence
 
+Check out the full documentation [here](https://flower.ai/docs/intelligence), and the project website [here](https://flower.ai/intelligence).
+
 You can use `npm` or `pnpm` (or probably `yarn`), but this `README.md` shows examples using `pnpm`
 
 ## Install
