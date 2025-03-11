@@ -1,16 +1,16 @@
 {
-  "name": "encrypted",
+  "name": "encrypted-e2e",
   "version": "1.0.0",
   "description": "",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "pnpm i && pnpm build && node dist/index.js"
+    "start": "cd ../.. && pnpm build && cd e2e/encrypted && pnpm i && pnpm build && node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@flwr/flwr": "^0.1.2",
+    "@flwr/flwr": "file:../..",
     "cross-spawn": "^7.0.5"
   },
   "devDependencies": {

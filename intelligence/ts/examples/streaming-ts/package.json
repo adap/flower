@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "cd ../.. && pnpm build && cd examples/streaming-ts && pnpm i && pnpm build && node dist/index.js"
+    "start": "pnpm i && pnpm build && node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@flwr/flwr": "file:../../dist",
+    "@flwr/flwr": "^0.1.2",
     "cross-spawn": "^7.0.5"
   },
   "devDependencies": {
