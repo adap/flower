@@ -64,32 +64,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Bumps the minimum Python version from 3.9 to 3.9.2 and updates the `cryptography` package from 43.0.1 to 44.0.1. This change ensures compatibility with the latest security updates and features.
 
-## TODO: DELETE FI PR
-
-### Flower Intelligence
-
-- **refactor(intelligence) Reorganize remote engine** ([#5023](https://github.com/adap/flower/pull/5023))
-- **fix(intelligence) Update packages to prevent vulnerabilities** ([#5019](https://github.com/adap/flower/pull/5019))
-- **feat(intelligence) Add initial TypeScript SDK code** ([#4996](https://github.com/adap/flower/pull/4996))
-- **docs(intelligence) Fix models list** ([#5009](https://github.com/adap/flower/pull/5009))
-- **docs(intelligence) Add console logs to examples** ([#5015](https://github.com/adap/flower/pull/5015))
-- **docs(intelligence) Update main page** ([#5008](https://github.com/adap/flower/pull/5008))
-- **docs(intelligence) Add deployment to CI** ([#5006](https://github.com/adap/flower/pull/5006))
-- **docs(intelligence) Add initial doc page** ([#5005](https://github.com/adap/flower/pull/5005))
-- **feat(intelligence) Add isSupported engine method** ([#5024](https://github.com/adap/flower/pull/5024))
-- **feat(intelligence) Use remote endpoint for checking models** ([#5031](https://github.com/adap/flower/pull/5031))
-- **feat(intelligence) Use isSupported method in main class** ([#5026](https://github.com/adap/flower/pull/5026))
-- **refactor(intelligence) Remove incompatible README section** ([#5034](https://github.com/adap/flower/pull/5034))
-- **ci(:skip) Update CODEOWNERS** ([#5030](https://github.com/adap/flower/pull/5030))
-- **ci(:skip) Add release workflow** ([#5003](https://github.com/adap/flower/pull/5003))
-- **refactor(intelligence) Update examples** ([#5033](https://github.com/adap/flower/pull/5033))
-- **ci(intelligence) Add copyright checks** ([#5040](https://github.com/adap/flower/pull/5040))
-- **refactor(intelligence) Bump version** ([#5046](https://github.com/adap/flower/pull/5046))
-- **ci(intelligence) Fix release workflow** ([#5043](https://github.com/adap/flower/pull/5043))
-- **feat(intelligence) Add Swift package** ([#5029](https://github.com/adap/flower/pull/5029))
-- **docs(framework) Fix versioned docs** ([#5044](https://github.com/adap/flower/pull/5044))
-- **docs(framework) Fix docs config** ([#5039](https://github.com/adap/flower/pull/5039))
-
 ## v1.15.2 (2025-02-17)
 
 ### Thanks to our contributors
