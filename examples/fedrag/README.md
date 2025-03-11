@@ -146,9 +146,9 @@ For instance, the returned result would look like follows:
 |    PubMedQA    |       10       |       8       |     0.53     |      6.03       |
 |     BioASQ     |       10       |       9       |     0.61     |      5.83       |
 
-# FedRAG Pipeline Description
+## FedRAG Pipeline Description
 
-## Corpus, Indices & Benchmark Datasets
+### Corpus, Indices & Benchmark Datasets
 
 **Corpus.** The example supports the following corpora for document retrieval:
 
@@ -191,7 +191,7 @@ All the curated QA benchmark datasets are downloaded from the [MIRAGE](https://g
 For more details regarding corpus downloading, pre-processing, and indexing steps,
 please read the [README.md](../fedrag/data/README.md) file under the `data` directory.
 
-## Document Retrieval and Merge
+### Document Retrieval and Merge
 
 **Retrieval.** The clients use their local FAISS index to retrieve documents from their local document store.
 The `k-nn` value defined in the `[tool.flwr.app.config]` section of the `pyproject.yaml` file controls how many
@@ -211,7 +211,7 @@ such as using a Re-Ranker model.
 > If you set `k-rrf=0` then only the retrieval score is considering when merging the retrieved documents,
 > while if you set `k-rrf>0` then the retrieved documents are merged using the RRF method.
 
-## Pipeline Configuration
+### Pipeline Configuration
 
 The current example uses the Message API to carry out the communication between the server and the clients. For every
 question in the benchmark QA dataset, the server submits the question (query) once to each client and the clients
@@ -254,7 +254,7 @@ Based on the computing resources you will use to run the example, please feel fr
 `server-llm-hfpath` and use a larger model to execute the RAG query. Moreover, if you like, you can perform or introduce
 another merging operation at the server-side over the retrieved documents instead of using the simple RRF approach.
 
-## Enable GPU
+### Enable GPU
 
 Given that the clients do not need to use the GPU to perform the retrieval of the documents from the document store,
 it is recommended to enable GPU access only at the server side, since this will allow the server to load the LLM into
@@ -271,7 +271,7 @@ for instance to `0.1`.
 options.backend.client-resources.num-gpus = 0.1
 ```
 
-# References
+## References
 
 1. <a id="ref1"></a> Jung, Jincheol, Hongju Jeong, and Eui-Nam Huh. "Federated Learning and RAG Integration: A Scalable Approach for Medical Large Language Models." arXiv preprint arXiv:2412.13720 (2024).
 
