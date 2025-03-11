@@ -1,4 +1,4 @@
-# Flower Intelligence - TypeScript
+# Flower Intelligence
 
 You can use `npm` or `pnpm` (or probably `yarn`), but this `README.md` shows examples using `pnpm`
 
@@ -18,13 +18,6 @@ The `FlowerIntelligence` package uses the singleton pattern. It can be instancia
 
 ```typescript
 const fi = FlowerIntelligence.instance;
-```
-
-And configured with:
-
-```typescript
-fi.remoteHandoff = true; // False by default
-fi.apiKey = '<API_KEY>'; // Undefined by default
 ```
 
 ### Simple chat
@@ -60,32 +53,29 @@ if (!response.ok) {
 }
 ```
 
-### Streaming
+### Complete code
 
-In order to stream the response from the model, you can set `stream: true`, and provide a callback to the `chat` mehods options.
-The callback should take a `StreamEvent` argument of the form `{ chunk: string }`.
+```javascript
+import { FlowerIntelligence } from 'https://unpkg.com/@flwr/flwr';
 
-```typescript
-const response = await fi.chat({
-  messages: [
-    { role: 'system', content: 'You are a helpful assistant' },
-    { role: 'user', content: 'How are you?' },
-  ],
-  stream: true,
-  onStreamEvent: (event: { chunk: string }) => {
-    process.stdout.write(event.chunk);
-  },
-});
-```
+const fi = FlowerIntelligence.instance;
 
-Note that once the streaming is done, the full response is returned by the `chat` method:
+async function main() {
+  const response = await fi.chat({
+    messages: [
+      { role: 'system', content: 'You are a helpful assistant' },
+      { role: 'user', content: 'How are you?' },
+    ],
+  });
 
-```typescript
-if (!response.ok)) {
-  console.error(response.failure.code);
-} else {
-  console.log(`\n\nComplete reply: ${response.message.content}`);
+  if (!response.ok) {
+    console.error(`${response.failure.code}: ${response.failure.description}`);
+  } else {
+    console.log(response.message.content);
+  }
 }
+
+await main().then().catch();
 ```
 
 ## Demo
