@@ -38,7 +38,7 @@ strategy = fl.server.strategy.FedAvg(
 )
 
 
-# Define ServerApp
+# Run via `flower-server-app server:app`
 app = fl.server.ServerApp(
     config=fl.server.ServerConfig(num_rounds=3),
     strategy=strategy,
