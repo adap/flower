@@ -30,7 +30,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Upgrade FedProx baseline to a Flower App** ([#4937](https://github.com/adap/flower/pull/4937))
 
-  Updates FedProx to the new Flower format by removing Hydra, migrating configs to `pyproject.toml`, using `ClientApp` and `ServerApp`, integrating `flwr-datasets` with `DistributionPartitioner`, enabling result saving, and updating `README.md`.
+  Updates FedProx to the a Flower App by removing Hydra, migrating configs to `pyproject.toml`, using `ClientApp` and `ServerApp`, integrating `flwr-datasets` with `DistributionPartitioner`, enabling result saving, and updating `README.md`.
 
 - **Migrate framework to Message-based system** ([#4959](https://github.com/adap/flower/pull/4959), [#4993](https://github.com/adap/flower/pull/4993), [#4979](https://github.com/adap/flower/pull/4979), [#4999](https://github.com/adap/flower/pull/4999))
 
