@@ -36,10 +36,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
   The Flower framework has been fully migrated from a `TaskIns`/`TaskRes`-based system to a `Message`-based system, aligning with the user-facing `Message` class. This includes adding validator functions for `Message`, introducing `LinkState` methods that operate on `Message`, updating `LinkState` to use `Message`-only methods, and removing the `Task`-related code entirely.
 
-- **Introduce SuperLink dashboard plugin** ([#4960](https://github.com/adap/flower/pull/4960), [#4973](https://github.com/adap/flower/pull/4973), [#4976](https://github.com/adap/flower/pull/4976))
-
-  Prepares for an upcoming SuperLink dashboard feature. These changes lay the groundwork for future enhancements.
-
 - **Introduce event logging extension points** ([#4948](https://github.com/adap/flower/pull/4948), [#5013](https://github.com/adap/flower/pull/5013))
 
   Begins implementing an event logging system for SuperLink, allowing RPC calls to be logged when enabled. These changes introduce initial extension points.
