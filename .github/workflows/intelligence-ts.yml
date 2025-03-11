@@ -221,6 +221,10 @@ jobs:
         working-directory: intelligence/ts
         run: pnpm install
 
+      - name: Run build
+        working-directory: intelligence/ts
+        run: pnpm build
+
       - name: Publishing dry-run
         working-directory: intelligence/ts
         env:
