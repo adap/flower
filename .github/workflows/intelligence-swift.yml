@@ -38,7 +38,7 @@ jobs:
 
   fi_swift_tests:
     name: Tests
-    runs-on: macos-14-arm64
+    runs-on: macos-14
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
