@@ -14,7 +14,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   `RecordSet` now supports dictionary-like access, allowing interactions similar to built-in Python dictionaries. For example, instead of `recordset.parameters_records["model"]`, users can simply use `recordset["model"]`. This enhancement maintains backward compatibility with existing `recordset.*_records` properties.
 
-  Additionally, the `Array` class now accepts `NDArray` instances directly in its constructor, enabling instantiation with a NumPy array via `Array(np_arr)`.
+  Additionally, the `Array` class now accepts `numpy.ndarray` instances directly in its constructor, enabling instantiation with a NumPy array via `Array(np_arr)`.
 
 - **Support function-specific modifiers for `ClientApp`** ([#4954](https://github.com/adap/flower/pull/4954), [#4962](https://github.com/adap/flower/pull/4962))
 
@@ -24,7 +24,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   `ServerApp` and `ClientApp` now support `@app.lifespan()`, enabling custom enter/exit handlers for resource setup and cleanup. Throughout the entire FL training, these handlers in `ClientApp` may run multiple times as instances are dynamically managed.
 
-- **Add FedRAG example** ([#4955](https://github.com/adap/flower/pull/4955), [#5036](https://github.com/adap/flower/pull/5036))
+- **Add FedRAG example** ([#4955](https://github.com/adap/flower/pull/4955), [#5036](https://github.com/adap/flower/pull/5036), [#5042](https://github.com/adap/flower/pull/5042))
 
   Adds a [FedRAG example](https://flower.ai/docs/examples/fedrag.html), integrating Federated Learning with Retrieval Augmented Generation (RAG). This approach allows Large Language Models (LLMs) to query distributed data silos without centrally aggregating the corpora, enhancing performance while preserving data privacy.
 
@@ -48,11 +48,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
   The default TTL for messages is now 12 hours (up from 1 hour), and the gRPC message size limit has increased from 512MB to 2GB. TTL sets a hard limit on the time between the `ServerApp` sending an instruction and receiving a reply from the `ClientApp`.
 
-- **Improve documentation** ([#4945](https://github.com/adap/flower/pull/4945), [#4965](https://github.com/adap/flower/pull/4965), [#4994](https://github.com/adap/flower/pull/4994), [#4964](https://github.com/adap/flower/pull/4964), [#4991](https://github.com/adap/flower/pull/4991), [#5014](https://github.com/adap/flower/pull/5014), [#4970](https://github.com/adap/flower/pull/4970), [#4990](https://github.com/adap/flower/pull/4990), [#4978](https://github.com/adap/flower/pull/4978), [#4944](https://github.com/adap/flower/pull/4944), [#5022](https://github.com/adap/flower/pull/5022), [#5007](https://github.com/adap/flower/pull/5007), [#4988](https://github.com/adap/flower/pull/4988), [#5042] (https://github.com/adap/flower/pull/5042)),
+- **Improve documentation** ([#4945](https://github.com/adap/flower/pull/4945), [#4965](https://github.com/adap/flower/pull/4965), [#4994](https://github.com/adap/flower/pull/4994), [#4964](https://github.com/adap/flower/pull/4964), [#4991](https://github.com/adap/flower/pull/4991), [#5014](https://github.com/adap/flower/pull/5014), [#4970](https://github.com/adap/flower/pull/4970), [#4990](https://github.com/adap/flower/pull/4990), [#4978](https://github.com/adap/flower/pull/4978), [#4944](https://github.com/adap/flower/pull/4944), [#5022](https://github.com/adap/flower/pull/5022), [#5007](https://github.com/adap/flower/pull/5007), [#4988](https://github.com/adap/flower/pull/4988))
 
 - **Update CI/CD** ([#4943](https://github.com/adap/flower/pull/4943), [#4942](https://github.com/adap/flower/pull/4942), [#4953](https://github.com/adap/flower/pull/4953), [#4985](https://github.com/adap/flower/pull/4985), [#4984](https://github.com/adap/flower/pull/4984), [#5025](https://github.com/adap/flower/pull/5025), [#4987](https://github.com/adap/flower/pull/4987), [#4912](https://github.com/adap/flower/pull/4912))
 
-- **Bugfixes** ([#4969](https://github.com/adap/flower/pull/4969), [#4974](https://github.com/adap/flower/pull/4974), [#5017](https://github.com/adap/flower/pull/5017), [#4995](https://github.com/adap/flower/pull/4995), [#4971](https://github.com/adap/flower/pull/4971), [#5037](https://github.com/adap/flower/pull/5037))
+- **Bugfixes** ([#4969](https://github.com/adap/flower/pull/4969), [#4974](https://github.com/adap/flower/pull/4974), [#5017](https://github.com/adap/flower/pull/5017), [#4995](https://github.com/adap/flower/pull/4995), [#4971](https://github.com/adap/flower/pull/4971), [#5037](https://github.com/adap/flower/pull/5037), [#5038](https://github.com/adap/flower/pull/5038))
 
 - **General Improvements** ([#4947](https://github.com/adap/flower/pull/4947), [#4972](https://github.com/adap/flower/pull/4972), [#4992](https://github.com/adap/flower/pull/4992), [#5020](https://github.com/adap/flower/pull/5020), [#5018](https://github.com/adap/flower/pull/5018), [#4989](https://github.com/adap/flower/pull/4989), [#4957](https://github.com/adap/flower/pull/4957), [#5000](https://github.com/adap/flower/pull/5000), [#5012](https://github.com/adap/flower/pull/5012), [#5001](https://github.com/adap/flower/pull/5001))
 
@@ -83,6 +83,12 @@ We would like to give our special thanks to all the contributors who made the ne
 - **ci(:skip) Update CODEOWNERS** ([#5030](https://github.com/adap/flower/pull/5030))
 - **ci(:skip) Add release workflow** ([#5003](https://github.com/adap/flower/pull/5003))
 - **refactor(intelligence) Update examples** ([#5033](https://github.com/adap/flower/pull/5033))
+- **ci(intelligence) Add copyright checks** ([#5040](https://github.com/adap/flower/pull/5040))
+- **refactor(intelligence) Bump version** ([#5046](https://github.com/adap/flower/pull/5046))
+- **ci(intelligence) Fix release workflow** ([#5043](https://github.com/adap/flower/pull/5043))
+- **feat(intelligence) Add Swift package** ([#5029](https://github.com/adap/flower/pull/5029))
+- **docs(framework) Fix versioned docs** ([#5044](https://github.com/adap/flower/pull/5044))
+- **docs(framework) Fix docs config** ([#5039](https://github.com/adap/flower/pull/5039))
 
 ## v1.15.2 (2025-02-17)
 
