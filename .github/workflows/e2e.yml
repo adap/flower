@@ -76,7 +76,8 @@ jobs:
   superexec:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
-    needs: wheel
+    needs: [changes, wheel]
+    if: ${{ needs.changes.outputs.framework == 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -134,7 +135,8 @@ jobs:
   frameworks:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
-    needs: wheel
+    needs: [changes, wheel]
+    if: ${{ needs.changes.outputs.framework == 'true' }}
     # Using approach described here:
     # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
     strategy:
@@ -259,7 +261,8 @@ jobs:
   strategies:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
-    needs: wheel
+    needs: [changes, wheel]
+    if: ${{ needs.changes.outputs.framework == 'true' }}
     strategy:
       matrix:
         strat: ["FedMedian", "FedTrimmedAvg", "QFedAvg", "FaultTolerantFedAvg", "FedAvgM", "FedAdam", "FedAdagrad", "FedYogi"]
@@ -296,7 +299,8 @@ jobs:
   templates:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
-    needs: wheel
+    needs: [changes, wheel]
+    if: ${{ needs.changes.outputs.framework == 'true' }}
     strategy:
       matrix:
         framework: ["numpy", "pytorch", "tensorflow", "jax", "sklearn"]
@@ -333,7 +337,8 @@ jobs:
   build_and_install:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
-    needs: wheel
+    needs: [changes, wheel]
+    if: ${{ needs.changes.outputs.framework == 'true' }}
     strategy:
       matrix:
         framework: ["numpy"]
@@ -369,7 +374,8 @@ jobs:
   numpy:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
-    needs: wheel
+    needs: [changes, wheel]
+    if: ${{ needs.changes.outputs.framework == 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -427,7 +433,8 @@ jobs:
     env:
       PYTHONIOENCODING: utf-8
     timeout-minutes: 10
-    needs: wheel
+    needs: [changes, wheel]
+    if: ${{ needs.changes.outputs.framework == 'true' }}
   
     name: Windows compatibility test
 
