@@ -132,7 +132,6 @@ class TestGrpcDriver(unittest.TestCase):
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""
         # Prepare
-        mock_response = Mock()
         # A Message must have either content or error set so we prepare
         run_id = 12345
         ok_message = create_res_message(src_node_id=123, dst_node_id=456, run_id=run_id)
@@ -142,22 +141,37 @@ class TestGrpcDriver(unittest.TestCase):
             src_node_id=123, dst_node_id=789, run_id=run_id, error=Error(code=0)
         )
         error_message.metadata.reply_to_message = "id3"
-        # The the response from the DriverServicer is in the form of Protbuf Messages
-        mock_response.messages_list = [ok_message, error_message]
-        self.mock_stub.PullMessages.return_value = mock_response
-        msg_ids = ["id1", "id2", "id3"]
+
+        # Create separate mock responses for each call
+        mock_response1 = Mock()
+        mock_response1.messages_list = [ok_message]
+        mock_response2 = Mock()
+        mock_response2.messages_list = [error_message]
+
+        # Configure PullMessages to return a different response per call
+        self.mock_stub.PullMessages.side_effect = [mock_response1, mock_response2]
+
+        msg_ids = ["id2", "id3"]
+        # Set driver message_ids for the test
+        self.driver._message_ids = msg_ids  # pylint: disable=protected-access
 
         # Execute
-        msgs = self.driver.pull_messages(msg_ids)
+        msgs = list(self.driver.pull_messages(msg_ids))
         reply_tos = {msg.metadata.reply_to_message for msg in msgs}
-        args, kwargs = self.mock_stub.PullMessages.call_args
 
         # Assert
-        self.mock_stub.GetRun.assert_called_once()
-        self.assertEqual(len(args), 1)
-        self.assertEqual(len(kwargs), 0)
-        self.assertIsInstance(args[0], PullResMessagesRequest)
-        self.assertEqual(args[0].message_ids, msg_ids)
+        # PullMessages was called twice (once per message id)
+        calls = self.mock_stub.PullMessages.call_args_list
+        self.assertEqual(len(calls), len(msg_ids))
+        for call, expected_msg_id in zip(calls, msg_ids):
+            args, kwargs = call
+            self.assertEqual(len(args), 1)
+            self.assertEqual(len(kwargs), 0)
+            self.assertIsInstance(args[0], PullResMessagesRequest)
+            # Each call should be made with a single-element list containing
+            # the current message id
+            self.assertEqual(args[0].message_ids, [expected_msg_id])
+
         self.assertEqual(reply_tos, {"id2", "id3"})
 
     def test_send_and_receive_messages_complete(self) -> None:

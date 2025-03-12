@@ -50,6 +50,7 @@ class InMemoryDriver(Driver):
         self.state = state_factory.state()
         self.pull_interval = pull_interval
         self.node = Node(node_id=SUPERLINK_NODE_ID)
+        self._message_ids: list[str] = []
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -74,6 +75,11 @@ class InMemoryDriver(Driver):
     def run(self) -> Run:
         """Run ID."""
         return Run(**vars(cast(Run, self._run)))
+
+    @property
+    def message_ids(self) -> list[str]:
+        """Message IDs of pushed messages."""
+        return self._message_ids.copy()
 
     def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
@@ -127,16 +133,27 @@ class InMemoryDriver(Driver):
             msg_id = self.state.store_message_ins(msg)
             if msg_id:
                 msg_ids.append(str(msg_id))
-
+        # Store message IDs
+        self._message_ids.extend(msg_ids)
         return msg_ids
 
-    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
-        """Pull messages based on message IDs.
+    def pull_messages(
+        self, message_ids: Optional[Iterable[str]] = None
+    ) -> Iterable[Message]:
+        """Pull messages from the SuperLink based on message IDs.
 
         This method is used to collect messages from the SuperLink that correspond to a
-        set of given message IDs.
+        set of given message IDs. If no message IDs are provided, it defaults to the
+        stored message IDs.
         """
-        msg_ids = {UUID(msg_id) for msg_id in message_ids}
+        # Raise an error if no message IDs are provided and none are stored
+        if not self._message_ids:
+            raise ValueError("No message IDs to pull. Call `push_messages` first.")
+        msg_ids = (
+            {UUID(msg_id) for msg_id in message_ids}
+            if message_ids is not None
+            else {UUID(msg_id) for msg_id in self._message_ids}
+        )
         # Pull Messages
         message_res_list = self.state.get_message_res(message_ids=msg_ids)
         # Get IDs of Messages these replies are for
