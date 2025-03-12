@@ -2,11 +2,12 @@
 
 import random
 import time
+from collections.abc import Iterable
 from logging import INFO
 
 import numpy as np
 
-from flwr.common import Context, MessageType, RecordSet, Message
+from flwr.common import Context, Message, MessageType, RecordSet
 from flwr.common.logger import log
 from flwr.server import Driver, ServerApp
 
@@ -27,9 +28,9 @@ def main(driver: Driver, context: Context) -> None:
         log(INFO, "Starting round %s/%s", server_round + 1, num_rounds)
 
         # Loop and wait until enough nodes are available.
-        all_node_ids = []
+        all_node_ids: list[int] = []
         while len(all_node_ids) < min_nodes:
-            all_node_ids = driver.get_node_ids()
+            all_node_ids = list(driver.get_node_ids())
             if len(all_node_ids) >= min_nodes:
                 # Sample nodes
                 num_to_sample = int(len(all_node_ids) * fraction_sample)
@@ -63,7 +64,7 @@ def main(driver: Driver, context: Context) -> None:
         log(INFO, "Aggregated histogram: %s", aggregated_hist)
 
 
-def aggregate_partial_histograms(messages: Message):
+def aggregate_partial_histograms(messages: Iterable[Message]):
     """Aggregate partial histograms."""
 
     aggregated_hist = {}
@@ -71,7 +72,7 @@ def aggregate_partial_histograms(messages: Message):
     for rep in messages:
         if rep.has_error():
             continue
-        query_results = rep.content.metrics_records["query_results"]
+        query_results = rep.content["query_results"]
         # Sum metrics
         for k, v in query_results.items():
             if k in ["SepalLengthCm", "SepalWidthCm"]:

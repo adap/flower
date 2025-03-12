@@ -69,7 +69,7 @@ MESSAGE_DISCONNECT = Message(
         ttl=DEFAULT_TTL,
         message_type="reconnect",
     ),
-    content=RecordSet(configs_records={"config": ConfigsRecord({"reason": 0})}),
+    content=RecordSet({"config": ConfigsRecord({"reason": 0})}),
 )
 
 

@@ -9,8 +9,8 @@ Example:
 import os
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
-from typing import List
 
 from flwr_tool.init_py_check import get_init_dir_list_and_warnings
 
@@ -37,12 +37,17 @@ def _get_file_creation_year(filepath: str) -> str:
         text=True,
         check=True,
     )
+
+    if not result.stdout:
+        # Since the file is not in Git history, use the current year
+        return str(datetime.now().year)
+
     date_str = result.stdout.splitlines()[-1]  # Get the first commit date
     creation_year = date_str.split("-")[0]  # Extract the year
     return creation_year
 
 
-def _check_copyright(dir_list: List[str]) -> None:
+def _check_copyright(dir_list: list[str]) -> None:
     warning_list = []
     for valid_dir in dir_list:
         if "proto" in valid_dir:

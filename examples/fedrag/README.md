@@ -17,6 +17,13 @@ data across distributed silos without the need to centrally aggregate data, whil
 > Both `ClientApp` and `ServerApp` operate directly on the [Message](https://flower.ai/docs/framework/ref-api/flwr.common.Message.html)
 > and [RecordSet](https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html) objects.
 
+## Advanced FedRAG Examples
+
+This example provides the building blocks to develop more advanced Federated RAG pipelines, such as enhancing domain-specific
+fine-tuned LLMs [\[1\]](#ref1), using confidential compute environments for secure document re-ranking and LLM inference
+[\[2\]](#ref2), and applying collaborative ANN searches on encrypted data with homomorphic encryption
+and multiplicative caching for improved performance [\[3\]](#ref3).
+
 ## FedRAG Pipeline Overview
 
 The figure below demonstrates an overview of the Federated RAG pipeline.
@@ -26,11 +33,6 @@ The figure below demonstrates an overview of the Federated RAG pipeline.
 Given a user query, the server broadcasts the query to each client. Every client retrieves the relevant (top-k)
 documents related to the given query and sends them back to the server. The server merges and ranks the retrieved
 documents and passes the re-ranked documents as context to the augmented query prompt submitted to the LLM.
-
-> \[!CAUTION\]
-> To make this example fully secure and private, the documents retrieved at each client need to be shared
-> through [secure layers](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and all server operations
-> (e.g., document merge, RAG query execution) need to run inside a Confidential Compute environment.
 
 ## Setup the Example
 
@@ -121,7 +123,7 @@ corpus, please refer to the [README.md](data/README.md) file under the `data` di
 For more details regarding how each corpus is downloaded and how the corresponding index is created,
 please read the section below as well the previously referenced [README.md](data/README.md).
 
-All corpora used in this work were derived from the MedRAG toolkit [\[1\]](#ref1).
+All corpora used in this work were derived from the MedRAG toolkit [\[4\]](#ref4).
 
 ## Run with Simulation Engine
 
@@ -144,9 +146,9 @@ For instance, the returned result would look like follows:
 |    PubMedQA    |       10       |       8       |     0.53     |      6.03       |
 |     BioASQ     |       10       |       9       |     0.61     |      5.83       |
 
-# FedRAG Pipeline Description
+## FedRAG Pipeline Description
 
-## Corpus, Indices & Benchmark Datasets
+### Corpus, Indices & Benchmark Datasets
 
 **Corpus.** The example supports the following corpora for document retrieval:
 
@@ -189,7 +191,7 @@ All the curated QA benchmark datasets are downloaded from the [MIRAGE](https://g
 For more details regarding corpus downloading, pre-processing, and indexing steps,
 please read the [README.md](../fedrag/data/README.md) file under the `data` directory.
 
-## Document Retrieval and Merge
+### Document Retrieval and Merge
 
 **Retrieval.** The clients use their local FAISS index to retrieve documents from their local document store.
 The `k-nn` value defined in the `[tool.flwr.app.config]` section of the `pyproject.yaml` file controls how many
@@ -200,7 +202,7 @@ the score of a retrieved document the better, since L2 Distance measures dissimi
 **Merge.** Once documents and their associated retrieval scores are received by the server, the server merges the retrieved
 documents into a single ranked list, either by sorting the documents based on the retrieval score; the lower the score the
 more relevant the document is to the query, since we are using the `L2` Euclidean distance. Alternatively, you can use
-the simple yet effective Reciprocal Rank Fusion (RRF) method [\[2\]](#ref2). To smooth ranking differences during merging, using RRF,
+the simple yet effective Reciprocal Rank Fusion (RRF) method [\[5\]](#ref5). To smooth ranking differences during merging, using RRF,
 you can change the `k-rrf`value defined in the `[tool.flwr.app.config]` section of the `pyproject.yaml` file. Even though
 this is a simple merging technique, you should feel free to extend this and define other merging approaches,
 such as using a Re-Ranker model.
@@ -209,7 +211,7 @@ such as using a Re-Ranker model.
 > If you set `k-rrf=0` then only the retrieval score is considering when merging the retrieved documents,
 > while if you set `k-rrf>0` then the retrieved documents are merged using the RRF method.
 
-## Pipeline Configuration
+### Pipeline Configuration
 
 The current example uses the Message API to carry out the communication between the server and the clients. For every
 question in the benchmark QA dataset, the server submits the question (query) once to each client and the clients
@@ -252,7 +254,7 @@ Based on the computing resources you will use to run the example, please feel fr
 `server-llm-hfpath` and use a larger model to execute the RAG query. Moreover, if you like, you can perform or introduce
 another merging operation at the server-side over the retrieved documents instead of using the simple RRF approach.
 
-## Enable GPU
+### Enable GPU
 
 Given that the clients do not need to use the GPU to perform the retrieval of the documents from the document store,
 it is recommended to enable GPU access only at the server side, since this will allow the server to load the LLM into
@@ -269,8 +271,14 @@ for instance to `0.1`.
 options.backend.client-resources.num-gpus = 0.1
 ```
 
-# References
+## References
 
-1. <a id="ref1"></a> Xiong, G., Jin, Q., Lu, Z. and Zhang, A., 2024, August. Benchmarking retrieval-augmented generation for medicine. In Findings of the Association for Computational Linguistics ACL 2024 (pp. 6233-6251).
+1. <a id="ref1"></a> Jung, Jincheol, Hongju Jeong, and Eui-Nam Huh. "Federated Learning and RAG Integration: A Scalable Approach for Medical Large Language Models." arXiv preprint arXiv:2412.13720 (2024).
 
-2. <a id="ref2"></a> Cormack, G.V., Clarke, C.L. and Buettcher, S., 2009, July. Reciprocal rank fusion outperforms condorcet and individual rank learning methods. In Proceedings of the 32nd international ACM SIGIR conference on Research and development in information retrieval (pp. 758-759).
+2. <a id="ref2"></a> Addison, Parker, Minh-Tuan H. Nguyen, Tomislav Medan, Mohammad T. Manzari, Brendan McElrone, Laksh Lalwani, Aboli More et al. "C-FedRAG: A Confidential Federated Retrieval-Augmented Generation System." arXiv preprint arXiv:2412.13163 (2024).
+
+3. <a id="ref3"></a> Zhao, Dongfang. "FRAG: Toward Federated Vector Database Management for Collaborative and Secure Retrieval-Augmented Generation." arXiv preprint arXiv:2410.13272 (2024).
+
+4. <a id="ref4"></a> Xiong, Guangzhi, Qiao Jin, Zhiyong Lu, and Aidong Zhang. "Benchmarking retrieval-augmented generation for medicine." In Findings of the Association for Computational Linguistics ACL 2024, pp. 6233-6251. 2024.
+
+5. <a id="ref5"></a> Cormack, Gordon V., Charles LA Clarke, and Stefan Buettcher. "Reciprocal rank fusion outperforms condorcet and individual rank learning methods." In Proceedings of the 32nd international ACM SIGIR conference on Research and development in information retrieval, pp. 758-759. 2009.

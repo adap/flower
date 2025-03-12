@@ -1,4 +1,17 @@
 // Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// =============================================================================
 
 import nodeCrypto from 'crypto';
 import getRandomValues from 'get-random-values';
@@ -35,51 +48,6 @@ const CRYPTO_ALG = 'AES-GCM';
 const HASH_ALG = 'SHA-256';
 const HKDF_INFO = new TextEncoder().encode('ecdh key exchange');
 
-interface ChoiceMessage {
-  role: string;
-  content?: string;
-  tool_calls?: ToolCall[];
-}
-
-interface Choice {
-  index: number;
-  message: ChoiceMessage;
-}
-
-interface StreamChoice {
-  index: number;
-  delta: {
-    content: string;
-    role: string;
-  };
-}
-
-interface Usage {
-  total_duration: number; // time spent generating the response
-  load_duration: number; // time spent in nanoseconds loading the model
-  prompt_eval_count: number; // number of tokens in the prompt
-  prompt_eval_duration: number; // time spent in nanoseconds evaluating the prompt
-  eval_count: number; // number of tokens in the response
-  eval_duration: number; // time in nanoseconds spent generating the response
-}
-
-interface ChatCompletionsRequest {
-  model: string;
-  messages: Message[];
-  temperature?: number;
-  max_completion_tokens?: number;
-  tools?: Tool[];
-  encrypt?: boolean;
-}
-
-interface ChatCompletionsResponse {
-  object: string;
-  created: number;
-  model: string;
-  choices: Choice[];
-  usage: Usage;
-}
-
 export class RemoteEngine extends BaseEngine {
   private baseUrl: string;
   private apiKey: string;
@@ -90,35 +58,6 @@ export class RemoteEngine extends BaseEngine {
     this.baseUrl = REMOTE_URL;
     this.apiKey = apiKey;
     this.cryptoHandler = new CryptographyHandler(this.baseUrl, this.apiKey);
-  }
-
-  private createRequestData(
-    messages: Message[],
-    model: string,
-    temperature?: number,
-    maxCompletionTokens?: number,
-    stream?: boolean,
-    tools?: Tool[],
-    encrypt?: boolean
-  ): ChatCompletionsRequest {
-    return {
-      model,
-      messages,
-      ...(temperature && { temperature }),
-      ...(maxCompletionTokens && {
-        max_completion_tokens: maxCompletionTokens,
-      }),
-      ...(stream && { stream }),
-      ...(tools && { tools }),
-      ...(encrypt && { encrypt, encryption_id: this.cryptoHandler.encryptionId }),
-    };
-  }
-
-  private getHeaders() {
-    return {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${this.apiKey}`,
-    };
   }
 
   async chat(
@@ -184,6 +123,43 @@ export class RemoteEngine extends BaseEngine {
         code: FailureCode.EngineSpecificError,
         description: 'Cannot fetch model with remote inference engine.',
       },
+    };
+  }
+
+  async isSupported(model: string): Promise<Result<string>> {
+    await Promise.resolve();
+    return {
+      ok: true,
+      value: model,
+    };
+  }
+
+  private createRequestData(
+    messages: Message[],
+    model: string,
+    temperature?: number,
+    maxCompletionTokens?: number,
+    stream?: boolean,
+    tools?: Tool[],
+    encrypt?: boolean
+  ): ChatCompletionsRequest {
+    return {
+      model,
+      messages,
+      ...(temperature && { temperature }),
+      ...(maxCompletionTokens && {
+        max_completion_tokens: maxCompletionTokens,
+      }),
+      ...(stream && { stream }),
+      ...(tools && { tools }),
+      ...(encrypt && { encrypt, encryption_id: this.cryptoHandler.encryptionId }),
+    };
+  }
+
+  private getHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${this.apiKey}`,
     };
   }
 
@@ -655,4 +631,49 @@ async function hkdf(
  */
 export function getTimestamp(dateString: string) {
   return new Date(dateString.slice(0, 23) + 'Z').valueOf();
+}
+
+interface ChoiceMessage {
+  role: string;
+  content?: string;
+  tool_calls?: ToolCall[];
+}
+
+interface Choice {
+  index: number;
+  message: ChoiceMessage;
+}
+
+interface StreamChoice {
+  index: number;
+  delta: {
+    content: string;
+    role: string;
+  };
+}
+
+interface Usage {
+  total_duration: number; // time spent generating the response
+  load_duration: number; // time spent in nanoseconds loading the model
+  prompt_eval_count: number; // number of tokens in the prompt
+  prompt_eval_duration: number; // time spent in nanoseconds evaluating the prompt
+  eval_count: number; // number of tokens in the response
+  eval_duration: number; // time in nanoseconds spent generating the response
+}
+
+interface ChatCompletionsRequest {
+  model: string;
+  messages: Message[];
+  temperature?: number;
+  max_completion_tokens?: number;
+  tools?: Tool[];
+  encrypt?: boolean;
+}
+
+interface ChatCompletionsResponse {
+  object: string;
+  created: number;
+  model: string;
+  choices: Choice[];
+  usage: Usage;
 }

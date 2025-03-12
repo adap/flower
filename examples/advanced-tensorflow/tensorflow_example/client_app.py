@@ -4,7 +4,7 @@ import keras
 from tensorflow_example.task import load_data, load_model
 
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context, ParametersRecord, RecordSet, array_from_numpy
+from flwr.common import Array, Context, ParametersRecord, RecordSet
 
 
 # Define Flower Client and client_fn
@@ -64,9 +64,7 @@ class FlowerClient(NumPyClient):
         # Get weights from the last layer
         layer_name = "dense"
         for variable in model.get_layer(layer_name).trainable_variables:
-            state_dict_arrays[f"{layer_name}.{variable.name}"] = array_from_numpy(
-                variable.numpy()
-            )
+            state_dict_arrays[f"{layer_name}.{variable.name}"] = Array(variable.numpy())
 
         # Add to recordset (replace if already exists)
         self.client_state.parameters_records[self.local_layer_name] = ParametersRecord(
