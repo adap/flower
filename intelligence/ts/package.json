@@ -18,30 +18,28 @@
     "url": "git+https://github.com/adap/flower.git"
   },
   "author": "The Flower Authors <hello@flower.ai>",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
-  "main": "./flowerintelligence.cjs.js",
-  "module": "./flowerintelligence.es.js",
-  "types": "./index.d.ts",
+  "main": "./dist/flowerintelligence.cjs.js",
+  "module": "./dist/flowerintelligence.es.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./flowerintelligence.es.js",
-      "require": "./flowerintelligence.cjs.js",
-      "types": "./index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/flowerintelligence.es.js",
+      "require": "./dist/flowerintelligence.cjs.js"
     }
   },
   "scripts": {
     "build:docs": "typedoc",
     "build:types": "tsc --emitDeclarationOnly",
     "build:watch": "tsc --watch && vite build",
-    "build": "tsc && vite build && pnpm build:types && cp package.json dist",
-    "demo": "pnpm build && node examples/hello-world/index.mjs",
-    "demo:js-proj": "cd examples/simple-js-project && pnpm start && cd ../..",
-    "demo:ts-proj": "cd examples/simple-ts-project && pnpm start && cd ../..",
-    "demo:tool": "cd examples/tool-calling && pnpm start && cd ../..",
-    "demo:tool-ts": "cd examples/tool-calling-ts && pnpm start && cd ../..",
-    "demo:stream-ts": "cd examples/streaming-ts && pnpm start && cd ../..",
+    "build": "tsc && vite build && pnpm build:types",
+    "demo": "cd examples/hello-world-ts && pnpm start && cd ../..",
+    "demo:js": "cd examples/hello-world-js && pnpm start && cd ../..",
+    "demo:stream": "cd examples/streaming && pnpm start && cd ../..",
     "demo:ee": "cd examples/encrypted && pnpm start && cd ../..",
+    "demo:e2e": "cd e2e/encrypted && pnpm start && cd ../..",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint --fix src",
@@ -53,28 +51,29 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.0",
-    "@eslint/js": "^9.21.0",
-    "@types/eslint__js": "^8.42.3",
-    "@typescript-eslint/eslint-plugin": "^8.24.1",
-    "@typescript-eslint/parser": "^8.24.1",
-    "@vitest/coverage-v8": "2.1.4",
+    "@eslint/js": "^9.22.0",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
+    "@vitest/coverage-v8": "3.0.8",
     "emoji-regex": "^10.4.0",
-    "eslint": "^9.21.0",
-    "eslint-import-resolver-typescript": "^3.8.3",
+    "eslint": "^9.22.0",
+    "eslint-import-resolver-typescript": "^3.8.4",
     "eslint-plugin-import": "^2.31.0",
-    "globals": "^15.15.0",
+    "globals": "^16.0.0",
     "http-server": "^14.1.1",
-    "prettier": "^3.5.2",
-    "typedoc": "^0.27.8",
+    "prettier": "^3.5.3",
+    "typedoc": "^0.27.9",
     "typedoc-plugin-markdown": "^4.4.2",
-    "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.1",
-    "vite": "^5.4.14",
-    "vitest": "^2.1.9"
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.1",
+    "vite": "^6.2.1",
+    "vitest": "^3.0.8"
   },
   "dependencies": {
-    "@huggingface/transformers": "^3.3.3",
+    "@huggingface/transformers": "^3.4.0",
     "@mlc-ai/web-llm": "^0.2.78",
     "get-random-values": "^3.0.0"
-  }
+  },
+  "jsdelivr": "./dist/flowerintelligence.cjs.js",
+  "unpkg": "./dist/flowerintelligence.cjs.js"
 }
