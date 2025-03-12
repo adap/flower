@@ -17,12 +17,14 @@
 
 import time
 import warnings
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
+from logging import WARNING
 from typing import Optional, cast
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.common.logger import log
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
@@ -149,11 +151,24 @@ class InMemoryDriver(Driver):
         # Raise an error if no message IDs are provided and none are stored
         if not self._message_ids:
             raise ValueError("No message IDs to pull. Call `push_messages` first.")
-        msg_ids = (
-            {UUID(msg_id) for msg_id in message_ids}
-            if message_ids is not None
-            else {UUID(msg_id) for msg_id in self._message_ids}
-        )
+
+        # Allow an override but default to the stored pending IDs
+        if message_ids is None:
+            # If no message_ids are provided, use the stored ones
+            message_ids_to_pull = self._message_ids
+        else:
+            # Otherwise, filter the provided list to only those in self._message_ids
+            provided_ids = set(message_ids)
+            message_ids_to_pull = sorted(provided_ids & set(self._message_ids))
+            missing_ids = sorted(provided_ids - set(self._message_ids))
+            if missing_ids:
+                log(
+                    WARNING,
+                    "Cannot pull messages for the following missing message IDs: %s",
+                    missing_ids,
+                )
+
+        msg_ids = {UUID(msg_id) for msg_id in message_ids_to_pull}
         # Pull Messages
         message_res_list = self.state.get_message_res(message_ids=msg_ids)
         # Get IDs of Messages these replies are for
@@ -163,7 +178,10 @@ class InMemoryDriver(Driver):
         # Delete
         self.state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
 
-        return message_res_list
+        def iter_msg() -> Iterator[Message]:
+            return iter(message_res_list)
+
+        return iter_msg()
 
     def send_and_receive(
         self,
@@ -184,7 +202,7 @@ class InMemoryDriver(Driver):
         end_time = time.time() + (timeout if timeout is not None else 0.0)
         ret: list[Message] = []
         while timeout is None or time.time() < end_time:
-            res_msgs = self.pull_messages(msg_ids)
+            res_msgs = list(self.pull_messages(msg_ids))
             ret.extend(res_msgs)
             msg_ids.difference_update(
                 {msg.metadata.reply_to_message for msg in res_msgs}

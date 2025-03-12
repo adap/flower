@@ -18,6 +18,7 @@
 import time
 import unittest
 from collections.abc import Iterable
+from logging import WARNING
 from unittest.mock import MagicMock, patch
 from uuid import UUID, uuid4
 
@@ -157,6 +158,7 @@ class TestInMemoryDriver(unittest.TestCase):
         msg_ids = [str(uuid4()) for _ in range(2)]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)
         self.state.get_message_res.return_value = message_res_list
+        self.driver._message_ids.extend(msg_ids)  # pylint: disable=protected-access
 
         # Execute
         pulled_msgs = list(self.driver.pull_messages(msg_ids))
@@ -169,6 +171,58 @@ class TestInMemoryDriver(unittest.TestCase):
         self.state.delete_messages.assert_called_once_with(
             message_ins_ids={UUID(m_id) for m_id in msg_ids}
         )
+
+    def test_pull_messages_without_given_message_ids(self) -> None:
+        """Test pulling messages successful when no message_ids are provided."""
+        # Prepare
+        msg_ids = [str(uuid4()) for _ in range(2)]
+        message_res_list = create_message_replies_for_specific_ids(msg_ids)
+        self.state.get_message_res.return_value = message_res_list
+        self.driver._message_ids.extend(msg_ids)  # pylint: disable=protected-access
+
+        # Execute
+        pulled_msgs = list(self.driver.pull_messages())
+        reply_tos = [msg.metadata.reply_to_message for msg in pulled_msgs]
+
+        # Assert
+        self.assertEqual(len(pulled_msgs), 2)
+        self.assertEqual(reply_tos, msg_ids)
+        # Ensure messages are deleted
+        self.state.delete_messages.assert_called_once_with(
+            message_ins_ids={UUID(m_id) for m_id in msg_ids}
+        )
+
+    def test_pull_messages_with_invalid_message_ids(self) -> None:
+        """Test pulling messages when provided message_ids include values not stored in
+        self._message_ids."""
+        # Prepare
+        provided_msg_ids = sorted([str(uuid4()) for _ in range(5)])
+        msg_ids = provided_msg_ids[:2]
+        message_res_list = create_message_replies_for_specific_ids(msg_ids)
+        self.state.get_message_res.return_value = message_res_list
+        self.driver._message_ids.extend(msg_ids)  # pylint: disable=protected-access
+        expected_missing = sorted(set(provided_msg_ids) - set(msg_ids))
+
+        # Execute
+        with patch("flwr.server.driver.inmemory_driver.log") as mock_log:
+            pulled_msgs = list(self.driver.pull_messages(provided_msg_ids))
+        reply_tos = [msg.metadata.reply_to_message for msg in pulled_msgs]
+
+        # Assert
+        self.assertEqual(len(pulled_msgs), 2)
+        self.assertEqual(reply_tos, msg_ids)
+        # Ensure messages are deleted
+        self.state.delete_messages.assert_called_once_with(
+            message_ins_ids={UUID(m_id) for m_id in msg_ids}
+        )
+        # Warning was logged with the missing IDs
+        mock_log.assert_called_once()
+        args, _ = mock_log.call_args
+        self.assertEqual(args[0], WARNING)
+        self.assertEqual(
+            args[1], "Cannot pull messages for the following missing message IDs: %s"
+        )
+        self.assertEqual(args[2], expected_missing)
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""

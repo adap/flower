@@ -227,11 +227,11 @@ class TestGrpcDriver(unittest.TestCase):
         # Warning was logged with the missing IDs
         mock_log.assert_called_once()
         args, _ = mock_log.call_args
-        log_level = args[0]
-        logged_missing_ids = args[2]
-        # Log level is WARNING and the missing IDs appear in the log message
-        self.assertEqual(log_level, WARNING)
-        self.assertEqual(logged_missing_ids, expected_missing)
+        self.assertEqual(args[0], WARNING)
+        self.assertEqual(
+            args[1], "Cannot pull messages for the following missing message IDs: %s"
+        )
+        self.assertEqual(args[2], expected_missing)
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
