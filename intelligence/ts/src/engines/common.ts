@@ -21,6 +21,12 @@ const STALE_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours.
 const CACHE_KEY = 'engineModelsCache'; // For browser localStorage.
 const CACHE_FILE = 'engineModelsCache.json'; // For Node filesystem.
 
+interface ModelResponse {
+  is_supported: boolean;
+  engine_model: string | undefined;
+  model: string | undefined;
+}
+
 interface CachedEntry {
   engineModel: string;
   timestamp: number;
@@ -171,10 +177,4 @@ export async function getEngineModelName(model: string, engine: string): Promise
     // Not in cache, call updateModel synchronously.
     return await updateModel(model, engine);
   }
-}
-
-interface ModelResponse {
-  is_supported: boolean;
-  engine_model: string | undefined;
-  model: string | undefined;
 }
