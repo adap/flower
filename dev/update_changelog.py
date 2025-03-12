@@ -73,13 +73,6 @@ PR_TYPE_TO_SECTION = {
 # Maximum number of workers in the thread pool
 MAX_WORKERS = argv[2] if len(argv) > 2 else 10
 
-# Ignore the following PRs when checking for repeated PRs
-IGNORED_REPEATED_PRS = {
-    "549",  # This PR includes different topics
-    "717",  # This PR includes different topics
-    "721",  # This PR is not repeated; it is mentioned in the summary
-}
-
 
 def _get_latest_tag(gh_api: Github) -> tuple[Repository, str]:
     """Retrieve the latest tag from the GitHub repository."""
@@ -316,7 +309,7 @@ def _check_repeated_prs(content: str) -> None:
             count_prs[pr] = 0
         count_prs[pr] += 1
     for pr, count in count_prs.items():
-        if count > 1 and pr not in IGNORED_REPEATED_PRS:
+        if count > 1:
             print(f"PR #{pr} is repeated {count} times.")
 
 

@@ -1471,15 +1471,11 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
   Remove unmaintained experimental strategies (`FastAndSlow`, `FedFSv0`, `FedFSv1`).
 
-TODO: None of the PRs renames `Weights` to `NDArrays`
-
-- **Rename** `Weights` **to** `NDArrays` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+- **Rename** `Weights` **to** `NDArrays` ([#1296](https://github.com/adap/flower/pull/1296))
 
   `flwr.common.Weights` was renamed to `flwr.common.NDArrays` to better capture what this type is all about.
 
-TODO: None of the PRs removes antiquated `force_final_distributed_eval`
-
-- **Remove antiquated** `force_final_distributed_eval` **from** `start_server` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+- **Remove antiquated** `force_final_distributed_eval` **from** `start_server` ([#1315](https://github.com/adap/flower/pull/1315))
 
   The `start_server` parameter `force_final_distributed_eval` has long been a historic artefact, in this release it is finally gone for good.
 
@@ -1596,9 +1592,8 @@ TODO: None of the PRs removes antiquated `force_final_distributed_eval`
 
 - **Remove deprecated no-op extra installs** ([#973](https://github.com/adap/flower/pull/973))
 
-TODO: The PR below does not change `FitRes` or `EvaluateRes`
+- **Remove deprecated proto fields from** `FitRes` **and** `EvaluateRes` ([#870](https://github.com/adap/flower/pull/870))
 
-- **Remove deprecated proto fields from** `FitRes` **and** `EvaluateRes` ([#869](https://github.com/adap/flower/pull/869))
 - **Remove deprecated QffedAvg strategy (replaced by QFedAvg)** ([#1107](https://github.com/adap/flower/pull/1107))
 
 ## v0.18.0 (2022-02-28)
@@ -1721,16 +1716,6 @@ TODO: The PR below does not change `FitRes` or `EvaluateRes`
   - (abstract) FedOpt
   - FedAdagrad
 
-- **Custom metrics for server and strategies** ([#717](https://github.com/adap/flower/pull/717))
-
-  The Flower server is now fully task-agnostic, all remaining instances of task-specific metrics (such as `accuracy`) have been replaced by custom metrics dictionaries. Flower 0.15 introduced the capability to pass a dictionary containing custom metrics from client to server. As of this release, custom metrics replace task-specific metrics on the server.
-
-  Custom metric dictionaries are now used in two user-facing APIs: they are returned from Strategy methods `aggregate_fit`/`aggregate_evaluate` and they enable evaluation functions passed to built-in strategies (via `eval_fn`) to return more than two evaluation metrics. Strategies can even return *aggregated* metrics dictionaries for the server to keep track of.
-
-  Strategy implementations should migrate their `aggregate_fit` and `aggregate_evaluate` methods to the new return type (e.g., by simply returning an empty `{}`), server-side evaluation functions should migrate from `return loss, accuracy` to `return loss, {"accuracy": accuracy}`.
-
-  Flower 0.15-style return types are deprecated (but still supported), compatibility will be removed in a future release.
-
 - **Migration warnings for deprecated functionality** ([#690](https://github.com/adap/flower/pull/690))
 
   Earlier versions of Flower were often migrated to new APIs, while maintaining compatibility with legacy APIs. This release introduces detailed warning messages if usage of deprecated APIs is detected. The new warning messages often provide details on how to migrate to more recent APIs, thus easing the transition from one release to another.
@@ -1743,13 +1728,23 @@ TODO: The PR below does not change `FitRes` or `EvaluateRes`
 
 ### Incompatible changes
 
+- **Custom metrics for server and strategies** ([#717](https://github.com/adap/flower/pull/717))
+
+  The Flower server is now fully task-agnostic, all remaining instances of task-specific metrics (such as `accuracy`) have been replaced by custom metrics dictionaries. Flower 0.15 introduced the capability to pass a dictionary containing custom metrics from client to server. As of this release, custom metrics replace task-specific metrics on the server.
+
+  Custom metric dictionaries are now used in two user-facing APIs: they are returned from Strategy methods `aggregate_fit`/`aggregate_evaluate` and they enable evaluation functions passed to built-in strategies (via `eval_fn`) to return more than two evaluation metrics. Strategies can even return *aggregated* metrics dictionaries for the server to keep track of.
+
+  Strategy implementations should migrate their `aggregate_fit` and `aggregate_evaluate` methods to the new return type (e.g., by simply returning an empty `{}`), server-side evaluation functions should migrate from `return loss, accuracy` to `return loss, {"accuracy": accuracy}`.
+
+  Flower 0.15-style return types are deprecated (but still supported), compatibility will be removed in a future release.
+
+  Deprecated `flwr.server.Server.evaluate`, use `flwr.server.Server.evaluate_round` instead
+
 - **Serialization-agnostic server** ([#721](https://github.com/adap/flower/pull/721))
 
   The Flower server is now fully serialization-agnostic. Prior usage of class `Weights` (which represents parameters as deserialized NumPy ndarrays) was replaced by class `Parameters` (e.g., in `Strategy`). `Parameters` objects are fully serialization-agnostic and represents parameters as byte arrays, the `tensor_type` attributes indicates how these byte arrays should be interpreted (e.g., for serialization/deserialization).
 
-  Built-in strategies implement this approach by handling serialization and deserialization to/from `Weights` internally. Custom/3rd-party Strategy implementations should update to the slightly changed Strategy method definitions. Strategy authors can consult PR [#721](https://github.com/adap/flower/pull/721) to see how strategies can easily migrate to the new format.
-
-- Deprecated `flwr.server.Server.evaluate`, use `flwr.server.Server.evaluate_round` instead ([#717](https://github.com/adap/flower/pull/717))
+  Built-in strategies implement this approach by handling serialization and deserialization to/from `Weights` internally. Custom/3rd-party Strategy implementations should update to the slightly changed Strategy method definitions. Strategy authors can consult [PR #721](https://github.com/adap/flower/pull/721) to see how strategies can easily migrate to the new format.
 
 ## v0.15.0 (2021-03-12)
 
@@ -1838,11 +1833,11 @@ What's new?
 
 What's new?
 
-- New example: PyTorch From Centralized To Federated ([#549](https://github.com/adap/flower/pull/549))
+- New example: PyTorch From Centralized To Federated ([#531](https://github.com/adap/flower/pull/531))
 - Improved documentation
   - New documentation theme ([#551](https://github.com/adap/flower/pull/551))
   - New API reference ([#554](https://github.com/adap/flower/pull/554))
-  - Updated examples documentation ([#549](https://github.com/adap/flower/pull/549))
+  - Updated examples documentation ([#534](https://github.com/adap/flower/pull/534))
   - Removed obsolete documentation ([#548](https://github.com/adap/flower/pull/548))
 
 Bugfix:
