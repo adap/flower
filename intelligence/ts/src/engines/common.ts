@@ -21,7 +21,6 @@ const STALE_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours.
 const CACHE_KEY = 'engineModelsCache'; // For browser localStorage.
 const CACHE_FILE = 'engineModelsCache.json'; // For Node filesystem.
 
-// Types: each model mapping now has its own timestamp.
 interface CachedEntry {
   engineModel: string;
   timestamp: number;
@@ -37,8 +36,8 @@ interface CachedMapping {
 async function loadCache(): Promise<CachedMapping | null> {
   if (isNode) {
     try {
-      const fs = await import('fs/promises');
-      const data = await fs.readFile(CACHE_FILE, 'utf-8');
+      const { readFile } = await import('fs/promises');
+      const data = await readFile(CACHE_FILE, 'utf-8');
       return JSON.parse(data) as CachedMapping;
     } catch (_) {
       return null;
@@ -61,8 +60,8 @@ async function loadCache(): Promise<CachedMapping | null> {
  */
 async function saveCache(cache: CachedMapping): Promise<void> {
   if (isNode) {
-    const fs = await import('fs/promises');
-    await fs.writeFile(CACHE_FILE, JSON.stringify(cache), 'utf-8');
+    const { writeFile } = await import('fs/promises');
+    await writeFile(CACHE_FILE, JSON.stringify(cache), 'utf-8');
   } else {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   }
@@ -70,7 +69,7 @@ async function saveCache(cache: CachedMapping): Promise<void> {
 
 async function updateModel(model: string, engine: string): Promise<Result<string>> {
   try {
-    const response = await fetch(REMOTE_URL, {
+    const response = await fetch(`${REMOTE_URL}/v1/fetch-model-config`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -94,15 +93,15 @@ async function updateModel(model: string, engine: string): Promise<Result<string
     const data = (await response.json()) as ModelResponse;
 
     if (data.is_supported && data.engine_model) {
-      await addOrUpdateCache(model, data.engine_model);
+      await addOrUpdateCache(model, engine, data.engine_model);
       return { ok: true, value: data.engine_model };
     } else {
-      await removeFromCache(model);
+      await removeFromCache(model, engine);
       return {
         ok: false,
         failure: {
           code: FailureCode.UnsupportedModelError,
-          description: `Model '${model}' is not supported on the webllm engine.`,
+          description: `Model '${model}' is not supported on the ${engine} engine.`,
         },
       };
     }
@@ -120,23 +119,25 @@ async function updateModel(model: string, engine: string): Promise<Result<string
 /**
  * Adds or updates a model mapping in the cache with the current timestamp.
  */
-async function addOrUpdateCache(model: string, engineModel: string): Promise<void> {
+async function addOrUpdateCache(model: string, engine: string, engineModel: string): Promise<void> {
   const now = Date.now();
   let cache = await loadCache();
   if (!cache) {
     cache = { mapping: {} };
   }
-  cache.mapping[model] = { engineModel, timestamp: now };
+  const key = `${model}_${engine}`;
+  cache.mapping[key] = { engineModel, timestamp: now };
   await saveCache(cache);
 }
 
 /**
  * Removes a model from the cache.
  */
-async function removeFromCache(model: string): Promise<void> {
+async function removeFromCache(model: string, engine: string): Promise<void> {
   const cache = await loadCache();
-  if (cache && model in cache.mapping) {
-    const { [model]: removed, ...rest } = cache.mapping;
+  const key = `${model}_${engine}`;
+  if (cache && key in cache.mapping) {
+    const { [key]: removed, ...rest } = cache.mapping;
     cache.mapping = rest;
     await saveCache(cache);
   }
@@ -155,8 +156,9 @@ export async function getEngineModelName(model: string, engine: string): Promise
     cache = { mapping: {} };
   }
 
-  if (model in cache.mapping) {
-    const cachedEntry = cache.mapping[model];
+  const key = `${model}_${engine}`;
+  if (key in cache.mapping) {
+    const cachedEntry = cache.mapping[key];
     // If the cached entry is stale, trigger a background update.
     if (now - cachedEntry.timestamp > STALE_TIMEOUT_MS) {
       updateModel(model, engine).catch((err: unknown) => {

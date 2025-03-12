@@ -191,7 +191,7 @@ export class FlowerIntelligence {
       return localEngineResult;
     }
 
-    return this.getOrCreateRemoteEngine();
+    return this.getOrCreateRemoteEngine(localEngineResult);
   }
 
   private async chooseLocalEngine(modelId: string): Promise<Result<Engine>> {
@@ -217,7 +217,10 @@ export class FlowerIntelligence {
     }
   }
 
-  private getOrCreateRemoteEngine(): Result<Engine> {
+  private getOrCreateRemoteEngine(localFailure?: Result<Engine>): Result<Engine> {
+    if (localFailure && !FlowerIntelligence.#remoteHandoff && !FlowerIntelligence.#apiKey) {
+      return localFailure;
+    }
     if (!FlowerIntelligence.#remoteHandoff) {
       return {
         ok: false,
