@@ -28,7 +28,7 @@ def get_wandb_mod(name: str) -> Mod:
             run_name = f"Node ID: {node_id}"
 
             # To keep things self contained, and because the processes running the ClientApps
-            # in simuilation will effectively _simulate_ different nodes (each with their id)
+            # in simulation will effectively _simulate_ different nodes (each with their id)
             # we need to re-init wandb each time the mod is exectued. For this to work we must
             # set `reinit=True` and pass to the `id` argument an identifier that's unique to
             # the actual ClientApp being executed (the best identifier is the `node_id`).
@@ -42,8 +42,8 @@ def get_wandb_mod(name: str) -> Mod:
                 resume="allow",
                 reinit=True,
             )
-            # We'll use a custom metric as x-axis step
-            # This is needed if not all clients participate in all rounds
+            # We'll define `server-round` as the custom metric in the x-axis step.
+            # This is needed if not all clients participate in all rounds.
             # W&B doesn't allow logging at step 1,2,4 (i.e. skipping 3)
             wandb.define_metric("server-round")
 
@@ -60,7 +60,7 @@ def get_wandb_mod(name: str) -> Mod:
             results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
             results_to_log["fit_time"] = time_diff
 
-            # Ensure all metrics to log use the custom step
+            # Ensure all metrics to be logged use the same custom `step_metric`
             wandb.define_metric("*", step_metric="server-round")
             results_to_log["server-round"] = server_round
             # Log as usual
@@ -71,7 +71,7 @@ def get_wandb_mod(name: str) -> Mod:
     return wandb_mod
 
 
-def get_tensorboard_mod(logdir) -> Mod:
+def get_tensorboard_mod(logdir: str) -> Mod:
     """Return a mod that logs metrics to Tensorboard."""
     os.makedirs(logdir, exist_ok=True)
 
@@ -85,8 +85,8 @@ def get_tensorboard_mod(logdir) -> Mod:
         node_id = str(msg.metadata.dst_node_id)
         server_round = int(msg.metadata.group_id)
 
-        # Let's say we want to measure the time takeng to exectue the app.
-        # We can easily do this in the mod but measuring the time difference as shown below
+        # Let's say we want to measure the time taken to execute the app.
+        # We can easily do this in the mod by measuring the time difference as shown below.
         start_time = time.time()
 
         # Run the app
@@ -102,7 +102,7 @@ def get_tensorboard_mod(logdir) -> Mod:
             metrics = dict(
                 reply.content.configs_records.get("fitres.metrics", ConfigsRecord())
             )
-            writer.add_scalar(f"fit_time", time_diff, global_step=server_round)
+            writer.add_scalar("fit_time", time_diff, global_step=server_round)
             for metric in metrics:
                 writer.add_scalar(
                     f"{metric}",
