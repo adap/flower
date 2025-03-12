@@ -15,11 +15,10 @@
 """Run ServerApp."""
 
 
-from logging import DEBUG, ERROR
+from logging import DEBUG
 from typing import Optional
 
-from flwr.common import Context, EventType, event
-from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common import Context
 from flwr.common.logger import log
 from flwr.common.object_ref import load_app
 
@@ -64,13 +63,3 @@ def run(
 
     log(DEBUG, "ServerApp finished running.")
     return context
-
-
-def run_server_app() -> None:
-    """Run Flower server app."""
-    event(EventType.RUN_SERVER_APP_ENTER)
-    log(
-        ERROR,
-        "The command `flower-server-app` has been replaced by `flwr run`.",
-    )
-    register_exit_handlers(event_type=EventType.RUN_SERVER_APP_LEAVE)

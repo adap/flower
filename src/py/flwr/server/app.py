@@ -753,7 +753,8 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "--insecure",
         action="store_true",
         help="Run the server without HTTPS, regardless of whether certificate "
-        "paths are provided. By default, the server runs with HTTPS enabled. "
+        "paths are provided. Data transmitted between the gRPC client and server "
+        "is not encrypted. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
     )
     parser.add_argument(

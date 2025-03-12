@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@flwr/flwr':
-        specifier: file:../../dist
-        version: file:../../dist
+        specifier: ^0.1.2
+        version: 0.1.2
       '@mozilla/readability':
         specifier: ^0.5.0
         version: 0.5.0
@@ -241,15 +241,15 @@ packages:
     resolution: {integrity: sha512-2b/g5hRmpbb1o4GnTZax9N9m0FXzz9OV42ZzI4rDDMDuHUqigAiQCEWChBWCY4ztAGVRjoWT19v0yMmc5/L5kA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@flwr/flwr@file:../../dist':
-    resolution: {directory: ../../dist, type: directory}
+  '@flwr/flwr@0.1.2':
+    resolution: {integrity: sha512-pxiQrpQbWzgHlS1RegT0fRR8Ixi9TVwC83pjUtGhxVpPK0QGv81+nD3LDdDAiNREB5fmijxz4MeLXki5WQ9O4A==}
 
   '@huggingface/jinja@0.3.3':
     resolution: {integrity: sha512-vQQr2JyWvVFba3Lj9es4q9vCl1sAc74fdgnEMoX8qHrXtswap9ge9uO3ONDzQB0cQ0PUyaKY2N6HaVbTBvSXvw==}
     engines: {node: '>=18'}
 
-  '@huggingface/transformers@3.3.3':
-    resolution: {integrity: sha512-OcMubhBjW6u1xnp0zSt5SvCxdGHuhP2k+w2Vlm3i0vNcTJhJTZWxxYQmPBfcb7PX+Q6c43lGSzWD6tsJFwka4Q==}
+  '@huggingface/transformers@3.4.0':
+    resolution: {integrity: sha512-jyuglsWc+Ls9/U7eGDDY+xYgDgDtwxQ4ul/5VQoqo2r0LfAnJ+zSRUjKnY6paOyzyhbKaftfEsvXJ049aL1cyw==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -1277,15 +1277,15 @@ packages:
   onnxruntime-common@1.20.1:
     resolution: {integrity: sha512-YiU0s0IzYYC+gWvqD1HzLc46Du1sXpSiwzKb63PACIJr6LfL27VsXSXQvt68EzD3V0D5Bc0vyJTjmMxp0ylQiw==}
 
-  onnxruntime-common@1.21.0-dev.20250206-d981b153d3:
-    resolution: {integrity: sha512-TwaE51xV9q2y8pM61q73rbywJnusw9ivTEHAJ39GVWNZqxCoDBpe/tQkh/w9S+o/g+zS7YeeL0I/2mEWd+dgyA==}
+  onnxruntime-common@1.22.0-dev.20250306-aafa8d170a:
+    resolution: {integrity: sha512-NfIQnW4lIk/8LnhnYqknYPeet0U0+AADgKQRlKex36QrNoVSCY+aNaX6wyy2VzQ4CNWxsYh0E203ajRD/zxn0g==}
 
   onnxruntime-node@1.20.1:
     resolution: {integrity: sha512-di/I4HDXRw+FLgq+TyHmQEDd3cEp9iFFZm0r4uJ1Wd7b/WE1VXtKWo8yemex347c6GNF/3Pv86ZfPhIWxORr0w==}
     os: [win32, darwin, linux]
 
-  onnxruntime-web@1.21.0-dev.20250206-d981b153d3:
-    resolution: {integrity: sha512-esDVQdRic6J44VBMFLumYvcGfioMh80ceLmzF1yheJyuLKq/Th8VT2aj42XWQst+2bcWnAhw4IKmRQaqzU8ugg==}
+  onnxruntime-web@1.22.0-dev.20250306-ccf8fdd9ea:
+    resolution: {integrity: sha512-YwqS9Qqx2eKFXIx+HQloqRUG5/STHPUuNk8wn+qVVmwXBIfNdXX0/Lm7wgo5CnC2k+yqZmjDV5V1dZi4PeSPGQ==}
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -1738,19 +1738,19 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@flwr/flwr@file:../../dist':
+  '@flwr/flwr@0.1.2':
     dependencies:
-      '@huggingface/transformers': 3.3.3
+      '@huggingface/transformers': 3.4.0
       '@mlc-ai/web-llm': 0.2.78
       get-random-values: 3.0.0
 
   '@huggingface/jinja@0.3.3': {}
 
-  '@huggingface/transformers@3.3.3':
+  '@huggingface/transformers@3.4.0':
     dependencies:
       '@huggingface/jinja': 0.3.3
       onnxruntime-node: 1.20.1
-      onnxruntime-web: 1.21.0-dev.20250206-d981b153d3
+      onnxruntime-web: 1.22.0-dev.20250306-ccf8fdd9ea
       sharp: 0.33.5
 
   '@humanfs/core@0.19.1': {}
@@ -2838,19 +2838,19 @@ snapshots:
 
   onnxruntime-common@1.20.1: {}
 
-  onnxruntime-common@1.21.0-dev.20250206-d981b153d3: {}
+  onnxruntime-common@1.22.0-dev.20250306-aafa8d170a: {}
 
   onnxruntime-node@1.20.1:
     dependencies:
       onnxruntime-common: 1.20.1
       tar: 7.4.3
 
-  onnxruntime-web@1.21.0-dev.20250206-d981b153d3:
+  onnxruntime-web@1.22.0-dev.20250306-ccf8fdd9ea:
     dependencies:
       flatbuffers: 25.2.10
       guid-typescript: 1.0.9
       long: 5.2.3
-      onnxruntime-common: 1.21.0-dev.20250206-d981b153d3
+      onnxruntime-common: 1.22.0-dev.20250306-aafa8d170a
       platform: 1.3.6
       protobufjs: 7.4.0
 
