@@ -75,7 +75,7 @@ export class FlowerIntelligence {
   /**
    * Downloads and loads a model into memory.
    * @param model Model name to use for the chat.
-   * @param callback A callback to handle the progress of the download
+   * @param callback A callback function taking a {@link Progress} object to handle the loading event.
    * @returns A {@link Result} containing either a {@link Failure} (containing `code: number` and `description: string`) if `ok` is false or a value of `void`, if `ok` is true (meaning the loading was successful).
    */
   async fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>> {

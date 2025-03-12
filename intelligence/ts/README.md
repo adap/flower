@@ -23,10 +23,7 @@ Alternatively, you can use it in vanilla JS, without any bundler, by using a CDN
 ## Hello, Flower Intelligence!
 
 ```javascript
-// If installed with NPM
-// import { FlowerIntelligence } from '@flwr/flwr';
-
-import { FlowerIntelligence } from 'https://cdn.jsdelivr.net/npm/@flwr/flwr';
+import { FlowerIntelligence } from '@flwr/flwr';
 
 const fi = FlowerIntelligence.instance;
 
@@ -51,17 +48,10 @@ await main().then().catch();
 
 ## Demo
 
-You can also quickly try out the library with the `examples/hello-world` example:
+You can also quickly try out the library with the `examples/hello-world-ts` example (which is a minimal TypeScript project):
 
 ```sh
 pnpm demo
 ```
 
-This script will build the library and run the example demo. You can modify the
-prompt used inside `examples/hello-world/index.mjs`.
-
-You can also use `pnpm demo:js-proj` or `pnpm demo:ts-proj` to respectively
-run a simple JavaScript project example or a simple TypeScript project example.
-Those projects can be found respectively in `examples/simple-js-project` and
-`examples/simple-ts-project`. Note that, contrary to `examples/hello-world`,
-those project are valid `pnpm`/`npm` projects.
+You can also use `pnpm demo:js` to run the equivalent JavaScript project example (`examples/simple-ts-project`).
