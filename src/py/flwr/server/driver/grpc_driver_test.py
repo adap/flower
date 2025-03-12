@@ -209,38 +209,27 @@ class TestGrpcDriver(unittest.TestCase):
         self._message_ids."""
         # Prepare
         run_id = 12345
-        valid_msg_ids = self._setup_pull_messages_mocks(
-            run_id
-        )  # returns ["id2", "id3"]
-        # Store message IDs in the driver's internal state for testing
-        self.driver._message_ids.extend(  # pylint: disable=protected-access
-            valid_msg_ids
-        )
-        provided_msg_ids = [
-            "id2",
-            "id3",
-            "id4",
-            "id5",
-        ]  # "id4" and "id5" are not stored.
-        expected_missing = [
-            msg_id for msg_id in provided_msg_ids if msg_id not in valid_msg_ids
-        ]
+        msg_ids = self._setup_pull_messages_mocks(run_id)
 
-        # Patch the log function to capture the warning.
+        # Store message IDs in the driver's internal state for testing
+        self.driver._message_ids.extend(msg_ids)  # pylint: disable=protected-access
+
+        provided_msg_ids = {"id2", "id3", "id4", "id5"}
+        expected_missing = sorted(provided_msg_ids - set(msg_ids))
+
+        # Execute
         with patch("flwr.server.driver.grpc_driver.log") as mock_log:
-            # Execute
             messages = list(self.driver.pull_messages(provided_msg_ids))
 
         # Assert
         # Only valid IDs are pulled
-        self._assert_pull_messages(valid_msg_ids, messages)
+        self._assert_pull_messages(msg_ids, messages)
         # Warning was logged with the missing IDs
         mock_log.assert_called_once()
         args, _ = mock_log.call_args
         log_level = args[0]
         logged_missing_ids = args[2]
-        # Verify that the log level is WARNING and the missing IDs appear in the
-        # log message
+        # Log level is WARNING and the missing IDs appear in the log message
         self.assertEqual(log_level, WARNING)
         self.assertEqual(logged_missing_ids, expected_missing)
 
