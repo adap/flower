@@ -245,9 +245,25 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
             raise ValueError("No message IDs to pull. Call `push_messages` first.")
 
         # Allow an override but default to the stored pending IDs
-        message_ids_to_pull = (
-            message_ids if message_ids is not None else self._message_ids
-        )
+        # Prepare the set of message IDs to pull:
+        # - If no message_ids are provided, use the stored ones.
+        # - Otherwise, filter the provided list to only those in self._message_ids.
+        if message_ids is None:
+            message_ids_to_pull = self._message_ids
+        else:
+            provided_ids = list(message_ids)  # Preserve order
+            message_ids_to_pull = [
+                msg_id for msg_id in provided_ids if msg_id in self._message_ids
+            ]
+            missing_ids = [
+                msg_id for msg_id in provided_ids if msg_id not in self._message_ids
+            ]
+            if missing_ids:
+                log(
+                    WARNING,
+                    "Cannot pull messages for the following missing message IDs: %s",
+                    missing_ids,
+                )
 
         def iter_msg() -> Iterator[Message]:
             for msg_id in message_ids_to_pull:
