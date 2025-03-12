@@ -77,8 +77,10 @@ MAX_WORKERS = argv[2] if len(argv) > 2 else 10
 def _get_latest_tag(gh_api: Github) -> tuple[Repository, str]:
     """Retrieve the latest tag from the GitHub repository."""
     repo = gh_api.get_repo(REPO_NAME)
-    tags = sorted(LOCAL_REPO.tags, key=lambda t: t.commit.committed_datetime)
-    return repo, tags[-1].name
+    # Get tags starting with "v" (excluding "intelligence/v...")
+    tags = [t for t in LOCAL_REPO.tags if t.name.startswith("v")]
+    latest_tag = max(tags, key=lambda t: t.commit.committed_datetime)
+    return repo, latest_tag.name
 
 
 def _add_shortlog(new_version: str, shortlog: str) -> None:
@@ -285,11 +287,30 @@ def _update_changelog(prs: set[PullRequest], tag: str, new_tag: str) -> bool:
             # Find the end of the Unreleased section
             end_index = content.find(f"## {tag}", end_index)
 
+        # Check for repeated PRs
+        _check_repeated_prs(content)
+
         # Finalize content update
         file.seek(0)
         file.write(content)
         file.truncate()
     return True
+
+
+def _check_repeated_prs(content: str) -> None:
+    """Check for repeated PRs in the changelog."""
+    found_pairs = re.findall(r"\[#(\d+)\]\(https://github.com/adap/flower/pull/(\d+)\)", content)
+    
+    count_prs = {}
+    for pr, pr_http in found_pairs:
+        if pr_http != pr:
+            print(f"PR #{pr} has inconsistent http link.")
+        if pr not in count_prs:
+            count_prs[pr] = 0
+        count_prs[pr] += 1
+    for pr, count in count_prs.items():
+        if count > 1:
+            print(f"PR #{pr} is repeated {count} times.")
 
 
 def _insert_entry_no_desc(

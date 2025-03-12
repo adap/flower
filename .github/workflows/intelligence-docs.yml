@@ -46,9 +46,6 @@ jobs:
           pnpm build:docs --readme none --name "TypeScript API"
       - name: Move TS docs
         run: |
-          mkdir -p intelligence/docs/source/ts-api-ref
-          cp -r intelligence/ts/docs/* intelligence/docs/source/ts-api-ref/
-          mv intelligence/docs/source/ts-api-ref/README.md intelligence/docs/source/ts-api-ref/index.md
           echo -e '\n```{toctree}\n:hidden:\n:maxdepth: 2\n:glob:\n\n*/*\n```' >> intelligence/docs/source/ts-api-ref/index.md
       - name: Upload TS docs artifact
         uses: actions/upload-artifact@v4

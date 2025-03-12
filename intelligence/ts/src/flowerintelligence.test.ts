@@ -18,7 +18,7 @@ import { vi } from 'vitest';
 vi.mock('./constants', () => ({
   DEFAULT_MODEL: 'meta/llama3.2-1b/instruct-fp16',
   REMOTE_URL: process.env.FI_DEV_REMOTE_URL,
-  VERSION: '0.1.1',
+  VERSION: '0.2.0',
   SDK: 'TS',
 }));
 
@@ -43,7 +43,7 @@ describe('FlowerIntelligence', () => {
       const getEngineRes = await fi['getEngine']('meta/llama3.2-1b/instruct-fp16', true, false);
       expect(getEngineRes.ok).toBe(true);
       if (getEngineRes.ok) {
-        expect(getEngineRes.value[0]).toBeInstanceOf(RemoteEngine);
+        expect(getEngineRes.value).toBeInstanceOf(RemoteEngine);
       }
     });
 
@@ -51,7 +51,7 @@ describe('FlowerIntelligence', () => {
       const getEngineRes = await fi['getEngine']('meta/llama3.2-1b/instruct-fp16', false, false);
       expect(getEngineRes.ok).toBe(true);
       if (getEngineRes.ok) {
-        expect(getEngineRes.value[0]).toBeInstanceOf(TransformersEngine);
+        expect(getEngineRes.value).toBeInstanceOf(TransformersEngine);
       }
     });
 
@@ -88,7 +88,7 @@ describe('FlowerIntelligence', () => {
       const chooseEngineRes = await fi['chooseLocalEngine']('meta/llama3.2-1b/instruct-fp16');
       expect(chooseEngineRes.ok).toBe(true);
       if (chooseEngineRes.ok) {
-        expect(chooseEngineRes.value[0]).toBeInstanceOf(TransformersEngine);
+        expect(chooseEngineRes.value).toBeInstanceOf(TransformersEngine);
       }
     });
   });
