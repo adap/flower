@@ -1,11 +1,11 @@
 """custom_mods: A Flower app with custom mods."""
 
 import torch
+from custom_mods.mods import get_tensorboard_mod, get_wandb_mod
+from custom_mods.task import Net, get_weights, load_data, set_weights, test, train
+
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
-
-from custom_mods.task import Net, get_weights, load_data, set_weights, test, train
-from custom_mods.mods import get_wandb_mod, get_tensorboard_mod
 
 
 # Define Flower client
