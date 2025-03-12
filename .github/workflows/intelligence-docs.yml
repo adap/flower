@@ -23,20 +23,28 @@ env:
 
 jobs:
   build_and_deploy:
-    runs-on: ubuntu-22.04
+    runs-on: macos-14
     name: Build and deploy
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
-        run: sudo apt install pandoc
+        run: brew install pandoc
       - name: Install Flower dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
+      - uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0.0"
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "16.2"
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22.14.0'
+      - name: Install SourceDocs
+        run: brew install sourcedocs
       - name: Install pnpm
         run: |
           npm install -g pnpm
