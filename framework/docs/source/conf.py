@@ -67,7 +67,10 @@ versions = sorted(
     [
         tag.name
         for tag in repo.tags
-        if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 8
+        if not tag.name.startswith("intelligence/")
+        and tag.name[0] == "v"
+        and int(tag.name[1]) > 0
+        and int(tag.name.split(".")[1]) >= 8
     ],
     key=lambda x: [int(part) for part in x[1:].split(".")],
 )
@@ -89,10 +92,10 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version of the next release, including alpha/beta/rc tags
-release = "1.16.0"
+release = "1.17.0"
 # The current released version
 rst_prolog = """
-.. |stable_flwr_version| replace:: 1.15.2
+.. |stable_flwr_version| replace:: 1.16.0
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
 .. |ubuntu_version| replace:: 24.04
 .. |setuptools_version| replace:: 70.3.0

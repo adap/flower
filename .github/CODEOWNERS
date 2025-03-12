@@ -18,6 +18,10 @@ README.md @jafermarq @tanertopal @danieljanes
 # Flower Examples
 /examples @chongshenng @jafermarq @tanertopal @danieljanes
 
+# Flower Intelligence
+/intelligence/docs @charlesbvll @tanertopal @danieljanes
+/intelligence/ts @charlesbvll @tanertopal @danieljanes
+
 # Flower Templates
 /src/py/flwr/cli/new/templates @jafermarq @tanertopal @danieljanes
 

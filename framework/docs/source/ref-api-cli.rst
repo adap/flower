@@ -68,34 +68,3 @@ Technical Commands
     :module: flwr.simulation.run_simulation
     :func: _parse_args_run_simulation
     :prog: flower-simulation
-
-Deprecated Commands
--------------------
-
-.. _flower-server-app-apiref:
-
-``flower-server-app``
-~~~~~~~~~~~~~~~~~~~~~
-
-.. warning::
-
-    Note that from version ``1.13.0``, ``flower-server-app`` is deprecated. Instead, you
-    only need to execute |flwr_run_link|_ to start the run.
-
-.. _flower-superexec-apiref:
-
-``flower-superexec``
-~~~~~~~~~~~~~~~~~~~~
-
-.. warning::
-
-    Note that from version ``1.13.0``, ``flower-superexec`` is deprecated. Instead, you
-    only need to execute |flower_superlink_link|_.
-
-.. |flower_superlink_link| replace:: ``flower-superlink``
-
-.. |flwr_run_link| replace:: ``flwr run``
-
-.. _flower_superlink_link: ref-api-cli.html#flower-superlink
-
-.. _flwr_run_link: ref-api-cli.html#flwr-run
