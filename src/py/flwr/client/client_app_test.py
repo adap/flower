@@ -23,21 +23,21 @@ from flwr.common.context import Context
 from .client_app import ClientApp
 
 
-def test_lifecycle_success() -> None:
-    """Test the lifecycle decorator with success."""
+def test_lifespan_success() -> None:
+    """Test the lifespan decorator with success."""
     # Prepare
     app = ClientApp()
     enter_code = Mock()
     exit_code = Mock()
 
-    @app.lifecycle()
+    @app.lifespan()
     def test_fn(_: Context) -> Iterator[None]:
         enter_code()
         yield
         exit_code()
 
     # Execute
-    with app._lifecycle(Mock(spec=Context)):  # pylint: disable=W0212
+    with app._lifespan(Mock(spec=Context)):  # pylint: disable=W0212
         pass
 
     # Assert
@@ -45,14 +45,14 @@ def test_lifecycle_success() -> None:
     exit_code.assert_called_once()
 
 
-def test_lifecycle_failure() -> None:
-    """Test the lifecycle decorator with failure."""
+def test_lifespan_failure() -> None:
+    """Test the lifespan decorator with failure."""
     # Prepare
     app = ClientApp()
     enter_code = Mock()
     exit_code = Mock()
 
-    @app.lifecycle()
+    @app.lifespan()
     def test_fn(_: Context) -> Iterator[None]:
         enter_code()
         yield
@@ -60,7 +60,7 @@ def test_lifecycle_failure() -> None:
 
     # Execute
     try:
-        with app._lifecycle(Mock(spec=Context)):  # pylint: disable=W0212
+        with app._lifespan(Mock(spec=Context)):  # pylint: disable=W0212
             raise RuntimeError("Test exception")
     except RuntimeError:
         pass
@@ -72,19 +72,19 @@ def test_lifecycle_failure() -> None:
     exit_code.assert_called_once()
 
 
-def test_lifecycle_no_yield() -> None:
-    """Test the lifecycle decorator with no yield."""
+def test_lifespan_no_yield() -> None:
+    """Test the lifespan decorator with no yield."""
     # Prepare
     app = ClientApp()
     enter_code = Mock()
 
-    @app.lifecycle()
+    @app.lifespan()
     def test_fn(_: Context) -> Iterator[None]:  # type: ignore
         enter_code()
 
     # Execute
     try:
-        with app._lifecycle(Mock(spec=Context)):  # pylint: disable=W0212
+        with app._lifespan(Mock(spec=Context)):  # pylint: disable=W0212
             pass
     except RuntimeError:
         pass
@@ -95,15 +95,15 @@ def test_lifecycle_no_yield() -> None:
     enter_code.assert_called_once()
 
 
-def test_lifecycle_multiple_yields() -> None:
-    """Test the lifecycle decorator with multiple yields."""
+def test_lifespan_multiple_yields() -> None:
+    """Test the lifespan decorator with multiple yields."""
     # Prepare
     app = ClientApp()
     enter_code = Mock()
     middle_code = Mock()
     exit_code = Mock()
 
-    @app.lifecycle()
+    @app.lifespan()
     def test_fn(_: Context) -> Iterator[None]:
         enter_code()
         yield
@@ -113,7 +113,7 @@ def test_lifecycle_multiple_yields() -> None:
 
     # Execute
     try:
-        with app._lifecycle(Mock(spec=Context)):  # pylint: disable=W0212
+        with app._lifespan(Mock(spec=Context)):  # pylint: disable=W0212
             pass
     except RuntimeError:
         pass

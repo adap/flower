@@ -138,6 +138,8 @@ def build(
                 and f.name != "pyproject.toml"  # Exclude the original pyproject.toml
             ]
 
+            all_files.sort()
+
             for file_path in all_files:
                 # Read the file content manually
                 with open(file_path, "rb") as f:
