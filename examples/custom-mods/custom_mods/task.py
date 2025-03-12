@@ -1,3 +1,5 @@
+"""custom_mods: A Flower app with custom mods."""
+
 import warnings
 from collections import OrderedDict
 

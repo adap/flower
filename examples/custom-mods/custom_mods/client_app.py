@@ -1,3 +1,5 @@
+"""custom_mods: A Flower app with custom mods."""
+
 import torch
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context

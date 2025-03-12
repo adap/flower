@@ -1,3 +1,5 @@
+"""custom_mods: A Flower app with custom mods."""
+
 import os
 import time
 import wandb

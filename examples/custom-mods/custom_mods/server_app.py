@@ -1,3 +1,5 @@
+"""custom_mods: A Flower app with custom mods."""
+
 from typing import List, Tuple
 
 from flwr.common import Metrics
