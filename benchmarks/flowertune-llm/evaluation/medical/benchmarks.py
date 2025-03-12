@@ -112,7 +112,7 @@ def infer_careqa(model, tokenizer, batch_size, run_name):
 
     def post_process(row):
         options = [row["op1"], row["op2"], row["op3"], row["op4"]]
-        answer = int(row["cop"])-1
+        answer = int(row["cop"]) - 1
         row["prompt"] = format_example(row["question"], options)
         row["gold"] = chr(ord("A") + answer) if answer in [0, 1, 2, 3] else None
         row["prompt"] = f"{instruction}\n{row['prompt']}\nThe answer is:\n"
