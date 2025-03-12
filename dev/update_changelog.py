@@ -73,6 +73,13 @@ PR_TYPE_TO_SECTION = {
 # Maximum number of workers in the thread pool
 MAX_WORKERS = argv[2] if len(argv) > 2 else 10
 
+# Ignore the following PRs when checking for repeated PRs
+IGNORED_REPEATED_PRS = {
+    "549",  # This PR includes different topics
+    "717",  # This PR includes different topics
+    "721",  # This PR is not repeated; it is mentioned in the summary
+}
+
 
 def _get_latest_tag(gh_api: Github) -> tuple[Repository, str]:
     """Retrieve the latest tag from the GitHub repository."""
@@ -287,11 +294,30 @@ def _update_changelog(prs: set[PullRequest], tag: str, new_tag: str) -> bool:
             # Find the end of the Unreleased section
             end_index = content.find(f"## {tag}", end_index)
 
+        # Check for repeated PRs
+        _check_repeated_prs(content)
+
         # Finalize content update
         file.seek(0)
         file.write(content)
         file.truncate()
     return True
+
+
+def _check_repeated_prs(content: str) -> None:
+    """Check for repeated PRs in the changelog."""
+    found_pairs = re.findall(r"\[#(\d+)\]\(https://github.com/adap/flower/pull/(\d+)\)", content)
+    
+    count_prs = {}
+    for pr, pr_http in found_pairs:
+        if pr_http != pr:
+            print(f"PR #{pr} has inconsistent http link.")
+        if pr not in count_prs:
+            count_prs[pr] = 0
+        count_prs[pr] += 1
+    for pr, count in count_prs.items():
+        if count > 1 and pr not in IGNORED_REPEATED_PRS:
+            print(f"PR #{pr} is repeated {count} times.")
 
 
 def _insert_entry_no_desc(
