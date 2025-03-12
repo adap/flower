@@ -1586,20 +1586,20 @@ TODO: None of the PRs removes antiquated `force_final_distributed_eval`
 
 ### Incompatible changes
 
+- **Remove deprecated DefaultStrategy strategy** ([#1142](https://github.com/adap/flower/pull/1142))
+
+  Removes the deprecated `DefaultStrategy` strategy, along with deprecated support for the `eval_fn` accuracy return value and passing initial parameters as NumPy ndarrays.
+
 - **Remove deprecated support for Python 3.6** ([#871](https://github.com/adap/flower/pull/871))
 
 - **Remove deprecated KerasClient** ([#857](https://github.com/adap/flower/pull/857))
 
 - **Remove deprecated no-op extra installs** ([#973](https://github.com/adap/flower/pull/973))
-  TODO: The PR below does not change `FitRes` or `EvaluateRes`
+
+TODO: The PR below does not change `FitRes` or `EvaluateRes`
 
 - **Remove deprecated proto fields from** `FitRes` **and** `EvaluateRes` ([#869](https://github.com/adap/flower/pull/869))
-
 - **Remove deprecated QffedAvg strategy (replaced by QFedAvg)** ([#1107](https://github.com/adap/flower/pull/1107))
-
-- **Remove deprecated DefaultStrategy strategy** ([#1142](https://github.com/adap/flower/pull/1142))
-
-  Removes the deprecated `DefaultStrategy` strategy, along with deprecated support for the `eval_fn` accuracy return value and passing initial parameters as NumPy ndarrays.
 
 ## v0.18.0 (2022-02-28)
 
