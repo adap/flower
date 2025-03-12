@@ -131,8 +131,10 @@ class TestGrpcDriver(unittest.TestCase):
             self.driver.push_messages(msgs)
 
     def _setup_pull_messages_mocks(self, run_id: int) -> list[str]:
-        """Set up common mocks for pull_messages. This creates two mock responses,
-        one for each message ID, and configures the stub to return them sequentially.
+        """Set up common mocks for pull_messages.
+
+        This creates two mock responses, one for each message ID, and configures the
+        stub to return them sequentially.
         """
         # Create messages with distinct reply_to values
         ok_message = create_res_message(src_node_id=123, dst_node_id=456, run_id=run_id)
@@ -157,9 +159,8 @@ class TestGrpcDriver(unittest.TestCase):
     def _assert_pull_messages(
         self, expected_ids: list[str], messages: list[Message]
     ) -> None:
-        """Check that PullMessages was called once per expected message ID and
-        that the returned messages have the correct reply_to values.
-        """
+        """Check that PullMessages was called once per expected message ID and that the
+        returned messages have the correct reply_to values."""
         reply_tos = {msg.metadata.reply_to_message for msg in messages}
         calls = self.mock_stub.PullMessages.call_args_list
         self.assertEqual(len(calls), len(expected_ids))
@@ -204,8 +205,8 @@ class TestGrpcDriver(unittest.TestCase):
         self._assert_pull_messages(msg_ids, messages)
 
     def test_pull_messages_with_invalid_message_ids(self) -> None:
-        """Test pulling messages when provided message_ids include values not
-        stored in self._message_ids."""
+        """Test pulling messages when provided message_ids include values not stored in
+        self._message_ids."""
         # Prepare
         run_id = 12345
         valid_msg_ids = self._setup_pull_messages_mocks(
