@@ -20,7 +20,7 @@ from collections.abc import Iterable
 from typing import Optional
 
 from flwr.common import Message, RecordSet
-from flwr.common.typing import Run
+from flwr.common.typing import ReadOnlyList, Run
 
 
 class Driver(ABC):
@@ -44,6 +44,11 @@ class Driver(ABC):
     @abstractmethod
     def run(self) -> Run:
         """Run information."""
+
+    @property
+    @abstractmethod
+    def message_ids(self) -> ReadOnlyList:
+        """Message IDs of pushed messages."""
 
     @abstractmethod
     def create_message(  # pylint: disable=too-many-arguments,R0917
@@ -89,7 +94,7 @@ class Driver(ABC):
         """Get node IDs."""
 
     @abstractmethod
-    def push_messages(self, messages: Iterable[Message]) -> None:
+    def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.
 
         This method takes an iterable of messages and sends each message
@@ -111,11 +116,11 @@ class Driver(ABC):
     def pull_messages(
         self, message_ids: Optional[Iterable[str]] = None
     ) -> Iterable[Message]:
-        """Pull messages from the SuperLink.
+        """Pull messages from the SuperLink based on message IDs.
 
-        This method is used to collect all available messages from the SuperLink.
-        If provided, it will only pull messages that correspond to a set of given
-        message IDs.
+        This method is used to collect messages from the SuperLink that correspond to a
+        set of given message IDs. If no message IDs are provided, it defaults to the
+        stored message IDs.
 
         Parameters
         ----------

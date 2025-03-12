@@ -19,7 +19,7 @@ import time
 import warnings
 from collections.abc import Iterable
 from logging import DEBUG, WARNING
-from typing import Optional, cast
+from typing import Generator, Optional, cast
 
 import grpc
 
@@ -32,7 +32,7 @@ from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
-from flwr.common.typing import Run
+from flwr.common.typing import ReadOnlyList, Run
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
@@ -56,7 +56,7 @@ Call `connect()` on the `GrpcDriverStub` instance before calling any of the othe
 """
 
 
-class GrpcDriver(Driver):
+class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
     """`GrpcDriver` provides an interface to the ServerAppIo API.
 
     Parameters
@@ -81,7 +81,7 @@ class GrpcDriver(Driver):
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
         self._retry_invoker = _make_simple_grpc_retry_invoker()
-        self._pending_messages: set[str] = set()
+        self._message_ids: list[str] = []
 
     @property
     def _is_connected(self) -> bool:
@@ -138,6 +138,11 @@ class GrpcDriver(Driver):
             self._connect()
         return cast(ServerAppIoStub, self._grpc_stub)
 
+    @property
+    def message_ids(self) -> ReadOnlyList:
+        """Message IDs of pushed messages."""
+        return ReadOnlyList(self._message_ids)
+
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
@@ -192,7 +197,7 @@ class GrpcDriver(Driver):
         )
         return [node.node_id for node in res.nodes]
 
-    def push_messages(self, messages: Iterable[Message]) -> None:
+    def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.
 
         This method takes an iterable of messages and sends each message
@@ -222,30 +227,43 @@ class GrpcDriver(Driver):
                 "list has `None` for those messages (the order is preserved as passed "
                 "to `push_messages`). This could be due to a malformed message.",
             )
-        self._pending_messages.update(res.message_ids)
+        # Store message IDs
+        msg_ids = list(res.message_ids)
+        self._message_ids = msg_ids
+        return msg_ids
 
     def pull_messages(
         self, message_ids: Optional[Iterable[str]] = None
     ) -> Iterable[Message]:
-        """Pull messages based on message IDs.
+        """Pull messages from the SuperLink based on message IDs.
 
         This method is used to collect messages from the SuperLink that correspond to a
-        set of given message IDs.
+        set of given message IDs. If no message IDs are provided, it defaults to the
+        stored message IDs.
         """
-        # Allow an override but default to the stored pending IDs.
+        # Raise an error if no message IDs are provided and none are stored
+        if not self._message_ids:
+            raise ValueError("No message IDs to pull. Call `push_messages` first.")
+
+        # Allow an override but default to the stored pending IDs
         message_ids_to_pull = (
-            message_ids if message_ids is not None else self._pending_messages
+            message_ids if message_ids is not None else self._message_ids
         )
-        # Pull Messages
-        res: PullResMessagesResponse = self._stub.PullMessages(
-            PullResMessagesRequest(
-                message_ids=message_ids_to_pull,
-                run_id=cast(Run, self._run).run_id,
-            )
-        )
-        # Convert Message from Protobuf representation
-        msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
-        return msgs
+
+        def iter_msg() -> Generator[Message, None, None]:
+            for msg_id in message_ids_to_pull:
+                # Pull Messages for each message ID
+                res: PullResMessagesResponse = self._stub.PullMessages(
+                    PullResMessagesRequest(
+                        message_ids=[msg_id],
+                        run_id=cast(Run, self._run).run_id,
+                    )
+                )
+                # Convert Message from Protobuf representation
+                msg = message_from_proto(res.messages_list[0])
+                yield msg
+
+        return iter_msg()
 
     def send_and_receive(
         self,
