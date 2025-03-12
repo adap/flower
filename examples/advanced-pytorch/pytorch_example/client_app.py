@@ -4,7 +4,7 @@ import torch
 from pytorch_example.task import Net, get_weights, load_data, set_weights, test, train
 
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context, ParametersRecord, RecordSet, array_from_numpy
+from flwr.common import Array, Context, ParametersRecord, RecordSet
 
 
 # Define Flower Client and client_fn
@@ -64,7 +64,7 @@ class FlowerClient(NumPyClient):
         """Save last layer weights to state."""
         state_dict_arrays = {}
         for k, v in self.net.fc2.state_dict().items():
-            state_dict_arrays[k] = array_from_numpy(v.cpu().numpy())
+            state_dict_arrays[k] = Array(v.cpu().numpy())
 
         # Add to recordset (replace if already exists)
         self.client_state.parameters_records[self.local_layer_name] = ParametersRecord(

@@ -15,12 +15,8 @@
 """Event log plugin components."""
 
 
-from .event_log_plugin import EventLogRequest as EventLogRequest
-from .event_log_plugin import EventLogResponse as EventLogResponse
 from .event_log_plugin import EventLogWriterPlugin as EventLogWriterPlugin
 
 __all__ = [
-    "EventLogRequest",
-    "EventLogResponse",
     "EventLogWriterPlugin",
 ]

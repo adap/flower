@@ -18,19 +18,23 @@
 
 import pathlib
 import re
+import time
+from concurrent.futures import ThreadPoolExecutor
+from datetime import date
+from sys import argv
+from typing import Optional
+
+import git
+from git import Commit
+from github import Github
+from github.PullRequest import PullRequest
+from github.Repository import Repository
 
 try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib
-from datetime import date
-from sys import argv
-from typing import Optional
 
-from github import Github
-from github.PullRequest import PullRequest
-from github.Repository import Repository
-from github.Tag import Tag
 
 REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "framework/docs/source/ref-changelog.md"
@@ -39,8 +43,8 @@ CHANGELOG_SECTION_HEADER = "### Changelog entry"
 # Load the TOML configuration
 with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
     "rb"
-) as file:
-    CONFIG = tomllib.load(file)
+) as toml_f:
+    CONFIG = tomllib.load(toml_f)
 
 # Extract types, project, and scope from the config
 TYPES = "|".join(CONFIG["type"])
@@ -52,12 +56,31 @@ ALLOWED_VERBS = CONFIG["allowed_verbs"]
 PATTERN_TEMPLATE = CONFIG["pattern_template"]
 PATTERN = PATTERN_TEMPLATE.format(types=TYPES, projects=PROJECTS, scope=SCOPE)
 
+# Local git repository
+LOCAL_REPO = git.Repo(search_parent_directories=True)
 
-def _get_latest_tag(gh_api: Github) -> tuple[Repository, Optional[Tag]]:
+# Map PR types to sections in the changelog
+PR_TYPE_TO_SECTION = {
+    "feat": "### New features",
+    "docs": "### Documentation improvements",
+    "break": "### Incompatible changes",
+    "ci": "### Other changes",
+    "fix": "### Other changes",
+    "refactor": "### Other changes",
+    "unknown": "### Unknown changes",
+}
+
+# Maximum number of workers in the thread pool
+MAX_WORKERS = argv[2] if len(argv) > 2 else 10
+
+
+def _get_latest_tag(gh_api: Github) -> tuple[Repository, str]:
     """Retrieve the latest tag from the GitHub repository."""
     repo = gh_api.get_repo(REPO_NAME)
-    tags = repo.get_tags()
-    return repo, tags[0] if tags.totalCount > 0 else None
+    # Get tags starting with "v" (excluding "intelligence/v...")
+    tags = [t for t in LOCAL_REPO.tags if t.name.startswith("v")]
+    latest_tag = max(tags, key=lambda t: t.commit.committed_datetime)
+    return repo, latest_tag.name
 
 
 def _add_shortlog(new_version: str, shortlog: str) -> None:
@@ -75,6 +98,7 @@ def _add_shortlog(new_version: str, shortlog: str) -> None:
         content = file.readlines()
 
     token_exists = any(token in line for line in content)
+    shortlog_exists = True
 
     with open(CHANGELOG_FILE, "w", encoding="utf-8") as file:
         for line in content:
@@ -84,29 +108,75 @@ def _add_shortlog(new_version: str, shortlog: str) -> None:
             elif "## Unreleased" in line and not token_exists:
                 # Add the new entry under "## Unreleased"
                 file.write(f"## {new_version} ({current_date})\n{entry}\n")
+                shortlog_exists = False
                 token_exists = True
             else:
                 file.write(line)
 
+    if shortlog_exists:
+        print("Shortlog already exists in the changelog, skipping addition.")
+    else:
+        print("Shortlog added to the changelog.")
 
-def _get_pull_requests_since_tag(
-    repo: Repository, tag: Tag
-) -> tuple[str, set[PullRequest]]:
-    """Get a list of pull requests merged into the main branch since a given tag."""
-    commit_shas = set()
-    contributors = set()
-    prs = set()
 
-    for commit in repo.compare(tag.commit.sha, "main").commits:
-        commit_shas.add(commit.sha)
+def _git_commits_since_tag(tag: str) -> list[Commit]:
+    """Get a set of commits since a given tag."""
+    return list(LOCAL_REPO.iter_commits(f"{tag}..origin/main"))
+
+
+def _get_contributors_from_commits(api: Github, commits: list[Commit]) -> set[str]:
+    """Get a set of contributors from a set of commits."""
+    # Get authors and co-authors from the commits
+    contributors: set[str] = set()
+    coauthor_names_emails: set[tuple[str, str]] = set()
+    coauthor_pattern = r"Co-authored-by:\s*(.+?)\s*<(.+?)>"
+
+    for commit in commits:
         if commit.author.name is None:
             continue
         if "[bot]" in commit.author.name:
             continue
-        contributors.add(commit.author.name)
+        # Find co-authors in the commit message
+        matches: list[str] = re.findall(coauthor_pattern, commit.message)
 
+        contributors.add(commit.author.name)
+        if matches:
+            coauthor_names_emails.update(matches)
+
+    # Get full names of the GitHub usernames
+    def _get_user(username: str, email: str) -> Optional[str]:
+        try:
+            user = api.get_user(username)
+            if user.email == email:
+                return user.name
+            print(f"Email mismatch for user {username}: {email} != {user.email}")
+        except Exception:  # pylint: disable=broad-exception-caught
+            print(f"FAILED to get user profile from GitHub: {username} <{email}>")
+        return None
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        for name in executor.map(lambda x: _get_user(*x), coauthor_names_emails):
+            if name:
+                contributors.add(name)
+    return contributors
+
+
+def _get_pull_requests_since_tag(
+    api: Github, repo: Repository, tag: str
+) -> tuple[str, set[PullRequest]]:
+    """Get a list of pull requests merged into the main branch since a given tag."""
+    prs = set()
+
+    print(f"Retrieving commits since tag '{tag}'...")
+    commits = _git_commits_since_tag(tag)
+
+    print("Retrieving contributors...")
+    contributors = _get_contributors_from_commits(api, commits)
+
+    print("Retrieving pull requests...")
+    commit_shas = {commit.hexsha for commit in commits}
     for pr_info in repo.get_pulls(
-        state="closed", sort="created", direction="desc", base="main"
+        state="closed", sort="updated", direction="desc", base="main"
     ):
         if pr_info.merge_commit_sha in commit_shas:
             prs.add(pr_info)
@@ -167,83 +237,55 @@ def _extract_changelog_entry(
     }
 
 
-def _update_changelog(prs: set[PullRequest]) -> bool:
+def _update_changelog(prs: set[PullRequest], tag: str, new_tag: str) -> bool:
     """Update the changelog file with entries from provided pull requests."""
-    breaking_changes = False
-    unknown_changes = False
-
     with open(CHANGELOG_FILE, "r+", encoding="utf-8") as file:
         content = file.read()
-        unreleased_index = content.find("## Unreleased")
+        unreleased_index = content.find(
+            "\n## Unreleased\n"
+        )  # Avoid finding `## Unreleased` in other text
+        if unreleased_index == -1:
+            unreleased_index = content.find(
+                f"## {new_tag}"
+            )  # Try to find the new tag if Unreleased not found
+        else:
+            unreleased_index += 1  # Skip the newline (\n) character
+
+        # Find the end of the Unreleased section
+        end_index = content.find(f"## {tag}", unreleased_index + 1)
+
+        for section in PR_TYPE_TO_SECTION.values():
+            if content.find(section, unreleased_index, end_index) == -1:
+                content = content[:end_index] + f"\n{section}\n\n" + content[end_index:]
+                end_index = content.find(f"## {tag}", end_index)
 
         if unreleased_index == -1:
             print("Unreleased header not found in the changelog.")
             return False
 
-        # Find the end of the Unreleased section
-        next_header_index = content.find("## ", unreleased_index + 1)
-        next_header_index = (
-            next_header_index if next_header_index != -1 else len(content)
-        )
-
         for pr_info in prs:
             parsed_title = _extract_changelog_entry(pr_info)
 
-            # Skip if PR should be skipped or already in changelog
-            if (
-                parsed_title.get("scope", "unknown") == "skip"
-                or f"#{pr_info.number}]" in content
-            ):
+            # Skip if the PR is already in changelog
+            if f"#{pr_info.number}]" in content:
                 continue
 
+            # Find section to insert
             pr_type = parsed_title.get("type", "unknown")
-            if pr_type == "feat":
-                insert_content_index = content.find("### What", unreleased_index + 1)
-            elif pr_type == "docs":
-                insert_content_index = content.find(
-                    "### Documentation improvements", unreleased_index + 1
-                )
-            elif pr_type == "break":
-                breaking_changes = True
-                insert_content_index = content.find(
-                    "### Incompatible changes", unreleased_index + 1
-                )
-            elif pr_type in {"ci", "fix", "refactor"}:
-                insert_content_index = content.find(
-                    "### Other changes", unreleased_index + 1
-                )
-            else:
-                unknown_changes = True
-                insert_content_index = unreleased_index
+            section = PR_TYPE_TO_SECTION.get(pr_type, "### Unknown changes")
+            insert_index = content.find(section, unreleased_index, end_index)
 
             pr_reference = _format_pr_reference(
                 pr_info.title, pr_info.number, pr_info.html_url
             )
-
             content = _insert_entry_no_desc(
                 content,
                 pr_reference,
-                insert_content_index,
+                insert_index,
             )
 
-            next_header_index = content.find("## ", unreleased_index + 1)
-            next_header_index = (
-                next_header_index if next_header_index != -1 else len(content)
-            )
-
-        if unknown_changes:
-            content = _insert_entry_no_desc(
-                content,
-                "### Unknown changes",
-                unreleased_index,
-            )
-
-        if not breaking_changes:
-            content = _insert_entry_no_desc(
-                content,
-                "None",
-                content.find("### Incompatible changes", unreleased_index + 1),
-            )
+            # Find the end of the Unreleased section
+            end_index = content.find(f"## {tag}", end_index)
 
         # Finalize content update
         file.seek(0)
@@ -263,34 +305,53 @@ def _insert_entry_no_desc(
     return content
 
 
-def _bump_minor_version(tag: Tag) -> Optional[str]:
+def _bump_minor_version(tag: str) -> Optional[str]:
     """Bump the minor version of the tag."""
-    match = re.match(r"v(\d+)\.(\d+)\.(\d+)", tag.name)
+    match = re.match(r"v(\d+)\.(\d+)\.(\d+)", tag)
     if match is None:
         return None
-    major, minor, _ = [int(x) for x in match.groups()]
+    major, minor, _ = (int(x) for x in match.groups())
     # Increment the minor version and reset patch version
     new_version = f"v{major}.{minor + 1}.0"
     return new_version
 
 
+def _fetch_origin() -> None:
+    """Fetch the latest changes from the origin."""
+    LOCAL_REPO.remote("origin").fetch()
+
+
 def main() -> None:
     """Update changelog using the descriptions of PRs since the latest tag."""
+    start = time.time()
+
     # Initialize GitHub Client with provided token (as argument)
     gh_api = Github(argv[1])
+
+    # Fetch the latest changes from the origin
+    print("Fetching the latest changes from the origin...")
+    _fetch_origin()
+
+    # Get the repository and the latest tag
+    print("Retrieving the latest tag...")
     repo, latest_tag = _get_latest_tag(gh_api)
     if not latest_tag:
         print("No tags found in the repository.")
         return
 
-    shortlog, prs = _get_pull_requests_since_tag(repo, latest_tag)
-    if _update_changelog(prs):
-        new_version = _bump_minor_version(latest_tag)
+    # Get the shortlog and the pull requests since the latest tag
+    shortlog, prs = _get_pull_requests_since_tag(gh_api, repo, latest_tag)
+
+    # Update the changelog
+    print("Updating the changelog...")
+    new_version = _bump_minor_version(latest_tag)
+    if _update_changelog(prs, latest_tag, new_version):
+
         if not new_version:
             print("Wrong tag format.")
             return
         _add_shortlog(new_version, shortlog)
-        print("Changelog updated succesfully.")
+        print(f"Changelog updated successfully in {time.time() - start:.2f}s.")
 
 
 if __name__ == "__main__":

@@ -16,6 +16,8 @@
 
 
 import inspect
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Callable, Optional
 
 from flwr.client.client import Client
@@ -71,6 +73,11 @@ def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFn
     return client_fn
 
 
+@contextmanager
+def _empty_lifespan(_: Context) -> Iterator[None]:
+    yield
+
+
 class ClientAppException(Exception):
     """Exception raised when an exception is raised while executing a ClientApp."""
 
@@ -95,15 +102,6 @@ class ClientApp:
     >>>    return FlowerClient().to_client()
     >>>
     >>> app = ClientApp(client_fn)
-
-    If the above code is in a Python module called `client`, it can be started as
-    follows:
-
-    >>> flower-client-app client:app --insecure
-
-    In this `client:app` example, `client` refers to the Python module `client.py` in
-    which the previous code lives in and `app` refers to the global attribute `app` that
-    points to an object of type `ClientApp`.
     """
 
     def __init__(
@@ -135,29 +133,31 @@ class ClientApp:
         self._train: Optional[ClientAppCallable] = None
         self._evaluate: Optional[ClientAppCallable] = None
         self._query: Optional[ClientAppCallable] = None
+        self._lifespan = _empty_lifespan
 
     def __call__(self, message: Message, context: Context) -> Message:
         """Execute `ClientApp`."""
-        # Execute message using `client_fn`
-        if self._call:
-            return self._call(message, context)
+        with self._lifespan(context):
+            # Execute message using `client_fn`
+            if self._call:
+                return self._call(message, context)
 
-        # Execute message using a new
-        if message.metadata.message_type == MessageType.TRAIN:
-            if self._train:
-                return self._train(message, context)
-            raise ValueError("No `train` function registered")
-        if message.metadata.message_type == MessageType.EVALUATE:
-            if self._evaluate:
-                return self._evaluate(message, context)
-            raise ValueError("No `evaluate` function registered")
-        if message.metadata.message_type == MessageType.QUERY:
-            if self._query:
-                return self._query(message, context)
-            raise ValueError("No `query` function registered")
+            # Execute message using a new
+            if message.metadata.message_type == MessageType.TRAIN:
+                if self._train:
+                    return self._train(message, context)
+                raise ValueError("No `train` function registered")
+            if message.metadata.message_type == MessageType.EVALUATE:
+                if self._evaluate:
+                    return self._evaluate(message, context)
+                raise ValueError("No `evaluate` function registered")
+            if message.metadata.message_type == MessageType.QUERY:
+                if self._query:
+                    return self._query(message, context)
+                raise ValueError("No `query` function registered")
 
-        # Message type did not match one of the known message types abvoe
-        raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
+            # Message type did not match one of the known message types abvoe
+            raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
 
     def train(
         self, mods: Optional[list[Mod]] = None
@@ -295,6 +295,70 @@ class ClientApp:
             return query_fn
 
         return query_decorator
+
+    def lifespan(
+        self,
+    ) -> Callable[
+        [Callable[[Context], Iterator[None]]], Callable[[Context], Iterator[None]]
+    ]:
+        """Return a decorator that registers the lifespan fn with the client app.
+
+        The decorated function should accept a `Context` object and use `yield`
+        to define enter and exit behavior.
+
+        Examples
+        --------
+        >>> app = ClientApp()
+        >>>
+        >>> @app.lifespan()
+        >>> def lifespan(context: Context) -> None:
+        >>>     # Perform initialization tasks before the app starts
+        >>>     print("Initializing ClientApp")
+        >>>
+        >>>     yield  # ClientApp is running
+        >>>
+        >>>     # Perform cleanup tasks after the app stops
+        >>>     print("Cleaning up ClientApp")
+        """
+
+        def lifespan_decorator(
+            lifespan_fn: Callable[[Context], Iterator[None]]
+        ) -> Callable[[Context], Iterator[None]]:
+            """Register the lifespan fn with the ServerApp object."""
+            warn_preview_feature("ClientApp-register-lifespan-function")
+
+            @contextmanager
+            def decorated_lifespan(context: Context) -> Iterator[None]:
+                # Execute the code before `yield` in lifespan_fn
+                try:
+                    if not isinstance(it := lifespan_fn(context), Iterator):
+                        raise StopIteration
+                    next(it)
+                except StopIteration:
+                    raise RuntimeError(
+                        "lifespan function should yield at least once."
+                    ) from None
+
+                try:
+                    # Enter the context
+                    yield
+                finally:
+                    try:
+                        # Execute the code after `yield` in lifespan_fn
+                        next(it)
+                    except StopIteration:
+                        pass
+                    else:
+                        raise RuntimeError("lifespan function should only yield once.")
+
+            # Register provided function with the ClientApp object
+            # Ignore mypy error because of different argument names (`_` vs `context`)
+            self._lifespan = decorated_lifespan  # type: ignore
+
+            # Return provided function unmodified
+            return lifespan_fn
+
+        return lifespan_decorator
 
 
 class LoadClientAppError(Exception):

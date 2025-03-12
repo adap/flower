@@ -15,21 +15,17 @@
 """Utility functions for State."""
 
 
-from logging import ERROR
 from os import urandom
-from typing import Optional, Union
+from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import ConfigsRecord, Context, log, now, serde
+from flwr.common import ConfigsRecord, Context, Error, Message, Metadata, now, serde
 from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
-from flwr.proto.error_pb2 import Error
 from flwr.proto.message_pb2 import Context as ProtoContext
-from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 
 # pylint: enable=E0611
 
@@ -235,165 +231,141 @@ def has_valid_sub_status(status: RunStatus) -> bool:
     return status.sub_status == ""
 
 
-def create_taskres_for_unavailable_taskins(taskins_id: Union[str, UUID]) -> TaskRes:
-    """Generate a TaskRes with a TaskIns unavailable error.
-
-    Parameters
-    ----------
-    taskins_id : Union[str, UUID]
-        The ID of the unavailable TaskIns.
-
-    Returns
-    -------
-    TaskRes
-        A TaskRes with an error code MESSAGE_UNAVAILABLE to indicate that the
-        inquired TaskIns ID cannot be found (due to non-existence or expiration).
-    """
+def create_message_error_unavailable_res_message(ins_metadata: Metadata) -> Message:
+    """Generate an error Message that the SuperLink returns carrying the specified
+    error."""
     current_time = now().timestamp()
-    return TaskRes(
-        task_id=str(uuid4()),
-        group_id="",  # Unknown group ID
-        run_id=0,  # Unknown run ID
-        task=Task(
-            # This function is only called by SuperLink, and thus it's the producer.
-            producer=Node(node_id=SUPERLINK_NODE_ID),
-            consumer=Node(node_id=SUPERLINK_NODE_ID),
-            created_at=current_time,
-            ttl=0,
-            ancestry=[str(taskins_id)],
-            task_type="",  # Unknown message type
-            error=Error(
-                code=ErrorCode.MESSAGE_UNAVAILABLE,
-                reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
-            ),
+    ttl = max(ins_metadata.ttl - (current_time - ins_metadata.created_at), 0)
+    metadata = Metadata(
+        run_id=ins_metadata.run_id,
+        message_id=str(uuid4()),
+        src_node_id=SUPERLINK_NODE_ID,
+        dst_node_id=SUPERLINK_NODE_ID,
+        reply_to_message=ins_metadata.message_id,
+        group_id=ins_metadata.group_id,
+        message_type=ins_metadata.message_type,
+        ttl=ttl,
+    )
+
+    return Message(
+        metadata=metadata,
+        error=Error(
+            code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
+            reason=REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
         ),
     )
 
 
-def create_taskres_for_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
-    """Generate a TaskRes with a reply message unavailable error from a TaskIns.
+def create_message_error_unavailable_ins_message(reply_to_message: UUID) -> Message:
+    """Error to indicate that the enquired Message had expired before reply arrived or
+    that it isn't found."""
+    metadata = Metadata(
+        run_id=0,  # Unknown
+        message_id=str(uuid4()),
+        src_node_id=SUPERLINK_NODE_ID,
+        dst_node_id=SUPERLINK_NODE_ID,
+        reply_to_message=str(reply_to_message),
+        group_id="",  # Unknown
+        message_type="",  # Unknown
+        ttl=0,
+    )
 
-    Parameters
-    ----------
-    ref_taskins : TaskIns
-        The reference TaskIns object.
-
-    Returns
-    -------
-    TaskRes
-        The generated TaskRes with an error code REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
-        indicating that the original TaskRes has expired.
-    """
-    current_time = now().timestamp()
-    ttl = ref_taskins.task.ttl - (current_time - ref_taskins.task.created_at)
-    if ttl < 0:
-        log(ERROR, "Creating TaskRes for TaskIns that exceeds its TTL.")
-        ttl = 0
-    return TaskRes(
-        task_id=str(uuid4()),
-        group_id=ref_taskins.group_id,
-        run_id=ref_taskins.run_id,
-        task=Task(
-            # This function is only called by SuperLink, and thus it's the producer.
-            producer=Node(node_id=SUPERLINK_NODE_ID),
-            consumer=Node(node_id=SUPERLINK_NODE_ID),
-            created_at=current_time,
-            ttl=ttl,
-            ancestry=[ref_taskins.task_id],
-            task_type=ref_taskins.task.task_type,
-            error=Error(
-                code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
-                reason=REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
-            ),
+    return Message(
+        metadata=metadata,
+        error=Error(
+            code=ErrorCode.MESSAGE_UNAVAILABLE,
+            reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
         ),
     )
 
 
-def has_expired(task_ins_or_res: Union[TaskIns, TaskRes], current_time: float) -> bool:
-    """Check if the TaskIns/TaskRes has expired."""
-    return task_ins_or_res.task.ttl + task_ins_or_res.task.created_at < current_time
+def message_ttl_has_expired(message_metadata: Metadata, current_time: float) -> bool:
+    """Check if the Message has expired."""
+    return message_metadata.ttl + message_metadata.created_at < current_time
 
 
-def verify_taskins_ids(
-    inquired_taskins_ids: set[UUID],
-    found_taskins_dict: dict[UUID, TaskIns],
+def verify_message_ids(
+    inquired_message_ids: set[UUID],
+    found_message_ins_dict: dict[UUID, Message],
     current_time: Optional[float] = None,
     update_set: bool = True,
-) -> dict[UUID, TaskRes]:
-    """Verify found TaskIns and generate error TaskRes for invalid ones.
+) -> dict[UUID, Message]:
+    """Verify found Messages and generate error Messages for invalid ones.
 
     Parameters
     ----------
-    inquired_taskins_ids : set[UUID]
-        Set of TaskIns IDs for which to generate error TaskRes if invalid.
-    found_taskins_dict : dict[UUID, TaskIns]
-        Dictionary containing all found TaskIns indexed by their IDs.
+    inquired_message_ids : set[UUID]
+        Set of Message IDs for which to generate error Message if invalid.
+    found_message_ins_dict : dict[UUID, Message]
+        Dictionary containing all found Message indexed by their IDs.
     current_time : Optional[float] (default: None)
         The current time to check for expiration. If set to `None`, the current time
         will automatically be set to the current timestamp using `now().timestamp()`.
     update_set : bool (default: True)
-        If True, the `inquired_taskins_ids` will be updated to remove invalid ones,
+        If True, the `inquired_message_ids` will be updated to remove invalid ones,
         by default True.
 
     Returns
     -------
-    dict[UUID, TaskRes]
-        A dictionary of error TaskRes indexed by the corresponding TaskIns ID.
+    dict[UUID, Message]
+        A dictionary of error Message indexed by the corresponding ID of the message
+        they are a reply of.
     """
     ret_dict = {}
     current = current_time if current_time else now().timestamp()
-    for taskins_id in list(inquired_taskins_ids):
-        # Generate error TaskRes if the task_ins doesn't exist or has expired
-        taskins = found_taskins_dict.get(taskins_id)
-        if taskins is None or has_expired(taskins, current):
+    for message_id in list(inquired_message_ids):
+        # Generate error message if the inquired message doesn't exist or has expired
+        message_ins = found_message_ins_dict.get(message_id)
+        if message_ins is None or message_ttl_has_expired(
+            message_ins.metadata, current
+        ):
             if update_set:
-                inquired_taskins_ids.remove(taskins_id)
-            taskres = create_taskres_for_unavailable_taskins(taskins_id)
-            ret_dict[taskins_id] = taskres
+                inquired_message_ids.remove(message_id)
+            message_res = create_message_error_unavailable_ins_message(message_id)
+            ret_dict[message_id] = message_res
     return ret_dict
 
 
-def verify_found_taskres(
-    inquired_taskins_ids: set[UUID],
-    found_taskins_dict: dict[UUID, TaskIns],
-    found_taskres_list: list[TaskRes],
+def verify_found_message_replies(
+    inquired_message_ids: set[UUID],
+    found_message_ins_dict: dict[UUID, Message],
+    found_message_res_list: list[Message],
     current_time: Optional[float] = None,
     update_set: bool = True,
-) -> dict[UUID, TaskRes]:
-    """Verify found TaskRes and generate error TaskRes for invalid ones.
+) -> dict[UUID, Message]:
+    """Verify found Message replies and generate error Message for invalid ones.
 
     Parameters
     ----------
-    inquired_taskins_ids : set[UUID]
-        Set of TaskIns IDs for which to generate error TaskRes if invalid.
-    found_taskins_dict : dict[UUID, TaskIns]
-        Dictionary containing all found TaskIns indexed by their IDs.
-    found_taskres_list : dict[TaskIns, TaskRes]
-        List of found TaskRes to be verified.
+    inquired_message_ids : set[UUID]
+        Set of Message IDs for which to generate error Message if invalid.
+    found_message_ins_dict : dict[UUID, Message]
+        Dictionary containing all found instruction Messages indexed by their IDs.
+    found_message_res_list : dict[Message, Message]
+        List of found Message to be verified.
     current_time : Optional[float] (default: None)
         The current time to check for expiration. If set to `None`, the current time
         will automatically be set to the current timestamp using `now().timestamp()`.
     update_set : bool (default: True)
-        If True, the `inquired_taskins_ids` will be updated to remove ones
-        that have a TaskRes, by default True.
+        If True, the `inquired_message_ids` will be updated to remove ones
+        that have a reply Message, by default True.
 
     Returns
     -------
-    dict[UUID, TaskRes]
-        A dictionary of TaskRes indexed by the corresponding TaskIns ID.
+    dict[UUID, Message]
+        A dictionary of Message indexed by the corresponding Message ID.
     """
-    ret_dict: dict[UUID, TaskRes] = {}
+    ret_dict: dict[UUID, Message] = {}
     current = current_time if current_time else now().timestamp()
-    for taskres in found_taskres_list:
-        taskins_id = UUID(taskres.task.ancestry[0])
+    for message_res in found_message_res_list:
+        message_ins_id = UUID(message_res.metadata.reply_to_message)
         if update_set:
-            inquired_taskins_ids.remove(taskins_id)
-        # Check if the TaskRes has expired
-        if has_expired(taskres, current):
-            # No need to insert the error TaskRes
-            taskres = create_taskres_for_unavailable_taskres(
-                found_taskins_dict[taskins_id]
+            inquired_message_ids.remove(message_ins_id)
+        # Check if the reply Message has expired
+        if message_ttl_has_expired(message_res.metadata, current):
+            # No need to insert the error Message
+            message_res = create_message_error_unavailable_res_message(
+                found_message_ins_dict[message_ins_id].metadata
             )
-            taskres.task.delivered_at = now().isoformat()
-        ret_dict[taskins_id] = taskres
+        ret_dict[message_ins_id] = message_res
     return ret_dict
