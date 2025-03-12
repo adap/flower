@@ -415,6 +415,133 @@ In this example, the conversation history is maintained in an array that include
 
             await main().then().catch();
 
+Pre-loading the model
+---------------------
+
+You might have noticed that the first time you run inference on a given model, you'll have to wait longer for it to complete compared to the second time you call the model.
+This is because the model first needs to be downloaded. This might be undesirable if you have an app where users can click a button and expect a quick response from the model.
+In this case, you might want to first let the user download the model (or download it on the first start-up), so once they click on the inference button, the results are consistently fast.
+This can be done using the :doc:`fetchModel <ts-api-ref/classes/FlowerIntelligence>` method.
+
+.. tab-set::
+    :sync-group: category
+
+    .. tab-item:: TypeScript
+        :sync: ts
+
+        .. code-block:: ts
+
+            import { ChatResponseResult, FlowerIntelligence, type StreamEvent } from '@flwr/flwr';
+
+            // Access the singleton instance
+            const fi: FlowerIntelligence = FlowerIntelligence.instance;
+
+            // Initialize history with a system message.
+            const history: Message[] = [
+              { role: "system", content: "You are a friendly assistant that loves using emojis." }
+            ];
+
+            // Function to chat while preserving conversation history.
+            async function chatWithHistory(userInput: string): Promise<void> {
+              // Append user input to the history.
+              history.push({ role: "user", content: userInput });
+
+              // Send the entire history to the chat method.
+              const response: ChatResponseResult = await fi.chat({
+                messages: history,
+                model: 'meta/llama3.2-1b/instruct-fp16',
+                stream: true,
+                onStreamEvent: (event: StreamEvent) => console.log(event.chunk)
+              });
+
+              if (response.ok) {
+                // Append the assistant's response to the history.
+                history.push(response.message);
+                console.log("Assistant's full response:", response.message.content);
+              } else {
+                console.error("Chat error:", response.failure.description);
+              }
+            }
+
+            async function main() {
+              // Download the model first
+              await fi.fetchModel('meta/llama3.2-1b/instruct-fp16');
+              chatWithHistory("Why is the sky blue?");
+            }
+
+            await main().then().catch();
+
+    .. tab-item:: JavaScript
+        :sync: js
+
+        .. code-block:: js
+
+            import { FlowerIntelligence } from '@flwr/flwr';
+
+            // Access the singleton instance
+            const fi = FlowerIntelligence.instance;
+
+            // Initialize history with a system message.
+            const history = [
+              { role: "system", content: "You are a friendly assistant that loves using emojis." }
+            ];
+
+            // Function to chat while preserving conversation history.
+            async function chatWithHistory(userInput) {
+              // Append user input to the history.
+              history.push({ role: "user", content: userInput });
+
+              // Send the entire history to the chat method.
+              const response = await fi.chat({
+                messages: history,
+                model: 'meta/llama3.2-1b/instruct-fp16',
+                stream: true,
+                onStreamEvent: (event) => console.log(event.chunk)
+              });
+
+              if (response.ok) {
+                // Append the assistant's response to the history.
+                history.push(response.message);
+                console.log("Assistant's full response:", response.message.content);
+              } else {
+                console.error("Chat error:", response.failure.description);
+              }
+            }
+
+            async function main() {
+              await fi.fetchModel('meta/llama3.2-1b/instruct-fp16');
+              chatWithHistory("Why is the sky blue?");
+            }
+
+            await main().then().catch();
+
+If you want to follow the progress of the download, you can pass a callback function that takes a :doc:`Progress <ts-api-ref/interfaces/Progress>` object as input:
+
+.. tab-set::
+    :sync-group: category
+
+    .. tab-item:: TypeScript
+        :sync: ts
+
+        .. code-block:: ts
+
+            import { FlowerIntelligence, Progress } from '@flwr/flwr';
+
+            await fi.fetchModel('meta/llama3.2-1b/instruct-fp16', (progress: Progress) =>
+              console.log(progress.percentage ?? '')
+            );
+
+    .. tab-item:: JavaScript
+        :sync: js
+
+        .. code-block:: js
+
+            import { FlowerIntelligence } from '@flwr/flwr';
+
+            await fi.fetchModel('meta/llama3.2-1b/instruct-fp16', (progress) =>
+              console.log(progress.percentage ?? '')
+            );
+
 .. note::
    Checkout out full examples over on `GitHub <https://github.com/adap/flower/tree/main/intelligence/ts/examples>`_ for more information!
 
