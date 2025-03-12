@@ -22,7 +22,7 @@ interface ModelResponse {
   model: string | undefined;
 }
 
-export async function checkSupport(model: string, engine: string): Promise<Result<string>> {
+export async function getEngineModelName(model: string, engine: string): Promise<Result<string>> {
   try {
     const response = await fetch(`${REMOTE_URL}/v1/fetch-model-config`, {
       method: 'POST',

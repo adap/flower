@@ -83,8 +83,7 @@ export class FlowerIntelligence {
     if (!engineResult.ok) {
       return engineResult;
     } else {
-      const [engine, modelId] = engineResult.value;
-      return await engine.fetchModel(modelId, callback);
+      return await engineResult.value.fetchModel(model, callback);
     }
   }
 
@@ -153,8 +152,9 @@ export class FlowerIntelligence {
       ({ messages, ...options } = inputOrOptions);
     }
 
+    const model = options.model ?? DEFAULT_MODEL;
     const engineResult = await this.getEngine(
-      options.model ?? DEFAULT_MODEL,
+      model,
       options.forceRemote ?? false,
       options.forceLocal ?? false
     );
@@ -163,10 +163,9 @@ export class FlowerIntelligence {
       return engineResult;
     }
 
-    const [engine, modelId] = engineResult.value;
-    return await engine.chat(
+    return await engineResult.value.chat(
       messages,
-      modelId,
+      model,
       options.temperature,
       options.maxCompletionTokens,
       options.stream,
@@ -180,14 +179,14 @@ export class FlowerIntelligence {
     modelId: string,
     forceRemote: boolean,
     forceLocal: boolean
-  ): Promise<Result<[Engine, string]>> {
+  ): Promise<Result<Engine>> {
     const argsResult = this.validateArgs(forceRemote, forceLocal);
     if (!argsResult.ok) {
       return argsResult;
     }
 
     if (forceRemote) {
-      return this.getOrCreateRemoteEngine(modelId);
+      return this.getOrCreateRemoteEngine();
     }
 
     const localEngineResult = await this.chooseLocalEngine(modelId);
@@ -195,18 +194,17 @@ export class FlowerIntelligence {
       return localEngineResult;
     }
 
-    return this.getOrCreateRemoteEngine(modelId);
+    return this.getOrCreateRemoteEngine();
   }
 
-  private async chooseLocalEngine(modelId: string): Promise<Result<[Engine, string]>> {
+  private async chooseLocalEngine(modelId: string): Promise<Result<Engine>> {
     const compatibleEngines = (
       await Promise.all(
         this.#availableLocalEngines.map(async (engine) => {
-          const supportedResult = await engine.isSupported(modelId);
-          return supportedResult.ok ? [engine, supportedResult.value] : null;
+          return (await engine.isSupported(modelId)) ? engine : null;
         })
       )
-    ).filter((item): item is [Engine, string] => item !== null);
+    ).filter((item): item is Engine => item !== null);
 
     if (compatibleEngines.length > 0) {
       // Currently we just select the first compatible localEngine without further check
@@ -222,7 +220,7 @@ export class FlowerIntelligence {
     }
   }
 
-  private getOrCreateRemoteEngine(modelId: string): Result<[Engine, string]> {
+  private getOrCreateRemoteEngine(): Result<Engine> {
     if (!FlowerIntelligence.#remoteHandoff) {
       return {
         ok: false,
@@ -242,7 +240,7 @@ export class FlowerIntelligence {
       };
     }
     this.#remoteEngine = this.#remoteEngine ?? new RemoteEngine(FlowerIntelligence.#apiKey);
-    return { ok: true, value: [this.#remoteEngine, modelId] };
+    return { ok: true, value: this.#remoteEngine };
   }
 
   private validateArgs(forceRemote: boolean, forceLocal: boolean): Result<void> {
