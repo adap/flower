@@ -23,6 +23,8 @@ from flwr.common import Context, Message
 from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 
+from flwr.proto.node_pb2 import NodeInfo
+
 
 class LinkState(abc.ABC):  # pylint: disable=R0904
     """Abstract LinkState."""
@@ -144,6 +146,10 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
+
+    @abc.abstractmethod
+    def get_nodes_info(self) -> list[NodeInfo]:
+        """Retrieve info about all connected nodes."""
 
     @abc.abstractmethod
     def set_node_public_key(self, node_id: int, public_key: bytes) -> None:

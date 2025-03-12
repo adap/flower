@@ -9,6 +9,20 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
+class NodeInfo(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_ID_FIELD_NUMBER: builtins.int
+    IS_ONLINE_FIELD_NUMBER: builtins.int
+    node_id: builtins.int
+    is_online: builtins.bool
+    def __init__(self,
+        *,
+        node_id: builtins.int = ...,
+        is_online: builtins.bool = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["is_online",b"is_online","node_id",b"node_id"]) -> None: ...
+global___NodeInfo = NodeInfo
+
 class Node(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_ID_FIELD_NUMBER: builtins.int

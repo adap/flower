@@ -43,6 +43,8 @@ from .utils import (
     verify_found_message_replies,
     verify_message_ids,
 )
+from flwr.proto.node_pb2 import NodeInfo
+
 
 
 @dataclass
@@ -349,6 +351,17 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 for node_id, (online_until, _) in self.node_ids.items()
                 if online_until > current_time
             }
+
+    def get_nodes_info(self) -> list[NodeInfo]:
+        """Retrieve info about all connected nodes."""
+        nodes_info = []
+        current_time = time.time()
+        for node_id, (online_until, _) in self.node_ids.items():
+            is_online = online_until > current_time
+            node_info = NodeInfo(node_id=node_id, is_online=is_online)
+            nodes_info.append(node_info)
+
+        return nodes_info
 
     def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
         """Set `public_key` for the specified `node_id`."""
