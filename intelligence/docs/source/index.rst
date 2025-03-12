@@ -33,7 +33,11 @@ Install
 
         .. code-block:: bash
 
-          swift package add https://github.com/adap/flower.git
+          # You can add package dependency to your Xcode project via its UI.
+          # Please refer to https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app.
+          # 
+          # To add dependency to your Swift package, you can run the following command:
+          swift package add-dependency "https://github.com/adap/flower.git"
 
 
 Hello, Flower Intelligence!
@@ -407,6 +411,29 @@ Instead of simply sending a single string, you can provide an array of :doc:`mes
             }
 
             await main().then().catch();
+    
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            let messages = [
+              Message(role: "system", content: "You are a helpful assistant."),
+              Message(role: "user", content: "Why is the sky blue?")
+            ]
+
+            let options = ChatOptions(model: "meta/llama3.2-1b/instruct-fp16")
+            let result = await fi.chat(options: (messages, options))
+            switch result {
+            case .success(let message):
+              print(message.content)
+            case .failure(let error):
+              print(error.localizedDescription)
+            }
 
 Handle history
 --------------
@@ -501,6 +528,50 @@ In this example, the conversation history is maintained in an array that include
             }
 
             await main().then().catch();
+    
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            // Initialize history with a system message
+            var history: [Message] = [
+                Message(role: "system", content: "You are a friendly assistant that loves using emojis.")
+            ]
+
+            // Function to chat while preserving conversation history
+            func chatWithHistory(userInput: String) async {
+                // Append user input to the history
+                history.append(Message(role: "user", content: userInput))
+
+                // Define chat options with streaming
+                let options = ChatOptions(
+                    model: "meta/llama3.2-1b/instruct-fp16",
+                    stream: true,
+                    onStreamEvent: { event in
+                        print(event.chunk)
+                    }
+                )
+
+                // Perform chat with full history
+                let result = await fi.chat(options: (history, options))
+
+                switch result {
+                case .success(let response):
+                    // Append assistant's response to history
+                    history.append(response)
+                    print("Assistant's full response:", response.content)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+
+            // Start the conversation
+            await chatWithHistory("Why is the sky blue?")
 
 .. note::
    Checkout out full examples over on `GitHub <https://github.com/adap/flower/tree/main/intelligence/ts/examples>`_ for more information!
@@ -590,6 +661,36 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
             }
 
             await main().then().catch();
+    
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+            fi.remoteHandoff = true
+            fi.apiKey = "YOUR_API_KEY"
+
+            let messages = [
+              Message(role: "system", content: "You are a helpful assistant."),
+              Message(role: "user", content: "Why is the sky blue?")
+            ]
+
+            let options = ChatOptions(
+              model: "meta/llama3.2-1b/instruct-fp16",
+              stream: true,
+              onStreamEvent: { event in
+                  print(event.chunk)
+              }
+            )
+
+            let result = await fi.chat(options: (messages, options))
+
+            if case .failure(let error) = result {
+              print(error.localizedDescription)
+            }
 
 References
 ----------
@@ -603,6 +704,7 @@ Information-oriented API reference and other reference material.
 
    ref-models
    ts-api-ref/index
+   swift-api-ref/index
 
 Join the Flower Community
 -------------------------
@@ -614,4 +716,3 @@ The Flower Community is growing quickly - we're a friendly group of researchers,
     :shadow:
 
     Join us on Slack
-
