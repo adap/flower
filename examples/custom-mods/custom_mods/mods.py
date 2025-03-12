@@ -86,7 +86,7 @@ def get_tensorboard_mod(logdir: str) -> Mod:
         node_id = str(msg.metadata.dst_node_id)
         server_round = int(msg.metadata.group_id)
 
-        # Let's say we want to measure the time taken to execute the app.
+        # Let's say we want to measure the time taken to run the app.
         # We can easily do this in the mod by measuring the time difference as shown below.
         start_time = time.time()
 
