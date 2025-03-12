@@ -47,6 +47,7 @@ jobs:
           ls
       - name: Move TS docs
         run: |
+          ls
           mkdir -p intelligence/docs/source/ts-api-ref
           cp -r intelligence/ts/docs/* intelligence/docs/source/ts-api-ref/
           mv intelligence/docs/source/ts-api-ref/README.md intelligence/docs/source/ts-api-ref/index.md
