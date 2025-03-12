@@ -33,8 +33,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '22.14.0'
-      - name: Install SourceDocs
-        run: brew install sourcedocs
       - name: Install pnpm
         run: |
           npm install -g pnpm
@@ -90,7 +88,7 @@ jobs:
           path: intelligence/docs/source/swift-api-ref/
 
   build_and_deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [build_ts_docs, build_swift_docs]
     name: Build and Deploy Docs
     steps:
@@ -98,7 +96,7 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
-        run: brew install pandoc
+        run: sudo apt install pandoc
       - name: Install Flower dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
       - name: Download TS docs
