@@ -29,7 +29,7 @@ import {
   Tool,
 } from '../typing';
 import { BaseEngine } from './engine';
-import { checkSupport } from './common';
+import { getEngineModelName } from './common';
 
 async function runQuery(
   engine: MLCEngineInterface,
@@ -72,10 +72,20 @@ export class WebllmEngine extends BaseEngine {
     onStreamEvent?: (event: StreamEvent) => void,
     _tools?: Tool[]
   ): Promise<ChatResponseResult> {
+    const modelNameRes = await getEngineModelName(model, 'webllm');
+    if (!modelNameRes.ok) {
+      return {
+        ok: false,
+        failure: {
+          code: FailureCode.UnsupportedModelError,
+          description: `The model ${model} is not supported on the WebLLM engine.`,
+        },
+      };
+    }
     try {
       if (!(model in this.#loadedEngines)) {
         this.#loadedEngines.model = await CreateMLCEngine(
-          model,
+          modelNameRes.value,
           {},
           {
             context_window_size: 2048,
@@ -109,10 +119,20 @@ export class WebllmEngine extends BaseEngine {
   }
 
   async fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>> {
+    const modelNameRes = await getEngineModelName(model, 'webllm');
+    if (!modelNameRes.ok) {
+      return {
+        ok: false,
+        failure: {
+          code: FailureCode.UnsupportedModelError,
+          description: `The model ${model} is not supported on the WebLLM engine.`,
+        },
+      };
+    }
     try {
       if (!(model in this.#loadedEngines)) {
         this.#loadedEngines.model = await CreateMLCEngine(
-          model,
+          modelNameRes.value,
           {
             initProgressCallback: (report: InitProgressReport) => {
               callback({ percentage: report.progress, description: report.text });
@@ -132,7 +152,8 @@ export class WebllmEngine extends BaseEngine {
     }
   }
 
-  async isSupported(model: string): Promise<Result<string>> {
-    return await checkSupport(model, 'webllm');
+  async isSupported(model: string): Promise<boolean> {
+    const modelNameRes = await getEngineModelName(model, 'webllm');
+    return modelNameRes.ok;
   }
 }
