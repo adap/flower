@@ -19,7 +19,7 @@ import time
 import warnings
 from collections.abc import Iterable
 from logging import DEBUG, WARNING
-from typing import Generator, Optional, cast
+from typing import Iterator, Optional, cast
 
 import grpc
 
@@ -249,7 +249,7 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
             message_ids if message_ids is not None else self._message_ids
         )
 
-        def iter_msg() -> Generator[Message, None, None]:
+        def iter_msg() -> Iterator[Message]:
             for msg_id in message_ids_to_pull:
                 # Pull Messages for each message ID
                 res: PullResMessagesResponse = self._stub.PullMessages(
