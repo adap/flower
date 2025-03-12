@@ -78,9 +78,12 @@ class MlxEngine: Engine {
     stream: Bool = false,
     onStreamEvent: (@Sendable (StreamEvent) -> Void)? = nil,
     tools: [Tool]? = nil
-  ) async throws -> [String: Any] {
+  ) async throws -> Message {
     if let model = model {
-      modelConfiguration = modelMapping[model] ?? ModelRegistry.llama3_2_1B_4bit
+      modelConfiguration = modelMapping[model] ?? ModelConfiguration(
+        id: "mlx-community/Llama-3.2-1B-Instruct-8bit",
+        defaultPrompt: "What is the difference between a fruit and a vegetable?"
+    )
     }
 
     let generateParameters = GenerateParameters(temperature: temperature ?? 0.6)
@@ -88,6 +91,10 @@ class MlxEngine: Engine {
 
     let modelContainer = try await load()
     MLXRandom.seed(UInt64(Date.timeIntervalSinceReferenceDate * 1000))
+      
+      print(messages.map {
+          Dictionary(uniqueKeysWithValues: [($0.role, $0.content)])
+        })
 
     let result = try await modelContainer.perform { context in
       let input = try await context.processor.prepare(
@@ -113,7 +120,7 @@ class MlxEngine: Engine {
         }
       }
     }
-    return ["content": result.output]
+      return Message(role: "assistant", content: result.output)
   }
 
   func fetchModel(model: String, callback: @escaping (Progress) -> Void) async throws {

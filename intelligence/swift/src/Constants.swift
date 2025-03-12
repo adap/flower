@@ -24,6 +24,12 @@ let hashAlgorithm = SHA256.self
 let hkdfInfo = Data("ecdh key exchange".utf8)
 let aesKeyLength = 32
 let modelMapping: [String: ModelConfiguration] = [
-  "meta/llama3.2-1b": ModelRegistry.llama3_2_1B_4bit,
-  "meta/llama3.2-3b": ModelRegistry.llama3_2_3B_4bit,
+    "meta/llama3.2-1b": ModelConfiguration(
+        id: "mlx-community/Llama-3.2-1B-Instruct-8bit",
+        defaultPrompt: "What is the difference between a fruit and a vegetable?"
+    ),
+  "meta/llama3.2-3b": ModelConfiguration(
+    id: "mlx-community/Llama-3.2-3B-Instruct",
+    defaultPrompt: "What is the difference between a fruit and a vegetable?"
+),
 ]

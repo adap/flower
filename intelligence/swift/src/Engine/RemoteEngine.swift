@@ -33,7 +33,7 @@ class RemoteEngine: RemoteEngineProtocol {
     temperature: Float?,
     maxCompletionTokens: Int?,
     stream: Bool,
-    onStreamEvent: ((StreamEvent) -> Void)?,
+    onStreamEvent: (@Sendable (StreamEvent) -> Void)?,
     tools: [Tool]?
   ) async throws -> Message {
     let model = model ?? "meta/llama3.2-1b"
@@ -127,7 +127,6 @@ enum NetworkService {
         message: "Invalid response from server"
       )
     }
-      print(try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any])
     try checkStatusCode(httpResponse)
     return try parseJson(from: data, as: Element.self)
   }
@@ -257,21 +256,15 @@ struct DeltaMessage: Codable {
 }
 
 struct Usage: Codable {
-  let totalDuration: Int  // Time spent generating the response
-  let loadDuration: Int  // Time spent in nanoseconds loading the model
-  let promptEvalCount: Int  // Number of tokens in the prompt
-  let promptEvalDuration: Int  // Time spent in nanoseconds evaluating the prompt
-  let evalCount: Int  // Number of tokens in the response
-  let evalDuration: Int  // Time in nanoseconds spent generating the response
-
-  enum CodingKeys: String, CodingKey {
-    case totalDuration = "total_duration"
-    case loadDuration = "load_duration"
-    case promptEvalCount = "prompt_eval_count"
-    case promptEvalDuration = "prompt_eval_duration"
-    case evalCount = "eval_count"
-    case evalDuration = "eval_duration"
-  }
+    let completionTokens: Int
+    let promptTokens: Int
+    let totalTokens: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case completionTokens = "completion_tokens"
+        case promptTokens = "prompt_tokens"
+        case totalTokens = "total_tokens"
+    }
 }
 
 struct ChatCompletionsRequest: Codable {
