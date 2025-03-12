@@ -18,30 +18,28 @@
     "url": "git+https://github.com/adap/flower.git"
   },
   "author": "The Flower Authors <hello@flower.ai>",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "type": "module",
-  "main": "./flowerintelligence.cjs.js",
-  "module": "./flowerintelligence.es.js",
-  "types": "./index.d.ts",
+  "main": "./dist/flowerintelligence.cjs.js",
+  "module": "./dist/flowerintelligence.es.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "import": "./flowerintelligence.es.js",
-      "require": "./flowerintelligence.cjs.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/flowerintelligence.es.js",
+      "require": "./dist/flowerintelligence.cjs.js"
     }
   },
   "scripts": {
     "build:docs": "typedoc",
     "build:types": "tsc --emitDeclarationOnly",
     "build:watch": "tsc --watch && vite build",
-    "build": "tsc && vite build && pnpm build:types && cp package.json dist",
-    "demo": "pnpm build && node examples/hello-world/index.mjs",
-    "demo:js-proj": "cd examples/simple-js-project && pnpm start && cd ../..",
-    "demo:ts-proj": "cd examples/simple-ts-project && pnpm start && cd ../..",
-    "demo:tool": "cd examples/tool-calling && pnpm start && cd ../..",
-    "demo:tool-ts": "cd examples/tool-calling-ts && pnpm start && cd ../..",
-    "demo:stream-ts": "cd examples/streaming-ts && pnpm start && cd ../..",
+    "build": "tsc && vite build && pnpm build:types",
+    "demo": "cd examples/hello-world-ts && pnpm start && cd ../..",
+    "demo:js": "cd examples/hello-world-js && pnpm start && cd ../..",
+    "demo:stream": "cd examples/streaming && pnpm start && cd ../..",
     "demo:ee": "cd examples/encrypted && pnpm start && cd ../..",
+    "demo:e2e": "cd e2e/encrypted && pnpm start && cd ../..",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint --fix src",
