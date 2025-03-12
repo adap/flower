@@ -168,6 +168,9 @@ poetry.lock
 
 # iOS
 xcuserdata/
+.swiftpm/
+.build/
+Package.resolved
 
 # Android
 .gradle
