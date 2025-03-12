@@ -32,7 +32,7 @@ from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
-from flwr.common.typing import ReadOnlyList, Run
+from flwr.common.typing import Run
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
@@ -139,9 +139,9 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
         return cast(ServerAppIoStub, self._grpc_stub)
 
     @property
-    def message_ids(self) -> ReadOnlyList:
+    def message_ids(self) -> list[str]:
         """Message IDs of pushed messages."""
-        return ReadOnlyList(self._message_ids)
+        return self._message_ids.copy()
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -228,9 +228,8 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
                 "to `push_messages`). This could be due to a malformed message.",
             )
         # Store message IDs
-        msg_ids = list(res.message_ids)
-        self._message_ids = msg_ids
-        return msg_ids
+        self._message_ids.extend(res.message_ids)
+        return list(res.message_ids)
 
     def pull_messages(
         self, message_ids: Optional[Iterable[str]] = None

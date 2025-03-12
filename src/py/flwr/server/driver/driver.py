@@ -20,7 +20,7 @@ from collections.abc import Iterable
 from typing import Optional
 
 from flwr.common import Message, RecordSet
-from flwr.common.typing import ReadOnlyList, Run
+from flwr.common.typing import Run
 
 
 class Driver(ABC):
@@ -47,7 +47,7 @@ class Driver(ABC):
 
     @property
     @abstractmethod
-    def message_ids(self) -> ReadOnlyList:
+    def message_ids(self) -> list[str]:
         """Message IDs of pushed messages."""
 
     @abstractmethod

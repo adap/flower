@@ -15,10 +15,9 @@
 """Flower type definitions."""
 
 
-from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Optional, Union, cast, overload
+from typing import Any, Callable, Optional, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -323,33 +322,3 @@ class LogEntry:
     actor: Actor
     event: Event
     status: str
-
-
-class ReadOnlyList(Sequence[str]):
-    """A thin, generic read-only wrapper for a list of strings."""
-
-    def __init__(self, data: list[str]) -> None:
-        # Store a reference to the original mutable list
-        self._data = data
-
-    @overload
-    def __getitem__(self, index: int) -> str: ...
-
-    @overload
-    def __getitem__(self, index: slice) -> Sequence[str]: ...
-
-    def __getitem__(self, index: Union[int, slice]) -> Union[str, "ReadOnlyList"]:
-        result = self._data[index]
-        # If the result is a slice, wrap it in a ReadOnlyList.
-        if isinstance(index, slice):
-            return ReadOnlyList(cast(list[str], result))
-        return cast(str, result)
-
-    def __len__(self) -> int:
-        return len(self._data)
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(self._data)
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__qualname__}({self._data!r})"
