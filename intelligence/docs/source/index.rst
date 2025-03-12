@@ -418,7 +418,7 @@ In this example, the conversation history is maintained in an array that include
 Pre-loading the model
 ---------------------
 
-You might have noticed that the first time you run inference on a given model, you'll have to wait quite a lot for it to complete.
+You might have noticed that the first time you run inference on a given model, you'll have to wait longer for it to complete compared to the second time you call the model.
 This is because the model first needs to be downloaded. This might be undesirable if you have an app where users can click a button and expect a quick response from the model.
 In this case, you might want to first let the user download the model (or download it on the first start-up), so once they click on the inference button, the results are consistently fast.
 This can be done using the :doc:`fetchModel <ts-api-ref/classes/FlowerIntelligence>` method.
