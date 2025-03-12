@@ -1,14 +1,16 @@
-import { FlowerIntelligence, Progress } from '@flwr/flwr';
+import { FlowerIntelligence, Progress, StreamEvent } from '@flwr/flwr';
 
 const fi = FlowerIntelligence.instance;
 
-async function sendChat(message: string): Promise<string> {
+async function sendChat(message: string, func: (text: string) => void): Promise<string> {
   const response = await fi.chat({
     messages: [
       { role: 'system', content: 'You are a helpful assistant' },
       { role: 'user', content: message },
     ],
-    // model: 'meta/llama3.2-1b/instruct-fp16',
+    stream: true,
+    onStreamEvent: (event: StreamEvent) => func(event.chunk),
+    model: 'meta/llama3.2-1b/instruct-fp16',
     // model: 'meta/llama3.2-3b/instruct-q4',
     // model: 'meta/llama3.1-8b/instruct-q4',
     // model: 'deepseek/r1',
@@ -24,6 +26,7 @@ const chatInput = document.getElementById('chatInput') as HTMLInputElement;
 const sendButton = document.getElementById('sendButton') as HTMLButtonElement;
 const loadButton = document.getElementById('loadButton') as HTMLButtonElement;
 const chatLog = document.getElementById('chatLog') as HTMLDivElement;
+const loading = document.getElementById('loading') as HTMLDivElement;
 
 sendButton.addEventListener('click', async () => {
   const message = chatInput.value.trim();
@@ -32,23 +35,18 @@ sendButton.addEventListener('click', async () => {
   appendToChatLog(`You: ${message}`);
   chatInput.value = '';
 
-  const response = await sendChat(message);
-  appendToChatLog(`Bot: ${response}`);
+  appendToChatLog(`Bot: `);
+  await sendChat(message, appendToChatLog);
+  chatLog.scrollTop = chatLog.scrollHeight;
 });
 
 loadButton.addEventListener('click', async () => {
   fi.fetchModel('meta/llama3.2-1b/instruct-fp16', (progress: Progress) => {
     // To change later
-    console.log(progress.description);
-    console.log(progress.loadedBytes);
-    console.log(progress.totalBytes);
-    console.log(progress.percentage);
+    loading.textContent = String(progress.percentage);
   });
 });
 
 function appendToChatLog(text: string) {
-  const p = document.createElement('p');
-  p.textContent = text;
-  chatLog.appendChild(p);
-  chatLog.scrollTop = chatLog.scrollHeight;
+  chatLog.textContent = chatLog.textContent ?? '' + text;
 }

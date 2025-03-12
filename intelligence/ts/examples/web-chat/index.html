@@ -1,45 +1,48 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Minimal Vite Chat</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-      }
 
-      #chatLog {
-        border: 1px solid #ccc;
-        padding: 10px;
-        margin-top: 10px;
-        height: 200px;
-        overflow-y: auto;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <title>Minimal Vite Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
 
-      input {
-        padding: 5px;
-        font-size: 16px;
-      }
+    #chatLog {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+      height: 200px;
+      overflow-y: auto;
+    }
 
-      button {
-        padding: 5px 10px;
-        font-size: 16px;
-        margin-left: 5px;
-      }
-    </style>
-  </head>
+    input {
+      padding: 5px;
+      font-size: 16px;
+    }
 
-  <body>
-    <h1>Minimal Vite Chat</h1>
-    <div>
-      <input id="chatInput" type="text" placeholder="Type your message..." />
-      <button id="sendButton">Send</button>
-      <button id="loadButton">Load</button>
-    </div>
-    <div id="chatLog">
-      <p>Chat log will appear here...</p>
-    </div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+    button {
+      padding: 5px 10px;
+      font-size: 16px;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Minimal Vite Chat</h1>
+  <div>
+    <input id="chatInput" type="text" placeholder="Type your message..." />
+    <button id="sendButton">Send</button>
+    <button id="loadButton">Load</button>
+  </div>
+  <div id="loading">
+  </div>
+  <div id="chatLog">
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
 </html>
