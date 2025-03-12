@@ -44,7 +44,7 @@ jobs:
         run: |
           cd intelligence/ts
           pnpm build:docs --readme none --name "TypeScript API"
-          cd ../..
+          ls
       - name: Move TS docs
         run: |
           mkdir -p intelligence/docs/source/ts-api-ref
