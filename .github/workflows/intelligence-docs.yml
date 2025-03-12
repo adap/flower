@@ -23,7 +23,7 @@ env:
 
 jobs:
   build_ts_docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Build TypeScript Docs
     steps:
       - uses: actions/checkout@v4
