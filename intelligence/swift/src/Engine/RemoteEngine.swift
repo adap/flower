@@ -127,6 +127,7 @@ enum NetworkService {
         message: "Invalid response from server"
       )
     }
+      print(try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any])
     try checkStatusCode(httpResponse)
     return try parseJson(from: data, as: Element.self)
   }
@@ -219,6 +220,7 @@ enum NetworkService {
         message: "Invalid response from server"
       )
     }
+    print(stream)
     try checkStatusCode(httpResponse)
     for try await line in stream.lines {
       guard let json = line.data(using: .utf8) else { continue }
