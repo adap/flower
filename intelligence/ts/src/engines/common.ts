@@ -27,7 +27,7 @@ async function loadCache(): Promise<CachedMapping | null> {
       const fs = await import('fs/promises');
       const data = await fs.readFile(CACHE_FILE, 'utf-8');
       return JSON.parse(data) as CachedMapping;
-    } catch (err) {
+    } catch (_) {
       return null;
     }
   } else {
@@ -122,8 +122,9 @@ async function addOrUpdateCache(model: string, engineModel: string): Promise<voi
  */
 async function removeFromCache(model: string): Promise<void> {
   const cache = await loadCache();
-  if (cache && cache.mapping[model]) {
-    delete cache.mapping[model];
+  if (cache && model in cache.mapping) {
+    const { [model]: removed, ...rest } = cache.mapping;
+    cache.mapping = rest;
     await saveCache(cache);
   }
 }
@@ -134,21 +135,20 @@ async function removeFromCache(model: string): Promise<void> {
  * - If it exists but is stale (older than 24 hours), trigger a background update (and return the stale mapping).
  * - If it does not exist, update synchronously.
  */
-export async function checkSupport(model: string, engine: string): Promise<Result<string>> {
+export async function getEngineModelName(model: string, engine: string): Promise<Result<string>> {
   const now = Date.now();
   let cache = await loadCache();
   if (!cache) {
     cache = { mapping: {} };
   }
 
-  const cachedEntry = cache.mapping[model];
-
-  if (cachedEntry !== undefined) {
+  if (model in cache.mapping) {
+    const cachedEntry = cache.mapping[model];
     // If the cached entry is stale, trigger a background update.
     if (now - cachedEntry.timestamp > STALE_TIMEOUT_MS) {
-      updateModel(model, engine).catch((err) =>
-        console.warn(`Background update failed for model ${model}:`, err)
-      );
+      updateModel(model, engine).catch((err: unknown) => {
+        console.warn(`Background update failed for model ${model}:`, String(err));
+      });
     }
     // Return the (possibly stale) cached result.
     return { ok: true, value: cachedEntry.engineModel };
