@@ -54,7 +54,7 @@ export async function getEngineModelName(model: string, engine: string): Promise
         ok: false,
         failure: {
           code: FailureCode.UnsupportedModelError,
-          description: `Model '${model}' is not supported on the webllm engine.`,
+          description: `Model '${model}' is not supported on the ${engine} engine.`,
         },
       };
     }
