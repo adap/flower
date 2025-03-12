@@ -19,7 +19,7 @@ parser.add_argument(
     "--datasets",
     type=str,
     default="pubmedqa",
-    help="The dataset to infer on: [pubmedqa, medqa, medmcqa]",
+    help="The dataset to infer on: [pubmedqa, medqa, medmcqa, careqa]",
 )
 parser.add_argument("--batch-size", type=int, default=16)
 parser.add_argument("--quantization", type=int, default=4)
