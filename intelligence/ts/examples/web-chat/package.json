@@ -5,18 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc",
-    "start": "pnpm i && pnpm build && http-server ."
+    "start": "pnpm i && vite"
   },
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@flwr/flwr": "^0.1.3",
-    "cross-spawn": "^7.0.5"
+    "@flwr/flwr": "^0.1.3"
   },
   "devDependencies": {
     "typescript": "^5.6.3",
-    "vite": "^6.2.0",
-    "http-server": "^14.1.1"
+    "vite": "^6.2.0"
   }
 }
