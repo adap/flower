@@ -17,12 +17,15 @@ class CreateNodeRequest(google.protobuf.message.Message):
     """CreateNode messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PING_INTERVAL_FIELD_NUMBER: builtins.int
+    NAME_FIELD_NUMBER: builtins.int
     ping_interval: builtins.float
+    name: typing.Text
     def __init__(self,
         *,
         ping_interval: builtins.float = ...,
+        name: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["ping_interval",b"ping_interval"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["name",b"name","ping_interval",b"ping_interval"]) -> None: ...
 global___CreateNodeRequest = CreateNodeRequest
 
 class CreateNodeResponse(google.protobuf.message.Message):

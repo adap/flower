@@ -63,7 +63,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             peer=context.peer(),
             state=self.state_factory.state(),
         )
-        log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
+        log(
+            INFO,
+            "[Fleet.CreateNode] Created node_id=%s (name: %s)",
+            response.node.node_id,
+            request.name,
+        )
         log(DEBUG, "[Fleet.CreateNode] Response: %s", MessageToDict(response))
         return response
 

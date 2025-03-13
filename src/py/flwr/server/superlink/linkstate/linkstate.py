@@ -129,7 +129,9 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Get all instruction Message IDs for the given run_id."""
 
     @abc.abstractmethod
-    def create_node(self, ping_interval: float, peer: Optional[str] = None) -> int:
+    def create_node(
+        self, ping_interval: float, metadata: Optional[dict[str, str]] = None
+    ) -> int:
         """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod

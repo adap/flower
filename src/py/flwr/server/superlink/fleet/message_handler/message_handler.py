@@ -59,7 +59,10 @@ def create_node(
 ) -> CreateNodeResponse:
     """."""
     # Create node
-    node_id = state.create_node(ping_interval=request.ping_interval, peer=peer)
+    node_id = state.create_node(
+        ping_interval=request.ping_interval,
+        metadata={"address": peer, "name": request.name},
+    )
     return CreateNodeResponse(node=Node(node_id=node_id))
 
 

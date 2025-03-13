@@ -306,7 +306,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.message_res_store)
 
-    def create_node(self, ping_interval: float, peer: Optional[str] = None) -> int:
+    def create_node(
+        self, ping_interval: float, metadata: Optional[dict[str, str]] = None
+    ) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(
@@ -318,7 +320,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
-            self.node_ids[node_id] = (time.time() + ping_interval, ping_interval, peer)
+            self.node_ids[node_id] = (
+                time.time() + ping_interval,
+                ping_interval,
+                metadata,
+            )
             return node_id
 
     def delete_node(self, node_id: int) -> None:
@@ -355,9 +361,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Retrieve info about all connected nodes."""
         nodes_info = []
         current_time = time.time()
-        for node_id, (online_until, _, peer) in self.node_ids.items():
+        for node_id, (online_until, _, metadata) in self.node_ids.items():
             is_online = online_until > current_time
-            metadata = {"address": peer}
             node_info = NodeInfo(
                 node_id=node_id, is_online=is_online, metadata=metadata
             )
