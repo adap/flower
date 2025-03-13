@@ -46,6 +46,7 @@ class DummyFleetLogPlugin(EventLogWriterPlugin):
         user_info: Optional[UserInfo],
         method_name: str,
     ) -> LogEntry:
+        """Compose pre-event log entry from the provided request and context."""
         return LogEntry(
             timestamp="before_timestamp",
             actor=Actor(
@@ -65,6 +66,7 @@ class DummyFleetLogPlugin(EventLogWriterPlugin):
         method_name: str,
         response: Optional[Union[GrpcMessage, Exception]],
     ) -> LogEntry:
+        """Compose post-event log entry from the provided response and context."""
         return LogEntry(
             timestamp="after_timestamp",
             actor=Actor(
@@ -77,6 +79,7 @@ class DummyFleetLogPlugin(EventLogWriterPlugin):
         )
 
     def write_log(self, log_entry: LogEntry) -> None:
+        """Write the event log to the specified data sink."""
         self.logs.append(log_entry)
 
 
@@ -84,6 +87,7 @@ class TestFleetEventLogInterceptor(unittest.TestCase):
     """Test the FleetEventLogInterceptor logging for unary-unary RPC calls."""
 
     def setUp(self) -> None:
+        """Set up the test."""
         self.log_plugin = DummyFleetLogPlugin()
         self.interceptor = FleetEventLogInterceptor(log_plugin=self.log_plugin)
         # For the Fleet interceptor, user_info is always passed as None.
