@@ -37,14 +37,14 @@ interface CachedMapping {
 
 async function getCacheFilePath(): Promise<string> {
   if (!isNode) return ''; // Not used in browsers.
-  const { join } = await import('path');
+  const path = await import('path');
   const os = await import('os');
   const fs = await import('fs/promises');
 
   const homeDir = os.homedir();
-  const cacheFolder = join(homeDir, '.flwr', 'cache');
+  const cacheFolder = path.join(homeDir, '.flwr', 'cache');
   await fs.mkdir(cacheFolder, { recursive: true });
-  return join(cacheFolder, 'intelligence-model-names.json');
+  return path.join(cacheFolder, 'intelligence-model-names.json');
 }
 
 /**
