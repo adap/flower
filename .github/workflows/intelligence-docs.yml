@@ -22,34 +22,9 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  changes:
-    runs-on: ubuntu-22.04
-    outputs:
-      swift: ${{ steps.filter.outputs.swift }}
-      typescript: ${{ steps.filter.outputs.typescript }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Filter changed paths
-        id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            swift:
-              - 'intelligence/docs/**/*'
-              - 'intelligence/swift/**/*'
-              - '.github/workflows/intelligence-swift.yml'
-              - '.github/workflows/intelligence-docs.yml'
-            typescript:
-              - 'intelligence/docs/**/*'
-              - 'intelligence/ts/**/*'
-              - '.github/workflows/intelligence-ts.yml'
-              - '.github/workflows/intelligence-docs.yml'
-
   build_ts_docs:
     runs-on: ubuntu-22.04
     name: Build TypeScript Docs
-    if: ${{ (github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork) || needs.changes.outputs.typescript == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
@@ -81,7 +56,6 @@ jobs:
   build_swift_docs:
     runs-on: macos-14
     name: Build Swift Docs
-    if: ${{ (github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork) || needs.changes.outputs.swift == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
