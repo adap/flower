@@ -1,5 +1,5 @@
 ---
-tags: [advanced, vision, fds, wandb]
+tags: [web, vision, fds, wandb]
 dataset: [Fashion-MNIST]
 framework: [torch, torchvision]
 ---

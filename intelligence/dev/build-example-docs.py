@@ -43,10 +43,10 @@ engineers, students, professionals, academics, and other enthusiasts.
 
     Join us on Slack
 
-Quickstart Examples
--------------------
+Node Examples
+-------------
 
-Flower Quickstart Examples are a collection of demo projects that show how you
+Flower Node Examples are a collection of demo projects that show how you
 can use Flower in combination with other existing frameworks or technologies.
 
 """
@@ -57,8 +57,8 @@ table_headers = (
 )
 
 categories = {
-    "quickstart": {"table": table_headers, "list": ""},
-    "advanced": {"table": table_headers, "list": ""},
+    "node": {"table": table_headers, "list": ""},
+    "web": {"table": table_headers, "list": ""},
     "other": {"table": table_headers, "list": ""},
 }
 
@@ -233,46 +233,46 @@ def _main():
             _copy_markdown_files(example_path)
             _add_gh_button(example)
             # _copy_images(example_path)
-            if not _add_table_entry(example_path, "quickstart", "quickstart"):
+            if not _add_table_entry(example_path, "node", "node"):
                 if not _add_table_entry(example_path, "comprehensive", "comprehensive"):
-                    if not _add_table_entry(example_path, "advanced", "advanced"):
+                    if not _add_table_entry(example_path, "web", "web"):
                         _add_table_entry(example_path, "", "other")
 
     with open(INDEX, "a") as index_file:
-        index_file.write(categories["quickstart"]["table"])
+        index_file.write(categories["node"]["table"])
 
-        index_file.write("\nAdvanced Examples\n-----------------\n")
+        index_file.write("\nWeb Examples\n------------\n")
         index_file.write(
-            "Advanced Examples are mostly for users that are both familiar with "
+            "Web Examples are mostly for users that are both familiar with "
             "Federated Learning but also somewhat familiar with Flower's main "
             "features.\n"
         )
-        index_file.write(categories["advanced"]["table"])
+        index_file.write(categories["web"]["table"])
 
-        index_file.write("\nOther Examples\n--------------\n")
-        index_file.write(
-            "Flower Examples are a collection of example projects written with "
-            "Flower that explore different domains and features. You can check "
-            "which examples already exist and/or contribute your own example.\n"
-        )
-        index_file.write(categories["other"]["table"])
+        # index_file.write("\nOther Examples\n--------------\n")
+        # index_file.write(
+        #     "Flower Examples are a collection of example projects written with "
+        #     "Flower that explore different domains and features. You can check "
+        #     "which examples already exist and/or contribute your own example.\n"
+        # )
+        # index_file.write(categories["other"]["table"])
 
-        _add_all_entries()
+        # _add_all_entries()
 
         index_file.write(
             "\n.. toctree::\n  :maxdepth: 1\n  :caption: Quickstart\n  :hidden:\n\n"
         )
-        index_file.write(categories["quickstart"]["list"])
+        index_file.write(categories["node"]["list"])
 
         index_file.write(
             "\n.. toctree::\n  :maxdepth: 1\n  :caption: Advanced\n  :hidden:\n\n"
         )
-        index_file.write(categories["advanced"]["list"])
+        index_file.write(categories["web"]["list"])
 
-        index_file.write(
-            "\n.. toctree::\n  :maxdepth: 1\n  :caption: Others\n  :hidden:\n\n"
-        )
-        index_file.write(categories["other"]["list"])
+        # index_file.write(
+        #     "\n.. toctree::\n  :maxdepth: 1\n  :caption: Others\n  :hidden:\n\n"
+        # )
+        # index_file.write(categories["other"]["list"])
 
         index_file.write("\n")
 
