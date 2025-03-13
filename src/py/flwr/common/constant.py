@@ -217,14 +217,8 @@ class AuthType:
 class EventLogWriterType:
     """Event log writer types."""
 
-    FALSE = "false"
     STDOUT = "stdout"
 
     def __new__(cls) -> EventLogWriterType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
-
-    @classmethod
-    def choices(cls) -> list[str]:
-        """Return a list of available log writer choices."""
-        return [cls.FALSE, cls.STDOUT]
