@@ -30,5 +30,6 @@ pnpm dev
 
 This should display a URL that you can navigate to on your browser to view the web-chat.
 
-> [!NOTE]
-> You can also use `pnpm start` to perform the installation and run steps at the same time.
+```{note}
+You can also use `pnpm start` to perform the installation, build, and run steps at the same time.
+```

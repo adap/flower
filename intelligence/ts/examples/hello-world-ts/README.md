@@ -36,5 +36,6 @@ In order to run the example once the project has been built:
 node dist/index.js
 ```
 
-> [!NOTE]
-> You can also use `pnpm start` to perform the installation, build, and run steps at the same time.
+```{note}
+You can also use `pnpm start` to perform the installation, build, and run steps at the same time.
+```

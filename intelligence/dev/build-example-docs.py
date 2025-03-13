@@ -40,7 +40,7 @@ respective pages.
 """
 
 table_headers = (
-    "\n.. list-table::\n   :widths: 50 15 15 15\n   "
+    "\n.. list-table::\n   :widths: 50 45 \n   "
     ":header-rows: 1\n\n   * - Title\n     - Tags\n\n"
 )
 
