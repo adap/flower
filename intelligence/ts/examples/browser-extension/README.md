@@ -24,11 +24,11 @@ pnpm i
 > The `watch` script relies on [entr](https://github.com/eradman/entr).
 
 > [!WARNING]
->In order to use remote handoff, copy `.env.example` into `.env` and update the API key inside it (if you don't have a valid API key, you can register [here](https://flower.ai/intelligence/)).
+> In order to use remote handoff, copy `.env.example` into `.env` and update the API key inside it (if you don't have a valid API key, you can register [here](https://flower.ai/intelligence/)).
 >
->```typescript
->fi.apiKey = 'REPLACE_HERE';
->```
+> ```typescript
+> fi.apiKey = 'REPLACE_HERE';
+> ```
 
 ## Build
 
@@ -47,5 +47,5 @@ pnpm watch
 
 ## Run
 
-Once you have built the project, you should find the web-extension content that 
+Once you have built the project, you should find the web-extension content that
 can be imported into a browser in `dist/`.

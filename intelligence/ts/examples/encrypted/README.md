@@ -21,11 +21,11 @@ pnpm i
 ```
 
 > [!WARNING]
->In order to run this example, you need to update the following values inside `src/index.ts` with a valid API key (if you don't have one, you can register [here](https://flower.ai/intelligence/)):
+> In order to run this example, you need to update the following values inside `src/index.ts` with a valid API key (if you don't have one, you can register [here](https://flower.ai/intelligence/)):
 >
->```typescript
->fi.apiKey = 'REPLACE_HERE';
->```
+> ```typescript
+> fi.apiKey = 'REPLACE_HERE';
+> ```
 
 ## Build
 

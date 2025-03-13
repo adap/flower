@@ -10,7 +10,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint --fix src",
     "lint:check": "eslint src",
-    "ibuild": "pnpm i && pnpm build",
+    "ibuild": "pnpm i && pnpm build"
   },
   "dependencies": {
     "@flwr/flwr": "^0.1.3",
