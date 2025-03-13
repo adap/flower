@@ -117,7 +117,7 @@ except ImportError:
         )
 
     def get_fleet_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
-        """Return all FLeet API event log writer plugins."""
+        """Return all Fleet API event log writer plugins."""
         raise NotImplementedError(
             "No event log writer plugins are currently supported."
         )
