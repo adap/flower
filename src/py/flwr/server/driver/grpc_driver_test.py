@@ -178,18 +178,6 @@ class TestGrpcDriver(unittest.TestCase):
         self.assertEqual(args[0].message_ids, expected_ids)
         self.assertSetEqual(reply_tos, {"id2", "id3"})
 
-        # calls = self.mock_stub.PullMessages.call_args_list
-        # self.assertEqual(len(calls), len(expected_ids))
-        # for call, expected_msg_id in zip(calls, expected_ids):
-        #     args, kwargs = call
-        #     self.assertEqual(len(args), 1)
-        #     self.assertEqual(len(kwargs), 0)
-        #     self.assertIsInstance(args[0], PullResMessagesRequest)
-        #     # Each call should be made with a single-element list
-        #     # containing the expected message id
-        #     self.assertEqual(args[0].message_ids, [expected_msg_id])
-        # self.assertSetEqual(reply_tos, {"id2", "id3"})
-
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""
         # Prepare
