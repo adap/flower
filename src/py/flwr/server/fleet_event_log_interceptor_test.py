@@ -22,10 +22,10 @@ from unittest.mock import MagicMock
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.dummy_grpc_handlers import (
-    DummyUnaryUnaryHandlerException,
-    DummyUnsupportedHandler,
-    get_dummy_unary_unary_handler,
+from flwr.common.dummy_grpc_handlers_test import (
+    NoOpUnaryUnaryHandlerException,
+    NoOpUnsupportedHandler,
+    get_noop_unary_unary_handler,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.typing import Actor, Event, LogEntry, UserInfo
@@ -122,7 +122,7 @@ class TestFleetEventLogInterceptor(unittest.TestCase):
         handler_call_details = MagicMock()
         handler_call_details.method = "dummy_method"
         expected_method_name = handler_call_details.method
-        continuation = get_dummy_unary_unary_handler
+        continuation = get_noop_unary_unary_handler
         intercepted_handler = self.interceptor.intercept_service(
             continuation, handler_call_details
         )
@@ -146,8 +146,8 @@ class TestFleetEventLogInterceptor(unittest.TestCase):
         # pylint: disable=unused-argument
         def continuation(
             handler_call_details: grpc.HandlerCallDetails,
-        ) -> DummyUnaryUnaryHandlerException:
-            return DummyUnaryUnaryHandlerException()
+        ) -> NoOpUnaryUnaryHandlerException:
+            return NoOpUnaryUnaryHandlerException()
 
         intercepted_handler = self.interceptor.intercept_service(
             continuation, handler_call_details
@@ -172,8 +172,8 @@ class TestFleetEventLogInterceptor(unittest.TestCase):
         # pylint: disable=unused-argument
         def continuation(
             handler_call_details: grpc.HandlerCallDetails,
-        ) -> DummyUnsupportedHandler:
-            return DummyUnsupportedHandler()
+        ) -> NoOpUnsupportedHandler:
+            return NoOpUnsupportedHandler()
 
         handler_call_details = MagicMock()
         with self.assertRaises(NotImplementedError):
