@@ -28,7 +28,7 @@ Setting up the repo
 -------------------
 
 If you already have the Flower repository cloned somewhere, you can skip this step and
-just navigate to it and run ``git pull``.
+navigate to it and run ``git pull``.
 
 **Clone the Flower repo and navigate into it.**
 
