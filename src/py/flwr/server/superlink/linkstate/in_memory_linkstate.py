@@ -353,7 +353,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             current_time = time.time()
             return {
                 node_id
-                for node_id, (online_until, _) in self.node_ids.items()
+                for node_id, (online_until, _, _) in self.node_ids.items()
                 if online_until > current_time
             }
 
