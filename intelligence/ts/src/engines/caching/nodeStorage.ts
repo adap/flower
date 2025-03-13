@@ -1,7 +1,7 @@
-import { CachedMapping, CacheStorage } from './storage';
 import { join } from 'path';
 import os from 'os';
 import { mkdir, readFile, writeFile } from 'fs/promises';
+import { CachedMapping, CacheStorage } from './storage';
 
 export class NodeCacheStorage extends CacheStorage {
   private filePath: string | undefined;
