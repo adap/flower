@@ -30,8 +30,7 @@ Setting up the repo
 If you already have the Flower repo cloned somewhere, you can skip this step and
 just navigate to it and run ``git pull``.
 
-1. **Clone the repository:**  
-   Clone the Flower repo and navigate into it.
+**Clone the Flower repo and navigate into it.**
 
 .. code-block:: bash
 
