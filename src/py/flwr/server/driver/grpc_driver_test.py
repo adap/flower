@@ -148,16 +148,6 @@ class TestGrpcDriver(unittest.TestCase):
         mock_response = Mock()
         mock_response.messages_list = [ok_message, error_message]
         self.mock_stub.PullMessages.return_value = mock_response
-        # msg_ids = ["id1", "id2", "id3"]
-
-        # # Create separate mock responses for each call
-        # mock_response1 = Mock()
-        # mock_response1.messages_list = [ok_message]
-        # mock_response2 = Mock()
-        # mock_response2.messages_list = [error_message]
-
-        # # Configure PullMessages to return a different response per call
-        # self.mock_stub.PullMessages.side_effect = [mock_response1, mock_response2]
 
         # Return the message IDs to be used in the tests (the valid ones)
         return ["id2", "id3"]
