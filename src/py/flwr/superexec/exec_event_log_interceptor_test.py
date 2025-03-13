@@ -45,15 +45,15 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: UserInfo,
+        user_info: Optional[UserInfo],
         method_name: str,
     ) -> LogEntry:
-        """."""
+        """Compose pre-event log entry from the provided request and context."""
         return LogEntry(
             timestamp="before_timestamp",
             actor=Actor(
-                actor_id=user_info.user_id,
-                description=user_info.user_name,
+                actor_id=user_info.user_id if user_info else None,
+                description=user_info.user_name if user_info else None,
                 ip_address="1.2.3.4",
             ),
             event=Event(action=method_name, run_id=None, fab_hash=None),
@@ -64,16 +64,16 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: UserInfo,
+        user_info: Optional[UserInfo],
         method_name: str,
         response: Optional[Union[GrpcMessage, Exception]],
     ) -> LogEntry:
-        """."""
+        """Compose post-event log entry from the provided response and context."""
         return LogEntry(
             timestamp="after_timestamp",
             actor=Actor(
-                actor_id=user_info.user_id,
-                description=user_info.user_name,
+                actor_id=user_info.user_id if user_info else None,
+                description=user_info.user_name if user_info else None,
                 ip_address="5.6.7.8",
             ),
             event=Event(action=method_name, run_id=None, fab_hash=None),
@@ -81,7 +81,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         )
 
     def write_log(self, log_entry: LogEntry) -> None:
-        """."""
+        """Write the event log to the specified data sink."""
         self.logs.append(log_entry)
 
 
