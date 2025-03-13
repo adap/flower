@@ -262,7 +262,7 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
         # Pull Messages
         res: PullResMessagesResponse = self._stub.PullMessages(
             PullResMessagesRequest(
-                message_ids=sorted(msg_ids_to_pull),
+                message_ids=msg_ids_to_pull,
                 run_id=cast(Run, self._run).run_id,
             )
         )
