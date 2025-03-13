@@ -234,7 +234,7 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
     def pull_messages(
         self, message_ids: Optional[Iterable[str]] = None
     ) -> Iterable[Message]:
-        """Pull messages from the SuperLink based on message IDs.
+        """Pull messages based on message IDs.
 
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs. If no message IDs are provided, it defaults to the
@@ -247,12 +247,13 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
         # Allow an override but default to the stored pending IDs
         if message_ids is None:
             # If no message_ids are provided, use the stored ones
-            message_ids_to_pull = self._message_ids
+            msg_ids_to_pull = self._message_ids
         else:
-            # Otherwise, filter the provided list to only those in self._message_ids
+            # Else, keep the IDs (from the given IDs) that are in `self._message_ids`
             provided_ids = set(message_ids)
-            message_ids_to_pull = sorted(provided_ids & set(self._message_ids))
-            missing_ids = sorted(provided_ids - set(self._message_ids))
+            stored_ids = set(self._message_ids)
+            msg_ids_to_pull = sorted(provided_ids & stored_ids)
+            missing_ids = sorted(provided_ids - stored_ids)
             if missing_ids:
                 log(
                     WARNING,
@@ -261,8 +262,8 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
                 )
 
         def iter_msg() -> Iterator[Message]:
-            for msg_id in message_ids_to_pull:
-                # Pull Messages for each message ID
+            for msg_id in msg_ids_to_pull:
+                # Pull a Message for each message ID
                 res: PullResMessagesResponse = self._stub.PullMessages(
                     PullResMessagesRequest(
                         message_ids=[msg_id],
