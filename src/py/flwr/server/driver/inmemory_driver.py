@@ -52,7 +52,7 @@ class InMemoryDriver(Driver):
         self.state = state_factory.state()
         self.pull_interval = pull_interval
         self.node = Node(node_id=SUPERLINK_NODE_ID)
-        self._message_ids: list[str] = []
+        self._message_ids: set[str] = set()
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -79,7 +79,7 @@ class InMemoryDriver(Driver):
         return Run(**vars(cast(Run, self._run)))
 
     @property
-    def message_ids(self) -> list[str]:
+    def message_ids(self) -> Iterable[str]:
         """Message IDs of pushed messages."""
         return self._message_ids.copy()
 
@@ -136,7 +136,7 @@ class InMemoryDriver(Driver):
             if msg_id:
                 msg_ids.append(str(msg_id))
         # Store message IDs
-        self._message_ids.extend(msg_ids)
+        self._message_ids.update(msg_ids)
         return msg_ids
 
     def pull_messages(
@@ -155,20 +155,19 @@ class InMemoryDriver(Driver):
         # Allow an override but default to the stored pending IDs
         if message_ids is None:
             # If no message_ids are provided, use the stored ones
-            message_ids_to_pull = self._message_ids
+            msg_ids_to_pull = self._message_ids
         else:
             # Otherwise, filter the provided list to only those in self._message_ids
             provided_ids = set(message_ids)
-            message_ids_to_pull = sorted(provided_ids & set(self._message_ids))
-            missing_ids = sorted(provided_ids - set(self._message_ids))
-            if missing_ids:
+            msg_ids_to_pull = provided_ids & self._message_ids
+            if missing_ids := provided_ids - msg_ids_to_pull:
                 log(
                     WARNING,
                     "Cannot pull messages for the following missing message IDs: %s",
                     missing_ids,
                 )
 
-        msg_ids = {UUID(msg_id) for msg_id in message_ids_to_pull}
+        msg_ids = {UUID(msg_id) for msg_id in msg_ids_to_pull}
         # Pull Messages
         message_res_list = self.state.get_message_res(message_ids=msg_ids)
         # Get IDs of Messages these replies are for
@@ -202,7 +201,7 @@ class InMemoryDriver(Driver):
         end_time = time.time() + (timeout if timeout is not None else 0.0)
         ret: list[Message] = []
         while timeout is None or time.time() < end_time:
-            res_msgs = list(self.pull_messages(msg_ids))
+            res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
             msg_ids.difference_update(
                 {msg.metadata.reply_to_message for msg in res_msgs}

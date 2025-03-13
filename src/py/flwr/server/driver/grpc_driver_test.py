@@ -181,7 +181,7 @@ class TestGrpcDriver(unittest.TestCase):
         msg_ids = self._setup_pull_messages_mocks(run_id)
 
         # Store message IDs in the driver's internal state for testing
-        self.driver._message_ids.extend(msg_ids)  # pylint: disable=protected-access
+        self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
 
         # Execute
         messages = list(self.driver.pull_messages(msg_ids))
@@ -196,7 +196,7 @@ class TestGrpcDriver(unittest.TestCase):
         msg_ids = self._setup_pull_messages_mocks(run_id)
 
         # Store message IDs in the driver's internal state for testing
-        self.driver._message_ids.extend(msg_ids)  # pylint: disable=protected-access
+        self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
 
         # Execute
         messages = list(self.driver.pull_messages())
@@ -212,14 +212,14 @@ class TestGrpcDriver(unittest.TestCase):
         msg_ids = self._setup_pull_messages_mocks(run_id)
 
         # Store message IDs in the driver's internal state for testing
-        self.driver._message_ids.extend(msg_ids)  # pylint: disable=protected-access
+        self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
 
         provided_msg_ids = {"id2", "id3", "id4", "id5"}
-        expected_missing = sorted(provided_msg_ids - set(msg_ids))
+        expected_missing = provided_msg_ids - set(msg_ids)
 
         # Execute
         with patch("flwr.server.driver.grpc_driver.log") as mock_log:
-            messages = list(self.driver.pull_messages(provided_msg_ids))
+            messages = self.driver.pull_messages(provided_msg_ids)
 
         # Assert
         # Only valid IDs are pulled
@@ -231,7 +231,7 @@ class TestGrpcDriver(unittest.TestCase):
         self.assertEqual(
             args[1], "Cannot pull messages for the following missing message IDs: %s"
         )
-        self.assertEqual(args[2], expected_missing)
+        self.assertSetEqual(args[2], expected_missing)
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
@@ -250,6 +250,9 @@ class TestGrpcDriver(unittest.TestCase):
         mock_response.messages_list = message_res_list
         self.mock_stub.PullMessages.return_value = mock_response
         msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
+
+        # Store message IDs in the driver's internal state for testing
+        self.driver._message_ids.update(["id1"])  # pylint: disable=protected-access
 
         # Execute
         ret_msgs = list(self.driver.send_and_receive(msgs))

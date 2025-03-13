@@ -81,7 +81,7 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
         self._retry_invoker = _make_simple_grpc_retry_invoker()
-        self._message_ids: list[str] = []
+        self._message_ids: set[str] = set()
 
     @property
     def _is_connected(self) -> bool:
@@ -139,7 +139,7 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
         return cast(ServerAppIoStub, self._grpc_stub)
 
     @property
-    def message_ids(self) -> list[str]:
+    def message_ids(self) -> Iterable[str]:
         """Message IDs of pushed messages."""
         return self._message_ids.copy()
 
@@ -228,7 +228,7 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
                 "to `push_messages`). This could be due to a malformed message.",
             )
         # Store message IDs
-        self._message_ids.extend(res.message_ids)
+        self._message_ids.update(res.message_ids)
         return list(res.message_ids)
 
     def pull_messages(
@@ -251,10 +251,8 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
         else:
             # Else, keep the IDs (from the given IDs) that are in `self._message_ids`
             provided_ids = set(message_ids)
-            stored_ids = set(self._message_ids)
-            msg_ids_to_pull = sorted(provided_ids & stored_ids)
-            missing_ids = sorted(provided_ids - stored_ids)
-            if missing_ids:
+            msg_ids_to_pull = provided_ids & self._message_ids
+            if missing_ids := provided_ids - msg_ids_to_pull:
                 log(
                     WARNING,
                     "Cannot pull messages for the following missing message IDs: %s",
@@ -262,7 +260,7 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
                 )
 
         def iter_msg() -> Iterator[Message]:
-            for msg_id in msg_ids_to_pull:
+            for msg_id in sorted(msg_ids_to_pull):
                 # Pull a Message for each message ID
                 res: PullResMessagesResponse = self._stub.PullMessages(
                     PullResMessagesRequest(
@@ -274,9 +272,11 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
                 if res.messages_list:
                     # Convert Message from Protobuf representation
                     msg = message_from_proto(res.messages_list[0])
+                    # Remove the message once pulled
+                    self._message_ids.remove(msg.metadata.reply_to_message)
                     yield msg
-                else:
-                    continue
+                # else:
+                #     continue
 
         return iter_msg()
 
@@ -299,7 +299,7 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
         end_time = time.time() + (timeout if timeout is not None else 0.0)
         ret: list[Message] = []
         while timeout is None or time.time() < end_time:
-            res_msgs = list(self.pull_messages(msg_ids))
+            res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
             msg_ids.difference_update(
                 {msg.metadata.reply_to_message for msg in res_msgs}

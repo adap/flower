@@ -158,7 +158,7 @@ class TestInMemoryDriver(unittest.TestCase):
         msg_ids = [str(uuid4()) for _ in range(2)]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)
         self.state.get_message_res.return_value = message_res_list
-        self.driver._message_ids.extend(msg_ids)  # pylint: disable=protected-access
+        self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
 
         # Execute
         pulled_msgs = list(self.driver.pull_messages(msg_ids))
@@ -178,7 +178,7 @@ class TestInMemoryDriver(unittest.TestCase):
         msg_ids = [str(uuid4()) for _ in range(2)]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)
         self.state.get_message_res.return_value = message_res_list
-        self.driver._message_ids.extend(msg_ids)  # pylint: disable=protected-access
+        self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
 
         # Execute
         pulled_msgs = list(self.driver.pull_messages())
@@ -200,8 +200,8 @@ class TestInMemoryDriver(unittest.TestCase):
         msg_ids = provided_msg_ids[:2]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)
         self.state.get_message_res.return_value = message_res_list
-        self.driver._message_ids.extend(msg_ids)  # pylint: disable=protected-access
-        expected_missing = sorted(set(provided_msg_ids) - set(msg_ids))
+        self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
+        expected_missing = set(provided_msg_ids) - set(msg_ids)
 
         # Execute
         with patch("flwr.server.driver.inmemory_driver.log") as mock_log:
@@ -222,7 +222,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.assertEqual(
             args[1], "Cannot pull messages for the following missing message IDs: %s"
         )
-        self.assertEqual(args[2], expected_missing)
+        self.assertSetEqual(args[2], expected_missing)
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""

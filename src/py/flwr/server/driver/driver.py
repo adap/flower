@@ -47,7 +47,7 @@ class Driver(ABC):
 
     @property
     @abstractmethod
-    def message_ids(self) -> list[str]:
+    def message_ids(self) -> Iterable[str]:
         """Message IDs of pushed messages."""
 
     @abstractmethod
