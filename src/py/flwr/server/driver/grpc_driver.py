@@ -17,7 +17,7 @@
 
 import time
 import warnings
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
 from logging import DEBUG, WARNING
 from typing import Optional, cast
 
@@ -259,24 +259,19 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
                     missing_ids,
                 )
 
-        def iter_msg() -> Iterator[Message]:
-            for msg_id in sorted(msg_ids_to_pull):
-                # Pull a Message for each message ID
-                res: PullResMessagesResponse = self._stub.PullMessages(
-                    PullResMessagesRequest(
-                        message_ids=[msg_id],
-                        run_id=cast(Run, self._run).run_id,
-                    )
-                )
-                # Yield a message if the response contains it, otherwise continue
-                if res.messages_list:
-                    # Convert Message from Protobuf representation
-                    msg = message_from_proto(res.messages_list[0])
-                    # Remove the message once pulled
-                    self._message_ids.remove(msg.metadata.reply_to_message)
-                    yield msg
-
-        return iter_msg()
+        # Pull Messages
+        res: PullResMessagesResponse = self._stub.PullMessages(
+            PullResMessagesRequest(
+                message_ids=sorted(msg_ids_to_pull),
+                run_id=cast(Run, self._run).run_id,
+            )
+        )
+        # Convert Message from Protobuf representation
+        msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
+        for msg in msgs:
+            # Remove the message ID from the stored message IDs
+            self._message_ids.remove(msg.metadata.reply_to_message)
+        return msgs
 
     def send_and_receive(
         self,
@@ -297,7 +292,7 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
         end_time = time.time() + (timeout if timeout is not None else 0.0)
         ret: list[Message] = []
         while timeout is None or time.time() < end_time:
-            res_msgs = list(self.pull_messages(msg_ids))
+            res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
             msg_ids.difference_update(
                 {msg.metadata.reply_to_message for msg in res_msgs}

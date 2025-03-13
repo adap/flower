@@ -161,7 +161,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
 
         # Execute
-        pulled_msgs = self.driver.pull_messages(msg_ids)
+        pulled_msgs = list(self.driver.pull_messages(msg_ids))
         reply_tos = [msg.metadata.reply_to_message for msg in pulled_msgs]
 
         # Assert
@@ -181,7 +181,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
 
         # Execute
-        pulled_msgs = self.driver.pull_messages()
+        pulled_msgs = list(self.driver.pull_messages())
         reply_tos = [msg.metadata.reply_to_message for msg in pulled_msgs]
 
         # Assert
@@ -205,7 +205,7 @@ class TestInMemoryDriver(unittest.TestCase):
 
         # Execute
         with patch("flwr.server.driver.inmemory_driver.log") as mock_log:
-            pulled_msgs = self.driver.pull_messages(provided_msg_ids)
+            pulled_msgs = list(self.driver.pull_messages(provided_msg_ids))
         reply_tos = [msg.metadata.reply_to_message for msg in pulled_msgs]
 
         # Assert

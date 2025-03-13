@@ -17,8 +17,8 @@
 
 import time
 import unittest
+from collections.abc import Iterable
 from logging import WARNING
-from typing import Iterable
 from unittest.mock import Mock, patch
 
 import grpc
@@ -145,14 +145,19 @@ class TestGrpcDriver(unittest.TestCase):
         )
         error_message.metadata.reply_to_message = "id3"
 
-        # Create separate mock responses for each call
-        mock_response1 = Mock()
-        mock_response1.messages_list = [ok_message]
-        mock_response2 = Mock()
-        mock_response2.messages_list = [error_message]
+        mock_response = Mock()
+        mock_response.messages_list = [ok_message, error_message]
+        self.mock_stub.PullMessages.return_value = mock_response
+        # msg_ids = ["id1", "id2", "id3"]
 
-        # Configure PullMessages to return a different response per call
-        self.mock_stub.PullMessages.side_effect = [mock_response1, mock_response2]
+        # # Create separate mock responses for each call
+        # mock_response1 = Mock()
+        # mock_response1.messages_list = [ok_message]
+        # mock_response2 = Mock()
+        # mock_response2.messages_list = [error_message]
+
+        # # Configure PullMessages to return a different response per call
+        # self.mock_stub.PullMessages.side_effect = [mock_response1, mock_response2]
 
         # Return the message IDs to be used in the tests (the valid ones)
         return ["id2", "id3"]
@@ -163,17 +168,27 @@ class TestGrpcDriver(unittest.TestCase):
         """Check that PullMessages was called once per expected message ID and that the
         returned messages have the correct reply_to values."""
         reply_tos = {msg.metadata.reply_to_message for msg in messages}
-        calls = self.mock_stub.PullMessages.call_args_list
-        self.assertEqual(len(calls), len(expected_ids))
-        for call, expected_msg_id in zip(calls, expected_ids):
-            args, kwargs = call
-            self.assertEqual(len(args), 1)
-            self.assertEqual(len(kwargs), 0)
-            self.assertIsInstance(args[0], PullResMessagesRequest)
-            # Each call should be made with a single-element list
-            # containing the expected message id
-            self.assertEqual(args[0].message_ids, [expected_msg_id])
+        args, kwargs = self.mock_stub.PullMessages.call_args
+
+        # Assert
+        self.mock_stub.GetRun.assert_called_once()
+        self.assertEqual(len(args), 1)
+        self.assertEqual(len(kwargs), 0)
+        self.assertIsInstance(args[0], PullResMessagesRequest)
+        self.assertEqual(args[0].message_ids, expected_ids)
         self.assertSetEqual(reply_tos, {"id2", "id3"})
+
+        # calls = self.mock_stub.PullMessages.call_args_list
+        # self.assertEqual(len(calls), len(expected_ids))
+        # for call, expected_msg_id in zip(calls, expected_ids):
+        #     args, kwargs = call
+        #     self.assertEqual(len(args), 1)
+        #     self.assertEqual(len(kwargs), 0)
+        #     self.assertIsInstance(args[0], PullResMessagesRequest)
+        #     # Each call should be made with a single-element list
+        #     # containing the expected message id
+        #     self.assertEqual(args[0].message_ids, [expected_msg_id])
+        # self.assertSetEqual(reply_tos, {"id2", "id3"})
 
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""
