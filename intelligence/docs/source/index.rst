@@ -642,6 +642,7 @@ Information-oriented API reference and other reference material.
    :caption: Reference docs
 
    ref-models
+   examples
    ts-api-ref/index
 
 Join the Flower Community
