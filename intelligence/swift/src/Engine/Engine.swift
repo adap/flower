@@ -23,7 +23,7 @@ protocol Engine {
     temperature: Float?,
     maxCompletionTokens: Int?,
     stream: Bool,
-    onStreamEvent: ((StreamEvent) -> Void)?,
+    onStreamEvent: (@Sendable (StreamEvent) -> Void)?,
     tools: [Tool]?
   ) async throws -> Message
 
@@ -37,7 +37,7 @@ extension Engine {
     temperature: Float? = nil,
     maxCompletionTokens: Int? = nil,
     stream: Bool = false,
-    onStreamEvent: ((StreamEvent) -> Void)? = nil,
+    onStreamEvent: (@Sendable (StreamEvent) -> Void)? = nil,
     tools: [Tool]? = nil
   ) async throws -> Message {
     throw Failure(

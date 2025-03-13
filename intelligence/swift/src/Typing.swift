@@ -108,7 +108,7 @@ public struct ChatOptions {
   public var temperature: Float?
   public var maxCompletionTokens: Int?
   public var stream: Bool
-  public var onStreamEvent: ((StreamEvent) -> Void)?
+  public var onStreamEvent: (@Sendable (StreamEvent) -> Void)?
   public var tools: [Tool]?
   public var forceRemote: Bool
   public var forceLocal: Bool
@@ -119,7 +119,7 @@ public struct ChatOptions {
     temperature: Float? = nil,
     maxCompletionTokens: Int? = nil,
     stream: Bool = false,
-    onStreamEvent: ((StreamEvent) -> Void)? = nil,
+    onStreamEvent: (@Sendable (StreamEvent) -> Void)? = nil,
     tools: [Tool]? = nil,
     forceRemote: Bool = false,
     forceLocal: Bool = false,
