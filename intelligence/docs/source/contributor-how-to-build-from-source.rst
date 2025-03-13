@@ -27,7 +27,7 @@ Alternatively, if you are using Corepack (bundled with recent Node.js versions),
 Setting up the repo
 -------------------
 
-If you already have the Flower repo cloned somewhere, you can skip this step and
+If you already have the Flower repository cloned somewhere, you can skip this step and
 just navigate to it and run ``git pull``.
 
 **Clone the Flower repo and navigate into it.**
