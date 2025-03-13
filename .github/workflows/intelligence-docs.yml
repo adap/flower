@@ -70,6 +70,7 @@ jobs:
         run: brew install sourcedocs
       - name: Build Swift docs
         run: |
+          xcodebuild -list
           sourcedocs generate --module-name FlowerIntelligence -- -scheme flower -destination 'platform=macOS'
           mkdir -p intelligence/docs/source/swift-api-ref
           cp -r Documentation/Reference/* intelligence/docs/source/swift-api-ref/
