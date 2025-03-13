@@ -19,10 +19,7 @@ import { TransformersEngine } from './engines/transformersEngine';
 import { ChatOptions, ChatResponseResult, FailureCode, Message, Progress, Result } from './typing';
 import { WebllmEngine } from './engines/webllmEngine';
 import { DEFAULT_MODEL } from './constants';
-
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-const isNode = typeof process !== 'undefined' && process.versions.node != null;
-/* eslint-enable @typescript-eslint/no-unnecessary-condition */
+import { isNode } from './env';
 
 /**
  * Class representing the core intelligence service for Flower Labs.
