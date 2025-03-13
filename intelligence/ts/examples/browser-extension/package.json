@@ -13,7 +13,7 @@
     "ibuild": "pnpm i && pnpm build"
   },
   "dependencies": {
-    "@flwr/flwr": "^0.1.3",
+    "@flwr/flwr": "^0.1.4",
     "@mozilla/readability": "^0.6.0",
     "webextension-polyfill": "^0.12.0"
   },
