@@ -15,8 +15,9 @@ let messages = [
 ]
 
 let result = await fi.chat("Why is the sky blue?")
-print(result)
-
-if case .failure(let error) = result {
-  print("Error: \(error.message)")
+switch result {
+case .success(let success):
+    print(success.content)
+case .failure(let failure):
+    print(failure.message)
 }
