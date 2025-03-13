@@ -22,7 +22,7 @@ interface ModelResponse {
   model: string | undefined;
 }
 
-export async function checkSupport(model: string, engine: string): Promise<Result<string>> {
+export async function getEngineModelName(model: string, engine: string): Promise<Result<string>> {
   try {
     const response = await fetch(`${REMOTE_URL}/v1/fetch-model-config`, {
       method: 'POST',
@@ -54,7 +54,7 @@ export async function checkSupport(model: string, engine: string): Promise<Resul
         ok: false,
         failure: {
           code: FailureCode.UnsupportedModelError,
-          description: `Model '${model}' is not supported on the webllm engine.`,
+          description: `Model '${model}' is not supported on the ${engine} engine.`,
         },
       };
     }
