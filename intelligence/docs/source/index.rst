@@ -644,6 +644,18 @@ Information-oriented API reference and other reference material.
    ref-models
    ts-api-ref/index
 
+Contributor guides
+------------------
+
+If you are interested in contributing or playing around with the source code.
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+   :caption: Contributor docs
+
+   contributor-how-to-build-from-source.rst
+
 Join the Flower Community
 -------------------------
 
