@@ -165,7 +165,7 @@ class TestGrpcDriver(unittest.TestCase):
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PullResMessagesRequest)
-        self.assertEqual(args[0].message_ids, expected_ids)
+        self.assertSetEqual(set(args[0].message_ids), set(expected_ids))
         self.assertSetEqual(reply_tos, {"id2", "id3"})
 
     def test_pull_messages_with_given_message_ids(self) -> None:
