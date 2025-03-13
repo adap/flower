@@ -19,10 +19,6 @@ cd "$ROOT"
 ./datasets/dev/build-flwr-datasets-docs.sh
 
 cd "$ROOT"
-cd intelligence/docs
-make html
-
-cd "$ROOT"
 cd framework/docs 
 
 if [ "$1" = true ]; then

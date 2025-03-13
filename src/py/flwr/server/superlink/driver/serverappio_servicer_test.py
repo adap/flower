@@ -17,17 +17,18 @@
 
 import tempfile
 import unittest
+from typing import Optional
 
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigsRecord, Context
+from flwr.common import ConfigsRecord, Context, Error, RecordSet
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.serde import context_to_proto, run_status_to_proto
+from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
 from flwr.proto.message_pb2 import Message  # pylint: disable=E0611
@@ -166,7 +167,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
 
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. GetNodesRequest is only allowed
+        # in running status.
         self._transition_run_status(run_id, 2)
         request = GetNodesRequest(run_id=run_id)
 
@@ -215,7 +217,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
 
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. PushInsMessagesRequest is only
+        # allowed in running status.
         self._transition_run_status(run_id, 2)
         request = PushInsMessagesRequest(messages_list=[message_ins], run_id=run_id)
 
@@ -265,7 +268,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PullMessages` success."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. PullResMessagesRequest is only
+        # allowed in running status.
         self._transition_run_status(run_id, 2)
         request = PullResMessagesRequest(message_ids=[], run_id=run_id)
 
@@ -275,6 +279,53 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, PullResMessagesResponse)
         assert grpc.StatusCode.OK == call.code()
+
+    @parameterized.expand(
+        [
+            # Reply with Message
+            (RecordSet(), None),
+            # Reply with Error
+            (None, Error(code=0)),
+        ]
+    )  # type: ignore
+    def test_successful_pull_messages_deletes_messages_in_linkstate(
+        self, content: Optional[RecordSet], error: Optional[Error]
+    ) -> None:
+        """Test `PullMessages` deletes messages from LinkState."""
+        # Prepare
+        node_id = self.state.create_node(ping_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+
+        # Transition status to running.
+        self._transition_run_status(run_id, 2)
+
+        # Push Messages and reply
+        message_ins = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        msg_id = self.state.store_message_ins(message=message_ins)
+        msg_ = self.state.get_message_ins(node_id=node_id, limit=1)[0]
+
+        if content is not None:
+            reply_msg = msg_.create_reply(content=content)
+        else:
+            assert error is not None
+            reply_msg = msg_.create_error_reply(error=error)
+
+        self.state.store_message_res(message=reply_msg)
+
+        request = PullResMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
+
+        # Execute
+        response, call = self._pull_messages.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, PullResMessagesResponse)
+        assert grpc.StatusCode.OK == call.code()
+        assert self.state.num_message_ins() == 0
+        assert self.state.num_message_res() == 0
 
     def _assert_pull_messages_not_allowed(self, run_id: int) -> None:
         """Assert `PullMessages` not allowed."""
@@ -319,7 +370,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             run_config=maker.user_config(),
         )
 
-        # Transition status to running. PushTaskRes is only allowed in running status.
+        # Transition status to running. PushServerAppOutputsRequest is only
+        # allowed in running status.
         self._transition_run_status(run_id, 2)
         request = PushServerAppOutputsRequest(
             run_id=run_id, context=context_to_proto(context)

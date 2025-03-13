@@ -22,8 +22,8 @@ from uuid import UUID
 
 import grpc
 
-from flwr.common import ConfigsRecord
-from flwr.common.constant import Status
+from flwr.common import ConfigsRecord, Message
+from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -31,9 +31,7 @@ from flwr.common.serde import (
     fab_from_proto,
     fab_to_proto,
     message_from_proto,
-    message_from_taskres,
     message_to_proto,
-    message_to_taskins,
     run_status_from_proto,
     run_status_to_proto,
     run_to_proto,
@@ -69,12 +67,11 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
 )
-from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
-from flwr.server.utils.validator import validate_task_ins_or_res
+from flwr.server.utils.validator import validate_message
 
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
@@ -161,20 +158,19 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         while request.messages_list:
             message_proto = request.messages_list.pop(0)
             message = message_from_proto(message_proto=message_proto)
-            task_ins = message_to_taskins(message=message)
-            validation_errors = validate_task_ins_or_res(task_ins)
+            validation_errors = validate_message(message, is_reply_message=False)
             _raise_if(
                 validation_error=bool(validation_errors),
                 request_name="PushMessages",
                 detail=", ".join(validation_errors),
             )
             _raise_if(
-                validation_error=request.run_id != task_ins.run_id,
+                validation_error=request.run_id != message.metadata.run_id,
                 request_name="PushMessages",
-                detail="`task_ins` has mismatched `run_id`",
+                detail="`Message.metadata` has mismatched `run_id`",
             )
             # Store
-            message_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
+            message_id: Optional[UUID] = state.store_message_ins(message=message)
             message_ids.append(message_id)
 
         return PushInsMessagesResponse(
@@ -200,32 +196,34 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             context,
         )
 
-        # Convert each task_id str to UUID
+        # Convert each message_id str to UUID
         message_ids: set[UUID] = {
             UUID(message_id) for message_id in request.message_ids
         }
 
         # Read from state
-        task_res_list: list[TaskRes] = state.get_task_res(task_ids=message_ids)
+        messages_res: list[Message] = state.get_message_res(message_ids=message_ids)
 
-        # Delete the TaskIns/TaskRes pairs if TaskRes is found
-        task_ins_ids_to_delete = {
-            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
+        # Delete the instruction Messages and their replies if found
+        message_ins_ids_to_delete = {
+            UUID(msg_res.metadata.reply_to_message) for msg_res in messages_res
         }
 
-        state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
+        state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
 
-        # Convert to Messages
+        # Convert Messages to proto
         messages_list = []
-        while task_res_list:
-            task_res = task_res_list.pop(0)
-            _raise_if(
-                validation_error=request.run_id != task_res.run_id,
-                request_name="PullMessages",
-                detail="`task_res` has mismatched `run_id`",
-            )
-            message = message_from_taskres(taskres=task_res)
-            messages_list.append(message_to_proto(message))
+        while messages_res:
+            msg = messages_res.pop(0)
+
+            # Skip `run_id` check for SuperLink generated replies
+            if msg.metadata.src_node_id != SUPERLINK_NODE_ID:
+                _raise_if(
+                    validation_error=request.run_id != msg.metadata.run_id,
+                    request_name="PullMessages",
+                    detail="`message.metadata` has mismatched `run_id`",
+                )
+            messages_list.append(message_to_proto(msg))
 
         return PullResMessagesResponse(messages_list=messages_list)
 
