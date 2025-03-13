@@ -1,5 +1,10 @@
 import { FlowerIntelligence, Progress, StreamEvent } from '@flwr/flwr';
 
+const MODEL = 'meta/llama3.2-1b/instruct-fp16';
+// const MODEL= 'meta/llama3.2-3b/instruct-q4';
+// const MODEL= 'meta/llama3.1-8b/instruct-q4';
+// const MODEL= 'deepseek/r1';
+
 const fi = FlowerIntelligence.instance;
 
 async function sendChat(message: string, func: (text: string) => void): Promise<string> {
@@ -10,10 +15,7 @@ async function sendChat(message: string, func: (text: string) => void): Promise<
     ],
     stream: true,
     onStreamEvent: (event: StreamEvent) => func(event.chunk),
-    model: 'meta/llama3.2-1b/instruct-fp16',
-    // model: 'meta/llama3.2-3b/instruct-q4',
-    // model: 'meta/llama3.1-8b/instruct-q4',
-    // model: 'deepseek/r1',
+    model: MODEL,
   });
   if (!response.ok) {
     console.error(`${response.failure.code}: ${response.failure.description}`);
@@ -27,6 +29,8 @@ const sendButton = document.getElementById('sendButton') as HTMLButtonElement;
 const loadButton = document.getElementById('loadButton') as HTMLButtonElement;
 const chatLog = document.getElementById('chatLog') as HTMLDivElement;
 const loading = document.getElementById('loading') as HTMLDivElement;
+const title = document.getElementById('title') as HTMLHeadingElement;
+title.textContent = title.textContent + ` (${MODEL})`;
 
 sendButton.addEventListener('click', async () => {
   const message = chatInput.value.trim();
@@ -41,12 +45,8 @@ sendButton.addEventListener('click', async () => {
 });
 
 loadButton.addEventListener('click', async () => {
-  fi.fetchModel('meta/llama3.2-1b/instruct-fp16', (progress: Progress) => {
-    if (progress.percentage && progress.percentage < 1) {
-      loading.textContent = String((progress.loadedBytes ?? 1) / (progress.totalBytes ?? 1));
-    } else {
-      loading.textContent = 'Loaded';
-    }
+  fi.fetchModel(MODEL, (progress: Progress) => {
+    loading.textContent = progress.description ?? '';
   });
 });
 
