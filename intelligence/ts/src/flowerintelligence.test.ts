@@ -19,7 +19,7 @@ vi.mock('./constants', () => ({
   DEFAULT_MODEL: 'meta/llama3.2-1b/instruct-fp16',
   REMOTE_URL: process.env.FI_DEV_REMOTE_URL,
   VERSION: '0.2.0',
-  SDK: 'TypeScript',
+  SDK: 'TS',
 }));
 
 import emojiRegex from 'emoji-regex';
