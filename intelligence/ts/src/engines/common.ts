@@ -19,7 +19,6 @@ import { FailureCode, Result } from '../typing';
 
 const STALE_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours.
 const CACHE_KEY = 'flowerintelligence-model-name-cache'; // For browser localStorage.
-const CACHE_FILE = 'engineModelsCache.json'; // For Node filesystem.
 
 interface ModelResponse {
   is_supported: boolean;
@@ -36,6 +35,18 @@ interface CachedMapping {
   mapping: Record<string, CachedEntry>;
 }
 
+async function getCacheFilePath(): Promise<string> {
+  if (!isNode) return ''; // Not used in browsers.
+  const { join } = await import('path');
+  const os = await import('os');
+  const fs = await import('fs/promises');
+
+  const homeDir = os.homedir();
+  const cacheFolder = join(homeDir, '.flwr', 'cache');
+  await fs.mkdir(cacheFolder, { recursive: true });
+  return join(cacheFolder, 'intelligence-model-names.json');
+}
+
 /**
  * Loads the cached mapping from persistent storage.
  */
@@ -43,7 +54,8 @@ async function loadCache(): Promise<CachedMapping | null> {
   if (isNode) {
     try {
       const { readFile } = await import('fs/promises');
-      const data = await readFile(CACHE_FILE, 'utf-8');
+      const filePath = await getCacheFilePath();
+      const data = await readFile(filePath, 'utf-8');
       return JSON.parse(data) as CachedMapping;
     } catch (_) {
       return null;
@@ -67,7 +79,8 @@ async function loadCache(): Promise<CachedMapping | null> {
 async function saveCache(cache: CachedMapping): Promise<void> {
   if (isNode) {
     const { writeFile } = await import('fs/promises');
-    await writeFile(CACHE_FILE, JSON.stringify(cache), 'utf-8');
+    const filePath = await getCacheFilePath();
+    await writeFile(filePath, JSON.stringify(cache), 'utf-8');
   } else {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   }
