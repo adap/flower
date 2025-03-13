@@ -411,7 +411,7 @@ def run_superlink() -> None:
                 log(DEBUG, "Automatic node authentication enabled")
 
             interceptors = [AuthenticateServerInterceptor(state_factory, auto_auth)]
-            if args.enable_event_log:
+            if getattr(args, "enable_event_log", None):
                 fleet_log_plugin = _try_obtain_fleet_event_log_writer_plugin()
                 if fleet_log_plugin is not None:
                     interceptors.append(FleetEventLogInterceptor(fleet_log_plugin))
