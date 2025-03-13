@@ -27,12 +27,6 @@ export default defineConfig({
         'path',
         'os',
       ],
-      output: {
-        globals: {
-          '@huggingface/transformers': 'transformers',
-          '@mlc-ai/web-llm': 'webllm',
-        },
-      },
     },
   },
 });
