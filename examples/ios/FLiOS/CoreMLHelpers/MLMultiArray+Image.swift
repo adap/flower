@@ -25,10 +25,10 @@ import CoreML
 
 public protocol MultiArrayType: Comparable {
   static var multiArrayDataType: MLMultiArrayDataType { get }
-  static func +(lhs: Self, rhs: Self) -> Self
-  static func -(lhs: Self, rhs: Self) -> Self
-  static func *(lhs: Self, rhs: Self) -> Self
-  static func /(lhs: Self, rhs: Self) -> Self
+  static func + (lhs: Self, rhs: Self) -> Self
+  static func - (lhs: Self, rhs: Self) -> Self
+  static func * (lhs: Self, rhs: Self) -> Self
+  static func / (lhs: Self, rhs: Self) -> Self
   init(_: Int)
   var toUInt8: UInt8 { get }
 }
@@ -75,10 +75,12 @@ extension MLMultiArray {
     For example, if the range of the data in the multi-array is [-1, 1], use
     `min: -1, max: 1`. If the range is already [0, 255], then use the defaults.
   */
-  public func cgImage(min: Double = 0,
-                      max: Double = 255,
-                      channel: Int? = nil,
-                      axes: (Int, Int, Int)? = nil) -> CGImage? {
+  public func cgImage(
+    min: Double = 0,
+    max: Double = 255,
+    channel: Int? = nil,
+    axes: (Int, Int, Int)? = nil
+  ) -> CGImage? {
     switch self.dataType {
     case .double:
       return _image(min: min, max: max, channel: channel, axes: axes)
@@ -95,10 +97,12 @@ extension MLMultiArray {
     Helper function that allows us to use generics. The type of `min` and `max`
     is also the dataType of the MLMultiArray.
   */
-  private func _image<T: MultiArrayType>(min: T,
-                                         max: T,
-                                         channel: Int?,
-                                         axes: (Int, Int, Int)?) -> CGImage? {
+  private func _image<T: MultiArrayType>(
+    min: T,
+    max: T,
+    channel: Int?,
+    axes: (Int, Int, Int)?
+  ) -> CGImage? {
     if let (b, w, h, c) = toRawBytes(min: min, max: max, channel: channel, axes: axes) {
       if c == 1 {
         return CGImage.fromByteArrayGray(b, width: w, height: h)
@@ -121,11 +125,14 @@ extension MLMultiArray {
     - Returns: tuple containing the RGBA bytes, the dimensions of the image,
                and the number of channels in the image (1, 3, or 4).
   */
-  public func toRawBytes<T: MultiArrayType>(min: T,
-                                            max: T,
-                                            channel: Int? = nil,
-                                            axes: (Int, Int, Int)? = nil)
-                  -> (bytes: [UInt8], width: Int, height: Int, channels: Int)? {
+  public func toRawBytes<T: MultiArrayType>(
+    min: T,
+    max: T,
+    channel: Int? = nil,
+    axes: (Int, Int, Int)? = nil
+  )
+    -> (bytes: [UInt8], width: Int, height: Int, channels: Int)?
+  {
     // MLMultiArray with unsupported shape?
     if shape.count < 2 {
       print("Cannot convert MLMultiArray of shape \(shape) to image")
@@ -140,9 +147,10 @@ extension MLMultiArray {
       channelAxis = axes.0
       heightAxis = axes.1
       widthAxis = axes.2
-      guard channelAxis >= 0 && channelAxis < shape.count &&
-            heightAxis >= 0 && heightAxis < shape.count &&
-            widthAxis >= 0 && widthAxis < shape.count else {
+      guard
+        channelAxis >= 0 && channelAxis < shape.count && heightAxis >= 0 && heightAxis < shape.count
+          && widthAxis >= 0 && widthAxis < shape.count
+      else {
         print("Invalid axes \(axes) for shape \(shape)")
         return nil
       }
@@ -150,7 +158,7 @@ extension MLMultiArray {
       // Expected shape for grayscale is (height, width)
       heightAxis = 0
       widthAxis = 1
-      channelAxis = -1 // Never be used
+      channelAxis = -1  // Never be used
     } else {
       // Expected shape for color is (channels, height, width)
       channelAxis = 0
@@ -176,7 +184,7 @@ extension MLMultiArray {
       bytesPerPixel = 1
       channelOffset = 0
 
-    // MLMultiArray with more than two dimensions can be color or grayscale.
+      // MLMultiArray with more than two dimensions can be color or grayscale.
     } else {
       let channelDim = self.shape[channelAxis].intValue
       if let channel = channel {
@@ -216,10 +224,10 @@ extension MLMultiArray {
     for c in 0..<channels {
       for y in 0..<height {
         for x in 0..<width {
-          let value = ptr[c*cStride + y*yStride + x*xStride]
+          let value = ptr[c * cStride + y * yStride + x * xStride]
           let scaled = (value - min) * T(255) / (max - min)
           let pixel = clamp(scaled, min: T(0), max: T(255)).toUInt8
-          pixels[(y*width + x)*bytesPerPixel + c] = pixel
+          pixels[(y * width + x) * bytesPerPixel + c] = pixel
         }
       }
     }
@@ -227,22 +235,22 @@ extension MLMultiArray {
   }
 }
 
-/**
-  Fast conversion from MLMultiArray to CGImage using the vImage framework.
-
-  - Parameters:
-    - features: A multi-array with data type FLOAT32 and three dimensions
-                (3, height, width).
-    - min: The smallest value in the multi-array. This value, as well as any
-           smaller values, will be mapped to 0 in the output image.
-    - max: The largest value in the multi-array. This and any larger values
-           will be will be mapped to 255 in the output image.
-
-  - Returns: a new CGImage or nil if the conversion fails
-*/
-public func createCGImage(fromFloatArray features: MLMultiArray,
-                          min: Float = 0,
-                          max: Float = 255) -> CGImage? {
+/// Fast conversion from MLMultiArray to CGImage using the vImage framework.
+///
+/// - Parameters:
+///   - features: A multi-array with data type FLOAT32 and three dimensions
+///               (3, height, width).
+///   - min: The smallest value in the multi-array. This value, as well as any
+///          smaller values, will be mapped to 0 in the output image.
+///   - max: The largest value in the multi-array. This and any larger values
+///          will be will be mapped to 255 in the output image.
+///
+/// - Returns: a new CGImage or nil if the conversion fails
+public func createCGImage(
+  fromFloatArray features: MLMultiArray,
+  min: Float = 0,
+  max: Float = 255
+) -> CGImage? {
   assert(features.dataType == .float32)
   assert(features.shape.count == 3)
 
@@ -254,18 +262,21 @@ public func createCGImage(fromFloatArray features: MLMultiArray,
   let rowStride = features.strides[1].intValue
   let srcRowBytes = rowStride * MemoryLayout<Float>.stride
 
-  var blueBuffer = vImage_Buffer(data: ptr,
-                                 height: vImagePixelCount(height),
-                                 width: vImagePixelCount(width),
-                                 rowBytes: srcRowBytes)
-  var greenBuffer = vImage_Buffer(data: ptr.advanced(by: channelStride),
-                                  height: vImagePixelCount(height),
-                                  width: vImagePixelCount(width),
-                                  rowBytes: srcRowBytes)
-  var redBuffer = vImage_Buffer(data: ptr.advanced(by: channelStride * 2),
-                                height: vImagePixelCount(height),
-                                width: vImagePixelCount(width),
-                                rowBytes: srcRowBytes)
+  var blueBuffer = vImage_Buffer(
+    data: ptr,
+    height: vImagePixelCount(height),
+    width: vImagePixelCount(width),
+    rowBytes: srcRowBytes)
+  var greenBuffer = vImage_Buffer(
+    data: ptr.advanced(by: channelStride),
+    height: vImagePixelCount(height),
+    width: vImagePixelCount(width),
+    rowBytes: srcRowBytes)
+  var redBuffer = vImage_Buffer(
+    data: ptr.advanced(by: channelStride * 2),
+    height: vImagePixelCount(height),
+    width: vImagePixelCount(width),
+    rowBytes: srcRowBytes)
 
   let destRowBytes = width * 4
 
@@ -273,19 +284,21 @@ public func createCGImage(fromFloatArray features: MLMultiArray,
   var pixels = [UInt8](repeating: 0, count: height * destRowBytes)
 
   pixels.withUnsafeMutableBufferPointer { ptr in
-    var destBuffer = vImage_Buffer(data: ptr.baseAddress!,
-                                   height: vImagePixelCount(height),
-                                   width: vImagePixelCount(width),
-                                   rowBytes: destRowBytes)
+    var destBuffer = vImage_Buffer(
+      data: ptr.baseAddress!,
+      height: vImagePixelCount(height),
+      width: vImagePixelCount(width),
+      rowBytes: destRowBytes)
 
-    error = vImageConvert_PlanarFToBGRX8888(&blueBuffer,
-                                            &greenBuffer,
-                                            &redBuffer,
-                                            Pixel_8(255),
-                                            &destBuffer,
-                                            [max, max, max],
-                                            [min, min, min],
-                                            vImage_Flags(0))
+    error = vImageConvert_PlanarFToBGRX8888(
+      &blueBuffer,
+      &greenBuffer,
+      &redBuffer,
+      Pixel_8(255),
+      &destBuffer,
+      [max, max, max],
+      [min, min, min],
+      vImage_Flags(0))
   }
 
   if error == kvImageNoError {
@@ -297,23 +310,27 @@ public func createCGImage(fromFloatArray features: MLMultiArray,
 
 #if canImport(UIKit)
 
-import UIKit
+  import UIKit
 
-extension MLMultiArray {
-  public func image(min: Double = 0,
-                    max: Double = 255,
-                    channel: Int? = nil,
-                    axes: (Int, Int, Int)? = nil) -> UIImage? {
-    let cgImg = cgImage(min: min, max: max, channel: channel, axes: axes)
+  extension MLMultiArray {
+    public func image(
+      min: Double = 0,
+      max: Double = 255,
+      channel: Int? = nil,
+      axes: (Int, Int, Int)? = nil
+    ) -> UIImage? {
+      let cgImg = cgImage(min: min, max: max, channel: channel, axes: axes)
+      return cgImg.map { UIImage(cgImage: $0) }
+    }
+  }
+
+  public func createUIImage(
+    fromFloatArray features: MLMultiArray,
+    min: Float = 0,
+    max: Float = 255
+  ) -> UIImage? {
+    let cgImg = createCGImage(fromFloatArray: features, min: min, max: max)
     return cgImg.map { UIImage(cgImage: $0) }
   }
-}
-
-public func createUIImage(fromFloatArray features: MLMultiArray,
-                          min: Float = 0,
-                          max: Float = 255) -> UIImage? {
-  let cgImg = createCGImage(fromFloatArray: features, min: min, max: max)
-  return cgImg.map { UIImage(cgImage: $0) }
-}
 
 #endif

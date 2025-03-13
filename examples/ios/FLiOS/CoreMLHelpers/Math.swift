@@ -20,16 +20,14 @@
   IN THE SOFTWARE.
 */
 
-import Foundation
 import Accelerate
+import Foundation
 
-/**
-  Returns the index and value of the largest element in the array.
-
-  - Parameters:
-    - count: If provided, only look at the first `count` elements of the array,
-             otherwise look at the entire array.
-*/
+/// Returns the index and value of the largest element in the array.
+///
+/// - Parameters:
+///   - count: If provided, only look at the first `count` elements of the array,
+///            otherwise look at the entire array.
 public func argmax(_ array: [Float], count: Int? = nil) -> (Int, Float) {
   var maxValue: Float = 0
   var maxIndex: vDSP_Length = 0
@@ -37,14 +35,12 @@ public func argmax(_ array: [Float], count: Int? = nil) -> (Int, Float) {
   return (Int(maxIndex), maxValue)
 }
 
-/**
-  Returns the index and value of the largest element in the array.
-
-  - Parameters:
-    - ptr: Pointer to the first element in memory.
-    - count: How many elements to look at.
-    - stride: The distance between two elements in memory.
-*/
+/// Returns the index and value of the largest element in the array.
+///
+/// - Parameters:
+///   - ptr: Pointer to the first element in memory.
+///   - count: How many elements to look at.
+///   - stride: The distance between two elements in memory.
 public func argmax(_ ptr: UnsafePointer<Float>, count: Int, stride: Int = 1) -> (Int, Float) {
   var maxValue: Float = 0
   var maxIndex: vDSP_Length = 0
@@ -52,13 +48,11 @@ public func argmax(_ ptr: UnsafePointer<Float>, count: Int, stride: Int = 1) -> 
   return (Int(maxIndex), maxValue)
 }
 
-/**
-  Returns the index and value of the largest element in the array.
-
-  - Parameters:
-    - count: If provided, only look at the first `count` elements of the array,
-             otherwise look at the entire array.
-*/
+/// Returns the index and value of the largest element in the array.
+///
+/// - Parameters:
+///   - count: If provided, only look at the first `count` elements of the array,
+///            otherwise look at the entire array.
 public func argmax(_ array: [Double], count: Int? = nil) -> (Int, Double) {
   var maxValue: Double = 0
   var maxIndex: vDSP_Length = 0
@@ -66,14 +60,12 @@ public func argmax(_ array: [Double], count: Int? = nil) -> (Int, Double) {
   return (Int(maxIndex), maxValue)
 }
 
-/**
-  Returns the index and value of the largest element in the array.
-
-  - Parameters:
-    - ptr: Pointer to the first element in memory.
-    - count: How many elements to look at.
-    - stride: The distance between two elements in memory.
-*/
+/// Returns the index and value of the largest element in the array.
+///
+/// - Parameters:
+///   - ptr: Pointer to the first element in memory.
+///   - count: How many elements to look at.
+///   - stride: The distance between two elements in memory.
 public func argmax(_ ptr: UnsafePointer<Double>, count: Int, stride: Int = 1) -> (Int, Double) {
   var maxValue: Double = 0
   var maxIndex: vDSP_Length = 0
@@ -81,19 +73,19 @@ public func argmax(_ ptr: UnsafePointer<Double>, count: Int, stride: Int = 1) ->
   return (Int(maxIndex), maxValue)
 }
 
-/** Ensures that `x` is in the range `[min, max]`. */
+/// Ensures that `x` is in the range `[min, max]`.
 public func clamp<T: Comparable>(_ x: T, min: T, max: T) -> T {
   if x < min { return min }
   if x > max { return max }
   return x
 }
 
-/** Logistic sigmoid. */
+/// Logistic sigmoid.
 public func sigmoid(_ x: Float) -> Float {
   return 1 / (1 + exp(-x))
 }
 
-/** Logistic sigmoid. */
+/// Logistic sigmoid.
 public func sigmoid(_ x: Double) -> Double {
   return 1 / (1 + exp(-x))
 }
@@ -118,21 +110,19 @@ public func sigmoid(_ x: UnsafeMutablePointer<Double>, count: Int) {
   vvrec(x, x, &cnt)
 }
 
-/**
-  Computes the "softmax" function over an array.
-
-  Based on code from https://github.com/nikolaypavlov/MLPNeuralNet/
-
-  This is what softmax looks like in "pseudocode" (actually using Python
-  and numpy):
-
-      x -= np.max(x)
-      exp_scores = np.exp(x)
-      softmax = exp_scores / np.sum(exp_scores)
-
-  First we shift the values of x so that the highest value in the array is 0.
-  This ensures numerical stability with the exponents, so they don't blow up.
-*/
+/// Computes the "softmax" function over an array.
+///
+/// Based on code from https://github.com/nikolaypavlov/MLPNeuralNet/
+///
+/// This is what softmax looks like in "pseudocode" (actually using Python
+/// and numpy):
+///
+///     x -= np.max(x)
+///     exp_scores = np.exp(x)
+///     softmax = exp_scores / np.sum(exp_scores)
+///
+/// First we shift the values of x so that the highest value in the array is 0.
+/// This ensures numerical stability with the exponents, so they don't blow up.
 public func softmax(_ x: [Float]) -> [Float] {
   var x = x
   let len = vDSP_Length(x.count)

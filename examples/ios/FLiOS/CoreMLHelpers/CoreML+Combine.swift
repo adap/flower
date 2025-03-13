@@ -20,8 +20,8 @@
   IN THE SOFTWARE.
 */
 
-import CoreML
 import Combine
+import CoreML
 
 @available(iOS 13.0, tvOS 13.0, OSX 10.15, *)
 extension Publisher where Self.Output: MLFeatureProvider {

@@ -25,7 +25,6 @@ import NIO
 import NIOConcurrencyHelpers
 import SwiftProtobuf
 
-
 /// Usage: instantiate `Flwr_Proto_FlowerServiceClient`, then call methods of this protocol to make API calls.
 internal protocol Flwr_Proto_FlowerServiceClientProtocol: GRPCClient {
   var serviceName: String { get }
@@ -65,9 +64,9 @@ extension Flwr_Proto_FlowerServiceClientProtocol {
 }
 
 #if compiler(>=5.6)
-@available(*, deprecated)
-extension Flwr_Proto_FlowerServiceClient: @unchecked Sendable {}
-#endif // compiler(>=5.6)
+  @available(*, deprecated)
+  extension Flwr_Proto_FlowerServiceClient: @unchecked Sendable {}
+#endif  // compiler(>=5.6)
 
 @available(*, deprecated, renamed: "Flwr_Proto_FlowerServiceNIOClient")
 internal final class Flwr_Proto_FlowerServiceClient: Flwr_Proto_FlowerServiceClientProtocol {
@@ -124,87 +123,92 @@ internal struct Flwr_Proto_FlowerServiceNIOClient: Flwr_Proto_FlowerServiceClien
 }
 
 #if compiler(>=5.6)
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-internal protocol Flwr_Proto_FlowerServiceAsyncClientProtocol: GRPCClient {
-  static var serviceDescriptor: GRPCServiceDescriptor { get }
-  var interceptors: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol? { get }
+  @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+  internal protocol Flwr_Proto_FlowerServiceAsyncClientProtocol: GRPCClient {
+    static var serviceDescriptor: GRPCServiceDescriptor { get }
+    var interceptors: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol? { get }
 
-  func makeJoinCall(
-    callOptions: CallOptions?
-  ) -> GRPCAsyncBidirectionalStreamingCall<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>
-}
-
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-extension Flwr_Proto_FlowerServiceAsyncClientProtocol {
-  internal static var serviceDescriptor: GRPCServiceDescriptor {
-    return Flwr_Proto_FlowerServiceClientMetadata.serviceDescriptor
+    func makeJoinCall(
+      callOptions: CallOptions?
+    ) -> GRPCAsyncBidirectionalStreamingCall<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>
   }
 
-  internal var interceptors: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol? {
-    return nil
+  @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+  extension Flwr_Proto_FlowerServiceAsyncClientProtocol {
+    internal static var serviceDescriptor: GRPCServiceDescriptor {
+      return Flwr_Proto_FlowerServiceClientMetadata.serviceDescriptor
+    }
+
+    internal var interceptors: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol? {
+      return nil
+    }
+
+    internal func makeJoinCall(
+      callOptions: CallOptions? = nil
+    ) -> GRPCAsyncBidirectionalStreamingCall<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage> {
+      return self.makeAsyncBidirectionalStreamingCall(
+        path: Flwr_Proto_FlowerServiceClientMetadata.Methods.join.path,
+        callOptions: callOptions ?? self.defaultCallOptions,
+        interceptors: self.interceptors?.makeJoinInterceptors() ?? []
+      )
+    }
   }
 
-  internal func makeJoinCall(
-    callOptions: CallOptions? = nil
-  ) -> GRPCAsyncBidirectionalStreamingCall<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage> {
-    return self.makeAsyncBidirectionalStreamingCall(
-      path: Flwr_Proto_FlowerServiceClientMetadata.Methods.join.path,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeJoinInterceptors() ?? []
-    )
+  @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+  extension Flwr_Proto_FlowerServiceAsyncClientProtocol {
+    internal func join<RequestStream>(
+      _ requests: RequestStream,
+      callOptions: CallOptions? = nil
+    ) -> GRPCAsyncResponseStream<Flwr_Proto_ServerMessage>
+    where RequestStream: Sequence, RequestStream.Element == Flwr_Proto_ClientMessage {
+      return self.performAsyncBidirectionalStreamingCall(
+        path: Flwr_Proto_FlowerServiceClientMetadata.Methods.join.path,
+        requests: requests,
+        callOptions: callOptions ?? self.defaultCallOptions,
+        interceptors: self.interceptors?.makeJoinInterceptors() ?? []
+      )
+    }
+
+    internal func join<RequestStream>(
+      _ requests: RequestStream,
+      callOptions: CallOptions? = nil
+    ) -> GRPCAsyncResponseStream<Flwr_Proto_ServerMessage>
+    where RequestStream: AsyncSequence & Sendable, RequestStream.Element == Flwr_Proto_ClientMessage
+    {
+      return self.performAsyncBidirectionalStreamingCall(
+        path: Flwr_Proto_FlowerServiceClientMetadata.Methods.join.path,
+        requests: requests,
+        callOptions: callOptions ?? self.defaultCallOptions,
+        interceptors: self.interceptors?.makeJoinInterceptors() ?? []
+      )
+    }
   }
-}
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-extension Flwr_Proto_FlowerServiceAsyncClientProtocol {
-  internal func join<RequestStream>(
-    _ requests: RequestStream,
-    callOptions: CallOptions? = nil
-  ) -> GRPCAsyncResponseStream<Flwr_Proto_ServerMessage> where RequestStream: Sequence, RequestStream.Element == Flwr_Proto_ClientMessage {
-    return self.performAsyncBidirectionalStreamingCall(
-      path: Flwr_Proto_FlowerServiceClientMetadata.Methods.join.path,
-      requests: requests,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeJoinInterceptors() ?? []
-    )
+  @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+  internal struct Flwr_Proto_FlowerServiceAsyncClient: Flwr_Proto_FlowerServiceAsyncClientProtocol {
+    internal var channel: GRPCChannel
+    internal var defaultCallOptions: CallOptions
+    internal var interceptors: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol?
+
+    internal init(
+      channel: GRPCChannel,
+      defaultCallOptions: CallOptions = CallOptions(),
+      interceptors: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol? = nil
+    ) {
+      self.channel = channel
+      self.defaultCallOptions = defaultCallOptions
+      self.interceptors = interceptors
+    }
   }
 
-  internal func join<RequestStream>(
-    _ requests: RequestStream,
-    callOptions: CallOptions? = nil
-  ) -> GRPCAsyncResponseStream<Flwr_Proto_ServerMessage> where RequestStream: AsyncSequence & Sendable, RequestStream.Element == Flwr_Proto_ClientMessage {
-    return self.performAsyncBidirectionalStreamingCall(
-      path: Flwr_Proto_FlowerServiceClientMetadata.Methods.join.path,
-      requests: requests,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeJoinInterceptors() ?? []
-    )
-  }
-}
-
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-internal struct Flwr_Proto_FlowerServiceAsyncClient: Flwr_Proto_FlowerServiceAsyncClientProtocol {
-  internal var channel: GRPCChannel
-  internal var defaultCallOptions: CallOptions
-  internal var interceptors: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol?
-
-  internal init(
-    channel: GRPCChannel,
-    defaultCallOptions: CallOptions = CallOptions(),
-    interceptors: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol? = nil
-  ) {
-    self.channel = channel
-    self.defaultCallOptions = defaultCallOptions
-    self.interceptors = interceptors
-  }
-}
-
-#endif // compiler(>=5.6)
+#endif  // compiler(>=5.6)
 
 internal protocol Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol: GRPCSendable {
 
   /// - Returns: Interceptors to use when invoking 'join'.
-  func makeJoinInterceptors() -> [ClientInterceptor<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>]
+  func makeJoinInterceptors() -> [ClientInterceptor<
+    Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage
+  >]
 }
 
 internal enum Flwr_Proto_FlowerServiceClientMetadata {
@@ -212,7 +216,7 @@ internal enum Flwr_Proto_FlowerServiceClientMetadata {
     name: "FlowerService",
     fullName: "flwr.proto.FlowerService",
     methods: [
-      Flwr_Proto_FlowerServiceClientMetadata.Methods.join,
+      Flwr_Proto_FlowerServiceClientMetadata.Methods.join
     ]
   )
 
@@ -229,7 +233,9 @@ internal enum Flwr_Proto_FlowerServiceClientMetadata {
 internal protocol Flwr_Proto_FlowerServiceProvider: CallHandlerProvider {
   var interceptors: Flwr_Proto_FlowerServiceServerInterceptorFactoryProtocol? { get }
 
-  func join(context: StreamingResponseCallContext<Flwr_Proto_ServerMessage>) -> EventLoopFuture<(StreamEvent<Flwr_Proto_ClientMessage>) -> Void>
+  func join(context: StreamingResponseCallContext<Flwr_Proto_ServerMessage>) -> EventLoopFuture<
+    (StreamEvent<Flwr_Proto_ClientMessage>) -> Void
+  >
 }
 
 extension Flwr_Proto_FlowerServiceProvider {
@@ -261,60 +267,62 @@ extension Flwr_Proto_FlowerServiceProvider {
 
 #if compiler(>=5.6)
 
-/// To implement a server, implement an object which conforms to this protocol.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-internal protocol Flwr_Proto_FlowerServiceAsyncProvider: CallHandlerProvider {
-  static var serviceDescriptor: GRPCServiceDescriptor { get }
-  var interceptors: Flwr_Proto_FlowerServiceServerInterceptorFactoryProtocol? { get }
+  /// To implement a server, implement an object which conforms to this protocol.
+  @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+  internal protocol Flwr_Proto_FlowerServiceAsyncProvider: CallHandlerProvider {
+    static var serviceDescriptor: GRPCServiceDescriptor { get }
+    var interceptors: Flwr_Proto_FlowerServiceServerInterceptorFactoryProtocol? { get }
 
-  @Sendable func join(
-    requestStream: GRPCAsyncRequestStream<Flwr_Proto_ClientMessage>,
-    responseStream: GRPCAsyncResponseStreamWriter<Flwr_Proto_ServerMessage>,
-    context: GRPCAsyncServerCallContext
-  ) async throws
-}
-
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-extension Flwr_Proto_FlowerServiceAsyncProvider {
-  internal static var serviceDescriptor: GRPCServiceDescriptor {
-    return Flwr_Proto_FlowerServiceServerMetadata.serviceDescriptor
+    @Sendable func join(
+      requestStream: GRPCAsyncRequestStream<Flwr_Proto_ClientMessage>,
+      responseStream: GRPCAsyncResponseStreamWriter<Flwr_Proto_ServerMessage>,
+      context: GRPCAsyncServerCallContext
+    ) async throws
   }
 
-  internal var serviceName: Substring {
-    return Flwr_Proto_FlowerServiceServerMetadata.serviceDescriptor.fullName[...]
-  }
+  @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+  extension Flwr_Proto_FlowerServiceAsyncProvider {
+    internal static var serviceDescriptor: GRPCServiceDescriptor {
+      return Flwr_Proto_FlowerServiceServerMetadata.serviceDescriptor
+    }
 
-  internal var interceptors: Flwr_Proto_FlowerServiceServerInterceptorFactoryProtocol? {
-    return nil
-  }
+    internal var serviceName: Substring {
+      return Flwr_Proto_FlowerServiceServerMetadata.serviceDescriptor.fullName[...]
+    }
 
-  internal func handle(
-    method name: Substring,
-    context: CallHandlerContext
-  ) -> GRPCServerHandlerProtocol? {
-    switch name {
-    case "Join":
-      return GRPCAsyncServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<Flwr_Proto_ClientMessage>(),
-        responseSerializer: ProtobufSerializer<Flwr_Proto_ServerMessage>(),
-        interceptors: self.interceptors?.makeJoinInterceptors() ?? [],
-        wrapping: self.join(requestStream:responseStream:context:)
-      )
-
-    default:
+    internal var interceptors: Flwr_Proto_FlowerServiceServerInterceptorFactoryProtocol? {
       return nil
     }
-  }
-}
 
-#endif // compiler(>=5.6)
+    internal func handle(
+      method name: Substring,
+      context: CallHandlerContext
+    ) -> GRPCServerHandlerProtocol? {
+      switch name {
+      case "Join":
+        return GRPCAsyncServerHandler(
+          context: context,
+          requestDeserializer: ProtobufDeserializer<Flwr_Proto_ClientMessage>(),
+          responseSerializer: ProtobufSerializer<Flwr_Proto_ServerMessage>(),
+          interceptors: self.interceptors?.makeJoinInterceptors() ?? [],
+          wrapping: self.join(requestStream:responseStream:context:)
+        )
+
+      default:
+        return nil
+      }
+    }
+  }
+
+#endif  // compiler(>=5.6)
 
 internal protocol Flwr_Proto_FlowerServiceServerInterceptorFactoryProtocol {
 
   /// - Returns: Interceptors to use when handling 'join'.
   ///   Defaults to calling `self.makeInterceptors()`.
-  func makeJoinInterceptors() -> [ServerInterceptor<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>]
+  func makeJoinInterceptors() -> [ServerInterceptor<
+    Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage
+  >]
 }
 
 internal enum Flwr_Proto_FlowerServiceServerMetadata {
@@ -322,7 +330,7 @@ internal enum Flwr_Proto_FlowerServiceServerMetadata {
     name: "FlowerService",
     fullName: "flwr.proto.FlowerService",
     methods: [
-      Flwr_Proto_FlowerServiceServerMetadata.Methods.join,
+      Flwr_Proto_FlowerServiceServerMetadata.Methods.join
     ]
   )
 

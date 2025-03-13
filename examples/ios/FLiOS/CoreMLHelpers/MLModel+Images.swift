@@ -33,29 +33,33 @@ extension MLModel {
 }
 
 #if canImport(UIKit)
-import UIKit
+  import UIKit
 
-@available(iOS 13.0, tvOS 13.0, *)
-extension MLModel {
-  /**
+  @available(iOS 13.0, tvOS 13.0, *)
+  extension MLModel {
+    /**
     Converts a UIImage into an MLFeatureValue, using the image constraint of
     the specified model input.
    */
-  public func featureValue(fromUIImage image: UIImage,
-                           forInput inputName: String,
-                           orientation: CGImagePropertyOrientation = .up,
-                           options: [MLFeatureValue.ImageOption: Any]? = nil)
-                           -> MLFeatureValue? {
+    public func featureValue(
+      fromUIImage image: UIImage,
+      forInput inputName: String,
+      orientation: CGImagePropertyOrientation = .up,
+      options: [MLFeatureValue.ImageOption: Any]? = nil
+    )
+      -> MLFeatureValue?
+    {
 
-    guard let cgImage = image.cgImage else {
-      print("Error: could not convert UIImage to CGImage")
-      return nil
+      guard let cgImage = image.cgImage else {
+        print("Error: could not convert UIImage to CGImage")
+        return nil
+      }
+
+      return featureValue(
+        fromCGImage: cgImage, forInput: inputName,
+        orientation: orientation, options: options)
     }
-
-    return featureValue(fromCGImage: cgImage, forInput: inputName,
-                        orientation: orientation, options: options)
   }
-}
 
 #endif
 
@@ -65,21 +69,27 @@ extension MLModel {
     Converts a CGImage into an MLFeatureValue, using the image constraint of
     the specified model input.
    */
-  public func featureValue(fromCGImage image: CGImage,
-                           forInput inputName: String,
-                           orientation: CGImagePropertyOrientation = .up,
-                           options: [MLFeatureValue.ImageOption: Any]? = nil)
-                           -> MLFeatureValue? {
+  public func featureValue(
+    fromCGImage image: CGImage,
+    forInput inputName: String,
+    orientation: CGImagePropertyOrientation = .up,
+    options: [MLFeatureValue.ImageOption: Any]? = nil
+  )
+    -> MLFeatureValue?
+  {
 
     guard let constraint = imageConstraint(forInput: inputName) else {
       print("Error: could not get image constraint for input named '\(inputName)'")
       return nil
     }
 
-    guard let featureValue = try? MLFeatureValue(cgImage: image,
-                                                 orientation: orientation,
-                                                 constraint: constraint,
-                                                 options: options) else {
+    guard
+      let featureValue = try? MLFeatureValue(
+        cgImage: image,
+        orientation: orientation,
+        constraint: constraint,
+        options: options)
+    else {
       print("Error: could not get feature value for image \(image)")
       return nil
     }
@@ -91,20 +101,25 @@ extension MLModel {
     Converts an image file from a URL into an MLFeatureValue, using the image
     constraint of the specified model input.
    */
-  public func featureValue(fromImageAt url: URL,
-                           forInput inputName: String,
-                           orientation: CGImagePropertyOrientation = .up,
-                           options: [MLFeatureValue.ImageOption: Any]? = nil) -> MLFeatureValue? {
+  public func featureValue(
+    fromImageAt url: URL,
+    forInput inputName: String,
+    orientation: CGImagePropertyOrientation = .up,
+    options: [MLFeatureValue.ImageOption: Any]? = nil
+  ) -> MLFeatureValue? {
 
     guard let constraint = imageConstraint(forInput: inputName) else {
       print("Error: could not get image constraint for input named '\(inputName)'")
       return nil
     }
 
-    guard let featureValue = try? MLFeatureValue(imageAt: url,
-                                                 orientation: orientation,
-                                                 constraint: constraint,
-                                                 options: options) else {
+    guard
+      let featureValue = try? MLFeatureValue(
+        imageAt: url,
+        orientation: orientation,
+        constraint: constraint,
+        options: options)
+    else {
       print("Error: could not get feature value for image at '\(url)'")
       return nil
     }

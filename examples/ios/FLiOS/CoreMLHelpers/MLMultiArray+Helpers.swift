@@ -43,10 +43,11 @@ extension MLMultiArray {
     let newShape_ = dimensions.map { NSNumber(value: $0) }
     let newStrides_ = newStrides.map { NSNumber(value: $0) }
 
-    return try MLMultiArray(dataPointer: self.dataPointer,
-                            shape: newShape_,
-                            dataType: self.dataType,
-                            strides: newStrides_)
+    return try MLMultiArray(
+      dataPointer: self.dataPointer,
+      shape: newShape_,
+      dataType: self.dataType,
+      strides: newStrides_)
   }
 
   /**
