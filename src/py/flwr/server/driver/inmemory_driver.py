@@ -17,7 +17,7 @@
 
 import time
 import warnings
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
 from logging import WARNING
 from typing import Optional, cast
 from uuid import UUID
@@ -177,10 +177,7 @@ class InMemoryDriver(Driver):
         # Delete
         self.state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
 
-        def iter_msg() -> Iterator[Message]:
-            return iter(message_res_list)
-
-        return iter_msg()
+        return message_res_list
 
     def send_and_receive(
         self,
@@ -201,7 +198,7 @@ class InMemoryDriver(Driver):
         end_time = time.time() + (timeout if timeout is not None else 0.0)
         ret: list[Message] = []
         while timeout is None or time.time() < end_time:
-            res_msgs = list(self.pull_messages(msg_ids))
+            res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
             msg_ids.difference_update(
                 {msg.metadata.reply_to_message for msg in res_msgs}
