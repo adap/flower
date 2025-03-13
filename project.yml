@@ -1,0 +1,35 @@
+name: FI-Swift-Examples
+options:
+  bundleIdPrefix: ai.flower
+  deploymentTarget:
+    iOS: "16.0"
+
+packages:
+  Flwr:
+    path: "."
+
+settings:
+  base:
+    SWIFT_VERSION: 5.0
+
+targets:
+  Example1:
+    type: tool
+    platform: macOS
+    sources: ["intelligence/swift/examples/Example1"]
+    dependencies:
+      - package: Flwr
+    settings:
+      base:
+        PRODUCT_NAME: Example1
+        MACH_O_TYPE: mh_execute
+  Example2:
+    type: tool
+    platform: macOS
+    sources: ["intelligence/swift/examples/Example2"]
+    dependencies:
+      - package: Flwr
+    settings:
+      base:
+        PRODUCT_NAME: Example2
+        MACH_O_TYPE: mh_execute
