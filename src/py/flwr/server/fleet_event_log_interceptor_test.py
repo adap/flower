@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Exec API event log interceptor tests."""
+"""Flower Fleet API event log interceptor tests."""
 
 
 import unittest
@@ -23,19 +23,17 @@ import grpc
 from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.dummy_grpc_handlers_test import (
-    NoOpUnaryStreamHandlerException,
     NoOpUnaryUnaryHandlerException,
     NoOpUnsupportedHandler,
-    get_noop_unary_stream_handler,
     get_noop_unary_unary_handler,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.typing import Actor, Event, LogEntry, UserInfo
-from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
-from flwr.superexec.exec_user_auth_interceptor import shared_user_info
+
+from .fleet_event_log_interceptor import FleetEventLogInterceptor
 
 
-class DummyLogPlugin(EventLogWriterPlugin):
+class DummyFleetLogPlugin(EventLogWriterPlugin):
     """Dummy log plugin for testing."""
 
     def __init__(self) -> None:
@@ -52,8 +50,8 @@ class DummyLogPlugin(EventLogWriterPlugin):
         return LogEntry(
             timestamp="before_timestamp",
             actor=Actor(
-                actor_id=user_info.user_id if user_info else None,
-                description=user_info.user_name if user_info else None,
+                actor_id="none",
+                description="none",
                 ip_address="1.2.3.4",
             ),
             event=Event(action=method_name, run_id=None, fab_hash=None),
@@ -72,8 +70,8 @@ class DummyLogPlugin(EventLogWriterPlugin):
         return LogEntry(
             timestamp="after_timestamp",
             actor=Actor(
-                actor_id=user_info.user_id if user_info else None,
-                description=user_info.user_name if user_info else None,
+                actor_id="none",
+                description="none",
                 ip_address="5.6.7.8",
             ),
             event=Event(action=method_name, run_id=None, fab_hash=None),
@@ -85,31 +83,23 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self.logs.append(log_entry)
 
 
-class TestExecEventLogInterceptor(unittest.TestCase):
-    """Test the ExecEventLogInterceptor logging for different RPC call types."""
+class TestFleetEventLogInterceptor(unittest.TestCase):
+    """Test the FleetEventLogInterceptor logging for unary-unary RPC calls."""
 
     def setUp(self) -> None:
-        """Initialize."""
-        self.log_plugin = DummyLogPlugin()
-        self.interceptor = ExecEventLogInterceptor(log_plugin=self.log_plugin)
-        # Because shared_user_info.get() is read-only, we need to set the user info
-        # and store the token to reset it after the test.
-        self.expected_user_info = UserInfo(user_id="user_id", user_name="user_name")
-        self.token = shared_user_info.set(self.expected_user_info)
-
-    def tearDown(self) -> None:
-        """Cleanup."""
-        # Reset shared_user_info to its previous state
-        shared_user_info.reset(self.token)
+        """Set up the test."""
+        self.log_plugin = DummyFleetLogPlugin()
+        self.interceptor = FleetEventLogInterceptor(log_plugin=self.log_plugin)
+        # For the Fleet interceptor, user_info is always passed as None.
 
     def get_expected_logs(self, method_name: str) -> list[LogEntry]:
-        """Get the expected log entries for the given method name."""
-        expected_logs = [
+        """Return the expected before/after log entries."""
+        return [
             LogEntry(
                 timestamp="before_timestamp",
                 actor=Actor(
-                    actor_id=self.expected_user_info.user_id,
-                    description=self.expected_user_info.user_name,
+                    actor_id="none",
+                    description="none",
                     ip_address="1.2.3.4",
                 ),
                 event=Event(action=method_name, run_id=None, fab_hash=None),
@@ -118,15 +108,14 @@ class TestExecEventLogInterceptor(unittest.TestCase):
             LogEntry(
                 timestamp="after_timestamp",
                 actor=Actor(
-                    actor_id=self.expected_user_info.user_id,
-                    description=self.expected_user_info.user_name,
+                    actor_id="none",
+                    description="none",
                     ip_address="5.6.7.8",
                 ),
                 event=Event(action=method_name, run_id=None, fab_hash=None),
                 status="after",
             ),
         ]
-        return expected_logs
 
     def test_unary_unary_interceptor(self) -> None:
         """Test unary-unary RPC call logging."""
@@ -144,12 +133,12 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         dummy_context = MagicMock()
         response = intercepted_handler.unary_unary(dummy_request, dummy_context)
 
-        # Assert: Verify response and that logs were written before and after.
+        # Assert: Verify response and that logs were written before and after
         self.assertEqual(response, "dummy_response")
         self.assertEqual(self.log_plugin.logs, expected_logs)
 
     def test_unary_unary_interceptor_exception(self) -> None:
-        """Test unary-unary RPC call when the handler raises an Exception."""
+        """Test unary-unary RPC call logging when the handler raises an Exception."""
         handler_call_details = MagicMock()
         handler_call_details.method = "exception_method"
         expected_method_name = handler_call_details.method
@@ -171,58 +160,6 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         with self.assertRaises(Exception) as context_manager:
             intercepted_handler.unary_unary(dummy_request, dummy_context)
         self.assertEqual(str(context_manager.exception), "Test error")
-
-        # Assert that the expected logs should include the before log and the after
-        # log (even though an exception occurred)
-        expected_logs = self.get_expected_logs(expected_method_name)
-        self.assertEqual(self.log_plugin.logs, expected_logs)
-
-    def test_unary_stream_interceptor(self) -> None:
-        """Test unary-stream RPC call logging."""
-        handler_call_details = MagicMock()
-        handler_call_details.method = "stream_method"
-        expected_method_name = handler_call_details.method
-        continuation = get_noop_unary_stream_handler
-        intercepted_handler = self.interceptor.intercept_service(
-            continuation, handler_call_details
-        )
-        expected_logs = self.get_expected_logs(expected_method_name)
-
-        # Execute: Invoke the intercepted unary_stream method
-        dummy_request = MagicMock()
-        dummy_context = MagicMock()
-        response_iterator = intercepted_handler.unary_stream(
-            dummy_request, dummy_context
-        )
-        responses = list(response_iterator)
-
-        # Assert: Verify the stream responses and that logs were written.
-        self.assertEqual(responses, ["stream response 1", "stream response 2"])
-        self.assertEqual(self.log_plugin.logs, expected_logs)
-
-    def test_unary_stream_interceptor_exception(self) -> None:
-        """Test unary-stream RPC call when the stream handler raises an Exception."""
-        handler_call_details = MagicMock()
-        handler_call_details.method = "stream_exception_method"
-        expected_method_name = handler_call_details.method
-
-        # pylint: disable=unused-argument
-        def continuation(
-            handler_call_details: grpc.HandlerCallDetails,
-        ) -> NoOpUnaryStreamHandlerException:
-            return NoOpUnaryStreamHandlerException()
-
-        intercepted_handler = self.interceptor.intercept_service(
-            continuation, handler_call_details
-        )
-        dummy_request = MagicMock()
-        dummy_context = MagicMock()
-
-        # Execute & Assert
-        # Ierating the response iterator raises the expected exception.
-        with self.assertRaises(Exception) as context_manager:
-            list(intercepted_handler.unary_stream(dummy_request, dummy_context))
-        self.assertEqual(str(context_manager.exception), "Test stream error")
 
         # Assert that the expected logs should include the before log and the after
         # log (even though an exception occurred)
