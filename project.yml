@@ -42,8 +42,9 @@ targets:
     settings:
       base:
         PRODUCT_NAME: hello-world-macos
-        INFOPLIST_FILE: "intelligence/swift/examples/hello-world-macos/Info.plist"
-        MACOSX_DEPLOYMENT_TARGET: "13.0"
+        CODE_SIGN_ENTITLEMENTS: "intelligence/swift/examples/hello-world-macos/LLMEvaluate.entitlements"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        GENERATE_INFOPLIST_FILE: YES
 
   hello-world-ios:
     type: application

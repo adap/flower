@@ -7,25 +7,30 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A8B006902E0773E0F8431FB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC36445A31D9E220357EE335 /* ContentView.swift */; };
 		208DA00DDFEA33FA2D1A112E /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 15139DB4CC3098599F34292F /* Flwr */; };
+		216416412D83348A00991B1D /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 216416402D83348A00991B1D /* Flwr */; };
 		4545595769757CDF5A93B6D1 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB49280706125EC6055EAD24 /* main.swift */; };
 		48FF80AC17C637B85E744AD8 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6A8873D262AA6AE119F79B /* main.swift */; };
+		733CDD8C85D8DDFD3085993A /* HelloWorldApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45ADDD9C9000D0D8FC17BBE /* HelloWorldApp.swift */; };
 		79E008597C41118E7A522295 /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 373207A0BF3B259232F9BF9D /* Flwr */; };
+		7ECF7E50DDE4B3155D2DBE53 /* HelloWorldApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 542CC304048C910B72B1F57F /* HelloWorldApp.swift */; };
+		942641CF636281B9FE746FB4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54DFE2EF24961D8599B5BF17 /* ContentView.swift */; };
 		96BF61B6193BE6C646A83537 /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 576C5843B4F652E912D76DFC /* Flwr */; };
-		C8FED47FAC926B716DA0899D /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 6D8B0AC98833A52178D0497F /* Flwr */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		213FDA1B2D83071400D188FF /* HelloWorldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloWorldApp.swift; sourceTree = "<group>"; };
-		213FDA1C2D83073300D188FF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		213FDA1D2D83076900D188FF /* HelloWorldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloWorldApp.swift; sourceTree = "<group>"; };
-		213FDA1E2D83077100D188FF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		542CC304048C910B72B1F57F /* HelloWorldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloWorldApp.swift; sourceTree = "<group>"; };
+		54DFE2EF24961D8599B5BF17 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		69212C0CFA05658DA8C0A74D /* flower */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flower; path = .; sourceTree = SOURCE_ROOT; };
 		8479E2DC84518C08DD6AF276 /* hello-world-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hello-world-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E6A8873D262AA6AE119F79B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		B45ADDD9C9000D0D8FC17BBE /* HelloWorldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloWorldApp.swift; sourceTree = "<group>"; };
 		C6BD3399AA6BD83B07A5EA84 /* streaming-cli */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = "streaming-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCDCB52D0C26A18CD0141074 /* hello-world-cli */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = "hello-world-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB49280706125EC6055EAD24 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		EC36445A31D9E220357EE335 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		F48A7FCB204C9908847ADC16 /* HelloWorld.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HelloWorld.entitlements; sourceTree = "<group>"; };
 		FD42C6A2EB3ECEECEFB04CD2 /* hello-world-ios.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "hello-world-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -42,7 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C8FED47FAC926B716DA0899D /* Flwr in Frameworks */,
+				216416412D83348A00991B1D /* Flwr in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,11 +73,18 @@
 		17070FB607F1A93B597A9383 /* hello-world-ios */ = {
 			isa = PBXGroup;
 			children = (
-				213FDA1B2D83071400D188FF /* HelloWorldApp.swift */,
-				213FDA1C2D83073300D188FF /* ContentView.swift */,
+				54DFE2EF24961D8599B5BF17 /* ContentView.swift */,
+				542CC304048C910B72B1F57F /* HelloWorldApp.swift */,
 			);
 			name = "hello-world-ios";
 			path = "intelligence/swift/examples/hello-world-ios";
+			sourceTree = "<group>";
+		};
+		2164163F2D83348A00991B1D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		284E31D4D0AF6515A39364A0 /* streaming-cli */ = {
@@ -93,6 +105,7 @@
 				E0A685C9273E6A69D7A151CB /* Packages */,
 				284E31D4D0AF6515A39364A0 /* streaming-cli */,
 				CF91D5D4DF95608A7EB662BF /* Products */,
+				2164163F2D83348A00991B1D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -108,8 +121,9 @@
 		A7D4934C0102920B93405E95 /* hello-world-macos */ = {
 			isa = PBXGroup;
 			children = (
-				213FDA1D2D83076900D188FF /* HelloWorldApp.swift */,
-				213FDA1E2D83077100D188FF /* ContentView.swift */,
+				EC36445A31D9E220357EE335 /* ContentView.swift */,
+				F48A7FCB204C9908847ADC16 /* HelloWorld.entitlements */,
+				B45ADDD9C9000D0D8FC17BBE /* HelloWorldApp.swift */,
 			);
 			name = "hello-world-macos";
 			path = "intelligence/swift/examples/hello-world-macos";
@@ -188,7 +202,7 @@
 			);
 			name = "hello-world-macos";
 			packageProductDependencies = (
-				6D8B0AC98833A52178D0497F /* Flwr */,
+				216416402D83348A00991B1D /* Flwr */,
 			);
 			productName = "hello-world-macos";
 			productReference = 8479E2DC84518C08DD6AF276 /* hello-world-macos.app */;
@@ -266,6 +280,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				942641CF636281B9FE746FB4 /* ContentView.swift in Sources */,
+				7ECF7E50DDE4B3155D2DBE53 /* HelloWorldApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -273,6 +289,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A8B006902E0773E0F8431FB /* ContentView.swift in Sources */,
+				733CDD8C85D8DDFD3085993A /* HelloWorldApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -283,13 +301,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "intelligence/swift/examples/hello-world-macos/HelloWorld.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = "intelligence/swift/examples/hello-world-macos/Info.plist";
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.hello-world-macos";
 				PRODUCT_NAME = "hello-world-macos";
 				SDKROOT = macosx;
@@ -496,13 +515,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "intelligence/swift/examples/hello-world-macos/HelloWorld.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = "intelligence/swift/examples/hello-world-macos/Info.plist";
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.hello-world-macos";
 				PRODUCT_NAME = "hello-world-macos";
 				SDKROOT = macosx;
@@ -586,15 +606,15 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = Flwr;
 		};
+		216416402D83348A00991B1D /* Flwr */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Flwr;
+		};
 		373207A0BF3B259232F9BF9D /* Flwr */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Flwr;
 		};
 		576C5843B4F652E912D76DFC /* Flwr */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Flwr;
-		};
-		6D8B0AC98833A52178D0497F /* Flwr */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Flwr;
 		};
