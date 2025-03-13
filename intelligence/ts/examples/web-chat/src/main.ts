@@ -35,18 +35,28 @@ sendButton.addEventListener('click', async () => {
   appendToChatLog(`You: ${message}`);
   chatInput.value = '';
 
-  appendToChatLog(`Bot: `);
-  await sendChat(message, appendToChatLog);
+  appendToChatLog('Bot: ');
+  await sendChat(message, (input: string) => appendToChatLog(input, true));
   chatLog.scrollTop = chatLog.scrollHeight;
 });
 
 loadButton.addEventListener('click', async () => {
   fi.fetchModel('meta/llama3.2-1b/instruct-fp16', (progress: Progress) => {
-    // To change later
-    loading.textContent = String(progress.percentage);
+    if (progress.percentage && progress.percentage < 1) {
+      loading.textContent = String((progress.loadedBytes ?? 1) / (progress.totalBytes ?? 1));
+    } else {
+      loading.textContent = 'Loaded';
+    }
   });
 });
 
-function appendToChatLog(text: string) {
-  chatLog.textContent = chatLog.textContent ?? '' + text;
+function appendToChatLog(text: string, stream: boolean = false) {
+  if (stream && chatLog.lastChild) {
+    chatLog.lastChild.textContent = chatLog.lastChild.textContent + text;
+  } else {
+    const p = document.createElement('p');
+    p.textContent = text;
+    chatLog.appendChild(p);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
 }
