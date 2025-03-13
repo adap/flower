@@ -38,6 +38,12 @@ let package = Package(
                 .product(name: "MLXLLM", package: "mlx-swift-examples"),
                 .product(name: "Crypto", package: "swift-crypto")
             ],
-            path: "intelligence/swift/src"),
+            path: "intelligence/swift/src"
+        ),
+        .testTarget(
+            name: "FlowerIntelligenceTests",
+            dependencies: ["FlowerIntelligence"],
+            path: "intelligence/swift/tests"
+        )
     ]
 )
