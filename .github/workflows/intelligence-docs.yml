@@ -107,7 +107,9 @@ jobs:
           name: swift-docs
           path: intelligence/docs/source/swift-api-ref/
       - name: Build final docs
-        run: make html
+        run: |
+          cd intelligence/docs
+          make html
       - name: Deploy docs
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         env:
