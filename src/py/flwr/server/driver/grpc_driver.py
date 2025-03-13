@@ -275,8 +275,6 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
                     # Remove the message once pulled
                     self._message_ids.remove(msg.metadata.reply_to_message)
                     yield msg
-                # else:
-                #     continue
 
         return iter_msg()
 
@@ -299,7 +297,7 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
         end_time = time.time() + (timeout if timeout is not None else 0.0)
         ret: list[Message] = []
         while timeout is None or time.time() < end_time:
-            res_msgs = self.pull_messages(msg_ids)
+            res_msgs = list(self.pull_messages(msg_ids))
             ret.extend(res_msgs)
             msg_ids.difference_update(
                 {msg.metadata.reply_to_message for msg in res_msgs}

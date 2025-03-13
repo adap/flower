@@ -18,6 +18,7 @@
 import time
 import unittest
 from logging import WARNING
+from typing import Iterable
 from unittest.mock import Mock, patch
 
 import grpc
@@ -157,7 +158,7 @@ class TestGrpcDriver(unittest.TestCase):
         return ["id2", "id3"]
 
     def _assert_pull_messages(
-        self, expected_ids: list[str], messages: list[Message]
+        self, expected_ids: list[str], messages: Iterable[Message]
     ) -> None:
         """Check that PullMessages was called once per expected message ID and that the
         returned messages have the correct reply_to values."""
@@ -172,7 +173,7 @@ class TestGrpcDriver(unittest.TestCase):
             # Each call should be made with a single-element list
             # containing the expected message id
             self.assertEqual(args[0].message_ids, [expected_msg_id])
-        self.assertEqual(reply_tos, {"id2", "id3"})
+        self.assertSetEqual(reply_tos, {"id2", "id3"})
 
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""
@@ -184,10 +185,13 @@ class TestGrpcDriver(unittest.TestCase):
         self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
 
         # Execute
-        messages = list(self.driver.pull_messages(msg_ids))
+        messages = self.driver.pull_messages(msg_ids)
 
         # Assert
         self._assert_pull_messages(msg_ids, messages)
+        # Ensure messages are deleted
+        # pylint: disable=protected-access
+        self.assertFalse(set(msg_ids).issubset(self.driver._message_ids))
 
     def test_pull_messages_without_given_message_ids(self) -> None:
         """Test pulling messages successful when no message_ids are provided."""
@@ -199,10 +203,13 @@ class TestGrpcDriver(unittest.TestCase):
         self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
 
         # Execute
-        messages = list(self.driver.pull_messages())
+        messages = self.driver.pull_messages()
 
         # Assert
         self._assert_pull_messages(msg_ids, messages)
+        # Ensure messages are deleted
+        # pylint: disable=protected-access
+        self.assertFalse(set(msg_ids).issubset(self.driver._message_ids))
 
     def test_pull_messages_with_invalid_message_ids(self) -> None:
         """Test pulling messages when provided message_ids include values not stored in
@@ -224,6 +231,9 @@ class TestGrpcDriver(unittest.TestCase):
         # Assert
         # Only valid IDs are pulled
         self._assert_pull_messages(msg_ids, messages)
+        # Ensure messages are deleted
+        # pylint: disable=protected-access
+        self.assertFalse(set(msg_ids).issubset(self.driver._message_ids))
         # Warning was logged with the missing IDs
         mock_log.assert_called_once()
         args, _ = mock_log.call_args
@@ -250,9 +260,6 @@ class TestGrpcDriver(unittest.TestCase):
         mock_response.messages_list = message_res_list
         self.mock_stub.PullMessages.return_value = mock_response
         msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
-
-        # Store message IDs in the driver's internal state for testing
-        self.driver._message_ids.update(["id1"])  # pylint: disable=protected-access
 
         # Execute
         ret_msgs = list(self.driver.send_and_receive(msgs))
