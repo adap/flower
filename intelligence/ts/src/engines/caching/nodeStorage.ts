@@ -31,7 +31,7 @@ export class NodeCacheStorage extends CacheStorage {
     return this.filePath;
   }
 
-  async loadCache(): Promise<CachedMapping | null> {
+  protected async load(): Promise<CachedMapping | null> {
     try {
       const filePath = await this.getCacheFilePath();
       const data = await readFile(filePath, 'utf-8');
@@ -41,7 +41,7 @@ export class NodeCacheStorage extends CacheStorage {
     }
   }
 
-  async saveCache(cache: CachedMapping): Promise<void> {
+  protected async save(cache: CachedMapping): Promise<void> {
     const filePath = await this.getCacheFilePath();
     await writeFile(filePath, JSON.stringify(cache), 'utf-8');
   }
