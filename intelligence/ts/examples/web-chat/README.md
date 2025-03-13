@@ -9,6 +9,12 @@ framework: [torch, torchvision]
 Run example:
 
 ```bash
-pnpm i && pnpm build
+pnpm i
 pnpm dev
+```
+
+or simply:
+
+```bash
+pnpm start
 ```
