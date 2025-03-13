@@ -60,6 +60,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         log(DEBUG, "[Fleet.CreateNode] Request: %s", MessageToDict(request))
         response = message_handler.create_node(
             request=request,
+            peer=context.peer(),
             state=self.state_factory.state(),
         )
         log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)

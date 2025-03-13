@@ -22,7 +22,6 @@ from uuid import UUID
 from flwr.common import Context, Message
 from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
-
 from flwr.proto.node_pb2 import NodeInfo
 
 
@@ -130,7 +129,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Get all instruction Message IDs for the given run_id."""
 
     @abc.abstractmethod
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(self, ping_interval: float, peer: Optional[str] = None) -> int:
         """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod

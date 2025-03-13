@@ -33,6 +33,7 @@ from flwr.common.constant import (
 )
 from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.proto.node_pb2 import NodeInfo
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
 
@@ -43,8 +44,6 @@ from .utils import (
     verify_found_message_replies,
     verify_message_ids,
 )
-from flwr.proto.node_pb2 import NodeInfo
-
 
 
 @dataclass
@@ -61,8 +60,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def __init__(self) -> None:
 
-        # Map node_id to (online_until, ping_interval)
-        self.node_ids: dict[int, tuple[float, float]] = {}
+        # Map node_id to (online_until, ping_interval, grpc-peer)
+        self.node_ids: dict[int, tuple[float, float, str]] = {}
         self.public_key_to_node_id: dict[bytes, int] = {}
         self.node_id_to_public_key: dict[int, bytes] = {}
 
@@ -307,7 +306,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.message_res_store)
 
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(self, ping_interval: float, peer: Optional[str] = None) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(
@@ -319,7 +318,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
-            self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+            self.node_ids[node_id] = (time.time() + ping_interval, ping_interval, peer)
             return node_id
 
     def delete_node(self, node_id: int) -> None:
@@ -356,9 +355,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Retrieve info about all connected nodes."""
         nodes_info = []
         current_time = time.time()
-        for node_id, (online_until, _) in self.node_ids.items():
+        for node_id, (online_until, _, peer) in self.node_ids.items():
             is_online = online_until > current_time
-            node_info = NodeInfo(node_id=node_id, is_online=is_online)
+            metadata = {"address": peer}
+            node_info = NodeInfo(
+                node_id=node_id, is_online=is_online, metadata=metadata
+            )
             nodes_info.append(node_info)
 
         return nodes_info
@@ -535,7 +537,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         with self.lock:
             if node_id in self.node_ids:
-                self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+                # Only override relevant fields
+                self.node_ids[node_id][0] = time.time() + ping_interval
+                self.node_ids[node_id][1] = ping_interval
                 return True
         return False
 

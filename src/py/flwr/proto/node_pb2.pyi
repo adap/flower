@@ -4,23 +4,42 @@ isort:skip_file
 """
 import builtins
 import google.protobuf.descriptor
+import google.protobuf.internal.containers
 import google.protobuf.message
+import typing
 import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class NodeInfo(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class MetadataEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        value: typing.Text
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Text = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
     NODE_ID_FIELD_NUMBER: builtins.int
     IS_ONLINE_FIELD_NUMBER: builtins.int
+    METADATA_FIELD_NUMBER: builtins.int
     node_id: builtins.int
     is_online: builtins.bool
+    @property
+    def metadata(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
     def __init__(self,
         *,
         node_id: builtins.int = ...,
         is_online: builtins.bool = ...,
+        metadata: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["is_online",b"is_online","node_id",b"node_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["is_online",b"is_online","metadata",b"metadata","node_id",b"node_id"]) -> None: ...
 global___NodeInfo = NodeInfo
 
 class Node(google.protobuf.message.Message):

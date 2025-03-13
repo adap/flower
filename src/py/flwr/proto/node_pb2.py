@@ -14,15 +14,19 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x66lwr/proto/node.proto\x12\nflwr.proto\".\n\x08NodeInfo\x12\x0f\n\x07node_id\x18\x01 \x01(\x04\x12\x11\n\tis_online\x18\x02 \x01(\x08\"\x17\n\x04Node\x12\x0f\n\x07node_id\x18\x01 \x01(\x04\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x66lwr/proto/node.proto\x12\nflwr.proto\"\x95\x01\n\x08NodeInfo\x12\x0f\n\x07node_id\x18\x01 \x01(\x04\x12\x11\n\tis_online\x18\x02 \x01(\x08\x12\x34\n\x08metadata\x18\x03 \x03(\x0b\x32\".flwr.proto.NodeInfo.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x17\n\x04Node\x12\x0f\n\x07node_id\x18\x01 \x01(\x04\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'flwr.proto.node_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_NODEINFO']._serialized_start=37
-  _globals['_NODEINFO']._serialized_end=83
-  _globals['_NODE']._serialized_start=85
-  _globals['_NODE']._serialized_end=108
+  _globals['_NODEINFO_METADATAENTRY']._options = None
+  _globals['_NODEINFO_METADATAENTRY']._serialized_options = b'8\001'
+  _globals['_NODEINFO']._serialized_start=38
+  _globals['_NODEINFO']._serialized_end=187
+  _globals['_NODEINFO_METADATAENTRY']._serialized_start=140
+  _globals['_NODEINFO_METADATAENTRY']._serialized_end=187
+  _globals['_NODE']._serialized_start=189
+  _globals['_NODE']._serialized_end=212
 # @@protoc_insertion_point(module_scope)

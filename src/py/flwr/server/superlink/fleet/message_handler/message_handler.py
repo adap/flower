@@ -54,11 +54,12 @@ from flwr.server.superlink.utils import check_abort
 
 def create_node(
     request: CreateNodeRequest,  # pylint: disable=unused-argument
+    peer: str,
     state: LinkState,
 ) -> CreateNodeResponse:
     """."""
     # Create node
-    node_id = state.create_node(ping_interval=request.ping_interval)
+    node_id = state.create_node(ping_interval=request.ping_interval, peer=peer)
     return CreateNodeResponse(node=Node(node_id=node_id))
 
 
