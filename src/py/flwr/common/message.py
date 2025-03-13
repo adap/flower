@@ -21,7 +21,7 @@ import time
 from logging import WARNING
 from typing import Optional, cast
 
-from .constant import MESSAGE_TTL_TOLERANCE
+from .constant import MESSAGE_TTL_TOLERANCE, MessageType
 from .logger import log
 from .record import RecordSet
 
@@ -417,3 +417,28 @@ def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
         ttl=ttl,
         message_type=msg.metadata.message_type,
     )
+
+
+def check_message_type(message_type: str) -> bool:
+    """Check if the message type is valid.
+
+    A valid message type format is one of the following:
+
+    - "<category>"
+    - "<category>.<action>"
+    """
+    valid_types = {MessageType.TRAIN, MessageType.EVALUATE, MessageType.QUERY}
+
+    # Check if conforming to the format "<category>"
+    if message_type in valid_types:
+        return True
+
+    # Check if conforming to the format "<category>.<action>"
+    if message_type.count(".") != 1:
+        return False
+
+    category, action = message_type.split(".")
+    if category in valid_types and action.isidentifier():
+        return True
+
+    return False
