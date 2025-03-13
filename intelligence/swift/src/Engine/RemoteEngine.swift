@@ -219,7 +219,6 @@ enum NetworkService {
         message: "Invalid response from server"
       )
     }
-    print(stream)
     try checkStatusCode(httpResponse)
     for try await line in stream.lines {
       guard let json = line.data(using: .utf8) else { continue }

@@ -26,7 +26,10 @@ class MlxEngine: Engine {
   }
 
   var loadState = LoadState.idle
-  var modelConfiguration = ModelRegistry.llama3_2_1B_4bit {
+  var modelConfiguration = ModelConfiguration(
+    id: "mlx-community/Llama-3.2-1B-Instruct-8bit",
+    defaultPrompt: "What is the difference between a fruit and a vegetable?"
+) {
     didSet {
       loadState = .idle
     }
@@ -57,7 +60,7 @@ class MlxEngine: Engine {
     }
   }
 
-  private static func convertToolsToDictionaries(_ tools: [Tool]?) throws -> [[String: Any]] {
+  private static func convertToolsToDictionaries(_ tools: [Tool]?) throws -> [[String: Any]]? {
     let encoder = JSONEncoder()
     encoder.dateEncodingStrategy = .iso8601
     if let tools = tools {
@@ -67,7 +70,7 @@ class MlxEngine: Engine {
         return dictionaryArray
       }
     }
-    return []
+    return nil
   }
 
   func chat(
@@ -91,16 +94,11 @@ class MlxEngine: Engine {
 
     let modelContainer = try await load()
     MLXRandom.seed(UInt64(Date.timeIntervalSinceReferenceDate * 1000))
-      
-      print(messages.map {
-          Dictionary(uniqueKeysWithValues: [($0.role, $0.content)])
-        })
-
     let result = try await modelContainer.perform { context in
       let input = try await context.processor.prepare(
         input: .init(
           messages: messages.map {
-            Dictionary(uniqueKeysWithValues: [($0.role, $0.content)])
+            Dictionary(uniqueKeysWithValues: [("role", $0.role), ("content", $0.content)])
           },
           tools: MlxEngine.convertToolsToDictionaries(tools))
       )
