@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@flwr/flwr':
-        specifier: ^0.1.3
-        version: 0.1.3
+        specifier: ^0.1.4
+        version: 0.1.4
       '@mozilla/readability':
         specifier: ^0.6.0
         version: 0.6.0
@@ -254,8 +254,8 @@ packages:
     resolution: {integrity: sha512-JubJ5B2pJ4k4yGxaNLdbjrnk9d/iDz6/q8wOilpIowd6PJPgaxCuHBnBszq7Ce2TyMrywm5r4PnKm6V3iiZF+g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@flwr/flwr@0.1.3':
-    resolution: {integrity: sha512-x4St1YPreyVfVj6rZU3TbsA/DOOB44YlcnU9dZemdAs8nZvMoBeT81pQln0BjNzqG17hCilH4pllcRlji4t+SA==}
+  '@flwr/flwr@0.1.4':
+    resolution: {integrity: sha512-+NYfaoUPzu/QHLn9Jp8+MjkWUQSAEZYNGBDLXjYWO5lHo4l2/v7Jacgqqp31WkO0ZwOVeVMVgPvygLeANf9SEg==}
 
   '@huggingface/jinja@0.3.3':
     resolution: {integrity: sha512-vQQr2JyWvVFba3Lj9es4q9vCl1sAc74fdgnEMoX8qHrXtswap9ge9uO3ONDzQB0cQ0PUyaKY2N6HaVbTBvSXvw==}
@@ -1865,7 +1865,7 @@ snapshots:
       '@eslint/core': 0.12.0
       levn: 0.4.1
 
-  '@flwr/flwr@0.1.3':
+  '@flwr/flwr@0.1.4':
     dependencies:
       '@huggingface/transformers': 3.4.0
       '@mlc-ai/web-llm': 0.2.78
