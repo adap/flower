@@ -18,7 +18,7 @@ import { isNode } from '../env';
 import { FailureCode, Result } from '../typing';
 
 const STALE_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours.
-const CACHE_KEY = 'engineModelsCache'; // For browser localStorage.
+const CACHE_KEY = 'flowerintelligence-model-name-cache'; // For browser localStorage.
 const CACHE_FILE = 'engineModelsCache.json'; // For Node filesystem.
 
 interface ModelResponse {
