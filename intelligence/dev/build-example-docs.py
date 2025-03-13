@@ -18,108 +18,36 @@ import os
 import re
 import shutil
 
-# import subprocess
 from pathlib import Path
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 INDEX = os.path.join(ROOT, "docs", "source", "examples.rst")
 
 initial_text = """
-Flower Examples Documentation
-=============================
+Examples
+========
 
-Welcome to Flower Examples' documentation. `Flower <https://flower.ai>`_ is
-a friendly federated AI framework.
+Below you will find a list of Flower Intelligence examples for Node.js and one
+for web apps.
 
-Join the Flower Community
--------------------------
+Node.js Examples
+----------------
 
-The Flower Community is growing quickly - we're a friendly group of researchers,
-engineers, students, professionals, academics, and other enthusiasts.
-
-.. button-link:: https://flower.ai/join-slack
-    :color: primary
-    :shadow:
-
-    Join us on Slack
-
-Node Examples
--------------
-
-Flower Node Examples are a collection of demo projects that show how you
-can use Flower in combination with other existing frameworks or technologies.
+Those examples will run in the terminal and are mostly there to showcase some
+features with very low overhead. You'll find more instruction in the
+respective pages.
 
 """
 
 table_headers = (
     "\n.. list-table::\n   :widths: 50 15 15 15\n   "
-    ":header-rows: 1\n\n   * - Title\n     - Framework\n     - Dataset\n     - Tags\n\n"
+    ":header-rows: 1\n\n   * - Title\n     - Tags\n\n"
 )
 
 categories = {
     "node": {"table": table_headers, "list": ""},
     "web": {"table": table_headers, "list": ""},
-    "other": {"table": table_headers, "list": ""},
 }
-
-urls = {
-    # Frameworks
-    "Android": "https://www.android.com/",
-    "C++": "https://isocpp.org/",
-    "Docker": "https://www.docker.com/",
-    "JAX": "https://jax.readthedocs.io/en/latest/",
-    "Java": "https://www.java.com/",
-    "Keras": "https://keras.io/",
-    "Kotlin": "https://kotlinlang.org/",
-    "MLX": "https://ml-explore.github.io/mlx/build/html/index.html",
-    "MONAI": "https://monai.io/",
-    "PEFT": "https://huggingface.co/docs/peft/index",
-    "Swift": "https://www.swift.org/",
-    "TensorFlowLite": "https://www.tensorflow.org/lite",
-    "fastai": "https://fast.ai/",
-    "lifelines": "https://lifelines.readthedocs.io/en/latest/index.html",
-    "lightning": "https://lightning.ai/docs/pytorch/stable/",
-    "numpy": "https://numpy.org/",
-    "opacus": "https://opacus.ai/",
-    "pandas": "https://pandas.pydata.org/",
-    "scikit-learn": "https://scikit-learn.org/",
-    "tensorboard": "https://www.tensorflow.org/tensorboard",
-    "tensorflow": "https://www.tensorflow.org/",
-    "torch": "https://pytorch.org/",
-    "torchvision": "https://pytorch.org/vision/stable/index.html",
-    "transformers": "https://huggingface.co/docs/transformers/index",
-    "wandb": "https://wandb.ai/home",
-    "whisper": "https://huggingface.co/openai/whisper-tiny",
-    "xgboost": "https://xgboost.readthedocs.io/en/stable/",
-    # Datasets
-    "Adult Census Income": "https://www.kaggle.com/datasets/uciml/adult-census-income/data",
-    "Alpaca-GPT4": "https://huggingface.co/datasets/vicgalle/alpaca-gpt4",
-    "CIFAR-10": "https://huggingface.co/datasets/uoft-cs/cifar10",
-    "HIGGS": "https://archive.ics.uci.edu/dataset/280/higgs",
-    "IMDB": "https://huggingface.co/datasets/stanfordnlp/imdb",
-    "Iris": "https://scikit-learn.org/stable/auto_examples/datasets/plot_iris_dataset.html",
-    "MNIST": "https://huggingface.co/datasets/ylecun/mnist",
-    "MedNIST": "https://medmnist.com/",
-    "Oxford Flower-102": "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/",
-    "SpeechCommands": "https://huggingface.co/datasets/google/speech_commands",
-    "Titanic": "https://www.kaggle.com/competitions/titanic",
-    "Waltons": "https://lifelines.readthedocs.io/en/latest/lifelines.datasets.html#lifelines.datasets.load_waltons",
-}
-
-
-def _convert_to_link(search_result):
-    if "," in search_result:
-        result = ""
-        for part in search_result.split(","):
-            result += f"{_convert_to_link(part)}, "
-        return result[:-2]
-    else:
-        search_result = search_result.strip()
-        name, url = search_result, urls.get(search_result, None)
-        if url:
-            return f"`{name.strip()} <{url.strip()}>`_"
-        else:
-            return search_result
 
 
 def _read_metadata(example):
@@ -141,32 +69,13 @@ def _read_metadata(example):
         raise ValueError("Tags not found in metadata")
     tags = tags_match.group(1).strip()
 
-    dataset_match = re.search(
-        r"^dataset:\s*\[(.*?)\]$", metadata, re.DOTALL | re.MULTILINE
-    )
-    if not dataset_match:
-        raise ValueError("Dataset not found in metadata")
-    dataset = dataset_match.group(1).strip()
-
-    framework_match = re.search(
-        r"^framework:\s*\[(.*?|)\]$", metadata, re.DOTALL | re.MULTILINE
-    )
-    if not framework_match:
-        raise ValueError("Framework not found in metadata")
-    framework = framework_match.group(1).strip()
-
-    dataset = _convert_to_link(re.sub(r"\s+", " ", dataset).strip())
-    framework = _convert_to_link(re.sub(r"\s+", " ", framework).strip())
-    return title, tags, dataset, framework
+    return title, tags
 
 
 def _add_table_entry(example, tag, table_var):
-    title, tags, dataset, framework = _read_metadata(example)
+    title, tags = _read_metadata(example)
     example_name = Path(example).stem
-    table_entry = (
-        f"   * - `{title} <{example_name}.html>`_ \n     "
-        f"- {framework} \n     - {dataset} \n     - {tags}\n\n"
-    )
+    table_entry = f"   * - `{title} <{example_name}.html>`_ \n     - {tags}\n\n"
     if tag in tags:
         categories[table_var]["table"] += table_entry
         categories[table_var]["list"] += f"  {example_name}\n"
@@ -198,27 +107,6 @@ def _add_gh_button(example):
             f.truncate()
 
 
-# def _copy_images(example):
-#     static_dir = os.path.join(example, "_static")
-#     dest_dir = os.path.join(ROOT, "examples", "docs", "source", "_static")
-#     if os.path.isdir(static_dir):
-#         for file in os.listdir(static_dir):
-#             if file.endswith((".jpg", ".png", ".jpeg")):
-#                 shutil.copyfile(
-#                     os.path.join(static_dir, file), os.path.join(dest_dir, file)
-#                 )
-
-
-def _add_all_entries():
-    examples_dir = os.path.join(ROOT, "ts", "examples")
-    for example in sorted(os.listdir(examples_dir)):
-        example_path = os.path.join(examples_dir, example)
-        if os.path.isdir(example_path):
-            _copy_markdown_files(example_path)
-            _add_gh_button(example)
-            # _copy_images(example)
-
-
 def _main():
     if os.path.exists(INDEX):
         os.remove(INDEX)
@@ -232,32 +120,18 @@ def _main():
         if os.path.isdir(example_path):
             _copy_markdown_files(example_path)
             _add_gh_button(example)
-            # _copy_images(example_path)
             if not _add_table_entry(example_path, "node", "node"):
-                if not _add_table_entry(example_path, "comprehensive", "comprehensive"):
-                    if not _add_table_entry(example_path, "web", "web"):
-                        _add_table_entry(example_path, "", "other")
+                _add_table_entry(example_path, "web", "web")
 
     with open(INDEX, "a") as index_file:
         index_file.write(categories["node"]["table"])
 
         index_file.write("\nWeb Examples\n------------\n")
         index_file.write(
-            "Web Examples are mostly for users that are both familiar with "
-            "Federated Learning but also somewhat familiar with Flower's main "
-            "features.\n"
+            "Those examples will require you to use a browser. You'll find "
+            "more instructions in the respective pages.\n"
         )
         index_file.write(categories["web"]["table"])
-
-        # index_file.write("\nOther Examples\n--------------\n")
-        # index_file.write(
-        #     "Flower Examples are a collection of example projects written with "
-        #     "Flower that explore different domains and features. You can check "
-        #     "which examples already exist and/or contribute your own example.\n"
-        # )
-        # index_file.write(categories["other"]["table"])
-
-        # _add_all_entries()
 
         index_file.write(
             "\n.. toctree::\n  :maxdepth: 1\n  :caption: Quickstart\n  :hidden:\n\n"
@@ -269,14 +143,8 @@ def _main():
         )
         index_file.write(categories["web"]["list"])
 
-        # index_file.write(
-        #     "\n.. toctree::\n  :maxdepth: 1\n  :caption: Others\n  :hidden:\n\n"
-        # )
-        # index_file.write(categories["other"]["list"])
-
         index_file.write("\n")
 
 
 if __name__ == "__main__":
     _main()
-    # subprocess.call(f"cd {ROOT}/examples/docs && make html", shell=True)
