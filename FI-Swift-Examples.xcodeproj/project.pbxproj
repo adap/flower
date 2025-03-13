@@ -7,75 +7,123 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1B1D9D9E99F6ACD26DF9948D /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = BD690527BB2D2892808DC6D0 /* Flwr */; };
-		9787FF5764C1463FE7E3C356 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = B85C96D7A4242A487B52DCA9 /* main.swift */; };
-		A72FD195D4FCD97047685FF4 /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 0A6987F4B9B577F4B11949C9 /* Flwr */; };
-		B08385FC6CBBE1B2DB5A71BD /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = A78694F2D5F4676AAFA67BC5 /* main.swift */; };
+		208DA00DDFEA33FA2D1A112E /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 15139DB4CC3098599F34292F /* Flwr */; };
+		4545595769757CDF5A93B6D1 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB49280706125EC6055EAD24 /* main.swift */; };
+		48FF80AC17C637B85E744AD8 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6A8873D262AA6AE119F79B /* main.swift */; };
+		79E008597C41118E7A522295 /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 373207A0BF3B259232F9BF9D /* Flwr */; };
+		96BF61B6193BE6C646A83537 /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 576C5843B4F652E912D76DFC /* Flwr */; };
+		C8FED47FAC926B716DA0899D /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 6D8B0AC98833A52178D0497F /* Flwr */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		213FDA1B2D83071400D188FF /* HelloWorldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloWorldApp.swift; sourceTree = "<group>"; };
+		213FDA1C2D83073300D188FF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		213FDA1D2D83076900D188FF /* HelloWorldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloWorldApp.swift; sourceTree = "<group>"; };
+		213FDA1E2D83077100D188FF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		69212C0CFA05658DA8C0A74D /* flower */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flower; path = .; sourceTree = SOURCE_ROOT; };
-		71052EB7D89DCE434FE9D5BC /* Example1 */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = Example1; sourceTree = BUILT_PRODUCTS_DIR; };
-		A78694F2D5F4676AAFA67BC5 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		AE13999218F8AC89F7A76279 /* Example2 */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = Example2; sourceTree = BUILT_PRODUCTS_DIR; };
-		B85C96D7A4242A487B52DCA9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		8479E2DC84518C08DD6AF276 /* hello-world-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hello-world-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E6A8873D262AA6AE119F79B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		C6BD3399AA6BD83B07A5EA84 /* streaming-cli */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = "streaming-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CCDCB52D0C26A18CD0141074 /* hello-world-cli */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = "hello-world-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB49280706125EC6055EAD24 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		FD42C6A2EB3ECEECEFB04CD2 /* hello-world-ios.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "hello-world-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		1A8242C5E9AA416DCE9AB6C1 /* Frameworks */ = {
+		47AFF7473930F0E9A1D13F2D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A72FD195D4FCD97047685FF4 /* Flwr in Frameworks */,
+				79E008597C41118E7A522295 /* Flwr in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		652DF81E0C79E2154E5A565D /* Frameworks */ = {
+		5C6373A92920E767AB25027B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1B1D9D9E99F6ACD26DF9948D /* Flwr in Frameworks */,
+				C8FED47FAC926B716DA0899D /* Flwr in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A96D7DC03575303B60AF7480 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				208DA00DDFEA33FA2D1A112E /* Flwr in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AECA0E9B28A1D6B9CC563400 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				96BF61B6193BE6C646A83537 /* Flwr in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		17070FB607F1A93B597A9383 /* hello-world-ios */ = {
+			isa = PBXGroup;
+			children = (
+				213FDA1B2D83071400D188FF /* HelloWorldApp.swift */,
+				213FDA1C2D83073300D188FF /* ContentView.swift */,
+			);
+			name = "hello-world-ios";
+			path = "intelligence/swift/examples/hello-world-ios";
+			sourceTree = "<group>";
+		};
+		284E31D4D0AF6515A39364A0 /* streaming-cli */ = {
+			isa = PBXGroup;
+			children = (
+				9E6A8873D262AA6AE119F79B /* main.swift */,
+			);
+			name = "streaming-cli";
+			path = "intelligence/swift/examples/streaming-cli";
+			sourceTree = "<group>";
+		};
 		33A6C1819E46C8473CCBC357 = {
 			isa = PBXGroup;
 			children = (
-				405055DDF2FEF96F65631FDD /* hello-world-cli */,
-				D81C9A54319982EFB9633766 /* streaming-cli */,
+				3C25C9C3F81B52B5018F66DD /* hello-world-cli */,
+				17070FB607F1A93B597A9383 /* hello-world-ios */,
+				A7D4934C0102920B93405E95 /* hello-world-macos */,
 				E0A685C9273E6A69D7A151CB /* Packages */,
+				284E31D4D0AF6515A39364A0 /* streaming-cli */,
 				CF91D5D4DF95608A7EB662BF /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		405055DDF2FEF96F65631FDD /* hello-world-cli */ = {
+		3C25C9C3F81B52B5018F66DD /* hello-world-cli */ = {
 			isa = PBXGroup;
 			children = (
-				A78694F2D5F4676AAFA67BC5 /* main.swift */,
+				EB49280706125EC6055EAD24 /* main.swift */,
 			);
 			name = "hello-world-cli";
 			path = "intelligence/swift/examples/hello-world-cli";
 			sourceTree = "<group>";
 		};
+		A7D4934C0102920B93405E95 /* hello-world-macos */ = {
+			isa = PBXGroup;
+			children = (
+				213FDA1D2D83076900D188FF /* HelloWorldApp.swift */,
+				213FDA1E2D83077100D188FF /* ContentView.swift */,
+			);
+			name = "hello-world-macos";
+			path = "intelligence/swift/examples/hello-world-macos";
+			sourceTree = "<group>";
+		};
 		CF91D5D4DF95608A7EB662BF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				71052EB7D89DCE434FE9D5BC /* Example1 */,
-				AE13999218F8AC89F7A76279 /* Example2 */,
+				CCDCB52D0C26A18CD0141074 /* hello-world-cli */,
+				FD42C6A2EB3ECEECEFB04CD2 /* hello-world-ios.app */,
+				8479E2DC84518C08DD6AF276 /* hello-world-macos.app */,
+				C6BD3399AA6BD83B07A5EA84 /* streaming-cli */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		D81C9A54319982EFB9633766 /* streaming-cli */ = {
-			isa = PBXGroup;
-			children = (
-				B85C96D7A4242A487B52DCA9 /* main.swift */,
-			);
-			name = "streaming-cli";
-			path = "intelligence/swift/examples/streaming-cli";
 			sourceTree = "<group>";
 		};
 		E0A685C9273E6A69D7A151CB /* Packages */ = {
@@ -89,42 +137,80 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		067C49AEC4251B4194AB3976 /* Example1 */ = {
+		4673BF2ACFB281464516E7F3 /* hello-world-ios */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 04590B9743B8B4A0A7209BF3 /* Build configuration list for PBXNativeTarget "Example1" */;
+			buildConfigurationList = 94635E797BA13466BF4F0896 /* Build configuration list for PBXNativeTarget "hello-world-ios" */;
 			buildPhases = (
-				B4209808321085CFA46CBDFA /* Sources */,
-				1A8242C5E9AA416DCE9AB6C1 /* Frameworks */,
+				9AA7B54332A7393D608DB827 /* Sources */,
+				47AFF7473930F0E9A1D13F2D /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = Example1;
+			name = "hello-world-ios";
 			packageProductDependencies = (
-				0A6987F4B9B577F4B11949C9 /* Flwr */,
+				373207A0BF3B259232F9BF9D /* Flwr */,
 			);
-			productName = Example1;
-			productReference = 71052EB7D89DCE434FE9D5BC /* Example1 */;
+			productName = "hello-world-ios";
+			productReference = FD42C6A2EB3ECEECEFB04CD2 /* hello-world-ios.app */;
+			productType = "com.apple.product-type.application";
+		};
+		54B8E20FBF3685A8CB545764 /* streaming-cli */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A5B7183CE630979926292BE3 /* Build configuration list for PBXNativeTarget "streaming-cli" */;
+			buildPhases = (
+				54E34C14BA57DF94A657B07E /* Sources */,
+				A96D7DC03575303B60AF7480 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "streaming-cli";
+			packageProductDependencies = (
+				15139DB4CC3098599F34292F /* Flwr */,
+			);
+			productName = "streaming-cli";
+			productReference = C6BD3399AA6BD83B07A5EA84 /* streaming-cli */;
 			productType = "com.apple.product-type.tool";
 		};
-		D7F0E73BC0D09886F352D9E1 /* Example2 */ = {
+		8085A333DE63938527EAD848 /* hello-world-macos */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 85567A6AA92C2B787AEE6151 /* Build configuration list for PBXNativeTarget "Example2" */;
+			buildConfigurationList = A653252CD4A35B230DFBADE8 /* Build configuration list for PBXNativeTarget "hello-world-macos" */;
 			buildPhases = (
-				8BFC01E9E021F950D79E0190 /* Sources */,
-				652DF81E0C79E2154E5A565D /* Frameworks */,
+				E19597DB45A593067740F8D3 /* Sources */,
+				5C6373A92920E767AB25027B /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = Example2;
+			name = "hello-world-macos";
 			packageProductDependencies = (
-				BD690527BB2D2892808DC6D0 /* Flwr */,
+				6D8B0AC98833A52178D0497F /* Flwr */,
 			);
-			productName = Example2;
-			productReference = AE13999218F8AC89F7A76279 /* Example2 */;
+			productName = "hello-world-macos";
+			productReference = 8479E2DC84518C08DD6AF276 /* hello-world-macos.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E0E6C724053C978CC8E309F1 /* hello-world-cli */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F3209EF28C9A02B453F19324 /* Build configuration list for PBXNativeTarget "hello-world-cli" */;
+			buildPhases = (
+				57ABBC6F848867B7BE3F5C3B /* Sources */,
+				AECA0E9B28A1D6B9CC563400 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "hello-world-cli";
+			packageProductDependencies = (
+				576C5843B4F652E912D76DFC /* Flwr */,
+			);
+			productName = "hello-world-cli";
+			productReference = CCDCB52D0C26A18CD0141074 /* hello-world-cli */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -134,7 +220,6 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1430;
 			};
 			buildConfigurationList = F58BFF02AE30E45A3697BCF0 /* Build configuration list for PBXProject "FI-Swift-Examples" */;
@@ -152,32 +237,112 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				067C49AEC4251B4194AB3976 /* Example1 */,
-				D7F0E73BC0D09886F352D9E1 /* Example2 */,
+				E0E6C724053C978CC8E309F1 /* hello-world-cli */,
+				4673BF2ACFB281464516E7F3 /* hello-world-ios */,
+				8085A333DE63938527EAD848 /* hello-world-macos */,
+				54B8E20FBF3685A8CB545764 /* streaming-cli */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		8BFC01E9E021F950D79E0190 /* Sources */ = {
+		54E34C14BA57DF94A657B07E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9787FF5764C1463FE7E3C356 /* main.swift in Sources */,
+				48FF80AC17C637B85E744AD8 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B4209808321085CFA46CBDFA /* Sources */ = {
+		57ABBC6F848867B7BE3F5C3B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B08385FC6CBBE1B2DB5A71BD /* main.swift in Sources */,
+				4545595769757CDF5A93B6D1 /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AA7B54332A7393D608DB827 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E19597DB45A593067740F8D3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		16486AF060A2F92E3A70D467 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "intelligence/swift/examples/hello-world-macos/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.hello-world-macos";
+				PRODUCT_NAME = "hello-world-macos";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		3D91A7BFDE419E94F631E2A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACH_O_TYPE = mh_execute;
+				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.streaming-cli";
+				PRODUCT_NAME = "streaming-cli";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		41F43A7D925518D4FB3A1813 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACH_O_TYPE = mh_execute;
+				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.hello-world-cli";
+				PRODUCT_NAME = "hello-world-cli";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		555E15AADF7AB5EDCA8D3C94 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "intelligence/swift/examples/hello-world-ios/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.hello-world-ios";
+				PRODUCT_NAME = "hello-world-ios";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
 		71AD52A235C211609189E941 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -234,12 +399,43 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
+		};
+		9DDF2A2B259347537805C447 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "intelligence/swift/examples/hello-world-ios/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.hello-world-ios";
+				PRODUCT_NAME = "hello-world-ios";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		B1027A439E19E8E77412B1CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACH_O_TYPE = mh_execute;
+				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.streaming-cli";
+				PRODUCT_NAME = "streaming-cli";
+				SDKROOT = macosx;
+			};
+			name = Release;
 		};
 		C8F92BFC7F656266CD6B0936 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -290,44 +486,30 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
-		CF792406D1CA415FB1F3052E /* Release */ = {
+		D1FA8B7B6E5CEA25E9BDAE33 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "intelligence/swift/examples/hello-world-macos/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACH_O_TYPE = mh_execute;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.flower.Example1;
-				PRODUCT_NAME = Example1;
-				SDKROOT = macosx;
-			};
-			name = Release;
-		};
-		EB39D70D42628C2425FF74D9 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACH_O_TYPE = mh_execute;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.flower.Example1;
-				PRODUCT_NAME = Example1;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.hello-world-macos";
+				PRODUCT_NAME = "hello-world-macos";
 				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
-		F84FE982D0A95DA6A4E02952 /* Release */ = {
+		F31EDA89F74B2787CAADB6A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
@@ -336,23 +518,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACH_O_TYPE = mh_execute;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.flower.Example2;
-				PRODUCT_NAME = Example2;
-				SDKROOT = macosx;
-			};
-			name = Release;
-		};
-		FAAFD626742D036999D0C6E8 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACH_O_TYPE = mh_execute;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.flower.Example2;
-				PRODUCT_NAME = Example2;
+				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.hello-world-cli";
+				PRODUCT_NAME = "hello-world-cli";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -360,20 +527,38 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		04590B9743B8B4A0A7209BF3 /* Build configuration list for PBXNativeTarget "Example1" */ = {
+		94635E797BA13466BF4F0896 /* Build configuration list for PBXNativeTarget "hello-world-ios" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				EB39D70D42628C2425FF74D9 /* Debug */,
-				CF792406D1CA415FB1F3052E /* Release */,
+				555E15AADF7AB5EDCA8D3C94 /* Debug */,
+				9DDF2A2B259347537805C447 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		85567A6AA92C2B787AEE6151 /* Build configuration list for PBXNativeTarget "Example2" */ = {
+		A5B7183CE630979926292BE3 /* Build configuration list for PBXNativeTarget "streaming-cli" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FAAFD626742D036999D0C6E8 /* Debug */,
-				F84FE982D0A95DA6A4E02952 /* Release */,
+				3D91A7BFDE419E94F631E2A9 /* Debug */,
+				B1027A439E19E8E77412B1CF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A653252CD4A35B230DFBADE8 /* Build configuration list for PBXNativeTarget "hello-world-macos" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1FA8B7B6E5CEA25E9BDAE33 /* Debug */,
+				16486AF060A2F92E3A70D467 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F3209EF28C9A02B453F19324 /* Build configuration list for PBXNativeTarget "hello-world-cli" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F31EDA89F74B2787CAADB6A9 /* Debug */,
+				41F43A7D925518D4FB3A1813 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -397,11 +582,19 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0A6987F4B9B577F4B11949C9 /* Flwr */ = {
+		15139DB4CC3098599F34292F /* Flwr */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Flwr;
 		};
-		BD690527BB2D2892808DC6D0 /* Flwr */ = {
+		373207A0BF3B259232F9BF9D /* Flwr */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Flwr;
+		};
+		576C5843B4F652E912D76DFC /* Flwr */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Flwr;
+		};
+		6D8B0AC98833A52178D0497F /* Flwr */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Flwr;
 		};

@@ -10,26 +10,49 @@ packages:
 
 settings:
   base:
-    SWIFT_VERSION: 5.0
+    SWIFT_VERSION: 6.0
 
 targets:
-  Example1:
+  hello-world-cli:
     type: tool
     platform: macOS
-    sources: ["intelligence/swift/examples/Example1"]
+    sources: ["intelligence/swift/examples/hello-world-cli"]
     dependencies:
       - package: Flwr
     settings:
       base:
-        PRODUCT_NAME: Example1
+        PRODUCT_NAME: hello-world-cli
         MACH_O_TYPE: mh_execute
-  Example2:
+  streaming-cli:
     type: tool
     platform: macOS
-    sources: ["intelligence/swift/examples/Example2"]
+    sources: ["intelligence/swift/examples/streaming-cli"]
     dependencies:
       - package: Flwr
     settings:
       base:
-        PRODUCT_NAME: Example2
+        PRODUCT_NAME: streaming-cli
         MACH_O_TYPE: mh_execute
+  hello-world-macos:
+    type: application
+    platform: macOS
+    sources: ["intelligence/swift/examples/hello-world-macos"]
+    dependencies:
+      - package: Flwr
+    settings:
+      base:
+        PRODUCT_NAME: hello-world-macos
+        INFOPLIST_FILE: "intelligence/swift/examples/hello-world-macos/Info.plist"
+        MACOSX_DEPLOYMENT_TARGET: "13.0"
+
+  hello-world-ios:
+    type: application
+    platform: iOS
+    sources: ["intelligence/swift/examples/hello-world-ios"]
+    dependencies:
+      - package: Flwr
+    settings:
+      base:
+        PRODUCT_NAME: hello-world-ios
+        INFOPLIST_FILE: "intelligence/swift/examples/hello-world-ios/Info.plist"
+        TARGETED_DEVICE_FAMILY: "1" 
