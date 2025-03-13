@@ -543,8 +543,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             if node_id in self.node_ids:
                 # Only override relevant fields
-                self.node_ids[node_id][0] = time.time() + ping_interval
-                self.node_ids[node_id][1] = ping_interval
+                self.node_ids[node_id] = (
+                    time.time() + ping_interval,
+                    ping_interval,
+                    self.node_ids[node_id][-1],
+                )
                 return True
         return False
 
