@@ -16,9 +16,11 @@
 import { REMOTE_URL, SDK, VERSION } from '../constants';
 import { isNode } from '../env';
 import { FailureCode, Result } from '../typing';
+import { NodeCacheStorage } from './caching/nodeStorage';
+import { WebCacheStorage } from './caching/webStorage';
+import { CacheStorage } from './caching/storage';
 
 const STALE_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours.
-const CACHE_KEY = 'flowerintelligence-model-name-cache'; // For browser localStorage.
 
 interface ModelResponse {
   is_supported: boolean;
@@ -26,65 +28,7 @@ interface ModelResponse {
   model: string | undefined;
 }
 
-interface CachedEntry {
-  engineModel: string;
-  timestamp: number;
-}
-
-interface CachedMapping {
-  mapping: Record<string, CachedEntry>;
-}
-
-async function getCacheFilePath(): Promise<string> {
-  if (!isNode) return ''; // Not used in browsers.
-  const path = await import('path');
-  const os = await import('os');
-  const fs = await import('fs/promises');
-
-  const homeDir = os.homedir();
-  const cacheFolder = path.join(homeDir, '.flwr', 'cache');
-  await fs.mkdir(cacheFolder, { recursive: true });
-  return path.join(cacheFolder, 'intelligence-model-names.json');
-}
-
-/**
- * Loads the cached mapping from persistent storage.
- */
-async function loadCache(): Promise<CachedMapping | null> {
-  if (isNode) {
-    try {
-      const { readFile } = await import('fs/promises');
-      const filePath = await getCacheFilePath();
-      const data = await readFile(filePath, 'utf-8');
-      return JSON.parse(data) as CachedMapping;
-    } catch (_) {
-      return null;
-    }
-  } else {
-    const data = localStorage.getItem(CACHE_KEY);
-    if (data) {
-      try {
-        return JSON.parse(data) as CachedMapping;
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  }
-}
-
-/**
- * Saves the cache to persistent storage.
- */
-async function saveCache(cache: CachedMapping): Promise<void> {
-  if (isNode) {
-    const { writeFile } = await import('fs/promises');
-    const filePath = await getCacheFilePath();
-    await writeFile(filePath, JSON.stringify(cache), 'utf-8');
-  } else {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-  }
-}
+export const cacheStorage: CacheStorage = isNode ? new NodeCacheStorage() : new WebCacheStorage();
 
 async function updateModel(model: string, engine: string): Promise<Result<string>> {
   try {
@@ -140,25 +84,25 @@ async function updateModel(model: string, engine: string): Promise<Result<string
  */
 async function addOrUpdateCache(model: string, engine: string, engineModel: string): Promise<void> {
   const now = Date.now();
-  let cache = await loadCache();
+  let cache = await cacheStorage.loadCache();
   if (!cache) {
     cache = { mapping: {} };
   }
   const key = `${model}_${engine}`;
   cache.mapping[key] = { engineModel, timestamp: now };
-  await saveCache(cache);
+  await cacheStorage.saveCache(cache);
 }
 
 /**
  * Removes a model from the cache.
  */
 async function removeFromCache(model: string, engine: string): Promise<void> {
-  const cache = await loadCache();
+  const cache = await cacheStorage.loadCache();
   const key = `${model}_${engine}`;
   if (cache && key in cache.mapping) {
     const { [key]: removed, ...rest } = cache.mapping;
     cache.mapping = rest;
-    await saveCache(cache);
+    await cacheStorage.saveCache(cache);
   }
 }
 
@@ -170,7 +114,7 @@ async function removeFromCache(model: string, engine: string): Promise<void> {
  */
 export async function getEngineModelName(model: string, engine: string): Promise<Result<string>> {
   const now = Date.now();
-  let cache = await loadCache();
+  let cache = await cacheStorage.loadCache();
   if (!cache) {
     cache = { mapping: {} };
   }
