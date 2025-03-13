@@ -10,8 +10,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint --fix src",
     "lint:check": "eslint src",
-    "ibuild": "pnpm i && pnpm build",
-    "build:extension": "pnpm ibuild && cd dist && zip -r -FS ./flower-intelligence-browser-assistant.xpi * && cd .."
+    "ibuild": "pnpm i && pnpm build"
   },
   "dependencies": {
     "@flwr/flwr": "^0.1.3",
