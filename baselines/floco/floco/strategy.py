@@ -133,8 +133,6 @@ class Floco(FedAvg):
         from which models are sampled.
     endpoints: int = 1
         Number of endpoints of the solution simplex.
-    num_clients: int = 10
-        Total number of clients that participate in training.
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
@@ -162,7 +160,6 @@ class Floco(FedAvg):
         tau: int = 0,
         rho: float = 1.0,
         endpoints: int = 1,
-        num_clients: int = 10,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -180,12 +177,12 @@ class Floco(FedAvg):
         self.tau = tau
         self.rho = rho
         self.endpoints = endpoints
-        self.num_clients = num_clients
         self.last_selected_partition_ids: List[int] = []
         self.client_cid_to_partition_id: Dict = {}
         self.projected_clients: List = [ndarray]
         self.client_subregion_parameters: Dict = {}
         self.client_gradients: Dict = {}
+        self.num_collected_client_gradients: int = 0
         self.context = context
         # Custom evaluation function that allows to send context object.
         self.eval_fn = evaluate_fn
@@ -249,10 +246,16 @@ class Floco(FedAvg):
             for client in clients
         ]
         if (server_round + 1) == self.tau:  # Round before projection
-            clients = client_manager.sample(  # Sample all clients to get gradients
-                num_clients=self.num_clients, min_num_clients=self.num_clients
+            regular_fraction_fit = self.fraction_fit
+            self.fraction_fit = 1.0
+            sample_size, min_num_clients = self.num_fit_clients(
+                client_manager.num_available()
             )
-
+            self.num_collected_client_gradients = sample_size
+            self.fraction_fit = regular_fraction_fit
+            clients = client_manager.sample(  # Sample all clients to get gradients
+                num_clients=sample_size, min_num_clients=min_num_clients
+            )
             # Create client cid to partition id mapping
             for client in clients:
                 self.client_cid_to_partition_id[client.cid] = client.get_properties(
@@ -265,7 +268,10 @@ class Floco(FedAvg):
                 self.client_gradients, self.endpoints
             )
             self.client_subregion_parameters = dict(
-                zip(np.arange(self.num_clients), self.projected_clients)
+                zip(
+                    np.arange(self.num_collected_client_gradients),
+                    self.projected_clients,
+                )
             )
         if server_round >= self.tau:
             fit_ins_all_clients = []

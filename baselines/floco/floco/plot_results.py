@@ -61,23 +61,25 @@ def make_plot(dir_path: str, dataset: str, split: str, plt_title: str) -> None:
                 algorithm = r"Floco$^{+}$"
             rounds = list(range(1, len(federated_accuracies) + 1))
             results[algorithm] = (rounds, federated_accuracies, centralized_accuracies)
-    # Plot the algorithms in the order of COLORS keys
-    for algorithm, color in COLORS.items():
-        if algorithm in results:
-            rounds, federated_accuracies, centralized_accuracies = results[algorithm]
-            print(f"Max accuracy ({algorithm}): {max(federated_accuracies):.2f}")
-            ax[0].plot(
-                rounds,
-                centralized_accuracies[1:],  # Skip the first value to match indexing
-                color=color,
-                label=algorithm,
-            )
-            ax[1].plot(
-                rounds,
-                federated_accuracies,
-                color=color,
-                label=algorithm,
-            )
+            if algorithm in results:
+                rounds, federated_accuracies, centralized_accuracies = results[
+                    algorithm
+                ]
+                print(f"Max accuracy ({algorithm}): {max(federated_accuracies):.2f}")
+                ax[0].plot(
+                    # rounds,
+                    centralized_accuracies[
+                        1:
+                    ],  # Skip the first value to match indexing
+                    color=COLORS[algorithm],
+                    label=algorithm,
+                )
+                ax[1].plot(
+                    # rounds,
+                    federated_accuracies,
+                    color=COLORS[algorithm],
+                    label=algorithm,
+                )
     ax[1].legend()
     ax[0].set_xlabel("Rounds")
     ax[0].set_ylabel("Accuracy")

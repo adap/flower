@@ -138,7 +138,9 @@ def train(net, trainloader, epochs, device, reg_params=None, lamda=0.0):
     net.train()
     running_loss = 0.0
     for _ in range(epochs):
-        for images, labels in trainloader:
+        for batch in trainloader:
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
             loss = criterion(net(images.to(device)), labels.to(device))
             optimizer.zero_grad()
             loss.backward()
@@ -157,8 +159,8 @@ def test(net, testloader, device):
     correct, loss = 0, 0.0
     with torch.no_grad():
         for batch in testloader:
-            images = batch[0].to(device)
-            labels = batch[1].to(device)
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()

@@ -7,7 +7,7 @@ from typing import Dict, Optional, Tuple, Union
 
 import torch
 
-from floco.dataset import load_dataloaders
+from floco.dataset import get_testloader
 from floco.model import Net, SimplexModel, get_weights, set_weights, test
 from floco.strategy import CustomFedAvg, Floco
 from flwr.common import (
@@ -98,8 +98,10 @@ def server_evaluate(
     else:
         server_model = Net(seed=0)
         set_weights(server_model, parameters)
-    num_clients = int(context.run_config["num-clients"])
-    _, _, testloader = load_dataloaders(0, num_clients, context)
+    dataset = str(context.run_config["dataset"])
+
+    testloader = get_testloader(dataset)
+
     loss, accuracy = test(server_model, testloader, DEVICE)
     write_res({"centralized_loss": loss, "centralized_accuracy": accuracy})
     return loss, {"centralized_accuracy": accuracy}
@@ -108,7 +110,6 @@ def server_evaluate(
 def get_strategy(context: Context) -> Union[CustomFedAvg, Floco]:
     """Get the strategy."""
     fraction_fit = float(context.run_config["fraction-fit"])
-    num_clients = int(context.run_config["num-clients"])
     seed = int(context.run_config["seed"])
 
     if context.run_config["algorithm"] == "FedAvg":
@@ -140,7 +141,6 @@ def get_strategy(context: Context) -> Union[CustomFedAvg, Floco]:
             tau=tau,
             rho=rho,
             endpoints=endpoints,
-            num_clients=num_clients,
         )
     else:
         raise ValueError("Algorithm not implemented")

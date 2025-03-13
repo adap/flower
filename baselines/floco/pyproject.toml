@@ -136,7 +136,6 @@ tau = 250
 rho = 0
 endpoints = 0
 pers_lamda = 0
-num-clients = 100
 seed = 0
 
 # Dataset specs

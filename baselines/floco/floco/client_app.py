@@ -4,7 +4,7 @@ import copy
 
 import torch
 
-from floco.dataset import load_dataloaders
+from floco.dataset import get_federated_dataloaders
 from floco.model import Net, SimplexModel, get_weights, set_weights, test, train
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context, ParametersRecord, array_from_numpy, bytes_to_ndarray
@@ -136,6 +136,8 @@ def client_fn(context: Context):
     local_epochs = int(context.run_config["local-epochs"])
     pers_model = None
     pers_lamda = 0
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
 
     if context.run_config["algorithm"] == "FedAvg":
         global_model = Net(seed=seed).to(device)
@@ -146,10 +148,9 @@ def client_fn(context: Context):
             pers_model = SimplexModel(endpoints=endpoints, seed=seed).to(device)
     else:
         raise ValueError("Algorithm not implemented")
-
-    partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
-    trainloader, valloader, _ = load_dataloaders(partition_id, num_partitions, context)
+    trainloader, valloader = get_federated_dataloaders(
+        partition_id, num_partitions, context
+    )
 
     # Return Client instance
     return FlowerClient(
