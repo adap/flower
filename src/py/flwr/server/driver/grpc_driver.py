@@ -269,9 +269,13 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
                         run_id=cast(Run, self._run).run_id,
                     )
                 )
-                # Convert Message from Protobuf representation
-                msg = message_from_proto(res.messages_list[0])
-                yield msg
+                # Yield a message if the response contains it, otherwise continue
+                if res.messages_list:
+                    # Convert Message from Protobuf representation
+                    msg = message_from_proto(res.messages_list[0])
+                    yield msg
+                else:
+                    continue
 
         return iter_msg()
 
