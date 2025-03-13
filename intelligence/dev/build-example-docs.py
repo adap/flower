@@ -27,8 +27,8 @@ initial_text = """
 Examples
 ========
 
-Below you will find a list of Flower Intelligence examples for Node.js and one
-for web apps.
+Below you will find a list of Flower Intelligence examples for Node.js and for
+web apps  running in the browser (as a tab or WebExtension).
 
 Node.js Examples
 ----------------
