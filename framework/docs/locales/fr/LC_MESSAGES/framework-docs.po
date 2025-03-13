@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-12 00:31+0000\n"
+"POT-Creation-Date: 2025-03-13 00:32+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -3582,9 +3582,9 @@ msgstr "Démarrage rapide fastai"
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:125
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:127
 #: ../../source/ref-changelog.md:523 ../../source/ref-changelog.md:889
-#: ../../source/ref-changelog.md:1166 ../../source/ref-changelog.md:1230
-#: ../../source/ref-changelog.md:1288 ../../source/ref-changelog.md:1357
-#: ../../source/ref-changelog.md:1419
+#: ../../source/ref-changelog.md:1164 ../../source/ref-changelog.md:1228
+#: ../../source/ref-changelog.md:1286 ../../source/ref-changelog.md:1355
+#: ../../source/ref-changelog.md:1417
 msgid "None"
 msgstr "Aucun"
 
@@ -16202,7 +16202,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.FedAdagrad.rst:2
-#: ../../source/ref-changelog.md:1721
+#: ../../source/ref-changelog.md:1717
 msgid "FedAdagrad"
 msgstr "FedAdagrad"
 
@@ -18032,10 +18032,10 @@ msgstr "v1.4.0 (2023-04-21)"
 #: ../../source/ref-changelog.md:495 ../../source/ref-changelog.md:527
 #: ../../source/ref-changelog.md:631 ../../source/ref-changelog.md:729
 #: ../../source/ref-changelog.md:829 ../../source/ref-changelog.md:893
-#: ../../source/ref-changelog.md:986 ../../source/ref-changelog.md:1086
-#: ../../source/ref-changelog.md:1170 ../../source/ref-changelog.md:1234
-#: ../../source/ref-changelog.md:1292 ../../source/ref-changelog.md:1361
-#: ../../source/ref-changelog.md:1430
+#: ../../source/ref-changelog.md:986 ../../source/ref-changelog.md:1084
+#: ../../source/ref-changelog.md:1168 ../../source/ref-changelog.md:1232
+#: ../../source/ref-changelog.md:1290 ../../source/ref-changelog.md:1359
+#: ../../source/ref-changelog.md:1428
 msgid "Thanks to our contributors"
 msgstr "Merci à nos contributeurs"
 
@@ -18046,9 +18046,9 @@ msgstr "Merci à nos contributeurs"
 #: ../../source/ref-changelog.md:497 ../../source/ref-changelog.md:529
 #: ../../source/ref-changelog.md:633 ../../source/ref-changelog.md:731
 #: ../../source/ref-changelog.md:831 ../../source/ref-changelog.md:895
-#: ../../source/ref-changelog.md:988 ../../source/ref-changelog.md:1088
-#: ../../source/ref-changelog.md:1172 ../../source/ref-changelog.md:1236
-#: ../../source/ref-changelog.md:1294
+#: ../../source/ref-changelog.md:988 ../../source/ref-changelog.md:1086
+#: ../../source/ref-changelog.md:1170 ../../source/ref-changelog.md:1234
+#: ../../source/ref-changelog.md:1292
 msgid ""
 "We would like to give our special thanks to all the contributors who made"
 " the new version of Flower possible (in `git shortlog` order):"
@@ -18072,13 +18072,13 @@ msgstr ""
 #: ../../source/ref-changelog.md:533 ../../source/ref-changelog.md:637
 #: ../../source/ref-changelog.md:735 ../../source/ref-changelog.md:835
 #: ../../source/ref-changelog.md:899 ../../source/ref-changelog.md:992
-#: ../../source/ref-changelog.md:1092 ../../source/ref-changelog.md:1176
-#: ../../source/ref-changelog.md:1240 ../../source/ref-changelog.md:1298
-#: ../../source/ref-changelog.md:1367 ../../source/ref-changelog.md:1496
-#: ../../source/ref-changelog.md:1538 ../../source/ref-changelog.md:1605
-#: ../../source/ref-changelog.md:1671 ../../source/ref-changelog.md:1716
-#: ../../source/ref-changelog.md:1755 ../../source/ref-changelog.md:1788
-#: ../../source/ref-changelog.md:1838
+#: ../../source/ref-changelog.md:1090 ../../source/ref-changelog.md:1174
+#: ../../source/ref-changelog.md:1238 ../../source/ref-changelog.md:1296
+#: ../../source/ref-changelog.md:1365 ../../source/ref-changelog.md:1490
+#: ../../source/ref-changelog.md:1529 ../../source/ref-changelog.md:1601
+#: ../../source/ref-changelog.md:1667 ../../source/ref-changelog.md:1712
+#: ../../source/ref-changelog.md:1751 ../../source/ref-changelog.md:1784
+#: ../../source/ref-changelog.md:1834
 msgid "What's new?"
 msgstr "Quoi de neuf ?"
 
@@ -18356,12 +18356,12 @@ msgstr ""
 #: ../../source/ref-changelog.md:487 ../../source/ref-changelog.md:521
 #: ../../source/ref-changelog.md:601 ../../source/ref-changelog.md:717
 #: ../../source/ref-changelog.md:813 ../../source/ref-changelog.md:887
-#: ../../source/ref-changelog.md:962 ../../source/ref-changelog.md:1074
-#: ../../source/ref-changelog.md:1164 ../../source/ref-changelog.md:1228
-#: ../../source/ref-changelog.md:1286 ../../source/ref-changelog.md:1355
-#: ../../source/ref-changelog.md:1417 ../../source/ref-changelog.md:1436
-#: ../../source/ref-changelog.md:1592 ../../source/ref-changelog.md:1663
-#: ../../source/ref-changelog.md:1700 ../../source/ref-changelog.md:1743
+#: ../../source/ref-changelog.md:962 ../../source/ref-changelog.md:1072
+#: ../../source/ref-changelog.md:1162 ../../source/ref-changelog.md:1226
+#: ../../source/ref-changelog.md:1284 ../../source/ref-changelog.md:1353
+#: ../../source/ref-changelog.md:1415 ../../source/ref-changelog.md:1434
+#: ../../source/ref-changelog.md:1583 ../../source/ref-changelog.md:1659
+#: ../../source/ref-changelog.md:1696 ../../source/ref-changelog.md:1729
 msgid "Incompatible changes"
 msgstr "Changements incompatibles"
 
@@ -18586,7 +18586,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "**Update FlowerTuneLLM Leaderboard evaluation scripts** "
-"([#4919](https://github.com/adap/flower/pull/4910))"
+"([#4910](https://github.com/adap/flower/pull/4910))"
 msgstr ""
 "**Ajouter une nouvelle stratégie `FedProx`** "
 "([#1619](https://github.com/adap/flower/pull/1619))"
@@ -20069,7 +20069,7 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:391 ../../source/ref-changelog.md:590
 #: ../../source/ref-changelog.md:707 ../../source/ref-changelog.md:799
-#: ../../source/ref-changelog.md:1782
+#: ../../source/ref-changelog.md:1778
 msgid "Deprecations"
 msgstr "Dépréciations"
 
@@ -22907,7 +22907,7 @@ msgstr ""
 msgid "Many Flower code examples received substantial updates."
 msgstr ""
 
-#: ../../source/ref-changelog.md:943 ../../source/ref-changelog.md:1036
+#: ../../source/ref-changelog.md:943 ../../source/ref-changelog.md:1034
 #, fuzzy
 msgid "**Update Flower Baselines**"
 msgstr "Demande pour une nouvelle Flower Baseline"
@@ -23364,7 +23364,7 @@ msgstr ""
 "**Ajouter une nouvelle stratégie `FedProx`** "
 "([#1619](https://github.com/adap/flower/pull/1619))"
 
-#: ../../source/ref-changelog.md:1032 ../../source/ref-changelog.md:1034
+#: ../../source/ref-changelog.md:1032
 #, fuzzy
 msgid ""
 "**Introduce `WorkloadState`** "
@@ -23375,7 +23375,7 @@ msgstr ""
 "([#828](https://github.com/adap/flower/pull/828) "
 "[#822](https://github.com/adap/flower/pull/822))"
 
-#: ../../source/ref-changelog.md:1038
+#: ../../source/ref-changelog.md:1036
 #, fuzzy
 msgid ""
 "FedProx ([#2210](https://github.com/adap/flower/pull/2210), "
@@ -23387,7 +23387,7 @@ msgstr ""
 "[#1286](https://github.com/adap/flower/pull/1286), "
 "[#1282](https://github.com/adap/flower/pull/1282))"
 
-#: ../../source/ref-changelog.md:1040
+#: ../../source/ref-changelog.md:1038
 #, fuzzy
 msgid ""
 "Baselines Docs ([#2290](https://github.com/adap/flower/pull/2290), "
@@ -23397,7 +23397,7 @@ msgstr ""
 "([#906](https://github.com/adap/flower/pull/906), "
 "[#1143](https://github.com/adap/flower/pull/1143))"
 
-#: ../../source/ref-changelog.md:1042
+#: ../../source/ref-changelog.md:1040
 #, fuzzy
 msgid ""
 "FedMLB ([#2340](https://github.com/adap/flower/pull/2340), "
@@ -23407,7 +23407,7 @@ msgstr ""
 "([#1344](https://github.com/adap/flower/pull/1344), "
 "[#1347](https://github.com/adap/flower/pull/1347))"
 
-#: ../../source/ref-changelog.md:1044
+#: ../../source/ref-changelog.md:1042
 #, fuzzy
 msgid ""
 "TAMUNA ([#2254](https://github.com/adap/flower/pull/2254), "
@@ -23417,48 +23417,48 @@ msgstr ""
 "([#828](https://github.com/adap/flower/pull/828) "
 "[#822](https://github.com/adap/flower/pull/822))"
 
-#: ../../source/ref-changelog.md:1046
+#: ../../source/ref-changelog.md:1044
 #, fuzzy
 msgid "FedMeta [#2438](https://github.com/adap/flower/pull/2438)"
 msgstr "Nouvelle référence API ([#554](https://github.com/adap/flower/pull/554))"
 
-#: ../../source/ref-changelog.md:1048
+#: ../../source/ref-changelog.md:1046
 #, fuzzy
 msgid "FjORD [#2431](https://github.com/adap/flower/pull/2431)"
 msgstr ""
 "Amélioration de la documentation sur le serveur gRPC "
 "([#841](https://github.com/adap/flower/pull/841))"
 
-#: ../../source/ref-changelog.md:1050
+#: ../../source/ref-changelog.md:1048
 #, fuzzy
 msgid "MOON [#2421](https://github.com/adap/flower/pull/2421)"
 msgstr ""
 "**Ajouter une nouvelle stratégie `FedProx`** "
 "([#1619](https://github.com/adap/flower/pull/1619))"
 
-#: ../../source/ref-changelog.md:1052
+#: ../../source/ref-changelog.md:1050
 #, fuzzy
 msgid "DepthFL [#2295](https://github.com/adap/flower/pull/2295)"
 msgstr ""
 "**Ajouter une nouvelle stratégie `FedProx`** "
 "([#1619](https://github.com/adap/flower/pull/1619))"
 
-#: ../../source/ref-changelog.md:1054
+#: ../../source/ref-changelog.md:1052
 #, fuzzy
 msgid "FedPer [#2266](https://github.com/adap/flower/pull/2266)"
 msgstr "Nouvelle référence API ([#554](https://github.com/adap/flower/pull/554))"
 
-#: ../../source/ref-changelog.md:1056
+#: ../../source/ref-changelog.md:1054
 #, fuzzy
 msgid "FedWav2vec [#2551](https://github.com/adap/flower/pull/2551)"
 msgstr "Nouvelle référence API ([#554](https://github.com/adap/flower/pull/554))"
 
-#: ../../source/ref-changelog.md:1058
+#: ../../source/ref-changelog.md:1056
 #, fuzzy
 msgid "niid-Bench [#2428](https://github.com/adap/flower/pull/2428)"
 msgstr "Nouvelle référence API ([#554](https://github.com/adap/flower/pull/554))"
 
-#: ../../source/ref-changelog.md:1060
+#: ../../source/ref-changelog.md:1058
 #, fuzzy
 msgid ""
 "FedBN ([#2608](https://github.com/adap/flower/pull/2608), "
@@ -23468,7 +23468,7 @@ msgstr ""
 "([#828](https://github.com/adap/flower/pull/828) "
 "[#822](https://github.com/adap/flower/pull/822))"
 
-#: ../../source/ref-changelog.md:1062
+#: ../../source/ref-changelog.md:1060
 #, fuzzy
 msgid ""
 "**General updates to Flower Examples** "
@@ -23484,7 +23484,7 @@ msgstr ""
 "[#1301](https://github.com/adap/flower/pull/1301), "
 "[#1310](https://github.com/adap/flower/pull/1310))"
 
-#: ../../source/ref-changelog.md:1064
+#: ../../source/ref-changelog.md:1062
 #, fuzzy
 msgid ""
 "**General updates to Flower Baselines** "
@@ -23517,7 +23517,7 @@ msgstr ""
 "[#1564](https://github.com/adap/flower/pull/1564), "
 "[#1566](https://github.com/adap/flower/pull/1566))"
 
-#: ../../source/ref-changelog.md:1066
+#: ../../source/ref-changelog.md:1064
 #, fuzzy
 msgid ""
 "**General updates to the simulation engine** "
@@ -23532,7 +23532,7 @@ msgstr ""
 "[#1301](https://github.com/adap/flower/pull/1301), "
 "[#1310](https://github.com/adap/flower/pull/1310))"
 
-#: ../../source/ref-changelog.md:1068
+#: ../../source/ref-changelog.md:1066
 #, fuzzy
 msgid ""
 "**General updates to Flower SDKs** "
@@ -23551,7 +23551,7 @@ msgstr ""
 "[#1474](https://github.com/adap/flower/pull/1474), "
 "[#1475](https://github.com/adap/flower/pull/1475))"
 
-#: ../../source/ref-changelog.md:1070
+#: ../../source/ref-changelog.md:1068
 msgid ""
 "**General improvements** "
 "([#2309](https://github.com/adap/flower/pull/2309), "
@@ -23583,15 +23583,15 @@ msgid ""
 "[#2596](https://github.com/adap/flower/pull/2596))"
 msgstr ""
 
-#: ../../source/ref-changelog.md:1072 ../../source/ref-changelog.md:1162
-#: ../../source/ref-changelog.md:1226 ../../source/ref-changelog.md:1280
-#: ../../source/ref-changelog.md:1347
+#: ../../source/ref-changelog.md:1070 ../../source/ref-changelog.md:1160
+#: ../../source/ref-changelog.md:1224 ../../source/ref-changelog.md:1278
+#: ../../source/ref-changelog.md:1345
 msgid "Flower received many improvements under the hood, too many to list here."
 msgstr ""
 "Flower a reçu de nombreuses améliorations sous le capot, trop nombreuses "
 "pour être énumérées ici."
 
-#: ../../source/ref-changelog.md:1076
+#: ../../source/ref-changelog.md:1074
 #, fuzzy
 msgid ""
 "**Remove support for Python 3.7** "
@@ -23608,13 +23608,13 @@ msgstr ""
 "[#1065](https://github.com/adap/flower/pull/1065), "
 "[#1090](https://github.com/adap/flower/pull/1090))"
 
-#: ../../source/ref-changelog.md:1078
+#: ../../source/ref-changelog.md:1076
 msgid ""
 "Python 3.7 support was deprecated in Flower 1.5, and this release removes"
 " support. Flower now requires Python 3.8."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1080
+#: ../../source/ref-changelog.md:1078
 #, fuzzy
 msgid ""
 "**Remove experimental argument** `rest` **from** `start_client` "
@@ -23623,19 +23623,19 @@ msgstr ""
 "**Supprimer les stratégies expérimentales** "
 "([#1280](https://github.com/adap/flower/pull/1280))"
 
-#: ../../source/ref-changelog.md:1082
+#: ../../source/ref-changelog.md:1080
 msgid ""
 "The (still experimental) argument `rest` was removed from `start_client` "
 "and `start_numpy_client`. Use `transport=\"rest\"` to opt into the "
 "experimental REST API instead."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1084
+#: ../../source/ref-changelog.md:1082
 #, fuzzy
 msgid "v1.5.0 (2023-08-31)"
 msgstr "v1.4.0 (2023-04-21)"
 
-#: ../../source/ref-changelog.md:1090
+#: ../../source/ref-changelog.md:1088
 msgid ""
 "`Adam Narozniak`, `Anass Anhari`, `Charles Beauville`, `Dana-Farber`, "
 "`Daniel J. Beutel`, `Daniel Nata Nugraha`, `Edoardo Gabrielli`, `Gustavo "
@@ -23644,7 +23644,7 @@ msgid ""
 "TOKEN_v1.5.0-->"
 msgstr ""
 
-#: ../../source/ref-changelog.md:1094
+#: ../../source/ref-changelog.md:1092
 #, fuzzy
 msgid ""
 "**Introduce new simulation engine** "
@@ -23657,7 +23657,7 @@ msgstr ""
 "[#1544](https://github.com/adap/flower/pull/1544), "
 "[#1584](https://github.com/adap/flower/pull/1584))"
 
-#: ../../source/ref-changelog.md:1096
+#: ../../source/ref-changelog.md:1094
 msgid ""
 "The new simulation engine has been rewritten from the ground up, yet it "
 "remains fully backwards compatible. It offers much improved stability and"
@@ -23666,7 +23666,7 @@ msgid ""
 "only, CPU+GPU, multi-GPU, or multi-node multi-GPU environments."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1098
+#: ../../source/ref-changelog.md:1096
 msgid ""
 "Comprehensive documentation includes a new [how-to run "
 "simulations](https://flower.ai/docs/framework/how-to-run-"
@@ -23677,7 +23677,7 @@ msgid ""
 "series](https://www.youtube.com/watch?v=cRebUIGB5RU&list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB)."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1100
+#: ../../source/ref-changelog.md:1098
 msgid ""
 "**Restructure Flower Docs** "
 "([#1824](https://github.com/adap/flower/pull/1824), "
@@ -23709,7 +23709,7 @@ msgid ""
 "[#2227](https://github.com/adap/flower/pull/2227))"
 msgstr ""
 
-#: ../../source/ref-changelog.md:1102
+#: ../../source/ref-changelog.md:1100
 msgid ""
 "Much effort went into a completely restructured Flower docs experience. "
 "The documentation on [flower.ai/docs](https://flower.ai/docs) is now "
@@ -23717,7 +23717,7 @@ msgid ""
 "Flower iOS SDK, and code example projects."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1104
+#: ../../source/ref-changelog.md:1102
 #, fuzzy
 msgid ""
 "**Introduce Flower Swift SDK** "
@@ -23728,14 +23728,14 @@ msgstr ""
 "([#1621](https://github.com/adap/flower/pull/1621), "
 "[#1764](https://github.com/adap/flower/pull/1764))"
 
-#: ../../source/ref-changelog.md:1106
+#: ../../source/ref-changelog.md:1104
 msgid ""
 "This is the first preview release of the Flower Swift SDK. Flower support"
 " on iOS is improving, and alongside the Swift SDK and code example, there"
 " is now also an iOS quickstart tutorial."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1108
+#: ../../source/ref-changelog.md:1106
 #, fuzzy
 msgid ""
 "**Introduce Flower Android SDK** "
@@ -23744,14 +23744,14 @@ msgstr ""
 "**Introduire une nouvelle ligne de base pour les fleurs : FedAvg "
 "FEMNIST** ([#1655](https://github.com/adap/flower/pull/1655))"
 
-#: ../../source/ref-changelog.md:1110
+#: ../../source/ref-changelog.md:1108
 msgid ""
 "This is the first preview release of the Flower Kotlin SDK. Flower "
 "support on Android is improving, and alongside the Kotlin SDK and code "
 "example, there is now also an Android quickstart tutorial."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1112
+#: ../../source/ref-changelog.md:1110
 #, fuzzy
 msgid ""
 "**Introduce new end-to-end testing infrastructure** "
@@ -23784,24 +23784,24 @@ msgstr ""
 "[#1662](https://github.com/adap/flower/pull/1662), "
 "[#1794](https://github.com/adap/flower/pull/1794))"
 
-#: ../../source/ref-changelog.md:1114
+#: ../../source/ref-changelog.md:1112
 msgid ""
 "A new testing infrastructure ensures that new changes stay compatible "
 "with existing framework integrations or strategies."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1116
+#: ../../source/ref-changelog.md:1114
 #, fuzzy
 msgid "**Deprecate Python 3.7**"
 msgstr "**Créer le PR**"
 
-#: ../../source/ref-changelog.md:1118
+#: ../../source/ref-changelog.md:1116
 msgid ""
 "Since Python 3.7 reached its end of life (EOL) on 2023-06-27, support for"
 " Python 3.7 is now deprecated and will be removed in an upcoming release."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1120
+#: ../../source/ref-changelog.md:1118
 #, fuzzy
 msgid ""
 "**Add new** `FedTrimmedAvg` **strategy** "
@@ -23812,7 +23812,7 @@ msgstr ""
 "([#1469](https://github.com/adap/flower/pull/1469), "
 "[#1535](https://github.com/adap/flower/pull/1535))"
 
-#: ../../source/ref-changelog.md:1122
+#: ../../source/ref-changelog.md:1120
 #, fuzzy
 msgid ""
 "The new `FedTrimmedAvg` strategy implements Trimmed Mean by [Dong Yin, "
@@ -23822,7 +23822,7 @@ msgstr ""
 "(FedMedian) par [Yin et al., 2018] "
 "(https://arxiv.org/pdf/1803.01498v1.pdf)."
 
-#: ../../source/ref-changelog.md:1124
+#: ../../source/ref-changelog.md:1122
 #, fuzzy
 msgid ""
 "**Introduce start_driver** "
@@ -23831,7 +23831,7 @@ msgstr ""
 "**Ajouter une nouvelle stratégie `FedProx`** "
 "([#1619](https://github.com/adap/flower/pull/1619))"
 
-#: ../../source/ref-changelog.md:1126
+#: ../../source/ref-changelog.md:1124
 msgid ""
 "In addition to `start_server` and using the raw Driver API, there is a "
 "new `start_driver` function that allows for running `start_server` "
@@ -23840,7 +23840,7 @@ msgid ""
 "`start_driver`."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1128
+#: ../../source/ref-changelog.md:1126
 #, fuzzy
 msgid ""
 "**Add parameter aggregation to** `mt-pytorch` **code example** "
@@ -23849,7 +23849,7 @@ msgstr ""
 "**Nouvel exemple de code PyTorch avancé** "
 "([#1007](https://github.com/adap/flower/pull/1007))"
 
-#: ../../source/ref-changelog.md:1130
+#: ../../source/ref-changelog.md:1128
 msgid ""
 "The `mt-pytorch` example shows how to aggregate parameters when writing a"
 " driver script. The included `driver.py` and `server.py` have been "
@@ -23857,7 +23857,7 @@ msgid ""
 "building server-side logic."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1132
+#: ../../source/ref-changelog.md:1130
 #, fuzzy
 msgid ""
 "**Migrate experimental REST API to Starlette** "
@@ -23866,14 +23866,14 @@ msgstr ""
 "**Nouvelle stratégie expérimentale TensorBoard** "
 "([#789](https://github.com/adap/flower/pull/789))"
 
-#: ../../source/ref-changelog.md:1134
+#: ../../source/ref-changelog.md:1132
 msgid ""
 "The (experimental) REST API used to be implemented in "
 "[FastAPI](https://fastapi.tiangolo.com/), but it has now been migrated to"
 " use [Starlette](https://www.starlette.io/) directly."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1136
+#: ../../source/ref-changelog.md:1134
 #, fuzzy
 msgid ""
 "Please note: The REST request-response API is still experimental and will"
@@ -23882,7 +23882,7 @@ msgstr ""
 "Remarque : l'API REST est encore expérimentale et est susceptible de "
 "changer de manière significative au fil du temps."
 
-#: ../../source/ref-changelog.md:1138
+#: ../../source/ref-changelog.md:1136
 #, fuzzy
 msgid ""
 "**Introduce experimental gRPC request-response API** "
@@ -23893,14 +23893,14 @@ msgstr ""
 "([#1357](https://github.com/adap/flower/pull/1357), "
 "[#1460](https://github.com/adap/flower/pull/1460))"
 
-#: ../../source/ref-changelog.md:1140
+#: ../../source/ref-changelog.md:1138
 msgid ""
 "In addition to the existing gRPC API (based on bidirectional streaming) "
 "and the experimental REST API, there is now a new gRPC API that uses a "
 "request-response model to communicate with client nodes."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1142
+#: ../../source/ref-changelog.md:1140
 #, fuzzy
 msgid ""
 "Please note: The gRPC request-response API is still experimental and will"
@@ -23909,7 +23909,7 @@ msgstr ""
 "Remarque : l'API REST est encore expérimentale et est susceptible de "
 "changer de manière significative au fil du temps."
 
-#: ../../source/ref-changelog.md:1144
+#: ../../source/ref-changelog.md:1142
 #, fuzzy
 msgid ""
 "**Replace the experimental** `start_client(rest=True)` **with the new** "
@@ -23919,7 +23919,7 @@ msgstr ""
 "**Initialise** `start_simulation` **avec une liste d'ID de clients** "
 "([#860](https://github.com/adap/flower/pull/860))"
 
-#: ../../source/ref-changelog.md:1146
+#: ../../source/ref-changelog.md:1144
 msgid ""
 "The (experimental) `start_client` argument `rest` was deprecated in "
 "favour of a new argument `transport`. `start_client(transport=\"rest\")` "
@@ -23928,7 +23928,7 @@ msgid ""
 "argument `rest` will be removed in a future release."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1148
+#: ../../source/ref-changelog.md:1146
 #, fuzzy
 msgid ""
 "**Add a new gRPC option** "
@@ -23937,14 +23937,14 @@ msgstr ""
 "**Ajouter une nouvelle stratégie `FedProx`** "
 "([#1619](https://github.com/adap/flower/pull/1619))"
 
-#: ../../source/ref-changelog.md:1150
+#: ../../source/ref-changelog.md:1148
 msgid ""
 "We now start a gRPC server with the `grpc.keepalive_permit_without_calls`"
 " option set to 0 by default. This prevents the clients from sending "
 "keepalive pings when there is no outstanding stream."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1152
+#: ../../source/ref-changelog.md:1150
 #, fuzzy
 msgid ""
 "**Improve example notebooks** "
@@ -23953,12 +23953,12 @@ msgstr ""
 "**Supprimer les stratégies expérimentales** "
 "([#1280](https://github.com/adap/flower/pull/1280))"
 
-#: ../../source/ref-changelog.md:1154
+#: ../../source/ref-changelog.md:1152
 #, fuzzy
 msgid "There's a new 30min Federated Learning PyTorch tutorial!"
 msgstr "Bienvenue au tutoriel sur l'apprentissage fédéré de la fleur !"
 
-#: ../../source/ref-changelog.md:1156
+#: ../../source/ref-changelog.md:1154
 msgid ""
 "**Example updates** ([#1772](https://github.com/adap/flower/pull/1772), "
 "[#1873](https://github.com/adap/flower/pull/1873), "
@@ -23973,7 +23973,7 @@ msgid ""
 "[#2183](https://github.com/adap/flower/pull/2183))"
 msgstr ""
 
-#: ../../source/ref-changelog.md:1158
+#: ../../source/ref-changelog.md:1156
 msgid ""
 "Many examples have received significant updates, including simplified "
 "advanced-tensorflow and advanced-pytorch examples, improved macOS "
@@ -23982,13 +23982,12 @@ msgid ""
 "(in addition to `pyproject.toml`)."
 msgstr ""
 
-#: ../../source/ref-changelog.md:1160
+#: ../../source/ref-changelog.md:1158
 #, fuzzy
 msgid ""
 "**General improvements** "
 "([#1872](https://github.com/adap/flower/pull/1872), "
 "[#1866](https://github.com/adap/flower/pull/1866), "
-"[#1884](https://github.com/adap/flower/pull/1884), "
 "[#1837](https://github.com/adap/flower/pull/1837), "
 "[#1477](https://github.com/adap/flower/pull/1477), "
 "[#2171](https://github.com/adap/flower/pull/2171))"
@@ -24002,11 +24001,11 @@ msgstr ""
 "[#1613](https://github.com/adap/flower/pull/1613), "
 "[#1614](https://github.com/adap/flower/pull/1614))"
 
-#: ../../source/ref-changelog.md:1168
+#: ../../source/ref-changelog.md:1166
 msgid "v1.4.0 (2023-04-21)"
 msgstr "v1.4.0 (2023-04-21)"
 
-#: ../../source/ref-changelog.md:1174
+#: ../../source/ref-changelog.md:1172
 msgid ""
 "`Adam Narozniak`, `Alexander Viala Bellander`, `Charles Beauville`, "
 "`Chenyang Ma (Danny)`, `Daniel J. Beutel`, `Edoardo`, `Gautam Jajoo`, "
@@ -24022,7 +24021,7 @@ msgstr ""
 "Lane`, `Nikolaos Episkopos`, `Ragy`, `Saurav Maheshkar`, `Semo Yang`, "
 "`Steve Laskaridis`, `Steven Hé (Sīchàng)`, `Taner Topal`"
 
-#: ../../source/ref-changelog.md:1178
+#: ../../source/ref-changelog.md:1176
 msgid ""
 "**Introduce support for XGBoost (**`FedXgbNnAvg` **strategy and "
 "example)** ([#1694](https://github.com/adap/flower/pull/1694), "
@@ -24040,7 +24039,7 @@ msgstr ""
 "[#1763](https://github.com/adap/flower/pull/1763), "
 "[#1795](https://github.com/adap/flower/pull/1795))"
 
-#: ../../source/ref-changelog.md:1180
+#: ../../source/ref-changelog.md:1178
 msgid ""
 "XGBoost is a tree-based ensemble machine learning algorithm that uses "
 "gradient boosting to improve model accuracy. We added a new `FedXgbNnAvg`"
@@ -24057,7 +24056,7 @@ msgstr ""
 "qui démontre l'utilisation de cette nouvelle stratégie dans un projet "
 "XGBoost."
 
-#: ../../source/ref-changelog.md:1182
+#: ../../source/ref-changelog.md:1180
 msgid ""
 "**Introduce iOS SDK (preview)** "
 "([#1621](https://github.com/adap/flower/pull/1621), "
@@ -24067,7 +24066,7 @@ msgstr ""
 "([#1621](https://github.com/adap/flower/pull/1621), "
 "[#1764](https://github.com/adap/flower/pull/1764))"
 
-#: ../../source/ref-changelog.md:1184
+#: ../../source/ref-changelog.md:1182
 msgid ""
 "This is a major update for anyone wanting to implement Federated Learning"
 " on iOS mobile devices. We now have a swift iOS SDK present under "
@@ -24086,7 +24085,7 @@ msgstr ""
 "iOS](https://github.com/adap/flower/tree/main/examples/ios) a également "
 "été mis à jour !"
 
-#: ../../source/ref-changelog.md:1186
+#: ../../source/ref-changelog.md:1184
 msgid ""
 "**Introduce new \"What is Federated Learning?\" tutorial** "
 "([#1657](https://github.com/adap/flower/pull/1657), "
@@ -24096,7 +24095,7 @@ msgstr ""
 " \"** ([#1657](https://github.com/adap/flower/pull/1657), "
 "[#1721](https://github.com/adap/flower/pull/1721))"
 
-#: ../../source/ref-changelog.md:1188
+#: ../../source/ref-changelog.md:1186
 #, fuzzy
 msgid ""
 "A new [entry-level tutorial](https://flower.ai/docs/framework/tutorial-"
@@ -24112,7 +24111,7 @@ msgstr ""
 " voyage avec Flower. Fais-le suivre à tous ceux qui s'intéressent à "
 "l'apprentissage fédéré !"
 
-#: ../../source/ref-changelog.md:1190
+#: ../../source/ref-changelog.md:1188
 msgid ""
 "**Introduce new Flower Baseline: FedProx MNIST** "
 "([#1513](https://github.com/adap/flower/pull/1513), "
@@ -24126,7 +24125,7 @@ msgstr ""
 "[#1681](https://github.com/adap/flower/pull/1681), "
 "[#1679](https://github.com/adap/flower/pull/1679))"
 
-#: ../../source/ref-changelog.md:1192
+#: ../../source/ref-changelog.md:1190
 msgid ""
 "This new baseline replicates the MNIST+CNN task from the paper [Federated"
 " Optimization in Heterogeneous Networks (Li et al., "
@@ -24139,7 +24138,7 @@ msgstr ""
 "qui vise à rendre la convergence plus robuste dans des contextes "
 "hétérogènes."
 
-#: ../../source/ref-changelog.md:1194
+#: ../../source/ref-changelog.md:1192
 msgid ""
 "**Introduce new Flower Baseline: FedAvg FEMNIST** "
 "([#1655](https://github.com/adap/flower/pull/1655))"
@@ -24147,7 +24146,7 @@ msgstr ""
 "**Introduire une nouvelle ligne de base pour les fleurs : FedAvg "
 "FEMNIST** ([#1655](https://github.com/adap/flower/pull/1655))"
 
-#: ../../source/ref-changelog.md:1196
+#: ../../source/ref-changelog.md:1194
 msgid ""
 "This new baseline replicates an experiment evaluating the performance of "
 "the FedAvg algorithm on the FEMNIST dataset from the paper [LEAF: A "
@@ -24159,7 +24158,7 @@ msgstr ""
 " l'article [LEAF : A Benchmark for Federated Settings (Caldas et al., "
 "2018)] (https://arxiv.org/abs/1812.01097)."
 
-#: ../../source/ref-changelog.md:1198
+#: ../../source/ref-changelog.md:1196
 msgid ""
 "**Introduce (experimental) REST API** "
 "([#1594](https://github.com/adap/flower/pull/1594), "
@@ -24179,7 +24178,7 @@ msgstr ""
 "[#1770](https://github.com/adap/flower/pull/1770), "
 "[#1733](https://github.com/adap/flower/pull/1733))"
 
-#: ../../source/ref-changelog.md:1200
+#: ../../source/ref-changelog.md:1198
 msgid ""
 "A new REST API has been introduced as an alternative to the gRPC-based "
 "communication stack. In this initial version, the REST API only supports "
@@ -24189,7 +24188,7 @@ msgstr ""
 "communication basée sur gRPC. Dans cette version initiale, l'API REST ne "
 "prend en charge que les clients anonymes."
 
-#: ../../source/ref-changelog.md:1202
+#: ../../source/ref-changelog.md:1200
 msgid ""
 "Please note: The REST API is still experimental and will likely change "
 "significantly over time."
@@ -24197,7 +24196,7 @@ msgstr ""
 "Remarque : l'API REST est encore expérimentale et est susceptible de "
 "changer de manière significative au fil du temps."
 
-#: ../../source/ref-changelog.md:1204
+#: ../../source/ref-changelog.md:1202
 msgid ""
 "**Improve the (experimental) Driver API** "
 "([#1663](https://github.com/adap/flower/pull/1663), "
@@ -24221,7 +24220,7 @@ msgstr ""
 "[#1662](https://github.com/adap/flower/pull/1662), "
 "[#1794](https://github.com/adap/flower/pull/1794))"
 
-#: ../../source/ref-changelog.md:1206
+#: ../../source/ref-changelog.md:1204
 msgid ""
 "The Driver API is still an experimental feature, but this release "
 "introduces some major upgrades. One of the main improvements is the "
@@ -24239,7 +24238,7 @@ msgstr ""
 "considérablement l'efficacité de la mémoire d'un serveur Flower "
 "fonctionnant depuis longtemps."
 
-#: ../../source/ref-changelog.md:1208
+#: ../../source/ref-changelog.md:1206
 msgid ""
 "**Fix spilling issues related to Ray during simulations** "
 "([#1698](https://github.com/adap/flower/pull/1698))"
@@ -24247,7 +24246,7 @@ msgstr ""
 "**Répare les problèmes de déversement liés à Ray pendant les "
 "simulations** ([#1698](https://github.com/adap/flower/pull/1698))"
 
-#: ../../source/ref-changelog.md:1210
+#: ../../source/ref-changelog.md:1208
 #, fuzzy
 msgid ""
 "While running long simulations, `ray` was sometimes spilling huge amounts"
@@ -24258,7 +24257,7 @@ msgstr ""
 "d'énormes quantités de données qui rendaient l'entraînement incapable de "
 "continuer. ce problème est maintenant corrigé ! 🎉"
 
-#: ../../source/ref-changelog.md:1212
+#: ../../source/ref-changelog.md:1210
 msgid ""
 "**Add new example using** `TabNet` **and Flower** "
 "([#1725](https://github.com/adap/flower/pull/1725))"
@@ -24266,7 +24265,7 @@ msgstr ""
 "**Ajouter un nouvel exemple utilisant** `TabNet` **et Flower** "
 "([#1725](https://github.com/adap/flower/pull/1725))"
 
-#: ../../source/ref-changelog.md:1214
+#: ../../source/ref-changelog.md:1212
 msgid ""
 "TabNet is a powerful and flexible framework for training machine learning"
 " models on tabular data. We now have a federated example using Flower: "
@@ -24279,7 +24278,7 @@ msgstr ""
 "tabnet](https://github.com/adap/flower/tree/main/examples/quickstart-"
 "tabnet)."
 
-#: ../../source/ref-changelog.md:1216
+#: ../../source/ref-changelog.md:1214
 msgid ""
 "**Add new how-to guide for monitoring simulations** "
 "([#1649](https://github.com/adap/flower/pull/1649))"
@@ -24287,7 +24286,7 @@ msgstr ""
 "**Ajouter un nouveau guide pratique pour le suivi des simulations** "
 "([#1649](https://github.com/adap/flower/pull/1649))"
 
-#: ../../source/ref-changelog.md:1218
+#: ../../source/ref-changelog.md:1216
 msgid ""
 "We now have a documentation guide to help users monitor their performance"
 " during simulations."
@@ -24295,7 +24294,7 @@ msgstr ""
 "Nous avons maintenant un guide de documentation pour aider les "
 "utilisateurs à surveiller leurs performances pendant les simulations."
 
-#: ../../source/ref-changelog.md:1220
+#: ../../source/ref-changelog.md:1218
 msgid ""
 "**Add training metrics to** `History` **object during simulations** "
 "([#1696](https://github.com/adap/flower/pull/1696))"
@@ -24303,7 +24302,7 @@ msgstr ""
 "**Ajouter des mesures de formation à** `History` **objet pendant les "
 "simulations** ([#1696](https://github.com/adap/flower/pull/1696))"
 
-#: ../../source/ref-changelog.md:1222
+#: ../../source/ref-changelog.md:1220
 msgid ""
 "The `fit_metrics_aggregation_fn` can be used to aggregate training "
 "metrics, but previous releases did not save the results in the `History` "
@@ -24314,11 +24313,11 @@ msgstr ""
 "n'enregistraient pas les résultats dans l'objet `History`. c'est "
 "désormais le cas !"
 
-#: ../../source/ref-changelog.md:1224
+#: ../../source/ref-changelog.md:1222
+#, fuzzy
 msgid ""
 "**General improvements** "
-"([#1659](https://github.com/adap/flower/pull/1659), "
-"[#1646](https://github.com/adap/flower/pull/1646), "
+"([#1646](https://github.com/adap/flower/pull/1646), "
 "[#1647](https://github.com/adap/flower/pull/1647), "
 "[#1471](https://github.com/adap/flower/pull/1471), "
 "[#1648](https://github.com/adap/flower/pull/1648), "
@@ -24389,11 +24388,11 @@ msgstr ""
 "[#1692](https://github.com/adap/flower/pull/1692), "
 "[#1705](https://github.com/ada"
 
-#: ../../source/ref-changelog.md:1232
+#: ../../source/ref-changelog.md:1230
 msgid "v1.3.0 (2023-02-06)"
 msgstr "v1.3.0 (2023-02-06)"
 
-#: ../../source/ref-changelog.md:1238
+#: ../../source/ref-changelog.md:1236
 msgid ""
 "`Adam Narozniak`, `Alexander Viala Bellander`, `Charles Beauville`, "
 "`Daniel J. Beutel`, `JDRanpariya`, `Lennart Behme`, `Taner Topal`"
@@ -24401,7 +24400,7 @@ msgstr ""
 "`Adam Narozniak`, `Alexander Viala Bellander`, `Charles Beauville`, "
 "`Daniel J. Beutel`, `JDRanpariya`, `Lennart Behme`, `Taner Topal`"
 
-#: ../../source/ref-changelog.md:1242
+#: ../../source/ref-changelog.md:1240
 msgid ""
 "**Add support for** `workload_id` **and** `group_id` **in Driver API** "
 "([#1595](https://github.com/adap/flower/pull/1595))"
@@ -24409,7 +24408,7 @@ msgstr ""
 "**Ajouter la prise en charge de** `workload_id` **et** `group_id` **dans "
 "l'API du pilote** ([#1595](https://github.com/adap/flower/pull/1595))"
 
-#: ../../source/ref-changelog.md:1244
+#: ../../source/ref-changelog.md:1242
 msgid ""
 "The (experimental) Driver API now supports a `workload_id` that can be "
 "used to identify which workload a task belongs to. It also supports a new"
@@ -24424,7 +24423,7 @@ msgstr ""
 "en cours. Le `workload_id` et le `group_id` permettent tous deux aux "
 "nœuds clients de décider s'ils veulent traiter une tâche ou non."
 
-#: ../../source/ref-changelog.md:1246
+#: ../../source/ref-changelog.md:1244
 msgid ""
 "**Make Driver API and Fleet API address configurable** "
 "([#1637](https://github.com/adap/flower/pull/1637))"
@@ -24433,7 +24432,7 @@ msgstr ""
 "flotte soit configurable** "
 "([#1637](https://github.com/adap/flower/pull/1637))"
 
-#: ../../source/ref-changelog.md:1248
+#: ../../source/ref-changelog.md:1246
 msgid ""
 "The (experimental) long-running Flower server (Driver API and Fleet API) "
 "can now configure the server address of both Driver API (via `--driver-"
@@ -24444,7 +24443,7 @@ msgstr ""
 "`--driver-api-address`) et de Fleet API (via `--fleet-api-address`) lors "
 "de son démarrage :"
 
-#: ../../source/ref-changelog.md:1250
+#: ../../source/ref-changelog.md:1248
 #, fuzzy
 msgid ""
 "`flower-server --driver-api-address \"0.0.0.0:8081\" --fleet-api-address "
@@ -24453,11 +24452,11 @@ msgstr ""
 "``flower-superlink --driver-api-address \"0.0.0.0:8081\" --fleet-api-"
 "address \"0.0.0.0:8086\" ``"
 
-#: ../../source/ref-changelog.md:1252
+#: ../../source/ref-changelog.md:1250
 msgid "Both IPv4 and IPv6 addresses are supported."
 msgstr "Les adresses IPv4 et IPv6 sont toutes deux prises en charge."
 
-#: ../../source/ref-changelog.md:1254
+#: ../../source/ref-changelog.md:1252
 msgid ""
 "**Add new example of Federated Learning using fastai and Flower** "
 "([#1598](https://github.com/adap/flower/pull/1598))"
@@ -24465,7 +24464,7 @@ msgstr ""
 "**Ajouter un nouvel exemple d'apprentissage fédéré utilisant fastai et "
 "Flower** ([#1598](https://github.com/adap/flower/pull/1598))"
 
-#: ../../source/ref-changelog.md:1256
+#: ../../source/ref-changelog.md:1254
 msgid ""
 "A new code example (`quickstart-fastai`) demonstrates federated learning "
 "with [fastai](https://www.fast.ai/) and Flower. You can find it here: "
@@ -24478,7 +24477,7 @@ msgstr ""
 "fastai](https://github.com/adap/flower/tree/main/examples/quickstart-"
 "fastai)."
 
-#: ../../source/ref-changelog.md:1258
+#: ../../source/ref-changelog.md:1256
 msgid ""
 "**Make Android example compatible with** `flwr >= 1.0.0` **and the latest"
 " versions of Android** "
@@ -24488,7 +24487,7 @@ msgstr ""
 "dernières versions d'Android** "
 "([#1603](https://github.com/adap/flower/pull/1603))"
 
-#: ../../source/ref-changelog.md:1260
+#: ../../source/ref-changelog.md:1258
 #, fuzzy
 msgid ""
 "The Android code example has received a substantial update: the project "
@@ -24502,7 +24501,7 @@ msgstr ""
 "est mis à jour pour être compatible avec les outils Android les plus "
 "récents."
 
-#: ../../source/ref-changelog.md:1262
+#: ../../source/ref-changelog.md:1260
 msgid ""
 "**Add new `FedProx` strategy** "
 "([#1619](https://github.com/adap/flower/pull/1619))"
@@ -24510,7 +24509,7 @@ msgstr ""
 "**Ajouter une nouvelle stratégie `FedProx`** "
 "([#1619](https://github.com/adap/flower/pull/1619))"
 
-#: ../../source/ref-changelog.md:1264
+#: ../../source/ref-changelog.md:1262
 msgid ""
 "This "
 "[strategy](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedprox.py)"
@@ -24530,7 +24529,7 @@ msgstr ""
 "un paramètre appelé `proximal_mu` pour régulariser les modèles locaux par"
 " rapport aux modèles globaux."
 
-#: ../../source/ref-changelog.md:1266
+#: ../../source/ref-changelog.md:1264
 msgid ""
 "**Add new metrics to telemetry events** "
 "([#1640](https://github.com/adap/flower/pull/1640))"
@@ -24538,7 +24537,7 @@ msgstr ""
 "**Ajouter de nouvelles métriques aux événements de télémétrie** "
 "([#1640](https://github.com/adap/flower/pull/1640))"
 
-#: ../../source/ref-changelog.md:1268
+#: ../../source/ref-changelog.md:1266
 msgid ""
 "An updated event structure allows, for example, the clustering of events "
 "within the same workload."
@@ -24546,7 +24545,7 @@ msgstr ""
 "Une structure d'événements mise à jour permet, par exemple, de regrouper "
 "des événements au sein d'une même charge de travail."
 
-#: ../../source/ref-changelog.md:1270
+#: ../../source/ref-changelog.md:1268
 msgid ""
 "**Add new custom strategy tutorial section** "
 "[#1623](https://github.com/adap/flower/pull/1623)"
@@ -24554,7 +24553,7 @@ msgstr ""
 "**Ajouter une nouvelle section de tutoriel sur les stratégies "
 "personnalisées** [#1623](https://github.com/adap/flower/pull/1623)"
 
-#: ../../source/ref-changelog.md:1272
+#: ../../source/ref-changelog.md:1270
 #, fuzzy
 msgid ""
 "The Flower tutorial now has a new section that covers implementing a "
@@ -24568,7 +24567,7 @@ msgstr ""
 "Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source/tutorial/Flower-3-Building-a"
 "-Strategy-PyTorch.ipynb)"
 
-#: ../../source/ref-changelog.md:1274
+#: ../../source/ref-changelog.md:1272
 msgid ""
 "**Add new custom serialization tutorial section** "
 "([#1622](https://github.com/adap/flower/pull/1622))"
@@ -24576,7 +24575,7 @@ msgstr ""
 "**Ajouter une nouvelle section de tutoriel sur la sérialisation "
 "personnalisée** ([#1622](https://github.com/adap/flower/pull/1622))"
 
-#: ../../source/ref-changelog.md:1276
+#: ../../source/ref-changelog.md:1274
 #, fuzzy
 msgid ""
 "The Flower tutorial now has a new section that covers custom "
@@ -24589,7 +24588,8 @@ msgstr ""
 "Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source/tutorial/Flower-4"
 "-Client-and-NumPyClient-PyTorch.ipynb)"
 
-#: ../../source/ref-changelog.md:1278
+#: ../../source/ref-changelog.md:1276
+#, fuzzy
 msgid ""
 "**General improvements** "
 "([#1638](https://github.com/adap/flower/pull/1638), "
@@ -24607,14 +24607,12 @@ msgid ""
 "[#1607](https://github.com/adap/flower/pull/1607), "
 "[#1609](https://github.com/adap/flower/pull/1609), "
 "[#1608](https://github.com/adap/flower/pull/1608), "
-"[#1603](https://github.com/adap/flower/pull/1603), "
 "[#1590](https://github.com/adap/flower/pull/1590), "
 "[#1580](https://github.com/adap/flower/pull/1580), "
 "[#1599](https://github.com/adap/flower/pull/1599), "
 "[#1600](https://github.com/adap/flower/pull/1600), "
 "[#1601](https://github.com/adap/flower/pull/1601), "
 "[#1597](https://github.com/adap/flower/pull/1597), "
-"[#1595](https://github.com/adap/flower/pull/1595), "
 "[#1591](https://github.com/adap/flower/pull/1591), "
 "[#1588](https://github.com/adap/flower/pull/1588), "
 "[#1589](https://github.com/adap/flower/pull/1589), "
@@ -24648,7 +24646,7 @@ msgstr ""
 "[#1599](https://github.com/adap/flower/pull/1599), "
 "[#1600](https://github.com/ada"
 
-#: ../../source/ref-changelog.md:1282
+#: ../../source/ref-changelog.md:1280
 msgid ""
 "**Updated documentation** "
 "([#1629](https://github.com/adap/flower/pull/1629), "
@@ -24668,7 +24666,7 @@ msgstr ""
 "[#1613](https://github.com/adap/flower/pull/1613), "
 "[#1614](https://github.com/adap/flower/pull/1614))"
 
-#: ../../source/ref-changelog.md:1284 ../../source/ref-changelog.md:1351
+#: ../../source/ref-changelog.md:1282 ../../source/ref-changelog.md:1349
 msgid ""
 "As usual, the documentation has improved quite a bit. It is another step "
 "in our effort to make the Flower documentation the best documentation of "
@@ -24679,11 +24677,11 @@ msgstr ""
 " meilleure documentation de tout projet. Reste à l'écoute et comme "
 "toujours, n'hésite pas à nous faire part de tes commentaires !"
 
-#: ../../source/ref-changelog.md:1290
+#: ../../source/ref-changelog.md:1288
 msgid "v1.2.0 (2023-01-13)"
 msgstr "v1.2.0 (2023-01-13)"
 
-#: ../../source/ref-changelog.md:1296
+#: ../../source/ref-changelog.md:1294
 msgid ""
 "`Adam Narozniak`, `Charles Beauville`, `Daniel J. Beutel`, `Edoardo`, `L."
 " Jiang`, `Ragy`, `Taner Topal`, `dannymcy`"
@@ -24691,7 +24689,7 @@ msgstr ""
 "adam Narozniak`, `Charles Beauville`, `Daniel J. Beutel`, `Edoardo`, `L. "
 "Jiang`, `Ragy`, `Taner Topal`, `dannymcy`"
 
-#: ../../source/ref-changelog.md:1300
+#: ../../source/ref-changelog.md:1298
 msgid ""
 "**Introduce new Flower Baseline: FedAvg MNIST** "
 "([#1497](https://github.com/adap/flower/pull/1497), "
@@ -24701,7 +24699,7 @@ msgstr ""
 "([#1497](https://github.com/adap/flower/pull/1497), "
 "[#1552](https://github.com/adap/flower/pull/1552))"
 
-#: ../../source/ref-changelog.md:1302
+#: ../../source/ref-changelog.md:1300
 msgid ""
 "Over the coming weeks, we will be releasing a number of new reference "
 "implementations useful especially to FL newcomers. They will typically "
@@ -24721,7 +24719,7 @@ msgstr ""
 "suite.](https://flower.ai/blog/2023-01-12-fl-starter-pack-fedavg-mnist-"
 "cnn/)"
 
-#: ../../source/ref-changelog.md:1304
+#: ../../source/ref-changelog.md:1302
 msgid ""
 "**Improve GPU support in simulations** "
 "([#1555](https://github.com/adap/flower/pull/1555))"
@@ -24729,7 +24727,7 @@ msgstr ""
 "**Améliorer la prise en charge des GPU dans les simulations** "
 "([#1555](https://github.com/adap/flower/pull/1555))"
 
-#: ../../source/ref-changelog.md:1306
+#: ../../source/ref-changelog.md:1304
 msgid ""
 "The Ray-based Virtual Client Engine (`start_simulation`) has been updated"
 " to improve GPU support. The update includes some of the hard-earned "
@@ -24743,7 +24741,7 @@ msgstr ""
 "paramètres par défaut rendent l'exécution des simulations basées sur les "
 "GPU beaucoup plus robuste."
 
-#: ../../source/ref-changelog.md:1308
+#: ../../source/ref-changelog.md:1306
 msgid ""
 "**Improve GPU support in Jupyter Notebook tutorials** "
 "([#1527](https://github.com/adap/flower/pull/1527), "
@@ -24753,7 +24751,7 @@ msgstr ""
 "Notebook** ([#1527](https://github.com/adap/flower/pull/1527), "
 "[#1558](https://github.com/adap/flower/pull/1558))"
 
-#: ../../source/ref-changelog.md:1310
+#: ../../source/ref-changelog.md:1308
 msgid ""
 "Some users reported that Jupyter Notebooks have not always been easy to "
 "use on GPU instances. We listened and made improvements to all of our "
@@ -24764,7 +24762,7 @@ msgstr ""
 "écoutés et avons apporté des améliorations à tous nos carnets Jupyter ! "
 "Découvre les carnets mis à jour ici :"
 
-#: ../../source/ref-changelog.md:1312
+#: ../../source/ref-changelog.md:1310
 #, fuzzy
 msgid ""
 "[An Introduction to Federated Learning](https://flower.ai/docs/framework"
@@ -24773,7 +24771,7 @@ msgstr ""
 "[Une introduction à l'apprentissage fédéré] "
 "(https://flower.ai/docs/tutorial/Flower-1-Intro-to-FL-PyTorch.html)"
 
-#: ../../source/ref-changelog.md:1313
+#: ../../source/ref-changelog.md:1311
 #, fuzzy
 msgid ""
 "[Strategies in Federated Learning](https://flower.ai/docs/framework"
@@ -24782,7 +24780,7 @@ msgstr ""
 "[Stratégies d'apprentissage fédéré] "
 "(https://flower.ai/docs/tutorial/Flower-2-Strategies-in-FL-PyTorch.html)"
 
-#: ../../source/ref-changelog.md:1314
+#: ../../source/ref-changelog.md:1312
 #, fuzzy
 msgid ""
 "[Building a Strategy](https://flower.ai/docs/framework/tutorial-build-a"
@@ -24792,7 +24790,7 @@ msgstr ""
 "(https://flower.ai/docs/tutorial/Flower-3-Building-a-Strategy-"
 "PyTorch.html)"
 
-#: ../../source/ref-changelog.md:1315
+#: ../../source/ref-changelog.md:1313
 #, fuzzy
 msgid ""
 "[Client and NumPyClient](https://flower.ai/docs/framework/tutorial-"
@@ -24801,7 +24799,7 @@ msgstr ""
 "[Client et NumPyClient] (https://flower.ai/docs/tutorial/Flower-4-Client-"
 "and-NumPyClient-PyTorch.html)"
 
-#: ../../source/ref-changelog.md:1317
+#: ../../source/ref-changelog.md:1315
 msgid ""
 "**Introduce optional telemetry** "
 "([#1533](https://github.com/adap/flower/pull/1533), "
@@ -24813,7 +24811,7 @@ msgstr ""
 "[#1544](https://github.com/adap/flower/pull/1544), "
 "[#1584](https://github.com/adap/flower/pull/1584))"
 
-#: ../../source/ref-changelog.md:1319
+#: ../../source/ref-changelog.md:1317
 msgid ""
 "After a [request for "
 "feedback](https://github.com/adap/flower/issues/1534) from the community,"
@@ -24830,7 +24828,7 @@ msgstr ""
 "comment Flower est utilisé et quels sont les défis auxquels les "
 "utilisateurs peuvent être confrontés."
 
-#: ../../source/ref-changelog.md:1321
+#: ../../source/ref-changelog.md:1319
 #, fuzzy
 msgid ""
 "**Flower is a friendly framework for collaborative AI and data science.**"
@@ -24844,7 +24842,7 @@ msgstr ""
 "souhaitent pas partager des métriques d'utilisation anonymes.[Lire la "
 "suite.](https://flower.ai/docs/telemetry.html)."
 
-#: ../../source/ref-changelog.md:1323
+#: ../../source/ref-changelog.md:1321
 msgid ""
 "**Introduce (experimental) Driver API** "
 "([#1520](https://github.com/adap/flower/pull/1520), "
@@ -24863,7 +24861,7 @@ msgstr ""
 "[#1551](https://github.com/adap/flower/pull/1551), "
 "[#1567](https://github.com/adap/flower/pull/1567))"
 
-#: ../../source/ref-changelog.md:1325
+#: ../../source/ref-changelog.md:1323
 msgid ""
 "Flower now has a new (experimental) Driver API which will enable fully "
 "programmable, async, and multi-tenant Federated Learning and Federated "
@@ -24878,7 +24876,7 @@ msgstr ""
 "laquelle de nombreuses fonctionnalités à venir seront construites - et tu"
 " peux commencer à construire ces choses dès maintenant, aussi."
 
-#: ../../source/ref-changelog.md:1327
+#: ../../source/ref-changelog.md:1325
 msgid ""
 "The Driver API also enables a new execution mode in which the server runs"
 " indefinitely. Multiple individual workloads can run concurrently and "
@@ -24891,7 +24889,7 @@ msgstr ""
 "leur exécution indépendamment du serveur. Ceci est particulièrement utile"
 " pour les utilisateurs qui souhaitent déployer Flower en production."
 
-#: ../../source/ref-changelog.md:1329
+#: ../../source/ref-changelog.md:1327
 msgid ""
 "To learn more, check out the `mt-pytorch` code example. We look forward "
 "to you feedback!"
@@ -24899,7 +24897,7 @@ msgstr ""
 "Pour en savoir plus, consulte l'exemple de code `mt-pytorch`. Nous "
 "attendons tes commentaires avec impatience !"
 
-#: ../../source/ref-changelog.md:1331
+#: ../../source/ref-changelog.md:1329
 msgid ""
 "Please note: *The Driver API is still experimental and will likely change"
 " significantly over time.*"
@@ -24907,7 +24905,7 @@ msgstr ""
 "Remarque : *L'API du pilote est encore expérimentale et est susceptible "
 "de changer de manière significative au fil du temps.*"
 
-#: ../../source/ref-changelog.md:1333
+#: ../../source/ref-changelog.md:1331
 msgid ""
 "**Add new Federated Analytics with Pandas example** "
 "([#1469](https://github.com/adap/flower/pull/1469), "
@@ -24917,7 +24915,7 @@ msgstr ""
 "([#1469](https://github.com/adap/flower/pull/1469), "
 "[#1535](https://github.com/adap/flower/pull/1535))"
 
-#: ../../source/ref-changelog.md:1335
+#: ../../source/ref-changelog.md:1333
 msgid ""
 "A new code example (`quickstart-pandas`) demonstrates federated analytics"
 " with Pandas and Flower. You can find it here: [quickstart-"
@@ -24929,7 +24927,7 @@ msgstr ""
 "pandas](https://github.com/adap/flower/tree/main/examples/quickstart-"
 "pandas)."
 
-#: ../../source/ref-changelog.md:1337
+#: ../../source/ref-changelog.md:1335
 msgid ""
 "**Add new strategies: Krum and MultiKrum** "
 "([#1481](https://github.com/adap/flower/pull/1481))"
@@ -24937,7 +24935,7 @@ msgstr ""
 "**Ajouter de nouvelles stratégies : Krum et MultiKrum** "
 "([#1481](https://github.com/adap/flower/pull/1481))"
 
-#: ../../source/ref-changelog.md:1339
+#: ../../source/ref-changelog.md:1337
 msgid ""
 "Edoardo, a computer science student at the Sapienza University of Rome, "
 "contributed a new `Krum` strategy that enables users to easily use Krum "
@@ -24947,7 +24945,7 @@ msgstr ""
 "contribué à une nouvelle stratégie `Krum` qui permet aux utilisateurs "
 "d'utiliser facilement Krum et MultiKrum dans leurs charges de travail."
 
-#: ../../source/ref-changelog.md:1341
+#: ../../source/ref-changelog.md:1339
 msgid ""
 "**Update C++ example to be compatible with Flower v1.2.0** "
 "([#1495](https://github.com/adap/flower/pull/1495))"
@@ -24955,7 +24953,7 @@ msgstr ""
 "**Mettre à jour l'exemple C++ pour qu'il soit compatible avec Flower "
 "v1.2.0** ([#1495](https://github.com/adap/flower/pull/1495))"
 
-#: ../../source/ref-changelog.md:1343
+#: ../../source/ref-changelog.md:1341
 msgid ""
 "The C++ code example has received a substantial update to make it "
 "compatible with the latest version of Flower."
@@ -24963,7 +24961,7 @@ msgstr ""
 "L'exemple de code C++ a reçu une mise à jour substantielle pour le rendre"
 " compatible avec la dernière version de Flower."
 
-#: ../../source/ref-changelog.md:1345
+#: ../../source/ref-changelog.md:1343
 msgid ""
 "**General improvements** "
 "([#1491](https://github.com/adap/flower/pull/1491), "
@@ -24995,7 +24993,7 @@ msgstr ""
 "[#1564](https://github.com/adap/flower/pull/1564), "
 "[#1566](https://github.com/adap/flower/pull/1566))"
 
-#: ../../source/ref-changelog.md:1349
+#: ../../source/ref-changelog.md:1347
 msgid ""
 "**Updated documentation** "
 "([#1494](https://github.com/adap/flower/pull/1494), "
@@ -25019,7 +25017,7 @@ msgstr ""
 "[#1519](https://github.com/adap/flower/pull/1519), "
 "[#1515](https://github.com/adap/flower/pull/1515))"
 
-#: ../../source/ref-changelog.md:1353
+#: ../../source/ref-changelog.md:1351
 msgid ""
 "One highlight is the new [first time contributor "
 "guide](https://flower.ai/docs/first-time-contributors.html): if you've "
@@ -25029,11 +25027,11 @@ msgstr ""
 "(https://flower.ai/docs/first-time-contributors.html) : si tu n'as jamais"
 " contribué sur GitHub auparavant, c'est l'endroit idéal pour commencer !"
 
-#: ../../source/ref-changelog.md:1359
+#: ../../source/ref-changelog.md:1357
 msgid "v1.1.0 (2022-10-31)"
 msgstr "v1.1.0 (2022-10-31)"
 
-#: ../../source/ref-changelog.md:1363
+#: ../../source/ref-changelog.md:1361
 msgid ""
 "We would like to give our **special thanks** to all the contributors who "
 "made the new version of Flower possible (in `git shortlog` order):"
@@ -25042,7 +25040,7 @@ msgstr ""
 " qui ont rendu possible la nouvelle version de Flower (dans l'ordre `git "
 "shortlog`) :"
 
-#: ../../source/ref-changelog.md:1365
+#: ../../source/ref-changelog.md:1363
 msgid ""
 "`Akis Linardos`, `Christopher S`, `Daniel J. Beutel`, `George`, `Jan "
 "Schlicht`, `Mohammad Fares`, `Pedro Porto Buarque de Gusmão`, `Philipp "
@@ -25054,7 +25052,7 @@ msgstr ""
 "Wiesner`, `Rob Luke`, `Taner Topal`, `VasundharaAgarwal`, "
 "`danielnugraha`, `edogab33`"
 
-#: ../../source/ref-changelog.md:1369
+#: ../../source/ref-changelog.md:1367
 msgid ""
 "**Introduce Differential Privacy wrappers (preview)** "
 "([#1357](https://github.com/adap/flower/pull/1357), "
@@ -25064,7 +25062,7 @@ msgstr ""
 "([#1357](https://github.com/adap/flower/pull/1357), "
 "[#1460](https://github.com/adap/flower/pull/1460))"
 
-#: ../../source/ref-changelog.md:1371
+#: ../../source/ref-changelog.md:1369
 msgid ""
 "The first (experimental) preview of pluggable Differential Privacy "
 "wrappers enables easy configuration and usage of differential privacy "
@@ -25080,7 +25078,7 @@ msgstr ""
 "voir les documents de Flower, un nouvel explicatif va plus loin dans les "
 "détails."
 
-#: ../../source/ref-changelog.md:1373
+#: ../../source/ref-changelog.md:1371
 msgid ""
 "**New iOS CoreML code example** "
 "([#1289](https://github.com/adap/flower/pull/1289))"
@@ -25088,7 +25086,7 @@ msgstr ""
 "**Nouvel exemple de code CoreML pour iOS** "
 "([#1289](https://github.com/adap/flower/pull/1289))"
 
-#: ../../source/ref-changelog.md:1375
+#: ../../source/ref-changelog.md:1373
 msgid ""
 "Flower goes iOS! A massive new code example shows how Flower clients can "
 "be built for iOS. The code example contains both Flower iOS SDK "
@@ -25101,7 +25099,7 @@ msgstr ""
 "utilisés pour de nombreuses tâches, et un exemple de tâche fonctionnant "
 "sur CoreML."
 
-#: ../../source/ref-changelog.md:1377
+#: ../../source/ref-changelog.md:1375
 msgid ""
 "**New FedMedian strategy** "
 "([#1461](https://github.com/adap/flower/pull/1461))"
@@ -25109,7 +25107,7 @@ msgstr ""
 "**Nouvelle stratégie de FedMedian** "
 "([#1461](https://github.com/adap/flower/pull/1461))"
 
-#: ../../source/ref-changelog.md:1379
+#: ../../source/ref-changelog.md:1377
 msgid ""
 "The new `FedMedian` strategy implements Federated Median (FedMedian) by "
 "[Yin et al., 2018](https://arxiv.org/pdf/1803.01498v1.pdf)."
@@ -25118,7 +25116,7 @@ msgstr ""
 "(FedMedian) par [Yin et al., 2018] "
 "(https://arxiv.org/pdf/1803.01498v1.pdf)."
 
-#: ../../source/ref-changelog.md:1381
+#: ../../source/ref-changelog.md:1379
 msgid ""
 "**Log** `Client` **exceptions in Virtual Client Engine** "
 "([#1493](https://github.com/adap/flower/pull/1493))"
@@ -25126,7 +25124,7 @@ msgstr ""
 "**Log** `Client` **exceptions dans le moteur de client virtuel** "
 "([#1493](https://github.com/adap/flower/pull/1493))"
 
-#: ../../source/ref-changelog.md:1383
+#: ../../source/ref-changelog.md:1381
 msgid ""
 "All `Client` exceptions happening in the VCE are now logged by default "
 "and not just exposed to the configured `Strategy` (via the `failures` "
@@ -25136,7 +25134,7 @@ msgstr ""
 "maintenant enregistrées par défaut et ne sont pas seulement exposées à la"
 " `Stratégie` configurée (via l'argument `failures`)."
 
-#: ../../source/ref-changelog.md:1385
+#: ../../source/ref-changelog.md:1383
 msgid ""
 "**Improve Virtual Client Engine internals** "
 "([#1401](https://github.com/adap/flower/pull/1401), "
@@ -25146,7 +25144,7 @@ msgstr ""
 "([#1401](https://github.com/adap/flower/pull/1401), "
 "[#1453](https://github.com/adap/flower/pull/1453))"
 
-#: ../../source/ref-changelog.md:1387
+#: ../../source/ref-changelog.md:1385
 msgid ""
 "Some internals of the Virtual Client Engine have been revamped. The VCE "
 "now uses Ray 2.0 under the hood, the value type of the `client_resources`"
@@ -25157,7 +25155,7 @@ msgstr ""
 "dictionnaire `client_resources` a été remplacé par `float` pour permettre"
 " l'allocation de fractions de ressources."
 
-#: ../../source/ref-changelog.md:1389
+#: ../../source/ref-changelog.md:1387
 msgid ""
 "**Support optional** `Client`**/**`NumPyClient` **methods in Virtual "
 "Client Engine**"
@@ -25165,7 +25163,7 @@ msgstr ""
 "**Support optional** `Client`**/**`NumPyClient` **methods in Virtual "
 "Client Engine**"
 
-#: ../../source/ref-changelog.md:1391
+#: ../../source/ref-changelog.md:1389
 msgid ""
 "The Virtual Client Engine now has full support for optional `Client` (and"
 " `NumPyClient`) methods."
@@ -25173,7 +25171,7 @@ msgstr ""
 "Le moteur de client virtuel prend désormais en charge les méthodes "
 "optionnelles `Client` (et `NumPyClient`)."
 
-#: ../../source/ref-changelog.md:1393
+#: ../../source/ref-changelog.md:1391
 msgid ""
 "**Provide type information to packages using** `flwr` "
 "([#1377](https://github.com/adap/flower/pull/1377))"
@@ -25181,7 +25179,7 @@ msgstr ""
 "**Fournir des informations de type aux paquets en utilisant** `flwr` "
 "([#1377](https://github.com/adap/flower/pull/1377))"
 
-#: ../../source/ref-changelog.md:1395
+#: ../../source/ref-changelog.md:1393
 msgid ""
 "The package `flwr` is now bundled with a `py.typed` file indicating that "
 "the package is typed. This enables typing support for projects or "
@@ -25194,7 +25192,7 @@ msgstr ""
 "permettant d'améliorer leur code à l'aide de vérificateurs de types "
 "statiques comme `mypy`."
 
-#: ../../source/ref-changelog.md:1397
+#: ../../source/ref-changelog.md:1395
 msgid ""
 "**Updated code example** "
 "([#1344](https://github.com/adap/flower/pull/1344), "
@@ -25204,7 +25202,7 @@ msgstr ""
 "([#1344](https://github.com/adap/flower/pull/1344), "
 "[#1347](https://github.com/adap/flower/pull/1347))"
 
-#: ../../source/ref-changelog.md:1399
+#: ../../source/ref-changelog.md:1397
 msgid ""
 "The code examples covering scikit-learn and PyTorch Lightning have been "
 "updated to work with the latest version of Flower."
@@ -25212,11 +25210,11 @@ msgstr ""
 "Les exemples de code couvrant scikit-learn et PyTorch Lightning ont été "
 "mis à jour pour fonctionner avec la dernière version de Flower."
 
-#: ../../source/ref-changelog.md:1401
+#: ../../source/ref-changelog.md:1399
+#, fuzzy
 msgid ""
 "**Updated documentation** "
 "([#1355](https://github.com/adap/flower/pull/1355), "
-"[#1558](https://github.com/adap/flower/pull/1558), "
 "[#1379](https://github.com/adap/flower/pull/1379), "
 "[#1380](https://github.com/adap/flower/pull/1380), "
 "[#1381](https://github.com/adap/flower/pull/1381), "
@@ -25252,7 +25250,7 @@ msgstr ""
 "[#1465](https://github.com/adap/flower/pull/1465), "
 "[#1467](https://github.com/adap/flower/pull/1467))"
 
-#: ../../source/ref-changelog.md:1403
+#: ../../source/ref-changelog.md:1401
 msgid ""
 "There have been so many documentation updates that it doesn't even make "
 "sense to list them individually."
@@ -25260,7 +25258,7 @@ msgstr ""
 "Il y a eu tellement de mises à jour de la documentation que cela n'a même"
 " pas de sens de les énumérer individuellement."
 
-#: ../../source/ref-changelog.md:1405
+#: ../../source/ref-changelog.md:1403
 msgid ""
 "**Restructured documentation** "
 "([#1387](https://github.com/adap/flower/pull/1387))"
@@ -25268,7 +25266,7 @@ msgstr ""
 "**Documentation restructurée** "
 "([#1387](https://github.com/adap/flower/pull/1387))"
 
-#: ../../source/ref-changelog.md:1407
+#: ../../source/ref-changelog.md:1405
 msgid ""
 "The documentation has been restructured to make it easier to navigate. "
 "This is just the first step in a larger effort to make the Flower "
@@ -25278,7 +25276,7 @@ msgstr ""
 "n'est que la première étape d'un effort plus important visant à faire de "
 "la documentation de Flower la meilleure documentation de tous les projets"
 
-#: ../../source/ref-changelog.md:1409
+#: ../../source/ref-changelog.md:1407
 msgid ""
 "**Open in Colab button** "
 "([#1389](https://github.com/adap/flower/pull/1389))"
@@ -25286,7 +25284,7 @@ msgstr ""
 "**Ouvrir dans le bouton Colab** "
 "([#1389](https://github.com/adap/flower/pull/1389))"
 
-#: ../../source/ref-changelog.md:1411
+#: ../../source/ref-changelog.md:1409
 msgid ""
 "The four parts of the Flower Federated Learning Tutorial now come with a "
 "new `Open in Colab` button. No need to install anything on your local "
@@ -25299,7 +25297,7 @@ msgstr ""
 "maintenant utiliser et apprendre à connaître Flower dans ton navigateur, "
 "il te suffit d'un simple clic."
 
-#: ../../source/ref-changelog.md:1413
+#: ../../source/ref-changelog.md:1411
 msgid ""
 "**Improved tutorial** ([#1468](https://github.com/adap/flower/pull/1468),"
 " [#1470](https://github.com/adap/flower/pull/1470), "
@@ -25315,7 +25313,7 @@ msgstr ""
 "[#1474](https://github.com/adap/flower/pull/1474), "
 "[#1475](https://github.com/adap/flower/pull/1475))"
 
-#: ../../source/ref-changelog.md:1415
+#: ../../source/ref-changelog.md:1413
 msgid ""
 "The Flower Federated Learning Tutorial has two brand-new parts covering "
 "custom strategies (still WIP) and the distinction between `Client` and "
@@ -25328,27 +25326,27 @@ msgstr ""
 "existantes ont également été améliorées (beaucoup de petits changements "
 "et de corrections)."
 
-#: ../../source/ref-changelog.md:1421
+#: ../../source/ref-changelog.md:1419
 msgid "v1.0.0 (2022-07-28)"
 msgstr "v1.0.0 (2022-07-28)"
 
-#: ../../source/ref-changelog.md:1423
+#: ../../source/ref-changelog.md:1421
 msgid "Highlights"
 msgstr "Points forts"
 
-#: ../../source/ref-changelog.md:1425
+#: ../../source/ref-changelog.md:1423
 msgid "Stable **Virtual Client Engine** (accessible via `start_simulation`)"
 msgstr "Moteur de client virtuel stable** (accessible via `start_simulation`)"
 
-#: ../../source/ref-changelog.md:1426
+#: ../../source/ref-changelog.md:1424
 msgid "All `Client`/`NumPyClient` methods are now optional"
 msgstr "Toutes les méthodes `Client`/`NumPyClient` sont maintenant optionnelles"
 
-#: ../../source/ref-changelog.md:1427
+#: ../../source/ref-changelog.md:1425
 msgid "Configurable `get_parameters`"
 msgstr "`get_parameters` configurable"
 
-#: ../../source/ref-changelog.md:1428
+#: ../../source/ref-changelog.md:1426
 msgid ""
 "Tons of small API cleanups resulting in a more coherent developer "
 "experience"
@@ -25356,7 +25354,7 @@ msgstr ""
 "Des tonnes de petits nettoyages d'API résultant en une expérience plus "
 "cohérente pour les développeurs"
 
-#: ../../source/ref-changelog.md:1432
+#: ../../source/ref-changelog.md:1430
 msgid ""
 "We would like to give our **special thanks** to all the contributors who "
 "made Flower 1.0 possible (in reverse [GitHub "
@@ -25366,7 +25364,7 @@ msgstr ""
 "ont rendu Flower 1.0 possible (dans l'ordre inverse de [GitHub "
 "Contributors](https://github.com/adap/flower/graphs/contributors)) :"
 
-#: ../../source/ref-changelog.md:1434
+#: ../../source/ref-changelog.md:1432
 msgid ""
 "[@rtaiello](https://github.com/rtaiello), "
 "[@g-pichler](https://github.com/g-pichler), [@rob-"
@@ -25426,7 +25424,7 @@ msgstr ""
 "/Jueun-Park), [@architjen](https://github.com/architjen), "
 "[@PratikGarai](https://github.com/PratikGarai), [@mrinaald]("
 
-#: ../../source/ref-changelog.md:1438
+#: ../../source/ref-changelog.md:1436
 msgid ""
 "**All arguments must be passed as keyword arguments** "
 "([#1338](https://github.com/adap/flower/pull/1338))"
@@ -25434,7 +25432,7 @@ msgstr ""
 "**Tous les arguments doivent être passés comme des arguments de mot-clé**"
 " ([#1338](https://github.com/adap/flower/pull/1338))"
 
-#: ../../source/ref-changelog.md:1440
+#: ../../source/ref-changelog.md:1438
 #, fuzzy
 msgid ""
 "Pass all arguments as keyword arguments, positional arguments are not "
@@ -25450,7 +25448,7 @@ msgstr ""
 "``start_client(server_address=\"127.0.0.1:8080\", "
 "client=FlowerClient())`)."
 
-#: ../../source/ref-changelog.md:1442
+#: ../../source/ref-changelog.md:1440
 msgid ""
 "**Introduce configuration object** `ServerConfig` **in** `start_server` "
 "**and** `start_simulation` "
@@ -25460,7 +25458,7 @@ msgstr ""
 "`start_server` **et** `start_simulation` "
 "([#1317](https://github.com/adap/flower/pull/1317))"
 
-#: ../../source/ref-changelog.md:1444
+#: ../../source/ref-changelog.md:1442
 #, python-brace-format
 msgid ""
 "Instead of a config dictionary `{\"num_rounds\": 3, \"round_timeout\": "
@@ -25477,15 +25475,16 @@ msgstr ""
 "sécurisé plus facile et les valeurs des paramètres par défaut plus "
 "transparentes."
 
-#: ../../source/ref-changelog.md:1446
+#: ../../source/ref-changelog.md:1444
+#, fuzzy
 msgid ""
-"**Rename built-in strategy parameters for clarity** "
+"**Enhance Strategy evaluation API for clarity and consistency** "
 "([#1334](https://github.com/adap/flower/pull/1334))"
 msgstr ""
 "**Renommer les paramètres de la stratégie intégrée pour plus de clarté** "
 "([#1334](https://github.com/adap/flower/pull/1334))"
 
-#: ../../source/ref-changelog.md:1448
+#: ../../source/ref-changelog.md:1446
 msgid ""
 "The following built-in strategy parameters were renamed to improve "
 "readability and consistency with other API's:"
@@ -25493,19 +25492,40 @@ msgstr ""
 "Les paramètres de stratégie intégrés suivants ont été renommés pour "
 "améliorer la lisibilité et la cohérence avec d'autres API :"
 
-#: ../../source/ref-changelog.md:1450
+#: ../../source/ref-changelog.md:1448
 msgid "`fraction_eval` --> `fraction_evaluate`"
 msgstr "`fraction_eval` --> `fraction_evaluate`"
 
-#: ../../source/ref-changelog.md:1451
+#: ../../source/ref-changelog.md:1449
 msgid "`min_eval_clients` --> `min_evaluate_clients`"
 msgstr "`min_eval_clients` --> `min_evaluate_clients`"
 
-#: ../../source/ref-changelog.md:1452
+#: ../../source/ref-changelog.md:1450
 msgid "`eval_fn` --> `evaluate_fn`"
 msgstr "`eval_fn` --> `evaluate_fn`"
 
+#: ../../source/ref-changelog.md:1452
+msgid ""
+"The `Strategy` method `evaluate` now receives the current round of "
+"federated learning/evaluation as the first parameter."
+msgstr ""
+"La méthode `Stratégie` `évaluer` reçoit maintenant le cycle actuel "
+"d'apprentissage/évaluation fédéré comme premier paramètre."
+
 #: ../../source/ref-changelog.md:1454
+msgid ""
+"The `evaluate_fn` passed to built-in strategies like `FedAvg` now takes "
+"three parameters: (1) The current round of federated learning/evaluation "
+"(`server_round`), (2) the model parameters to evaluate (`parameters`), "
+"and (3) a config dictionary (`config`)."
+msgstr ""
+"Le `evaluate_fn` passé aux stratégies intégrées comme `FedAvg` prend "
+"maintenant trois paramètres : (1) le cycle actuel "
+"d'apprentissage/évaluation fédéré (`server_round`), (2) les paramètres du"
+" modèle à évaluer (`parameters`), et (3) un dictionnaire de configuration"
+" (`config`)."
+
+#: ../../source/ref-changelog.md:1456
 msgid ""
 "**Update default arguments of built-in strategies** "
 "([#1278](https://github.com/adap/flower/pull/1278))"
@@ -25513,7 +25533,7 @@ msgstr ""
 "**Mettre à jour les arguments par défaut des stratégies intégrées** "
 "([#1278](https://github.com/adap/flower/pull/1278))"
 
-#: ../../source/ref-changelog.md:1456
+#: ../../source/ref-changelog.md:1458
 msgid ""
 "All built-in strategies now use `fraction_fit=1.0` and "
 "`fraction_evaluate=1.0`, which means they select *all* currently "
@@ -25528,56 +25548,19 @@ msgstr ""
 "peuvent retrouver le comportement antérieur en initialisant la stratégie "
 "de la manière suivante :"
 
-#: ../../source/ref-changelog.md:1458
+#: ../../source/ref-changelog.md:1460
 msgid "`strategy = FedAvg(fraction_fit=0.1, fraction_evaluate=0.1)`"
 msgstr "`stratégie = FedAvg(fraction_fit=0.1, fraction_evaluate=0.1)`"
 
-#: ../../source/ref-changelog.md:1460
-msgid ""
-"**Add** `server_round` **to** `Strategy.evaluate` "
-"([#1334](https://github.com/adap/flower/pull/1334))"
-msgstr ""
-"**Ajouter** `server_round` **à** `Strategy.evaluate` "
-"([#1334](https://github.com/adap/flower/pull/1334))"
-
 #: ../../source/ref-changelog.md:1462
 msgid ""
-"The `Strategy` method `evaluate` now receives the current round of "
-"federated learning/evaluation as the first parameter."
+"**Rename** `rnd` **to** `server_round` "
+"([#1321](https://github.com/adap/flower/pull/1321))"
 msgstr ""
-"La méthode `Stratégie` `évaluer` reçoit maintenant le cycle actuel "
-"d'apprentissage/évaluation fédéré comme premier paramètre."
+"**Rename** `rnd` **to** `server_round` "
+"([#1321](https://github.com/adap/flower/pull/1321))"
 
 #: ../../source/ref-changelog.md:1464
-msgid ""
-"**Add** `server_round` **and** `config` **parameters to** `evaluate_fn` "
-"([#1334](https://github.com/adap/flower/pull/1334))"
-msgstr ""
-"**Ajouter** `server_round` **et** `config` **paramètres à** `evaluate_fn`"
-" ([#1334](https://github.com/adap/flower/pull/1334))"
-
-#: ../../source/ref-changelog.md:1466
-msgid ""
-"The `evaluate_fn` passed to built-in strategies like `FedAvg` now takes "
-"three parameters: (1) The current round of federated learning/evaluation "
-"(`server_round`), (2) the model parameters to evaluate (`parameters`), "
-"and (3) a config dictionary (`config`)."
-msgstr ""
-"Le `evaluate_fn` passé aux stratégies intégrées comme `FedAvg` prend "
-"maintenant trois paramètres : (1) le cycle actuel "
-"d'apprentissage/évaluation fédéré (`server_round`), (2) les paramètres du"
-" modèle à évaluer (`parameters`), et (3) un dictionnaire de configuration"
-" (`config`)."
-
-#: ../../source/ref-changelog.md:1468
-msgid ""
-"**Rename** `rnd` **to** `server_round` "
-"([#1321](https://github.com/adap/flower/pull/1321))"
-msgstr ""
-"**Rename** `rnd` **to** `server_round` "
-"([#1321](https://github.com/adap/flower/pull/1321))"
-
-#: ../../source/ref-changelog.md:1470
 msgid ""
 "Several Flower methods and functions (`evaluate_fn`, `configure_fit`, "
 "`aggregate_fit`, `configure_evaluate`, `aggregate_evaluate`) receive the "
@@ -25592,7 +25575,7 @@ msgstr ""
 " la fiabilité et éviter la confusion avec *random*, ce paramètre a été "
 "renommé de `rnd` à `server_round`."
 
-#: ../../source/ref-changelog.md:1472
+#: ../../source/ref-changelog.md:1466
 msgid ""
 "**Move** `flwr.dataset` **to** `flwr_baselines` "
 "([#1273](https://github.com/adap/flower/pull/1273))"
@@ -25600,11 +25583,11 @@ msgstr ""
 "**Déplacer** `flwr.dataset` **vers** `flwr_baselines` "
 "([#1273](https://github.com/adap/flower/pull/1273))"
 
-#: ../../source/ref-changelog.md:1474
+#: ../../source/ref-changelog.md:1468
 msgid "The experimental package `flwr.dataset` was migrated to Flower Baselines."
 msgstr "Le paquet expérimental `flwr.dataset` a été migré vers Flower Baselines."
 
-#: ../../source/ref-changelog.md:1476
+#: ../../source/ref-changelog.md:1470
 msgid ""
 "**Remove experimental strategies** "
 "([#1280](https://github.com/adap/flower/pull/1280))"
@@ -25612,7 +25595,7 @@ msgstr ""
 "**Supprimer les stratégies expérimentales** "
 "([#1280](https://github.com/adap/flower/pull/1280))"
 
-#: ../../source/ref-changelog.md:1478
+#: ../../source/ref-changelog.md:1472
 msgid ""
 "Remove unmaintained experimental strategies (`FastAndSlow`, `FedFSv0`, "
 "`FedFSv1`)."
@@ -25620,17 +25603,16 @@ msgstr ""
 "Supprimer les stratégies expérimentales non maintenues (`FastAndSlow`, "
 "`FedFSv0`, `FedFSv1`)."
 
-#: ../../source/ref-changelog.md:1480
+#: ../../source/ref-changelog.md:1474
+#, fuzzy
 msgid ""
 "**Rename** `Weights` **to** `NDArrays` "
-"([#1258](https://github.com/adap/flower/pull/1258), "
-"[#1259](https://github.com/adap/flower/pull/1259))"
+"([#1296](https://github.com/adap/flower/pull/1296))"
 msgstr ""
-"**Rename** `Weights` **to** `NDArrays` "
-"([#1258](https://github.com/adap/flower/pull/1258), "
-"[#1259](https://github.com/adap/flower/pull/1259))"
+"**Rename** `rnd` **to** `server_round` "
+"([#1321](https://github.com/adap/flower/pull/1321))"
 
-#: ../../source/ref-changelog.md:1482
+#: ../../source/ref-changelog.md:1476
 msgid ""
 "`flwr.common.Weights` was renamed to `flwr.common.NDArrays` to better "
 "capture what this type is all about."
@@ -25638,17 +25620,17 @@ msgstr ""
 "`flwr.common.Weights` a été renommé en `flwr.common.NDArys` pour mieux "
 "rendre compte de la nature de ce type."
 
-#: ../../source/ref-changelog.md:1484
+#: ../../source/ref-changelog.md:1478
+#, fuzzy
 msgid ""
 "**Remove antiquated** `force_final_distributed_eval` **from** "
-"`start_server` ([#1258](https://github.com/adap/flower/pull/1258), "
-"[#1259](https://github.com/adap/flower/pull/1259))"
+"`start_server` ([#1315](https://github.com/adap/flower/pull/1315))"
 msgstr ""
 "**Supprimez l'ancien** `force_final_distributed_eval` **de** "
 "`start_server` ([#1258](https://github.com/adap/flower/pull/1258), "
 "[#1259](https://github.com/adap/flower/pull/1259))"
 
-#: ../../source/ref-changelog.md:1486
+#: ../../source/ref-changelog.md:1480
 msgid ""
 "The `start_server` parameter `force_final_distributed_eval` has long been"
 " a historic artefact, in this release it is finally gone for good."
@@ -25657,7 +25639,7 @@ msgstr ""
 "été un artefact historique, dans cette version il a finalement disparu "
 "pour de bon."
 
-#: ../../source/ref-changelog.md:1488
+#: ../../source/ref-changelog.md:1482
 msgid ""
 "**Make** `get_parameters` **configurable** "
 "([#1242](https://github.com/adap/flower/pull/1242))"
@@ -25665,7 +25647,7 @@ msgstr ""
 "**Make** `get_parameters` **configurable** "
 "([#1242](https://github.com/adap/flower/pull/1242))"
 
-#: ../../source/ref-changelog.md:1490
+#: ../../source/ref-changelog.md:1484
 msgid ""
 "The `get_parameters` method now accepts a configuration dictionary, just "
 "like `get_properties`, `fit`, and `evaluate`."
@@ -25673,28 +25655,32 @@ msgstr ""
 "La méthode `get_parameters` accepte maintenant un dictionnaire de "
 "configuration, tout comme `get_properties`, `fit`, et `evaluate`."
 
-#: ../../source/ref-changelog.md:1492
+#: ../../source/ref-changelog.md:1486
+#, fuzzy
 msgid ""
-"**Replace** `num_rounds` **in** `start_simulation` **with new** `config` "
-"**parameter** ([#1281](https://github.com/adap/flower/pull/1281))"
-msgstr ""
-"**Remplace** `num_rounds` **dans** `start_simulation` **avec le nouveau**"
-" `config` **paramètre** "
+"**Update** `start_simulation` **to align with** `start_server` "
 "([#1281](https://github.com/adap/flower/pull/1281))"
+msgstr ""
+"**Rename** `rnd` **to** `server_round` "
+"([#1321](https://github.com/adap/flower/pull/1321))"
 
-#: ../../source/ref-changelog.md:1494
+#: ../../source/ref-changelog.md:1488
+#, fuzzy
 msgid ""
 "The `start_simulation` function now accepts a configuration dictionary "
 "`config` instead of the `num_rounds` integer. This improves the "
 "consistency between `start_simulation` and `start_server` and makes "
-"transitioning between the two easier."
+"transitioning between the two easier. Additionally, `start_simulation` "
+"now accepts a full `Server` instance. This enables users to heavily "
+"customize the execution of eperiments and opens the door to running, for "
+"example, async FL using the Virtual Client Engine."
 msgstr ""
 "La fonction `start_simulation` accepte maintenant un dictionnaire de "
 "configuration `config` au lieu de l'entier `num_rounds`. Cela améliore la"
 " cohérence entre `start_simulation` et `start_server` et facilite la "
 "transition entre les deux."
 
-#: ../../source/ref-changelog.md:1498
+#: ../../source/ref-changelog.md:1492
 msgid ""
 "**Support Python 3.10** "
 "([#1320](https://github.com/adap/flower/pull/1320))"
@@ -25702,7 +25688,7 @@ msgstr ""
 "**Support Python 3.10** "
 "([#1320](https://github.com/adap/flower/pull/1320))"
 
-#: ../../source/ref-changelog.md:1500
+#: ../../source/ref-changelog.md:1494
 msgid ""
 "The previous Flower release introduced experimental support for Python "
 "3.10, this release declares Python 3.10 support as stable."
@@ -25711,7 +25697,7 @@ msgstr ""
 "expérimentale de Python 3.10, cette version déclare la prise en charge de"
 " Python 3.10 comme stable."
 
-#: ../../source/ref-changelog.md:1502
+#: ../../source/ref-changelog.md:1496
 msgid ""
 "**Make all** `Client` **and** `NumPyClient` **methods optional** "
 "([#1260](https://github.com/adap/flower/pull/1260), "
@@ -25721,7 +25707,7 @@ msgstr ""
 "**facultatives** ([#1260](https://github.com/adap/flower/pull/1260), "
 "[#1277](https://github.com/adap/flower/pull/1277))"
 
-#: ../../source/ref-changelog.md:1504
+#: ../../source/ref-changelog.md:1498
 msgid ""
 "The `Client`/`NumPyClient` methods `get_properties`, `get_parameters`, "
 "`fit`, and `evaluate` are all optional. This enables writing clients that"
@@ -25734,15 +25720,7 @@ msgstr ""
 "méthode. Pas besoin d'implémenter `evaluate` quand on utilise "
 "l'évaluation centralisée !"
 
-#: ../../source/ref-changelog.md:1506
-msgid ""
-"**Enable passing a** `Server` **instance to** `start_simulation` "
-"([#1281](https://github.com/adap/flower/pull/1281))"
-msgstr ""
-"**Autoriser le passage d'une **instance `Server` à** `start_simulation` "
-"([#1281](https://github.com/adap/flower/pull/1281))"
-
-#: ../../source/ref-changelog.md:1508
+#: ../../source/ref-changelog.md:1500
 msgid ""
 "Similar to `start_server`, `start_simulation` now accepts a full `Server`"
 " instance. This enables users to heavily customize the execution of "
@@ -25755,7 +25733,7 @@ msgstr ""
 "l'exécution, par exemple, de FL asynchrones à l'aide du moteur de client "
 "virtuel."
 
-#: ../../source/ref-changelog.md:1510
+#: ../../source/ref-changelog.md:1502
 msgid ""
 "**Update code examples** "
 "([#1291](https://github.com/adap/flower/pull/1291), "
@@ -25767,7 +25745,7 @@ msgstr ""
 "[#1286](https://github.com/adap/flower/pull/1286), "
 "[#1282](https://github.com/adap/flower/pull/1282))"
 
-#: ../../source/ref-changelog.md:1512
+#: ../../source/ref-changelog.md:1504
 msgid ""
 "Many code examples received small or even large maintenance updates, "
 "among them are"
@@ -25775,31 +25753,31 @@ msgstr ""
 "De nombreux exemples de code ont reçu de petites ou même de grandes mises"
 " à jour de maintenance"
 
-#: ../../source/ref-changelog.md:1514
+#: ../../source/ref-changelog.md:1506
 msgid "`scikit-learn`"
 msgstr "`scikit-learn`"
 
-#: ../../source/ref-changelog.md:1515
+#: ../../source/ref-changelog.md:1507
 msgid "`simulation_pytorch`"
 msgstr "`simulation_pytorch`"
 
-#: ../../source/ref-changelog.md:1516
+#: ../../source/ref-changelog.md:1508
 msgid "`quickstart_pytorch`"
 msgstr "`quickstart_pytorch` (démarrage rapide)"
 
-#: ../../source/ref-changelog.md:1517
+#: ../../source/ref-changelog.md:1509
 msgid "`quickstart_simulation`"
 msgstr "`quickstart_simulation`"
 
-#: ../../source/ref-changelog.md:1518
+#: ../../source/ref-changelog.md:1510
 msgid "`quickstart_tensorflow`"
 msgstr "`quickstart_tensorflow`"
 
-#: ../../source/ref-changelog.md:1519
+#: ../../source/ref-changelog.md:1511
 msgid "`advanced_tensorflow`"
 msgstr "`advanced_tensorflow` (en anglais)"
 
-#: ../../source/ref-changelog.md:1521
+#: ../../source/ref-changelog.md:1513
 msgid ""
 "**Remove the obsolete simulation example** "
 "([#1328](https://github.com/adap/flower/pull/1328))"
@@ -25807,7 +25785,7 @@ msgstr ""
 "**Supprime l'exemple de simulation obsolète** "
 "([#1328](https://github.com/adap/flower/pull/1328))"
 
-#: ../../source/ref-changelog.md:1523
+#: ../../source/ref-changelog.md:1515
 msgid ""
 "Removes the obsolete `simulation` example and renames "
 "`quickstart_simulation` to `simulation_tensorflow` so it fits withs the "
@@ -25817,7 +25795,7 @@ msgstr ""
 "`quickstart_simulation` en `simulation_tensorflow` pour qu'il corresponde"
 " au nom de `simulation_pytorch`"
 
-#: ../../source/ref-changelog.md:1525
+#: ../../source/ref-changelog.md:1517
 msgid ""
 "**Update documentation** "
 "([#1223](https://github.com/adap/flower/pull/1223), "
@@ -25843,7 +25821,7 @@ msgstr ""
 "[#1305](https://github.com/adap/flower/pull/1305), "
 "[#1307](https://github.com/adap/flower/pull/1307))"
 
-#: ../../source/ref-changelog.md:1527
+#: ../../source/ref-changelog.md:1519
 msgid ""
 "One substantial documentation update fixes multiple smaller rendering "
 "issues, makes titles more succinct to improve navigation, removes a "
@@ -25860,12 +25838,12 @@ msgstr ""
 "markdown, migre le changelog de `.rst` vers `.md`, et corrige un certain "
 "nombre de détails plus petits !"
 
-#: ../../source/ref-changelog.md:1529 ../../source/ref-changelog.md:1584
-#: ../../source/ref-changelog.md:1653 ../../source/ref-changelog.md:1692
+#: ../../source/ref-changelog.md:1521 ../../source/ref-changelog.md:1575
+#: ../../source/ref-changelog.md:1649 ../../source/ref-changelog.md:1688
 msgid "**Minor updates**"
 msgstr "**Mises à jour mineures**"
 
-#: ../../source/ref-changelog.md:1531
+#: ../../source/ref-changelog.md:1523
 msgid ""
 "Add round number to fit and evaluate log messages "
 "([#1266](https://github.com/adap/flower/pull/1266))"
@@ -25873,15 +25851,7 @@ msgstr ""
 "Ajoute un chiffre rond pour ajuster et évaluer les messages du journal "
 "([#1266](https://github.com/adap/flower/pull/1266))"
 
-#: ../../source/ref-changelog.md:1532
-msgid ""
-"Add secure gRPC connection to the `advanced_tensorflow` code example "
-"([#847](https://github.com/adap/flower/pull/847))"
-msgstr ""
-"Ajouter une connexion gRPC sécurisée à l'exemple de code "
-"`advanced_tensorflow` ([#847](https://github.com/adap/flower/pull/847))"
-
-#: ../../source/ref-changelog.md:1533
+#: ../../source/ref-changelog.md:1524
 msgid ""
 "Update developer tooling "
 "([#1231](https://github.com/adap/flower/pull/1231), "
@@ -25895,7 +25865,7 @@ msgstr ""
 "[#1301](https://github.com/adap/flower/pull/1301), "
 "[#1310](https://github.com/adap/flower/pull/1310))"
 
-#: ../../source/ref-changelog.md:1534
+#: ../../source/ref-changelog.md:1525
 msgid ""
 "Rename ProtoBuf messages to improve consistency "
 "([#1214](https://github.com/adap/flower/pull/1214), "
@@ -25907,11 +25877,11 @@ msgstr ""
 "[#1258](https://github.com/adap/flower/pull/1258), "
 "[#1259](https://github.com/adap/flower/pull/1259))"
 
-#: ../../source/ref-changelog.md:1536
+#: ../../source/ref-changelog.md:1527
 msgid "v0.19.0 (2022-05-18)"
 msgstr "v0.19.0 (2022-05-18)"
 
-#: ../../source/ref-changelog.md:1540
+#: ../../source/ref-changelog.md:1531
 msgid ""
 "**Flower Baselines (preview): FedOpt, FedBN, FedAvgM** "
 "([#919](https://github.com/adap/flower/pull/919), "
@@ -25923,7 +25893,7 @@ msgstr ""
 "[#1127](https://github.com/adap/flower/pull/1127), "
 "[#914](https://github.com/adap/flower/pull/914))"
 
-#: ../../source/ref-changelog.md:1542
+#: ../../source/ref-changelog.md:1533
 #, fuzzy
 msgid ""
 "The first preview release of Flower Baselines has arrived! We're "
@@ -25942,7 +25912,7 @@ msgstr ""
 "également la communauté à [contribuer à leurs propres lignes de "
 "base](https://flower.ai/docs/baselines/how-to-contribute-baselines.html)."
 
-#: ../../source/ref-changelog.md:1544
+#: ../../source/ref-changelog.md:1535
 msgid ""
 "**C++ client SDK (preview) and code example** "
 "([#1111](https://github.com/adap/flower/pull/1111))"
@@ -25950,7 +25920,7 @@ msgstr ""
 "**SDK client C++ (aperçu) et exemple de code** "
 "([#1111](https://github.com/adap/flower/pull/1111))"
 
-#: ../../source/ref-changelog.md:1546
+#: ../../source/ref-changelog.md:1537
 msgid ""
 "Preview support for Flower clients written in C++. The C++ preview "
 "includes a Flower client SDK and a quickstart code example that "
@@ -25960,7 +25930,7 @@ msgstr ""
 "code de démarrage rapide qui démontre un client C++ simple utilisant le "
 "SDK."
 
-#: ../../source/ref-changelog.md:1548
+#: ../../source/ref-changelog.md:1539
 msgid ""
 "**Add experimental support for Python 3.10 and Python 3.11** "
 "([#1135](https://github.com/adap/flower/pull/1135))"
@@ -25968,7 +25938,7 @@ msgstr ""
 "**Ajouter la prise en charge expérimentale de Python 3.10 et Python "
 "3.11** ([#1135](https://github.com/adap/flower/pull/1135))"
 
-#: ../../source/ref-changelog.md:1550
+#: ../../source/ref-changelog.md:1541
 msgid ""
 "Python 3.10 is the latest stable release of Python and Python 3.11 is due"
 " to be released in October. This Flower release adds experimental support"
@@ -25978,7 +25948,7 @@ msgstr ""
 "devrait sortir en octobre. Cette version de Flower ajoute une prise en "
 "charge expérimentale pour les deux versions de Python."
 
-#: ../../source/ref-changelog.md:1552
+#: ../../source/ref-changelog.md:1543
 msgid ""
 "**Aggregate custom metrics through user-provided functions** "
 "([#1144](https://github.com/adap/flower/pull/1144))"
@@ -25986,7 +25956,7 @@ msgstr ""
 "**Agréger des mesures personnalisées grâce à des fonctions fournies par "
 "l'utilisateur** ([#1144](https://github.com/adap/flower/pull/1144))"
 
-#: ../../source/ref-changelog.md:1554
+#: ../../source/ref-changelog.md:1545
 msgid ""
 "Custom metrics (e.g., `accuracy`) can now be aggregated without having to"
 " customize the strategy. Built-in strategies support two new arguments, "
@@ -25998,7 +25968,7 @@ msgstr ""
 "permettent de passer des fonctions d'agrégation de métriques "
 "personnalisées."
 
-#: ../../source/ref-changelog.md:1556
+#: ../../source/ref-changelog.md:1547
 msgid ""
 "**User-configurable round timeout** "
 "([#1162](https://github.com/adap/flower/pull/1162))"
@@ -26006,7 +25976,7 @@ msgstr ""
 "**Temps d'attente configurable par l'utilisateur** "
 "([#1162](https://github.com/adap/flower/pull/1162))"
 
-#: ../../source/ref-changelog.md:1558
+#: ../../source/ref-changelog.md:1549
 msgid ""
 "A new configuration value allows the round timeout to be set for "
 "`start_server` and `start_simulation`. If the `config` dictionary "
@@ -26018,7 +25988,7 @@ msgstr ""
 "valeur `float` en secondes), le serveur attendra *au moins* "
 "`round_timeout` secondes avant de fermer la connexion."
 
-#: ../../source/ref-changelog.md:1560
+#: ../../source/ref-changelog.md:1551
 msgid ""
 "**Enable both federated evaluation and centralized evaluation to be used "
 "at the same time in all built-in strategies** "
@@ -26028,7 +25998,7 @@ msgstr ""
 "l'évaluation centralisée dans toutes les stratégies intégrées** "
 "([#1091](https://github.com/adap/flower/pull/1091))"
 
-#: ../../source/ref-changelog.md:1562
+#: ../../source/ref-changelog.md:1553
 msgid ""
 "Built-in strategies can now perform both federated evaluation (i.e., "
 "client-side) and centralized evaluation (i.e., server-side) in the same "
@@ -26040,7 +26010,7 @@ msgstr ""
 "(c'est-à-dire côté serveur) dans le même tour. L'évaluation fédérée peut "
 "être désactivée en réglant `fraction_eval` sur `0.0`."
 
-#: ../../source/ref-changelog.md:1564
+#: ../../source/ref-changelog.md:1555
 msgid ""
 "**Two new Jupyter Notebook tutorials** "
 "([#1141](https://github.com/adap/flower/pull/1141))"
@@ -26048,7 +26018,7 @@ msgstr ""
 "**Deux nouveaux tutoriels Jupyter Notebook** "
 "([#1141](https://github.com/adap/flower/pull/1141))"
 
-#: ../../source/ref-changelog.md:1566
+#: ../../source/ref-changelog.md:1557
 msgid ""
 "Two Jupyter Notebook tutorials (compatible with Google Colab) explain "
 "basic and intermediate Flower features:"
@@ -26056,7 +26026,7 @@ msgstr ""
 "Deux tutoriels Jupyter Notebook (compatibles avec Google Colab) "
 "expliquent les fonctionnalités de base et intermédiaires de Flower :"
 
-#: ../../source/ref-changelog.md:1568
+#: ../../source/ref-changelog.md:1559
 msgid ""
 "*An Introduction to Federated Learning*: [Open in "
 "Colab](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-1"
@@ -26066,7 +26036,7 @@ msgstr ""
 "Colab](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-1"
 "-Intro-to-FL-PyTorch.ipynb)"
 
-#: ../../source/ref-changelog.md:1570
+#: ../../source/ref-changelog.md:1561
 msgid ""
 "*Using Strategies in Federated Learning*: [Open in "
 "Colab](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-2"
@@ -26076,7 +26046,7 @@ msgstr ""
 "Colab](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-2"
 "-Strategies-in-FL-PyTorch.ipynb)"
 
-#: ../../source/ref-changelog.md:1572
+#: ../../source/ref-changelog.md:1563
 msgid ""
 "**New FedAvgM strategy (Federated Averaging with Server Momentum)** "
 "([#1076](https://github.com/adap/flower/pull/1076))"
@@ -26084,7 +26054,7 @@ msgstr ""
 "**Nouvelle stratégie FedAvgM (Federated Averaging with Server Momentum)**"
 " ([#1076](https://github.com/adap/flower/pull/1076))"
 
-#: ../../source/ref-changelog.md:1574
+#: ../../source/ref-changelog.md:1565
 #, fuzzy
 msgid ""
 "The new `FedAvgM` strategy implements Federated Averaging with Server "
@@ -26093,7 +26063,7 @@ msgstr ""
 "La nouvelle stratégie `FedAvgM` met en œuvre la moyenne fédérée avec le "
 "momentum du serveur [Hsu et al., 2019]."
 
-#: ../../source/ref-changelog.md:1576
+#: ../../source/ref-changelog.md:1567
 msgid ""
 "**New advanced PyTorch code example** "
 "([#1007](https://github.com/adap/flower/pull/1007))"
@@ -26101,7 +26071,7 @@ msgstr ""
 "**Nouvel exemple de code PyTorch avancé** "
 "([#1007](https://github.com/adap/flower/pull/1007))"
 
-#: ../../source/ref-changelog.md:1578
+#: ../../source/ref-changelog.md:1569
 msgid ""
 "A new code example (`advanced_pytorch`) demonstrates advanced Flower "
 "concepts with PyTorch."
@@ -26109,7 +26079,7 @@ msgstr ""
 "Un nouvel exemple de code (`advanced_pytorch`) démontre des concepts de "
 "fleur avancés avec PyTorch."
 
-#: ../../source/ref-changelog.md:1580
+#: ../../source/ref-changelog.md:1571
 msgid ""
 "**New JAX code example** "
 "([#906](https://github.com/adap/flower/pull/906), "
@@ -26119,7 +26089,7 @@ msgstr ""
 "([#906](https://github.com/adap/flower/pull/906), "
 "[#1143](https://github.com/adap/flower/pull/1143))"
 
-#: ../../source/ref-changelog.md:1582
+#: ../../source/ref-changelog.md:1573
 msgid ""
 "A new code example (`jax_from_centralized_to_federated`) shows federated "
 "learning with JAX and Flower."
@@ -26127,7 +26097,7 @@ msgstr ""
 "Un nouvel exemple de code (`jax_from_centralized_to_federated`) montre "
 "l'apprentissage fédéré avec JAX et Flower."
 
-#: ../../source/ref-changelog.md:1586
+#: ../../source/ref-changelog.md:1577
 msgid ""
 "New option to keep Ray running if Ray was already initialized in "
 "`start_simulation` ([#1177](https://github.com/adap/flower/pull/1177))"
@@ -26136,7 +26106,7 @@ msgstr ""
 "initialisé dans `start_simulation` "
 "([#1177](https://github.com/adap/flower/pull/1177))"
 
-#: ../../source/ref-changelog.md:1587
+#: ../../source/ref-changelog.md:1578
 msgid ""
 "Add support for custom `ClientManager` as a `start_simulation` parameter "
 "([#1171](https://github.com/adap/flower/pull/1171))"
@@ -26145,7 +26115,7 @@ msgstr ""
 "paramètre de `start_simulation` "
 "([#1171](https://github.com/adap/flower/pull/1171))"
 
-#: ../../source/ref-changelog.md:1588
+#: ../../source/ref-changelog.md:1579
 #, fuzzy
 msgid ""
 "New documentation for [implementing "
@@ -26158,7 +26128,7 @@ msgstr ""
 "strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), "
 "[#1175](https://github.com/adap/flower/pull/1175))"
 
-#: ../../source/ref-changelog.md:1589
+#: ../../source/ref-changelog.md:1580
 msgid ""
 "New mobile-friendly documentation theme "
 "([#1174](https://github.com/adap/flower/pull/1174))"
@@ -26166,7 +26136,7 @@ msgstr ""
 "Nouveau thème de documentation adapté aux mobiles "
 "([#1174](https://github.com/adap/flower/pull/1174))"
 
-#: ../../source/ref-changelog.md:1590
+#: ../../source/ref-changelog.md:1581
 msgid ""
 "Limit version range for (optional) `ray` dependency to include only "
 "compatible releases (`>=1.9.2,<1.12.0`) "
@@ -26176,7 +26146,22 @@ msgstr ""
 "n'inclure que les versions compatibles (`>=1.9.2,<1.12.0`) "
 "([#1205](https://github.com/adap/flower/pull/1205))"
 
-#: ../../source/ref-changelog.md:1594
+#: ../../source/ref-changelog.md:1585
+msgid ""
+"**Remove deprecated DefaultStrategy strategy** "
+"([#1142](https://github.com/adap/flower/pull/1142))"
+msgstr ""
+"**Supprime la stratégie DefaultStrategy qui est obsolète** "
+"([#1142](https://github.com/adap/flower/pull/1142))"
+
+#: ../../source/ref-changelog.md:1587
+msgid ""
+"Removes the deprecated `DefaultStrategy` strategy, along with deprecated "
+"support for the `eval_fn` accuracy return value and passing initial "
+"parameters as NumPy ndarrays."
+msgstr ""
+
+#: ../../source/ref-changelog.md:1589
 msgid ""
 "**Remove deprecated support for Python 3.6** "
 "([#871](https://github.com/adap/flower/pull/871))"
@@ -26184,7 +26169,7 @@ msgstr ""
 "**Supprime la prise en charge obsolète de Python 3.6** "
 "([#871](https://github.com/adap/flower/pull/871))"
 
-#: ../../source/ref-changelog.md:1595
+#: ../../source/ref-changelog.md:1591
 msgid ""
 "**Remove deprecated KerasClient** "
 "([#857](https://github.com/adap/flower/pull/857))"
@@ -26192,7 +26177,7 @@ msgstr ""
 "**Supprimez KerasClient** "
 "([#857](https://github.com/adap/flower/pull/857))"
 
-#: ../../source/ref-changelog.md:1596
+#: ../../source/ref-changelog.md:1593
 msgid ""
 "**Remove deprecated no-op extra installs** "
 "([#973](https://github.com/adap/flower/pull/973))"
@@ -26200,15 +26185,16 @@ msgstr ""
 "**Supprimer les installations supplémentaires no-op dépréciées** "
 "([#973](https://github.com/adap/flower/pull/973))"
 
-#: ../../source/ref-changelog.md:1597
+#: ../../source/ref-changelog.md:1595
+#, fuzzy
 msgid ""
 "**Remove deprecated proto fields from** `FitRes` **and** `EvaluateRes` "
-"([#869](https://github.com/adap/flower/pull/869))"
+"([#870](https://github.com/adap/flower/pull/870))"
 msgstr ""
 "**Supprimez les champs proto obsolètes de** `FitRes` **et** `EvaluateRes`"
 " ([#869](https://github.com/adap/flower/pull/869))"
 
-#: ../../source/ref-changelog.md:1598
+#: ../../source/ref-changelog.md:1597
 msgid ""
 "**Remove deprecated QffedAvg strategy (replaced by QFedAvg)** "
 "([#1107](https://github.com/adap/flower/pull/1107))"
@@ -26217,40 +26203,15 @@ msgstr ""
 "([#1107](https://github.com/adap/flower/pull/1107))"
 
 #: ../../source/ref-changelog.md:1599
-msgid ""
-"**Remove deprecated DefaultStrategy strategy** "
-"([#1142](https://github.com/adap/flower/pull/1142))"
-msgstr ""
-"**Supprime la stratégie DefaultStrategy qui est obsolète** "
-"([#1142](https://github.com/adap/flower/pull/1142))"
-
-#: ../../source/ref-changelog.md:1600
-msgid ""
-"**Remove deprecated support for eval_fn accuracy return value** "
-"([#1142](https://github.com/adap/flower/pull/1142))"
-msgstr ""
-"**Supprimer la prise en charge obsolète de la valeur de retour de la "
-"précision eval_fn** ([#1142](https://github.com/adap/flower/pull/1142))"
-
-#: ../../source/ref-changelog.md:1601
-msgid ""
-"**Remove deprecated support for passing initial parameters as NumPy "
-"ndarrays** ([#1142](https://github.com/adap/flower/pull/1142))"
-msgstr ""
-"**Supprime la prise en charge obsolète du passage des paramètres initiaux"
-" en tant que ndarrays NumPy** "
-"([#1142](https://github.com/adap/flower/pull/1142))"
-
-#: ../../source/ref-changelog.md:1603
 msgid "v0.18.0 (2022-02-28)"
 msgstr "v0.18.0 (2022-02-28)"
 
-#: ../../source/ref-changelog.md:1607
+#: ../../source/ref-changelog.md:1603
+#, fuzzy
 msgid ""
 "**Improved Virtual Client Engine compatibility with Jupyter Notebook / "
 "Google Colab** ([#866](https://github.com/adap/flower/pull/866), "
 "[#872](https://github.com/adap/flower/pull/872), "
-"[#833](https://github.com/adap/flower/pull/833), "
 "[#1036](https://github.com/adap/flower/pull/1036))"
 msgstr ""
 "**Amélioration de la compatibilité du moteur de client virtuel avec "
@@ -26260,7 +26221,7 @@ msgstr ""
 "[#833](https://github.com/adap/flower/pull/833), "
 "[#1036](https://github.com/adap/flower/pull/1036))"
 
-#: ../../source/ref-changelog.md:1609
+#: ../../source/ref-changelog.md:1605
 msgid ""
 "Simulations (using the Virtual Client Engine through `start_simulation`) "
 "now work more smoothly on Jupyter Notebooks (incl. Google Colab) after "
@@ -26272,7 +26233,7 @@ msgstr ""
 "Notebooks Jupyter (y compris Google Colab) après avoir installé Flower "
 "avec l'option `simulation` (`pip install 'flwr[simulation]'`)."
 
-#: ../../source/ref-changelog.md:1611
+#: ../../source/ref-changelog.md:1607
 msgid ""
 "**New Jupyter Notebook code example** "
 "([#833](https://github.com/adap/flower/pull/833))"
@@ -26280,7 +26241,7 @@ msgstr ""
 "**Nouvel exemple de code Jupyter Notebook** "
 "([#833](https://github.com/adap/flower/pull/833))"
 
-#: ../../source/ref-changelog.md:1613
+#: ../../source/ref-changelog.md:1609
 msgid ""
 "A new code example (`quickstart_simulation`) demonstrates Flower "
 "simulations using the Virtual Client Engine through Jupyter Notebook "
@@ -26290,7 +26251,7 @@ msgstr ""
 "simulations de Flower en utilisant le moteur de client virtuel via "
 "Jupyter Notebook (y compris Google Colab)."
 
-#: ../../source/ref-changelog.md:1615
+#: ../../source/ref-changelog.md:1611
 msgid ""
 "**Client properties (feature preview)** "
 "([#795](https://github.com/adap/flower/pull/795))"
@@ -26298,7 +26259,7 @@ msgstr ""
 "**Propriétés du client (aperçu des fonctionnalités)** "
 "([#795](https://github.com/adap/flower/pull/795))"
 
-#: ../../source/ref-changelog.md:1617
+#: ../../source/ref-changelog.md:1613
 msgid ""
 "Clients can implement a new method `get_properties` to enable server-side"
 " strategies to query client properties."
@@ -26307,7 +26268,7 @@ msgstr ""
 "pour permettre aux stratégies côté serveur d'interroger les propriétés du"
 " client."
 
-#: ../../source/ref-changelog.md:1619
+#: ../../source/ref-changelog.md:1615
 msgid ""
 "**Experimental Android support with TFLite** "
 "([#865](https://github.com/adap/flower/pull/865))"
@@ -26315,7 +26276,7 @@ msgstr ""
 "**Support expérimental d'Android avec TFLite** "
 "([#865](https://github.com/adap/flower/pull/865))"
 
-#: ../../source/ref-changelog.md:1621
+#: ../../source/ref-changelog.md:1617
 msgid ""
 "Android support has finally arrived in `main`! Flower is both client-"
 "agnostic and framework-agnostic by design. One can integrate arbitrary "
@@ -26327,7 +26288,7 @@ msgstr ""
 "intégrer des plates-formes client arbitraires et avec cette version, "
 "l'utilisation de Flower sur Android est devenue beaucoup plus facile."
 
-#: ../../source/ref-changelog.md:1623
+#: ../../source/ref-changelog.md:1619
 msgid ""
 "The example uses TFLite on the client side, along with a new "
 "`FedAvgAndroid` strategy. The Android client and `FedAvgAndroid` are "
@@ -26341,7 +26302,7 @@ msgstr ""
 "part entière et une implémentation unifiée de `FedAvg` intégrant la "
 "nouvelle fonctionnalité de `FedAvgAndroid`."
 
-#: ../../source/ref-changelog.md:1625
+#: ../../source/ref-changelog.md:1621
 msgid ""
 "**Make gRPC keepalive time user-configurable and decrease default "
 "keepalive time** ([#1069](https://github.com/adap/flower/pull/1069))"
@@ -26350,7 +26311,7 @@ msgstr ""
 "diminuer le temps de garde par défaut** "
 "([#1069](https://github.com/adap/flower/pull/1069))"
 
-#: ../../source/ref-changelog.md:1627
+#: ../../source/ref-changelog.md:1623
 msgid ""
 "The default gRPC keepalive time has been reduced to increase the "
 "compatibility of Flower with more cloud environments (for example, "
@@ -26363,7 +26324,7 @@ msgstr ""
 "de keepalive pour personnaliser la pile gRPC en fonction d'exigences "
 "spécifiques."
 
-#: ../../source/ref-changelog.md:1629
+#: ../../source/ref-changelog.md:1625
 msgid ""
 "**New differential privacy example using Opacus and PyTorch** "
 "([#805](https://github.com/adap/flower/pull/805))"
@@ -26371,7 +26332,7 @@ msgstr ""
 "**Nouvel exemple de confidentialité différentielle utilisant Opacus et "
 "PyTorch** ([#805](https://github.com/adap/flower/pull/805))"
 
-#: ../../source/ref-changelog.md:1631
+#: ../../source/ref-changelog.md:1627
 msgid ""
 "A new code example (`opacus`) demonstrates differentially-private "
 "federated learning with Opacus, PyTorch, and Flower."
@@ -26379,7 +26340,7 @@ msgstr ""
 "Un nouvel exemple de code (`opacus`) démontre l'apprentissage fédéré "
 "différentiellement privé avec Opacus, PyTorch et Flower."
 
-#: ../../source/ref-changelog.md:1633
+#: ../../source/ref-changelog.md:1629
 msgid ""
 "**New Hugging Face Transformers code example** "
 "([#863](https://github.com/adap/flower/pull/863))"
@@ -26387,7 +26348,7 @@ msgstr ""
 "**Nouvel exemple de code pour les Transformers à visage embrassant** "
 "([#863](https://github.com/adap/flower/pull/863))"
 
-#: ../../source/ref-changelog.md:1635
+#: ../../source/ref-changelog.md:1631
 msgid ""
 "A new code example (`quickstart_huggingface`) demonstrates usage of "
 "Hugging Face Transformers with Flower."
@@ -26395,7 +26356,7 @@ msgstr ""
 "Un nouvel exemple de code (`quickstart_huggingface`) démontre "
 "l'utilisation des transformateurs Hugging Face avec Flower."
 
-#: ../../source/ref-changelog.md:1637
+#: ../../source/ref-changelog.md:1633
 msgid ""
 "**New MLCube code example** "
 "([#779](https://github.com/adap/flower/pull/779), "
@@ -26409,7 +26370,7 @@ msgstr ""
 "[#1065](https://github.com/adap/flower/pull/1065), "
 "[#1090](https://github.com/adap/flower/pull/1090))"
 
-#: ../../source/ref-changelog.md:1639
+#: ../../source/ref-changelog.md:1635
 msgid ""
 "A new code example (`quickstart_mlcube`) demonstrates usage of MLCube "
 "with Flower."
@@ -26417,7 +26378,7 @@ msgstr ""
 "Un nouvel exemple de code (`quickstart_mlcube`) démontre l'utilisation de"
 " MLCube avec Flower."
 
-#: ../../source/ref-changelog.md:1641
+#: ../../source/ref-changelog.md:1637
 msgid ""
 "**SSL-enabled server and client** "
 "([#842](https://github.com/adap/flower/pull/842),  "
@@ -26434,18 +26395,20 @@ msgstr ""
 "[#993](https://github.com/adap/flower/pull/993), "
 "[#994](https://github.com/adap/flower/pull/994))"
 
-#: ../../source/ref-changelog.md:1643
+#: ../../source/ref-changelog.md:1639
+#, fuzzy
 msgid ""
 "SSL enables secure encrypted connections between clients and servers. "
 "This release open-sources the Flower secure gRPC implementation to make "
-"encrypted communication channels accessible to all Flower users."
+"encrypted communication channels accessible to all Flower users. The "
+"`advanced_tensorflow` code example now uses secure gRPC connection."
 msgstr ""
 "SSL permet d'établir des connexions cryptées et sécurisées entre les "
 "clients et les serveurs. Cette version met en open-source "
 "l'implémentation gRPC sécurisée de Flower afin de rendre les canaux de "
 "communication cryptés accessibles à tous les utilisateurs de Flower."
 
-#: ../../source/ref-changelog.md:1645
+#: ../../source/ref-changelog.md:1641
 msgid ""
 "**Updated** `FedAdam` **and** `FedYogi` **strategies** "
 "([#885](https://github.com/adap/flower/pull/885), "
@@ -26455,7 +26418,7 @@ msgstr ""
 "([#885](https://github.com/adap/flower/pull/885), "
 "[#895](https://github.com/adap/flower/pull/895))"
 
-#: ../../source/ref-changelog.md:1647
+#: ../../source/ref-changelog.md:1643
 msgid ""
 "`FedAdam` and `FedAdam` match the latest version of the Adaptive "
 "Federated Optimization paper."
@@ -26463,7 +26426,7 @@ msgstr ""
 "`FedAdam` et `FedAdam` correspondent à la dernière version de l'article "
 "sur l'optimisation fédérée adaptative."
 
-#: ../../source/ref-changelog.md:1649
+#: ../../source/ref-changelog.md:1645
 msgid ""
 "**Initialize** `start_simulation` **with a list of client IDs** "
 "([#860](https://github.com/adap/flower/pull/860))"
@@ -26471,7 +26434,7 @@ msgstr ""
 "**Initialise** `start_simulation` **avec une liste d'ID de clients** "
 "([#860](https://github.com/adap/flower/pull/860))"
 
-#: ../../source/ref-changelog.md:1651
+#: ../../source/ref-changelog.md:1647
 msgid ""
 "`start_simulation` can now be called with a list of client IDs "
 "(`clients_ids`, type: `List[str]`). Those IDs will be passed to the "
@@ -26485,7 +26448,7 @@ msgstr ""
 "être initialisé, ce qui peut faciliter le chargement de partitions de "
 "données qui ne sont pas accessibles par des identifiants `int`."
 
-#: ../../source/ref-changelog.md:1655
+#: ../../source/ref-changelog.md:1651
 msgid ""
 "Update `num_examples` calculation in PyTorch code examples in "
 "([#909](https://github.com/adap/flower/pull/909))"
@@ -26493,7 +26456,7 @@ msgstr ""
 "Mettre à jour le calcul de `num_examples` dans les exemples de code "
 "PyTorch dans ([#909](https://github.com/adap/flower/pull/909))"
 
-#: ../../source/ref-changelog.md:1656
+#: ../../source/ref-changelog.md:1652
 msgid ""
 "Expose Flower version through `flwr.__version__` "
 "([#952](https://github.com/adap/flower/pull/952))"
@@ -26501,7 +26464,7 @@ msgstr ""
 "Exposer la version de Flower à travers `flwr.__version__` "
 "([#952](https://github.com/adap/flower/pull/952))"
 
-#: ../../source/ref-changelog.md:1657
+#: ../../source/ref-changelog.md:1653
 msgid ""
 "`start_server` in `app.py` now returns a `History` object containing "
 "metrics from training ([#974](https://github.com/adap/flower/pull/974))"
@@ -26510,7 +26473,7 @@ msgstr ""
 "contenant les métriques de l'entraînement "
 "([#974](https://github.com/adap/flower/pull/974))"
 
-#: ../../source/ref-changelog.md:1658
+#: ../../source/ref-changelog.md:1654
 msgid ""
 "Make `max_workers` (used by `ThreadPoolExecutor`) configurable "
 "([#978](https://github.com/adap/flower/pull/978))"
@@ -26518,7 +26481,7 @@ msgstr ""
 "Rendre `max_workers` (utilisé par `ThreadPoolExecutor`) configurable "
 "([#978](https://github.com/adap/flower/pull/978))"
 
-#: ../../source/ref-changelog.md:1659
+#: ../../source/ref-changelog.md:1655
 msgid ""
 "Increase sleep time after server start to three seconds in all code "
 "examples ([#1086](https://github.com/adap/flower/pull/1086))"
@@ -26527,7 +26490,7 @@ msgstr ""
 "secondes dans tous les exemples de code "
 "([#1086](https://github.com/adap/flower/pull/1086))"
 
-#: ../../source/ref-changelog.md:1660
+#: ../../source/ref-changelog.md:1656
 msgid ""
 "Added a new FAQ section to the documentation "
 "([#948](https://github.com/adap/flower/pull/948))"
@@ -26535,7 +26498,7 @@ msgstr ""
 "Ajout d'une nouvelle section FAQ à la documentation "
 "([#948](https://github.com/adap/flower/pull/948))"
 
-#: ../../source/ref-changelog.md:1661
+#: ../../source/ref-changelog.md:1657
 msgid ""
 "And many more under-the-hood changes, library updates, documentation "
 "changes, and tooling improvements!"
@@ -26544,7 +26507,7 @@ msgstr ""
 "bibliothèque, des modifications de la documentation et des améliorations "
 "de l'outillage !"
 
-#: ../../source/ref-changelog.md:1665
+#: ../../source/ref-changelog.md:1661
 msgid ""
 "**Removed** `flwr_example` **and** `flwr_experimental` **from release "
 "build** ([#869](https://github.com/adap/flower/pull/869))"
@@ -26552,7 +26515,7 @@ msgstr ""
 "**Supprimé** `flwr_example` **et** `flwr_experimental` **de la version "
 "release build** ([#869](https://github.com/adap/flower/pull/869))"
 
-#: ../../source/ref-changelog.md:1667
+#: ../../source/ref-changelog.md:1663
 msgid ""
 "The packages `flwr_example` and `flwr_experimental` have been deprecated "
 "since Flower 0.12.0 and they are not longer included in Flower release "
@@ -26566,23 +26529,23 @@ msgstr ""
 "tensorflow`, `http-logger`, `ops`) sont maintenant no-op et seront "
 "supprimés dans une prochaine version."
 
-#: ../../source/ref-changelog.md:1669
+#: ../../source/ref-changelog.md:1665
 msgid "v0.17.0 (2021-09-24)"
 msgstr "v0.17.0 (2021-09-24)"
 
-#: ../../source/ref-changelog.md:1673
+#: ../../source/ref-changelog.md:1669
+#, fuzzy
 msgid ""
 "**Experimental virtual client engine** "
 "([#781](https://github.com/adap/flower/pull/781) "
-"[#790](https://github.com/adap/flower/pull/790) "
-"[#791](https://github.com/adap/flower/pull/791))"
+"[#790](https://github.com/adap/flower/pull/790))"
 msgstr ""
 "**Moteur expérimental de client virtuel** "
 "([#781](https://github.com/adap/flower/pull/781) "
 "[#790](https://github.com/adap/flower/pull/790) "
 "[#791](https://github.com/adap/flower/pull/791))"
 
-#: ../../source/ref-changelog.md:1675
+#: ../../source/ref-changelog.md:1671
 msgid ""
 "One of Flower's goals is to enable research at scale. This release "
 "enables a first (experimental) peek at a major new feature, codenamed the"
@@ -26600,7 +26563,7 @@ msgstr ""
 "fonctionnalité est de regarder les deux nouveaux exemples de code appelés"
 " `quickstart_simulation` et `simulation_pytorch`."
 
-#: ../../source/ref-changelog.md:1677
+#: ../../source/ref-changelog.md:1673
 msgid ""
 "The feature is still experimental, so there's no stability guarantee for "
 "the API. It's also not quite ready for prime time and comes with a few "
@@ -26613,7 +26576,7 @@ msgstr ""
 " les personnes curieuses sont encouragées à l'essayer et à faire part de "
 "leurs réflexions."
 
-#: ../../source/ref-changelog.md:1679
+#: ../../source/ref-changelog.md:1675
 msgid ""
 "**New built-in strategies** "
 "([#828](https://github.com/adap/flower/pull/828) "
@@ -26623,7 +26586,7 @@ msgstr ""
 "([#828](https://github.com/adap/flower/pull/828) "
 "[#822](https://github.com/adap/flower/pull/822))"
 
-#: ../../source/ref-changelog.md:1681
+#: ../../source/ref-changelog.md:1677
 msgid ""
 "FedYogi - Federated learning strategy using Yogi on server-side. "
 "Implementation based on https://arxiv.org/abs/2003.00295"
@@ -26631,7 +26594,7 @@ msgstr ""
 "FedYogi - Stratégie d'apprentissage fédéré utilisant Yogi côté serveur. "
 "Mise en oeuvre basée sur https://arxiv.org/abs/2003.00295"
 
-#: ../../source/ref-changelog.md:1682
+#: ../../source/ref-changelog.md:1678
 msgid ""
 "FedAdam - Federated learning strategy using Adam on server-side. "
 "Implementation based on https://arxiv.org/abs/2003.00295"
@@ -26639,7 +26602,7 @@ msgstr ""
 "FedAdam - Stratégie d'apprentissage fédéré utilisant Adam côté serveur. "
 "Mise en œuvre basée sur https://arxiv.org/abs/2003.00295"
 
-#: ../../source/ref-changelog.md:1684
+#: ../../source/ref-changelog.md:1680
 msgid ""
 "**New PyTorch Lightning code example** "
 "([#617](https://github.com/adap/flower/pull/617))"
@@ -26647,7 +26610,7 @@ msgstr ""
 "**Nouvel exemple de code PyTorch Lightning** "
 "([#617](https://github.com/adap/flower/pull/617))"
 
-#: ../../source/ref-changelog.md:1686
+#: ../../source/ref-changelog.md:1682
 msgid ""
 "**New Variational Auto-Encoder code example** "
 "([#752](https://github.com/adap/flower/pull/752))"
@@ -26655,7 +26618,7 @@ msgstr ""
 "**Nouvel exemple de code d'autocodage variationnel** "
 "([#752](https://github.com/adap/flower/pull/752))"
 
-#: ../../source/ref-changelog.md:1688
+#: ../../source/ref-changelog.md:1684
 msgid ""
 "**New scikit-learn code example** "
 "([#748](https://github.com/adap/flower/pull/748))"
@@ -26663,7 +26626,7 @@ msgstr ""
 "**Nouvel exemple de code scikit-learn** "
 "([#748](https://github.com/adap/flower/pull/748))"
 
-#: ../../source/ref-changelog.md:1690
+#: ../../source/ref-changelog.md:1686
 msgid ""
 "**New experimental TensorBoard strategy** "
 "([#789](https://github.com/adap/flower/pull/789))"
@@ -26671,7 +26634,7 @@ msgstr ""
 "**Nouvelle stratégie expérimentale TensorBoard** "
 "([#789](https://github.com/adap/flower/pull/789))"
 
-#: ../../source/ref-changelog.md:1694
+#: ../../source/ref-changelog.md:1690
 msgid ""
 "Improved advanced TensorFlow code example "
 "([#769](https://github.com/adap/flower/pull/769))"
@@ -26679,7 +26642,7 @@ msgstr ""
 "Amélioration de l'exemple de code TensorFlow avancé "
 "([#769](https://github.com/adap/flower/pull/769))"
 
-#: ../../source/ref-changelog.md:1695
+#: ../../source/ref-changelog.md:1691
 msgid ""
 "Warning when `min_available_clients` is misconfigured "
 "([#830](https://github.com/adap/flower/pull/830))"
@@ -26687,7 +26650,7 @@ msgstr ""
 "Avertissement lorsque `min_available_clients` est mal configuré "
 "([#830](https://github.com/adap/flower/pull/830))"
 
-#: ../../source/ref-changelog.md:1696
+#: ../../source/ref-changelog.md:1692
 msgid ""
 "Improved gRPC server docs "
 "([#841](https://github.com/adap/flower/pull/841))"
@@ -26695,7 +26658,7 @@ msgstr ""
 "Amélioration de la documentation sur le serveur gRPC "
 "([#841](https://github.com/adap/flower/pull/841))"
 
-#: ../../source/ref-changelog.md:1697
+#: ../../source/ref-changelog.md:1693
 msgid ""
 "Improved error message in `NumPyClient` "
 "([#851](https://github.com/adap/flower/pull/851))"
@@ -26703,7 +26666,7 @@ msgstr ""
 "Amélioration du message d'erreur dans `NumPyClient` "
 "([#851](https://github.com/adap/flower/pull/851))"
 
-#: ../../source/ref-changelog.md:1698
+#: ../../source/ref-changelog.md:1694
 msgid ""
 "Improved PyTorch quickstart code example "
 "([#852](https://github.com/adap/flower/pull/852))"
@@ -26711,7 +26674,7 @@ msgstr ""
 "Exemple de code de démarrage rapide PyTorch amélioré "
 "([#852](https://github.com/adap/flower/pull/852))"
 
-#: ../../source/ref-changelog.md:1702
+#: ../../source/ref-changelog.md:1698
 msgid ""
 "**Disabled final distributed evaluation** "
 "([#800](https://github.com/adap/flower/pull/800))"
@@ -26719,7 +26682,7 @@ msgstr ""
 "**Désactivé l'évaluation finale distribuée** "
 "([#800](https://github.com/adap/flower/pull/800))"
 
-#: ../../source/ref-changelog.md:1704
+#: ../../source/ref-changelog.md:1700
 msgid ""
 "Prior behaviour was to perform a final round of distributed evaluation on"
 " all connected clients, which is often not required (e.g., when using "
@@ -26732,7 +26695,7 @@ msgstr ""
 "l'évaluation côté serveur). Le comportement précédent peut être activé en"
 " passant `force_final_distributed_eval=True` à `start_server`."
 
-#: ../../source/ref-changelog.md:1706
+#: ../../source/ref-changelog.md:1702
 msgid ""
 "**Renamed q-FedAvg strategy** "
 "([#802](https://github.com/adap/flower/pull/802))"
@@ -26740,7 +26703,7 @@ msgstr ""
 "**Renommé stratégie q-FedAvg** "
 "([#802](https://github.com/adap/flower/pull/802))"
 
-#: ../../source/ref-changelog.md:1708
+#: ../../source/ref-changelog.md:1704
 msgid ""
 "The strategy named `QffedAvg` was renamed to `QFedAvg` to better reflect "
 "the notation given in the original paper (q-FFL is the optimization "
@@ -26755,7 +26718,7 @@ msgstr ""
 "des raisons de compatibilité (elle sera supprimée dans une prochaine "
 "version)."
 
-#: ../../source/ref-changelog.md:1710
+#: ../../source/ref-changelog.md:1706
 msgid ""
 "**Deprecated and renamed code example** `simulation_pytorch` **to** "
 "`simulation_pytorch_legacy` "
@@ -26765,7 +26728,7 @@ msgstr ""
 "`simulation_pytorch_legacy` "
 "([#791](https://github.com/adap/flower/pull/791))"
 
-#: ../../source/ref-changelog.md:1712
+#: ../../source/ref-changelog.md:1708
 msgid ""
 "This example has been replaced by a new example. The new example is based"
 " on the experimental virtual client engine, which will become the new "
@@ -26780,11 +26743,11 @@ msgstr ""
 "conservé à des fins de référence, mais il pourrait être supprimé à "
 "l'avenir."
 
-#: ../../source/ref-changelog.md:1714
+#: ../../source/ref-changelog.md:1710
 msgid "v0.16.0 (2021-05-11)"
 msgstr "v0.16.0 (2021-05-11)"
 
-#: ../../source/ref-changelog.md:1718
+#: ../../source/ref-changelog.md:1714
 msgid ""
 "**New built-in strategies** "
 "([#549](https://github.com/adap/flower/pull/549))"
@@ -26792,11 +26755,63 @@ msgstr ""
 "**Nouvelles stratégies intégrées** "
 "([#549](https://github.com/adap/flower/pull/549))"
 
-#: ../../source/ref-changelog.md:1720
+#: ../../source/ref-changelog.md:1716
 msgid "(abstract) FedOpt"
 msgstr "(résumé) FedOpt"
 
+#: ../../source/ref-changelog.md:1719
+msgid ""
+"**Migration warnings for deprecated functionality** "
+"([#690](https://github.com/adap/flower/pull/690))"
+msgstr ""
+"**Avertissements de migration pour les fonctionnalités obsolètes** "
+"([#690](https://github.com/adap/flower/pull/690))"
+
+#: ../../source/ref-changelog.md:1721
+msgid ""
+"Earlier versions of Flower were often migrated to new APIs, while "
+"maintaining compatibility with legacy APIs. This release introduces "
+"detailed warning messages if usage of deprecated APIs is detected. The "
+"new warning messages often provide details on how to migrate to more "
+"recent APIs, thus easing the transition from one release to another."
+msgstr ""
+"Les versions antérieures de Flower ont souvent été migrées vers de "
+"nouvelles API, tout en maintenant la compatibilité avec les anciennes "
+"API. Cette version introduit des messages d'avertissement détaillés si "
+"l'utilisation d'API obsolètes est détectée. Les nouveaux messages "
+"d'avertissement fournissent souvent des détails sur la façon de migrer "
+"vers des API plus récentes, facilitant ainsi la transition d'une version "
+"à l'autre."
+
 #: ../../source/ref-changelog.md:1723
+msgid ""
+"Improved docs and docstrings "
+"([#691](https://github.com/adap/flower/pull/691) "
+"[#692](https://github.com/adap/flower/pull/692) "
+"[#713](https://github.com/adap/flower/pull/713))"
+msgstr ""
+"Amélioration des docs et des docstrings "
+"([#691](https://github.com/adap/flower/pull/691) "
+"[#692](https://github.com/adap/flower/pull/692) "
+"[#713](https://github.com/adap/flower/pull/713))"
+
+#: ../../source/ref-changelog.md:1725
+msgid "MXNet example and documentation"
+msgstr "Exemple et documentation MXNet"
+
+#: ../../source/ref-changelog.md:1727
+msgid ""
+"FedBN implementation in example PyTorch: From Centralized To Federated "
+"([#696](https://github.com/adap/flower/pull/696) "
+"[#702](https://github.com/adap/flower/pull/702) "
+"[#705](https://github.com/adap/flower/pull/705))"
+msgstr ""
+"Mise en œuvre de FedBN dans l'exemple PyTorch : De la centralisation à la"
+" fédération ([#696](https://github.com/adap/flower/pull/696) "
+"[#702](https://github.com/adap/flower/pull/702) "
+"[#705](https://github.com/adap/flower/pull/705))"
+
+#: ../../source/ref-changelog.md:1731
 msgid ""
 "**Custom metrics for server and strategies** "
 "([#717](https://github.com/adap/flower/pull/717))"
@@ -26804,7 +26819,7 @@ msgstr ""
 "**Métriques personnalisées pour le serveur et les stratégies** "
 "([#717](https://github.com/adap/flower/pull/717))"
 
-#: ../../source/ref-changelog.md:1725
+#: ../../source/ref-changelog.md:1733
 msgid ""
 "The Flower server is now fully task-agnostic, all remaining instances of "
 "task-specific metrics (such as `accuracy`) have been replaced by custom "
@@ -26820,7 +26835,7 @@ msgstr ""
 " À partir de cette version, les métriques personnalisées remplacent les "
 "métriques spécifiques à une tâche sur le serveur."
 
-#: ../../source/ref-changelog.md:1727
+#: ../../source/ref-changelog.md:1735
 #, fuzzy
 msgid ""
 "Custom metric dictionaries are now used in two user-facing APIs: they are"
@@ -26838,7 +26853,7 @@ msgstr ""
 "stratégies peuvent même renvoyer des dictionnaires de métriques "
 "*agrégées* pour que le serveur puisse en garder la trace."
 
-#: ../../source/ref-changelog.md:1729
+#: ../../source/ref-changelog.md:1737
 #, fuzzy, python-brace-format
 msgid ""
 "Strategy implementations should migrate their `aggregate_fit` and "
@@ -26852,7 +26867,7 @@ msgstr ""
 "d'évaluation côté serveur doivent migrer de `return loss, accuracy` à "
 "`return loss, {\"accuracy\" : accuracy}`."
 
-#: ../../source/ref-changelog.md:1731
+#: ../../source/ref-changelog.md:1739
 msgid ""
 "Flower 0.15-style return types are deprecated (but still supported), "
 "compatibility will be removed in a future release."
@@ -26861,59 +26876,17 @@ msgstr ""
 "pris en charge), la compatibilité sera supprimée dans une prochaine "
 "version."
 
-#: ../../source/ref-changelog.md:1733
-msgid ""
-"**Migration warnings for deprecated functionality** "
-"([#690](https://github.com/adap/flower/pull/690))"
-msgstr ""
-"**Avertissements de migration pour les fonctionnalités obsolètes** "
-"([#690](https://github.com/adap/flower/pull/690))"
-
-#: ../../source/ref-changelog.md:1735
-msgid ""
-"Earlier versions of Flower were often migrated to new APIs, while "
-"maintaining compatibility with legacy APIs. This release introduces "
-"detailed warning messages if usage of deprecated APIs is detected. The "
-"new warning messages often provide details on how to migrate to more "
-"recent APIs, thus easing the transition from one release to another."
-msgstr ""
-"Les versions antérieures de Flower ont souvent été migrées vers de "
-"nouvelles API, tout en maintenant la compatibilité avec les anciennes "
-"API. Cette version introduit des messages d'avertissement détaillés si "
-"l'utilisation d'API obsolètes est détectée. Les nouveaux messages "
-"d'avertissement fournissent souvent des détails sur la façon de migrer "
-"vers des API plus récentes, facilitant ainsi la transition d'une version "
-"à l'autre."
-
-#: ../../source/ref-changelog.md:1737
-msgid ""
-"Improved docs and docstrings "
-"([#691](https://github.com/adap/flower/pull/691) "
-"[#692](https://github.com/adap/flower/pull/692) "
-"[#713](https://github.com/adap/flower/pull/713))"
-msgstr ""
-"Amélioration des docs et des docstrings "
-"([#691](https://github.com/adap/flower/pull/691) "
-"[#692](https://github.com/adap/flower/pull/692) "
-"[#713](https://github.com/adap/flower/pull/713))"
-
-#: ../../source/ref-changelog.md:1739
-msgid "MXNet example and documentation"
-msgstr "Exemple et documentation MXNet"
-
 #: ../../source/ref-changelog.md:1741
+#, fuzzy
 msgid ""
-"FedBN implementation in example PyTorch: From Centralized To Federated "
-"([#696](https://github.com/adap/flower/pull/696) "
-"[#702](https://github.com/adap/flower/pull/702) "
-"[#705](https://github.com/adap/flower/pull/705))"
+"Deprecated `flwr.server.Server.evaluate`, use "
+"`flwr.server.Server.evaluate_round` instead"
 msgstr ""
-"Mise en œuvre de FedBN dans l'exemple PyTorch : De la centralisation à la"
-" fédération ([#696](https://github.com/adap/flower/pull/696) "
-"[#702](https://github.com/adap/flower/pull/702) "
-"[#705](https://github.com/adap/flower/pull/705))"
+"Déclassé `flwr.server.Server.evaluate`, utiliser "
+"`flwr.server.Server.evaluate_round` à la place "
+"([#717](https://github.com/adap/flower/pull/717))"
 
-#: ../../source/ref-changelog.md:1745
+#: ../../source/ref-changelog.md:1743
 msgid ""
 "**Serialization-agnostic server** "
 "([#721](https://github.com/adap/flower/pull/721))"
@@ -26921,7 +26894,7 @@ msgstr ""
 "**Serveur agnostique de sérialisation** "
 "([#721](https://github.com/adap/flower/pull/721))"
 
-#: ../../source/ref-changelog.md:1747
+#: ../../source/ref-changelog.md:1745
 msgid ""
 "The Flower server is now fully serialization-agnostic. Prior usage of "
 "class `Weights` (which represents parameters as deserialized NumPy "
@@ -26941,14 +26914,15 @@ msgstr ""
 "d'octets doivent être interprétés (par exemple, pour la "
 "sérialisation/désérialisation)."
 
-#: ../../source/ref-changelog.md:1749
+#: ../../source/ref-changelog.md:1747
+#, fuzzy
 msgid ""
 "Built-in strategies implement this approach by handling serialization and"
 " deserialization to/from `Weights` internally. Custom/3rd-party Strategy "
 "implementations should update to the slightly changed Strategy method "
-"definitions. Strategy authors can consult PR "
-"[#721](https://github.com/adap/flower/pull/721) to see how strategies can"
-" easily migrate to the new format."
+"definitions. Strategy authors can consult [PR "
+"#721](https://github.com/adap/flower/pull/721) to see how strategies can "
+"easily migrate to the new format."
 msgstr ""
 "Les stratégies intégrées mettent en œuvre cette approche en gérant en "
 "interne la sérialisation et la désérialisation de `Weights`. Les "
@@ -26958,21 +26932,11 @@ msgstr ""
 "[#721](https://github.com/adap/flower/pull/721) pour voir comment les "
 "stratégies peuvent facilement migrer vers le nouveau format."
 
-#: ../../source/ref-changelog.md:1751
-msgid ""
-"Deprecated `flwr.server.Server.evaluate`, use "
-"`flwr.server.Server.evaluate_round` instead "
-"([#717](https://github.com/adap/flower/pull/717))"
-msgstr ""
-"Déclassé `flwr.server.Server.evaluate`, utiliser "
-"`flwr.server.Server.evaluate_round` à la place "
-"([#717](https://github.com/adap/flower/pull/717))"
-
-#: ../../source/ref-changelog.md:1753
+#: ../../source/ref-changelog.md:1749
 msgid "v0.15.0 (2021-03-12)"
 msgstr "v0.15.0 (2021-03-12)"
 
-#: ../../source/ref-changelog.md:1757
+#: ../../source/ref-changelog.md:1753
 msgid ""
 "**Server-side parameter initialization** "
 "([#658](https://github.com/adap/flower/pull/658))"
@@ -26980,7 +26944,7 @@ msgstr ""
 "**Initialisation des paramètres côté serveur** "
 "([#658](https://github.com/adap/flower/pull/658))"
 
-#: ../../source/ref-changelog.md:1759
+#: ../../source/ref-changelog.md:1755
 msgid ""
 "Model parameters can now be initialized on the server-side. Server-side "
 "parameter initialization works via a new `Strategy` method called "
@@ -26990,7 +26954,7 @@ msgstr ""
 "serveur. L'initialisation des paramètres côté serveur fonctionne via une "
 "nouvelle méthode `Strategy` appelée `initialize_parameters`."
 
-#: ../../source/ref-changelog.md:1761
+#: ../../source/ref-changelog.md:1757
 msgid ""
 "Built-in strategies support a new constructor argument called "
 "`initial_parameters` to set the initial parameters. Built-in strategies "
@@ -27002,7 +26966,7 @@ msgstr ""
 "initiaux. Les stratégies intégrées fourniront ces paramètres initiaux au "
 "serveur au démarrage et les supprimeront ensuite pour libérer la mémoire."
 
-#: ../../source/ref-changelog.md:1780
+#: ../../source/ref-changelog.md:1776
 msgid ""
 "If no initial parameters are provided to the strategy, the server will "
 "continue to use the current behaviour (namely, it will ask one of the "
@@ -27014,7 +26978,7 @@ msgstr ""
 "l'un des clients connectés ses paramètres et les utilisera comme "
 "paramètres globaux initiaux)."
 
-#: ../../source/ref-changelog.md:1784
+#: ../../source/ref-changelog.md:1780
 msgid ""
 "Deprecate `flwr.server.strategy.DefaultStrategy` (migrate to "
 "`flwr.server.strategy.FedAvg`, which is equivalent)"
@@ -27022,11 +26986,11 @@ msgstr ""
 "Déclasser `flwr.server.strategy.DefaultStrategy` (migrer vers "
 "`flwr.server.strategy.FedAvg`, qui est équivalent)"
 
-#: ../../source/ref-changelog.md:1786
+#: ../../source/ref-changelog.md:1782
 msgid "v0.14.0 (2021-02-18)"
 msgstr "v0.14.0 (2021-02-18)"
 
-#: ../../source/ref-changelog.md:1790
+#: ../../source/ref-changelog.md:1786
 msgid ""
 "**Generalized** `Client.fit` **and** `Client.evaluate` **return values** "
 "([#610](https://github.com/adap/flower/pull/610) "
@@ -27038,7 +27002,7 @@ msgstr ""
 "[#572](https://github.com/adap/flower/pull/572) "
 "[#633](https://github.com/adap/flower/pull/633))"
 
-#: ../../source/ref-changelog.md:1792
+#: ../../source/ref-changelog.md:1788
 msgid ""
 "Clients can now return an additional dictionary mapping `str` keys to "
 "values of the following types: `bool`, `bytes`, `float`, `int`, `str`. "
@@ -27051,7 +27015,7 @@ msgstr ""
 "valeurs presque arbitraires de `fit`/`evaluate` et les utiliser du côté "
 "du serveur !"
 
-#: ../../source/ref-changelog.md:1794
+#: ../../source/ref-changelog.md:1790
 msgid ""
 "This improvement also allowed for more consistent return types between "
 "`fit` and `evaluate`: `evaluate` should now return a tuple `(float, int, "
@@ -27064,7 +27028,7 @@ msgstr ""
 "d'exemples, et un dictionnaire contenant des valeurs arbitraires "
 "spécifiques au problème comme la précision."
 
-#: ../../source/ref-changelog.md:1796
+#: ../../source/ref-changelog.md:1792
 msgid ""
 "In case you wondered: this feature is compatible with existing projects, "
 "the additional dictionary return value is optional. New code should "
@@ -27081,7 +27045,7 @@ msgstr ""
 "Scalar]`, `evaluate` : `float, int, Dict[str, Scalar]`). Voir l'exemple "
 "ci-dessous pour plus de détails."
 
-#: ../../source/ref-changelog.md:1798
+#: ../../source/ref-changelog.md:1794
 msgid ""
 "*Code example:* note the additional dictionary return values in both "
 "`FlwrClient.fit` and `FlwrClient.evaluate`:"
@@ -27089,7 +27053,7 @@ msgstr ""
 "*Exemple de code:* note les valeurs de retour du dictionnaire "
 "supplémentaires dans `FlwrClient.fit` et `FlwrClient.evaluate` :"
 
-#: ../../source/ref-changelog.md:1813
+#: ../../source/ref-changelog.md:1809
 msgid ""
 "**Generalized** `config` **argument in** `Client.fit` **and** "
 "`Client.evaluate` ([#595](https://github.com/adap/flower/pull/595))"
@@ -27097,7 +27061,7 @@ msgstr ""
 "**Généralisé** `config` **argument dans** `Client.fit` **et** "
 "`Client.evaluate` ([#595](https://github.com/adap/flower/pull/595))"
 
-#: ../../source/ref-changelog.md:1815
+#: ../../source/ref-changelog.md:1811
 msgid ""
 "The `config` argument used to be of type `Dict[str, str]`, which means "
 "that dictionary values were expected to be strings. The new release "
@@ -27109,7 +27073,7 @@ msgstr ""
 "nouvelle version généralise cela pour permettre les valeurs des types "
 "suivants : `bool`, `bytes`, `float`, `int`, `str`."
 
-#: ../../source/ref-changelog.md:1817
+#: ../../source/ref-changelog.md:1813
 msgid ""
 "This means one can now pass almost arbitrary values to `fit`/`evaluate` "
 "using the `config` dictionary. Yay, no more `str(epochs)` on the server-"
@@ -27120,7 +27084,7 @@ msgstr ""
 "Yay, plus de `str(epochs)` du côté serveur et `int(config[\"epochs\"])` "
 "du côté client !"
 
-#: ../../source/ref-changelog.md:1819
+#: ../../source/ref-changelog.md:1815
 msgid ""
 "*Code example:* note that the `config` dictionary now contains non-`str` "
 "values in both `Client.fit` and `Client.evaluate`:"
@@ -27128,41 +27092,43 @@ msgstr ""
 "*Exemple de code:* Notez que le dictionnaire `config` contient maintenant"
 " des valeurs autres que `str` dans `Client.fit` et `Client.evaluate` :"
 
-#: ../../source/ref-changelog.md:1836
+#: ../../source/ref-changelog.md:1832
 msgid "v0.13.0 (2021-01-08)"
 msgstr "v0.13.0 (2021-01-08)"
 
-#: ../../source/ref-changelog.md:1840
+#: ../../source/ref-changelog.md:1836
+#, fuzzy
 msgid ""
 "New example: PyTorch From Centralized To Federated "
-"([#549](https://github.com/adap/flower/pull/549))"
+"([#531](https://github.com/adap/flower/pull/531))"
 msgstr ""
 "Nouvel exemple : PyTorch de centralisé à fédéré "
 "([#549](https://github.com/adap/flower/pull/549))"
 
-#: ../../source/ref-changelog.md:1841
+#: ../../source/ref-changelog.md:1837
 msgid "Improved documentation"
 msgstr "Amélioration de la documentation"
 
-#: ../../source/ref-changelog.md:1842
+#: ../../source/ref-changelog.md:1838
 msgid "New documentation theme ([#551](https://github.com/adap/flower/pull/551))"
 msgstr ""
 "Nouveau thème de documentation "
 "([#551](https://github.com/adap/flower/pull/551))"
 
-#: ../../source/ref-changelog.md:1843
+#: ../../source/ref-changelog.md:1839
 msgid "New API reference ([#554](https://github.com/adap/flower/pull/554))"
 msgstr "Nouvelle référence API ([#554](https://github.com/adap/flower/pull/554))"
 
-#: ../../source/ref-changelog.md:1844
+#: ../../source/ref-changelog.md:1840
+#, fuzzy
 msgid ""
 "Updated examples documentation "
-"([#549](https://github.com/adap/flower/pull/549))"
+"([#534](https://github.com/adap/flower/pull/534))"
 msgstr ""
 "Mise à jour de la documentation des exemples "
 "([#549](https://github.com/adap/flower/pull/549))"
 
-#: ../../source/ref-changelog.md:1845
+#: ../../source/ref-changelog.md:1841
 msgid ""
 "Removed obsolete documentation "
 "([#548](https://github.com/adap/flower/pull/548))"
@@ -27170,11 +27136,11 @@ msgstr ""
 "Suppression de la documentation obsolète "
 "([#548](https://github.com/adap/flower/pull/548))"
 
-#: ../../source/ref-changelog.md:1847
+#: ../../source/ref-changelog.md:1843
 msgid "Bugfix:"
 msgstr "Correction de bogues :"
 
-#: ../../source/ref-changelog.md:1849
+#: ../../source/ref-changelog.md:1845
 msgid ""
 "`Server.fit` does not disconnect clients when finished, disconnecting the"
 " clients is now handled in `flwr.server.start_server` "
@@ -27187,15 +27153,15 @@ msgstr ""
 "([#553](https://github.com/adap/flower/pull/553) "
 "[#540](https://github.com/adap/flower/issues/540))."
 
-#: ../../source/ref-changelog.md:1851
+#: ../../source/ref-changelog.md:1847
 msgid "v0.12.0 (2020-12-07)"
 msgstr "v0.12.0 (2020-12-07)"
 
-#: ../../source/ref-changelog.md:1853 ../../source/ref-changelog.md:1869
+#: ../../source/ref-changelog.md:1849 ../../source/ref-changelog.md:1865
 msgid "Important changes:"
 msgstr "Changements importants :"
 
-#: ../../source/ref-changelog.md:1855
+#: ../../source/ref-changelog.md:1851
 msgid ""
 "Added an example for embedded devices "
 "([#507](https://github.com/adap/flower/pull/507))"
@@ -27203,7 +27169,7 @@ msgstr ""
 "Ajout d'un exemple pour les périphériques embarqués "
 "([#507](https://github.com/adap/flower/pull/507))"
 
-#: ../../source/ref-changelog.md:1856
+#: ../../source/ref-changelog.md:1852
 msgid ""
 "Added a new NumPyClient (in addition to the existing KerasClient) "
 "([#504](https://github.com/adap/flower/pull/504) "
@@ -27213,7 +27179,7 @@ msgstr ""
 "([#504](https://github.com/adap/flower/pull/504) "
 "[#508](https://github.com/adap/flower/pull/508))"
 
-#: ../../source/ref-changelog.md:1857
+#: ../../source/ref-changelog.md:1853
 msgid ""
 "Deprecated `flwr_example` package and started to migrate examples into "
 "the top-level `examples` directory "
@@ -27225,15 +27191,15 @@ msgstr ""
 "([#494](https://github.com/adap/flower/pull/494) "
 "[#512](https://github.com/adap/flower/pull/512))"
 
-#: ../../source/ref-changelog.md:1859
+#: ../../source/ref-changelog.md:1855
 msgid "v0.11.0 (2020-11-30)"
 msgstr "v0.11.0 (2020-11-30)"
 
-#: ../../source/ref-changelog.md:1861
+#: ../../source/ref-changelog.md:1857
 msgid "Incompatible changes:"
 msgstr "Changements incompatibles :"
 
-#: ../../source/ref-changelog.md:1863
+#: ../../source/ref-changelog.md:1859
 msgid ""
 "Renamed strategy methods "
 "([#486](https://github.com/adap/flower/pull/486)) to unify the naming of "
@@ -27250,23 +27216,23 @@ msgstr ""
 "quatre méthodes de Stratégie. Pour migrer, renommez les méthodes de "
 "`Strategy` suivantes en conséquence :"
 
-#: ../../source/ref-changelog.md:1864
+#: ../../source/ref-changelog.md:1860
 msgid "`on_configure_evaluate` => `configure_evaluate`"
 msgstr "`on_configure_evaluate` => `configure_evaluate`"
 
-#: ../../source/ref-changelog.md:1865
+#: ../../source/ref-changelog.md:1861
 msgid "`on_aggregate_evaluate` => `aggregate_evaluate`"
 msgstr "`on_aggregate_evaluate` => `aggregate_evaluate`"
 
-#: ../../source/ref-changelog.md:1866
+#: ../../source/ref-changelog.md:1862
 msgid "`on_configure_fit` => `configure_fit`"
 msgstr "`on_configure_fit` => `configure_fit`"
 
-#: ../../source/ref-changelog.md:1867
+#: ../../source/ref-changelog.md:1863
 msgid "`on_aggregate_fit` => `aggregate_fit`"
 msgstr "`on_aggregate_fit` => `aggregate_fit`"
 
-#: ../../source/ref-changelog.md:1871
+#: ../../source/ref-changelog.md:1867
 msgid ""
 "Deprecated `DefaultStrategy` "
 "([#479](https://github.com/adap/flower/pull/479)). To migrate use "
@@ -27276,7 +27242,7 @@ msgstr ""
 "([#479](https://github.com/adap/flower/pull/479)). Pour migrer, utilisez "
 "`FedAvg` à la place."
 
-#: ../../source/ref-changelog.md:1872
+#: ../../source/ref-changelog.md:1868
 msgid ""
 "Simplified examples and baselines "
 "([#484](https://github.com/adap/flower/pull/484))."
@@ -27284,7 +27250,7 @@ msgstr ""
 "Exemples simplifiés et lignes de base "
 "([#484](https://github.com/adap/flower/pull/484))."
 
-#: ../../source/ref-changelog.md:1873
+#: ../../source/ref-changelog.md:1869
 msgid ""
 "Removed presently unused `on_conclude_round` from strategy interface "
 "([#483](https://github.com/adap/flower/pull/483))."
@@ -27292,7 +27258,7 @@ msgstr ""
 "Suppression de `on_conclude_round` actuellement inutilisé de l'interface "
 "de stratégie ([#483](https://github.com/adap/flower/pull/483))."
 
-#: ../../source/ref-changelog.md:1874
+#: ../../source/ref-changelog.md:1870
 msgid ""
 "Set minimal Python version to 3.6.1 instead of 3.6.9 "
 "([#471](https://github.com/adap/flower/pull/471))."
@@ -27300,7 +27266,7 @@ msgstr ""
 "Fixe la version minimale de Python à 3.6.1 au lieu de 3.6.9 "
 "([#471](https://github.com/adap/flower/pull/471))."
 
-#: ../../source/ref-changelog.md:1875
+#: ../../source/ref-changelog.md:1871
 msgid ""
 "Improved `Strategy` docstrings "
 "([#470](https://github.com/adap/flower/pull/470))."
@@ -32236,7 +32202,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|8869f4d59e144c718ac3d7f2fb70f0c5|"
+msgid "|da8a064587764437aa744321c646ed8a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -32255,7 +32221,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|4db491d8af5143e3b3fadfc2a370c87c|"
+msgid "|83edff6447e84fa3ba7ae438fdb0bec8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -32287,7 +32253,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|603698944fca4d3188b8f45d7bd22fb7|"
+msgid "|d09ebdaec63c4feab1a6c422105d60ad|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -32308,7 +32274,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|6f749ab29c5b43e09f0a95019826c24d|"
+msgid "|fa6b319a95964903958b591133ce3f0f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -32330,7 +32296,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|e511316757634140a030e6b3b68ff3ea|"
+msgid "|5a77403301d94f828c664fef30916d51|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -32351,7 +32317,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|0b978d791bec4b5a865010dcbfabca36|"
+msgid "|e5a8491fcc48461f9b2a1009d32cb0d2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -32377,7 +32343,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|1aff3c6a1ae94fc090061ca411dd688f|"
+msgid "|fbd662e5ccd84430940b56cc7daf82e8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -32396,7 +32362,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|7993e78e8ef84336baedb5cea1877433|"
+msgid "|fdd4aaee8ab041d79e7e89da84cf4b75|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -32627,7 +32593,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|6b4861f0a7b44ae3b44517127a032258|"
+msgid "|25e597a052c749c39c69ed61d390e194|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -32662,7 +32628,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|372becfd4ce4452c9a51547d7cfa8ff7|"
+msgid "|7678b911560f43ccb50ae352028af2eb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -32695,7 +32661,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|51693b3cfc5546dfaed2f8255866234f|"
+msgid "|5fc4f7141ea6409cbbb5bf5f5f51622b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -32726,7 +32692,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|eb95dcaf723f4dd1952be307e7d16d14|"
+msgid "|429bc6acd3634c68aa0e39fa68626cc9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -32786,7 +32752,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|e98cc271f6804e0b922b4999d1627c98|"
+msgid "|862985bea398410a9b2362d6bad7d2d5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -32930,7 +32896,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|4cdb176fbef14897b58a4289e494be63|"
+msgid "|dd64555e826940ffa0bb245a88fa0aa8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -47997,5 +47963,120 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|c3ddf0e3c97b46419197af99321e74d6|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Add** `server_round` **to** `Strategy.evaluate`"
+#~ " ([#1334](https://github.com/adap/flower/pull/1334))"
+#~ msgstr ""
+#~ "**Ajouter** `server_round` **à** `Strategy.evaluate`"
+#~ " ([#1334](https://github.com/adap/flower/pull/1334))"
+
+#~ msgid ""
+#~ "**Add** `server_round` **and** `config` "
+#~ "**parameters to** `evaluate_fn` "
+#~ "([#1334](https://github.com/adap/flower/pull/1334))"
+#~ msgstr ""
+#~ "**Ajouter** `server_round` **et** `config` "
+#~ "**paramètres à** `evaluate_fn` "
+#~ "([#1334](https://github.com/adap/flower/pull/1334))"
+
+#~ msgid ""
+#~ "**Rename** `Weights` **to** `NDArrays` "
+#~ "([#1258](https://github.com/adap/flower/pull/1258), "
+#~ "[#1259](https://github.com/adap/flower/pull/1259))"
+#~ msgstr ""
+#~ "**Rename** `Weights` **to** `NDArrays` "
+#~ "([#1258](https://github.com/adap/flower/pull/1258), "
+#~ "[#1259](https://github.com/adap/flower/pull/1259))"
+
+#~ msgid ""
+#~ "**Replace** `num_rounds` **in** `start_simulation`"
+#~ " **with new** `config` **parameter** "
+#~ "([#1281](https://github.com/adap/flower/pull/1281))"
+#~ msgstr ""
+#~ "**Remplace** `num_rounds` **dans** "
+#~ "`start_simulation` **avec le nouveau** "
+#~ "`config` **paramètre** "
+#~ "([#1281](https://github.com/adap/flower/pull/1281))"
+
+#~ msgid ""
+#~ "**Enable passing a** `Server` **instance "
+#~ "to** `start_simulation` "
+#~ "([#1281](https://github.com/adap/flower/pull/1281))"
+#~ msgstr ""
+#~ "**Autoriser le passage d'une **instance "
+#~ "`Server` à** `start_simulation` "
+#~ "([#1281](https://github.com/adap/flower/pull/1281))"
+
+#~ msgid ""
+#~ "Add secure gRPC connection to the "
+#~ "`advanced_tensorflow` code example "
+#~ "([#847](https://github.com/adap/flower/pull/847))"
+#~ msgstr ""
+#~ "Ajouter une connexion gRPC sécurisée à"
+#~ " l'exemple de code `advanced_tensorflow` "
+#~ "([#847](https://github.com/adap/flower/pull/847))"
+
+#~ msgid ""
+#~ "**Remove deprecated support for eval_fn "
+#~ "accuracy return value** "
+#~ "([#1142](https://github.com/adap/flower/pull/1142))"
+#~ msgstr ""
+#~ "**Supprimer la prise en charge obsolète"
+#~ " de la valeur de retour de la"
+#~ " précision eval_fn** "
+#~ "([#1142](https://github.com/adap/flower/pull/1142))"
+
+#~ msgid ""
+#~ "**Remove deprecated support for passing "
+#~ "initial parameters as NumPy ndarrays** "
+#~ "([#1142](https://github.com/adap/flower/pull/1142))"
+#~ msgstr ""
+#~ "**Supprime la prise en charge obsolète"
+#~ " du passage des paramètres initiaux "
+#~ "en tant que ndarrays NumPy** "
+#~ "([#1142](https://github.com/adap/flower/pull/1142))"
+
+#~ msgid "|8869f4d59e144c718ac3d7f2fb70f0c5|"
+#~ msgstr ""
+
+#~ msgid "|4db491d8af5143e3b3fadfc2a370c87c|"
+#~ msgstr ""
+
+#~ msgid "|603698944fca4d3188b8f45d7bd22fb7|"
+#~ msgstr ""
+
+#~ msgid "|6f749ab29c5b43e09f0a95019826c24d|"
+#~ msgstr ""
+
+#~ msgid "|e511316757634140a030e6b3b68ff3ea|"
+#~ msgstr ""
+
+#~ msgid "|0b978d791bec4b5a865010dcbfabca36|"
+#~ msgstr ""
+
+#~ msgid "|1aff3c6a1ae94fc090061ca411dd688f|"
+#~ msgstr ""
+
+#~ msgid "|7993e78e8ef84336baedb5cea1877433|"
+#~ msgstr ""
+
+#~ msgid "|6b4861f0a7b44ae3b44517127a032258|"
+#~ msgstr ""
+
+#~ msgid "|372becfd4ce4452c9a51547d7cfa8ff7|"
+#~ msgstr ""
+
+#~ msgid "|51693b3cfc5546dfaed2f8255866234f|"
+#~ msgstr ""
+
+#~ msgid "|eb95dcaf723f4dd1952be307e7d16d14|"
+#~ msgstr ""
+
+#~ msgid "|e98cc271f6804e0b922b4999d1627c98|"
+#~ msgstr ""
+
+#~ msgid "|4cdb176fbef14897b58a4289e494be63|"
 #~ msgstr ""
 

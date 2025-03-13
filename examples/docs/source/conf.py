@@ -70,6 +70,7 @@ redirects = {
     "vit-finetune": "flowertune-vit.html",
     "simulation-pytorch": "quickstart-pytorch.html",
     "simulation-tensorflow": "quickstart-tensorflow.html",
+    "quickstart-mlcube": "index.html",
 }
 
 

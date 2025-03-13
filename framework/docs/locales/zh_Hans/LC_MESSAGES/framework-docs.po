@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 00:31+0000\n"
+"POT-Creation-Date: 2025-03-13 00:32+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -3431,9 +3431,9 @@ msgstr "快速入门 fastai"
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:125
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:127
 #: ../../source/ref-changelog.md:523 ../../source/ref-changelog.md:889
-#: ../../source/ref-changelog.md:1166 ../../source/ref-changelog.md:1230
-#: ../../source/ref-changelog.md:1288 ../../source/ref-changelog.md:1357
-#: ../../source/ref-changelog.md:1419
+#: ../../source/ref-changelog.md:1164 ../../source/ref-changelog.md:1228
+#: ../../source/ref-changelog.md:1286 ../../source/ref-changelog.md:1355
+#: ../../source/ref-changelog.md:1417
 msgid "None"
 msgstr "无"
 
@@ -17027,7 +17027,7 @@ msgstr ""
 "\\(num\\_available\\_clients\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.FedAdagrad.rst:2
-#: ../../source/ref-changelog.md:1721
+#: ../../source/ref-changelog.md:1717
 msgid "FedAdagrad"
 msgstr "FedAdagrad"
 
@@ -19474,10 +19474,10 @@ msgstr "v1.5.0 (2023-08-31)"
 #: ../../source/ref-changelog.md:495 ../../source/ref-changelog.md:527
 #: ../../source/ref-changelog.md:631 ../../source/ref-changelog.md:729
 #: ../../source/ref-changelog.md:829 ../../source/ref-changelog.md:893
-#: ../../source/ref-changelog.md:986 ../../source/ref-changelog.md:1086
-#: ../../source/ref-changelog.md:1170 ../../source/ref-changelog.md:1234
-#: ../../source/ref-changelog.md:1292 ../../source/ref-changelog.md:1361
-#: ../../source/ref-changelog.md:1430
+#: ../../source/ref-changelog.md:986 ../../source/ref-changelog.md:1084
+#: ../../source/ref-changelog.md:1168 ../../source/ref-changelog.md:1232
+#: ../../source/ref-changelog.md:1290 ../../source/ref-changelog.md:1359
+#: ../../source/ref-changelog.md:1428
 msgid "Thanks to our contributors"
 msgstr "感谢我们的贡献者"
 
@@ -19488,9 +19488,9 @@ msgstr "感谢我们的贡献者"
 #: ../../source/ref-changelog.md:497 ../../source/ref-changelog.md:529
 #: ../../source/ref-changelog.md:633 ../../source/ref-changelog.md:731
 #: ../../source/ref-changelog.md:831 ../../source/ref-changelog.md:895
-#: ../../source/ref-changelog.md:988 ../../source/ref-changelog.md:1088
-#: ../../source/ref-changelog.md:1172 ../../source/ref-changelog.md:1236
-#: ../../source/ref-changelog.md:1294
+#: ../../source/ref-changelog.md:988 ../../source/ref-changelog.md:1086
+#: ../../source/ref-changelog.md:1170 ../../source/ref-changelog.md:1234
+#: ../../source/ref-changelog.md:1292
 msgid ""
 "We would like to give our special thanks to all the contributors who made"
 " the new version of Flower possible (in `git shortlog` order):"
@@ -19517,13 +19517,13 @@ msgstr ""
 #: ../../source/ref-changelog.md:533 ../../source/ref-changelog.md:637
 #: ../../source/ref-changelog.md:735 ../../source/ref-changelog.md:835
 #: ../../source/ref-changelog.md:899 ../../source/ref-changelog.md:992
-#: ../../source/ref-changelog.md:1092 ../../source/ref-changelog.md:1176
-#: ../../source/ref-changelog.md:1240 ../../source/ref-changelog.md:1298
-#: ../../source/ref-changelog.md:1367 ../../source/ref-changelog.md:1496
-#: ../../source/ref-changelog.md:1538 ../../source/ref-changelog.md:1605
-#: ../../source/ref-changelog.md:1671 ../../source/ref-changelog.md:1716
-#: ../../source/ref-changelog.md:1755 ../../source/ref-changelog.md:1788
-#: ../../source/ref-changelog.md:1838
+#: ../../source/ref-changelog.md:1090 ../../source/ref-changelog.md:1174
+#: ../../source/ref-changelog.md:1238 ../../source/ref-changelog.md:1296
+#: ../../source/ref-changelog.md:1365 ../../source/ref-changelog.md:1490
+#: ../../source/ref-changelog.md:1529 ../../source/ref-changelog.md:1601
+#: ../../source/ref-changelog.md:1667 ../../source/ref-changelog.md:1712
+#: ../../source/ref-changelog.md:1751 ../../source/ref-changelog.md:1784
+#: ../../source/ref-changelog.md:1834
 msgid "What's new?"
 msgstr "有什么新内容？"
 
@@ -19794,12 +19794,12 @@ msgstr ""
 #: ../../source/ref-changelog.md:487 ../../source/ref-changelog.md:521
 #: ../../source/ref-changelog.md:601 ../../source/ref-changelog.md:717
 #: ../../source/ref-changelog.md:813 ../../source/ref-changelog.md:887
-#: ../../source/ref-changelog.md:962 ../../source/ref-changelog.md:1074
-#: ../../source/ref-changelog.md:1164 ../../source/ref-changelog.md:1228
-#: ../../source/ref-changelog.md:1286 ../../source/ref-changelog.md:1355
-#: ../../source/ref-changelog.md:1417 ../../source/ref-changelog.md:1436
-#: ../../source/ref-changelog.md:1592 ../../source/ref-changelog.md:1663
-#: ../../source/ref-changelog.md:1700 ../../source/ref-changelog.md:1743
+#: ../../source/ref-changelog.md:962 ../../source/ref-changelog.md:1072
+#: ../../source/ref-changelog.md:1162 ../../source/ref-changelog.md:1226
+#: ../../source/ref-changelog.md:1284 ../../source/ref-changelog.md:1353
+#: ../../source/ref-changelog.md:1415 ../../source/ref-changelog.md:1434
+#: ../../source/ref-changelog.md:1583 ../../source/ref-changelog.md:1659
+#: ../../source/ref-changelog.md:1696 ../../source/ref-changelog.md:1729
 msgid "Incompatible changes"
 msgstr "不兼容的更改"
 
@@ -20016,7 +20016,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "**Update FlowerTuneLLM Leaderboard evaluation scripts** "
-"([#4919](https://github.com/adap/flower/pull/4910))"
+"([#4910](https://github.com/adap/flower/pull/4910))"
 msgstr "** 添加一个新的 gRPC 选项**（[#2197](https://github.com/adap/flower/pull/2197)）"
 
 #: ../../source/ref-changelog.md:127
@@ -21477,7 +21477,7 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:391 ../../source/ref-changelog.md:590
 #: ../../source/ref-changelog.md:707 ../../source/ref-changelog.md:799
-#: ../../source/ref-changelog.md:1782
+#: ../../source/ref-changelog.md:1778
 msgid "Deprecations"
 msgstr "停用"
 
@@ -24470,7 +24470,7 @@ msgstr ""
 msgid "Many Flower code examples received substantial updates."
 msgstr "许多 \"Flower \"代码示例得到了大幅更新。"
 
-#: ../../source/ref-changelog.md:943 ../../source/ref-changelog.md:1036
+#: ../../source/ref-changelog.md:943 ../../source/ref-changelog.md:1034
 msgid "**Update Flower Baselines**"
 msgstr "**更新 Flower Baselines**"
 
@@ -25010,7 +25010,7 @@ msgid ""
 "([#2611](https://github.com/adap/flower/pull/2611))"
 msgstr "**添加新的`FedProx`策略** （[#1619](https://github.com/adap/flower/pull/1619)）"
 
-#: ../../source/ref-changelog.md:1032 ../../source/ref-changelog.md:1034
+#: ../../source/ref-changelog.md:1032
 #, fuzzy
 msgid ""
 "**Introduce `WorkloadState`** "
@@ -25020,7 +25020,7 @@ msgstr ""
 "**新的内置策略**（[#828](https://github.com/adap/flower/pull/828) "
 "[#822](https://github.com/adap/flower/pull/822)"
 
-#: ../../source/ref-changelog.md:1038
+#: ../../source/ref-changelog.md:1036
 msgid ""
 "FedProx ([#2210](https://github.com/adap/flower/pull/2210), "
 "[#2286](https://github.com/adap/flower/pull/2286), "
@@ -25030,7 +25030,7 @@ msgstr ""
 "[#2286](https://github.com/adap/flower/pull/2286), "
 "[#2509](https://github.com/adap/flower/pull/2509))"
 
-#: ../../source/ref-changelog.md:1040
+#: ../../source/ref-changelog.md:1038
 msgid ""
 "Baselines Docs ([#2290](https://github.com/adap/flower/pull/2290), "
 "[#2400](https://github.com/adap/flower/pull/2400))"
@@ -25038,51 +25038,51 @@ msgstr ""
 "Baselines文档（[#2290](https://github.com/adap/flower/pull/2290), "
 "[#2400](https://github.com/adap/flower/pull/2400)"
 
+#: ../../source/ref-changelog.md:1040
+msgid ""
+"FedMLB ([#2340](https://github.com/adap/flower/pull/2340), "
+"[#2507](https://github.com/adap/flower/pull/2507))"
+msgstr ""
+"FedMLB ([#2340](https://github.com/adap/flower/pull/2340), "
+"[#2507](https://github.com/adap/flower/pull/2507))"
+
 #: ../../source/ref-changelog.md:1042
 msgid ""
-"FedMLB ([#2340](https://github.com/adap/flower/pull/2340), "
-"[#2507](https://github.com/adap/flower/pull/2507))"
+"TAMUNA ([#2254](https://github.com/adap/flower/pull/2254), "
+"[#2508](https://github.com/adap/flower/pull/2508))"
 msgstr ""
-"FedMLB ([#2340](https://github.com/adap/flower/pull/2340), "
-"[#2507](https://github.com/adap/flower/pull/2507))"
+"TAMUNA ([#2254](https://github.com/adap/flower/pull/2254), "
+"[#2508](https://github.com/adap/flower/pull/2508))"
 
 #: ../../source/ref-changelog.md:1044
-msgid ""
-"TAMUNA ([#2254](https://github.com/adap/flower/pull/2254), "
-"[#2508](https://github.com/adap/flower/pull/2508))"
-msgstr ""
-"TAMUNA ([#2254](https://github.com/adap/flower/pull/2254), "
-"[#2508](https://github.com/adap/flower/pull/2508))"
-
-#: ../../source/ref-changelog.md:1046
 msgid "FedMeta [#2438](https://github.com/adap/flower/pull/2438)"
 msgstr "FedMeta [#2438](https://github.com/adap/flower/pull/2438)"
 
-#: ../../source/ref-changelog.md:1048
+#: ../../source/ref-changelog.md:1046
 msgid "FjORD [#2431](https://github.com/adap/flower/pull/2431)"
 msgstr "FjORD [#2431](https://github.com/adap/flower/pull/2431)"
 
-#: ../../source/ref-changelog.md:1050
+#: ../../source/ref-changelog.md:1048
 msgid "MOON [#2421](https://github.com/adap/flower/pull/2421)"
 msgstr "MOON [#2421](https://github.com/adap/flower/pull/2421)"
 
-#: ../../source/ref-changelog.md:1052
+#: ../../source/ref-changelog.md:1050
 msgid "DepthFL [#2295](https://github.com/adap/flower/pull/2295)"
 msgstr "DepthFL [#2295](https://github.com/adap/flower/pull/2295)"
 
-#: ../../source/ref-changelog.md:1054
+#: ../../source/ref-changelog.md:1052
 msgid "FedPer [#2266](https://github.com/adap/flower/pull/2266)"
 msgstr "FedPer [#2266](https://github.com/adap/flower/pull/2266)"
 
-#: ../../source/ref-changelog.md:1056
+#: ../../source/ref-changelog.md:1054
 msgid "FedWav2vec [#2551](https://github.com/adap/flower/pull/2551)"
 msgstr "FedWav2vec [#2551](https://github.com/adap/flower/pull/2551)"
 
-#: ../../source/ref-changelog.md:1058
+#: ../../source/ref-changelog.md:1056
 msgid "niid-Bench [#2428](https://github.com/adap/flower/pull/2428)"
 msgstr "niid-Bench [#2428](https://github.com/adap/flower/pull/2428)"
 
-#: ../../source/ref-changelog.md:1060
+#: ../../source/ref-changelog.md:1058
 msgid ""
 "FedBN ([#2608](https://github.com/adap/flower/pull/2608), "
 "[#2615](https://github.com/adap/flower/pull/2615))"
@@ -25090,7 +25090,7 @@ msgstr ""
 "FedBN ([#2608](https://github.com/adap/flower/pull/2608), "
 "[#2615](https://github.com/adap/flower/pull/2615))"
 
-#: ../../source/ref-changelog.md:1062
+#: ../../source/ref-changelog.md:1060
 #, fuzzy
 msgid ""
 "**General updates to Flower Examples** "
@@ -25105,7 +25105,7 @@ msgstr ""
 "[#2523](https://github.com/adap/flower/pull/2523), "
 "[#2522](https://github.com/adap/flower/pull/2522))"
 
-#: ../../source/ref-changelog.md:1064
+#: ../../source/ref-changelog.md:1062
 #, fuzzy
 msgid ""
 "**General updates to Flower Baselines** "
@@ -25133,7 +25133,7 @@ msgstr ""
 "[#2446](https://github.com/adap/flower/pull/2446) "
 "[#2561](https://github.com/adap/flower/pull/2561))"
 
-#: ../../source/ref-changelog.md:1066
+#: ../../source/ref-changelog.md:1064
 #, fuzzy
 msgid ""
 "**General updates to the simulation engine** "
@@ -25146,7 +25146,7 @@ msgstr ""
 "[#2447](https://github.com/adap/flower/pull/2447), "
 "[#2448](https://github.com/adap/flower/pull/2448))"
 
-#: ../../source/ref-changelog.md:1068
+#: ../../source/ref-changelog.md:1066
 #, fuzzy
 msgid ""
 "**General updates to Flower SDKs** "
@@ -25165,7 +25165,7 @@ msgstr ""
 "[#1474](https://github.com/adap/flower/pull/1474), "
 "[#1475](https://github.com/adap/flower/pull/1475)))"
 
-#: ../../source/ref-changelog.md:1070
+#: ../../source/ref-changelog.md:1068
 #, fuzzy
 msgid ""
 "**General improvements** "
@@ -25225,13 +25225,13 @@ msgstr ""
 "[#2553](https://github.com/adap/flower/pull/2553), "
 "[#2596](https://github.com/adap/flower/pull/2596))"
 
-#: ../../source/ref-changelog.md:1072 ../../source/ref-changelog.md:1162
-#: ../../source/ref-changelog.md:1226 ../../source/ref-changelog.md:1280
-#: ../../source/ref-changelog.md:1347
+#: ../../source/ref-changelog.md:1070 ../../source/ref-changelog.md:1160
+#: ../../source/ref-changelog.md:1224 ../../source/ref-changelog.md:1278
+#: ../../source/ref-changelog.md:1345
 msgid "Flower received many improvements under the hood, too many to list here."
 msgstr "Flower 进行了许多改进，这里就不一一列举了。"
 
-#: ../../source/ref-changelog.md:1076
+#: ../../source/ref-changelog.md:1074
 msgid ""
 "**Remove support for Python 3.7** "
 "([#2280](https://github.com/adap/flower/pull/2280), "
@@ -25249,13 +25249,13 @@ msgstr ""
 "[#2355](https://github.com/adap/flower/pull/2355), "
 "[#2356](https://github.com/adap/flower/pull/2356))"
 
-#: ../../source/ref-changelog.md:1078
+#: ../../source/ref-changelog.md:1076
 msgid ""
 "Python 3.7 support was deprecated in Flower 1.5, and this release removes"
 " support. Flower now requires Python 3.8."
 msgstr "在 Flower 1.5 中，Python 3.7 支持已被弃用，本版本将删除该支持。Flower 现在需要 Python 3.8。"
 
-#: ../../source/ref-changelog.md:1080
+#: ../../source/ref-changelog.md:1078
 msgid ""
 "**Remove experimental argument** `rest` **from** `start_client` "
 "([#2324](https://github.com/adap/flower/pull/2324))"
@@ -25263,7 +25263,7 @@ msgstr ""
 "**从** `start_client` 中移除** `rest` **实验参数 "
 "([#2324](https://github.com/adap/flower/pull/2324))"
 
-#: ../../source/ref-changelog.md:1082
+#: ../../source/ref-changelog.md:1080
 msgid ""
 "The (still experimental) argument `rest` was removed from `start_client` "
 "and `start_numpy_client`. Use `transport=\"rest\"` to opt into the "
@@ -25272,11 +25272,11 @@ msgstr ""
 "删除了 `start_client` 和 `start_numpy_client` 中的参数 `rest`（仍属试验性质）。请使用 "
 "`transport=\"rest\"` 来选择使用试验性 REST API。"
 
-#: ../../source/ref-changelog.md:1084
+#: ../../source/ref-changelog.md:1082
 msgid "v1.5.0 (2023-08-31)"
 msgstr "v1.5.0 (2023-08-31)"
 
-#: ../../source/ref-changelog.md:1090
+#: ../../source/ref-changelog.md:1088
 msgid ""
 "`Adam Narozniak`, `Anass Anhari`, `Charles Beauville`, `Dana-Farber`, "
 "`Daniel J. Beutel`, `Daniel Nata Nugraha`, `Edoardo Gabrielli`, `Gustavo "
@@ -25290,7 +25290,7 @@ msgstr ""
 "Topal`, `achiverram28`, `danielnugraha`, `eunchung`, `ruthgal` <!---"
 "TOKEN_v1.5.0-->"
 
-#: ../../source/ref-changelog.md:1094
+#: ../../source/ref-changelog.md:1092
 msgid ""
 "**Introduce new simulation engine** "
 "([#1969](https://github.com/adap/flower/pull/1969), "
@@ -25301,7 +25301,7 @@ msgstr ""
 "[#2221](https://github.com/adap/flower/pull/2221), "
 "[#2248](https://github.com/adap/flower/pull/2248))"
 
-#: ../../source/ref-changelog.md:1096
+#: ../../source/ref-changelog.md:1094
 msgid ""
 "The new simulation engine has been rewritten from the ground up, yet it "
 "remains fully backwards compatible. It offers much improved stability and"
@@ -25312,7 +25312,7 @@ msgstr ""
 "新的模拟引擎从头开始重新编写，但仍完全向后兼容。它的稳定性和内存处理能力大大提高，尤其是在使用 GPU 时。仿真可透明地适应不同的设置，以在仅 "
 "CPU、CPU+GPU、多 GPU 或多节点多 GPU 环境中扩展模拟。"
 
-#: ../../source/ref-changelog.md:1098
+#: ../../source/ref-changelog.md:1096
 msgid ""
 "Comprehensive documentation includes a new [how-to run "
 "simulations](https://flower.ai/docs/framework/how-to-run-"
@@ -25329,7 +25329,7 @@ msgstr ""
 "tensorflow.html) notebooks, and a new [YouTube tutorial "
 "series](https://www.youtube.com/watch?v=cRebUIGB5RU&list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB)。"
 
-#: ../../source/ref-changelog.md:1100
+#: ../../source/ref-changelog.md:1098
 msgid ""
 "**Restructure Flower Docs** "
 "([#1824](https://github.com/adap/flower/pull/1824), "
@@ -25388,7 +25388,7 @@ msgstr ""
 "[#2243](https://github.com/adap/flower/pull/2243), "
 "[#2227](https://github.com/adap/flower/pull/2227))"
 
-#: ../../source/ref-changelog.md:1102
+#: ../../source/ref-changelog.md:1100
 #, fuzzy
 msgid ""
 "Much effort went into a completely restructured Flower docs experience. "
@@ -25399,7 +25399,7 @@ msgstr ""
 "Flower 文档体验的全面重构耗费了大量精力。现在，[flower.ai/docs](flower.ai/docs)上的文档分为 Flower "
 "Framework、Flower Baselines、Flower Android SDK、Flower iOS SDK 和代码示例项目。"
 
-#: ../../source/ref-changelog.md:1104
+#: ../../source/ref-changelog.md:1102
 msgid ""
 "**Introduce Flower Swift SDK** "
 "([#1858](https://github.com/adap/flower/pull/1858), "
@@ -25409,7 +25409,7 @@ msgstr ""
 "([#1858](https://github.com/adap/flower/pull/1858), "
 "[#1897](https://github.com/adap/flower/pull/1897))"
 
-#: ../../source/ref-changelog.md:1106
+#: ../../source/ref-changelog.md:1104
 msgid ""
 "This is the first preview release of the Flower Swift SDK. Flower support"
 " on iOS is improving, and alongside the Swift SDK and code example, there"
@@ -25418,7 +25418,7 @@ msgstr ""
 "这是 Flower Swift SDK 的首个预览版。Flower 对 iOS 的支持正在不断改进，除了 Swift SDK "
 "和代码示例外，现在还有 iOS 快速入门教程。"
 
-#: ../../source/ref-changelog.md:1108
+#: ../../source/ref-changelog.md:1106
 msgid ""
 "**Introduce Flower Android SDK** "
 "([#2131](https://github.com/adap/flower/pull/2131))"
@@ -25426,7 +25426,7 @@ msgstr ""
 "**介绍Flower Android SDK** "
 "([#2131](https://github.com/adap/flower/pull/2131))"
 
-#: ../../source/ref-changelog.md:1110
+#: ../../source/ref-changelog.md:1108
 msgid ""
 "This is the first preview release of the Flower Kotlin SDK. Flower "
 "support on Android is improving, and alongside the Kotlin SDK and code "
@@ -25435,7 +25435,7 @@ msgstr ""
 "这是 Flower Kotlin SDK 的首个预览版。Flower 对 Android 的支持正在不断改进，除了 Kotlin SDK "
 "和代码示例，现在还有 Android 快速入门教程。"
 
-#: ../../source/ref-changelog.md:1112
+#: ../../source/ref-changelog.md:1110
 msgid ""
 "**Introduce new end-to-end testing infrastructure** "
 "([#1842](https://github.com/adap/flower/pull/1842), "
@@ -25474,23 +25474,23 @@ msgstr ""
 "[#2137](https://github.com/adap/flower/pull/2137), "
 "[#2165](https://github.com/adap/flower/pull/2165))"
 
-#: ../../source/ref-changelog.md:1114
+#: ../../source/ref-changelog.md:1112
 msgid ""
 "A new testing infrastructure ensures that new changes stay compatible "
 "with existing framework integrations or strategies."
 msgstr "新的测试设施可确保新的变更与现有的框架集成或策略保持兼容。"
 
-#: ../../source/ref-changelog.md:1116
+#: ../../source/ref-changelog.md:1114
 msgid "**Deprecate Python 3.7**"
 msgstr "** 过时的 Python 3.7**"
 
-#: ../../source/ref-changelog.md:1118
+#: ../../source/ref-changelog.md:1116
 msgid ""
 "Since Python 3.7 reached its end of life (EOL) on 2023-06-27, support for"
 " Python 3.7 is now deprecated and will be removed in an upcoming release."
 msgstr "由于 Python 3.7 已于 2023-06-27 弃用 (EOL)，对 Python 3.7 的支持现已废弃，并将在即将发布的版本中移除。"
 
-#: ../../source/ref-changelog.md:1120
+#: ../../source/ref-changelog.md:1118
 msgid ""
 "**Add new** `FedTrimmedAvg` **strategy** "
 "([#1769](https://github.com/adap/flower/pull/1769), "
@@ -25499,7 +25499,7 @@ msgstr ""
 "**添加新的**`FedTrimmedAvg`**策略**（[#1769](https://github.com/adap/flower/pull/1769),"
 " [#1853](https://github.com/adap/flower/pull/1853)"
 
-#: ../../source/ref-changelog.md:1122
+#: ../../source/ref-changelog.md:1120
 msgid ""
 "The new `FedTrimmedAvg` strategy implements Trimmed Mean by [Dong Yin, "
 "2018](https://arxiv.org/abs/1803.01498)."
@@ -25507,13 +25507,13 @@ msgstr ""
 "新的 \"FedTrimmedAvg \"策略实现了[Dong Yin, "
 "2018]（https://arxiv.org/abs/1803.01498）的 \"Trimmed Mean\"。"
 
-#: ../../source/ref-changelog.md:1124
+#: ../../source/ref-changelog.md:1122
 msgid ""
 "**Introduce start_driver** "
 "([#1697](https://github.com/adap/flower/pull/1697))"
 msgstr "**引入 start_driver**（[#1697](https://github.com/adap/flower/pull/1697)）"
 
-#: ../../source/ref-changelog.md:1126
+#: ../../source/ref-changelog.md:1124
 msgid ""
 "In addition to `start_server` and using the raw Driver API, there is a "
 "new `start_driver` function that allows for running `start_server` "
@@ -25525,7 +25525,7 @@ msgstr ""
 "`start_server` 脚本作为 Flower 驱动程序运行。请查看 `mt-pytorch` 代码示例，了解使用 "
 "`start_driver` 的工作示例。"
 
-#: ../../source/ref-changelog.md:1128
+#: ../../source/ref-changelog.md:1126
 msgid ""
 "**Add parameter aggregation to** `mt-pytorch` **code example** "
 "([#1785](https://github.com/adap/flower/pull/1785))"
@@ -25533,7 +25533,7 @@ msgstr ""
 "为 `mt-pytorch` **代码示例**添加参数聚合 "
 "([#1785](https://github.com/adap/flower/pull/1785))"
 
-#: ../../source/ref-changelog.md:1130
+#: ../../source/ref-changelog.md:1128
 msgid ""
 "The `mt-pytorch` example shows how to aggregate parameters when writing a"
 " driver script. The included `driver.py` and `server.py` have been "
@@ -25543,7 +25543,7 @@ msgstr ""
 "`mt-pytorch`示例展示了如何在编写驱动程序脚本时聚合参数。附带的 `driver.py` 和 `server.py` "
 "已经进行了调整，以演示构建服务器端逻辑的低级方法和高级方法。"
 
-#: ../../source/ref-changelog.md:1132
+#: ../../source/ref-changelog.md:1130
 msgid ""
 "**Migrate experimental REST API to Starlette** "
 "([2171](https://github.com/adap/flower/pull/2171))"
@@ -25551,7 +25551,7 @@ msgstr ""
 "**将实验性 REST API 移植到 Starlette** "
 "([2171](https://github.com/adap/flower/pull/2171))"
 
-#: ../../source/ref-changelog.md:1134
+#: ../../source/ref-changelog.md:1132
 msgid ""
 "The (experimental) REST API used to be implemented in "
 "[FastAPI](https://fastapi.tiangolo.com/), but it has now been migrated to"
@@ -25560,13 +25560,13 @@ msgstr ""
 "REST API（试验性）曾在 [FastAPI](https://fastapi.tiangolo.com/) 中实现，但现在已迁移到直接使用 "
 "[Starlette](https://www.starlette.io/) 。"
 
-#: ../../source/ref-changelog.md:1136
+#: ../../source/ref-changelog.md:1134
 msgid ""
 "Please note: The REST request-response API is still experimental and will"
 " likely change significantly over time."
 msgstr "请注意：REST 请求-响应 API 仍处于试验阶段，随着时间的推移可能会发生重大变化。"
 
-#: ../../source/ref-changelog.md:1138
+#: ../../source/ref-changelog.md:1136
 msgid ""
 "**Introduce experimental gRPC request-response API** "
 "([#1867](https://github.com/adap/flower/pull/1867), "
@@ -25576,7 +25576,7 @@ msgstr ""
 "（[#1867](https://github.com/adap/flower/pull/1867), "
 "[#1901](https://github.com/adap/flower/pull/1901)"
 
-#: ../../source/ref-changelog.md:1140
+#: ../../source/ref-changelog.md:1138
 msgid ""
 "In addition to the existing gRPC API (based on bidirectional streaming) "
 "and the experimental REST API, there is now a new gRPC API that uses a "
@@ -25585,13 +25585,13 @@ msgstr ""
 "除了现有的 gRPC 应用程序接口（基于双向流）和试验性 REST 应用程序接口外，现在还有一个新的 gRPC "
 "应用程序接口，它使用请求-响应模型与客户端节点通信。"
 
-#: ../../source/ref-changelog.md:1142
+#: ../../source/ref-changelog.md:1140
 msgid ""
 "Please note: The gRPC request-response API is still experimental and will"
 " likely change significantly over time."
 msgstr "请注意：gRPC 请求-响应 API 仍处于试验阶段，随着时间的推移可能会发生重大变化。"
 
-#: ../../source/ref-changelog.md:1144
+#: ../../source/ref-changelog.md:1142
 msgid ""
 "**Replace the experimental** `start_client(rest=True)` **with the new** "
 "`start_client(transport=\"rest\")` "
@@ -25601,7 +25601,7 @@ msgstr ""
 "`start_client(rest=True)` "
 "([#1880](https://github.com/adap/flower/pull/1880))"
 
-#: ../../source/ref-changelog.md:1146
+#: ../../source/ref-changelog.md:1144
 msgid ""
 "The (experimental) `start_client` argument `rest` was deprecated in "
 "favour of a new argument `transport`. `start_client(transport=\"rest\")` "
@@ -25612,13 +25612,13 @@ msgstr ""
 "已废弃（试验性的）`start_client`参数`rest`，改用新参数`transport`。`start_client(transport=\"rest\")`将产生与以前的`start_client(rest=True)`相同的行为。所有代码都应迁移到新参数"
 " `transport`。过时的参数 `rest` 将在今后的版本中删除。"
 
-#: ../../source/ref-changelog.md:1148
+#: ../../source/ref-changelog.md:1146
 msgid ""
 "**Add a new gRPC option** "
 "([#2197](https://github.com/adap/flower/pull/2197))"
 msgstr "** 添加一个新的 gRPC 选项**（[#2197](https://github.com/adap/flower/pull/2197)）"
 
-#: ../../source/ref-changelog.md:1150
+#: ../../source/ref-changelog.md:1148
 msgid ""
 "We now start a gRPC server with the `grpc.keepalive_permit_without_calls`"
 " option set to 0 by default. This prevents the clients from sending "
@@ -25627,17 +25627,17 @@ msgstr ""
 "现在我们启动一个 gRPC 服务器，并将 `grpc.keepalive_permit_without_calls` 选项默认设置为 "
 "0。这将防止客户端在没有未处理数据流时发送 keepalive pings。"
 
-#: ../../source/ref-changelog.md:1152
+#: ../../source/ref-changelog.md:1150
 msgid ""
 "**Improve example notebooks** "
 "([#2005](https://github.com/adap/flower/pull/2005))"
 msgstr "**改进示例笔记** ([#2005](https://github.com/adap/flower/pull/2005))"
 
-#: ../../source/ref-changelog.md:1154
+#: ../../source/ref-changelog.md:1152
 msgid "There's a new 30min Federated Learning PyTorch tutorial!"
 msgstr "有一个新的 30 分钟的联邦学习 PyTorch 教程！"
 
-#: ../../source/ref-changelog.md:1156
+#: ../../source/ref-changelog.md:1154
 msgid ""
 "**Example updates** ([#1772](https://github.com/adap/flower/pull/1772), "
 "[#1873](https://github.com/adap/flower/pull/1873), "
@@ -25663,7 +25663,7 @@ msgstr ""
 "[#2225](https://github.com/adap/flower/pull/2225), "
 "[#2183](https://github.com/adap/flower/pull/2183))"
 
-#: ../../source/ref-changelog.md:1158
+#: ../../source/ref-changelog.md:1156
 msgid ""
 "Many examples have received significant updates, including simplified "
 "advanced-tensorflow and advanced-pytorch examples, improved macOS "
@@ -25675,12 +25675,12 @@ msgstr ""
 "TensorFlow 示例的 macOS 兼容性，以及模拟代码示例。一项重大升级是所有代码示例现在都有了 "
 "\"requirements.txt\"（除 \"pyproject.toml \"外）。"
 
-#: ../../source/ref-changelog.md:1160
+#: ../../source/ref-changelog.md:1158
+#, fuzzy
 msgid ""
 "**General improvements** "
 "([#1872](https://github.com/adap/flower/pull/1872), "
 "[#1866](https://github.com/adap/flower/pull/1866), "
-"[#1884](https://github.com/adap/flower/pull/1884), "
 "[#1837](https://github.com/adap/flower/pull/1837), "
 "[#1477](https://github.com/adap/flower/pull/1477), "
 "[#2171](https://github.com/adap/flower/pull/2171))"
@@ -25692,11 +25692,11 @@ msgstr ""
 "[#1477](https://github.com/adap/flower/pull/1477), "
 "[#2171](https://github.com/adap/flower/pull/2171))"
 
-#: ../../source/ref-changelog.md:1168
+#: ../../source/ref-changelog.md:1166
 msgid "v1.4.0 (2023-04-21)"
 msgstr "v1.4.0 (2023-04-21)"
 
-#: ../../source/ref-changelog.md:1174
+#: ../../source/ref-changelog.md:1172
 msgid ""
 "`Adam Narozniak`, `Alexander Viala Bellander`, `Charles Beauville`, "
 "`Chenyang Ma (Danny)`, `Daniel J. Beutel`, `Edoardo`, `Gautam Jajoo`, "
@@ -25712,7 +25712,7 @@ msgstr ""
 "Lane`, `Nikolaos Episkopos`, `Ragy`, `Saurav Maheshkar`, `Semo Yang`, "
 "`Steve Laskaridis`, `Steven Hé (Sīchàng)`, `Taner Topal`"
 
-#: ../../source/ref-changelog.md:1178
+#: ../../source/ref-changelog.md:1176
 msgid ""
 "**Introduce support for XGBoost (**`FedXgbNnAvg` **strategy and "
 "example)** ([#1694](https://github.com/adap/flower/pull/1694), "
@@ -25730,7 +25730,7 @@ msgstr ""
 "[#1763](https://github.com/adap/flower/pull/1763), "
 "[#1795](https://github.com/adap/flower/pull/1795))"
 
-#: ../../source/ref-changelog.md:1180
+#: ../../source/ref-changelog.md:1178
 msgid ""
 "XGBoost is a tree-based ensemble machine learning algorithm that uses "
 "gradient boosting to improve model accuracy. We added a new `FedXgbNnAvg`"
@@ -25744,7 +25744,7 @@ msgstr ""
 "\"FedXgbNnAvg\"[策略](https://github.com/adap/flower/tree/main/src/py/flwr/server/strategy/fedxgb_nn_avg.py)和一个[代码示例](https://github.com/adap/flower/tree/main/examples"
 "/xgboost-quickstart)，演示如何在 XGBoost 项目中使用这个新策略。"
 
-#: ../../source/ref-changelog.md:1182
+#: ../../source/ref-changelog.md:1180
 msgid ""
 "**Introduce iOS SDK (preview)** "
 "([#1621](https://github.com/adap/flower/pull/1621), "
@@ -25753,7 +25753,7 @@ msgstr ""
 "**介绍 iOS SDK（预览版）** ([#1621](https://github.com/adap/flower/pull/1621), "
 "[#1764](https://github.com/adap/flower/pull/1764))"
 
-#: ../../source/ref-changelog.md:1184
+#: ../../source/ref-changelog.md:1182
 msgid ""
 "This is a major update for anyone wanting to implement Federated Learning"
 " on iOS mobile devices. We now have a swift iOS SDK present under "
@@ -25768,7 +25768,7 @@ msgstr ""
 " 下提供了一个迅捷的 iOS SDK，这将大大方便应用程序的创建过程。为了展示其使用情况，我们还更新了 [iOS "
 "示例](https://github.com/adap/flower/tree/main/examples/ios)！"
 
-#: ../../source/ref-changelog.md:1186
+#: ../../source/ref-changelog.md:1184
 msgid ""
 "**Introduce new \"What is Federated Learning?\" tutorial** "
 "([#1657](https://github.com/adap/flower/pull/1657), "
@@ -25778,7 +25778,7 @@ msgstr ""
 "\"什么是联邦学习？\"教程**（[#1657](https://github.com/adap/flower/pull/1657), "
 "[#1721](https://github.com/adap/flower/pull/1721)"
 
-#: ../../source/ref-changelog.md:1188
+#: ../../source/ref-changelog.md:1186
 msgid ""
 "A new [entry-level tutorial](https://flower.ai/docs/framework/tutorial-"
 "what-is-federated-learning.html) in our documentation explains the basics"
@@ -25790,7 +25790,7 @@ msgstr ""
 "federated-learning.html)，解释了联邦学习的基础知识。它让任何不熟悉联邦学习的人都能开始 Flower "
 "之旅。请转发给对联邦学习感兴趣的人！"
 
-#: ../../source/ref-changelog.md:1190
+#: ../../source/ref-changelog.md:1188
 msgid ""
 "**Introduce new Flower Baseline: FedProx MNIST** "
 "([#1513](https://github.com/adap/flower/pull/1513), "
@@ -25804,7 +25804,7 @@ msgstr ""
 "[#1681](https://github.com/adap/flower/pull/1681), "
 "[#1679](https://github.com/adap/flower/pull/1679)"
 
-#: ../../source/ref-changelog.md:1192
+#: ../../source/ref-changelog.md:1190
 msgid ""
 "This new baseline replicates the MNIST+CNN task from the paper [Federated"
 " Optimization in Heterogeneous Networks (Li et al., "
@@ -25815,7 +25815,7 @@ msgstr ""
 "al., 2018)](https://arxiv.org/abs/1812.06127)中的 MNIST+CNN 任务。它使用 "
 "\"FedProx \"策略，旨在使收敛在异构环境中更加稳健。"
 
-#: ../../source/ref-changelog.md:1194
+#: ../../source/ref-changelog.md:1192
 msgid ""
 "**Introduce new Flower Baseline: FedAvg FEMNIST** "
 "([#1655](https://github.com/adap/flower/pull/1655))"
@@ -25823,7 +25823,7 @@ msgstr ""
 "**引入新的 Flower Baseline： FedAvg FEMNIST** "
 "([#1655](https://github.com/adap/flower/pull/1655))"
 
-#: ../../source/ref-changelog.md:1196
+#: ../../source/ref-changelog.md:1194
 msgid ""
 "This new baseline replicates an experiment evaluating the performance of "
 "the FedAvg algorithm on the FEMNIST dataset from the paper [LEAF: A "
@@ -25833,7 +25833,7 @@ msgstr ""
 "这一新Baseline复现了论文[LEAF: A Benchmark for Federated Settings（Caldas 等人，2018 "
 "年）](https://arxiv.org/abs/1812.01097)中评估 FedAvg 算法在 FEMNIST 数据集上性能的实验。"
 
-#: ../../source/ref-changelog.md:1198
+#: ../../source/ref-changelog.md:1196
 msgid ""
 "**Introduce (experimental) REST API** "
 "([#1594](https://github.com/adap/flower/pull/1594), "
@@ -25852,20 +25852,20 @@ msgstr ""
 "[#1770](https://github.com/adap/flower/pull/1770), "
 "[#1733](https://github.com/adap/flower/pull/1733))"
 
-#: ../../source/ref-changelog.md:1200
+#: ../../source/ref-changelog.md:1198
 msgid ""
 "A new REST API has been introduced as an alternative to the gRPC-based "
 "communication stack. In this initial version, the REST API only supports "
 "anonymous clients."
 msgstr "作为基于 gRPC 的通信栈的替代方案，我们引入了新的 REST API。在初始版本中，REST API 仅支持匿名客户端。"
 
-#: ../../source/ref-changelog.md:1202
+#: ../../source/ref-changelog.md:1200
 msgid ""
 "Please note: The REST API is still experimental and will likely change "
 "significantly over time."
 msgstr "请注意：REST API 仍处于试验阶段，随着时间的推移可能会发生重大变化。"
 
-#: ../../source/ref-changelog.md:1204
+#: ../../source/ref-changelog.md:1202
 msgid ""
 "**Improve the (experimental) Driver API** "
 "([#1663](https://github.com/adap/flower/pull/1663), "
@@ -25888,7 +25888,7 @@ msgstr ""
 "[#1662](https://github.com/adap/flower/pull/1662), "
 "[#1794](https://github.com/adap/flower/pull/1794))"
 
-#: ../../source/ref-changelog.md:1206
+#: ../../source/ref-changelog.md:1204
 msgid ""
 "The Driver API is still an experimental feature, but this release "
 "introduces some major upgrades. One of the main improvements is the "
@@ -25901,20 +25901,20 @@ msgstr ""
 "数据库，将服务器状态存储在磁盘上（而不是内存中）。另一项改进是，已交付的任务（指令或结果）现在将被删除。这大大提高了长期运行的 Flower "
 "服务器的内存效率。"
 
-#: ../../source/ref-changelog.md:1208
+#: ../../source/ref-changelog.md:1206
 msgid ""
 "**Fix spilling issues related to Ray during simulations** "
 "([#1698](https://github.com/adap/flower/pull/1698))"
 msgstr "**修复模拟过程中与Ray有关的溢出问题** ([#1698](https://github.com/adap/flower/pull/1698))"
 
-#: ../../source/ref-changelog.md:1210
+#: ../../source/ref-changelog.md:1208
 msgid ""
 "While running long simulations, `ray` was sometimes spilling huge amounts"
 " of data that would make the training unable to continue. This is now "
 "fixed! 🎉"
 msgstr "在运行长时间模拟时，`ray` 有时会溢出大量数据，导致训练无法继续。现在这个问题已经解决！🎉"
 
-#: ../../source/ref-changelog.md:1212
+#: ../../source/ref-changelog.md:1210
 msgid ""
 "**Add new example using** `TabNet` **and Flower** "
 "([#1725](https://github.com/adap/flower/pull/1725))"
@@ -25922,7 +25922,7 @@ msgstr ""
 "** 添加使用** `TabNet` ** 的新示例** "
 "([#1725](https://github.com/adap/flower/pull/1725))"
 
-#: ../../source/ref-changelog.md:1214
+#: ../../source/ref-changelog.md:1212
 msgid ""
 "TabNet is a powerful and flexible framework for training machine learning"
 " models on tabular data. We now have a federated example using Flower: "
@@ -25933,19 +25933,19 @@ msgstr ""
 "tabnet](https://github.com/adap/flower/tree/main/examples/quickstart-"
 "tabnet)。"
 
-#: ../../source/ref-changelog.md:1216
+#: ../../source/ref-changelog.md:1214
 msgid ""
 "**Add new how-to guide for monitoring simulations** "
 "([#1649](https://github.com/adap/flower/pull/1649))"
 msgstr "** 添加新的模拟监控指南** ([#1649](https://github.com/adap/flower/pull/1649))"
 
-#: ../../source/ref-changelog.md:1218
+#: ../../source/ref-changelog.md:1216
 msgid ""
 "We now have a documentation guide to help users monitor their performance"
 " during simulations."
 msgstr "我们现在有一份文档指南，可帮助用户在模拟过程中监控其性能。"
 
-#: ../../source/ref-changelog.md:1220
+#: ../../source/ref-changelog.md:1218
 msgid ""
 "**Add training metrics to** `History` **object during simulations** "
 "([#1696](https://github.com/adap/flower/pull/1696))"
@@ -25953,7 +25953,7 @@ msgstr ""
 "**在模拟过程中为***`历史`***对象添加训练指标*** "
 "([#1696](https://github.com/adap/flower/pull/1696))"
 
-#: ../../source/ref-changelog.md:1222
+#: ../../source/ref-changelog.md:1220
 msgid ""
 "The `fit_metrics_aggregation_fn` can be used to aggregate training "
 "metrics, but previous releases did not save the results in the `History` "
@@ -25962,11 +25962,11 @@ msgstr ""
 "`fit_metrics_aggregation_fn`可用于汇总训练指标，但以前的版本不会将结果保存在 \"History "
 "\"对象中。现在可以了！"
 
-#: ../../source/ref-changelog.md:1224
+#: ../../source/ref-changelog.md:1222
+#, fuzzy
 msgid ""
 "**General improvements** "
-"([#1659](https://github.com/adap/flower/pull/1659), "
-"[#1646](https://github.com/adap/flower/pull/1646), "
+"([#1646](https://github.com/adap/flower/pull/1646), "
 "[#1647](https://github.com/adap/flower/pull/1647), "
 "[#1471](https://github.com/adap/flower/pull/1471), "
 "[#1648](https://github.com/adap/flower/pull/1648), "
@@ -26065,11 +26065,11 @@ msgstr ""
 "[#1804](https://github.com/adap/flower/pull/1804), "
 "[#1805](https://github.com/adap/flower/pull/1805))"
 
-#: ../../source/ref-changelog.md:1232
+#: ../../source/ref-changelog.md:1230
 msgid "v1.3.0 (2023-02-06)"
 msgstr "v1.3.0 (2023-02-06)"
 
-#: ../../source/ref-changelog.md:1238
+#: ../../source/ref-changelog.md:1236
 msgid ""
 "`Adam Narozniak`, `Alexander Viala Bellander`, `Charles Beauville`, "
 "`Daniel J. Beutel`, `JDRanpariya`, `Lennart Behme`, `Taner Topal`"
@@ -26077,7 +26077,7 @@ msgstr ""
 "`Adam Narozniak`, `Alexander Viala Bellander`, `Charles Beauville`, "
 "`Daniel J. Beutel`, `JDRanpariya`, `Lennart Behme`, `Taner Topal`"
 
-#: ../../source/ref-changelog.md:1242
+#: ../../source/ref-changelog.md:1240
 msgid ""
 "**Add support for** `workload_id` **and** `group_id` **in Driver API** "
 "([#1595](https://github.com/adap/flower/pull/1595))"
@@ -26085,7 +26085,7 @@ msgstr ""
 "**在驱动程序应用程序接口中添加对** `workload_id` **和** `group_id` **的支持** "
 "([#1595](https://github.com/adap/flower/pull/1595))"
 
-#: ../../source/ref-changelog.md:1244
+#: ../../source/ref-changelog.md:1242
 msgid ""
 "The (experimental) Driver API now supports a `workload_id` that can be "
 "used to identify which workload a task belongs to. It also supports a new"
@@ -26097,7 +26097,7 @@ msgstr ""
 "`group_id`，例如，可用于指示当前的训练轮次。通过 `workload_id` 和 `group_id` "
 "客户端节点可以决定是否要处理某个任务。"
 
-#: ../../source/ref-changelog.md:1246
+#: ../../source/ref-changelog.md:1244
 msgid ""
 "**Make Driver API and Fleet API address configurable** "
 "([#1637](https://github.com/adap/flower/pull/1637))"
@@ -26105,7 +26105,7 @@ msgstr ""
 "**使Driver API 和Fleet "
 "API地址可配置**（[#1637](https://github.com/adap/flower/pull/1637)）"
 
-#: ../../source/ref-changelog.md:1248
+#: ../../source/ref-changelog.md:1246
 msgid ""
 "The (experimental) long-running Flower server (Driver API and Fleet API) "
 "can now configure the server address of both Driver API (via `--driver-"
@@ -26114,7 +26114,7 @@ msgstr ""
 "长期运行的 Flower 服务器（Driver API 和 Fleet API）现在可以在启动时配置 Driver API（通过 "
 "`--driver-api-address`）和 Fleet API（通过 `-fleet-api-address`）的服务器地址："
 
-#: ../../source/ref-changelog.md:1250
+#: ../../source/ref-changelog.md:1248
 #, fuzzy
 msgid ""
 "`flower-server --driver-api-address \"0.0.0.0:8081\" --fleet-api-address "
@@ -26123,11 +26123,11 @@ msgstr ""
 "`flower-server --driver-api-address \"0.0.0.0:8081\" --fleet-api-address "
 "\"0.0.0.0:8086\"`"
 
-#: ../../source/ref-changelog.md:1252
+#: ../../source/ref-changelog.md:1250
 msgid "Both IPv4 and IPv6 addresses are supported."
 msgstr "支持 IPv4 和 IPv6 地址。"
 
-#: ../../source/ref-changelog.md:1254
+#: ../../source/ref-changelog.md:1252
 msgid ""
 "**Add new example of Federated Learning using fastai and Flower** "
 "([#1598](https://github.com/adap/flower/pull/1598))"
@@ -26135,7 +26135,7 @@ msgstr ""
 "** 添加使用 fastai 和 Flower 进行联邦学习的新示例** "
 "([#1598](https://github.com/adap/flower/pull/1598))"
 
-#: ../../source/ref-changelog.md:1256
+#: ../../source/ref-changelog.md:1254
 msgid ""
 "A new code example (`quickstart-fastai`) demonstrates federated learning "
 "with [fastai](https://www.fast.ai/) and Flower. You can find it here: "
@@ -26147,7 +26147,7 @@ msgstr ""
 "fastai](https://github.com/adap/flower/tree/main/examples/quickstart-"
 "fastai)。"
 
-#: ../../source/ref-changelog.md:1258
+#: ../../source/ref-changelog.md:1256
 msgid ""
 "**Make Android example compatible with** `flwr >= 1.0.0` **and the latest"
 " versions of Android** "
@@ -26156,7 +26156,7 @@ msgstr ""
 "**使安卓示例兼容** `flwr >= 1.0.0` **和最新版本的安卓** "
 "([#1603](https://github.com/adap/flower/pull/1603))"
 
-#: ../../source/ref-changelog.md:1260
+#: ../../source/ref-changelog.md:1258
 msgid ""
 "The Android code example has received a substantial update: the project "
 "is compatible with Flower 1.0 (and later), the UI received a full "
@@ -26166,13 +26166,13 @@ msgstr ""
 "Android 代码示例已进行了大幅更新：项目兼容 Flower 1.0（及更高版本），用户界面已全面刷新，项目已更新为兼容较新的 Android"
 " 工具。"
 
-#: ../../source/ref-changelog.md:1262
+#: ../../source/ref-changelog.md:1260
 msgid ""
 "**Add new `FedProx` strategy** "
 "([#1619](https://github.com/adap/flower/pull/1619))"
 msgstr "**添加新的`FedProx`策略** （[#1619](https://github.com/adap/flower/pull/1619)）"
 
-#: ../../source/ref-changelog.md:1264
+#: ../../source/ref-changelog.md:1262
 msgid ""
 "This "
 "[strategy](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedprox.py)"
@@ -26186,25 +26186,25 @@ msgstr ""
 "该[策略](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedprox.py)与[`FedAvg`](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedavg.py)几乎相同，但可以帮助用户复现本[论文](https://arxiv.org/abs/1812.06127)中的描述。它的本质是添加一个名为"
 " `proximal_mu`的参数，使局部模型与全局模型正则化。"
 
-#: ../../source/ref-changelog.md:1266
+#: ../../source/ref-changelog.md:1264
 msgid ""
 "**Add new metrics to telemetry events** "
 "([#1640](https://github.com/adap/flower/pull/1640))"
 msgstr "**为遥测事件添加新指标**（[#1640](https://github.com/adap/flower/pull/1640)）"
 
-#: ../../source/ref-changelog.md:1268
+#: ../../source/ref-changelog.md:1266
 msgid ""
 "An updated event structure allows, for example, the clustering of events "
 "within the same workload."
 msgstr "例如，更新后的事件结构可以将同一工作负载中的事件集中在一起。"
 
-#: ../../source/ref-changelog.md:1270
+#: ../../source/ref-changelog.md:1268
 msgid ""
 "**Add new custom strategy tutorial section** "
 "[#1623](https://github.com/adap/flower/pull/1623)"
 msgstr "**添加新的自定义策略教程部分** [#1623](https://github.com/adap/flower/pull/1623)"
 
-#: ../../source/ref-changelog.md:1272
+#: ../../source/ref-changelog.md:1270
 msgid ""
 "The Flower tutorial now has a new section that covers implementing a "
 "custom strategy from scratch: [Open in "
@@ -26215,13 +26215,13 @@ msgstr ""
 "中打开](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-build-a-strategy-from-scratch-pytorch.ipynb)"
 
-#: ../../source/ref-changelog.md:1274
+#: ../../source/ref-changelog.md:1272
 msgid ""
 "**Add new custom serialization tutorial section** "
 "([#1622](https://github.com/adap/flower/pull/1622))"
 msgstr "** 添加新的自定义序列化教程部分** ([#1622](https://github.com/adap/flower/pull/1622))"
 
-#: ../../source/ref-changelog.md:1276
+#: ../../source/ref-changelog.md:1274
 msgid ""
 "The Flower tutorial now has a new section that covers custom "
 "serialization: [Open in "
@@ -26232,7 +26232,8 @@ msgstr ""
 "中打开](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-customize-the-client-pytorch.ipynb)"
 
-#: ../../source/ref-changelog.md:1278
+#: ../../source/ref-changelog.md:1276
+#, fuzzy
 msgid ""
 "**General improvements** "
 "([#1638](https://github.com/adap/flower/pull/1638), "
@@ -26250,14 +26251,12 @@ msgid ""
 "[#1607](https://github.com/adap/flower/pull/1607), "
 "[#1609](https://github.com/adap/flower/pull/1609), "
 "[#1608](https://github.com/adap/flower/pull/1608), "
-"[#1603](https://github.com/adap/flower/pull/1603), "
 "[#1590](https://github.com/adap/flower/pull/1590), "
 "[#1580](https://github.com/adap/flower/pull/1580), "
 "[#1599](https://github.com/adap/flower/pull/1599), "
 "[#1600](https://github.com/adap/flower/pull/1600), "
 "[#1601](https://github.com/adap/flower/pull/1601), "
 "[#1597](https://github.com/adap/flower/pull/1597), "
-"[#1595](https://github.com/adap/flower/pull/1595), "
 "[#1591](https://github.com/adap/flower/pull/1591), "
 "[#1588](https://github.com/adap/flower/pull/1588), "
 "[#1589](https://github.com/adap/flower/pull/1589), "
@@ -26303,7 +26302,7 @@ msgstr ""
 "[#1572](https://github.com/adap/flower/pull/1572), "
 "[#1586](https://github.com/adap/flower/pull/1586))"
 
-#: ../../source/ref-changelog.md:1282
+#: ../../source/ref-changelog.md:1280
 msgid ""
 "**Updated documentation** "
 "([#1629](https://github.com/adap/flower/pull/1629), "
@@ -26322,18 +26321,18 @@ msgstr ""
 "[#1613](https://github.com/adap/flower/pull/1613), "
 "[#1614](https://github.com/adap/flower/pull/1614)))"
 
-#: ../../source/ref-changelog.md:1284 ../../source/ref-changelog.md:1351
+#: ../../source/ref-changelog.md:1282 ../../source/ref-changelog.md:1349
 msgid ""
 "As usual, the documentation has improved quite a bit. It is another step "
 "in our effort to make the Flower documentation the best documentation of "
 "any project. Stay tuned and as always, feel free to provide feedback!"
 msgstr "和往常一样，我们的文档有了很大的改进。这是我们努力使 Flower 文档成为所有项目中最好文档的又一步骤。请继续关注，并随时提供反馈意见！"
 
-#: ../../source/ref-changelog.md:1290
+#: ../../source/ref-changelog.md:1288
 msgid "v1.2.0 (2023-01-13)"
 msgstr "v1.2.0 (2023-01-13)"
 
-#: ../../source/ref-changelog.md:1296
+#: ../../source/ref-changelog.md:1294
 msgid ""
 "`Adam Narozniak`, `Charles Beauville`, `Daniel J. Beutel`, `Edoardo`, `L."
 " Jiang`, `Ragy`, `Taner Topal`, `dannymcy`"
@@ -26341,7 +26340,7 @@ msgstr ""
 "`Adam Narozniak`, `Charles Beauville`, `Daniel J. Beutel`, `Edoardo`, `L."
 " Jiang`, `Ragy`, `Taner Topal`, `dannymcy`"
 
-#: ../../source/ref-changelog.md:1300
+#: ../../source/ref-changelog.md:1298
 msgid ""
 "**Introduce new Flower Baseline: FedAvg MNIST** "
 "([#1497](https://github.com/adap/flower/pull/1497), "
@@ -26351,7 +26350,7 @@ msgstr ""
 "([#1497](https://github.com/adap/flower/pull/1497), "
 "[#1552](https://github.com/adap/flower/pull/1552))"
 
-#: ../../source/ref-changelog.md:1302
+#: ../../source/ref-changelog.md:1300
 msgid ""
 "Over the coming weeks, we will be releasing a number of new reference "
 "implementations useful especially to FL newcomers. They will typically "
@@ -26366,13 +26365,13 @@ msgstr ""
 "的总体了解。今天发布的是该系列中的第一篇。[阅读全文](https://flower.ai/blog/2023-01-12-fl-starter-"
 "pack-fedavg-mnist-cnn/)"
 
-#: ../../source/ref-changelog.md:1304
+#: ../../source/ref-changelog.md:1302
 msgid ""
 "**Improve GPU support in simulations** "
 "([#1555](https://github.com/adap/flower/pull/1555))"
 msgstr "**改进模拟中的 GPU 支持**（[#1555](https://github.com/adap/flower/pull/1555)）"
 
-#: ../../source/ref-changelog.md:1306
+#: ../../source/ref-changelog.md:1304
 msgid ""
 "The Ray-based Virtual Client Engine (`start_simulation`) has been updated"
 " to improve GPU support. The update includes some of the hard-earned "
@@ -26382,7 +26381,7 @@ msgstr ""
 "基于 Ray 的虚拟客户端引擎 (`start_simulation`)已更新，以改进对 GPU 的支持。此次更新包含了在 GPU "
 "集群环境中扩展模拟的一些经验教训。新的默认设置使基于 GPU 的模拟运行更加稳健。"
 
-#: ../../source/ref-changelog.md:1308
+#: ../../source/ref-changelog.md:1306
 msgid ""
 "**Improve GPU support in Jupyter Notebook tutorials** "
 "([#1527](https://github.com/adap/flower/pull/1527), "
@@ -26392,7 +26391,7 @@ msgstr ""
 "([#1527](https://github.com/adap/flower/pull/1527), "
 "[#1558](https://github.com/adap/flower/pull/1558))"
 
-#: ../../source/ref-changelog.md:1310
+#: ../../source/ref-changelog.md:1308
 msgid ""
 "Some users reported that Jupyter Notebooks have not always been easy to "
 "use on GPU instances. We listened and made improvements to all of our "
@@ -26401,7 +26400,7 @@ msgstr ""
 "一些用户报告说，在 GPU 实例上使用 Jupyter 笔记本并不是很方便。我们听取了他们的意见，并对所有 Jupyter "
 "笔记本进行了改进！点击这里查看更新后的笔记本："
 
-#: ../../source/ref-changelog.md:1312
+#: ../../source/ref-changelog.md:1310
 msgid ""
 "[An Introduction to Federated Learning](https://flower.ai/docs/framework"
 "/tutorial-get-started-with-flower-pytorch.html)"
@@ -26409,7 +26408,7 @@ msgstr ""
 "[联邦学习简介](https://flower.ai/docs/framework/tutorial-get-started-with-"
 "flower-pytorch.html)"
 
-#: ../../source/ref-changelog.md:1313
+#: ../../source/ref-changelog.md:1311
 msgid ""
 "[Strategies in Federated Learning](https://flower.ai/docs/framework"
 "/tutorial-use-a-federated-learning-strategy-pytorch.html)"
@@ -26417,7 +26416,7 @@ msgstr ""
 "[联邦学习策略](https://flower.ai/docs/framework/tutorial-use-a-federated-"
 "learning-strategy-pytorch.html)"
 
-#: ../../source/ref-changelog.md:1314
+#: ../../source/ref-changelog.md:1312
 msgid ""
 "[Building a Strategy](https://flower.ai/docs/framework/tutorial-build-a"
 "-strategy-from-scratch-pytorch.html)"
@@ -26425,7 +26424,7 @@ msgstr ""
 "[制定策略](https://flower.ai/docs/framework/tutorial-build-a-strategy-from-"
 "scratch-pytorch.html)"
 
-#: ../../source/ref-changelog.md:1315
+#: ../../source/ref-changelog.md:1313
 msgid ""
 "[Client and NumPyClient](https://flower.ai/docs/framework/tutorial-"
 "customize-the-client-pytorch.html)"
@@ -26433,7 +26432,7 @@ msgstr ""
 "[客户端和 NumPyClient](https://flower.ai/docs/framework/tutorial-customize-"
 "the-client-pytorch.html)"
 
-#: ../../source/ref-changelog.md:1317
+#: ../../source/ref-changelog.md:1315
 msgid ""
 "**Introduce optional telemetry** "
 "([#1533](https://github.com/adap/flower/pull/1533), "
@@ -26444,7 +26443,7 @@ msgstr ""
 "[#1544](https://github.com/adap/flower/pull/1544), "
 "[#1584](https://github.com/adap/flower/pull/1584)"
 
-#: ../../source/ref-changelog.md:1319
+#: ../../source/ref-changelog.md:1317
 msgid ""
 "After a [request for "
 "feedback](https://github.com/adap/flower/issues/1534) from the community,"
@@ -26457,7 +26456,7 @@ msgstr ""
 "开放源码项目引入了可选的*匿名*使用指标收集，以便在充分知情的情况下做出改进 Flower 的决定。这样做能让 Flower 团队了解 "
 "Flower 的使用情况以及用户可能面临的挑战。"
 
-#: ../../source/ref-changelog.md:1321
+#: ../../source/ref-changelog.md:1319
 msgid ""
 "**Flower is a friendly framework for collaborative AI and data science.**"
 " Staying true to this statement, Flower makes it easy to disable "
@@ -26467,7 +26466,7 @@ msgstr ""
 "**Flower 是一个用于协作式人工智能和数据科学的友好框架。** Flower "
 "遵循这一声明，让不想分享匿名使用指标的用户可以轻松禁用遥测技术。[阅读全文](https://flower.ai/docs/telemetry.html)。"
 
-#: ../../source/ref-changelog.md:1323
+#: ../../source/ref-changelog.md:1321
 msgid ""
 "**Introduce (experimental) Driver API** "
 "([#1520](https://github.com/adap/flower/pull/1520), "
@@ -26486,7 +26485,7 @@ msgstr ""
 "[#1551](https://github.com/adap/flower/pull/1551), "
 "[#1567](https://github.com/adap/flower/pull/1567))"
 
-#: ../../source/ref-changelog.md:1325
+#: ../../source/ref-changelog.md:1323
 msgid ""
 "Flower now has a new (experimental) Driver API which will enable fully "
 "programmable, async, and multi-tenant Federated Learning and Federated "
@@ -26498,7 +26497,7 @@ msgstr ""
 "API），它将支持完全可编程、异步和多租户的联邦学习（Federated Learning）和联邦分析（Federated "
 "Analytics）应用程序。展望未来，Driver API 将成为许多即将推出的功能的抽象基础，您现在就可以开始构建这些功能。"
 
-#: ../../source/ref-changelog.md:1327
+#: ../../source/ref-changelog.md:1325
 msgid ""
 "The Driver API also enables a new execution mode in which the server runs"
 " indefinitely. Multiple individual workloads can run concurrently and "
@@ -26508,19 +26507,19 @@ msgstr ""
 "驱动程序应用程序接口还支持一种新的执行模式，在这种模式下，服务器可无限期运行。多个单独的工作负载可以同时运行，并独立于服务器启动和停止执行。这对于希望在生产中部署"
 " Flower 的用户来说尤其有用。"
 
-#: ../../source/ref-changelog.md:1329
+#: ../../source/ref-changelog.md:1327
 msgid ""
 "To learn more, check out the `mt-pytorch` code example. We look forward "
 "to you feedback!"
 msgstr "要了解更多信息，请查看 `mt-pytorch` 代码示例。我们期待您的反馈！"
 
-#: ../../source/ref-changelog.md:1331
+#: ../../source/ref-changelog.md:1329
 msgid ""
 "Please note: *The Driver API is still experimental and will likely change"
 " significantly over time.*"
 msgstr "请注意：Driver API仍处于试验阶段，随着时间的推移可能会发生重大变化。*"
 
-#: ../../source/ref-changelog.md:1333
+#: ../../source/ref-changelog.md:1331
 msgid ""
 "**Add new Federated Analytics with Pandas example** "
 "([#1469](https://github.com/adap/flower/pull/1469), "
@@ -26530,7 +26529,7 @@ msgstr ""
 "的联邦分析示例**（[#1469](https://github.com/adap/flower/pull/1469), "
 "[#1535](https://github.com/adap/flower/pull/1535)"
 
-#: ../../source/ref-changelog.md:1335
+#: ../../source/ref-changelog.md:1333
 msgid ""
 "A new code example (`quickstart-pandas`) demonstrates federated analytics"
 " with Pandas and Flower. You can find it here: [quickstart-"
@@ -26541,7 +26540,7 @@ msgstr ""
 "[quickstart-pandas](https://github.com/adap/flower/tree/main/examples"
 "/quickstart-pandas)。"
 
-#: ../../source/ref-changelog.md:1337
+#: ../../source/ref-changelog.md:1335
 msgid ""
 "**Add new strategies: Krum and MultiKrum** "
 "([#1481](https://github.com/adap/flower/pull/1481))"
@@ -26549,7 +26548,7 @@ msgstr ""
 "**添加新策略： Krum 和 MultiKrum** "
 "([#1481](https://github.com/adap/flower/pull/1481))"
 
-#: ../../source/ref-changelog.md:1339
+#: ../../source/ref-changelog.md:1337
 msgid ""
 "Edoardo, a computer science student at the Sapienza University of Rome, "
 "contributed a new `Krum` strategy that enables users to easily use Krum "
@@ -26558,7 +26557,7 @@ msgstr ""
 "罗马萨皮恩扎大学（Sapienza University）计算机科学专业的学生埃多尔多（Edoardo）提出了一种新的 \"Krum "
 "\"策略，使用户能够在其工作负载中轻松使用 Krum 和 MultiKrum。"
 
-#: ../../source/ref-changelog.md:1341
+#: ../../source/ref-changelog.md:1339
 msgid ""
 "**Update C++ example to be compatible with Flower v1.2.0** "
 "([#1495](https://github.com/adap/flower/pull/1495))"
@@ -26566,13 +26565,13 @@ msgstr ""
 "** 更新 C++ 示例，与 Flower v1.2.0 兼容** "
 "([#1495](https://github.com/adap/flower/pull/1495))"
 
-#: ../../source/ref-changelog.md:1343
+#: ../../source/ref-changelog.md:1341
 msgid ""
 "The C++ code example has received a substantial update to make it "
 "compatible with the latest version of Flower."
 msgstr "为了与最新版本的 Flower 兼容，C++ 示例代码进行了大幅更新。"
 
-#: ../../source/ref-changelog.md:1345
+#: ../../source/ref-changelog.md:1343
 msgid ""
 "**General improvements** "
 "([#1491](https://github.com/adap/flower/pull/1491), "
@@ -26603,7 +26602,7 @@ msgstr ""
 "[#1564](https://github.com/adap/flower/pull/1564), "
 "[#1566](https://github.com/adap/flower/pull/1566))"
 
-#: ../../source/ref-changelog.md:1349
+#: ../../source/ref-changelog.md:1347
 msgid ""
 "**Updated documentation** "
 "([#1494](https://github.com/adap/flower/pull/1494), "
@@ -26626,7 +26625,7 @@ msgstr ""
 "[#1519](https://github.com/adap/flower/pull/1519), "
 "[#1515](https://github.com/adap/flower/pull/1515))"
 
-#: ../../source/ref-changelog.md:1353
+#: ../../source/ref-changelog.md:1351
 msgid ""
 "One highlight is the new [first time contributor "
 "guide](https://flower.ai/docs/first-time-contributors.html): if you've "
@@ -26635,17 +26634,17 @@ msgstr ""
 "其中一个亮点是新的[首次贡献者指南](https://flower.ai/docs/first-time-"
 "contributors.html)：如果你以前从未在 GitHub 上做过贡献，这将是一个完美的开始！"
 
-#: ../../source/ref-changelog.md:1359
+#: ../../source/ref-changelog.md:1357
 msgid "v1.1.0 (2022-10-31)"
 msgstr "v1.1.0 (2022-10-31)"
 
-#: ../../source/ref-changelog.md:1363
+#: ../../source/ref-changelog.md:1361
 msgid ""
 "We would like to give our **special thanks** to all the contributors who "
 "made the new version of Flower possible (in `git shortlog` order):"
 msgstr "在此，我们向所有促成 Flower 新版本的贡献者致以**特别的谢意（按 \"git shortlog \"顺序排列）："
 
-#: ../../source/ref-changelog.md:1365
+#: ../../source/ref-changelog.md:1363
 msgid ""
 "`Akis Linardos`, `Christopher S`, `Daniel J. Beutel`, `George`, `Jan "
 "Schlicht`, `Mohammad Fares`, `Pedro Porto Buarque de Gusmão`, `Philipp "
@@ -26657,7 +26656,7 @@ msgstr ""
 "Wiesner`, `Rob Luke`, `Taner Topal`, `VasundharaAgarwal`, "
 "`danielnugraha`, `edogab33`"
 
-#: ../../source/ref-changelog.md:1369
+#: ../../source/ref-changelog.md:1367
 msgid ""
 "**Introduce Differential Privacy wrappers (preview)** "
 "([#1357](https://github.com/adap/flower/pull/1357), "
@@ -26666,7 +26665,7 @@ msgstr ""
 "**引入差分隐私包装器（预览）** ([#1357](https://github.com/adap/flower/pull/1357), "
 "[#1460](https://github.com/adap/flower/pull/1460))"
 
-#: ../../source/ref-changelog.md:1371
+#: ../../source/ref-changelog.md:1369
 msgid ""
 "The first (experimental) preview of pluggable Differential Privacy "
 "wrappers enables easy configuration and usage of differential privacy "
@@ -26677,13 +26676,13 @@ msgstr ""
 "可插拔差分隐私封装器的首个（实验性）预览版可轻松配置和使用差分隐私（DP）。可插拔的差分隐私封装器可实现客户端差分隐私和服务器端差分隐私的框架无关**以及**策略无关的使用。请访问"
 " Flower 文档，新的解释器会提供更多细节。"
 
-#: ../../source/ref-changelog.md:1373
+#: ../../source/ref-changelog.md:1371
 msgid ""
 "**New iOS CoreML code example** "
 "([#1289](https://github.com/adap/flower/pull/1289))"
 msgstr "**新的 iOS CoreML 代码示例**（[#1289](https://github.com/adap/flower/pull/1289)）"
 
-#: ../../source/ref-changelog.md:1375
+#: ../../source/ref-changelog.md:1373
 msgid ""
 "Flower goes iOS! A massive new code example shows how Flower clients can "
 "be built for iOS. The code example contains both Flower iOS SDK "
@@ -26693,13 +26692,13 @@ msgstr ""
 "Flower 进入 iOS！大量新代码示例展示了如何为 iOS 构建 Flower 客户端。该代码示例包含可用于多种任务的 Flower iOS "
 "SDK 组件，以及在 CoreML 上运行的一个任务示例。"
 
-#: ../../source/ref-changelog.md:1377
+#: ../../source/ref-changelog.md:1375
 msgid ""
 "**New FedMedian strategy** "
 "([#1461](https://github.com/adap/flower/pull/1461))"
 msgstr "**新的联邦医疗策略** ([#1461](https://github.com/adap/flower/pull/1461))"
 
-#: ../../source/ref-changelog.md:1379
+#: ../../source/ref-changelog.md:1377
 msgid ""
 "The new `FedMedian` strategy implements Federated Median (FedMedian) by "
 "[Yin et al., 2018](https://arxiv.org/pdf/1803.01498v1.pdf)."
@@ -26707,27 +26706,27 @@ msgstr ""
 "新的 \"FedMedian \"战略实现了[Yin "
 "等人，2018]的联邦中值（FedMedian）(https://arxiv.org/pdf/1803.01498v1.pdf)。"
 
-#: ../../source/ref-changelog.md:1381
+#: ../../source/ref-changelog.md:1379
 msgid ""
 "**Log** `Client` **exceptions in Virtual Client Engine** "
 "([#1493](https://github.com/adap/flower/pull/1493))"
 msgstr "**虚拟客户端引擎中的**日志**`客户端`**异常（[#1493](https://github.com/adap/flower/pull/1493)）"
 
-#: ../../source/ref-changelog.md:1383
+#: ../../source/ref-changelog.md:1381
 msgid ""
 "All `Client` exceptions happening in the VCE are now logged by default "
 "and not just exposed to the configured `Strategy` (via the `failures` "
 "argument)."
 msgstr "VCE 中发生的所有 \"客户端 \"异常现在都会被默认记录下来，而不只是暴露给配置的 `Strategy`（通过 `failures`参数）。"
 
-#: ../../source/ref-changelog.md:1385
+#: ../../source/ref-changelog.md:1383
 msgid ""
 "**Improve Virtual Client Engine internals** "
 "([#1401](https://github.com/adap/flower/pull/1401), "
 "[#1453](https://github.com/adap/flower/pull/1453))"
 msgstr "**改进虚拟客户端引擎内部**（[#1401](https://github.com/adap/flower/pull/1401)、[#1453](https://github.com/adap/flower/pull/1453)）"
 
-#: ../../source/ref-changelog.md:1387
+#: ../../source/ref-changelog.md:1385
 msgid ""
 "Some internals of the Virtual Client Engine have been revamped. The VCE "
 "now uses Ray 2.0 under the hood, the value type of the `client_resources`"
@@ -26737,19 +26736,19 @@ msgstr ""
 "虚拟客户端引擎的部分内部结构已进行了修改。VCE 现在使用 Ray 2.0，\"client_resources \"字典的值类型改为 "
 "\"float\"，以允许分配分数资源。"
 
-#: ../../source/ref-changelog.md:1389
+#: ../../source/ref-changelog.md:1387
 msgid ""
 "**Support optional** `Client`**/**`NumPyClient` **methods in Virtual "
 "Client Engine**"
 msgstr "**支持虚拟客户端引擎中的可选** `Client`**/**`NumPyClient` **方法**"
 
-#: ../../source/ref-changelog.md:1391
+#: ../../source/ref-changelog.md:1389
 msgid ""
 "The Virtual Client Engine now has full support for optional `Client` (and"
 " `NumPyClient`) methods."
 msgstr "虚拟客户端引擎现在完全支持可选的 `Client`（和 `NumPyClient`）方法。"
 
-#: ../../source/ref-changelog.md:1393
+#: ../../source/ref-changelog.md:1391
 msgid ""
 "**Provide type information to packages using** `flwr` "
 "([#1377](https://github.com/adap/flower/pull/1377))"
@@ -26757,7 +26756,7 @@ msgstr ""
 "**使用** `flwr`向软件包提供类型信息 "
 "([#1377](https://github.com/adap/flower/pull/1377))"
 
-#: ../../source/ref-changelog.md:1395
+#: ../../source/ref-changelog.md:1393
 msgid ""
 "The package `flwr` is now bundled with a `py.typed` file indicating that "
 "the package is typed. This enables typing support for projects or "
@@ -26767,7 +26766,7 @@ msgstr ""
 "软件包 `flwr` 现在捆绑了一个 `py.typed` 文件，表明该软件包是类型化的。这样，使用 `flwr` 的项目或软件包就可以使用 "
 "`mypy` 等静态类型检查器改进代码，从而获得类型支持。"
 
-#: ../../source/ref-changelog.md:1397
+#: ../../source/ref-changelog.md:1395
 msgid ""
 "**Updated code example** "
 "([#1344](https://github.com/adap/flower/pull/1344), "
@@ -26776,17 +26775,17 @@ msgstr ""
 "** 更新代码示例** ([#1344](https://github.com/adap/flower/pull/1344), "
 "[#1347](https://github.com/adap/flower/pull/1347))"
 
-#: ../../source/ref-changelog.md:1399
+#: ../../source/ref-changelog.md:1397
 msgid ""
 "The code examples covering scikit-learn and PyTorch Lightning have been "
 "updated to work with the latest version of Flower."
 msgstr "涵盖 scikit-learn 和 PyTorch Lightning 的代码示例已更新，以便与最新版本的 Flower 配合使用。"
 
-#: ../../source/ref-changelog.md:1401
+#: ../../source/ref-changelog.md:1399
+#, fuzzy
 msgid ""
 "**Updated documentation** "
 "([#1355](https://github.com/adap/flower/pull/1355), "
-"[#1558](https://github.com/adap/flower/pull/1558), "
 "[#1379](https://github.com/adap/flower/pull/1379), "
 "[#1380](https://github.com/adap/flower/pull/1380), "
 "[#1381](https://github.com/adap/flower/pull/1381), "
@@ -26821,32 +26820,32 @@ msgstr ""
 "[#1465](https://github.com/adap/flower/pull/1465), "
 "[#1467](https://github.com/adap/flower/pull/1467))"
 
-#: ../../source/ref-changelog.md:1403
+#: ../../source/ref-changelog.md:1401
 msgid ""
 "There have been so many documentation updates that it doesn't even make "
 "sense to list them individually."
 msgstr "文档更新的数量之多，甚至没有必要逐一列出。"
 
-#: ../../source/ref-changelog.md:1405
+#: ../../source/ref-changelog.md:1403
 msgid ""
 "**Restructured documentation** "
 "([#1387](https://github.com/adap/flower/pull/1387))"
 msgstr "**重构文档**（[#1387](https://github.com/adap/flower/pull/1387)）"
 
-#: ../../source/ref-changelog.md:1407
+#: ../../source/ref-changelog.md:1405
 msgid ""
 "The documentation has been restructured to make it easier to navigate. "
 "This is just the first step in a larger effort to make the Flower "
 "documentation the best documentation of any project ever. Stay tuned!"
 msgstr "我们对文档进行了重组，使其更易于浏览。这只是让 Flower 文档成为所有项目中最好文档的第一步。敬请期待！"
 
-#: ../../source/ref-changelog.md:1409
+#: ../../source/ref-changelog.md:1407
 msgid ""
 "**Open in Colab button** "
 "([#1389](https://github.com/adap/flower/pull/1389))"
 msgstr "**在 Colab 中打开按钮** ([#1389](https://github.com/adap/flower/pull/1389))"
 
-#: ../../source/ref-changelog.md:1411
+#: ../../source/ref-changelog.md:1409
 msgid ""
 "The four parts of the Flower Federated Learning Tutorial now come with a "
 "new `Open in Colab` button. No need to install anything on your local "
@@ -26856,7 +26855,7 @@ msgstr ""
 "Flower 联邦学习教程的四个部分现在都带有一个新的 \"在 Colab 中打开 "
 "\"按钮。现在，您无需在本地计算机上安装任何软件，只需点击一下，就可以在浏览器中使用和学习 Flower。"
 
-#: ../../source/ref-changelog.md:1413
+#: ../../source/ref-changelog.md:1411
 msgid ""
 "**Improved tutorial** ([#1468](https://github.com/adap/flower/pull/1468),"
 " [#1470](https://github.com/adap/flower/pull/1470), "
@@ -26872,7 +26871,7 @@ msgstr ""
 "[#1474](https://github.com/adap/flower/pull/1474), "
 "[#1475](https://github.com/adap/flower/pull/1475)))"
 
-#: ../../source/ref-changelog.md:1415
+#: ../../source/ref-changelog.md:1413
 msgid ""
 "The Flower Federated Learning Tutorial has two brand-new parts covering "
 "custom strategies (still WIP) and the distinction between `Client` and "
@@ -26882,33 +26881,33 @@ msgstr ""
 "Flower 联邦学习教程有两个全新的部分，涉及自定义策略（仍处于 WIP 阶段）和 `Client` 与 `NumPyClient` "
 "之间的区别。现有的第一和第二部分也得到了改进（许多小改动和修正）。"
 
-#: ../../source/ref-changelog.md:1421
+#: ../../source/ref-changelog.md:1419
 msgid "v1.0.0 (2022-07-28)"
 msgstr "v1.0.0 (2022-07-28)"
 
-#: ../../source/ref-changelog.md:1423
+#: ../../source/ref-changelog.md:1421
 msgid "Highlights"
 msgstr "亮点"
 
-#: ../../source/ref-changelog.md:1425
+#: ../../source/ref-changelog.md:1423
 msgid "Stable **Virtual Client Engine** (accessible via `start_simulation`)"
 msgstr "稳定的**虚拟客户端引擎**（可通过`start_simulation`访问）"
 
-#: ../../source/ref-changelog.md:1426
+#: ../../source/ref-changelog.md:1424
 msgid "All `Client`/`NumPyClient` methods are now optional"
 msgstr "所有 `Client`/`NumPyClient` 方法现在都是可选的了"
 
-#: ../../source/ref-changelog.md:1427
+#: ../../source/ref-changelog.md:1425
 msgid "Configurable `get_parameters`"
 msgstr "可配置的`get_parameters`"
 
-#: ../../source/ref-changelog.md:1428
+#: ../../source/ref-changelog.md:1426
 msgid ""
 "Tons of small API cleanups resulting in a more coherent developer "
 "experience"
 msgstr "对大量小型应用程序接口进行了清理，使开发人员的体验更加一致"
 
-#: ../../source/ref-changelog.md:1432
+#: ../../source/ref-changelog.md:1430
 msgid ""
 "We would like to give our **special thanks** to all the contributors who "
 "made Flower 1.0 possible (in reverse [GitHub "
@@ -26917,7 +26916,7 @@ msgstr ""
 "在此，我们谨向所有促成 Flower 1.0 的贡献者致以**特别的谢意（按[GitHub "
 "贡献者](https://github.com/adap/flower/graphs/contributors) 倒序排列）："
 
-#: ../../source/ref-changelog.md:1434
+#: ../../source/ref-changelog.md:1432
 msgid ""
 "[@rtaiello](https://github.com/rtaiello), "
 "[@g-pichler](https://github.com/g-pichler), [@rob-"
@@ -26993,13 +26992,13 @@ msgstr ""
 "[@tanertopal](https://github.com/tanertopal), "
 "[@danieljanes](https://github.com/danieljanes)."
 
-#: ../../source/ref-changelog.md:1438
+#: ../../source/ref-changelog.md:1436
 msgid ""
 "**All arguments must be passed as keyword arguments** "
 "([#1338](https://github.com/adap/flower/pull/1338))"
 msgstr "** 所有参数必须作为关键字参数传递** ([#1338](https://github.com/adap/flower/pull/1338))"
 
-#: ../../source/ref-changelog.md:1440
+#: ../../source/ref-changelog.md:1438
 msgid ""
 "Pass all arguments as keyword arguments, positional arguments are not "
 "longer supported. Code that uses positional arguments (e.g., "
@@ -27012,7 +27011,7 @@ msgstr ""
 "FlowerClient())`）必须为每个位置参数添加关键字（例如，`start_client(server_address=\"127.0.0.1:8080\","
 " client=FlowerClient())`）。"
 
-#: ../../source/ref-changelog.md:1442
+#: ../../source/ref-changelog.md:1440
 msgid ""
 "**Introduce configuration object** `ServerConfig` **in** `start_server` "
 "**and** `start_simulation` "
@@ -27021,7 +27020,7 @@ msgstr ""
 "**在*** `start_server` ***和*** `start_simulation` 中引入配置对象*** "
 "`ServerConfig` ([#1317](https://github.com/adap/flower/pull/1317))"
 
-#: ../../source/ref-changelog.md:1444
+#: ../../source/ref-changelog.md:1442
 #, python-brace-format
 msgid ""
 "Instead of a config dictionary `{\"num_rounds\": 3, \"round_timeout\": "
@@ -27035,37 +27034,54 @@ msgstr ""
 "`flwr.server.ServerConfig`的配置对象。`ServerConfig`接收的参数与之前的 config dict "
 "相同，但它使编写类型安全代码变得更容易，默认参数值也更加透明。"
 
-#: ../../source/ref-changelog.md:1446
+#: ../../source/ref-changelog.md:1444
+#, fuzzy
 msgid ""
-"**Rename built-in strategy parameters for clarity** "
+"**Enhance Strategy evaluation API for clarity and consistency** "
 "([#1334](https://github.com/adap/flower/pull/1334))"
 msgstr "**重新命名内置策略参数，使其更加清晰** ([#1334](https://github.com/adap/flower/pull/1334))"
 
-#: ../../source/ref-changelog.md:1448
+#: ../../source/ref-changelog.md:1446
 msgid ""
 "The following built-in strategy parameters were renamed to improve "
 "readability and consistency with other API's:"
 msgstr "以下内置策略参数已重新命名，以提高可读性并与其他 API 保持一致："
 
-#: ../../source/ref-changelog.md:1450
+#: ../../source/ref-changelog.md:1448
 msgid "`fraction_eval` --> `fraction_evaluate`"
 msgstr "`fraction_eval` --> `fraction_evaluate`"
 
-#: ../../source/ref-changelog.md:1451
+#: ../../source/ref-changelog.md:1449
 msgid "`min_eval_clients` --> `min_evaluate_clients`"
 msgstr "`min_eval_clients` --> `min_evaluate_clients`"
 
-#: ../../source/ref-changelog.md:1452
+#: ../../source/ref-changelog.md:1450
 msgid "`eval_fn` --> `evaluate_fn`"
 msgstr "`eval_fn` --> `evaluate_fn`"
 
+#: ../../source/ref-changelog.md:1452
+msgid ""
+"The `Strategy` method `evaluate` now receives the current round of "
+"federated learning/evaluation as the first parameter."
+msgstr "`Strategy`的`evaluate` 方法现在会接收当前一轮联邦学习/评估作为第一个参数。"
+
 #: ../../source/ref-changelog.md:1454
+msgid ""
+"The `evaluate_fn` passed to built-in strategies like `FedAvg` now takes "
+"three parameters: (1) The current round of federated learning/evaluation "
+"(`server_round`), (2) the model parameters to evaluate (`parameters`), "
+"and (3) a config dictionary (`config`)."
+msgstr ""
+"传递给内置策略（如 `FedAvg`）的 `evaluate_fn` 现在需要三个参数：(1) 当前一轮联邦学习/评估 "
+"(`server_round`)，(2) 要评估的模型参数 (`parameters`)，(3) 配置字典 (`config`)。"
+
+#: ../../source/ref-changelog.md:1456
 msgid ""
 "**Update default arguments of built-in strategies** "
 "([#1278](https://github.com/adap/flower/pull/1278))"
 msgstr "**更新内置策略的默认参数** ([#1278](https://github.com/adap/flower/pull/1278))"
 
-#: ../../source/ref-changelog.md:1456
+#: ../../source/ref-changelog.md:1458
 msgid ""
 "All built-in strategies now use `fraction_fit=1.0` and "
 "`fraction_evaluate=1.0`, which means they select *all* currently "
@@ -27076,43 +27092,11 @@ msgstr ""
 "所有内置策略现在都使用 \"fraction_fit=1.0 \"和 "
 "\"fraction_evaluate=1.0\"，这意味着它们会选择*所有*当前可用的客户端进行训练和评估。依赖以前默认值的项目可以通过以下方式初始化策略，获得以前的行为："
 
-#: ../../source/ref-changelog.md:1458
+#: ../../source/ref-changelog.md:1460
 msgid "`strategy = FedAvg(fraction_fit=0.1, fraction_evaluate=0.1)`"
 msgstr "`strategy = FedAvg(fraction_fit=0.1, fraction_evaluate=0.1)`"
 
-#: ../../source/ref-changelog.md:1460
-msgid ""
-"**Add** `server_round` **to** `Strategy.evaluate` "
-"([#1334](https://github.com/adap/flower/pull/1334))"
-msgstr ""
-"**添加*** `server_round` ***到*** `Strategy.evaluate` "
-"([#1334](https://github.com/adap/flower/pull/1334))"
-
 #: ../../source/ref-changelog.md:1462
-msgid ""
-"The `Strategy` method `evaluate` now receives the current round of "
-"federated learning/evaluation as the first parameter."
-msgstr "`Strategy`的`evaluate` 方法现在会接收当前一轮联邦学习/评估作为第一个参数。"
-
-#: ../../source/ref-changelog.md:1464
-msgid ""
-"**Add** `server_round` **and** `config` **parameters to** `evaluate_fn` "
-"([#1334](https://github.com/adap/flower/pull/1334))"
-msgstr ""
-"**将*** `server_round` **和*** `config` **参数添加到*** `evaluate_fn` "
-"([#1334](https://github.com/adap/flower/pull/1334))"
-
-#: ../../source/ref-changelog.md:1466
-msgid ""
-"The `evaluate_fn` passed to built-in strategies like `FedAvg` now takes "
-"three parameters: (1) The current round of federated learning/evaluation "
-"(`server_round`), (2) the model parameters to evaluate (`parameters`), "
-"and (3) a config dictionary (`config`)."
-msgstr ""
-"传递给内置策略（如 `FedAvg`）的 `evaluate_fn` 现在需要三个参数：(1) 当前一轮联邦学习/评估 "
-"(`server_round`)，(2) 要评估的模型参数 (`parameters`)，(3) 配置字典 (`config`)。"
-
-#: ../../source/ref-changelog.md:1468
 msgid ""
 "**Rename** `rnd` **to** `server_round` "
 "([#1321](https://github.com/adap/flower/pull/1321))"
@@ -27120,7 +27104,7 @@ msgstr ""
 "**重新命名** `rnd` ** to** `server_round` "
 "([#1321](https://github.com/adap/flower/pull/1321))"
 
-#: ../../source/ref-changelog.md:1470
+#: ../../source/ref-changelog.md:1464
 msgid ""
 "Several Flower methods and functions (`evaluate_fn`, `configure_fit`, "
 "`aggregate_fit`, `configure_evaluate`, `aggregate_evaluate`) receive the "
@@ -27132,7 +27116,7 @@ msgstr ""
 "方法和函数（`evaluate_fn`、`configure_fit`、`aggregate_fit`、`configure_evaluate`、`aggregate_evaluate`）的第一个参数是当前一轮的联邦学习/评估。为提高可重复性并避免与"
 " *random* 混淆，该参数已从 `rnd` 更名为 `server_round`。"
 
-#: ../../source/ref-changelog.md:1472
+#: ../../source/ref-changelog.md:1466
 msgid ""
 "**Move** `flwr.dataset` **to** `flwr_baselines` "
 "([#1273](https://github.com/adap/flower/pull/1273))"
@@ -27140,49 +27124,48 @@ msgstr ""
 "**移动*** `flwr.dataset` **到*** `flwr_baselines` "
 "([#1273](https://github.com/adap/flower/pull/1273))"
 
-#: ../../source/ref-changelog.md:1474
+#: ../../source/ref-changelog.md:1468
 msgid "The experimental package `flwr.dataset` was migrated to Flower Baselines."
 msgstr "实验软件包 `flwr.dataset` 已迁移至 Flower Baselines。"
 
-#: ../../source/ref-changelog.md:1476
+#: ../../source/ref-changelog.md:1470
 msgid ""
 "**Remove experimental strategies** "
 "([#1280](https://github.com/adap/flower/pull/1280))"
 msgstr "**删除实验策略** ([#1280](https://github.com/adap/flower/pull/1280))"
 
-#: ../../source/ref-changelog.md:1478
+#: ../../source/ref-changelog.md:1472
 msgid ""
 "Remove unmaintained experimental strategies (`FastAndSlow`, `FedFSv0`, "
 "`FedFSv1`)."
 msgstr "移除未维护的试验性策略（`FastAndSlow`、`FedFSv0`、`FedFSv1`）。"
 
-#: ../../source/ref-changelog.md:1480
+#: ../../source/ref-changelog.md:1474
+#, fuzzy
 msgid ""
 "**Rename** `Weights` **to** `NDArrays` "
-"([#1258](https://github.com/adap/flower/pull/1258), "
-"[#1259](https://github.com/adap/flower/pull/1259))"
+"([#1296](https://github.com/adap/flower/pull/1296))"
 msgstr ""
-"**重新命名** `Weights` **到** `NDArrays` "
-"([#1258](https://github.com/adap/flower/pull/1258), "
-"[#1259](https://github.com/adap/flower/pull/1259))"
+"**重新命名** `rnd` ** to** `server_round` "
+"([#1321](https://github.com/adap/flower/pull/1321))"
 
-#: ../../source/ref-changelog.md:1482
+#: ../../source/ref-changelog.md:1476
 msgid ""
 "`flwr.common.Weights` was renamed to `flwr.common.NDArrays` to better "
 "capture what this type is all about."
 msgstr "flwr.common.Weights \"更名为 \"flwr.common.NDArrays\"，以更好地反映该类型的含义。"
 
-#: ../../source/ref-changelog.md:1484
+#: ../../source/ref-changelog.md:1478
+#, fuzzy
 msgid ""
 "**Remove antiquated** `force_final_distributed_eval` **from** "
-"`start_server` ([#1258](https://github.com/adap/flower/pull/1258), "
-"[#1259](https://github.com/adap/flower/pull/1259))"
+"`start_server` ([#1315](https://github.com/adap/flower/pull/1315))"
 msgstr ""
 "**从** `start_server` 中移除过时的** `force_final_distributed_eval` "
 "([#1258](https://github.com/adap/flower/pull/1258), "
 "[#1259](https://github.com/adap/flower/pull/1259))"
 
-#: ../../source/ref-changelog.md:1486
+#: ../../source/ref-changelog.md:1480
 msgid ""
 "The `start_server` parameter `force_final_distributed_eval` has long been"
 " a historic artefact, in this release it is finally gone for good."
@@ -27190,7 +27173,7 @@ msgstr ""
 "start_server \"参数 \"force_final_distributed_eval "
 "\"长期以来一直是个历史遗留问题，在此版本中终于永远消失了。"
 
-#: ../../source/ref-changelog.md:1488
+#: ../../source/ref-changelog.md:1482
 msgid ""
 "**Make** `get_parameters` **configurable** "
 "([#1242](https://github.com/adap/flower/pull/1242))"
@@ -27198,7 +27181,7 @@ msgstr ""
 "**使** `get_parameters` **可配置** "
 "([#1242](https://github.com/adap/flower/pull/1242))"
 
-#: ../../source/ref-changelog.md:1490
+#: ../../source/ref-changelog.md:1484
 msgid ""
 "The `get_parameters` method now accepts a configuration dictionary, just "
 "like `get_properties`, `fit`, and `evaluate`."
@@ -27206,37 +27189,42 @@ msgstr ""
 "现在，\"get_parameters \"方法与 \"get_properties\"、\"fit \"和 \"evaluate "
 "\"一样，都接受配置字典。"
 
-#: ../../source/ref-changelog.md:1492
+#: ../../source/ref-changelog.md:1486
+#, fuzzy
 msgid ""
-"**Replace** `num_rounds` **in** `start_simulation` **with new** `config` "
-"**parameter** ([#1281](https://github.com/adap/flower/pull/1281))"
-msgstr ""
-"**用新的** `config` 参数** 替换** `num_rounds` ** in** `start_simulation` ** "
+"**Update** `start_simulation` **to align with** `start_server` "
 "([#1281](https://github.com/adap/flower/pull/1281))"
+msgstr ""
+"**重新命名** `rnd` ** to** `server_round` "
+"([#1321](https://github.com/adap/flower/pull/1321))"
 
-#: ../../source/ref-changelog.md:1494
+#: ../../source/ref-changelog.md:1488
+#, fuzzy
 msgid ""
 "The `start_simulation` function now accepts a configuration dictionary "
 "`config` instead of the `num_rounds` integer. This improves the "
 "consistency between `start_simulation` and `start_server` and makes "
-"transitioning between the two easier."
+"transitioning between the two easier. Additionally, `start_simulation` "
+"now accepts a full `Server` instance. This enables users to heavily "
+"customize the execution of eperiments and opens the door to running, for "
+"example, async FL using the Virtual Client Engine."
 msgstr ""
 "现在，`start_simulation`（开始模拟）` 函数接受配置字典 `config` 而不是 `num_rounds` 整数。这改进了 "
 "`start_simulation` 和 `start_server` 之间的一致性，并使两者之间的转换更容易。"
 
-#: ../../source/ref-changelog.md:1498
+#: ../../source/ref-changelog.md:1492
 msgid ""
 "**Support Python 3.10** "
 "([#1320](https://github.com/adap/flower/pull/1320))"
 msgstr "** 支持 Python 3.10** ([#1320](https://github.com/adap/flower/pull/1320))"
 
-#: ../../source/ref-changelog.md:1500
+#: ../../source/ref-changelog.md:1494
 msgid ""
 "The previous Flower release introduced experimental support for Python "
 "3.10, this release declares Python 3.10 support as stable."
 msgstr "上一个 Flower 版本引入了对 Python 3.10 的实验支持，而本版本则宣布对 Python 3.10 的支持为稳定支持。"
 
-#: ../../source/ref-changelog.md:1502
+#: ../../source/ref-changelog.md:1496
 msgid ""
 "**Make all** `Client` **and** `NumPyClient` **methods optional** "
 "([#1260](https://github.com/adap/flower/pull/1260), "
@@ -27246,7 +27234,7 @@ msgstr ""
 "([#1260](https://github.com/adap/flower/pull/1260), "
 "[#1277](https://github.com/adap/flower/pull/1277))"
 
-#: ../../source/ref-changelog.md:1504
+#: ../../source/ref-changelog.md:1498
 msgid ""
 "The `Client`/`NumPyClient` methods `get_properties`, `get_parameters`, "
 "`fit`, and `evaluate` are all optional. This enables writing clients that"
@@ -27257,15 +27245,7 @@ msgstr ""
 "\"evaluate \"方法都是可选的。这样就可以编写只实现 `fit` 而不实现其他方法的客户端。使用集中评估时，无需实现 "
 "`evaluate`！"
 
-#: ../../source/ref-changelog.md:1506
-msgid ""
-"**Enable passing a** `Server` **instance to** `start_simulation` "
-"([#1281](https://github.com/adap/flower/pull/1281))"
-msgstr ""
-"**启用向** `start_simulation` 传递** `Server` 实例 "
-"([#1281](https://github.com/adap/flower/pull/1281))"
-
-#: ../../source/ref-changelog.md:1508
+#: ../../source/ref-changelog.md:1500
 msgid ""
 "Similar to `start_server`, `start_simulation` now accepts a full `Server`"
 " instance. This enables users to heavily customize the execution of "
@@ -27275,7 +27255,7 @@ msgstr ""
 "与 `start_server` 类似，`start_simulation` 现在也接受一个完整的 `Server` "
 "实例。这使得用户可以对实验的执行进行大量自定义，并为使用虚拟客户端引擎运行异步 FL 等打开了大门。"
 
-#: ../../source/ref-changelog.md:1510
+#: ../../source/ref-changelog.md:1502
 msgid ""
 "**Update code examples** "
 "([#1291](https://github.com/adap/flower/pull/1291), "
@@ -27286,43 +27266,43 @@ msgstr ""
 "[#1286](https://github.com/adap/flower/pull/1286), "
 "[#1282](https://github.com/adap/flower/pull/1282))"
 
-#: ../../source/ref-changelog.md:1512
+#: ../../source/ref-changelog.md:1504
 msgid ""
 "Many code examples received small or even large maintenance updates, "
 "among them are"
 msgstr "许多代码示例都进行了小规模甚至大规模的维护更新，其中包括"
 
-#: ../../source/ref-changelog.md:1514
+#: ../../source/ref-changelog.md:1506
 msgid "`scikit-learn`"
 msgstr "`scikit-learn`"
 
-#: ../../source/ref-changelog.md:1515
+#: ../../source/ref-changelog.md:1507
 msgid "`simulation_pytorch`"
 msgstr "`simulation_pytorch`"
 
-#: ../../source/ref-changelog.md:1516
+#: ../../source/ref-changelog.md:1508
 msgid "`quickstart_pytorch`"
 msgstr "`quickstart_pytorch`"
 
-#: ../../source/ref-changelog.md:1517
+#: ../../source/ref-changelog.md:1509
 msgid "`quickstart_simulation`"
 msgstr "`quickstart_simulation`"
 
-#: ../../source/ref-changelog.md:1518
+#: ../../source/ref-changelog.md:1510
 msgid "`quickstart_tensorflow`"
 msgstr "`quickstart_tensorflow`"
 
-#: ../../source/ref-changelog.md:1519
+#: ../../source/ref-changelog.md:1511
 msgid "`advanced_tensorflow`"
 msgstr "`advanced_tensorflow`"
 
-#: ../../source/ref-changelog.md:1521
+#: ../../source/ref-changelog.md:1513
 msgid ""
 "**Remove the obsolete simulation example** "
 "([#1328](https://github.com/adap/flower/pull/1328))"
 msgstr "**删除过时的模拟示例** ([#1328](https://github.com/adap/flower/pull/1328))"
 
-#: ../../source/ref-changelog.md:1523
+#: ../../source/ref-changelog.md:1515
 msgid ""
 "Removes the obsolete `simulation` example and renames "
 "`quickstart_simulation` to `simulation_tensorflow` so it fits withs the "
@@ -27331,7 +27311,7 @@ msgstr ""
 "删除过时的 \"simulation \"示例，并将 \"quickstart_simulation \"重命名为 "
 "\"simulation_tensorflow\"，使其与 \"simulation_pytorch \"的命名一致"
 
-#: ../../source/ref-changelog.md:1525
+#: ../../source/ref-changelog.md:1517
 msgid ""
 "**Update documentation** "
 "([#1223](https://github.com/adap/flower/pull/1223), "
@@ -27356,7 +27336,7 @@ msgstr ""
 "[#1305](https://github.com/adap/flower/pull/1305), "
 "[#1307](https://github.com/adap/flower/pull/1307))"
 
-#: ../../source/ref-changelog.md:1527
+#: ../../source/ref-changelog.md:1519
 msgid ""
 "One substantial documentation update fixes multiple smaller rendering "
 "issues, makes titles more succinct to improve navigation, removes a "
@@ -27369,26 +27349,18 @@ msgstr ""
 "`flwr.common` 模块，包含了对基于 markdown 的文档的支持，将更新日志从 `.rst` 移植到了 "
 "`.md`，并修复了一些较小的细节！"
 
-#: ../../source/ref-changelog.md:1529 ../../source/ref-changelog.md:1584
-#: ../../source/ref-changelog.md:1653 ../../source/ref-changelog.md:1692
+#: ../../source/ref-changelog.md:1521 ../../source/ref-changelog.md:1575
+#: ../../source/ref-changelog.md:1649 ../../source/ref-changelog.md:1688
 msgid "**Minor updates**"
 msgstr "**小规模更新**"
 
-#: ../../source/ref-changelog.md:1531
+#: ../../source/ref-changelog.md:1523
 msgid ""
 "Add round number to fit and evaluate log messages "
 "([#1266](https://github.com/adap/flower/pull/1266))"
 msgstr "添加四舍五入数字，以适应和评估日志信息（[#1266](https://github.com/adap/flower/pull/1266)）"
 
-#: ../../source/ref-changelog.md:1532
-msgid ""
-"Add secure gRPC connection to the `advanced_tensorflow` code example "
-"([#847](https://github.com/adap/flower/pull/847))"
-msgstr ""
-"为 `advanced_tensorflow` 代码示例添加安全 gRPC 连接 "
-"([#847](https://github.com/adap/flower/pull/847))"
-
-#: ../../source/ref-changelog.md:1533
+#: ../../source/ref-changelog.md:1524
 msgid ""
 "Update developer tooling "
 "([#1231](https://github.com/adap/flower/pull/1231), "
@@ -27401,7 +27373,7 @@ msgstr ""
 "[#1301](https://github.com/adap/flower/pull/1301), "
 "[#1310](https://github.com/adap/flower/pull/1310)"
 
-#: ../../source/ref-changelog.md:1534
+#: ../../source/ref-changelog.md:1525
 msgid ""
 "Rename ProtoBuf messages to improve consistency "
 "([#1214](https://github.com/adap/flower/pull/1214), "
@@ -27412,11 +27384,11 @@ msgstr ""
 "[#1258](https://github.com/adap/flower/pull/1258), "
 "[#1259](https://github.com/adap/flower/pull/1259)"
 
-#: ../../source/ref-changelog.md:1536
+#: ../../source/ref-changelog.md:1527
 msgid "v0.19.0 (2022-05-18)"
 msgstr "v0.19.0 (2022-05-18)"
 
-#: ../../source/ref-changelog.md:1540
+#: ../../source/ref-changelog.md:1531
 msgid ""
 "**Flower Baselines (preview): FedOpt, FedBN, FedAvgM** "
 "([#919](https://github.com/adap/flower/pull/919), "
@@ -27428,7 +27400,7 @@ msgstr ""
 "[#1127](https://github.com/adap/flower/pull/1127), "
 "[#914](https://github.com/adap/flower/pull/914))"
 
-#: ../../source/ref-changelog.md:1542
+#: ../../source/ref-changelog.md:1533
 #, fuzzy
 msgid ""
 "The first preview release of Flower Baselines has arrived! We're "
@@ -27445,13 +27417,13 @@ msgstr ""
 "baselines.html)。在首次发布预览版时，我们还邀请社区成员[贡献自己的Baselines](https://flower.ai/docs"
 "/contributing-baselines.html)。"
 
-#: ../../source/ref-changelog.md:1544
+#: ../../source/ref-changelog.md:1535
 msgid ""
 "**C++ client SDK (preview) and code example** "
 "([#1111](https://github.com/adap/flower/pull/1111))"
 msgstr "**C++客户端SDK（预览版）和代码示例**（[#1111](https://github.com/adap/flower/pull/1111)）"
 
-#: ../../source/ref-changelog.md:1546
+#: ../../source/ref-changelog.md:1537
 msgid ""
 "Preview support for Flower clients written in C++. The C++ preview "
 "includes a Flower client SDK and a quickstart code example that "
@@ -27460,7 +27432,7 @@ msgstr ""
 "预览版支持用 C++ 编写的 Flower 客户端。C++ 预览版包括一个 Flower 客户端 SDK 和一个快速入门代码示例，使用 SDK "
 "演示了一个简单的 C++ 客户端。"
 
-#: ../../source/ref-changelog.md:1548
+#: ../../source/ref-changelog.md:1539
 msgid ""
 "**Add experimental support for Python 3.10 and Python 3.11** "
 "([#1135](https://github.com/adap/flower/pull/1135))"
@@ -27468,7 +27440,7 @@ msgstr ""
 "** 增加对 Python 3.10 和 Python 3.11 的实验支持** "
 "([#1135](https://github.com/adap/flower/pull/1135))"
 
-#: ../../source/ref-changelog.md:1550
+#: ../../source/ref-changelog.md:1541
 msgid ""
 "Python 3.10 is the latest stable release of Python and Python 3.11 is due"
 " to be released in October. This Flower release adds experimental support"
@@ -27477,13 +27449,13 @@ msgstr ""
 "Python 3.10 是 Python 的最新稳定版本，Python 3.11 将于 10 月份发布。Flower 版本增加了对这两个 "
 "Python 版本的实验支持。"
 
-#: ../../source/ref-changelog.md:1552
+#: ../../source/ref-changelog.md:1543
 msgid ""
 "**Aggregate custom metrics through user-provided functions** "
 "([#1144](https://github.com/adap/flower/pull/1144))"
 msgstr "**通过用户提供的函数聚合自定义指标**（[#1144](https://github.com/adap/flower/pull/1144)）"
 
-#: ../../source/ref-changelog.md:1554
+#: ../../source/ref-changelog.md:1545
 msgid ""
 "Custom metrics (e.g., `accuracy`) can now be aggregated without having to"
 " customize the strategy. Built-in strategies support two new arguments, "
@@ -27493,13 +27465,13 @@ msgstr ""
 "现在无需定制策略即可聚合自定义度量（如`准确度`）。内置策略支持两个新参数：`fit_metrics_aggregation_fn` "
 "和`evaluate_metrics_aggregation_fn`，允许传递自定义度量聚合函数。"
 
-#: ../../source/ref-changelog.md:1556
+#: ../../source/ref-changelog.md:1547
 msgid ""
 "**User-configurable round timeout** "
 "([#1162](https://github.com/adap/flower/pull/1162))"
 msgstr "**用户可配置的回合超时**（[#1162](https://github.com/adap/flower/pull/1162)）"
 
-#: ../../source/ref-changelog.md:1558
+#: ../../source/ref-changelog.md:1549
 msgid ""
 "A new configuration value allows the round timeout to be set for "
 "`start_server` and `start_simulation`. If the `config` dictionary "
@@ -27510,7 +27482,7 @@ msgstr ""
 "新的配置值允许为 `start_server` 和 `start_simulation` 设置回合超时。如果 `config` 字典中包含一个 "
 "`round_timeout` 键（以秒为单位的 `float`值），服务器将至少等待 ** `round_timeout` 秒后才关闭连接。"
 
-#: ../../source/ref-changelog.md:1560
+#: ../../source/ref-changelog.md:1551
 msgid ""
 "**Enable both federated evaluation and centralized evaluation to be used "
 "at the same time in all built-in strategies** "
@@ -27519,7 +27491,7 @@ msgstr ""
 "**允许在所有内置策略中同时使用联邦评价和集中评估** "
 "([#1091](https://github.com/adap/flower/pull/1091))"
 
-#: ../../source/ref-changelog.md:1562
+#: ../../source/ref-changelog.md:1553
 msgid ""
 "Built-in strategies can now perform both federated evaluation (i.e., "
 "client-side) and centralized evaluation (i.e., server-side) in the same "
@@ -27529,7 +27501,7 @@ msgstr ""
 "内置策略现在可以在同一轮中同时执行联邦评估（即客户端）和集中评估（即服务器端）。可以通过将 `fraction_eval` 设置为 "
 "`0.0`来禁用联邦评估。"
 
-#: ../../source/ref-changelog.md:1564
+#: ../../source/ref-changelog.md:1555
 msgid ""
 "**Two new Jupyter Notebook tutorials** "
 "([#1141](https://github.com/adap/flower/pull/1141))"
@@ -27537,13 +27509,13 @@ msgstr ""
 "**两本新的 Jupyter Notebook 教程** "
 "([#1141](https://github.com/adap/flower/pull/1141))"
 
-#: ../../source/ref-changelog.md:1566
+#: ../../source/ref-changelog.md:1557
 msgid ""
 "Two Jupyter Notebook tutorials (compatible with Google Colab) explain "
 "basic and intermediate Flower features:"
 msgstr "两本 Jupyter Notebook 教程（与 Google Colab 兼容）介绍了 Flower 的基本和中级功能："
 
-#: ../../source/ref-changelog.md:1568
+#: ../../source/ref-changelog.md:1559
 msgid ""
 "*An Introduction to Federated Learning*: [Open in "
 "Colab](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-1"
@@ -27553,7 +27525,7 @@ msgstr ""
 "中打开](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-1"
 "-Intro-to-FL-PyTorch.ipynb)"
 
-#: ../../source/ref-changelog.md:1570
+#: ../../source/ref-changelog.md:1561
 msgid ""
 "*Using Strategies in Federated Learning*: [Open in "
 "Colab](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-2"
@@ -27563,7 +27535,7 @@ msgstr ""
 "中打开](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-2"
 "-Strategies-in-FL-PyTorch.ipynb)"
 
-#: ../../source/ref-changelog.md:1572
+#: ../../source/ref-changelog.md:1563
 msgid ""
 "**New FedAvgM strategy (Federated Averaging with Server Momentum)** "
 "([#1076](https://github.com/adap/flower/pull/1076))"
@@ -27571,25 +27543,25 @@ msgstr ""
 "**新的 FedAvgM 策略（带服务器动量的联邦平均）** "
 "([#1076](https://github.com/adap/flower/pull/1076))"
 
-#: ../../source/ref-changelog.md:1574
+#: ../../source/ref-changelog.md:1565
 msgid ""
 "The new `FedAvgM` strategy implements Federated Averaging with Server "
 "Momentum \\[Hsu et al., 2019\\]."
 msgstr "新的 \"FedAvgM \"策略实现了带服务器动量的联邦平均[Hsu et al., 2019\\]."
 
-#: ../../source/ref-changelog.md:1576
+#: ../../source/ref-changelog.md:1567
 msgid ""
 "**New advanced PyTorch code example** "
 "([#1007](https://github.com/adap/flower/pull/1007))"
 msgstr "**新的 PyTorch 高级代码示例** ([#1007](https://github.com/adap/flower/pull/1007))"
 
-#: ../../source/ref-changelog.md:1578
+#: ../../source/ref-changelog.md:1569
 msgid ""
 "A new code example (`advanced_pytorch`) demonstrates advanced Flower "
 "concepts with PyTorch."
 msgstr "新代码示例 (`advanced_pytorch`) 演示了 PyTorch 的高级 Flower 概念。"
 
-#: ../../source/ref-changelog.md:1580
+#: ../../source/ref-changelog.md:1571
 msgid ""
 "**New JAX code example** "
 "([#906](https://github.com/adap/flower/pull/906), "
@@ -27598,13 +27570,13 @@ msgstr ""
 "**新的 JAX 代码示例**（[#906](https://github.com/adap/flower/pull/906), "
 "[#1143](https://github.com/adap/flower/pull/1143)"
 
-#: ../../source/ref-changelog.md:1582
+#: ../../source/ref-changelog.md:1573
 msgid ""
 "A new code example (`jax_from_centralized_to_federated`) shows federated "
 "learning with JAX and Flower."
 msgstr "新代码示例（`jax_from_centralized_to_federated`）展示了使用 JAX 和 Flower 的联邦学习。"
 
-#: ../../source/ref-changelog.md:1586
+#: ../../source/ref-changelog.md:1577
 msgid ""
 "New option to keep Ray running if Ray was already initialized in "
 "`start_simulation` ([#1177](https://github.com/adap/flower/pull/1177))"
@@ -27612,7 +27584,7 @@ msgstr ""
 "新增选项，用于在 \"start_simulation\"（开始模拟）中已初始化 Ray 的情况下保持 Ray "
 "运行（[#1177](https://github.com/adap/flower/pull/1177)）"
 
-#: ../../source/ref-changelog.md:1587
+#: ../../source/ref-changelog.md:1578
 msgid ""
 "Add support for custom `ClientManager` as a `start_simulation` parameter "
 "([#1171](https://github.com/adap/flower/pull/1171))"
@@ -27620,7 +27592,7 @@ msgstr ""
 "添加对自定义 \"客户端管理器 \"作为 \"start_simulation "
 "\"参数的支持（[#1171](https://github.com/adap/flower/pull/1171)）"
 
-#: ../../source/ref-changelog.md:1588
+#: ../../source/ref-changelog.md:1579
 msgid ""
 "New documentation for [implementing "
 "strategies](https://flower.ai/docs/framework/how-to-implement-"
@@ -27631,13 +27603,13 @@ msgstr ""
 " 的新文件（[#1097](https://github.com/adap/flower/pull/1097), "
 "[#1175](https://github.com/adap/flower/pull/1175)"
 
-#: ../../source/ref-changelog.md:1589
+#: ../../source/ref-changelog.md:1580
 msgid ""
 "New mobile-friendly documentation theme "
 "([#1174](https://github.com/adap/flower/pull/1174))"
 msgstr "新的移动友好型文档主题 ([#1174](https://github.com/adap/flower/pull/1174))"
 
-#: ../../source/ref-changelog.md:1590
+#: ../../source/ref-changelog.md:1581
 msgid ""
 "Limit version range for (optional) `ray` dependency to include only "
 "compatible releases (`>=1.9.2,<1.12.0`) "
@@ -27646,33 +27618,49 @@ msgstr ""
 "限制（可选）`ray`依赖的版本范围，使其仅包含兼容版本（`>=1.9.2,<1.12.0`） "
 "([#1205](https://github.com/adap/flower/pull/1205))"
 
-#: ../../source/ref-changelog.md:1594
+#: ../../source/ref-changelog.md:1585
+msgid ""
+"**Remove deprecated DefaultStrategy strategy** "
+"([#1142](https://github.com/adap/flower/pull/1142))"
+msgstr ""
+"**删除过时的 DefaultStrategy 策略** "
+"([#1142](https://github.com/adap/flower/pull/1142))"
+
+#: ../../source/ref-changelog.md:1587
+msgid ""
+"Removes the deprecated `DefaultStrategy` strategy, along with deprecated "
+"support for the `eval_fn` accuracy return value and passing initial "
+"parameters as NumPy ndarrays."
+msgstr ""
+
+#: ../../source/ref-changelog.md:1589
 msgid ""
 "**Remove deprecated support for Python 3.6** "
 "([#871](https://github.com/adap/flower/pull/871))"
 msgstr "**删除对 Python 3.6 的过时支持** ([#871](https://github.com/adap/flower/pull/871))"
 
-#: ../../source/ref-changelog.md:1595
+#: ../../source/ref-changelog.md:1591
 msgid ""
 "**Remove deprecated KerasClient** "
 "([#857](https://github.com/adap/flower/pull/857))"
 msgstr "**移除过时的 KerasClient**（[#857](https://github.com/adap/flower/pull/857)）"
 
-#: ../../source/ref-changelog.md:1596
+#: ../../source/ref-changelog.md:1593
 msgid ""
 "**Remove deprecated no-op extra installs** "
 "([#973](https://github.com/adap/flower/pull/973))"
 msgstr "**移除过时的不操作额外安装** ([#973](https://github.com/adap/flower/pull/973))"
 
-#: ../../source/ref-changelog.md:1597
+#: ../../source/ref-changelog.md:1595
+#, fuzzy
 msgid ""
 "**Remove deprecated proto fields from** `FitRes` **and** `EvaluateRes` "
-"([#869](https://github.com/adap/flower/pull/869))"
+"([#870](https://github.com/adap/flower/pull/870))"
 msgstr ""
 "**从** `FitRes` **和** `EvaluateRes` 中移除已废弃的 proto 字段 "
 "([#869](https://github.com/adap/flower/pull/869))"
 
-#: ../../source/ref-changelog.md:1598
+#: ../../source/ref-changelog.md:1597
 msgid ""
 "**Remove deprecated QffedAvg strategy (replaced by QFedAvg)** "
 "([#1107](https://github.com/adap/flower/pull/1107))"
@@ -27681,39 +27669,15 @@ msgstr ""
 "([#1107](https://github.com/adap/flower/pull/1107))"
 
 #: ../../source/ref-changelog.md:1599
-msgid ""
-"**Remove deprecated DefaultStrategy strategy** "
-"([#1142](https://github.com/adap/flower/pull/1142))"
-msgstr ""
-"**删除过时的 DefaultStrategy 策略** "
-"([#1142](https://github.com/adap/flower/pull/1142))"
-
-#: ../../source/ref-changelog.md:1600
-msgid ""
-"**Remove deprecated support for eval_fn accuracy return value** "
-"([#1142](https://github.com/adap/flower/pull/1142))"
-msgstr ""
-"**删除已过时的对 eval_fn 返回值准确性的支持** "
-"([#1142](https://github.com/adap/flower/pull/1142))"
-
-#: ../../source/ref-changelog.md:1601
-msgid ""
-"**Remove deprecated support for passing initial parameters as NumPy "
-"ndarrays** ([#1142](https://github.com/adap/flower/pull/1142))"
-msgstr ""
-"**移除对以 NumPy ndarrays 传递初始参数的过时支持** "
-"([#1142](https://github.com/adap/flower/pull/1142))"
-
-#: ../../source/ref-changelog.md:1603
 msgid "v0.18.0 (2022-02-28)"
 msgstr "v0.18.0 (2022-02-28)"
 
-#: ../../source/ref-changelog.md:1607
+#: ../../source/ref-changelog.md:1603
+#, fuzzy
 msgid ""
 "**Improved Virtual Client Engine compatibility with Jupyter Notebook / "
 "Google Colab** ([#866](https://github.com/adap/flower/pull/866), "
 "[#872](https://github.com/adap/flower/pull/872), "
-"[#833](https://github.com/adap/flower/pull/833), "
 "[#1036](https://github.com/adap/flower/pull/1036))"
 msgstr ""
 "**改进了虚拟客户端引擎与 Jupyter Notebook / Google Colab 的兼容性** "
@@ -27722,7 +27686,7 @@ msgstr ""
 "[#833](https://github.com/adap/flower/pull/833), "
 "[#1036](https://github.com/adap/flower/pull/1036))"
 
-#: ../../source/ref-changelog.md:1609
+#: ../../source/ref-changelog.md:1605
 msgid ""
 "Simulations (using the Virtual Client Engine through `start_simulation`) "
 "now work more smoothly on Jupyter Notebooks (incl. Google Colab) after "
@@ -27733,7 +27697,7 @@ msgstr ""
 "`simulation` (`pip install 'flwr[simulation]'`)后，模拟（通过 `start_simulation`"
 " 使用虚拟客户端引擎）现在可以更流畅地运行。"
 
-#: ../../source/ref-changelog.md:1611
+#: ../../source/ref-changelog.md:1607
 msgid ""
 "**New Jupyter Notebook code example** "
 "([#833](https://github.com/adap/flower/pull/833))"
@@ -27741,7 +27705,7 @@ msgstr ""
 "**新的 Jupyter Notebook 代码示例** "
 "([#833](https://github.com/adap/flower/pull/833))"
 
-#: ../../source/ref-changelog.md:1613
+#: ../../source/ref-changelog.md:1609
 msgid ""
 "A new code example (`quickstart_simulation`) demonstrates Flower "
 "simulations using the Virtual Client Engine through Jupyter Notebook "
@@ -27750,25 +27714,25 @@ msgstr ""
 "新代码示例（`quickstart_simulation`）通过 Jupyter Notebook（包括 Google "
 "Colab）演示了使用虚拟客户端引擎进行 Flower 模拟。"
 
-#: ../../source/ref-changelog.md:1615
+#: ../../source/ref-changelog.md:1611
 msgid ""
 "**Client properties (feature preview)** "
 "([#795](https://github.com/adap/flower/pull/795))"
 msgstr "**客户端属性（功能预览）** ([#795](https://github.com/adap/flower/pull/795))"
 
-#: ../../source/ref-changelog.md:1617
+#: ../../source/ref-changelog.md:1613
 msgid ""
 "Clients can implement a new method `get_properties` to enable server-side"
 " strategies to query client properties."
 msgstr "客户端可以实现一个新方法 `get_properties`，以启用服务器端策略来查询客户端属性。"
 
-#: ../../source/ref-changelog.md:1619
+#: ../../source/ref-changelog.md:1615
 msgid ""
 "**Experimental Android support with TFLite** "
 "([#865](https://github.com/adap/flower/pull/865))"
 msgstr "** 使用 TFLite 实验性支持安卓系统** ([#865](https://github.com/adap/flower/pull/865))"
 
-#: ../../source/ref-changelog.md:1621
+#: ../../source/ref-changelog.md:1617
 msgid ""
 "Android support has finally arrived in `main`! Flower is both client-"
 "agnostic and framework-agnostic by design. One can integrate arbitrary "
@@ -27778,7 +27742,7 @@ msgstr ""
 "`main`终于支持 Android 了！Flower 的设计与客户端和框架无关。我们可以集成任意客户端平台，有了这个版本，在安卓系统上使用 "
 "Flower 就变得更容易了。"
 
-#: ../../source/ref-changelog.md:1623
+#: ../../source/ref-changelog.md:1619
 msgid ""
 "The example uses TFLite on the client side, along with a new "
 "`FedAvgAndroid` strategy. The Android client and `FedAvgAndroid` are "
@@ -27790,7 +27754,7 @@ msgstr ""
 "`FedAvgAndroid`仍处于试验阶段，但这是向成熟的 Android SDK 和集成了 `FedAvgAndroid`新功能的统一 "
 "`FedAvg`实现迈出的第一步。"
 
-#: ../../source/ref-changelog.md:1625
+#: ../../source/ref-changelog.md:1621
 msgid ""
 "**Make gRPC keepalive time user-configurable and decrease default "
 "keepalive time** ([#1069](https://github.com/adap/flower/pull/1069))"
@@ -27798,7 +27762,7 @@ msgstr ""
 "**使 gRPC 保持连接时间可由用户配置，并缩短默认保持连接时间** "
 "([#1069](https://github.com/adap/flower/pull/1069))"
 
-#: ../../source/ref-changelog.md:1627
+#: ../../source/ref-changelog.md:1623
 msgid ""
 "The default gRPC keepalive time has been reduced to increase the "
 "compatibility of Flower with more cloud environments (for example, "
@@ -27808,7 +27772,7 @@ msgstr ""
 "为提高 Flower 与更多云环境（如 Microsoft Azure）的兼容性，缩短了默认 gRPC 保持时间。用户可以根据具体要求配置 "
 "keepalive 时间，自定义 gRPC 堆栈。"
 
-#: ../../source/ref-changelog.md:1629
+#: ../../source/ref-changelog.md:1625
 msgid ""
 "**New differential privacy example using Opacus and PyTorch** "
 "([#805](https://github.com/adap/flower/pull/805))"
@@ -27816,13 +27780,13 @@ msgstr ""
 "**使用 Opacus 和 PyTorch 的新差分隐私示例** "
 "([#805](https://github.com/adap/flower/pull/805))"
 
-#: ../../source/ref-changelog.md:1631
+#: ../../source/ref-changelog.md:1627
 msgid ""
 "A new code example (`opacus`) demonstrates differentially-private "
 "federated learning with Opacus, PyTorch, and Flower."
 msgstr "一个新的代码示例（\"opacus\"）演示了使用 Opacus、PyTorch 和 Flower 进行差分隐私的联邦学习。"
 
-#: ../../source/ref-changelog.md:1633
+#: ../../source/ref-changelog.md:1629
 msgid ""
 "**New Hugging Face Transformers code example** "
 "([#863](https://github.com/adap/flower/pull/863))"
@@ -27830,13 +27794,13 @@ msgstr ""
 "**新的Hugging Face Transformers代码示例** "
 "([#863](https://github.com/adap/flower/pull/863))"
 
-#: ../../source/ref-changelog.md:1635
+#: ../../source/ref-changelog.md:1631
 msgid ""
 "A new code example (`quickstart_huggingface`) demonstrates usage of "
 "Hugging Face Transformers with Flower."
 msgstr "新的代码示例(`quickstart_huggingface`)证明了结合Flower和Hugging Face Transformers的实用性。"
 
-#: ../../source/ref-changelog.md:1637
+#: ../../source/ref-changelog.md:1633
 msgid ""
 "**New MLCube code example** "
 "([#779](https://github.com/adap/flower/pull/779), "
@@ -27849,13 +27813,13 @@ msgstr ""
 "[#1065](https://github.com/adap/flower/pull/1065), "
 "[#1090](https://github.com/adap/flower/pull/1090))"
 
-#: ../../source/ref-changelog.md:1639
+#: ../../source/ref-changelog.md:1635
 msgid ""
 "A new code example (`quickstart_mlcube`) demonstrates usage of MLCube "
 "with Flower."
 msgstr "新代码示例（\"quickstart_mlcube\"）演示了 MLCube 与 Flower 的用法。"
 
-#: ../../source/ref-changelog.md:1641
+#: ../../source/ref-changelog.md:1637
 msgid ""
 "**SSL-enabled server and client** "
 "([#842](https://github.com/adap/flower/pull/842),  "
@@ -27872,14 +27836,16 @@ msgstr ""
 "[#993](https://github.com/adap/flower/pull/993), "
 "[#994](https://github.com/adap/flower/pull/994))"
 
-#: ../../source/ref-changelog.md:1643
+#: ../../source/ref-changelog.md:1639
+#, fuzzy
 msgid ""
 "SSL enables secure encrypted connections between clients and servers. "
 "This release open-sources the Flower secure gRPC implementation to make "
-"encrypted communication channels accessible to all Flower users."
+"encrypted communication channels accessible to all Flower users. The "
+"`advanced_tensorflow` code example now uses secure gRPC connection."
 msgstr "SSL 可实现客户端与服务器之间的安全加密连接。该版本开源了 Flower 安全 gRPC 实现，使所有 Flower 用户都能访问加密通信通道。"
 
-#: ../../source/ref-changelog.md:1645
+#: ../../source/ref-changelog.md:1641
 msgid ""
 "**Updated** `FedAdam` **and** `FedYogi` **strategies** "
 "([#885](https://github.com/adap/flower/pull/885), "
@@ -27889,13 +27855,13 @@ msgstr ""
 "([#885](https://github.com/adap/flower/pull/885), "
 "[#895](https://github.com/adap/flower/pull/895))"
 
-#: ../../source/ref-changelog.md:1647
+#: ../../source/ref-changelog.md:1643
 msgid ""
 "`FedAdam` and `FedAdam` match the latest version of the Adaptive "
 "Federated Optimization paper."
 msgstr "FedAdam \"和 \"FedAdam \"与最新版本的 \"自适应联邦优化 \"论文相匹配。"
 
-#: ../../source/ref-changelog.md:1649
+#: ../../source/ref-changelog.md:1645
 msgid ""
 "**Initialize** `start_simulation` **with a list of client IDs** "
 "([#860](https://github.com/adap/flower/pull/860))"
@@ -27903,7 +27869,7 @@ msgstr ""
 "**初始化** `start_simulation` **使用客户端 ID 列表** "
 "([#860](https://github.com/adap/flower/pull/860))"
 
-#: ../../source/ref-changelog.md:1651
+#: ../../source/ref-changelog.md:1647
 msgid ""
 "`start_simulation` can now be called with a list of client IDs "
 "(`clients_ids`, type: `List[str]`). Those IDs will be passed to the "
@@ -27915,7 +27881,7 @@ msgstr ""
 "`start_simulation`。每当需要初始化客户端时，这些 ID 就会被传递到 `client_fn` 中，这样就能更轻松地加载无法通过 "
 "`int` 标识符访问的数据分区。"
 
-#: ../../source/ref-changelog.md:1655
+#: ../../source/ref-changelog.md:1651
 msgid ""
 "Update `num_examples` calculation in PyTorch code examples in "
 "([#909](https://github.com/adap/flower/pull/909))"
@@ -27923,7 +27889,7 @@ msgstr ""
 "更新 PyTorch 代码示例中的 \"num_examples \"计算 "
 "([#909](https://github.com/adap/flower/pull/909))"
 
-#: ../../source/ref-changelog.md:1656
+#: ../../source/ref-changelog.md:1652
 msgid ""
 "Expose Flower version through `flwr.__version__` "
 "([#952](https://github.com/adap/flower/pull/952))"
@@ -27931,7 +27897,7 @@ msgstr ""
 "通过 `flwr.__version__` 公开 Flower 版本 "
 "([#952](https://github.com/adap/flower/pull/952))"
 
-#: ../../source/ref-changelog.md:1657
+#: ../../source/ref-changelog.md:1653
 msgid ""
 "`start_server` in `app.py` now returns a `History` object containing "
 "metrics from training ([#974](https://github.com/adap/flower/pull/974))"
@@ -27939,7 +27905,7 @@ msgstr ""
 "`app.py`中的 `start_server`现在会返回一个 `History` "
 "对象，其中包含训练中的指标（[#974](https://github.com/adap/flower/pull/974)）"
 
-#: ../../source/ref-changelog.md:1658
+#: ../../source/ref-changelog.md:1654
 msgid ""
 "Make `max_workers` (used by `ThreadPoolExecutor`) configurable "
 "([#978](https://github.com/adap/flower/pull/978))"
@@ -27947,25 +27913,25 @@ msgstr ""
 "使 `max_workers`（由 "
 "`ThreadPoolExecutor`使用）可配置（[#978](https://github.com/adap/flower/pull/978)）"
 
-#: ../../source/ref-changelog.md:1659
+#: ../../source/ref-changelog.md:1655
 msgid ""
 "Increase sleep time after server start to three seconds in all code "
 "examples ([#1086](https://github.com/adap/flower/pull/1086))"
 msgstr "在所有代码示例中，将服务器启动后的休眠时间延长至三秒（[#1086](https://github.com/adap/flower/pull/1086)）"
 
-#: ../../source/ref-changelog.md:1660
+#: ../../source/ref-changelog.md:1656
 msgid ""
 "Added a new FAQ section to the documentation "
 "([#948](https://github.com/adap/flower/pull/948))"
 msgstr "在文档中添加了新的常见问题部分 ([#948](https://github.com/adap/flower/pull/948))"
 
-#: ../../source/ref-changelog.md:1661
+#: ../../source/ref-changelog.md:1657
 msgid ""
 "And many more under-the-hood changes, library updates, documentation "
 "changes, and tooling improvements!"
 msgstr "还有更多底层更改、库更新、文档更改和工具改进！"
 
-#: ../../source/ref-changelog.md:1665
+#: ../../source/ref-changelog.md:1661
 msgid ""
 "**Removed** `flwr_example` **and** `flwr_experimental` **from release "
 "build** ([#869](https://github.com/adap/flower/pull/869))"
@@ -27973,7 +27939,7 @@ msgstr ""
 "**从发布版中删除**`flwr_example`**和**`flwr_experimental`** "
 "([#869](https://github.com/adap/flower/pull/869))"
 
-#: ../../source/ref-changelog.md:1667
+#: ../../source/ref-changelog.md:1663
 msgid ""
 "The packages `flwr_example` and `flwr_experimental` have been deprecated "
 "since Flower 0.12.0 and they are not longer included in Flower release "
@@ -27985,22 +27951,22 @@ msgstr ""
 "Flower 的发布版本中。相关的额外包（`baseline`, `examples-pytorch`, `examples-"
 "tensorflow`, `http-logger`, `ops`）现在已不再使用，并将在即将发布的版本中移除。"
 
-#: ../../source/ref-changelog.md:1669
+#: ../../source/ref-changelog.md:1665
 msgid "v0.17.0 (2021-09-24)"
 msgstr "v0.17.0 (2021-09-24)"
 
-#: ../../source/ref-changelog.md:1673
+#: ../../source/ref-changelog.md:1669
+#, fuzzy
 msgid ""
 "**Experimental virtual client engine** "
 "([#781](https://github.com/adap/flower/pull/781) "
-"[#790](https://github.com/adap/flower/pull/790) "
-"[#791](https://github.com/adap/flower/pull/791))"
+"[#790](https://github.com/adap/flower/pull/790))"
 msgstr ""
 "**实验性虚拟客户端引擎** ([#781](https://github.com/adap/flower/pull/781) "
 "[#790](https://github.com/adap/flower/pull/790) "
 "[#791](https://github.com/adap/flower/pull/791))"
 
-#: ../../source/ref-changelog.md:1675
+#: ../../source/ref-changelog.md:1671
 msgid ""
 "One of Flower's goals is to enable research at scale. This release "
 "enables a first (experimental) peek at a major new feature, codenamed the"
@@ -28013,7 +27979,7 @@ msgstr ""
 "\"的重要新功能。虚拟客户端可以在单台机器或计算集群上对大量客户端进行模拟。测试新功能的最简单方法是查看名为 "
 "\"quickstart_simulation \"和 \"simulation_pytorch \"的两个新代码示例。"
 
-#: ../../source/ref-changelog.md:1677
+#: ../../source/ref-changelog.md:1673
 msgid ""
 "The feature is still experimental, so there's no stability guarantee for "
 "the API. It's also not quite ready for prime time and comes with a few "
@@ -28023,7 +27989,7 @@ msgstr ""
 "该功能仍处于试验阶段，因此无法保证 API "
 "的稳定性。此外，它还没有完全准备好进入黄金时间，并有一些已知的注意事项。不过，我们鼓励好奇的用户尝试使用并分享他们的想法。"
 
-#: ../../source/ref-changelog.md:1679
+#: ../../source/ref-changelog.md:1675
 msgid ""
 "**New built-in strategies** "
 "([#828](https://github.com/adap/flower/pull/828) "
@@ -28032,19 +27998,19 @@ msgstr ""
 "**新的内置策略**（[#828](https://github.com/adap/flower/pull/828) "
 "[#822](https://github.com/adap/flower/pull/822)"
 
-#: ../../source/ref-changelog.md:1681
+#: ../../source/ref-changelog.md:1677
 msgid ""
 "FedYogi - Federated learning strategy using Yogi on server-side. "
 "Implementation based on https://arxiv.org/abs/2003.00295"
 msgstr "FedYogi - 在服务器端使用 Yogi 的联邦学习策略。基于 https://arxiv.org/abs/2003.00295 实现"
 
-#: ../../source/ref-changelog.md:1682
+#: ../../source/ref-changelog.md:1678
 msgid ""
 "FedAdam - Federated learning strategy using Adam on server-side. "
 "Implementation based on https://arxiv.org/abs/2003.00295"
 msgstr "FedAdam - 在服务器端使用 Adam 的联邦学习策略。基于 https://arxiv.org/abs/2003.00295 实现"
 
-#: ../../source/ref-changelog.md:1684
+#: ../../source/ref-changelog.md:1680
 msgid ""
 "**New PyTorch Lightning code example** "
 "([#617](https://github.com/adap/flower/pull/617))"
@@ -28052,31 +28018,31 @@ msgstr ""
 "**新的 PyTorch Lightning 代码示例** "
 "([#617](https://github.com/adap/flower/pull/617))"
 
-#: ../../source/ref-changelog.md:1686
+#: ../../source/ref-changelog.md:1682
 msgid ""
 "**New Variational Auto-Encoder code example** "
 "([#752](https://github.com/adap/flower/pull/752))"
 msgstr "**新的变分自动编码器代码示例** ([#752](https://github.com/adap/flower/pull/752))"
 
-#: ../../source/ref-changelog.md:1688
+#: ../../source/ref-changelog.md:1684
 msgid ""
 "**New scikit-learn code example** "
 "([#748](https://github.com/adap/flower/pull/748))"
 msgstr "**新的 scikit-learn 代码示例** ([#748](https://github.com/adap/flower/pull/748))"
 
-#: ../../source/ref-changelog.md:1690
+#: ../../source/ref-changelog.md:1686
 msgid ""
 "**New experimental TensorBoard strategy** "
 "([#789](https://github.com/adap/flower/pull/789))"
 msgstr "**新的实验性 TensorBoard 策略**（[#789](https://github.com/adap/flower/pull/789)）"
 
-#: ../../source/ref-changelog.md:1694
+#: ../../source/ref-changelog.md:1690
 msgid ""
 "Improved advanced TensorFlow code example "
 "([#769](https://github.com/adap/flower/pull/769))"
 msgstr "改进的高级 TensorFlow 代码示例（[#769](https://github.com/adap/flower/pull/769)"
 
-#: ../../source/ref-changelog.md:1695
+#: ../../source/ref-changelog.md:1691
 msgid ""
 "Warning when `min_available_clients` is misconfigured "
 "([#830](https://github.com/adap/flower/pull/830))"
@@ -28084,31 +28050,31 @@ msgstr ""
 "当 `min_available_clients` 配置错误时发出警告 "
 "([#830](https://github.com/adap/flower/pull/830))"
 
-#: ../../source/ref-changelog.md:1696
+#: ../../source/ref-changelog.md:1692
 msgid ""
 "Improved gRPC server docs "
 "([#841](https://github.com/adap/flower/pull/841))"
 msgstr "改进了 gRPC 服务器文档（[#841](https://github.com/adap/flower/pull/841)）"
 
-#: ../../source/ref-changelog.md:1697
+#: ../../source/ref-changelog.md:1693
 msgid ""
 "Improved error message in `NumPyClient` "
 "([#851](https://github.com/adap/flower/pull/851))"
 msgstr "改进了 `NumPyClient` 中的错误信息 ([#851](https://github.com/adap/flower/pull/851))"
 
-#: ../../source/ref-changelog.md:1698
+#: ../../source/ref-changelog.md:1694
 msgid ""
 "Improved PyTorch quickstart code example "
 "([#852](https://github.com/adap/flower/pull/852))"
 msgstr "改进的 PyTorch 快速启动代码示例 ([#852](https://github.com/adap/flower/pull/852))"
 
-#: ../../source/ref-changelog.md:1702
+#: ../../source/ref-changelog.md:1698
 msgid ""
 "**Disabled final distributed evaluation** "
 "([#800](https://github.com/adap/flower/pull/800))"
 msgstr "**禁用最终分布式评价** ([#800](https://github.com/adap/flower/pull/800))"
 
-#: ../../source/ref-changelog.md:1704
+#: ../../source/ref-changelog.md:1700
 msgid ""
 "Prior behaviour was to perform a final round of distributed evaluation on"
 " all connected clients, which is often not required (e.g., when using "
@@ -28118,13 +28084,13 @@ msgstr ""
 "之前的行为是在所有连接的客户端上执行最后一轮分布式评估，而这通常是不需要的（例如，在使用服务器端评估时）。可以通过向 `start_server`"
 " 传递 `force_final_distributed_eval=True` 来启用之前的行为。"
 
-#: ../../source/ref-changelog.md:1706
+#: ../../source/ref-changelog.md:1702
 msgid ""
 "**Renamed q-FedAvg strategy** "
 "([#802](https://github.com/adap/flower/pull/802))"
 msgstr "**更名为 q-FedAvg 策略** ([#802](https://github.com/adap/flower/pull/802))"
 
-#: ../../source/ref-changelog.md:1708
+#: ../../source/ref-changelog.md:1704
 msgid ""
 "The strategy named `QffedAvg` was renamed to `QFedAvg` to better reflect "
 "the notation given in the original paper (q-FFL is the optimization "
@@ -28135,7 +28101,7 @@ msgstr ""
 "名为 `QffedAvg` 的策略已更名为 `QFedAvg`，以更好地反映原始论文中给出的符号（q-FFL 是优化目标，q-FedAvg "
 "是建议的求解器）。请注意，出于兼容性原因，原始（现已废弃）的 `QffedAvg` 类仍然可用（它将在未来的版本中移除）。"
 
-#: ../../source/ref-changelog.md:1710
+#: ../../source/ref-changelog.md:1706
 msgid ""
 "**Deprecated and renamed code example** `simulation_pytorch` **to** "
 "`simulation_pytorch_legacy` "
@@ -28144,7 +28110,7 @@ msgstr ""
 "**删除并重命名代码示例**`simulation_pytorch`**为**`simulation_pytorch_legacy` "
 "([#791](https://github.com/adap/flower/pull/791))"
 
-#: ../../source/ref-changelog.md:1712
+#: ../../source/ref-changelog.md:1708
 msgid ""
 "This example has been replaced by a new example. The new example is based"
 " on the experimental virtual client engine, which will become the new "
@@ -28155,27 +28121,71 @@ msgstr ""
 "该示例已被新示例取代。新示例基于试验性虚拟客户端引擎，它将成为在 Flower "
 "中进行大多数类型大规模模拟的新的默认方式。现有示例将作为参考保留，但将来可能会删除。"
 
-#: ../../source/ref-changelog.md:1714
+#: ../../source/ref-changelog.md:1710
 msgid "v0.16.0 (2021-05-11)"
 msgstr "v0.16.0 (2021-05-11)"
 
-#: ../../source/ref-changelog.md:1718
+#: ../../source/ref-changelog.md:1714
 msgid ""
 "**New built-in strategies** "
 "([#549](https://github.com/adap/flower/pull/549))"
 msgstr "**新的内置策略** ([#549](https://github.com/adap/flower/pull/549))"
 
-#: ../../source/ref-changelog.md:1720
+#: ../../source/ref-changelog.md:1716
 msgid "(abstract) FedOpt"
 msgstr "（摘要） FedOpt"
 
+#: ../../source/ref-changelog.md:1719
+msgid ""
+"**Migration warnings for deprecated functionality** "
+"([#690](https://github.com/adap/flower/pull/690))"
+msgstr "** 过时功能的迁移警告** ([#690](https://github.com/adap/flower/pull/690))"
+
+#: ../../source/ref-changelog.md:1721
+msgid ""
+"Earlier versions of Flower were often migrated to new APIs, while "
+"maintaining compatibility with legacy APIs. This release introduces "
+"detailed warning messages if usage of deprecated APIs is detected. The "
+"new warning messages often provide details on how to migrate to more "
+"recent APIs, thus easing the transition from one release to another."
+msgstr ""
+"Flower 早期版本通常会迁移到新的应用程序接口，同时保持与旧版应用程序接口的兼容。如果检测到使用了过时的 "
+"API，本版本将引入详细的警告信息。新的警告信息通常会详细说明如何迁移到更新的 API，从而简化从一个版本到另一个版本的过渡。"
+
 #: ../../source/ref-changelog.md:1723
+msgid ""
+"Improved docs and docstrings "
+"([#691](https://github.com/adap/flower/pull/691) "
+"[#692](https://github.com/adap/flower/pull/692) "
+"[#713](https://github.com/adap/flower/pull/713))"
+msgstr ""
+"改进了文档和文档说明 ([#691](https://github.com/adap/flower/pull/691) "
+"[#692](https://github.com/adap/flower/pull/692) "
+"[#713](https://github.com/adap/flower/pull/713))"
+
+#: ../../source/ref-changelog.md:1725
+msgid "MXNet example and documentation"
+msgstr "MXNet 示例和文档"
+
+#: ../../source/ref-changelog.md:1727
+msgid ""
+"FedBN implementation in example PyTorch: From Centralized To Federated "
+"([#696](https://github.com/adap/flower/pull/696) "
+"[#702](https://github.com/adap/flower/pull/702) "
+"[#705](https://github.com/adap/flower/pull/705))"
+msgstr ""
+"PyTorch 示例中的 FedBN 实现： 从集中到联邦 "
+"([#696](https://github.com/adap/flower/pull/696) "
+"[#702](https://github.com/adap/flower/pull/702) "
+"[#705](https://github.com/adap/flower/pull/705))"
+
+#: ../../source/ref-changelog.md:1731
 msgid ""
 "**Custom metrics for server and strategies** "
 "([#717](https://github.com/adap/flower/pull/717))"
 msgstr "**服务器和策略的自定义指标** ([#717](https://github.com/adap/flower/pull/717))"
 
-#: ../../source/ref-changelog.md:1725
+#: ../../source/ref-changelog.md:1733
 msgid ""
 "The Flower server is now fully task-agnostic, all remaining instances of "
 "task-specific metrics (such as `accuracy`) have been replaced by custom "
@@ -28186,7 +28196,7 @@ msgstr ""
 "Flower 服务器现在完全与任务无关，所有剩余的任务特定度量（如 \"准确度\"）都已被自定义度量字典取代。Flower 0.15 "
 "引入了从客户端向服务器传递包含自定义指标的字典的功能。从本版本开始，自定义指标将取代服务器上的特定任务指标。"
 
-#: ../../source/ref-changelog.md:1727
+#: ../../source/ref-changelog.md:1735
 msgid ""
 "Custom metric dictionaries are now used in two user-facing APIs: they are"
 " returned from Strategy methods `aggregate_fit`/`aggregate_evaluate` and "
@@ -28199,7 +28209,7 @@ msgstr ""
 "返回，还可使传递给内置策略（通过 `eval_fn`）的评估函数返回两个以上的评估度量。策略甚至可以返回 *aggregated* "
 "指标字典，以便服务器跟踪。"
 
-#: ../../source/ref-changelog.md:1729
+#: ../../source/ref-changelog.md:1737
 #, python-brace-format
 msgid ""
 "Strategy implementations should migrate their `aggregate_fit` and "
@@ -28211,63 +28221,28 @@ msgstr ""
 "方法迁移到新的返回类型（例如，只需返回空的 `{}`），服务器端评估函数应从 `return loss, accuracy` 迁移到 "
 "`return loss, {\"accuracy\": accuracy}`。"
 
-#: ../../source/ref-changelog.md:1731
+#: ../../source/ref-changelog.md:1739
 msgid ""
 "Flower 0.15-style return types are deprecated (but still supported), "
 "compatibility will be removed in a future release."
 msgstr "Flower 0.15 风格的返回类型已被弃用（但仍受支持），兼容性将在未来的版本中移除。"
 
-#: ../../source/ref-changelog.md:1733
-msgid ""
-"**Migration warnings for deprecated functionality** "
-"([#690](https://github.com/adap/flower/pull/690))"
-msgstr "** 过时功能的迁移警告** ([#690](https://github.com/adap/flower/pull/690))"
-
-#: ../../source/ref-changelog.md:1735
-msgid ""
-"Earlier versions of Flower were often migrated to new APIs, while "
-"maintaining compatibility with legacy APIs. This release introduces "
-"detailed warning messages if usage of deprecated APIs is detected. The "
-"new warning messages often provide details on how to migrate to more "
-"recent APIs, thus easing the transition from one release to another."
-msgstr ""
-"Flower 早期版本通常会迁移到新的应用程序接口，同时保持与旧版应用程序接口的兼容。如果检测到使用了过时的 "
-"API，本版本将引入详细的警告信息。新的警告信息通常会详细说明如何迁移到更新的 API，从而简化从一个版本到另一个版本的过渡。"
-
-#: ../../source/ref-changelog.md:1737
-msgid ""
-"Improved docs and docstrings "
-"([#691](https://github.com/adap/flower/pull/691) "
-"[#692](https://github.com/adap/flower/pull/692) "
-"[#713](https://github.com/adap/flower/pull/713))"
-msgstr ""
-"改进了文档和文档说明 ([#691](https://github.com/adap/flower/pull/691) "
-"[#692](https://github.com/adap/flower/pull/692) "
-"[#713](https://github.com/adap/flower/pull/713))"
-
-#: ../../source/ref-changelog.md:1739
-msgid "MXNet example and documentation"
-msgstr "MXNet 示例和文档"
-
 #: ../../source/ref-changelog.md:1741
+#, fuzzy
 msgid ""
-"FedBN implementation in example PyTorch: From Centralized To Federated "
-"([#696](https://github.com/adap/flower/pull/696) "
-"[#702](https://github.com/adap/flower/pull/702) "
-"[#705](https://github.com/adap/flower/pull/705))"
+"Deprecated `flwr.server.Server.evaluate`, use "
+"`flwr.server.Server.evaluate_round` instead"
 msgstr ""
-"PyTorch 示例中的 FedBN 实现： 从集中到联邦 "
-"([#696](https://github.com/adap/flower/pull/696) "
-"[#702](https://github.com/adap/flower/pull/702) "
-"[#705](https://github.com/adap/flower/pull/705))"
+"已弃用 `flwr.server.Server.evaluate`，改用 "
+"`flwr.server.Server.evaluate_round`（[#717](https://github.com/adap/flower/pull/717)"
 
-#: ../../source/ref-changelog.md:1745
+#: ../../source/ref-changelog.md:1743
 msgid ""
 "**Serialization-agnostic server** "
 "([#721](https://github.com/adap/flower/pull/721))"
 msgstr "**序列化无关服务器** ([#721](https://github.com/adap/flower/pull/721))"
 
-#: ../../source/ref-changelog.md:1747
+#: ../../source/ref-changelog.md:1745
 msgid ""
 "The Flower server is now fully serialization-agnostic. Prior usage of "
 "class `Weights` (which represents parameters as deserialized NumPy "
@@ -28281,38 +28256,30 @@ msgstr ""
 "`Parameters` 类取代（例如在 `Strategy`中）。参数 "
 "\"对象与序列化完全无关，它以字节数组的形式表示参数，\"tensor_type \"属性表示如何解释这些字节数组（例如，用于序列化/反序列化）。"
 
-#: ../../source/ref-changelog.md:1749
+#: ../../source/ref-changelog.md:1747
+#, fuzzy
 msgid ""
 "Built-in strategies implement this approach by handling serialization and"
 " deserialization to/from `Weights` internally. Custom/3rd-party Strategy "
 "implementations should update to the slightly changed Strategy method "
-"definitions. Strategy authors can consult PR "
-"[#721](https://github.com/adap/flower/pull/721) to see how strategies can"
-" easily migrate to the new format."
+"definitions. Strategy authors can consult [PR "
+"#721](https://github.com/adap/flower/pull/721) to see how strategies can "
+"easily migrate to the new format."
 msgstr ""
 "内置策略通过在内部处理序列化和反序列化到/从`Weights`来实现这种方法。自定义/第三方策略实现应更新为稍有改动的策略方法定义。策略作者可查阅"
 " PR [#721](https://github.com/adap/flower/pull/721) 以了解如何将策略轻松迁移到新格式。"
 
-#: ../../source/ref-changelog.md:1751
-msgid ""
-"Deprecated `flwr.server.Server.evaluate`, use "
-"`flwr.server.Server.evaluate_round` instead "
-"([#717](https://github.com/adap/flower/pull/717))"
-msgstr ""
-"已弃用 `flwr.server.Server.evaluate`，改用 "
-"`flwr.server.Server.evaluate_round`（[#717](https://github.com/adap/flower/pull/717)"
-
-#: ../../source/ref-changelog.md:1753
+#: ../../source/ref-changelog.md:1749
 msgid "v0.15.0 (2021-03-12)"
 msgstr "v0.15.0 (2021-03-12)"
 
-#: ../../source/ref-changelog.md:1757
+#: ../../source/ref-changelog.md:1753
 msgid ""
 "**Server-side parameter initialization** "
 "([#658](https://github.com/adap/flower/pull/658))"
 msgstr "**服务器端参数初始化** ([#658](https://github.com/adap/flower/pull/658))"
 
-#: ../../source/ref-changelog.md:1759
+#: ../../source/ref-changelog.md:1755
 msgid ""
 "Model parameters can now be initialized on the server-side. Server-side "
 "parameter initialization works via a new `Strategy` method called "
@@ -28321,7 +28288,7 @@ msgstr ""
 "现在可以在服务器端初始化模型参数。服务器端参数初始化通过名为 \"initialize_parameters \"的新 \"Strategy "
 "\"方法进行。"
 
-#: ../../source/ref-changelog.md:1761
+#: ../../source/ref-changelog.md:1757
 msgid ""
 "Built-in strategies support a new constructor argument called "
 "`initial_parameters` to set the initial parameters. Built-in strategies "
@@ -28331,7 +28298,7 @@ msgstr ""
 "内置策略支持名为 \"initial_parameters "
 "\"的新构造函数参数，用于设置初始参数。内置策略会在启动时向服务器提供这些初始参数，然后删除它们以释放内存。"
 
-#: ../../source/ref-changelog.md:1780
+#: ../../source/ref-changelog.md:1776
 msgid ""
 "If no initial parameters are provided to the strategy, the server will "
 "continue to use the current behaviour (namely, it will ask one of the "
@@ -28339,7 +28306,7 @@ msgid ""
 "parameters)."
 msgstr "如果没有向策略提供初始参数，服务器将继续使用当前行为（即向其中一个已连接的客户端询问参数，并将这些参数用作初始全局参数）。"
 
-#: ../../source/ref-changelog.md:1784
+#: ../../source/ref-changelog.md:1780
 msgid ""
 "Deprecate `flwr.server.strategy.DefaultStrategy` (migrate to "
 "`flwr.server.strategy.FedAvg`, which is equivalent)"
@@ -28347,11 +28314,11 @@ msgstr ""
 "停用 `flwr.server.strategy.DefaultStrategy`（迁移到等价的 "
 "`flwr.server.strategy.FedAvg`）"
 
-#: ../../source/ref-changelog.md:1786
+#: ../../source/ref-changelog.md:1782
 msgid "v0.14.0 (2021-02-18)"
 msgstr "v0.14.0 (2021-02-18)"
 
-#: ../../source/ref-changelog.md:1790
+#: ../../source/ref-changelog.md:1786
 msgid ""
 "**Generalized** `Client.fit` **and** `Client.evaluate` **return values** "
 "([#610](https://github.com/adap/flower/pull/610) "
@@ -28363,7 +28330,7 @@ msgstr ""
 "[#572](https://github.com/adap/flower/pull/572) "
 "[#633](https://github.com/adap/flower/pull/633))"
 
-#: ../../source/ref-changelog.md:1792
+#: ../../source/ref-changelog.md:1788
 msgid ""
 "Clients can now return an additional dictionary mapping `str` keys to "
 "values of the following types: `bool`, `bytes`, `float`, `int`, `str`. "
@@ -28374,7 +28341,7 @@ msgstr ""
 "bool`、`bytes`、`float`、`int`、`str`。这意味着我们可以从 `fit`/`evaluate` "
 "返回几乎任意的值，并在服务器端使用它们！"
 
-#: ../../source/ref-changelog.md:1794
+#: ../../source/ref-changelog.md:1790
 msgid ""
 "This improvement also allowed for more consistent return types between "
 "`fit` and `evaluate`: `evaluate` should now return a tuple `(float, int, "
@@ -28384,7 +28351,7 @@ msgstr ""
 "这一改进还使 `fit` 和 `evaluate` 之间的返回类型更加一致：`evaluate` 现在应返回一个元组`(float, int, "
 "dict)`，代表损失、示例数和一个包含特定问题任意值（如准确度）的字典。"
 
-#: ../../source/ref-changelog.md:1796
+#: ../../source/ref-changelog.md:1792
 msgid ""
 "In case you wondered: this feature is compatible with existing projects, "
 "the additional dictionary return value is optional. New code should "
@@ -28397,13 +28364,13 @@ msgstr ""
 "版本兼容（`fit`: `List[np.ndarray], int, Dict[str, Scalar]`，`evaluate`: "
 "`float, int, Dict[str, Scalar]`）。详见下面的示例。"
 
-#: ../../source/ref-changelog.md:1798
+#: ../../source/ref-changelog.md:1794
 msgid ""
 "*Code example:* note the additional dictionary return values in both "
 "`FlwrClient.fit` and `FlwrClient.evaluate`:"
 msgstr "*代码示例：* 注意 `FlwrClient.fit` 和 `FlwrClient.evaluate` 中的附加字典返回值："
 
-#: ../../source/ref-changelog.md:1813
+#: ../../source/ref-changelog.md:1809
 msgid ""
 "**Generalized** `config` **argument in** `Client.fit` **and** "
 "`Client.evaluate` ([#595](https://github.com/adap/flower/pull/595))"
@@ -28411,7 +28378,7 @@ msgstr ""
 "**在**`Client.fit` "
 "**和**`Client.evaluate`中泛化**`config`参数（[#595](https://github.com/adap/flower/pull/595)）"
 
-#: ../../source/ref-changelog.md:1815
+#: ../../source/ref-changelog.md:1811
 msgid ""
 "The `config` argument used to be of type `Dict[str, str]`, which means "
 "that dictionary values were expected to be strings. The new release "
@@ -28421,7 +28388,7 @@ msgstr ""
 "`config`参数曾是 \"字典[str, str]\"类型，这意味着字典值应是字符串。新版本将其扩展为以下类型的值： "
 "bool`、`bytes`、`float`、`int`、`str`。"
 
-#: ../../source/ref-changelog.md:1817
+#: ../../source/ref-changelog.md:1813
 msgid ""
 "This means one can now pass almost arbitrary values to `fit`/`evaluate` "
 "using the `config` dictionary. Yay, no more `str(epochs)` on the server-"
@@ -28430,51 +28397,53 @@ msgstr ""
 "这意味着现在可以使用 `config` 字典向 `fit`/`evaluate` 传递几乎任意的值。耶，服务器端不再需要 "
 "`str(epochs)`，客户端不再需要 `int(config[\"epochs\"])`！"
 
-#: ../../source/ref-changelog.md:1819
+#: ../../source/ref-changelog.md:1815
 msgid ""
 "*Code example:* note that the `config` dictionary now contains non-`str` "
 "values in both `Client.fit` and `Client.evaluate`:"
 msgstr "*代码示例：* 注意 `config` 字典现在在 `Client.fit` 和 `Client.evaluate` 中都包含非 `str` 值："
 
-#: ../../source/ref-changelog.md:1836
+#: ../../source/ref-changelog.md:1832
 msgid "v0.13.0 (2021-01-08)"
 msgstr "v0.13.0 (2021-01-08)"
 
-#: ../../source/ref-changelog.md:1840
+#: ../../source/ref-changelog.md:1836
+#, fuzzy
 msgid ""
 "New example: PyTorch From Centralized To Federated "
-"([#549](https://github.com/adap/flower/pull/549))"
+"([#531](https://github.com/adap/flower/pull/531))"
 msgstr "新示例： PyTorch 从集中到联邦 ([#549](https://github.com/adap/flower/pull/549))"
 
-#: ../../source/ref-changelog.md:1841
+#: ../../source/ref-changelog.md:1837
 msgid "Improved documentation"
 msgstr "改进文档"
 
-#: ../../source/ref-changelog.md:1842
+#: ../../source/ref-changelog.md:1838
 msgid "New documentation theme ([#551](https://github.com/adap/flower/pull/551))"
 msgstr "新文档主题 ([#551](https://github.com/adap/flower/pull/551))"
 
-#: ../../source/ref-changelog.md:1843
+#: ../../source/ref-changelog.md:1839
 msgid "New API reference ([#554](https://github.com/adap/flower/pull/554))"
 msgstr "新的 API 参考 ([#554](https://github.com/adap/flower/pull/554))"
 
-#: ../../source/ref-changelog.md:1844
+#: ../../source/ref-changelog.md:1840
+#, fuzzy
 msgid ""
 "Updated examples documentation "
-"([#549](https://github.com/adap/flower/pull/549))"
+"([#534](https://github.com/adap/flower/pull/534))"
 msgstr "更新了示例文档 ([#549](https://github.com/adap/flower/pull/549))"
 
-#: ../../source/ref-changelog.md:1845
+#: ../../source/ref-changelog.md:1841
 msgid ""
 "Removed obsolete documentation "
 "([#548](https://github.com/adap/flower/pull/548))"
 msgstr "删除了过时的文档 ([#548](https://github.com/adap/flower/pull/548))"
 
-#: ../../source/ref-changelog.md:1847
+#: ../../source/ref-changelog.md:1843
 msgid "Bugfix:"
 msgstr "错误修正："
 
-#: ../../source/ref-changelog.md:1849
+#: ../../source/ref-changelog.md:1845
 msgid ""
 "`Server.fit` does not disconnect clients when finished, disconnecting the"
 " clients is now handled in `flwr.server.start_server` "
@@ -28485,21 +28454,21 @@ msgstr ""
 "\"中处理的（[#553](https://github.com/adap/flower/pull/553) "
 "[#540](https://github.com/adap/flower/issues/540)）。"
 
-#: ../../source/ref-changelog.md:1851
+#: ../../source/ref-changelog.md:1847
 msgid "v0.12.0 (2020-12-07)"
 msgstr "v0.12.0 (2020-12-07)"
 
-#: ../../source/ref-changelog.md:1853 ../../source/ref-changelog.md:1869
+#: ../../source/ref-changelog.md:1849 ../../source/ref-changelog.md:1865
 msgid "Important changes:"
 msgstr "重要变更："
 
-#: ../../source/ref-changelog.md:1855
+#: ../../source/ref-changelog.md:1851
 msgid ""
 "Added an example for embedded devices "
 "([#507](https://github.com/adap/flower/pull/507))"
 msgstr "添加了嵌入式设备示例 ([#507](https://github.com/adap/flower/pull/507))"
 
-#: ../../source/ref-changelog.md:1856
+#: ../../source/ref-changelog.md:1852
 msgid ""
 "Added a new NumPyClient (in addition to the existing KerasClient) "
 "([#504](https://github.com/adap/flower/pull/504) "
@@ -28509,7 +28478,7 @@ msgstr ""
 "之外）（[#504](https://github.com/adap/flower/pull/504) "
 "[#508](https://github.com/adap/flower/pull/508)"
 
-#: ../../source/ref-changelog.md:1857
+#: ../../source/ref-changelog.md:1853
 msgid ""
 "Deprecated `flwr_example` package and started to migrate examples into "
 "the top-level `examples` directory "
@@ -28520,15 +28489,15 @@ msgstr ""
 "([#494](https://github.com/adap/flower/pull/494) "
 "[#512](https://github.com/adap/flower/pull/512))"
 
-#: ../../source/ref-changelog.md:1859
+#: ../../source/ref-changelog.md:1855
 msgid "v0.11.0 (2020-11-30)"
 msgstr "v0.11.0 (2020-11-30)"
 
-#: ../../source/ref-changelog.md:1861
+#: ../../source/ref-changelog.md:1857
 msgid "Incompatible changes:"
 msgstr "不兼容的更改："
 
-#: ../../source/ref-changelog.md:1863
+#: ../../source/ref-changelog.md:1859
 msgid ""
 "Renamed strategy methods "
 "([#486](https://github.com/adap/flower/pull/486)) to unify the naming of "
@@ -28541,23 +28510,23 @@ msgstr ""
 "API 的命名。其他公共方法/函数（例如 `Client` 中的每个方法，以及 `Strategy.evaluate`）不使用 `on_` "
 "前缀，这就是我们从 Strategy 中的四个方法中移除它的原因。迁移时，请相应地重命名以下 `Strategy` 方法："
 
-#: ../../source/ref-changelog.md:1864
+#: ../../source/ref-changelog.md:1860
 msgid "`on_configure_evaluate` => `configure_evaluate`"
 msgstr "`on_configure_evaluate` => `configure_evaluate`"
 
-#: ../../source/ref-changelog.md:1865
+#: ../../source/ref-changelog.md:1861
 msgid "`on_aggregate_evaluate` => `aggregate_evaluate`"
 msgstr "`on_aggregate_evaluate` => `aggregate_evaluate`"
 
-#: ../../source/ref-changelog.md:1866
+#: ../../source/ref-changelog.md:1862
 msgid "`on_configure_fit` => `configure_fit`"
 msgstr "`on_configure_fit` => `configure_fit`"
 
-#: ../../source/ref-changelog.md:1867
+#: ../../source/ref-changelog.md:1863
 msgid "`on_aggregate_fit` => `aggregate_fit`"
 msgstr "`on_aggregate_fit` => `aggregate_fit`"
 
-#: ../../source/ref-changelog.md:1871
+#: ../../source/ref-changelog.md:1867
 msgid ""
 "Deprecated `DefaultStrategy` "
 "([#479](https://github.com/adap/flower/pull/479)). To migrate use "
@@ -28566,13 +28535,13 @@ msgstr ""
 "已废弃的 `DefaultStrategy` ([#479](https://github.com/adap/flower/pull/479)) "
 "。迁移时请使用 `FedAvg`。"
 
-#: ../../source/ref-changelog.md:1872
+#: ../../source/ref-changelog.md:1868
 msgid ""
 "Simplified examples and baselines "
 "([#484](https://github.com/adap/flower/pull/484))."
 msgstr "简化示例和baselines（[#484](https://github.com/adap/flower/pull/484)）。"
 
-#: ../../source/ref-changelog.md:1873
+#: ../../source/ref-changelog.md:1869
 msgid ""
 "Removed presently unused `on_conclude_round` from strategy interface "
 "([#483](https://github.com/adap/flower/pull/483))."
@@ -28580,7 +28549,7 @@ msgstr ""
 "删除了策略界面中目前未使用的 "
 "\"on_conclude_round\"（[#483](https://github.com/adap/flower/pull/483)）。"
 
-#: ../../source/ref-changelog.md:1874
+#: ../../source/ref-changelog.md:1870
 msgid ""
 "Set minimal Python version to 3.6.1 instead of 3.6.9 "
 "([#471](https://github.com/adap/flower/pull/471))."
@@ -28588,7 +28557,7 @@ msgstr ""
 "将最小 Python 版本设为 3.6.1，而不是 3.6.9 "
 "([#471](https://github.com/adap/flower/pull/471))."
 
-#: ../../source/ref-changelog.md:1875
+#: ../../source/ref-changelog.md:1871
 msgid ""
 "Improved `Strategy` docstrings "
 "([#470](https://github.com/adap/flower/pull/470))."
@@ -33061,7 +33030,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|8869f4d59e144c718ac3d7f2fb70f0c5|"
+msgid "|da8a064587764437aa744321c646ed8a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -33076,7 +33045,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|4db491d8af5143e3b3fadfc2a370c87c|"
+msgid "|83edff6447e84fa3ba7ae438fdb0bec8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -33100,7 +33069,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|603698944fca4d3188b8f45d7bd22fb7|"
+msgid "|d09ebdaec63c4feab1a6c422105d60ad|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -33118,7 +33087,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|6f749ab29c5b43e09f0a95019826c24d|"
+msgid "|fa6b319a95964903958b591133ce3f0f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -33135,7 +33104,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|e511316757634140a030e6b3b68ff3ea|"
+msgid "|5a77403301d94f828c664fef30916d51|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -33150,7 +33119,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|0b978d791bec4b5a865010dcbfabca36|"
+msgid "|e5a8491fcc48461f9b2a1009d32cb0d2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -33171,7 +33140,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|1aff3c6a1ae94fc090061ca411dd688f|"
+msgid "|fbd662e5ccd84430940b56cc7daf82e8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -33186,7 +33155,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|7993e78e8ef84336baedb5cea1877433|"
+msgid "|fdd4aaee8ab041d79e7e89da84cf4b75|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -33346,7 +33315,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|6b4861f0a7b44ae3b44517127a032258|"
+msgid "|25e597a052c749c39c69ed61d390e194|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -33371,7 +33340,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|372becfd4ce4452c9a51547d7cfa8ff7|"
+msgid "|7678b911560f43ccb50ae352028af2eb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -33397,7 +33366,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|51693b3cfc5546dfaed2f8255866234f|"
+msgid "|5fc4f7141ea6409cbbb5bf5f5f51622b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -33420,7 +33389,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|eb95dcaf723f4dd1952be307e7d16d14|"
+msgid "|429bc6acd3634c68aa0e39fa68626cc9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -33467,7 +33436,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|e98cc271f6804e0b922b4999d1627c98|"
+msgid "|862985bea398410a9b2362d6bad7d2d5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -33575,7 +33544,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|4cdb176fbef14897b58a4289e494be63|"
+msgid "|dd64555e826940ffa0bb245a88fa0aa8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -42674,5 +42643,113 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|c3ddf0e3c97b46419197af99321e74d6|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Add** `server_round` **to** `Strategy.evaluate`"
+#~ " ([#1334](https://github.com/adap/flower/pull/1334))"
+#~ msgstr ""
+#~ "**添加*** `server_round` ***到*** `Strategy.evaluate`"
+#~ " ([#1334](https://github.com/adap/flower/pull/1334))"
+
+#~ msgid ""
+#~ "**Add** `server_round` **and** `config` "
+#~ "**parameters to** `evaluate_fn` "
+#~ "([#1334](https://github.com/adap/flower/pull/1334))"
+#~ msgstr ""
+#~ "**将*** `server_round` **和*** `config` "
+#~ "**参数添加到*** `evaluate_fn` "
+#~ "([#1334](https://github.com/adap/flower/pull/1334))"
+
+#~ msgid ""
+#~ "**Rename** `Weights` **to** `NDArrays` "
+#~ "([#1258](https://github.com/adap/flower/pull/1258), "
+#~ "[#1259](https://github.com/adap/flower/pull/1259))"
+#~ msgstr ""
+#~ "**重新命名** `Weights` **到** `NDArrays` "
+#~ "([#1258](https://github.com/adap/flower/pull/1258), "
+#~ "[#1259](https://github.com/adap/flower/pull/1259))"
+
+#~ msgid ""
+#~ "**Replace** `num_rounds` **in** `start_simulation`"
+#~ " **with new** `config` **parameter** "
+#~ "([#1281](https://github.com/adap/flower/pull/1281))"
+#~ msgstr ""
+#~ "**用新的** `config` 参数** 替换** `num_rounds` "
+#~ "** in** `start_simulation` ** "
+#~ "([#1281](https://github.com/adap/flower/pull/1281))"
+
+#~ msgid ""
+#~ "**Enable passing a** `Server` **instance "
+#~ "to** `start_simulation` "
+#~ "([#1281](https://github.com/adap/flower/pull/1281))"
+#~ msgstr ""
+#~ "**启用向** `start_simulation` 传递** `Server` 实例"
+#~ " ([#1281](https://github.com/adap/flower/pull/1281))"
+
+#~ msgid ""
+#~ "Add secure gRPC connection to the "
+#~ "`advanced_tensorflow` code example "
+#~ "([#847](https://github.com/adap/flower/pull/847))"
+#~ msgstr ""
+#~ "为 `advanced_tensorflow` 代码示例添加安全 gRPC 连接 "
+#~ "([#847](https://github.com/adap/flower/pull/847))"
+
+#~ msgid ""
+#~ "**Remove deprecated support for eval_fn "
+#~ "accuracy return value** "
+#~ "([#1142](https://github.com/adap/flower/pull/1142))"
+#~ msgstr ""
+#~ "**删除已过时的对 eval_fn 返回值准确性的支持** "
+#~ "([#1142](https://github.com/adap/flower/pull/1142))"
+
+#~ msgid ""
+#~ "**Remove deprecated support for passing "
+#~ "initial parameters as NumPy ndarrays** "
+#~ "([#1142](https://github.com/adap/flower/pull/1142))"
+#~ msgstr ""
+#~ "**移除对以 NumPy ndarrays 传递初始参数的过时支持** "
+#~ "([#1142](https://github.com/adap/flower/pull/1142))"
+
+#~ msgid "|8869f4d59e144c718ac3d7f2fb70f0c5|"
+#~ msgstr ""
+
+#~ msgid "|4db491d8af5143e3b3fadfc2a370c87c|"
+#~ msgstr ""
+
+#~ msgid "|603698944fca4d3188b8f45d7bd22fb7|"
+#~ msgstr ""
+
+#~ msgid "|6f749ab29c5b43e09f0a95019826c24d|"
+#~ msgstr ""
+
+#~ msgid "|e511316757634140a030e6b3b68ff3ea|"
+#~ msgstr ""
+
+#~ msgid "|0b978d791bec4b5a865010dcbfabca36|"
+#~ msgstr ""
+
+#~ msgid "|1aff3c6a1ae94fc090061ca411dd688f|"
+#~ msgstr ""
+
+#~ msgid "|7993e78e8ef84336baedb5cea1877433|"
+#~ msgstr ""
+
+#~ msgid "|6b4861f0a7b44ae3b44517127a032258|"
+#~ msgstr ""
+
+#~ msgid "|372becfd4ce4452c9a51547d7cfa8ff7|"
+#~ msgstr ""
+
+#~ msgid "|51693b3cfc5546dfaed2f8255866234f|"
+#~ msgstr ""
+
+#~ msgid "|eb95dcaf723f4dd1952be307e7d16d14|"
+#~ msgstr ""
+
+#~ msgid "|e98cc271f6804e0b922b4999d1627c98|"
+#~ msgstr ""
+
+#~ msgid "|4cdb176fbef14897b58a4289e494be63|"
 #~ msgstr ""
 
