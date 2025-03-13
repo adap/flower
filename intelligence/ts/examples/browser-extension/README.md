@@ -1,3 +1,9 @@
+---
+tags: [advanced, vision, fds, wandb]
+dataset: [Fashion-MNIST]
+framework: [torch, torchvision]
+---
+
 # Flower Intelligence Flower Extension Example
 
 ## Dev Notes
