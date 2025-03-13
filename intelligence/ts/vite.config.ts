@@ -19,12 +19,6 @@ export default defineConfig({
     },
     rollupOptions: {
       external: ['@huggingface/transformers', '@mlc-ai/web-llm', 'crypto'],
-      output: {
-        globals: {
-          '@huggingface/transformers': 'transformers',
-          '@mlc-ai/web-llm': 'webllm',
-        },
-      },
     },
   },
 });
