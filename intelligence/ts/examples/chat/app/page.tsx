@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { ArrowUpIcon } from '@heroicons/react/24/solid';
 import { FlowerIntelligence, ChatResponseResult, Message, Progress } from '@flwr/flwr';
 
 const fi: FlowerIntelligence = FlowerIntelligence.instance;
@@ -216,41 +218,18 @@ export default function ClientSideChatPage() {
         ))}
       </div>
 
-      {/* Input Area with Model Select, Remote Handoff Toggle, and Text Input */}
-      <div className="border-t p-4 bg-gray-50 flex flex-col md:flex-row items-center md:space-x-4 space-y-4 md:space-y-0">
-        {/* Model Select */}
-        <div className="w-full md:w-1/4 p-2 border border-gray-300 rounded bg-white text-gray-800">
-          <select
-            className="w-full"
-            value={model || availableModels[0]}
-            onChange={(e) => setModel(e.target.value)}
-          >
-            {availableModels.map((modelName) => (
-              <option key={modelName} value={modelName}>
-                {modelName}
-              </option>
-            ))}
-          </select>
-        </div>
-        {/* Remote Handoff Toggle (only in non-production) */}
-        {!isProduction && (
-          <div className="w-full md:w-1/4">
-            <label className="flex items-center space-x-2 text-lg">
-              <input
-                type="checkbox"
-                checked={allowRemote}
-                onChange={(e) => setAllowRemote(e.target.checked)}
-              />
-              <span className="text-gray-800">Allow remote handoff</span>
-            </label>
+      {/* Input Area with Text Input, Model Select and Remote Handoff Toggle */}
+      <div className="px-4 py-4 bg-gray-50">
+        <div className="relative">
+          {/* Left Icon (Flower Logo) */}
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <Image src="/flwr-head.png" alt="Flower Icon" width={50} height={50} />
           </div>
-        )}
-        {/* Text Input and Send Button */}
-        <div className="w-full md:w-1/2 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
+          {/* Text Input and Send Button */}
           <input
             type="text"
             placeholder="Type your question..."
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none bg-white text-gray-800"
+            className="block w-full p-4 pl-16 text-lg text-gray-900 border border-gray-300 rounded-full bg-white focus:border-sky-500 focus:outline-sky-500"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -258,10 +237,41 @@ export default function ClientSideChatPage() {
           <button
             onClick={sendQuestion}
             disabled={loading || !input.trim() || modelLoadingDescription !== null}
-            className="w-full md:w-auto bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-400"
+            className="absolute right-2.5 bottom-2.5 bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-full p-2"
           >
-            {loading ? 'Sending...' : 'Send'}
+            <ArrowUpIcon className="w-6 h-6 text-white" />
           </button>
+        </div>
+
+        {/* Additional Controls Below Input */}
+        <div className="mt-4 flex flex-col md:flex-row items-center md:space-x-4 space-y-4 md:space-y-0">
+          {/* Model Select */}
+          <div className="p-2 border border-gray-300 rounded bg-white text-gray-800">
+            <select
+              className="w-full"
+              value={model || availableModels[0]}
+              onChange={(e) => setModel(e.target.value)}
+            >
+              {availableModels.map((modelName) => (
+                <option key={modelName} value={modelName}>
+                  {modelName}
+                </option>
+              ))}
+            </select>
+          </div>
+          {/* Remote Handoff Toggle (only in non-production) */}
+          {!isProduction && (
+            <div>
+              <label className="flex items-center space-x-2 text-md">
+                <input
+                  type="checkbox"
+                  checked={allowRemote}
+                  onChange={(e) => setAllowRemote(e.target.checked)}
+                />
+                <span className="text-gray-800">Allow remote handoff</span>
+              </label>
+            </div>
+          )}
         </div>
       </div>
     </div>
