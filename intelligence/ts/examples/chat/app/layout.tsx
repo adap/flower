@@ -48,7 +48,12 @@ export default function RootLayout({
                 FlowerLabs
               </a>
             </span>
-            <Image src="/logo_secondary-w-border.png" alt="FlowerLabs Logo" className="h-6" width={24} />
+            <Image
+              src="/logo_secondary-w-border.png"
+              alt="FlowerLabs Logo"
+              width={24}
+              height={24}
+            />
           </div>
           <div className="mt-2 text-md">
             <a

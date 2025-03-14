@@ -140,7 +140,7 @@ export default function ClientSideChatPage() {
       } else {
         history.push(response.message);
       }
-    } catch (error) {
+    } catch {
       setChatLog(
         history
           .filter((msg) => msg.role !== 'system')
