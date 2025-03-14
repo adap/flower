@@ -35,10 +35,20 @@ export default function ClientSideChatPage() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [model, setModel] = useState(availableModels[0]); // Default to first model
+  const [allowRemote, setAllowRemote] = useState(false);
 
   const sendQuestion = async () => {
     if (!input.trim()) return;
     setLoading(true);
+
+    // Set remote handoff based on the toggle
+    if (allowRemote) {
+      fi.remoteHandoff = true;
+      fi.apiKey = process.env.NEXT_PUBLIC_API_KEY || "";
+    } else {
+      fi.remoteHandoff = false;
+      fi.apiKey = "";
+    }
 
     // Append the user's question to both local and global history
     setChatLog((prev) => [...prev, { role: 'user', content: input }]);
@@ -112,8 +122,8 @@ export default function ClientSideChatPage() {
           >
             <div
               className={`p-3 rounded-lg ${entry.role === 'user'
-                  ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
-                  : 'text-gray-800 rounded-tl-none'
+                ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
+                : 'text-gray-800 rounded-tl-none'
                 }`}
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -124,7 +134,7 @@ export default function ClientSideChatPage() {
         ))}
       </div>
 
-      {/* Input Area with Model Select */}
+      {/* Input Area with Model Select and Remote Handoff Toggle */}
       <div className="border-t p-4 bg-gray-50 flex items-center">
         {/* Model select on the left */}
         <select
@@ -138,6 +148,16 @@ export default function ClientSideChatPage() {
             </option>
           ))}
         </select>
+
+        {/* Remote handoff toggle */}
+        <label className="mr-4 flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={allowRemote}
+            onChange={(e) => setAllowRemote(e.target.checked)}
+          />
+          <span className="text-gray-800">Allow remote handoff</span>
+        </label>
 
         {/* Input field and Send button */}
         <div className="flex flex-grow space-x-2">
