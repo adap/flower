@@ -16,11 +16,11 @@
 import { CachedEntry, CacheStorage } from './storage';
 
 export class WebCacheStorage extends CacheStorage {
-  private readonly CACHE_KEY_PREFIX = 'flwr-mdl-cache';
+  private readonly CACHE_KEY_PREFIX = 'flwr-mdl-cache-';
 
   async getItem(key: string): Promise<CachedEntry | null> {
     await Promise.resolve();
-    const data = localStorage.getItem(`${this.CACHE_KEY_PREFIX}-${key}`);
+    const data = localStorage.getItem(`${this.CACHE_KEY_PREFIX}${key}`);
     if (data) {
       try {
         return JSON.parse(data) as CachedEntry;
@@ -34,11 +34,11 @@ export class WebCacheStorage extends CacheStorage {
     await Promise.resolve();
     if (value) {
       localStorage.setItem(
-        `${this.CACHE_KEY_PREFIX}-${key}`,
+        `${this.CACHE_KEY_PREFIX}${key}`,
         JSON.stringify({ engineModel: value, timestamp: Date.now() })
       );
     } else {
-      localStorage.removeItem(`${this.CACHE_KEY_PREFIX}-${key}`);
+      localStorage.removeItem(`${this.CACHE_KEY_PREFIX}${key}`);
     }
   }
 }
