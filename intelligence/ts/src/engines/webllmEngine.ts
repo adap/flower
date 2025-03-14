@@ -154,15 +154,17 @@ export class WebllmEngine extends BaseEngine {
   }
 
   async isSupported(model: string): Promise<boolean> {
-    const modelInfoRes = await getEngineModelInfo(model, 'webllm');
-    if (modelInfoRes.ok) {
-      if (modelInfoRes.value.vram) {
-        const availableRamRes = await getAvailableRAM();
-        if (availableRamRes.ok) {
-          return modelInfoRes.value.vram < availableRamRes.value;
+    if (typeof navigator !== 'undefined' && 'gpu' in navigator) {
+      const modelInfoRes = await getEngineModelInfo(model, 'webllm');
+      if (modelInfoRes.ok) {
+        if (modelInfoRes.value.vram) {
+          const availableRamRes = await getAvailableRAM();
+          if (availableRamRes.ok) {
+            return modelInfoRes.value.vram < availableRamRes.value;
+          }
         }
+        return true;
       }
-      return true;
     }
     return false;
   }

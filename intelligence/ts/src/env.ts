@@ -21,15 +21,16 @@ export const isNode: boolean = typeof process !== 'undefined' && process.version
 
 export async function getAvailableRAM(): Promise<Result<number>> {
   if (typeof window !== 'undefined' && 'navigator' in window && 'deviceMemory' in navigator) {
-    // Browser environment: Approximate free RAM based on total device memory
-    const totalRAM = navigator.deviceMemory as number; // deviceMemory is in GB
-    return { ok: true, value: Math.floor((totalRAM * 1024) / 2) }; // Assume 50% is available, convert GB to MB
+    // deviceMemory is in GB, it can only be one of 0.25, 0.5, 1, 2, 4, 8
+    const totalRAM = navigator.deviceMemory as number;
+    // Assume 50% is available, convert GB to MB
+    return { ok: true, value: Math.floor((totalRAM * 1024) / 2) };
   }
 
   if (isNode) {
-    // Node.js environment: Use os.freemem()
     const os = await import('os');
-    return { ok: true, value: Math.floor(os.freemem() / (1024 * 1024)) }; // Convert bytes to MB
+    // Convert bytes to MB
+    return { ok: true, value: Math.floor(os.freemem() / (1024 * 1024)) };
   }
 
   return {
