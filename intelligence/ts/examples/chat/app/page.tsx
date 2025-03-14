@@ -16,6 +16,14 @@ interface ChatEntry {
   content: string;
 }
 
+// List of available models
+const availableModels = [
+  "meta/llama3.2-1b/instruct-fp16",
+  "meta/llama3.2-3b/instruct-q4",
+  "meta/llama3.1-8b/instruct-q4",
+  "deepseek/r1-distill-llama-8b/q4"
+];
+
 export default function ClientSideChatPage() {
   // Initialize local state using the current global history (excluding the system message)
   const [chatLog, setChatLog] = useState<ChatEntry[]>(
@@ -26,6 +34,7 @@ export default function ClientSideChatPage() {
   );
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [model, setModel] = useState(availableModels[0]); // Default to first model
 
   const sendQuestion = async () => {
     if (!input.trim()) return;
@@ -37,12 +46,12 @@ export default function ClientSideChatPage() {
     setInput('');
 
     // Append an empty bot message as a placeholder for streamed content.
-    // Its rendering will show "Thinking..." until the first chunk arrives.
     setChatLog((prev) => [...prev, { role: 'bot', content: '' }]);
 
     try {
       const response: ChatResponseResult = await fi.chat({
         messages: history,
+        model: model,
         stream: true,
         onStreamEvent: (event) => {
           // Append each chunk to the last bot message.
@@ -103,8 +112,8 @@ export default function ClientSideChatPage() {
           >
             <div
               className={`p-3 rounded-lg ${entry.role === 'user'
-                ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
-                : 'text-gray-800 rounded-tl-none'
+                  ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
+                  : 'text-gray-800 rounded-tl-none'
                 }`}
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -115,9 +124,23 @@ export default function ClientSideChatPage() {
         ))}
       </div>
 
-      {/* Input Area */}
-      <div className="border-t p-4 bg-gray-50 pl-20">
-        <div className="flex space-x-2">
+      {/* Input Area with Model Select */}
+      <div className="border-t p-4 bg-gray-50 flex items-center">
+        {/* Model select on the left */}
+        <select
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          className="mr-4 p-2 border border-gray-300 rounded bg-white text-gray-800"
+        >
+          {availableModels.map((modelName) => (
+            <option key={modelName} value={modelName}>
+              {modelName}
+            </option>
+          ))}
+        </select>
+
+        {/* Input field and Send button */}
+        <div className="flex flex-grow space-x-2">
           <input
             type="text"
             placeholder="Type your question..."
