@@ -8,7 +8,7 @@ import { FlowerIntelligence, ChatResponseResult, Message, Progress } from '@flwr
 const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
 const history: Message[] = [
-  { role: "system", content: "You are a friendly assistant that loves using emojis." }
+  { role: 'system', content: 'You are a friendly assistant that loves using emojis.' },
 ];
 
 interface ChatEntry {
@@ -19,10 +19,10 @@ interface ChatEntry {
 }
 
 const availableModels = [
-  "meta/llama3.2-1b/instruct-fp16",
-  "meta/llama3.2-3b/instruct-q4",
-  "meta/llama3.1-8b/instruct-q4",
-  "deepseek/r1-distill-llama-8b/q4"
+  'meta/llama3.2-1b/instruct-fp16',
+  'meta/llama3.2-3b/instruct-q4',
+  'meta/llama3.1-8b/instruct-q4',
+  'deepseek/r1-distill-llama-8b/q4',
 ];
 
 // A simple collapsible component to show/hide internal reasoning.
@@ -30,16 +30,11 @@ const Collapsible: React.FC<{ content: string }> = ({ content }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="mb-2">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="text-sm text-blue-500 underline mb-1"
-      >
+      <button onClick={() => setIsOpen(!isOpen)} className="text-sm text-blue-500 underline mb-1">
         {isOpen ? 'Hide internal reasoning' : 'Show internal reasoning'}
       </button>
       {isOpen && (
-        <div className="p-2 border-l-4 border-blue-500 bg-blue-50 text-sm italic">
-          {content}
-        </div>
+        <div className="p-2 border-l-4 border-blue-500 bg-blue-50 text-sm italic">{content}</div>
       )}
     </div>
   );
@@ -64,10 +59,10 @@ export default function ClientSideChatPage() {
   // Helper to render bot responses based on the model used.
   const renderAssistantContent = (entry: ChatEntry) => {
     const content = entry.content;
-    if (!content) return "Thinking...";
+    if (!content) return 'Thinking...';
     // Use stored model if available, otherwise fall back to current model.
     const usedModel = entry.modelUsed || model;
-    if (usedModel === "deepseek/r1-distill-llama-8b/q4") {
+    if (usedModel === 'deepseek/r1-distill-llama-8b/q4') {
       // Extract <think> internal reasoning and main content.
       const regex = /<think>([\s\S]*?)<\/think>([\s\S]*)/;
       const match = content.match(regex);
@@ -77,9 +72,7 @@ export default function ClientSideChatPage() {
         return (
           <>
             <Collapsible content={internalReasoning} />
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {mainContent}
-            </ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{mainContent}</ReactMarkdown>
           </>
         );
       }
@@ -94,15 +87,15 @@ export default function ClientSideChatPage() {
     // Enable remote handoff if allowed.
     if (allowRemote) {
       fi.remoteHandoff = true;
-      fi.apiKey = process.env.NEXT_PUBLIC_API_KEY || "";
+      fi.apiKey = process.env.NEXT_PUBLIC_API_KEY || '';
     } else {
       fi.remoteHandoff = false;
-      fi.apiKey = "";
+      fi.apiKey = '';
     }
 
     // Check if the selected model is loaded; if not, fetch it.
     if (!loadedModels.includes(model)) {
-      setModelLoadingDescription("Start to fetch params");
+      setModelLoadingDescription('Start to fetch params');
       await fi.fetchModel(model, (progress: Progress) => {
         setModelLoadingDescription(progress.description ?? null);
       });
@@ -116,10 +109,7 @@ export default function ClientSideChatPage() {
     setInput('');
 
     // Append a placeholder bot message with the current model stored.
-    setChatLog((prev) => [
-      ...prev,
-      { role: 'bot', content: '', modelUsed: model }
-    ]);
+    setChatLog((prev) => [...prev, { role: 'bot', content: '', modelUsed: model }]);
 
     try {
       const response: ChatResponseResult = await fi.chat({
@@ -180,16 +170,22 @@ export default function ClientSideChatPage() {
       {/* Chat Messages */}
       <div className="flex-grow p-4 overflow-auto">
         {chatLog.map((entry, index) => (
-          <div key={index} className={`mb-4 flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          <div
+            key={index}
+            className={`mb-4 flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
             <div
-              className={`p-3 rounded-lg ${entry.role === 'user'
-                ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
-                : 'text-gray-800 rounded-tl-none'
-                }`}
+              className={`p-3 rounded-lg ${
+                entry.role === 'user'
+                  ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
+                  : 'text-gray-800 rounded-tl-none'
+              }`}
             >
-              {entry.role === 'bot'
-                ? renderAssistantContent(entry)
-                : <ReactMarkdown remarkPlugins={[remarkGfm]}>{entry.content}</ReactMarkdown>}
+              {entry.role === 'bot' ? (
+                renderAssistantContent(entry)
+              ) : (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{entry.content}</ReactMarkdown>
+              )}
             </div>
           </div>
         ))}
