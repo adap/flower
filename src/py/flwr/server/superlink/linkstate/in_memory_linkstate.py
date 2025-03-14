@@ -27,6 +27,7 @@ from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
+    PING_PATIENCE,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
@@ -538,13 +539,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat.
 
-        It allows for one missed ping (in a 2 * ping_interval) before marking the node
-        as offline.
+        It allows for one missed ping (in a PING_PATIENCE * ping_interval) before
+        marking the node as offline, where PING_PATIENCE = 2 in default.
         """
         with self.lock:
             if node_id in self.node_ids:
                 self.node_ids[node_id] = (
-                    time.time() + 2 * ping_interval,
+                    time.time() + PING_PATIENCE * ping_interval,
                     ping_interval,
                 )
                 return True

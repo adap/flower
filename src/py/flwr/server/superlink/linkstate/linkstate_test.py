@@ -27,7 +27,13 @@ from uuid import UUID
 from parameterized import parameterized
 
 from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, Error, RecordSet, now
-from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
+from flwr.common.constant import (
+    PING_PATIENCE,
+    SUPERLINK_NODE_ID,
+    ErrorCode,
+    Status,
+    SubStatus,
+)
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     public_key_to_bytes,
@@ -756,7 +762,8 @@ class StateTest(unittest.TestCase):
     def test_acknowledge_ping(self) -> None:
         """Test if acknowledge_ping works and get_nodes return online nodes.
 
-        We permit one missed ping (2 × ping_interval) before marking the node offline.
+        We permit one missed ping (PING_PATIENCE × ping_interval) before marking the
+        node offline, where PING_PATIENCE = 2.
         """
         # Prepare
         state: LinkState = self.state_factory()
@@ -770,8 +777,8 @@ class StateTest(unittest.TestCase):
         # Execute
         current_time = time.time()
         # Test with current_time + 70s
-        # node_ids[:70] remain online until current_time + 2*30s,
-        # node_ids[70:] remain online until current_time + 2*90s.
+        # node_ids[:70] remain online until current_time + PING_PATIENCE * 30s = 60s,
+        # node_ids[70:] remain online until current_time + PING_PATIENCE * 90s = 180s.
         # As a result, only node_ids[70:] will be returned by get_nodes().
         with patch("time.time", side_effect=lambda: current_time + 70):
             actual_node_ids = state.get_nodes(run_id)
@@ -832,8 +839,8 @@ class StateTest(unittest.TestCase):
         # Execute
         current_time = time.time()
         # Test with current_time + 100s
-        # node_id_0 remain online until current_time + 2*90s,
-        # node_id_1 remain online until current_time + 2*30s.
+        # node_id_0 remain online until current_time + PING_PATIENCE * 90s = 180s,
+        # node_id_1 remain online until current_time + PING_PATIENCE * 30s = 60s.
         # As a result, a reply message with NODE_UNAVAILABLE
         # error will generate for node_id_1.
         with patch("time.time", side_effect=lambda: current_time + 100):

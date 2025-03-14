@@ -30,6 +30,7 @@ from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
+    PING_PATIENCE,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
@@ -927,8 +928,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat.
 
-        It allows for one missed ping (2 * ping_interval) before marking the node as
-        offline.
+        It allows for one missed ping (in a PING_PATIENCE * ping_interval) before
+        marking the node as offline, where PING_PATIENCE = 2 in default.
         """
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
@@ -940,7 +941,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Update `online_until` and `ping_interval` for the given `node_id`
         query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?"
         self.query(
-            query, (time.time() + 2 * ping_interval, ping_interval, sint64_node_id)
+            query,
+            (
+                time.time() + PING_PATIENCE * ping_interval,
+                ping_interval,
+                sint64_node_id,
+            ),
         )
         return True
 
