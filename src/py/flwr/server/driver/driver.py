@@ -45,6 +45,11 @@ class Driver(ABC):
     def run(self) -> Run:
         """Run information."""
 
+    @property
+    @abstractmethod
+    def message_ids(self) -> Iterable[str]:
+        """Message IDs of pushed messages."""
+
     @abstractmethod
     def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
@@ -108,16 +113,21 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
-        """Pull messages based on message IDs.
+    def pull_messages(
+        self, message_ids: Optional[Iterable[str]] = None
+    ) -> Iterable[Message]:
+        """Pull messages from the SuperLink based on message IDs.
 
-        This method is used to collect messages from the SuperLink
-        that correspond to a set of given message IDs.
+        This method is used to collect messages from the SuperLink that correspond to a
+        set of given message IDs. If no message IDs are provided, it defaults to the
+        stored message IDs.
 
         Parameters
         ----------
-        message_ids : Iterable[str]
+        message_ids : Optional[Iterable[str]]
             An iterable of message IDs for which reply messages are to be retrieved.
+            If specified, the method will only pull messages that correspond to these
+            IDs. If `None`, all messages will be retrieved.
 
         Returns
         -------

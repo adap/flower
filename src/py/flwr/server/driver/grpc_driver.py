@@ -56,7 +56,7 @@ Call `connect()` on the `GrpcDriverStub` instance before calling any of the othe
 """
 
 
-class GrpcDriver(Driver):
+class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
     """`GrpcDriver` provides an interface to the ServerAppIo API.
 
     Parameters
@@ -81,6 +81,7 @@ class GrpcDriver(Driver):
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
         self._retry_invoker = _make_simple_grpc_retry_invoker()
+        self._message_ids: set[str] = set()
 
     @property
     def _is_connected(self) -> bool:
@@ -136,6 +137,11 @@ class GrpcDriver(Driver):
         if not self._is_connected:
             self._connect()
         return cast(ServerAppIoStub, self._grpc_stub)
+
+    @property
+    def message_ids(self) -> Iterable[str]:
+        """Message IDs of pushed messages."""
+        return self._message_ids.copy()
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -221,23 +227,50 @@ class GrpcDriver(Driver):
                 "list has `None` for those messages (the order is preserved as passed "
                 "to `push_messages`). This could be due to a malformed message.",
             )
+        # Store message IDs
+        self._message_ids.update(res.message_ids)
         return list(res.message_ids)
 
-    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
+    def pull_messages(
+        self, message_ids: Optional[Iterable[str]] = None
+    ) -> Iterable[Message]:
         """Pull messages based on message IDs.
 
         This method is used to collect messages from the SuperLink that correspond to a
-        set of given message IDs.
+        set of given message IDs. If no message IDs are provided, it defaults to the
+        stored message IDs.
         """
+        # Raise an error if no message IDs are provided and none are stored
+        if not self._message_ids:
+            raise ValueError("No message IDs to pull. Call `push_messages` first.")
+
+        # Allow an override but default to the stored pending IDs
+        if message_ids is None:
+            # If no message_ids are provided, use the stored ones
+            msg_ids_to_pull = self._message_ids
+        else:
+            # Else, keep the IDs (from the given IDs) that are in `self._message_ids`
+            provided_ids = set(message_ids)
+            msg_ids_to_pull = provided_ids & self._message_ids
+            if missing_ids := provided_ids - msg_ids_to_pull:
+                log(
+                    WARNING,
+                    "Cannot pull messages for the following missing message IDs: %s",
+                    missing_ids,
+                )
+
         # Pull Messages
         res: PullResMessagesResponse = self._stub.PullMessages(
             PullResMessagesRequest(
-                message_ids=message_ids,
+                message_ids=msg_ids_to_pull,
                 run_id=cast(Run, self._run).run_id,
             )
         )
         # Convert Message from Protobuf representation
         msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
+        for msg in msgs:
+            # Remove the message ID from the stored message IDs
+            self._message_ids.remove(msg.metadata.reply_to_message)
         return msgs
 
     def send_and_receive(
