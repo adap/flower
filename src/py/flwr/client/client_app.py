@@ -32,6 +32,8 @@ from flwr.common.message import validate_message_type
 
 from .typing import ClientAppCallable
 
+DEFAULT_ACTION = "default"
+
 
 def _alert_erroneous_client_fn() -> None:
     raise ValueError(
@@ -150,18 +152,18 @@ class ClientApp:
                     f"Invalid message type: {message.metadata.message_type}"
                 )
 
-            category, name = message.metadata.message_type, "default"
+            category, action = message.metadata.message_type, DEFAULT_ACTION
             if "." in category:
-                category, name = category.split(".")
+                category, action = category.split(".")
 
             # Check if the function is registered
-            if (full_name := f"{category}.{name}") in self._registered_funcs:
+            if (full_name := f"{category}.{action}") in self._registered_funcs:
                 return self._registered_funcs[full_name](message, context)
 
-            raise ValueError(f"No {category} function registered with name '{name}'")
+            raise ValueError(f"No {category} function registered with name '{action}'")
 
     def train(
-        self, action: str = "default", *, mods: Optional[list[Mod]] = None
+        self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Return a decorator that registers a train function with the client app.
 
@@ -211,7 +213,7 @@ class ClientApp:
         return _get_decorator(self, MessageType.TRAIN, action, mods)
 
     def evaluate(
-        self, action: str = "default", *, mods: Optional[list[Mod]] = None
+        self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Return a decorator that registers an evaluate function with the client app.
 
@@ -261,7 +263,7 @@ class ClientApp:
         return _get_decorator(self, MessageType.EVALUATE, action, mods)
 
     def query(
-        self, action: str = "default", *, mods: Optional[list[Mod]] = None
+        self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Return a decorator that registers a query function with the client app.
 
@@ -388,7 +390,7 @@ def _get_decorator(
         raise _registration_error(category)
 
     def decorator(fn: ClientAppCallable) -> ClientAppCallable:
-        warn_deprecated_feature(f"ClientApp-register-{category}-function")
+        warn_preview_feature(f"ClientApp-register-{category}-function")
 
         # Check if the name is a valid Python identifier
         if not action.isidentifier():
