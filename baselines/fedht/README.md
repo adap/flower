@@ -1,6 +1,6 @@
 ---
 title: Federated nonconvex sparse learning
-url: https://arxiv.org/abs/2101.00052
+url: https://par.nsf.gov/servlets/purl/10378100
 labels: [non-iid, image classification, sparsity]
 dataset: [MNIST]
 ---
