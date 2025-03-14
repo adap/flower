@@ -74,6 +74,13 @@
     "@mlc-ai/web-llm": "^0.2.78",
     "get-random-values": "^3.0.0"
   },
+  "browser": {
+    "crypto": false,
+    "fs": false,
+    "fs/promises": false,
+    "path": false,
+    "os": false
+  },
   "jsdelivr": "./dist/flowerintelligence.cjs.js",
   "unpkg": "./dist/flowerintelligence.cjs.js"
 }
