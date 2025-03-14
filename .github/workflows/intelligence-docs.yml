@@ -22,6 +22,18 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
+  check_format_docs:
+    runs-on: ubuntu-22.04
+    name: Check Docs Formatting
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install dependencies (mandatory only)
+        run: python -m poetry install --all-extras
+      - name: Check docs format
+        run: docstrfmt --check intelligence/docs/source
+
   build_ts_docs:
     runs-on: ubuntu-22.04
     name: Build TypeScript Docs
