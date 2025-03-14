@@ -1,12 +1,4 @@
-"""Define our models, and training and eval functions.
-
-If your model is 100% off-the-shelf (e.g. directly from torchvision without requiring
-modifications) you might be better off instantiating your  model directly from the Hydra
-config. In this way, swapping your model for  another one can be done without changing
-the python code at all
-"""
-
-from typing import Tuple
+"""fedbn: A Flower Baseline."""
 
 import torch
 from torch import nn
@@ -55,60 +47,47 @@ class CNNModel(nn.Module):
         return x
 
 
-# pylint: disable=too-many-locals
-def train(model, traindata, epochs, l_r, device) -> Tuple[float, float]:
-    """Train the network."""
-    # Define loss and optimizer
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=l_r)
+def train(net, trainloader, epochs, learning_rate, device):
+    """Train the model on the training set."""
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
 
-    # Train the network
-    model.to(device)
-    model.train()
+    net.to(device)  # move model to GPU if available
+    net.train()
     total_loss = 0.0
-    for _ in range(epochs):  # loop over the dataset multiple times
+    for _ in range(epochs):
         total = 0.0
         correct = 0
-        for _i, data in enumerate(traindata, 0):
+        for data in trainloader:
             images, labels = data[0].to(device), data[1].to(device)
-
-            # zero the parameter gradients
             optimizer.zero_grad()
-
-            # forward + backward + optimize
-            outputs = model(images)
+            outputs = net(images)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
-
             # print statistics
             total_loss += loss.item()
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-    return total_loss / len(traindata), correct / total
+    return total_loss / len(trainloader), correct / total
 
 
-def test(model, testdata, device) -> Tuple[float, float]:
-    """Validate the network on the entire test set."""
-    # Define loss and metrics
-    criterion = nn.CrossEntropyLoss()
-    correct = 0
-    total = 0
-    loss = 0.0
-
-    # Evaluate the network
-    model.to(device)
-    model.eval()
+def test(net, testloader, device):
+    """Validate the model on the test set."""
+    net.to(device)
+    criterion = torch.nn.CrossEntropyLoss()
+    correct, total, loss = 0, 0, 0.0
+    net.eval()
     with torch.no_grad():
-        for data in testdata:
+        for data in testloader:
             images, labels = data[0].to(device), data[1].to(device)
-            outputs = model(images)
+            outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
     accuracy = correct / total
-    loss = loss / len(testdata)
+    loss = loss / len(testloader)
     return loss, accuracy
