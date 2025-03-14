@@ -294,7 +294,7 @@ class ParametersRecord(TypedDict[str, Array]):
     2. By providing a dictionary of Arrays (via the `array_dict` argument).
     3. By providing a list of NumPy ndarrays (via the `numpy_ndarrays` argument).
     4. By providing a PyTorch state_dict (via the `state_dict` argument).
-    5. By providing a TensorFlow model weights (a list of NumPy arrays via the
+    5. By providing TensorFlow model weights (a list of NumPy arrays via the
        `tf_weights` argument).
 
     Parameters
