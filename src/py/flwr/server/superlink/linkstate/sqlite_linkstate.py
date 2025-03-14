@@ -30,6 +30,7 @@ from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
+    PING_PATIENCE,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
@@ -52,6 +53,7 @@ from flwr.server.utils.validator import validate_message
 
 from .linkstate import LinkState
 from .utils import (
+    check_node_availability_for_in_message,
     configsrecord_from_bytes,
     configsrecord_to_bytes,
     context_from_bytes,
@@ -442,6 +444,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
     def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
         """Get reply Messages for the given Message IDs."""
+        # pylint: disable-msg=too-many-locals
         ret: dict[UUID, Message] = {}
 
         # Verify Message IDs
@@ -464,6 +467,29 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             found_message_ins_dict=found_message_ins_dict,
             current_time=current,
         )
+
+        # Check node availability
+        dst_node_ids: set[int] = set()
+        for message_id in message_ids:
+            in_message = found_message_ins_dict[message_id]
+            sint_node_id = convert_uint64_to_sint64(in_message.metadata.dst_node_id)
+            dst_node_ids.add(sint_node_id)
+        query = f"""
+                    SELECT node_id, online_until
+                    FROM node
+                    WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))});
+                """
+        rows = self.query(query, tuple(dst_node_ids))
+        tmp_ret_dict = check_node_availability_for_in_message(
+            inquired_in_message_ids=message_ids,
+            found_in_message_dict=found_message_ins_dict,
+            node_id_to_online_until={
+                convert_sint64_to_uint64(row["node_id"]): row["online_until"]
+                for row in rows
+            },
+            current_time=current,
+        )
+        ret.update(tmp_ret_dict)
 
         # Find all reply Messages
         query = f"""
@@ -584,6 +610,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             "VALUES (?, ?, ?, ?)"
         )
 
+        # Mark the node online util time.time() + ping_interval
         try:
             self.query(
                 query,
@@ -899,7 +926,11 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         return configsrecord_from_bytes(row["federation_options"])
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        """Acknowledge a ping received from a node, serving as a heartbeat.
+
+        It allows for one missed ping (in a PING_PATIENCE * ping_interval) before
+        marking the node as offline, where PING_PATIENCE = 2 in default.
+        """
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
         # Check if the node exists in the `node` table
@@ -909,7 +940,14 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Update `online_until` and `ping_interval` for the given `node_id`
         query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?"
-        self.query(query, (time.time() + ping_interval, ping_interval, sint64_node_id))
+        self.query(
+            query,
+            (
+                time.time() + PING_PATIENCE * ping_interval,
+                ping_interval,
+                sint64_node_id,
+            ),
+        )
         return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
