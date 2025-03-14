@@ -25,6 +25,8 @@ const availableModels = [
   'deepseek/r1-distill-llama-8b/q4',
 ];
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 // A simple collapsible component to show/hide internal reasoning.
 const Collapsible: React.FC<{ content: string }> = ({ content }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -64,6 +66,13 @@ export default function ClientSideChatPage() {
   }, [model]);
 
   const [allowRemote, setAllowRemote] = useState(false);
+  // In production, force allowRemote to be false.
+  useEffect(() => {
+    if (isProduction) {
+      setAllowRemote(false);
+    }
+  }, []);
+
   // Keep track of which models have been loaded.
   const [loadedModels, setLoadedModels] = useState<string[]>([]);
   // Store the current model loading description (null when not loading).
@@ -97,8 +106,8 @@ export default function ClientSideChatPage() {
     if (!input.trim()) return;
     setLoading(true);
 
-    // Enable remote handoff if allowed.
-    if (allowRemote) {
+    // In production, always disable remote handoff.
+    if (!isProduction && allowRemote) {
       fi.remoteHandoff = true;
       fi.apiKey = process.env.NEXT_PUBLIC_API_KEY || '';
     } else {
@@ -216,14 +225,16 @@ export default function ClientSideChatPage() {
             ))}
           </select>
         </div>
-        <label className="mr-4 flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={allowRemote}
-            onChange={(e) => setAllowRemote(e.target.checked)}
-          />
-          <span className="text-gray-800">Allow remote handoff</span>
-        </label>
+        {!isProduction && (
+          <label className="mr-4 flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={allowRemote}
+              onChange={(e) => setAllowRemote(e.target.checked)}
+            />
+            <span className="text-gray-800">Allow remote handoff</span>
+          </label>
+        )}
         <div className="flex flex-grow space-x-2">
           <input
             type="text"
