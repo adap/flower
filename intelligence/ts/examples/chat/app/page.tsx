@@ -193,17 +193,15 @@ export default function ClientSideChatPage() {
 
       {/* Input Area with Model Select and Remote Handoff Toggle */}
       <div className="border-t p-4 bg-gray-50 flex items-center">
-        <select
-          value={model}
-          onChange={(e) => setModel(e.target.value)}
-          className="mr-4 p-2 border border-gray-300 rounded bg-white text-gray-800"
-        >
-          {availableModels.map((modelName) => (
-            <option key={modelName} value={modelName}>
-              {modelName}
-            </option>
-          ))}
-        </select>
+        <div className="mr-4 p-2 border border-gray-300 rounded bg-white text-gray-800">
+          <select value={model} onChange={(e) => setModel(e.target.value)}>
+            {availableModels.map((modelName) => (
+              <option key={modelName} value={modelName}>
+                {modelName}
+              </option>
+            ))}
+          </select>
+        </div>
         <label className="mr-4 flex items-center space-x-2">
           <input
             type="checkbox"
