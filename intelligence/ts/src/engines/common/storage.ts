@@ -45,7 +45,7 @@ export class WebCacheStorage extends CacheStorage {
     if (value) {
       localStorage.setItem(
         `${this.CACHE_KEY_PREFIX}${key}`,
-        JSON.stringify({ engineModel: value, timestamp: Date.now() })
+        JSON.stringify({ value, lastUpdate: Date.now() })
       );
     } else {
       localStorage.removeItem(`${this.CACHE_KEY_PREFIX}${key}`);
