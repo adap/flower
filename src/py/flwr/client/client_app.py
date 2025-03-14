@@ -359,7 +359,7 @@ def _get_decorator(
         # Check if the name is a valid Python identifier
         if not action.isidentifier():
             raise ValueError(
-                f"Cannot reigster {category} function with name '{action}'. "
+                f"Cannot register {category} function with name '{action}'. "
                 "The name must follow Python's function naming rules."
             )
 
