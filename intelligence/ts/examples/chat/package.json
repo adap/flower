@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@flwr/flwr": "^0.1.4",
+    "@flwr/flwr": "^0.1.5",
     "next": "15.2.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
