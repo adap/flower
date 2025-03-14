@@ -29,7 +29,7 @@ import {
   Tool,
 } from '../typing';
 import { BaseEngine } from './engine';
-import { getEngineModelName } from './common';
+import { getEngineModelName } from './common/modelName';
 
 async function runQuery(
   engine: MLCEngineInterface,
