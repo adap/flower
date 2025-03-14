@@ -16,7 +16,6 @@ interface ChatEntry {
   content: string;
 }
 
-// List of available models
 const availableModels = [
   "meta/llama3.2-1b/instruct-fp16",
   "meta/llama3.2-3b/instruct-q4",
@@ -24,24 +23,66 @@ const availableModels = [
   "deepseek/r1-distill-llama-8b/q4"
 ];
 
+// A simple collapsible component to show/hide internal reasoning.
+const Collapsible: React.FC<{ content: string }> = ({ content }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="mb-2">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="text-sm text-blue-500 underline mb-1"
+      >
+        {isOpen ? 'Hide internal reasoning' : 'Show internal reasoning'}
+      </button>
+      {isOpen && (
+        <div className="p-2 border-l-4 border-blue-500 bg-blue-50 text-sm italic">
+          {content}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function ClientSideChatPage() {
-  // Initialize local state using the current global history (excluding the system message)
   const [chatLog, setChatLog] = useState<ChatEntry[]>(
-    history.filter((msg) => msg.role !== 'system').map((msg) => ({
-      role: msg.role as 'user' | 'bot',
-      content: msg.content,
-    }))
+    history
+      .filter((msg) => msg.role !== 'system')
+      .map((msg) => ({ role: msg.role as 'user' | 'bot', content: msg.content }))
   );
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [model, setModel] = useState(availableModels[0]); // Default to first model
+  const [model, setModel] = useState(availableModels[0]);
   const [allowRemote, setAllowRemote] = useState(false);
+
+  // Render the assistant's response differently based on model.
+  const renderAssistantContent = (content: string) => {
+    if (!content) return "Thinking...";
+    // Special handling for deepseek model.
+    if (model === "deepseek/r1-distill-llama-8b/q4") {
+      // Use regex to extract content inside <think> tags and the main content.
+      const regex = /<think>([\s\S]*?)<\/think>([\s\S]*)/;
+      const match = content.match(regex);
+      if (match) {
+        const internalReasoning = match[1].trim();
+        const mainContent = match[2].trim();
+        return (
+          <>
+            <Collapsible content={internalReasoning} />
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {mainContent}
+            </ReactMarkdown>
+          </>
+        );
+      }
+    }
+    return <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>;
+  };
 
   const sendQuestion = async () => {
     if (!input.trim()) return;
     setLoading(true);
 
-    // Set remote handoff based on the toggle
+    // Enable remote handoff if allowed.
     if (allowRemote) {
       fi.remoteHandoff = true;
       fi.apiKey = process.env.NEXT_PUBLIC_API_KEY || "";
@@ -50,12 +91,12 @@ export default function ClientSideChatPage() {
       fi.apiKey = "";
     }
 
-    // Append the user's question to both local and global history
+    // Append user's message.
     setChatLog((prev) => [...prev, { role: 'user', content: input }]);
     history.push({ role: 'user', content: input });
     setInput('');
 
-    // Append an empty bot message as a placeholder for streamed content.
+    // Append placeholder bot message.
     setChatLog((prev) => [...prev, { role: 'bot', content: '' }]);
 
     try {
@@ -64,7 +105,7 @@ export default function ClientSideChatPage() {
         model: model,
         stream: true,
         onStreamEvent: (event) => {
-          // Append each chunk to the last bot message.
+          // Stream chunks into the last bot message.
           setChatLog((prev) => {
             const updated = [...prev];
             const lastIndex = updated.length - 1;
@@ -77,27 +118,19 @@ export default function ClientSideChatPage() {
         },
       });
       if (!response.ok) {
-        // If the response fails, update the last bot message with an error.
         setChatLog((prev) => {
           const updated = [...prev];
-          updated[updated.length - 1] = {
-            role: 'bot',
-            content: 'Failed to get a valid response.',
-          };
+          updated[updated.length - 1] = { role: 'bot', content: 'Failed to get a valid response.' };
           return updated;
         });
       } else {
-        // If successful, append the final bot message to the global history.
         history.push(response.message);
       }
     } catch (error) {
       setChatLog(
         history
           .filter((msg) => msg.role !== 'system')
-          .map((msg) => ({
-            role: msg.role as 'user' | 'bot',
-            content: msg.content,
-          }))
+          .map((msg) => ({ role: msg.role as 'user' | 'bot', content: msg.content }))
       );
     } finally {
       setLoading(false);
@@ -116,19 +149,16 @@ export default function ClientSideChatPage() {
       {/* Chat Messages */}
       <div className="flex-grow p-4 overflow-auto">
         {chatLog.map((entry, index) => (
-          <div
-            key={index}
-            className={`mb-4 flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
+          <div key={index} className={`mb-4 flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
               className={`p-3 rounded-lg ${entry.role === 'user'
-                ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
-                : 'text-gray-800 rounded-tl-none'
+                  ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
+                  : 'text-gray-800 rounded-tl-none'
                 }`}
             >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {entry.role === 'bot' && entry.content === '' ? "Thinking..." : entry.content}
-              </ReactMarkdown>
+              {entry.role === 'bot'
+                ? renderAssistantContent(entry.content)
+                : <ReactMarkdown remarkPlugins={[remarkGfm]}>{entry.content}</ReactMarkdown>}
             </div>
           </div>
         ))}
@@ -136,7 +166,6 @@ export default function ClientSideChatPage() {
 
       {/* Input Area with Model Select and Remote Handoff Toggle */}
       <div className="border-t p-4 bg-gray-50 flex items-center">
-        {/* Model select on the left */}
         <select
           value={model}
           onChange={(e) => setModel(e.target.value)}
@@ -148,8 +177,6 @@ export default function ClientSideChatPage() {
             </option>
           ))}
         </select>
-
-        {/* Remote handoff toggle */}
         <label className="mr-4 flex items-center space-x-2">
           <input
             type="checkbox"
@@ -158,8 +185,6 @@ export default function ClientSideChatPage() {
           />
           <span className="text-gray-800">Allow remote handoff</span>
         </label>
-
-        {/* Input field and Send button */}
         <div className="flex flex-grow space-x-2">
           <input
             type="text"
