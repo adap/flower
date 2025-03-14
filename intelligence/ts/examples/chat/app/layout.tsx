@@ -45,7 +45,7 @@ export default function RootLayout({
                 rel="noopener noreferrer"
                 className="underline"
               >
-                FlowerLabs
+                Flower Intelligence
               </a>
             </span>
             <Image
