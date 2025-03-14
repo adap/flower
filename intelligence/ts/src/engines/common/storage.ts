@@ -14,7 +14,7 @@
 // =============================================================================
 
 interface CachedEntry {
-  engineModel: string;
+  value: string;
   lastUpdate: number;
 }
 
@@ -111,7 +111,7 @@ export class NodeCacheStorage extends CacheStorage {
       cache = { mapping: {} };
     }
     if (value) {
-      cache.mapping[key] = { engineModel: value, lastUpdate: now };
+      cache.mapping[key] = { value: value, lastUpdate: now };
       await this.save(cache);
     } else {
       if (key in cache.mapping) {

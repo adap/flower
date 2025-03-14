@@ -95,7 +95,7 @@ export async function getEngineModelName(model: string, engine: string): Promise
       });
     }
     // Return the (possibly stale) cached result.
-    return { ok: true, value: cachedEntry.engineModel };
+    return { ok: true, value: cachedEntry.value };
   } else {
     // Not in cache, call updateModel synchronously.
     return await updateModel(model, engine);
