@@ -70,7 +70,7 @@ export default function RootLayout({
               rel="noopener noreferrer"
               className="underline"
             >
-              Private Policy
+              Privacy
             </a>
           </div>
         </footer>
