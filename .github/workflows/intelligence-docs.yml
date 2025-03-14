@@ -99,26 +99,33 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-22.04
     needs: [build_ts_docs, build_swift_docs]
-    name: Build and Deploy Docs
+    name: Deploy Docs
     steps:
       - uses: actions/checkout@v4
+        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
       - name: Bootstrap
+        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
+        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         run: sudo apt install pandoc
       - name: Install Flower dependencies (mandatory only)
+        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         run: python -m poetry install --extras "simulation"
       - name: Download TS docs
+        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         uses: actions/download-artifact@v4
         with:
           name: ts-docs
           path: intelligence/docs/source/ts-api-ref/
       - name: Download Swift docs
+        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         uses: actions/download-artifact@v4
         with:
           name: swift-docs
           path: intelligence/docs/source/swift-api-ref/
       - name: Build final docs
+        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         run: |
           cd intelligence/docs
           make html
