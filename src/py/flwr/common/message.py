@@ -21,7 +21,7 @@ import time
 from logging import WARNING
 from typing import Optional, cast
 
-from .constant import MESSAGE_TTL_TOLERANCE, MessageType
+from .constant import MESSAGE_TTL_TOLERANCE, MessageType, MessageTypeLegacy
 from .logger import log
 from .record import RecordSet
 
@@ -232,7 +232,14 @@ class Message:
         if not (content is None) ^ (error is None):
             raise ValueError("Either `content` or `error` must be set, but not both.")
 
-        if not validate_message_type(metadata.message_type):
+        # Allow legacy message types
+        if metadata.message_type in (
+            MessageTypeLegacy.GET_PARAMETERS,
+            MessageTypeLegacy.GET_PROPERTIES,
+        ):
+            pass
+        # Validate message type for non-legacy messages
+        elif not validate_message_type(metadata.message_type):
             raise ValueError(
                 f"Invalid message type: {metadata.message_type}. "
                 "Expected format: '<category>' or '<category>.<action>', "

@@ -215,7 +215,8 @@ class ClientApp:
     def evaluate(
         self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers an evaluate function with the ``ClientApp``.
+        """Return a decorator that registers an evaluate function with the
+        ``ClientApp``.
 
         Parameters
         ----------
