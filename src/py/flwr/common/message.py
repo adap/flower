@@ -232,6 +232,14 @@ class Message:
         if not (content is None) ^ (error is None):
             raise ValueError("Either `content` or `error` must be set, but not both.")
 
+        if not validate_message_type(metadata.message_type):
+            raise ValueError(
+                f"Invalid message type: {metadata.message_type}. "
+                "Expected format: '<category>' or '<category>.<action>', "
+                "where <category> must be 'train', 'evaluate', or 'query', "
+                "and <action> must be a valid Python identifier."
+            )
+
         metadata.created_at = time.time()  # Set the message creation timestamp
         metadata.delivered_at = ""
         var_dict = {
@@ -422,18 +430,13 @@ def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
 def validate_message_type(message_type: str) -> bool:
     """Validate if the message type is valid.
 
-    A valid message type format is one of the following:
+    A valid message type format must be one of the following:
 
     - "<category>"
     - "<category>.<action>"
 
-    where `category` is one of the following:
-
-    - "train"
-    - "evaluate"
-    - "query"
-
-    and `action` is a valid Python identifier.
+    where `category` must be one of "train", "evaluate", or "query",
+    and `action` must be a valid Python identifier.
     """
     valid_types = {MessageType.TRAIN, MessageType.EVALUATE, MessageType.QUERY}
 
