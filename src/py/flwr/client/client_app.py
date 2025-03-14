@@ -163,7 +163,14 @@ class ClientApp:
     def train(
         self, action: str = "default", *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers the train fn with the client app.
+        """Return a decorator that registers a train function with the client app.
+
+        Parameters
+        ----------
+        action : str (default: "default")
+            The action name used to route messages. Defaults to "default".
+        mods : Optional[list[Mod]] (default: None)
+            A list of function-specific modifiers.
 
         Examples
         --------
@@ -173,36 +180,47 @@ class ClientApp:
         >>>
         >>> @app.train()
         >>> def train(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp training running")
-        >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(content=message.content)
-
-        Registering a train function with a function-specific modifier:
-
-        >>> from flwr.client.mod import message_size_mod
-        >>>
-        >>> app = ClientApp()
-        >>>
-        >>> @app.train(mods=[message_size_mod])
-        >>> def train(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp training running with message size mod")
-        >>>    return message.create_reply(content=message.content)
+        >>>     print("Executing default train function")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
 
         Registering a train function with a custom action name:
 
         >>> app = ClientApp()
         >>>
+        >>> # Messages with `message_type="train.custom_action"` will be
+        >>> # routed to this function.
         >>> @app.train("custom_action")
         >>> def custom_action(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp training running with custom action")
-        >>>    return message.create_reply(content=message.content)
+        >>>     print("Executing train function for custom action")
+        >>>     return message.create_reply(content=message.content)
+
+        Registering a train function with a function-specific Flower Mod:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>>
+        >>> app = ClientApp()
+        >>>
+        >>> # Using the `mods` argument to apply a function-specific mod.
+        >>> @app.train(mods=[message_size_mod])
+        >>> def train(message: Message, context: Context) -> Message:
+        >>>     print("Executing train function with message size mod")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
         """
         return _get_decorator(self, MessageType.TRAIN, action, mods)
 
     def evaluate(
         self, action: str = "default", *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers the evaluate fn with the client app.
+        """Return a decorator that registers an evaluate function with the client app.
+
+        Parameters
+        ----------
+        action : str (default: "default")
+            The action name used to route messages. Defaults to "default".
+        mods : Optional[list[Mod]] (default: None)
+            A list of function-specific modifiers.
 
         Examples
         --------
@@ -212,37 +230,47 @@ class ClientApp:
         >>>
         >>> @app.evaluate()
         >>> def evaluate(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp evaluation running")
-        >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(content=message.content)
-
-        Registering an evaluate function with a function-specific modifier:
-
-        >>> from flwr.client.mod import message_size_mod
-        >>>
-        >>> app = ClientApp()
-        >>>
-        >>> @app.evaluate(mods=[message_size_mod])
-        >>> def evaluate(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp evaluation running with message size mod")
-        >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(content=message.content)
+        >>>     print("Executing default evaluate function")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
 
         Registering an evaluate function with a custom action name:
 
         >>> app = ClientApp()
         >>>
+        >>> # Messages with `message_type="evaluate.custom_action"` will be
+        >>> # routed to this function.
         >>> @app.evaluate("custom_action")
         >>> def custom_action(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp evaluation running with custom action")
-        >>>    return message.create_reply(content=message)
+        >>>     print("Executing evaluate function for custom action")
+        >>>     return message.create_reply(content=message.content)
+
+        Registering an evaluate function with a function-specific Flower Mod:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>>
+        >>> app = ClientApp()
+        >>>
+        >>> # Using the `mods` argument to apply a function-specific mod.
+        >>> @app.evaluate(mods=[message_size_mod])
+        >>> def evaluate(message: Message, context: Context) -> Message:
+        >>>     print("Executing evaluate function with message size mod")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
         """
         return _get_decorator(self, MessageType.EVALUATE, action, mods)
 
     def query(
         self, action: str = "default", *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers the query fn with the client app.
+        """Return a decorator that registers a query function with the client app.
+
+        Parameters
+        ----------
+        action : str (default: "default")
+            The action name used to route messages. Defaults to "default".
+        mods : Optional[list[Mod]] (default: None)
+            A list of function-specific modifiers.
 
         Examples
         --------
@@ -252,30 +280,33 @@ class ClientApp:
         >>>
         >>> @app.query()
         >>> def query(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp query running")
-        >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(content=message.content)
-
-        Registering a query function with a function-specific modifier:
-
-        >>> from flwr.client.mod import message_size_mod
-        >>>
-        >>> app = ClientApp()
-        >>>
-        >>> @app.query(mods=[message_size_mod])
-        >>> def query(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp query running with message size mod")
-        >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(content=message.content)
+        >>>     print("Executing default query function")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
 
         Registering a query function with a custom action name:
 
         >>> app = ClientApp()
         >>>
+        >>> # Messages with `message_type="query.custom_action"` will be
+        >>> # routed to this function.
         >>> @app.query("custom_action")
         >>> def custom_action(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp query running with custom action")
-        >>>    return message.create_reply(content=message.content)
+        >>>     print("Executing query function for custom action")
+        >>>     return message.create_reply(content=message.content)
+
+        Registering a query function with a function-specific Flower Mod:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>>
+        >>> app = ClientApp()
+        >>>
+        >>> # Using the `mods` argument to apply a function-specific mod.
+        >>> @app.query(mods=[message_size_mod])
+        >>> def query(message: Message, context: Context) -> Message:
+        >>>     print("Executing query function with message size mod")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
         """
         return _get_decorator(self, MessageType.QUERY, action, mods)
 
