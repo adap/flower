@@ -29,7 +29,8 @@ import {
   Tool,
 } from '../typing';
 import { BaseEngine } from './engine';
-import { getEngineModelName } from './common/modelName';
+import { getEngineModelInfo } from './common/modelName';
+import { getAvailableRAM } from '../env';
 
 async function runQuery(
   engine: MLCEngineInterface,
@@ -72,8 +73,8 @@ export class WebllmEngine extends BaseEngine {
     onStreamEvent?: (event: StreamEvent) => void,
     _tools?: Tool[]
   ): Promise<ChatResponseResult> {
-    const modelNameRes = await getEngineModelName(model, 'webllm');
-    if (!modelNameRes.ok) {
+    const modelInfoRes = await getEngineModelInfo(model, 'webllm');
+    if (!modelInfoRes.ok) {
       return {
         ok: false,
         failure: {
@@ -85,7 +86,7 @@ export class WebllmEngine extends BaseEngine {
     try {
       if (!(model in this.#loadedEngines)) {
         this.#loadedEngines.model = await CreateMLCEngine(
-          modelNameRes.value,
+          modelInfoRes.value.name,
           {},
           {
             context_window_size: 2048,
@@ -119,8 +120,8 @@ export class WebllmEngine extends BaseEngine {
   }
 
   async fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>> {
-    const modelNameRes = await getEngineModelName(model, 'webllm');
-    if (!modelNameRes.ok) {
+    const modelInfoRes = await getEngineModelInfo(model, 'webllm');
+    if (!modelInfoRes.ok) {
       return {
         ok: false,
         failure: {
@@ -132,7 +133,7 @@ export class WebllmEngine extends BaseEngine {
     try {
       if (!(model in this.#loadedEngines)) {
         this.#loadedEngines.model = await CreateMLCEngine(
-          modelNameRes.value,
+          modelInfoRes.value.name,
           {
             initProgressCallback: (report: InitProgressReport) => {
               callback({ percentage: report.progress, description: report.text });
@@ -153,7 +154,16 @@ export class WebllmEngine extends BaseEngine {
   }
 
   async isSupported(model: string): Promise<boolean> {
-    const modelNameRes = await getEngineModelName(model, 'webllm');
-    return modelNameRes.ok;
+    const modelInfoRes = await getEngineModelInfo(model, 'webllm');
+    if (modelInfoRes.ok) {
+      if (modelInfoRes.value.vram) {
+        const availableRamRes = await getAvailableRAM();
+        if (availableRamRes.ok) {
+          return modelInfoRes.value.vram < availableRamRes.value;
+        }
+      }
+      return true;
+    }
+    return false;
   }
 }

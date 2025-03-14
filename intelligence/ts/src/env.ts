@@ -13,6 +13,30 @@
 // limitations under the License.
 // =============================================================================
 
+import { FailureCode, Result } from './typing';
+
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 export const isNode: boolean = typeof process !== 'undefined' && process.versions?.node != null;
 /* eslint-enable @typescript-eslint/no-unnecessary-condition */
+
+export async function getAvailableRAM(): Promise<Result<number>> {
+  if (typeof window !== 'undefined' && 'navigator' in window && 'deviceMemory' in navigator) {
+    // Browser environment: Approximate free RAM based on total device memory
+    const totalRAM = navigator.deviceMemory as number; // deviceMemory is in GB
+    return { ok: true, value: Math.floor((totalRAM * 1024) / 2) }; // Assume 50% is available, convert GB to MB
+  }
+
+  if (isNode) {
+    // Node.js environment: Use os.freemem()
+    const os = await import('os');
+    return { ok: true, value: Math.floor(os.freemem() / (1024 * 1024)) }; // Convert bytes to MB
+  }
+
+  return {
+    ok: false,
+    failure: {
+      code: FailureCode.LocalError,
+      description: 'Unsupported environment: Cannot determine available RAM.',
+    },
+  };
+}

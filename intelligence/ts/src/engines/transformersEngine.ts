@@ -26,7 +26,8 @@ import type { ProgressInfo, TextGenerationConfig } from '@huggingface/transforme
 import { FailureCode, Message, Result, Progress, ChatResponseResult } from '../typing';
 
 import { BaseEngine } from './engine';
-import { getEngineModelName } from './common/modelName';
+import { getEngineModelInfo } from './common/modelName';
+import { getAvailableRAM } from '../env';
 
 const stoppingCriteria = new InterruptableStoppingCriteria();
 const choice = 0;
@@ -42,8 +43,8 @@ export class TransformersEngine extends BaseEngine {
     stream?: boolean,
     onStreamEvent?: (event: { chunk: string }) => void
   ): Promise<ChatResponseResult> {
-    const modelNameRes = await getEngineModelName(model, 'onnx');
-    if (!modelNameRes.ok) {
+    const modelInfoRes = await getEngineModelInfo(model, 'onnx');
+    if (!modelInfoRes.ok) {
       return {
         ok: false,
         failure: {
@@ -55,7 +56,7 @@ export class TransformersEngine extends BaseEngine {
     try {
       if (!(model in this.generationPipelines)) {
         let options = {};
-        const modelElems = modelNameRes.value.split('|');
+        const modelElems = modelInfoRes.value.name.split('|');
         const modelId = modelElems[0];
         if (modelElems.length > 1) {
           options = {
@@ -143,8 +144,8 @@ export class TransformersEngine extends BaseEngine {
   }
 
   async fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>> {
-    const modelNameRes = await getEngineModelName(model, 'onnx');
-    if (!modelNameRes.ok) {
+    const modelInfoRes = await getEngineModelInfo(model, 'onnx');
+    if (!modelInfoRes.ok) {
       return {
         ok: false,
         failure: {
@@ -155,30 +156,34 @@ export class TransformersEngine extends BaseEngine {
     }
     try {
       if (!(model in this.generationPipelines)) {
-        this.generationPipelines.model = await pipeline('text-generation', modelNameRes.value, {
-          dtype: 'q4',
-          progress_callback: (progressInfo: ProgressInfo) => {
-            let percentage = 0;
-            let total = 0;
-            let loaded = 0;
-            let description = progressInfo.status as string;
-            if (progressInfo.status == 'progress') {
-              percentage = progressInfo.progress;
-              total = progressInfo.total;
-              loaded = progressInfo.loaded;
-              description = progressInfo.file;
-            } else if (progressInfo.status === 'done') {
-              percentage = 100;
-              description = progressInfo.status;
-            }
-            callback({
-              totalBytes: total,
-              loadedBytes: loaded,
-              percentage,
-              description,
-            });
-          },
-        });
+        this.generationPipelines.model = await pipeline(
+          'text-generation',
+          modelInfoRes.value.name,
+          {
+            dtype: 'q4',
+            progress_callback: (progressInfo: ProgressInfo) => {
+              let percentage = 0;
+              let total = 0;
+              let loaded = 0;
+              let description = progressInfo.status as string;
+              if (progressInfo.status == 'progress') {
+                percentage = progressInfo.progress;
+                total = progressInfo.total;
+                loaded = progressInfo.loaded;
+                description = progressInfo.file;
+              } else if (progressInfo.status === 'done') {
+                percentage = 100;
+                description = progressInfo.status;
+              }
+              callback({
+                totalBytes: total,
+                loadedBytes: loaded,
+                percentage,
+                description,
+              });
+            },
+          }
+        );
       }
       return { ok: true, value: undefined };
     } catch (error) {
@@ -190,7 +195,16 @@ export class TransformersEngine extends BaseEngine {
   }
 
   async isSupported(model: string): Promise<boolean> {
-    const modelNameRes = await getEngineModelName(model, 'onnx');
-    return modelNameRes.ok;
+    const modelInfoRes = await getEngineModelInfo(model, 'onnx');
+    if (modelInfoRes.ok) {
+      if (modelInfoRes.value.vram) {
+        const availableRamRes = await getAvailableRAM();
+        if (availableRamRes.ok) {
+          return modelInfoRes.value.vram < availableRamRes.value;
+        }
+      }
+      return true;
+    }
+    return false;
   }
 }
