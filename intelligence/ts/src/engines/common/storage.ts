@@ -53,7 +53,7 @@ export class WebCacheStorage extends CacheStorage {
   }
 }
 
-interface CachedMapping {
+export interface CachedMapping {
   mapping: Record<string, CachedEntry>;
 }
 

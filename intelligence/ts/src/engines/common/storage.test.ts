@@ -13,9 +13,9 @@
 // limitations under the License.
 // =============================================================================
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import path from 'path';
 import os from 'os';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // --- In-memory file system ---
 // This object will simulate our file system.
@@ -25,29 +25,32 @@ let fileSystem: Record<string, string> = {};
 // We intercept dynamic imports of 'fs/promises' by providing mocked implementations.
 vi.mock('fs/promises', () => ({
   readFile: vi.fn(async (filePath: string, _encoding: string) => {
-    if (fileSystem[filePath] !== undefined) {
+    await Promise.resolve();
+    if (filePath in fileSystem) {
       return fileSystem[filePath];
     }
     throw new Error('File not found');
   }),
   writeFile: vi.fn(async (filePath: string, data: string, _encoding: string) => {
+    await Promise.resolve();
     fileSystem[filePath] = data;
   }),
   mkdir: vi.fn(async (_folder: string, _options: { recursive: boolean }) => {
     // In our mock, we don't need to do anything.
+    await Promise.resolve();
     return;
   }),
 }));
 
-import { NodeCacheStorage } from './storage';
 import { VERSION } from '../../constants';
+import { CachedMapping, NodeCacheStorage } from './storage';
 
 // --- Tests ---
 describe('NodeCacheStorage', () => {
   let cacheStorage: NodeCacheStorage;
   let expectedCacheFilePath: string;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     // Reset the in-memory file system before each test.
     fileSystem = {};
     cacheStorage = new NodeCacheStorage();
@@ -78,7 +81,7 @@ describe('NodeCacheStorage', () => {
     // Also, verify that our in-memory file system has been updated.
     const data = fileSystem[expectedCacheFilePath];
     expect(data).toBeDefined();
-    const parsedData = JSON.parse(data);
+    const parsedData = JSON.parse(data) as CachedMapping;
     expect(parsedData.mapping[key].value).toBe(value);
   });
 
@@ -100,7 +103,7 @@ describe('NodeCacheStorage', () => {
     // Verify the in-memory cache file no longer contains the key.
     const data = fileSystem[expectedCacheFilePath];
     expect(data).toBeDefined();
-    const parsedData = JSON.parse(data);
+    const parsedData = JSON.parse(data) as CachedMapping;
     expect(parsedData.mapping[key]).toBeUndefined();
   });
 });
