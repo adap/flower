@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { FlowerIntelligence, ChatResponseResult, ChatOptions, Message } from '@flwr/flwr';
+import { FlowerIntelligence, ChatResponseResult, Message } from '@flwr/flwr';
 
 const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
@@ -30,32 +30,57 @@ export default function ClientSideChatPage() {
   const sendQuestion = async () => {
     if (!input.trim()) return;
     setLoading(true);
-    setChatLog((prev) => [...prev, { role: 'user', content: input }]);
 
-    // Append user's question to the global history.
+    // Append the user's question to both local and global history
+    setChatLog((prev) => [...prev, { role: 'user', content: input }]);
     history.push({ role: 'user', content: input });
+    setInput('');
+
+    // Append an empty bot message as a placeholder for streamed content.
+    // Its rendering will show "Thinking..." until the first chunk arrives.
+    setChatLog((prev) => [...prev, { role: 'bot', content: '' }]);
+
     try {
-      // Call the FlowerIntelligence client directly with updated history.
       const response: ChatResponseResult = await fi.chat({
         messages: history,
+        stream: true,
+        onStreamEvent: (event) => {
+          // Append each chunk to the last bot message.
+          setChatLog((prev) => {
+            const updated = [...prev];
+            const lastIndex = updated.length - 1;
+            updated[lastIndex] = {
+              role: 'bot',
+              content: updated[lastIndex].content + event.chunk,
+            };
+            return updated;
+          });
+        },
       });
-      if (response.ok) {
-        history.push(response.message);
+      if (!response.ok) {
+        // If the response fails, update the last bot message with an error.
+        setChatLog((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            role: 'bot',
+            content: 'Failed to get a valid response.',
+          };
+          return updated;
+        });
       } else {
-        history.push({ role: 'bot', content: 'Failed to get a valid response.' });
+        // If successful, append the final bot message to the global history.
+        history.push(response.message);
       }
     } catch (error) {
-      setChatLog([...history.filter((msg) => msg.role !== 'system').map((msg) => ({
-        role: msg.role as 'user' | 'bot',
-        content: msg.content,
-      }))]);
+      setChatLog(
+        history
+          .filter((msg) => msg.role !== 'system')
+          .map((msg) => ({
+            role: msg.role as 'user' | 'bot',
+            content: msg.content,
+          }))
+      );
     } finally {
-      // Update local chat log to reflect the global history (filtering out the system message).
-      setChatLog([...history.filter((msg) => msg.role !== 'system').map((msg) => ({
-        role: msg.role as 'user' | 'bot',
-        content: msg.content,
-      }))]);
-      setInput('');
       setLoading(false);
     }
   };
@@ -83,18 +108,11 @@ export default function ClientSideChatPage() {
                 }`}
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {entry.content}
+                {entry.role === 'bot' && entry.content === '' ? "Thinking..." : entry.content}
               </ReactMarkdown>
             </div>
           </div>
         ))}
-        {loading && (
-          <div className="mb-4 flex justify-start">
-            <div className="p-3 text-gray-800 rounded-lg rounded-tl-none">
-              Thinking...
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Input Area */}
