@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{
@@ -34,7 +34,7 @@ export default function RootLayout({
           backgroundRepeat: 'no-repeat',
         }}
       >
-        {children}
+        <div className="flex-grow">{children}</div>
         <footer className="w-full text-center text-white bg-transparent">
           <div className="flex items-center justify-center space-x-2 text-lg font-bold">
             <span>
