@@ -37,7 +37,7 @@ export default function RootLayout({
         <footer className="w-full text-center text-white bg-transparent">
           <div className="flex items-center justify-center space-x-2 text-lg font-bold">
             <span>
-              Powered by{" "}
+              Powered by{' '}
               <a
                 href="https://flower.ai/"
                 target="_blank"
@@ -47,11 +47,7 @@ export default function RootLayout({
                 FlowerLabs
               </a>
             </span>
-            <img
-              src="/logo_secondary-w-border.png"
-              alt="FlowerLabs Logo"
-              className="h-6"
-            />
+            <img src="/logo_secondary-w-border.png" alt="FlowerLabs Logo" className="h-6" />
           </div>
           <div className="mt-2 text-md">
             <a

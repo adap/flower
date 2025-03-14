@@ -175,10 +175,11 @@ export default function ClientSideChatPage() {
             className={`mb-4 flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`p-3 rounded-lg ${entry.role === 'user'
-                ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
-                : 'text-gray-800 rounded-tl-none'
-                }`}
+              className={`p-3 rounded-lg ${
+                entry.role === 'user'
+                  ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
+                  : 'text-gray-800 rounded-tl-none'
+              }`}
             >
               {entry.role === 'bot' ? (
                 renderAssistantContent(entry)
