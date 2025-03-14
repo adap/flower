@@ -16,7 +16,7 @@
 import { join } from 'path';
 import os from 'os';
 import { mkdir, readFile, writeFile } from 'fs/promises';
-import { CachedMapping, CacheStorage } from './storage';
+import { CachedEntry, CachedMapping, CacheStorage } from './storage';
 
 export class NodeCacheStorage extends CacheStorage {
   private filePath: string | undefined;
@@ -31,7 +31,7 @@ export class NodeCacheStorage extends CacheStorage {
     return this.filePath;
   }
 
-  protected async load(): Promise<CachedMapping | null> {
+  private async load(): Promise<CachedMapping | null> {
     try {
       const filePath = await this.getCacheFilePath();
       const data = await readFile(filePath, 'utf-8');
@@ -41,8 +41,42 @@ export class NodeCacheStorage extends CacheStorage {
     }
   }
 
-  protected async save(cache: CachedMapping): Promise<void> {
-    const filePath = await this.getCacheFilePath();
-    await writeFile(filePath, JSON.stringify(cache), 'utf-8');
+  private async save(cache: CachedMapping): Promise<void> {
+    try {
+      const filePath = await this.getCacheFilePath();
+      await writeFile(filePath, JSON.stringify(cache), 'utf-8');
+    } catch (_) {
+      return undefined;
+    }
+  }
+
+  async getItem(key: string): Promise<CachedEntry | null> {
+    let cache = await this.load();
+    if (!cache) {
+      cache = { mapping: {} };
+    }
+
+    if (key in cache.mapping) {
+      return cache.mapping[key];
+    }
+    return null;
+  }
+
+  async setItem(key: string, value: string | null): Promise<void> {
+    const now = Date.now();
+    let cache = await this.load();
+    if (!cache) {
+      cache = { mapping: {} };
+    }
+    if (value) {
+      cache.mapping[key] = { engineModel: value, timestamp: now };
+      await this.save(cache);
+    } else {
+      if (key in cache.mapping) {
+        const { [key]: removed, ...rest } = cache.mapping;
+        cache.mapping = rest;
+        await this.save(cache);
+      }
+    }
   }
 }

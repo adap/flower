@@ -13,26 +13,32 @@
 // limitations under the License.
 // =============================================================================
 
-import { CachedMapping, CacheStorage } from './storage';
+import { CachedEntry, CacheStorage } from './storage';
 
 export class WebCacheStorage extends CacheStorage {
-  private readonly CACHE_KEY = 'flwr-mdl-cache';
+  private readonly CACHE_KEY_PREFIX = 'flwr-mdl-cache';
 
-  protected async load(): Promise<CachedMapping | null> {
+  async getItem(key: string): Promise<CachedEntry | null> {
     await Promise.resolve();
-    const data = localStorage.getItem(this.CACHE_KEY);
+    const data = localStorage.getItem(`${this.CACHE_KEY_PREFIX}-${key}`);
     if (data) {
       try {
-        return JSON.parse(data) as CachedMapping;
+        return JSON.parse(data) as CachedEntry;
       } catch {
         return null;
       }
     }
     return null;
   }
-
-  protected async save(cache: CachedMapping): Promise<void> {
+  async setItem(key: string, value: string | null): Promise<void> {
     await Promise.resolve();
-    localStorage.setItem(this.CACHE_KEY, JSON.stringify(cache));
+    if (value) {
+      localStorage.setItem(
+        `${this.CACHE_KEY_PREFIX}-${key}`,
+        JSON.stringify({ engineModel: value, timestamp: Date.now() })
+      );
+    } else {
+      localStorage.removeItem(`${this.CACHE_KEY_PREFIX}-${key}`);
+    }
   }
 }

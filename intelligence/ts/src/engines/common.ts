@@ -59,7 +59,7 @@ async function updateModel(model: string, engine: string): Promise<Result<string
       await cacheStorage.setItem(`${model}_${engine}`, data.engine_model);
       return { ok: true, value: data.engine_model };
     } else {
-      await cacheStorage.remove(model, engine);
+      await cacheStorage.setItem(`${model}_${engine}`, null);
       return {
         ok: false,
         failure: {
