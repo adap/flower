@@ -216,10 +216,15 @@ export default function ClientSideChatPage() {
         ))}
       </div>
 
-      {/* Input Area with Model Select and Remote Handoff Toggle */}
-      <div className="border-t p-4 bg-gray-50 flex items-center">
-        <div className="mr-4 p-2 border border-gray-300 rounded bg-white text-gray-800">
-          <select value={model || availableModels[0]} onChange={(e) => setModel(e.target.value)}>
+      {/* Input Area with Model Select, Remote Handoff Toggle, and Text Input */}
+      <div className="border-t p-4 bg-gray-50 flex flex-col md:flex-row items-center md:space-x-4 space-y-4 md:space-y-0">
+        {/* Model Select */}
+        <div className="w-full md:w-1/4 p-2 border border-gray-300 rounded bg-white text-gray-800">
+          <select
+            className="w-full"
+            value={model || availableModels[0]}
+            onChange={(e) => setModel(e.target.value)}
+          >
             {availableModels.map((modelName) => (
               <option key={modelName} value={modelName}>
                 {modelName}
@@ -227,21 +232,25 @@ export default function ClientSideChatPage() {
             ))}
           </select>
         </div>
+        {/* Remote Handoff Toggle (only in non-production) */}
         {!isProduction && (
-          <label className="mr-4 flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={allowRemote}
-              onChange={(e) => setAllowRemote(e.target.checked)}
-            />
-            <span className="text-gray-800">Allow remote handoff</span>
-          </label>
+          <div className="w-full md:w-1/4">
+            <label className="flex items-center space-x-2 text-lg">
+              <input
+                type="checkbox"
+                checked={allowRemote}
+                onChange={(e) => setAllowRemote(e.target.checked)}
+              />
+              <span className="text-gray-800">Allow remote handoff</span>
+            </label>
+          </div>
         )}
-        <div className="flex flex-grow space-x-2">
+        {/* Text Input and Send Button */}
+        <div className="w-full md:w-1/2 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
           <input
             type="text"
             placeholder="Type your question..."
-            className="flex-grow p-2 border border-gray-300 rounded focus:outline-none bg-white text-gray-800"
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none bg-white text-gray-800"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -249,7 +258,7 @@ export default function ClientSideChatPage() {
           <button
             onClick={sendQuestion}
             disabled={loading || !input.trim() || modelLoadingDescription !== null}
-            className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-400"
+            className="w-full md:w-auto bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-400"
           >
             {loading ? 'Sending...' : 'Send'}
           </button>
