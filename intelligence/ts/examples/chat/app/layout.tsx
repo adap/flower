@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import Image from 'next/image';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -47,7 +48,7 @@ export default function RootLayout({
                 FlowerLabs
               </a>
             </span>
-            <img src="/logo_secondary-w-border.png" alt="FlowerLabs Logo" className="h-6" />
+            <Image src="/logo_secondary-w-border.png" alt="FlowerLabs Logo" className="h-6" width={24} />
           </div>
           <div className="mt-2 text-md">
             <a
