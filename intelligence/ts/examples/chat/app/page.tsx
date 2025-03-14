@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { FlowerIntelligence, ChatResponseResult, Message, Progress } from '@flwr/flwr';
@@ -48,12 +48,25 @@ export default function ClientSideChatPage() {
   );
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  // Currently selected model
-  const [model, setModel] = useState(availableModels[0]);
+
+  // Initialize model state as null; load the stored model on mount.
+  const [model, setModel] = useState<string | null>(null);
+  useEffect(() => {
+    const stored = localStorage.getItem('selectedModel');
+    setModel(stored || availableModels[0]);
+  }, []);
+
+  // Update localStorage whenever the model changes (and is not null).
+  useEffect(() => {
+    if (model !== null) {
+      localStorage.setItem('selectedModel', model);
+    }
+  }, [model]);
+
   const [allowRemote, setAllowRemote] = useState(false);
-  // Keep track of which models have been loaded
+  // Keep track of which models have been loaded.
   const [loadedModels, setLoadedModels] = useState<string[]>([]);
-  // Store the current model loading description (null when not loading)
+  // Store the current model loading description (null when not loading).
   const [modelLoadingDescription, setModelLoadingDescription] = useState<string | null>(null);
 
   // Helper to render bot responses based on the model used.
@@ -61,7 +74,7 @@ export default function ClientSideChatPage() {
     const content = entry.content;
     if (!content) return 'Thinking...';
     // Use stored model if available, otherwise fall back to current model.
-    const usedModel = entry.modelUsed || model;
+    const usedModel = entry.modelUsed || model || availableModels[0];
     if (usedModel === 'deepseek/r1-distill-llama-8b/q4') {
       // Extract <think> internal reasoning and main content.
       const regex = /<think>([\s\S]*?)<\/think>([\s\S]*)/;
@@ -94,12 +107,13 @@ export default function ClientSideChatPage() {
     }
 
     // Check if the selected model is loaded; if not, fetch it.
-    if (!loadedModels.includes(model)) {
+    const currentModel = model || availableModels[0];
+    if (!loadedModels.includes(currentModel)) {
       setModelLoadingDescription('Start to fetch params');
-      await fi.fetchModel(model, (progress: Progress) => {
+      await fi.fetchModel(currentModel, (progress: Progress) => {
         setModelLoadingDescription(progress.description ?? null);
       });
-      setLoadedModels((prev) => [...prev, model]);
+      setLoadedModels((prev) => [...prev, currentModel]);
       setModelLoadingDescription(null);
     }
 
@@ -109,12 +123,12 @@ export default function ClientSideChatPage() {
     setInput('');
 
     // Append a placeholder bot message with the current model stored.
-    setChatLog((prev) => [...prev, { role: 'bot', content: '', modelUsed: model }]);
+    setChatLog((prev) => [...prev, { role: 'bot', content: '', modelUsed: currentModel }]);
 
     try {
       const response: ChatResponseResult = await fi.chat({
         messages: history,
-        model: model,
+        model: currentModel,
         stream: true,
         onStreamEvent: (event) => {
           setChatLog((prev) => {
@@ -194,7 +208,7 @@ export default function ClientSideChatPage() {
       {/* Input Area with Model Select and Remote Handoff Toggle */}
       <div className="border-t p-4 bg-gray-50 flex items-center">
         <div className="mr-4 p-2 border border-gray-300 rounded bg-white text-gray-800">
-          <select value={model} onChange={(e) => setModel(e.target.value)}>
+          <select value={model || availableModels[0]} onChange={(e) => setModel(e.target.value)}>
             {availableModels.map((modelName) => (
               <option key={modelName} value={modelName}>
                 {modelName}
