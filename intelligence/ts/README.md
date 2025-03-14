@@ -48,10 +48,15 @@ await main().then().catch();
 
 ## Demo
 
-You can also quickly try out the library with the `examples/hello-world-ts` example (which is a minimal TypeScript project):
+You can also quickly try out the library with the [`examples/hello-world-ts`](https://github.com/adap/flower/tree/main/intelligence/ts/examples/hello-world-ts) example (which is a minimal TypeScript project):
 
 ```sh
-pnpm demo
+git clone --depth=1 https://github.com/adap/flower.git _tmp && \
+mv _tmp/intelligence/ts/examples/hello-world-ts . && \
+rm -rf _tmp && \
+cd hello-world-ts
+
+pnpm start
 ```
 
-You can also use `pnpm demo:js` to run the equivalent JavaScript project example (`examples/simple-ts-project`).
+You can also use `pnpm demo:js` to run the equivalent JavaScript project example ([`examples/simple-ts-project`](https://github.com/adap/flower/tree/main/intelligence/ts/examples/hello-world-js)).
