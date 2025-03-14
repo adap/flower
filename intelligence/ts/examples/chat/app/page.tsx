@@ -14,6 +14,8 @@ const history: Message[] = [
 interface ChatEntry {
   role: 'user' | 'bot';
   content: string;
+  // Store the model used to generate this message (for bot messages)
+  modelUsed?: string;
 }
 
 const availableModels = [
@@ -54,11 +56,13 @@ export default function ClientSideChatPage() {
   const [model, setModel] = useState(availableModels[0]);
   const [allowRemote, setAllowRemote] = useState(false);
 
-  // Render the assistant's response differently based on model.
-  const renderAssistantContent = (content: string) => {
+  // Render the assistant's response based on the model used for that message.
+  const renderAssistantContent = (entry: ChatEntry) => {
+    const content = entry.content;
     if (!content) return "Thinking...";
-    // Special handling for deepseek model.
-    if (model === "deepseek/r1-distill-llama-8b/q4") {
+    // Use the model used when the message was generated
+    const usedModel = entry.modelUsed || model;
+    if (usedModel === "deepseek/r1-distill-llama-8b/q4") {
       // Use regex to extract content inside <think> tags and the main content.
       const regex = /<think>([\s\S]*?)<\/think>([\s\S]*)/;
       const match = content.match(regex);
@@ -82,7 +86,7 @@ export default function ClientSideChatPage() {
     if (!input.trim()) return;
     setLoading(true);
 
-    // Enable remote handoff if allowed.
+    // Set remote handoff based on the toggle.
     if (allowRemote) {
       fi.remoteHandoff = true;
       fi.apiKey = process.env.NEXT_PUBLIC_API_KEY || "";
@@ -96,8 +100,11 @@ export default function ClientSideChatPage() {
     history.push({ role: 'user', content: input });
     setInput('');
 
-    // Append placeholder bot message.
-    setChatLog((prev) => [...prev, { role: 'bot', content: '' }]);
+    // Append placeholder bot message with the current model stored.
+    setChatLog((prev) => [
+      ...prev,
+      { role: 'bot', content: '', modelUsed: model }
+    ]);
 
     try {
       const response: ChatResponseResult = await fi.chat({
@@ -105,12 +112,12 @@ export default function ClientSideChatPage() {
         model: model,
         stream: true,
         onStreamEvent: (event) => {
-          // Stream chunks into the last bot message.
+          // Append each chunk to the last bot message.
           setChatLog((prev) => {
             const updated = [...prev];
             const lastIndex = updated.length - 1;
             updated[lastIndex] = {
-              role: 'bot',
+              ...updated[lastIndex],
               content: updated[lastIndex].content + event.chunk,
             };
             return updated;
@@ -120,7 +127,10 @@ export default function ClientSideChatPage() {
       if (!response.ok) {
         setChatLog((prev) => {
           const updated = [...prev];
-          updated[updated.length - 1] = { role: 'bot', content: 'Failed to get a valid response.' };
+          updated[updated.length - 1] = {
+            ...updated[updated.length - 1],
+            content: 'Failed to get a valid response.',
+          };
           return updated;
         });
       } else {
@@ -149,15 +159,18 @@ export default function ClientSideChatPage() {
       {/* Chat Messages */}
       <div className="flex-grow p-4 overflow-auto">
         {chatLog.map((entry, index) => (
-          <div key={index} className={`mb-4 flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          <div
+            key={index}
+            className={`mb-4 flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
             <div
               className={`p-3 rounded-lg ${entry.role === 'user'
-                  ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
-                  : 'text-gray-800 rounded-tl-none'
+                ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
+                : 'text-gray-800 rounded-tl-none'
                 }`}
             >
               {entry.role === 'bot'
-                ? renderAssistantContent(entry.content)
+                ? renderAssistantContent(entry)
                 : <ReactMarkdown remarkPlugins={[remarkGfm]}>{entry.content}</ReactMarkdown>}
             </div>
           </div>
