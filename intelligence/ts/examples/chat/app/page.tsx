@@ -159,7 +159,7 @@ export default function ClientSideChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(80vh)] border rounded shadow bg-white m-20">
+    <div className="flex flex-col h-[calc(80vh)] border rounded shadow bg-white mt-16 mx-20 mb-8">
       {/* Display model loading description if model is being loaded */}
       {modelLoadingDescription !== null && (
         <div className="p-2 text-center bg-yellow-100 text-yellow-800">
@@ -175,11 +175,10 @@ export default function ClientSideChatPage() {
             className={`mb-4 flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`p-3 rounded-lg ${
-                entry.role === 'user'
-                  ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
-                  : 'text-gray-800 rounded-tl-none'
-              }`}
+              className={`p-3 rounded-lg ${entry.role === 'user'
+                ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
+                : 'text-gray-800 rounded-tl-none'
+                }`}
             >
               {entry.role === 'bot' ? (
                 renderAssistantContent(entry)

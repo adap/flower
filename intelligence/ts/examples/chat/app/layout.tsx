@@ -34,6 +34,44 @@ export default function RootLayout({
         }}
       >
         {children}
+        <footer className="w-full text-center text-white bg-transparent">
+          <div className="flex items-center justify-center space-x-2 text-lg font-bold">
+            <span>
+              Powered by{" "}
+              <a
+                href="https://flower.ai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                FlowerLabs
+              </a>
+            </span>
+            <img
+              src="/logo_secondary-w-border.png"
+              alt="FlowerLabs Logo"
+              className="h-6"
+            />
+          </div>
+          <div className="mt-2 text-md">
+            <a
+              href="https://flower.ai/imprint/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline mr-4"
+            >
+              Imprint
+            </a>
+            <a
+              href="https://flower.ai/privacy/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              Private Policy
+            </a>
+          </div>
+        </footer>
       </body>
     </html>
   );
