@@ -13,6 +13,10 @@
 // limitations under the License.
 // =============================================================================
 
+import os from 'os';
+import path from 'path';
+import { mkdir, readFile, writeFile } from 'fs/promises';
+
 interface CachedEntry {
   value: string;
   lastUpdate: number;
@@ -60,9 +64,6 @@ export class NodeCacheStorage extends CacheStorage {
 
   private async getCacheFilePath(): Promise<string> {
     if (!this.filePath) {
-      const os = await import('os');
-      const path = await import('path');
-      const { mkdir } = await import('fs/promises');
       const homeDir = os.homedir();
       const cacheFolder = path.join(homeDir, '.flwr', 'cache');
       await mkdir(cacheFolder, { recursive: true });
@@ -73,7 +74,6 @@ export class NodeCacheStorage extends CacheStorage {
 
   private async load(): Promise<CachedMapping | null> {
     try {
-      const { readFile } = await import('fs/promises');
       const filePath = await this.getCacheFilePath();
       const data = await readFile(filePath, 'utf-8');
       return JSON.parse(data) as CachedMapping;
@@ -84,7 +84,6 @@ export class NodeCacheStorage extends CacheStorage {
 
   private async save(cache: CachedMapping): Promise<void> {
     try {
-      const { writeFile } = await import('fs/promises');
       const filePath = await this.getCacheFilePath();
       await writeFile(filePath, JSON.stringify(cache), 'utf-8');
     } catch (_) {
