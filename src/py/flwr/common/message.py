@@ -21,7 +21,7 @@ import time
 from logging import WARNING
 from typing import Optional, cast
 
-from .constant import MESSAGE_TTL_TOLERANCE
+from .constant import MESSAGE_TTL_TOLERANCE, MessageType, MessageTypeLegacy
 from .logger import log
 from .record import RecordSet
 
@@ -232,6 +232,21 @@ class Message:
         if not (content is None) ^ (error is None):
             raise ValueError("Either `content` or `error` must be set, but not both.")
 
+        # Allow legacy message types
+        if metadata.message_type in (
+            MessageTypeLegacy.GET_PARAMETERS,
+            MessageTypeLegacy.GET_PROPERTIES,
+        ):
+            pass
+        # Validate message type for non-legacy messages
+        elif not validate_message_type(metadata.message_type):
+            raise ValueError(
+                f"Invalid message type: {metadata.message_type}. "
+                "Expected format: '<category>' or '<category>.<action>', "
+                "where <category> must be 'train', 'evaluate', or 'query', "
+                "and <action> must be a valid Python identifier."
+            )
+
         metadata.created_at = time.time()  # Set the message creation timestamp
         metadata.delivered_at = ""
         var_dict = {
@@ -417,3 +432,31 @@ def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
         ttl=ttl,
         message_type=msg.metadata.message_type,
     )
+
+
+def validate_message_type(message_type: str) -> bool:
+    """Validate if the message type is valid.
+
+    A valid message type format must be one of the following:
+
+    - "<category>"
+    - "<category>.<action>"
+
+    where `category` must be one of "train", "evaluate", or "query",
+    and `action` must be a valid Python identifier.
+    """
+    valid_types = {MessageType.TRAIN, MessageType.EVALUATE, MessageType.QUERY}
+
+    # Check if conforming to the format "<category>"
+    if message_type in valid_types:
+        return True
+
+    # Check if conforming to the format "<category>.<action>"
+    if message_type.count(".") != 1:
+        return False
+
+    category, action = message_type.split(".")
+    if category in valid_types and action.isidentifier():
+        return True
+
+    return False
