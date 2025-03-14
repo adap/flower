@@ -18,13 +18,15 @@ export default defineConfig({
       fileName: (format) => `flowerintelligence.${format}.js`,
     },
     rollupOptions: {
-      external: ['@huggingface/transformers', '@mlc-ai/web-llm', 'crypto'],
-      output: {
-        globals: {
-          '@huggingface/transformers': 'transformers',
-          '@mlc-ai/web-llm': 'webllm',
-        },
-      },
+      external: [
+        '@huggingface/transformers',
+        '@mlc-ai/web-llm',
+        'crypto',
+        'fs',
+        'fs/promises',
+        'path',
+        'os',
+      ],
     },
   },
 });
