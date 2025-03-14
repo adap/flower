@@ -74,7 +74,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                     unary_response = cast(
                         GrpcMessage, method_handler.unary_unary(request, context)
                     )
-                except BaseException as e:  # pylint: disable=broad-except
+                except BaseException as e:
                     error = e
                     raise
                 finally:
@@ -102,7 +102,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                         # pylint: disable=use-yield-from
                         for stream_response in response_iterator:
                             yield stream_response
-                    except BaseException as e:  # pylint: disable=broad-except
+                    except BaseException as e:
                         error = e
                         raise
                     finally:
