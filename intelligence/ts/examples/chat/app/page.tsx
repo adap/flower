@@ -36,9 +36,9 @@ export default function ClientSideChatPage() {
     history.push({ role: 'user', content: input });
     try {
       // Call the FlowerIntelligence client directly with updated history.
-      const response: ChatResponseResult = await fi.chat(input, {
+      const response: ChatResponseResult = await fi.chat({
         messages: history,
-      } as ChatOptions);
+      });
       if (response.ok) {
         history.push(response.message);
       } else {
