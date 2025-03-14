@@ -75,7 +75,6 @@
     "get-random-values": "^3.0.0"
   },
   "browser": {
-    "crypto": false,
     "fs": false,
     "fs/promises": false,
     "path": false,
