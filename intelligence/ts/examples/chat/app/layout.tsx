@@ -43,7 +43,7 @@ export default function RootLayout({
                 href="https://flower.ai/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline"
+                className="hover:text-blue-300 hover:underline"
               >
                 Flower Intelligence
               </a>
@@ -60,7 +60,7 @@ export default function RootLayout({
               href="https://flower.ai/imprint/"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline mr-4"
+              className="hover:text-blue-300 hover:underline mr-4"
             >
               Imprint
             </a>
@@ -68,7 +68,7 @@ export default function RootLayout({
               href="https://flower.ai/privacy/"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline"
+              className="hover:text-blue-300 hover:underline"
             >
               Privacy
             </a>
