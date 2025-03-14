@@ -419,13 +419,21 @@ def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
     )
 
 
-def check_message_type(message_type: str) -> bool:
-    """Check if the message type is valid.
+def validate_message_type(message_type: str) -> bool:
+    """Validate if the message type is valid.
 
     A valid message type format is one of the following:
 
     - "<category>"
     - "<category>.<action>"
+
+    where `category` is one of the following:
+
+    - "train"
+    - "evaluate"
+    - "query"
+
+    and `action` is a valid Python identifier.
     """
     valid_types = {MessageType.TRAIN, MessageType.EVALUATE, MessageType.QUERY}
 

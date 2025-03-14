@@ -28,7 +28,7 @@ from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFnExt, Mod
 from flwr.common import Context, Message, MessageType
 from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
-from flwr.common.message import check_message_type
+from flwr.common.message import validate_message_type
 
 from .typing import ClientAppCallable
 
@@ -142,7 +142,10 @@ class ClientApp:
                 return self._call(message, context)
 
             # Get the category and the action
-            if not check_message_type(message.metadata.message_type):
+            # A valid message type is of the form "<category>" or "<category>.<action>",
+            # where <category> must be "train"/"evaluate"/"query", and <action> is a
+            # valid Python identifier
+            if not validate_message_type(message.metadata.message_type):
                 raise ValueError(
                     f"Invalid message type: {message.metadata.message_type}"
                 )
