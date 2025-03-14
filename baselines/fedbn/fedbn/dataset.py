@@ -1,6 +1,7 @@
-"""Digits dataset."""
+"""fedbn: A Flower Baseline."""
 
 import os
+from pathlib import Path
 from random import shuffle
 from typing import List, Optional, Tuple
 
@@ -9,6 +10,8 @@ from omegaconf import DictConfig
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
+
+DATA_DIRECTORY = Path(os.path.abspath(__file__)).parent.parent / "data"
 
 
 class DigitsDataset(Dataset):
@@ -208,10 +211,10 @@ def load_partition(
 
 
 # pylint: disable=too-many-locals
-def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, str]]:
+def get_data(config: DictConfig) -> List[Tuple[DataLoader, DataLoader, str]]:
     """Generate dataloaders for each client."""
     client_data = []
-    d_cfg = dataset_cfg
+    d_cfg = config
 
     total_partitions = (
         10  # each dataset was pre-processed by the authors and split into 10 partitions
@@ -248,21 +251,20 @@ def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, str]
     num_clients_per_dataset = d_cfg.num_clients // num_clients_step
     num_parts = int(d_cfg.percent * total_partitions)
 
-    for dataset_name in dataset_cfg.to_include:
+    for dataset_name in config.to_include:
         parts = list(range(total_partitions))
         shuffle(parts)
         for i in range(num_clients_per_dataset):
             parts_for_client = parts[i * num_parts : (i + 1) * num_parts]
-            print(f"{dataset_name = } | {parts_for_client = }")
+            # print(f"{dataset_name = } | {parts_for_client = }")
             trainloader, testloader = load_partition(
                 dataset_name,
-                path_to_data=d_cfg.data_path,
+                path_to_data=str(DATA_DIRECTORY),
                 partition_indx=parts_for_client,
                 batch_size=d_cfg.batch_size,
             )
 
             client_data.append((trainloader, testloader, dataset_name))
-
     # Ensure there is an entry in the list for each client
     assert (
         len(client_data) == d_cfg.num_clients
