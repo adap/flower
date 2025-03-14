@@ -25,9 +25,9 @@ import {
 import type { ProgressInfo, TextGenerationConfig } from '@huggingface/transformers';
 import { FailureCode, Message, Result, Progress, ChatResponseResult } from '../typing';
 
+import { getAvailableRAM } from '../env';
 import { BaseEngine } from './engine';
 import { getEngineModelInfo } from './common/modelName';
-import { getAvailableRAM } from '../env';
 
 const stoppingCriteria = new InterruptableStoppingCriteria();
 const choice = 0;

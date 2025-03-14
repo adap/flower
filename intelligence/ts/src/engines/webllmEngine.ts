@@ -28,9 +28,9 @@ import {
   StreamEvent,
   Tool,
 } from '../typing';
+import { getAvailableRAM } from '../env';
 import { BaseEngine } from './engine';
 import { getEngineModelInfo } from './common/modelName';
-import { getAvailableRAM } from '../env';
 
 async function runQuery(
   engine: MLCEngineInterface,
