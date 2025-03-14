@@ -42,6 +42,12 @@ const Collapsible: React.FC<{ content: string }> = ({ content }) => {
   );
 };
 
+// Helper function using guard clauses to determine remote handoff settings.
+const getRemoteHandoffSettings = (allowRemote: boolean) => {
+  if (isProduction || !allowRemote) return { remoteHandoff: false, apiKey: '' };
+  return { remoteHandoff: true, apiKey: process.env.NEXT_PUBLIC_API_KEY || '' };
+};
+
 export default function ClientSideChatPage() {
   const [chatLog, setChatLog] = useState<ChatEntry[]>(
     history
@@ -106,14 +112,10 @@ export default function ClientSideChatPage() {
     if (!input.trim()) return;
     setLoading(true);
 
-    // In production, always disable remote handoff.
-    if (!isProduction && allowRemote) {
-      fi.remoteHandoff = true;
-      fi.apiKey = process.env.NEXT_PUBLIC_API_KEY || '';
-    } else {
-      fi.remoteHandoff = false;
-      fi.apiKey = '';
-    }
+    // Use guard clause helper to set remote handoff settings.
+    const { remoteHandoff, apiKey } = getRemoteHandoffSettings(allowRemote);
+    fi.remoteHandoff = remoteHandoff;
+    fi.apiKey = apiKey;
 
     // Check if the selected model is loaded; if not, fetch it.
     const currentModel = model || availableModels[0];
@@ -160,9 +162,9 @@ export default function ClientSideChatPage() {
           };
           return updated;
         });
-      } else {
-        history.push(response.message);
+        return; // Guard clause: exit early on error.
       }
+      history.push(response.message);
     } catch {
       setChatLog(
         history
