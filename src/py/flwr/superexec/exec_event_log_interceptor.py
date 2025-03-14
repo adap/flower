@@ -56,7 +56,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         def _generic_method_handler(
             request: GrpcMessage,
             context: grpc.ServicerContext,
-        ) -> Union[GrpcMessage, Iterator[GrpcMessage], Exception]:
+        ) -> Union[GrpcMessage, Iterator[GrpcMessage], BaseException]:
             log_entry: LogEntry
             # Log before call
             log_entry = self.log_plugin.compose_log_before_event(
@@ -74,7 +74,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                     unary_response = cast(
                         GrpcMessage, method_handler.unary_unary(request, context)
                     )
-                except Exception as e:  # pylint: disable=broad-except
+                except BaseException as e:
                     error = e
                     raise
                 finally:
@@ -102,7 +102,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                         # pylint: disable=use-yield-from
                         for stream_response in response_iterator:
                             yield stream_response
-                    except Exception as e:  # pylint: disable=broad-except
+                    except BaseException as e:
                         error = e
                         raise
                     finally:
