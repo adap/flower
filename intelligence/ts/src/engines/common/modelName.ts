@@ -13,12 +13,10 @@
 // limitations under the License.
 // =============================================================================
 
-import { REMOTE_URL, SDK, VERSION } from '../constants';
-import { isNode } from '../env';
-import { FailureCode, Result } from '../typing';
-import { NodeCacheStorage } from './caching/nodeStorage';
-import { WebCacheStorage } from './caching/webStorage';
-import { CacheStorage } from './caching/storage';
+import { REMOTE_URL, SDK, VERSION } from '../../constants';
+import { isNode } from '../../env';
+import { FailureCode, Result } from '../../typing';
+import { CacheStorage, NodeCacheStorage, WebCacheStorage } from './storage';
 
 const STALE_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours.
 
@@ -91,7 +89,7 @@ export async function getEngineModelName(model: string, engine: string): Promise
   const cachedEntry = await cacheStorage.getItem(`${model}_${engine}`);
   if (cachedEntry) {
     // If the cached entry is stale, trigger a background update.
-    if (now - cachedEntry.timestamp > STALE_TIMEOUT_MS) {
+    if (now - cachedEntry.lastUpdate > STALE_TIMEOUT_MS) {
       updateModel(model, engine).catch((err: unknown) => {
         console.warn(`Background update failed for model ${model}:`, String(err));
       });

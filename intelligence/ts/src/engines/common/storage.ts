@@ -13,26 +13,67 @@
 // limitations under the License.
 // =============================================================================
 
-import { join } from 'path';
-import os from 'os';
-import { mkdir, readFile, writeFile } from 'fs/promises';
-import { CachedEntry, CachedMapping, CacheStorage } from './storage';
+interface CachedEntry {
+  engineModel: string;
+  lastUpdate: number;
+}
+
+export abstract class CacheStorage {
+  abstract getItem(key: string): Promise<CachedEntry | null>;
+  abstract setItem(key: string, value: string | null): Promise<void>;
+}
+
+export class WebCacheStorage extends CacheStorage {
+  private readonly CACHE_KEY_PREFIX = 'flwr-cache-';
+
+  async getItem(key: string): Promise<CachedEntry | null> {
+    await Promise.resolve();
+    const data = localStorage.getItem(`${this.CACHE_KEY_PREFIX}${key}`);
+    if (data) {
+      try {
+        return JSON.parse(data) as CachedEntry;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+  async setItem(key: string, value: string | null): Promise<void> {
+    await Promise.resolve();
+    if (value) {
+      localStorage.setItem(
+        `${this.CACHE_KEY_PREFIX}${key}`,
+        JSON.stringify({ engineModel: value, timestamp: Date.now() })
+      );
+    } else {
+      localStorage.removeItem(`${this.CACHE_KEY_PREFIX}${key}`);
+    }
+  }
+}
+
+interface CachedMapping {
+  mapping: Record<string, CachedEntry>;
+}
 
 export class NodeCacheStorage extends CacheStorage {
   private filePath: string | undefined;
 
   private async getCacheFilePath(): Promise<string> {
     if (!this.filePath) {
+      const os = await import('os');
+      const path = await import('path');
+      const { mkdir } = await import('fs/promises');
       const homeDir = os.homedir();
-      const cacheFolder = join(homeDir, '.flwr', 'cache');
+      const cacheFolder = path.join(homeDir, '.flwr', 'cache');
       await mkdir(cacheFolder, { recursive: true });
-      this.filePath = join(cacheFolder, 'intelligence-model-names.json');
+      this.filePath = path.join(cacheFolder, 'intelligence-model-names.json');
     }
     return this.filePath;
   }
 
   private async load(): Promise<CachedMapping | null> {
     try {
+      const { readFile } = await import('fs/promises');
       const filePath = await this.getCacheFilePath();
       const data = await readFile(filePath, 'utf-8');
       return JSON.parse(data) as CachedMapping;
@@ -43,6 +84,7 @@ export class NodeCacheStorage extends CacheStorage {
 
   private async save(cache: CachedMapping): Promise<void> {
     try {
+      const { writeFile } = await import('fs/promises');
       const filePath = await this.getCacheFilePath();
       await writeFile(filePath, JSON.stringify(cache), 'utf-8');
     } catch (_) {
@@ -69,7 +111,7 @@ export class NodeCacheStorage extends CacheStorage {
       cache = { mapping: {} };
     }
     if (value) {
-      cache.mapping[key] = { engineModel: value, timestamp: now };
+      cache.mapping[key] = { engineModel: value, lastUpdate: now };
       await this.save(cache);
     } else {
       if (key in cache.mapping) {
