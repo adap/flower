@@ -68,7 +68,7 @@ export default function ClientSideChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-60px)] border rounded shadow bg-white">
+    <div className="flex flex-col h-[calc(80vh)] border rounded shadow bg-white m-20">
       {/* Chat Messages */}
       <div className="flex-grow p-4 overflow-auto">
         {chatLog.map((entry, index) => (
@@ -77,9 +77,9 @@ export default function ClientSideChatPage() {
             className={`mb-4 flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[75%] p-3 rounded-lg ${entry.role === 'user'
-                ? 'bg-blue-500 text-white rounded-tr-none'
-                : 'bg-gray-100 text-gray-800 rounded-tl-none'
+              className={`p-3 rounded-lg ${entry.role === 'user'
+                ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
+                : 'text-gray-800 rounded-tl-none'
                 }`}
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -90,7 +90,7 @@ export default function ClientSideChatPage() {
         ))}
         {loading && (
           <div className="mb-4 flex justify-start">
-            <div className="max-w-[75%] p-3 bg-gray-100 text-gray-800 rounded-lg rounded-tl-none">
+            <div className="p-3 text-gray-800 rounded-lg rounded-tl-none">
               Thinking...
             </div>
           </div>
