@@ -59,4 +59,4 @@ cd hello-world-ts
 pnpm start
 ```
 
-You can also use `pnpm demo:js` to run the equivalent JavaScript project example ([`examples/simple-ts-project`](https://github.com/adap/flower/tree/main/intelligence/ts/examples/hello-world-js)).
+You can also use `pnpm demo:js` to run the equivalent JavaScript project example ([`examples/hello-world-js`](https://github.com/adap/flower/tree/main/intelligence/ts/examples/hello-world-js)).
