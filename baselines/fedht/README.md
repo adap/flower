@@ -90,3 +90,5 @@ Based on the loss and accuracy results shown in the figures above, we see that F
 
 We can see, at least visually, that significant performance degradation seems to occur around 100 output parameters in each layer. We also see an increase in variance as the number of parameters kept decreases. Additionally, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model. Results differ slightly from published work due to differing hyperparameters.
 
+The above results can be recreated by running the [run\_exp.sh](https://github.com/chancejohnstone/flower/blob/main/baselines/fedht/run_exp.sh) script. Plots can be generated using the [fedht\_plot.py](https://github.com/chancejohnstone/flower/blob/main/baselines/fedht/fedht_plot.py) script.
+
