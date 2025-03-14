@@ -111,6 +111,7 @@ export default function ClientSideChatPage() {
   };
 
   const sendQuestion = async () => {
+    if (loading) return; // Prevent new submissions while loading.
     if (!input.trim()) return;
     setLoading(true);
 
@@ -118,6 +119,11 @@ export default function ClientSideChatPage() {
     const { remoteHandoff, apiKey } = getRemoteHandoffSettings(allowRemote);
     fi.remoteHandoff = remoteHandoff;
     fi.apiKey = apiKey;
+
+    // Append the user's message.
+    setChatLog((prev) => [...prev, { role: 'user', content: input }]);
+    history.push({ role: 'user', content: input });
+    setInput('');
 
     // Check if the selected model is loaded; if not, fetch it.
     const currentModel = model || availableModels[0];
@@ -129,11 +135,6 @@ export default function ClientSideChatPage() {
       setLoadedModels((prev) => [...prev, currentModel]);
       setModelLoadingDescription(null);
     }
-
-    // Append the user's message.
-    setChatLog((prev) => [...prev, { role: 'user', content: input }]);
-    history.push({ role: 'user', content: input });
-    setInput('');
 
     // Append a placeholder bot message with the current model stored.
     setChatLog((prev) => [...prev, { role: 'bot', content: '', modelUsed: currentModel }]);
@@ -164,7 +165,7 @@ export default function ClientSideChatPage() {
           };
           return updated;
         });
-        return; // Guard clause: exit early on error.
+        return; // Exit early on error.
       }
       history.push(response.message);
     } catch {
@@ -178,8 +179,11 @@ export default function ClientSideChatPage() {
     }
   };
 
+  // Determine if the submit button should be disabled.
+  const isSubmitDisabled = loading || !input.trim() || modelLoadingDescription !== null;
+
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !isSubmitDisabled) {
       e.preventDefault();
       sendQuestion();
     }
@@ -187,7 +191,6 @@ export default function ClientSideChatPage() {
 
   return (
     <div className="flex flex-col h-[calc(80vh)] border rounded shadow bg-white mt-16 mx-auto mb-8 max-w-7xl">
-      {/* Display model loading description if model is being loaded */}
       {modelLoadingDescription !== null && (
         <div className="p-2 text-center bg-yellow-100 text-yellow-800">
           {modelLoadingDescription}
@@ -218,26 +221,31 @@ export default function ClientSideChatPage() {
         ))}
       </div>
 
-      {/* Input Area with Text Input, Model Select and Remote Handoff Toggle */}
+      {/* Updated Input Area */}
       <div className="px-4 py-4 bg-gray-50">
         <div className="relative">
           {/* Left Icon (Flower Logo) */}
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Image src="/flwr-head.png" alt="Flower Icon" width={50} height={50} />
           </div>
-          {/* Text Input and Send Button */}
+          {/* Text Input */}
           <input
             type="text"
             placeholder="Type your question..."
-            className="block w-full p-4 pl-16 text-lg text-gray-900 border border-gray-300 rounded-full bg-white focus:border-sky-500 focus:outline-sky-500"
+            className="block w-full p-4 pl-16 text-lg text-gray-900 border border-gray-300 rounded-full bg-white focus:border-gray-700 focus:outline-gray-700"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
           />
+          {/* Send Button */}
           <button
             onClick={sendQuestion}
-            disabled={loading || !input.trim() || modelLoadingDescription !== null}
-            className="absolute right-2.5 bottom-2.5 bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-full p-2"
+            disabled={isSubmitDisabled}
+            className={`absolute right-2.5 bottom-2.5 bg-gray-300 rounded-full p-2 ${
+              !isSubmitDisabled
+                ? 'hover:bg-gray-400 focus:ring-2 focus:ring-gray-400 cursor-pointer'
+                : 'cursor-not-allowed'
+            }`}
           >
             <ArrowUpIcon className="w-6 h-6 text-white" />
           </button>
