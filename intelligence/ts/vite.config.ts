@@ -5,7 +5,7 @@ import path from 'path';
 export default defineConfig({
   test: {
     coverage: {
-      exclude: ['docs/**', 'examples/**', ...coverageConfigDefaults.exclude],
+      exclude: ['docs/**', 'create/**', 'e2e/**', 'examples/**', ...coverageConfigDefaults.exclude],
       reporter: ['lcov'],
     },
     exclude: [...defaultExclude],

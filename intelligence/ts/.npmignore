@@ -25,6 +25,7 @@ pnpm-lock.yaml
 
 docs
 examples
+create
 e2e
 coverage
 .env
