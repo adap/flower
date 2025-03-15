@@ -165,7 +165,7 @@ class ClientApp:
     def train(
         self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers a train function with the ``ClientApp``.
+        """Register a train function with the ``ClientApp``.
 
         Parameters
         ----------
@@ -177,8 +177,7 @@ class ClientApp:
         Returns
         -------
         Callable[[ClientAppCallable], ClientAppCallable]
-            A decorator that registers the decorated function as a train function
-            within the ``ClientApp``.
+            A decorator that registers a train function with the ``ClientApp``.
 
         Examples
         --------
@@ -221,8 +220,7 @@ class ClientApp:
     def evaluate(
         self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers an evaluate function with the
-        ``ClientApp``.
+        """Register an evaluate function with the ``ClientApp``.
 
         Parameters
         ----------
@@ -234,8 +232,7 @@ class ClientApp:
         Returns
         -------
         Callable[[ClientAppCallable], ClientAppCallable]
-            A decorator that registers the decorated function as a train function
-            within the ``ClientApp``.
+            A decorator that registers an evaluate function with the ``ClientApp``.
 
         Examples
         --------
@@ -278,7 +275,7 @@ class ClientApp:
     def query(
         self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers a query function with the ``ClientApp``.
+        """Register a query function with the ``ClientApp``.
 
         Parameters
         ----------
@@ -290,8 +287,7 @@ class ClientApp:
         Returns
         -------
         Callable[[ClientAppCallable], ClientAppCallable]
-            A decorator that registers the decorated function as a train function
-            within the ``ClientApp``.
+            A decorator that registers a query function with the ``ClientApp``.
 
         Examples
         --------
