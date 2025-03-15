@@ -81,7 +81,7 @@ async function updateModel(model: string, engine: string): Promise<Result<ModelI
   }
 }
 
-export interface ModelInfo {
+interface ModelInfo {
   name: string;
   vram?: number;
 }
