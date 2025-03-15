@@ -17,11 +17,13 @@
 
 import time
 import unittest
+from logging import WARNING
+from typing import Iterable
 from unittest.mock import Mock, patch
 
 import grpc
 
-from flwr.common import DEFAULT_TTL, RecordSet
+from flwr.common import DEFAULT_TTL, Message, RecordSet
 from flwr.common.message import Error
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -129,36 +131,117 @@ class TestGrpcDriver(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.driver.push_messages(msgs)
 
-    def test_pull_messages_with_given_message_ids(self) -> None:
-        """Test pulling messages with specific message IDs."""
-        # Prepare
-        mock_response = Mock()
-        # A Message must have either content or error set so we prepare
-        run_id = 12345
+    def _setup_pull_messages_mocks(self, run_id: int) -> list[str]:
+        """Set up common mocks for pull_messages.
+
+        This creates two mock responses, one for each message ID, and configures the
+        stub to return them sequentially.
+        """
+        # Create messages with distinct reply_to values
         ok_message = create_res_message(src_node_id=123, dst_node_id=456, run_id=run_id)
         ok_message.metadata.reply_to_message = "id2"
-
         error_message = create_res_message(
             src_node_id=123, dst_node_id=789, run_id=run_id, error=Error(code=0)
         )
         error_message.metadata.reply_to_message = "id3"
-        # The the response from the DriverServicer is in the form of Protbuf Messages
-        mock_response.messages_list = [ok_message, error_message]
-        self.mock_stub.PullMessages.return_value = mock_response
-        msg_ids = ["id1", "id2", "id3"]
+
+        # Create separate mock responses for each call
+        mock_response1 = Mock()
+        mock_response1.messages_list = [ok_message]
+        mock_response2 = Mock()
+        mock_response2.messages_list = [error_message]
+
+        # Configure PullMessages to return a different response per call
+        self.mock_stub.PullMessages.side_effect = [mock_response1, mock_response2]
+
+        # Return the message IDs to be used in the tests (the valid ones)
+        return ["id2", "id3"]
+
+    def _assert_pull_messages(
+        self, expected_ids: list[str], messages: Iterable[Message]
+    ) -> None:
+        """Check that PullMessages was called once per expected message ID and that the
+        returned messages have the correct reply_to values."""
+        reply_tos = {msg.metadata.reply_to_message for msg in messages}
+        calls = self.mock_stub.PullMessages.call_args_list
+        self.assertEqual(len(calls), len(expected_ids))
+        for call, expected_msg_id in zip(calls, expected_ids):
+            args, kwargs = call
+            self.assertEqual(len(args), 1)
+            self.assertEqual(len(kwargs), 0)
+            self.assertIsInstance(args[0], PullResMessagesRequest)
+            # Each call should be made with a single-element list
+            # containing the expected message id
+            self.assertEqual(args[0].message_ids, [expected_msg_id])
+        self.assertSetEqual(reply_tos, {"id2", "id3"})
+
+    def test_pull_messages_with_given_message_ids(self) -> None:
+        """Test pulling messages with specific message IDs."""
+        # Prepare
+        run_id = 12345
+        msg_ids = self._setup_pull_messages_mocks(run_id)
+
+        # Store message IDs in the driver's internal state for testing
+        self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
 
         # Execute
-        msgs = self.driver.pull_messages(msg_ids)
-        reply_tos = {msg.metadata.reply_to_message for msg in msgs}
-        args, kwargs = self.mock_stub.PullMessages.call_args
+        messages = self.driver.pull_messages(msg_ids)
 
         # Assert
-        self.mock_stub.GetRun.assert_called_once()
-        self.assertEqual(len(args), 1)
-        self.assertEqual(len(kwargs), 0)
-        self.assertIsInstance(args[0], PullResMessagesRequest)
-        self.assertEqual(args[0].message_ids, msg_ids)
-        self.assertEqual(reply_tos, {"id2", "id3"})
+        self._assert_pull_messages(msg_ids, messages)
+        # Ensure messages are deleted
+        # pylint: disable=protected-access
+        self.assertFalse(set(msg_ids).issubset(self.driver._message_ids))
+
+    def test_pull_messages_without_given_message_ids(self) -> None:
+        """Test pulling messages successful when no message_ids are provided."""
+        # Prepare
+        run_id = 12345
+        msg_ids = self._setup_pull_messages_mocks(run_id)
+
+        # Store message IDs in the driver's internal state for testing
+        self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
+
+        # Execute
+        messages = self.driver.pull_messages()
+
+        # Assert
+        self._assert_pull_messages(msg_ids, messages)
+        # Ensure messages are deleted
+        # pylint: disable=protected-access
+        self.assertFalse(set(msg_ids).issubset(self.driver._message_ids))
+
+    def test_pull_messages_with_invalid_message_ids(self) -> None:
+        """Test pulling messages when provided message_ids include values not stored in
+        self._message_ids."""
+        # Prepare
+        run_id = 12345
+        msg_ids = self._setup_pull_messages_mocks(run_id)
+
+        # Store message IDs in the driver's internal state for testing
+        self.driver._message_ids.update(msg_ids)  # pylint: disable=protected-access
+
+        provided_msg_ids = {"id2", "id3", "id4", "id5"}
+        expected_missing = provided_msg_ids - set(msg_ids)
+
+        # Execute
+        with patch("flwr.server.driver.grpc_driver.log") as mock_log:
+            messages = self.driver.pull_messages(provided_msg_ids)
+
+        # Assert
+        # Only valid IDs are pulled
+        self._assert_pull_messages(msg_ids, messages)
+        # Ensure messages are deleted
+        # pylint: disable=protected-access
+        self.assertFalse(set(msg_ids).issubset(self.driver._message_ids))
+        # Warning was logged with the missing IDs
+        mock_log.assert_called_once()
+        args, _ = mock_log.call_args
+        self.assertEqual(args[0], WARNING)
+        self.assertEqual(
+            args[1], "Cannot pull messages for the following missing message IDs: %s"
+        )
+        self.assertSetEqual(args[2], expected_missing)
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
@@ -191,14 +274,14 @@ class TestGrpcDriver(unittest.TestCase):
         sleep_fn = time.sleep
         mock_response = Mock(message_ids=["id1"])
         self.mock_stub.PushMessages.return_value = mock_response
-        mock_response = Mock(messages_list=[])
-        self.mock_stub.PullMessages.return_value = mock_response
         msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
 
         # Execute
-        with patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01)):
-            start_time = time.time()
-            ret_msgs = list(self.driver.send_and_receive(msgs, timeout=0.15))
+        # Patch pull_messages to always return an empty iterator.
+        with patch.object(self.driver, "pull_messages", return_value=iter([])):
+            with patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01)):
+                start_time = time.time()
+                ret_msgs = list(self.driver.send_and_receive(msgs, timeout=0.15))
 
         # Assert
         self.assertLess(time.time() - start_time, 0.2)
