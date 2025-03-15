@@ -186,6 +186,17 @@ class RecordMaker:
             raise NotImplementedError(f"Unsupported dtype: {dtype}")
         return cast(T, ret)
 
+    def get_message_type(self) -> str:
+        """Create a message type."""
+        # Create a legacy message type
+        if self.rng.random() < 0.5:
+            return self.rng.choice(["get_parameters", "get_properties", "reconnect"])
+
+        # Create a message type
+        category = self.rng.choice(["train", "evaluate", "query"])
+        suffix = self.rng.choice(["", ".custom_action", ".mock_action"])
+        return f"{category}{suffix}"
+
     def array(self) -> Array:
         """Create a Array."""
         dtypes = ("float", "int")
@@ -261,7 +272,7 @@ class RecordMaker:
             dst_node_id=self.rng.randint(0, 1 << 63),
             reply_to_message=self.get_str(64),
             ttl=self.rng.randint(1, 1 << 30),
-            message_type=self.get_str(10),
+            message_type=self.get_message_type(),
         )
 
     def user_config(self) -> typing.UserConfig:

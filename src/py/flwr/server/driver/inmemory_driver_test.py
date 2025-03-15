@@ -47,7 +47,7 @@ def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str]
         node_id = driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
     num_messages = 3
     msgs = [
-        driver.create_message(RecordSet(), "message_type", node_id, "")
+        driver.create_message(RecordSet(), "query", node_id, "")
         for _ in range(num_messages)
     ]
 
@@ -123,7 +123,7 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         num_messages = 2
         msgs = [
-            self.driver.create_message(RecordSet(), "message_type", 1, "")
+            self.driver.create_message(RecordSet(), "query", 1, "")
             for _ in range(num_messages)
         ]
 
@@ -141,8 +141,7 @@ class TestInMemoryDriver(unittest.TestCase):
         """Test pushing invalid messages."""
         # Prepare
         msgs = [
-            self.driver.create_message(RecordSet(), "message_type", 1, "")
-            for _ in range(2)
+            self.driver.create_message(RecordSet(), "query", 1, "") for _ in range(2)
         ]
         # Use invalid run_id
         msgs[1].metadata._run_id += 1  # type: ignore
@@ -173,7 +172,7 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
         # Prepare
-        msgs = [self.driver.create_message(RecordSet(), "", 0, "")]
+        msgs = [self.driver.create_message(RecordSet(), "query", 0, "")]
         # Prepare
         msg_ids = [str(uuid4()) for _ in range(2)]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)
@@ -190,7 +189,7 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_send_and_receive_messages_timeout(self) -> None:
         """Test send and receive messages but time out."""
         # Prepare
-        msgs = [self.driver.create_message(RecordSet(), "", 0, "")]
+        msgs = [self.driver.create_message(RecordSet(), "query", 0, "")]
         # Prepare
         msg_ids = [str(uuid4()) for _ in range(2)]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)
