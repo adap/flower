@@ -165,7 +165,7 @@ class ClientApp:
     def train(
         self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers a train function with the ``ClientApp``.
+        """Register a train function with the ``ClientApp``.
 
         Parameters
         ----------
@@ -173,6 +173,11 @@ class ClientApp:
             The action name used to route messages. Defaults to "default".
         mods : Optional[list[Mod]] (default: None)
             A list of function-specific modifiers.
+
+        Returns
+        -------
+        Callable[[ClientAppCallable], ClientAppCallable]
+            A decorator that registers a train function with the ``ClientApp``.
 
         Examples
         --------
@@ -215,8 +220,7 @@ class ClientApp:
     def evaluate(
         self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers an evaluate function with the
-        ``ClientApp``.
+        """Register an evaluate function with the ``ClientApp``.
 
         Parameters
         ----------
@@ -224,6 +228,11 @@ class ClientApp:
             The action name used to route messages. Defaults to "default".
         mods : Optional[list[Mod]] (default: None)
             A list of function-specific modifiers.
+
+        Returns
+        -------
+        Callable[[ClientAppCallable], ClientAppCallable]
+            A decorator that registers an evaluate function with the ``ClientApp``.
 
         Examples
         --------
@@ -266,7 +275,7 @@ class ClientApp:
     def query(
         self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers a query function with the ``ClientApp``.
+        """Register a query function with the ``ClientApp``.
 
         Parameters
         ----------
@@ -274,6 +283,11 @@ class ClientApp:
             The action name used to route messages. Defaults to "default".
         mods : Optional[list[Mod]] (default: None)
             A list of function-specific modifiers.
+
+        Returns
+        -------
+        Callable[[ClientAppCallable], ClientAppCallable]
+            A decorator that registers a query function with the ``ClientApp``.
 
         Examples
         --------
