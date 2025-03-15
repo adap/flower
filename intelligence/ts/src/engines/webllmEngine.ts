@@ -30,7 +30,7 @@ import {
 } from '../typing';
 import { getAvailableRAM } from '../env';
 import { BaseEngine } from './engine';
-import { getEngineModelInfo } from './common/modelName';
+import { getEngineModelInfo } from './common/model';
 
 async function runQuery(
   engine: MLCEngineInterface,

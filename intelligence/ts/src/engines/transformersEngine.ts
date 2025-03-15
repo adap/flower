@@ -27,7 +27,7 @@ import { FailureCode, Message, Result, Progress, ChatResponseResult } from '../t
 
 import { getAvailableRAM } from '../env';
 import { BaseEngine } from './engine';
-import { getEngineModelInfo } from './common/modelName';
+import { getEngineModelInfo } from './common/model';
 
 const stoppingCriteria = new InterruptableStoppingCriteria();
 const choice = 0;

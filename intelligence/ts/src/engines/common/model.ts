@@ -86,6 +86,16 @@ export interface ModelInfo {
   vram?: number;
 }
 
+function isModelInfo(obj: unknown): obj is ModelInfo {
+  return !(
+    obj === null ||
+    typeof obj !== 'object' ||
+    !('name' in obj) ||
+    typeof obj.name !== 'string' ||
+    ('vram' in obj && typeof obj.vram !== 'number')
+  );
+}
+
 /**
  * Checks if a model is supported.
  * - If the model exists in the cache and its timestamp is fresh, return it.
@@ -106,8 +116,24 @@ export async function getEngineModelInfo(
         console.warn(`Background update failed for model ${model}:`, String(err));
       });
     }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(cachedEntry.value);
+    } catch {
+      parsed = null;
+    }
+
     // Return the (possibly stale) cached result.
-    return { ok: true, value: JSON.parse(cachedEntry.value) as ModelInfo };
+    return parsed !== null && isModelInfo(parsed)
+      ? { ok: true, value: parsed }
+      : {
+          ok: false,
+          failure: {
+            code: FailureCode.LocalError,
+            description: 'Wrong cache format, try deleting existing cache',
+          },
+        };
   } else {
     // Not in cache, call updateModel synchronously.
     return await updateModel(model, engine);
