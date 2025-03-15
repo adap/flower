@@ -174,6 +174,12 @@ class ClientApp:
         mods : Optional[list[Mod]] (default: None)
             A list of function-specific modifiers.
 
+        Returns
+        -------
+        Callable[[ClientAppCallable], ClientAppCallable]
+            A decorator that registers the decorated function as a train function
+            within the ``ClientApp``.
+
         Examples
         --------
         Registering a train function:
@@ -225,6 +231,12 @@ class ClientApp:
         mods : Optional[list[Mod]] (default: None)
             A list of function-specific modifiers.
 
+        Returns
+        -------
+        Callable[[ClientAppCallable], ClientAppCallable]
+            A decorator that registers the decorated function as a train function
+            within the ``ClientApp``.
+
         Examples
         --------
         Registering an evaluate function:
@@ -274,6 +286,12 @@ class ClientApp:
             The action name used to route messages. Defaults to "default".
         mods : Optional[list[Mod]] (default: None)
             A list of function-specific modifiers.
+
+        Returns
+        -------
+        Callable[[ClientAppCallable], ClientAppCallable]
+            A decorator that registers the decorated function as a train function
+            within the ``ClientApp``.
 
         Examples
         --------

@@ -75,6 +75,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
             "_message_type": message_type,
         }
         self.__dict__.update(var_dict)
+        self.message_type = message_type  # Trigger validation
 
     @property
     def run_id(self) -> int:
@@ -154,6 +155,17 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     @message_type.setter
     def message_type(self, value: str) -> None:
         """Set message_type."""
+        # Validate message type
+        if validate_legacy_message_type(value):
+            pass  # Backward compatibility for legacy message types
+        elif not validate_message_type(value):
+            raise ValueError(
+                f"Invalid message type: '{value}'. "
+                "Expected format: '<category>' or '<category>.<action>', "
+                "where <category> must be 'train', 'evaluate', or 'query', "
+                "and <action> must be a valid Python identifier."
+            )
+
         self.__dict__["_message_type"] = value
 
     def __repr__(self) -> str:
@@ -231,21 +243,6 @@ class Message:
     ) -> None:
         if not (content is None) ^ (error is None):
             raise ValueError("Either `content` or `error` must be set, but not both.")
-
-        # Allow legacy message types
-        if metadata.message_type in (
-            MessageTypeLegacy.GET_PARAMETERS,
-            MessageTypeLegacy.GET_PROPERTIES,
-        ):
-            pass
-        # Validate message type for non-legacy messages
-        elif not validate_message_type(metadata.message_type):
-            raise ValueError(
-                f"Invalid message type: {metadata.message_type}. "
-                "Expected format: '<category>' or '<category>.<action>', "
-                "where <category> must be 'train', 'evaluate', or 'query', "
-                "and <action> must be a valid Python identifier."
-            )
 
         metadata.created_at = time.time()  # Set the message creation timestamp
         metadata.delivered_at = ""
@@ -445,9 +442,13 @@ def validate_message_type(message_type: str) -> bool:
     where `category` must be one of "train", "evaluate", or "query",
     and `action` must be a valid Python identifier.
     """
-    valid_types = {MessageType.TRAIN, MessageType.EVALUATE, MessageType.QUERY}
-
     # Check if conforming to the format "<category>"
+    valid_types = {
+        MessageType.TRAIN,
+        MessageType.EVALUATE,
+        MessageType.QUERY,
+        MessageType.SYSTEM,
+    }
     if message_type in valid_types:
         return True
 
@@ -457,6 +458,19 @@ def validate_message_type(message_type: str) -> bool:
 
     category, action = message_type.split(".")
     if category in valid_types and action.isidentifier():
+        return True
+
+    return False
+
+
+def validate_legacy_message_type(message_type: str) -> bool:
+    """Validate if the legacy message type is valid."""
+    # Backward compatibility for legacy message types
+    if message_type in (
+        MessageTypeLegacy.GET_PARAMETERS,
+        MessageTypeLegacy.GET_PROPERTIES,
+        "reconnect",
+    ):
         return True
 
     return False
