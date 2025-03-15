@@ -175,7 +175,7 @@ def test_create_reply(
                 "reply_to_message": "reply_789",
                 "group_id": "group_xyz",
                 "ttl": 10.0,
-                "message_type": "request",
+                "message_type": "query",
             },
         ),
         (Error, {"code": 1, "reason": "reason_098"}),

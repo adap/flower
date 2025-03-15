@@ -96,7 +96,7 @@ class TestGrpcDriver(unittest.TestCase):
         mock_response = Mock(message_ids=["id1", "id2"])
         self.mock_stub.PushMessages.return_value = mock_response
         msgs = [
-            self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)
+            self.driver.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)
             for _ in range(2)
         ]
 
@@ -119,7 +119,7 @@ class TestGrpcDriver(unittest.TestCase):
         mock_response = Mock(message_ids=["id1", "id2"])
         self.mock_stub.PushMessages.return_value = mock_response
         msgs = [
-            self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)
+            self.driver.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)
             for _ in range(2)
         ]
         # Use invalid run_id
@@ -176,7 +176,7 @@ class TestGrpcDriver(unittest.TestCase):
 
         mock_response.messages_list = message_res_list
         self.mock_stub.PullMessages.return_value = mock_response
-        msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
+        msgs = [self.driver.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)]
 
         # Execute
         ret_msgs = list(self.driver.send_and_receive(msgs))
@@ -193,7 +193,7 @@ class TestGrpcDriver(unittest.TestCase):
         self.mock_stub.PushMessages.return_value = mock_response
         mock_response = Mock(messages_list=[])
         self.mock_stub.PullMessages.return_value = mock_response
-        msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
+        msgs = [self.driver.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)]
 
         # Execute
         with patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01)):

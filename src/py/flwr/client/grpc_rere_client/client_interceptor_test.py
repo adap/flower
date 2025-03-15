@@ -93,7 +93,7 @@ class _MockServicer:
                     dst_node_id=SUPERLINK_NODE_ID,
                     group_id="",
                     ttl=DEFAULT_TTL,
-                    message_type="mock",
+                    message_type="train",
                     reply_to_message="",
                 ),
                 content=RecordSet(),
