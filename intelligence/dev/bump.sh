@@ -43,7 +43,7 @@ rm src/constants.ts.bak src/flowerintelligence.test.ts.bak ../docs/source/conf.p
 # Update all examples/*/package.json files to set "@flwr/flwr" to the old version.
 for pkg in examples/*/package.json; do
   echo "Updating $pkg with version ^$old_version"
-  sed -i.bak "s/\"@flwr\/flwr\": \"\^[0-9]*\.[0-9]*\.[0-9]*\",/\"@flwr\/flwr\": \"^$old_version\",/g" "$pkg"
+  sed -i.bak "s/\"@flwr\/flwr\": \"\^[0-9]*\.[0-9]*\.[0-9]*\"/\"@flwr\/flwr\": \"^$old_version\"/g" "$pkg"
   rm "$pkg.bak"
 done
 

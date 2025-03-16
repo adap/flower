@@ -68,7 +68,7 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             unary_response, error = None, None
             try:
                 unary_response = cast(GrpcMessage, call(request, context))
-            except Exception as e:  # pylint: disable=broad-except
+            except BaseException as e:
                 error = e
                 raise
             finally:
