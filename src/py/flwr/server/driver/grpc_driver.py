@@ -18,7 +18,7 @@
 import time
 import warnings
 from collections.abc import Iterable
-from logging import DEBUG, WARNING
+from logging import DEBUG, ERROR, WARNING
 from typing import Optional, cast
 
 import grpc
@@ -48,11 +48,9 @@ from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E
 
 from .driver import Driver
 
-ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
-[flwr-serverapp] Error: Not connected.
-
-Call `connect()` on the `GrpcDriverStub` instance before calling any of the other
-`GrpcDriverStub` methods.
+ERROR_MESSAGE_RESOURCE_EXHAUSTED = """
+"The 2GB gRPC limit has been reached. Consider reducing the number of messages pushed "
+"in the batch or sample a smaller number of nodes before pushing the messages."
 """
 
 
@@ -206,12 +204,17 @@ class GrpcDriver(Driver):
             msg_proto = message_to_proto(msg)
             # Add to list
             message_proto_list.append(msg_proto)
-        # Call GrpcDriverStub method
-        res: PushInsMessagesResponse = self._stub.PushMessages(
-            PushInsMessagesRequest(
-                messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
+
+        try:
+            # Call GrpcDriverStub method
+            res: PushInsMessagesResponse = self._stub.PushMessages(
+                PushInsMessagesRequest(
+                    messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
+                )
             )
-        )
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
+                log(ERROR, ERROR_MESSAGE_RESOURCE_EXHAUSTED)
         if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
             list(message_proto_list)
         ):
@@ -229,13 +232,17 @@ class GrpcDriver(Driver):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        # Pull Messages
-        res: PullResMessagesResponse = self._stub.PullMessages(
-            PullResMessagesRequest(
-                message_ids=message_ids,
-                run_id=cast(Run, self._run).run_id,
+        try:
+            # Pull Messages
+            res: PullResMessagesResponse = self._stub.PullMessages(
+                PullResMessagesRequest(
+                    message_ids=message_ids,
+                    run_id=cast(Run, self._run).run_id,
+                )
             )
-        )
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
+                log(ERROR, ERROR_MESSAGE_RESOURCE_EXHAUSTED)
         # Convert Message from Protobuf representation
         msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
         return msgs
