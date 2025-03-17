@@ -38,7 +38,9 @@ const Collapsible: React.FC<{ content: string }> = ({ content }) => {
         {isOpen ? 'Hide internal reasoning' : 'Show internal reasoning'}
       </button>
       {isOpen && (
-        <div className="p-2 border-l-4 border-amber-400 bg-amber-50 text-sm italic">{content}</div>
+        <div className="p-2 border-l-4 border-amber-400 bg-amber-50 text-sm text-justify italic">
+          {content}
+        </div>
       )}
     </div>
   );
@@ -205,7 +207,7 @@ export default function ClientSideChatPage() {
     <div className="flex items-center min-h-[calc(90vh)]">
       <div className="flex flex-col max-h-[calc(80vh)] border rounded-2xl shadow bg-white mt-16 mx-auto mb-8 w-full max-w-7xl">
         {modelLoadingDescription !== null && (
-          <div className="p-2 text-center bg-zinc-50 text-zinc-600 rounded-t-2xl">
+          <div className="p-2 text-center bg-amber-500/50 text-zinc-600 rounded-t-2xl">
             {modelLoadingDescription}
           </div>
         )}
