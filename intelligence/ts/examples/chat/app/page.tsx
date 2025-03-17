@@ -38,7 +38,7 @@ const Collapsible: React.FC<{ content: string }> = ({ content }) => {
         {isOpen ? 'Hide internal reasoning' : 'Show internal reasoning'}
       </button>
       {isOpen && (
-        <div className="p-2 border-l-4 border-amber-400 bg-yellow-50 text-sm italic">{content}</div>
+        <div className="p-2 border-l-4 border-amber-400 bg-amber-50 text-sm italic">{content}</div>
       )}
     </div>
   );
@@ -202,7 +202,7 @@ export default function ClientSideChatPage() {
   };
 
   return (
-    <div className="flex items-center min-h-screen">
+    <div className="flex items-center min-h-[calc(90vh)]">
       <div className="flex flex-col max-h-[calc(80vh)] border rounded-2xl shadow bg-white mt-16 mx-auto mb-8 w-full max-w-7xl">
         {modelLoadingDescription !== null && (
           <div className="p-2 text-center bg-zinc-50 text-zinc-600 rounded-t-2xl">
@@ -218,10 +218,11 @@ export default function ClientSideChatPage() {
               className={`mb-4 flex text-pretty ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`p-4 rounded-lg ${entry.role === 'user'
-                  ? 'max-w-[75%] bg-zinc-100 text-zinc-900 rounded-tr-none'
-                  : 'text-zinc-900 rounded-tl-none w-5/6'
-                  }`}
+                className={`p-4 rounded-lg ${
+                  entry.role === 'user'
+                    ? 'max-w-[75%] bg-zinc-100 text-zinc-900 rounded-tr-none'
+                    : 'text-zinc-900 rounded-tl-none w-5/6'
+                }`}
               >
                 {entry.role === 'bot' ? (
                   renderAssistantContent(entry)
@@ -253,10 +254,11 @@ export default function ClientSideChatPage() {
             <button
               onClick={sendQuestion}
               disabled={isSubmitDisabled}
-              className={`absolute right-4 top-1/2 transform -translate-y-1/2 rounded-full p-2 ${isSubmitDisabled
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-zinc-900 hover:bg-zinc-700 focus:ring-2 focus:ring-amber-400 cursor-pointer'
-                }`}
+              className={`absolute right-4 top-1/2 transform -translate-y-1/2 rounded-full p-2 ${
+                isSubmitDisabled
+                  ? 'bg-gray-300 cursor-not-allowed'
+                  : 'bg-zinc-900 hover:bg-zinc-700 focus:ring-2 focus:ring-amber-400 cursor-pointer'
+              }`}
             >
               <ArrowUpIcon className="w-6 h-6 text-white font-bold" />
             </button>

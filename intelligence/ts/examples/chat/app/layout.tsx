@@ -25,10 +25,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-900`}
-      >
-        <div className="flex-grow">{children}</div>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-900`}>
+        {children}
         <footer className="w-full text-center text-white bg-transparent">
           <div className="flex items-center justify-center space-x-2 text-lg font-bold">
             <span>
@@ -42,12 +40,7 @@ export default function RootLayout({
                 Flower Intelligence
               </a>
             </span>
-            <Image
-              src="/fi-icon.png"
-              alt="FlowerLabs Logo"
-              width={24}
-              height={24}
-            />
+            <Image src="/fi-icon.png" alt="FlowerLabs Logo" width={24} height={24} />
           </div>
           <div className="mt-2 text-md text-zinc-700">
             <a
