@@ -115,7 +115,7 @@ def test_push_messages() -> None:
             dst_node_id=0,
             reply_to_message="",
             ttl=123,
-            message_type="",
+            message_type="query",
         ),
     )
 
