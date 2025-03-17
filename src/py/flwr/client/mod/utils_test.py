@@ -86,7 +86,7 @@ def _get_dummy_flower_message() -> Message:
             dst_node_id=0,
             reply_to_message="",
             ttl=DEFAULT_TTL,
-            message_type="mock",
+            message_type="train",
         ),
     )
 
@@ -127,7 +127,7 @@ class TestMakeApp(unittest.TestCase):
         self.assertEqual(state.metrics_records[METRIC][COUNTER], 2 * len(mock_mods))
 
     def test_filter(self) -> None:
-        """Test if a mod can filter incoming TaskIns."""
+        """Test if a mod can filter incoming Message."""
         # Prepare
         footprint: list[str] = []
         mock_app = make_mock_app("app", footprint)

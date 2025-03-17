@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.16.0"
+version = "1.17.0"
 description = "Flower: A Friendly Federated AI Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -51,8 +51,6 @@ exclude = ["src/py/**/*_test.py"]
 [tool.poetry.scripts]
 # `flwr` CLI
 flwr = "flwr.cli.app:app"
-# SuperExec (can run with either Deployment Engine or Simulation Engine)
-flower-superexec = "flwr.superexec.app:run_superexec" # Deprecated
 # Simulation Engine
 flwr-simulation = "flwr.simulation.app:flwr_simulation"
 flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
@@ -60,17 +58,15 @@ flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 flower-superlink = "flwr.server.app:run_superlink"
 flower-supernode = "flwr.client.supernode.app:run_supernode"
 flwr-serverapp = "flwr.server.serverapp:flwr_serverapp"
-flower-server-app = "flwr.server.run_serverapp:run_server_app" # Deprecated
 flwr-clientapp = "flwr.client.clientapp:flwr_clientapp"
-flower-client-app = "flwr.client.supernode:run_client_app" # Deprecated
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.9.2"
 # Mandatory dependencies
 numpy = ">=1.26.0,<3.0.0"
 grpcio = "^1.62.3,!=1.65.0"
 protobuf = "^4.21.6"
-cryptography = "^43.0.1"
+cryptography = "^44.0.1"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
 typer = "^0.12.5"
@@ -85,10 +81,16 @@ ray = { version = "==2.31.0", optional = true, python = ">=3.9,<3.13" }
 # Optional dependencies (REST transport layer)
 starlette = { version = "^0.45.2", optional = true }
 uvicorn = { version = "^0.34.0", extras = ["standard"], optional = true }
+# Optional dependencies (PyTorch)
+torch = { version = ">=1.8.0", optional = true, python = ">=3.9,<3.13" }
+# Optional dependencies (TensorFlow)
+tensorflow = { version = ">=2.5.0", optional = true, python = ">=3.9,<3.13" }
 
 [tool.poetry.extras]
 simulation = ["ray"]
 rest = ["starlette", "uvicorn"]
+torch = ["torch"]
+tensorflow = ["tensorflow"]
 
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.6"
@@ -150,6 +152,10 @@ extend_exclude = [
     "framework/docs/source/tutorial-quickstart-huggingface.rst",
     "framework/docs/source/_templates/autosummary/*",
     "framework/docs/source/ref-api/*",
+    "intelligence/docs/source/ts-ref-api/*",
+    "intelligence/docs/source/swift-ref-api/*",
+    "intelligence/docs/source/_templates/autosummary/*",
+    "intelligence/docs/source/conf.py",
 ]
 
 [tool.isort]

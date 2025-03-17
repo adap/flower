@@ -19,24 +19,23 @@ import time
 import unittest
 from collections.abc import Iterable
 from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from flwr.common import ConfigsRecord, RecordSet, now
-from flwr.common.constant import NODE_ID_NUM_BYTES, PING_MAX_INTERVAL, Status
-from flwr.common.message import Error
-from flwr.common.serde import (
-    error_to_proto,
-    message_from_taskins,
-    message_to_taskres,
-    recordset_to_proto,
+from flwr.common import ConfigsRecord, Message, RecordSet, now
+from flwr.common.constant import (
+    NODE_ID_NUM_BYTES,
+    PING_MAX_INTERVAL,
+    SUPERLINK_NODE_ID,
+    Status,
 )
+from flwr.common.serde import message_from_proto
 from flwr.common.typing import Run, RunStatus
-from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import (
     InMemoryLinkState,
     LinkStateFactory,
     SqliteLinkState,
 )
+from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .inmemory_driver import InMemoryDriver
@@ -48,7 +47,7 @@ def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str]
         node_id = driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
     num_messages = 3
     msgs = [
-        driver.create_message(RecordSet(), "message_type", node_id, "")
+        driver.create_message(RecordSet(), "query", node_id, "")
         for _ in range(num_messages)
     ]
 
@@ -59,13 +58,11 @@ def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str]
 def get_replies(
     driver: InMemoryDriver, msg_ids: Iterable[str], node_id: int
 ) -> list[str]:
-    """Help create message replies and pull taskres from state."""
-    taskins = driver.state.get_task_ins(node_id, limit=len(list(msg_ids)))
-    for taskin in taskins:
-        msg = message_from_taskins(taskin)
+    """Help create message replies and pull them from state."""
+    messages = driver.state.get_message_ins(node_id, limit=len(list(msg_ids)))
+    for msg in messages:
         reply_msg = msg.create_reply(RecordSet())
-        task_res = message_to_taskres(reply_msg)
-        driver.state.store_task_res(task_res=task_res)
+        driver.state.store_message_res(message=reply_msg)
 
     # Execute: Pull messages
     pulled_msgs = driver.pull_messages(msg_ids)
@@ -116,7 +113,7 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
         # Execute
-        node_ids = self.driver.get_node_ids()
+        node_ids = list(self.driver.get_node_ids())
 
         # Assert
         self.assertEqual(len(node_ids), self.num_nodes)
@@ -126,26 +123,25 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         num_messages = 2
         msgs = [
-            self.driver.create_message(RecordSet(), "message_type", 1, "")
+            self.driver.create_message(RecordSet(), "query", 1, "")
             for _ in range(num_messages)
         ]
 
-        taskins_ids = [uuid4() for _ in range(num_messages)]
-        self.state.store_task_ins.side_effect = taskins_ids
+        msg_ids = [uuid4() for _ in range(num_messages)]
+        self.state.store_message_ins.side_effect = msg_ids
 
         # Execute
-        msg_ids = list(self.driver.push_messages(msgs))
+        msg_res_ids = list(self.driver.push_messages(msgs))
 
         # Assert
-        self.assertEqual(len(msg_ids), 2)
-        self.assertEqual(msg_ids, [str(ids) for ids in taskins_ids])
+        self.assertEqual(len(msg_res_ids), 2)
+        self.assertEqual(msg_res_ids, [str(ids) for ids in msg_ids])
 
     def test_push_messages_invalid(self) -> None:
         """Test pushing invalid messages."""
         # Prepare
         msgs = [
-            self.driver.create_message(RecordSet(), "message_type", 1, "")
-            for _ in range(2)
+            self.driver.create_message(RecordSet(), "query", 1, "") for _ in range(2)
         ]
         # Use invalid run_id
         msgs[1].metadata._run_id += 1  # type: ignore
@@ -158,17 +154,8 @@ class TestInMemoryDriver(unittest.TestCase):
         """Test pulling messages with specific message IDs."""
         # Prepare
         msg_ids = [str(uuid4()) for _ in range(2)]
-        task_res_list = [
-            TaskRes(
-                task=Task(
-                    ancestry=[msg_ids[0]], recordset=recordset_to_proto(RecordSet())
-                )
-            ),
-            TaskRes(
-                task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
-            ),
-        ]
-        self.state.get_task_res.return_value = task_res_list
+        message_res_list = create_message_replies_for_specific_ids(msg_ids)
+        self.state.get_message_res.return_value = message_res_list
 
         # Execute
         pulled_msgs = list(self.driver.pull_messages(msg_ids))
@@ -177,25 +164,20 @@ class TestInMemoryDriver(unittest.TestCase):
         # Assert
         self.assertEqual(len(pulled_msgs), 2)
         self.assertEqual(reply_tos, msg_ids)
+        # Ensure messages are deleted
+        self.state.delete_messages.assert_called_once_with(
+            message_ins_ids={UUID(m_id) for m_id in msg_ids}
+        )
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
         # Prepare
-        msgs = [self.driver.create_message(RecordSet(), "", 0, "")]
+        msgs = [self.driver.create_message(RecordSet(), "query", 0, "")]
         # Prepare
         msg_ids = [str(uuid4()) for _ in range(2)]
-        task_res_list = [
-            TaskRes(
-                task=Task(
-                    ancestry=[msg_ids[0]], recordset=recordset_to_proto(RecordSet())
-                )
-            ),
-            TaskRes(
-                task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
-            ),
-        ]
-        self.state.store_task_ins.side_effect = msg_ids
-        self.state.get_task_res.return_value = task_res_list
+        message_res_list = create_message_replies_for_specific_ids(msg_ids)
+        self.state.get_message_res.return_value = message_res_list
+        self.state.store_message_ins.side_effect = msg_ids
 
         # Execute
         ret_msgs = list(self.driver.send_and_receive(msgs))
@@ -207,21 +189,12 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_send_and_receive_messages_timeout(self) -> None:
         """Test send and receive messages but time out."""
         # Prepare
-        msgs = [self.driver.create_message(RecordSet(), "", 0, "")]
+        msgs = [self.driver.create_message(RecordSet(), "query", 0, "")]
         # Prepare
         msg_ids = [str(uuid4()) for _ in range(2)]
-        task_res_list = [
-            TaskRes(
-                task=Task(
-                    ancestry=[msg_ids[0]], recordset=recordset_to_proto(RecordSet())
-                )
-            ),
-            TaskRes(
-                task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
-            ),
-        ]
-        self.state.store_task_ins.side_effect = msg_ids
-        self.state.get_task_res.return_value = task_res_list
+        message_res_list = create_message_replies_for_specific_ids(msg_ids)
+        self.state.get_message_res.return_value = message_res_list
+        self.state.store_message_ins.side_effect = msg_ids
 
         # Execute
         with patch("time.sleep", side_effect=lambda t: time.sleep(t * 0.01)):
@@ -232,8 +205,8 @@ class TestInMemoryDriver(unittest.TestCase):
         self.assertLess(time.time() - start_time, 0.2)
         self.assertEqual(len(ret_msgs), 0)
 
-    def test_task_store_consistency_after_push_pull_sqlitestate(self) -> None:
-        """Test tasks are deleted in sqlite state once messages are pulled."""
+    def test_message_store_consistency_after_push_pull_sqlitestate(self) -> None:
+        """Test messages are deleted in sqlite state once messages are pulled."""
         # Prepare
         state = LinkStateFactory("").state()
         run_id = state.create_run("", "", "", {}, ConfigsRecord())
@@ -243,23 +216,23 @@ class TestInMemoryDriver(unittest.TestCase):
         assert isinstance(state, SqliteLinkState)
 
         # Check recorded
-        task_ins = state.query("SELECT * FROM task_ins;")
-        self.assertEqual(len(task_ins), len(list(msg_ids)))
+        num_msg_ins = len(state.query("SELECT * FROM message_ins;"))
+        self.assertEqual(num_msg_ins, len(list(msg_ids)))
 
         # Prepare: create replies
         reply_tos = get_replies(self.driver, msg_ids, node_id)
 
-        # Query number of task_ins and task_res in State
-        task_res = state.query("SELECT * FROM task_res;")
-        task_ins = state.query("SELECT * FROM task_ins;")
+        # Query number of Messages and reply Messages in State
+        num_msg_res = len(state.query("SELECT * FROM message_res;"))
+        num_msg_ins = len(state.query("SELECT * FROM message_ins;"))
 
         # Assert
         self.assertEqual(reply_tos, msg_ids)
-        self.assertEqual(len(task_res), 0)
-        self.assertEqual(len(task_ins), 0)
+        self.assertEqual(num_msg_res, 0)
+        self.assertEqual(num_msg_ins, 0)
 
-    def test_task_store_consistency_after_push_pull_inmemory_state(self) -> None:
-        """Test tasks are deleted in in-memory state once messages are pulled."""
+    def test_message_store_consistency_after_push_pull_inmemory_state(self) -> None:
+        """Test messages are deleted in in-memory state once messages are pulled."""
         # Prepare
         state_factory = LinkStateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
@@ -270,12 +243,32 @@ class TestInMemoryDriver(unittest.TestCase):
         assert isinstance(state, InMemoryLinkState)
 
         # Check recorded
-        self.assertEqual(len(state.task_ins_store), len(list(msg_ids)))
+        self.assertEqual(len(state.message_ins_store), len(list(msg_ids)))
 
         # Prepare: create replies
         reply_tos = get_replies(self.driver, msg_ids, node_id)
 
         # Assert
         self.assertEqual(set(reply_tos), set(msg_ids))
-        self.assertEqual(len(state.task_res_store), 0)
-        self.assertEqual(len(state.task_ins_store), 0)
+        self.assertEqual(len(state.message_res_store), 0)
+        self.assertEqual(len(state.message_ins_store), 0)
+
+
+def create_message_replies_for_specific_ids(message_ids: list[str]) -> list[Message]:
+    """Create reply Messages for a set of message IDs."""
+    message_replies = []
+
+    for msg_id in message_ids:
+
+        message = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=123, run_id=456
+            )
+        )
+        # pylint: disable=W0212
+        message.metadata._message_id = msg_id  # type: ignore
+
+        # Append reply
+        message_replies.append(message.create_reply(content=RecordSet()))
+
+    return message_replies

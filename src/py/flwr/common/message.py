@@ -21,11 +21,11 @@ import time
 from logging import WARNING
 from typing import Optional, cast
 
-from .constant import MESSAGE_TTL_TOLERANCE
+from .constant import MESSAGE_TTL_TOLERANCE, MessageType, MessageTypeLegacy
 from .logger import log
 from .record import RecordSet
 
-DEFAULT_TTL = 3600
+DEFAULT_TTL = 43200  # This is 12 hours
 
 
 class Metadata:  # pylint: disable=too-many-instance-attributes
@@ -75,6 +75,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
             "_message_type": message_type,
         }
         self.__dict__.update(var_dict)
+        self.message_type = message_type  # Trigger validation
 
     @property
     def run_id(self) -> int:
@@ -127,6 +128,16 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         self.__dict__["_created_at"] = value
 
     @property
+    def delivered_at(self) -> str:
+        """Unix timestamp when the message was delivered."""
+        return cast(str, self.__dict__["_delivered_at"])
+
+    @delivered_at.setter
+    def delivered_at(self, value: str) -> None:
+        """Set delivery timestamp of this message."""
+        self.__dict__["_delivered_at"] = value
+
+    @property
     def ttl(self) -> float:
         """Time-to-live for this message."""
         return cast(float, self.__dict__["_ttl"])
@@ -144,6 +155,17 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     @message_type.setter
     def message_type(self, value: str) -> None:
         """Set message_type."""
+        # Validate message type
+        if validate_legacy_message_type(value):
+            pass  # Backward compatibility for legacy message types
+        elif not validate_message_type(value):
+            raise ValueError(
+                f"Invalid message type: '{value}'. "
+                "Expected format: '<category>' or '<category>.<action>', "
+                "where <category> must be 'train', 'evaluate', or 'query', "
+                "and <action> must be a valid Python identifier."
+            )
+
         self.__dict__["_message_type"] = value
 
     def __repr__(self) -> str:
@@ -223,6 +245,7 @@ class Message:
             raise ValueError("Either `content` or `error` must be set, but not both.")
 
         metadata.created_at = time.time()  # Set the message creation timestamp
+        metadata.delivered_at = ""
         var_dict = {
             "_metadata": metadata,
             "_content": content,
@@ -310,7 +333,7 @@ class Message:
             )
             message.metadata.ttl = ttl
 
-        self._limit_task_res_ttl(message)
+        self._limit_message_res_ttl(message)
 
         return message
 
@@ -353,7 +376,7 @@ class Message:
             )
             message.metadata.ttl = ttl
 
-        self._limit_task_res_ttl(message)
+        self._limit_message_res_ttl(message)
 
         return message
 
@@ -368,14 +391,14 @@ class Message:
         )
         return f"{self.__class__.__qualname__}({view})"
 
-    def _limit_task_res_ttl(self, message: Message) -> None:
-        """Limit the TaskRes TTL to not exceed the expiration time of the TaskIns it
-        replies to.
+    def _limit_message_res_ttl(self, message: Message) -> None:
+        """Limit the TTL of the provided Message to not exceed the expiration time of
+        this Message it replies to.
 
         Parameters
         ----------
         message : Message
-            The message to which the TaskRes is replying.
+            The reply Message to limit the TTL for.
         """
         # Calculate the maximum allowed TTL
         max_allowed_ttl = (
@@ -406,3 +429,48 @@ def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
         ttl=ttl,
         message_type=msg.metadata.message_type,
     )
+
+
+def validate_message_type(message_type: str) -> bool:
+    """Validate if the message type is valid.
+
+    A valid message type format must be one of the following:
+
+    - "<category>"
+    - "<category>.<action>"
+
+    where `category` must be one of "train", "evaluate", or "query",
+    and `action` must be a valid Python identifier.
+    """
+    # Check if conforming to the format "<category>"
+    valid_types = {
+        MessageType.TRAIN,
+        MessageType.EVALUATE,
+        MessageType.QUERY,
+        MessageType.SYSTEM,
+    }
+    if message_type in valid_types:
+        return True
+
+    # Check if conforming to the format "<category>.<action>"
+    if message_type.count(".") != 1:
+        return False
+
+    category, action = message_type.split(".")
+    if category in valid_types and action.isidentifier():
+        return True
+
+    return False
+
+
+def validate_legacy_message_type(message_type: str) -> bool:
+    """Validate if the legacy message type is valid."""
+    # Backward compatibility for legacy message types
+    if message_type in (
+        MessageTypeLegacy.GET_PARAMETERS,
+        MessageTypeLegacy.GET_PROPERTIES,
+        "reconnect",
+    ):
+        return True
+
+    return False

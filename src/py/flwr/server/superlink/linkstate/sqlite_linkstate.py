@@ -26,7 +26,7 @@ from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
-from flwr.common import Context, log, now
+from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -35,15 +35,20 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.record import ConfigsRecord
+from flwr.common.serde import (
+    error_from_proto,
+    error_to_proto,
+    recordset_from_proto,
+    recordset_to_proto,
+)
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
-from flwr.proto.node_pb2 import Node
+from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 
 # pylint: enable=E0611
-from flwr.server.utils.validator import validate_task_ins_or_res
+from flwr.server.utils.validator import validate_message
 
 from .linkstate import LinkState
 from .utils import (
@@ -58,8 +63,8 @@ from .utils import (
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
-    verify_found_taskres,
-    verify_taskins_ids,
+    verify_found_message_replies,
+    verify_message_ids,
 )
 
 SQL_CREATE_TABLE_NODE = """
@@ -117,36 +122,39 @@ CREATE TABLE IF NOT EXISTS context(
 );
 """
 
-SQL_CREATE_TABLE_TASK_INS = """
-CREATE TABLE IF NOT EXISTS task_ins(
-    task_id                 TEXT UNIQUE,
+SQL_CREATE_TABLE_MESSAGE_INS = """
+CREATE TABLE IF NOT EXISTS message_ins(
+    message_id              TEXT UNIQUE,
     group_id                TEXT,
     run_id                  INTEGER,
-    producer_node_id        INTEGER,
-    consumer_node_id        INTEGER,
+    src_node_id             INTEGER,
+    dst_node_id             INTEGER,
+    reply_to_message        TEXT,
     created_at              REAL,
     delivered_at            TEXT,
     ttl                     REAL,
-    ancestry                TEXT,
-    task_type               TEXT,
-    recordset               BLOB,
+    message_type            TEXT,
+    content                 BLOB NULL,
+    error                   BLOB NULL,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
 
-SQL_CREATE_TABLE_TASK_RES = """
-CREATE TABLE IF NOT EXISTS task_res(
-    task_id                 TEXT UNIQUE,
+
+SQL_CREATE_TABLE_MESSAGE_RES = """
+CREATE TABLE IF NOT EXISTS message_res(
+    message_id              TEXT UNIQUE,
     group_id                TEXT,
     run_id                  INTEGER,
-    producer_node_id        INTEGER,
-    consumer_node_id        INTEGER,
+    src_node_id             INTEGER,
+    dst_node_id             INTEGER,
+    reply_to_message        TEXT,
     created_at              REAL,
     delivered_at            TEXT,
     ttl                     REAL,
-    ancestry                TEXT,
-    task_type               TEXT,
-    recordset               BLOB,
+    message_type            TEXT,
+    content                 BLOB NULL,
+    error                   BLOB NULL,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
@@ -196,8 +204,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_RUN)
         cur.execute(SQL_CREATE_TABLE_LOGS)
         cur.execute(SQL_CREATE_TABLE_CONTEXT)
-        cur.execute(SQL_CREATE_TABLE_TASK_INS)
-        cur.execute(SQL_CREATE_TABLE_TASK_RES)
+        cur.execute(SQL_CREATE_TABLE_MESSAGE_INS)
+        cur.execute(SQL_CREATE_TABLE_MESSAGE_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
@@ -239,88 +247,62 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return result
 
-    def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
-        """Store one TaskIns.
-
-        Usually, the ServerAppIo API calls this to schedule instructions.
-
-        Stores the value of the task_ins in the link state and, if successful,
-        returns the task_id (UUID) of the task_ins. If, for any reason, storing
-        the task_ins fails, `None` is returned.
-
-        Constraints
-        -----------
-
-        `task_ins.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
-        """
-        # Validate task
-        errors = validate_task_ins_or_res(task_ins)
+    def store_message_ins(self, message: Message) -> Optional[UUID]:
+        """Store one Message."""
+        # Validate message
+        errors = validate_message(message=message, is_reply_message=False)
         if any(errors):
             log(ERROR, errors)
             return None
-        # Create task_id
-        task_id = uuid4()
+        # Create message_id
+        message_id = uuid4()
 
-        # Store TaskIns
-        task_ins.task_id = str(task_id)
-        data = (task_ins_to_dict(task_ins),)
+        # Store Message
+        # pylint: disable-next=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
+        data = (message_to_dict(message),)
 
         # Convert values from uint64 to sint64 for SQLite
         convert_uint64_values_in_dict_to_sint64(
-            data[0], ["run_id", "producer_node_id", "consumer_node_id"]
+            data[0], ["run_id", "src_node_id", "dst_node_id"]
         )
 
         # Validate run_id
         query = "SELECT run_id FROM run WHERE run_id = ?;"
         if not self.query(query, (data[0]["run_id"],)):
-            log(ERROR, "Invalid run ID for TaskIns: %s", task_ins.run_id)
+            log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
             return None
+
         # Validate source node ID
-        if task_ins.task.producer.node_id != SUPERLINK_NODE_ID:
+        if message.metadata.src_node_id != SUPERLINK_NODE_ID:
             log(
                 ERROR,
-                "Invalid source node ID for TaskIns: %s",
-                task_ins.task.producer.node_id,
+                "Invalid source node ID for Message: %s",
+                message.metadata.src_node_id,
             )
             return None
+
         # Validate destination node ID
         query = "SELECT node_id FROM node WHERE node_id = ?;"
-        if not self.query(query, (data[0]["consumer_node_id"],)):
+        if not self.query(query, (data[0]["dst_node_id"],)):
             log(
                 ERROR,
-                "Invalid destination node ID for TaskIns: %s",
-                task_ins.task.consumer.node_id,
+                "Invalid destination node ID for Message: %s",
+                message.metadata.dst_node_id,
             )
             return None
 
         columns = ", ".join([f":{key}" for key in data[0]])
-        query = f"INSERT INTO task_ins VALUES({columns});"
+        query = f"INSERT INTO message_ins VALUES({columns});"
 
         # Only invalid run_id can trigger IntegrityError.
         # This may need to be changed in the future version with more integrity checks.
         self.query(query, data)
 
-        return task_id
+        return message_id
 
-    def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
-        """Get undelivered TaskIns for one node.
-
-        Usually, the Fleet API calls this for Nodes planning to work on one or more
-        TaskIns.
-
-        Constraints
-        -----------
-        Retrieve all TaskIns where
-
-            1. the `task_ins.task.consumer.node_id` equals `node_id` AND
-            2. the `task_ins.task.delivered_at` equals `""`.
-
-        `delivered_at` MUST BE set (i.e., not `""`) otherwise the TaskIns MUST not be in
-        the result.
-
-        If `limit` is not `None`, return, at most, `limit` number of `task_ins`. If
-        `limit` is set, it has to be greater than zero.
-        """
+    def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
+        """Get all Messages that have not been delivered yet."""
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
@@ -333,11 +315,11 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Convert the uint64 value to sint64 for SQLite
         data["node_id"] = convert_uint64_to_sint64(node_id)
 
-        # Retrieve all TaskIns for node_id
+        # Retrieve all Messages for node_id
         query = """
-            SELECT task_id
-            FROM task_ins
-            WHERE   consumer_node_id == :node_id
+            SELECT message_id
+            FROM message_ins
+            WHERE   dst_node_id == :node_id
             AND   delivered_at = ""
             AND   (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
         """
@@ -352,20 +334,20 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         if rows:
             # Prepare query
-            task_ids = [row["task_id"] for row in rows]
-            placeholders: str = ",".join([f":id_{i}" for i in range(len(task_ids))])
+            message_ids = [row["message_id"] for row in rows]
+            placeholders: str = ",".join([f":id_{i}" for i in range(len(message_ids))])
             query = f"""
-                UPDATE task_ins
+                UPDATE message_ins
                 SET delivered_at = :delivered_at
-                WHERE task_id IN ({placeholders})
+                WHERE message_id IN ({placeholders})
                 RETURNING *;
             """
 
             # Prepare data for query
             delivered_at = now().isoformat()
             data = {"delivered_at": delivered_at}
-            for index, task_id in enumerate(task_ids):
-                data[f"id_{index}"] = str(task_id)
+            for index, msg_id in enumerate(message_ids):
+                data[f"id_{index}"] = str(msg_id)
 
             # Run query
             rows = self.query(query, data)
@@ -373,86 +355,80 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         for row in rows:
             # Convert values from sint64 to uint64
             convert_sint64_values_in_dict_to_uint64(
-                row, ["run_id", "producer_node_id", "consumer_node_id"]
+                row, ["run_id", "src_node_id", "dst_node_id"]
             )
 
-        result = [dict_to_task_ins(row) for row in rows]
+        result = [dict_to_message(row) for row in rows]
 
         return result
 
-    def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
-        """Store one TaskRes.
-
-        Usually, the Fleet API calls this when Nodes return their results.
-
-        Stores the TaskRes and, if successful, returns the `task_id` (UUID) of
-        the `task_res`. If storing the `task_res` fails, `None` is returned.
-
-        Constraints
-        -----------
-        `task_res.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
-        """
-        # Validate task
-        errors = validate_task_ins_or_res(task_res)
+    def store_message_res(self, message: Message) -> Optional[UUID]:
+        """Store one Message."""
+        # Validate message
+        errors = validate_message(message=message, is_reply_message=True)
         if any(errors):
             log(ERROR, errors)
             return None
 
-        # Create task_id
-        task_id = uuid4()
-
-        task_ins_id = task_res.task.ancestry[0]
-        task_ins = self.get_valid_task_ins(task_ins_id)
-        if task_ins is None:
+        res_metadata = message.metadata
+        msg_ins_id = res_metadata.reply_to_message
+        msg_ins = self.get_valid_message_ins(msg_ins_id)
+        if msg_ins is None:
             log(
                 ERROR,
-                "Failed to store TaskRes: "
-                "TaskIns with task_id %s does not exist or has expired.",
-                task_ins_id,
+                "Failed to store Message reply: "
+                "The message it replies to with message_id %s does not exist or "
+                "has expired.",
+                msg_ins_id,
             )
             return None
 
-        # Ensure that the consumer_id of taskIns matches the producer_id of taskRes.
+        # Ensure that the dst_node_id of the original message matches the src_node_id of
+        # reply being processed.
         if (
-            task_ins
-            and task_res
-            and convert_sint64_to_uint64(task_ins["consumer_node_id"])
-            != task_res.task.producer.node_id
+            msg_ins
+            and message
+            and convert_sint64_to_uint64(msg_ins["dst_node_id"])
+            != res_metadata.src_node_id
         ):
             return None
 
-        # Fail if the TaskRes TTL exceeds the
-        # expiration time of the TaskIns it replies to.
-        # Condition: TaskIns.created_at + TaskIns.ttl ≥
-        #            TaskRes.created_at + TaskRes.ttl
+        # Fail if the Message TTL exceeds the
+        # expiration time of the Message it replies to.
+        # Condition: ins_metadata.created_at + ins_metadata.ttl ≥
+        #            res_metadata.created_at + res_metadata.ttl
         # A small tolerance is introduced to account
         # for floating-point precision issues.
         max_allowed_ttl = (
-            task_ins["created_at"] + task_ins["ttl"] - task_res.task.created_at
+            msg_ins["created_at"] + msg_ins["ttl"] - res_metadata.created_at
         )
-        if task_res.task.ttl and (
-            task_res.task.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
+        if res_metadata.ttl and (
+            res_metadata.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
         ):
             log(
                 WARNING,
-                "Received TaskRes with TTL %.2f "
-                "exceeding the allowed maximum TTL %.2f.",
-                task_res.task.ttl,
+                "Received Message with TTL %.2f exceeding the allowed maximum "
+                "TTL %.2f.",
+                res_metadata.ttl,
                 max_allowed_ttl,
             )
             return None
 
-        # Store TaskRes
-        task_res.task_id = str(task_id)
-        data = (task_res_to_dict(task_res),)
+        # Create message_id
+        message_id = uuid4()
+
+        # Store Message
+        # pylint: disable-next=W0212
+        message.metadata._message_id = str(message_id)  # type: ignore
+        data = (message_to_dict(message),)
 
         # Convert values from uint64 to sint64 for SQLite
         convert_uint64_values_in_dict_to_sint64(
-            data[0], ["run_id", "producer_node_id", "consumer_node_id"]
+            data[0], ["run_id", "src_node_id", "dst_node_id"]
         )
 
         columns = ", ".join([f":{key}" for key in data[0]])
-        query = f"INSERT INTO task_res VALUES({columns});"
+        query = f"INSERT INTO message_res VALUES({columns});"
 
         # Only invalid run_id can trigger IntegrityError.
         # This may need to be changed in the future version with more integrity checks.
@@ -462,124 +438,125 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             log(ERROR, "`run` is invalid")
             return None
 
-        return task_id
+        return message_id
 
-    # pylint: disable-next=R0912,R0915,R0914
-    def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
-        """Get TaskRes for the given TaskIns IDs."""
-        ret: dict[UUID, TaskRes] = {}
+    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+        """Get reply Messages for the given Message IDs."""
+        ret: dict[UUID, Message] = {}
 
-        # Verify TaskIns IDs
+        # Verify Message IDs
         current = time.time()
         query = f"""
             SELECT *
-            FROM task_ins
-            WHERE task_id IN ({",".join(["?"] * len(task_ids))});
+            FROM message_ins
+            WHERE message_id IN ({",".join(["?"] * len(message_ids))});
         """
-        rows = self.query(query, tuple(str(task_id) for task_id in task_ids))
-        found_task_ins_dict: dict[UUID, TaskIns] = {}
+        rows = self.query(query, tuple(str(message_id) for message_id in message_ids))
+        found_message_ins_dict: dict[UUID, Message] = {}
         for row in rows:
             convert_sint64_values_in_dict_to_uint64(
-                row, ["run_id", "producer_node_id", "consumer_node_id"]
+                row, ["run_id", "src_node_id", "dst_node_id"]
             )
-            found_task_ins_dict[UUID(row["task_id"])] = dict_to_task_ins(row)
+            found_message_ins_dict[UUID(row["message_id"])] = dict_to_message(row)
 
-        ret = verify_taskins_ids(
-            inquired_taskins_ids=task_ids,
-            found_taskins_dict=found_task_ins_dict,
+        ret = verify_message_ids(
+            inquired_message_ids=message_ids,
+            found_message_ins_dict=found_message_ins_dict,
             current_time=current,
         )
 
-        # Find all TaskRes
+        # Find all reply Messages
         query = f"""
             SELECT *
-            FROM task_res
-            WHERE ancestry IN ({",".join(["?"] * len(task_ids))})
+            FROM message_res
+            WHERE reply_to_message IN ({",".join(["?"] * len(message_ids))})
             AND delivered_at = "";
         """
-        rows = self.query(query, tuple(str(task_id) for task_id in task_ids))
+        rows = self.query(query, tuple(str(message_id) for message_id in message_ids))
         for row in rows:
             convert_sint64_values_in_dict_to_uint64(
-                row, ["run_id", "producer_node_id", "consumer_node_id"]
+                row, ["run_id", "src_node_id", "dst_node_id"]
             )
-        tmp_ret_dict = verify_found_taskres(
-            inquired_taskins_ids=task_ids,
-            found_taskins_dict=found_task_ins_dict,
-            found_taskres_list=[dict_to_task_res(row) for row in rows],
+        tmp_ret_dict = verify_found_message_replies(
+            inquired_message_ids=message_ids,
+            found_message_ins_dict=found_message_ins_dict,
+            found_message_res_list=[dict_to_message(row) for row in rows],
             current_time=current,
         )
         ret.update(tmp_ret_dict)
 
-        # Mark existing TaskRes to be returned as delivered
+        # Mark existing reply Messages to be returned as delivered
         delivered_at = now().isoformat()
-        for task_res in ret.values():
-            task_res.task.delivered_at = delivered_at
-        task_res_ids = [task_res.task_id for task_res in ret.values()]
+        for message_res in ret.values():
+            message_res.metadata.delivered_at = delivered_at
+        message_res_ids = [
+            message_res.metadata.message_id for message_res in ret.values()
+        ]
         query = f"""
-            UPDATE task_res
+            UPDATE message_res
             SET delivered_at = ?
-            WHERE task_id IN ({",".join(["?"] * len(task_res_ids))});
+            WHERE message_id IN ({",".join(["?"] * len(message_res_ids))});
         """
-        data: list[Any] = [delivered_at] + task_res_ids
+        data: list[Any] = [delivered_at] + message_res_ids
         self.query(query, data)
 
         return list(ret.values())
 
-    def num_task_ins(self) -> int:
-        """Calculate the number of task_ins in store.
+    def num_message_ins(self) -> int:
+        """Calculate the number of instruction Messages in store.
 
-        This includes delivered but not yet deleted task_ins.
+        This includes delivered but not yet deleted.
         """
-        query = "SELECT count(*) AS num FROM task_ins;"
+        query = "SELECT count(*) AS num FROM message_ins;"
         rows = self.query(query)
         result = rows[0]
         num = cast(int, result["num"])
         return num
 
-    def num_task_res(self) -> int:
-        """Calculate the number of task_res in store.
+    def num_message_res(self) -> int:
+        """Calculate the number of reply Messages in store.
 
-        This includes delivered but not yet deleted task_res.
+        This includes delivered but not yet deleted.
         """
-        query = "SELECT count(*) AS num FROM task_res;"
+        query = "SELECT count(*) AS num FROM message_res;"
         rows = self.query(query)
         result: dict[str, int] = rows[0]
         return result["num"]
 
-    def delete_tasks(self, task_ins_ids: set[UUID]) -> None:
-        """Delete TaskIns/TaskRes pairs based on provided TaskIns IDs."""
-        if not task_ins_ids:
+    def delete_messages(self, message_ins_ids: set[UUID]) -> None:
+        """Delete a Message and its reply based on provided Message IDs."""
+        if not message_ins_ids:
             return
         if self.conn is None:
             raise AttributeError("LinkState not initialized")
 
-        placeholders = ",".join(["?"] * len(task_ins_ids))
-        data = tuple(str(task_id) for task_id in task_ins_ids)
+        placeholders = ",".join(["?"] * len(message_ins_ids))
+        data = tuple(str(message_id) for message_id in message_ins_ids)
 
-        # Delete task_ins
+        # Delete Message
         query_1 = f"""
-            DELETE FROM task_ins
-            WHERE task_id IN ({placeholders});
+            DELETE FROM message_ins
+            WHERE message_id IN ({placeholders});
         """
 
-        # Delete task_res
+        # Delete reply Message
         query_2 = f"""
-            DELETE FROM task_res
-            WHERE ancestry IN ({placeholders});
+            DELETE FROM message_res
+            WHERE reply_to_message IN ({placeholders});
         """
 
         with self.conn:
             self.conn.execute(query_1, data)
             self.conn.execute(query_2, data)
 
-    def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
-        """Get all TaskIns IDs for the given run_id."""
+    def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all instruction Message IDs for the given run_id."""
         if self.conn is None:
             raise AttributeError("LinkState not initialized")
 
         query = """
-            SELECT task_id
-            FROM task_ins
+            SELECT message_id
+            FROM message_ins
             WHERE run_id = :run_id;
         """
 
@@ -589,7 +566,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         with self.conn:
             rows = self.conn.execute(query, data).fetchall()
 
-        return {UUID(row["task_id"]) for row in rows}
+        return {UUID(row["message_id"]) for row in rows}
 
     def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
@@ -1001,32 +978,32 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         latest_timestamp = rows[-1]["timestamp"] if rows else 0.0
         return "".join(row["log"] for row in rows), latest_timestamp
 
-    def get_valid_task_ins(self, task_id: str) -> Optional[dict[str, Any]]:
-        """Check if the TaskIns exists and is valid (not expired).
+    def get_valid_message_ins(self, message_id: str) -> Optional[dict[str, Any]]:
+        """Check if the Message exists and is valid (not expired).
 
-        Return TaskIns if valid.
+        Return Message if valid.
         """
         query = """
             SELECT *
-            FROM task_ins
-            WHERE task_id = :task_id
+            FROM message_ins
+            WHERE message_id = :message_id
         """
-        data = {"task_id": task_id}
+        data = {"message_id": message_id}
         rows = self.query(query, data)
         if not rows:
-            # TaskIns does not exist
+            # Message does not exist
             return None
 
-        task_ins = rows[0]
-        created_at = task_ins["created_at"]
-        ttl = task_ins["ttl"]
+        message_ins = rows[0]
+        created_at = message_ins["created_at"]
+        ttl = message_ins["ttl"]
         current_time = time.time()
 
-        # Check if TaskIns is expired
+        # Check if Message is expired
         if ttl is not None and created_at + ttl <= current_time:
             return None
 
-        return task_ins
+        return message_ins
 
 
 def dict_factory(
@@ -1041,94 +1018,51 @@ def dict_factory(
     return dict(zip(fields, row))
 
 
-def task_ins_to_dict(task_msg: TaskIns) -> dict[str, Any]:
-    """Transform TaskIns to dict."""
+def message_to_dict(message: Message) -> dict[str, Any]:
+    """Transform Message to dict."""
     result = {
-        "task_id": task_msg.task_id,
-        "group_id": task_msg.group_id,
-        "run_id": task_msg.run_id,
-        "producer_node_id": task_msg.task.producer.node_id,
-        "consumer_node_id": task_msg.task.consumer.node_id,
-        "created_at": task_msg.task.created_at,
-        "delivered_at": task_msg.task.delivered_at,
-        "ttl": task_msg.task.ttl,
-        "ancestry": ",".join(task_msg.task.ancestry),
-        "task_type": task_msg.task.task_type,
-        "recordset": task_msg.task.recordset.SerializeToString(),
+        "message_id": message.metadata.message_id,
+        "group_id": message.metadata.group_id,
+        "run_id": message.metadata.run_id,
+        "src_node_id": message.metadata.src_node_id,
+        "dst_node_id": message.metadata.dst_node_id,
+        "reply_to_message": message.metadata.reply_to_message,
+        "created_at": message.metadata.created_at,
+        "delivered_at": message.metadata.delivered_at,
+        "ttl": message.metadata.ttl,
+        "message_type": message.metadata.message_type,
+        "content": None,
+        "error": None,
     }
+
+    if message.has_content():
+        result["content"] = recordset_to_proto(message.content).SerializeToString()
+    else:
+        result["error"] = error_to_proto(message.error).SerializeToString()
+
     return result
 
 
-def task_res_to_dict(task_msg: TaskRes) -> dict[str, Any]:
-    """Transform TaskRes to dict."""
-    result = {
-        "task_id": task_msg.task_id,
-        "group_id": task_msg.group_id,
-        "run_id": task_msg.run_id,
-        "producer_node_id": task_msg.task.producer.node_id,
-        "consumer_node_id": task_msg.task.consumer.node_id,
-        "created_at": task_msg.task.created_at,
-        "delivered_at": task_msg.task.delivered_at,
-        "ttl": task_msg.task.ttl,
-        "ancestry": ",".join(task_msg.task.ancestry),
-        "task_type": task_msg.task.task_type,
-        "recordset": task_msg.task.recordset.SerializeToString(),
-    }
-    return result
+def dict_to_message(message_dict: dict[str, Any]) -> Message:
+    """Transform dict to Message."""
+    content, error = None, None
+    if (b_content := message_dict.pop("content")) is not None:
+        content = recordset_from_proto(ProtoRecordSet.FromString(b_content))
+    if (b_error := message_dict.pop("error")) is not None:
+        error = error_from_proto(ProtoError.FromString(b_error))
 
-
-def dict_to_task_ins(task_dict: dict[str, Any]) -> TaskIns:
-    """Turn task_dict into protobuf message."""
-    recordset = ProtoRecordSet()
-    recordset.ParseFromString(task_dict["recordset"])
-
-    result = TaskIns(
-        task_id=task_dict["task_id"],
-        group_id=task_dict["group_id"],
-        run_id=task_dict["run_id"],
-        task=Task(
-            producer=Node(
-                node_id=task_dict["producer_node_id"],
-            ),
-            consumer=Node(
-                node_id=task_dict["consumer_node_id"],
-            ),
-            created_at=task_dict["created_at"],
-            delivered_at=task_dict["delivered_at"],
-            ttl=task_dict["ttl"],
-            ancestry=task_dict["ancestry"].split(","),
-            task_type=task_dict["task_type"],
-            recordset=recordset,
-        ),
+    # Metadata constructor doesn't allow passing created_at. We set it later
+    metadata = Metadata(
+        **{
+            k: v
+            for k, v in message_dict.items()
+            if k not in ["created_at", "delivered_at"]
+        }
     )
-    return result
-
-
-def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
-    """Turn task_dict into protobuf message."""
-    recordset = ProtoRecordSet()
-    recordset.ParseFromString(task_dict["recordset"])
-
-    result = TaskRes(
-        task_id=task_dict["task_id"],
-        group_id=task_dict["group_id"],
-        run_id=task_dict["run_id"],
-        task=Task(
-            producer=Node(
-                node_id=task_dict["producer_node_id"],
-            ),
-            consumer=Node(
-                node_id=task_dict["consumer_node_id"],
-            ),
-            created_at=task_dict["created_at"],
-            delivered_at=task_dict["delivered_at"],
-            ttl=task_dict["ttl"],
-            ancestry=task_dict["ancestry"].split(","),
-            task_type=task_dict["task_type"],
-            recordset=recordset,
-        ),
-    )
-    return result
+    msg = Message(metadata=metadata, content=content, error=error)
+    msg.metadata.__dict__["_created_at"] = message_dict["created_at"]
+    msg.metadata.delivered_at = message_dict["delivered_at"]
+    return msg
 
 
 def determine_run_status(row: dict[str, Any]) -> str:

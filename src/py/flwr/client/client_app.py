@@ -16,6 +16,8 @@
 
 
 import inspect
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Callable, Optional
 
 from flwr.client.client import Client
@@ -26,8 +28,11 @@ from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFnExt, Mod
 from flwr.common import Context, Message, MessageType
 from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
+from flwr.common.message import validate_message_type
 
 from .typing import ClientAppCallable
+
+DEFAULT_ACTION = "default"
 
 
 def _alert_erroneous_client_fn() -> None:
@@ -71,6 +76,11 @@ def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFn
     return client_fn
 
 
+@contextmanager
+def _empty_lifespan(_: Context) -> Iterator[None]:
+    yield
+
+
 class ClientAppException(Exception):
     """Exception raised when an exception is raised while executing a ClientApp."""
 
@@ -95,15 +105,6 @@ class ClientApp:
     >>>    return FlowerClient().to_client()
     >>>
     >>> app = ClientApp(client_fn)
-
-    If the above code is in a Python module called `client`, it can be started as
-    follows:
-
-    >>> flower-client-app client:app --insecure
-
-    In this `client:app` example, `client` refers to the Python module `client.py` in
-    which the previous code lives in and `app` refers to the global attribute `app` that
-    points to an object of type `ClientApp`.
     """
 
     def __init__(
@@ -112,6 +113,7 @@ class ClientApp:
         mods: Optional[list[Mod]] = None,
     ) -> None:
         self._mods: list[Mod] = mods if mods is not None else []
+        self._registered_funcs: dict[str, ClientAppCallable] = {}
 
         # Create wrapper function for `handle`
         self._call: Optional[ClientAppCallable] = None
@@ -131,127 +133,303 @@ class ClientApp:
             # Wrap mods around the wrapped handle function
             self._call = make_ffn(ffn, mods if mods is not None else [])
 
-        # Step functions
-        self._train: Optional[ClientAppCallable] = None
-        self._evaluate: Optional[ClientAppCallable] = None
-        self._query: Optional[ClientAppCallable] = None
+        # Lifespan function
+        self._lifespan = _empty_lifespan
 
     def __call__(self, message: Message, context: Context) -> Message:
         """Execute `ClientApp`."""
-        # Execute message using `client_fn`
-        if self._call:
-            return self._call(message, context)
+        with self._lifespan(context):
+            # Execute message using `client_fn`
+            if self._call:
+                return self._call(message, context)
 
-        # Execute message using a new
-        if message.metadata.message_type == MessageType.TRAIN:
-            if self._train:
-                return self._train(message, context)
-            raise ValueError("No `train` function registered")
-        if message.metadata.message_type == MessageType.EVALUATE:
-            if self._evaluate:
-                return self._evaluate(message, context)
-            raise ValueError("No `evaluate` function registered")
-        if message.metadata.message_type == MessageType.QUERY:
-            if self._query:
-                return self._query(message, context)
-            raise ValueError("No `query` function registered")
+            # Get the category and the action
+            # A valid message type is of the form "<category>" or "<category>.<action>",
+            # where <category> must be "train"/"evaluate"/"query", and <action> is a
+            # valid Python identifier
+            if not validate_message_type(message.metadata.message_type):
+                raise ValueError(
+                    f"Invalid message type: {message.metadata.message_type}"
+                )
 
-        # Message type did not match one of the known message types abvoe
-        raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
+            category, action = message.metadata.message_type, DEFAULT_ACTION
+            if "." in category:
+                category, action = category.split(".")
 
-    def train(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers the train fn with the client app.
+            # Check if the function is registered
+            if (full_name := f"{category}.{action}") in self._registered_funcs:
+                return self._registered_funcs[full_name](message, context)
+
+            raise ValueError(f"No {category} function registered with name '{action}'")
+
+    def train(
+        self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
+    ) -> Callable[[ClientAppCallable], ClientAppCallable]:
+        """Register a train function with the ``ClientApp``.
+
+        Parameters
+        ----------
+        action : str (default: "default")
+            The action name used to route messages. Defaults to "default".
+        mods : Optional[list[Mod]] (default: None)
+            A list of function-specific modifiers.
+
+        Returns
+        -------
+        Callable[[ClientAppCallable], ClientAppCallable]
+            A decorator that registers a train function with the ``ClientApp``.
 
         Examples
         --------
+        Registering a train function:
+
         >>> app = ClientApp()
         >>>
         >>> @app.train()
         >>> def train(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp training running")
-        >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(content=message.content())
+        >>>     print("Executing default train function")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
+
+        Registering a train function with a custom action name:
+
+        >>> app = ClientApp()
+        >>>
+        >>> # Messages with `message_type="train.custom_action"` will be
+        >>> # routed to this function.
+        >>> @app.train("custom_action")
+        >>> def custom_action(message: Message, context: Context) -> Message:
+        >>>     print("Executing train function for custom action")
+        >>>     return message.create_reply(content=message.content)
+
+        Registering a train function with a function-specific Flower Mod:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>>
+        >>> app = ClientApp()
+        >>>
+        >>> # Using the `mods` argument to apply a function-specific mod.
+        >>> @app.train(mods=[message_size_mod])
+        >>> def train(message: Message, context: Context) -> Message:
+        >>>     print("Executing train function with message size mod")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
         """
+        return _get_decorator(self, MessageType.TRAIN, action, mods)
 
-        def train_decorator(train_fn: ClientAppCallable) -> ClientAppCallable:
-            """Register the train fn with the ServerApp object."""
-            if self._call:
-                raise _registration_error(MessageType.TRAIN)
+    def evaluate(
+        self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
+    ) -> Callable[[ClientAppCallable], ClientAppCallable]:
+        """Register an evaluate function with the ``ClientApp``.
 
-            warn_preview_feature("ClientApp-register-train-function")
+        Parameters
+        ----------
+        action : str (default: "default")
+            The action name used to route messages. Defaults to "default".
+        mods : Optional[list[Mod]] (default: None)
+            A list of function-specific modifiers.
 
-            # Register provided function with the ClientApp object
-            # Wrap mods around the wrapped step function
-            self._train = make_ffn(train_fn, self._mods)
-
-            # Return provided function unmodified
-            return train_fn
-
-        return train_decorator
-
-    def evaluate(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers the evaluate fn with the client app.
+        Returns
+        -------
+        Callable[[ClientAppCallable], ClientAppCallable]
+            A decorator that registers an evaluate function with the ``ClientApp``.
 
         Examples
         --------
+        Registering an evaluate function:
+
         >>> app = ClientApp()
         >>>
         >>> @app.evaluate()
         >>> def evaluate(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp evaluation running")
-        >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(content=message.content())
+        >>>     print("Executing default evaluate function")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
+
+        Registering an evaluate function with a custom action name:
+
+        >>> app = ClientApp()
+        >>>
+        >>> # Messages with `message_type="evaluate.custom_action"` will be
+        >>> # routed to this function.
+        >>> @app.evaluate("custom_action")
+        >>> def custom_action(message: Message, context: Context) -> Message:
+        >>>     print("Executing evaluate function for custom action")
+        >>>     return message.create_reply(content=message.content)
+
+        Registering an evaluate function with a function-specific Flower Mod:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>>
+        >>> app = ClientApp()
+        >>>
+        >>> # Using the `mods` argument to apply a function-specific mod.
+        >>> @app.evaluate(mods=[message_size_mod])
+        >>> def evaluate(message: Message, context: Context) -> Message:
+        >>>     print("Executing evaluate function with message size mod")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
         """
+        return _get_decorator(self, MessageType.EVALUATE, action, mods)
 
-        def evaluate_decorator(evaluate_fn: ClientAppCallable) -> ClientAppCallable:
-            """Register the evaluate fn with the ServerApp object."""
-            if self._call:
-                raise _registration_error(MessageType.EVALUATE)
+    def query(
+        self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
+    ) -> Callable[[ClientAppCallable], ClientAppCallable]:
+        """Register a query function with the ``ClientApp``.
 
-            warn_preview_feature("ClientApp-register-evaluate-function")
+        Parameters
+        ----------
+        action : str (default: "default")
+            The action name used to route messages. Defaults to "default".
+        mods : Optional[list[Mod]] (default: None)
+            A list of function-specific modifiers.
 
-            # Register provided function with the ClientApp object
-            # Wrap mods around the wrapped step function
-            self._evaluate = make_ffn(evaluate_fn, self._mods)
+        Returns
+        -------
+        Callable[[ClientAppCallable], ClientAppCallable]
+            A decorator that registers a query function with the ``ClientApp``.
 
-            # Return provided function unmodified
-            return evaluate_fn
+        Examples
+        --------
+        Registering a query function:
 
-        return evaluate_decorator
+        >>> app = ClientApp()
+        >>>
+        >>> @app.query()
+        >>> def query(message: Message, context: Context) -> Message:
+        >>>     print("Executing default query function")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
 
-    def query(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
-        """Return a decorator that registers the query fn with the client app.
+        Registering a query function with a custom action name:
+
+        >>> app = ClientApp()
+        >>>
+        >>> # Messages with `message_type="query.custom_action"` will be
+        >>> # routed to this function.
+        >>> @app.query("custom_action")
+        >>> def custom_action(message: Message, context: Context) -> Message:
+        >>>     print("Executing query function for custom action")
+        >>>     return message.create_reply(content=message.content)
+
+        Registering a query function with a function-specific Flower Mod:
+
+        >>> from flwr.client.mod import message_size_mod
+        >>>
+        >>> app = ClientApp()
+        >>>
+        >>> # Using the `mods` argument to apply a function-specific mod.
+        >>> @app.query(mods=[message_size_mod])
+        >>> def query(message: Message, context: Context) -> Message:
+        >>>     print("Executing query function with message size mod")
+        >>>     # Create and return an echo reply message
+        >>>     return message.create_reply(content=message.content)
+        """
+        return _get_decorator(self, MessageType.QUERY, action, mods)
+
+    def lifespan(
+        self,
+    ) -> Callable[
+        [Callable[[Context], Iterator[None]]], Callable[[Context], Iterator[None]]
+    ]:
+        """Return a decorator that registers the lifespan fn with the client app.
+
+        The decorated function should accept a `Context` object and use `yield`
+        to define enter and exit behavior.
 
         Examples
         --------
         >>> app = ClientApp()
         >>>
-        >>> @app.query()
-        >>> def query(message: Message, context: Context) -> Message:
-        >>>    print("ClientApp query running")
-        >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(content=message.content())
+        >>> @app.lifespan()
+        >>> def lifespan(context: Context) -> None:
+        >>>     # Perform initialization tasks before the app starts
+        >>>     print("Initializing ClientApp")
+        >>>
+        >>>     yield  # ClientApp is running
+        >>>
+        >>>     # Perform cleanup tasks after the app stops
+        >>>     print("Cleaning up ClientApp")
         """
 
-        def query_decorator(query_fn: ClientAppCallable) -> ClientAppCallable:
-            """Register the query fn with the ServerApp object."""
-            if self._call:
-                raise _registration_error(MessageType.QUERY)
+        def lifespan_decorator(
+            lifespan_fn: Callable[[Context], Iterator[None]]
+        ) -> Callable[[Context], Iterator[None]]:
+            """Register the lifespan fn with the ServerApp object."""
+            warn_preview_feature("ClientApp-register-lifespan-function")
 
-            warn_preview_feature("ClientApp-register-query-function")
+            @contextmanager
+            def decorated_lifespan(context: Context) -> Iterator[None]:
+                # Execute the code before `yield` in lifespan_fn
+                try:
+                    if not isinstance(it := lifespan_fn(context), Iterator):
+                        raise StopIteration
+                    next(it)
+                except StopIteration:
+                    raise RuntimeError(
+                        "lifespan function should yield at least once."
+                    ) from None
+
+                try:
+                    # Enter the context
+                    yield
+                finally:
+                    try:
+                        # Execute the code after `yield` in lifespan_fn
+                        next(it)
+                    except StopIteration:
+                        pass
+                    else:
+                        raise RuntimeError("lifespan function should only yield once.")
 
             # Register provided function with the ClientApp object
-            # Wrap mods around the wrapped step function
-            self._query = make_ffn(query_fn, self._mods)
+            # Ignore mypy error because of different argument names (`_` vs `context`)
+            self._lifespan = decorated_lifespan  # type: ignore
 
             # Return provided function unmodified
-            return query_fn
+            return lifespan_fn
 
-        return query_decorator
+        return lifespan_decorator
 
 
 class LoadClientAppError(Exception):
     """Error when trying to load `ClientApp`."""
+
+
+def _get_decorator(
+    app: ClientApp, category: str, action: str, mods: Optional[list[Mod]]
+) -> Callable[[ClientAppCallable], ClientAppCallable]:
+    """Get the decorator for the given category and action."""
+    # pylint: disable=protected-access
+    if app._call:
+        raise _registration_error(category)
+
+    def decorator(fn: ClientAppCallable) -> ClientAppCallable:
+        warn_preview_feature(f"ClientApp-register-{category}-function")
+
+        # Check if the name is a valid Python identifier
+        if not action.isidentifier():
+            raise ValueError(
+                f"Cannot register {category} function with name '{action}'. "
+                "The name must follow Python's function naming rules."
+            )
+
+        # Check if the name is already registered
+        full_name = f"{category}.{action}"  # Full name of the message type
+        if full_name in app._registered_funcs:
+            raise ValueError(
+                f"Cannot register {category} function with name '{action}'. "
+                f"A {category} function with the name '{action}' is already registered."
+            )
+
+        # Register provided function with the ClientApp object
+        app._registered_funcs[full_name] = make_ffn(fn, app._mods + (mods or []))
+
+        # Return provided function unmodified
+        return fn
+
+    # pylint: enable=protected-access
+    return decorator
 
 
 def _registration_error(fn_name: str) -> ValueError:

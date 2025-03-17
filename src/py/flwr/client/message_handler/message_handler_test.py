@@ -264,7 +264,7 @@ class TestMessageValidation(unittest.TestCase):
             reply_to_message="",
             group_id="group1",
             ttl=DEFAULT_TTL,
-            message_type="mock",
+            message_type="evaluate",
         )
         # We need to set created_at in this way
         # since this `self.in_metadata` is used for tests
@@ -279,7 +279,7 @@ class TestMessageValidation(unittest.TestCase):
             reply_to_message="qwerty",
             group_id="group1",
             ttl=DEFAULT_TTL,
-            message_type="mock",
+            message_type="evaluate",
         )
         self.common_content = RecordSet()
 
@@ -300,7 +300,7 @@ class TestMessageValidation(unittest.TestCase):
         invalid_metadata_list: list[Metadata] = []
         attrs = list(vars(self.valid_out_metadata).keys())
         for attr in attrs:
-            if attr == "_partition_id":
+            if attr == "_delivered_at":
                 continue
             if attr == "_ttl":  # Skip configurable ttl
                 continue

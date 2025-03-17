@@ -127,6 +127,7 @@ class MessageType:
     TRAIN = "train"
     EVALUATE = "evaluate"
     QUERY = "query"
+    SYSTEM = "system"
 
     def __new__(cls) -> MessageType:
         """Prevent instantiation."""
@@ -210,5 +211,15 @@ class AuthType:
     OIDC = "oidc"
 
     def __new__(cls) -> AuthType:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class EventLogWriterType:
+    """Event log writer types."""
+
+    STDOUT = "stdout"
+
+    def __new__(cls) -> EventLogWriterType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")

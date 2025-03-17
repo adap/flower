@@ -45,7 +45,6 @@ from . import (
     RecordSet,
     typing,
 )
-from .constant import SUPERLINK_NODE_ID
 from .message import Error, Message, Metadata
 from .serde import (
     array_from_proto,
@@ -59,11 +58,7 @@ from .serde import (
     fab_from_proto,
     fab_to_proto,
     message_from_proto,
-    message_from_taskins,
-    message_from_taskres,
     message_to_proto,
-    message_to_taskins,
-    message_to_taskres,
     metrics_record_from_proto,
     metrics_record_to_proto,
     parameters_record_from_proto,
@@ -191,6 +186,17 @@ class RecordMaker:
             raise NotImplementedError(f"Unsupported dtype: {dtype}")
         return cast(T, ret)
 
+    def get_message_type(self) -> str:
+        """Create a message type."""
+        # Create a legacy message type
+        if self.rng.random() < 0.5:
+            return self.rng.choice(["get_parameters", "get_properties", "reconnect"])
+
+        # Create a message type
+        category = self.rng.choice(["train", "evaluate", "query"])
+        suffix = self.rng.choice(["", ".custom_action", ".mock_action"])
+        return f"{category}{suffix}"
+
     def array(self) -> Array:
         """Create a Array."""
         dtypes = ("float", "int")
@@ -247,20 +253,14 @@ class RecordMaker:
         num_configs_records: int,
     ) -> RecordSet:
         """Create a RecordSet."""
-        return RecordSet(
-            parameters_records={
-                self.get_str(): self.parameters_record()
-                for _ in range(num_params_records)
-            },
-            metrics_records={
-                self.get_str(): self.metrics_record()
-                for _ in range(num_metrics_records)
-            },
-            configs_records={
-                self.get_str(): self.configs_record()
-                for _ in range(num_configs_records)
-            },
-        )
+        ret = RecordSet()
+        for _ in range(num_params_records):
+            ret[self.get_str()] = self.parameters_record()
+        for _ in range(num_metrics_records):
+            ret[self.get_str()] = self.metrics_record()
+        for _ in range(num_configs_records):
+            ret[self.get_str()] = self.configs_record()
+        return ret
 
     def metadata(self) -> Metadata:
         """Create a Metadata."""
@@ -272,7 +272,7 @@ class RecordMaker:
             dst_node_id=self.rng.randint(0, 1 << 63),
             reply_to_message=self.get_str(64),
             ttl=self.rng.randint(1, 1 << 30),
-            message_type=self.get_str(10),
+            message_type=self.get_message_type(),
         )
 
     def user_config(self) -> typing.UserConfig:
@@ -362,96 +362,6 @@ def test_recordset_serialization_deserialization() -> None:
     # Assert
     assert isinstance(proto, ProtoRecordSet)
     assert original == deserialized
-
-
-@pytest.mark.parametrize(
-    "content_fn, error_fn",
-    [
-        (
-            lambda maker: maker.recordset(1, 1, 1),
-            None,
-        ),  # check when only content is set
-        (None, lambda code: Error(code=code)),  # check when only error is set
-    ],
-)
-def test_message_to_and_from_taskins(
-    content_fn: Callable[
-        [
-            RecordMaker,
-        ],
-        RecordSet,
-    ],
-    error_fn: Callable[[int], Error],
-) -> None:
-    """Test Message to and from TaskIns."""
-    # Prepare
-
-    maker = RecordMaker(state=1)
-    metadata = maker.metadata()
-    # pylint: disable-next=protected-access
-    metadata.__dict__["_src_node_id"] = SUPERLINK_NODE_ID  # Assume driver node
-
-    original = Message(
-        metadata=metadata,
-        content=None if content_fn is None else content_fn(maker),
-        error=None if error_fn is None else error_fn(0),
-    )
-
-    # Execute
-    taskins = message_to_taskins(original)
-    taskins.task_id = metadata.message_id
-    deserialized = message_from_taskins(taskins)
-
-    # Assert
-    if original.has_content():
-        assert original.content == deserialized.content
-    if original.has_error():
-        assert original.error == deserialized.error
-    assert metadata == deserialized.metadata
-
-
-@pytest.mark.parametrize(
-    "content_fn, error_fn",
-    [
-        (
-            lambda maker: maker.recordset(1, 1, 1),
-            None,
-        ),  # check when only content is set
-        (None, lambda code: Error(code=code)),  # check when only error is set
-    ],
-)
-def test_message_to_and_from_taskres(
-    content_fn: Callable[
-        [
-            RecordMaker,
-        ],
-        RecordSet,
-    ],
-    error_fn: Callable[[int], Error],
-) -> None:
-    """Test Message to and from TaskRes."""
-    # Prepare
-    maker = RecordMaker(state=2)
-    metadata = maker.metadata()
-    metadata.dst_node_id = SUPERLINK_NODE_ID  # Assume driver node
-
-    original = Message(
-        metadata=metadata,
-        content=None if content_fn is None else content_fn(maker),
-        error=None if error_fn is None else error_fn(0),
-    )
-
-    # Execute
-    taskres = message_to_taskres(original)
-    taskres.task_id = metadata.message_id
-    deserialized = message_from_taskres(taskres)
-
-    # Assert
-    if original.has_content():
-        assert original.content == deserialized.content
-    if original.has_error():
-        assert original.error == deserialized.error
-    assert metadata == deserialized.metadata
 
 
 @pytest.mark.parametrize(

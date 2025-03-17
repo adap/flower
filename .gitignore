@@ -17,6 +17,9 @@ examples/**/dataset/**
 # Flower Baselines
 baselines/datasets/leaf
 
+# Swift auto-generated documentation
+Documentation
+
 # Exclude ee package
 src/py/flwr/ee
 
@@ -168,6 +171,9 @@ poetry.lock
 
 # iOS
 xcuserdata/
+.swiftpm/
+.build/
+Package.resolved
 
 # Android
 .gradle
