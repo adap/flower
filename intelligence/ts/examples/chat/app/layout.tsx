@@ -26,13 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{
-          backgroundImage: "url('/bg-image.jpg')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-900`}
       >
         <div className="flex-grow">{children}</div>
         <footer className="w-full text-center text-white bg-transparent">
@@ -43,24 +37,24 @@ export default function RootLayout({
                 href="https://flower.ai/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-blue-300 hover:underline"
+                className="hover:text-zinc-200 hover:underline"
               >
                 Flower Intelligence
               </a>
             </span>
             <Image
-              src="/logo_secondary-w-border.png"
+              src="/fi-icon.png"
               alt="FlowerLabs Logo"
               width={24}
               height={24}
             />
           </div>
-          <div className="mt-2 text-md">
+          <div className="mt-2 text-md text-zinc-700">
             <a
               href="https://flower.ai/imprint/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-blue-300 hover:underline mr-4"
+              className="hover:text-zinc-300 hover:underline mr-4"
             >
               Imprint
             </a>
@@ -68,7 +62,7 @@ export default function RootLayout({
               href="https://flower.ai/privacy/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-blue-300 hover:underline"
+              className="hover:text-zinc-300 hover:underline"
             >
               Privacy
             </a>
