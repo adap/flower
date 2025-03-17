@@ -47,8 +47,9 @@ def create_message(  # pylint: disable=R0913, R0917
         reply_to_message=reply_to_message,
         group_id="",
         ttl=ttl,
-        message_type=msg_type,
+        message_type="train",  # Bypass message type validation
     )
+    metadata.__dict__["_message_type"] = msg_type
     ret = Message(metadata=metadata, content=RecordSet())
     if not has_content:
         ret.__dict__["_content"] = None

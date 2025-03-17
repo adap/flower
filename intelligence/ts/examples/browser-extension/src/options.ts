@@ -2,8 +2,6 @@ import { storage } from 'webextension-polyfill';
 import {
   DEFAULT_REPLY_PROMPT,
   DEFAULT_SUMMARY_PROMPT,
-  DEFAULT_REMOTE_HANDOFF,
-  REMOTE_HANDOFF_CACHE_KEY,
   REPLY_CACHE_KEY,
   SUMMARY_PROMPT_CACHE_KEY,
 } from './constants';
@@ -82,12 +80,10 @@ const updateResetContainerState = (isModified: boolean, resetContainer: HTMLElem
 
 let cachedSummaryPrompt = DEFAULT_SUMMARY_PROMPT;
 let cachedReplyPrompt = DEFAULT_REPLY_PROMPT;
-let cachedRemoteHandoff = DEFAULT_REMOTE_HANDOFF;
 
 async function loadPromptValues() {
   const summaryCacheRes = await storage.local.get(SUMMARY_PROMPT_CACHE_KEY);
   const replyCacheRes = await storage.local.get(REPLY_CACHE_KEY);
-  const remoteCacheRes = await storage.local.get(REMOTE_HANDOFF_CACHE_KEY);
 
   let shouldSaveDefaults = false;
 
@@ -105,18 +101,10 @@ async function loadPromptValues() {
     cachedReplyPrompt = String(replyCacheRes[REPLY_CACHE_KEY]);
   }
 
-  if (!(REMOTE_HANDOFF_CACHE_KEY in remoteCacheRes)) {
-    cachedRemoteHandoff = DEFAULT_REMOTE_HANDOFF;
-    shouldSaveDefaults = true;
-  } else {
-    cachedRemoteHandoff = Boolean(remoteCacheRes[REMOTE_HANDOFF_CACHE_KEY]);
-  }
-
   if (shouldSaveDefaults) {
     await storage.local.set({
       [SUMMARY_PROMPT_CACHE_KEY]: cachedSummaryPrompt,
       [REPLY_CACHE_KEY]: cachedReplyPrompt,
-      [REMOTE_HANDOFF_CACHE_KEY]: cachedRemoteHandoff,
     });
   }
 
@@ -128,19 +116,15 @@ async function loadPromptValues() {
 
   toggleSettingDisplay(isSummaryModified, elements.summaryToggleButton, elements.summarySetting);
   toggleSettingDisplay(isReplyModified, elements.replyToggleButton, elements.replySetting);
-  toggleSettingDisplay(cachedRemoteHandoff, elements.remoteToggleButton);
 
   handleInputChange(isSummaryModified, isReplyModified);
 }
-const getCurrentRemoteToggleState = () =>
-  elements.remoteToggleButton.classList.contains('toggle-on');
 
 const handleInputChange = (isSummaryModified: boolean, isReplyModified: boolean) => {
   const isSummaryChanged = elements.summarizePromptInput.value !== cachedSummaryPrompt;
   const isReplyChanged = elements.replyPromptInput.value !== cachedReplyPrompt;
-  const isRemoteChanged = getCurrentRemoteToggleState() !== cachedRemoteHandoff;
 
-  const anyModified = isSummaryChanged || isReplyChanged || isRemoteChanged;
+  const anyModified = isSummaryChanged || isReplyChanged;
   updateButtonState(anyModified);
 
   updateResetContainerState(isSummaryModified, elements.resetSummaryContainer);
@@ -190,12 +174,10 @@ const attachEventListeners = () => {
         await storage.local.set({
           [SUMMARY_PROMPT_CACHE_KEY]: elements.summarizePromptInput.value,
           [REPLY_CACHE_KEY]: elements.replyPromptInput.value,
-          [REMOTE_HANDOFF_CACHE_KEY]: getCurrentRemoteToggleState(),
         });
 
         cachedSummaryPrompt = elements.summarizePromptInput.value;
         cachedReplyPrompt = elements.replyPromptInput.value;
-        cachedRemoteHandoff = getCurrentRemoteToggleState();
 
         updateButtonState(false);
         elements.settingsButton.innerText = 'Saved!';
