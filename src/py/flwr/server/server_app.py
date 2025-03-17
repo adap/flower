@@ -20,9 +20,7 @@ from contextlib import contextmanager
 from typing import Callable, Optional
 
 from flwr.common import Context
-from flwr.common.logger import (
-    warn_deprecated_feature_with_example,
-)
+from flwr.common.logger import warn_deprecated_feature_with_example
 from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
