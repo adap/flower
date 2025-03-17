@@ -9,9 +9,7 @@ import { FlowerIntelligence, ChatResponseResult, Message, Progress } from '@flwr
 
 const fi: FlowerIntelligence = FlowerIntelligence.instance;
 
-const history: Message[] = [
-  { role: 'system', content: 'You are a friendly assistant that loves using emojis.' },
-];
+const history: Message[] = [{ role: 'system', content: 'You are a friendly assistant.' }];
 
 interface ChatEntry {
   role: 'user' | 'bot';
