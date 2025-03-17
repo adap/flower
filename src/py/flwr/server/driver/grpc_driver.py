@@ -48,9 +48,18 @@ from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E
 
 from .driver import Driver
 
-ERROR_MESSAGE_RESOURCE_EXHAUSTED = """
-"The 2GB gRPC limit has been reached. Consider reducing the number of messages pushed "
-"in the batch or sample a smaller number of nodes before pushing the messages."
+ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED = """
+[Driver.push_messages] gRPC error occurred:
+
+The 2GB gRPC limit has been reached. Consider reducing the number of messages pushed 
+in the batch or sample a smaller number of nodes before pushing the messages.
+"""
+
+ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED = """
+[Driver.pull_messages] gRPC error occurred:
+
+The 2GB gRPC limit has been reached. Consider reducing the number of messages pulled 
+in the batch or sample a smaller number of nodes before pulling the messages.
 """
 
 
@@ -212,19 +221,21 @@ class GrpcDriver(Driver):
                     messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
                 )
             )
+            if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
+                list(message_proto_list)
+            ):
+                log(
+                    WARNING,
+                    "Not all messages could be pushed to the SuperLink. The returned "
+                    "list has `None` for those messages (the order is preserved as "
+                    "passed to `push_messages`). This could be due to a malformed "
+                    "message.",
+                )
+            return list(res.message_ids)
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
-                log(ERROR, ERROR_MESSAGE_RESOURCE_EXHAUSTED)
-        if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
-            list(message_proto_list)
-        ):
-            log(
-                WARNING,
-                "Not all messages could be pushed to the SuperLink. The returned "
-                "list has `None` for those messages (the order is preserved as passed "
-                "to `push_messages`). This could be due to a malformed message.",
-            )
-        return list(res.message_ids)
+                log(ERROR, ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED)
+            return []
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
@@ -240,12 +251,13 @@ class GrpcDriver(Driver):
                     run_id=cast(Run, self._run).run_id,
                 )
             )
+            # Convert Message from Protobuf representation
+            msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
+            return msgs
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
-                log(ERROR, ERROR_MESSAGE_RESOURCE_EXHAUSTED)
-        # Convert Message from Protobuf representation
-        msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
-        return msgs
+                log(ERROR, ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED)
+            return []
 
     def send_and_receive(
         self,
