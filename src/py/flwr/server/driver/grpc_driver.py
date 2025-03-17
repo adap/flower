@@ -222,7 +222,7 @@ class GrpcDriver(Driver):
                 )
             )
             if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
-                list(message_proto_list)
+                message_proto_list
             ):
                 log(
                     WARNING,
@@ -235,7 +235,8 @@ class GrpcDriver(Driver):
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
                 log(ERROR, ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED)
-            return []
+                return []
+            raise
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
@@ -257,7 +258,8 @@ class GrpcDriver(Driver):
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
                 log(ERROR, ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED)
-            return []
+                return []
+            raise
 
     def send_and_receive(
         self,
