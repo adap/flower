@@ -21,7 +21,7 @@ import time
 from logging import WARNING
 from typing import Optional, cast
 
-from .constant import MESSAGE_TTL_TOLERANCE
+from .constant import MESSAGE_TTL_TOLERANCE, MessageType, MessageTypeLegacy
 from .logger import log
 from .record import RecordSet
 
@@ -75,6 +75,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
             "_message_type": message_type,
         }
         self.__dict__.update(var_dict)
+        self.message_type = message_type  # Trigger validation
 
     @property
     def run_id(self) -> int:
@@ -154,6 +155,17 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     @message_type.setter
     def message_type(self, value: str) -> None:
         """Set message_type."""
+        # Validate message type
+        if validate_legacy_message_type(value):
+            pass  # Backward compatibility for legacy message types
+        elif not validate_message_type(value):
+            raise ValueError(
+                f"Invalid message type: '{value}'. "
+                "Expected format: '<category>' or '<category>.<action>', "
+                "where <category> must be 'train', 'evaluate', or 'query', "
+                "and <action> must be a valid Python identifier."
+            )
+
         self.__dict__["_message_type"] = value
 
     def __repr__(self) -> str:
@@ -417,3 +429,48 @@ def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
         ttl=ttl,
         message_type=msg.metadata.message_type,
     )
+
+
+def validate_message_type(message_type: str) -> bool:
+    """Validate if the message type is valid.
+
+    A valid message type format must be one of the following:
+
+    - "<category>"
+    - "<category>.<action>"
+
+    where `category` must be one of "train", "evaluate", or "query",
+    and `action` must be a valid Python identifier.
+    """
+    # Check if conforming to the format "<category>"
+    valid_types = {
+        MessageType.TRAIN,
+        MessageType.EVALUATE,
+        MessageType.QUERY,
+        MessageType.SYSTEM,
+    }
+    if message_type in valid_types:
+        return True
+
+    # Check if conforming to the format "<category>.<action>"
+    if message_type.count(".") != 1:
+        return False
+
+    category, action = message_type.split(".")
+    if category in valid_types and action.isidentifier():
+        return True
+
+    return False
+
+
+def validate_legacy_message_type(message_type: str) -> bool:
+    """Validate if the legacy message type is valid."""
+    # Backward compatibility for legacy message types
+    if message_type in (
+        MessageTypeLegacy.GET_PARAMETERS,
+        MessageTypeLegacy.GET_PROPERTIES,
+        "reconnect",
+    ):
+        return True
+
+    return False

@@ -255,15 +255,15 @@ struct DeltaMessage: Codable {
 }
 
 struct Usage: Codable {
-    let completionTokens: Int
-    let promptTokens: Int
-    let totalTokens: Int
-    
-    enum CodingKeys: String, CodingKey {
-        case completionTokens = "completion_tokens"
-        case promptTokens = "prompt_tokens"
-        case totalTokens = "total_tokens"
-    }
+  let completionTokens: Int
+  let promptTokens: Int
+  let totalTokens: Int
+
+  enum CodingKeys: String, CodingKey {
+    case completionTokens = "completion_tokens"
+    case promptTokens = "prompt_tokens"
+    case totalTokens = "total_tokens"
+  }
 }
 
 struct ChatCompletionsRequest: Codable {

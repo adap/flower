@@ -26,10 +26,7 @@ class MlxEngine: Engine {
   }
 
   var loadState = LoadState.idle
-  var modelConfiguration = ModelConfiguration(
-    id: "mlx-community/Llama-3.2-1B-Instruct-8bit",
-    defaultPrompt: "What is the difference between a fruit and a vegetable?"
-) {
+  var modelConfiguration = llama3_2_1B {
     didSet {
       loadState = .idle
     }
@@ -83,10 +80,7 @@ class MlxEngine: Engine {
     tools: [Tool]? = nil
   ) async throws -> Message {
     if let model = model {
-      modelConfiguration = modelMapping[model] ?? ModelConfiguration(
-        id: "mlx-community/Llama-3.2-1B-Instruct-8bit",
-        defaultPrompt: "What is the difference between a fruit and a vegetable?"
-    )
+      modelConfiguration = modelMapping[model] ?? llama3_2_1B
     }
 
     let generateParameters = GenerateParameters(temperature: temperature ?? 0.6)
@@ -118,7 +112,7 @@ class MlxEngine: Engine {
         }
       }
     }
-      return Message(role: "assistant", content: result.output)
+    return Message(role: "assistant", content: result.output)
   }
 
   func fetchModel(model: String, callback: @escaping (Progress) -> Void) async throws {

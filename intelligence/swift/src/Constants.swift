@@ -23,13 +23,15 @@ let chatCompletionPath = "/v1/chat/completions"
 let hashAlgorithm = SHA256.self
 let hkdfInfo = Data("ecdh key exchange".utf8)
 let aesKeyLength = 32
+let llama3_2_1B: ModelConfiguration = .init(
+  id: "mlx-community/Llama-3.2-1B-Instruct-bf16",
+  defaultPrompt: "What is the difference between a fruit and a vegetable?"
+)
+let llama3_2_3B: ModelConfiguration = .init(
+  id: "mlx-community/Llama-3.2-3B-Instruct",
+  defaultPrompt: "What is the difference between a fruit and a vegetable?"
+)
 let modelMapping: [String: ModelConfiguration] = [
-    "meta/llama3.2-1b": ModelConfiguration(
-        id: "mlx-community/Llama-3.2-1B-Instruct-8bit",
-        defaultPrompt: "What is the difference between a fruit and a vegetable?"
-    ),
-  "meta/llama3.2-3b": ModelConfiguration(
-    id: "mlx-community/Llama-3.2-3B-Instruct",
-    defaultPrompt: "What is the difference between a fruit and a vegetable?"
-),
+  "meta/llama3.2-1b": llama3_2_1B,
+  "meta/llama3.2-3b": llama3_2_3B,
 ]

@@ -34,7 +34,7 @@ jobs:
 
       - name: Check formatting and lint
         working-directory: intelligence/swift
-        run: swift-format lint --recursive .
+        run: swift-format lint --recursive --strict .
 
   fi_swift_tests:
     name: Tests
