@@ -207,7 +207,7 @@ export default function ClientSideChatPage() {
     <div className="flex items-center min-h-[calc(90vh)]">
       <div className="flex flex-col max-h-[calc(80vh)] border rounded-2xl shadow bg-white mt-16 mx-auto mb-8 w-full max-w-7xl">
         {modelLoadingDescription !== null && (
-          <div className="p-2 text-center bg-amber-500/50 text-zinc-600 rounded-t-2xl">
+          <div className="p-2 text-center bg-amber-500/50 text-zinc-600 rounded-t-2xl px-4">
             {modelLoadingDescription}
           </div>
         )}
