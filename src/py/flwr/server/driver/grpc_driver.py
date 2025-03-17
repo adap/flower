@@ -51,14 +51,14 @@ from .driver import Driver
 ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED = """
 [Driver.push_messages] gRPC error occurred:
 
-The 2GB gRPC limit has been reached. Consider reducing the number of messages pushed 
+The 2GB gRPC limit has been reached. Consider reducing the number of messages pushed
 in the batch.
 """
 
 ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED = """
 [Driver.pull_messages] gRPC error occurred:
 
-The 2GB gRPC limit has been reached. Consider reducing the number of messages pulled 
+The 2GB gRPC limit has been reached. Consider reducing the number of messages pulled
 in the batch.
 """
 
