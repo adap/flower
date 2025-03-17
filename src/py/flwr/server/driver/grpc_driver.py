@@ -49,17 +49,31 @@ from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E
 from .driver import Driver
 
 ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED = """
+
 [Driver.push_messages] gRPC error occurred:
 
 The 2GB gRPC limit has been reached. Consider reducing the number of messages pushed
-in the batch.
+at once, or push messages individually, for example:
+
+> msgs = [msg1, msg2, msg3]
+> msg_ids = []
+> for msg in msgs:
+>     msg_id = driver.push_messages([msg])
+>     msg_ids.extend(msg_id)
 """
 
 ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED = """
+
 [Driver.pull_messages] gRPC error occurred:
 
 The 2GB gRPC limit has been reached. Consider reducing the number of messages pulled
-in the batch.
+at once, or pull messages individually, for example:
+
+> msgs_ids = [msg_id1, msg_id2, msg_id3]
+> msgs = []
+> for msg_id in msg_ids:
+>     msg = driver.pull_messages([msg_id])
+>     msgs.extend(msg)
 """
 
 
