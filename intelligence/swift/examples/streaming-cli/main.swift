@@ -13,14 +13,14 @@ fi.apiKey = "fk_0_aO1K3V7iFjEvD2vftkiUdWAuiGEdhajjCRFachcnryI"
 
 let messages = [
   Message(role: "system", content: "You are a helpful assistant."),
-  Message(role: "user", content: "Why is the sky blue?")
+  Message(role: "user", content: "Why is the sky blue?"),
 ]
 
 let options = ChatOptions(
   model: "meta/llama3.2-1b",
   stream: true,
   onStreamEvent: { streamEvent in
-      print(streamEvent.chunk)
+    print(streamEvent.chunk)
   }
 )
 
