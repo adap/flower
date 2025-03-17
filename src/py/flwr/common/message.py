@@ -17,9 +17,10 @@
 
 from __future__ import annotations
 
-import time
+from flwr.common.date import now
 from logging import WARNING
-from typing import Optional, cast
+from typing import Optional, cast, overload, Any
+from flwr.common.logger import warn_deprecated_feature
 
 from .constant import MESSAGE_TTL_TOLERANCE
 from .logger import log
@@ -46,6 +47,8 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     group_id : str
         An identifier for grouping messages. In some settings,
         this is used as the FL round.
+    created_at : float
+        Unix timestamp when the message was created.
     ttl : float
         Time-to-live for this message in seconds.
     message_type : str
@@ -61,6 +64,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         dst_node_id: int,
         reply_to_message: str,
         group_id: str,
+        created_at: float,
         ttl: float,
         message_type: str,
     ) -> None:
@@ -71,6 +75,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
             "_dst_node_id": dst_node_id,
             "_reply_to_message": reply_to_message,
             "_group_id": group_id,
+            "_created_at": created_at,
             "_ttl": ttl,
             "_message_type": message_type,
         }
@@ -211,6 +216,7 @@ class Error:
 class Message:
     """State of your application from the viewpoint of the entity using it.
 
+    TODO: Update docstring
     Parameters
     ----------
     metadata : Metadata
@@ -223,17 +229,95 @@ class Message:
         when processing another message.
     """
 
+    @overload
+    def __init__(self, content: RecordSet, dst_node_id: int, message_type: str) -> None:
+        ...
+
+    @overload
+    def __init__(self, content: RecordSet, dst_node_id: int, message_type: str, *, ttl: float) -> None:
+        ...
+
+    @overload
+    def __init__(self, content: RecordSet, dst_node_id: int, message_type: str, *, ttl: float, group_id: str) -> None:
+        ...
+
+    @overload
+    def __init__(self, content: RecordSet, *, reply_to: Message, ttl: float) -> None:
+        ...
+
+    @overload
+    def __init__(self, error: Error, *, reply_to: Message, ttl: float) -> None:
+        ...
+
     def __init__(
         self,
-        metadata: Metadata,
+        content_or_error: RecordSet | Error | None = None,
+        dst_node_id: int | None = None,
+        message_type: str | None = None,
+        *,
         content: RecordSet | None = None,
         error: Error | None = None,
+        ttl: float | None = None,
+        group_id: str | None = None,
+        reply_to: Message | None = None,
+        metadata: Metadata | None = None,
     ) -> None:
-        if not (content is None) ^ (error is None):
-            raise ValueError("Either `content` or `error` must be set, but not both.")
+        # One and only one of `content_or_error`, `content` and `error` must be set
+        if sum(x is not None for x in [content_or_error, content, error]) != 1:
+            _raise_msg_init_error()
 
-        metadata.created_at = time.time()  # Set the message creation timestamp
-        metadata.delivered_at = ""
+        # Set `content` or `error` based on `content_or_error`
+        if content_or_error is not None:  # This means `content` and `error` are None
+            if isinstance(content_or_error, RecordSet):
+                content = content_or_error
+            elif isinstance(content_or_error, Error):
+                error = content_or_error
+            else:
+                _raise_msg_init_error()
+        
+        # Create metadata for an instruction message
+        if reply_to is None:
+            # Check arguments
+            # `content`, `dst_node_id` and `message_type` must be set
+            if any(x is None for x in [content, dst_node_id, message_type]):
+                _raise_msg_init_error()
+            
+            # Set metadata
+            metadata = Metadata(
+                run_id="", # Will be set before pushed
+                message_id="",  # Will be set by the SuperLink
+                src_node_id=0,  # Will be set before pushed
+                dst_node_id=dst_node_id,
+                reply_to_message="",  # Instruction messages do not reply to any message
+                group_id=group_id or "",
+                created_at=now().timestamp(),
+                ttl=ttl or DEFAULT_TTL,
+                message_type=message_type,
+            )
+            metadata.delivered_at = ""  # Backward compatibility
+        
+        # Create metadata for a reply message
+        else:
+            # Check arguments
+            # `dst_node_id`, `message_type` and `group_id` must not be set
+            if any(x is not None for x in [dst_node_id, message_type, group_id]):
+                _raise_msg_init_error()
+            
+            # Set metadata
+            current = now().timestamp()
+            metadata = metadata or Metadata(
+                run_id=reply_to.metadata.run_id,
+                message_id="",
+                src_node_id=reply_to.metadata.dst_node_id,
+                dst_node_id=reply_to.metadata.src_node_id,
+                reply_to_message=reply_to.metadata.message_id,
+                group_id=reply_to.metadata.group_id,
+                created_at=current,
+                ttl=_limit_reply_ttl(current, ttl, reply_to),
+                message_type=reply_to.metadata.message_type,
+            )
+            metadata.delivered_at = ""
+
         var_dict = {
             "_metadata": metadata,
             "_content": content,
@@ -308,22 +392,8 @@ class Message:
         message : Message
             A Message containing only the relevant error and metadata.
         """
-        # If no TTL passed, use default for message creation (will update after
-        # message creation)
-        ttl_ = DEFAULT_TTL if ttl is None else ttl
-        # Create reply with error
-        message = Message(metadata=_create_reply_metadata(self, ttl_), error=error)
-
-        if ttl is None:
-            # Set TTL equal to the remaining time for the received message to expire
-            ttl = self.metadata.ttl - (
-                message.metadata.created_at - self.metadata.created_at
-            )
-            message.metadata.ttl = ttl
-
-        self._limit_message_res_ttl(message)
-
-        return message
+        # TODO: Warn about deprecated feature
+        return Message(error, reply_to=self, ttl=ttl)
 
     def create_reply(self, content: RecordSet, ttl: float | None = None) -> Message:
         """Create a reply to this message with specified content and TTL.
@@ -348,25 +418,8 @@ class Message:
         Message
             A new `Message` instance representing the reply.
         """
-        # If no TTL passed, use default for message creation (will update after
-        # message creation)
-        ttl_ = DEFAULT_TTL if ttl is None else ttl
-
-        message = Message(
-            metadata=_create_reply_metadata(self, ttl_),
-            content=content,
-        )
-
-        if ttl is None:
-            # Set TTL equal to the remaining time for the received message to expire
-            ttl = self.metadata.ttl - (
-                message.metadata.created_at - self.metadata.created_at
-            )
-            message.metadata.ttl = ttl
-
-        self._limit_message_res_ttl(message)
-
-        return message
+        # TODO: Warn about deprecated feature
+        return Message(content, reply_to=self, ttl=ttl)
 
     def __repr__(self) -> str:
         """Return a string representation of this instance."""
@@ -379,41 +432,30 @@ class Message:
         )
         return f"{self.__class__.__qualname__}({view})"
 
-    def _limit_message_res_ttl(self, message: Message) -> None:
-        """Limit the TTL of the provided Message to not exceed the expiration time of
-        this Message it replies to.
 
-        Parameters
-        ----------
-        message : Message
-            The reply Message to limit the TTL for.
-        """
-        # Calculate the maximum allowed TTL
-        max_allowed_ttl = (
-            self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
+def _limit_reply_ttl(current: float, reply_ttl: float | None, reply_to: Message) -> float:
+    """Limit the TTL of a reply message to not exceed the expiration time of the
+    message it replies to."""
+    # Calculate the maximum allowed TTL
+    max_allowed_ttl = reply_to.metadata.created_at + reply_to.metadata.ttl - current
+
+    if reply_ttl is not None and reply_ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE:
+        log(
+            WARNING,
+            "The reply TTL of %.2f seconds exceeded the "
+            "allowed maximum of %.2f seconds. "
+            "The TTL has been updated to the allowed maximum.",
+            reply_ttl,
+            max_allowed_ttl,
         )
+        return max_allowed_ttl
 
-        if message.metadata.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE:
-            log(
-                WARNING,
-                "The reply TTL of %.2f seconds exceeded the "
-                "allowed maximum of %.2f seconds. "
-                "The TTL has been updated to the allowed maximum.",
-                message.metadata.ttl,
-                max_allowed_ttl,
-            )
-            message.metadata.ttl = max_allowed_ttl
+    return reply_ttl or max_allowed_ttl
 
 
-def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
-    """Construct metadata for a reply message."""
-    return Metadata(
-        run_id=msg.metadata.run_id,
-        message_id="",
-        src_node_id=msg.metadata.dst_node_id,
-        dst_node_id=msg.metadata.src_node_id,
-        reply_to_message=msg.metadata.message_id,
-        group_id=msg.metadata.group_id,
-        ttl=ttl,
-        message_type=msg.metadata.message_type,
+def _raise_msg_init_error() -> None:
+    raise TypeError(
+        f"Invalid arguments for {Message.__qualname__}. Expected one of the documented signatures: "
+        "Message(content: RecordSet, dst_node_id: int, message_type: str, *, [ttl: float, group_id: str]) "
+        "or Message(content: RecordSet | error: Error, *, reply_to: Message, [ttl: float])."
     )
