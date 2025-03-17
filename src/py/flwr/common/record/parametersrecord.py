@@ -282,7 +282,7 @@ class ParametersRecord(TypedDict[str, Array]):
 
     A typed dictionary (string to :class:`Array`) that can store named parameters
     as serialized tensors. Internally, this behaves similarly to an
-    `OrderedDict[str, Array]`. A `ParametersRecord` can be viewed as an
+    ``OrderedDict[str, Array]``. A ``ParametersRecord`` can be viewed as an
     equivalent to PyTorch's state_dict, but it holds arrays in serialized form.
 
     This object is one of the record types supported by :class:`RecordSet` and can
@@ -291,11 +291,11 @@ class ParametersRecord(TypedDict[str, Array]):
     This class can be instantiated in multiple ways:
 
     1. By providing nothing (empty container).
-    2. By providing a dictionary of Arrays (via the `array_dict` argument).
-    3. By providing a list of NumPy ndarrays (via the `numpy_ndarrays` argument).
-    4. By providing a PyTorch state_dict (via the `state_dict` argument).
+    2. By providing a dictionary of Arrays (via the ``array_dict`` argument).
+    3. By providing a list of NumPy ndarrays (via the ``numpy_ndarrays`` argument).
+    4. By providing a PyTorch state_dict (via the ``state_dict`` argument).
     5. By providing TensorFlow model weights (a list of NumPy arrays via the
-       `tf_weights` argument).
+       ``tf_weights`` argument).
 
     Parameters
     ----------
@@ -319,10 +319,10 @@ class ParametersRecord(TypedDict[str, Array]):
         this record with generated keys.
 
     keep_input : bool (default: True)
-        If `False`, entries from the input are removed after being added to
-        this record to free up memory. If `True`, the input remains unchanged.
+        If ``False``, entries from the input are removed after being added to
+        this record to free up memory. If ``True``, the input remains unchanged.
         Regardless of this value, no duplicate memory is used if the input is a
-        dictionary of Arrays, i.e., `array_dict`.
+        dictionary of Arrays, i.e., ``array_dict``.
 
     Examples
     --------
@@ -330,7 +330,7 @@ class ParametersRecord(TypedDict[str, Array]):
 
     >>> p_record = ParametersRecord()
 
-    Initializing with a dictionary of Arrays (`Array` instances):
+    Initializing with a dictionary of Arrays (:class:`Array` instances):
 
     >>> arr = Array("float32", [5, 5], "numpy.ndarray", b"serialized_data...")
     >>> p_record = ParametersRecord({"weight": arr})
@@ -556,7 +556,7 @@ class ParametersRecord(TypedDict[str, Array]):
         *,
         keep_input: bool = True,
     ) -> ParametersRecord:
-        """Create `ParametersRecord from a list of TensorFlow weights (NumPy arrays).
+        """Create ParametersRecord from a list of TensorFlow weights (NumPy arrays).
 
         Example
         -------
