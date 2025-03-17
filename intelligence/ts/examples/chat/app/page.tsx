@@ -32,11 +32,11 @@ const Collapsible: React.FC<{ content: string }> = ({ content }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="mb-2">
-      <button onClick={() => setIsOpen(!isOpen)} className="text-sm text-amber-400 underline mb-1">
+      <button onClick={() => setIsOpen(!isOpen)} className="text-sm text-amber-500 underline mb-1">
         {isOpen ? 'Hide internal reasoning' : 'Show internal reasoning'}
       </button>
       {isOpen && (
-        <div className="p-2 border-l-4 border-amber-400 bg-amber-50 text-sm text-justify italic">
+        <div className="p-4 border-l-4 border-amber-400 bg-amber-50 text-sm text-justify italic">
           {content}
         </div>
       )}
@@ -65,7 +65,7 @@ export default function ClientSideChatPage() {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [chatLog]);
+  }, [loading]);
 
   // Initialize model state as null; load the stored model on mount.
   const [model, setModel] = useState<string | null>(null);
