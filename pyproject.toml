@@ -82,7 +82,7 @@ ray = { version = "==2.31.0", optional = true, python = ">=3.9,<3.13" }
 starlette = { version = "^0.45.2", optional = true }
 uvicorn = { version = "^0.34.0", extras = ["standard"], optional = true }
 # Optional dependencies (PyTorch)
-torch = { version = ">=1.8.0", optional = true, python = ">=3.9,<3.13" }
+torch = { version = ">=1.8.0", optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray"]
