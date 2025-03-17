@@ -22,7 +22,6 @@ from typing import Callable, Optional
 from flwr.common import Context
 from flwr.common.logger import (
     warn_deprecated_feature_with_example,
-    warn_preview_feature,
 )
 from flwr.server.strategy import Strategy
 
@@ -213,7 +212,6 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
             lifespan_fn: Callable[[Context], Iterator[None]]
         ) -> Callable[[Context], Iterator[None]]:
             """Register the lifespan fn with the ServerApp object."""
-            warn_preview_feature("ServerApp-register-lifespan-function")
 
             @contextmanager
             def decorated_lifespan(context: Context) -> Iterator[None]:
