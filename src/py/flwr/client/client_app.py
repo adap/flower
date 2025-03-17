@@ -405,7 +405,6 @@ def _get_decorator(
         raise _registration_error(category)
 
     def decorator(fn: ClientAppCallable) -> ClientAppCallable:
-        warn_preview_feature(f"ClientApp-register-{category}-function")
 
         # Check if the name is a valid Python identifier
         if not action.isidentifier():

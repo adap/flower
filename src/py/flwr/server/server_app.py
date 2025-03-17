@@ -176,8 +176,6 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                     """,
                 )
 
-            warn_preview_feature("ServerApp-register-main-function")
-
             # Register provided function with the ServerApp object
             self._main = main_fn
 
