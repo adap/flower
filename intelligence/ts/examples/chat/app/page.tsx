@@ -34,11 +34,11 @@ const Collapsible: React.FC<{ content: string }> = ({ content }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="mb-2">
-      <button onClick={() => setIsOpen(!isOpen)} className="text-sm text-blue-500 underline mb-1">
+      <button onClick={() => setIsOpen(!isOpen)} className="text-sm text-sky-500 underline mb-1">
         {isOpen ? 'Hide internal reasoning' : 'Show internal reasoning'}
       </button>
       {isOpen && (
-        <div className="p-2 border-l-4 border-blue-500 bg-blue-50 text-sm italic">{content}</div>
+        <div className="p-2 border-l-4 border-sky-500 bg-sky-50 text-sm italic">{content}</div>
       )}
     </div>
   );
@@ -205,11 +205,10 @@ export default function ClientSideChatPage() {
             className={`mb-4 flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`p-3 rounded-lg ${
-                entry.role === 'user'
-                  ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
-                  : 'text-gray-800 rounded-tl-none'
-              }`}
+              className={`p-3 rounded-lg ${entry.role === 'user'
+                ? 'max-w-[75%] bg-gray-300 text-gray-900 rounded-tr-none'
+                : 'text-gray-800 rounded-tl-none'
+                }`}
             >
               {entry.role === 'bot' ? (
                 renderAssistantContent(entry)
@@ -222,17 +221,17 @@ export default function ClientSideChatPage() {
       </div>
 
       {/* Updated Input Area */}
-      <div className="px-4 py-4 bg-gray-50">
+      <div className="px-4 py-4 bg-white">
         <div className="relative">
           {/* Left Icon (Flower Logo) */}
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
             <Image src="/flwr-head.png" alt="Flower Icon" width={50} height={50} />
           </div>
           {/* Text Input */}
           <input
             type="text"
             placeholder="Type your question..."
-            className="block w-full p-4 pl-16 text-lg text-gray-900 border border-gray-300 rounded-full bg-white focus:border-gray-700 focus:outline-gray-700"
+            className="block w-full p-4 pl-20 text-xl text-gray-900 border border-gray-300 rounded-full bg-white focus:border-sky-500 focus:outline-sky-500"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -241,22 +240,21 @@ export default function ClientSideChatPage() {
           <button
             onClick={sendQuestion}
             disabled={isSubmitDisabled}
-            className={`absolute right-2.5 bottom-2.5 bg-gray-300 rounded-full p-2 ${
-              !isSubmitDisabled
-                ? 'hover:bg-gray-400 focus:ring-2 focus:ring-gray-400 cursor-pointer'
-                : 'cursor-not-allowed'
-            }`}
+            className={`absolute right-4 top-1/2 transform -translate-y-1/2 rounded-full p-2 ${isSubmitDisabled
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-sky-500 hover:bg-sky-600 focus:ring-2 focus:ring-sky-500 cursor-pointer'
+              }`}
           >
-            <ArrowUpIcon className="w-6 h-6 text-white" />
+            <ArrowUpIcon className="w-6 h-6 text-white font-bold" />
           </button>
         </div>
 
         {/* Additional Controls Below Input */}
         <div className="mt-4 flex flex-col md:flex-row items-center md:space-x-4 space-y-4 md:space-y-0">
           {/* Model Select */}
-          <div className="p-2 border border-gray-300 rounded bg-white text-gray-800">
+          <div className="p-2 border border-gray-300 rounded-full bg-white text-gray-800">
             <select
-              className="w-full"
+              className="w-full border-0 outline-none bg-transparent"
               value={model || availableModels[0]}
               onChange={(e) => setModel(e.target.value)}
             >
