@@ -26,7 +26,7 @@ import type { ProgressInfo, TextGenerationConfig } from '@huggingface/transforme
 import { FailureCode, Message, Result, Progress, ChatResponseResult } from '../typing';
 
 import { BaseEngine } from './engine';
-import { checkSupport } from './common';
+import { getEngineModelName } from './common/modelName';
 
 const stoppingCriteria = new InterruptableStoppingCriteria();
 const choice = 0;
@@ -42,10 +42,20 @@ export class TransformersEngine extends BaseEngine {
     stream?: boolean,
     onStreamEvent?: (event: { chunk: string }) => void
   ): Promise<ChatResponseResult> {
+    const modelNameRes = await getEngineModelName(model, 'onnx');
+    if (!modelNameRes.ok) {
+      return {
+        ok: false,
+        failure: {
+          code: FailureCode.UnsupportedModelError,
+          description: `The model ${model} is not supported on the Transformers.js engine.`,
+        },
+      };
+    }
     try {
       if (!(model in this.generationPipelines)) {
         let options = {};
-        const modelElems = model.split('|');
+        const modelElems = modelNameRes.value.split('|');
         const modelId = modelElems[0];
         if (modelElems.length > 1) {
           options = {
@@ -126,16 +136,26 @@ export class TransformersEngine extends BaseEngine {
         ok: false,
         failure: {
           code: FailureCode.LocalEngineChatError,
-          description: `TransformersEngine failed with: ${String(error)}`,
+          description: `Transformers.js engine failed with: ${String(error)}`,
         },
       };
     }
   }
 
   async fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>> {
+    const modelNameRes = await getEngineModelName(model, 'onnx');
+    if (!modelNameRes.ok) {
+      return {
+        ok: false,
+        failure: {
+          code: FailureCode.UnsupportedModelError,
+          description: `The model ${model} is not supported on the Transformers.js engine.`,
+        },
+      };
+    }
     try {
       if (!(model in this.generationPipelines)) {
-        this.generationPipelines.model = await pipeline('text-generation', model, {
+        this.generationPipelines.model = await pipeline('text-generation', modelNameRes.value, {
           dtype: 'q4',
           progress_callback: (progressInfo: ProgressInfo) => {
             let percentage = 0;
@@ -169,7 +189,8 @@ export class TransformersEngine extends BaseEngine {
     }
   }
 
-  async isSupported(model: string): Promise<Result<string>> {
-    return await checkSupport(model, 'onnx');
+  async isSupported(model: string): Promise<boolean> {
+    const modelNameRes = await getEngineModelName(model, 'onnx');
+    return modelNameRes.ok;
   }
 }

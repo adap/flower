@@ -264,7 +264,7 @@ class TestMessageValidation(unittest.TestCase):
             reply_to_message="",
             group_id="group1",
             ttl=DEFAULT_TTL,
-            message_type="mock",
+            message_type="evaluate",
         )
         # We need to set created_at in this way
         # since this `self.in_metadata` is used for tests
@@ -279,7 +279,7 @@ class TestMessageValidation(unittest.TestCase):
             reply_to_message="qwerty",
             group_id="group1",
             ttl=DEFAULT_TTL,
-            message_type="mock",
+            message_type="evaluate",
         )
         self.common_content = RecordSet()
 
