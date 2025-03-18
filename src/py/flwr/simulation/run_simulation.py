@@ -39,7 +39,7 @@ from flwr.common.logger import (
     warn_deprecated_feature_with_example,
 )
 from flwr.common.typing import Run, RunStatus, UserConfig
-from flwr.server.driver import Driver, InMemoryDriver
+from flwr.server.grid import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run as _run
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
