@@ -280,10 +280,10 @@ def _check_value(value: Array) -> None:
 class ParametersRecord(TypedDict[str, Array]):
     r"""Parameters record.
 
-    A typed dictionary (string to :class:`Array`) that can store named parameters
+    A typed dictionary (``str`` to :class:`Array`) that can store named parameters
     as serialized tensors. Internally, this behaves similarly to an
     ``OrderedDict[str, Array]``. A ``ParametersRecord`` can be viewed as an
-    equivalent to PyTorch's state_dict, but it holds arrays in serialized form.
+    equivalent to PyTorch's ``state_dict``, but it holds arrays in serialized form.
 
     This object is one of the record types supported by :class:`RecordSet` and can
     therefore be stored in a :class:`Message` or a :class:`Context`.
@@ -300,15 +300,12 @@ class ParametersRecord(TypedDict[str, Array]):
     array_dict : Optional[OrderedDict[str, Array]] (default: None)
         An existing dictionary containing named :class:`Array` objects. If
         provided, these entries will be used directly to populate the record.
-
     numpy_ndarrays : Optional[list[NDArray]] (default: None)
         A list of NumPy arrays. Each array will be automatically converted
         into an :class:`Array` and stored in this record with generated keys.
-
     state_dict : Optional[OrderedDict[str, torch.Tensor]] (default: None)
         A PyTorch state_dict (str keys to torch.Tensor values). Each
         tensor will be converted into an :class:`Array` and stored in this record.
-
     keep_input : bool (default: True)
         If ``False``, entries from the input are removed after being added to
         this record to free up memory. If ``True``, the input remains unchanged.
