@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 import time
-import warnings
 from collections.abc import Iterable
 from logging import DEBUG, ERROR, WARNING
 from typing import Optional, cast
@@ -46,7 +45,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
-from .driver import Driver
+from .grid import Driver
 
 ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED = """
 
@@ -183,14 +182,6 @@ class GrpcDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        if ttl:
-            warnings.warn(
-                "A custom TTL was set, but note that the SuperLink does not enforce "
-                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
-                "version of Flower.",
-                stacklevel=2,
-            )
-
         ttl_ = DEFAULT_TTL if ttl is None else ttl
         metadata = Metadata(
             run_id=cast(Run, self._run).run_id,
