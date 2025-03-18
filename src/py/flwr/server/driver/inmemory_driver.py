@@ -16,6 +16,7 @@
 
 
 import time
+import warnings
 from collections.abc import Iterable
 from typing import Optional, cast
 from uuid import UUID
@@ -87,6 +88,13 @@ class InMemoryDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
+        if ttl:
+            warnings.warn(
+                "A custom TTL was set, but note that the SuperLink does not enforce "
+                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
+                "version of Flower.",
+                stacklevel=2,
+            )
         ttl_ = DEFAULT_TTL if ttl is None else ttl
 
         metadata = Metadata(
