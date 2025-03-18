@@ -131,12 +131,11 @@ def test_create_reply(
 
     time.sleep(0.1)
 
-    kwargs = {"ttl": reply_ttl} if reply_ttl else {}
     if message.has_error():
         dummy_error = Error(code=0, reason="it crashed")
-        reply_message = Message(dummy_error, reply_to=message, **kwargs)
+        reply_message = Message(dummy_error, reply_to=message, ttl=reply_ttl)
     else:
-        reply_message = Message(RecordSet(), reply_to=message, **kwargs)
+        reply_message = Message(RecordSet(), reply_to=message, ttl=reply_ttl)
 
     # Ensure reply has a higher timestamp
     assert message.metadata.created_at < reply_message.metadata.created_at

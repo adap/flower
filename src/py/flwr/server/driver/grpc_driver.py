@@ -22,13 +22,13 @@ from typing import Optional, cast
 
 import grpc
 
-from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common import Message, RecordSet
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Run
@@ -182,18 +182,11 @@ class GrpcDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        ttl_ = DEFAULT_TTL if ttl is None else ttl
-        metadata = Metadata(
-            run_id=cast(Run, self._run).run_id,
-            message_id="",  # Will be set by the server
-            src_node_id=self.node.node_id,
-            dst_node_id=dst_node_id,
-            reply_to_message="",
-            group_id=group_id,
-            ttl=ttl_,
-            message_type=message_type,
+        warn_deprecated_feature(
+            "`Driver.create_message` is deprecated."
+            "Use `Message` constructor instead."
         )
-        return Message(metadata=metadata, content=content)
+        return Message(content, dst_node_id, message_type, ttl=ttl, group_id=group_id)
 
     def get_node_ids(self) -> Iterable[int]:
         """Get node IDs."""
@@ -210,8 +203,12 @@ class GrpcDriver(Driver):
         to the node specified in `dst_node_id`.
         """
         # Construct Messages
+        run_id = cast(Run, self._run).run_id
         message_proto_list: list[ProtoMessage] = []
         for msg in messages:
+            # Populate metadata
+            msg.metadata.__dict__["_run_id"] = run_id
+            msg.metadata.__dict__["_src_node_id"] = self.node.node_id
             # Check message
             self._check_message(msg)
             # Convert to proto
@@ -222,9 +219,7 @@ class GrpcDriver(Driver):
         try:
             # Call GrpcDriverStub method
             res: PushInsMessagesResponse = self._stub.PushMessages(
-                PushInsMessagesRequest(
-                    messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
-                )
+                PushInsMessagesRequest(messages_list=message_proto_list, run_id=run_id)
             )
             if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
                 message_proto_list

@@ -27,6 +27,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
+from flwr.common.message import make_message
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
@@ -250,10 +251,11 @@ def create_message_error_unavailable_res_message(ins_metadata: Metadata) -> Mess
         reply_to_message=ins_metadata.message_id,
         group_id=ins_metadata.group_id,
         message_type=ins_metadata.message_type,
+        created_at=current_time,
         ttl=ttl,
     )
 
-    return Message(
+    return make_message(
         metadata=metadata,
         error=Error(
             code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
@@ -273,10 +275,11 @@ def create_message_error_unavailable_ins_message(reply_to_message: UUID) -> Mess
         reply_to_message=str(reply_to_message),
         group_id="",  # Unknown
         message_type=MessageType.SYSTEM,
+        created_at=now().timestamp(),
         ttl=0,
     )
 
-    return Message(
+    return make_message(
         metadata=metadata,
         error=Error(
             code=ErrorCode.MESSAGE_UNAVAILABLE,

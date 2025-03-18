@@ -20,8 +20,9 @@ from collections.abc import Iterable
 from typing import Optional, cast
 from uuid import UUID
 
-from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common import Message, RecordSet
 from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.common.logger import warn_deprecated_feature
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
@@ -87,19 +88,11 @@ class InMemoryDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        ttl_ = DEFAULT_TTL if ttl is None else ttl
-
-        metadata = Metadata(
-            run_id=cast(Run, self._run).run_id,
-            message_id="",  # Will be set by the server
-            src_node_id=self.node.node_id,
-            dst_node_id=dst_node_id,
-            reply_to_message="",
-            group_id=group_id,
-            ttl=ttl_,
-            message_type=message_type,
+        warn_deprecated_feature(
+            "`Driver.create_message` is deprecated."
+            "Use `Message` constructor instead."
         )
-        return Message(metadata=metadata, content=content)
+        return Message(content, dst_node_id, message_type, ttl=ttl, group_id=group_id)
 
     def get_node_ids(self) -> Iterable[int]:
         """Get node IDs."""

@@ -24,17 +24,14 @@ from flwr.client import Client, NumPyClient
 from flwr.client.client_app import ClientApp
 from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import (
-    DEFAULT_TTL,
     Config,
     ConfigsRecord,
     Context,
     Message,
     MessageTypeLegacy,
-    Metadata,
     RecordSet,
     Scalar,
 )
-from flwr.common.message import make_message
 from flwr.common.constant import NUM_PARTITIONS_KEY, PARTITION_ID_KEY
 from flwr.common.recordset_compat import (
     getpropertiesins_to_recordset,

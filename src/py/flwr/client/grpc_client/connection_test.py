@@ -24,7 +24,7 @@ from unittest.mock import patch
 
 import grpc
 
-from flwr.common import DEFAULT_TTL, ConfigsRecord, Message, Metadata, RecordSet
+from flwr.common import ConfigsRecord, Message, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.common.constant import MessageTypeLegacy
 from flwr.common.retry_invoker import RetryInvoker, exponential

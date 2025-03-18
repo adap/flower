@@ -23,6 +23,7 @@ from typing import Any, Callable, Optional, TypeVar, Union, cast
 import pytest
 
 from flwr.common.date import now
+from flwr.common.message import make_message
 
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2
@@ -47,7 +48,7 @@ from . import (
     RecordSet,
     typing,
 )
-from .message import Error, Message, Metadata
+from .message import Error, Metadata
 from .serde import (
     array_from_proto,
     array_to_proto,
@@ -392,7 +393,7 @@ def test_message_serialization_deserialization(
     metadata = maker.metadata()
     metadata.dst_node_id = 0  # Assume driver node
 
-    original = Message(
+    original = make_message(
         metadata=metadata,
         content=None if content_fn is None else content_fn(maker),
         error=None if error_fn is None else error_fn(0),

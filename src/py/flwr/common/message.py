@@ -36,6 +36,13 @@ MESSAGE_INIT_ERROR_MESSAGE = (
 )
 
 
+class MessageInitializationError(TypeError):
+    """Error raised when initializing a message with invalid arguments."""
+
+    def __init__(self, message: str | None = None) -> None:
+        super().__init__(message or MESSAGE_INIT_ERROR_MESSAGE)
+
+
 class Metadata:  # pylint: disable=too-many-instance-attributes
     """The class representing metadata associated with the current message.
 
@@ -133,6 +140,11 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     def created_at(self) -> float:
         """Unix timestamp when the message was created."""
         return cast(float, self.__dict__["_created_at"])
+
+    @created_at.setter
+    def created_at(self, value: float) -> None:
+        """Set creation timestamp of this message."""
+        self.__dict__["_created_at"] = value
 
     @property
     def delivered_at(self) -> str:
@@ -247,7 +259,8 @@ class Message:
         A string that encodes the action to be executed on
         the receiving end.
     ttl : Optional[float] (default: None)
-        Time-to-live for this message in seconds.
+        Time-to-live (TTL) for this message in seconds. If `None` (default),
+        the TTL is set to 43,200 seconds (12 hours).
     group_id : Optional[str] (default: None)
         An identifier for grouping messages. In some settings, this is used as
         the FL round.
@@ -257,42 +270,24 @@ class Message:
     """
 
     @overload
-    def __init__(  # noqa: E704
-        self, content: RecordSet, dst_node_id: int, message_type: str
-    ) -> None: ...
-
-    @overload
-    def __init__(  # noqa: E704
-        self, content: RecordSet, dst_node_id: int, message_type: str, *, ttl: float
-    ) -> None: ...
-
-    @overload
     def __init__(  # pylint: disable=too-many-arguments  # noqa: E704
         self,
         content: RecordSet,
         dst_node_id: int,
         message_type: str,
         *,
-        ttl: float,
-        group_id: str,
+        ttl: float | None = None,
+        group_id: str | None = None,
     ) -> None: ...
 
     @overload
     def __init__(  # noqa: E704
-        self, content: RecordSet, *, reply_to: Message
+        self, content: RecordSet, *, reply_to: Message, ttl: float | None = None
     ) -> None: ...
 
     @overload
     def __init__(  # noqa: E704
-        self, content: RecordSet, *, reply_to: Message, ttl: float
-    ) -> None: ...
-
-    @overload
-    def __init__(self, error: Error, *, reply_to: Message) -> None: ...  # noqa: E704
-
-    @overload
-    def __init__(  # noqa: E704
-        self, error: Error, *, reply_to: Message, ttl: float
+        self, error: Error, *, reply_to: Message, ttl: float | None = None
     ) -> None: ...
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -564,13 +559,6 @@ def _extract_positional_args(
         else:
             raise MessageInitializationError()
     return content, error, dst_node_id, message_type
-
-
-class MessageInitializationError(TypeError):
-    """Error raised when initializing a message with invalid arguments."""
-
-    def __init__(self, message: str | None = None) -> None:
-        super().__init__(message or MESSAGE_INIT_ERROR_MESSAGE)
 
 
 def validate_message_type(message_type: str) -> bool:

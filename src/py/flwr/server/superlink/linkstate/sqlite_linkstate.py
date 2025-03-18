@@ -34,6 +34,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.message import make_message
 from flwr.common.record import ConfigsRecord
 from flwr.common.serde import (
     error_from_proto,
@@ -1053,14 +1054,9 @@ def dict_to_message(message_dict: dict[str, Any]) -> Message:
 
     # Metadata constructor doesn't allow passing created_at. We set it later
     metadata = Metadata(
-        **{
-            k: v
-            for k, v in message_dict.items()
-            if k not in ["created_at", "delivered_at"]
-        }
+        **{k: v for k, v in message_dict.items() if k not in ["delivered_at"]}
     )
-    msg = Message(metadata=metadata, content=content, error=error)
-    msg.metadata.__dict__["_created_at"] = message_dict["created_at"]
+    msg = make_message(metadata=metadata, content=content, error=error)
     msg.metadata.delivered_at = message_dict["delivered_at"]
     return msg
 

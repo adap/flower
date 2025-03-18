@@ -27,15 +27,10 @@ from google.protobuf.message import Message as GrpcMessage
 from parameterized import parameterized
 
 from flwr.client.grpc_rere_client.connection import grpc_request_response
-from flwr.common import DEFAULT_TTL, GRPC_MAX_MESSAGE_LENGTH, now, serde
-from flwr.common.constant import (
-    PUBLIC_KEY_HEADER,
-    SIGNATURE_HEADER,
-    SUPERLINK_NODE_ID,
-    TIMESTAMP_HEADER,
-)
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.constant import PUBLIC_KEY_HEADER, SIGNATURE_HEADER, TIMESTAMP_HEADER
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
 from flwr.common.record import RecordSet
 from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -192,7 +187,7 @@ def _send(conn: Any) -> None:
     receive, send, create_node, _, _, _ = conn
     create_node()
     receive()
-    send(Message(Metadata(0, "", 123, 0, "", "", 0, ""), RecordSet()))
+    send(Message(RecordSet(), dst_node_id=0, message_type="query"))
 
 
 def _get_run(conn: Any) -> None:

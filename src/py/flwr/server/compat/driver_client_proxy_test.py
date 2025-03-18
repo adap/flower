@@ -24,8 +24,9 @@ from unittest.mock import Mock
 import numpy as np
 
 import flwr
-from flwr.common import Error, Message, Metadata, RecordSet
+from flwr.common import Error, Message, Metadata, RecordSet, now
 from flwr.common import recordset_compat as compat
+from flwr.common.message import make_message
 from flwr.common.typing import (
     Code,
     Config,
@@ -219,10 +220,11 @@ class DriverClientProxyTestCase(unittest.TestCase):
             dst_node_id=dst_node_id,
             reply_to_message="",
             group_id=group_id,
+            created_at=now().timestamp(),
             ttl=ttl_,
             message_type=message_type,
         )
-        self.created_msg = Message(metadata=metadata, content=content)
+        self.created_msg = make_message(metadata=metadata, content=content)
         return self.created_msg
 
     def _exec_send_and_receive(
