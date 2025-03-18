@@ -17,9 +17,10 @@
 
 from __future__ import annotations
 
-from flwr.common.date import now
 from logging import WARNING
-from typing import Optional, cast, overload, Any
+from typing import Any, Optional, cast, overload
+
+from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
 
 from .constant import MESSAGE_TTL_TOLERANCE
@@ -27,10 +28,16 @@ from .logger import log
 from .record import RecordSet
 
 DEFAULT_TTL = 43200  # This is 12 hours
+MESSAGE_INIT_ERROR_MESSAGE = (
+    "Invalid arguments for Message. Expected one of the documented "
+    "signatures: Message(content: RecordSet, dst_node_id: int, message_type: str,"
+    " *, [ttl: float, group_id: str]) or Message(content: RecordSet | error: Error,"
+    " *, reply_to: Message, [ttl: float])."
+)
 
 
 class Metadata:  # pylint: disable=too-many-instance-attributes
-    """A dataclass holding metadata associated with the current message.
+    """The class representing metadata associated with the current message.
 
     Parameters
     ----------
@@ -126,11 +133,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         """Unix timestamp when the message was created."""
         return cast(float, self.__dict__["_created_at"])
 
-    @created_at.setter
-    def created_at(self, value: float) -> None:
-        """Set creation timestamp for this message."""
-        self.__dict__["_created_at"] = value
-
     @property
     def delivered_at(self) -> str:
         """Unix timestamp when the message was delivered."""
@@ -174,7 +176,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
 
 
 class Error:
-    """A dataclass that stores information about an error that occurred.
+    """The class storing information about an error that occurred.
 
     Parameters
     ----------
@@ -214,47 +216,78 @@ class Error:
 
 
 class Message:
-    """State of your application from the viewpoint of the entity using it.
+    """Represents a message exchanged between ClientApp and ServerApp.
 
-    TODO: Update docstring
+    This class encapsulates the payload and metadata necessary for communication
+    between a ClientApp and a ServerApp.
+
     Parameters
     ----------
-    metadata : Metadata
-        A dataclass including information about the message to be executed.
-    content : Optional[RecordSet]
+    content : Optional[RecordSet] (default: None)
         Holds records either sent by another entity (e.g. sent by the server-side
         logic to a client, or vice-versa) or that will be sent to it.
-    error : Optional[Error]
+    error : Optional[Error] (default: None)
         A dataclass that captures information about an error that took place
         when processing another message.
+    dst_node_id : Optional[int] (default: None)
+        An identifier for the node receiving this message.
+    message_type : Optional[str] (default: None)
+        A string that encodes the action to be executed on
+        the receiving end.
+    ttl : Optional[float] (default: None)
+        Time-to-live for this message in seconds.
+    group_id : Optional[str] (default: None)
+        An identifier for grouping messages. In some settings, this is used as
+        the FL round.
+    reply_to : Optional[Message] (default: None)
+        The message to which this message is a reply. This message does not retain
+        the original message's content but derives its metadata from it.
     """
 
     @overload
-    def __init__(self, content: RecordSet, dst_node_id: int, message_type: str) -> None:
-        ...
+    def __init__(  # noqa: E704
+        self, content: RecordSet, dst_node_id: int, message_type: str
+    ) -> None: ...
 
     @overload
-    def __init__(self, content: RecordSet, dst_node_id: int, message_type: str, *, ttl: float) -> None:
-        ...
+    def __init__(  # noqa: E704
+        self, content: RecordSet, dst_node_id: int, message_type: str, *, ttl: float
+    ) -> None: ...
 
     @overload
-    def __init__(self, content: RecordSet, dst_node_id: int, message_type: str, *, ttl: float, group_id: str) -> None:
-        ...
-
-    @overload
-    def __init__(self, content: RecordSet, *, reply_to: Message, ttl: float) -> None:
-        ...
-
-    @overload
-    def __init__(self, error: Error, *, reply_to: Message, ttl: float) -> None:
-        ...
-
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments  # noqa: E704
         self,
-        content_or_error: RecordSet | Error | None = None,
+        content: RecordSet,
+        dst_node_id: int,
+        message_type: str,
+        *,
+        ttl: float,
+        group_id: str,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: E704
+        self, content: RecordSet, *, reply_to: Message
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: E704
+        self, content: RecordSet, *, reply_to: Message, ttl: float
+    ) -> None: ...
+
+    @overload
+    def __init__(self, error: Error, *, reply_to: Message) -> None: ...  # noqa: E704
+
+    @overload
+    def __init__(  # noqa: E704
+        self, error: Error, *, reply_to: Message, ttl: float
+    ) -> None: ...
+
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        *args: Any,
         dst_node_id: int | None = None,
         message_type: str | None = None,
-        *,
         content: RecordSet | None = None,
         error: Error | None = None,
         ttl: float | None = None,
@@ -262,29 +295,43 @@ class Message:
         reply_to: Message | None = None,
         metadata: Metadata | None = None,
     ) -> None:
-        # One and only one of `content_or_error`, `content` and `error` must be set
-        if sum(x is not None for x in [content_or_error, content, error]) != 1:
-            _raise_msg_init_error()
+        # Set positional arguments
+        content, error, dst_node_id, message_type = _extract_positional_args(
+            *args,
+            content=content,
+            error=error,
+            dst_node_id=dst_node_id,
+            message_type=message_type,
+        )
 
-        # Set `content` or `error` based on `content_or_error`
-        if content_or_error is not None:  # This means `content` and `error` are None
-            if isinstance(content_or_error, RecordSet):
-                content = content_or_error
-            elif isinstance(content_or_error, Error):
-                error = content_or_error
-            else:
-                _raise_msg_init_error()
-        
+        # Set metadata directly (This is for internal use only)
+        if metadata is not None:
+            # When metadata is set, all other arguments must be None,
+            # except `content`, `error`, or `content_or_error`
+            if any(
+                x is not None
+                for x in [dst_node_id, message_type, ttl, group_id, reply_to]
+            ):
+                raise MessageInitializationError(
+                    f"Invalid arguments for {Message.__qualname__}. "
+                    "Expected only `metadata` to be set when creating a message "
+                    "with provided metadata."
+                )
+
         # Create metadata for an instruction message
-        if reply_to is None:
+        elif reply_to is None:
             # Check arguments
             # `content`, `dst_node_id` and `message_type` must be set
-            if any(x is None for x in [content, dst_node_id, message_type]):
-                _raise_msg_init_error()
-            
+            if not (
+                isinstance(content, RecordSet)
+                and isinstance(dst_node_id, int)
+                and isinstance(message_type, str)
+            ):
+                raise MessageInitializationError()
+
             # Set metadata
             metadata = Metadata(
-                run_id="", # Will be set before pushed
+                run_id=0,  # Will be set before pushed
                 message_id="",  # Will be set by the SuperLink
                 src_node_id=0,  # Will be set before pushed
                 dst_node_id=dst_node_id,
@@ -295,14 +342,14 @@ class Message:
                 message_type=message_type,
             )
             metadata.delivered_at = ""  # Backward compatibility
-        
+
         # Create metadata for a reply message
         else:
             # Check arguments
             # `dst_node_id`, `message_type` and `group_id` must not be set
             if any(x is not None for x in [dst_node_id, message_type, group_id]):
-                _raise_msg_init_error()
-            
+                raise MessageInitializationError()
+
             # Set metadata
             current = now().timestamp()
             metadata = metadata or Metadata(
@@ -392,8 +439,14 @@ class Message:
         message : Message
             A Message containing only the relevant error and metadata.
         """
-        # TODO: Warn about deprecated feature
-        return Message(error, reply_to=self, ttl=ttl)
+        warn_deprecated_feature(
+            "`Message.create_error_reply` is deprecated. "
+            "Instead of calling `some_message.create_error_reply(some_error, ttl=...)`"
+            ", use `Message(some_error, reply_to=some_message, ttl=...)`."
+        )
+        if ttl is not None:
+            return Message(error, reply_to=self, ttl=ttl)
+        return Message(error, reply_to=self)
 
     def create_reply(self, content: RecordSet, ttl: float | None = None) -> Message:
         """Create a reply to this message with specified content and TTL.
@@ -418,8 +471,14 @@ class Message:
         Message
             A new `Message` instance representing the reply.
         """
-        # TODO: Warn about deprecated feature
-        return Message(content, reply_to=self, ttl=ttl)
+        warn_deprecated_feature(
+            "`Message.create_reply` is deprecated. "
+            "Instead of calling `some_message.create_reply(some_content, ttl=...)`"
+            ", use `Message(some_content, reply_to=some_message, ttl=...)`."
+        )
+        if ttl is not None:
+            return Message(content, reply_to=self, ttl=ttl)
+        return Message(content, reply_to=self)
 
     def __repr__(self) -> str:
         """Return a string representation of this instance."""
@@ -433,9 +492,18 @@ class Message:
         return f"{self.__class__.__qualname__}({view})"
 
 
-def _limit_reply_ttl(current: float, reply_ttl: float | None, reply_to: Message) -> float:
-    """Limit the TTL of a reply message to not exceed the expiration time of the
-    message it replies to."""
+def make_message(
+    metadata: Metadata, content: RecordSet | None = None, error: Error | None = None
+) -> Message:
+    """Create a message with the provided metadata, content, and error."""
+    return Message(metadata=metadata, content=content, error=error)  # type: ignore
+
+
+def _limit_reply_ttl(
+    current: float, reply_ttl: float | None, reply_to: Message
+) -> float:
+    """Limit the TTL of a reply message to not exceed the expiration time of the message
+    it replies to."""
     # Calculate the maximum allowed TTL
     max_allowed_ttl = reply_to.metadata.created_at + reply_to.metadata.ttl - current
 
@@ -453,9 +521,41 @@ def _limit_reply_ttl(current: float, reply_ttl: float | None, reply_to: Message)
     return reply_ttl or max_allowed_ttl
 
 
-def _raise_msg_init_error() -> None:
-    raise TypeError(
-        f"Invalid arguments for {Message.__qualname__}. Expected one of the documented signatures: "
-        "Message(content: RecordSet, dst_node_id: int, message_type: str, *, [ttl: float, group_id: str]) "
-        "or Message(content: RecordSet | error: Error, *, reply_to: Message, [ttl: float])."
-    )
+def _extract_positional_args(
+    *args: Any,
+    content: RecordSet | None,
+    error: Error | None,
+    dst_node_id: int | None,
+    message_type: str | None,
+) -> tuple[RecordSet | None, Error | None, int | None, str | None]:
+    """Extract positional arguments for the `Message` constructor."""
+    content_or_error = args[0] if args else None
+    if len(args) > 1:
+        if dst_node_id is not None:
+            raise MessageInitializationError()
+        dst_node_id = args[1]
+    if len(args) > 2:
+        if message_type is not None:
+            raise MessageInitializationError()
+        message_type = args[2]
+
+    # One and only one of `content_or_error`, `content` and `error` must be set
+    if sum(x is not None for x in [content_or_error, content, error]) != 1:
+        raise MessageInitializationError()
+
+    # Set `content` or `error` based on `content_or_error`
+    if content_or_error is not None:  # This means `content` and `error` are None
+        if isinstance(content_or_error, RecordSet):
+            content = content_or_error
+        elif isinstance(content_or_error, Error):
+            error = content_or_error
+        else:
+            raise MessageInitializationError()
+    return content, error, dst_node_id, message_type
+
+
+class MessageInitializationError(TypeError):
+    """Error raised when initializing a message with invalid arguments."""
+
+    def __init__(self, message: str | None = None) -> None:
+        super().__init__(message or MESSAGE_INIT_ERROR_MESSAGE)

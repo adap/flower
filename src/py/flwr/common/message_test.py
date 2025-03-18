@@ -25,7 +25,7 @@ import pytest
 # pylint: enable=E0611
 from . import RecordSet
 from .constant import MESSAGE_TTL_TOLERANCE
-from .message import Error, Message, Metadata
+from .message import Error, Message, Metadata, make_message
 from .serde_test import RecordMaker
 
 
@@ -41,32 +41,27 @@ from .serde_test import RecordMaker
         (
             lambda maker: maker.recordset(1, 1, 1),
             lambda code: Error(code=code),
-            pytest.raises(ValueError),
+            pytest.raises(TypeError),
         ),  # check when both are set (ERROR)
-        (None, None, pytest.raises(ValueError)),  # check when neither is set (ERROR)
+        (None, None, pytest.raises(TypeError)),  # check when neither is set (ERROR)
     ],
 )
 def test_message_creation(
-    content_fn: Callable[
-        [
-            RecordMaker,
-        ],
-        RecordSet,
-    ],
+    content_fn: Callable[[RecordMaker], RecordSet],
     error_fn: Callable[[int], Error],
     context: Any,
 ) -> None:
     """Test Message creation attempting to pass content and/or error."""
     # Prepare
     maker = RecordMaker(state=2)
-    metadata = maker.metadata()
+    current_time = time.time()
 
     with ExitStack() as stack:
         if context:
             stack.enter_context(context)
 
-        current_time = time.time()
-        message = Message(
+        metadata = maker.metadata()
+        message = make_message(
             metadata=metadata,
             content=None if content_fn is None else content_fn(maker),
             error=None if error_fn is None else error_fn(0),
@@ -82,7 +77,7 @@ def create_message_with_content(ttl: Optional[float] = None) -> Message:
     metadata = maker.metadata()
     if ttl:
         metadata.ttl = ttl
-    return Message(metadata=metadata, content=RecordSet())
+    return make_message(metadata=metadata, content=RecordSet())
 
 
 def create_message_with_error(ttl: Optional[float] = None) -> Message:
@@ -91,7 +86,7 @@ def create_message_with_error(ttl: Optional[float] = None) -> Message:
     metadata = maker.metadata()
     if ttl:
         metadata.ttl = ttl
-    return Message(metadata=metadata, error=Error(code=1))
+    return make_message(metadata=metadata, error=Error(code=1))
 
 
 @pytest.mark.parametrize(
@@ -102,10 +97,7 @@ def create_message_with_error(ttl: Optional[float] = None) -> Message:
     ],
 )
 def test_altering_message(
-    message_creation_fn: Callable[
-        [],
-        Message,
-    ],
+    message_creation_fn: Callable[[], Message],
 ) -> None:
     """Test that a message with content doesn't allow setting an error.
 
@@ -130,10 +122,7 @@ def test_altering_message(
     ],
 )
 def test_create_reply(
-    message_creation_fn: Callable[
-        [float],
-        Message,
-    ],
+    message_creation_fn: Callable[[float], Message],
     ttl: float,
     reply_ttl: Optional[float],
 ) -> None:
@@ -142,11 +131,12 @@ def test_create_reply(
 
     time.sleep(0.1)
 
+    kwargs = {"ttl": reply_ttl} if reply_ttl else {}
     if message.has_error():
         dummy_error = Error(code=0, reason="it crashed")
-        reply_message = message.create_error_reply(dummy_error, ttl=reply_ttl)
+        reply_message = Message(dummy_error, reply_to=message, **kwargs)
     else:
-        reply_message = message.create_reply(content=RecordSet(), ttl=reply_ttl)
+        reply_message = Message(RecordSet(), reply_to=message, **kwargs)
 
     # Ensure reply has a higher timestamp
     assert message.metadata.created_at < reply_message.metadata.created_at
@@ -174,6 +164,7 @@ def test_create_reply(
                 "dst_node_id": 2,
                 "reply_to_message": "reply_789",
                 "group_id": "group_xyz",
+                "created_at": 1234567890.0,
                 "ttl": 10.0,
                 "message_type": "request",
             },
@@ -228,9 +219,9 @@ def test_reply_ttl_limitation(
 
     if message.has_error():
         dummy_error = Error(code=0, reason="test error")
-        reply_message = message.create_error_reply(dummy_error, ttl=reply_ttl)
+        reply_message = Message(dummy_error, reply_to=message, ttl=reply_ttl)
     else:
-        reply_message = message.create_reply(content=RecordSet(), ttl=reply_ttl)
+        reply_message = Message(RecordSet(), reply_to=message, ttl=reply_ttl)
 
     assert reply_message.metadata.ttl - expected_reply_ttl <= MESSAGE_TTL_TOLERANCE, (
         f"Expected TTL to be <= {expected_reply_ttl}, "
