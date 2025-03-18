@@ -13,7 +13,7 @@ async function main() {
     console.error(`${response.failure.code}: ${response.failure.description}`);
     process.exit(1);
   } else {
-    console.log(response.content);
+    console.log(response.message.content);
   }
 }
 

@@ -1,21 +1,19 @@
 # node-ts
 
-You can use `npm` or `pnpm` (or probably `yarn`), but this README shows examples using `pnpm`
-
 ## Install
 
-You can then install the project dependencies with:
+You can install the project dependencies with:
 
 ```bash
-pnpm i
+npm i
 ```
 
 ## Build
 
-If you want to build the project, you can use:
+You can then build the project with:
 
 ```bash
-pnpm build
+npm run build
 ```
 
 ## Run
@@ -26,6 +24,8 @@ In order to run the example once the project has been built:
 node dist/index.js
 ```
 
-```{note}
-You can also use `pnpm start` to perform the installation, build, and run steps at the same time.
+or
+
+```bash
+npm run start
 ```

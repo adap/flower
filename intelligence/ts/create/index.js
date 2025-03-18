@@ -14,7 +14,7 @@ const starterKits = ['node-ts', 'node-js', 'web-ts'];
         type: 'input',
         name: 'projectName',
         message: 'Enter your project name',
-        default: 'my-fi-project',
+        default: 'awesome-flower-intelligence-app',
       },
       {
         type: 'list',
