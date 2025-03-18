@@ -20,7 +20,13 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from flwr.common import ConfigsRecord, Context, Error, Message, Metadata, now, serde
-from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
+from flwr.common.constant import (
+    SUPERLINK_NODE_ID,
+    ErrorCode,
+    MessageType,
+    Status,
+    SubStatus,
+)
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
@@ -266,7 +272,7 @@ def create_message_error_unavailable_ins_message(reply_to_message: UUID) -> Mess
         dst_node_id=SUPERLINK_NODE_ID,
         reply_to_message=str(reply_to_message),
         group_id="",  # Unknown
-        message_type="",  # Unknown
+        message_type=MessageType.SYSTEM,
         ttl=0,
     )
 

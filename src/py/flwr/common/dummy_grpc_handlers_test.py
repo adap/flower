@@ -52,10 +52,10 @@ class NoOpUnsupportedHandler:
 
 
 class NoOpUnaryUnaryHandlerException:
-    """Dummy handler for unary-unary RPC calls that raises an Exception."""
+    """Dummy handler for unary-unary RPC calls that raises a BaseException."""
 
     unary_unary = staticmethod(
-        lambda request, context: (_ for _ in ()).throw(Exception("Test error"))
+        lambda request, context: (_ for _ in ()).throw(BaseException("Test error"))
     )
     unary_stream = None
     request_deserializer = None
@@ -79,17 +79,17 @@ def get_noop_unary_stream_handler(
 def _noop_unary_stream_exception(
     request: GrpcMessage, context: grpc.ServicerContext  # pylint: disable=W0613
 ) -> Iterator[Any]:
-    """Raise an Exception upon iteration for unary-stream RPC call."""
+    """Raise a BaseException upon iteration for unary-stream RPC call."""
 
     def generator() -> Iterator[Any]:
-        raise Exception("Test stream error")  # pylint: disable=W0719
+        raise BaseException("Test stream error")  # pylint: disable=W0719
         yield  # This yield is never reached. pylint: disable=W0101
 
     return generator()
 
 
 class NoOpUnaryStreamHandlerException:
-    """Dummy handler for unary-stream RPC calls that raises an Exception."""
+    """Dummy handler for unary-stream RPC calls that raises a BaseException."""
 
     unary_unary = None
     unary_stream = staticmethod(_noop_unary_stream_exception)

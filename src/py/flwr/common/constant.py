@@ -127,6 +127,7 @@ class MessageType:
     TRAIN = "train"
     EVALUATE = "evaluate"
     QUERY = "query"
+    SYSTEM = "system"
 
     def __new__(cls) -> MessageType:
         """Prevent instantiation."""

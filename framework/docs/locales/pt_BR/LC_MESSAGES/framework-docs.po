@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-13 00:32+0000\n"
+"POT-Creation-Date: 2025-03-16 00:35+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -9512,6 +9512,9 @@ msgstr ""
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
+#: flwr.client.client_app.ClientApp.evaluate
+#: flwr.client.client_app.ClientApp.query
+#: flwr.client.client_app.ClientApp.train
 #: flwr.client.mod.localdp_mod.LocalDpMod
 #: flwr.client.numpy_client.NumPyClient.evaluate
 #: flwr.client.numpy_client.NumPyClient.fit
@@ -9573,6 +9576,9 @@ msgstr ""
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
+#: flwr.client.client_app.ClientApp.evaluate
+#: flwr.client.client_app.ClientApp.query
+#: flwr.client.client_app.ClientApp.train
 #: flwr.client.numpy_client.NumPyClient.evaluate
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
@@ -9608,6 +9614,9 @@ msgstr ""
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
+#: flwr.client.client_app.ClientApp.evaluate
+#: flwr.client.client_app.ClientApp.query
+#: flwr.client.client_app.ClientApp.train
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
 #: flwr.common.message.Message.create_error_reply
@@ -9688,10 +9697,10 @@ msgstr ""
 
 #: flwr.client.app.start_client:51 flwr.client.app.start_numpy_client:36
 #: flwr.client.client_app.ClientApp:4
-#: flwr.client.client_app.ClientApp.evaluate:4
+#: flwr.client.client_app.ClientApp.evaluate:12
 #: flwr.client.client_app.ClientApp.lifespan:7
-#: flwr.client.client_app.ClientApp.query:4
-#: flwr.client.client_app.ClientApp.train:4
+#: flwr.client.client_app.ClientApp.query:12
+#: flwr.client.client_app.ClientApp.train:12
 #: flwr.client.mod.localdp_mod.LocalDpMod:22
 #: flwr.common.record.configsrecord.ConfigsRecord:20
 #: flwr.common.record.metricsrecord.MetricsRecord:19
@@ -9716,12 +9725,14 @@ msgid ""
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
-msgid ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\[mods\\]\\)"
+msgid ""
+":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\[action\\, "
+"mods\\]\\)"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
-msgid "Return a decorator that registers the evaluate fn with the client app."
+msgid "Register an evaluate function with the ``ClientApp``."
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
@@ -9734,29 +9745,49 @@ msgid "Return a decorator that registers the lifespan fn with the client app."
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
-msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\[mods\\]\\)"
+msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\[action\\, mods\\]\\)"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
 #: flwr.client.client_app.ClientApp.query:1 of
-msgid "Return a decorator that registers the query fn with the client app."
+msgid "Register a query function with the ``ClientApp``."
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
-msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\[mods\\]\\)"
+msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\[action\\, mods\\]\\)"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
 #: flwr.client.client_app.ClientApp.train:1 of
-msgid "Return a decorator that registers the train fn with the client app."
+msgid "Register a train function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:5 of
+#: flwr.client.client_app.ClientApp.evaluate:3
+#: flwr.client.client_app.ClientApp.query:3
+#: flwr.client.client_app.ClientApp.train:3 of
+msgid "The action name used to route messages. Defaults to \"default\"."
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.evaluate:5
+#: flwr.client.client_app.ClientApp.query:5
+#: flwr.client.client_app.ClientApp.train:5 of
+msgid "A list of function-specific modifiers."
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.evaluate:8 of
+msgid "A decorator that registers an evaluate function with the ``ClientApp``."
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.evaluate:13 of
 msgid "Registering an evaluate function:"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:15 of
-msgid "Registering an evaluate function with a function-specific modifier:"
+#: flwr.client.client_app.ClientApp.evaluate:23 of
+msgid "Registering an evaluate function with a custom action name:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.evaluate:34 of
+msgid "Registering an evaluate function with a function-specific Flower Mod:"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.lifespan:3
@@ -9766,20 +9797,36 @@ msgid ""
 "to define enter and exit behavior."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:5 of
+#: flwr.client.client_app.ClientApp.query:8 of
+msgid "A decorator that registers a query function with the ``ClientApp``."
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.query:13 of
 msgid "Registering a query function:"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:15 of
-msgid "Registering a query function with a function-specific modifier:"
+#: flwr.client.client_app.ClientApp.query:23 of
+msgid "Registering a query function with a custom action name:"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.train:5 of
+#: flwr.client.client_app.ClientApp.query:34 of
+msgid "Registering a query function with a function-specific Flower Mod:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.train:8 of
+msgid "A decorator that registers a train function with the ``ClientApp``."
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.train:13 of
 msgid "Registering a train function:"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.train:15 of
-msgid "Registering a train function with a function-specific modifier:"
+#: flwr.client.client_app.ClientApp.train:23 of
+msgid "Registering a train function with a custom action name:"
+msgstr ""
+
+#: flwr.client.client_app.ClientApp.train:34 of
+msgid "Registering a train function with a function-specific Flower Mod:"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:2
@@ -12206,15 +12253,19 @@ msgstr ""
 msgid "MessageType"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.MessageType.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MessageType.rst:31:<autosummary>:1
 msgid ":py:obj:`EVALUATE <flwr.common.MessageType.EVALUATE>`\\"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.MessageType.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MessageType.rst:31:<autosummary>:1
 msgid ":py:obj:`QUERY <flwr.common.MessageType.QUERY>`\\"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.MessageType.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MessageType.rst:31:<autosummary>:1
+msgid ":py:obj:`SYSTEM <flwr.common.MessageType.SYSTEM>`\\"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.MessageType.rst:31:<autosummary>:1
 msgid ":py:obj:`TRAIN <flwr.common.MessageType.TRAIN>`\\"
 msgstr ""
 
@@ -27588,7 +27639,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|da8a064587764437aa744321c646ed8a|"
+msgid "|6423c63301254f07bf93b90f0f627340|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -27603,7 +27654,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|83edff6447e84fa3ba7ae438fdb0bec8|"
+msgid "|921b9e2224d8462fba7e9157686102f8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -27625,7 +27676,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|d09ebdaec63c4feab1a6c422105d60ad|"
+msgid "|66ca4b87ee3e495389a0de3504b4cf04|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -27641,7 +27692,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|fa6b319a95964903958b591133ce3f0f|"
+msgid "|eec7936921d14f04885827df45ff1c04|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -27657,7 +27708,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|5a77403301d94f828c664fef30916d51|"
+msgid "|36e7408103ee4f158b4e1e835728f86a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -27672,7 +27723,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|e5a8491fcc48461f9b2a1009d32cb0d2|"
+msgid "|b0c827a728c24730b9d61063da20f281|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -27692,7 +27743,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|fbd662e5ccd84430940b56cc7daf82e8|"
+msgid "|77ef7c9994bb4bcca3d1dcda1924bdcd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -27707,7 +27758,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|fdd4aaee8ab041d79e7e89da84cf4b75|"
+msgid "|ed58eec163c14d1a8a501bac2511a797|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -27847,7 +27898,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|25e597a052c749c39c69ed61d390e194|"
+msgid "|af8a7f17a37f45948c49f9ab2d2d81d9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -27871,7 +27922,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|7678b911560f43ccb50ae352028af2eb|"
+msgid "|6cc75f03a88d47b4b688da695bce38d5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -27895,7 +27946,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|5fc4f7141ea6409cbbb5bf5f5f51622b|"
+msgid "|fd8d87bd3690448ab443a574ba0f7bff|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -27918,7 +27969,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|429bc6acd3634c68aa0e39fa68626cc9|"
+msgid "|8cae3c4603a746aa99a152e2ecb33b43|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -27956,7 +28007,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|862985bea398410a9b2362d6bad7d2d5|"
+msgid "|57fd4aa1641e458cb6fc78fe1ca31c08|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -28050,7 +28101,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|dd64555e826940ffa0bb245a88fa0aa8|"
+msgid "|1b03cf8b3d9845dc960d71eaa08299cc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -42485,5 +42536,74 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|4cdb176fbef14897b58a4289e494be63|"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\[mods\\]\\)"
+#~ msgstr ""
+
+#~ msgid "Return a decorator that registers the evaluate fn with the client app."
+#~ msgstr ""
+
+#~ msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\[mods\\]\\)"
+#~ msgstr ""
+
+#~ msgid "Return a decorator that registers the query fn with the client app."
+#~ msgstr ""
+
+#~ msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\[mods\\]\\)"
+#~ msgstr ""
+
+#~ msgid "Return a decorator that registers the train fn with the client app."
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function with a function-specific modifier:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function with a function-specific modifier:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function with a function-specific modifier:"
+#~ msgstr ""
+
+#~ msgid "|da8a064587764437aa744321c646ed8a|"
+#~ msgstr ""
+
+#~ msgid "|83edff6447e84fa3ba7ae438fdb0bec8|"
+#~ msgstr ""
+
+#~ msgid "|d09ebdaec63c4feab1a6c422105d60ad|"
+#~ msgstr ""
+
+#~ msgid "|fa6b319a95964903958b591133ce3f0f|"
+#~ msgstr ""
+
+#~ msgid "|5a77403301d94f828c664fef30916d51|"
+#~ msgstr ""
+
+#~ msgid "|e5a8491fcc48461f9b2a1009d32cb0d2|"
+#~ msgstr ""
+
+#~ msgid "|fbd662e5ccd84430940b56cc7daf82e8|"
+#~ msgstr ""
+
+#~ msgid "|fdd4aaee8ab041d79e7e89da84cf4b75|"
+#~ msgstr ""
+
+#~ msgid "|25e597a052c749c39c69ed61d390e194|"
+#~ msgstr ""
+
+#~ msgid "|7678b911560f43ccb50ae352028af2eb|"
+#~ msgstr ""
+
+#~ msgid "|5fc4f7141ea6409cbbb5bf5f5f51622b|"
+#~ msgstr ""
+
+#~ msgid "|429bc6acd3634c68aa0e39fa68626cc9|"
+#~ msgstr ""
+
+#~ msgid "|862985bea398410a9b2362d6bad7d2d5|"
+#~ msgstr ""
+
+#~ msgid "|dd64555e826940ffa0bb245a88fa0aa8|"
 #~ msgstr ""
 

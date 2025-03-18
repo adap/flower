@@ -16,9 +16,8 @@
 
 
 import time
-import warnings
 from collections.abc import Iterable
-from logging import DEBUG, WARNING
+from logging import DEBUG, ERROR, WARNING
 from typing import Optional, cast
 
 import grpc
@@ -48,11 +47,32 @@ from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E
 
 from .driver import Driver
 
-ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
-[flwr-serverapp] Error: Not connected.
+ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED = """
 
-Call `connect()` on the `GrpcDriverStub` instance before calling any of the other
-`GrpcDriverStub` methods.
+[Driver.push_messages] gRPC error occurred:
+
+The 2GB gRPC limit has been reached. Consider reducing the number of messages pushed
+at once, or push messages individually, for example:
+
+> msgs = [msg1, msg2, msg3]
+> msg_ids = []
+> for msg in msgs:
+>     msg_id = driver.push_messages([msg])
+>     msg_ids.extend(msg_id)
+"""
+
+ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED = """
+
+[Driver.pull_messages] gRPC error occurred:
+
+The 2GB gRPC limit has been reached. Consider reducing the number of messages pulled
+at once, or pull messages individually, for example:
+
+> msgs_ids = [msg_id1, msg_id2, msg_id3]
+> msgs = []
+> for msg_id in msg_ids:
+>     msg = driver.pull_messages([msg_id])
+>     msgs.extend(msg)
 """
 
 
@@ -162,14 +182,6 @@ class GrpcDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        if ttl:
-            warnings.warn(
-                "A custom TTL was set, but note that the SuperLink does not enforce "
-                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
-                "version of Flower.",
-                stacklevel=2,
-            )
-
         ttl_ = DEFAULT_TTL if ttl is None else ttl
         metadata = Metadata(
             run_id=cast(Run, self._run).run_id,
@@ -206,22 +218,30 @@ class GrpcDriver(Driver):
             msg_proto = message_to_proto(msg)
             # Add to list
             message_proto_list.append(msg_proto)
-        # Call GrpcDriverStub method
-        res: PushInsMessagesResponse = self._stub.PushMessages(
-            PushInsMessagesRequest(
-                messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
+
+        try:
+            # Call GrpcDriverStub method
+            res: PushInsMessagesResponse = self._stub.PushMessages(
+                PushInsMessagesRequest(
+                    messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
+                )
             )
-        )
-        if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
-            list(message_proto_list)
-        ):
-            log(
-                WARNING,
-                "Not all messages could be pushed to the SuperLink. The returned "
-                "list has `None` for those messages (the order is preserved as passed "
-                "to `push_messages`). This could be due to a malformed message.",
-            )
-        return list(res.message_ids)
+            if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
+                message_proto_list
+            ):
+                log(
+                    WARNING,
+                    "Not all messages could be pushed to the SuperLink. The returned "
+                    "list has `None` for those messages (the order is preserved as "
+                    "passed to `push_messages`). This could be due to a malformed "
+                    "message.",
+                )
+            return list(res.message_ids)
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
+                log(ERROR, ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED)
+                return []
+            raise
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
@@ -229,16 +249,22 @@ class GrpcDriver(Driver):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        # Pull Messages
-        res: PullResMessagesResponse = self._stub.PullMessages(
-            PullResMessagesRequest(
-                message_ids=message_ids,
-                run_id=cast(Run, self._run).run_id,
+        try:
+            # Pull Messages
+            res: PullResMessagesResponse = self._stub.PullMessages(
+                PullResMessagesRequest(
+                    message_ids=message_ids,
+                    run_id=cast(Run, self._run).run_id,
+                )
             )
-        )
-        # Convert Message from Protobuf representation
-        msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
-        return msgs
+            # Convert Message from Protobuf representation
+            msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
+            return msgs
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
+                log(ERROR, ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED)
+                return []
+            raise
 
     def send_and_receive(
         self,

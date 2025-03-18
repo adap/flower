@@ -64,7 +64,7 @@ class DummyFleetLogPlugin(EventLogWriterPlugin):
         context: grpc.ServicerContext,
         user_info: Optional[UserInfo],
         method_name: str,
-        response: Optional[Union[GrpcMessage, Exception]],
+        response: Optional[Union[GrpcMessage, BaseException]],
     ) -> LogEntry:
         """Compose post-event log entry from the provided response and context."""
         return LogEntry(
@@ -138,7 +138,7 @@ class TestFleetEventLogInterceptor(unittest.TestCase):
         self.assertEqual(self.log_plugin.logs, expected_logs)
 
     def test_unary_unary_interceptor_exception(self) -> None:
-        """Test unary-unary RPC call logging when the handler raises an Exception."""
+        """Test unary-unary RPC call logging when the handler raises a BaseException."""
         handler_call_details = MagicMock()
         handler_call_details.method = "exception_method"
         expected_method_name = handler_call_details.method
@@ -156,8 +156,8 @@ class TestFleetEventLogInterceptor(unittest.TestCase):
         dummy_context = MagicMock()
 
         # Execute & Assert
-        # Invoking the unary_unary method raises an Exception with the expected message
-        with self.assertRaises(Exception) as context_manager:
+        # Invoking the unary_unary method raises a BaseException with the expected msg
+        with self.assertRaises(BaseException) as context_manager:
             intercepted_handler.unary_unary(dummy_request, dummy_context)
         self.assertEqual(str(context_manager.exception), "Test error")
 

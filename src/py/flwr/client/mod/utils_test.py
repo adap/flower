@@ -86,7 +86,7 @@ def _get_dummy_flower_message() -> Message:
             dst_node_id=0,
             reply_to_message="",
             ttl=DEFAULT_TTL,
-            message_type="mock",
+            message_type="train",
         ),
     )
 

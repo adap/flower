@@ -166,7 +166,7 @@ def test_create_reply(
                 "group_id": "group_xyz",
                 "created_at": 1234567890.0,
                 "ttl": 10.0,
-                "message_type": "request",
+                "message_type": "query",
             },
         ),
         (Error, {"code": 1, "reason": "reason_098"}),
