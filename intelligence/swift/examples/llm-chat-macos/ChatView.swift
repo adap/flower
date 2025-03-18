@@ -1,0 +1,133 @@
+import FlowerIntelligence
+import SwiftUI
+
+struct ChatMessage: Identifiable {
+  let id = UUID()
+  let message: Message
+
+  init(role: String, content: String) {
+    self.message = Message(role: role, content: content)
+  }
+}
+
+struct ChatView: View {
+  @State private var messages: [ChatMessage] = [
+    ChatMessage(
+      role: "system",
+      content:
+        "You are a helpful, respectful and honest assistant, except that you're currently drunk after having a few too many cocktails. You will try your very best to answer questions and respond to prompts, but you'll get sidetracked easily and have unrealistic, sometimes not-entirely-coherent ideas."
+    )
+  ]
+  @State private var userInput: String = ""
+  @State private var isLoading: Bool = false
+
+  @State private var selectedModel: String = "meta/llama3.2-1b"
+  let availableModels = [
+    "meta/llama3.2-1b", "meta/llama3.2-3b", "deepseek/r1-distill-qwen-32b/4-bit", "deepseek/r1-distill-llama-8b/q4"
+  ]
+
+  var body: some View {
+    VStack {
+      ScrollView {
+        VStack(alignment: .leading, spacing: 10) {
+          ForEach(messages) { message in
+            ChatBubble(message: message)
+          }
+          if isLoading {
+            ProgressView("Searching files...")
+              .padding()
+          }
+        }
+        .padding()
+      }
+
+      Divider()
+      
+      VStack(alignment: .leading) {
+          Picker("", selection: $selectedModel) {
+              ForEach(availableModels, id: \.self) { model in
+                  Text(model).tag(model)
+              }
+          }
+          .pickerStyle(MenuPickerStyle()) // Modern dropdown
+          .frame(width: 150) // Adjust width if needed
+
+          HStack {
+              TextField("Type a message...", text: $userInput)
+                  .textFieldStyle(RoundedBorderTextFieldStyle())
+
+              Button(action: {
+                  Task {
+                      await sendMessage()
+                  }
+              }) {
+                  Image(systemName: "paperplane.fill")
+                      
+              }
+              .buttonStyle(BorderlessButtonStyle())
+          }
+          
+      }.padding()
+    }
+  }
+
+  func sendMessage() async {
+    guard !userInput.isEmpty else { return }
+
+    let userMessage = ChatMessage(role: "user", content: userInput)
+    messages.append(userMessage)
+
+    userInput = ""
+    let assistantAnswer = ChatMessage(role: "assistant", content: "")
+    messages.append(assistantAnswer)
+
+    let fi = FlowerIntelligence.instance
+    let result = await fi.chat(
+      options: (
+        messages.map { $0.message },
+        ChatOptions(
+          model: selectedModel, stream: true,
+          onStreamEvent: { stream in
+            DispatchQueue.main.async {
+              let message = messages.removeLast()
+              let newMessage = ChatMessage(
+                role: "assistant", content: stream.chunk)
+              messages.append(newMessage)
+            }
+          })
+      ))
+    messages.removeLast()
+    switch result {
+    case .success(let success):
+      messages.append(ChatMessage(role: success.role, content: success.content))
+    case .failure(let failure):
+      print(failure)
+    }
+  }
+}
+
+struct ChatBubble: View {
+  let message: ChatMessage
+
+  var body: some View {
+    HStack {
+      if message.message.role == "user" {
+        Spacer()
+        Text(message.message.content)
+          .padding()
+          .background(Color.gray.opacity(0.2))
+          .cornerRadius(20)
+          .frame(maxWidth: 300, alignment: .trailing)
+      } else {
+        Text(message.message.content)
+          .padding()
+          .frame(alignment: .leading)
+        Spacer()
+      }
+    }
+  }
+}
+
+#Preview {
+  ChatView()
+}

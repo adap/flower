@@ -31,7 +31,15 @@ let llama3_2_3B: ModelConfiguration = .init(
   id: "mlx-community/Llama-3.2-3B-Instruct",
   defaultPrompt: "What is the difference between a fruit and a vegetable?"
 )
+let r1_distill: ModelConfiguration = .init(
+  id: "mlx-community/DeepSeek-R1-Distill-Qwen-32B-4bit"
+)
+let r1_distill_llama: ModelConfiguration = .init(id: "mlx-community/DeepSeek-R1-Distill-Llama-8B-4bit")
+
 let modelMapping: [String: ModelConfiguration] = [
   "meta/llama3.2-1b": llama3_2_1B,
   "meta/llama3.2-3b": llama3_2_3B,
+  "deepseek/r1-distill-qwen-32b/4-bit": r1_distill,
+  "deepseek/r1-distill-llama-8b/q4": r1_distill_llama
+  
 ]

@@ -155,4 +155,14 @@ public class FlowerIntelligence {
         error as? Failure ?? Failure(code: .unavailableError, message: error.localizedDescription))
     }
   }
+  
+  public func fetchModel(model: String, callback: @escaping @Sendable (Progress) -> Void) async -> Result<Void, Failure> {
+    do {
+      try await engine.fetchModel(model: model, callback: callback)
+    } catch {
+      return .failure(
+        error as? Failure ?? Failure(code: .unavailableError, message: error.localizedDescription))
+    }
+    return .success(())
+  }
 }

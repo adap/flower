@@ -27,7 +27,7 @@ protocol Engine {
     tools: [Tool]?
   ) async throws -> Message
 
-  func fetchModel(model: String, callback: @escaping (Progress) -> Void) async throws
+  func fetchModel(model: String, callback: @escaping @Sendable (Progress) -> Void) async throws
 }
 
 extension Engine {
@@ -46,7 +46,7 @@ extension Engine {
     )
   }
 
-  func fetchModel(model: String, callback: @escaping (Progress) -> Void) async throws {
+  func fetchModel(model: String, callback: @escaping @Sendable (Progress) -> Void) async throws {
     throw Failure(
       code: .notImplementedError,
       message: "FetchModel function is not implemented yet"

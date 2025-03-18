@@ -41,6 +41,7 @@ class MlxEngine: Engine {
       let modelContainer = try await LLMModelFactory.shared.loadContainer(
         configuration: modelConfiguration
       ) { [modelConfiguration] progress in
+        print("Downloading \(modelConfiguration.name): \(Int(progress.fractionCompleted * 100))%")
         if let progressHandler = progressHandler {
           let ret = Progress(
             totalBytes: Int(progress.totalUnitCount), loadedBytes: Int(progress.completedUnitCount),
@@ -115,7 +116,7 @@ class MlxEngine: Engine {
     return Message(role: "assistant", content: result.output)
   }
 
-  func fetchModel(model: String, callback: @escaping (Progress) -> Void) async throws {
+  func fetchModel(model: String, callback: @escaping @Sendable (Progress) -> Void) async throws {
     modelConfiguration = modelMapping[model] ?? ModelRegistry.llama3_2_1B_4bit
     let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     let base = documents.appending(component: "huggingface")
@@ -123,6 +124,6 @@ class MlxEngine: Engine {
       let modelUrl = base.appending(component: "models").appending(component: id)
       if FileManager.default.fileExists(atPath: modelUrl.path) { return }
     }
-    _ = try await load()
+    _ = try await load(callback)
   }
 }

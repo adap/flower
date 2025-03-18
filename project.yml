@@ -42,10 +42,21 @@ targets:
     settings:
       base:
         PRODUCT_NAME: hello-world-macos
-        CODE_SIGN_ENTITLEMENTS: "intelligence/swift/examples/hello-world-macos/LLMEvaluate.entitlements"
+        CODE_SIGN_ENTITLEMENTS: "intelligence/swift/examples/hello-world-macos/HelloWorld.entitlements"
         MACOSX_DEPLOYMENT_TARGET: "14.0"
         GENERATE_INFOPLIST_FILE: YES
-
+  llm-chat-macos:
+    type: application
+    platform: macOS
+    sources: ["intelligence/swift/examples/llm-chat-macos"]
+    dependencies:
+      - package: Flwr
+    settings:
+      base:
+        PRODUCT_NAME: llm-chat-macos
+        CODE_SIGN_ENTITLEMENTS: "intelligence/swift/examples/llm-chat-macos/LlmChat.entitlements"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        GENERATE_INFOPLIST_FILE: YES
   hello-world-ios:
     type: application
     platform: iOS
