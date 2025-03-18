@@ -25,24 +25,24 @@ from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 
-from ..grid import Driver
+from ..grid import Grid
 from .app_utils import start_update_client_manager_thread
 
 
 def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     *,
-    driver: Driver,
+    driver: Grid,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
 ) -> History:
-    """Start a Flower Driver API server.
+    """Start a Flower Grid API server.
 
     Parameters
     ----------
-    driver : Driver
-        The Driver object to use.
+    driver : Grid
+        The Grid object to use.
     server : Optional[flwr.server.Server] (default: None)
         A server implementation, either `flwr.server.Server` or a subclass
         thereof. If no instance is provided, then `start_driver` will create
@@ -64,7 +64,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     hist : flwr.server.history.History
         Object containing training and evaluation metrics.
     """
-    # Initialize the Driver API server and config
+    # Initialize the Grid API server and config
     initialized_server, initialized_config = init_defaults(
         server=server,
         config=config,

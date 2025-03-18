@@ -57,7 +57,7 @@ at once, or push messages individually, for example:
 > msgs = [msg1, msg2, msg3]
 > msg_ids = []
 > for msg in msgs:
->     msg_id = driver.push_messages([msg])
+>     msg_id = grid.push_messages([msg])
 >     msg_ids.extend(msg_id)
 """
 
@@ -71,7 +71,7 @@ at once, or pull messages individually, for example:
 > msgs_ids = [msg_id1, msg_id2, msg_id3]
 > msgs = []
 > for msg_id in msg_ids:
->     msg = driver.pull_messages([msg_id])
+>     msg = grid.pull_messages([msg_id])
 >     msgs.extend(msg)
 """
 

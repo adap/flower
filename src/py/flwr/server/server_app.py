@@ -25,7 +25,7 @@ from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
 from .compat import start_driver
-from .grid import Driver
+from .grid import Grid
 from .server import Server
 from .server_config import ServerConfig
 from .typing import ServerAppCallable, ServerFn
@@ -71,7 +71,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
     >>> app = ServerApp()
     >>>
     >>> @app.main()
-    >>> def main(driver: Driver, context: Context) -> None:
+    >>> def main(driver: Grid, context: Context) -> None:
     >>>    print("ServerApp running")
     """
 
@@ -111,7 +111,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         self._main: Optional[ServerAppCallable] = None
         self._lifespan = _empty_lifespan
 
-    def __call__(self, driver: Driver, context: Context) -> None:
+    def __call__(self, driver: Grid, context: Context) -> None:
         """Execute `ServerApp`."""
         with self._lifespan(context):
             # Compatibility mode
@@ -143,7 +143,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         >>> app = ServerApp()
         >>>
         >>> @app.main()
-        >>> def main(driver: Driver, context: Context) -> None:
+        >>> def main(driver: Grid, context: Context) -> None:
         >>>    print("ServerApp running")
         """
 
@@ -168,7 +168,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                     >>> app = ServerApp()
                     >>>
                     >>> @app.main()
-                    >>> def main(driver: Driver, context: Context) -> None:
+                    >>> def main(driver: Grid, context: Context) -> None:
                     >>>    print("ServerApp running")
                     """,
                 )

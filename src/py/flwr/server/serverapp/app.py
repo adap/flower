@@ -60,7 +60,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsResponse,
     PushServerAppOutputsRequest,
 )
-from flwr.server.grid.grpc_grid import GrpcDriver
+from flwr.server.grid.grpc_grid import GrpcGrid
 from flwr.server.run_serverapp import run as run_
 
 
@@ -106,7 +106,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
-    driver = GrpcDriver(
+    driver = GrpcGrid(
         serverappio_service_address=serverappio_api_address,
         root_certificates=certificates,
     )
@@ -182,7 +182,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                 event_details={"run-id-hash": hash_run_id},
             )
 
-            # Load and run the ServerApp with the Driver
+            # Load and run the ServerApp with the Grid
             updated_context = run_(
                 driver=driver,
                 server_app_dir=app_path,

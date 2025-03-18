@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower ClientProxy implementation for Driver API."""
+"""Flower ClientProxy implementation for Grid API."""
 
 
 from typing import Optional
@@ -22,13 +22,13 @@ from flwr.common import Message, MessageType, MessageTypeLegacy, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.server.client_proxy import ClientProxy
 
-from ..grid.grid import Driver
+from ..grid.grid import Grid
 
 
-class DriverClientProxy(ClientProxy):
-    """Flower client proxy which delegates work using the Driver API."""
+class GridClientProxy(ClientProxy):
+    """Flower client proxy which delegates work using the Grid API."""
 
-    def __init__(self, node_id: int, driver: Driver, run_id: int):
+    def __init__(self, node_id: int, driver: Grid, run_id: int):
         super().__init__(str(node_id))
         self.node_id = node_id
         self.driver = driver

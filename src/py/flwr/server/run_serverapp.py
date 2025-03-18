@@ -22,18 +22,18 @@ from flwr.common import Context
 from flwr.common.logger import log
 from flwr.common.object_ref import load_app
 
-from .grid import Driver
+from .grid import Grid
 from .server_app import LoadServerAppError, ServerApp
 
 
 def run(
-    driver: Driver,
+    driver: Grid,
     context: Context,
     server_app_dir: str,
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
 ) -> Context:
-    """Run ServerApp with a given Driver."""
+    """Run ServerApp with a given Grid."""
     if not (server_app_attr is None) ^ (loaded_server_app is None):
         raise ValueError(
             "Either `server_app_attr` or `loaded_server_app` should be set "

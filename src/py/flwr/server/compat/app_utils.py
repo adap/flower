@@ -20,18 +20,18 @@ import threading
 from flwr.common.typing import RunNotRunningException
 
 from ..client_manager import ClientManager
-from ..compat.driver_client_proxy import DriverClientProxy
-from ..grid import Driver
+from ..compat.driver_client_proxy import GridClientProxy
+from ..grid import Grid
 
 
 def start_update_client_manager_thread(
-    driver: Driver,
+    driver: Grid,
     client_manager: ClientManager,
 ) -> tuple[threading.Thread, threading.Event, threading.Event]:
     """Periodically update the nodes list in the client manager in a thread.
 
     This function starts a thread that periodically uses the associated driver to
-    get all node_ids. Each node_id is then converted into a `DriverClientProxy`
+    get all node_ids. Each node_id is then converted into a `GridClientProxy`
     instance and stored in the `registered_nodes` dictionary with node_id as key.
 
     New nodes will be added to the ClientManager via `client_manager.register()`,
@@ -40,8 +40,8 @@ def start_update_client_manager_thread(
 
     Parameters
     ----------
-    driver : Driver
-        The Driver object to use.
+    driver : Grid
+        The Grid object to use.
     client_manager : ClientManager
         The ClientManager object to be updated.
 
@@ -72,14 +72,14 @@ def start_update_client_manager_thread(
 
 
 def _update_client_manager(
-    driver: Driver,
+    driver: Grid,
     client_manager: ClientManager,
     f_stop: threading.Event,
     c_done: threading.Event,
 ) -> None:
     """Update the nodes list in the client manager."""
     # Loop until the driver is disconnected
-    registered_nodes: dict[int, DriverClientProxy] = {}
+    registered_nodes: dict[int, GridClientProxy] = {}
     while not f_stop.is_set():
         try:
             all_node_ids = set(driver.get_node_ids())
@@ -97,7 +97,7 @@ def _update_client_manager(
 
         # Register new nodes
         for node_id in new_nodes:
-            client_proxy = DriverClientProxy(
+            client_proxy = GridClientProxy(
                 node_id=node_id,
                 driver=driver,
                 run_id=driver.run.run_id,
