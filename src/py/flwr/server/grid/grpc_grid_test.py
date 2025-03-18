@@ -35,7 +35,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 )
 
 from ..superlink.linkstate.linkstate_test import create_res_message
-from .grpc_driver import GrpcDriver
+from .grpc_grid import GrpcDriver
 
 
 class TestGrpcDriver(unittest.TestCase):

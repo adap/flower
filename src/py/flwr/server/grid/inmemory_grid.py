@@ -26,7 +26,7 @@ from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 
-from .driver import Driver
+from .grid import Driver
 
 
 class InMemoryDriver(Driver):
