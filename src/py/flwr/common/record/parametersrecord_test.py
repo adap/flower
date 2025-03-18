@@ -214,7 +214,7 @@ class TestParametersRecord(unittest.TestCase):
                 [call(arr) for arr in ndarrays], any_order=False
             )
 
-    def test_from_state_dict_with_torch(self) -> None:
+    def test_from_torch_state_dict_with_torch(self) -> None:
         """Test creating a ParametersRecord from a PyTorch state_dict."""
         # Prepare
         # Mock state_dict with tensor mocks
@@ -249,8 +249,8 @@ class TestParametersRecord(unittest.TestCase):
             )
             self.assertEqual(list(record.values()), mock_arrays)
 
-    def test_from_state_dict_without_torch(self) -> None:
-        """Test `ParametersRecord.from_state_dict` without PyTorch."""
+    def test_from_torch_state_dict_without_torch(self) -> None:
+        """Test `ParametersRecord.from_torch_state_dict` without PyTorch."""
         with patch.dict("sys.modules", {}, clear=True):
             with self.assertRaises(RuntimeError) as cm:
                 ParametersRecord.from_torch_state_dict(OrderedDict())
@@ -301,7 +301,7 @@ class TestParametersRecord(unittest.TestCase):
         self.assertEqual(list(state_dict.values()), tensors)
 
     def test_to_state_dict_without_torch(self) -> None:
-        """Test `ParametersRecord.to_state_dict` without PyTorch."""
+        """Test `ParametersRecord.to_torch_state_dict` without PyTorch."""
         with patch.dict("sys.modules", {}, clear=True):
             record = ParametersRecord()
             with self.assertRaises(RuntimeError) as cm:
@@ -356,7 +356,7 @@ class TestParametersRecord(unittest.TestCase):
         [
             ("array_dict", OrderedDict({"x": Array("mock", [1], "np", b"data")})),
             (None, OrderedDict({"x": Array("mock", [1], "np", b"data")})),
-            ("state_dict", OrderedDict({"x": MOCK_TORCH_TENSOR})),
+            ("torch_state_dict", OrderedDict({"x": MOCK_TORCH_TENSOR})),
             (None, OrderedDict({"x": MOCK_TORCH_TENSOR})),
             ("numpy_ndarrays", [np.array([1, 2, 3])]),
             (None, [np.array([1, 2, 3])]),
@@ -405,20 +405,22 @@ class TestParametersRecord(unittest.TestCase):
         self.assertEqual(len(arr_dict), 1)
 
     @parameterized.expand([(True,), (False,)])  # type: ignore
-    def test_init_state_dict_calls_from_state_dict(self, use_keyword: bool) -> None:
+    def test_init_state_dict_calls_from_torch_state_dict(
+        self, use_keyword: bool
+    ) -> None:
         """Test initializing with a state_dict."""
         state_dict = OrderedDict({"layer.weight": MOCK_TORCH_TENSOR})
         with patch.object(
             ParametersRecord,
-            "from_state_dict",
+            "from_torch_state_dict",
             return_value=Mock(spec=ParametersRecord),
         ) as mock_from_state_dict:
             if use_keyword:
-                _ = ParametersRecord(state_dict=state_dict)
+                _ = ParametersRecord(torch_state_dict=state_dict)
             else:
                 _ = ParametersRecord(state_dict)
 
-            # from_state_dict() should be called exactly once with the provided dict
+            # The method should be called exactly once with the provided dict
             mock_from_state_dict.assert_called_once_with(state_dict, keep_input=True)
 
     @parameterized.expand(  # type: ignore
@@ -434,7 +436,10 @@ class TestParametersRecord(unittest.TestCase):
             ),
             (([np.array([1])],), {"array_dict": {"x": Mock(spec=Array)}}),
             (([np.array([1])],), {"numpy_ndarrays": [np.array([2])]}),
-            (([np.array([1])],), {"state_dict": {"layer.weight": MOCK_TORCH_TENSOR}}),
+            (
+                ([np.array([1])],),
+                {"torch_state_dict": {"layer.weight": MOCK_TORCH_TENSOR}},
+            ),
         ]
     )
     def test_init_unrecognized_arg_raises_error(
