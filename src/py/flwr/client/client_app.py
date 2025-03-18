@@ -27,7 +27,7 @@ from flwr.client.message_handler.message_handler import (
 from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFnExt, Mod
 from flwr.common import Context, Message, MessageType
-from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
+from flwr.common.logger import warn_deprecated_feature
 from flwr.common.message import validate_message_type
 
 from .typing import ClientAppCallable
@@ -356,7 +356,6 @@ class ClientApp:
             lifespan_fn: Callable[[Context], Iterator[None]]
         ) -> Callable[[Context], Iterator[None]]:
             """Register the lifespan fn with the ServerApp object."""
-            warn_preview_feature("ClientApp-register-lifespan-function")
 
             @contextmanager
             def decorated_lifespan(context: Context) -> Iterator[None]:
@@ -405,7 +404,6 @@ def _get_decorator(
         raise _registration_error(category)
 
     def decorator(fn: ClientAppCallable) -> ClientAppCallable:
-        warn_preview_feature(f"ClientApp-register-{category}-function")
 
         # Check if the name is a valid Python identifier
         if not action.isidentifier():

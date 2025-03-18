@@ -205,7 +205,7 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: ${{ (matrix.directory == 'e2e-fastai') && '3.10' || '3.9' }}
       - name: Install build tools
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
