@@ -12,6 +12,7 @@ struct ContentView: View {
   @State var answer: String = ""
   var body: some View {
     ChatView()
+      .padding()
       .task {
         let fi = FlowerIntelligence.instance
         await fi.fetchModel(model: "deepseek/r1-distill-qwen-32b/4-bit") {

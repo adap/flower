@@ -20,10 +20,12 @@ struct ChatView: View {
   ]
   @State private var userInput: String = ""
   @State private var isLoading: Bool = false
+  @State private var isHovered: Bool = false
 
   @State private var selectedModel: String = "meta/llama3.2-1b"
   let availableModels = [
-    "meta/llama3.2-1b", "meta/llama3.2-3b", "deepseek/r1-distill-qwen-32b/4-bit", "deepseek/r1-distill-llama-8b/q4"
+    "meta/llama3.2-1b", "meta/llama3.2-3b", "deepseek/r1-distill-qwen-32b/4-bit",
+    "deepseek/r1-distill-llama-8b/q4",
   ]
 
   var body: some View {
@@ -39,34 +41,74 @@ struct ChatView: View {
           }
         }
         .padding()
-      }
+        
+      }.mask(
+        LinearGradient(
+            gradient: Gradient(stops: [
+                .init(color: Color.clear, location: 0.0),
+                .init(color: Color.black, location: 0.1),
+                .init(color: Color.black, location: 0.9),
+                .init(color: Color.clear, location: 1.0)
+            ]),
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    )
 
-      Divider()
       
+
       VStack(alignment: .leading) {
-          Picker("", selection: $selectedModel) {
-              ForEach(availableModels, id: \.self) { model in
-                  Text(model).tag(model)
-              }
-          }
-          .pickerStyle(MenuPickerStyle()) // Modern dropdown
-          .frame(width: 150) // Adjust width if needed
+        HStack {
+          Image("flwr")
+            .resizable() // Allows resizing
+              .scaledToFit() // Maintains aspect ratio
+              .frame(width: 30, height: 30)
 
-          HStack {
-              TextField("Type a message...", text: $userInput)
-                  .textFieldStyle(RoundedBorderTextFieldStyle())
+          TextField("Type a message...", text: $userInput)
+            .textFieldStyle(PlainTextFieldStyle())
 
-              Button(action: {
-                  Task {
-                      await sendMessage()
-                  }
-              }) {
-                  Image(systemName: "paperplane.fill")
-                      
-              }
-              .buttonStyle(BorderlessButtonStyle())
+          Button(action: {
+            Task {
+              await sendMessage()
+            }
+          }) {
+            Image(systemName: "arrow.up.circle.fill")
+              .resizable() // Allows resizing
+                .scaledToFit() // Maintains aspect ratio
+                .frame(width: 25, height: 25)
+
           }
-          
+          .buttonStyle(BorderlessButtonStyle())
+        }
+        .padding()
+          .overlay(
+            RoundedRectangle(cornerRadius: 30)
+              .stroke(.gray.opacity(0.4), lineWidth: 2)
+          )
+          .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 30))
+        Menu {
+          // Dropdown items
+          ForEach(availableModels, id: \.self) { model in
+            Button(action: {
+              selectedModel = model
+            }) {
+              Text(model)
+            }
+          }
+        } label: {
+          Text(selectedModel)
+            .foregroundColor(.gray)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(isHovered ? Color.gray.opacity(0.2) : Color.clear)
+            .cornerRadius(20)
+            .onHover { hovering in
+              isHovered = hovering
+            }
+
+        }.buttonStyle(.plain)
+        
+
       }.padding()
     }
   }
@@ -118,6 +160,16 @@ struct ChatBubble: View {
           .background(Color.gray.opacity(0.2))
           .cornerRadius(20)
           .frame(maxWidth: 300, alignment: .trailing)
+      } else if message.message.role == "system" {
+        VStack(alignment: .leading) {
+          Text("System instructions").padding(.bottom, 4)
+          Text(message.message.content)
+        }
+        
+          .padding()
+          .frame(alignment: .leading)
+          .foregroundColor(.gray)
+        Spacer()
       } else {
         Text(message.message.content)
           .padding()
