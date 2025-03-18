@@ -294,8 +294,6 @@ class ParametersRecord(TypedDict[str, Array]):
     2. By providing a dictionary of Arrays (via the ``array_dict`` argument).
     3. By providing a list of NumPy ndarrays (via the ``numpy_ndarrays`` argument).
     4. By providing a PyTorch state_dict (via the ``state_dict`` argument).
-    5. By providing TensorFlow model weights (a list of NumPy arrays via the
-       ``tf_weights`` argument).
 
     Parameters
     ----------
@@ -310,13 +308,6 @@ class ParametersRecord(TypedDict[str, Array]):
     state_dict : Optional[OrderedDict[str, torch.Tensor]] (default: None)
         A PyTorch state_dict (str keys to torch.Tensor values). Each
         tensor will be converted into an :class:`Array` and stored in this record.
-
-    tf_weights : Optional[list[NDArray]] (default: None)
-        A list of TensorFlow weights (NumPy arrays) obtained from ``get_weights``
-        method, see the `TensorFlow documentation
-        <https://www.tensorflow.org/api_docs/python/tf/keras/Layer#get_weights>`_.
-        Each array will be automatically converted into an :class:`Array` and stored in
-        this record with generated keys.
 
     keep_input : bool (default: True)
         If ``False``, entries from the input are removed after being added to
@@ -390,11 +381,10 @@ class ParametersRecord(TypedDict[str, Array]):
         super().__init__(_check_key, _check_value)
 
         # Determine the initialization method and validates input arguments.
-        # Support four initialization formats:
+        # Support the following initialization formats:
         # 1. ParametersRecord(array_dict: OrderedDict[str, Array], keep_input: bool)
         # 2. ParametersRecord(numpy_ndarrays: list[NDArray], keep_input: bool)
         # 3. ParametersRecord(state_dict: dict[str, torch.Tensor], keep_input: bool)
-        # 4. ParametersRecord(tf_weights: list[NDArray], keep_input: bool)
 
         # Init the argument
         if len(args) > 1:
@@ -424,7 +414,6 @@ class ParametersRecord(TypedDict[str, Array]):
         _try_set_arg(array_dict, "array_dict")
         _try_set_arg(numpy_ndarrays, "numpy_ndarrays")
         _try_set_arg(state_dict, "state_dict")
-        _try_set_arg(tf_weights, "tf_weights")
 
         # If no arguments are provided, return and keep self empty
         if arg is None:
@@ -466,16 +455,6 @@ class ParametersRecord(TypedDict[str, Array]):
             ):
                 state_dict = cast(OrderedDict[str, torch.Tensor], arg)  # type: ignore
                 converted = self.from_state_dict(state_dict, keep_input=keep_input)
-                self.__dict__.update(converted.__dict__)
-                return
-
-        # Handle TensorFlow weights
-        if not init_method or init_method == "tf_weights":
-            # Type check the input
-            # pylint: disable-next=not-an-iterable
-            if isinstance(arg, list) and all(isinstance(v, np.ndarray) for v in arg):
-                tf_weights = cast(list[NDArray], arg)
-                converted = self.from_tf_weights(tf_weights, keep_input=keep_input)
                 self.__dict__.update(converted.__dict__)
                 return
 
@@ -549,24 +528,6 @@ class ParametersRecord(TypedDict[str, Array]):
 
         return record
 
-    @classmethod
-    def from_tf_weights(
-        cls,
-        weights: list[NDArray],
-        *,
-        keep_input: bool = True,
-    ) -> ParametersRecord:
-        """Create ParametersRecord from a list of TensorFlow weights (NumPy arrays).
-
-        Example
-        -------
-        >>> import tensorflow as tf
-        >>> model = tf.keras.Sequential([tf.keras.layers.Dense(5, input_shape=(10,))])
-        >>> p_record = ParametersRecord.from_tf_weights(model.get_weights())
-        """
-        # TensorFlow weights are a list of NumPy arrays
-        return cls.from_numpy_ndarrays(weights, keep_input=keep_input)
-
     def to_numpy_ndarrays(self, *, keep_input: bool = True) -> list[NDArray]:
         """Return the ParametersRecord as a list of NumPy arrays."""
         if keep_input:
@@ -607,18 +568,6 @@ class ParametersRecord(TypedDict[str, Array]):
             state_dict[k] = torch.from_numpy(arr.numpy())
 
         return state_dict
-
-    def to_tf_weights(self, *, keep_input: bool = True) -> list[NDArray]:
-        """Return the ParametersRecord as a list of TensorFlow weights (NumPy arrays).
-
-        Example
-        -------
-        >>> import tensorflow as tf
-        >>> model = tf.keras.Sequential([tf.keras.layers.Dense(5, input_shape=(10,))])
-        >>> model.set_weights(p_record.to_tf_weights())
-        """
-        # TensorFlow weights are a list of NumPy arrays
-        return self.to_numpy_ndarrays(keep_input=keep_input)
 
     def count_bytes(self) -> int:
         """Return number of Bytes stored in this object.

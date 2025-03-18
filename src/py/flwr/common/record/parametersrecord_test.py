@@ -256,22 +256,6 @@ class TestParametersRecord(unittest.TestCase):
                 ParametersRecord.from_state_dict(OrderedDict())
             self.assertIn("PyTorch is required", str(cm.exception))
 
-    @parameterized.expand(  # type: ignore
-        [
-            ([np.array([1, 2]), np.array([3, 4])],),  # Two arrays
-            ([np.array(5)],),  # Single array
-            ([],),  # Empty list
-        ]
-    )
-    def test_from_tf_weights(self, tf_weights: list[NDArray]) -> None:
-        """Test creating a ParametersRecord from a list of TensorFlow weights."""
-        with patch.object(Array, "from_numpy_ndarray") as mock_from_numpy:
-            mock_from_numpy.return_value = Mock(spec=Array)
-            ParametersRecord.from_tf_weights(tf_weights)
-            mock_from_numpy.assert_has_calls(
-                [call(w) for w in tf_weights], any_order=False
-            )
-
     def test_to_numpy_ndarrays(self) -> None:
         """Test converting a ParametersRecord to a list of NumPy arrays."""
         # Prepare
@@ -323,25 +307,6 @@ class TestParametersRecord(unittest.TestCase):
             with self.assertRaises(RuntimeError) as cm:
                 record.to_state_dict()
             self.assertIn("PyTorch is required", str(cm.exception))
-
-    def test_to_tf_weights(self) -> None:
-        """Test converting a ParametersRecord to a list of TensorFlow weights."""
-        # Prepare
-        record = ParametersRecord()
-        numpy_arrays = [np.array([1, 2]), np.array([3, 4])]
-        mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
-        for mock_arr, arr in zip(mock_arrays, numpy_arrays):
-            mock_arr.numpy.return_value = arr
-        record["0"] = mock_arrays[0]
-        record["1"] = mock_arrays[1]
-
-        # Execute
-        result = record.to_tf_weights()
-
-        # Assert
-        self.assertEqual(result, numpy_arrays)
-        for mock_arr in mock_arrays:
-            mock_arr.numpy.assert_called_once()
 
     def test_init_no_args(self) -> None:
         """Test initializing with no arguments."""
@@ -395,7 +360,6 @@ class TestParametersRecord(unittest.TestCase):
             (None, OrderedDict({"x": MOCK_TORCH_TENSOR})),
             ("numpy_ndarrays", [np.array([1, 2, 3])]),
             (None, [np.array([1, 2, 3])]),
-            ("tf_weights", [np.array([1, 2, 3])]),
         ]
     )
     def test_init_keep_input_true_and_false(
@@ -463,12 +427,14 @@ class TestParametersRecord(unittest.TestCase):
             (("invalid",), {}),
             (
                 (),
-                {"numpy_ndarrays": [np.array([2])], "tf_weights": [np.array([2])]},
+                {
+                    "numpy_ndarrays": [np.array([2])],
+                    "array_dict": {"x": Mock(spec=Array)},
+                },
             ),
             (([np.array([1])],), {"array_dict": {"x": Mock(spec=Array)}}),
             (([np.array([1])],), {"numpy_ndarrays": [np.array([2])]}),
             (([np.array([1])],), {"state_dict": {"layer.weight": MOCK_TORCH_TENSOR}}),
-            (([np.array([1])],), {"tf_weights": [np.array([2])]}),
         ]
     )
     def test_init_unrecognized_arg_raises_error(
