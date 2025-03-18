@@ -20,7 +20,7 @@ import { CacheStorage, NodeCacheStorage, WebCacheStorage } from './storage';
 
 const STALE_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours.
 
-interface ModelResponse {
+interface ModelConfigResponse {
   is_supported: boolean;
   engine_model?: string;
   model?: string;
@@ -29,7 +29,7 @@ interface ModelResponse {
 
 const cacheStorage: CacheStorage = isNode ? new NodeCacheStorage() : new WebCacheStorage();
 
-async function updateModel(model: string, engine: string): Promise<Result<ModelInfo>> {
+async function updateModelConfig(model: string, engine: string): Promise<Result<ModelConfig>> {
   try {
     const response = await fetch(`${REMOTE_URL}/v1/fetch-model-config`, {
       method: 'POST',
@@ -52,7 +52,7 @@ async function updateModel(model: string, engine: string): Promise<Result<ModelI
       };
     }
 
-    const data = (await response.json()) as ModelResponse;
+    const data = (await response.json()) as ModelConfigResponse;
 
     if (data.is_supported && data.engine_model) {
       await cacheStorage.setItem(
@@ -81,12 +81,12 @@ async function updateModel(model: string, engine: string): Promise<Result<ModelI
   }
 }
 
-interface ModelInfo {
+interface ModelConfig {
   name: string;
   vram?: number;
 }
 
-function isModelInfo(obj: unknown): obj is ModelInfo {
+function isModelConfig(obj: unknown): obj is ModelConfig {
   return !(
     obj === null ||
     typeof obj !== 'object' ||
@@ -102,17 +102,17 @@ function isModelInfo(obj: unknown): obj is ModelInfo {
  * - If it exists but is stale (older than 24 hours), trigger a background update (and return the stale mapping).
  * - If it does not exist, update synchronously.
  */
-export async function getEngineModelInfo(
+export async function getEngineModelConfig(
   model: string,
   engine: string
-): Promise<Result<ModelInfo>> {
+): Promise<Result<ModelConfig>> {
   const now = Date.now();
 
   const cachedEntry = await cacheStorage.getItem(`${model}_${engine}`);
   if (cachedEntry) {
     // If the cached entry is stale, trigger a background update.
     if (now - cachedEntry.lastUpdate > STALE_TIMEOUT_MS) {
-      updateModel(model, engine).catch((err: unknown) => {
+      updateModelConfig(model, engine).catch((err: unknown) => {
         console.warn(`Background update failed for model ${model}:`, String(err));
       });
     }
@@ -125,7 +125,7 @@ export async function getEngineModelInfo(
     }
 
     // Return the (possibly stale) cached result.
-    return parsed !== null && isModelInfo(parsed)
+    return parsed !== null && isModelConfig(parsed)
       ? { ok: true, value: parsed }
       : {
           ok: false,
@@ -136,6 +136,6 @@ export async function getEngineModelInfo(
         };
   } else {
     // Not in cache, call updateModel synchronously.
-    return await updateModel(model, engine);
+    return await updateModelConfig(model, engine);
   }
 }

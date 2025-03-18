@@ -27,7 +27,7 @@ import { FailureCode, Message, Result, Progress, ChatResponseResult } from '../t
 
 import { getAvailableRAM } from '../env';
 import { BaseEngine } from './engine';
-import { getEngineModelInfo } from './common/model';
+import { getEngineModelConfig } from './common/model';
 
 const stoppingCriteria = new InterruptableStoppingCriteria();
 const choice = 0;
@@ -43,8 +43,8 @@ export class TransformersEngine extends BaseEngine {
     stream?: boolean,
     onStreamEvent?: (event: { chunk: string }) => void
   ): Promise<ChatResponseResult> {
-    const modelInfoRes = await getEngineModelInfo(model, 'onnx');
-    if (!modelInfoRes.ok) {
+    const modelConfigRes = await getEngineModelConfig(model, 'onnx');
+    if (!modelConfigRes.ok) {
       return {
         ok: false,
         failure: {
@@ -56,7 +56,7 @@ export class TransformersEngine extends BaseEngine {
     try {
       if (!(model in this.generationPipelines)) {
         let options = {};
-        const modelElems = modelInfoRes.value.name.split('|');
+        const modelElems = modelConfigRes.value.name.split('|');
         const modelId = modelElems[0];
         if (modelElems.length > 1) {
           options = {
@@ -144,8 +144,8 @@ export class TransformersEngine extends BaseEngine {
   }
 
   async fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>> {
-    const modelInfoRes = await getEngineModelInfo(model, 'onnx');
-    if (!modelInfoRes.ok) {
+    const modelConfigRes = await getEngineModelConfig(model, 'onnx');
+    if (!modelConfigRes.ok) {
       return {
         ok: false,
         failure: {
@@ -158,7 +158,7 @@ export class TransformersEngine extends BaseEngine {
       if (!(model in this.generationPipelines)) {
         this.generationPipelines.model = await pipeline(
           'text-generation',
-          modelInfoRes.value.name,
+          modelConfigRes.value.name,
           {
             dtype: 'q4',
             progress_callback: (progressInfo: ProgressInfo) => {
@@ -195,12 +195,12 @@ export class TransformersEngine extends BaseEngine {
   }
 
   async isSupported(model: string): Promise<boolean> {
-    const modelInfoRes = await getEngineModelInfo(model, 'onnx');
-    if (modelInfoRes.ok) {
-      if (modelInfoRes.value.vram) {
+    const modelConfigRes = await getEngineModelConfig(model, 'onnx');
+    if (modelConfigRes.ok) {
+      if (modelConfigRes.value.vram) {
         const availableRamRes = await getAvailableRAM();
         if (availableRamRes.ok) {
-          return modelInfoRes.value.vram < availableRamRes.value;
+          return modelConfigRes.value.vram < availableRamRes.value;
         }
       }
       return true;
