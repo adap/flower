@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Driver (abstract base class)."""
+"""Grid (abstract base class)."""
 
 
 from abc import ABC, abstractmethod
@@ -23,8 +23,8 @@ from flwr.common import Message, RecordSet
 from flwr.common.typing import Run
 
 
-class Driver(ABC):
-    """Abstract base Driver class for the ServerAppIo API."""
+class Grid(ABC):
+    """Abstract base Grid class for the ServerAppIo API."""
 
     @abstractmethod
     def set_run(self, run_id: int) -> None:
@@ -32,12 +32,12 @@ class Driver(ABC):
 
         If a Run with the specified `run_id` exists, a local Run
         object will be created. It enables further functionality
-        in the driver, such as sending `Messages`.
+        in the Grid, such as sending `Messages`.
 
         Parameters
         ----------
         run_id : int
-            The `run_id` of the Run this Driver object operates in.
+            The `run_id` of the Run this Grid object operates in.
         """
 
     @property

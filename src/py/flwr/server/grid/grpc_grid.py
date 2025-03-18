@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower gRPC Driver."""
+"""Flower gRPC Grid."""
 
 
 import time
@@ -45,11 +45,11 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
-from .grid import Driver
+from .grid import Grid
 
 ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED = """
 
-[Driver.push_messages] gRPC error occurred:
+[Grid.push_messages] gRPC error occurred:
 
 The 2GB gRPC limit has been reached. Consider reducing the number of messages pushed
 at once, or push messages individually, for example:
@@ -63,7 +63,7 @@ at once, or push messages individually, for example:
 
 ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED = """
 
-[Driver.pull_messages] gRPC error occurred:
+[Grid.pull_messages] gRPC error occurred:
 
 The 2GB gRPC limit has been reached. Consider reducing the number of messages pulled
 at once, or pull messages individually, for example:
@@ -76,8 +76,8 @@ at once, or pull messages individually, for example:
 """
 
 
-class GrpcDriver(Driver):
-    """`GrpcDriver` provides an interface to the ServerAppIo API.
+class GrpcGrid(Grid):
+    """`GrpcGrid` provides an interface to the ServerAppIo API.
 
     Parameters
     ----------
@@ -197,7 +197,7 @@ class GrpcDriver(Driver):
 
     def get_node_ids(self) -> Iterable[int]:
         """Get node IDs."""
-        # Call GrpcDriverStub method
+        # Call GrpcServerAppIoStub method
         res: GetNodesResponse = self._stub.GetNodes(
             GetNodesRequest(run_id=cast(Run, self._run).run_id)
         )
@@ -220,7 +220,7 @@ class GrpcDriver(Driver):
             message_proto_list.append(msg_proto)
 
         try:
-            # Call GrpcDriverStub method
+            # Call GrpcServerAppIoStub method
             res: PushInsMessagesResponse = self._stub.PushMessages(
                 PushInsMessagesRequest(
                     messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
