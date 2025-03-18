@@ -41,7 +41,7 @@ from flwr.common.typing import (
     Properties,
     Status,
 )
-from flwr.server.compat.driver_client_proxy import DriverClientProxy
+from flwr.server.compat.grid_client_proxy import DriverClientProxy
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 

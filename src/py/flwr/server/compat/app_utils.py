@@ -20,8 +20,8 @@ import threading
 from flwr.common.typing import RunNotRunningException
 
 from ..client_manager import ClientManager
-from ..compat.driver_client_proxy import DriverClientProxy
 from ..grid import Driver
+from .grid_client_proxy import DriverClientProxy
 
 
 def start_update_client_manager_thread(
