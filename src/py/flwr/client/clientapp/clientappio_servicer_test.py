@@ -24,8 +24,9 @@ from flwr.client.clientapp.app import (
     pull_clientappinputs,
     push_clientappoutputs,
 )
-from flwr.common import Context, Message, typing
+from flwr.common import Context, typing
 from flwr.common.constant import RUN_ID_NUM_BYTES
+from flwr.common.message import make_message
 from flwr.common.serde import (
     clientappstatus_from_proto,
     clientappstatus_to_proto,
@@ -66,7 +67,7 @@ class TestClientAppIoServicer(unittest.TestCase):
     def test_set_inputs(self) -> None:
         """Test setting ClientApp inputs."""
         # Prepare
-        message = Message(
+        message = make_message(
             metadata=self.maker.metadata(),
             content=self.maker.recordset(2, 2, 1),
         )
@@ -128,7 +129,7 @@ class TestClientAppIoServicer(unittest.TestCase):
     def test_get_outputs(self) -> None:
         """Test getting ClientApp outputs."""
         # Prepare
-        message = Message(
+        message = make_message(
             metadata=self.maker.metadata(),
             content=self.maker.recordset(2, 2, 1),
         )
@@ -158,7 +159,7 @@ class TestClientAppIoServicer(unittest.TestCase):
     def test_pull_clientapp_inputs(self) -> None:
         """Test pulling messages from SuperNode."""
         # Prepare
-        mock_message = Message(
+        mock_message = make_message(
             metadata=self.maker.metadata(),
             content=self.maker.recordset(3, 2, 1),
         )
@@ -193,7 +194,7 @@ class TestClientAppIoServicer(unittest.TestCase):
     def test_push_clientapp_outputs(self) -> None:
         """Test pushing messages to SuperNode."""
         # Prepare
-        message = Message(
+        message = make_message(
             metadata=self.maker.metadata(),
             content=self.maker.recordset(2, 2, 1),
         )

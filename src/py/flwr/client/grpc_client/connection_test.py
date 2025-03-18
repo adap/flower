@@ -44,32 +44,16 @@ SERVER_MESSAGE = ServerMessage(get_properties_ins=ServerMessage.GetPropertiesIns
 SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect_ins=ServerMessage.ReconnectIns())
 
 MESSAGE_GET_PROPERTIES = Message(
-    metadata=Metadata(
-        run_id=0,
-        message_id="",
-        src_node_id=0,
-        dst_node_id=0,
-        reply_to_message="",
-        group_id="",
-        ttl=DEFAULT_TTL,
-        message_type=MessageTypeLegacy.GET_PROPERTIES,
-    ),
     content=compat.getpropertiesres_to_recordset(
         GetPropertiesRes(Status(Code.OK, ""), {})
     ),
+    dst_node_id=0,
+    message_type=MessageTypeLegacy.GET_PROPERTIES,
 )
 MESSAGE_DISCONNECT = Message(
-    metadata=Metadata(
-        run_id=0,
-        message_id="",
-        src_node_id=0,
-        dst_node_id=0,
-        reply_to_message="",
-        group_id="",
-        ttl=DEFAULT_TTL,
-        message_type="reconnect",
-    ),
     content=RecordSet({"config": ConfigsRecord({"reason": 0})}),
+    dst_node_id=0,
+    message_type="reconnect",
 )
 
 

@@ -84,22 +84,6 @@ class _MockServicer:
                 return PushMessagesResponse()
             if isinstance(request, GetRunRequest):
                 return GetRunResponse()
-
-            msg = Message(
-                metadata=Metadata(
-                    run_id=1234,
-                    message_id="",
-                    src_node_id=123,
-                    dst_node_id=SUPERLINK_NODE_ID,
-                    group_id="",
-                    ttl=DEFAULT_TTL,
-                    message_type="mock",
-                    reply_to_message="",
-                ),
-                content=RecordSet(),
-            )
-            proto_msg = serde.message_to_proto(msg)
-            proto_msg.metadata.created_at = now().timestamp()
             return PullMessagesResponse(messages_list=[])
 
     def received_client_metadata(

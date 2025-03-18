@@ -60,7 +60,7 @@ from . import (
     RecordSet,
     typing,
 )
-from .message import Error, Message, Metadata
+from .message import Error, Message, Metadata, make_message
 from .record.typeddict import TypedDict
 
 #  === Parameters message ===
@@ -675,6 +675,7 @@ def metadata_from_proto(metadata_proto: ProtoMetadata) -> Metadata:
         dst_node_id=metadata_proto.dst_node_id,
         reply_to_message=metadata_proto.reply_to_message,
         group_id=metadata_proto.group_id,
+        created_at=metadata_proto.created_at,
         ttl=metadata_proto.ttl,
         message_type=metadata_proto.message_type,
     )
@@ -698,8 +699,7 @@ def message_to_proto(message: Message) -> ProtoMessage:
 
 def message_from_proto(message_proto: ProtoMessage) -> Message:
     """Deserialize `Message` from ProtoBuf."""
-    created_at = message_proto.metadata.created_at
-    message = Message(
+    return make_message(
         metadata=metadata_from_proto(message_proto.metadata),
         content=(
             recordset_from_proto(message_proto.content)
@@ -712,10 +712,6 @@ def message_from_proto(message_proto: ProtoMessage) -> Message:
             else None
         ),
     )
-    # `.created_at` is set upon Message object construction
-    # we need to manually set it to the original value
-    message.metadata.created_at = created_at
-    return message
 
 
 # === Context messages ===

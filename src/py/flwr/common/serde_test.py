@@ -22,6 +22,8 @@ from typing import Any, Callable, Optional, TypeVar, Union, cast
 
 import pytest
 
+from flwr.common.date import now
+
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2
 from flwr.proto import transport_pb2 as pb2
@@ -260,6 +262,7 @@ class RecordMaker:
             src_node_id=self.rng.randint(0, 1 << 63),
             dst_node_id=self.rng.randint(0, 1 << 63),
             reply_to_message=self.get_str(64),
+            created_at=now().timestamp(),
             ttl=self.rng.randint(1, 1 << 30),
             message_type=self.get_str(10),
         )

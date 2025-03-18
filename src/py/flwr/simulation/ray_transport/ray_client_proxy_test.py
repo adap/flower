@@ -34,6 +34,7 @@ from flwr.common import (
     RecordSet,
     Scalar,
 )
+from flwr.common.message import make_message
 from flwr.common.constant import NUM_PARTITIONS_KEY, PARTITION_ID_KEY
 from flwr.common.recordset_compat import (
     getpropertiesins_to_recordset,
@@ -216,17 +217,11 @@ def test_cid_consistency_without_proxies() -> None:
     for node_id in node_ids:
         message = Message(
             content=recordset,
-            metadata=Metadata(
-                run_id=run_id,
-                message_id="",
-                group_id=str(0),
-                src_node_id=0,
-                dst_node_id=node_id,
-                reply_to_message="",
-                ttl=DEFAULT_TTL,
-                message_type=MessageTypeLegacy.GET_PROPERTIES,
-            ),
+            dst_node_id=node_id,
+            message_type=MessageTypeLegacy.GET_PROPERTIES,
+            group_id=str(0),
         )
+        message.metadata.__dict__["_run_id"] = run_id
         # register and retrieve context
         node_info_stores[node_id].register_context(run_id=run_id)
         context = node_info_stores[node_id].retrieve_context(run_id=run_id)
