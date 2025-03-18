@@ -370,18 +370,12 @@ class ParametersRecord(TypedDict[str, Array]):
         self, state_dict: OrderedDict[str, torch.Tensor], *, keep_input: bool = True
     ) -> None: ...
 
-    @overload
-    def __init__(  # noqa: E704
-        self, tf_weights: list[NDArray], *, keep_input: bool = True
-    ) -> None: ...
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         *args: Any,
         numpy_ndarrays: list[NDArray] | None = None,
         state_dict: OrderedDict[str, torch.Tensor] | None = None,
         array_dict: OrderedDict[str, Array] | None = None,
-        tf_weights: list[NDArray] | None = None,
         keep_input: bool = True,
     ) -> None:
         super().__init__(_check_key, _check_value)

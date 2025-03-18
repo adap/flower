@@ -132,7 +132,7 @@ def test_set_parameters_while_keeping_intputs() -> None:
     p_record = ParametersRecord(array_dict, keep_input=True)
 
     # Creating a second parametersrecord passing the same `array_dict` (not erased)
-    p_record_2 = ParametersRecord(array_dict, keep_input=False)
+    p_record_2 = ParametersRecord(array_dict)
     assert p_record == p_record_2
 
     # Now it should be empty (the second ParametersRecord wasn't flagged to keep it)
