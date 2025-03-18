@@ -177,6 +177,7 @@ export default function ClientSideChatPage() {
           };
           return updated;
         });
+        console.error(response.failure.description);
         return; // Exit early on error.
       }
       history.push(response.message);
