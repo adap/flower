@@ -26,6 +26,8 @@ In order to run the example once the project has been built:
 node src/index.js
 ```
 
+or
+
 ```bash
 npm run start
 ```
