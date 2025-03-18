@@ -452,8 +452,8 @@ def _run_simulation(
         backend_config["init_args"]["logging_level"] = backend_config["init_args"].get(
             "logging_level", WARNING
         )
-        backend_config["init_args"]["log_to_grid"] = backend_config["init_args"].get(
-            "log_to_grid", True
+        backend_config["init_args"]["log_to_driver"] = backend_config["init_args"].get(
+            "log_to_driver", True
         )
 
     if enable_tf_gpu_growth:
