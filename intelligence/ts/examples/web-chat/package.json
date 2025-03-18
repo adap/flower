@@ -4,8 +4,7 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "start": "pnpm i && vite"
+    "dev": "vite"
   },
   "keywords": [],
   "author": "",
