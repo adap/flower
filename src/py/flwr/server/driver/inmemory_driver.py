@@ -54,9 +54,7 @@ class InMemoryDriver(Driver):
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            message.metadata.run_id == cast(Run, self._run).run_id
-            and message.metadata.src_node_id == self.node.node_id
-            and message.metadata.message_id == ""
+            message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""
             and message.metadata.ttl > 0
             and message.metadata.delivered_at == ""
@@ -106,6 +104,9 @@ class InMemoryDriver(Driver):
         """
         msg_ids: list[str] = []
         for msg in messages:
+            # Populate metadata
+            msg.metadata.__dict__["_run_id"] = cast(Run, self._run).run_id
+            msg.metadata.__dict__["_src_node_id"] = self.node.node_id
             # Check message
             self._check_message(msg)
             # Store in state

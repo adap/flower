@@ -47,7 +47,7 @@ def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str]
         node_id = driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
     num_messages = 3
     msgs = [
-        driver.create_message(RecordSet(), "query", node_id, "")
+        Message(RecordSet(), node_id, "query")
         for _ in range(num_messages)
     ]
 
@@ -61,7 +61,7 @@ def get_replies(
     """Help create message replies and pull them from state."""
     messages = driver.state.get_message_ins(node_id, limit=len(list(msg_ids)))
     for msg in messages:
-        reply_msg = msg.create_reply(RecordSet())
+        reply_msg = Message(RecordSet(), reply_to=msg)
         driver.state.store_message_res(message=reply_msg)
 
     # Execute: Pull messages
@@ -141,10 +141,10 @@ class TestInMemoryDriver(unittest.TestCase):
         """Test pushing invalid messages."""
         # Prepare
         msgs = [
-            self.driver.create_message(RecordSet(), "query", 1, "") for _ in range(2)
+            Message(RecordSet(), 1, "query") for _ in range(2)
         ]
         # Use invalid run_id
-        msgs[1].metadata._run_id += 1  # type: ignore
+        msgs[1].metadata.__dict__["_message_id"] = "invald message id"
 
         # Execute and assert
         with self.assertRaises(ValueError):

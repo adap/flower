@@ -160,10 +160,7 @@ class GrpcDriver(Driver):
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            # Assume self._run being initialized
-            message.metadata.run_id == cast(Run, self._run).run_id
-            and message.metadata.src_node_id == self.node.node_id
-            and message.metadata.message_id == ""
+            message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""
             and message.metadata.ttl > 0
         ):
