@@ -85,7 +85,7 @@ export class WebllmEngine extends BaseEngine {
     }
     try {
       if (!(model in this.#loadedEngines)) {
-        this.#loadedEngines.model = await CreateMLCEngine(modelNameRes.value.name);
+        this.#loadedEngines.model = await CreateMLCEngine(modelInfoRes.value.name);
       }
       const result = await runQuery(
         this.#loadedEngines.model,
@@ -126,7 +126,7 @@ export class WebllmEngine extends BaseEngine {
     }
     try {
       if (!(model in this.#loadedEngines)) {
-        this.#loadedEngines.model = await CreateMLCEngine(modelNameRes.value.name, {
+        this.#loadedEngines.model = await CreateMLCEngine(modelInfoRes.value.name, {
           initProgressCallback: (report: InitProgressReport) => {
             callback({ percentage: report.progress, description: report.text });
           },
