@@ -16,7 +16,7 @@ In order to run the example once the dependencies have been installed:
 node dist/index.js
 ```
 
-or 
+or
 
 ```bash
 npm run start
