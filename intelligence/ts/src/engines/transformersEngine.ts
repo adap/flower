@@ -55,15 +55,12 @@ export class TransformersEngine extends BaseEngine {
     }
     try {
       if (!(model in this.generationPipelines)) {
-        let options = {};
         const modelElems = modelConfigRes.value.name.split('|');
         const modelId = modelElems[0];
-        if (modelElems.length > 1) {
-          options = {
-            dtype: modelElems[1],
-          };
-        }
-        this.generationPipelines.model = await pipeline('text-generation', modelId, options);
+
+        this.generationPipelines.model = await pipeline('text-generation', modelId, {
+          ...(modelElems.length > 1 && { dtype: modelElems[1] as DTYPE }),
+        });
       }
       const tokenizer = this.generationPipelines.model.tokenizer;
       const modelInstance = this.generationPipelines.model.model;
@@ -156,34 +153,33 @@ export class TransformersEngine extends BaseEngine {
     }
     try {
       if (!(model in this.generationPipelines)) {
-        this.generationPipelines.model = await pipeline(
-          'text-generation',
-          modelConfigRes.value.name,
-          {
-            dtype: 'q4',
-            progress_callback: (progressInfo: ProgressInfo) => {
-              let percentage = 0;
-              let total = 0;
-              let loaded = 0;
-              let description = progressInfo.status as string;
-              if (progressInfo.status == 'progress') {
-                percentage = progressInfo.progress;
-                total = progressInfo.total;
-                loaded = progressInfo.loaded;
-                description = progressInfo.file;
-              } else if (progressInfo.status === 'done') {
-                percentage = 100;
-                description = progressInfo.status;
-              }
-              callback({
-                totalBytes: total,
-                loadedBytes: loaded,
-                percentage,
-                description,
-              });
-            },
-          }
-        );
+        const modelElems = modelConfigRes.value.name.split('|');
+        const modelId = modelElems[0];
+
+        this.generationPipelines.model = await pipeline('text-generation', modelId, {
+          progress_callback: (progressInfo: ProgressInfo) => {
+            let percentage = 0;
+            let total = 0;
+            let loaded = 0;
+            let description = progressInfo.status as string;
+            if (progressInfo.status == 'progress') {
+              percentage = progressInfo.progress;
+              total = progressInfo.total;
+              loaded = progressInfo.loaded;
+              description = progressInfo.file;
+            } else if (progressInfo.status === 'done') {
+              percentage = 100;
+              description = progressInfo.status;
+            }
+            callback({
+              totalBytes: total,
+              loadedBytes: loaded,
+              percentage,
+              description,
+            });
+          },
+          ...(modelElems.length > 1 && { dtype: modelElems[1] as DTYPE }),
+        });
       }
       return { ok: true, value: undefined };
     } catch (error) {
@@ -208,3 +204,15 @@ export class TransformersEngine extends BaseEngine {
     return false;
   }
 }
+
+type DTYPE =
+  | 'auto'
+  | 'fp32'
+  | 'fp16'
+  | 'q8'
+  | 'int8'
+  | 'uint8'
+  | 'q4'
+  | 'bnb4'
+  | 'q4f16'
+  | Record<string, 'auto' | 'fp32' | 'fp16' | 'q8' | 'int8' | 'uint8' | 'q4' | 'bnb4' | 'q4f16'>;
