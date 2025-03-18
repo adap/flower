@@ -27,17 +27,6 @@ Install
         .. code-block:: bash
 
           npm i "@flwr/flwr"
-      
-    .. tab-item:: Swift
-        :sync: swift
-
-        .. code-block:: bash
-
-          # You can add package dependency to your Xcode project via its UI.
-          # Please refer to https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app.
-          # 
-          # To add dependency to your Swift package, you can run the following command:
-          swift package add-dependency "https://github.com/adap/flower.git"
 
     .. tab-item:: Swift
         :sync: swift
@@ -170,26 +159,6 @@ the :doc:`available models list <ref-models>`.
             }
 
             await main().then().catch();
-    
-    .. tab-item:: Swift
-        :sync: swift
-
-        .. code-block:: swift
-
-            import FlowerIntelligence
-
-            let fi = FlowerIntelligence.instance
-
-            let options = ChatOptions(model: "meta/llama3.2-1b/instruct-fp16")
-            let result = await fi.chat("Why is the sky blue?", maybeOptions: options)
-            
-            switch result {
-            case .success(let message):
-                print(message.content)
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-
 
     .. tab-item:: Swift
         :sync: swift
@@ -451,29 +420,6 @@ ensuring that the assistant responds in a way that’s tailored to the scenario.
             }
 
             await main().then().catch();
-    
-    .. tab-item:: Swift
-        :sync: swift
-
-        .. code-block:: swift
-
-            import FlowerIntelligence
-
-            let fi = FlowerIntelligence.instance
-
-            let messages = [
-              Message(role: "system", content: "You are a helpful assistant."),
-              Message(role: "user", content: "Why is the sky blue?")
-            ]
-
-            let options = ChatOptions(model: "meta/llama3.2-1b/instruct-fp16")
-            let result = await fi.chat(options: (messages, options))
-            switch result {
-            case .success(let message):
-              print(message.content)
-            case .failure(let error):
-              print(error.localizedDescription)
-            }
 
     .. tab-item:: Swift
         :sync: swift
@@ -595,50 +541,6 @@ interactions, resulting in a more coherent and dynamic conversation.
             }
 
             await main().then().catch();
-    
-    .. tab-item:: Swift
-        :sync: swift
-
-        .. code-block:: swift
-
-            import FlowerIntelligence
-
-            let fi = FlowerIntelligence.instance
-
-            // Initialize history with a system message
-            var history: [Message] = [
-                Message(role: "system", content: "You are a friendly assistant that loves using emojis.")
-            ]
-
-            // Function to chat while preserving conversation history
-            func chatWithHistory(userInput: String) async {
-                // Append user input to the history
-                history.append(Message(role: "user", content: userInput))
-
-                // Define chat options with streaming
-                let options = ChatOptions(
-                    model: "meta/llama3.2-1b/instruct-fp16",
-                    stream: true,
-                    onStreamEvent: { event in
-                        print(event.chunk)
-                    }
-                )
-
-                // Perform chat with full history
-                let result = await fi.chat(options: (history, options))
-
-                switch result {
-                case .success(let response):
-                    // Append assistant's response to history
-                    history.append(response)
-                    print("Assistant's full response:", response.content)
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
-
-            // Start the conversation
-            await chatWithHistory("Why is the sky blue?")
 
     .. tab-item:: Swift
         :sync: swift
@@ -911,36 +813,6 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
             }
 
             await main().then().catch();
-    
-    .. tab-item:: Swift
-        :sync: swift
-
-        .. code-block:: swift
-
-            import FlowerIntelligence
-
-            let fi = FlowerIntelligence.instance
-            fi.remoteHandoff = true
-            fi.apiKey = "YOUR_API_KEY"
-
-            let messages = [
-              Message(role: "system", content: "You are a helpful assistant."),
-              Message(role: "user", content: "Why is the sky blue?")
-            ]
-
-            let options = ChatOptions(
-              model: "meta/llama3.2-1b/instruct-fp16",
-              stream: true,
-              onStreamEvent: { event in
-                  print(event.chunk)
-              }
-            )
-
-            let result = await fi.chat(options: (messages, options))
-
-            if case .failure(let error) = result {
-              print(error.localizedDescription)
-            }
 
     .. tab-item:: Swift
         :sync: swift
