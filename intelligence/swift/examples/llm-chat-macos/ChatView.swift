@@ -32,13 +32,11 @@ struct ChatView: View {
     VStack {
       ScrollView {
         VStack(alignment: .leading, spacing: 10) {
-          ForEach(messages) { message in
-            ChatBubble(message: message)
-          }
-          if isLoading {
-            ProgressView("Searching files...")
-              .padding()
-          }
+          ForEach(messages.indices, id: \.self) { index in
+                                  ChatBubble(message: messages[index]) { updatedContent in
+                                      messages[index] = ChatMessage(role: "system", content: updatedContent)
+                                  }
+                              }
         }
         .padding()
         
@@ -131,7 +129,7 @@ struct ChatView: View {
           model: selectedModel, stream: true,
           onStreamEvent: { stream in
             DispatchQueue.main.async {
-              let message = messages.removeLast()
+              _ = messages.removeLast()
               let newMessage = ChatMessage(
                 role: "assistant", content: stream.chunk)
               messages.append(newMessage)
@@ -149,35 +147,65 @@ struct ChatView: View {
 }
 
 struct ChatBubble: View {
-  let message: ChatMessage
+    @State private var isEditing: Bool = false
+    @State private var editedMessage: String = ""
+    
+    let message: ChatMessage
+    let onSave: (String) -> Void // Callback to update system message
 
-  var body: some View {
-    HStack {
-      if message.message.role == "user" {
-        Spacer()
-        Text(message.message.content)
-          .padding()
-          .background(Color.gray.opacity(0.2))
-          .cornerRadius(20)
-          .frame(maxWidth: 300, alignment: .trailing)
-      } else if message.message.role == "system" {
-        VStack(alignment: .leading) {
-          Text("System instructions").padding(.bottom, 4)
-          Text(message.message.content)
+    var body: some View {
+        HStack {
+            if message.message.role == "user" {
+                Spacer()
+                Text(message.message.content)
+                    .padding()
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(20)
+                    .frame(maxWidth: 300, alignment: .trailing)
+            } else if message.message.role == "system" {
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("System instructions")
+                            .padding(.bottom, 4)
+                        Spacer()
+                        Button(action: {
+                            isEditing.toggle()
+                            if !isEditing {
+                                onSave(editedMessage) // Save when exiting edit mode
+                            }
+                        }) {
+                            Image(systemName: isEditing ? "checkmark.circle.fill" : "pencil.circle.fill")
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    
+                    if isEditing {
+                        TextEditor(text: $editedMessage)
+                        .padding()
+                        .textEditorStyle(.plain)
+                        .lineSpacing(5)
+                        .font(.custom("HelveticaNeue", size: 14))
+                        .background(.ultraThinMaterial, in: .rect(cornerRadius: 10))
+                    } else {
+                        Text(message.message.content)
+                    }
+                }
+                .padding()
+                .frame(alignment: .leading)
+                .foregroundColor(.gray)
+                .onAppear {
+                    editedMessage = message.message.content // Initialize editable text
+                }
+                
+                Spacer()
+            } else {
+                Text(message.message.content)
+                    .padding()
+                    .frame(alignment: .leading)
+                Spacer()
+            }
         }
-        
-          .padding()
-          .frame(alignment: .leading)
-          .foregroundColor(.gray)
-        Spacer()
-      } else {
-        Text(message.message.content)
-          .padding()
-          .frame(alignment: .leading)
-        Spacer()
-      }
     }
-  }
 }
 
 #Preview {
