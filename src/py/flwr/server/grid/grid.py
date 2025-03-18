@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Driver (abstract base class)."""
+"""Grid (abstract base class)."""
 
 
 from abc import ABC, abstractmethod
@@ -20,11 +20,12 @@ from collections.abc import Iterable
 from typing import Optional
 
 from flwr.common import Message, RecordSet
+from flwr.common.logger import warn_deprecated_feature_with_example
 from flwr.common.typing import Run
 
 
-class Driver(ABC):
-    """Abstract base Driver class for the ServerAppIo API."""
+class Grid(ABC):
+    """Abstract base Grid class for the ServerAppIo API."""
 
     @abstractmethod
     def set_run(self, run_id: int) -> None:
@@ -37,7 +38,7 @@ class Driver(ABC):
         Parameters
         ----------
         run_id : int
-            The `run_id` of the Run this Driver object operates in.
+            The `run_id` of the Run this Grid object operates in.
         """
 
     @property
@@ -159,3 +160,26 @@ class Driver(ABC):
         replies for all sent messages. A message remains valid until its TTL,
         which is not affected by `timeout`.
         """
+
+
+GRID_USAGE_EXAMPLE = """
+            app = ServerApp()
+        
+            @app.main()
+            def main(grid: Grid, context: Context) -> None:
+                # Your existing ServerApp code ...
+"""
+
+
+class Driver(Grid):
+    """Deprecated abstract base class for Driver"""
+
+    def __init__(self) -> None:
+        warn_deprecated_feature_with_example(
+            deprecation_message="The `Driver` class will be deprecated in "
+            "future versions of Flower. Please use `Grid` instead.",
+            example_message="In the signature of your ServerApp, pass `Grid` "
+            "instead of `Driver`. For example: ",
+            code_example=GRID_USAGE_EXAMPLE,
+        )
+        super().__init__()

@@ -45,6 +45,7 @@ class InMemoryDriver(Driver):
         state_factory: LinkStateFactory,
         pull_interval: float = 0.1,
     ) -> None:
+        super().__init__()
         self._run: Optional[Run] = None
         self.state = state_factory.state()
         self.pull_interval = pull_interval

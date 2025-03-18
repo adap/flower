@@ -94,6 +94,7 @@ class GrpcDriver(Driver):
         serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: Optional[bytes] = None,
     ) -> None:
+        super().__init__()
         self._addr = serverappio_service_address
         self._cert = root_certificates
         self._run: Optional[Run] = None
