@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower gRPC Grid."""
+"""Flower gRPC Driver."""
 
 
 import time
@@ -45,11 +45,11 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
-from .grid import Grid
+from .grid import Driver
 
 ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED = """
 
-[Grid.push_messages] gRPC error occurred:
+[Driver.push_messages] gRPC error occurred:
 
 The 2GB gRPC limit has been reached. Consider reducing the number of messages pushed
 at once, or push messages individually, for example:
@@ -57,13 +57,13 @@ at once, or push messages individually, for example:
 > msgs = [msg1, msg2, msg3]
 > msg_ids = []
 > for msg in msgs:
->     msg_id = grid.push_messages([msg])
+>     msg_id = driver.push_messages([msg])
 >     msg_ids.extend(msg_id)
 """
 
 ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED = """
 
-[Grid.pull_messages] gRPC error occurred:
+[Driver.pull_messages] gRPC error occurred:
 
 The 2GB gRPC limit has been reached. Consider reducing the number of messages pulled
 at once, or pull messages individually, for example:
@@ -71,13 +71,13 @@ at once, or pull messages individually, for example:
 > msgs_ids = [msg_id1, msg_id2, msg_id3]
 > msgs = []
 > for msg_id in msg_ids:
->     msg = grid.pull_messages([msg_id])
+>     msg = driver.pull_messages([msg_id])
 >     msgs.extend(msg)
 """
 
 
-class GrpcGrid(Grid):
-    """`GrpcGrid` provides an interface to the ServerAppIo API.
+class GrpcDriver(Driver):
+    """`GrpcDriver` provides an interface to the ServerAppIo API.
 
     Parameters
     ----------
@@ -198,7 +198,7 @@ class GrpcGrid(Grid):
 
     def get_node_ids(self) -> Iterable[int]:
         """Get node IDs."""
-        # Call GrpcServerAppIoStub method
+        # Call GrpcDriverStub method
         res: GetNodesResponse = self._stub.GetNodes(
             GetNodesRequest(run_id=cast(Run, self._run).run_id)
         )
@@ -221,7 +221,7 @@ class GrpcGrid(Grid):
             message_proto_list.append(msg_proto)
 
         try:
-            # Call GrpcServerAppIoStub method
+            # Call GrpcDriverStub method
             res: PushInsMessagesResponse = self._stub.PushMessages(
                 PushInsMessagesRequest(
                     messages_list=message_proto_list, run_id=cast(Run, self._run).run_id

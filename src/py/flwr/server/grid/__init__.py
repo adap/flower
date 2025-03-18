@@ -15,11 +15,12 @@
 """Flower grid SDK."""
 
 
-from .grid import Grid
+from .grid import Driver, Grid
 from .grpc_grid import GrpcGrid
 from .inmemory_grid import InMemoryGrid
 
 __all__ = [
+    "Driver",
     "Grid",
     "GrpcGrid",
     "InMemoryGrid",
