@@ -84,13 +84,7 @@ export class WebllmEngine extends BaseEngine {
     }
     try {
       if (!(model in this.#loadedEngines)) {
-        this.#loadedEngines.model = await CreateMLCEngine(
-          modelNameRes.value,
-          {},
-          {
-            context_window_size: 2048,
-          }
-        );
+        this.#loadedEngines.model = await CreateMLCEngine(modelNameRes.value);
       }
       const result = await runQuery(
         this.#loadedEngines.model,
@@ -131,17 +125,11 @@ export class WebllmEngine extends BaseEngine {
     }
     try {
       if (!(model in this.#loadedEngines)) {
-        this.#loadedEngines.model = await CreateMLCEngine(
-          modelNameRes.value,
-          {
-            initProgressCallback: (report: InitProgressReport) => {
-              callback({ percentage: report.progress, description: report.text });
-            },
+        this.#loadedEngines.model = await CreateMLCEngine(modelNameRes.value, {
+          initProgressCallback: (report: InitProgressReport) => {
+            callback({ percentage: report.progress, description: report.text });
           },
-          {
-            context_window_size: 2048,
-          }
-        );
+        });
       }
       return { ok: true, value: undefined };
     } catch (error) {
