@@ -236,7 +236,7 @@ class TestParametersRecord(unittest.TestCase):
             mock_from_numpy.side_effect = mock_arrays
 
             # Execute
-            record = ParametersRecord.from_state_dict(state_dict)
+            record = ParametersRecord.from_torch_state_dict(state_dict)
 
             # Assert
             self.assertEqual(list(record.keys()), list(state_dict.keys()))
@@ -253,7 +253,7 @@ class TestParametersRecord(unittest.TestCase):
         """Test `ParametersRecord.from_state_dict` without PyTorch."""
         with patch.dict("sys.modules", {}, clear=True):
             with self.assertRaises(RuntimeError) as cm:
-                ParametersRecord.from_state_dict(OrderedDict())
+                ParametersRecord.from_torch_state_dict(OrderedDict())
             self.assertIn("PyTorch is required", str(cm.exception))
 
     def test_to_numpy_ndarrays(self) -> None:
@@ -290,7 +290,7 @@ class TestParametersRecord(unittest.TestCase):
         record["bias"] = mock_arrays[1]
 
         # Execute
-        state_dict = record.to_state_dict()
+        state_dict = record.to_torch_state_dict()
 
         # Assert
         self.assertIsInstance(state_dict, OrderedDict)
@@ -305,7 +305,7 @@ class TestParametersRecord(unittest.TestCase):
         with patch.dict("sys.modules", {}, clear=True):
             record = ParametersRecord()
             with self.assertRaises(RuntimeError) as cm:
-                record.to_state_dict()
+                record.to_torch_state_dict()
             self.assertIn("PyTorch is required", str(cm.exception))
 
     def test_init_no_args(self) -> None:
