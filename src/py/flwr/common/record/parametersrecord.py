@@ -38,7 +38,7 @@ def _raise_array_init_error() -> None:
 
 @dataclass
 class Array:
-    """Array type.
+    """Array type test test.
 
     A dataclass containing serialized data from an array-like or tensor-like object
     along with metadata about it. The class can be initialized in one of two ways:
