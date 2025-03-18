@@ -445,7 +445,9 @@ class ParametersRecord(TypedDict[str, Array]):
                 and all(isinstance(k, str) for k in arg.keys())
                 and all(isinstance(v, torch.Tensor) for v in arg.values())
             ):
-                torch_state_dict = cast(OrderedDict[str, torch.Tensor], arg)  # type: ignore
+                torch_state_dict = cast(
+                    OrderedDict[str, torch.Tensor], arg  # type: ignore
+                )
                 converted = self.from_torch_state_dict(
                     torch_state_dict, keep_input=keep_input
                 )
