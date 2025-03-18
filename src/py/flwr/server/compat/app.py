@@ -25,7 +25,7 @@ from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 
-from ..driver import Driver
+from ..grid import Driver
 from .app_utils import start_update_client_manager_thread
 
 
