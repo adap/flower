@@ -225,7 +225,7 @@ def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
     server_app_run_config: UserConfig,
-    driver: Grid,
+    grid: Grid,
     app_dir: str,
     f_stop: threading.Event,
     has_exception: threading.Event,
@@ -239,7 +239,7 @@ def run_serverapp_th(
         tf_gpu_growth: bool,
         stop_event: threading.Event,
         exception_event: threading.Event,
-        _driver: Grid,
+        _grid: Grid,
         _server_app_dir: str,
         _server_app_run_config: UserConfig,
         _server_app_attr: Optional[str],
@@ -266,7 +266,7 @@ def run_serverapp_th(
 
             # Run ServerApp
             updated_context = _run(
-                driver=_driver,
+                grid=_grid,
                 context=context,
                 server_app_dir=_server_app_dir,
                 server_app_attr=_server_app_attr,
@@ -291,7 +291,7 @@ def run_serverapp_th(
             enable_tf_gpu_growth,
             f_stop,
             has_exception,
-            driver,
+            grid,
             app_dir,
             server_app_run_config,
             server_app_attr,
@@ -348,8 +348,8 @@ def _main_loop(
             server_app_run_config = {}
 
         # Initialize Grid
-        driver = InMemoryGrid(state_factory=state_factory)
-        driver.set_run(run_id=run.run_id)
+        grid = InMemoryGrid(state_factory=state_factory)
+        grid.set_run(run_id=run.run_id)
         output_context_queue: Queue[Context] = Queue()
 
         # Get and run ServerApp thread
@@ -357,7 +357,7 @@ def _main_loop(
             server_app_attr=server_app_attr,
             server_app=server_app,
             server_app_run_config=server_app_run_config,
-            driver=driver,
+            grid=grid,
             app_dir=app_dir,
             f_stop=f_stop,
             has_exception=server_app_thread_has_exception,
@@ -452,8 +452,8 @@ def _run_simulation(
         backend_config["init_args"]["logging_level"] = backend_config["init_args"].get(
             "logging_level", WARNING
         )
-        backend_config["init_args"]["log_to_driver"] = backend_config["init_args"].get(
-            "log_to_driver", True
+        backend_config["init_args"]["log_to_grid"] = backend_config["init_args"].get(
+            "log_to_grid", True
         )
 
     if enable_tf_gpu_growth:

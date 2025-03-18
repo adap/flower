@@ -27,7 +27,7 @@ from .server_app import LoadServerAppError, ServerApp
 
 
 def run(
-    driver: Grid,
+    grid: Grid,
     context: Context,
     server_app_dir: str,
     server_app_attr: Optional[str] = None,
@@ -59,7 +59,7 @@ def run(
     server_app = _load()
 
     # Call ServerApp
-    server_app(driver=driver, context=context)
+    server_app(grid=grid, context=context)
 
     log(DEBUG, "ServerApp finished running.")
     return context

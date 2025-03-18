@@ -28,10 +28,10 @@ from ..grid.grid import Grid
 class GridClientProxy(ClientProxy):
     """Flower client proxy which delegates work using the Grid API."""
 
-    def __init__(self, node_id: int, driver: Grid, run_id: int):
+    def __init__(self, node_id: int, grid: Grid, run_id: int):
         super().__init__(str(node_id))
         self.node_id = node_id
-        self.driver = driver
+        self.grid = grid
         self.run_id = run_id
 
     def get_properties(
@@ -110,7 +110,7 @@ class GridClientProxy(ClientProxy):
     ) -> RecordSet:
 
         # Create message
-        message = self.driver.create_message(
+        message = self.grid.create_message(
             content=recordset,
             message_type=message_type,
             dst_node_id=self.node_id,
@@ -119,7 +119,7 @@ class GridClientProxy(ClientProxy):
         )
 
         # Send message and wait for reply
-        messages = list(self.driver.send_and_receive(messages=[message]))
+        messages = list(self.grid.send_and_receive(messages=[message]))
 
         # A single reply is expected
         if len(messages) != 1:

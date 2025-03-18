@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Utility functions for the `start_driver`."""
+"""Utility functions for the `start_grid`."""
 
 
 import threading
@@ -20,17 +20,17 @@ import threading
 from flwr.common.typing import RunNotRunningException
 
 from ..client_manager import ClientManager
-from ..compat.driver_client_proxy import GridClientProxy
 from ..grid import Grid
+from .grid_client_proxy import GridClientProxy
 
 
 def start_update_client_manager_thread(
-    driver: Grid,
+    grid: Grid,
     client_manager: ClientManager,
 ) -> tuple[threading.Thread, threading.Event, threading.Event]:
     """Periodically update the nodes list in the client manager in a thread.
 
-    This function starts a thread that periodically uses the associated driver to
+    This function starts a thread that periodically uses the associated grid to
     get all node_ids. Each node_id is then converted into a `GridClientProxy`
     instance and stored in the `registered_nodes` dictionary with node_id as key.
 
@@ -40,7 +40,7 @@ def start_update_client_manager_thread(
 
     Parameters
     ----------
-    driver : Grid
+    grid : Grid
         The Grid object to use.
     client_manager : ClientManager
         The ClientManager object to be updated.
@@ -59,7 +59,7 @@ def start_update_client_manager_thread(
     thread = threading.Thread(
         target=_update_client_manager,
         args=(
-            driver,
+            grid,
             client_manager,
             f_stop,
             c_done,
@@ -72,17 +72,17 @@ def start_update_client_manager_thread(
 
 
 def _update_client_manager(
-    driver: Grid,
+    grid: Grid,
     client_manager: ClientManager,
     f_stop: threading.Event,
     c_done: threading.Event,
 ) -> None:
     """Update the nodes list in the client manager."""
-    # Loop until the driver is disconnected
+    # Loop until the grid is disconnected
     registered_nodes: dict[int, GridClientProxy] = {}
     while not f_stop.is_set():
         try:
-            all_node_ids = set(driver.get_node_ids())
+            all_node_ids = set(grid.get_node_ids())
         except RunNotRunningException:
             f_stop.set()
             break
@@ -99,8 +99,8 @@ def _update_client_manager(
         for node_id in new_nodes:
             client_proxy = GridClientProxy(
                 node_id=node_id,
-                driver=driver,
-                run_id=driver.run.run_id,
+                grid=grid,
+                run_id=grid.run.run_id,
             )
             if client_manager.register(client_proxy):
                 registered_nodes[node_id] = client_proxy

@@ -387,7 +387,7 @@ def test_message_serialization_deserialization(
     # Prepare
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
-    metadata.dst_node_id = 0  # Assume driver node
+    metadata.dst_node_id = 0  # Assume grid node
 
     original = Message(
         metadata=metadata,
