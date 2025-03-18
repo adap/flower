@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ from flwr.common.typing import (
     Properties,
     Status,
 )
-from flwr.server.compat.driver_client_proxy import DriverClientProxy
+from flwr.server.compat.grid_client_proxy import DriverClientProxy
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 
