@@ -9,8 +9,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint --fix src",
-    "lint:check": "eslint src",
-    "ibuild": "pnpm i && pnpm build"
+    "lint:check": "eslint src"
   },
   "dependencies": {
     "@flwr/flwr": "^0.1.5",
