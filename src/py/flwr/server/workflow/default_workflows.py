@@ -36,7 +36,7 @@ from flwr.common.constant import MessageType, MessageTypeLegacy
 from ..client_proxy import ClientProxy
 from ..compat.app_utils import start_update_client_manager_thread
 from ..compat.legacy_context import LegacyContext
-from ..driver import Driver
+from ..grid import Driver
 from ..typing import Workflow
 from .constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD, Key
 

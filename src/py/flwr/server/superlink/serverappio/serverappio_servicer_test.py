@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,11 +46,11 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
 )
-from flwr.server.superlink.driver.serverappio_grpc import run_serverappio_api_grpc
-from flwr.server.superlink.driver.serverappio_servicer import _raise_if
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
+from flwr.server.superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
+from flwr.server.superlink.serverappio.serverappio_servicer import _raise_if
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 
 # pylint: disable=broad-except
