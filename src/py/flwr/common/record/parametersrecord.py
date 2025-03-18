@@ -36,12 +36,6 @@ if TYPE_CHECKING:
 
 GC_THRESHOLD = 200_000_000  # 200 MB
 
-if TYPE_CHECKING:
-    import torch
-
-
-GC_THRESHOLD = 200_000_000  # 200 MB
-
 
 def _raise_array_init_error() -> None:
     raise TypeError(
