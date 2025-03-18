@@ -26,15 +26,12 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
-from ..constant import SType
+from ..constant import GC_THRESHOLD, SType
 from ..typing import NDArray
 from .typeddict import TypedDict
 
 if TYPE_CHECKING:
     import torch
-
-
-GC_THRESHOLD = 200_000_000  # 200 MB
 
 
 def _raise_array_init_error() -> None:
@@ -286,7 +283,8 @@ class ParametersRecord(TypedDict[str, Array]):
     equivalent to PyTorch's ``state_dict``, but it holds arrays in serialized form.
 
     This object is one of the record types supported by :class:`RecordSet` and can
-    therefore be stored in a :class:`Message` or a :class:`Context`.
+    therefore be stored in the ``content`` of a :class:`Message` or the ``state``
+    of a :class:`Context`.
 
     This class can be instantiated in multiple ways:
 
