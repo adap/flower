@@ -200,13 +200,12 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                 )
 
             # Check if the type annotation uses the deprecated Driver type
-            if param.annotation is not inspect.Parameter.empty:
-                if param.annotation is Driver:
-                    warn_deprecated_feature_with_example(
-                        deprecation_message=DRIVER_DEPRECATION_MSG,
-                        example_message=DRIVER_EXAMPLE_MSG,
-                        code_example=GRID_USAGE_EXAMPLE,
-                    )
+            if param.annotation is Driver:
+                warn_deprecated_feature_with_example(
+                    deprecation_message=DRIVER_DEPRECATION_MSG,
+                    example_message=DRIVER_EXAMPLE_MSG,
+                    code_example=GRID_USAGE_EXAMPLE,
+                )
 
             # Register provided function with the ServerApp object
             self._main = main_fn
