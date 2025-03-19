@@ -50,9 +50,9 @@ def main(grid: Grid, context: Context) -> None:
 
         # Create messages
         gmodel_record = pytorch_to_parameter_record(global_model)
-        recordset = RecordDict({global_model_key: gmodel_record})
+        recorddict = RecordDict({global_model_key: gmodel_record})
         messages = construct_messages(
-            node_ids, recordset, MessageType.TRAIN, grid, server_round
+            node_ids, recorddict, MessageType.TRAIN, grid, server_round
         )
 
         # Send messages and wait for all results
@@ -84,9 +84,9 @@ def main(grid: Grid, context: Context) -> None:
         # Sample all nodes
         all_node_ids = grid.get_node_ids()
         gmodel_record = pytorch_to_parameter_record(global_model)
-        recordset = RecordDict({global_model_key: gmodel_record})
+        recorddict = RecordDict({global_model_key: gmodel_record})
         messages = construct_messages(
-            node_ids, recordset, MessageType.EVALUATE, grid, server_round
+            node_ids, recorddict, MessageType.EVALUATE, grid, server_round
         )
 
         # Send messages and wait for all results

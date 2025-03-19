@@ -77,8 +77,8 @@ def submit_question(
     messages = []
     # Send the same Message to each connected node (which run `ClientApp` instances)
     for node_idx, node_id in enumerate(node_ids):
-        # The payload of a Message is of type RecordSet
-        # https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html
+        # The payload of a Message is of type RecordDict
+        # https://flower.ai/docs/framework/ref-api/flwr.common.RecordDict.html
         # Which can carry different types of records. We'll use a ConfigsRecord object
         # We need to create a new ConfigsRecord() object for every node, otherwise
         # if we just override a single key, e.g., corpus_name, the grid will send

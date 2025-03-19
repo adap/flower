@@ -42,11 +42,11 @@ def main(grid: Grid, context: Context) -> None:
         log(INFO, "Sampled %s nodes (out of %s)", len(node_ids), len(all_node_ids))
 
         # Create messages
-        recordset = RecordDict()
+        recorddict = RecordDict()
         messages = []
         for node_id in node_ids:  # one message for each node
             message = grid.create_message(
-                content=recordset,
+                content=recorddict,
                 message_type=MessageType.QUERY,  # target `query` method in ClientApp
                 dst_node_id=node_id,
                 group_id=str(server_round),

@@ -66,7 +66,7 @@ class FlowerClient(NumPyClient):
         for k, v in self.net.fc2.state_dict().items():
             state_dict_arrays[k] = Array(v.cpu().numpy())
 
-        # Add to recordset (replace if already exists)
+        # Add to recorddict (replace if already exists)
         self.client_state.parameters_records[self.local_layer_name] = ParametersRecord(
             state_dict_arrays
         )
