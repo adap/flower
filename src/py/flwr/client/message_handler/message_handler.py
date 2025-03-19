@@ -26,7 +26,7 @@ from flwr.client.client import (
 )
 from flwr.client.numpy_client import NumPyClient
 from flwr.client.typing import ClientFnExt
-from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet, log
+from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordDict, log
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,
@@ -79,7 +79,7 @@ def handle_control_message(message: Message) -> tuple[Optional[Message], int]:
         )
         # Store DisconnectRes in recordset
         reason = cast(int, disconnect_msg.disconnect_res.reason)
-        recordset = RecordSet()
+        recordset = RecordDict()
         recordset.configs_records["config"] = ConfigsRecord({"reason": reason})
         out_message = message.create_reply(recordset)
         # Return Message and sleep duration

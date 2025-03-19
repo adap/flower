@@ -4,7 +4,7 @@ import torch
 from pytorch_example.task import Net, get_weights, load_data, set_weights, test, train
 
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Array, Context, ParametersRecord, RecordSet
+from flwr.common import Array, Context, ParametersRecord, RecordDict
 
 
 # Define Flower Client and client_fn
@@ -17,7 +17,7 @@ class FlowerClient(NumPyClient):
     """
 
     def __init__(
-        self, net, client_state: RecordSet, trainloader, valloader, local_epochs
+        self, net, client_state: RecordDict, trainloader, valloader, local_epochs
     ):
         self.net: Net = net
         self.client_state = client_state

@@ -4,7 +4,7 @@ import keras
 from tensorflow_example.task import load_data, load_model
 
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Array, Context, ParametersRecord, RecordSet
+from flwr.common import Array, Context, ParametersRecord, RecordDict
 
 
 # Define Flower Client and client_fn
@@ -16,7 +16,7 @@ class FlowerClient(NumPyClient):
     and updated during `fit()` and used during `evaluate()`.
     """
 
-    def __init__(self, client_state: RecordSet, data, batch_size, local_epochs):
+    def __init__(self, client_state: RecordDict, data, batch_size, local_epochs):
         self.client_state = client_state
         self.x_train, self.y_train, self.x_test, self.y_test = data
         self.batch_size = batch_size

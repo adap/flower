@@ -44,7 +44,7 @@ from . import (
     Context,
     MetricsRecord,
     ParametersRecord,
-    RecordSet,
+    RecordDict,
     typing,
 )
 from .message import Error, Message, Metadata
@@ -253,9 +253,9 @@ class RecordMaker:
         num_params_records: int,
         num_metrics_records: int,
         num_configs_records: int,
-    ) -> RecordSet:
+    ) -> RecordDict:
         """Create a RecordSet."""
-        ret = RecordSet()
+        ret = RecordDict()
         for _ in range(num_params_records):
             ret[self.get_str()] = self.parameters_record()
         for _ in range(num_metrics_records):
@@ -381,7 +381,7 @@ def test_message_serialization_deserialization(
         [
             RecordMaker,
         ],
-        RecordSet,
+        RecordDict,
     ],
     error_fn: Callable[[int], Error],
 ) -> None:

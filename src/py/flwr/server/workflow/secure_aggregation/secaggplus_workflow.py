@@ -28,7 +28,7 @@ from flwr.common import (
     Message,
     MessageType,
     NDArrays,
-    RecordSet,
+    RecordDict,
     bytes_to_ndarray,
     log,
     ndarrays_to_parameters,
@@ -66,7 +66,7 @@ class WorkflowState:  # pylint: disable=R0902
     """The state of the SecAgg+ protocol."""
 
     nid_to_proxies: dict[int, ClientProxy] = field(default_factory=dict)
-    nid_to_fitins: dict[int, RecordSet] = field(default_factory=dict)
+    nid_to_fitins: dict[int, RecordDict] = field(default_factory=dict)
     sampled_node_ids: set[int] = field(default_factory=set)
     active_node_ids: set[int] = field(default_factory=set)
     num_shares: int = 0
@@ -367,7 +367,7 @@ class SecAggPlusWorkflow:
 
         # Send setup configuration to clients
         cfgs_record = ConfigsRecord(sa_params_dict)  # type: ignore
-        content = RecordSet({RECORD_KEY_CONFIGS: cfgs_record})
+        content = RecordDict({RECORD_KEY_CONFIGS: cfgs_record})
 
         def make(nid: int) -> Message:
             return grid.create_message(
@@ -417,7 +417,7 @@ class SecAggPlusWorkflow:
                 {str(nid): state.nid_to_publickeys[nid] for nid in neighbours}
             )
             cfgs_record[Key.STAGE] = Stage.SHARE_KEYS
-            content = RecordSet({RECORD_KEY_CONFIGS: cfgs_record})
+            content = RecordDict({RECORD_KEY_CONFIGS: cfgs_record})
             return grid.create_message(
                 content=content,
                 message_type=MessageType.TRAIN,
@@ -566,7 +566,7 @@ class SecAggPlusWorkflow:
                 Key.DEAD_NODE_ID_LIST: list(neighbours & dead_nids),
             }
             cfgs_record = ConfigsRecord(cfgs_dict)  # type: ignore
-            content = RecordSet({RECORD_KEY_CONFIGS: cfgs_record})
+            content = RecordDict({RECORD_KEY_CONFIGS: cfgs_record})
             return grid.create_message(
                 content=content,
                 message_type=MessageType.TRAIN,

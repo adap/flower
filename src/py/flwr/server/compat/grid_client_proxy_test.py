@@ -24,7 +24,7 @@ from unittest.mock import Mock
 import numpy as np
 
 import flwr
-from flwr.common import Error, Message, Metadata, RecordSet
+from flwr.common import Error, Message, Metadata, RecordDict
 from flwr.common import recordset_compat as compat
 from flwr.common.typing import (
     Code,
@@ -200,7 +200,7 @@ class GridClientProxyTestCase(unittest.TestCase):
 
     def _create_message_dummy(  # pylint: disable=R0913,too-many-positional-arguments
         self,
-        content: RecordSet,
+        content: RecordDict,
         message_type: str,
         dst_node_id: int,
         group_id: str,

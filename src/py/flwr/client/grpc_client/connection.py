@@ -31,7 +31,7 @@ from flwr.common import (
     ConfigsRecord,
     Message,
     Metadata,
-    RecordSet,
+    RecordDict,
 )
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
@@ -163,7 +163,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
             )
             message_type = MessageType.EVALUATE
         elif field == "reconnect_ins":
-            recordset = RecordSet()
+            recordset = RecordDict()
             recordset.configs_records["config"] = ConfigsRecord(
                 {"seconds": proto.reconnect_ins.seconds}
             )

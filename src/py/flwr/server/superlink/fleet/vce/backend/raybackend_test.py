@@ -33,7 +33,7 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
-    RecordSet,
+    RecordDict,
     Scalar,
 )
 from flwr.common.constant import PARTITION_ID_KEY
@@ -45,7 +45,7 @@ from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, state: RecordSet) -> None:
+    def __init__(self, state: RecordDict) -> None:
         self.client_state = state
 
     def get_properties(self, config: Config) -> dict[str, Scalar]:

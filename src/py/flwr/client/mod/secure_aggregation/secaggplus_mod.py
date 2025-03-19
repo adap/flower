@@ -26,7 +26,7 @@ from flwr.common import (
     Context,
     Message,
     Parameters,
-    RecordSet,
+    RecordDict,
     ndarray_to_bytes,
     parameters_to_ndarrays,
 )
@@ -162,7 +162,7 @@ def secaggplus_mod(
     check_configs(state.current_stage, configs)
 
     # Execute
-    out_content = RecordSet()
+    out_content = RecordDict()
     if state.current_stage == Stage.SETUP:
         state.nid = msg.metadata.dst_node_id
         res = _setup(state, configs)

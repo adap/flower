@@ -11,7 +11,7 @@ from app_pytorch.task import (
     pytorch_to_parameter_record,
 )
 
-from flwr.common import Context, Message, MessageType, RecordSet
+from flwr.common import Context, Message, MessageType, RecordDict
 from flwr.common.logger import log
 from flwr.server import Grid, ServerApp
 
@@ -50,7 +50,7 @@ def main(grid: Grid, context: Context) -> None:
 
         # Create messages
         gmodel_record = pytorch_to_parameter_record(global_model)
-        recordset = RecordSet({global_model_key: gmodel_record})
+        recordset = RecordDict({global_model_key: gmodel_record})
         messages = construct_messages(
             node_ids, recordset, MessageType.TRAIN, grid, server_round
         )
@@ -84,7 +84,7 @@ def main(grid: Grid, context: Context) -> None:
         # Sample all nodes
         all_node_ids = grid.get_node_ids()
         gmodel_record = pytorch_to_parameter_record(global_model)
-        recordset = RecordSet({global_model_key: gmodel_record})
+        recordset = RecordDict({global_model_key: gmodel_record})
         messages = construct_messages(
             node_ids, recordset, MessageType.EVALUATE, grid, server_round
         )
@@ -107,7 +107,7 @@ def main(grid: Grid, context: Context) -> None:
 
 def construct_messages(
     node_ids: list[int],
-    record: RecordSet,
+    record: RecordDict,
     message_type: MessageType,
     grid: Grid,
     server_round: int,

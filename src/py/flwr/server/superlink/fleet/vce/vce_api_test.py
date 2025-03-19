@@ -36,7 +36,7 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
-    RecordSet,
+    RecordDict,
     Scalar,
     now,
 )
@@ -55,7 +55,7 @@ from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, state: RecordSet) -> None:
+    def __init__(self, state: RecordDict) -> None:
         self.client_state = state
 
     def get_properties(self, config: Config) -> dict[str, Scalar]:

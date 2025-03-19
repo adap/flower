@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 
-from .record import RecordSet
+from .record import RecordDict
 from .typing import UserConfig
 
 
@@ -50,7 +50,7 @@ class Context:
     run_id: int
     node_id: int
     node_config: UserConfig
-    state: RecordSet
+    state: RecordDict
     run_config: UserConfig
 
     def __init__(  # pylint: disable=too-many-arguments, too-many-positional-arguments
@@ -58,7 +58,7 @@ class Context:
         run_id: int,
         node_id: int,
         node_config: UserConfig,
-        state: RecordSet,
+        state: RecordDict,
         run_config: UserConfig,
     ) -> None:
         self.run_id = run_id

@@ -31,7 +31,7 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
-    RecordSet,
+    RecordDict,
     Scalar,
 )
 from flwr.common.constant import NUM_PARTITIONS_KEY, PARTITION_ID_KEY
@@ -55,7 +55,7 @@ from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, node_id: int, state: RecordSet) -> None:
+    def __init__(self, node_id: int, state: RecordDict) -> None:
         self.node_id = node_id
         self.client_state = state
 

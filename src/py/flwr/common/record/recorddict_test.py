@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ from flwr.common.typing import (
     Parameters,
 )
 
-from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordDict
 
 
 def get_ndarrays() -> NDArrays:
@@ -409,7 +409,7 @@ def test_record_is_picklable() -> None:
     p_record = ParametersRecord()
     m_record = MetricsRecord({"aa": 123})
     c_record = ConfigsRecord({"cc": bytes(9)})
-    rs = RecordSet()
+    rs = RecordDict()
     rs.parameters_records["params"] = p_record
     rs.metrics_records["metrics"] = m_record
     rs.configs_records["configs"] = c_record
@@ -421,7 +421,7 @@ def test_record_is_picklable() -> None:
 def test_recordset_repr() -> None:
     """Test the string representation of RecordSet."""
     # Prepare
-    rs = RecordSet(
+    rs = RecordDict(
         {
             "params": ParametersRecord(),
             "metrics": MetricsRecord({"aa": 123}),
@@ -441,7 +441,7 @@ def test_recordset_repr() -> None:
 def test_recordset_set_get_del_item() -> None:
     """Test setting, getting, and deleting items in RecordSet."""
     # Prepare
-    rs = RecordSet()
+    rs = RecordDict()
     p_record = ParametersRecord()
     m_record = MetricsRecord({"aa": 123})
     c_record = ConfigsRecord({"cc": bytes(5)})

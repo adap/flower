@@ -26,7 +26,7 @@ from flwr.common import (
     Context,
     Message,
     Metadata,
-    RecordSet,
+    RecordDict,
 )
 from flwr.common.constant import MessageType
 from flwr.common.secure_aggregation.secaggplus_constants import (
@@ -46,7 +46,7 @@ def get_test_handler(
     """."""
 
     def empty_ffn(_msg: Message, _2: Context) -> Message:
-        return _msg.create_reply(RecordSet())
+        return _msg.create_reply(RecordDict())
 
     app = make_ffn(empty_ffn, [secaggplus_mod])
 
@@ -62,7 +62,7 @@ def get_test_handler(
                 ttl=DEFAULT_TTL,
                 message_type=MessageType.TRAIN,
             ),
-            content=RecordSet({RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
+            content=RecordDict({RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
         )
         out_msg = app(in_msg, ctxt)
         return out_msg.content.configs_records[RECORD_KEY_CONFIGS]
@@ -76,7 +76,7 @@ def _make_ctxt() -> Context:
         run_id=234,
         node_id=123,
         node_config={},
-        state=RecordSet({RECORD_KEY_STATE: cfg}),
+        state=RecordDict({RECORD_KEY_STATE: cfg}),
         run_config={},
     )
 

@@ -37,7 +37,7 @@ from flwr.common import (
     Message,
     Metadata,
     Parameters,
-    RecordSet,
+    RecordDict,
     Status,
 )
 from flwr.common import recordset_compat as compat
@@ -143,7 +143,7 @@ def test_client_without_get_properties() -> None:
         client_fn=_get_client_fn(client),
         message=message,
         context=Context(
-            run_id=2234, node_id=1123, node_config={}, state=RecordSet(), run_config={}
+            run_id=2234, node_id=1123, node_config={}, state=RecordDict(), run_config={}
         ),
     )
 
@@ -209,7 +209,7 @@ def test_client_with_get_properties() -> None:
         client_fn=_get_client_fn(client),
         message=message,
         context=Context(
-            run_id=2234, node_id=1123, node_config={}, state=RecordSet(), run_config={}
+            run_id=2234, node_id=1123, node_config={}, state=RecordDict(), run_config={}
         ),
     )
 
@@ -281,12 +281,12 @@ class TestMessageValidation(unittest.TestCase):
             ttl=DEFAULT_TTL,
             message_type="evaluate",
         )
-        self.common_content = RecordSet()
+        self.common_content = RecordDict()
 
     def test_valid_message(self) -> None:
         """Test a valid message."""
         # Prepare
-        valid_message = Message(metadata=self.valid_out_metadata, content=RecordSet())
+        valid_message = Message(metadata=self.valid_out_metadata, content=RecordDict())
 
         # Assert
         self.assertTrue(validate_out_message(valid_message, self.in_metadata))
@@ -294,7 +294,7 @@ class TestMessageValidation(unittest.TestCase):
     def test_invalid_message_run_id(self) -> None:
         """Test invalid messages."""
         # Prepare
-        msg = Message(metadata=self.valid_out_metadata, content=RecordSet())
+        msg = Message(metadata=self.valid_out_metadata, content=RecordDict())
 
         # Execute
         invalid_metadata_list: list[Metadata] = []

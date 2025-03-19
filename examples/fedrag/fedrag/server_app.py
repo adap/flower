@@ -14,7 +14,7 @@ from fedrag.mirage_qa import MirageQA
 from fedrag.task import index_exists
 from sklearn.metrics import accuracy_score
 
-from flwr.common import ConfigsRecord, Context, MessageType, RecordSet
+from flwr.common import ConfigsRecord, Context, MessageType, RecordDict
 from flwr.server import Grid, ServerApp
 
 
@@ -91,7 +91,7 @@ def submit_question(
         # by infinitely looping over the corpus names.
         config_record["corpus_name"] = next(corpus_names_iter)
 
-        task_record = RecordSet({"config": config_record})
+        task_record = RecordDict({"config": config_record})
         message = grid.create_message(
             content=task_record,
             message_type=MessageType.QUERY,  # target `query` method in ClientApp

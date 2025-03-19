@@ -23,7 +23,7 @@ from flwr import common
 from flwr.client import ClientFnExt
 from flwr.client.client_app import ClientApp
 from flwr.client.run_info_store import DeprecatedRunInfoStore
-from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common import DEFAULT_TTL, Message, Metadata, RecordDict
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -111,7 +111,7 @@ class RayActorClientProxy(ClientProxy):
 
     def _wrap_recordset_in_message(
         self,
-        recordset: RecordSet,
+        recordset: RecordDict,
         message_type: str,
         timeout: Optional[float],
         group_id: Optional[int],

@@ -57,7 +57,7 @@ from . import (
     Context,
     MetricsRecord,
     ParametersRecord,
-    RecordSet,
+    RecordDict,
     typing,
 )
 from .message import Error, Message, Metadata
@@ -561,7 +561,7 @@ def error_from_proto(error_proto: ProtoError) -> Error:
 # === RecordSet message ===
 
 
-def recordset_to_proto(recordset: RecordSet) -> ProtoRecordSet:
+def recordset_to_proto(recordset: RecordDict) -> ProtoRecordSet:
     """Serialize RecordSet to ProtoBuf."""
     return ProtoRecordSet(
         parameters={
@@ -577,9 +577,9 @@ def recordset_to_proto(recordset: RecordSet) -> ProtoRecordSet:
     )
 
 
-def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordSet:
+def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordDict:
     """Deserialize RecordSet from ProtoBuf."""
-    ret = RecordSet()
+    ret = RecordDict()
     for k, p_record_proto in recordset_proto.parameters.items():
         ret[k] = parameters_record_from_proto(p_record_proto)
     for k, m_record_proto in recordset_proto.metrics.items():

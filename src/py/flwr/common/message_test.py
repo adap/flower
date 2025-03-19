@@ -23,7 +23,7 @@ from typing import Any, Callable, Optional
 import pytest
 
 # pylint: enable=E0611
-from . import RecordSet
+from . import RecordDict
 from .constant import MESSAGE_TTL_TOLERANCE
 from .message import Error, Message, Metadata
 from .serde_test import RecordMaker
@@ -51,7 +51,7 @@ def test_message_creation(
         [
             RecordMaker,
         ],
-        RecordSet,
+        RecordDict,
     ],
     error_fn: Callable[[int], Error],
     context: Any,
@@ -82,7 +82,7 @@ def create_message_with_content(ttl: Optional[float] = None) -> Message:
     metadata = maker.metadata()
     if ttl:
         metadata.ttl = ttl
-    return Message(metadata=metadata, content=RecordSet())
+    return Message(metadata=metadata, content=RecordDict())
 
 
 def create_message_with_error(ttl: Optional[float] = None) -> Message:
@@ -117,7 +117,7 @@ def test_altering_message(
         if message.has_content():
             message.error = Error(code=123)
         if message.has_error():
-            message.content = RecordSet()
+            message.content = RecordDict()
 
 
 @pytest.mark.parametrize(
@@ -146,7 +146,7 @@ def test_create_reply(
         dummy_error = Error(code=0, reason="it crashed")
         reply_message = message.create_error_reply(dummy_error, ttl=reply_ttl)
     else:
-        reply_message = message.create_reply(content=RecordSet(), ttl=reply_ttl)
+        reply_message = message.create_reply(content=RecordDict(), ttl=reply_ttl)
 
     # Ensure reply has a higher timestamp
     assert message.metadata.created_at < reply_message.metadata.created_at
@@ -230,7 +230,7 @@ def test_reply_ttl_limitation(
         dummy_error = Error(code=0, reason="test error")
         reply_message = message.create_error_reply(dummy_error, ttl=reply_ttl)
     else:
-        reply_message = message.create_reply(content=RecordSet(), ttl=reply_ttl)
+        reply_message = message.create_reply(content=RecordDict(), ttl=reply_ttl)
 
     assert reply_message.metadata.ttl - expected_reply_ttl <= MESSAGE_TTL_TOLERANCE, (
         f"Expected TTL to be <= {expected_reply_ttl}, "

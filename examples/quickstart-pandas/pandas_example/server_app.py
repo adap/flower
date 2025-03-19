@@ -7,7 +7,7 @@ from logging import INFO
 
 import numpy as np
 
-from flwr.common import Context, Message, MessageType, RecordSet
+from flwr.common import Context, Message, MessageType, RecordDict
 from flwr.common.logger import log
 from flwr.server import Grid, ServerApp
 
@@ -42,7 +42,7 @@ def main(grid: Grid, context: Context) -> None:
         log(INFO, "Sampled %s nodes (out of %s)", len(node_ids), len(all_node_ids))
 
         # Create messages
-        recordset = RecordSet()
+        recordset = RecordDict()
         messages = []
         for node_id in node_ids:  # one message for each node
             message = grid.create_message(

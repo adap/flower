@@ -18,7 +18,7 @@
 from typing import Optional
 
 from flwr import common
-from flwr.common import Message, MessageType, MessageTypeLegacy, RecordSet
+from flwr.common import Message, MessageType, MessageTypeLegacy, RecordDict
 from flwr.common import recordset_compat as compat
 from flwr.server.client_proxy import ClientProxy
 
@@ -103,11 +103,11 @@ class GridClientProxy(ClientProxy):
 
     def _send_receive_recordset(
         self,
-        recordset: RecordSet,
+        recordset: RecordDict,
         message_type: str,
         timeout: Optional[float],
         group_id: Optional[int],
-    ) -> RecordSet:
+    ) -> RecordDict:
 
         # Create message
         message = self.grid.create_message(
