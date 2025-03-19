@@ -7,29 +7,40 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2186CA8CA6ACBFEE8600CBAF /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 3E665FFF8BA4124A79C92D43 /* Flwr */; };
 		5CAC536F19AE5062E58881B8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2940C21F680D4AD885318A0 /* ContentView.swift */; };
 		5DC300C4103CB296DE06A824 /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 7D6D86FB026C80EFB61189EB /* Flwr */; };
 		7221A91C5429BB5C5999651F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567A9812B7FAC92EE118B9A /* main.swift */; };
 		7EAA9DAC191A77EFA73EC91E /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73DE71AB0FD4B6E3EBFBEABE /* main.swift */; };
+		900C90FBA86B9299077BA5B9 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C6B5008CFD38CD572321504 /* ChatView.swift */; };
 		94560A238130C4CA6D2B9B45 /* HelloWorldApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296E3A51313266F8A35C159B /* HelloWorldApp.swift */; };
+		9DE9C7C44622683467968E1E /* LlmChat.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D9BC3F96391A873AB367FA2E /* LlmChat.xcassets */; };
 		AEE7E5E782D4FBC371C1D8FB /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 25FB052C47301588B25B4B5D /* Flwr */; };
 		C329C5655E2E2BF52A74E226 /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = EE13715D193DE89C0AFCC9B7 /* Flwr */; };
+		C8035BEE0E74205A7F8CB276 /* LlmChatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B11C7918194D38B4A7A23ED5 /* LlmChatApp.swift */; };
 		CA88B78CFD27FBEC69293DA8 /* HelloWorldApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55B49A9ED91BA12AFC62D827 /* HelloWorldApp.swift */; };
 		CDCDA30F995CBA5809598931 /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = E06603F3598E7783ADFDD7B3 /* Flwr */; };
 		D9A621DB4A76F15371CBF493 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30966334263E4C2CC2D4C50 /* ContentView.swift */; };
+		FBCE3B1A7ABDF2695FAE7F73 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5FAC31AB75945DC79736E /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0C4C13DB49CC2D34E1DEE6D9 /* HelloWorld.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HelloWorld.entitlements; sourceTree = "<group>"; };
+		0DE0A6E7938CF574C2C9A974 /* llm-chat-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "llm-chat-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1C6B5008CFD38CD572321504 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		1CFAE91D5BDAD075A7A05F54 /* streaming-cli */ = {isa = PBXFileReference; includeInIndex = 0; path = "streaming-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
 		209DA0E56757DEB5DBE65F60 /* hello-world-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hello-world-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		296E3A51313266F8A35C159B /* HelloWorldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloWorldApp.swift; sourceTree = "<group>"; };
+		3F7619F5AE1EB828BF4A53B4 /* LlmChat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LlmChat.entitlements; sourceTree = "<group>"; };
 		4567A9812B7FAC92EE118B9A /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		52B5FAC31AB75945DC79736E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		55B49A9ED91BA12AFC62D827 /* HelloWorldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloWorldApp.swift; sourceTree = "<group>"; };
 		73DE71AB0FD4B6E3EBFBEABE /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		934858BBEF5ADB70C512E30D /* flower */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flower; path = .; sourceTree = SOURCE_ROOT; };
+		B11C7918194D38B4A7A23ED5 /* LlmChatApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlmChatApp.swift; sourceTree = "<group>"; };
 		C9281C5167C5E54E063AF6E7 /* hello-world-ios.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "hello-world-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D30966334263E4C2CC2D4C50 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D9BC3F96391A873AB367FA2E /* LlmChat.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = LlmChat.xcassets; sourceTree = "<group>"; };
 		F2940C21F680D4AD885318A0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		FF119EE4A193B8B6726ABDCD /* hello-world-cli */ = {isa = PBXFileReference; includeInIndex = 0; path = "hello-world-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -67,6 +78,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A31DBD1A2DD34506D637AA04 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2186CA8CA6ACBFEE8600CBAF /* Flwr in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -76,6 +95,7 @@
 				6531429BF80886042F53831F /* hello-world-cli */,
 				BFEEA94F9A196387270F00A6 /* hello-world-ios */,
 				F522D79061B553BCA6ACEFCD /* hello-world-macos */,
+				DC74C9C54881F31E441652E4 /* llm-chat-macos */,
 				B3F479103F06412F0BECC25F /* Packages */,
 				F3C87B0B5E818D02A5C88CCC /* streaming-cli */,
 				6DD262CB76DFE2C64FA80EE7 /* Products */,
@@ -97,6 +117,7 @@
 				FF119EE4A193B8B6726ABDCD /* hello-world-cli */,
 				C9281C5167C5E54E063AF6E7 /* hello-world-ios.app */,
 				209DA0E56757DEB5DBE65F60 /* hello-world-macos.app */,
+				0DE0A6E7938CF574C2C9A974 /* llm-chat-macos.app */,
 				1CFAE91D5BDAD075A7A05F54 /* streaming-cli */,
 			);
 			name = Products;
@@ -118,6 +139,19 @@
 			);
 			name = "hello-world-ios";
 			path = "intelligence/swift/examples/hello-world-ios";
+			sourceTree = "<group>";
+		};
+		DC74C9C54881F31E441652E4 /* llm-chat-macos */ = {
+			isa = PBXGroup;
+			children = (
+				1C6B5008CFD38CD572321504 /* ChatView.swift */,
+				52B5FAC31AB75945DC79736E /* ContentView.swift */,
+				3F7619F5AE1EB828BF4A53B4 /* LlmChat.entitlements */,
+				D9BC3F96391A873AB367FA2E /* LlmChat.xcassets */,
+				B11C7918194D38B4A7A23ED5 /* LlmChatApp.swift */,
+			);
+			name = "llm-chat-macos";
+			path = "intelligence/swift/examples/llm-chat-macos";
 			sourceTree = "<group>";
 		};
 		F3C87B0B5E818D02A5C88CCC /* streaming-cli */ = {
@@ -180,6 +214,26 @@
 			productName = "hello-world-cli";
 			productReference = FF119EE4A193B8B6726ABDCD /* hello-world-cli */;
 			productType = "com.apple.product-type.tool";
+		};
+		7631C0CCF31C7AC4023EC625 /* llm-chat-macos */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 22BC6FEF48D1F8987AA61BD2 /* Build configuration list for PBXNativeTarget "llm-chat-macos" */;
+			buildPhases = (
+				14509E03517A7A9F070D08CC /* Sources */,
+				CDEB20C8A087BC76CCCA2C19 /* Resources */,
+				A31DBD1A2DD34506D637AA04 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "llm-chat-macos";
+			packageProductDependencies = (
+				3E665FFF8BA4124A79C92D43 /* Flwr */,
+			);
+			productName = "llm-chat-macos";
+			productReference = 0DE0A6E7938CF574C2C9A974 /* llm-chat-macos.app */;
+			productType = "com.apple.product-type.application";
 		};
 		9D1DB31810C475791AAEE652 /* hello-world-ios */ = {
 			isa = PBXNativeTarget;
@@ -248,12 +302,34 @@
 				5A02C7B387CD510CF08FD9A8 /* hello-world-cli */,
 				9D1DB31810C475791AAEE652 /* hello-world-ios */,
 				31F37F4997B933B7EF22B524 /* hello-world-macos */,
+				7631C0CCF31C7AC4023EC625 /* llm-chat-macos */,
 				A3F67B287DCA2AAB80E345AB /* streaming-cli */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		CDEB20C8A087BC76CCCA2C19 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9DE9C7C44622683467968E1E /* LlmChat.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		14509E03517A7A9F070D08CC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				900C90FBA86B9299077BA5B9 /* ChatView.swift in Sources */,
+				FBCE3B1A7ABDF2695FAE7F73 /* ContentView.swift in Sources */,
+				C8035BEE0E74205A7F8CB276 /* LlmChatApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1B4C927FBD24D2596C40EB8A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -402,6 +478,24 @@
 			};
 			name = Release;
 		};
+		792A70477B909F24D378251C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "intelligence/swift/examples/llm-chat-macos/LlmChat.entitlements";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.llm-chat-macos";
+				PRODUCT_NAME = "llm-chat-macos";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		985613350348AEE8EF85C5A8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -523,6 +617,24 @@
 			};
 			name = Release;
 		};
+		F2F36FDD48E5DE37E77BC24D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "intelligence/swift/examples/llm-chat-macos/LlmChat.entitlements";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.llm-chat-macos";
+				PRODUCT_NAME = "llm-chat-macos";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
 		FB11364C1BD5968AFE6BF5B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -555,6 +667,15 @@
 			buildConfigurations = (
 				13319350D0CF2A784AD4CB27 /* Debug */,
 				D245E5A7FE1E9A51FCC09647 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		22BC6FEF48D1F8987AA61BD2 /* Build configuration list for PBXNativeTarget "llm-chat-macos" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F2F36FDD48E5DE37E77BC24D /* Debug */,
+				792A70477B909F24D378251C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -597,6 +718,10 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		25FB052C47301588B25B4B5D /* Flwr */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Flwr;
+		};
+		3E665FFF8BA4124A79C92D43 /* Flwr */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Flwr;
 		};

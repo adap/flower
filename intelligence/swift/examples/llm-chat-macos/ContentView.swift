@@ -14,14 +14,9 @@ struct ContentView: View {
     ChatView()
       .padding()
       .task {
-        let homeDirectory = FileManager.default.homeDirectoryForCurrentUser
-          let cachePath = homeDirectory.appendingPathComponent(".cache/huggingface/hub")
-        print(FileManager.default.fileExists(atPath: cachePath.path))
-
         let fi = FlowerIntelligence.instance
         await fi.fetchModel(model: "deepseek/r1-685b/q4") {
           print("\($0.description): \($0.percentage), \($0.loadedBytes), \($0.totalBytes)")
-          
         }
       }
   }
