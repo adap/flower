@@ -95,10 +95,7 @@ class TestGrpcDriver(unittest.TestCase):
         # Prepare
         mock_response = Mock(message_ids=["id1", "id2"])
         self.mock_stub.PushMessages.return_value = mock_response
-        msgs = [
-            Message(RecordSet(), 0, "query")
-            for _ in range(2)
-        ]
+        msgs = [Message(RecordSet(), 0, "query") for _ in range(2)]
 
         # Execute
         msg_ids = self.driver.push_messages(msgs)
@@ -118,10 +115,7 @@ class TestGrpcDriver(unittest.TestCase):
         # Prepare
         mock_response = Mock(message_ids=["id1", "id2"])
         self.mock_stub.PushMessages.return_value = mock_response
-        msgs = [
-            Message(RecordSet(), 0, "query")
-            for _ in range(2)
-        ]
+        msgs = [Message(RecordSet(), 0, "query") for _ in range(2)]
         # Use invalid run_id
         msgs[1].metadata.__dict__["_message_id"] = "invald message id"
 

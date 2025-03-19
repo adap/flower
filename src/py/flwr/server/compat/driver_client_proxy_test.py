@@ -249,10 +249,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
             elif isinstance(res, EvaluateRes):
                 recordset = compat.evaluateres_to_recordset(res)
 
-            if recordset is not None:
-                ret = msg.create_reply(recordset)
-            else:
-                ret = msg.create_error_reply(ERROR_REPLY)
+            ret = Message(recordset or ERROR_REPLY, reply_to=msg)
 
             # Reply messages given the push message
             return [ret]

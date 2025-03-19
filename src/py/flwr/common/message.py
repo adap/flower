@@ -369,7 +369,7 @@ class Message:
                 ttl=_limit_reply_ttl(current, ttl, reply_to),
                 message_type=reply_to.metadata.message_type,
             )
-        
+
         metadata.delivered_at = ""  # Backward compatibility
         var_dict = {
             "_metadata": metadata,
