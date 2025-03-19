@@ -130,8 +130,8 @@ Still, the private sub-package ``flwr.server.grid`` defines a "public" API using
         "InMemoryGrid",
     ]
 
-The interesting part is that both ``GrpcGrid`` and ``InMemoryGrid`` are never used
-by Flower framework users, only by other parts of the Flower framework codebase. Those
+The interesting part is that both ``GrpcGrid`` and ``InMemoryGrid`` are never used by
+Flower framework users, only by other parts of the Flower framework codebase. Those
 other parts of the codebase import, for example, ``InMemoryGrid`` using ``from
 flwr.server.driver import InMemoryGrid`` (i.e., the ``InMemoryGrid`` exported via
 ``__all__``), not ``from flwr.server.driver.in_memory_driver import InMemoryGrid``
