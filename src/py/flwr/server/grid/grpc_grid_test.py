@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for driver SDK."""
+"""Tests for grid SDK."""
 
 
 import time
@@ -35,14 +35,14 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 )
 
 from ..superlink.linkstate.linkstate_test import create_res_message
-from .grpc_driver import GrpcDriver
+from .grpc_grid import GrpcGrid
 
 
-class TestGrpcDriver(unittest.TestCase):
-    """Tests for `GrpcDriver` class."""
+class TestGrpcGrid(unittest.TestCase):
+    """Tests for `GrpcGrid` class."""
 
     def setUp(self) -> None:
-        """Initialize mock GrpcDriverStub and Driver instance before each test."""
+        """Initialize mock GrpcServerAppIoStub and Grid instance before each test."""
 
         def _mock_fn(req: GetRunRequest) -> GetRunResponse:
             return GetRunResponse(
@@ -57,18 +57,18 @@ class TestGrpcDriver(unittest.TestCase):
         self.mock_stub = Mock()
         self.mock_channel = Mock()
         self.mock_stub.GetRun.side_effect = _mock_fn
-        self.driver = GrpcDriver()
-        self.driver._grpc_stub = self.mock_stub  # pylint: disable=protected-access
-        self.driver._channel = self.mock_channel  # pylint: disable=protected-access
-        self.driver.set_run(run_id=61016)
+        self.grid = GrpcGrid()
+        self.grid._grpc_stub = self.mock_stub  # pylint: disable=protected-access
+        self.grid._channel = self.mock_channel  # pylint: disable=protected-access
+        self.grid.set_run(run_id=61016)
 
-    def test_init_grpc_driver(self) -> None:
-        """Test GrpcDriverStub initialization."""
+    def test_init_grpc_grid(self) -> None:
+        """Test GrpcServerAppIoStub initialization."""
         # Assert
-        self.assertEqual(self.driver.run.run_id, 61016)
-        self.assertEqual(self.driver.run.fab_id, "mock/mock")
-        self.assertEqual(self.driver.run.fab_version, "v1.0.0")
-        self.assertEqual(self.driver.run.fab_hash, "9f86d08")
+        self.assertEqual(self.grid.run.run_id, 61016)
+        self.assertEqual(self.grid.run.fab_id, "mock/mock")
+        self.assertEqual(self.grid.run.fab_version, "v1.0.0")
+        self.assertEqual(self.grid.run.fab_hash, "9f86d08")
         self.mock_stub.GetRun.assert_called_once()
 
     def test_get_nodes(self) -> None:
@@ -79,7 +79,7 @@ class TestGrpcDriver(unittest.TestCase):
         self.mock_stub.GetNodes.return_value = mock_response
 
         # Execute
-        node_ids = self.driver.get_node_ids()
+        node_ids = self.grid.get_node_ids()
         args, kwargs = self.mock_stub.GetNodes.call_args
 
         # Assert
@@ -96,12 +96,12 @@ class TestGrpcDriver(unittest.TestCase):
         mock_response = Mock(message_ids=["id1", "id2"])
         self.mock_stub.PushMessages.return_value = mock_response
         msgs = [
-            self.driver.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)
+            self.grid.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)
             for _ in range(2)
         ]
 
         # Execute
-        msg_ids = self.driver.push_messages(msgs)
+        msg_ids = self.grid.push_messages(msgs)
         args, kwargs = self.mock_stub.PushMessages.call_args
 
         # Assert
@@ -119,7 +119,7 @@ class TestGrpcDriver(unittest.TestCase):
         mock_response = Mock(message_ids=["id1", "id2"])
         self.mock_stub.PushMessages.return_value = mock_response
         msgs = [
-            self.driver.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)
+            self.grid.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)
             for _ in range(2)
         ]
         # Use invalid run_id
@@ -127,7 +127,7 @@ class TestGrpcDriver(unittest.TestCase):
 
         # Execute and assert
         with self.assertRaises(ValueError):
-            self.driver.push_messages(msgs)
+            self.grid.push_messages(msgs)
 
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""
@@ -142,13 +142,13 @@ class TestGrpcDriver(unittest.TestCase):
             src_node_id=123, dst_node_id=789, run_id=run_id, error=Error(code=0)
         )
         error_message.metadata.reply_to_message = "id3"
-        # The the response from the DriverServicer is in the form of Protbuf Messages
+        # The response from the ServerAppIoServicer is in the form of Protobuf Messages
         mock_response.messages_list = [ok_message, error_message]
         self.mock_stub.PullMessages.return_value = mock_response
         msg_ids = ["id1", "id2", "id3"]
 
         # Execute
-        msgs = self.driver.pull_messages(msg_ids)
+        msgs = self.grid.pull_messages(msg_ids)
         reply_tos = {msg.metadata.reply_to_message for msg in msgs}
         args, kwargs = self.mock_stub.PullMessages.call_args
 
@@ -176,10 +176,10 @@ class TestGrpcDriver(unittest.TestCase):
 
         mock_response.messages_list = message_res_list
         self.mock_stub.PullMessages.return_value = mock_response
-        msgs = [self.driver.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)]
+        msgs = [self.grid.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)]
 
         # Execute
-        ret_msgs = list(self.driver.send_and_receive(msgs))
+        ret_msgs = list(self.grid.send_and_receive(msgs))
 
         # Assert
         self.assertEqual(len(ret_msgs), 1)
@@ -193,33 +193,33 @@ class TestGrpcDriver(unittest.TestCase):
         self.mock_stub.PushMessages.return_value = mock_response
         mock_response = Mock(messages_list=[])
         self.mock_stub.PullMessages.return_value = mock_response
-        msgs = [self.driver.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)]
+        msgs = [self.grid.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)]
 
         # Execute
         with patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01)):
             start_time = time.time()
-            ret_msgs = list(self.driver.send_and_receive(msgs, timeout=0.15))
+            ret_msgs = list(self.grid.send_and_receive(msgs, timeout=0.15))
 
         # Assert
         self.assertLess(time.time() - start_time, 0.2)
         self.assertEqual(len(ret_msgs), 0)
 
-    def test_del_with_initialized_driver(self) -> None:
-        """Test cleanup behavior when Driver is initialized."""
+    def test_del_with_initialized_grid(self) -> None:
+        """Test cleanup behavior when Grid is initialized."""
         # Execute
-        self.driver.close()
+        self.grid.close()
 
         # Assert
         self.mock_channel.close.assert_called_once()
 
-    def test_del_with_uninitialized_driver(self) -> None:
-        """Test cleanup behavior when Driver is not initialized."""
+    def test_del_with_uninitialized_grid(self) -> None:
+        """Test cleanup behavior when Grid is not initialized."""
         # Prepare
-        self.driver._grpc_stub = None  # pylint: disable=protected-access
-        self.driver._channel = None  # pylint: disable=protected-access
+        self.grid._grpc_stub = None  # pylint: disable=protected-access
+        self.grid._channel = None  # pylint: disable=protected-access
 
         # Execute
-        self.driver.close()
+        self.grid.close()
 
         # Assert
         self.mock_channel.close.assert_not_called()
@@ -236,8 +236,8 @@ class TestGrpcDriver(unittest.TestCase):
         ]
         # Make pylint happy
         # pylint: disable=protected-access
-        self.driver._grpc_stub = Mock(
-            GetNodes=lambda *args, **kwargs: self.driver._retry_invoker.invoke(
+        self.grid._grpc_stub = Mock(
+            GetNodes=lambda *args, **kwargs: self.grid._retry_invoker.invoke(
                 mock_get_nodes, *args, **kwargs
             )
         )
@@ -245,7 +245,7 @@ class TestGrpcDriver(unittest.TestCase):
 
         # Execute
         with patch("time.sleep", side_effect=lambda _: None):
-            node_ids = self.driver.get_node_ids()
+            node_ids = self.grid.get_node_ids()
 
         # Assert
         self.assertIn(404, node_ids)

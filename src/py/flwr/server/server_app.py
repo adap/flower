@@ -15,6 +15,7 @@
 """Flower ServerApp."""
 
 
+import inspect
 from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Callable, Optional
@@ -24,8 +25,8 @@ from flwr.common.logger import warn_deprecated_feature_with_example
 from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
-from .compat import start_driver
-from .driver import Driver
+from .compat import start_grid
+from .grid import Driver, Grid
 from .server import Server
 from .server_config import ServerConfig
 from .typing import ServerAppCallable, ServerFn
@@ -43,6 +44,21 @@ SERVER_FN_USAGE_EXAMPLE = """
         app = ServerApp(server_fn=server_fn)
 """
 
+GRID_USAGE_EXAMPLE = """
+                app = ServerApp()
+
+                @app.main()
+                def main(grid: Grid, context: Context) -> None:
+                    # Your existing ServerApp code ...
+"""
+
+DRIVER_DEPRECATION_MSG = """
+            The `Driver` class is deprecated, it will be removed in a future release.
+"""
+DRIVER_EXAMPLE_MSG = """
+            Instead, use `Grid` in the signature of your `ServerApp`. For example:
+"""
+
 
 @contextmanager
 def _empty_lifespan(_: Context) -> Iterator[None]:
@@ -54,7 +70,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
     Examples
     --------
-    Use the `ServerApp` with an existing `Strategy`:
+    Use the ``ServerApp`` with an existing ``Strategy``:
 
     >>> def server_fn(context: Context):
     >>>     server_config = ServerConfig(num_rounds=3)
@@ -66,12 +82,12 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
     >>>
     >>> app = ServerApp(server_fn=server_fn)
 
-    Use the `ServerApp` with a custom main function:
+    Use the ``ServerApp`` with a custom main function:
 
     >>> app = ServerApp()
     >>>
     >>> @app.main()
-    >>> def main(driver: Driver, context: Context) -> None:
+    >>> def main(grid: Grid, context: Context) -> None:
     >>>    print("ServerApp running")
     """
 
@@ -111,7 +127,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         self._main: Optional[ServerAppCallable] = None
         self._lifespan = _empty_lifespan
 
-    def __call__(self, driver: Driver, context: Context) -> None:
+    def __call__(self, grid: Grid, context: Context) -> None:
         """Execute `ServerApp`."""
         with self._lifespan(context):
             # Compatibility mode
@@ -123,17 +139,17 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                     self._config = components.config
                     self._strategy = components.strategy
                     self._client_manager = components.client_manager
-                start_driver(
+                start_grid(
                     server=self._server,
                     config=self._config,
                     strategy=self._strategy,
                     client_manager=self._client_manager,
-                    driver=driver,
+                    grid=grid,
                 )
                 return
 
             # New execution mode
-            self._main(driver, context)
+            self._main(grid, context)
 
     def main(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
         """Return a decorator that registers the main fn with the server app.
@@ -143,7 +159,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         >>> app = ServerApp()
         >>>
         >>> @app.main()
-        >>> def main(driver: Driver, context: Context) -> None:
+        >>> def main(grid: Grid, context: Context) -> None:
         >>>    print("ServerApp running")
         """
 
@@ -168,9 +184,19 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                     >>> app = ServerApp()
                     >>>
                     >>> @app.main()
-                    >>> def main(driver: Driver, context: Context) -> None:
+                    >>> def main(grid: Grid, context: Context) -> None:
                     >>>    print("ServerApp running")
                     """,
+                )
+
+            sig = inspect.signature(main_fn)
+            param = list(sig.parameters.values())[0]
+            # Check if parameter name or the annotation should be updated
+            if param.name == "driver" or param.annotation is Driver:
+                warn_deprecated_feature_with_example(
+                    deprecation_message=DRIVER_DEPRECATION_MSG,
+                    example_message=DRIVER_EXAMPLE_MSG,
+                    code_example=GRID_USAGE_EXAMPLE,
                 )
 
             # Register provided function with the ServerApp object
@@ -207,7 +233,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         """
 
         def lifespan_decorator(
-            lifespan_fn: Callable[[Context], Iterator[None]]
+            lifespan_fn: Callable[[Context], Iterator[None]],
         ) -> Callable[[Context], Iterator[None]]:
             """Register the lifespan fn with the ServerApp object."""
 

@@ -1,4 +1,4 @@
-name: FI-Swift-Examples
+name: FlowerIntelligenceExamples
 options:
   bundleIdPrefix: ai.flower
   deploymentTarget:

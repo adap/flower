@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DriverClientProxy tests."""
+"""GridClientProxy tests."""
 
 
 import unittest
@@ -41,7 +41,7 @@ from flwr.common.typing import (
     Properties,
     Status,
 )
-from flwr.server.compat.driver_client_proxy import DriverClientProxy
+from flwr.server.compat.grid_client_proxy import GridClientProxy
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 
@@ -54,17 +54,17 @@ RUN_ID = 61016
 NODE_ID = 1
 
 
-class DriverClientProxyTestCase(unittest.TestCase):
-    """Tests for DriverClientProxy."""
+class GridClientProxyTestCase(unittest.TestCase):
+    """Tests for GridClientProxy."""
 
     def setUp(self) -> None:
         """Set up mocks for tests."""
-        driver = Mock()
-        driver.get_node_ids.return_value = [1]
-        driver.create_message.side_effect = self._create_message_dummy
-        client = DriverClientProxy(node_id=NODE_ID, driver=driver, run_id=61016)
+        grid = Mock()
+        grid.get_node_ids.return_value = [1]
+        grid.create_message.side_effect = self._create_message_dummy
+        client = GridClientProxy(node_id=NODE_ID, grid=grid, run_id=61016)
 
-        self.driver = driver
+        self.grid = grid
         self.client = client
         self.created_msg: Optional[Message] = None
         self.called_times: int = 0
@@ -73,7 +73,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         """Test positive case."""
         # Prepare
         res = GetPropertiesRes(status=CLIENT_STATUS, properties=CLIENT_PROPERTIES)
-        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(res)
+        self.grid.send_and_receive.side_effect = self._exec_send_and_receive(res)
         request_properties: Config = {"tensor_type": "str"}
         ins = GetPropertiesIns(config=request_properties)
 
@@ -91,7 +91,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
             status=CLIENT_STATUS,
             parameters=MESSAGE_PARAMETERS,
         )
-        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(res)
+        self.grid.send_and_receive.side_effect = self._exec_send_and_receive(res)
         ins = GetParametersIns(config={})
 
         # Execute
@@ -110,7 +110,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
             num_examples=10,
             metrics={},
         )
-        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(res)
+        self.grid.send_and_receive.side_effect = self._exec_send_and_receive(res)
         parameters = flwr.common.ndarrays_to_parameters([np.ones((2, 2))])
         ins = FitIns(parameters, {})
 
@@ -130,7 +130,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
             num_examples=0,
             metrics={},
         )
-        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(res)
+        self.grid.send_and_receive.side_effect = self._exec_send_and_receive(res)
         parameters = Parameters(tensors=[b"random params%^&*F"], tensor_type="np")
         ins = EvaluateIns(parameters, {})
 
@@ -144,7 +144,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_get_properties_and_fail(self) -> None:
         """Test negative case."""
         # Prepare
-        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(
+        self.grid.send_and_receive.side_effect = self._exec_send_and_receive(
             None, error_reply=True
         )
         request_properties: Config = {"tensor_type": "str"}
@@ -159,7 +159,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_get_parameters_and_fail(self) -> None:
         """Test negative case."""
         # Prepare
-        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(
+        self.grid.send_and_receive.side_effect = self._exec_send_and_receive(
             None, error_reply=True
         )
         ins = GetParametersIns(config={})
@@ -173,7 +173,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_fit_and_fail(self) -> None:
         """Test negative case."""
         # Prepare
-        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(
+        self.grid.send_and_receive.side_effect = self._exec_send_and_receive(
             None, error_reply=True
         )
         parameters = flwr.common.ndarrays_to_parameters([np.ones((2, 2))])
@@ -186,7 +186,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_evaluate_and_fail(self) -> None:
         """Test negative case."""
         # Prepare
-        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(
+        self.grid.send_and_receive.side_effect = self._exec_send_and_receive(
             None, error_reply=True
         )
         parameters = Parameters(tensors=[b"random params%^&*F"], tensor_type="np")
@@ -230,7 +230,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         res: Union[GetParametersRes, GetPropertiesRes, FitRes, EvaluateRes, None],
         error_reply: bool = False,
     ) -> Callable[[Iterable[Message]], Iterable[Message]]:
-        """Get the generate_replies function that sets the return value of driver's
+        """Get the generate_replies function that sets the return value of grid's
         send_and_receive when called."""
 
         def generate_replies(messages: Iterable[Message]) -> Iterable[Message]:
@@ -271,8 +271,8 @@ class DriverClientProxyTestCase(unittest.TestCase):
         self.assertEqual(actual_ins, original_ins)
 
         # Check if send_and_receive is called once with expected args/kwargs.
-        self.driver.send_and_receive.assert_called_once()
+        self.grid.send_and_receive.assert_called_once()
         try:
-            self.driver.send_and_receive.assert_any_call([self.created_msg])
+            self.grid.send_and_receive.assert_any_call([self.created_msg])
         except AssertionError:
-            self.driver.send_and_receive.assert_any_call(messages=[self.created_msg])
+            self.grid.send_and_receive.assert_any_call(messages=[self.created_msg])

@@ -1,4 +1,4 @@
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower driver SDK."""
+"""Flower grid SDK."""
 
 
-from .driver import Driver
-from .grpc_driver import GrpcDriver
-from .inmemory_driver import InMemoryDriver
+from .grid import Driver, Grid
+from .grpc_grid import GrpcGrid
+from .inmemory_grid import InMemoryGrid
 
 __all__ = [
     "Driver",
-    "GrpcDriver",
-    "InMemoryDriver",
+    "Grid",
+    "GrpcGrid",
+    "InMemoryGrid",
 ]

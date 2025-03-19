@@ -22,14 +22,14 @@ import pytest
 
 from flwr.common import Context, RecordSet
 from flwr.server import ServerApp, ServerConfig
-from flwr.server.driver import Driver
+from flwr.server.grid import Grid
 
 
 def test_server_app_custom_mode() -> None:
     """Test sampling w/o criterion."""
     # Prepare
     app = ServerApp()
-    driver = MagicMock()
+    grid = MagicMock()
     context = Context(
         run_id=1, node_id=0, node_config={}, state=RecordSet(), run_config={}
     )
@@ -38,13 +38,13 @@ def test_server_app_custom_mode() -> None:
 
     # pylint: disable=unused-argument
     @app.main()
-    def custom_main(driver: Driver, context: Context) -> None:
+    def custom_main(grid: Grid, context: Context) -> None:
         called["called"] = True
 
     # pylint: enable=unused-argument
 
     # Execute
-    app(driver, context)
+    app(grid, context)
 
     # Assert
     assert called["called"]
@@ -59,7 +59,7 @@ def test_server_app_exception_when_both_modes() -> None:
     with pytest.raises(ValueError):
         # pylint: disable=unused-argument
         @app.main()
-        def custom_main(driver: Driver, context: Context) -> None:
+        def custom_main(grid: Grid, context: Context) -> None:
             pass
 
         # pylint: enable=unused-argument
