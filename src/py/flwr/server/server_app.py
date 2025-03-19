@@ -15,6 +15,7 @@
 """Flower ServerApp."""
 
 
+import inspect
 from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Callable, Optional
@@ -43,6 +44,21 @@ SERVER_FN_USAGE_EXAMPLE = """
         app = ServerApp(server_fn=server_fn)
 """
 
+GRID_USAGE_EXAMPLE = """
+                app = ServerApp()
+
+                @app.main()
+                def main(grid: Grid, context: Context) -> None:
+                    # Your existing ServerApp code ...
+"""
+
+DRIVER_DEPRECATION_MSG = """
+            The `Driver` class is deprecated, it will be removed in a future release.
+"""
+DRIVER_EXAMPLE_MSG = """
+            Instead, use `Grid` in the signature of your `ServerApp`. For example:
+"""
+
 
 @contextmanager
 def _empty_lifespan(_: Context) -> Iterator[None]:
@@ -54,7 +70,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
     Examples
     --------
-    Use the `ServerApp` with an existing `Strategy`:
+    Use the ``ServerApp`` with an existing ``Strategy``:
 
     >>> def server_fn(context: Context):
     >>>     server_config = ServerConfig(num_rounds=3)
@@ -66,7 +82,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
     >>>
     >>> app = ServerApp(server_fn=server_fn)
 
-    Use the `ServerApp` with a custom main function:
+    Use the ``ServerApp`` with a custom main function:
 
     >>> app = ServerApp()
     >>>
@@ -171,6 +187,16 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                     >>> def main(driver: Driver, context: Context) -> None:
                     >>>    print("ServerApp running")
                     """,
+                )
+
+            sig = inspect.signature(main_fn)
+            param = list(sig.parameters.values())[0]
+            # Check if parameter name or the annotation should be updated
+            if param.name == "driver" or param.annotation is Driver:
+                warn_deprecated_feature_with_example(
+                    deprecation_message=DRIVER_DEPRECATION_MSG,
+                    example_message=DRIVER_EXAMPLE_MSG,
+                    code_example=GRID_USAGE_EXAMPLE,
                 )
 
             # Register provided function with the ServerApp object
