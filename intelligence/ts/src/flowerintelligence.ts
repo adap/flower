@@ -229,7 +229,7 @@ export class FlowerIntelligence {
     ) {
       let description = localFailure.failure.description;
       description += FlowerIntelligence.#remoteHandoff
-        ? '\nAnd no valid API key was provided for Remote Handoff.'
+        ? '\nAdditionally, a valid API key for Remote Handoff was not provided.'
         : '\nAnd Remote Handoff was not enabled with a valid API key.';
       return {
         ok: false,
