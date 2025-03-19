@@ -32,12 +32,14 @@ from flwr.common import (
     Message,
     Metadata,
     RecordSet,
+    now,
 )
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
+from flwr.common.message import make_message
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.typing import Fab, Run
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
@@ -175,7 +177,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
             )
 
         # Construct Message
-        return Message(
+        return make_message(
             metadata=Metadata(
                 run_id=0,
                 message_id=str(uuid.uuid4()),
@@ -183,6 +185,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
                 dst_node_id=0,
                 reply_to_message="",
                 group_id="",
+                created_at=now().timestamp(),
                 ttl=DEFAULT_TTL,
                 message_type=message_type,
             ),

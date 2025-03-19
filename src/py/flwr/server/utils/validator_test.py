@@ -19,8 +19,9 @@ import unittest
 
 from parameterized import parameterized
 
-from flwr.common import DEFAULT_TTL, Error, Message, Metadata, RecordSet
+from flwr.common import DEFAULT_TTL, Error, Message, Metadata, RecordSet, now
 from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.common.message import make_message
 
 from .validator import validate_message
 
@@ -46,11 +47,12 @@ def create_message(  # pylint: disable=R0913, R0917
         dst_node_id=dst_node_id,
         reply_to_message=reply_to_message,
         group_id="",
+        created_at=now().timestamp(),
         ttl=ttl,
         message_type="train",  # Bypass message type validation
     )
     metadata.__dict__["_message_type"] = msg_type
-    ret = Message(metadata=metadata, content=RecordSet())
+    ret = make_message(metadata=metadata, content=RecordSet())
     if not has_content:
         ret.__dict__["_content"] = None
     if has_error:

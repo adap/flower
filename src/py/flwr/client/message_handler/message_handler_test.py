@@ -15,7 +15,6 @@
 """Client-side message handler tests."""
 
 
-import time
 import unittest
 import uuid
 from copy import copy
@@ -34,15 +33,16 @@ from flwr.common import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
-    Message,
     Metadata,
     Parameters,
     RecordSet,
     Status,
+    now,
 )
 from flwr.common import recordset_compat as compat
 from flwr.common import typing
 from flwr.common.constant import MessageTypeLegacy
+from flwr.common.message import make_message
 
 from .message_handler import handle_legacy_message_from_msgtype, validate_out_message
 
@@ -124,7 +124,7 @@ def test_client_without_get_properties() -> None:
     # Prepare
     client = ClientWithoutProps()
     recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
-    message = Message(
+    message = make_message(
         metadata=Metadata(
             run_id=123,
             message_id=str(uuid.uuid4()),
@@ -132,6 +132,7 @@ def test_client_without_get_properties() -> None:
             src_node_id=0,
             dst_node_id=1123,
             reply_to_message="",
+            created_at=now().timestamp(),
             ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
@@ -156,7 +157,7 @@ def test_client_without_get_properties() -> None:
         properties={},
     )
     expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
-    expected_msg = Message(
+    expected_msg = make_message(
         metadata=Metadata(
             run_id=123,
             message_id="",
@@ -164,6 +165,7 @@ def test_client_without_get_properties() -> None:
             src_node_id=1123,
             dst_node_id=0,
             reply_to_message=message.metadata.message_id,
+            created_at=now().timestamp(),
             ttl=actual_msg.metadata.ttl,  # computed based on [message].create_reply()
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
@@ -190,7 +192,7 @@ def test_client_with_get_properties() -> None:
     # Prepare
     client = ClientWithProps()
     recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
-    message = Message(
+    message = make_message(
         metadata=Metadata(
             run_id=123,
             message_id=str(uuid.uuid4()),
@@ -198,6 +200,7 @@ def test_client_with_get_properties() -> None:
             src_node_id=0,
             dst_node_id=1123,
             reply_to_message="",
+            created_at=now().timestamp(),
             ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
@@ -222,7 +225,7 @@ def test_client_with_get_properties() -> None:
         properties={"str_prop": "val", "int_prop": 1},
     )
     expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
-    expected_msg = Message(
+    expected_msg = make_message(
         metadata=Metadata(
             run_id=123,
             message_id="",
@@ -230,6 +233,7 @@ def test_client_with_get_properties() -> None:
             src_node_id=1123,
             dst_node_id=0,
             reply_to_message=message.metadata.message_id,
+            created_at=now().timestamp(),
             ttl=actual_msg.metadata.ttl,  # computed based on [message].create_reply()
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
@@ -263,13 +267,10 @@ class TestMessageValidation(unittest.TestCase):
             dst_node_id=20,
             reply_to_message="",
             group_id="group1",
+            created_at=now().timestamp(),
             ttl=DEFAULT_TTL,
             message_type="evaluate",
         )
-        # We need to set created_at in this way
-        # since this `self.in_metadata` is used for tests
-        # without it ever being part of a Message
-        self.in_metadata.created_at = time.time()
 
         self.valid_out_metadata = Metadata(
             run_id=123,
@@ -278,6 +279,7 @@ class TestMessageValidation(unittest.TestCase):
             dst_node_id=10,
             reply_to_message="qwerty",
             group_id="group1",
+            created_at=now().timestamp(),
             ttl=DEFAULT_TTL,
             message_type="evaluate",
         )
@@ -286,7 +288,9 @@ class TestMessageValidation(unittest.TestCase):
     def test_valid_message(self) -> None:
         """Test a valid message."""
         # Prepare
-        valid_message = Message(metadata=self.valid_out_metadata, content=RecordSet())
+        valid_message = make_message(
+            metadata=self.valid_out_metadata, content=RecordSet()
+        )
 
         # Assert
         self.assertTrue(validate_out_message(valid_message, self.in_metadata))
@@ -294,7 +298,7 @@ class TestMessageValidation(unittest.TestCase):
     def test_invalid_message_run_id(self) -> None:
         """Test invalid messages."""
         # Prepare
-        msg = Message(metadata=self.valid_out_metadata, content=RecordSet())
+        msg = make_message(metadata=self.valid_out_metadata, content=RecordSet())
 
         # Execute
         invalid_metadata_list: list[Metadata] = []

@@ -152,8 +152,8 @@ def run_clientapp(  # pylint: disable=R0914
                 log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
 
                 # Create error message
-                reply_message = message.create_error_reply(
-                    error=Error(code=e_code, reason=reason)
+                reply_message = Message(
+                    Error(code=e_code, reason=reason), reply_to=message
                 )
 
             # Push Message and Context to SuperNode
