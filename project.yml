@@ -1,4 +1,4 @@
-name: FI-Swift-Examples
+name: FlowerIntelligenceExamples
 options:
   bundleIdPrefix: ai.flower
   deploymentTarget:
@@ -42,7 +42,7 @@ targets:
     settings:
       base:
         PRODUCT_NAME: hello-world-macos
-        CODE_SIGN_ENTITLEMENTS: "intelligence/swift/examples/hello-world-macos/LLMEvaluate.entitlements"
+        CODE_SIGN_ENTITLEMENTS: "intelligence/swift/examples/hello-world-macos/HelloWorld.entitlements"
         MACOSX_DEPLOYMENT_TARGET: "14.0"
         GENERATE_INFOPLIST_FILE: YES
 
