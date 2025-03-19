@@ -572,7 +572,7 @@ def _extract_positional_args(
     return content, error, dst_node_id, message_type
 
 
-def _check_arg_types(
+def _check_arg_types(  # pylint: disable=too-many-arguments, R0917
     dst_node_id: int | None = None,
     message_type: str | None = None,
     content: RecordSet | None = None,
@@ -583,6 +583,7 @@ def _check_arg_types(
     metadata: Metadata | None = None,
 ) -> None:
     """Check argument types for the `Message` constructor."""
+    # pylint: disable=too-many-boolean-expressions
     if (
         (dst_node_id is None or isinstance(dst_node_id, int))
         and (message_type is None or isinstance(message_type, str))
