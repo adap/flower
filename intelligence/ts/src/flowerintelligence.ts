@@ -251,7 +251,7 @@ export class FlowerIntelligence {
       return {
         ok: false,
         failure: {
-          code: FailureCode.NoLocalProviderError,
+          code: localFailure.failure.code,
           description,
         },
       };
