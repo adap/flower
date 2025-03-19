@@ -518,7 +518,7 @@ def make_message(
 def _limit_reply_ttl(
     current: float, reply_ttl: float | None, reply_to: Message
 ) -> float:
-    """Limit the TTL of a reply message to not exceed the expiration time of the message
+    """Limit the TTL of a reply message such that it does exceed the expiration time of the message
     it replies to."""
     # Calculate the maximum allowed TTL
     max_allowed_ttl = reply_to.metadata.created_at + reply_to.metadata.ttl - current
