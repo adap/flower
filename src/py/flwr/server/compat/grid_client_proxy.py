@@ -19,7 +19,7 @@ from typing import Optional
 
 from flwr import common
 from flwr.common import Message, MessageType, MessageTypeLegacy, RecordDict
-from flwr.common import recordset_compat as compat
+from flwr.common import recorddict_compat as compat
 from flwr.server.client_proxy import ClientProxy
 
 from ..grid.grid import Grid

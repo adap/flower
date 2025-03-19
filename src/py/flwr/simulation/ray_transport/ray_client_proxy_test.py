@@ -35,11 +35,11 @@ from flwr.common import (
     Scalar,
 )
 from flwr.common.constant import NUM_PARTITIONS_KEY, PARTITION_ID_KEY
-from flwr.common.recordset_compat import (
+from flwr.common.recorddict_compat import (
     getpropertiesins_to_recordset,
     recordset_to_getpropertiesres,
 )
-from flwr.common.recordset_compat_test import _get_valid_getpropertiesins
+from flwr.common.recorddict_compat_test import _get_valid_getpropertiesins
 from flwr.simulation.legacy_app import (
     NodeToPartitionMapping,
     _create_node_id_to_partition_mapping,

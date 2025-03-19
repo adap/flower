@@ -22,7 +22,7 @@ import numpy as np
 import pytest
 
 from .parameter import ndarrays_to_parameters
-from .recordset_compat import (
+from .recorddict_compat import (
     evaluateins_to_recordset,
     evaluateres_to_recordset,
     fitins_to_recordset,

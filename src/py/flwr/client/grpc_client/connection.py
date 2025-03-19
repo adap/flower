@@ -33,7 +33,7 @@ from flwr.common import (
     Metadata,
     RecordDict,
 )
-from flwr.common import recordset_compat as compat
+from flwr.common import recorddict_compat as compat
 from flwr.common import serde
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.grpc import create_channel, on_channel_state_change

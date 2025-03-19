@@ -40,7 +40,7 @@ from flwr.common import (
     RecordDict,
     Status,
 )
-from flwr.common import recordset_compat as compat
+from flwr.common import recorddict_compat as compat
 from flwr.common import typing
 from flwr.common.constant import MessageTypeLegacy
 

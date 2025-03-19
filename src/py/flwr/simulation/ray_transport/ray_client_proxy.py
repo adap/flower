@@ -31,7 +31,7 @@ from flwr.common.constant import (
     MessageTypeLegacy,
 )
 from flwr.common.logger import log
-from flwr.common.recordset_compat import (
+from flwr.common.recorddict_compat import (
     evaluateins_to_recordset,
     fitins_to_recordset,
     getparametersins_to_recordset,

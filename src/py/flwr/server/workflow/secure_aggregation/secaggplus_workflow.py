@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from logging import DEBUG, ERROR, INFO, WARN
 from typing import Optional, Union, cast
 
-import flwr.common.recordset_compat as compat
+import flwr.common.recorddict_compat as compat
 from flwr.common import (
     ConfigsRecord,
     Context,

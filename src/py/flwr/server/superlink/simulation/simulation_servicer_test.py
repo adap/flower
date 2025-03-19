@@ -97,7 +97,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
             run_id=run_id,
             node_id=0,
             node_config=maker.user_config(),
-            state=maker.recordset(1, 1, 1),
+            state=maker.recorddict(1, 1, 1),
             run_config=maker.user_config(),
         )
 
@@ -148,7 +148,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
             run_id=run_id,
             node_id=0,
             node_config=maker.user_config(),
-            state=maker.recordset(1, 1, 1),
+            state=maker.recorddict(1, 1, 1),
             run_config=maker.user_config(),
         )
 

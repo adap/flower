@@ -183,7 +183,7 @@ def test_create_reply(
             Message,
             {
                 "metadata": RecordMaker(1).metadata(),
-                "content": RecordMaker(1).recordset(1, 1, 1),
+                "content": RecordMaker(1).recorddict(1, 1, 1),
             },
         ),
         (

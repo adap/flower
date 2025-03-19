@@ -248,7 +248,7 @@ class RecordMaker:
             keep_input=False,
         )
 
-    def recordset(
+    def recorddict(
         self,
         num_params_records: int,
         num_metrics_records: int,
@@ -355,7 +355,7 @@ def test_recordset_serialization_deserialization() -> None:
     """Test serialization and deserialization of RecordSet."""
     # Prepare
     maker = RecordMaker(state=0)
-    original = maker.recordset(2, 2, 1)
+    original = maker.recorddict(2, 2, 1)
 
     # Execute
     proto = recordset_to_proto(original)
@@ -420,7 +420,7 @@ def test_context_serialization_deserialization() -> None:
         run_id=0,
         node_id=1,
         node_config=maker.user_config(),
-        state=maker.recordset(1, 1, 1),
+        state=maker.recorddict(1, 1, 1),
         run_config=maker.user_config(),
     )
 

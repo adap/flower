@@ -41,7 +41,7 @@ from flwr.common import (
     now,
 )
 from flwr.common.constant import Status
-from flwr.common.recordset_compat import getpropertiesins_to_recordset
+from flwr.common.recorddict_compat import getpropertiesins_to_recordset
 from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,

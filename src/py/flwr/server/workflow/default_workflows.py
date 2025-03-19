@@ -20,7 +20,7 @@ import timeit
 from logging import INFO, WARN
 from typing import Optional, Union, cast
 
-import flwr.common.recordset_compat as compat
+import flwr.common.recorddict_compat as compat
 from flwr.common import (
     Code,
     ConfigsRecord,

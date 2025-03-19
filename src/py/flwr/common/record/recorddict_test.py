@@ -24,7 +24,7 @@ import numpy as np
 import pytest
 
 from flwr.common.parameter import ndarrays_to_parameters, parameters_to_ndarrays
-from flwr.common.recordset_compat import (
+from flwr.common.recorddict_compat import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )

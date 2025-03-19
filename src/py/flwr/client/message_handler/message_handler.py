@@ -28,7 +28,7 @@ from flwr.client.numpy_client import NumPyClient
 from flwr.client.typing import ClientFnExt
 from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordDict, log
 from flwr.common.constant import MessageType, MessageTypeLegacy
-from flwr.common.recordset_compat import (
+from flwr.common.recorddict_compat import (
     evaluateres_to_recordset,
     fitres_to_recordset,
     getparametersres_to_recordset,

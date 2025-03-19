@@ -25,7 +25,7 @@ import numpy as np
 
 import flwr
 from flwr.common import Error, Message, Metadata, RecordDict
-from flwr.common import recordset_compat as compat
+from flwr.common import recorddict_compat as compat
 from flwr.common.typing import (
     Code,
     Config,
