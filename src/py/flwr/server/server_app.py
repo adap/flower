@@ -20,15 +20,12 @@ from contextlib import contextmanager
 from typing import Callable, Optional
 
 from flwr.common import Context
-from flwr.common.logger import (
-    warn_deprecated_feature_with_example,
-    warn_preview_feature,
-)
+from flwr.common.logger import warn_deprecated_feature_with_example
 from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
 from .compat import start_driver
-from .driver import Driver
+from .grid import Driver
 from .server import Server
 from .server_config import ServerConfig
 from .typing import ServerAppCallable, ServerFn
@@ -176,8 +173,6 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                     """,
                 )
 
-            warn_preview_feature("ServerApp-register-main-function")
-
             # Register provided function with the ServerApp object
             self._main = main_fn
 
@@ -212,10 +207,9 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         """
 
         def lifespan_decorator(
-            lifespan_fn: Callable[[Context], Iterator[None]]
+            lifespan_fn: Callable[[Context], Iterator[None]],
         ) -> Callable[[Context], Iterator[None]]:
             """Register the lifespan fn with the ServerApp object."""
-            warn_preview_feature("ServerApp-register-lifespan-function")
 
             @contextmanager
             def decorated_lifespan(context: Context) -> Iterator[None]:
