@@ -5,7 +5,7 @@ isort:skip_file
 import builtins
 import flwr.proto.fab_pb2
 import flwr.proto.node_pb2
-import flwr.proto.recorddict_pb2
+import flwr.proto.recordset_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -258,10 +258,10 @@ class GetFederationOptionsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     FEDERATION_OPTIONS_FIELD_NUMBER: builtins.int
     @property
-    def federation_options(self) -> flwr.proto.recorddict_pb2.ConfigsRecord: ...
+    def federation_options(self) -> flwr.proto.recordset_pb2.ConfigsRecord: ...
     def __init__(self,
         *,
-        federation_options: typing.Optional[flwr.proto.recorddict_pb2.ConfigsRecord] = ...,
+        federation_options: typing.Optional[flwr.proto.recordset_pb2.ConfigsRecord] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["federation_options",b"federation_options"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["federation_options",b"federation_options"]) -> None: ...
