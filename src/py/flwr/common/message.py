@@ -310,6 +310,16 @@ class Message:
             dst_node_id=dst_node_id,
             message_type=message_type,
         )
+        _check_arg_types(
+            dst_node_id=dst_node_id,
+            message_type=message_type,
+            content=content,
+            error=error,
+            ttl=ttl,
+            group_id=group_id,
+            reply_to=reply_to,
+            metadata=metadata,
+        )
 
         # Set metadata directly (This is for internal use only)
         if metadata is not None:
@@ -358,7 +368,7 @@ class Message:
 
             # Set metadata
             current = now().timestamp()
-            metadata = metadata or Metadata(
+            metadata = Metadata(
                 run_id=reply_to.metadata.run_id,
                 message_id="",
                 src_node_id=reply_to.metadata.dst_node_id,
@@ -544,6 +554,8 @@ def _extract_positional_args(
         if message_type is not None:
             raise MessageInitializationError()
         message_type = args[2]
+    if len(args) > 3:
+        raise MessageInitializationError()
 
     # One and only one of `content_or_error`, `content` and `error` must be set
     if sum(x is not None for x in [content_or_error, content, error]) != 1:
@@ -558,6 +570,31 @@ def _extract_positional_args(
         else:
             raise MessageInitializationError()
     return content, error, dst_node_id, message_type
+
+
+def _check_arg_types(
+    dst_node_id: int | None = None,
+    message_type: str | None = None,
+    content: RecordSet | None = None,
+    error: Error | None = None,
+    ttl: float | None = None,
+    group_id: str | None = None,
+    reply_to: Message | None = None,
+    metadata: Metadata | None = None,
+) -> None:
+    """Check argument types for the `Message` constructor."""
+    if (
+        (dst_node_id is None or isinstance(dst_node_id, int))
+        and (message_type is None or isinstance(message_type, str))
+        and (content is None or isinstance(content, RecordSet))
+        and (error is None or isinstance(error, Error))
+        and (ttl is None or isinstance(ttl, (int, float)))
+        and (group_id is None or isinstance(group_id, str))
+        and (reply_to is None or isinstance(reply_to, Message))
+        and (metadata is None or isinstance(metadata, Metadata))
+    ):
+        return
+    raise MessageInitializationError()
 
 
 def validate_message_type(message_type: str) -> bool:

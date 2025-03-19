@@ -18,14 +18,22 @@
 import time
 from collections import namedtuple
 from contextlib import ExitStack
-from typing import Any, Callable, Optional
+from itertools import product
+from typing import Any, Callable, Optional, Union
 
 import pytest
 
-# pylint: enable=E0611
 from . import RecordSet
 from .constant import MESSAGE_TTL_TOLERANCE
-from .message import Error, Message, Metadata, make_message
+from .date import now
+from .message import (
+    DEFAULT_TTL,
+    Error,
+    Message,
+    MessageInitializationError,
+    Metadata,
+    make_message,
+)
 from .serde_test import RecordMaker
 
 
@@ -226,3 +234,144 @@ def test_reply_ttl_limitation(
         f"Expected TTL to be <= {expected_reply_ttl}, "
         f"but got {reply_message.metadata.ttl}"
     )
+
+
+@pytest.mark.parametrize(
+    "ttl,group_id,use_keyword",
+    product([None, 10.0, 10], [None, "group_xyz"], [True, False]),
+)
+def test_create_ins_message_success(
+    ttl: Optional[float], group_id: Optional[str], use_keyword: bool
+) -> None:
+    """Test creating an instruction message with content."""
+    # Prepare
+    current_time = now().timestamp()
+    kwargs = {k: v for k, v in [("ttl", ttl), ("group_id", group_id)] if v is not None}
+
+    # Execute
+    if use_keyword:
+        msg = Message(
+            content=RecordSet(),
+            dst_node_id=123,
+            message_type="query",
+            **kwargs,  # type: ignore
+        )
+    else:
+        msg = Message(RecordSet(), 123, "query", **kwargs)  # type: ignore
+
+    # Assert
+    assert msg.has_content() and msg.content == RecordSet()
+    assert msg.metadata.dst_node_id == 123
+    assert msg.metadata.message_type == "query"
+    assert msg.metadata.ttl == (ttl or DEFAULT_TTL)
+    assert msg.metadata.group_id == (group_id or "")
+    assert current_time < msg.metadata.created_at < now().timestamp()
+    assert msg.metadata.run_id == 0  # Should be unset
+    assert msg.metadata.message_id == ""  # Should be unset
+    assert msg.metadata.src_node_id == 0  # Should be unset
+    assert msg.metadata.reply_to_message == ""  # Should be unset
+
+
+@pytest.mark.parametrize(
+    "content_or_error,ttl",
+    product([RecordSet(), Error(0)], [None, 10.0, 20]),
+)
+def test_create_reply_message_success(
+    content_or_error: Union[RecordSet, Error], ttl: Optional[float]
+) -> None:
+    """Test creating a reply message."""
+    # Prepare
+    msg = make_message(content=RecordSet(), metadata=RecordMaker(1).metadata())
+    current_time = msg.metadata.created_at
+
+    # Execute
+    reply = Message(content_or_error, reply_to=msg, ttl=ttl)
+
+    # Assert
+    assert reply.metadata.run_id == msg.metadata.run_id
+    assert reply.metadata.src_node_id == msg.metadata.dst_node_id
+    assert reply.metadata.dst_node_id == msg.metadata.src_node_id
+    assert reply.metadata.reply_to_message == msg.metadata.message_id
+    assert reply.metadata.group_id == msg.metadata.group_id
+    assert current_time < reply.metadata.created_at < now().timestamp()
+    assert (
+        reply.metadata.created_at + reply.metadata.ttl
+        <= msg.metadata.created_at + msg.metadata.ttl
+    )
+    assert reply.metadata.message_type == msg.metadata.message_type
+    assert reply.metadata.message_id == ""  # Should be unset
+    if isinstance(content_or_error, RecordSet):
+        assert reply.has_content()
+    else:
+        assert reply.has_error()
+
+
+@pytest.mark.parametrize(
+    "args,kwargs",
+    [
+        # Pass Error instead of content
+        ((Error(0), 123, "query"), {}),
+        # Too many positional args
+        ((RecordSet(), 123, "query", 123), {}),
+        # Too few positional args
+        ((RecordSet(),), {}),
+        ((RecordSet(), 123), {}),
+        # Use keyword args when positional args are set
+        ((RecordSet(), 123, "query"), {"content": RecordSet()}),
+        ((RecordSet(), 123, "query"), {"dst_node_id": 123}),
+        ((RecordSet(), 123, "query"), {"message_type": "query"}),
+        # Use keyword args not allowed
+        ((RecordSet(), 123, "query"), {"metadata": RecordMaker(1).metadata()}),
+        ((RecordSet(), 123, "query"), {"error": Error(0)}),
+        ((RecordSet(), 123, "query"), {"reply_to": Message(RecordSet(), 123, "query")}),
+        # Use invalid arg types
+        (("wrong type", 123, "query"), {}),
+        ((RecordSet(), "wrong type", "query"), {}),
+        ((RecordSet(), 123, 456), {}),
+        ((RecordSet(), 123, "query"), {"ttl": "wrong type"}),
+        ((RecordSet(), 123, "query"), {"group_id": 123}),
+        ((RecordSet(), 123, "query"), {"group_id": 123.0}),
+    ],
+)
+def test_create_ins_message_failure(args: Any, kwargs: dict[str, Any]) -> None:
+    """Test creating an instruction message with error."""
+    # Execute
+    with pytest.raises(MessageInitializationError):
+        Message(*args, **kwargs)
+
+
+@pytest.mark.parametrize(
+    "args,kwargs",
+    [
+        # Too many positional args
+        ((RecordSet(), 123), {}),
+        ((Error(0), 123), {}),
+        # Too few positional args
+        ((), {}),
+        # Use keyword args when positional args are set
+        ((RecordSet(),), {"content": RecordSet()}),
+        ((Error(0),), {"error": Error(0)}),
+        # Use keyword args not allowed
+        ((RecordSet(),), {"metadata": RecordMaker(1).metadata()}),
+        ((Error(0),), {"metadata": RecordMaker(1).metadata()}),
+        ((RecordSet(),), {"dst_node_id": 123}),
+        ((Error(0),), {"dst_node_id": 123}),
+        ((RecordSet(),), {"message_type": "query"}),
+        ((Error(0),), {"message_type": "query"}),
+        ((RecordSet(),), {"group_id": "group_xyz"}),
+        ((Error(0),), {"group_id": "group_xyz"}),
+        # Use invalid arg types
+        (("wrong type",), {}),
+        ((123,), {}),
+        ((RecordSet(),), {"ttl": "wrong type"}),
+        ((Error(0),), {"ttl": "wrong type"}),
+    ],
+)
+def test_create_reply_message_failure(args: Any, kwargs: dict[str, Any]) -> None:
+    """Test creating a reply message with error."""
+    # Prepare
+    msg = make_message(content=RecordSet(), metadata=RecordMaker(1).metadata())
+
+    # Execute
+    with pytest.raises(MessageInitializationError):
+        Message(*args, reply_to=msg, **kwargs)
