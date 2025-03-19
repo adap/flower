@@ -9,7 +9,6 @@ import FlowerIntelligence
 import SwiftUI
 
 struct ContentView: View {
-  @State var answer: String = ""
   var body: some View {
     ChatView()
       .padding()
