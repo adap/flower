@@ -191,7 +191,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
             sig = inspect.signature(main_fn)
             param = list(sig.parameters.values())[0]
-            # Check if parameter name should be updated
+            # Check if parameter name or the annotation should be updated
             if param.name == "driver" or param.annotation is Driver:
                 warn_deprecated_feature_with_example(
                     deprecation_message=DRIVER_DEPRECATION_MSG,
