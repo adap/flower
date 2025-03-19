@@ -20,7 +20,6 @@ from collections.abc import Iterable
 from typing import Optional
 
 from flwr.common import Message, RecordSet
-from flwr.common.logger import warn_deprecated_feature_with_example
 from flwr.common.typing import Run
 
 
@@ -33,7 +32,7 @@ class Grid(ABC):
 
         If a Run with the specified `run_id` exists, a local Run
         object will be created. It enables further functionality
-        in the Grid, such as sending `Messages`.
+        in the grid, such as sending `Messages`.
 
         Parameters
         ----------
@@ -162,24 +161,5 @@ class Grid(ABC):
         """
 
 
-GRID_USAGE_EXAMPLE = """
-            app = ServerApp()
-        
-            @app.main()
-            def main(grid: Grid, context: Context) -> None:
-                # Your existing ServerApp code ...
-"""
-
-
 class Driver(Grid):
-    """Deprecated abstract base class for Driver"""
-
-    def __init__(self) -> None:
-        warn_deprecated_feature_with_example(
-            deprecation_message="The `Driver` class will be deprecated in "
-            "future versions of Flower. Please use `Grid` instead.",
-            example_message="In the signature of your ServerApp, pass `Grid` "
-            "instead of `Driver`. For example: ",
-            code_example=GRID_USAGE_EXAMPLE,
-        )
-        super().__init__()
+    """Deprecated abstract base class for Driver. Use Grid instead."""
