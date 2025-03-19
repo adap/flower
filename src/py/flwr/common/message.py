@@ -265,7 +265,7 @@ class Message:
         An identifier for grouping messages. In some settings, this is used as
         the FL round.
     reply_to : Optional[Message] (default: None)
-        The message to which this message is a reply. This message does not retain
+        The instruction message to which this message is a reply. This message does not retain
         the original message's content but derives its metadata from it.
     """
 
