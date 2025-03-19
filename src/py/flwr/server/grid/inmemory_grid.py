@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower in-memory Driver."""
+"""Flower in-memory Grid."""
 
 
 import time
@@ -26,16 +26,16 @@ from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 
-from .grid import Driver
+from .grid import Grid
 
 
-class InMemoryDriver(Driver):
-    """`InMemoryDriver` class provides an interface to the ServerAppIo API.
+class InMemoryGrid(Grid):
+    """`InMemoryGrid` class provides an interface to the ServerAppIo API.
 
     Parameters
     ----------
     state_factory : StateFactory
-        A StateFactory embedding a state that this driver can interface with.
+        A StateFactory embedding a state that this grid can interface with.
     pull_interval : float (default=0.1)
         Sleep duration between calls to `pull_messages`.
     """

@@ -55,7 +55,7 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.compat.legacy_context import LegacyContext
-from flwr.server.grid import Driver
+from flwr.server.grid import Grid
 
 from ..constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD
 from ..constant import Key as WorkflowKey
@@ -186,7 +186,7 @@ class SecAggPlusWorkflow:
 
         self._check_init_params()
 
-    def __call__(self, driver: Driver, context: Context) -> None:
+    def __call__(self, grid: Grid, context: Context) -> None:
         """Run the SecAgg+ protocol."""
         if not isinstance(context, LegacyContext):
             raise TypeError(
@@ -202,7 +202,7 @@ class SecAggPlusWorkflow:
         )
         log(INFO, "Secure aggregation commencing.")
         for step in steps:
-            if not step(driver, context, state):
+            if not step(grid, context, state):
                 log(INFO, "Secure aggregation halted.")
                 return
         log(INFO, "Secure aggregation completed.")
@@ -279,7 +279,7 @@ class SecAggPlusWorkflow:
         return True
 
     def setup_stage(  # pylint: disable=R0912, R0914, R0915
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, grid: Grid, context: LegacyContext, state: WorkflowState
     ) -> bool:
         """Execute the 'setup' stage."""
         # Obtain fit instructions
@@ -370,7 +370,7 @@ class SecAggPlusWorkflow:
         content = RecordSet({RECORD_KEY_CONFIGS: cfgs_record})
 
         def make(nid: int) -> Message:
-            return driver.create_message(
+            return grid.create_message(
                 content=content,
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
@@ -382,7 +382,7 @@ class SecAggPlusWorkflow:
             "[Stage 0] Sending configurations to %s clients.",
             len(state.active_node_ids),
         )
-        msgs = driver.send_and_receive(
+        msgs = grid.send_and_receive(
             [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
         )
         state.active_node_ids = {
@@ -406,7 +406,7 @@ class SecAggPlusWorkflow:
         return self._check_threshold(state)
 
     def share_keys_stage(  # pylint: disable=R0914
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, grid: Grid, context: LegacyContext, state: WorkflowState
     ) -> bool:
         """Execute the 'share keys' stage."""
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
@@ -418,7 +418,7 @@ class SecAggPlusWorkflow:
             )
             cfgs_record[Key.STAGE] = Stage.SHARE_KEYS
             content = RecordSet({RECORD_KEY_CONFIGS: cfgs_record})
-            return driver.create_message(
+            return grid.create_message(
                 content=content,
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
@@ -431,7 +431,7 @@ class SecAggPlusWorkflow:
             "[Stage 1] Forwarding public keys to %s clients.",
             len(state.active_node_ids),
         )
-        msgs = driver.send_and_receive(
+        msgs = grid.send_and_receive(
             [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
         )
         state.active_node_ids = {
@@ -476,7 +476,7 @@ class SecAggPlusWorkflow:
         return self._check_threshold(state)
 
     def collect_masked_vectors_stage(
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, grid: Grid, context: LegacyContext, state: WorkflowState
     ) -> bool:
         """Execute the 'collect masked vectors' stage."""
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
@@ -491,7 +491,7 @@ class SecAggPlusWorkflow:
             cfgs_record = ConfigsRecord(cfgs_dict)  # type: ignore
             content = state.nid_to_fitins[nid]
             content.configs_records[RECORD_KEY_CONFIGS] = cfgs_record
-            return driver.create_message(
+            return grid.create_message(
                 content=content,
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
@@ -503,7 +503,7 @@ class SecAggPlusWorkflow:
             "[Stage 2] Forwarding encrypted key shares to %s clients.",
             len(state.active_node_ids),
         )
-        msgs = driver.send_and_receive(
+        msgs = grid.send_and_receive(
             [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
         )
         state.active_node_ids = {
@@ -547,7 +547,7 @@ class SecAggPlusWorkflow:
         return self._check_threshold(state)
 
     def unmask_stage(  # pylint: disable=R0912, R0914, R0915
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, grid: Grid, context: LegacyContext, state: WorkflowState
     ) -> bool:
         """Execute the 'unmask' stage."""
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
@@ -567,7 +567,7 @@ class SecAggPlusWorkflow:
             }
             cfgs_record = ConfigsRecord(cfgs_dict)  # type: ignore
             content = RecordSet({RECORD_KEY_CONFIGS: cfgs_record})
-            return driver.create_message(
+            return grid.create_message(
                 content=content,
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
@@ -579,7 +579,7 @@ class SecAggPlusWorkflow:
             "[Stage 3] Requesting key shares from %s clients to remove masks.",
             len(state.active_node_ids),
         )
-        msgs = driver.send_and_receive(
+        msgs = grid.send_and_receive(
             [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
         )
         state.active_node_ids = {
