@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower ClientProxy implementation for Driver API."""
+"""Flower ClientProxy implementation using Grid."""
 
 
 from typing import Optional
@@ -22,16 +22,16 @@ from flwr.common import Message, MessageType, MessageTypeLegacy, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.server.client_proxy import ClientProxy
 
-from ..grid.grid import Driver
+from ..grid.grid import Grid
 
 
-class DriverClientProxy(ClientProxy):
-    """Flower client proxy which delegates work using the Driver API."""
+class GridClientProxy(ClientProxy):
+    """Flower client proxy which delegates work using Grid."""
 
-    def __init__(self, node_id: int, driver: Driver, run_id: int):
+    def __init__(self, node_id: int, grid: Grid, run_id: int):
         super().__init__(str(node_id))
         self.node_id = node_id
-        self.driver = driver
+        self.grid = grid
         self.run_id = run_id
 
     def get_properties(
@@ -110,7 +110,7 @@ class DriverClientProxy(ClientProxy):
     ) -> RecordSet:
 
         # Create message
-        message = self.driver.create_message(
+        message = self.grid.create_message(
             content=recordset,
             message_type=message_type,
             dst_node_id=self.node_id,
@@ -119,7 +119,7 @@ class DriverClientProxy(ClientProxy):
         )
 
         # Send message and wait for reply
-        messages = list(self.driver.send_and_receive(messages=[message]))
+        messages = list(self.grid.send_and_receive(messages=[message]))
 
         # A single reply is expected
         if len(messages) != 1:
