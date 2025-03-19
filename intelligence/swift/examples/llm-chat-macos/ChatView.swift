@@ -11,6 +11,7 @@ struct ChatMessage: Identifiable {
 }
 
 struct ChatView: View {
+  @Environment(\.colorScheme) var colorScheme
   @State private var messages: [ChatMessage] = [
     ChatMessage(
       role: "system",
@@ -33,81 +34,32 @@ struct ChatView: View {
       ScrollView {
         VStack(alignment: .leading, spacing: 10) {
           ForEach(messages.indices, id: \.self) { index in
-                                  ChatBubble(message: messages[index]) { updatedContent in
-                                      messages[index] = ChatMessage(role: "system", content: updatedContent)
-                                  }
-                              }
+            ChatBubble(message: messages[index]) { updatedContent in
+              messages[index] = ChatMessage(role: "system", content: updatedContent)
+            }
+          }
         }
         .padding()
-        
+
       }.mask(
         LinearGradient(
-            gradient: Gradient(stops: [
-                .init(color: Color.clear, location: 0.0),
-                .init(color: Color.black, location: 0.1),
-                .init(color: Color.black, location: 0.9),
-                .init(color: Color.clear, location: 1.0)
-            ]),
-            startPoint: .top,
-            endPoint: .bottom
+          gradient: Gradient(stops: [
+            .init(color: Color.clear, location: 0.0),
+            .init(color: Color.black, location: 0.1),
+            .init(color: Color.black, location: 0.9),
+            .init(color: Color.clear, location: 1.0),
+          ]),
+          startPoint: .top,
+          endPoint: .bottom
         )
-    )
+      )
 
-      
-
-      VStack(alignment: .leading) {
-        HStack {
-          Image("flwr")
-            .resizable() // Allows resizing
-              .scaledToFit() // Maintains aspect ratio
-              .frame(width: 30, height: 30)
-
-          TextField("Type a message...", text: $userInput)
-            .textFieldStyle(PlainTextFieldStyle())
-
-          Button(action: {
-            Task {
-              await sendMessage()
-            }
-          }) {
-            Image(systemName: "arrow.up.circle.fill")
-              .resizable() // Allows resizing
-                .scaledToFit() // Maintains aspect ratio
-                .frame(width: 25, height: 25)
-
-          }
-          .buttonStyle(BorderlessButtonStyle())
-        }
-        .padding()
-          .overlay(
-            RoundedRectangle(cornerRadius: 30)
-              .stroke(.gray.opacity(0.4), lineWidth: 2)
-          )
-          .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 30))
-        Menu {
-          // Dropdown items
-          ForEach(availableModels, id: \.self) { model in
-            Button(action: {
-              selectedModel = model
-            }) {
-              Text(model)
-            }
-          }
-        } label: {
-          Text(selectedModel)
-            .foregroundColor(.gray)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(isHovered ? Color.gray.opacity(0.2) : Color.clear)
-            .cornerRadius(20)
-            .onHover { hovering in
-              isHovered = hovering
-            }
-
-        }.buttonStyle(.plain)
-        
-
-      }.padding()
+      ChatInput(
+        userInput: $userInput,
+        sendMessage: { Task { await sendMessage() } },
+        selectedModel: $selectedModel,
+        availableModels: availableModels
+      )
     }
   }
 
@@ -147,65 +99,65 @@ struct ChatView: View {
 }
 
 struct ChatBubble: View {
-    @State private var isEditing: Bool = false
-    @State private var editedMessage: String = ""
-    
-    let message: ChatMessage
-    let onSave: (String) -> Void // Callback to update system message
+  @State private var isEditing: Bool = false
+  @State private var editedMessage: String = ""
 
-    var body: some View {
-        HStack {
-            if message.message.role == "user" {
-                Spacer()
-                Text(message.message.content)
-                    .padding()
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(20)
-                    .frame(maxWidth: 300, alignment: .trailing)
-            } else if message.message.role == "system" {
-                VStack(alignment: .leading) {
-                    HStack {
-                        Text("System instructions")
-                            .padding(.bottom, 4)
-                        Spacer()
-                        Button(action: {
-                            isEditing.toggle()
-                            if !isEditing {
-                                onSave(editedMessage) // Save when exiting edit mode
-                            }
-                        }) {
-                            Image(systemName: isEditing ? "checkmark.circle.fill" : "pencil.circle.fill")
-                                .foregroundColor(.blue)
-                        }
-                    }
-                    
-                    if isEditing {
-                        TextEditor(text: $editedMessage)
-                        .padding()
-                        .textEditorStyle(.plain)
-                        .lineSpacing(5)
-                        .font(.custom("HelveticaNeue", size: 14))
-                        .background(.ultraThinMaterial, in: .rect(cornerRadius: 10))
-                    } else {
-                        Text(message.message.content)
-                    }
-                }
-                .padding()
-                .frame(alignment: .leading)
+  let message: ChatMessage
+  let onSave: (String) -> Void
+
+  var body: some View {
+    HStack {
+      if message.message.role == "user" {
+        Spacer()
+        Text(message.message.content)
+          .padding()
+          .background(Color.gray.opacity(0.2))
+          .cornerRadius(20)
+          .frame(maxWidth: 300, alignment: .trailing)
+      } else if message.message.role == "system" {
+        VStack(alignment: .leading) {
+          HStack {
+            Text("System instructions")
+              
+            Button(action: {
+              isEditing.toggle()
+              if !isEditing {
+                onSave(editedMessage)
+              }
+            }) {
+              Image(systemName: isEditing ? "checkmark.circle.fill" : "pencil")
                 .foregroundColor(.gray)
-                .onAppear {
-                    editedMessage = message.message.content // Initialize editable text
-                }
-                
-                Spacer()
-            } else {
-                Text(message.message.content)
-                    .padding()
-                    .frame(alignment: .leading)
-                Spacer()
             }
+          }.padding(.bottom, 4)
+
+          if isEditing {
+            TextEditor(text: $editedMessage)
+              .padding()
+              .textEditorStyle(.plain)
+              .lineSpacing(5)
+              .font(.custom("HelveticaNeue", size: 14))
+              .background(Color.white)
+              .cornerRadius(10)
+          } else {
+            Text(message.message.content)
+          }
         }
+        .padding()
+        .frame(alignment: .leading)
+        .foregroundColor(.gray)
+        .onAppear {
+          editedMessage = message.message.content
+        }
+
+        Spacer()
+      } else {
+        Text(message.message.content)
+          .padding()
+          .frame(alignment: .leading)
+        Spacer()
+      }
     }
+  }
 }
 
 #Preview {
