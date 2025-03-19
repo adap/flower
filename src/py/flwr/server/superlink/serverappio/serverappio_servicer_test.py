@@ -308,8 +308,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         msg_id = self.state.store_message_ins(message=message_ins)
         msg_ = self.state.get_message_ins(node_id=node_id, limit=1)[0]
 
-        assert (content or error) is not None
-        reply_msg = Message(content or error, reply_to=msg_)
+        if content is not None:
+            reply_msg = Message(content, reply_to=msg_)
+        else:
+            assert error is not None
+            reply_msg = Message(error, reply_to=msg_)
 
         self.state.store_message_res(message=reply_msg)
 
