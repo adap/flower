@@ -341,7 +341,7 @@ class StateTest(unittest.TestCase):
         # Get Message to mark them delivered
         msg_ins_list = state.get_message_ins(node_id=node_id, limit=None)
 
-        # Insert one reply Message and retrive it to mark it as delivered
+        # Insert one reply Message and retrieve it to mark it as delivered
         msg_res_0 = Message(Error(0), reply_to=msg_ins_list[0])
 
         _ = state.store_message_res(message=msg_res_0)

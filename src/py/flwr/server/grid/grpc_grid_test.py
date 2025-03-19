@@ -117,7 +117,7 @@ class TestGrpcDriver(unittest.TestCase):
         self.mock_stub.PushMessages.return_value = mock_response
         msgs = [Message(RecordSet(), 0, "query") for _ in range(2)]
         # Use invalid run_id
-        msgs[1].metadata.__dict__["_message_id"] = "invald message id"
+        msgs[1].metadata.__dict__["_message_id"] = "invalid message id"
 
         # Execute and assert
         with self.assertRaises(ValueError):
