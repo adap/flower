@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 import time
-import warnings
 from collections.abc import Iterable
 from typing import Optional, cast
 from uuid import UUID
@@ -27,7 +26,7 @@ from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 
-from .driver import Driver
+from .grid import Driver
 
 
 class InMemoryDriver(Driver):
@@ -88,13 +87,6 @@ class InMemoryDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        if ttl:
-            warnings.warn(
-                "A custom TTL was set, but note that the SuperLink does not enforce "
-                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
-                "version of Flower.",
-                stacklevel=2,
-            )
         ttl_ = DEFAULT_TTL if ttl is None else ttl
 
         metadata = Metadata(

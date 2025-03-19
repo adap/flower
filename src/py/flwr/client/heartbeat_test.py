@@ -20,6 +20,8 @@ import time
 import unittest
 from unittest.mock import MagicMock
 
+import grpc
+
 from .heartbeat import start_ping_loop
 
 
@@ -45,7 +47,9 @@ class TestStartPingLoopWithFailures(unittest.TestCase):
     def test_ping_loop_with_failures_terminates(self) -> None:
         """Test if the ping loop thread with failures terminates when flagged."""
         # Prepare
-        ping_fn = MagicMock(side_effect=RuntimeError())
+        exc = grpc.RpcError()
+        exc.code = MagicMock(return_value=grpc.StatusCode.UNAVAILABLE)
+        ping_fn = MagicMock(side_effect=exc)
         stop_event = threading.Event()
 
         # Execute

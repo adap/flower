@@ -22,7 +22,7 @@ from flwr.common import Context
 from flwr.common.logger import log
 from flwr.common.object_ref import load_app
 
-from .driver import Driver
+from .grid import Driver
 from .server_app import LoadServerAppError, ServerApp
 
 
