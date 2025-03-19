@@ -141,7 +141,7 @@ def _check_mapping_from_recordscalartype_to_scalar(
     return cast(dict[str, Scalar], record_data)
 
 
-def _recordset_to_fit_or_evaluate_ins_components(
+def _recorddict_to_fit_or_evaluate_ins_components(
     recorddict: RecordDict,
     ins_str: str,
     keep_input: bool,
@@ -162,7 +162,7 @@ def _recordset_to_fit_or_evaluate_ins_components(
     return parameters, config_dict
 
 
-def _fit_or_evaluate_ins_to_recordset(
+def _fit_or_evaluate_ins_to_recorddict(
     ins: Union[FitIns, EvaluateIns], keep_input: bool
 ) -> RecordDict:
     recorddict = RecordDict()
@@ -178,7 +178,7 @@ def _fit_or_evaluate_ins_to_recordset(
     return recorddict
 
 
-def _embed_status_into_recordset(
+def _embed_status_into_recorddict(
     res_str: str, status: Status, recorddict: RecordDict
 ) -> RecordDict:
     status_dict: dict[str, ConfigsRecordValues] = {
@@ -191,15 +191,15 @@ def _embed_status_into_recordset(
     return recorddict
 
 
-def _extract_status_from_recordset(res_str: str, recorddict: RecordDict) -> Status:
+def _extract_status_from_recorddict(res_str: str, recorddict: RecordDict) -> Status:
     status = recorddict.configs_records[f"{res_str}.status"]
     code = cast(int, status["code"])
     return Status(code=Code(code), message=str(status["message"]))
 
 
-def recordset_to_fitins(recorddict: RecordDict, keep_input: bool) -> FitIns:
+def recorddict_to_fitins(recorddict: RecordDict, keep_input: bool) -> FitIns:
     """Derive FitIns from a RecordDict object."""
-    parameters, config = _recordset_to_fit_or_evaluate_ins_components(
+    parameters, config = _recorddict_to_fit_or_evaluate_ins_components(
         recorddict,
         ins_str="fitins",
         keep_input=keep_input,
@@ -208,12 +208,12 @@ def recordset_to_fitins(recorddict: RecordDict, keep_input: bool) -> FitIns:
     return FitIns(parameters=parameters, config=config)
 
 
-def fitins_to_recordset(fitins: FitIns, keep_input: bool) -> RecordDict:
+def fitins_to_recorddict(fitins: FitIns, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a FitIns object."""
-    return _fit_or_evaluate_ins_to_recordset(fitins, keep_input)
+    return _fit_or_evaluate_ins_to_recorddict(fitins, keep_input)
 
 
-def recordset_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
+def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
     """Derive FitRes from a RecordDict object."""
     ins_str = "fitres"
     parameters = parametersrecord_to_parameters(
@@ -226,14 +226,14 @@ def recordset_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
     configs_record = recorddict.configs_records[f"{ins_str}.metrics"]
     # pylint: disable-next=protected-access
     metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record)
-    status = _extract_status_from_recordset(ins_str, recorddict)
+    status = _extract_status_from_recorddict(ins_str, recorddict)
 
     return FitRes(
         status=status, parameters=parameters, num_examples=num_examples, metrics=metrics
     )
 
 
-def fitres_to_recordset(fitres: FitRes, keep_input: bool) -> RecordDict:
+def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a FitRes object."""
     recorddict = RecordDict()
 
@@ -253,14 +253,14 @@ def fitres_to_recordset(fitres: FitRes, keep_input: bool) -> RecordDict:
     )
 
     # status
-    recorddict = _embed_status_into_recordset(res_str, fitres.status, recorddict)
+    recorddict = _embed_status_into_recorddict(res_str, fitres.status, recorddict)
 
     return recorddict
 
 
-def recordset_to_evaluateins(recorddict: RecordDict, keep_input: bool) -> EvaluateIns:
+def recorddict_to_evaluateins(recorddict: RecordDict, keep_input: bool) -> EvaluateIns:
     """Derive EvaluateIns from a RecordDict object."""
-    parameters, config = _recordset_to_fit_or_evaluate_ins_components(
+    parameters, config = _recorddict_to_fit_or_evaluate_ins_components(
         recorddict,
         ins_str="evaluateins",
         keep_input=keep_input,
@@ -269,12 +269,12 @@ def recordset_to_evaluateins(recorddict: RecordDict, keep_input: bool) -> Evalua
     return EvaluateIns(parameters=parameters, config=config)
 
 
-def evaluateins_to_recordset(evaluateins: EvaluateIns, keep_input: bool) -> RecordDict:
+def evaluateins_to_recorddict(evaluateins: EvaluateIns, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a EvaluateIns object."""
-    return _fit_or_evaluate_ins_to_recordset(evaluateins, keep_input)
+    return _fit_or_evaluate_ins_to_recorddict(evaluateins, keep_input)
 
 
-def recordset_to_evaluateres(recorddict: RecordDict) -> EvaluateRes:
+def recorddict_to_evaluateres(recorddict: RecordDict) -> EvaluateRes:
     """Derive EvaluateRes from a RecordDict object."""
     ins_str = "evaluateres"
 
@@ -287,14 +287,14 @@ def recordset_to_evaluateres(recorddict: RecordDict) -> EvaluateRes:
 
     # pylint: disable-next=protected-access
     metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record)
-    status = _extract_status_from_recordset(ins_str, recorddict)
+    status = _extract_status_from_recorddict(ins_str, recorddict)
 
     return EvaluateRes(
         status=status, loss=loss, num_examples=num_examples, metrics=metrics
     )
 
 
-def evaluateres_to_recordset(evaluateres: EvaluateRes) -> RecordDict:
+def evaluateres_to_recorddict(evaluateres: EvaluateRes) -> RecordDict:
     """Construct a RecordDict from a EvaluateRes object."""
     recorddict = RecordDict()
 
@@ -315,14 +315,14 @@ def evaluateres_to_recordset(evaluateres: EvaluateRes) -> RecordDict:
     )
 
     # status
-    recorddict = _embed_status_into_recordset(
+    recorddict = _embed_status_into_recorddict(
         f"{res_str}", evaluateres.status, recorddict
     )
 
     return recorddict
 
 
-def recordset_to_getparametersins(recorddict: RecordDict) -> GetParametersIns:
+def recorddict_to_getparametersins(recorddict: RecordDict) -> GetParametersIns:
     """Derive GetParametersIns from a RecordDict object."""
     config_record = recorddict.configs_records["getparametersins.config"]
     # pylint: disable-next=protected-access
@@ -331,7 +331,7 @@ def recordset_to_getparametersins(recorddict: RecordDict) -> GetParametersIns:
     return GetParametersIns(config=config_dict)
 
 
-def getparametersins_to_recordset(getparameters_ins: GetParametersIns) -> RecordDict:
+def getparametersins_to_recorddict(getparameters_ins: GetParametersIns) -> RecordDict:
     """Construct a RecordDict from a GetParametersIns object."""
     recorddict = RecordDict()
 
@@ -341,7 +341,7 @@ def getparametersins_to_recordset(getparameters_ins: GetParametersIns) -> Record
     return recorddict
 
 
-def getparametersres_to_recordset(
+def getparametersres_to_recorddict(
     getparametersres: GetParametersRes, keep_input: bool
 ) -> RecordDict:
     """Construct a RecordDict from a GetParametersRes object."""
@@ -353,14 +353,14 @@ def getparametersres_to_recordset(
     recorddict.parameters_records[f"{res_str}.parameters"] = parameters_record
 
     # status
-    recorddict = _embed_status_into_recordset(
+    recorddict = _embed_status_into_recorddict(
         res_str, getparametersres.status, recorddict
     )
 
     return recorddict
 
 
-def recordset_to_getparametersres(
+def recorddict_to_getparametersres(
     recorddict: RecordDict, keep_input: bool
 ) -> GetParametersRes:
     """Derive GetParametersRes from a RecordDict object."""
@@ -369,11 +369,11 @@ def recordset_to_getparametersres(
         recorddict.parameters_records[f"{res_str}.parameters"], keep_input=keep_input
     )
 
-    status = _extract_status_from_recordset(res_str, recorddict)
+    status = _extract_status_from_recorddict(res_str, recorddict)
     return GetParametersRes(status=status, parameters=parameters)
 
 
-def recordset_to_getpropertiesins(recorddict: RecordDict) -> GetPropertiesIns:
+def recorddict_to_getpropertiesins(recorddict: RecordDict) -> GetPropertiesIns:
     """Derive GetPropertiesIns from a RecordDict object."""
     config_record = recorddict.configs_records["getpropertiesins.config"]
     # pylint: disable-next=protected-access
@@ -382,7 +382,7 @@ def recordset_to_getpropertiesins(recorddict: RecordDict) -> GetPropertiesIns:
     return GetPropertiesIns(config=config_dict)
 
 
-def getpropertiesins_to_recordset(getpropertiesins: GetPropertiesIns) -> RecordDict:
+def getpropertiesins_to_recorddict(getpropertiesins: GetPropertiesIns) -> RecordDict:
     """Construct a RecordDict from a GetPropertiesRes object."""
     recorddict = RecordDict()
     recorddict.configs_records["getpropertiesins.config"] = ConfigsRecord(
@@ -398,7 +398,7 @@ def recorddict_to_getpropertiesres(recorddict: RecordDict) -> GetPropertiesRes:
     # pylint: disable-next=protected-access
     properties = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
-    status = _extract_status_from_recordset(res_str, recorddict=recorddict)
+    status = _extract_status_from_recorddict(res_str, recorddict=recorddict)
 
     return GetPropertiesRes(status=status, properties=properties)
 
@@ -411,7 +411,7 @@ def getpropertiesres_to_recorddict(getpropertiesres: GetPropertiesRes) -> Record
         getpropertiesres.properties,  # type: ignore
     )
     # status
-    recorddict = _embed_status_into_recordset(
+    recorddict = _embed_status_into_recorddict(
         res_str, getpropertiesres.status, recorddict
     )
 

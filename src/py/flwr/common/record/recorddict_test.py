@@ -418,7 +418,7 @@ def test_record_is_picklable() -> None:
     pickle.dumps((p_record, m_record, c_record, rs))
 
 
-def test_recordset_repr() -> None:
+def test_recorddict_repr() -> None:
     """Test the string representation of RecordDict."""
     # Prepare
     rs = RecordDict(
@@ -438,7 +438,7 @@ def test_recordset_repr() -> None:
     assert str(rs) == expected
 
 
-def test_recordset_set_get_del_item() -> None:
+def test_recorddict_set_get_del_item() -> None:
     """Test setting, getting, and deleting items in RecordDict."""
     # Prepare
     rs = RecordDict()

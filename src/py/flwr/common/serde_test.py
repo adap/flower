@@ -34,7 +34,7 @@ from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
 from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
-from flwr.proto.recordset_pb2 import RecordDict as ProtoRecordSet
+from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.run_pb2 import Run as ProtoRun
 
 # pylint: enable=E0611
@@ -65,8 +65,8 @@ from .serde import (
     metrics_record_to_proto,
     parameters_record_from_proto,
     parameters_record_to_proto,
-    recordset_from_proto,
-    recordset_to_proto,
+    recorddict_from_proto,
+    recorddict_to_proto,
     run_from_proto,
     run_to_proto,
     scalar_from_proto,
@@ -351,15 +351,15 @@ def test_configs_record_serialization_deserialization() -> None:
     assert original == deserialized
 
 
-def test_recordset_serialization_deserialization() -> None:
+def test_recorddict_serialization_deserialization() -> None:
     """Test serialization and deserialization of RecordDict."""
     # Prepare
     maker = RecordMaker(state=0)
     original = maker.recorddict(2, 2, 1)
 
     # Execute
-    proto = recordset_to_proto(original)
-    deserialized = recordset_from_proto(proto)
+    proto = recorddict_to_proto(original)
+    deserialized = recorddict_from_proto(proto)
 
     # Assert
     assert isinstance(proto, ProtoRecordSet)

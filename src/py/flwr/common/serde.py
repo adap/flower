@@ -36,7 +36,7 @@ from flwr.proto.recordset_pb2 import DoubleList
 from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
-from flwr.proto.recordset_pb2 import RecordDict as ProtoRecordSet
+from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.recordset_pb2 import SintList, StringList, UintList
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.proto.run_pb2 import RunStatus as ProtoRunStatus
@@ -561,7 +561,7 @@ def error_from_proto(error_proto: ProtoError) -> Error:
 # === RecordDict message ===
 
 
-def recordset_to_proto(recorddict: RecordDict) -> ProtoRecordSet:
+def recorddict_to_proto(recorddict: RecordDict) -> ProtoRecordSet:
     """Serialize RecordDict to ProtoBuf."""
     return ProtoRecordSet(
         parameters={
@@ -577,7 +577,7 @@ def recordset_to_proto(recorddict: RecordDict) -> ProtoRecordSet:
     )
 
 
-def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordDict:
+def recorddict_from_proto(recordset_proto: ProtoRecordSet) -> RecordDict:
     """Deserialize RecordDict from ProtoBuf."""
     ret = RecordDict()
     for k, p_record_proto in recordset_proto.parameters.items():
@@ -689,7 +689,7 @@ def message_to_proto(message: Message) -> ProtoMessage:
     proto = ProtoMessage(
         metadata=metadata_to_proto(message.metadata),
         content=(
-            recordset_to_proto(message.content) if message.has_content() else None
+            recorddict_to_proto(message.content) if message.has_content() else None
         ),
         error=error_to_proto(message.error) if message.has_error() else None,
     )
@@ -702,7 +702,7 @@ def message_from_proto(message_proto: ProtoMessage) -> Message:
     message = Message(
         metadata=metadata_from_proto(message_proto.metadata),
         content=(
-            recordset_from_proto(message_proto.content)
+            recorddict_from_proto(message_proto.content)
             if message_proto.HasField("content")
             else None
         ),
@@ -727,7 +727,7 @@ def context_to_proto(context: Context) -> ProtoContext:
         run_id=context.run_id,
         node_id=context.node_id,
         node_config=user_config_to_proto(context.node_config),
-        state=recordset_to_proto(context.state),
+        state=recorddict_to_proto(context.state),
         run_config=user_config_to_proto(context.run_config),
     )
     return proto
@@ -739,7 +739,7 @@ def context_from_proto(context_proto: ProtoContext) -> Context:
         run_id=context_proto.run_id,
         node_id=context_proto.node_id,
         node_config=user_config_from_proto(context_proto.node_config),
-        state=recordset_from_proto(context_proto.state),
+        state=recorddict_from_proto(context_proto.state),
         run_config=user_config_from_proto(context_proto.run_config),
     )
     return context

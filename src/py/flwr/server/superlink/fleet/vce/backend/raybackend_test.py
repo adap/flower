@@ -37,7 +37,7 @@ from flwr.common import (
     Scalar,
 )
 from flwr.common.constant import PARTITION_ID_KEY
-from flwr.common.recorddict_compat import getpropertiesins_to_recordset
+from flwr.common.recorddict_compat import getpropertiesins_to_recorddict
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 
@@ -90,7 +90,7 @@ def _create_message_and_context() -> tuple[Message, Context, float]:
     mult_factor = 2024
     run_id = 0
     getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
-    recorddict = getpropertiesins_to_recordset(getproperties_ins)
+    recorddict = getpropertiesins_to_recorddict(getproperties_ins)
     message = Message(
         content=recorddict,
         metadata=Metadata(

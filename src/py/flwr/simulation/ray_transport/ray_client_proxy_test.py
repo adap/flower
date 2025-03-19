@@ -36,7 +36,7 @@ from flwr.common import (
 )
 from flwr.common.constant import NUM_PARTITIONS_KEY, PARTITION_ID_KEY
 from flwr.common.recorddict_compat import (
-    getpropertiesins_to_recordset,
+    getpropertiesins_to_recorddict,
     recorddict_to_getpropertiesres,
 )
 from flwr.common.recorddict_compat_test import _get_valid_getpropertiesins
@@ -117,11 +117,11 @@ def test_cid_consistency_one_at_a_time() -> None:
     proxies, _, _ = prep()
 
     getproperties_ins = _get_valid_getpropertiesins()
-    recorddict = getpropertiesins_to_recordset(getproperties_ins)
+    recorddict = getpropertiesins_to_recorddict(getproperties_ins)
 
     # submit jobs one at a time
     for prox in proxies:
-        message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
+        message = prox._wrap_recorddict_in_message(  # pylint: disable=protected-access
             recorddict,
             MessageTypeLegacy.GET_PROPERTIES,
             timeout=None,
@@ -148,7 +148,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
     run_id = 0
 
     getproperties_ins = _get_valid_getpropertiesins()
-    recorddict = getpropertiesins_to_recordset(getproperties_ins)
+    recorddict = getpropertiesins_to_recorddict(getproperties_ins)
 
     # submit all jobs (collect later)
     shuffle(proxies)
@@ -158,7 +158,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         # Retrieve state
         state = prox.proxy_state.retrieve_context(run_id=run_id)
 
-        message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
+        message = prox._wrap_recorddict_in_message(  # pylint: disable=protected-access
             recorddict,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
             timeout=None,
@@ -205,7 +205,7 @@ def test_cid_consistency_without_proxies() -> None:
         )
 
     getproperties_ins = _get_valid_getpropertiesins()
-    recorddict = getpropertiesins_to_recordset(getproperties_ins)
+    recorddict = getpropertiesins_to_recorddict(getproperties_ins)
 
     def _load_app() -> ClientApp:
         return ClientApp(client_fn=get_dummy_client)

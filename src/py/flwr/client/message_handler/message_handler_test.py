@@ -123,7 +123,7 @@ def test_client_without_get_properties() -> None:
     """Test client implementing get_properties."""
     # Prepare
     client = ClientWithoutProps()
-    recorddict = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
+    recorddict = compat.getpropertiesins_to_recorddict(GetPropertiesIns({}))
     message = Message(
         metadata=Metadata(
             run_id=123,
@@ -189,7 +189,7 @@ def test_client_with_get_properties() -> None:
     """Test client not implementing get_properties."""
     # Prepare
     client = ClientWithProps()
-    recorddict = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
+    recorddict = compat.getpropertiesins_to_recorddict(GetPropertiesIns({}))
     message = Message(
         metadata=Metadata(
             run_id=123,

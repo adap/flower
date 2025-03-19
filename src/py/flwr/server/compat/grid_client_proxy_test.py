@@ -239,13 +239,13 @@ class GridClientProxyTestCase(unittest.TestCase):
             if error_reply:
                 pass
             elif isinstance(res, GetParametersRes):
-                recorddict = compat.getparametersres_to_recordset(res, True)
+                recorddict = compat.getparametersres_to_recorddict(res, True)
             elif isinstance(res, GetPropertiesRes):
                 recorddict = compat.getpropertiesres_to_recorddict(res)
             elif isinstance(res, FitRes):
-                recorddict = compat.fitres_to_recordset(res, True)
+                recorddict = compat.fitres_to_recorddict(res, True)
             elif isinstance(res, EvaluateRes):
-                recorddict = compat.evaluateres_to_recordset(res)
+                recorddict = compat.evaluateres_to_recorddict(res)
 
             if recorddict is not None:
                 ret = msg.create_reply(recorddict)
@@ -262,10 +262,10 @@ class GridClientProxyTestCase(unittest.TestCase):
         # Check if the created message contains the orignal *Ins
         assert self.created_msg is not None
         actual_ins = {  # type: ignore
-            GetPropertiesIns: compat.recordset_to_getpropertiesins,
-            GetParametersIns: compat.recordset_to_getparametersins,
-            FitIns: (lambda x: compat.recordset_to_fitins(x, True)),
-            EvaluateIns: (lambda x: compat.recordset_to_evaluateins(x, True)),
+            GetPropertiesIns: compat.recorddict_to_getpropertiesins,
+            GetParametersIns: compat.recorddict_to_getparametersins,
+            FitIns: (lambda x: compat.recorddict_to_fitins(x, True)),
+            EvaluateIns: (lambda x: compat.recorddict_to_evaluateins(x, True)),
         }[type(original_ins)](self.created_msg.content)
         self.assertEqual(self.called_times, 1)
         self.assertEqual(actual_ins, original_ins)

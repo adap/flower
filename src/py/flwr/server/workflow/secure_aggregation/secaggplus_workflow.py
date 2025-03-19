@@ -303,7 +303,7 @@ class SecAggPlusWorkflow:
         )
 
         state.nid_to_fitins = {
-            proxy.node_id: compat.fitins_to_recordset(fitins, True)
+            proxy.node_id: compat.fitins_to_recorddict(fitins, True)
             for proxy, fitins in proxy_fitins_lst
         }
         state.nid_to_proxies = {proxy.node_id: proxy for proxy, _ in proxy_fitins_lst}
@@ -540,7 +540,7 @@ class SecAggPlusWorkflow:
             if msg.has_error():
                 state.failures.append(Exception(msg.error))
                 continue
-            fitres = compat.recordset_to_fitres(msg.content, True)
+            fitres = compat.recorddict_to_fitres(msg.content, True)
             proxy = state.nid_to_proxies[msg.metadata.src_node_id]
             state.legacy_results.append((proxy, fitres))
 

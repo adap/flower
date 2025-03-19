@@ -32,13 +32,13 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log
 from flwr.common.recorddict_compat import (
-    evaluateins_to_recordset,
-    fitins_to_recordset,
-    getparametersins_to_recordset,
-    getpropertiesins_to_recordset,
-    recordset_to_evaluateres,
-    recordset_to_fitres,
-    recordset_to_getparametersres,
+    evaluateins_to_recorddict,
+    fitins_to_recorddict,
+    getparametersins_to_recorddict,
+    getpropertiesins_to_recorddict,
+    recorddict_to_evaluateres,
+    recorddict_to_fitres,
+    recorddict_to_getparametersres,
     recorddict_to_getpropertiesres,
 )
 from flwr.server.client_proxy import ClientProxy
@@ -109,7 +109,7 @@ class RayActorClientProxy(ClientProxy):
 
         return out_mssg
 
-    def _wrap_recordset_in_message(
+    def _wrap_recorddict_in_message(
         self,
         recorddict: RecordDict,
         message_type: str,
@@ -138,8 +138,8 @@ class RayActorClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
-        recorddict = getpropertiesins_to_recordset(ins)
-        message = self._wrap_recordset_in_message(
+        recorddict = getpropertiesins_to_recorddict(ins)
+        message = self._wrap_recorddict_in_message(
             recorddict,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
             timeout=timeout,
@@ -157,8 +157,8 @@ class RayActorClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        recorddict = getparametersins_to_recordset(ins)
-        message = self._wrap_recordset_in_message(
+        recorddict = getparametersins_to_recorddict(ins)
+        message = self._wrap_recorddict_in_message(
             recorddict,
             message_type=MessageTypeLegacy.GET_PARAMETERS,
             timeout=timeout,
@@ -167,16 +167,16 @@ class RayActorClientProxy(ClientProxy):
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_getparametersres(message_out.content, keep_input=False)
+        return recorddict_to_getparametersres(message_out.content, keep_input=False)
 
     def fit(
         self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-        recorddict = fitins_to_recordset(
+        recorddict = fitins_to_recorddict(
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
-        message = self._wrap_recordset_in_message(
+        message = self._wrap_recorddict_in_message(
             recorddict,
             message_type=MessageType.TRAIN,
             timeout=timeout,
@@ -185,16 +185,16 @@ class RayActorClientProxy(ClientProxy):
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_fitres(message_out.content, keep_input=False)
+        return recorddict_to_fitres(message_out.content, keep_input=False)
 
     def evaluate(
         self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-        recorddict = evaluateins_to_recordset(
+        recorddict = evaluateins_to_recorddict(
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
-        message = self._wrap_recordset_in_message(
+        message = self._wrap_recorddict_in_message(
             recorddict,
             message_type=MessageType.EVALUATE,
             timeout=timeout,
@@ -203,7 +203,7 @@ class RayActorClientProxy(ClientProxy):
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_evaluateres(message_out.content)
+        return recorddict_to_evaluateres(message_out.content)
 
     def reconnect(
         self,

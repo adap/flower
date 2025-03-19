@@ -36,10 +36,9 @@ from flwr.common.serde import message_from_proto, message_to_proto
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
-from flwr.proto.message_pb2 import Message, Metadata
-
-# pylint: disable=E0611
-from flwr.proto.recordset_pb2 import RecordDict as ProtoRecordSet
+from flwr.proto.message_pb2 import Message as ProtoMessage
+from flwr.proto.message_pb2 import Metadata as ProtoMetadata
+from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 
 # pylint: enable=E0611
 from flwr.server.superlink.linkstate import (
@@ -1170,10 +1169,10 @@ def create_ins_message(
     src_node_id: int,
     dst_node_id: int,
     run_id: int,
-) -> Message:
+) -> ProtoMessage:
     """Create a Message for testing."""
-    return Message(
-        metadata=Metadata(
+    return ProtoMessage(
+        metadata=ProtoMetadata(
             run_id=run_id,
             message_id="",
             src_node_id=src_node_id,
@@ -1192,7 +1191,7 @@ def create_res_message(
     dst_node_id: int,
     run_id: int,
     error: Optional[Error] = None,
-) -> Message:
+) -> ProtoMessage:
     """Create a (reply) Message for testing."""
     in_msg_proto = create_ins_message(
         src_node_id=dst_node_id, dst_node_id=src_node_id, run_id=run_id

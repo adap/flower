@@ -41,7 +41,7 @@ from flwr.common import (
     now,
 )
 from flwr.common.constant import Status
-from flwr.common.recorddict_compat import getpropertiesins_to_recordset
+from flwr.common.recorddict_compat import getpropertiesins_to_recorddict
 from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
@@ -142,7 +142,7 @@ def register_messages_into_state(
         # Construct a Message
         mult_factor = 2024 + i
         getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
-        recorddict = getpropertiesins_to_recordset(getproperties_ins)
+        recorddict = getpropertiesins_to_recorddict(getproperties_ins)
         message = Message(
             content=recorddict,
             metadata=Metadata(

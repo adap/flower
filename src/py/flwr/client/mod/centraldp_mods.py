@@ -53,7 +53,7 @@ def fixedclipping_mod(
     """
     if msg.metadata.message_type != MessageType.TRAIN:
         return call_next(msg, ctxt)
-    fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
+    fit_ins = compat.recorddict_to_fitins(msg.content, keep_input=True)
     if KEY_CLIPPING_NORM not in fit_ins.config:
         raise KeyError(
             f"The {KEY_CLIPPING_NORM} value is not supplied by the "
@@ -71,7 +71,7 @@ def fixedclipping_mod(
     if out_msg.has_error():
         return out_msg
 
-    fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
+    fit_res = compat.recorddict_to_fitres(out_msg.content, keep_input=True)
 
     client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
 
@@ -87,7 +87,7 @@ def fixedclipping_mod(
     )
 
     fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
-    out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)
+    out_msg.content = compat.fitres_to_recorddict(fit_res, keep_input=True)
     return out_msg
 
 
@@ -116,7 +116,7 @@ def adaptiveclipping_mod(
     if msg.metadata.message_type != MessageType.TRAIN:
         return call_next(msg, ctxt)
 
-    fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
+    fit_ins = compat.recorddict_to_fitins(msg.content, keep_input=True)
 
     if KEY_CLIPPING_NORM not in fit_ins.config:
         raise KeyError(
@@ -136,7 +136,7 @@ def adaptiveclipping_mod(
     if out_msg.has_error():
         return out_msg
 
-    fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
+    fit_res = compat.recorddict_to_fitres(out_msg.content, keep_input=True)
 
     client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
 
@@ -155,5 +155,5 @@ def adaptiveclipping_mod(
     fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
 
     fit_res.metrics[KEY_NORM_BIT] = norm_bit
-    out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)
+    out_msg.content = compat.fitres_to_recorddict(fit_res, keep_input=True)
     return out_msg

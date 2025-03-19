@@ -171,7 +171,7 @@ def secaggplus_mod(
     elif state.current_stage == Stage.COLLECT_MASKED_VECTORS:
         out_msg = call_next(msg, ctxt)
         out_content = out_msg.content
-        fitres = compat.recordset_to_fitres(out_content, keep_input=True)
+        fitres = compat.recorddict_to_fitres(out_content, keep_input=True)
         res = _collect_masked_vectors(
             state, configs, fitres.num_examples, fitres.parameters
         )

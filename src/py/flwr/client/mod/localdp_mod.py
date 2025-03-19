@@ -107,7 +107,7 @@ class LocalDpMod:
         if msg.metadata.message_type != MessageType.TRAIN:
             return call_next(msg, ctxt)
 
-        fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
+        fit_ins = compat.recorddict_to_fitins(msg.content, keep_input=True)
         server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
 
         # Call inner app
@@ -117,7 +117,7 @@ class LocalDpMod:
         if out_msg.has_error():
             return out_msg
 
-        fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
+        fit_res = compat.recorddict_to_fitres(out_msg.content, keep_input=True)
 
         client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
 
@@ -149,5 +149,5 @@ class LocalDpMod:
             noise_value_sd,
         )
 
-        out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)
+        out_msg.content = compat.fitres_to_recorddict(fit_res, keep_input=True)
         return out_msg

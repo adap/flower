@@ -137,7 +137,7 @@ def default_init_params_workflow(grid: Grid, context: Context) -> None:
         log(INFO, "Requesting initial parameters from one random client")
         random_client = context.client_manager.sample(1)[0]
         # Send GetParametersIns and get the response
-        content = compat.getparametersins_to_recordset(GetParametersIns({}))
+        content = compat.getparametersins_to_recorddict(GetParametersIns({}))
         messages = grid.send_and_receive(
             [
                 grid.create_message(
@@ -152,7 +152,7 @@ def default_init_params_workflow(grid: Grid, context: Context) -> None:
 
         if (
             msg.has_content()
-            and compat._extract_status_from_recordset(  # pylint: disable=W0212
+            and compat._extract_status_from_recorddict(  # pylint: disable=W0212
                 "getparametersres", msg.content
             ).code
             == Code.OK
@@ -254,7 +254,7 @@ def default_fit_workflow(grid: Grid, context: Context) -> None:  # pylint: disab
     # Build out messages
     out_messages = [
         grid.create_message(
-            content=compat.fitins_to_recordset(fitins, True),
+            content=compat.fitins_to_recorddict(fitins, True),
             message_type=MessageType.TRAIN,
             dst_node_id=proxy.node_id,
             group_id=str(current_round),
@@ -282,7 +282,7 @@ def default_fit_workflow(grid: Grid, context: Context) -> None:  # pylint: disab
     for msg in messages:
         if msg.has_content():
             proxy = node_id_to_proxy[msg.metadata.src_node_id]
-            fitres = compat.recordset_to_fitres(msg.content, False)
+            fitres = compat.recorddict_to_fitres(msg.content, False)
             if fitres.status.code == Code.OK:
                 results.append((proxy, fitres))
             else:
@@ -340,7 +340,7 @@ def default_evaluate_workflow(grid: Grid, context: Context) -> None:
     # Build out messages
     out_messages = [
         grid.create_message(
-            content=compat.evaluateins_to_recordset(evalins, True),
+            content=compat.evaluateins_to_recorddict(evalins, True),
             message_type=MessageType.EVALUATE,
             dst_node_id=proxy.node_id,
             group_id=str(current_round),
@@ -368,7 +368,7 @@ def default_evaluate_workflow(grid: Grid, context: Context) -> None:
     for msg in messages:
         if msg.has_content():
             proxy = node_id_to_proxy[msg.metadata.src_node_id]
-            evalres = compat.recordset_to_evaluateres(msg.content)
+            evalres = compat.recorddict_to_evaluateres(msg.content)
             if evalres.status.code == Code.OK:
                 results.append((proxy, evalres))
             else:
