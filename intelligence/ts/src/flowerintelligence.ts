@@ -207,11 +207,15 @@ export class FlowerIntelligence {
       // Currently we just select the first compatible localEngine without further check
       return { ok: true, value: compatibleEngines[0] };
     } else {
+      let description = `No available local engine for ${modelId}.\n`;
+      description += isNode
+        ? 'Make sure you have enough available RAM.'
+        : 'Make sure you are using a WebGPU compatible browser and have enough available RAM.';
       return {
         ok: false,
         failure: {
           code: FailureCode.NoLocalProviderError,
-          description: `No available local engine for ${modelId}.`,
+          description,
         },
       };
     }
