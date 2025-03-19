@@ -37,7 +37,7 @@ def start_grid(  # pylint: disable=too-many-arguments, too-many-locals
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
 ) -> History:
-    """Start a Flower Grid API server.
+    """Start a Flower server.
 
     Parameters
     ----------
@@ -64,7 +64,7 @@ def start_grid(  # pylint: disable=too-many-arguments, too-many-locals
     hist : flwr.server.history.History
         Object containing training and evaluation metrics.
     """
-    # Initialize the Grid API server and config
+    # Initialize the server and config
     initialized_server, initialized_config = init_defaults(
         server=server,
         config=config,

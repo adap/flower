@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower ClientProxy implementation for Grid API."""
+"""Flower ClientProxy implementation using Grid."""
 
 
 from typing import Optional
@@ -26,7 +26,7 @@ from ..grid.grid import Grid
 
 
 class GridClientProxy(ClientProxy):
-    """Flower client proxy which delegates work using the Grid API."""
+    """Flower client proxy which delegates work using Grid."""
 
     def __init__(self, node_id: int, grid: Grid, run_id: int):
         super().__init__(str(node_id))

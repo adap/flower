@@ -22,6 +22,8 @@ from typing import Any, Callable, Optional, TypeVar, Union, cast
 
 import pytest
 
+from flwr.common.constant import SUPERLINK_NODE_ID
+
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2
 from flwr.proto import transport_pb2 as pb2
@@ -387,7 +389,7 @@ def test_message_serialization_deserialization(
     # Prepare
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
-    metadata.dst_node_id = 0  # Assume grid node
+    metadata.dst_node_id = SUPERLINK_NODE_ID  # Assume SuperLink node ID
 
     original = Message(
         metadata=metadata,
