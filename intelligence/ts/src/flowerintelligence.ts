@@ -207,10 +207,10 @@ export class FlowerIntelligence {
       // Currently we just select the first compatible localEngine without further check
       return { ok: true, value: compatibleEngines[0] };
     } else {
-      let description = `No available local engine for ${modelId}.\n`;
+      let description = `No available local engine for ${modelId}`;
       description += isNode
-        ? 'Make sure you have enough available RAM.'
-        : 'Make sure you are using a WebGPU compatible browser and have enough available RAM.';
+        ? ' (make sure you have enough available RAM).'
+        : ' (make sure you are using a WebGPU compatible browser and have enough available RAM).';
       return {
         ok: false,
         failure: {
@@ -230,7 +230,7 @@ export class FlowerIntelligence {
       let description = localFailure.failure.description;
       description += FlowerIntelligence.#remoteHandoff
         ? '\nAnd no valid API key was provided for Remote Handoff.'
-        : '\nAnd Remote Handoff was not enabled (with a valid API key).';
+        : '\nAnd Remote Handoff was not enabled with a valid API key.';
       return {
         ok: false,
         failure: {
