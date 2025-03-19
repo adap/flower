@@ -20,15 +20,16 @@ import { CacheStorage, NodeCacheStorage, WebCacheStorage } from './storage';
 
 const STALE_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours.
 
-interface ModelResponse {
+interface ModelConfigResponse {
   is_supported: boolean;
-  engine_model: string | undefined;
-  model: string | undefined;
+  engine_model?: string;
+  model?: string;
+  vram?: number;
 }
 
-export const cacheStorage: CacheStorage = isNode ? new NodeCacheStorage() : new WebCacheStorage();
+const cacheStorage: CacheStorage = isNode ? new NodeCacheStorage() : new WebCacheStorage();
 
-async function updateModel(model: string, engine: string): Promise<Result<string>> {
+async function updateModelConfig(model: string, engine: string): Promise<Result<ModelConfig>> {
   try {
     const response = await fetch(`${REMOTE_URL}/v1/fetch-model-config`, {
       method: 'POST',
@@ -51,11 +52,14 @@ async function updateModel(model: string, engine: string): Promise<Result<string
       };
     }
 
-    const data = (await response.json()) as ModelResponse;
+    const data = (await response.json()) as ModelConfigResponse;
 
     if (data.is_supported && data.engine_model) {
-      await cacheStorage.setItem(`${model}_${engine}`, data.engine_model);
-      return { ok: true, value: data.engine_model };
+      await cacheStorage.setItem(
+        `${model}_${engine}`,
+        JSON.stringify({ name: data.engine_model, vram: data.vram })
+      );
+      return { ok: true, value: { name: data.engine_model, vram: data.vram } };
     } else {
       await cacheStorage.setItem(`${model}_${engine}`, null);
       return {
@@ -77,27 +81,61 @@ async function updateModel(model: string, engine: string): Promise<Result<string
   }
 }
 
+interface ModelConfig {
+  name: string;
+  vram?: number;
+}
+
+function isModelConfig(obj: unknown): obj is ModelConfig {
+  return !(
+    obj === null ||
+    typeof obj !== 'object' ||
+    !('name' in obj) ||
+    typeof obj.name !== 'string' ||
+    ('vram' in obj && typeof obj.vram !== 'number')
+  );
+}
+
 /**
  * Checks if a model is supported.
  * - If the model exists in the cache and its timestamp is fresh, return it.
  * - If it exists but is stale (older than 24 hours), trigger a background update (and return the stale mapping).
  * - If it does not exist, update synchronously.
  */
-export async function getEngineModelName(model: string, engine: string): Promise<Result<string>> {
+export async function getEngineModelConfig(
+  model: string,
+  engine: string
+): Promise<Result<ModelConfig>> {
   const now = Date.now();
 
   const cachedEntry = await cacheStorage.getItem(`${model}_${engine}`);
   if (cachedEntry) {
     // If the cached entry is stale, trigger a background update.
     if (now - cachedEntry.lastUpdate > STALE_TIMEOUT_MS) {
-      updateModel(model, engine).catch((err: unknown) => {
+      updateModelConfig(model, engine).catch((err: unknown) => {
         console.warn(`Background update failed for model ${model}:`, String(err));
       });
     }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(cachedEntry.value);
+    } catch {
+      parsed = null;
+    }
+
     // Return the (possibly stale) cached result.
-    return { ok: true, value: cachedEntry.value };
+    return parsed !== null && isModelConfig(parsed)
+      ? { ok: true, value: parsed }
+      : {
+          ok: false,
+          failure: {
+            code: FailureCode.LocalError,
+            description: 'Wrong cache format, try deleting existing cache',
+          },
+        };
   } else {
     // Not in cache, call updateModel synchronously.
-    return await updateModel(model, engine);
+    return await updateModelConfig(model, engine);
   }
 }
