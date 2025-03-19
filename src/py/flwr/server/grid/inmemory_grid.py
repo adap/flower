@@ -26,8 +26,6 @@ from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 
-from .grid import Grid
-
 
 class InMemoryGrid(Grid):
     """`InMemoryGrid` class provides an interface to the ServerAppIo API.

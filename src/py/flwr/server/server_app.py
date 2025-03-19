@@ -26,7 +26,7 @@ from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
 from .compat import start_grid
-from .grid import Grid
+from .grid import Driver, Grid
 from .server import Server
 from .server_config import ServerConfig
 from .typing import ServerAppCallable, ServerFn
