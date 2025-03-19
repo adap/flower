@@ -19,7 +19,7 @@ from typing import Callable
 
 from flwr.common import Context
 
-from .driver import Driver
+from .grid import Driver
 from .serverapp_components import ServerAppComponents
 
 ServerAppCallable = Callable[[Driver, Context], None]

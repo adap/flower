@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 )
 
 from ..superlink.linkstate.linkstate_test import create_res_message
-from .grpc_driver import GrpcDriver
+from .grpc_grid import GrpcDriver
 
 
 class TestGrpcDriver(unittest.TestCase):

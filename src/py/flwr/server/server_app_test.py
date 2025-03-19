@@ -22,7 +22,7 @@ import pytest
 
 from flwr.common import Context, RecordSet
 from flwr.server import ServerApp, ServerConfig
-from flwr.server.driver import Driver
+from flwr.server.grid import Driver
 
 
 def test_server_app_custom_mode() -> None:

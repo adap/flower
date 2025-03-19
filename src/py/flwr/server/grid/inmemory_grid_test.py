@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ from flwr.server.superlink.linkstate import (
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
-from .inmemory_driver import InMemoryDriver
+from .inmemory_grid import InMemoryDriver
 
 
 def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str], int]:
