@@ -22,6 +22,7 @@ from .client_manager import ClientManager as ClientManager
 from .client_manager import SimpleClientManager as SimpleClientManager
 from .compat import LegacyContext as LegacyContext
 from .grid import Driver as Driver
+from .grid import Grid as Grid
 from .history import History as History
 from .server import Server as Server
 from .server_app import ServerApp as ServerApp
@@ -31,6 +32,7 @@ from .serverapp_components import ServerAppComponents as ServerAppComponents
 __all__ = [
     "ClientManager",
     "Driver",
+    "Grid",
     "History",
     "LegacyContext",
     "Server",
