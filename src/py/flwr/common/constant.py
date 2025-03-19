@@ -120,6 +120,9 @@ TIMESTAMP_HEADER = "flwr-timestamp"
 TIMESTAMP_TOLERANCE = 10  # General tolerance for timestamp verification
 SYSTEM_TIME_TOLERANCE = 5  # Allowance for system time drift
 
+# Constants for ParametersRecord
+GC_THRESHOLD = 200_000_000  # 200 MB
+
 
 class MessageType:
     """Message type."""

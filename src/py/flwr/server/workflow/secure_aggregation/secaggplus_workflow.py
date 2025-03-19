@@ -55,7 +55,7 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.compat.legacy_context import LegacyContext
-from flwr.server.driver import Driver
+from flwr.server.grid import Driver
 
 from ..constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD
 from ..constant import Key as WorkflowKey
