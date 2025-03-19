@@ -158,7 +158,7 @@ export class WebllmEngine extends BaseEngine {
                 ok: false,
                 failure: {
                   code: FailureCode.InsufficientRAMError,
-                  description: `Model ${model} requires at least ${modelConfigRes.value.vram} MB to be loaded, but on ${availableRamRes.value} MB are currently available.`,
+                  description: `Model ${model} requires at least ${String(modelConfigRes.value.vram)} MB to be loaded, but on ${String(availableRamRes.value)} MB are currently available.`,
                 },
               };
             }
