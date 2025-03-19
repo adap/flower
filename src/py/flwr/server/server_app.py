@@ -15,6 +15,7 @@
 """Flower ServerApp."""
 
 
+import inspect
 from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Callable, Optional
@@ -41,6 +42,21 @@ SERVER_FN_USAGE_EXAMPLE = """
         )
 
         app = ServerApp(server_fn=server_fn)
+"""
+
+GRID_USAGE_EXAMPLE = """
+                app = ServerApp()
+        
+                @app.main()
+                def main(grid: Grid, context: Context) -> None:
+                    # Your existing ServerApp code ...
+"""
+
+DRIVER_DEPRECATION_MSG = """
+            Using the `Driver` class will be deprecated in future versions of Flower.
+"""
+DRIVER_EXAMPLE_MSG = """
+            Instead, use `Grid` in the signature of your ServerApp. For example:
 """
 
 
@@ -172,6 +188,25 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                     >>>    print("ServerApp running")
                     """,
                 )
+
+            sig = inspect.signature(main_fn)
+            param = list(sig.parameters.values())[0]
+            # Check if parameter name should be updated
+            if param.name == "driver":
+                warn_deprecated_feature_with_example(
+                    deprecation_message=DRIVER_DEPRECATION_MSG,
+                    example_message=DRIVER_EXAMPLE_MSG,
+                    code_example=GRID_USAGE_EXAMPLE,
+                )
+
+            # Check if the type annotation uses the deprecated Driver type
+            if param.annotation is not inspect.Parameter.empty:
+                if param.annotation is Driver:
+                    warn_deprecated_feature_with_example(
+                        deprecation_message=DRIVER_DEPRECATION_MSG,
+                        example_message=DRIVER_EXAMPLE_MSG,
+                        code_example=GRID_USAGE_EXAMPLE,
+                    )
 
             # Register provided function with the ServerApp object
             self._main = main_fn
