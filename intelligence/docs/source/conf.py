@@ -77,15 +77,6 @@ html_baseurl = "https://flower.ai/docs/intelligence/"
 html_theme_options = {
     "light_logo": "fi-light-mode.png",
     "dark_logo": "fi-dark-mode.png",
-        "announcement": "<a href='https://flower.ai/events/flower-ai-summit-2025/'><strong style='color: #f2b705;'>👉 Register now</strong></a> for Flower AI Summit 2025!<br />March 26-27, 🇬🇧 London & Online",
-        "light_css_variables": {
-            "color-announcement-background": "#292f36",
-            "color-announcement-text": "#ffffff"
-        },
-        "dark_css_variables": {
-            "color-announcement-background": "#292f36",
-            "color-announcement-text": "#ffffff"
-        },
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
