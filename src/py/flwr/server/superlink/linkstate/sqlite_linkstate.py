@@ -45,7 +45,7 @@ from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
 from flwr.proto.error_pb2 import Error as ProtoError
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.recordset_pb2 import RecordDict as ProtoRecordSet
 
 # pylint: enable=E0611
 from flwr.server.utils.validator import validate_message

@@ -209,8 +209,8 @@ class RecordDict(TypedDict[str, RecordType]):
             )
 
 
-class RecordSet(RecordDict):
-    """RecordSet is deprecated and will be removed in a future release.
+class RecordDict(RecordDict):
+    """RecordDict is deprecated and will be removed in a future release.
 
     Use :class:`RecordDict` instead.
     """
@@ -218,7 +218,7 @@ class RecordSet(RecordDict):
     def __init__(self, records: dict[str, RecordType] | None = None) -> None:
         log(
             WARN,
-            "The `RecordSet` class has been renamed to `RecordDict` and will "
+            "The `RecordDict` class has been renamed to `RecordDict` and will "
             "be removed in a future release. Please update your code accordingly.",
         )
         super().__init__(records)

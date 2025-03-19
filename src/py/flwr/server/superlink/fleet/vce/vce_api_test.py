@@ -142,9 +142,9 @@ def register_messages_into_state(
         # Construct a Message
         mult_factor = 2024 + i
         getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
-        recordset = getpropertiesins_to_recordset(getproperties_ins)
+        recorddict = getpropertiesins_to_recordset(getproperties_ins)
         message = Message(
-            content=recordset,
+            content=recorddict,
             metadata=Metadata(
                 run_id=run_id,
                 message_id="",

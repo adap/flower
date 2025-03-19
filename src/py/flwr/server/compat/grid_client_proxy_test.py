@@ -235,20 +235,20 @@ class GridClientProxyTestCase(unittest.TestCase):
 
         def generate_replies(messages: Iterable[Message]) -> Iterable[Message]:
             msg = list(messages)[0]
-            recordset = None
+            recorddict = None
             if error_reply:
                 pass
             elif isinstance(res, GetParametersRes):
-                recordset = compat.getparametersres_to_recordset(res, True)
+                recorddict = compat.getparametersres_to_recordset(res, True)
             elif isinstance(res, GetPropertiesRes):
-                recordset = compat.getpropertiesres_to_recordset(res)
+                recorddict = compat.getpropertiesres_to_recorddict(res)
             elif isinstance(res, FitRes):
-                recordset = compat.fitres_to_recordset(res, True)
+                recorddict = compat.fitres_to_recordset(res, True)
             elif isinstance(res, EvaluateRes):
-                recordset = compat.evaluateres_to_recordset(res)
+                recorddict = compat.evaluateres_to_recordset(res)
 
-            if recordset is not None:
-                ret = msg.create_reply(recordset)
+            if recorddict is not None:
+                ret = msg.create_reply(recorddict)
             else:
                 ret = msg.create_error_reply(ERROR_REPLY)
 

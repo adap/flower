@@ -35,7 +35,7 @@ from .record import ConfigsRecord as ConfigsRecord
 from .record import MetricsRecord as MetricsRecord
 from .record import ParametersRecord as ParametersRecord
 from .record import RecordDict as RecordDict
-from .record import RecordSet as RecordSet
+from .record import RecordDict as RecordDict
 from .record import array_from_numpy as array_from_numpy
 from .telemetry import EventType as EventType
 from .telemetry import event as event
@@ -100,7 +100,7 @@ __all__ = [
     "Properties",
     "ReconnectIns",
     "RecordDict",
-    "RecordSet",
+    "RecordDict",
     "Scalar",
     "ServerMessage",
     "Status",

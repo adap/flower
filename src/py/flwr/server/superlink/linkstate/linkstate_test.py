@@ -39,7 +39,7 @@ from flwr.common.typing import RunStatus
 from flwr.proto.message_pb2 import Message, Metadata
 
 # pylint: disable=E0611
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.recordset_pb2 import RecordDict as ProtoRecordSet
 
 # pylint: enable=E0611
 from flwr.server.superlink.linkstate import (

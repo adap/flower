@@ -61,7 +61,7 @@ class Grid(ABC):
 
         Parameters
         ----------
-        content : RecordSet
+        content : RecordDict
             The content for the new message. This holds records that are to be sent
             to the destination node.
         message_type : str

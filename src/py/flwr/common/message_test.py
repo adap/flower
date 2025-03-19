@@ -33,13 +33,13 @@ from .serde_test import RecordMaker
     "content_fn, error_fn, context",
     [
         (
-            lambda maker: maker.recordset(1, 1, 1),
+            lambda maker: maker.recorddict(1, 1, 1),
             None,
             None,
         ),  # check when only content is set
         (None, lambda code: Error(code=code), None),  # check when only error is set
         (
-            lambda maker: maker.recordset(1, 1, 1),
+            lambda maker: maker.recorddict(1, 1, 1),
             lambda code: Error(code=code),
             pytest.raises(ValueError),
         ),  # check when both are set (ERROR)

@@ -227,7 +227,7 @@ class Message:
     ----------
     metadata : Metadata
         A dataclass including information about the message to be executed.
-    content : Optional[RecordSet]
+    content : Optional[RecordDict]
         Holds records either sent by another entity (e.g. sent by the server-side
         logic to a client, or vice-versa) or that will be sent to it.
     error : Optional[Error]
@@ -346,7 +346,7 @@ class Message:
 
         Parameters
         ----------
-        content : RecordSet
+        content : RecordDict
             The content for the reply message.
         ttl : Optional[float] (default: None)
             Time-to-live for this message in seconds. If unset, it will be set based

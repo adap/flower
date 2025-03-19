@@ -32,7 +32,7 @@ from flwr.common.recorddict_compat import (
     evaluateres_to_recordset,
     fitres_to_recordset,
     getparametersres_to_recordset,
-    getpropertiesres_to_recordset,
+    getpropertiesres_to_recorddict,
     recordset_to_evaluateins,
     recordset_to_fitins,
     recordset_to_getparametersins,
@@ -70,18 +70,18 @@ def handle_control_message(message: Message) -> tuple[Optional[Message], int]:
         Number of seconds that the client should disconnect from the server.
     """
     if message.metadata.message_type == "reconnect":
-        # Retrieve ReconnectIns from recordset
-        recordset = message.content
-        seconds = cast(int, recordset.configs_records["config"]["seconds"])
+        # Retrieve ReconnectIns from recorddict
+        recorddict = message.content
+        seconds = cast(int, recorddict.configs_records["config"]["seconds"])
         # Construct ReconnectIns and call _reconnect
         disconnect_msg, sleep_duration = _reconnect(
             ServerMessage.ReconnectIns(seconds=seconds)
         )
-        # Store DisconnectRes in recordset
+        # Store DisconnectRes in recorddict
         reason = cast(int, disconnect_msg.disconnect_res.reason)
-        recordset = RecordDict()
-        recordset.configs_records["config"] = ConfigsRecord({"reason": reason})
-        out_message = message.create_reply(recordset)
+        recorddict = RecordDict()
+        recorddict.configs_records["config"] = ConfigsRecord({"reason": reason})
+        out_message = message.create_reply(recorddict)
         # Return Message and sleep duration
         return out_message, sleep_duration
 
@@ -113,7 +113,7 @@ def handle_legacy_message_from_msgtype(
             client=client,
             get_properties_ins=recordset_to_getpropertiesins(message.content),
         )
-        out_recordset = getpropertiesres_to_recordset(get_properties_res)
+        out_recordset = getpropertiesres_to_recorddict(get_properties_res)
     # Handle GetParametersIns
     elif message_type == MessageTypeLegacy.GET_PARAMETERS:
         get_parameters_res = maybe_call_get_parameters(

@@ -165,7 +165,7 @@ class TestGrpcGrid(unittest.TestCase):
         # Prepare
         mock_response = Mock(message_ids=["id1"])
         self.mock_stub.PushMessages.return_value = mock_response
-        # The response message must include either `content` (i.e. a recordset) or
+        # The response message must include either `content` (i.e. a recorddict) or
         # an `Error`. We choose the latter in this case
         run_id = 1234
         mssg = create_res_message(

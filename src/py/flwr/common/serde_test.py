@@ -34,7 +34,7 @@ from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
 from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.recordset_pb2 import RecordDict as ProtoRecordSet
 from flwr.proto.run_pb2 import Run as ProtoRun
 
 # pylint: enable=E0611
@@ -254,7 +254,7 @@ class RecordMaker:
         num_metrics_records: int,
         num_configs_records: int,
     ) -> RecordDict:
-        """Create a RecordSet."""
+        """Create a RecordDict."""
         ret = RecordDict()
         for _ in range(num_params_records):
             ret[self.get_str()] = self.parameters_record()
@@ -352,7 +352,7 @@ def test_configs_record_serialization_deserialization() -> None:
 
 
 def test_recordset_serialization_deserialization() -> None:
-    """Test serialization and deserialization of RecordSet."""
+    """Test serialization and deserialization of RecordDict."""
     # Prepare
     maker = RecordMaker(state=0)
     original = maker.recorddict(2, 2, 1)
@@ -370,7 +370,7 @@ def test_recordset_serialization_deserialization() -> None:
     "content_fn, error_fn",
     [
         (
-            lambda maker: maker.recordset(1, 1, 1),
+            lambda maker: maker.recorddict(1, 1, 1),
             None,
         ),  # check when only content is set
         (None, lambda code: Error(code=code)),  # check when only error is set

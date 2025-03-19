@@ -41,14 +41,14 @@ class GridClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
-        # Ins to RecordSet
+        # Ins to RecordDict
         out_recordset = compat.getpropertiesins_to_recordset(ins)
         # Fetch response
         in_recordset = self._send_receive_recordset(
             out_recordset, MessageTypeLegacy.GET_PROPERTIES, timeout, group_id
         )
-        # RecordSet to Res
-        return compat.recordset_to_getpropertiesres(in_recordset)
+        # RecordDict to Res
+        return compat.recorddict_to_getpropertiesres(in_recordset)
 
     def get_parameters(
         self,
@@ -57,39 +57,39 @@ class GridClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        # Ins to RecordSet
+        # Ins to RecordDict
         out_recordset = compat.getparametersins_to_recordset(ins)
         # Fetch response
         in_recordset = self._send_receive_recordset(
             out_recordset, MessageTypeLegacy.GET_PARAMETERS, timeout, group_id
         )
-        # RecordSet to Res
+        # RecordDict to Res
         return compat.recordset_to_getparametersres(in_recordset, False)
 
     def fit(
         self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-        # Ins to RecordSet
+        # Ins to RecordDict
         out_recordset = compat.fitins_to_recordset(ins, keep_input=True)
         # Fetch response
         in_recordset = self._send_receive_recordset(
             out_recordset, MessageType.TRAIN, timeout, group_id
         )
-        # RecordSet to Res
+        # RecordDict to Res
         return compat.recordset_to_fitres(in_recordset, keep_input=False)
 
     def evaluate(
         self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-        # Ins to RecordSet
+        # Ins to RecordDict
         out_recordset = compat.evaluateins_to_recordset(ins, keep_input=True)
         # Fetch response
         in_recordset = self._send_receive_recordset(
             out_recordset, MessageType.EVALUATE, timeout, group_id
         )
-        # RecordSet to Res
+        # RecordDict to Res
         return compat.recordset_to_evaluateres(in_recordset)
 
     def reconnect(
@@ -103,7 +103,7 @@ class GridClientProxy(ClientProxy):
 
     def _send_receive_recordset(
         self,
-        recordset: RecordDict,
+        recorddict: RecordDict,
         message_type: str,
         timeout: Optional[float],
         group_id: Optional[int],
@@ -111,7 +111,7 @@ class GridClientProxy(ClientProxy):
 
         # Create message
         message = self.grid.create_message(
-            content=recordset,
+            content=recorddict,
             message_type=message_type,
             dst_node_id=self.node_id,
             group_id=str(group_id) if group_id else "",

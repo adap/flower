@@ -34,7 +34,7 @@ class Context:
     node_config : UserConfig
         A config (key/value mapping) unique to the node and independent of the
         `run_config`. This config persists across all runs this node participates in.
-    state : RecordSet
+    state : RecordDict
         Holds records added by the entity in a given `run_id` and that will stay local.
         This means that the data it holds will never leave the system it's running from.
         This can be used as an intermediate storage or scratchpad when

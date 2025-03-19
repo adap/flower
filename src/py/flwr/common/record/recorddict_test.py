@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""RecordSet tests."""
+"""RecordDict tests."""
 
 
 import pickle
@@ -404,7 +404,7 @@ def test_count_bytes_configsrecord() -> None:
 
 
 def test_record_is_picklable() -> None:
-    """Test if RecordSet and *Record are picklable."""
+    """Test if RecordDict and *Record are picklable."""
     # Prepare
     p_record = ParametersRecord()
     m_record = MetricsRecord({"aa": 123})
@@ -419,7 +419,7 @@ def test_record_is_picklable() -> None:
 
 
 def test_recordset_repr() -> None:
-    """Test the string representation of RecordSet."""
+    """Test the string representation of RecordDict."""
     # Prepare
     rs = RecordDict(
         {
@@ -428,7 +428,7 @@ def test_recordset_repr() -> None:
             "configs": ConfigsRecord({"cc": bytes(5)}),
         },
     )
-    expected = """RecordSet(
+    expected = """RecordDict(
   parameters_records={'params': {}},
   metrics_records={'metrics': {'aa': 123}},
   configs_records={'configs': {'cc': b'\\x00\\x00\\x00\\x00\\x00'}}
@@ -439,7 +439,7 @@ def test_recordset_repr() -> None:
 
 
 def test_recordset_set_get_del_item() -> None:
-    """Test setting, getting, and deleting items in RecordSet."""
+    """Test setting, getting, and deleting items in RecordDict."""
     # Prepare
     rs = RecordDict()
     p_record = ParametersRecord()

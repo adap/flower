@@ -54,7 +54,7 @@ MESSAGE_GET_PROPERTIES = Message(
         ttl=DEFAULT_TTL,
         message_type=MessageTypeLegacy.GET_PROPERTIES,
     ),
-    content=compat.getpropertiesres_to_recordset(
+    content=compat.getpropertiesres_to_recorddict(
         GetPropertiesRes(Status(Code.OK, ""), {})
     ),
 )

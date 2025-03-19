@@ -90,9 +90,9 @@ def _create_message_and_context() -> tuple[Message, Context, float]:
     mult_factor = 2024
     run_id = 0
     getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
-    recordset = getpropertiesins_to_recordset(getproperties_ins)
+    recorddict = getpropertiesins_to_recordset(getproperties_ins)
     message = Message(
-        content=recordset,
+        content=recorddict,
         metadata=Metadata(
             run_id=run_id,
             message_id="",

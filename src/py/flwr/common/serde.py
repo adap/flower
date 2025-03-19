@@ -36,7 +36,7 @@ from flwr.proto.recordset_pb2 import DoubleList
 from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.recordset_pb2 import RecordDict as ProtoRecordSet
 from flwr.proto.recordset_pb2 import SintList, StringList, UintList
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.proto.run_pb2 import RunStatus as ProtoRunStatus
@@ -558,27 +558,27 @@ def error_from_proto(error_proto: ProtoError) -> Error:
     return Error(code=error_proto.code, reason=reason)
 
 
-# === RecordSet message ===
+# === RecordDict message ===
 
 
-def recordset_to_proto(recordset: RecordDict) -> ProtoRecordSet:
-    """Serialize RecordSet to ProtoBuf."""
+def recordset_to_proto(recorddict: RecordDict) -> ProtoRecordSet:
+    """Serialize RecordDict to ProtoBuf."""
     return ProtoRecordSet(
         parameters={
             k: parameters_record_to_proto(v)
-            for k, v in recordset.parameters_records.items()
+            for k, v in recorddict.parameters_records.items()
         },
         metrics={
-            k: metrics_record_to_proto(v) for k, v in recordset.metrics_records.items()
+            k: metrics_record_to_proto(v) for k, v in recorddict.metrics_records.items()
         },
         configs={
-            k: configs_record_to_proto(v) for k, v in recordset.configs_records.items()
+            k: configs_record_to_proto(v) for k, v in recorddict.configs_records.items()
         },
     )
 
 
 def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordDict:
-    """Deserialize RecordSet from ProtoBuf."""
+    """Deserialize RecordDict from ProtoBuf."""
     ret = RecordDict()
     for k, p_record_proto in recordset_proto.parameters.items():
         ret[k] = parameters_record_from_proto(p_record_proto)
