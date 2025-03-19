@@ -28,8 +28,9 @@ import {
   StreamEvent,
   Tool,
 } from '../typing';
+import { getAvailableRAM } from '../env';
 import { BaseEngine } from './engine';
-import { getEngineModelName } from './common/modelName';
+import { getEngineModelConfig } from './common/model';
 
 async function runQuery(
   engine: MLCEngineInterface,
@@ -72,8 +73,8 @@ export class WebllmEngine extends BaseEngine {
     onStreamEvent?: (event: StreamEvent) => void,
     _tools?: Tool[]
   ): Promise<ChatResponseResult> {
-    const modelNameRes = await getEngineModelName(model, 'webllm');
-    if (!modelNameRes.ok) {
+    const modelConfigRes = await getEngineModelConfig(model, 'webllm');
+    if (!modelConfigRes.ok) {
       return {
         ok: false,
         failure: {
@@ -84,7 +85,7 @@ export class WebllmEngine extends BaseEngine {
     }
     try {
       if (!(model in this.#loadedEngines)) {
-        this.#loadedEngines.model = await CreateMLCEngine(modelNameRes.value);
+        this.#loadedEngines.model = await CreateMLCEngine(modelConfigRes.value.name);
       }
       const result = await runQuery(
         this.#loadedEngines.model,
@@ -113,8 +114,8 @@ export class WebllmEngine extends BaseEngine {
   }
 
   async fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>> {
-    const modelNameRes = await getEngineModelName(model, 'webllm');
-    if (!modelNameRes.ok) {
+    const modelConfigRes = await getEngineModelConfig(model, 'webllm');
+    if (!modelConfigRes.ok) {
       return {
         ok: false,
         failure: {
@@ -125,7 +126,7 @@ export class WebllmEngine extends BaseEngine {
     }
     try {
       if (!(model in this.#loadedEngines)) {
-        this.#loadedEngines.model = await CreateMLCEngine(modelNameRes.value, {
+        this.#loadedEngines.model = await CreateMLCEngine(modelConfigRes.value.name, {
           initProgressCallback: (report: InitProgressReport) => {
             callback({ percentage: report.progress, description: report.text });
           },
@@ -141,7 +142,18 @@ export class WebllmEngine extends BaseEngine {
   }
 
   async isSupported(model: string): Promise<boolean> {
-    const modelNameRes = await getEngineModelName(model, 'webllm');
-    return modelNameRes.ok;
+    if (typeof navigator !== 'undefined' && 'gpu' in navigator) {
+      const modelConfigRes = await getEngineModelConfig(model, 'webllm');
+      if (modelConfigRes.ok) {
+        if (modelConfigRes.value.vram) {
+          const availableRamRes = await getAvailableRAM();
+          if (availableRamRes.ok) {
+            return modelConfigRes.value.vram < availableRamRes.value;
+          }
+        }
+        return true;
+      }
+    }
+    return false;
   }
 }
