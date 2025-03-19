@@ -53,10 +53,10 @@ GRID_USAGE_EXAMPLE = """
 """
 
 DRIVER_DEPRECATION_MSG = """
-            Using the `Driver` class will be deprecated in future versions of Flower.
+            The `Driver` class is deprecated, it will be removed in a future release.
 """
 DRIVER_EXAMPLE_MSG = """
-            Instead, use `Grid` in the signature of your ServerApp. For example:
+            Instead, use `Grid` in the signature of your `ServerApp`. For example:
 """
 
 
@@ -70,7 +70,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
     Examples
     --------
-    Use the `ServerApp` with an existing `Strategy`:
+    Use the ``ServerApp`` with an existing ``Strategy``:
 
     >>> def server_fn(context: Context):
     >>>     server_config = ServerConfig(num_rounds=3)
@@ -82,7 +82,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
     >>>
     >>> app = ServerApp(server_fn=server_fn)
 
-    Use the `ServerApp` with a custom main function:
+    Use the ``ServerApp`` with a custom main function:
 
     >>> app = ServerApp()
     >>>

@@ -24,20 +24,20 @@ from flwr.common.typing import Run
 
 
 class Grid(ABC):
-    """Abstract base Grid class for the ServerAppIo API."""
+    """Abstract base class Grid to send/receive messages."""
 
     @abstractmethod
     def set_run(self, run_id: int) -> None:
         """Request a run to the SuperLink with a given `run_id`.
 
-        If a Run with the specified `run_id` exists, a local Run
+        If a ``Run`` with the specified ``run_id`` exists, a local ``Run``
         object will be created. It enables further functionality
-        in the grid, such as sending `Messages`.
+        in the grid, such as sending ``Message``s.
 
         Parameters
         ----------
         run_id : int
-            The `run_id` of the Run this Grid object operates in.
+            The ``run_id`` of the ``Run`` this ``Grid`` object operates in.
         """
 
     @property
@@ -56,8 +56,8 @@ class Grid(ABC):
     ) -> Message:
         """Create a new message with specified parameters.
 
-        This method constructs a new `Message` with given content and metadata.
-        The `run_id` and `src_node_id` will be set automatically.
+        This method constructs a new ``Message`` with given content and metadata.
+        The ``run_id`` and ``src_node_id`` will be set automatically.
 
         Parameters
         ----------
@@ -71,12 +71,12 @@ class Grid(ABC):
             The ID of the destination node to which the message is being sent.
         group_id : str
             The ID of the group to which this message is associated. In some settings,
-            this is used as the FL round.
+            this is used as the federated learning round.
         ttl : Optional[float] (default: None)
             Time-to-live for the round trip of this message, i.e., the time from sending
             this message to receiving a reply. It specifies in seconds the duration for
             which the message and its potential reply are considered valid. If unset,
-            the default TTL (i.e., `common.DEFAULT_TTL`) will be used.
+            the default TTL (i.e., ``common.DEFAULT_TTL``) will be used.
 
         Returns
         -------
@@ -93,7 +93,7 @@ class Grid(ABC):
         """Push messages to specified node IDs.
 
         This method takes an iterable of messages and sends each message
-        to the node specified in `dst_node_id`.
+        to the node specified in ``dst_node_id``.
 
         Parameters
         ----------
@@ -154,24 +154,24 @@ class Grid(ABC):
 
         Notes
         -----
-        This method uses `push_messages` to send the messages and `pull_messages`
-        to collect the replies. If `timeout` is set, the method may not return
+        This method uses ``push_messages`` to send the messages and ``pull_messages``
+        to collect the replies. If ``timeout`` is set, the method may not return
         replies for all sent messages. A message remains valid until its TTL,
-        which is not affected by `timeout`.
+        which is not affected by ``timeout``.
         """
 
 
 class Driver(Grid):
-    """Deprecated abstract base class for the ServerAppIo API.
+    """Deprecated abstract base class ``Driver``, use ``Grid`` instead.
 
     This class is provided solely for backward compatibility with legacy
-    code that previously relied on the `Driver` class. It has been deprecated
-    in favor of the updated abstract base class `Grid`, which now encompasses
+    code that previously relied on the ``Driver`` class. It has been deprecated
+    in favor of the updated abstract base class ``Grid``, which now encompasses
     all communication-related functionality and improvements between the
     ServerApp and the SuperLink.
 
     .. warning::
-        `Driver` is deprecated and will be removed in a future release.
+        ``Driver`` is deprecated and will be removed in a future release.
         Use `Grid` in the signature of your ServerApp.
 
     Examples
