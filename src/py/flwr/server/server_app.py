@@ -46,7 +46,7 @@ SERVER_FN_USAGE_EXAMPLE = """
 
 GRID_USAGE_EXAMPLE = """
                 app = ServerApp()
-        
+
                 @app.main()
                 def main(grid: Grid, context: Context) -> None:
                     # Your existing ServerApp code ...
