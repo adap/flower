@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-16 00:35+0000\n"
+"POT-Creation-Date: 2025-03-19 00:32+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -9382,9 +9382,8 @@ msgid "Flower Built-in Mods."
 msgstr ""
 
 #: flwr.client.client.Client:1 flwr.client.numpy_client.NumPyClient:1
-#: flwr.server.client_manager.ClientManager:1
-#: flwr.server.driver.driver.Driver:1 flwr.server.strategy.strategy.Strategy:1
-#: of
+#: flwr.server.client_manager.ClientManager:1 flwr.server.grid.grid.Driver:1
+#: flwr.server.strategy.strategy.Strategy:1 of
 msgid "Bases: :py:class:`~abc.ABC`"
 msgstr ""
 
@@ -9533,11 +9532,11 @@ msgstr ""
 #: flwr.server.client_manager.SimpleClientManager.register
 #: flwr.server.client_manager.SimpleClientManager.unregister
 #: flwr.server.client_manager.SimpleClientManager.wait_for
-#: flwr.server.driver.driver.Driver.create_message
-#: flwr.server.driver.driver.Driver.pull_messages
-#: flwr.server.driver.driver.Driver.push_messages
-#: flwr.server.driver.driver.Driver.send_and_receive
-#: flwr.server.driver.driver.Driver.set_run
+#: flwr.server.grid.grid.Driver.create_message
+#: flwr.server.grid.grid.Driver.pull_messages
+#: flwr.server.grid.grid.Driver.push_messages
+#: flwr.server.grid.grid.Driver.send_and_receive
+#: flwr.server.grid.grid.Driver.set_run
 #: flwr.server.serverapp_components.ServerAppComponents
 #: flwr.server.strategy.bulyan.Bulyan
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping
@@ -9590,10 +9589,10 @@ msgstr ""
 #: flwr.server.client_manager.SimpleClientManager.num_available
 #: flwr.server.client_manager.SimpleClientManager.register
 #: flwr.server.client_manager.SimpleClientManager.wait_for
-#: flwr.server.driver.driver.Driver.create_message
-#: flwr.server.driver.driver.Driver.pull_messages
-#: flwr.server.driver.driver.Driver.push_messages
-#: flwr.server.driver.driver.Driver.send_and_receive
+#: flwr.server.grid.grid.Driver.create_message
+#: flwr.server.grid.grid.Driver.pull_messages
+#: flwr.server.grid.grid.Driver.push_messages
+#: flwr.server.grid.grid.Driver.send_and_receive
 #: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_evaluate
 #: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_fit
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
@@ -9626,10 +9625,10 @@ msgstr ""
 #: flwr.server.client_manager.SimpleClientManager.num_available
 #: flwr.server.client_manager.SimpleClientManager.register
 #: flwr.server.client_manager.SimpleClientManager.wait_for
-#: flwr.server.driver.driver.Driver.create_message
-#: flwr.server.driver.driver.Driver.pull_messages
-#: flwr.server.driver.driver.Driver.push_messages
-#: flwr.server.driver.driver.Driver.send_and_receive
+#: flwr.server.grid.grid.Driver.create_message
+#: flwr.server.grid.grid.Driver.pull_messages
+#: flwr.server.grid.grid.Driver.push_messages
+#: flwr.server.grid.grid.Driver.send_and_receive
 #: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_evaluate
 #: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_fit
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
@@ -9704,8 +9703,8 @@ msgstr ""
 #: flwr.client.mod.localdp_mod.LocalDpMod:22
 #: flwr.common.record.configsrecord.ConfigsRecord:20
 #: flwr.common.record.metricsrecord.MetricsRecord:19
-#: flwr.common.record.parametersrecord.Array:30
-#: flwr.common.record.parametersrecord.ParametersRecord:22
+#: flwr.common.record.parametersrecord.Array:35
+#: flwr.common.record.parametersrecord.ParametersRecord:35
 #: flwr.common.record.recordset.RecordSet:22 flwr.server.app.start_server:46
 #: flwr.server.server_app.ServerApp:4
 #: flwr.server.server_app.ServerApp.lifespan:7
@@ -10141,7 +10140,7 @@ msgstr ""
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:15
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:13
-#: flwr.server.driver.driver.Driver.send_and_receive:18
+#: flwr.server.grid.grid.Driver.send_and_receive:18
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:54
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:61
 #: of
@@ -10316,7 +10315,7 @@ msgstr ""
 msgid ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.record.conversion_utils.array_from_numpy:1
 #: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1 of
@@ -10667,9 +10666,7 @@ msgid "Model parameters."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-msgid ""
-":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ "
-"\\(\\[array\\_dict\\, keep\\_input\\]\\)"
+msgid ":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ \\(\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
@@ -10727,7 +10724,7 @@ msgstr ""
 msgid ""
 "A dataclass containing serialized data from an array-like or tensor-like "
 "object along with metadata about it. The class can be initialized in one "
-"of two ways:"
+"of three ways:"
 msgstr ""
 
 #: flwr.common.record.parametersrecord.Array:6 of
@@ -10738,68 +10735,95 @@ msgstr ""
 msgid "By providing a NumPy ndarray (via the `ndarray` argument)."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:9 of
+#: flwr.common.record.parametersrecord.Array:8 of
+msgid "By providing a PyTorch tensor (via the `torch_tensor` argument)."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:10 of
 msgid ""
-"In scenario (2), the `dtype`, `shape`, `stype`, and `data` are "
+"In scenarios (2)-(3), the `dtype`, `shape`, `stype`, and `data` are "
 "automatically derived from the input. In scenario (1), these fields must "
 "be specified manually."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:12 of
+#: flwr.common.record.parametersrecord.Array:13 of
 msgid ""
 "A string representing the data type of the serialized object (e.g. "
-"`\"float32\"`). Only required if you are not passing in a ndarray."
+"`\"float32\"`). Only required if you are not passing in a ndarray or a "
+"tensor."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:15 of
+#: flwr.common.record.parametersrecord.Array:16 of
 msgid ""
 "A list representing the shape of the unserialized array-like object. Only"
-" required if you are not passing in a ndarray."
+" required if you are not passing in a ndarray or a tensor."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:18 of
+#: flwr.common.record.parametersrecord.Array:19 of
 msgid ""
 "A string indicating the serialization mechanism used to generate the "
 "bytes in `data` from an array-like or tensor-like object. Only required "
-"if you are not passing in a ndarray."
+"if you are not passing in a ndarray or a tensor."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:22 of
+#: flwr.common.record.parametersrecord.Array:23 of
 msgid ""
 "A buffer of bytes containing the data. Only required if you are not "
-"passing in a ndarray."
+"passing in a ndarray or a tensor."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:25 of
+#: flwr.common.record.parametersrecord.Array:26 of
 msgid ""
 "A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data` "
 "fields are derived automatically from it."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:31 of
+#: flwr.common.record.parametersrecord.Array:29 of
+msgid ""
+"A PyTorch tensor. If provided, it will be **detached and moved to CPU** "
+"before conversion, and the `dtype`, `shape`, `stype`, and `data` fields "
+"will be derived automatically from it."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.Array:36 of
 msgid "Initializing by specifying all fields directly:"
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:40 of
+#: flwr.common.record.parametersrecord.Array:45 of
 msgid "Initializing with a NumPy ndarray:"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
+#: flwr.common.record.parametersrecord.Array:50 of
+msgid "Initializing with a PyTorch tensor:"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
 msgid ""
 ":py:obj:`from_numpy_ndarray <flwr.common.Array.from_numpy_ndarray>`\\ "
 "\\(ndarray\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+msgid ""
+":py:obj:`from_torch_tensor <flwr.common.Array.from_torch_tensor>`\\ "
+"\\(tensor\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: flwr.common.record.parametersrecord.Array.from_torch_tensor:1 of
+msgid "Create Array from PyTorch tensor."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
 msgid ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
 #: flwr.common.record.parametersrecord.Array.numpy:1 of
 msgid "Return the array as a NumPy array."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:31
+#: ../../source/ref-api/flwr.common.Array.rst:34
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:25
 #: ../../source/ref-api/flwr.common.Code.rst:19
 #: ../../source/ref-api/flwr.common.Context.rst:25
@@ -12528,64 +12552,91 @@ msgstr ""
 
 #: flwr.common.record.parametersrecord.ParametersRecord:3 of
 msgid ""
-"A dataclass storing named Arrays in order. This means that it holds "
-"entries as an OrderedDict[str, Array]. ParametersRecord objects can be "
-"viewed as an equivalent to PyTorch's state_dict, but holding serialised "
-"tensors instead. A :code:`ParametersRecord`  is one of the types of "
-"records that a `flwr.common.RecordSet "
-"<flwr.common.RecordSet.html#recordset>`_ supports and can therefore be "
-"used to construct :code:`common.Message` objects."
+"A typed dictionary (``str`` to :class:`Array`) that can store named "
+"parameters as serialized tensors. Internally, this behaves similarly to "
+"an ``OrderedDict[str, Array]``. A ``ParametersRecord`` can be viewed as "
+"an equivalent to PyTorch's ``state_dict``, but it holds arrays in "
+"serialized form."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:10 of
-msgid "A dictionary that stores serialized array-like or tensor-like objects."
+#: flwr.common.record.parametersrecord.ParametersRecord:8 of
+msgid ""
+"This object is one of the record types supported by :class:`RecordSet` "
+"and can therefore be stored in the ``content`` of a :class:`Message` or "
+"the ``state`` of a :class:`Context`."
 msgstr ""
 
 #: flwr.common.record.parametersrecord.ParametersRecord:12 of
-msgid ""
-"A boolean indicating whether parameters should be deleted from the input "
-"dictionary immediately after adding them to the record. If False, the "
-"dictionary passed to `set_parameters()` will be empty once exiting from "
-"that function. This is the desired behaviour when working with very large"
-" models/tensors/arrays. However, if you plan to continue working with "
-"your parameters after adding it to the record, set this flag to True. "
-"When set to True, the data is duplicated in memory."
+msgid "This class can be instantiated in multiple ways:"
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:23 of
-msgid ""
-"The usage of :code:`ParametersRecord` is envisioned for storing data "
-"arrays (e.g. parameters of a machine learning model). These first need to"
-" be serialized into a :code:`flwr.common.Array` data structure."
+#: flwr.common.record.parametersrecord.ParametersRecord:14 of
+msgid "By providing nothing (empty container)."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:27 of
-msgid "Let's see some examples:"
+#: flwr.common.record.parametersrecord.ParametersRecord:15 of
+msgid ""
+"By providing a dictionary of :class:`Array` (via the ``array_dict`` "
+"argument)."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:49 of
+#: flwr.common.record.parametersrecord.ParametersRecord:16 of
 msgid ""
-"Now that the NumPy array is embedded into a :code:`ParametersRecord` it "
-"could be sent if added as part of a :code:`common.Message` or it could be"
-" saved as a persistent state of a :code:`ClientApp` via its context. "
-"Regardless of the usecase, we will sooner or later want to recover the "
-"array in its original NumPy representation. For the example above, where "
-"the array was serialized using the built-in utility function, "
-"deserialization can be done as follows:"
+"By providing a list of NumPy ``ndarray`` (via the ``numpy_ndarrays`` "
+"argument)."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:64 of
+#: flwr.common.record.parametersrecord.ParametersRecord:17 of
 msgid ""
-"If you need finer control on how your arrays are serialized and "
-"deserialized, you can construct :code:`Array` objects directly like this:"
+"By providing a PyTorch ``state_dict`` (via the ``torch_state_dict`` "
+"argument)."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:82 of
+#: flwr.common.record.parametersrecord.ParametersRecord:19 of
 msgid ""
-"Note that different arrays (e.g. from PyTorch, Tensorflow) might require "
-"different serialization mechanism. Howerver, they often support a "
-"conversion to NumPy, therefore allowing to use the same or similar steps "
-"as in the example above."
+"An existing dictionary containing named :class:`Array` instances. If "
+"provided, these entries will be used directly to populate the record."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.ParametersRecord:22 of
+msgid ""
+"A list of NumPy arrays. Each array will be automatically converted into "
+"an :class:`Array` and stored in this record with generated keys."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.ParametersRecord:25 of
+msgid ""
+"A PyTorch ``state_dict`` (``str`` keys to ``torch.Tensor`` values). Each "
+"tensor will be converted into an :class:`Array` and stored in this "
+"record."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.ParametersRecord:28 of
+msgid ""
+"If ``False``, entries from the input are removed after being added to "
+"this record to free up memory. If ``True``, the input remains unchanged. "
+"Regardless of this value, no duplicate memory is used if the input is a "
+"dictionary of :class:`Array`, i.e., ``array_dict``."
+msgstr ""
+
+#: flwr.common.record.parametersrecord.ParametersRecord:36 of
+msgid "Initializing an empty ParametersRecord:"
+msgstr ""
+
+#: flwr.common.record.parametersrecord.ParametersRecord:40 of
+msgid "Initializing with a dictionary of :class:`Array`:"
+msgstr ""
+
+#: flwr.common.record.parametersrecord.ParametersRecord:45 of
+msgid "Initializing with a list of NumPy arrays:"
+msgstr ""
+
+#: flwr.common.record.parametersrecord.ParametersRecord:52 of
+msgid "Initializing with a PyTorch model state_dict:"
+msgstr ""
+
+#: flwr.common.record.parametersrecord.ParametersRecord:58 of
+msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -12594,6 +12645,44 @@ msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 msgid ":py:obj:`count_bytes <flwr.common.ParametersRecord.count_bytes>`\\ \\(\\)"
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+msgid ""
+":py:obj:`from_array_dict "
+"<flwr.common.ParametersRecord.from_array_dict>`\\ \\(array\\_dict\\, "
+"\\*\\[\\, keep\\_input\\]\\)"
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.record.parametersrecord.ParametersRecord.from_array_dict:1 of
+msgid "Create ParametersRecord from a dictionary of :class:`Array`."
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+msgid ""
+":py:obj:`from_numpy_ndarrays "
+"<flwr.common.ParametersRecord.from_numpy_ndarrays>`\\ \\(ndarrays\\, "
+"\\*\\[\\, keep\\_input\\]\\)"
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.record.parametersrecord.ParametersRecord.from_numpy_ndarrays:1
+#: of
+msgid "Create ParametersRecord from a list of NumPy ``ndarray``."
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+msgid ""
+":py:obj:`from_torch_state_dict "
+"<flwr.common.ParametersRecord.from_torch_state_dict>`\\ "
+"\\(state\\_dict\\, \\*\\[\\, ...\\]\\)"
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.record.parametersrecord.ParametersRecord.from_torch_state_dict:1
+#: of
+msgid "Create ParametersRecord from PyTorch ``state_dict``."
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -12620,6 +12709,31 @@ msgstr ""
 msgid ""
 ":py:obj:`setdefault <flwr.common.ParametersRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+msgid ""
+":py:obj:`to_numpy_ndarrays "
+"<flwr.common.ParametersRecord.to_numpy_ndarrays>`\\ \\(\\*\\[\\, "
+"keep\\_input\\]\\)"
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.record.parametersrecord.ParametersRecord.to_numpy_ndarrays:1 of
+msgid "Return the ParametersRecord as a list of NumPy ``ndarray``."
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+msgid ""
+":py:obj:`to_torch_state_dict "
+"<flwr.common.ParametersRecord.to_torch_state_dict>`\\ \\(\\*\\[\\, "
+"keep\\_input\\]\\)"
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.record.parametersrecord.ParametersRecord.to_torch_state_dict:1
+#: of
+msgid "Return the ParametersRecord as a PyTorch ``state_dict``."
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -12898,7 +13012,7 @@ msgid ":py:obj:`Driver <flwr.server.Driver>`\\ \\(\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
-#: flwr.server.driver.driver.Driver:1 of
+#: flwr.server.grid.grid.Driver:1 of
 msgid "Abstract base Driver class for the ServerAppIo API."
 msgstr ""
 
@@ -13099,7 +13213,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.create_message:1 of
+#: flwr.server.grid.grid.Driver.create_message:1 of
 msgid "Create a new message with specified parameters."
 msgstr ""
 
@@ -13108,7 +13222,7 @@ msgid ":py:obj:`get_node_ids <flwr.server.Driver.get_node_ids>`\\ \\(\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.get_node_ids:1 of
+#: flwr.server.grid.grid.Driver.get_node_ids:1 of
 msgid "Get node IDs."
 msgstr ""
 
@@ -13119,7 +13233,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.pull_messages:1 of
+#: flwr.server.grid.grid.Driver.pull_messages:1 of
 msgid "Pull messages based on message IDs."
 msgstr ""
 
@@ -13130,7 +13244,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.push_messages:1 of
+#: flwr.server.grid.grid.Driver.push_messages:1 of
 msgid "Push messages to specified node IDs."
 msgstr ""
 
@@ -13141,7 +13255,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.send_and_receive:1 of
+#: flwr.server.grid.grid.Driver.send_and_receive:1 of
 msgid "Push messages to specified node IDs and pull the reply messages."
 msgstr ""
 
@@ -13150,48 +13264,48 @@ msgid ":py:obj:`set_run <flwr.server.Driver.set_run>`\\ \\(run\\_id\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.set_run:1 of
+#: flwr.server.grid.grid.Driver.set_run:1 of
 msgid "Request a run to the SuperLink with a given `run_id`."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:1:<autosummary>:1 of
+#: flwr.server.grid.grid.Driver.create_message:1:<autosummary>:1 of
 msgid ":py:obj:`run <flwr.server.Driver.run>`\\"
 msgstr ""
 
 #: flwr.server.Driver.run:1
-#: flwr.server.driver.driver.Driver.create_message:1:<autosummary>:1 of
+#: flwr.server.grid.grid.Driver.create_message:1:<autosummary>:1 of
 msgid "Run information."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:3 of
+#: flwr.server.grid.grid.Driver.create_message:3 of
 msgid ""
 "This method constructs a new `Message` with given content and metadata. "
 "The `run_id` and `src_node_id` will be set automatically."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:6 of
+#: flwr.server.grid.grid.Driver.create_message:6 of
 msgid ""
 "The content for the new message. This holds records that are to be sent "
 "to the destination node."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:9 of
+#: flwr.server.grid.grid.Driver.create_message:9 of
 msgid ""
 "The type of the message, defining the action to be executed on the "
 "receiving end."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:12 of
+#: flwr.server.grid.grid.Driver.create_message:12 of
 msgid "The ID of the destination node to which the message is being sent."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:14 of
+#: flwr.server.grid.grid.Driver.create_message:14 of
 msgid ""
 "The ID of the group to which this message is associated. In some "
 "settings, this is used as the FL round."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:17 of
+#: flwr.server.grid.grid.Driver.create_message:17 of
 msgid ""
 "Time-to-live for the round trip of this message, i.e., the time from "
 "sending this message to receiving a reply. It specifies in seconds the "
@@ -13200,62 +13314,62 @@ msgid ""
 "used."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:23 of
+#: flwr.server.grid.grid.Driver.create_message:23 of
 msgid ""
 "**message** -- A new `Message` instance with the specified content and "
 "metadata."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.pull_messages:3 of
+#: flwr.server.grid.grid.Driver.pull_messages:3 of
 msgid ""
 "This method is used to collect messages from the SuperLink that "
 "correspond to a set of given message IDs."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.pull_messages:6 of
+#: flwr.server.grid.grid.Driver.pull_messages:6 of
 msgid "An iterable of message IDs for which reply messages are to be retrieved."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.pull_messages:9 of
+#: flwr.server.grid.grid.Driver.pull_messages:9 of
 msgid "**messages** -- An iterable of messages received."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.push_messages:3 of
+#: flwr.server.grid.grid.Driver.push_messages:3 of
 msgid ""
 "This method takes an iterable of messages and sends each message to the "
 "node specified in `dst_node_id`."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.push_messages:6
-#: flwr.server.driver.driver.Driver.send_and_receive:7 of
+#: flwr.server.grid.grid.Driver.push_messages:6
+#: flwr.server.grid.grid.Driver.send_and_receive:7 of
 msgid "An iterable of messages to be sent."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.push_messages:9 of
+#: flwr.server.grid.grid.Driver.push_messages:9 of
 msgid ""
 "**message_ids** -- An iterable of IDs for the messages that were sent, "
 "which can be used to pull replies."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.send_and_receive:3 of
+#: flwr.server.grid.grid.Driver.send_and_receive:3 of
 msgid ""
 "This method sends a list of messages to their destination node IDs and "
 "then waits for the replies. It continues to pull replies until either all"
 " replies are received or the specified timeout duration is exceeded."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.send_and_receive:9 of
+#: flwr.server.grid.grid.Driver.send_and_receive:9 of
 msgid ""
 "The timeout duration in seconds. If specified, the method will wait for "
 "replies for this duration. If `None`, there is no time limit and the "
 "method will wait until replies for all messages are received."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.send_and_receive:14 of
+#: flwr.server.grid.grid.Driver.send_and_receive:14 of
 msgid "**replies** -- An iterable of reply messages received from the SuperLink."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.send_and_receive:19 of
+#: flwr.server.grid.grid.Driver.send_and_receive:19 of
 msgid ""
 "This method uses `push_messages` to send the messages and `pull_messages`"
 " to collect the replies. If `timeout` is set, the method may not return "
@@ -13263,14 +13377,14 @@ msgid ""
 "which is not affected by `timeout`."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.set_run:3 of
+#: flwr.server.grid.grid.Driver.set_run:3 of
 msgid ""
 "If a Run with the specified `run_id` exists, a local Run object will be "
 "created. It enables further functionality in the driver, such as sending "
 "`Messages`."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.set_run:7 of
+#: flwr.server.grid.grid.Driver.set_run:7 of
 msgid "The `run_id` of the Run this Driver object operates in."
 msgstr ""
 
@@ -27639,7 +27753,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|6423c63301254f07bf93b90f0f627340|"
+msgid "|4586b350eba14c60a377118db345b088|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -27654,7 +27768,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|921b9e2224d8462fba7e9157686102f8|"
+msgid "|14cd96a1aadb4e16b87ba7d9a15a7145|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -27676,7 +27790,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|66ca4b87ee3e495389a0de3504b4cf04|"
+msgid "|c6fb95522f7a4cad910b0dd4c48714e3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -27692,7 +27806,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|eec7936921d14f04885827df45ff1c04|"
+msgid "|6d473f9cc3fe400fb5fbcdde11177250|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -27708,7 +27822,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|36e7408103ee4f158b4e1e835728f86a|"
+msgid "|e2dfc41bbd2a469297964671f6a065b6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -27723,7 +27837,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|b0c827a728c24730b9d61063da20f281|"
+msgid "|5d889cc375d94f758e7cf6a6c777ad58|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -27743,7 +27857,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|77ef7c9994bb4bcca3d1dcda1924bdcd|"
+msgid "|de6c7a9943164f498001e7fffecf2408|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -27758,7 +27872,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|ed58eec163c14d1a8a501bac2511a797|"
+msgid "|419d6b7fd9214ac9a756b608a928bfac|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -27898,7 +28012,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|af8a7f17a37f45948c49f9ab2d2d81d9|"
+msgid "|f69cdf2c229a4090b99e8d3c8010400c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -27922,7 +28036,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|6cc75f03a88d47b4b688da695bce38d5|"
+msgid "|678788e3434c4a91adfbb11320b5f7ea|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -27946,7 +28060,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|fd8d87bd3690448ab443a574ba0f7bff|"
+msgid "|383d325b915449e2a6ce550956a1fb50|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -27969,7 +28083,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|8cae3c4603a746aa99a152e2ecb33b43|"
+msgid "|581fe037e8364291889e459d66dba7de|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -28007,7 +28121,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|57fd4aa1641e458cb6fc78fe1ca31c08|"
+msgid "|91e211659a464c70864b2440158893a1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -28101,7 +28215,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|1b03cf8b3d9845dc960d71eaa08299cc|"
+msgid "|1eb9389cb6ea4e34ae4b98476a69ae90|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -42605,5 +42719,178 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|dd64555e826940ffa0bb245a88fa0aa8|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ "
+#~ "\\(\\[array\\_dict\\, keep\\_input\\]\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A dataclass containing serialized data "
+#~ "from an array-like or tensor-like"
+#~ " object along with metadata about it."
+#~ " The class can be initialized in "
+#~ "one of two ways:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In scenario (2), the `dtype`, `shape`,"
+#~ " `stype`, and `data` are automatically "
+#~ "derived from the input. In scenario "
+#~ "(1), these fields must be specified "
+#~ "manually."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A string representing the data type "
+#~ "of the serialized object (e.g. "
+#~ "`\"float32\"`). Only required if you are"
+#~ " not passing in a ndarray."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A list representing the shape of "
+#~ "the unserialized array-like object. Only"
+#~ " required if you are not passing "
+#~ "in a ndarray."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A string indicating the serialization "
+#~ "mechanism used to generate the bytes "
+#~ "in `data` from an array-like or"
+#~ " tensor-like object. Only required if"
+#~ " you are not passing in a "
+#~ "ndarray."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A buffer of bytes containing the "
+#~ "data. Only required if you are not"
+#~ " passing in a ndarray."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A dataclass storing named Arrays in "
+#~ "order. This means that it holds "
+#~ "entries as an OrderedDict[str, Array]. "
+#~ "ParametersRecord objects can be viewed "
+#~ "as an equivalent to PyTorch's "
+#~ "state_dict, but holding serialised tensors "
+#~ "instead. A :code:`ParametersRecord`  is one"
+#~ " of the types of records that a"
+#~ " `flwr.common.RecordSet "
+#~ "<flwr.common.RecordSet.html#recordset>`_ supports and "
+#~ "can therefore be used to construct "
+#~ ":code:`common.Message` objects."
+#~ msgstr ""
+
+#~ msgid "A dictionary that stores serialized array-like or tensor-like objects."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A boolean indicating whether parameters "
+#~ "should be deleted from the input "
+#~ "dictionary immediately after adding them "
+#~ "to the record. If False, the "
+#~ "dictionary passed to `set_parameters()` will"
+#~ " be empty once exiting from that "
+#~ "function. This is the desired behaviour"
+#~ " when working with very large "
+#~ "models/tensors/arrays. However, if you plan"
+#~ " to continue working with your "
+#~ "parameters after adding it to the "
+#~ "record, set this flag to True. "
+#~ "When set to True, the data is "
+#~ "duplicated in memory."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The usage of :code:`ParametersRecord` is "
+#~ "envisioned for storing data arrays (e.g."
+#~ " parameters of a machine learning "
+#~ "model). These first need to be "
+#~ "serialized into a :code:`flwr.common.Array` "
+#~ "data structure."
+#~ msgstr ""
+
+#~ msgid "Let's see some examples:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Now that the NumPy array is "
+#~ "embedded into a :code:`ParametersRecord` it"
+#~ " could be sent if added as part"
+#~ " of a :code:`common.Message` or it "
+#~ "could be saved as a persistent "
+#~ "state of a :code:`ClientApp` via its "
+#~ "context. Regardless of the usecase, we"
+#~ " will sooner or later want to "
+#~ "recover the array in its original "
+#~ "NumPy representation. For the example "
+#~ "above, where the array was serialized"
+#~ " using the built-in utility function,"
+#~ " deserialization can be done as "
+#~ "follows:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you need finer control on how"
+#~ " your arrays are serialized and "
+#~ "deserialized, you can construct :code:`Array`"
+#~ " objects directly like this:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that different arrays (e.g. from"
+#~ " PyTorch, Tensorflow) might require "
+#~ "different serialization mechanism. Howerver, "
+#~ "they often support a conversion to "
+#~ "NumPy, therefore allowing to use the "
+#~ "same or similar steps as in the"
+#~ " example above."
+#~ msgstr ""
+
+#~ msgid "|6423c63301254f07bf93b90f0f627340|"
+#~ msgstr ""
+
+#~ msgid "|921b9e2224d8462fba7e9157686102f8|"
+#~ msgstr ""
+
+#~ msgid "|66ca4b87ee3e495389a0de3504b4cf04|"
+#~ msgstr ""
+
+#~ msgid "|eec7936921d14f04885827df45ff1c04|"
+#~ msgstr ""
+
+#~ msgid "|36e7408103ee4f158b4e1e835728f86a|"
+#~ msgstr ""
+
+#~ msgid "|b0c827a728c24730b9d61063da20f281|"
+#~ msgstr ""
+
+#~ msgid "|77ef7c9994bb4bcca3d1dcda1924bdcd|"
+#~ msgstr ""
+
+#~ msgid "|ed58eec163c14d1a8a501bac2511a797|"
+#~ msgstr ""
+
+#~ msgid "|af8a7f17a37f45948c49f9ab2d2d81d9|"
+#~ msgstr ""
+
+#~ msgid "|6cc75f03a88d47b4b688da695bce38d5|"
+#~ msgstr ""
+
+#~ msgid "|fd8d87bd3690448ab443a574ba0f7bff|"
+#~ msgstr ""
+
+#~ msgid "|8cae3c4603a746aa99a152e2ecb33b43|"
+#~ msgstr ""
+
+#~ msgid "|57fd4aa1641e458cb6fc78fe1ca31c08|"
+#~ msgstr ""
+
+#~ msgid "|1b03cf8b3d9845dc960d71eaa08299cc|"
 #~ msgstr ""
 
