@@ -222,8 +222,22 @@ export class FlowerIntelligence {
   }
 
   private getOrCreateRemoteEngine(localFailure?: Result<Engine>): Result<Engine> {
-    if (localFailure && !FlowerIntelligence.#remoteHandoff && !FlowerIntelligence.#apiKey) {
-      return localFailure;
+    if (
+      localFailure &&
+      !localFailure.ok &&
+      (!FlowerIntelligence.#remoteHandoff || !FlowerIntelligence.#apiKey)
+    ) {
+      let description = localFailure.failure.description;
+      description += FlowerIntelligence.#remoteHandoff
+        ? '\nAnd no valid API key was provided for Remote Handoff.'
+        : '\nAnd Remote Handoff was not enabled (with a valid API key).';
+      return {
+        ok: false,
+        failure: {
+          code: FailureCode.NoLocalProviderError,
+          description,
+        },
+      };
     }
     if (!FlowerIntelligence.#remoteHandoff) {
       return {
