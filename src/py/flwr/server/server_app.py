@@ -25,8 +25,8 @@ from flwr.common.logger import warn_deprecated_feature_with_example
 from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
-from .compat import start_driver
-from .grid import Driver
+from .compat import start_grid
+from .grid import Driver, Grid
 from .server import Server
 from .server_config import ServerConfig
 from .typing import ServerAppCallable, ServerFn
@@ -87,7 +87,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
     >>> app = ServerApp()
     >>>
     >>> @app.main()
-    >>> def main(driver: Driver, context: Context) -> None:
+    >>> def main(grid: Grid, context: Context) -> None:
     >>>    print("ServerApp running")
     """
 
@@ -127,7 +127,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         self._main: Optional[ServerAppCallable] = None
         self._lifespan = _empty_lifespan
 
-    def __call__(self, driver: Driver, context: Context) -> None:
+    def __call__(self, grid: Grid, context: Context) -> None:
         """Execute `ServerApp`."""
         with self._lifespan(context):
             # Compatibility mode
@@ -139,17 +139,17 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                     self._config = components.config
                     self._strategy = components.strategy
                     self._client_manager = components.client_manager
-                start_driver(
+                start_grid(
                     server=self._server,
                     config=self._config,
                     strategy=self._strategy,
                     client_manager=self._client_manager,
-                    driver=driver,
+                    grid=grid,
                 )
                 return
 
             # New execution mode
-            self._main(driver, context)
+            self._main(grid, context)
 
     def main(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
         """Return a decorator that registers the main fn with the server app.
@@ -159,7 +159,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         >>> app = ServerApp()
         >>>
         >>> @app.main()
-        >>> def main(driver: Driver, context: Context) -> None:
+        >>> def main(grid: Grid, context: Context) -> None:
         >>>    print("ServerApp running")
         """
 
@@ -184,7 +184,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                     >>> app = ServerApp()
                     >>>
                     >>> @app.main()
-                    >>> def main(driver: Driver, context: Context) -> None:
+                    >>> def main(grid: Grid, context: Context) -> None:
                     >>>    print("ServerApp running")
                     """,
                 )

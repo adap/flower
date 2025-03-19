@@ -60,7 +60,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsResponse,
     PushServerAppOutputsRequest,
 )
-from flwr.server.grid.grpc_grid import GrpcDriver
+from flwr.server.grid.grpc_grid import GrpcGrid
 from flwr.server.run_serverapp import run as run_
 
 
@@ -106,7 +106,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
-    driver = GrpcDriver(
+    grid = GrpcGrid(
         serverappio_service_address=serverappio_api_address,
         root_certificates=certificates,
     )
@@ -123,7 +123,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             # Pull ServerAppInputs from LinkState
             req = PullServerAppInputsRequest()
             log(DEBUG, "[flwr-serverapp] Pull ServerAppInputs")
-            res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
+            res: PullServerAppInputsResponse = grid._stub.PullServerAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)
                 run_status = None
@@ -135,14 +135,14 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
 
             hash_run_id = get_sha256_hash(run.run_id)
 
-            driver.set_run(run.run_id)
+            grid.set_run(run.run_id)
 
             # Start log uploader for this run
             log_uploader = start_log_uploader(
                 log_queue=log_queue,
                 node_id=0,
                 run_id=run.run_id,
-                stub=driver._stub,
+                stub=grid._stub,
             )
 
             log(DEBUG, "[flwr-serverapp] Start FAB installation.")
@@ -173,7 +173,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
 
             # Change status to Running
             run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
-            driver._stub.UpdateRunStatus(
+            grid._stub.UpdateRunStatus(
                 UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
             )
 
@@ -182,9 +182,9 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                 event_details={"run-id-hash": hash_run_id},
             )
 
-            # Load and run the ServerApp with the Driver
+            # Load and run the ServerApp with the Grid
             updated_context = run_(
-                driver=driver,
+                grid=grid,
                 server_app_dir=app_path,
                 server_app_attr=server_app_attr,
                 context=context,
@@ -196,7 +196,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             out_req = PushServerAppOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )
-            _ = driver._stub.PushServerAppOutputs(out_req)
+            _ = grid._stub.PushServerAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
         except RunNotRunningException:
@@ -221,7 +221,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             # Update run status
             if run_status:
                 run_status_proto = run_status_to_proto(run_status)
-                driver._stub.UpdateRunStatus(
+                grid._stub.UpdateRunStatus(
                     UpdateRunStatusRequest(
                         run_id=run.run_id, run_status=run_status_proto
                     )
