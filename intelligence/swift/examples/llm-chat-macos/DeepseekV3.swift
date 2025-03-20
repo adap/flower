@@ -17,6 +17,7 @@ import Foundation
 import MLX
 import MLXLLM
 import MLXLMCommon
+import MLXNN
 
 struct DeepseekV3Configuration: Codable, Sendable {
   var modelType: String = "deepseek_v3"
@@ -117,14 +118,14 @@ struct DeepseekV3Configuration: Codable, Sendable {
 }
 
 func yarnFindCorrectionDim(
-  numRotations: Double, dim: Double, base: Double = 10000, maxPositionEmbeddings: Double = 2048
-) -> Double {
-  return (dim * log(maxPositionEmbeddings / (numRotations * 2 * Double.pi))) / (2 * log(base))
+  numRotations: Float, dim: Float, base: Float = 10000, maxPositionEmbeddings: Float = 2048
+) -> Float {
+  return (dim * log(maxPositionEmbeddings / (numRotations * 2 * Float.pi))) / (2 * log(base))
 }
 
 func yarnFindCorrectionRange(
-  lowRot: Double, highRot: Double, dim: Double, base: Double = 10000,
-  maxPositionEmbeddings: Double = 2048
+  lowRot: Float, highRot: Float, dim: Float, base: Float = 10000,
+  maxPositionEmbeddings: Float = 2048
 ) -> (Int, Int) {
   let low = Int(
     floor(
@@ -137,12 +138,31 @@ func yarnFindCorrectionRange(
   return (max(low, 0), min(high, Int(dim - 1)))
 }
 
-func yarnGetMScale(scale: Double = 1, mscale: Double = 1) -> Double {
+func yarnGetMScale(scale: Float = 1, mscale: Float = 1) -> Float {
   return scale <= 1 ? 1.0 : 0.1 * mscale * log(scale) + 1.0
 }
 
-func yarnLinearRampMask(minVal: Double, maxVal: Double, dim: Int) -> MLXArray {
+func yarnLinearRampMask(minVal: Float, maxVal: Float, dim: Int) -> MLXArray {
   let updatedMaxVal = minVal == maxVal ? maxVal + 0.001 : maxVal
   let linearFunc = (MLXArray(0..<dim) - minVal) / (updatedMaxVal - minVal)
   return clip(linearFunc, min: 0, max: 1)
+}
+
+class DeepseekV3YarnRotaryEmbedding: Module {
+  var mscale: Float
+  init(
+    dim: Int,
+    maxPositionEmbeddings: Int = 2048,
+    base: Float = 10000,
+    scalingFactor: Float = 1.0,
+    originalMaxPositionEmbeddings: Int = 4096,
+    betaFast: Float = 32,
+    betaSlow: Float = 1,
+    mscale: Float = 1,
+    mscaleAllDim: Float = 0
+  ) {
+    self.mscale =
+      yarnGetMScale(scale: scalingFactor, mscale: mscale)
+      / yarnGetMScale(scale: scalingFactor, mscale: mscaleAllDim)
+  }
 }
