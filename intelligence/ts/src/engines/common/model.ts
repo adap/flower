@@ -46,8 +46,10 @@ async function updateModelConfig(model: string, engine: string): Promise<Result<
       return {
         ok: false,
         failure: {
-          code: FailureCode.RemoteError,
-          description: `Remote call failed: ${response.statusText}`,
+          code: FailureCode.LocalEngineModelConfigFetchError,
+          description:
+            `Fetching model config failed with: ${response.statusText}\n` +
+            'See more information at: https://flower.ai/docs/intelligence/ts-api-ref/enumerations/FailureCode.html#localenginemodelconfigfetcherror',
         },
       };
     }
@@ -66,7 +68,9 @@ async function updateModelConfig(model: string, engine: string): Promise<Result<
         ok: false,
         failure: {
           code: FailureCode.UnsupportedModelError,
-          description: `Model '${model}' is not supported on the ${engine} engine.`,
+          description:
+            `Model '${model}' is not supported on the ${engine} engine.\n` +
+            'See more information at: https://flower.ai/docs/intelligence/ts-api-ref/enumerations/FailureCode.html#UnsupportedModelError',
         },
       };
     }
@@ -74,8 +78,8 @@ async function updateModelConfig(model: string, engine: string): Promise<Result<
     return {
       ok: false,
       failure: {
-        code: FailureCode.ConnectionError,
-        description: `Error calling remote endpoint: ${String(error)}`,
+        code: FailureCode.LocalEngineModelConfigFetchError,
+        description: `Error calling model config endpoint: ${String(error)}`,
       },
     };
   }
@@ -130,8 +134,10 @@ export async function getEngineModelConfig(
       : {
           ok: false,
           failure: {
-            code: FailureCode.LocalError,
-            description: 'Wrong cache format, try deleting existing cache',
+            code: FailureCode.LocalCacheError,
+            description:
+              'Wrong cache format, try deleting existing cache.\n' +
+              'See more information at: https://flower.ai/docs/intelligence/ts-api-ref/enumerations/FailureCode.html#localcacheerror',
           },
         };
   } else {

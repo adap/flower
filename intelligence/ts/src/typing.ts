@@ -146,6 +146,15 @@ export enum FailureCode {
   LocalError = 100,
 
   /**
+   * Indicates an error related to the local cache of the model config.
+   * This might be caused by an incorrect cache format, it is recommended to
+   * clear the cache in this case. For a desktop application, the cache files
+   * can be found in `~/.flwr/cache/`, for a web application, the cache can be
+   * cleared inside the browser.
+   */
+  LocalCacheError = 100,
+
+  /**
    * Indicates a chat error coming from a local engine.
    */
   LocalEngineChatError,
@@ -154,6 +163,12 @@ export enum FailureCode {
    * Indicates a fetch error coming from a local engine.
    */
   LocalEngineFetchError,
+
+  /**
+   * Indicates a generic server error while requesting the
+   * model configuration for running a local model (when it isn't cached or stale).
+   */
+  LocalEngineModelConfigFetchError,
 
   /**
    * Indicates an missing provider for a local model.
