@@ -249,7 +249,10 @@ class GridClientProxyTestCase(unittest.TestCase):
             elif isinstance(res, EvaluateRes):
                 recorddict = compat.evaluateres_to_recorddict(res)
 
-            ret = Message(recorddict if recorddict is not None else ERROR_REPLY, reply_to=msg)
+            if recorddict is not None:
+                ret = Message(recorddict, reply_to=msg)
+            else:
+                ret = Message(ERROR_REPLY, reply_to=msg)
 
             # Reply messages given the push message
             return [ret]

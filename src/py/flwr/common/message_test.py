@@ -251,16 +251,16 @@ def test_create_ins_message_success(
     # Execute
     if use_keyword:
         msg = Message(
-            content=RecordSet(),
+            content=RecordDict(),
             dst_node_id=123,
             message_type="query",
             **kwargs,  # type: ignore
         )
     else:
-        msg = Message(RecordSet(), 123, "query", **kwargs)  # type: ignore
+        msg = Message(RecordDict(), 123, "query", **kwargs)  # type: ignore
 
     # Assert
-    assert msg.has_content() and msg.content == RecordSet()
+    assert msg.has_content() and msg.content == RecordDict()
     assert msg.metadata.dst_node_id == 123
     assert msg.metadata.message_type == "query"
     assert msg.metadata.ttl == (ttl or DEFAULT_TTL)
@@ -274,14 +274,14 @@ def test_create_ins_message_success(
 
 @pytest.mark.parametrize(
     "content_or_error,ttl",
-    product([RecordSet(), Error(0)], [None, 10.0, 20]),
+    product([RecordDict(), Error(0)], [None, 10.0, 20]),
 )
 def test_create_reply_message_success(
-    content_or_error: Union[RecordSet, Error], ttl: Optional[float]
+    content_or_error: Union[RecordDict, Error], ttl: Optional[float]
 ) -> None:
     """Test creating a reply message."""
     # Prepare
-    msg = make_message(content=RecordSet(), metadata=RecordMaker(1).metadata())
+    msg = make_message(content=RecordDict(), metadata=RecordMaker(1).metadata())
     current_time = msg.metadata.created_at
 
     # Execute
@@ -300,7 +300,7 @@ def test_create_reply_message_success(
     )
     assert reply.metadata.message_type == msg.metadata.message_type
     assert reply.metadata.message_id == ""  # Should be unset
-    if isinstance(content_or_error, RecordSet):
+    if isinstance(content_or_error, RecordDict):
         assert reply.has_content()
     else:
         assert reply.has_error()
@@ -312,25 +312,28 @@ def test_create_reply_message_success(
         # Pass Error instead of content
         ((Error(0), 123, "query"), {}),
         # Too many positional args
-        ((RecordSet(), 123, "query", 123), {}),
+        ((RecordDict(), 123, "query", 123), {}),
         # Too few positional args
-        ((RecordSet(),), {}),
-        ((RecordSet(), 123), {}),
+        ((RecordDict(),), {}),
+        ((RecordDict(), 123), {}),
         # Use keyword args when positional args are set
-        ((RecordSet(), 123, "query"), {"content": RecordSet()}),
-        ((RecordSet(), 123, "query"), {"dst_node_id": 123}),
-        ((RecordSet(), 123, "query"), {"message_type": "query"}),
+        ((RecordDict(), 123, "query"), {"content": RecordDict()}),
+        ((RecordDict(), 123, "query"), {"dst_node_id": 123}),
+        ((RecordDict(), 123, "query"), {"message_type": "query"}),
         # Use keyword args not allowed
-        ((RecordSet(), 123, "query"), {"metadata": RecordMaker(1).metadata()}),
-        ((RecordSet(), 123, "query"), {"error": Error(0)}),
-        ((RecordSet(), 123, "query"), {"reply_to": Message(RecordSet(), 123, "query")}),
+        ((RecordDict(), 123, "query"), {"metadata": RecordMaker(1).metadata()}),
+        ((RecordDict(), 123, "query"), {"error": Error(0)}),
+        (
+            (RecordDict(), 123, "query"),
+            {"reply_to": Message(RecordDict(), 123, "query")},
+        ),
         # Use invalid arg types
         (("wrong type", 123, "query"), {}),
-        ((RecordSet(), "wrong type", "query"), {}),
-        ((RecordSet(), 123, 456), {}),
-        ((RecordSet(), 123, "query"), {"ttl": "wrong type"}),
-        ((RecordSet(), 123, "query"), {"group_id": 123}),
-        ((RecordSet(), 123, "query"), {"group_id": 123.0}),
+        ((RecordDict(), "wrong type", "query"), {}),
+        ((RecordDict(), 123, 456), {}),
+        ((RecordDict(), 123, "query"), {"ttl": "wrong type"}),
+        ((RecordDict(), 123, "query"), {"group_id": 123}),
+        ((RecordDict(), 123, "query"), {"group_id": 123.0}),
     ],
 )
 def test_create_ins_message_failure(args: Any, kwargs: dict[str, Any]) -> None:
@@ -344,33 +347,33 @@ def test_create_ins_message_failure(args: Any, kwargs: dict[str, Any]) -> None:
     "args,kwargs",
     [
         # Too many positional args
-        ((RecordSet(), 123), {}),
+        ((RecordDict(), 123), {}),
         ((Error(0), 123), {}),
         # Too few positional args
         ((), {}),
         # Use keyword args when positional args are set
-        ((RecordSet(),), {"content": RecordSet()}),
+        ((RecordDict(),), {"content": RecordDict()}),
         ((Error(0),), {"error": Error(0)}),
         # Use keyword args not allowed
-        ((RecordSet(),), {"metadata": RecordMaker(1).metadata()}),
+        ((RecordDict(),), {"metadata": RecordMaker(1).metadata()}),
         ((Error(0),), {"metadata": RecordMaker(1).metadata()}),
-        ((RecordSet(),), {"dst_node_id": 123}),
+        ((RecordDict(),), {"dst_node_id": 123}),
         ((Error(0),), {"dst_node_id": 123}),
-        ((RecordSet(),), {"message_type": "query"}),
+        ((RecordDict(),), {"message_type": "query"}),
         ((Error(0),), {"message_type": "query"}),
-        ((RecordSet(),), {"group_id": "group_xyz"}),
+        ((RecordDict(),), {"group_id": "group_xyz"}),
         ((Error(0),), {"group_id": "group_xyz"}),
         # Use invalid arg types
         (("wrong type",), {}),
         ((123,), {}),
-        ((RecordSet(),), {"ttl": "wrong type"}),
+        ((RecordDict(),), {"ttl": "wrong type"}),
         ((Error(0),), {"ttl": "wrong type"}),
     ],
 )
 def test_create_reply_message_failure(args: Any, kwargs: dict[str, Any]) -> None:
     """Test creating a reply message with error."""
     # Prepare
-    msg = make_message(content=RecordSet(), metadata=RecordMaker(1).metadata())
+    msg = make_message(content=RecordDict(), metadata=RecordMaker(1).metadata())
 
     # Execute
     with pytest.raises(MessageInitializationError):

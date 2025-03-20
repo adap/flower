@@ -30,8 +30,8 @@ from .record import RecordDict
 DEFAULT_TTL = 43200  # This is 12 hours
 MESSAGE_INIT_ERROR_MESSAGE = (
     "Invalid arguments for Message. Expected one of the documented "
-    "signatures: Message(content: RecordSet, dst_node_id: int, message_type: str,"
-    " *, [ttl: float, group_id: str]) or Message(content: RecordSet | error: Error,"
+    "signatures: Message(content: RecordDict, dst_node_id: int, message_type: str,"
+    " *, [ttl: float, group_id: str]) or Message(content: RecordDict | error: Error,"
     " *, reply_to: Message, [ttl: float])."
 )
 
@@ -272,7 +272,7 @@ class Message:
     @overload
     def __init__(  # pylint: disable=too-many-arguments  # noqa: E704
         self,
-        content: RecordSet,
+        content: RecordDict,
         dst_node_id: int,
         message_type: str,
         *,
@@ -282,7 +282,7 @@ class Message:
 
     @overload
     def __init__(  # noqa: E704
-        self, content: RecordSet, *, reply_to: Message, ttl: float | None = None
+        self, content: RecordDict, *, reply_to: Message, ttl: float | None = None
     ) -> None: ...
 
     @overload
@@ -340,7 +340,7 @@ class Message:
             # Check arguments
             # `content`, `dst_node_id` and `message_type` must be set
             if not (
-                isinstance(content, RecordSet)
+                isinstance(content, RecordDict)
                 and isinstance(dst_node_id, int)
                 and isinstance(message_type, str)
             ):
@@ -510,7 +510,7 @@ class Message:
 
 
 def make_message(
-    metadata: Metadata, content: RecordSet | None = None, error: Error | None = None
+    metadata: Metadata, content: RecordDict | None = None, error: Error | None = None
 ) -> Message:
     """Create a message with the provided metadata, content, and error."""
     return Message(metadata=metadata, content=content, error=error)  # type: ignore
@@ -540,11 +540,11 @@ def _limit_reply_ttl(
 
 def _extract_positional_args(
     *args: Any,
-    content: RecordSet | None,
+    content: RecordDict | None,
     error: Error | None,
     dst_node_id: int | None,
     message_type: str | None,
-) -> tuple[RecordSet | None, Error | None, int | None, str | None]:
+) -> tuple[RecordDict | None, Error | None, int | None, str | None]:
     """Extract positional arguments for the `Message` constructor."""
     content_or_error = args[0] if args else None
     if len(args) > 1:
@@ -564,7 +564,7 @@ def _extract_positional_args(
 
     # Set `content` or `error` based on `content_or_error`
     if content_or_error is not None:  # This means `content` and `error` are None
-        if isinstance(content_or_error, RecordSet):
+        if isinstance(content_or_error, RecordDict):
             content = content_or_error
         elif isinstance(content_or_error, Error):
             error = content_or_error
@@ -576,7 +576,7 @@ def _extract_positional_args(
 def _check_arg_types(  # pylint: disable=too-many-arguments, R0917
     dst_node_id: int | None = None,
     message_type: str | None = None,
-    content: RecordSet | None = None,
+    content: RecordDict | None = None,
     error: Error | None = None,
     ttl: float | None = None,
     group_id: str | None = None,
@@ -588,7 +588,7 @@ def _check_arg_types(  # pylint: disable=too-many-arguments, R0917
     if (
         (dst_node_id is None or isinstance(dst_node_id, int))
         and (message_type is None or isinstance(message_type, str))
-        and (content is None or isinstance(content, RecordSet))
+        and (content is None or isinstance(content, RecordDict))
         and (error is None or isinstance(error, Error))
         and (ttl is None or isinstance(ttl, (int, float)))
         and (group_id is None or isinstance(group_id, str))
