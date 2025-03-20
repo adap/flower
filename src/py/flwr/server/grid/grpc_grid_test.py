@@ -22,7 +22,7 @@ from unittest.mock import Mock, patch
 import grpc
 
 from flwr.common import DEFAULT_TTL, RecordSet
-from flwr.common.message import Error
+from flwr.common.message import Error, Message
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
@@ -95,10 +95,7 @@ class TestGrpcGrid(unittest.TestCase):
         # Prepare
         mock_response = Mock(message_ids=["id1", "id2"])
         self.mock_stub.PushMessages.return_value = mock_response
-        msgs = [
-            self.grid.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)
-            for _ in range(2)
-        ]
+        msgs = [Message(RecordSet(), 0, "query") for _ in range(2)]
 
         # Execute
         msg_ids = self.grid.push_messages(msgs)
@@ -118,12 +115,9 @@ class TestGrpcGrid(unittest.TestCase):
         # Prepare
         mock_response = Mock(message_ids=["id1", "id2"])
         self.mock_stub.PushMessages.return_value = mock_response
-        msgs = [
-            self.grid.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)
-            for _ in range(2)
-        ]
+        msgs = [Message(RecordSet(), 0, "query") for _ in range(2)]
         # Use invalid run_id
-        msgs[1].metadata.__dict__["_run_id"] += 1  # pylint: disable=protected-access
+        msgs[1].metadata.__dict__["_message_id"] = "invalid message id"
 
         # Execute and assert
         with self.assertRaises(ValueError):
