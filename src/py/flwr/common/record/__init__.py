@@ -15,7 +15,7 @@
 """Record APIs."""
 
 
-from .arrayrecord import Array, ArrayRecord
+from .arrayrecord import Array, ArrayRecord, ParametersRecord
 from .configsrecord import ConfigsRecord
 from .conversion_utils import array_from_numpy
 from .metricsrecord import MetricsRecord
@@ -26,6 +26,7 @@ __all__ = [
     "ArrayRecord",
     "ConfigsRecord",
     "MetricsRecord",
+    "ParametersRecord",
     "RecordDict",
     "RecordSet",
     "array_from_numpy",
