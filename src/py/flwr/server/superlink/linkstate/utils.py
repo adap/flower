@@ -31,7 +31,7 @@ from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Context as ProtoContext
-from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
+from flwr.proto.recorddict_pb2 import ConfigsRecord as ProtoConfigsRecord
 
 # pylint: enable=E0611
 

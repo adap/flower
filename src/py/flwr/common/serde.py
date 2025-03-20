@@ -28,16 +28,16 @@ from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata
-from flwr.proto.recordset_pb2 import Array as ProtoArray
-from flwr.proto.recordset_pb2 import BoolList, BytesList
-from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
-from flwr.proto.recordset_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
-from flwr.proto.recordset_pb2 import DoubleList
-from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
-from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
-from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
-from flwr.proto.recordset_pb2 import SintList, StringList, UintList
+from flwr.proto.recorddict_pb2 import Array as ProtoArray
+from flwr.proto.recorddict_pb2 import BoolList, BytesList
+from flwr.proto.recorddict_pb2 import ConfigsRecord as ProtoConfigsRecord
+from flwr.proto.recorddict_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
+from flwr.proto.recorddict_pb2 import DoubleList
+from flwr.proto.recorddict_pb2 import MetricsRecord as ProtoMetricsRecord
+from flwr.proto.recorddict_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
+from flwr.proto.recorddict_pb2 import ParametersRecord as ProtoParametersRecord
+from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
+from flwr.proto.recorddict_pb2 import SintList, StringList, UintList
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.proto.run_pb2 import RunStatus as ProtoRunStatus
 from flwr.proto.transport_pb2 import (
@@ -561,9 +561,9 @@ def error_from_proto(error_proto: ProtoError) -> Error:
 # === RecordDict message ===
 
 
-def recorddict_to_proto(recorddict: RecordDict) -> ProtoRecordSet:
+def recorddict_to_proto(recorddict: RecordDict) -> ProtoRecordDict:
     """Serialize RecordDict to ProtoBuf."""
-    return ProtoRecordSet(
+    return ProtoRecordDict(
         parameters={
             k: parameters_record_to_proto(v)
             for k, v in recorddict.parameters_records.items()
@@ -577,14 +577,14 @@ def recorddict_to_proto(recorddict: RecordDict) -> ProtoRecordSet:
     )
 
 
-def recorddict_from_proto(recordset_proto: ProtoRecordSet) -> RecordDict:
+def recorddict_from_proto(recorddict_proto: ProtoRecordDict) -> RecordDict:
     """Deserialize RecordDict from ProtoBuf."""
     ret = RecordDict()
-    for k, p_record_proto in recordset_proto.parameters.items():
+    for k, p_record_proto in recorddict_proto.parameters.items():
         ret[k] = parameters_record_from_proto(p_record_proto)
-    for k, m_record_proto in recordset_proto.metrics.items():
+    for k, m_record_proto in recorddict_proto.metrics.items():
         ret[k] = metrics_record_from_proto(m_record_proto)
-    for k, c_record_proto in recordset_proto.configs.items():
+    for k, c_record_proto in recorddict_proto.configs.items():
         ret[k] = configs_record_from_proto(c_record_proto)
     return ret
 

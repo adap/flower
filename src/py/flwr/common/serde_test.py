@@ -30,11 +30,11 @@ from flwr.proto import transport_pb2 as pb2
 from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
-from flwr.proto.recordset_pb2 import Array as ProtoArray
-from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
-from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
-from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.recorddict_pb2 import Array as ProtoArray
+from flwr.proto.recorddict_pb2 import ConfigsRecord as ProtoConfigsRecord
+from flwr.proto.recorddict_pb2 import MetricsRecord as ProtoMetricsRecord
+from flwr.proto.recorddict_pb2 import ParametersRecord as ProtoParametersRecord
+from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.proto.run_pb2 import Run as ProtoRun
 
 # pylint: enable=E0611
@@ -362,7 +362,7 @@ def test_recorddict_serialization_deserialization() -> None:
     deserialized = recorddict_from_proto(proto)
 
     # Assert
-    assert isinstance(proto, ProtoRecordSet)
+    assert isinstance(proto, ProtoRecordDict)
     assert original == deserialized
 
 
