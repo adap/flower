@@ -129,12 +129,12 @@ class RecordDict(TypedDict[str, RecordType]):
     >>>  # Adding it to the record_set would look like this
     >>>  my_records["my_metrics"] = m_record
 
-    Adding a :code:`ArrayRecord` follows the same steps as above but first,
+    Adding an :code:`ArrayRecord` follows the same steps as above but first,
     the array needs to be serialized and represented as a :code:`flwr.common.Array`.
     For example:
 
     >>>  from flwr.common import Array
-    >>>  # Creating a ArrayRecord would look like this
+    >>>  # Creating an ArrayRecord would look like this
     >>>  arr_np = np.random.randn(3, 3)
     >>>
     >>>  # You can use the built-in tool to serialize the array

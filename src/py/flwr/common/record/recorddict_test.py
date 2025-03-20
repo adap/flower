@@ -129,7 +129,7 @@ def test_set_parameters_while_keeping_intputs() -> None:
     )
     arr_record = ArrayRecord(array_dict, keep_input=True)
 
-    # Creating a second arrayrecord passing the same `array_dict` (not erased)
+    # Creating a second ArrayRecord passing the same `array_dict` (not erased)
     arr_record_2 = ArrayRecord(array_dict, keep_input=False)
     assert arr_record == arr_record_2
 
