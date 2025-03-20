@@ -22,13 +22,13 @@ from typing import Optional, Union, cast
 
 import flwr.common.recorddict_compat as compat
 from flwr.common import (
+    ArrayRecord,
     Code,
     ConfigsRecord,
     Context,
     EvaluateRes,
     FitRes,
     GetParametersIns,
-    ParametersRecord,
     log,
 )
 from flwr.common.constant import MessageType, MessageTypeLegacy
@@ -129,9 +129,7 @@ def default_init_params_workflow(grid: Grid, context: Context) -> None:
     )
     if parameters is not None:
         log(INFO, "Using initial global parameters provided by strategy")
-        paramsrecord = compat.parameters_to_parametersrecord(
-            parameters, keep_input=True
-        )
+        arr_record = compat.parameters_to_arrayrecord(parameters, keep_input=True)
     else:
         # Get initial parameters from one of the clients
         log(INFO, "Requesting initial parameters from one random client")
@@ -158,20 +156,20 @@ def default_init_params_workflow(grid: Grid, context: Context) -> None:
             == Code.OK
         ):
             log(INFO, "Received initial parameters from one random client")
-            paramsrecord = next(iter(msg.content.parameters_records.values()))
+            arr_record = next(iter(msg.content.array_records.values()))
         else:
             log(
                 WARN,
                 "Failed to receive initial parameters from the client."
                 " Empty initial parameters will be used.",
             )
-            paramsrecord = ParametersRecord()
+            arr_record = ArrayRecord()
 
-    context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
+    context.state.array_records[MAIN_PARAMS_RECORD] = arr_record
 
     # Evaluate initial parameters
     log(INFO, "Starting evaluation of initial global parameters")
-    parameters = compat.parametersrecord_to_parameters(paramsrecord, keep_input=True)
+    parameters = compat.arrayrecord_to_parameters(arr_record, keep_input=True)
     res = context.strategy.evaluate(0, parameters=parameters)
     if res is not None:
         log(
@@ -197,8 +195,8 @@ def default_centralized_evaluation_workflow(_: Grid, context: Context) -> None:
     start_time = cast(float, cfg[Key.START_TIME])
 
     # Centralized evaluation
-    parameters = compat.parametersrecord_to_parameters(
-        record=context.state.parameters_records[MAIN_PARAMS_RECORD],
+    parameters = compat.arrayrecord_to_parameters(
+        record=context.state.array_records[MAIN_PARAMS_RECORD],
         keep_input=True,
     )
     res_cen = context.strategy.evaluate(current_round, parameters=parameters)
@@ -226,10 +224,8 @@ def default_fit_workflow(grid: Grid, context: Context) -> None:  # pylint: disab
     # Get current_round and parameters
     cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
     current_round = cast(int, cfg[Key.CURRENT_ROUND])
-    parametersrecord = context.state.parameters_records[MAIN_PARAMS_RECORD]
-    parameters = compat.parametersrecord_to_parameters(
-        parametersrecord, keep_input=True
-    )
+    arr_record = context.state.array_records[MAIN_PARAMS_RECORD]
+    parameters = compat.arrayrecord_to_parameters(arr_record, keep_input=True)
 
     # Get clients and their respective instructions from strategy
     client_instructions = context.strategy.configure_fit(
@@ -295,10 +291,8 @@ def default_fit_workflow(grid: Grid, context: Context) -> None:  # pylint: disab
 
     # Update the parameters and write history
     if parameters_aggregated:
-        paramsrecord = compat.parameters_to_parametersrecord(
-            parameters_aggregated, True
-        )
-        context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
+        arr_record = compat.parameters_to_arrayrecord(parameters_aggregated, True)
+        context.state.array_records[MAIN_PARAMS_RECORD] = arr_record
         context.history.add_metrics_distributed_fit(
             server_round=current_round, metrics=metrics_aggregated
         )
@@ -313,10 +307,8 @@ def default_evaluate_workflow(grid: Grid, context: Context) -> None:
     # Get current_round and parameters
     cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
     current_round = cast(int, cfg[Key.CURRENT_ROUND])
-    parametersrecord = context.state.parameters_records[MAIN_PARAMS_RECORD]
-    parameters = compat.parametersrecord_to_parameters(
-        parametersrecord, keep_input=True
-    )
+    arr_record = context.state.array_records[MAIN_PARAMS_RECORD]
+    parameters = compat.arrayrecord_to_parameters(arr_record, keep_input=True)
 
     # Get clients and their respective instructions from strategy
     client_instructions = context.strategy.configure_evaluate(

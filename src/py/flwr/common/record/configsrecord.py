@@ -41,7 +41,7 @@ def _check_value(value: ConfigsRecordValues) -> None:
         # If your lists are large (e.g. 1M+ elements) this will be slow
         # 1s to check 10M element list on a M2 Pro
         # In such settings, you'd be better of treating such config as
-        # an array and pass it to a ParametersRecord.
+        # an array and pass it to a ArrayRecord.
         # Empty lists are valid
         if len(value) > 0:
             is_valid(value[0])
@@ -85,7 +85,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
     ). You can use standard Python built-in types such as :code:`float`, :code:`str`
     , :code:`bytes`. All types allowed are defined in
     :code:`flwr.common.ConfigsRecordValues`. While lists are supported, we
-    encourage you to use a :code:`ParametersRecord` instead if these are of high
+    encourage you to use a :code:`ArrayRecord` instead if these are of high
     dimensionality.
 
     Let's see some examples of how to construct a :code:`ConfigsRecord` from scratch:

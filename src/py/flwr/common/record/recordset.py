@@ -22,12 +22,12 @@ from textwrap import indent
 from typing import TypeVar, Union, cast
 
 from ..logger import log
+from .arrayrecord import ArrayRecord
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
-from .arrayrecord import ParametersRecord
 from .typeddict import TypedDict
 
-RecordType = Union[ParametersRecord, MetricsRecord, ConfigsRecord]
+RecordType = Union[ArrayRecord, MetricsRecord, ConfigsRecord]
 
 T = TypeVar("T")
 
@@ -41,9 +41,9 @@ def _check_key(key: str) -> None:
 
 
 def _check_value(value: RecordType) -> None:
-    if not isinstance(value, (ParametersRecord, MetricsRecord, ConfigsRecord)):
+    if not isinstance(value, (ArrayRecord, MetricsRecord, ConfigsRecord)):
         raise TypeError(
-            f"Expected `{ParametersRecord.__name__}`, `{MetricsRecord.__name__}`, "
+            f"Expected `{ArrayRecord.__name__}`, `{MetricsRecord.__name__}`, "
             f"or `{ConfigsRecord.__name__}` but received "
             f"`{type(value).__name__}` for the value."
         )
@@ -58,9 +58,7 @@ class _SyncedDict(TypedDict[str, T]):
     """
 
     def __init__(self, ref_recordset: RecordSet, allowed_type: type[T]) -> None:
-        if not issubclass(
-            allowed_type, (ParametersRecord, MetricsRecord, ConfigsRecord)
-        ):
+        if not issubclass(allowed_type, (ArrayRecord, MetricsRecord, ConfigsRecord)):
             raise TypeError(f"{allowed_type} is not a valid type.")
         super().__init__(_check_key, self.check_value)
         self.recordset = ref_recordset
@@ -84,17 +82,17 @@ class _SyncedDict(TypedDict[str, T]):
 
 
 class RecordSet(TypedDict[str, RecordType]):
-    """RecordSet stores groups of parameters, metrics and configs.
+    """RecordSet stores groups of arrays, metrics and configs.
 
-    A :class:`RecordSet` is the unified mechanism by which parameters,
+    A :class:`RecordSet` is the unified mechanism by which arrays,
     metrics and configs can be either stored as part of a :class:`Context`
     in your apps or communicated as part of a :class:`Message` between
     your apps.
 
     Parameters
     ----------
-    parameters_records : Optional[Dict[str, ParametersRecord]]
-        A dictionary of :code:`ParametersRecords` that can be used to record
+    array_records : Optional[Dict[str, ArrayRecord]]
+        A dictionary of :code:`ArrayRecord` that can be used to record
         and communicate model parameters and high-dimensional arrays.
     metrics_records : Optional[Dict[str, MetricsRecord]]
         A dictionary of :code:`MetricsRecord` that can be used to record
@@ -116,7 +114,7 @@ class RecordSet(TypedDict[str, RecordType]):
     Let's see an example.
 
     >>>  from flwr.common import RecordSet
-    >>>  from flwr.common import ConfigsRecord, MetricsRecord, ParametersRecord
+    >>>  from flwr.common import ConfigsRecord, MetricsRecord, ArrayRecord
     >>>
     >>>  # Let's begin with an empty record
     >>>  my_recordset = RecordSet()
@@ -131,28 +129,28 @@ class RecordSet(TypedDict[str, RecordType]):
     >>>  # Adding it to the record_set would look like this
     >>>  my_recordset["my_metrics"] = m_record
 
-    Adding a :code:`ParametersRecord` follows the same steps as above but first,
+    Adding a :code:`ArrayRecord` follows the same steps as above but first,
     the array needs to be serialized and represented as a :code:`flwr.common.Array`.
     If the array is a :code:`NumPy` array, you can use the built-in utility function
     `array_from_numpy <flwr.common.array_from_numpy.html>`_. It is often possible to
     convert an array first to :code:`NumPy` and then use the aforementioned function.
 
     >>>  from flwr.common import array_from_numpy
-    >>>  # Creating a ParametersRecord would look like this
+    >>>  # Creating a ArrayRecord would look like this
     >>>  arr_np = np.random.randn(3, 3)
     >>>
     >>>  # You can use the built-in tool to serialize the array
     >>>  arr = array_from_numpy(arr_np)
     >>>
     >>>  # Finally, create the record
-    >>>  p_record = ParametersRecord({"my_array": arr})
+    >>>  arr_record = ArrayRecord({"my_array": arr})
     >>>
     >>>  # Adding it to the record_set would look like this
-    >>>  my_recordset["my_parameters"] = p_record
+    >>>  my_recordset["my_arrays"] = arr_record
 
     For additional examples on how to construct each of the records types shown
     above, please refer to the documentation for :code:`ConfigsRecord`,
-    :code:`MetricsRecord` and :code:`ParametersRecord`.
+    :code:`MetricsRecord` and :code:`ArrayRecord`.
     """
 
     def __init__(self, records: dict[str, RecordType] | None = None) -> None:
@@ -162,11 +160,11 @@ class RecordSet(TypedDict[str, RecordType]):
                 self[key] = record
 
     @property
-    def parameters_records(self) -> TypedDict[str, ParametersRecord]:
-        """Dictionary holding only ParametersRecord instances."""
-        synced_dict = _SyncedDict[ParametersRecord](self, ParametersRecord)
+    def array_records(self) -> TypedDict[str, ArrayRecord]:
+        """Dictionary holding only ArrayRecord instances."""
+        synced_dict = _SyncedDict[ArrayRecord](self, ArrayRecord)
         for key, record in self.items():
-            if isinstance(record, ParametersRecord):
+            if isinstance(record, ArrayRecord):
                 synced_dict[key] = record
         return synced_dict
 
@@ -190,7 +188,7 @@ class RecordSet(TypedDict[str, RecordType]):
 
     def __repr__(self) -> str:
         """Return a string representation of this instance."""
-        flds = ("parameters_records", "metrics_records", "configs_records")
+        flds = ("array_records", "metrics_records", "configs_records")
         fld_views = [f"{fld}={dict(getattr(self, fld))!r}" for fld in flds]
         view = indent(",\n".join(fld_views), "  ")
         return f"{self.__class__.__qualname__}(\n{view}\n)"

@@ -34,8 +34,8 @@ def message_size_mod(
     """
     message_size_in_bytes = 0
 
-    for p_record in msg.content.parameters_records.values():
-        message_size_in_bytes += p_record.count_bytes()
+    for arr_record in msg.content.array_records.values():
+        message_size_in_bytes += arr_record.count_bytes()
 
     for c_record in msg.content.configs_records.values():
         message_size_in_bytes += c_record.count_bytes()
@@ -53,23 +53,23 @@ def parameters_size_mod(
 ) -> Message:
     """Parameters size mod.
 
-    This mod logs the number of parameters transmitted in the message as well as their
-    size in bytes.
+    This mod logs the number of parameters transmitted in ``ArrayRecord``s of
+    the message as well as their size in bytes.
     """
     model_size_stats = {}
     parameters_size_in_bytes = 0
-    for record_name, p_record in msg.content.parameters_records.items():
-        p_record_bytes = p_record.count_bytes()
-        parameters_size_in_bytes += p_record_bytes
+    for record_name, arr_record in msg.content.array_records.items():
+        arr_record_bytes = arr_record.count_bytes()
+        parameters_size_in_bytes += arr_record_bytes
         parameter_count = 0
-        for array in p_record.values():
+        for array in arr_record.values():
             parameter_count += (
                 int(np.prod(array.shape)) if array.shape else array.numpy().size
             )
 
         model_size_stats[f"{record_name}"] = {
             "parameters": parameter_count,
-            "bytes": p_record_bytes,
+            "bytes": arr_record_bytes,
         }
 
     if model_size_stats:

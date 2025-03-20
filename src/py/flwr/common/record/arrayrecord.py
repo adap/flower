@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""ParametersRecord and Array."""
+"""ArrayRecord and Array."""
 
 
 from __future__ import annotations
@@ -42,9 +42,9 @@ def _raise_array_init_error() -> None:
     )
 
 
-def _raise_parameters_record_init_error() -> None:
+def _raise_array_record_init_error() -> None:
     raise TypeError(
-        f"Invalid arguments for {ParametersRecord.__qualname__}. Expected either "
+        f"Invalid arguments for {ArrayRecord.__qualname__}. Expected either "
         "a list of NumPy ndarrays, a PyTorch state_dict, or a dictionary of Arrays. "
         "The `keep_input` argument is keyword-only."
     )
@@ -274,13 +274,14 @@ def _check_value(value: Array) -> None:
         )
 
 
-class ParametersRecord(TypedDict[str, Array]):
-    r"""Parameters record.
+class ArrayRecord(TypedDict[str, Array]):
+    r"""Array record.
 
-    A typed dictionary (``str`` to :class:`Array`) that can store named parameters
-    as serialized tensors. Internally, this behaves similarly to an
-    ``OrderedDict[str, Array]``. A ``ParametersRecord`` can be viewed as an
-    equivalent to PyTorch's ``state_dict``, but it holds arrays in serialized form.
+    A typed dictionary (``str`` to :class:`Array`) that can store named arrays,
+    including model parameters, gradients, or non-parameter arrays. Internally,
+    this behaves similarly to an ``OrderedDict[str, Array]``. An ``ArrayRecord``
+    can be viewed as an equivalent to PyTorch's ``state_dict``, but it holds arrays
+    in serialized form.
 
     This object is one of the record types supported by :class:`RecordDict` and can
     therefore be stored in the ``content`` of a :class:`Message` or the ``state``
@@ -312,33 +313,33 @@ class ParametersRecord(TypedDict[str, Array]):
 
     Examples
     --------
-    Initializing an empty ParametersRecord:
+    Initializing an empty ArrayRecord:
 
-    >>> record = ParametersRecord()
+    >>> record = ArrayRecord()
 
     Initializing with a dictionary of :class:`Array`:
 
     >>> arr = Array("float32", [5, 5], "numpy.ndarray", b"serialized_data...")
-    >>> record = ParametersRecord({"weight": arr})
+    >>> record = ArrayRecord({"weight": arr})
 
     Initializing with a list of NumPy arrays:
 
     >>> import numpy as np
     >>> arr1 = np.random.randn(3, 3)
     >>> arr2 = np.random.randn(2, 2)
-    >>> record = ParametersRecord([arr1, arr2])
+    >>> record = ArrayRecord([arr1, arr2])
 
     Initializing with a PyTorch model state_dict:
 
     >>> import torch.nn as nn
     >>> model = nn.Linear(10, 5)
-    >>> record = ParametersRecord(model.state_dict())
+    >>> record = ArrayRecord(model.state_dict())
 
     Initializing with a TensorFlow model weights (a list of NumPy arrays):
 
     >>> import tensorflow as tf
     >>> model = tf.keras.Sequential([tf.keras.layers.Dense(5, input_shape=(10,))])
-    >>> record = ParametersRecord(model.get_weights())
+    >>> record = ArrayRecord(model.get_weights())
     """
 
     @overload
@@ -380,7 +381,7 @@ class ParametersRecord(TypedDict[str, Array]):
 
         # Init the argument
         if len(args) > 1:
-            _raise_parameters_record_init_error()
+            _raise_array_record_init_error()
         arg = args[0] if args else None
         init_method: str | None = None  # Track which init method is being used
 
@@ -393,10 +394,10 @@ class ParametersRecord(TypedDict[str, Array]):
             nonlocal arg, init_method
             # Raise an error if arg is already set
             if arg is not None:
-                _raise_parameters_record_init_error()
+                _raise_array_record_init_error()
             # Raise an error if a different initialization method is already set
             if init_method is not None:
-                _raise_parameters_record_init_error()
+                _raise_array_record_init_error()
             # Set init_method and arg
             if init_method is None:
                 init_method = method
@@ -454,7 +455,7 @@ class ParametersRecord(TypedDict[str, Array]):
                 self.__dict__.update(converted.__dict__)
                 return
 
-        _raise_parameters_record_init_error()
+        _raise_array_record_init_error()
 
     @classmethod
     def from_array_dict(
@@ -462,9 +463,9 @@ class ParametersRecord(TypedDict[str, Array]):
         array_dict: OrderedDict[str, Array],
         *,
         keep_input: bool = True,
-    ) -> ParametersRecord:
-        """Create ParametersRecord from a dictionary of :class:`Array`."""
-        record = ParametersRecord()
+    ) -> ArrayRecord:
+        """Create ArrayRecord from a dictionary of :class:`Array`."""
+        record = ArrayRecord()
         for k, v in array_dict.items():
             record[k] = Array(
                 dtype=v.dtype, shape=list(v.shape), stype=v.stype, data=v.data
@@ -479,9 +480,9 @@ class ParametersRecord(TypedDict[str, Array]):
         ndarrays: list[NDArray],
         *,
         keep_input: bool = True,
-    ) -> ParametersRecord:
-        """Create ParametersRecord from a list of NumPy ``ndarray``."""
-        record = ParametersRecord()
+    ) -> ArrayRecord:
+        """Create ArrayRecord from a list of NumPy ``ndarray``."""
+        record = ArrayRecord()
         total_serialized_bytes = 0
 
         for i in range(len(ndarrays)):  # pylint: disable=C0200
@@ -509,14 +510,14 @@ class ParametersRecord(TypedDict[str, Array]):
         state_dict: OrderedDict[str, torch.Tensor],
         *,
         keep_input: bool = True,
-    ) -> ParametersRecord:
-        """Create ParametersRecord from PyTorch ``state_dict``."""
+    ) -> ArrayRecord:
+        """Create ArrayRecord from PyTorch ``state_dict``."""
         if "torch" not in sys.modules:
             raise RuntimeError(
                 f"PyTorch is required to use {cls.from_torch_state_dict.__name__}"
             )
 
-        record = ParametersRecord()
+        record = ArrayRecord()
 
         for k in list(state_dict.keys()):
             v = state_dict[k] if keep_input else state_dict.pop(k)
@@ -525,7 +526,7 @@ class ParametersRecord(TypedDict[str, Array]):
         return record
 
     def to_numpy_ndarrays(self, *, keep_input: bool = True) -> list[NDArray]:
-        """Return the ParametersRecord as a list of NumPy ``ndarray``."""
+        """Return the ArrayRecord as a list of NumPy ``ndarray``."""
         if keep_input:
             return [v.numpy() for v in self.values()]
 
@@ -551,7 +552,7 @@ class ParametersRecord(TypedDict[str, Array]):
     def to_torch_state_dict(
         self, *, keep_input: bool = True
     ) -> OrderedDict[str, torch.Tensor]:
-        """Return the ParametersRecord as a PyTorch ``state_dict``."""
+        """Return the ArrayRecord as a PyTorch ``state_dict``."""
         if not (torch := sys.modules.get("torch")):
             raise RuntimeError(
                 f"PyTorch is required to use {self.to_torch_state_dict.__name__}"

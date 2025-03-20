@@ -175,8 +175,8 @@ def secaggplus_mod(
         res = _collect_masked_vectors(
             state, configs, fitres.num_examples, fitres.parameters
         )
-        for p_record in out_content.parameters_records.values():
-            p_record.clear()
+        for arr_record in out_content.array_records.values():
+            arr_record.clear()
     elif state.current_stage == Stage.UNMASK:
         res = _unmask(state, configs)
     else:
