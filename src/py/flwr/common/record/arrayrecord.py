@@ -591,7 +591,7 @@ class ParametersRecord(ArrayRecord):
 
     This class exists solely for backward compatibility with legacy
     code that previously used ``ParametersRecord``. It has been renamed
-    to ``ArrayRecord`` and will be removed in a future release.
+    to ``ArrayRecord``.
 
     .. warning::
         ``ParametersRecord`` is deprecated and will be removed in a future release.
