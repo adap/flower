@@ -4,7 +4,7 @@ import keras
 from tensorflow_example.task import load_data, load_model
 
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Array, Context, ArrayRecord, RecordDict
+from flwr.common import Array, ArrayRecord, Context, RecordDict
 
 
 # Define Flower Client and client_fn

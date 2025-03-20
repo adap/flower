@@ -7,7 +7,7 @@ from time import sleep
 import torch
 from app_pytorch.task import Net
 
-from flwr.common import Context, Message, MessageType, RecordDict, ArrayRecord
+from flwr.common import ArrayRecord, Context, Message, MessageType, RecordDict
 from flwr.common.logger import log
 from flwr.server import Grid, ServerApp
 

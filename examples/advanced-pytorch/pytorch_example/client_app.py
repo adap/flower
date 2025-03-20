@@ -4,7 +4,7 @@ import torch
 from pytorch_example.task import Net, get_weights, load_data, set_weights, test, train
 
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Array, Context, ArrayRecord, RecordDict
+from flwr.common import Array, ArrayRecord, Context, RecordDict
 
 
 # Define Flower Client and client_fn
