@@ -609,7 +609,7 @@ class ParametersRecord(ArrayRecord):
 
         from flwr.common import ArrayRecord
 
-        my_content = ArrayRecord()
+        record = ArrayRecord()
     """
 
     _warning_logged = False
