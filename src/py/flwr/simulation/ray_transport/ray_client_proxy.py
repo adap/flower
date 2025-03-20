@@ -126,7 +126,7 @@ class RayActorClientProxy(ClientProxy):
                 group_id=str(group_id) if group_id is not None else "",
                 src_node_id=0,
                 dst_node_id=self.node_id,
-                reply_to_message="",
+                reply_to_message_id="",
                 created_at=now().timestamp(),
                 ttl=timeout if timeout else DEFAULT_TTL,
                 message_type=message_type,

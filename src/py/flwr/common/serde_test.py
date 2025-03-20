@@ -274,7 +274,7 @@ class RecordMaker:
             group_id=self.get_str(30),
             src_node_id=self.rng.randint(0, 1 << 63),
             dst_node_id=self.rng.randint(0, 1 << 63),
-            reply_to_message=self.get_str(64),
+            reply_to_message_id=self.get_str(64),
             created_at=now().timestamp(),
             ttl=self.rng.randint(1, 1 << 30),
             message_type=self.get_message_type(),

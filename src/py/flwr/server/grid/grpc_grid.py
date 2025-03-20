@@ -162,7 +162,7 @@ class GrpcGrid(Grid):
         # Check if the message is valid
         if not (
             message.metadata.message_id == ""
-            and message.metadata.reply_to_message == ""
+            and message.metadata.reply_to_message_id == ""
             and message.metadata.ttl > 0
         ):
             raise ValueError(f"Invalid message: {message}")
@@ -281,7 +281,7 @@ class GrpcGrid(Grid):
             res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
             msg_ids.difference_update(
-                {msg.metadata.reply_to_message for msg in res_msgs}
+                {msg.metadata.reply_to_message_id for msg in res_msgs}
             )
             if len(msg_ids) == 0:
                 break

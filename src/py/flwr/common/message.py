@@ -56,7 +56,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         An identifier for the node sending this message.
     dst_node_id : int
         An identifier for the node receiving this message.
-    reply_to_message : str
+    reply_to_message_id : str
         An identifier for the message this message replies to.
     group_id : str
         An identifier for grouping messages. In some settings,
@@ -76,7 +76,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         message_id: str,
         src_node_id: int,
         dst_node_id: int,
-        reply_to_message: str,
+        reply_to_message_id: str,
         group_id: str,
         created_at: float,
         ttl: float,
@@ -87,7 +87,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
             "_message_id": message_id,
             "_src_node_id": src_node_id,
             "_dst_node_id": dst_node_id,
-            "_reply_to_message": reply_to_message,
+            "_reply_to_message_id": reply_to_message_id,
             "_group_id": group_id,
             "_created_at": created_at,
             "_ttl": ttl,
@@ -112,9 +112,9 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         return cast(int, self.__dict__["_src_node_id"])
 
     @property
-    def reply_to_message(self) -> str:
+    def reply_to_message_id(self) -> str:
         """An identifier for the message this message replies to."""
-        return cast(str, self.__dict__["_reply_to_message"])
+        return cast(str, self.__dict__["_reply_to_message_id"])
 
     @property
     def dst_node_id(self) -> int:
@@ -352,7 +352,7 @@ class Message:
                 message_id="",  # Will be set by the SuperLink
                 src_node_id=0,  # Will be set before pushed
                 dst_node_id=dst_node_id,
-                reply_to_message="",  # Instruction messages do not reply to any message
+                reply_to_message_id="",  # Instruction messages reply to no message
                 group_id=group_id or "",
                 created_at=now().timestamp(),
                 ttl=ttl or DEFAULT_TTL,
@@ -373,7 +373,7 @@ class Message:
                 message_id="",
                 src_node_id=reply_to.metadata.dst_node_id,
                 dst_node_id=reply_to.metadata.src_node_id,
-                reply_to_message=reply_to.metadata.message_id,
+                reply_to_message_id=reply_to.metadata.message_id,
                 group_id=reply_to.metadata.group_id,
                 created_at=current,
                 ttl=_limit_reply_ttl(current, ttl, reply_to),
@@ -469,7 +469,7 @@ class Message:
 
         The method generates a new `Message` as a reply to this message.
         It inherits 'run_id', 'src_node_id', 'dst_node_id', and 'message_type' from
-        this message and sets 'reply_to_message' to the ID of this message.
+        this message and sets 'reply_to_message_id' to the ID of this message.
 
         Parameters
         ----------

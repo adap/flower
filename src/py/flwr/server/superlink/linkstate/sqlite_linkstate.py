@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS message_ins(
     run_id                  INTEGER,
     src_node_id             INTEGER,
     dst_node_id             INTEGER,
-    reply_to_message        TEXT,
+    reply_to_message_id     TEXT,
     created_at              REAL,
     delivered_at            TEXT,
     ttl                     REAL,
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS message_res(
     run_id                  INTEGER,
     src_node_id             INTEGER,
     dst_node_id             INTEGER,
-    reply_to_message        TEXT,
+    reply_to_message_id     TEXT,
     created_at              REAL,
     delivered_at            TEXT,
     ttl                     REAL,
@@ -374,7 +374,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         res_metadata = message.metadata
-        msg_ins_id = res_metadata.reply_to_message
+        msg_ins_id = res_metadata.reply_to_message_id
         msg_ins = self.get_valid_message_ins(msg_ins_id)
         if msg_ins is None:
             log(
@@ -496,7 +496,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         query = f"""
             SELECT *
             FROM message_res
-            WHERE reply_to_message IN ({",".join(["?"] * len(message_ids))})
+            WHERE reply_to_message_id IN ({",".join(["?"] * len(message_ids))})
             AND delivered_at = "";
         """
         rows = self.query(query, tuple(str(message_id) for message_id in message_ids))
@@ -569,7 +569,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Delete reply Message
         query_2 = f"""
             DELETE FROM message_res
-            WHERE reply_to_message IN ({placeholders});
+            WHERE reply_to_message_id IN ({placeholders});
         """
 
         with self.conn:
@@ -1065,7 +1065,7 @@ def message_to_dict(message: Message) -> dict[str, Any]:
         "run_id": message.metadata.run_id,
         "src_node_id": message.metadata.src_node_id,
         "dst_node_id": message.metadata.dst_node_id,
-        "reply_to_message": message.metadata.reply_to_message,
+        "reply_to_message_id": message.metadata.reply_to_message_id,
         "created_at": message.metadata.created_at,
         "delivered_at": message.metadata.delivered_at,
         "ttl": message.metadata.ttl,

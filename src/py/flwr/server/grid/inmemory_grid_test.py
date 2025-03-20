@@ -61,7 +61,7 @@ def get_replies(grid: InMemoryGrid, msg_ids: Iterable[str], node_id: int) -> lis
 
     # Execute: Pull messages
     pulled_msgs = grid.pull_messages(msg_ids)
-    return [msg.metadata.reply_to_message for msg in pulled_msgs]
+    return [msg.metadata.reply_to_message_id for msg in pulled_msgs]
 
 
 class TestInMemoryGrid(unittest.TestCase):
@@ -152,7 +152,7 @@ class TestInMemoryGrid(unittest.TestCase):
 
         # Execute
         pulled_msgs = list(self.grid.pull_messages(msg_ids))
-        reply_tos = [msg.metadata.reply_to_message for msg in pulled_msgs]
+        reply_tos = [msg.metadata.reply_to_message_id for msg in pulled_msgs]
 
         # Assert
         self.assertEqual(len(pulled_msgs), 2)
@@ -174,7 +174,7 @@ class TestInMemoryGrid(unittest.TestCase):
 
         # Execute
         ret_msgs = list(self.grid.send_and_receive(msgs))
-        reply_tos = [msg.metadata.reply_to_message for msg in ret_msgs]
+        reply_tos = [msg.metadata.reply_to_message_id for msg in ret_msgs]
         # Assert
         self.assertEqual(len(ret_msgs), 2)
         self.assertEqual(reply_tos, msg_ids)

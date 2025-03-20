@@ -98,7 +98,7 @@ class Metadata(google.protobuf.message.Message):
     MESSAGE_ID_FIELD_NUMBER: builtins.int
     SRC_NODE_ID_FIELD_NUMBER: builtins.int
     DST_NODE_ID_FIELD_NUMBER: builtins.int
-    REPLY_TO_MESSAGE_FIELD_NUMBER: builtins.int
+    REPLY_TO_MESSAGE_ID_FIELD_NUMBER: builtins.int
     GROUP_ID_FIELD_NUMBER: builtins.int
     TTL_FIELD_NUMBER: builtins.int
     MESSAGE_TYPE_FIELD_NUMBER: builtins.int
@@ -107,7 +107,7 @@ class Metadata(google.protobuf.message.Message):
     message_id: typing.Text
     src_node_id: builtins.int
     dst_node_id: builtins.int
-    reply_to_message: typing.Text
+    reply_to_message_id: typing.Text
     group_id: typing.Text
     ttl: builtins.float
     message_type: typing.Text
@@ -118,11 +118,11 @@ class Metadata(google.protobuf.message.Message):
         message_id: typing.Text = ...,
         src_node_id: builtins.int = ...,
         dst_node_id: builtins.int = ...,
-        reply_to_message: typing.Text = ...,
+        reply_to_message_id: typing.Text = ...,
         group_id: typing.Text = ...,
         ttl: builtins.float = ...,
         message_type: typing.Text = ...,
         created_at: builtins.float = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["created_at",b"created_at","dst_node_id",b"dst_node_id","group_id",b"group_id","message_id",b"message_id","message_type",b"message_type","reply_to_message",b"reply_to_message","run_id",b"run_id","src_node_id",b"src_node_id","ttl",b"ttl"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["created_at",b"created_at","dst_node_id",b"dst_node_id","group_id",b"group_id","message_id",b"message_id","message_type",b"message_type","reply_to_message_id",b"reply_to_message_id","run_id",b"run_id","src_node_id",b"src_node_id","ttl",b"ttl"]) -> None: ...
 global___Metadata = Metadata

@@ -31,7 +31,7 @@ def create_message(  # pylint: disable=R0913, R0917
     src_node_id: int = SUPERLINK_NODE_ID,
     dst_node_id: int = 456,
     ttl: int = DEFAULT_TTL,
-    reply_to_message: str = "",
+    reply_to_message_id: str = "",
     has_content: bool = True,
     has_error: bool = False,
     msg_type: str = "mock",
@@ -45,7 +45,7 @@ def create_message(  # pylint: disable=R0913, R0917
         message_id=message_id,
         src_node_id=src_node_id,
         dst_node_id=dst_node_id,
-        reply_to_message=reply_to_message,
+        reply_to_message_id=reply_to_message_id,
         group_id="",
         created_at=now().timestamp(),
         ttl=ttl,
@@ -84,12 +84,12 @@ class ValidatorTest(unittest.TestCase):
             (create_message(has_content=False), False, True),
             # Both `content` and `error` are set
             (create_message(has_error=True), False, True),
-            # `reply_to_message` is set in a non-reply message
-            (create_message(reply_to_message="789"), False, True),
-            # `reply_to_message` is not set in reply message
+            # `reply_to_message_id` is set in a non-reply message
+            (create_message(reply_to_message_id="789"), False, True),
+            # `reply_to_message_id` is not set in reply message
             (create_message(), True, True),
             # `dst_node_id` is not SuperLink in reply message
-            (create_message(src_node_id=123, reply_to_message="blabla"), True, True),
+            (create_message(src_node_id=123, reply_to_message_id="blabla"), True, True),
         ]
     )
     def test_message(self, message: Message, is_reply: bool, should_fail: bool) -> None:

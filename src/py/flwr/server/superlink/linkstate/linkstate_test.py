@@ -346,7 +346,7 @@ class StateTest(unittest.TestCase):
 
         _ = state.store_message_res(message=msg_res_0)
         retrieved_msg_res_0 = state.get_message_res(
-            message_ids={UUID(msg_res_0.metadata.reply_to_message)}
+            message_ids={UUID(msg_res_0.metadata.reply_to_message_id)}
         )[0]
         assert retrieved_msg_res_0.error.code == 0
 

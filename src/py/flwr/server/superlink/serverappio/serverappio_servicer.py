@@ -206,7 +206,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Delete the instruction Messages and their replies if found
         message_ins_ids_to_delete = {
-            UUID(msg_res.metadata.reply_to_message) for msg_res in messages_res
+            UUID(msg_res.metadata.reply_to_message_id) for msg_res in messages_res
         }
 
         state.delete_messages(message_ins_ids=message_ins_ids_to_delete)

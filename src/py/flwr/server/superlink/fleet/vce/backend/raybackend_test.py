@@ -101,7 +101,7 @@ def _create_message_and_context() -> tuple[Message, Context, float]:
             group_id="",
             src_node_id=0,
             dst_node_id=0,
-            reply_to_message="",
+            reply_to_message_id="",
             created_at=now().timestamp(),
             ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,

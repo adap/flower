@@ -156,7 +156,7 @@ def test_create_reply(
 
     assert message.metadata.src_node_id == reply_message.metadata.dst_node_id
     assert message.metadata.dst_node_id == reply_message.metadata.src_node_id
-    assert reply_message.metadata.reply_to_message == message.metadata.message_id
+    assert reply_message.metadata.reply_to_message_id == message.metadata.message_id
 
 
 @pytest.mark.parametrize(
@@ -169,7 +169,7 @@ def test_create_reply(
                 "message_id": "msg_456",
                 "src_node_id": 1,
                 "dst_node_id": 2,
-                "reply_to_message": "reply_789",
+                "reply_to_message_id": "reply_789",
                 "group_id": "group_xyz",
                 "created_at": 1234567890.0,
                 "ttl": 10.0,
@@ -269,7 +269,7 @@ def test_create_ins_message_success(
     assert msg.metadata.run_id == 0  # Should be unset
     assert msg.metadata.message_id == ""  # Should be unset
     assert msg.metadata.src_node_id == 0  # Should be unset
-    assert msg.metadata.reply_to_message == ""  # Should be unset
+    assert msg.metadata.reply_to_message_id == ""  # Should be unset
 
 
 @pytest.mark.parametrize(
@@ -291,7 +291,7 @@ def test_create_reply_message_success(
     assert reply.metadata.run_id == msg.metadata.run_id
     assert reply.metadata.src_node_id == msg.metadata.dst_node_id
     assert reply.metadata.dst_node_id == msg.metadata.src_node_id
-    assert reply.metadata.reply_to_message == msg.metadata.message_id
+    assert reply.metadata.reply_to_message_id == msg.metadata.message_id
     assert reply.metadata.group_id == msg.metadata.group_id
     assert current_time < reply.metadata.created_at < now().timestamp()
     assert (

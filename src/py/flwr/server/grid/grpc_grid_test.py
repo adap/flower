@@ -130,12 +130,12 @@ class TestGrpcGrid(unittest.TestCase):
         # A Message must have either content or error set so we prepare
         run_id = 12345
         ok_message = create_res_message(src_node_id=123, dst_node_id=456, run_id=run_id)
-        ok_message.metadata.reply_to_message = "id2"
+        ok_message.metadata.reply_to_message_id = "id2"
 
         error_message = create_res_message(
             src_node_id=123, dst_node_id=789, run_id=run_id, error=Error(code=0)
         )
-        error_message.metadata.reply_to_message = "id3"
+        error_message.metadata.reply_to_message_id = "id3"
         # The response from the ServerAppIoServicer is in the form of Protobuf Messages
         mock_response.messages_list = [ok_message, error_message]
         self.mock_stub.PullMessages.return_value = mock_response
@@ -143,7 +143,7 @@ class TestGrpcGrid(unittest.TestCase):
 
         # Execute
         msgs = self.grid.pull_messages(msg_ids)
-        reply_tos = {msg.metadata.reply_to_message for msg in msgs}
+        reply_tos = {msg.metadata.reply_to_message_id for msg in msgs}
         args, kwargs = self.mock_stub.PullMessages.call_args
 
         # Assert
@@ -165,7 +165,7 @@ class TestGrpcGrid(unittest.TestCase):
         mssg = create_res_message(
             src_node_id=123, dst_node_id=456, run_id=run_id, error=Error(code=0)
         )
-        mssg.metadata.reply_to_message = "id1"
+        mssg.metadata.reply_to_message_id = "id1"
         message_res_list = [mssg]
 
         mock_response.messages_list = message_res_list
@@ -177,7 +177,7 @@ class TestGrpcGrid(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(ret_msgs), 1)
-        self.assertEqual(ret_msgs[0].metadata.reply_to_message, "id1")
+        self.assertEqual(ret_msgs[0].metadata.reply_to_message_id, "id1")
 
     def test_send_and_receive_messages_timeout(self) -> None:
         """Test send and receive messages but time out."""

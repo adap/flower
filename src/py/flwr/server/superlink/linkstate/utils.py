@@ -248,7 +248,7 @@ def create_message_error_unavailable_res_message(
         message_id=str(uuid4()),
         src_node_id=SUPERLINK_NODE_ID,
         dst_node_id=SUPERLINK_NODE_ID,
-        reply_to_message=ins_metadata.message_id,
+        reply_to_message_id=ins_metadata.message_id,
         group_id=ins_metadata.group_id,
         message_type=ins_metadata.message_type,
         created_at=current_time,
@@ -272,7 +272,7 @@ def create_message_error_unavailable_res_message(
     )
 
 
-def create_message_error_unavailable_ins_message(reply_to_message: UUID) -> Message:
+def create_message_error_unavailable_ins_message(reply_to_message_id: UUID) -> Message:
     """Error to indicate that the enquired Message had expired before reply arrived or
     that it isn't found."""
     metadata = Metadata(
@@ -280,7 +280,7 @@ def create_message_error_unavailable_ins_message(reply_to_message: UUID) -> Mess
         message_id=str(uuid4()),
         src_node_id=SUPERLINK_NODE_ID,
         dst_node_id=SUPERLINK_NODE_ID,
-        reply_to_message=str(reply_to_message),
+        reply_to_message_id=str(reply_to_message_id),
         group_id="",  # Unknown
         message_type=MessageType.SYSTEM,
         created_at=now().timestamp(),
@@ -375,7 +375,7 @@ def verify_found_message_replies(
     ret_dict: dict[UUID, Message] = {}
     current = current_time if current_time else now().timestamp()
     for message_res in found_message_res_list:
-        message_ins_id = UUID(message_res.metadata.reply_to_message)
+        message_ins_id = UUID(message_res.metadata.reply_to_message_id)
         if update_set:
             inquired_message_ids.remove(message_ins_id)
         # Check if the reply Message has expired

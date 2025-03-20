@@ -55,7 +55,7 @@ class InMemoryGrid(Grid):
         # Check if the message is valid
         if not (
             message.metadata.message_id == ""
-            and message.metadata.reply_to_message == ""
+            and message.metadata.reply_to_message_id == ""
             and message.metadata.ttl > 0
             and message.metadata.delivered_at == ""
         ):
@@ -127,7 +127,7 @@ class InMemoryGrid(Grid):
         message_res_list = self.state.get_message_res(message_ids=msg_ids)
         # Get IDs of Messages these replies are for
         message_ins_ids_to_delete = {
-            UUID(msg_res.metadata.reply_to_message) for msg_res in message_res_list
+            UUID(msg_res.metadata.reply_to_message_id) for msg_res in message_res_list
         }
         # Delete
         self.state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
@@ -156,7 +156,7 @@ class InMemoryGrid(Grid):
             res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
             msg_ids.difference_update(
-                {msg.metadata.reply_to_message for msg in res_msgs}
+                {msg.metadata.reply_to_message_id for msg in res_msgs}
             )
             if len(msg_ids) == 0:
                 break

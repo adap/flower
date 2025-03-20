@@ -218,7 +218,7 @@ class GridClientProxyTestCase(unittest.TestCase):
             message_id="",  # Will be set by the server
             src_node_id=0,
             dst_node_id=dst_node_id,
-            reply_to_message="",
+            reply_to_message_id="",
             group_id=group_id,
             created_at=now().timestamp(),
             ttl=ttl_,

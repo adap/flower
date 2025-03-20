@@ -151,7 +151,7 @@ def register_messages_into_state(
                 group_id="",
                 src_node_id=0,
                 dst_node_id=dst_node_id,  # indicate destination node
-                reply_to_message="",
+                reply_to_message_id="",
                 created_at=now().timestamp(),
                 ttl=DEFAULT_TTL,
                 message_type=MessageTypeLegacy.GET_PROPERTIES,
@@ -323,5 +323,5 @@ class TestFleetSimulationEngineRayBackend(TestCase):
             content = message_res.content
             assert (
                 content.configs_records["getpropertiesres.properties"]["result"]
-                == expected_results[UUID(message_res.metadata.reply_to_message)]
+                == expected_results[UUID(message_res.metadata.reply_to_message_id)]
             )

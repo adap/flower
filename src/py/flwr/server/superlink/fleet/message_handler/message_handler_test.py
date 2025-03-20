@@ -114,7 +114,7 @@ def test_push_messages() -> None:
             group_id="",
             src_node_id=0,
             dst_node_id=0,
-            reply_to_message="",
+            reply_to_message_id="",
             created_at=now().timestamp(),
             ttl=123,
             message_type="query",
