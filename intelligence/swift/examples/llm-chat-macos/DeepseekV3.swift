@@ -13,18 +13,3 @@
 // limitations under the License.
 // ==============================================================================
 
-import FlowerIntelligence
-import SwiftUI
-
-struct ContentView: View {
-  var body: some View {
-    ChatView()
-      .padding()
-      .task {
-      }
-  }
-}
-
-#Preview {
-    ContentView()
-}
