@@ -15,6 +15,7 @@
 
 import Foundation
 import MLX
+import MLXFast
 import MLXLLM
 import MLXLMCommon
 import MLXNN
@@ -126,16 +127,14 @@ func yarnFindCorrectionDim(
 func yarnFindCorrectionRange(
   lowRot: Float, highRot: Float, dim: Float, base: Float = 10000,
   maxPositionEmbeddings: Float = 2048
-) -> (Int, Int) {
-  let low = Int(
-    floor(
-      yarnFindCorrectionDim(
-        numRotations: lowRot, dim: dim, base: base, maxPositionEmbeddings: maxPositionEmbeddings)))
-  let high = Int(
-    ceil(
-      yarnFindCorrectionDim(
-        numRotations: highRot, dim: dim, base: base, maxPositionEmbeddings: maxPositionEmbeddings)))
-  return (max(low, 0), min(high, Int(dim - 1)))
+) -> (Float, Float) {
+  let low = floor(
+    yarnFindCorrectionDim(
+      numRotations: lowRot, dim: dim, base: base, maxPositionEmbeddings: maxPositionEmbeddings))
+  let high = ceil(
+    yarnFindCorrectionDim(
+      numRotations: highRot, dim: dim, base: base, maxPositionEmbeddings: maxPositionEmbeddings))
+  return (max(low, 0), min(high, dim - 1))
 }
 
 func yarnGetMScale(scale: Float = 1, mscale: Float = 1) -> Float {
@@ -150,6 +149,7 @@ func yarnLinearRampMask(minVal: Float, maxVal: Float, dim: Int) -> MLXArray {
 
 class DeepseekV3YarnRotaryEmbedding: Module {
   var mscale: Float
+  var freqs: MLXArray
   init(
     dim: Int,
     maxPositionEmbeddings: Int = 2048,
@@ -164,5 +164,32 @@ class DeepseekV3YarnRotaryEmbedding: Module {
     self.mscale =
       yarnGetMScale(scale: scalingFactor, mscale: mscale)
       / yarnGetMScale(scale: scalingFactor, mscale: mscaleAllDim)
+    let freqExtra = base ** (MLXArray(stride(from: 0, to: dim, by: 2)) / dim)
+    let freqInter = scalingFactor * base ** (MLXArray(stride(from: 0, to: dim, by: 2)) / dim)
+    let (low, high) = yarnFindCorrectionRange(
+      lowRot: betaFast, highRot: betaSlow, dim: Float(dim), base: base,
+      maxPositionEmbeddings: Float(originalMaxPositionEmbeddings))
+
+    let freqMask = 1.0 - yarnLinearRampMask(minVal: low, maxVal: high, dim: dim / 2)
+
+    self.freqs = (freqInter * freqExtra) / (freqInter * freqMask + freqExtra * (1 - freqMask))
+  }
+
+  func callAsFunction(_ x: MLXArray, offset: Int = 0) -> MLXArray {
+    MLXFast.RoPE(
+      self.mscale != 1.0 ? self.mscale * x : x,
+      dimensions: x.shape[-1],
+      traditional: true,
+      base: nil,
+      scale: 1.0,
+      offset: offset,
+      freqs: freqs
+    )
   }
 }
+
+func clippedSilu(_ x: MLXArray) -> MLXArray {
+  clip(x * sigmoid(x), min: -100, max: 100)
+}
+
+
