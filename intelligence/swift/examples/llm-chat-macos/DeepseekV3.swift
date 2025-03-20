@@ -192,4 +192,136 @@ func clippedSilu(_ x: MLXArray) -> MLXArray {
   clip(x * sigmoid(x), min: -100, max: 100)
 }
 
+class DeepseekV3Attention: Module {
+  var config: DeepseekV3Configuration
+  var hiddenSize: Int
+  var numHeads: Int
+  var maxPositionEmbeddings: Int
+  var ropeTheta: Float
+  var qLoraRank: Int?
+  var qkRopeHeadDim: Int
+  var kvLoraRank: Int
+  var vHeadDim: Int
+  var qkNopeHeadDim: Int
+  var qHeadDim: Int
+  var scale: Float
 
+  var rope: DeepseekV3YarnRotaryEmbedding
+  var qProj: Linear?
+  var qAProj: Linear?
+  var qALayerNorm: RMSNorm?
+  var qBProj: Linear?
+  var oProj: Linear
+  var kvAProjWithMqa: Linear
+  var kvALayerNorm: RMSNorm
+  var kvBProj: Linear
+
+  init(config: DeepseekV3Configuration) {
+    self.config = config
+    self.hiddenSize = config.hiddenSize
+    self.numHeads = config.numAttentionHeads
+    self.maxPositionEmbeddings = config.maxPositionEmbeddings
+    self.ropeTheta = config.ropeTheta
+    self.qLoraRank = config.qLoraRank
+    self.qkRopeHeadDim = config.qkRopeHeadDim
+    self.kvLoraRank = config.kvLoraRank
+    self.vHeadDim = config.vHeadDim
+    self.qkNopeHeadDim = config.qkNopeHeadDim
+    self.qHeadDim = config.qkNopeHeadDim + config.qkRopeHeadDim
+
+    self.scale = pow(Float(qHeadDim), -0.5)
+
+    if let qLoraRank = qLoraRank {
+      self.qAProj = Linear(
+        hiddenSize, qLoraRank, bias: config.attentionBias
+      )
+      self.qALayerNorm = RMSNorm(dimensions: qLoraRank)
+      self.qBProj = Linear(
+        qLoraRank, numHeads * qHeadDim, bias: false
+      )
+    } else {
+      self.qProj = Linear(hiddenSize, numHeads * qHeadDim, bias: false)
+    }
+    
+    self.kvAProjWithMqa = Linear(
+      hiddenSize,
+      kvLoraRank + qkRopeHeadDim,
+      bias: config.attentionBias
+    )
+    self.kvALayerNorm = RMSNorm(dimensions: kvLoraRank)
+    self.kvBProj = Linear(
+      kvLoraRank,
+      numHeads * (qHeadDim - qkRopeHeadDim + vHeadDim),
+      bias: false
+    )
+    self.oProj = Linear(numHeads * vHeadDim, hiddenSize, bias: config.attentionBias)
+
+    guard let ropeScaling = config.ropeScaling,
+      case .float(let scalingFactor) = ropeScaling["factor"],
+      case .int(let originalMaxPositionEmbeddings) = ropeScaling["original_max_position_embeddings"]
+        ?? .int(4096),
+      case .float(let betaFast) = ropeScaling["beta_fast"] ?? .float(32),
+      case .float(let betaSlow) = ropeScaling["beta_slow"] ?? .float(1),
+      case .float(var mscale) = ropeScaling["mscale"] ?? .float(1),
+      case .float(let mscaleAllDim) = ropeScaling["mscale_all_dim"] ?? .float(0)
+    else {
+      self.rope = DeepseekV3YarnRotaryEmbedding(dim: qkRopeHeadDim, base: ropeTheta)
+      return
+    }
+    if mscaleAllDim != 0 {
+      mscale = yarnGetMScale(scale: scalingFactor, mscale: mscaleAllDim)
+      self.scale = self.scale * mscale * mscale
+    }
+
+    self.rope = DeepseekV3YarnRotaryEmbedding(
+      dim: qkRopeHeadDim, maxPositionEmbeddings: maxPositionEmbeddings,
+      base: ropeTheta,
+      scalingFactor: scalingFactor,
+      originalMaxPositionEmbeddings: originalMaxPositionEmbeddings,
+      betaFast: betaFast,
+      betaSlow: betaSlow,
+      mscale: mscale,
+      mscaleAllDim: mscaleAllDim)
+  }
+  
+  func callAsFunction(_ x: MLXArray, mask: MLXArray? = nil, cache: KVCache? = nil) -> MLXArray {
+    let (B, L, D) = (x.dim(0), x.dim(1), x.dim(2))
+    
+    var q: MLXArray
+    if qLoraRank == nil {
+      q = self.qProj!(x)
+    } else {
+      q = self.qBProj!(self.qALayerNorm!(self.qAProj!(x)))
+    }
+    
+    q = q.reshaped(B, L, self.numHeads, self.qHeadDim).transposed(0, 2, 1, 3)
+    let splitQ = split(q, indices: [qkNopeHeadDim], axis: -1)
+    var (qNope, qPe) = (splitQ[0], splitQ[1])
+    var compressedKv = self.kvAProjWithMqa(x)
+    let splitCompressedKv = split(compressedKv, indices: [kvLoraRank], axis: -1)
+    compressedKv = splitCompressedKv[0]
+    var kPe = splitCompressedKv[1]
+    kPe = kPe.reshaped(B, L, 1, self.qkRopeHeadDim).transposed(0, 2, 1, 3)
+    var kv = self.kvBProj(kvALayerNorm(compressedKv))
+    kv = kv.reshaped(B, L, self.numHeads, -1).transposed(0, 2, 1, 3)
+    let splitKv = split(kv, indices: [self.qkNopeHeadDim], axis: -1)
+    var (kNope, values) = (splitKv[0], splitKv[1])
+    
+    var keys: MLXArray
+    if let cache = cache {
+      qPe = self.rope(qPe, offset: cache.offset)
+      kPe = self.rope(kPe, offset: cache.offset)
+      kPe = repeated(kPe, count: numHeads, axis: 1)
+      (keys, values) = cache.update(keys: concatenated([kNope, kPe], axis: -1), values: values)
+    } else {
+      qPe = self.rope(qPe)
+      kPe = self.rope(kPe)
+      kPe = repeated(kPe, count: numHeads, axis: 1)
+      keys = concatenated([kNope, kPe], axis: -1)
+    }
+    let queries = concatenated([qNope, qPe], axis: -1)
+    let output = scaledDotProductAttention(queries: queries, keys: keys, values: values, scale: scale, mask: mask).transposed(0, 2, 1, 3)
+      .reshaped(B, L, -1)
+    return self.oProj(output)
+  }
+}
