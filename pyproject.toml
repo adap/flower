@@ -62,6 +62,7 @@ flwr-clientapp = "flwr.client.clientapp:flwr_clientapp"
 
 [tool.poetry.dependencies]
 python = "^3.9.2"
+setuptools = "==70.3.0"
 # Mandatory dependencies
 numpy = ">=1.26.0,<3.0.0"
 grpcio = "^1.62.3,!=1.65.0"
