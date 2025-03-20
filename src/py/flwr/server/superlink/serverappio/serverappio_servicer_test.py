@@ -22,7 +22,7 @@ from typing import Optional
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigsRecord, Context, Error, RecordSet
+from flwr.common import ConfigsRecord, Context, Error, RecordDict
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SUPERLINK_NODE_ID,
@@ -283,13 +283,13 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     @parameterized.expand(
         [
             # Reply with Message
-            (RecordSet(), None),
+            (RecordDict(), None),
             # Reply with Error
             (None, Error(code=0)),
         ]
     )  # type: ignore
     def test_successful_pull_messages_deletes_messages_in_linkstate(
-        self, content: Optional[RecordSet], error: Optional[Error]
+        self, content: Optional[RecordDict], error: Optional[Error]
     ) -> None:
         """Test `PullMessages` deletes messages from LinkState."""
         # Prepare
@@ -366,7 +366,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             run_id=run_id,
             node_id=0,
             node_config=maker.user_config(),
-            state=maker.recordset(1, 1, 1),
+            state=maker.recorddict(1, 1, 1),
             run_config=maker.user_config(),
         )
 
@@ -417,7 +417,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             run_id=run_id,
             node_id=0,
             node_config=maker.user_config(),
-            state=maker.recordset(1, 1, 1),
+            state=maker.recorddict(1, 1, 1),
             run_config=maker.user_config(),
         )
 

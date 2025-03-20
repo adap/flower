@@ -15,7 +15,7 @@ data across distributed silos without the need to centrally aggregate data, whil
 > \[!NOTE\]
 > This example uses Flower's Message API which remains a preview feature and subject to change.
 > Both `ClientApp` and `ServerApp` operate directly on the [Message](https://flower.ai/docs/framework/ref-api/flwr.common.Message.html)
-> and [RecordSet](https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html) objects.
+> and [RecordDict](https://flower.ai/docs/framework/ref-api/flwr.common.RecordDict.html) objects.
 
 ## Advanced FedRAG Examples
 

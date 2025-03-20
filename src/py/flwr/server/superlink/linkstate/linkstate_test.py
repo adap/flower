@@ -26,7 +26,7 @@ from uuid import UUID
 
 from parameterized import parameterized
 
-from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, Error, RecordSet, now
+from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, Error, RecordDict, now
 from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -36,10 +36,9 @@ from flwr.common.serde import message_from_proto, message_to_proto
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
-from flwr.proto.message_pb2 import Message, Metadata
-
-# pylint: disable=E0611
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.message_pb2 import Message as ProtoMessage
+from flwr.proto.message_pb2 import Metadata as ProtoMetadata
+from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
 from flwr.server.superlink.linkstate import (
@@ -344,7 +343,7 @@ class StateTest(unittest.TestCase):
         assert retrieved_msg_res_0.error.code == 0
 
         # Insert one reply Message, but don't retrieve it
-        msg_res_1 = msg_ins_list[1].create_reply(content=RecordSet())
+        msg_res_1 = msg_ins_list[1].create_reply(content=RecordDict())
         _ = state.store_message_res(message=msg_res_1)
 
         # Situation now:
@@ -698,8 +697,8 @@ class StateTest(unittest.TestCase):
         _ = state.store_message_ins(message=msg1)
 
         # Store replies
-        state.store_message_res(msg0.create_reply(content=RecordSet()))
-        state.store_message_res(msg1.create_reply(content=RecordSet()))
+        state.store_message_res(msg0.create_reply(content=RecordDict()))
+        state.store_message_res(msg1.create_reply(content=RecordDict()))
 
         # Execute
         num = state.num_message_res()
@@ -827,7 +826,7 @@ class StateTest(unittest.TestCase):
         state.get_message_ins(node_id=node_id_1, limit=None)
 
         # Create and store reply Messages
-        res_message_0 = in_message_0.create_reply(content=RecordSet())
+        res_message_0 = in_message_0.create_reply(content=RecordDict())
         state.store_message_res(res_message_0)
 
         # Execute
@@ -864,7 +863,7 @@ class StateTest(unittest.TestCase):
         state.store_message_ins(message=msg)
 
         msg_to_reply_to = state.get_message_ins(node_id=node_id, limit=2)[0]
-        reply_msg = msg_to_reply_to.create_reply(content=RecordSet())
+        reply_msg = msg_to_reply_to.create_reply(content=RecordDict())
 
         # This patch respresents a very slow communication/ClientApp execution
         # that triggers TTL
@@ -926,7 +925,7 @@ class StateTest(unittest.TestCase):
             msg.metadata.ttl = msg_ins_ttl
             state.store_message_ins(message=msg)
 
-            reply_msg = msg.create_reply(content=RecordSet())
+            reply_msg = msg.create_reply(content=RecordDict())
             reply_msg.metadata.created_at = msg_res_created_at
             reply_msg.metadata.ttl = msg_res_ttl
 
@@ -1041,7 +1040,7 @@ class StateTest(unittest.TestCase):
         # Fetch ins message
         ins_msg = state.get_message_ins(node_id=node_id, limit=1)[0]
         # Create reply and insert
-        res_msg = ins_msg.create_reply(content=RecordSet())
+        res_msg = ins_msg.create_reply(content=RecordDict())
         state.store_message_res(res_msg)
         assert state.num_message_res() == 1
 
@@ -1076,7 +1075,7 @@ class StateTest(unittest.TestCase):
         assert state.num_message_ins() == 1
 
         # Create reply, modify src_node_id and insert
-        res_msg = ins_msg.create_reply(content=RecordSet())
+        res_msg = ins_msg.create_reply(content=RecordDict())
         # pylint: disable=W0212
         res_msg.metadata._src_node_id = node_id + 1  # type: ignore
         msg_res_id = state.store_message_res(res_msg)
@@ -1094,7 +1093,7 @@ class StateTest(unittest.TestCase):
             run_id=1,
             node_id=SUPERLINK_NODE_ID,
             node_config={"mock": "mock"},
-            state=RecordSet(),
+            state=RecordDict(),
             run_config={"test": "test"},
         )
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
@@ -1116,7 +1115,7 @@ class StateTest(unittest.TestCase):
             run_id=1,
             node_id=1234,
             node_config={"mock": "mock"},
-            state=RecordSet(),
+            state=RecordDict(),
             run_config={"test": "test"},
         )
 
@@ -1235,10 +1234,10 @@ def create_ins_message(
     src_node_id: int,
     dst_node_id: int,
     run_id: int,
-) -> Message:
+) -> ProtoMessage:
     """Create a Message for testing."""
-    return Message(
-        metadata=Metadata(
+    return ProtoMessage(
+        metadata=ProtoMetadata(
             run_id=run_id,
             message_id="",
             src_node_id=src_node_id,
@@ -1248,7 +1247,7 @@ def create_ins_message(
             message_type="query",
             created_at=now().timestamp(),
         ),
-        content=ProtoRecordSet(parameters={}, metrics={}, configs={}),
+        content=ProtoRecordDict(parameters={}, metrics={}, configs={}),
     )
 
 
@@ -1257,7 +1256,7 @@ def create_res_message(
     dst_node_id: int,
     run_id: int,
     error: Optional[Error] = None,
-) -> Message:
+) -> ProtoMessage:
     """Create a (reply) Message for testing."""
     in_msg_proto = create_ins_message(
         src_node_id=dst_node_id, dst_node_id=src_node_id, run_id=run_id
@@ -1267,7 +1266,7 @@ def create_res_message(
     if error:
         out_msg = in_msg.create_error_reply(error=error)
     else:
-        out_msg = in_msg.create_reply(content=RecordSet())
+        out_msg = in_msg.create_reply(content=RecordDict())
 
     return message_to_proto(out_msg)
 

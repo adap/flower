@@ -26,7 +26,7 @@ from flwr.common import (
     Message,
     Metadata,
     MetricsRecord,
-    RecordSet,
+    RecordDict,
 )
 
 from .utils import make_ffn
@@ -67,7 +67,7 @@ def make_mock_app(name: str, footprint: list[str]) -> ClientAppCallable:
     def app(message: Message, context: Context) -> Message:
         footprint.append(name)
         message.content.configs_records[name] = ConfigsRecord()
-        out_message = Message(metadata=message.metadata, content=RecordSet())
+        out_message = Message(metadata=message.metadata, content=RecordDict())
         out_message.content.configs_records[name] = ConfigsRecord()
         print(context)
         return out_message
@@ -77,7 +77,7 @@ def make_mock_app(name: str, footprint: list[str]) -> ClientAppCallable:
 
 def _get_dummy_flower_message() -> Message:
     return Message(
-        content=RecordSet(),
+        content=RecordDict(),
         metadata=Metadata(
             run_id=0,
             message_id="",
@@ -102,7 +102,7 @@ class TestMakeApp(unittest.TestCase):
         mock_mod_names = [f"mod{i}" for i in range(1, 15)]
         mock_mods = [make_mock_mod(name, footprint) for name in mock_mod_names]
 
-        state = RecordSet()
+        state = RecordDict()
         state.metrics_records[METRIC] = MetricsRecord({COUNTER: 0.0})
         context = Context(
             run_id=1, node_id=0, node_config={}, state=state, run_config={}
@@ -132,7 +132,7 @@ class TestMakeApp(unittest.TestCase):
         footprint: list[str] = []
         mock_app = make_mock_app("app", footprint)
         context = Context(
-            run_id=1, node_id=0, node_config={}, state=RecordSet(), run_config={}
+            run_id=1, node_id=0, node_config={}, state=RecordDict(), run_config={}
         )
         message = _get_dummy_flower_message()
 
@@ -143,7 +143,7 @@ class TestMakeApp(unittest.TestCase):
         ) -> Message:
             footprint.append("filter")
             message.content.configs_records["filter"] = ConfigsRecord()
-            out_message = Message(metadata=message.metadata, content=RecordSet())
+            out_message = Message(metadata=message.metadata, content=RecordDict())
             out_message.content.configs_records["filter"] = ConfigsRecord()
             # Skip calling app
             return out_message

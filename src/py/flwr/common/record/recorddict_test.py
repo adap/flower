@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""RecordSet tests."""
+"""RecordDict tests."""
 
 
 import pickle
@@ -24,7 +24,7 @@ import numpy as np
 import pytest
 
 from flwr.common.parameter import ndarrays_to_parameters, parameters_to_ndarrays
-from flwr.common.recordset_compat import (
+from flwr.common.recorddict_compat import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )
@@ -36,7 +36,7 @@ from flwr.common.typing import (
     Parameters,
 )
 
-from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordDict
 
 
 def get_ndarrays() -> NDArrays:
@@ -404,12 +404,12 @@ def test_count_bytes_configsrecord() -> None:
 
 
 def test_record_is_picklable() -> None:
-    """Test if RecordSet and *Record are picklable."""
+    """Test if RecordDict and *Record are picklable."""
     # Prepare
     p_record = ParametersRecord()
     m_record = MetricsRecord({"aa": 123})
     c_record = ConfigsRecord({"cc": bytes(9)})
-    rs = RecordSet()
+    rs = RecordDict()
     rs.parameters_records["params"] = p_record
     rs.metrics_records["metrics"] = m_record
     rs.configs_records["configs"] = c_record
@@ -418,17 +418,17 @@ def test_record_is_picklable() -> None:
     pickle.dumps((p_record, m_record, c_record, rs))
 
 
-def test_recordset_repr() -> None:
-    """Test the string representation of RecordSet."""
+def test_recorddict_repr() -> None:
+    """Test the string representation of RecordDict."""
     # Prepare
-    rs = RecordSet(
+    rs = RecordDict(
         {
             "params": ParametersRecord(),
             "metrics": MetricsRecord({"aa": 123}),
             "configs": ConfigsRecord({"cc": bytes(5)}),
         },
     )
-    expected = """RecordSet(
+    expected = """RecordDict(
   parameters_records={'params': {}},
   metrics_records={'metrics': {'aa': 123}},
   configs_records={'configs': {'cc': b'\\x00\\x00\\x00\\x00\\x00'}}
@@ -438,10 +438,10 @@ def test_recordset_repr() -> None:
     assert str(rs) == expected
 
 
-def test_recordset_set_get_del_item() -> None:
-    """Test setting, getting, and deleting items in RecordSet."""
+def test_recorddict_set_get_del_item() -> None:
+    """Test setting, getting, and deleting items in RecordDict."""
     # Prepare
-    rs = RecordSet()
+    rs = RecordDict()
     p_record = ParametersRecord()
     m_record = MetricsRecord({"aa": 123})
     c_record = ConfigsRecord({"cc": bytes(5)})

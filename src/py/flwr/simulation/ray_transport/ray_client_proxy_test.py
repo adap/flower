@@ -31,15 +31,15 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
-    RecordSet,
+    RecordDict,
     Scalar,
 )
 from flwr.common.constant import NUM_PARTITIONS_KEY, PARTITION_ID_KEY
-from flwr.common.recordset_compat import (
-    getpropertiesins_to_recordset,
-    recordset_to_getpropertiesres,
+from flwr.common.recorddict_compat import (
+    getpropertiesins_to_recorddict,
+    recorddict_to_getpropertiesres,
 )
-from flwr.common.recordset_compat_test import _get_valid_getpropertiesins
+from flwr.common.recorddict_compat_test import _get_valid_getpropertiesins
 from flwr.simulation.legacy_app import (
     NodeToPartitionMapping,
     _create_node_id_to_partition_mapping,
@@ -55,7 +55,7 @@ from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, node_id: int, state: RecordSet) -> None:
+    def __init__(self, node_id: int, state: RecordDict) -> None:
         self.node_id = node_id
         self.client_state = state
 
@@ -117,12 +117,12 @@ def test_cid_consistency_one_at_a_time() -> None:
     proxies, _, _ = prep()
 
     getproperties_ins = _get_valid_getpropertiesins()
-    recordset = getpropertiesins_to_recordset(getproperties_ins)
+    recorddict = getpropertiesins_to_recorddict(getproperties_ins)
 
     # submit jobs one at a time
     for prox in proxies:
-        message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
-            recordset,
+        message = prox._wrap_recorddict_in_message(  # pylint: disable=protected-access
+            recorddict,
             MessageTypeLegacy.GET_PROPERTIES,
             timeout=None,
             group_id=0,
@@ -131,7 +131,7 @@ def test_cid_consistency_one_at_a_time() -> None:
             message=message, timeout=None
         )
 
-        res = recordset_to_getpropertiesres(message_out.content)
+        res = recorddict_to_getpropertiesres(message_out.content)
 
         assert int(prox.node_id) * pi == res.properties["result"]
 
@@ -148,7 +148,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
     run_id = 0
 
     getproperties_ins = _get_valid_getpropertiesins()
-    recordset = getpropertiesins_to_recordset(getproperties_ins)
+    recorddict = getpropertiesins_to_recorddict(getproperties_ins)
 
     # submit all jobs (collect later)
     shuffle(proxies)
@@ -158,8 +158,8 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         # Retrieve state
         state = prox.proxy_state.retrieve_context(run_id=run_id)
 
-        message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
-            recordset,
+        message = prox._wrap_recorddict_in_message(  # pylint: disable=protected-access
+            recorddict,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
             timeout=None,
             group_id=0,
@@ -176,7 +176,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
             str(prox.node_id), timeout=None
         )
         prox.proxy_state.update_context(run_id, context=updated_context)
-        res = recordset_to_getpropertiesres(message_out.content)
+        res = recorddict_to_getpropertiesres(message_out.content)
 
         assert prox.node_id * pi == res.properties["result"]
         assert (
@@ -205,7 +205,7 @@ def test_cid_consistency_without_proxies() -> None:
         )
 
     getproperties_ins = _get_valid_getpropertiesins()
-    recordset = getpropertiesins_to_recordset(getproperties_ins)
+    recorddict = getpropertiesins_to_recorddict(getproperties_ins)
 
     def _load_app() -> ClientApp:
         return ClientApp(client_fn=get_dummy_client)
@@ -215,7 +215,7 @@ def test_cid_consistency_without_proxies() -> None:
     run_id = 0
     for node_id in node_ids:
         message = Message(
-            content=recordset,
+            content=recorddict,
             metadata=Metadata(
                 run_id=run_id,
                 message_id="",
@@ -241,7 +241,7 @@ def test_cid_consistency_without_proxies() -> None:
     for node_id in node_ids:
         partition_id_str = str(mapping[node_id])
         message_out, _ = pool.get_client_result(partition_id_str, timeout=None)
-        res = recordset_to_getpropertiesres(message_out.content)
+        res = recorddict_to_getpropertiesres(message_out.content)
         assert node_id * pi == res.properties["result"]
 
     ray.shutdown()

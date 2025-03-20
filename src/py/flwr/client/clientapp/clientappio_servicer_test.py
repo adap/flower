@@ -68,13 +68,13 @@ class TestClientAppIoServicer(unittest.TestCase):
         # Prepare
         message = Message(
             metadata=self.maker.metadata(),
-            content=self.maker.recordset(2, 2, 1),
+            content=self.maker.recorddict(2, 2, 1),
         )
         context = Context(
             run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
-            state=self.maker.recordset(2, 2, 1),
+            state=self.maker.recorddict(2, 2, 1),
             run_config={"runconfig1": 6.1},
         )
         run = typing.Run(
@@ -130,13 +130,13 @@ class TestClientAppIoServicer(unittest.TestCase):
         # Prepare
         message = Message(
             metadata=self.maker.metadata(),
-            content=self.maker.recordset(2, 2, 1),
+            content=self.maker.recorddict(2, 2, 1),
         )
         context = Context(
             run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
-            state=self.maker.recordset(2, 2, 1),
+            state=self.maker.recorddict(2, 2, 1),
             run_config={"runconfig1": 6.1},
         )
         client_output = ClientAppOutputs(message, context)
@@ -160,7 +160,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         # Prepare
         mock_message = Message(
             metadata=self.maker.metadata(),
-            content=self.maker.recordset(3, 2, 1),
+            content=self.maker.recorddict(3, 2, 1),
         )
         mock_fab = typing.Fab(
             hash_str="abc123#$%",
@@ -195,13 +195,13 @@ class TestClientAppIoServicer(unittest.TestCase):
         # Prepare
         message = Message(
             metadata=self.maker.metadata(),
-            content=self.maker.recordset(2, 2, 1),
+            content=self.maker.recorddict(2, 2, 1),
         )
         context = Context(
             run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
-            state=self.maker.recordset(2, 2, 1),
+            state=self.maker.recorddict(2, 2, 1),
             run_config={"runconfig1": 6.1},
         )
         code = typing.ClientAppOutputCode.SUCCESS

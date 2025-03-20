@@ -23,7 +23,7 @@ from typing import Optional, cast
 
 from .constant import MESSAGE_TTL_TOLERANCE, MessageType, MessageTypeLegacy
 from .logger import log
-from .record import RecordSet
+from .record import RecordDict
 
 DEFAULT_TTL = 43200  # This is 12 hours
 
@@ -227,7 +227,7 @@ class Message:
     ----------
     metadata : Metadata
         A dataclass including information about the message to be executed.
-    content : Optional[RecordSet]
+    content : Optional[RecordDict]
         Holds records either sent by another entity (e.g. sent by the server-side
         logic to a client, or vice-versa) or that will be sent to it.
     error : Optional[Error]
@@ -238,7 +238,7 @@ class Message:
     def __init__(
         self,
         metadata: Metadata,
-        content: RecordSet | None = None,
+        content: RecordDict | None = None,
         error: Error | None = None,
     ) -> None:
         if not (content is None) ^ (error is None):
@@ -259,17 +259,17 @@ class Message:
         return cast(Metadata, self.__dict__["_metadata"])
 
     @property
-    def content(self) -> RecordSet:
+    def content(self) -> RecordDict:
         """The content of this message."""
         if self.__dict__["_content"] is None:
             raise ValueError(
                 "Message content is None. Use <message>.has_content() "
                 "to check if a message has content."
             )
-        return cast(RecordSet, self.__dict__["_content"])
+        return cast(RecordDict, self.__dict__["_content"])
 
     @content.setter
-    def content(self, value: RecordSet) -> None:
+    def content(self, value: RecordDict) -> None:
         """Set content."""
         if self.__dict__["_error"] is None:
             self.__dict__["_content"] = value
@@ -337,7 +337,7 @@ class Message:
 
         return message
 
-    def create_reply(self, content: RecordSet, ttl: float | None = None) -> Message:
+    def create_reply(self, content: RecordDict, ttl: float | None = None) -> Message:
         """Create a reply to this message with specified content and TTL.
 
         The method generates a new `Message` as a reply to this message.
@@ -346,7 +346,7 @@ class Message:
 
         Parameters
         ----------
-        content : RecordSet
+        content : RecordDict
             The content for the reply message.
         ttl : Optional[float] (default: None)
             Time-to-live for this message in seconds. If unset, it will be set based

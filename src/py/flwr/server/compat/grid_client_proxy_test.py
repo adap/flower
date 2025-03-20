@@ -24,8 +24,8 @@ from unittest.mock import Mock
 import numpy as np
 
 import flwr
-from flwr.common import Error, Message, Metadata, RecordSet
-from flwr.common import recordset_compat as compat
+from flwr.common import Error, Message, Metadata, RecordDict
+from flwr.common import recorddict_compat as compat
 from flwr.common.typing import (
     Code,
     Config,
@@ -200,7 +200,7 @@ class GridClientProxyTestCase(unittest.TestCase):
 
     def _create_message_dummy(  # pylint: disable=R0913,too-many-positional-arguments
         self,
-        content: RecordSet,
+        content: RecordDict,
         message_type: str,
         dst_node_id: int,
         group_id: str,
@@ -235,20 +235,20 @@ class GridClientProxyTestCase(unittest.TestCase):
 
         def generate_replies(messages: Iterable[Message]) -> Iterable[Message]:
             msg = list(messages)[0]
-            recordset = None
+            recorddict = None
             if error_reply:
                 pass
             elif isinstance(res, GetParametersRes):
-                recordset = compat.getparametersres_to_recordset(res, True)
+                recorddict = compat.getparametersres_to_recorddict(res, True)
             elif isinstance(res, GetPropertiesRes):
-                recordset = compat.getpropertiesres_to_recordset(res)
+                recorddict = compat.getpropertiesres_to_recorddict(res)
             elif isinstance(res, FitRes):
-                recordset = compat.fitres_to_recordset(res, True)
+                recorddict = compat.fitres_to_recorddict(res, True)
             elif isinstance(res, EvaluateRes):
-                recordset = compat.evaluateres_to_recordset(res)
+                recorddict = compat.evaluateres_to_recorddict(res)
 
-            if recordset is not None:
-                ret = msg.create_reply(recordset)
+            if recorddict is not None:
+                ret = msg.create_reply(recorddict)
             else:
                 ret = msg.create_error_reply(ERROR_REPLY)
 
@@ -262,10 +262,10 @@ class GridClientProxyTestCase(unittest.TestCase):
         # Check if the created message contains the orignal *Ins
         assert self.created_msg is not None
         actual_ins = {  # type: ignore
-            GetPropertiesIns: compat.recordset_to_getpropertiesins,
-            GetParametersIns: compat.recordset_to_getparametersins,
-            FitIns: (lambda x: compat.recordset_to_fitins(x, True)),
-            EvaluateIns: (lambda x: compat.recordset_to_evaluateins(x, True)),
+            GetPropertiesIns: compat.recorddict_to_getpropertiesins,
+            GetParametersIns: compat.recorddict_to_getparametersins,
+            FitIns: (lambda x: compat.recorddict_to_fitins(x, True)),
+            EvaluateIns: (lambda x: compat.recorddict_to_evaluateins(x, True)),
         }[type(original_ins)](self.created_msg.content)
         self.assertEqual(self.called_times, 1)
         self.assertEqual(actual_ins, original_ins)

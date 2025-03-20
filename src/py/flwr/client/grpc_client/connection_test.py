@@ -24,8 +24,8 @@ from unittest.mock import patch
 
 import grpc
 
-from flwr.common import DEFAULT_TTL, ConfigsRecord, Message, Metadata, RecordSet
-from flwr.common import recordset_compat as compat
+from flwr.common import DEFAULT_TTL, ConfigsRecord, Message, Metadata, RecordDict
+from flwr.common import recorddict_compat as compat
 from flwr.common.constant import MessageTypeLegacy
 from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.typing import Code, GetPropertiesRes, Status
@@ -54,7 +54,7 @@ MESSAGE_GET_PROPERTIES = Message(
         ttl=DEFAULT_TTL,
         message_type=MessageTypeLegacy.GET_PROPERTIES,
     ),
-    content=compat.getpropertiesres_to_recordset(
+    content=compat.getpropertiesres_to_recorddict(
         GetPropertiesRes(Status(Code.OK, ""), {})
     ),
 )
@@ -69,7 +69,7 @@ MESSAGE_DISCONNECT = Message(
         ttl=DEFAULT_TTL,
         message_type="reconnect",
     ),
-    content=RecordSet({"config": ConfigsRecord({"reason": 0})}),
+    content=RecordDict({"config": ConfigsRecord({"reason": 0})}),
 )
 
 

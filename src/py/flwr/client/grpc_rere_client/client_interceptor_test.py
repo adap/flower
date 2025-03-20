@@ -36,7 +36,7 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
-from flwr.common.record import RecordSet
+from flwr.common.record import RecordDict
 from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -96,7 +96,7 @@ class _MockServicer:
                     message_type="train",
                     reply_to_message="",
                 ),
-                content=RecordSet(),
+                content=RecordDict(),
             )
             proto_msg = serde.message_to_proto(msg)
             proto_msg.metadata.created_at = now().timestamp()
@@ -208,7 +208,7 @@ def _send(conn: Any) -> None:
     receive, send, create_node, _, _, _ = conn
     create_node()
     receive()
-    send(Message(Metadata(0, "", 123, 0, "", "", 0, ""), RecordSet()))
+    send(Message(Metadata(0, "", 123, 0, "", "", 0, ""), RecordDict()))
 
 
 def _get_run(conn: Any) -> None:

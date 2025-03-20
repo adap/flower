@@ -14,7 +14,7 @@ from fedrag.mirage_qa import MirageQA
 from fedrag.task import index_exists
 from sklearn.metrics import accuracy_score
 
-from flwr.common import ConfigsRecord, Context, MessageType, RecordSet
+from flwr.common import ConfigsRecord, Context, MessageType, RecordDict
 from flwr.server import Grid, ServerApp
 
 
@@ -77,9 +77,9 @@ def submit_question(
     messages = []
     # Send the same Message to each connected node (which run `ClientApp` instances)
     for node_idx, node_id in enumerate(node_ids):
-        # The payload of a Message is of type RecordSet
-        # https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html
-        # Which can carry different types of records. We'll use a ConfigsRecord object
+        # The payload of a Message is of type RecordDict
+        # https://flower.ai/docs/framework/ref-api/flwr.common.RecordDict.html
+        # which can carry different types of records. We'll use a ConfigsRecord object
         # We need to create a new ConfigsRecord() object for every node, otherwise
         # if we just override a single key, e.g., corpus_name, the grid will send
         # the same object to all nodes.
@@ -91,7 +91,7 @@ def submit_question(
         # by infinitely looping over the corpus names.
         config_record["corpus_name"] = next(corpus_names_iter)
 
-        task_record = RecordSet({"config": config_record})
+        task_record = RecordDict({"config": config_record})
         message = grid.create_message(
             content=task_record,
             message_type=MessageType.QUERY,  # target `query` method in ClientApp

@@ -31,9 +31,9 @@ from flwr.common import (
     ConfigsRecord,
     Message,
     Metadata,
-    RecordSet,
+    RecordDict,
 )
-from flwr.common import recordset_compat as compat
+from flwr.common import recorddict_compat as compat
 from flwr.common import serde
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.grpc import create_channel, on_channel_state_change
@@ -139,32 +139,32 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
         # Receive ServerMessage proto
         proto = next(server_message_iterator)
 
-        # ServerMessage proto --> *Ins --> RecordSet
+        # ServerMessage proto --> *Ins --> RecordDict
         field = proto.WhichOneof("msg")
         message_type = ""
         if field == "get_properties_ins":
-            recordset = compat.getpropertiesins_to_recordset(
+            recorddict = compat.getpropertiesins_to_recorddict(
                 serde.get_properties_ins_from_proto(proto.get_properties_ins)
             )
             message_type = MessageTypeLegacy.GET_PROPERTIES
         elif field == "get_parameters_ins":
-            recordset = compat.getparametersins_to_recordset(
+            recorddict = compat.getparametersins_to_recorddict(
                 serde.get_parameters_ins_from_proto(proto.get_parameters_ins)
             )
             message_type = MessageTypeLegacy.GET_PARAMETERS
         elif field == "fit_ins":
-            recordset = compat.fitins_to_recordset(
+            recorddict = compat.fitins_to_recorddict(
                 serde.fit_ins_from_proto(proto.fit_ins), False
             )
             message_type = MessageType.TRAIN
         elif field == "evaluate_ins":
-            recordset = compat.evaluateins_to_recordset(
+            recorddict = compat.evaluateins_to_recorddict(
                 serde.evaluate_ins_from_proto(proto.evaluate_ins), False
             )
             message_type = MessageType.EVALUATE
         elif field == "reconnect_ins":
-            recordset = RecordSet()
-            recordset.configs_records["config"] = ConfigsRecord(
+            recorddict = RecordDict()
+            recorddict.configs_records["config"] = ConfigsRecord(
                 {"seconds": proto.reconnect_ins.seconds}
             )
             message_type = "reconnect"
@@ -186,34 +186,34 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
                 ttl=DEFAULT_TTL,
                 message_type=message_type,
             ),
-            content=recordset,
+            content=recorddict,
         )
 
     def send(message: Message) -> None:
-        # Retrieve RecordSet and message_type
-        recordset = message.content
+        # Retrieve RecordDict and message_type
+        recorddict = message.content
         message_type = message.metadata.message_type
 
-        # RecordSet --> *Res --> *Res proto -> ClientMessage proto
+        # RecordDict --> *Res --> *Res proto -> ClientMessage proto
         if message_type == MessageTypeLegacy.GET_PROPERTIES:
-            getpropres = compat.recordset_to_getpropertiesres(recordset)
+            getpropres = compat.recorddict_to_getpropertiesres(recorddict)
             msg_proto = ClientMessage(
                 get_properties_res=serde.get_properties_res_to_proto(getpropres)
             )
         elif message_type == MessageTypeLegacy.GET_PARAMETERS:
-            getparamres = compat.recordset_to_getparametersres(recordset, False)
+            getparamres = compat.recorddict_to_getparametersres(recorddict, False)
             msg_proto = ClientMessage(
                 get_parameters_res=serde.get_parameters_res_to_proto(getparamres)
             )
         elif message_type == MessageType.TRAIN:
-            fitres = compat.recordset_to_fitres(recordset, False)
+            fitres = compat.recorddict_to_fitres(recorddict, False)
             msg_proto = ClientMessage(fit_res=serde.fit_res_to_proto(fitres))
         elif message_type == MessageType.EVALUATE:
-            evalres = compat.recordset_to_evaluateres(recordset)
+            evalres = compat.recorddict_to_evaluateres(recorddict)
             msg_proto = ClientMessage(evaluate_res=serde.evaluate_res_to_proto(evalres))
         elif message_type == "reconnect":
             reason = cast(
-                Reason.ValueType, recordset.configs_records["config"]["reason"]
+                Reason.ValueType, recorddict.configs_records["config"]["reason"]
             )
             msg_proto = ClientMessage(
                 disconnect_res=ClientMessage.DisconnectRes(reason=reason)

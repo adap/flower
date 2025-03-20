@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""RecordSet utilities."""
+"""RecordDict utilities."""
 
 
 from collections import OrderedDict
 from collections.abc import Mapping
 from typing import Union, cast, get_args
 
-from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordDict
 from .typing import (
     Code,
     ConfigsRecordValues,
@@ -135,72 +135,72 @@ def _check_mapping_from_recordscalartype_to_scalar(
                 "There is not a 1:1 mapping between `common.Scalar` types and those "
                 "supported in `common.ConfigsRecordValues` or "
                 "`common.ConfigsRecordValues`. Consider casting your values to a type "
-                "supported by the `common.RecordSet` infrastructure. "
+                "supported by the `common.RecordDict` infrastructure. "
                 f"You used type: {type(value)}"
             )
     return cast(dict[str, Scalar], record_data)
 
 
-def _recordset_to_fit_or_evaluate_ins_components(
-    recordset: RecordSet,
+def _recorddict_to_fit_or_evaluate_ins_components(
+    recorddict: RecordDict,
     ins_str: str,
     keep_input: bool,
 ) -> tuple[Parameters, dict[str, Scalar]]:
-    """Derive Fit/Evaluate Ins from a RecordSet."""
+    """Derive Fit/Evaluate Ins from a RecordDict."""
     # get Array and construct Parameters
-    parameters_record = recordset.parameters_records[f"{ins_str}.parameters"]
+    parameters_record = recorddict.parameters_records[f"{ins_str}.parameters"]
 
     parameters = parametersrecord_to_parameters(
         parameters_record, keep_input=keep_input
     )
 
     # get config dict
-    config_record = recordset.configs_records[f"{ins_str}.config"]
+    config_record = recorddict.configs_records[f"{ins_str}.config"]
     # pylint: disable-next=protected-access
     config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
     return parameters, config_dict
 
 
-def _fit_or_evaluate_ins_to_recordset(
+def _fit_or_evaluate_ins_to_recorddict(
     ins: Union[FitIns, EvaluateIns], keep_input: bool
-) -> RecordSet:
-    recordset = RecordSet()
+) -> RecordDict:
+    recorddict = RecordDict()
 
     ins_str = "fitins" if isinstance(ins, FitIns) else "evaluateins"
     parametersrecord = parameters_to_parametersrecord(ins.parameters, keep_input)
-    recordset.parameters_records[f"{ins_str}.parameters"] = parametersrecord
+    recorddict.parameters_records[f"{ins_str}.parameters"] = parametersrecord
 
-    recordset.configs_records[f"{ins_str}.config"] = ConfigsRecord(
+    recorddict.configs_records[f"{ins_str}.config"] = ConfigsRecord(
         ins.config  # type: ignore
     )
 
-    return recordset
+    return recorddict
 
 
-def _embed_status_into_recordset(
-    res_str: str, status: Status, recordset: RecordSet
-) -> RecordSet:
+def _embed_status_into_recorddict(
+    res_str: str, status: Status, recorddict: RecordDict
+) -> RecordDict:
     status_dict: dict[str, ConfigsRecordValues] = {
         "code": int(status.code.value),
         "message": status.message,
     }
     # we add it to a `ConfigsRecord`` because the `status.message`` is a string
     # and `str` values aren't supported in `MetricsRecords`
-    recordset.configs_records[f"{res_str}.status"] = ConfigsRecord(status_dict)
-    return recordset
+    recorddict.configs_records[f"{res_str}.status"] = ConfigsRecord(status_dict)
+    return recorddict
 
 
-def _extract_status_from_recordset(res_str: str, recordset: RecordSet) -> Status:
-    status = recordset.configs_records[f"{res_str}.status"]
+def _extract_status_from_recorddict(res_str: str, recorddict: RecordDict) -> Status:
+    status = recorddict.configs_records[f"{res_str}.status"]
     code = cast(int, status["code"])
     return Status(code=Code(code), message=str(status["message"]))
 
 
-def recordset_to_fitins(recordset: RecordSet, keep_input: bool) -> FitIns:
-    """Derive FitIns from a RecordSet object."""
-    parameters, config = _recordset_to_fit_or_evaluate_ins_components(
-        recordset,
+def recorddict_to_fitins(recorddict: RecordDict, keep_input: bool) -> FitIns:
+    """Derive FitIns from a RecordDict object."""
+    parameters, config = _recorddict_to_fit_or_evaluate_ins_components(
+        recorddict,
         ins_str="fitins",
         keep_input=keep_input,
     )
@@ -208,44 +208,44 @@ def recordset_to_fitins(recordset: RecordSet, keep_input: bool) -> FitIns:
     return FitIns(parameters=parameters, config=config)
 
 
-def fitins_to_recordset(fitins: FitIns, keep_input: bool) -> RecordSet:
-    """Construct a RecordSet from a FitIns object."""
-    return _fit_or_evaluate_ins_to_recordset(fitins, keep_input)
+def fitins_to_recorddict(fitins: FitIns, keep_input: bool) -> RecordDict:
+    """Construct a RecordDict from a FitIns object."""
+    return _fit_or_evaluate_ins_to_recorddict(fitins, keep_input)
 
 
-def recordset_to_fitres(recordset: RecordSet, keep_input: bool) -> FitRes:
-    """Derive FitRes from a RecordSet object."""
+def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
+    """Derive FitRes from a RecordDict object."""
     ins_str = "fitres"
     parameters = parametersrecord_to_parameters(
-        recordset.parameters_records[f"{ins_str}.parameters"], keep_input=keep_input
+        recorddict.parameters_records[f"{ins_str}.parameters"], keep_input=keep_input
     )
 
     num_examples = cast(
-        int, recordset.metrics_records[f"{ins_str}.num_examples"]["num_examples"]
+        int, recorddict.metrics_records[f"{ins_str}.num_examples"]["num_examples"]
     )
-    configs_record = recordset.configs_records[f"{ins_str}.metrics"]
+    configs_record = recorddict.configs_records[f"{ins_str}.metrics"]
     # pylint: disable-next=protected-access
     metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record)
-    status = _extract_status_from_recordset(ins_str, recordset)
+    status = _extract_status_from_recorddict(ins_str, recorddict)
 
     return FitRes(
         status=status, parameters=parameters, num_examples=num_examples, metrics=metrics
     )
 
 
-def fitres_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
-    """Construct a RecordSet from a FitRes object."""
-    recordset = RecordSet()
+def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
+    """Construct a RecordDict from a FitRes object."""
+    recorddict = RecordDict()
 
     res_str = "fitres"
 
-    recordset.configs_records[f"{res_str}.metrics"] = ConfigsRecord(
+    recorddict.configs_records[f"{res_str}.metrics"] = ConfigsRecord(
         fitres.metrics  # type: ignore
     )
-    recordset.metrics_records[f"{res_str}.num_examples"] = MetricsRecord(
+    recorddict.metrics_records[f"{res_str}.num_examples"] = MetricsRecord(
         {"num_examples": fitres.num_examples},
     )
-    recordset.parameters_records[f"{res_str}.parameters"] = (
+    recorddict.parameters_records[f"{res_str}.parameters"] = (
         parameters_to_parametersrecord(
             fitres.parameters,
             keep_input,
@@ -253,15 +253,15 @@ def fitres_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
     )
 
     # status
-    recordset = _embed_status_into_recordset(res_str, fitres.status, recordset)
+    recorddict = _embed_status_into_recorddict(res_str, fitres.status, recorddict)
 
-    return recordset
+    return recorddict
 
 
-def recordset_to_evaluateins(recordset: RecordSet, keep_input: bool) -> EvaluateIns:
-    """Derive EvaluateIns from a RecordSet object."""
-    parameters, config = _recordset_to_fit_or_evaluate_ins_components(
-        recordset,
+def recorddict_to_evaluateins(recorddict: RecordDict, keep_input: bool) -> EvaluateIns:
+    """Derive EvaluateIns from a RecordDict object."""
+    parameters, config = _recorddict_to_fit_or_evaluate_ins_components(
+        recorddict,
         ins_str="evaluateins",
         keep_input=keep_input,
     )
@@ -269,150 +269,150 @@ def recordset_to_evaluateins(recordset: RecordSet, keep_input: bool) -> Evaluate
     return EvaluateIns(parameters=parameters, config=config)
 
 
-def evaluateins_to_recordset(evaluateins: EvaluateIns, keep_input: bool) -> RecordSet:
-    """Construct a RecordSet from a EvaluateIns object."""
-    return _fit_or_evaluate_ins_to_recordset(evaluateins, keep_input)
+def evaluateins_to_recorddict(evaluateins: EvaluateIns, keep_input: bool) -> RecordDict:
+    """Construct a RecordDict from a EvaluateIns object."""
+    return _fit_or_evaluate_ins_to_recorddict(evaluateins, keep_input)
 
 
-def recordset_to_evaluateres(recordset: RecordSet) -> EvaluateRes:
-    """Derive EvaluateRes from a RecordSet object."""
+def recorddict_to_evaluateres(recorddict: RecordDict) -> EvaluateRes:
+    """Derive EvaluateRes from a RecordDict object."""
     ins_str = "evaluateres"
 
-    loss = cast(int, recordset.metrics_records[f"{ins_str}.loss"]["loss"])
+    loss = cast(int, recorddict.metrics_records[f"{ins_str}.loss"]["loss"])
 
     num_examples = cast(
-        int, recordset.metrics_records[f"{ins_str}.num_examples"]["num_examples"]
+        int, recorddict.metrics_records[f"{ins_str}.num_examples"]["num_examples"]
     )
-    configs_record = recordset.configs_records[f"{ins_str}.metrics"]
+    configs_record = recorddict.configs_records[f"{ins_str}.metrics"]
 
     # pylint: disable-next=protected-access
     metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record)
-    status = _extract_status_from_recordset(ins_str, recordset)
+    status = _extract_status_from_recorddict(ins_str, recorddict)
 
     return EvaluateRes(
         status=status, loss=loss, num_examples=num_examples, metrics=metrics
     )
 
 
-def evaluateres_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
-    """Construct a RecordSet from a EvaluateRes object."""
-    recordset = RecordSet()
+def evaluateres_to_recorddict(evaluateres: EvaluateRes) -> RecordDict:
+    """Construct a RecordDict from a EvaluateRes object."""
+    recorddict = RecordDict()
 
     res_str = "evaluateres"
     # loss
-    recordset.metrics_records[f"{res_str}.loss"] = MetricsRecord(
+    recorddict.metrics_records[f"{res_str}.loss"] = MetricsRecord(
         {"loss": evaluateres.loss},
     )
 
     # num_examples
-    recordset.metrics_records[f"{res_str}.num_examples"] = MetricsRecord(
+    recorddict.metrics_records[f"{res_str}.num_examples"] = MetricsRecord(
         {"num_examples": evaluateres.num_examples},
     )
 
     # metrics
-    recordset.configs_records[f"{res_str}.metrics"] = ConfigsRecord(
+    recorddict.configs_records[f"{res_str}.metrics"] = ConfigsRecord(
         evaluateres.metrics,  # type: ignore
     )
 
     # status
-    recordset = _embed_status_into_recordset(
-        f"{res_str}", evaluateres.status, recordset
+    recorddict = _embed_status_into_recorddict(
+        f"{res_str}", evaluateres.status, recorddict
     )
 
-    return recordset
+    return recorddict
 
 
-def recordset_to_getparametersins(recordset: RecordSet) -> GetParametersIns:
-    """Derive GetParametersIns from a RecordSet object."""
-    config_record = recordset.configs_records["getparametersins.config"]
+def recorddict_to_getparametersins(recorddict: RecordDict) -> GetParametersIns:
+    """Derive GetParametersIns from a RecordDict object."""
+    config_record = recorddict.configs_records["getparametersins.config"]
     # pylint: disable-next=protected-access
     config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
     return GetParametersIns(config=config_dict)
 
 
-def getparametersins_to_recordset(getparameters_ins: GetParametersIns) -> RecordSet:
-    """Construct a RecordSet from a GetParametersIns object."""
-    recordset = RecordSet()
+def getparametersins_to_recorddict(getparameters_ins: GetParametersIns) -> RecordDict:
+    """Construct a RecordDict from a GetParametersIns object."""
+    recorddict = RecordDict()
 
-    recordset.configs_records["getparametersins.config"] = ConfigsRecord(
+    recorddict.configs_records["getparametersins.config"] = ConfigsRecord(
         getparameters_ins.config,  # type: ignore
     )
-    return recordset
+    return recorddict
 
 
-def getparametersres_to_recordset(
+def getparametersres_to_recorddict(
     getparametersres: GetParametersRes, keep_input: bool
-) -> RecordSet:
-    """Construct a RecordSet from a GetParametersRes object."""
-    recordset = RecordSet()
+) -> RecordDict:
+    """Construct a RecordDict from a GetParametersRes object."""
+    recorddict = RecordDict()
     res_str = "getparametersres"
     parameters_record = parameters_to_parametersrecord(
         getparametersres.parameters, keep_input=keep_input
     )
-    recordset.parameters_records[f"{res_str}.parameters"] = parameters_record
+    recorddict.parameters_records[f"{res_str}.parameters"] = parameters_record
 
     # status
-    recordset = _embed_status_into_recordset(
-        res_str, getparametersres.status, recordset
+    recorddict = _embed_status_into_recorddict(
+        res_str, getparametersres.status, recorddict
     )
 
-    return recordset
+    return recorddict
 
 
-def recordset_to_getparametersres(
-    recordset: RecordSet, keep_input: bool
+def recorddict_to_getparametersres(
+    recorddict: RecordDict, keep_input: bool
 ) -> GetParametersRes:
-    """Derive GetParametersRes from a RecordSet object."""
+    """Derive GetParametersRes from a RecordDict object."""
     res_str = "getparametersres"
     parameters = parametersrecord_to_parameters(
-        recordset.parameters_records[f"{res_str}.parameters"], keep_input=keep_input
+        recorddict.parameters_records[f"{res_str}.parameters"], keep_input=keep_input
     )
 
-    status = _extract_status_from_recordset(res_str, recordset)
+    status = _extract_status_from_recorddict(res_str, recorddict)
     return GetParametersRes(status=status, parameters=parameters)
 
 
-def recordset_to_getpropertiesins(recordset: RecordSet) -> GetPropertiesIns:
-    """Derive GetPropertiesIns from a RecordSet object."""
-    config_record = recordset.configs_records["getpropertiesins.config"]
+def recorddict_to_getpropertiesins(recorddict: RecordDict) -> GetPropertiesIns:
+    """Derive GetPropertiesIns from a RecordDict object."""
+    config_record = recorddict.configs_records["getpropertiesins.config"]
     # pylint: disable-next=protected-access
     config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
     return GetPropertiesIns(config=config_dict)
 
 
-def getpropertiesins_to_recordset(getpropertiesins: GetPropertiesIns) -> RecordSet:
-    """Construct a RecordSet from a GetPropertiesRes object."""
-    recordset = RecordSet()
-    recordset.configs_records["getpropertiesins.config"] = ConfigsRecord(
+def getpropertiesins_to_recorddict(getpropertiesins: GetPropertiesIns) -> RecordDict:
+    """Construct a RecordDict from a GetPropertiesRes object."""
+    recorddict = RecordDict()
+    recorddict.configs_records["getpropertiesins.config"] = ConfigsRecord(
         getpropertiesins.config,  # type: ignore
     )
-    return recordset
+    return recorddict
 
 
-def recordset_to_getpropertiesres(recordset: RecordSet) -> GetPropertiesRes:
-    """Derive GetPropertiesRes from a RecordSet object."""
+def recorddict_to_getpropertiesres(recorddict: RecordDict) -> GetPropertiesRes:
+    """Derive GetPropertiesRes from a RecordDict object."""
     res_str = "getpropertiesres"
-    config_record = recordset.configs_records[f"{res_str}.properties"]
+    config_record = recorddict.configs_records[f"{res_str}.properties"]
     # pylint: disable-next=protected-access
     properties = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
-    status = _extract_status_from_recordset(res_str, recordset=recordset)
+    status = _extract_status_from_recorddict(res_str, recorddict=recorddict)
 
     return GetPropertiesRes(status=status, properties=properties)
 
 
-def getpropertiesres_to_recordset(getpropertiesres: GetPropertiesRes) -> RecordSet:
-    """Construct a RecordSet from a GetPropertiesRes object."""
-    recordset = RecordSet()
+def getpropertiesres_to_recorddict(getpropertiesres: GetPropertiesRes) -> RecordDict:
+    """Construct a RecordDict from a GetPropertiesRes object."""
+    recorddict = RecordDict()
     res_str = "getpropertiesres"
-    recordset.configs_records[f"{res_str}.properties"] = ConfigsRecord(
+    recorddict.configs_records[f"{res_str}.properties"] = ConfigsRecord(
         getpropertiesres.properties,  # type: ignore
     )
     # status
-    recordset = _embed_status_into_recordset(
-        res_str, getpropertiesres.status, recordset
+    recorddict = _embed_status_into_recorddict(
+        res_str, getpropertiesres.status, recorddict
     )
 
-    return recordset
+    return recorddict

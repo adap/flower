@@ -20,7 +20,7 @@ from unittest.mock import MagicMock, Mock
 
 import pytest
 
-from flwr.common import Context, RecordSet
+from flwr.common import Context, RecordDict
 from flwr.server import ServerApp, ServerConfig
 from flwr.server.grid import Grid
 
@@ -31,7 +31,7 @@ def test_server_app_custom_mode() -> None:
     app = ServerApp()
     grid = MagicMock()
     context = Context(
-        run_id=1, node_id=0, node_config={}, state=RecordSet(), run_config={}
+        run_id=1, node_id=0, node_config={}, state=RecordDict(), run_config={}
     )
 
     called = {"called": False}

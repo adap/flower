@@ -21,7 +21,7 @@ from collections.abc import Iterable
 from unittest.mock import MagicMock, patch
 from uuid import UUID, uuid4
 
-from flwr.common import ConfigsRecord, Message, RecordSet, now
+from flwr.common import ConfigsRecord, Message, RecordDict, now
 from flwr.common.constant import (
     NODE_ID_NUM_BYTES,
     PING_MAX_INTERVAL,
@@ -47,7 +47,7 @@ def push_messages(grid: InMemoryGrid, num_nodes: int) -> tuple[Iterable[str], in
         node_id = grid.state.create_node(ping_interval=PING_MAX_INTERVAL)
     num_messages = 3
     msgs = [
-        grid.create_message(RecordSet(), "query", node_id, "")
+        grid.create_message(RecordDict(), "query", node_id, "")
         for _ in range(num_messages)
     ]
 
@@ -59,7 +59,7 @@ def get_replies(grid: InMemoryGrid, msg_ids: Iterable[str], node_id: int) -> lis
     """Help create message replies and pull them from state."""
     messages = grid.state.get_message_ins(node_id, limit=len(list(msg_ids)))
     for msg in messages:
-        reply_msg = msg.create_reply(RecordSet())
+        reply_msg = msg.create_reply(RecordDict())
         grid.state.store_message_res(message=reply_msg)
 
     # Execute: Pull messages
@@ -121,7 +121,7 @@ class TestInMemoryGrid(unittest.TestCase):
         # Prepare
         num_messages = 2
         msgs = [
-            self.grid.create_message(RecordSet(), "query", 1, "")
+            self.grid.create_message(RecordDict(), "query", 1, "")
             for _ in range(num_messages)
         ]
 
@@ -138,7 +138,9 @@ class TestInMemoryGrid(unittest.TestCase):
     def test_push_messages_invalid(self) -> None:
         """Test pushing invalid messages."""
         # Prepare
-        msgs = [self.grid.create_message(RecordSet(), "query", 1, "") for _ in range(2)]
+        msgs = [
+            self.grid.create_message(RecordDict(), "query", 1, "") for _ in range(2)
+        ]
         # Use invalid run_id
         msgs[1].metadata._run_id += 1  # type: ignore
 
@@ -168,7 +170,7 @@ class TestInMemoryGrid(unittest.TestCase):
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
         # Prepare
-        msgs = [self.grid.create_message(RecordSet(), "query", 0, "")]
+        msgs = [self.grid.create_message(RecordDict(), "query", 0, "")]
         # Prepare
         msg_ids = [str(uuid4()) for _ in range(2)]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)
@@ -185,7 +187,7 @@ class TestInMemoryGrid(unittest.TestCase):
     def test_send_and_receive_messages_timeout(self) -> None:
         """Test send and receive messages but time out."""
         # Prepare
-        msgs = [self.grid.create_message(RecordSet(), "query", 0, "")]
+        msgs = [self.grid.create_message(RecordDict(), "query", 0, "")]
         # Prepare
         msg_ids = [str(uuid4()) for _ in range(2)]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)
@@ -265,6 +267,6 @@ def create_message_replies_for_specific_ids(message_ids: list[str]) -> list[Mess
         message.metadata._message_id = msg_id  # type: ignore
 
         # Append reply
-        message_replies.append(message.create_reply(content=RecordSet()))
+        message_replies.append(message.create_reply(content=RecordDict()))
 
     return message_replies

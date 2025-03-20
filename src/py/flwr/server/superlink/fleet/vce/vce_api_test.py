@@ -36,12 +36,12 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
-    RecordSet,
+    RecordDict,
     Scalar,
     now,
 )
 from flwr.common.constant import Status
-from flwr.common.recordset_compat import getpropertiesins_to_recordset
+from flwr.common.recorddict_compat import getpropertiesins_to_recorddict
 from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
@@ -55,7 +55,7 @@ from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, state: RecordSet) -> None:
+    def __init__(self, state: RecordDict) -> None:
         self.client_state = state
 
     def get_properties(self, config: Config) -> dict[str, Scalar]:
@@ -142,9 +142,9 @@ def register_messages_into_state(
         # Construct a Message
         mult_factor = 2024 + i
         getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
-        recordset = getpropertiesins_to_recordset(getproperties_ins)
+        recorddict = getpropertiesins_to_recorddict(getproperties_ins)
         message = Message(
-            content=recordset,
+            content=recorddict,
             metadata=Metadata(
                 run_id=run_id,
                 message_id="",
