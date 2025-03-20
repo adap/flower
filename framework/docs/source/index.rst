@@ -35,11 +35,13 @@ A learning-oriented series of federated learning tutorials, the best place to st
     :maxdepth: 1
     :caption: Tutorial
 
+    tute1
     tutorial-series-what-is-federated-learning
     tutorial-series-get-started-with-flower-pytorch
     tutorial-series-use-a-federated-learning-strategy-pytorch
     tutorial-series-build-a-strategy-from-scratch-pytorch
     tutorial-series-customize-the-client-pytorch
+    notebooks/index
 
 .. toctree::
     :maxdepth: 1
