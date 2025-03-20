@@ -265,7 +265,7 @@ class ConfigsRecord(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["data",b"data"]) -> None: ...
 global___ConfigsRecord = ConfigsRecord
 
-class RecordSet(google.protobuf.message.Message):
+class RecordDict(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class ParametersEntry(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -328,4 +328,4 @@ class RecordSet(google.protobuf.message.Message):
         configs: typing.Optional[typing.Mapping[typing.Text, global___ConfigsRecord]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["configs",b"configs","metrics",b"metrics","parameters",b"parameters"]) -> None: ...
-global___RecordSet = RecordSet
+global___RecordDict = RecordDict
