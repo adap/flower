@@ -57,7 +57,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     dst_node_id : int
         An identifier for the node receiving this message.
     reply_to_message_id : str
-        An identifier for the message this message replies to.
+        An identifier for the message to which this message is a reply.
     group_id : str
         An identifier for grouping messages. In some settings,
         this is used as the FL round.
@@ -113,7 +113,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
 
     @property
     def reply_to_message_id(self) -> str:
-        """An identifier for the message this message replies to."""
+        """An identifier for the message to which this message is a reply."""
         return cast(str, self.__dict__["_reply_to_message_id"])
 
     @property
@@ -352,7 +352,8 @@ class Message:
                 message_id="",  # Will be set by the SuperLink
                 src_node_id=0,  # Will be set before pushed
                 dst_node_id=dst_node_id,
-                reply_to_message_id="",  # Instruction messages reply to no message
+                # Instruction messages do not reply to any message
+                reply_to_message_id="",
                 group_id=group_id or "",
                 created_at=now().timestamp(),
                 ttl=ttl or DEFAULT_TTL,
@@ -370,7 +371,7 @@ class Message:
             current = now().timestamp()
             metadata = Metadata(
                 run_id=reply_to.metadata.run_id,
-                message_id="",
+                message_id="",  # Will be set by the SuperLink
                 src_node_id=reply_to.metadata.dst_node_id,
                 dst_node_id=reply_to.metadata.src_node_id,
                 reply_to_message_id=reply_to.metadata.message_id,
