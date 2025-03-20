@@ -121,12 +121,12 @@ class RecordDict(TypedDict[str, RecordType]):
     >>>
     >>>  # We can create a ConfigsRecord
     >>>  c_record = ConfigsRecord({"lr": 0.1, "batch-size": 128})
-    >>>  # Adding it to the record_set would look like this
+    >>>  # Adding it to the RecordDict would look like this
     >>>  my_records["my_config"] = c_record
     >>>
     >>>  # We can create a MetricsRecord following a similar process
     >>>  m_record = MetricsRecord({"accuracy": 0.93, "losses": [0.23, 0.1]})
-    >>>  # Adding it to the record_set would look like this
+    >>>  # Adding it to the RecordDict would look like this
     >>>  my_records["my_metrics"] = m_record
 
     Adding a :code:`ArrayRecord` follows the same steps as above but first,
@@ -143,7 +143,7 @@ class RecordDict(TypedDict[str, RecordType]):
     >>>  # Finally, create the record
     >>>  arr_record = ArrayRecord({"my_array": arr})
     >>>
-    >>>  # Adding it to the record_set would look like this
+    >>>  # Adding it to the RecordDict would look like this
     >>>  my_records["my_parameters"] = arr_record
 
     For additional examples on how to construct each of the records types shown
