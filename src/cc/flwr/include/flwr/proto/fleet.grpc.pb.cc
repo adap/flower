@@ -29,6 +29,7 @@ static const char* Fleet_method_names[] = {
   "/flwr.proto.Fleet/PullTaskIns",
   "/flwr.proto.Fleet/PushTaskRes",
   "/flwr.proto.Fleet/GetRun",
+  "/flwr.proto.Fleet/GetFab",
 };
 
 std::unique_ptr< Fleet::Stub> Fleet::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -44,6 +45,7 @@ Fleet::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, con
   , rpcmethod_PullTaskIns_(Fleet_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_PushTaskRes_(Fleet_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetRun_(Fleet_method_names[5], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetFab_(Fleet_method_names[6], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status Fleet::Stub::CreateNode(::grpc::ClientContext* context, const ::flwr::proto::CreateNodeRequest& request, ::flwr::proto::CreateNodeResponse* response) {
@@ -184,6 +186,29 @@ void Fleet::Stub::async::GetRun(::grpc::ClientContext* context, const ::flwr::pr
   return result;
 }
 
+::grpc::Status Fleet::Stub::GetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::flwr::proto::GetFabResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::flwr::proto::GetFabRequest, ::flwr::proto::GetFabResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetFab_, context, request, response);
+}
+
+void Fleet::Stub::async::GetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest* request, ::flwr::proto::GetFabResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::flwr::proto::GetFabRequest, ::flwr::proto::GetFabResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetFab_, context, request, response, std::move(f));
+}
+
+void Fleet::Stub::async::GetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest* request, ::flwr::proto::GetFabResponse* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetFab_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::flwr::proto::GetFabResponse>* Fleet::Stub::PrepareAsyncGetFabRaw(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::flwr::proto::GetFabResponse, ::flwr::proto::GetFabRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetFab_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::flwr::proto::GetFabResponse>* Fleet::Stub::AsyncGetFabRaw(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncGetFabRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 Fleet::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       Fleet_method_names[0],
@@ -245,6 +270,16 @@ Fleet::Service::Service() {
              ::flwr::proto::GetRunResponse* resp) {
                return service->GetRun(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      Fleet_method_names[6],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< Fleet::Service, ::flwr::proto::GetFabRequest, ::flwr::proto::GetFabResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](Fleet::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::flwr::proto::GetFabRequest* req,
+             ::flwr::proto::GetFabResponse* resp) {
+               return service->GetFab(ctx, req, resp);
+             }, this)));
 }
 
 Fleet::Service::~Service() {
@@ -286,6 +321,13 @@ Fleet::Service::~Service() {
 }
 
 ::grpc::Status Fleet::Service::GetRun(::grpc::ServerContext* context, const ::flwr::proto::GetRunRequest* request, ::flwr::proto::GetRunResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status Fleet::Service::GetFab(::grpc::ServerContext* context, const ::flwr::proto::GetFabRequest* request, ::flwr::proto::GetFabResponse* response) {
   (void) context;
   (void) request;
   (void) response;
