@@ -24,8 +24,9 @@ from unittest.mock import Mock
 import numpy as np
 
 import flwr
-from flwr.common import Error, Message, Metadata, RecordDict
+from flwr.common import Error, Message, Metadata, RecordDict, now
 from flwr.common import recorddict_compat as compat
+from flwr.common.message import make_message
 from flwr.common.typing import (
     Code,
     Config,
@@ -217,12 +218,13 @@ class GridClientProxyTestCase(unittest.TestCase):
             message_id="",  # Will be set by the server
             src_node_id=0,
             dst_node_id=dst_node_id,
-            reply_to_message="",
+            reply_to_message_id="",
             group_id=group_id,
+            created_at=now().timestamp(),
             ttl=ttl_,
             message_type=message_type,
         )
-        self.created_msg = Message(metadata=metadata, content=content)
+        self.created_msg = make_message(metadata=metadata, content=content)
         return self.created_msg
 
     def _exec_send_and_receive(
@@ -248,9 +250,9 @@ class GridClientProxyTestCase(unittest.TestCase):
                 recorddict = compat.evaluateres_to_recorddict(res)
 
             if recorddict is not None:
-                ret = msg.create_reply(recorddict)
+                ret = Message(recorddict, reply_to=msg)
             else:
-                ret = msg.create_error_reply(ERROR_REPLY)
+                ret = Message(ERROR_REPLY, reply_to=msg)
 
             # Reply messages given the push message
             return [ret]

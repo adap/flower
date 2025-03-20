@@ -33,7 +33,6 @@ from flwr.common import (
     ConfigsRecord,
     Context,
     GetPropertiesIns,
-    Message,
     MessageTypeLegacy,
     Metadata,
     RecordDict,
@@ -41,6 +40,7 @@ from flwr.common import (
     now,
 )
 from flwr.common.constant import Status
+from flwr.common.message import make_message
 from flwr.common.recorddict_compat import getpropertiesins_to_recorddict
 from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.fleet.vce.vce_api import (
@@ -143,7 +143,7 @@ def register_messages_into_state(
         mult_factor = 2024 + i
         getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
         recorddict = getpropertiesins_to_recorddict(getproperties_ins)
-        message = Message(
+        message = make_message(
             content=recorddict,
             metadata=Metadata(
                 run_id=run_id,
@@ -151,7 +151,8 @@ def register_messages_into_state(
                 group_id="",
                 src_node_id=0,
                 dst_node_id=dst_node_id,  # indicate destination node
-                reply_to_message="",
+                reply_to_message_id="",
+                created_at=now().timestamp(),
                 ttl=DEFAULT_TTL,
                 message_type=MessageTypeLegacy.GET_PROPERTIES,
             ),
@@ -322,5 +323,5 @@ class TestFleetSimulationEngineRayBackend(TestCase):
             content = message_res.content
             assert (
                 content.configs_records["getpropertiesres.properties"]["result"]
-                == expected_results[UUID(message_res.metadata.reply_to_message)]
+                == expected_results[UUID(message_res.metadata.reply_to_message_id)]
             )

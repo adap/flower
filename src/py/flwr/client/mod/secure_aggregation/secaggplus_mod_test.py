@@ -20,14 +20,7 @@ from itertools import product
 from typing import Callable
 
 from flwr.client.mod import make_ffn
-from flwr.common import (
-    DEFAULT_TTL,
-    ConfigsRecord,
-    Context,
-    Message,
-    Metadata,
-    RecordDict,
-)
+from flwr.common import ConfigsRecord, Context, Message, RecordDict
 from flwr.common.constant import MessageType
 from flwr.common.secure_aggregation.secaggplus_constants import (
     RECORD_KEY_CONFIGS,
@@ -46,23 +39,15 @@ def get_test_handler(
     """."""
 
     def empty_ffn(_msg: Message, _2: Context) -> Message:
-        return _msg.create_reply(RecordDict())
+        return Message(RecordDict(), reply_to=_msg)
 
     app = make_ffn(empty_ffn, [secaggplus_mod])
 
     def func(configs: dict[str, ConfigsRecordValues]) -> ConfigsRecord:
         in_msg = Message(
-            metadata=Metadata(
-                run_id=0,
-                message_id="",
-                src_node_id=0,
-                dst_node_id=123,
-                reply_to_message="",
-                group_id="",
-                ttl=DEFAULT_TTL,
-                message_type=MessageType.TRAIN,
-            ),
-            content=RecordDict({RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
+            RecordDict({RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
+            dst_node_id=123,
+            message_type=MessageType.TRAIN,
         )
         out_msg = app(in_msg, ctxt)
         return out_msg.content.configs_records[RECORD_KEY_CONFIGS]

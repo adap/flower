@@ -27,7 +27,9 @@ from flwr.common import (
     Metadata,
     MetricsRecord,
     RecordDict,
+    now,
 )
+from flwr.common.message import make_message
 
 from .utils import make_ffn
 
@@ -67,7 +69,7 @@ def make_mock_app(name: str, footprint: list[str]) -> ClientAppCallable:
     def app(message: Message, context: Context) -> Message:
         footprint.append(name)
         message.content.configs_records[name] = ConfigsRecord()
-        out_message = Message(metadata=message.metadata, content=RecordDict())
+        out_message = make_message(metadata=message.metadata, content=RecordDict())
         out_message.content.configs_records[name] = ConfigsRecord()
         print(context)
         return out_message
@@ -76,7 +78,7 @@ def make_mock_app(name: str, footprint: list[str]) -> ClientAppCallable:
 
 
 def _get_dummy_flower_message() -> Message:
-    return Message(
+    return make_message(
         content=RecordDict(),
         metadata=Metadata(
             run_id=0,
@@ -84,7 +86,8 @@ def _get_dummy_flower_message() -> Message:
             group_id="",
             src_node_id=0,
             dst_node_id=0,
-            reply_to_message="",
+            reply_to_message_id="",
+            created_at=now().timestamp(),
             ttl=DEFAULT_TTL,
             message_type="train",
         ),
@@ -143,7 +146,7 @@ class TestMakeApp(unittest.TestCase):
         ) -> Message:
             footprint.append("filter")
             message.content.configs_records["filter"] = ConfigsRecord()
-            out_message = Message(metadata=message.metadata, content=RecordDict())
+            out_message = make_message(metadata=message.metadata, content=RecordDict())
             out_message.content.configs_records["filter"] = ConfigsRecord()
             # Skip calling app
             return out_message

@@ -23,6 +23,8 @@ from typing import Any, Callable, Optional, TypeVar, Union, cast
 import pytest
 
 from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.common.date import now
+from flwr.common.message import make_message
 
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2
@@ -47,7 +49,7 @@ from . import (
     RecordDict,
     typing,
 )
-from .message import Error, Message, Metadata
+from .message import Error, Metadata
 from .serde import (
     array_from_proto,
     array_to_proto,
@@ -272,7 +274,8 @@ class RecordMaker:
             group_id=self.get_str(30),
             src_node_id=self.rng.randint(0, 1 << 63),
             dst_node_id=self.rng.randint(0, 1 << 63),
-            reply_to_message=self.get_str(64),
+            reply_to_message_id=self.get_str(64),
+            created_at=now().timestamp(),
             ttl=self.rng.randint(1, 1 << 30),
             message_type=self.get_message_type(),
         )
@@ -391,7 +394,7 @@ def test_message_serialization_deserialization(
     metadata = maker.metadata()
     metadata.dst_node_id = SUPERLINK_NODE_ID  # Assume SuperLink node ID
 
-    original = Message(
+    original = make_message(
         metadata=metadata,
         content=None if content_fn is None else content_fn(maker),
         error=None if error_fn is None else error_fn(0),

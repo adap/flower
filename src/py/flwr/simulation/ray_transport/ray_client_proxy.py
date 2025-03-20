@@ -23,7 +23,7 @@ from flwr import common
 from flwr.client import ClientFnExt
 from flwr.client.client_app import ClientApp
 from flwr.client.run_info_store import DeprecatedRunInfoStore
-from flwr.common import DEFAULT_TTL, Message, Metadata, RecordDict
+from flwr.common import DEFAULT_TTL, Message, Metadata, RecordDict, now
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -31,6 +31,7 @@ from flwr.common.constant import (
     MessageTypeLegacy,
 )
 from flwr.common.logger import log
+from flwr.common.message import make_message
 from flwr.common.recorddict_compat import (
     evaluateins_to_recorddict,
     fitins_to_recorddict,
@@ -117,7 +118,7 @@ class RayActorClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> Message:
         """Wrap a RecordDict inside a Message."""
-        return Message(
+        return make_message(
             content=recorddict,
             metadata=Metadata(
                 run_id=0,
@@ -125,7 +126,8 @@ class RayActorClientProxy(ClientProxy):
                 group_id=str(group_id) if group_id is not None else "",
                 src_node_id=0,
                 dst_node_id=self.node_id,
-                reply_to_message="",
+                reply_to_message_id="",
+                created_at=now().timestamp(),
                 ttl=timeout if timeout else DEFAULT_TTL,
                 message_type=message_type,
             ),

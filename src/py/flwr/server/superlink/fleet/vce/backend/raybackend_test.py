@@ -35,8 +35,10 @@ from flwr.common import (
     Metadata,
     RecordDict,
     Scalar,
+    now,
 )
 from flwr.common.constant import PARTITION_ID_KEY
+from flwr.common.message import make_message
 from flwr.common.recorddict_compat import getpropertiesins_to_recorddict
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
@@ -91,7 +93,7 @@ def _create_message_and_context() -> tuple[Message, Context, float]:
     run_id = 0
     getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
     recorddict = getpropertiesins_to_recorddict(getproperties_ins)
-    message = Message(
+    message = make_message(
         content=recorddict,
         metadata=Metadata(
             run_id=run_id,
@@ -99,7 +101,8 @@ def _create_message_and_context() -> tuple[Message, Context, float]:
             group_id="",
             src_node_id=0,
             dst_node_id=0,
-            reply_to_message="",
+            reply_to_message_id="",
+            created_at=now().timestamp(),
             ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
