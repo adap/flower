@@ -242,7 +242,7 @@ class DeepseekV3Attention: Module {
     } else {
       self.qProj = Linear(hiddenSize, numHeads * qHeadDim, bias: false)
     }
-    
+
     self.kvAProjWithMqa = Linear(
       hiddenSize,
       kvLoraRank + qkRopeHeadDim,
@@ -283,17 +283,17 @@ class DeepseekV3Attention: Module {
       mscale: mscale,
       mscaleAllDim: mscaleAllDim)
   }
-  
+
   func callAsFunction(_ x: MLXArray, mask: MLXArray? = nil, cache: KVCache? = nil) -> MLXArray {
     let (B, L, D) = (x.dim(0), x.dim(1), x.dim(2))
-    
+
     var q: MLXArray
     if qLoraRank == nil {
       q = self.qProj!(x)
     } else {
       q = self.qBProj!(self.qALayerNorm!(self.qAProj!(x)))
     }
-    
+
     q = q.reshaped(B, L, self.numHeads, self.qHeadDim).transposed(0, 2, 1, 3)
     let splitQ = split(q, indices: [qkNopeHeadDim], axis: -1)
     var (qNope, qPe) = (splitQ[0], splitQ[1])
@@ -305,8 +305,9 @@ class DeepseekV3Attention: Module {
     var kv = self.kvBProj(kvALayerNorm(compressedKv))
     kv = kv.reshaped(B, L, self.numHeads, -1).transposed(0, 2, 1, 3)
     let splitKv = split(kv, indices: [self.qkNopeHeadDim], axis: -1)
-    var (kNope, values) = (splitKv[0], splitKv[1])
     
+    var (kNope, values) = (splitKv[0], splitKv[1])
+
     var keys: MLXArray
     if let cache = cache {
       qPe = self.rope(qPe, offset: cache.offset)
@@ -319,9 +320,15 @@ class DeepseekV3Attention: Module {
       kPe = repeated(kPe, count: numHeads, axis: 1)
       keys = concatenated([kNope, kPe], axis: -1)
     }
+    
     let queries = concatenated([qNope, qPe], axis: -1)
-    let output = scaledDotProductAttention(queries: queries, keys: keys, values: values, scale: scale, mask: mask).transposed(0, 2, 1, 3)
-      .reshaped(B, L, -1)
+    
+    let output = scaledDotProductAttention(
+      queries: queries, keys: keys, values: values, scale: scale, mask: mask
+    )
+    .transposed(0, 2, 1, 3)
+    .reshaped(B, L, -1)
+    
     return self.oProj(output)
   }
 }
