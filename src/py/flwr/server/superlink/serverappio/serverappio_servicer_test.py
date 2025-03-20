@@ -22,7 +22,7 @@ from typing import Optional
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigsRecord, Context, Error, RecordDict
+from flwr.common import ConfigsRecord, Context, Error, Message, RecordDict
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SUPERLINK_NODE_ID,
@@ -31,7 +31,7 @@ from flwr.common.constant import (
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
-from flwr.proto.message_pb2 import Message  # pylint: disable=E0611
+from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
@@ -230,7 +230,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def _assert_push_ins_messages_not_allowed(
-        self, message: Message, run_id: int
+        self, message: ProtoMessage, run_id: int
     ) -> None:
         """Assert `PushInsMessages` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
@@ -309,10 +309,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         msg_ = self.state.get_message_ins(node_id=node_id, limit=1)[0]
 
         if content is not None:
-            reply_msg = msg_.create_reply(content=content)
+            reply_msg = Message(content, reply_to=msg_)
         else:
             assert error is not None
-            reply_msg = msg_.create_error_reply(error=error)
+            reply_msg = Message(error, reply_to=msg_)
 
         self.state.store_message_res(message=reply_msg)
 

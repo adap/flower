@@ -17,7 +17,8 @@
 
 from unittest.mock import MagicMock
 
-from flwr.common import Message, Metadata, RecordDict
+from flwr.common import Metadata, RecordDict, now
+from flwr.common.message import make_message
 from flwr.common.serde import message_to_proto
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -105,7 +106,7 @@ def test_pull_messages() -> None:
 def test_push_messages() -> None:
     """Test push_messages."""
     # Prepare
-    msg = Message(
+    msg = make_message(
         content=RecordDict(),
         metadata=Metadata(
             run_id=123,
@@ -113,7 +114,8 @@ def test_push_messages() -> None:
             group_id="",
             src_node_id=0,
             dst_node_id=0,
-            reply_to_message="",
+            reply_to_message_id="",
+            created_at=now().timestamp(),
             ttl=123,
             message_type="query",
         ),

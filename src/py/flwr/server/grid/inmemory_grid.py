@@ -20,8 +20,9 @@ from collections.abc import Iterable
 from typing import Optional, cast
 from uuid import UUID
 
-from flwr.common import DEFAULT_TTL, Message, Metadata, RecordDict
+from flwr.common import Message, RecordDict
 from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.common.logger import warn_deprecated_feature
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
@@ -53,10 +54,8 @@ class InMemoryGrid(Grid):
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            message.metadata.run_id == cast(Run, self._run).run_id
-            and message.metadata.src_node_id == self.node.node_id
-            and message.metadata.message_id == ""
-            and message.metadata.reply_to_message == ""
+            message.metadata.message_id == ""
+            and message.metadata.reply_to_message_id == ""
             and message.metadata.ttl > 0
             and message.metadata.delivered_at == ""
         ):
@@ -87,19 +86,11 @@ class InMemoryGrid(Grid):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        ttl_ = DEFAULT_TTL if ttl is None else ttl
-
-        metadata = Metadata(
-            run_id=cast(Run, self._run).run_id,
-            message_id="",  # Will be set by the server
-            src_node_id=self.node.node_id,
-            dst_node_id=dst_node_id,
-            reply_to_message="",
-            group_id=group_id,
-            ttl=ttl_,
-            message_type=message_type,
+        warn_deprecated_feature(
+            "`Driver.create_message` / `Grid.create_message` is deprecated."
+            "Use `Message` constructor instead."
         )
-        return Message(metadata=metadata, content=content)
+        return Message(content, dst_node_id, message_type, ttl=ttl, group_id=group_id)
 
     def get_node_ids(self) -> Iterable[int]:
         """Get node IDs."""
@@ -113,6 +104,9 @@ class InMemoryGrid(Grid):
         """
         msg_ids: list[str] = []
         for msg in messages:
+            # Populate metadata
+            msg.metadata.__dict__["_run_id"] = cast(Run, self._run).run_id
+            msg.metadata.__dict__["_src_node_id"] = self.node.node_id
             # Check message
             self._check_message(msg)
             # Store in state
@@ -133,7 +127,7 @@ class InMemoryGrid(Grid):
         message_res_list = self.state.get_message_res(message_ids=msg_ids)
         # Get IDs of Messages these replies are for
         message_ins_ids_to_delete = {
-            UUID(msg_res.metadata.reply_to_message) for msg_res in message_res_list
+            UUID(msg_res.metadata.reply_to_message_id) for msg_res in message_res_list
         }
         # Delete
         self.state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
@@ -162,7 +156,7 @@ class InMemoryGrid(Grid):
             res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
             msg_ids.difference_update(
-                {msg.metadata.reply_to_message for msg in res_msgs}
+                {msg.metadata.reply_to_message_id for msg in res_msgs}
             )
             if len(msg_ids) == 0:
                 break

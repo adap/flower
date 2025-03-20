@@ -158,7 +158,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         res_metadata = message.metadata
         with self.lock:
             # Check if the Message it is replying to exists and is valid
-            msg_ins_id = res_metadata.reply_to_message
+            msg_ins_id = res_metadata.reply_to_message_id
             msg_ins = self.message_ins_store.get(UUID(msg_ins_id))
 
             # Ensure that dst_node_id of original Message matches the src_node_id of

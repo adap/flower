@@ -46,10 +46,7 @@ def push_messages(grid: InMemoryGrid, num_nodes: int) -> tuple[Iterable[str], in
     for _ in range(num_nodes):
         node_id = grid.state.create_node(ping_interval=PING_MAX_INTERVAL)
     num_messages = 3
-    msgs = [
-        grid.create_message(RecordDict(), "query", node_id, "")
-        for _ in range(num_messages)
-    ]
+    msgs = [Message(RecordDict(), node_id, "query") for _ in range(num_messages)]
 
     # Execute: push messages
     return grid.push_messages(msgs), node_id
@@ -59,12 +56,12 @@ def get_replies(grid: InMemoryGrid, msg_ids: Iterable[str], node_id: int) -> lis
     """Help create message replies and pull them from state."""
     messages = grid.state.get_message_ins(node_id, limit=len(list(msg_ids)))
     for msg in messages:
-        reply_msg = msg.create_reply(RecordDict())
+        reply_msg = Message(RecordDict(), reply_to=msg)
         grid.state.store_message_res(message=reply_msg)
 
     # Execute: Pull messages
     pulled_msgs = grid.pull_messages(msg_ids)
-    return [msg.metadata.reply_to_message for msg in pulled_msgs]
+    return [msg.metadata.reply_to_message_id for msg in pulled_msgs]
 
 
 class TestInMemoryGrid(unittest.TestCase):
@@ -138,11 +135,9 @@ class TestInMemoryGrid(unittest.TestCase):
     def test_push_messages_invalid(self) -> None:
         """Test pushing invalid messages."""
         # Prepare
-        msgs = [
-            self.grid.create_message(RecordDict(), "query", 1, "") for _ in range(2)
-        ]
+        msgs = [Message(RecordDict(), 1, "query") for _ in range(2)]
         # Use invalid run_id
-        msgs[1].metadata._run_id += 1  # type: ignore
+        msgs[1].metadata.__dict__["_message_id"] = "invalid message id"
 
         # Execute and assert
         with self.assertRaises(ValueError):
@@ -157,7 +152,7 @@ class TestInMemoryGrid(unittest.TestCase):
 
         # Execute
         pulled_msgs = list(self.grid.pull_messages(msg_ids))
-        reply_tos = [msg.metadata.reply_to_message for msg in pulled_msgs]
+        reply_tos = [msg.metadata.reply_to_message_id for msg in pulled_msgs]
 
         # Assert
         self.assertEqual(len(pulled_msgs), 2)
@@ -179,7 +174,7 @@ class TestInMemoryGrid(unittest.TestCase):
 
         # Execute
         ret_msgs = list(self.grid.send_and_receive(msgs))
-        reply_tos = [msg.metadata.reply_to_message for msg in ret_msgs]
+        reply_tos = [msg.metadata.reply_to_message_id for msg in ret_msgs]
         # Assert
         self.assertEqual(len(ret_msgs), 2)
         self.assertEqual(reply_tos, msg_ids)
@@ -267,6 +262,6 @@ def create_message_replies_for_specific_ids(message_ids: list[str]) -> list[Mess
         message.metadata._message_id = msg_id  # type: ignore
 
         # Append reply
-        message_replies.append(message.create_reply(content=RecordDict()))
+        message_replies.append(Message(RecordDict(), reply_to=message))
 
     return message_replies
