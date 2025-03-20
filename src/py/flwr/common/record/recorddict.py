@@ -210,9 +210,29 @@ class RecordDict(TypedDict[str, RecordType]):
 
 
 class RecordSet(RecordDict):
-    """RecordSet is deprecated and will be removed in a future release.
+    """Deprecated class ``RecordSet``, use ``RecordDict`` instead.
 
-    Use :class:`RecordDict` instead.
+    This class exists solely for backward compatibility with legacy
+    code that previously used ``RecordSet``. It has been renamed
+    to ``RecordDict`` and will be removed in a future release.
+
+    .. warning::
+        ``RecordSet`` is deprecated and will be removed in a future release.
+        Use ``RecordDict`` instead.
+
+    Examples
+    --------
+    Legacy (deprecated) usage::
+
+        from flwr.common import RecordSet
+
+        my_content = RecordSet()
+
+    Updated usage::
+
+        from flwr.common import RecordDict
+
+        my_content = RecordDict()
     """
 
     _warning_logged = False
@@ -222,7 +242,8 @@ class RecordSet(RecordDict):
             RecordSet._warning_logged = True
             log(
                 WARN,
-                "The `RecordSet` class has been renamed to `RecordDict` and will "
-                "be removed in a future release. Please update your code accordingly.",
+                "The `RecordSet` class has been renamed to `RecordDict`. "
+                "Support for `RecordSet` will be removed in a future release. "
+                "Please update your code accordingly.",
             )
         super().__init__(records)

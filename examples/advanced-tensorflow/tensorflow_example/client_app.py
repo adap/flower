@@ -66,7 +66,7 @@ class FlowerClient(NumPyClient):
         for variable in model.get_layer(layer_name).trainable_variables:
             state_dict_arrays[f"{layer_name}.{variable.name}"] = Array(variable.numpy())
 
-        # Add to recorddict (replace if already exists)
+        # Add to RecordDict (replace if already exists)
         self.client_state.parameters_records[self.local_layer_name] = ParametersRecord(
             state_dict_arrays
         )
