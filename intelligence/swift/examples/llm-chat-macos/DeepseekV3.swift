@@ -305,7 +305,7 @@ class DeepseekV3Attention: Module {
     var kv = self.kvBProj(kvALayerNorm(compressedKv))
     kv = kv.reshaped(B, L, self.numHeads, -1).transposed(0, 2, 1, 3)
     let splitKv = split(kv, indices: [self.qkNopeHeadDim], axis: -1)
-    
+
     var (kNope, values) = (splitKv[0], splitKv[1])
 
     var keys: MLXArray
@@ -320,15 +320,37 @@ class DeepseekV3Attention: Module {
       kPe = repeated(kPe, count: numHeads, axis: 1)
       keys = concatenated([kNope, kPe], axis: -1)
     }
-    
+
     let queries = concatenated([qNope, qPe], axis: -1)
-    
+
     let output = scaledDotProductAttention(
       queries: queries, keys: keys, values: values, scale: scale, mask: mask
     )
     .transposed(0, 2, 1, 3)
     .reshaped(B, L, -1)
-    
+
     return self.oProj(output)
+  }
+}
+
+class DeepseekV3MLP: Module, UnaryLayer {
+  var config: DeepseekV3Configuration
+  var hiddenSize: Int
+  var intermediateSize: Int
+  var gateProj: Linear
+  var upProj: Linear
+  var downProj: Linear
+
+  init(config: DeepseekV3Configuration, hiddenSize: Int? = nil, intermediateSize: Int? = nil) {
+    self.config = config
+    self.hiddenSize = hiddenSize ?? config.hiddenSize
+    self.intermediateSize = intermediateSize ?? config.intermediateSize
+    self.gateProj = Linear(self.hiddenSize, self.intermediateSize, bias: false)
+    self.upProj = Linear(self.hiddenSize, self.intermediateSize, bias: false)
+    self.downProj = Linear(self.intermediateSize, self.hiddenSize, bias: false)
+  }
+
+  func callAsFunction(_ x: MLXArray) -> MLXArray {
+    self.downProj(silu(self.gateProj(x)) * self.upProj(x))
   }
 }
