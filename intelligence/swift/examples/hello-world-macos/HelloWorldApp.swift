@@ -11,9 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// =============================================================================
+// ==============================================================================
 
-export const DEFAULT_MODEL = 'meta/llama3.2-1b/instruct-fp16';
-export const REMOTE_URL = 'https://api.flower.ai';
-export const VERSION = '0.1.7';
-export const SDK = 'TS';
+import SwiftUI
+
+@main
+struct HelloWorldApp: App {
+  var body: some Scene {
+    WindowGroup {
+      ContentView()
+    }
+  }
+}

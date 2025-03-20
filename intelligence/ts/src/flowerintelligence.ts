@@ -16,7 +16,15 @@
 import { Engine } from './engines/engine';
 import { RemoteEngine } from './engines/remoteEngine';
 import { TransformersEngine } from './engines/transformersEngine';
-import { ChatOptions, ChatResponseResult, FailureCode, Message, Progress, Result } from './typing';
+import {
+  ChatOptions,
+  ChatResponseResult,
+  Failure,
+  FailureCode,
+  Message,
+  Progress,
+  Result,
+} from './typing';
 import { WebllmEngine } from './engines/webllmEngine';
 import { DEFAULT_MODEL } from './constants';
 import { isNode } from './env';
@@ -195,31 +203,58 @@ export class FlowerIntelligence {
   }
 
   private async chooseLocalEngine(modelId: string): Promise<Result<Engine>> {
-    const compatibleEngines = (
-      await Promise.all(
-        this.#availableLocalEngines.map(async (engine) => {
-          return (await engine.isSupported(modelId)) ? engine : null;
-        })
-      )
-    ).filter((item): item is Engine => item !== null);
+    const results = await Promise.all(
+      this.#availableLocalEngines.map(async (engine) => {
+        const supportResult = await engine.isSupported(modelId);
+        return { engine, supportResult };
+      })
+    );
+    const compatibleEngines = results
+      .filter(({ supportResult }) => supportResult.ok)
+      .map(({ engine }) => engine);
 
     if (compatibleEngines.length > 0) {
       // Currently we just select the first compatible localEngine without further check
       return { ok: true, value: compatibleEngines[0] };
     } else {
+      // We extract the failures from the results that didn't return a true `ok`
+      const failures = results
+        .filter(
+          (result): result is { engine: Engine; supportResult: { ok: false; failure: Failure } } =>
+            !result.supportResult.ok
+        )
+        .map(({ supportResult }) => supportResult.failure);
+
+      // We then compute which failure has the highest FailureCode
+      // usually corresponding to the most specific error
+      const highestFailure = failures.reduce(
+        (max, failure) => (failure.code > max.code ? failure : max),
+        failures[0]
+      );
       return {
         ok: false,
-        failure: {
-          code: FailureCode.NoLocalProviderError,
-          description: `No available local engine for ${modelId}.`,
-        },
+        failure: highestFailure,
       };
     }
   }
 
   private getOrCreateRemoteEngine(localFailure?: Result<Engine>): Result<Engine> {
-    if (localFailure && !FlowerIntelligence.#remoteHandoff && !FlowerIntelligence.#apiKey) {
-      return localFailure;
+    if (
+      localFailure &&
+      !localFailure.ok &&
+      (!FlowerIntelligence.#remoteHandoff || !FlowerIntelligence.#apiKey)
+    ) {
+      let description = localFailure.failure.description;
+      description += FlowerIntelligence.#remoteHandoff
+        ? '\nAdditionally, a valid API key for Remote Handoff was not provided.'
+        : '\nAdditionally, Remote Handoff was not enabled.';
+      return {
+        ok: false,
+        failure: {
+          code: localFailure.failure.code,
+          description,
+        },
+      };
     }
     if (!FlowerIntelligence.#remoteHandoff) {
       return {

@@ -11,9 +11,21 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// =============================================================================
+// ==============================================================================
 
-export const DEFAULT_MODEL = 'meta/llama3.2-1b/instruct-fp16';
-export const REMOTE_URL = 'https://api.flower.ai';
-export const VERSION = '0.1.7';
-export const SDK = 'TS';
+import FlowerIntelligence
+
+let fi = FlowerIntelligence.instance
+
+let messages = [
+  Message(role: "system", content: "You are a helpful assistant."),
+  Message(role: "user", content: "Why is the sky blue?"),
+]
+
+let result = await fi.chat("Why is the sky blue?")
+switch result {
+case .success(let success):
+  print(success.content)
+case .failure(let failure):
+  print(failure.message)
+}
