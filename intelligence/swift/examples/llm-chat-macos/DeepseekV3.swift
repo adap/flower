@@ -14,6 +14,7 @@
 // ==============================================================================
 
 import Foundation
+import MLX
 import MLXLLM
 import MLXLMCommon
 
@@ -113,4 +114,35 @@ struct DeepseekV3Configuration: Codable, Sendable {
       [String: StringOrNumber].self, forKey: .ropeScaling)
     self.attentionBias = try container.decode(Bool.self, forKey: .attentionBias)
   }
+}
+
+func yarnFindCorrectionDim(
+  numRotations: Double, dim: Double, base: Double = 10000, maxPositionEmbeddings: Double = 2048
+) -> Double {
+  return (dim * log(maxPositionEmbeddings / (numRotations * 2 * Double.pi))) / (2 * log(base))
+}
+
+func yarnFindCorrectionRange(
+  lowRot: Double, highRot: Double, dim: Double, base: Double = 10000,
+  maxPositionEmbeddings: Double = 2048
+) -> (Int, Int) {
+  let low = Int(
+    floor(
+      yarnFindCorrectionDim(
+        numRotations: lowRot, dim: dim, base: base, maxPositionEmbeddings: maxPositionEmbeddings)))
+  let high = Int(
+    ceil(
+      yarnFindCorrectionDim(
+        numRotations: highRot, dim: dim, base: base, maxPositionEmbeddings: maxPositionEmbeddings)))
+  return (max(low, 0), min(high, Int(dim - 1)))
+}
+
+func yarnGetMScale(scale: Double = 1, mscale: Double = 1) -> Double {
+  return scale <= 1 ? 1.0 : 0.1 * mscale * log(scale) + 1.0
+}
+
+func yarnLinearRampMask(minVal: Double, maxVal: Double, dim: Int) -> MLXArray {
+  let updatedMaxVal = minVal == maxVal ? maxVal + 0.001 : maxVal
+  let linearFunc = (MLXArray(0..<dim) - minVal) / (updatedMaxVal - minVal)
+  return clip(linearFunc, min: 0, max: 1)
 }
