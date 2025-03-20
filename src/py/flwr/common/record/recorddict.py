@@ -242,7 +242,7 @@ class RecordSet(RecordDict):
             RecordSet._warning_logged = True
             log(
                 WARN,
-                "The `RecordSet` class has been renamed to `RecordDict` and will "
+                "The `RecordSet` class has been renamed to `RecordDict`. `RecordSet` will "
                 "be removed in a future release. Please update your code accordingly.",
             )
         super().__init__(records)

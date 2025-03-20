@@ -70,14 +70,14 @@ def handle_control_message(message: Message) -> tuple[Optional[Message], int]:
         Number of seconds that the client should disconnect from the server.
     """
     if message.metadata.message_type == "reconnect":
-        # Retrieve ReconnectIns from recorddict
+        # Retrieve ReconnectIns from RecordDict
         recorddict = message.content
         seconds = cast(int, recorddict.configs_records["config"]["seconds"])
         # Construct ReconnectIns and call _reconnect
         disconnect_msg, sleep_duration = _reconnect(
             ServerMessage.ReconnectIns(seconds=seconds)
         )
-        # Store DisconnectRes in recorddict
+        # Store DisconnectRes in RecordDict
         reason = cast(int, disconnect_msg.disconnect_res.reason)
         recorddict = RecordDict()
         recorddict.configs_records["config"] = ConfigsRecord({"reason": reason})
