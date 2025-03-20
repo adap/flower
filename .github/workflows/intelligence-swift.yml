@@ -52,4 +52,4 @@ jobs:
             xcode-version: "16.2"
 
       - name: Run tests
-        run: xcodebuild test -scheme flower -destination 'platform=macOS'
+        run: xcodebuild test -scheme FlowerIntelligenceTests -destination 'platform=macOS'

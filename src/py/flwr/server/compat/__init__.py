@@ -15,10 +15,10 @@
 """Flower ServerApp compatibility package."""
 
 
-from .app import start_driver as start_driver
+from .app import start_grid as start_grid
 from .legacy_context import LegacyContext as LegacyContext
 
 __all__ = [
     "LegacyContext",
-    "start_driver",
+    "start_grid",
 ]

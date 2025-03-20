@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for in-memory driver."""
+"""Tests for in-memory grid."""
 
 
 import time
@@ -38,43 +38,41 @@ from flwr.server.superlink.linkstate import (
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
-from .inmemory_grid import InMemoryDriver
+from .inmemory_grid import InMemoryGrid
 
 
-def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str], int]:
+def push_messages(grid: InMemoryGrid, num_nodes: int) -> tuple[Iterable[str], int]:
     """Help push messages to state."""
     for _ in range(num_nodes):
-        node_id = driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
+        node_id = grid.state.create_node(ping_interval=PING_MAX_INTERVAL)
     num_messages = 3
     msgs = [Message(RecordSet(), node_id, "query") for _ in range(num_messages)]
 
     # Execute: push messages
-    return driver.push_messages(msgs), node_id
+    return grid.push_messages(msgs), node_id
 
 
-def get_replies(
-    driver: InMemoryDriver, msg_ids: Iterable[str], node_id: int
-) -> list[str]:
+def get_replies(grid: InMemoryGrid, msg_ids: Iterable[str], node_id: int) -> list[str]:
     """Help create message replies and pull them from state."""
-    messages = driver.state.get_message_ins(node_id, limit=len(list(msg_ids)))
+    messages = grid.state.get_message_ins(node_id, limit=len(list(msg_ids)))
     for msg in messages:
         reply_msg = Message(RecordSet(), reply_to=msg)
-        driver.state.store_message_res(message=reply_msg)
+        grid.state.store_message_res(message=reply_msg)
 
     # Execute: Pull messages
-    pulled_msgs = driver.pull_messages(msg_ids)
+    pulled_msgs = grid.pull_messages(msg_ids)
     return [msg.metadata.reply_to_message for msg in pulled_msgs]
 
 
-class TestInMemoryDriver(unittest.TestCase):
-    """Tests for `InMemoryDriver` class."""
+class TestInMemoryGrid(unittest.TestCase):
+    """Tests for `InMemoryGrid` class."""
 
     def setUp(self) -> None:
-        """Initialize State and Driver instance before each test.
+        """Initialize State and Grid instance before each test.
 
-        Driver uses the default StateFactory (i.e. SQLite)
+        Grid uses the default StateFactory (i.e. SQLite)
         """
-        # Create driver
+        # Create grid
         self.num_nodes = 42
         self.state = MagicMock()
         self.state.get_nodes.return_value = [
@@ -94,23 +92,23 @@ class TestInMemoryDriver(unittest.TestCase):
             status=RunStatus(status=Status.PENDING, sub_status="", details=""),
         )
         state_factory = MagicMock(state=lambda: self.state)
-        self.driver = InMemoryDriver(state_factory=state_factory)
-        self.driver.set_run(run_id=61016)
-        self.driver.state = self.state
+        self.grid = InMemoryGrid(state_factory=state_factory)
+        self.grid.set_run(run_id=61016)
+        self.grid.state = self.state
 
     def test_get_run(self) -> None:
-        """Test the InMemoryDriver starting with run_id."""
+        """Test the InMemoryGrid starting with run_id."""
         # Assert
-        self.assertEqual(self.driver.run.run_id, 61016)
-        self.assertEqual(self.driver.run.fab_id, "mock/mock")
-        self.assertEqual(self.driver.run.fab_version, "v1.0.0")
-        self.assertEqual(self.driver.run.fab_hash, "9f86d08")
-        self.assertEqual(self.driver.run.override_config["test_key"], "test_value")
+        self.assertEqual(self.grid.run.run_id, 61016)
+        self.assertEqual(self.grid.run.fab_id, "mock/mock")
+        self.assertEqual(self.grid.run.fab_version, "v1.0.0")
+        self.assertEqual(self.grid.run.fab_hash, "9f86d08")
+        self.assertEqual(self.grid.run.override_config["test_key"], "test_value")
 
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
         # Execute
-        node_ids = list(self.driver.get_node_ids())
+        node_ids = list(self.grid.get_node_ids())
 
         # Assert
         self.assertEqual(len(node_ids), self.num_nodes)
@@ -120,7 +118,7 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         num_messages = 2
         msgs = [
-            self.driver.create_message(RecordSet(), "query", 1, "")
+            self.grid.create_message(RecordSet(), "query", 1, "")
             for _ in range(num_messages)
         ]
 
@@ -128,7 +126,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.state.store_message_ins.side_effect = msg_ids
 
         # Execute
-        msg_res_ids = list(self.driver.push_messages(msgs))
+        msg_res_ids = list(self.grid.push_messages(msgs))
 
         # Assert
         self.assertEqual(len(msg_res_ids), 2)
@@ -143,7 +141,7 @@ class TestInMemoryDriver(unittest.TestCase):
 
         # Execute and assert
         with self.assertRaises(ValueError):
-            self.driver.push_messages(msgs)
+            self.grid.push_messages(msgs)
 
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""
@@ -153,7 +151,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.state.get_message_res.return_value = message_res_list
 
         # Execute
-        pulled_msgs = list(self.driver.pull_messages(msg_ids))
+        pulled_msgs = list(self.grid.pull_messages(msg_ids))
         reply_tos = [msg.metadata.reply_to_message for msg in pulled_msgs]
 
         # Assert
@@ -167,7 +165,7 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
         # Prepare
-        msgs = [self.driver.create_message(RecordSet(), "query", 0, "")]
+        msgs = [self.grid.create_message(RecordSet(), "query", 0, "")]
         # Prepare
         msg_ids = [str(uuid4()) for _ in range(2)]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)
@@ -175,7 +173,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.state.store_message_ins.side_effect = msg_ids
 
         # Execute
-        ret_msgs = list(self.driver.send_and_receive(msgs))
+        ret_msgs = list(self.grid.send_and_receive(msgs))
         reply_tos = [msg.metadata.reply_to_message for msg in ret_msgs]
         # Assert
         self.assertEqual(len(ret_msgs), 2)
@@ -184,7 +182,7 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_send_and_receive_messages_timeout(self) -> None:
         """Test send and receive messages but time out."""
         # Prepare
-        msgs = [self.driver.create_message(RecordSet(), "query", 0, "")]
+        msgs = [self.grid.create_message(RecordSet(), "query", 0, "")]
         # Prepare
         msg_ids = [str(uuid4()) for _ in range(2)]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)
@@ -194,7 +192,7 @@ class TestInMemoryDriver(unittest.TestCase):
         # Execute
         with patch("time.sleep", side_effect=lambda t: time.sleep(t * 0.01)):
             start_time = time.time()
-            ret_msgs = list(self.driver.send_and_receive(msgs, timeout=-1))
+            ret_msgs = list(self.grid.send_and_receive(msgs, timeout=-1))
 
         # Assert
         self.assertLess(time.time() - start_time, 0.2)
@@ -205,9 +203,9 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         state = LinkStateFactory("").state()
         run_id = state.create_run("", "", "", {}, ConfigsRecord())
-        self.driver = InMemoryDriver(MagicMock(state=lambda: state))
-        self.driver.set_run(run_id=run_id)
-        msg_ids, node_id = push_messages(self.driver, self.num_nodes)
+        self.grid = InMemoryGrid(MagicMock(state=lambda: state))
+        self.grid.set_run(run_id=run_id)
+        msg_ids, node_id = push_messages(self.grid, self.num_nodes)
         assert isinstance(state, SqliteLinkState)
 
         # Check recorded
@@ -215,7 +213,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.assertEqual(num_msg_ins, len(list(msg_ids)))
 
         # Prepare: create replies
-        reply_tos = get_replies(self.driver, msg_ids, node_id)
+        reply_tos = get_replies(self.grid, msg_ids, node_id)
 
         # Query number of Messages and reply Messages in State
         num_msg_res = len(state.query("SELECT * FROM message_res;"))
@@ -232,16 +230,16 @@ class TestInMemoryDriver(unittest.TestCase):
         state_factory = LinkStateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
         run_id = state.create_run("", "", "", {}, ConfigsRecord())
-        self.driver = InMemoryDriver(state_factory)
-        self.driver.set_run(run_id=run_id)
-        msg_ids, node_id = push_messages(self.driver, self.num_nodes)
+        self.grid = InMemoryGrid(state_factory)
+        self.grid.set_run(run_id=run_id)
+        msg_ids, node_id = push_messages(self.grid, self.num_nodes)
         assert isinstance(state, InMemoryLinkState)
 
         # Check recorded
         self.assertEqual(len(state.message_ins_store), len(list(msg_ids)))
 
         # Prepare: create replies
-        reply_tos = get_replies(self.driver, msg_ids, node_id)
+        reply_tos = get_replies(self.grid, msg_ids, node_id)
 
         # Assert
         self.assertEqual(set(reply_tos), set(msg_ids))

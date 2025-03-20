@@ -190,18 +190,40 @@ export class TransformersEngine extends BaseEngine {
     }
   }
 
-  async isSupported(model: string): Promise<boolean> {
+  async isSupported(model: string): Promise<Result<void>> {
     const modelConfigRes = await getEngineModelConfig(model, 'onnx');
     if (modelConfigRes.ok) {
       if (modelConfigRes.value.vram) {
         const availableRamRes = await getAvailableRAM();
         if (availableRamRes.ok) {
-          return modelConfigRes.value.vram < availableRamRes.value;
+          if (modelConfigRes.value.vram < availableRamRes.value) {
+            return {
+              ok: true,
+              value: undefined,
+            };
+          } else {
+            return {
+              ok: false,
+              failure: {
+                code: FailureCode.InsufficientRAMError,
+                description: `Model ${model} requires at least ${String(modelConfigRes.value.vram)} MB to be loaded, but on ${String(availableRamRes.value)} MB are currently available.`,
+              },
+            };
+          }
         }
       }
-      return true;
+      return {
+        ok: true,
+        value: undefined,
+      };
     }
-    return false;
+    return {
+      ok: false,
+      failure: {
+        code: FailureCode.UnsupportedModelError,
+        description: `Model ${model} is unavailable for local inference.`,
+      },
+    };
   }
 }
 

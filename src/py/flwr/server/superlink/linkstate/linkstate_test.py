@@ -761,7 +761,11 @@ class StateTest(unittest.TestCase):
         assert node_public_keys == public_keys
 
     def test_acknowledge_ping(self) -> None:
-        """Test if acknowledge_ping works and if get_nodes return online nodes."""
+        """Test if acknowledge_ping works and get_nodes return online nodes.
+
+        We permit one missed ping (PING_PATIENCE × ping_interval) before marking the
+        node offline, where PING_PATIENCE = 2.
+        """
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
@@ -773,7 +777,11 @@ class StateTest(unittest.TestCase):
 
         # Execute
         current_time = time.time()
-        with patch("time.time", side_effect=lambda: current_time + 50):
+        # Test with current_time + 70s
+        # node_ids[:70] remain online until current_time + PING_PATIENCE * 30s = 60s,
+        # node_ids[70:] remain online until current_time + PING_PATIENCE * 90s = 180s.
+        # As a result, only node_ids[70:] will be returned by get_nodes().
+        with patch("time.time", side_effect=lambda: current_time + 70):
             actual_node_ids = state.get_nodes(run_id)
 
         # Assert
@@ -789,6 +797,63 @@ class StateTest(unittest.TestCase):
 
         # Assert
         assert not is_successful
+
+    def test_node_unavailable_error(self) -> None:
+        """Test if get_message_res return Message containing node unavailable error."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        node_id_0 = state.create_node(ping_interval=10)
+        node_id_1 = state.create_node(ping_interval=10)
+
+        # Run acknowledge ping
+        state.acknowledge_ping(node_id_0, ping_interval=90)
+        state.acknowledge_ping(node_id_1, ping_interval=30)
+
+        # Create and store Messages
+        in_message_0 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id_0,
+                run_id=run_id,
+            )
+        )
+        in_message_1 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id_1,
+                run_id=run_id,
+            )
+        )
+        message_id_0 = state.store_message_ins(in_message_0)
+        message_id_1 = state.store_message_ins(in_message_1)
+        assert message_id_0 is not None and message_id_1 is not None
+
+        # Get Message to mark them delivered
+        state.get_message_ins(node_id=node_id_0, limit=None)
+        state.get_message_ins(node_id=node_id_1, limit=None)
+
+        # Create and store reply Messages
+        res_message_0 = in_message_0.create_reply(content=RecordSet())
+        state.store_message_res(res_message_0)
+
+        # Execute
+        current_time = time.time()
+        # Test with current_time + 100s
+        # node_id_0 remain online until current_time + PING_PATIENCE * 90s = 180s,
+        # node_id_1 remain online until current_time + PING_PATIENCE * 30s = 60s.
+        # As a result, a reply message with NODE_UNAVAILABLE
+        # error will generate for node_id_1.
+        with patch("time.time", side_effect=lambda: current_time + 100):
+            res_message_list = state.get_message_res({message_id_0, message_id_1})
+
+        # Assert
+        assert len(res_message_list) == 2
+        # Note: res_message_list[0] corresponds to node_id_1
+        # due to the order change from get_message_res()
+        err_message = res_message_list[0]
+        assert err_message.has_error()
+        assert err_message.error.code == ErrorCode.NODE_UNAVAILABLE
 
     def test_store_message_res_message_ins_expired(self) -> None:
         """Test behavior of store_message_res when the Message it replies to is
