@@ -88,7 +88,7 @@ rest = ["starlette", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.6"
-types-protobuf = "==4.21.0.7"
+types-protobuf = "==5.29.1.20250208"
 types-requests = "==2.31.0.20240125"
 types-setuptools = "==69.0.0.20240125"
 clang-format = "==17.0.6"
@@ -104,7 +104,7 @@ pytest = "==7.4.4"
 pytest-cov = "==4.1.0"
 pytest-watcher = "==0.4.3"
 grpcio-tools = "==1.62.3"
-mypy-protobuf = "==3.2.0"
+mypy-protobuf = "==3.6.0"
 jupyterlab = "==4.0.12"
 rope = "==1.13.0"
 semver = "==3.0.2"
