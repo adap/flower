@@ -181,7 +181,7 @@ class GrpcGrid(Grid):
         The `run_id` and `src_node_id` will be set automatically.
         """
         warn_deprecated_feature(
-            "`Driver.create_message` is deprecated."
+            "`Driver.create_message` / `Grid.create_message` is deprecated."
             "Use `Message` constructor instead."
         )
         return Message(content, dst_node_id, message_type, ttl=ttl, group_id=group_id)
