@@ -21,7 +21,7 @@ from unittest.mock import Mock, patch
 
 import grpc
 
-from flwr.common import DEFAULT_TTL, RecordSet
+from flwr.common import DEFAULT_TTL, RecordDict
 from flwr.common.message import Error, Message
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -95,7 +95,7 @@ class TestGrpcGrid(unittest.TestCase):
         # Prepare
         mock_response = Mock(message_ids=["id1", "id2"])
         self.mock_stub.PushMessages.return_value = mock_response
-        msgs = [Message(RecordSet(), 0, "query") for _ in range(2)]
+        msgs = [Message(RecordDict(), 0, "query") for _ in range(2)]
 
         # Execute
         msg_ids = self.grid.push_messages(msgs)
@@ -115,7 +115,7 @@ class TestGrpcGrid(unittest.TestCase):
         # Prepare
         mock_response = Mock(message_ids=["id1", "id2"])
         self.mock_stub.PushMessages.return_value = mock_response
-        msgs = [Message(RecordSet(), 0, "query") for _ in range(2)]
+        msgs = [Message(RecordDict(), 0, "query") for _ in range(2)]
         # Use invalid run_id
         msgs[1].metadata.__dict__["_message_id"] = "invalid message id"
 
@@ -159,7 +159,7 @@ class TestGrpcGrid(unittest.TestCase):
         # Prepare
         mock_response = Mock(message_ids=["id1"])
         self.mock_stub.PushMessages.return_value = mock_response
-        # The response message must include either `content` (i.e. a recordset) or
+        # The response message must include either `content` (i.e. a recorddict) or
         # an `Error`. We choose the latter in this case
         run_id = 1234
         mssg = create_res_message(
@@ -170,7 +170,7 @@ class TestGrpcGrid(unittest.TestCase):
 
         mock_response.messages_list = message_res_list
         self.mock_stub.PullMessages.return_value = mock_response
-        msgs = [self.grid.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)]
+        msgs = [self.grid.create_message(RecordDict(), "query", 0, "", DEFAULT_TTL)]
 
         # Execute
         ret_msgs = list(self.grid.send_and_receive(msgs))
@@ -187,7 +187,7 @@ class TestGrpcGrid(unittest.TestCase):
         self.mock_stub.PushMessages.return_value = mock_response
         mock_response = Mock(messages_list=[])
         self.mock_stub.PullMessages.return_value = mock_response
-        msgs = [self.grid.create_message(RecordSet(), "query", 0, "", DEFAULT_TTL)]
+        msgs = [self.grid.create_message(RecordDict(), "query", 0, "", DEFAULT_TTL)]
 
         # Execute
         with patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01)):

@@ -23,7 +23,7 @@ from typing import Any, Callable, Optional, Union
 
 import pytest
 
-from . import RecordSet
+from . import RecordDict
 from .constant import MESSAGE_TTL_TOLERANCE
 from .date import now
 from .message import (
@@ -41,13 +41,13 @@ from .serde_test import RecordMaker
     "content_fn, error_fn, context",
     [
         (
-            lambda maker: maker.recordset(1, 1, 1),
+            lambda maker: maker.recorddict(1, 1, 1),
             None,
             None,
         ),  # check when only content is set
         (None, lambda code: Error(code=code), None),  # check when only error is set
         (
-            lambda maker: maker.recordset(1, 1, 1),
+            lambda maker: maker.recorddict(1, 1, 1),
             lambda code: Error(code=code),
             pytest.raises(TypeError),
         ),  # check when both are set (ERROR)
@@ -55,7 +55,7 @@ from .serde_test import RecordMaker
     ],
 )
 def test_message_creation(
-    content_fn: Callable[[RecordMaker], RecordSet],
+    content_fn: Callable[[RecordMaker], RecordDict],
     error_fn: Callable[[int], Error],
     context: Any,
 ) -> None:
@@ -85,7 +85,7 @@ def create_message_with_content(ttl: Optional[float] = None) -> Message:
     metadata = maker.metadata()
     if ttl:
         metadata.ttl = ttl
-    return make_message(metadata=metadata, content=RecordSet())
+    return make_message(metadata=metadata, content=RecordDict())
 
 
 def create_message_with_error(ttl: Optional[float] = None) -> Message:
@@ -117,7 +117,7 @@ def test_altering_message(
         if message.has_content():
             message.error = Error(code=123)
         if message.has_error():
-            message.content = RecordSet()
+            message.content = RecordDict()
 
 
 @pytest.mark.parametrize(
@@ -143,7 +143,7 @@ def test_create_reply(
         dummy_error = Error(code=0, reason="it crashed")
         reply_message = Message(dummy_error, reply_to=message, ttl=reply_ttl)
     else:
-        reply_message = Message(RecordSet(), reply_to=message, ttl=reply_ttl)
+        reply_message = Message(RecordDict(), reply_to=message, ttl=reply_ttl)
 
     # Ensure reply has a higher timestamp
     assert message.metadata.created_at < reply_message.metadata.created_at
@@ -181,7 +181,7 @@ def test_create_reply(
             Message,
             {
                 "metadata": RecordMaker(1).metadata(),
-                "content": RecordMaker(1).recordset(1, 1, 1),
+                "content": RecordMaker(1).recorddict(1, 1, 1),
             },
         ),
         (
@@ -228,7 +228,7 @@ def test_reply_ttl_limitation(
         dummy_error = Error(code=0, reason="test error")
         reply_message = Message(dummy_error, reply_to=message, ttl=reply_ttl)
     else:
-        reply_message = Message(RecordSet(), reply_to=message, ttl=reply_ttl)
+        reply_message = Message(RecordDict(), reply_to=message, ttl=reply_ttl)
 
     assert reply_message.metadata.ttl - expected_reply_ttl <= MESSAGE_TTL_TOLERANCE, (
         f"Expected TTL to be <= {expected_reply_ttl}, "

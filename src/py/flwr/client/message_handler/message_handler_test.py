@@ -35,11 +35,11 @@ from flwr.common import (
     GetPropertiesRes,
     Metadata,
     Parameters,
-    RecordSet,
+    RecordDict,
     Status,
     now,
 )
-from flwr.common import recordset_compat as compat
+from flwr.common import recorddict_compat as compat
 from flwr.common import typing
 from flwr.common.constant import MessageTypeLegacy
 from flwr.common.message import make_message
@@ -123,7 +123,7 @@ def test_client_without_get_properties() -> None:
     """Test client implementing get_properties."""
     # Prepare
     client = ClientWithoutProps()
-    recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
+    recorddict = compat.getpropertiesins_to_recorddict(GetPropertiesIns({}))
     message = make_message(
         metadata=Metadata(
             run_id=123,
@@ -136,7 +136,7 @@ def test_client_without_get_properties() -> None:
             ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
-        content=recordset,
+        content=recorddict,
     )
 
     # Execute
@@ -144,7 +144,7 @@ def test_client_without_get_properties() -> None:
         client_fn=_get_client_fn(client),
         message=message,
         context=Context(
-            run_id=2234, node_id=1123, node_config={}, state=RecordSet(), run_config={}
+            run_id=2234, node_id=1123, node_config={}, state=RecordDict(), run_config={}
         ),
     )
 
@@ -156,7 +156,7 @@ def test_client_without_get_properties() -> None:
         ),
         properties={},
     )
-    expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
+    expected_rs = compat.getpropertiesres_to_recorddict(expected_get_properties_res)
     expected_msg = make_message(
         metadata=Metadata(
             run_id=123,
@@ -191,7 +191,7 @@ def test_client_with_get_properties() -> None:
     """Test client not implementing get_properties."""
     # Prepare
     client = ClientWithProps()
-    recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
+    recorddict = compat.getpropertiesins_to_recorddict(GetPropertiesIns({}))
     message = make_message(
         metadata=Metadata(
             run_id=123,
@@ -204,7 +204,7 @@ def test_client_with_get_properties() -> None:
             ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
-        content=recordset,
+        content=recorddict,
     )
 
     # Execute
@@ -212,7 +212,7 @@ def test_client_with_get_properties() -> None:
         client_fn=_get_client_fn(client),
         message=message,
         context=Context(
-            run_id=2234, node_id=1123, node_config={}, state=RecordSet(), run_config={}
+            run_id=2234, node_id=1123, node_config={}, state=RecordDict(), run_config={}
         ),
     )
 
@@ -224,7 +224,7 @@ def test_client_with_get_properties() -> None:
         ),
         properties={"str_prop": "val", "int_prop": 1},
     )
-    expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
+    expected_rs = compat.getpropertiesres_to_recorddict(expected_get_properties_res)
     expected_msg = make_message(
         metadata=Metadata(
             run_id=123,
@@ -283,13 +283,13 @@ class TestMessageValidation(unittest.TestCase):
             ttl=DEFAULT_TTL,
             message_type="evaluate",
         )
-        self.common_content = RecordSet()
+        self.common_content = RecordDict()
 
     def test_valid_message(self) -> None:
         """Test a valid message."""
         # Prepare
         valid_message = make_message(
-            metadata=self.valid_out_metadata, content=RecordSet()
+            metadata=self.valid_out_metadata, content=RecordDict()
         )
 
         # Assert
@@ -298,7 +298,7 @@ class TestMessageValidation(unittest.TestCase):
     def test_invalid_message_run_id(self) -> None:
         """Test invalid messages."""
         # Prepare
-        msg = make_message(metadata=self.valid_out_metadata, content=RecordSet())
+        msg = make_message(metadata=self.valid_out_metadata, content=RecordDict())
 
         # Execute
         invalid_metadata_list: list[Metadata] = []

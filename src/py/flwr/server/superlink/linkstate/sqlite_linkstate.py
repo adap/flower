@@ -40,14 +40,14 @@ from flwr.common.record import ConfigsRecord
 from flwr.common.serde import (
     error_from_proto,
     error_to_proto,
-    recordset_from_proto,
-    recordset_to_proto,
+    recorddict_from_proto,
+    recorddict_to_proto,
 )
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
 from flwr.proto.error_pb2 import Error as ProtoError
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
 from flwr.server.utils.validator import validate_message
@@ -1075,7 +1075,7 @@ def message_to_dict(message: Message) -> dict[str, Any]:
     }
 
     if message.has_content():
-        result["content"] = recordset_to_proto(message.content).SerializeToString()
+        result["content"] = recorddict_to_proto(message.content).SerializeToString()
     else:
         result["error"] = error_to_proto(message.error).SerializeToString()
 
@@ -1086,7 +1086,7 @@ def dict_to_message(message_dict: dict[str, Any]) -> Message:
     """Transform dict to Message."""
     content, error = None, None
     if (b_content := message_dict.pop("content")) is not None:
-        content = recordset_from_proto(ProtoRecordSet.FromString(b_content))
+        content = recorddict_from_proto(ProtoRecordDict.FromString(b_content))
     if (b_error := message_dict.pop("error")) is not None:
         error = error_from_proto(ProtoError.FromString(b_error))
 

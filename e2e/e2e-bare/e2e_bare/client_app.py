@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 
 from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import ConfigsRecord, Context, RecordSet
+from flwr.common import ConfigsRecord, Context, RecordDict
 
 SUBSET_SIZE = 1000
 STATE_VAR = "timestamp"
@@ -15,7 +15,7 @@ objective = 5
 
 # Define Flower client
 class FlowerClient(NumPyClient):
-    def __init__(self, state: RecordSet):
+    def __init__(self, state: RecordDict):
         self.state = state
 
     def get_parameters(self, config):
@@ -64,5 +64,5 @@ if __name__ == "__main__":
     # Start Flower client
     start_client(
         server_address="127.0.0.1:8080",
-        client=FlowerClient(state=RecordSet()).to_client(),
+        client=FlowerClient(state=RecordDict()).to_client(),
     )

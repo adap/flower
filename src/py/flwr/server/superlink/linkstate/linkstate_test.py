@@ -32,7 +32,7 @@ from flwr.common import (
     Context,
     Error,
     Message,
-    RecordSet,
+    RecordDict,
     now,
 )
 from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
@@ -46,7 +46,7 @@ from flwr.common.typing import RunStatus
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
 from flwr.server.superlink.linkstate import (
@@ -351,7 +351,7 @@ class StateTest(unittest.TestCase):
         assert retrieved_msg_res_0.error.code == 0
 
         # Insert one reply Message, but don't retrieve it
-        msg_res_1 = Message(RecordSet(), reply_to=msg_ins_list[1])
+        msg_res_1 = Message(RecordDict(), reply_to=msg_ins_list[1])
         _ = state.store_message_res(message=msg_res_1)
 
         # Situation now:
@@ -705,8 +705,8 @@ class StateTest(unittest.TestCase):
         _ = state.store_message_ins(message=msg1)
 
         # Store replies
-        state.store_message_res(Message(RecordSet(), reply_to=msg0))
-        state.store_message_res(Message(RecordSet(), reply_to=msg1))
+        state.store_message_res(Message(RecordDict(), reply_to=msg0))
+        state.store_message_res(Message(RecordDict(), reply_to=msg1))
 
         # Execute
         num = state.num_message_res()
@@ -834,7 +834,7 @@ class StateTest(unittest.TestCase):
         state.get_message_ins(node_id=node_id_1, limit=None)
 
         # Create and store reply Messages
-        res_message_0 = in_message_0.create_reply(content=RecordSet())
+        res_message_0 = in_message_0.create_reply(content=RecordDict())
         state.store_message_res(res_message_0)
 
         # Execute
@@ -871,7 +871,7 @@ class StateTest(unittest.TestCase):
         state.store_message_ins(message=msg)
 
         msg_to_reply_to = state.get_message_ins(node_id=node_id, limit=2)[0]
-        reply_msg = Message(RecordSet(), reply_to=msg_to_reply_to)
+        reply_msg = Message(RecordDict(), reply_to=msg_to_reply_to)
 
         # This patch respresents a very slow communication/ClientApp execution
         # that triggers TTL
@@ -933,7 +933,7 @@ class StateTest(unittest.TestCase):
             msg.metadata.ttl = msg_ins_ttl
             state.store_message_ins(message=msg)
 
-            reply_msg = Message(RecordSet(), reply_to=msg)
+            reply_msg = Message(RecordDict(), reply_to=msg)
             reply_msg.metadata.created_at = msg_res_created_at
             reply_msg.metadata.ttl = msg_res_ttl
 
@@ -1048,7 +1048,7 @@ class StateTest(unittest.TestCase):
         # Fetch ins message
         ins_msg = state.get_message_ins(node_id=node_id, limit=1)[0]
         # Create reply and insert
-        res_msg = Message(RecordSet(), reply_to=ins_msg)
+        res_msg = Message(RecordDict(), reply_to=ins_msg)
         state.store_message_res(res_msg)
         assert state.num_message_res() == 1
 
@@ -1083,7 +1083,7 @@ class StateTest(unittest.TestCase):
         assert state.num_message_ins() == 1
 
         # Create reply, modify src_node_id and insert
-        res_msg = Message(RecordSet(), reply_to=ins_msg)
+        res_msg = Message(RecordDict(), reply_to=ins_msg)
         # pylint: disable=W0212
         res_msg.metadata._src_node_id = node_id + 1  # type: ignore
         msg_res_id = state.store_message_res(res_msg)
@@ -1101,7 +1101,7 @@ class StateTest(unittest.TestCase):
             run_id=1,
             node_id=SUPERLINK_NODE_ID,
             node_config={"mock": "mock"},
-            state=RecordSet(),
+            state=RecordDict(),
             run_config={"test": "test"},
         )
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
@@ -1123,7 +1123,7 @@ class StateTest(unittest.TestCase):
             run_id=1,
             node_id=1234,
             node_config={"mock": "mock"},
-            state=RecordSet(),
+            state=RecordDict(),
             run_config={"test": "test"},
         )
 
@@ -1255,7 +1255,7 @@ def create_ins_message(
             message_type="query",
             created_at=now().timestamp(),
         ),
-        content=ProtoRecordSet(parameters={}, metrics={}, configs={}),
+        content=ProtoRecordDict(parameters={}, metrics={}, configs={}),
     )
 
 
@@ -1274,7 +1274,7 @@ def create_res_message(
     if error:
         out_msg = Message(error, reply_to=in_msg)
     else:
-        out_msg = Message(RecordSet(), reply_to=in_msg)
+        out_msg = Message(RecordDict(), reply_to=in_msg)
 
     return message_to_proto(out_msg)
 

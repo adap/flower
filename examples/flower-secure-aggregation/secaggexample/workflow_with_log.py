@@ -4,7 +4,7 @@ from logging import INFO
 
 from secaggexample.task import get_weights, make_net
 
-import flwr.common.recordset_compat as compat
+import flwr.common.recorddict_compat as compat
 from flwr.common import Context, log, parameters_to_ndarrays
 from flwr.common.secure_aggregation.quantization import quantize
 from flwr.server import Grid, LegacyContext

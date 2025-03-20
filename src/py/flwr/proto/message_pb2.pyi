@@ -4,7 +4,7 @@ isort:skip_file
 """
 import builtins
 import flwr.proto.error_pb2
-import flwr.proto.recordset_pb2
+import flwr.proto.recorddict_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -22,13 +22,13 @@ class Message(google.protobuf.message.Message):
     @property
     def metadata(self) -> global___Metadata: ...
     @property
-    def content(self) -> flwr.proto.recordset_pb2.RecordSet: ...
+    def content(self) -> flwr.proto.recorddict_pb2.RecordDict: ...
     @property
     def error(self) -> flwr.proto.error_pb2.Error: ...
     def __init__(self,
         *,
         metadata: typing.Optional[global___Metadata] = ...,
-        content: typing.Optional[flwr.proto.recordset_pb2.RecordSet] = ...,
+        content: typing.Optional[flwr.proto.recorddict_pb2.RecordDict] = ...,
         error: typing.Optional[flwr.proto.error_pb2.Error] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["content",b"content","error",b"error","metadata",b"metadata"]) -> builtins.bool: ...
@@ -77,7 +77,7 @@ class Context(google.protobuf.message.Message):
     @property
     def node_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     @property
-    def state(self) -> flwr.proto.recordset_pb2.RecordSet: ...
+    def state(self) -> flwr.proto.recorddict_pb2.RecordDict: ...
     @property
     def run_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     def __init__(self,
@@ -85,7 +85,7 @@ class Context(google.protobuf.message.Message):
         run_id: builtins.int = ...,
         node_id: builtins.int = ...,
         node_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
-        state: typing.Optional[flwr.proto.recordset_pb2.RecordSet] = ...,
+        state: typing.Optional[flwr.proto.recorddict_pb2.RecordDict] = ...,
         run_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["state",b"state"]) -> builtins.bool: ...

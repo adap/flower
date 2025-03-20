@@ -31,7 +31,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import PUBLIC_KEY_HEADER, SIGNATURE_HEADER, TIMESTAMP_HEADER
 from flwr.common.logger import log
 from flwr.common.message import Message
-from flwr.common.record import RecordSet
+from flwr.common.record import RecordDict
 from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -187,7 +187,7 @@ def _send(conn: Any) -> None:
     receive, send, create_node, _, _, _ = conn
     create_node()
     receive()
-    send(Message(RecordSet(), dst_node_id=0, message_type="query"))
+    send(Message(RecordDict(), dst_node_id=0, message_type="query"))
 
 
 def _get_run(conn: Any) -> None:

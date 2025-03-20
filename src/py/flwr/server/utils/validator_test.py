@@ -19,7 +19,7 @@ import unittest
 
 from parameterized import parameterized
 
-from flwr.common import DEFAULT_TTL, Error, Message, Metadata, RecordSet, now
+from flwr.common import DEFAULT_TTL, Error, Message, Metadata, RecordDict, now
 from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.message import make_message
 
@@ -38,7 +38,7 @@ def create_message(  # pylint: disable=R0913, R0917
 ) -> Message:
     """Create a Message for testing.
 
-    By default, it creates a valid instruction message containing a RecordSet.
+    By default, it creates a valid instruction message containing a RecordDict.
     """
     metadata = Metadata(
         run_id=0,
@@ -52,7 +52,7 @@ def create_message(  # pylint: disable=R0913, R0917
         message_type="train",  # Bypass message type validation
     )
     metadata.__dict__["_message_type"] = msg_type
-    ret = make_message(metadata=metadata, content=RecordSet())
+    ret = make_message(metadata=metadata, content=RecordDict())
     if not has_content:
         ret.__dict__["_content"] = None
     if has_error:

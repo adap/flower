@@ -26,11 +26,11 @@ from flwr.common import (
     Context,
     Message,
     Parameters,
-    RecordSet,
+    RecordDict,
     ndarray_to_bytes,
     parameters_to_ndarrays,
 )
-from flwr.common import recordset_compat as compat
+from flwr.common import recorddict_compat as compat
 from flwr.common.constant import MessageType
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
@@ -162,7 +162,7 @@ def secaggplus_mod(
     check_configs(state.current_stage, configs)
 
     # Execute
-    out_content = RecordSet()
+    out_content = RecordDict()
     if state.current_stage == Stage.SETUP:
         state.nid = msg.metadata.dst_node_id
         res = _setup(state, configs)
@@ -171,7 +171,7 @@ def secaggplus_mod(
     elif state.current_stage == Stage.COLLECT_MASKED_VECTORS:
         out_msg = call_next(msg, ctxt)
         out_content = out_msg.content
-        fitres = compat.recordset_to_fitres(out_content, keep_input=True)
+        fitres = compat.recorddict_to_fitres(out_content, keep_input=True)
         res = _collect_masked_vectors(
             state, configs, fitres.num_examples, fitres.parameters
         )

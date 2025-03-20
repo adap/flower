@@ -30,7 +30,7 @@ from typing import Any, Optional
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
 from flwr.client import ClientApp
-from flwr.common import Context, EventType, RecordSet, event, log, now
+from flwr.common import Context, EventType, RecordDict, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
 from flwr.common.constant import RUN_ID_NUM_BYTES, Status
 from flwr.common.logger import (
@@ -260,7 +260,7 @@ def run_serverapp_th(
                 run_id=run_id,
                 node_id=0,
                 node_config={},
-                state=RecordSet(),
+                state=RecordDict(),
                 run_config=_server_app_run_config,
             )
 
@@ -333,7 +333,7 @@ def _main_loop(
         run_id=run.run_id,
         node_id=0,
         node_config=UserConfig(),
-        state=RecordSet(),
+        state=RecordDict(),
         run_config=UserConfig(),
     )
     try:

@@ -24,8 +24,8 @@ from unittest.mock import patch
 
 import grpc
 
-from flwr.common import ConfigsRecord, Message, RecordSet
-from flwr.common import recordset_compat as compat
+from flwr.common import ConfigsRecord, Message, RecordDict
+from flwr.common import recorddict_compat as compat
 from flwr.common.constant import MessageTypeLegacy
 from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.typing import Code, GetPropertiesRes, Status
@@ -44,14 +44,14 @@ SERVER_MESSAGE = ServerMessage(get_properties_ins=ServerMessage.GetPropertiesIns
 SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect_ins=ServerMessage.ReconnectIns())
 
 MESSAGE_GET_PROPERTIES = Message(
-    content=compat.getpropertiesres_to_recordset(
+    content=compat.getpropertiesres_to_recorddict(
         GetPropertiesRes(Status(Code.OK, ""), {})
     ),
     dst_node_id=0,
     message_type=MessageTypeLegacy.GET_PROPERTIES,
 )
 MESSAGE_DISCONNECT = Message(
-    content=RecordSet({"config": ConfigsRecord({"reason": 0})}),
+    content=RecordDict({"config": ConfigsRecord({"reason": 0})}),
     dst_node_id=0,
     message_type="reconnect",
 )

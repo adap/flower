@@ -282,7 +282,7 @@ class ParametersRecord(TypedDict[str, Array]):
     ``OrderedDict[str, Array]``. A ``ParametersRecord`` can be viewed as an
     equivalent to PyTorch's ``state_dict``, but it holds arrays in serialized form.
 
-    This object is one of the record types supported by :class:`RecordSet` and can
+    This object is one of the record types supported by :class:`RecordDict` and can
     therefore be stored in the ``content`` of a :class:`Message` or the ``state``
     of a :class:`Context`.
 

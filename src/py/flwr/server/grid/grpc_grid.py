@@ -22,7 +22,7 @@ from typing import Optional, cast
 
 import grpc
 
-from flwr.common import Message, RecordSet
+from flwr.common import Message, RecordDict
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
@@ -169,7 +169,7 @@ class GrpcGrid(Grid):
 
     def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
-        content: RecordSet,
+        content: RecordDict,
         message_type: str,
         dst_node_id: int,
         group_id: str,

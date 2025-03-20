@@ -20,7 +20,7 @@ from collections.abc import Iterable
 from typing import Optional, cast
 from uuid import UUID
 
-from flwr.common import Message, RecordSet
+from flwr.common import Message, RecordDict
 from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.logger import warn_deprecated_feature
 from flwr.common.typing import Run
@@ -75,7 +75,7 @@ class InMemoryGrid(Grid):
 
     def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
-        content: RecordSet,
+        content: RecordDict,
         message_type: str,
         dst_node_id: int,
         group_id: str,
