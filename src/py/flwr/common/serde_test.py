@@ -23,7 +23,6 @@ from typing import Any, Callable, Optional, TypeVar, Union, cast
 import pytest
 
 from flwr.common.constant import SUPERLINK_NODE_ID
-
 from flwr.common.date import now
 from flwr.common.message import make_message
 

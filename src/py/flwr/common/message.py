@@ -265,8 +265,8 @@ class Message:
         An identifier for grouping messages. In some settings, this is used as
         the FL round.
     reply_to : Optional[Message] (default: None)
-        The instruction message to which this message is a reply. This message does not retain
-        the original message's content but derives its metadata from it.
+        The instruction message to which this message is a reply. This message does
+        not retain the original message's content but derives its metadata from it.
     """
 
     @overload
@@ -518,8 +518,8 @@ def make_message(
 def _limit_reply_ttl(
     current: float, reply_ttl: float | None, reply_to: Message
 ) -> float:
-    """Limit the TTL of a reply message such that it does exceed the expiration time of the message
-    it replies to."""
+    """Limit the TTL of a reply message such that it does exceed the expiration time of
+    the message it replies to."""
     # Calculate the maximum allowed TTL
     max_allowed_ttl = reply_to.metadata.created_at + reply_to.metadata.ttl - current
 
