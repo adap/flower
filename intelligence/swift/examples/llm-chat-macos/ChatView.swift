@@ -41,7 +41,7 @@ struct ChatView: View {
   @State private var selectedModel: String = "meta/llama3.2-1b"
   let availableModels = [
     "meta/llama3.2-1b", "meta/llama3.2-3b", "deepseek/r1-distill-qwen-32b/4-bit",
-    "deepseek/r1-distill-llama-8b/q4",
+    "deepseek/r1-distill-llama-8b/q4", "meta/llama3.1-405b/q4"
   ]
 
   var body: some View {
