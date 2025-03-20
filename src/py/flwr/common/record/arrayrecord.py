@@ -283,7 +283,7 @@ class ArrayRecord(TypedDict[str, Array]):
     including model parameters, gradients, or non-parameter arrays. Internally,
     this behaves similarly to an ``OrderedDict[str, Array]``. An ``ArrayRecord``
     can be viewed as an equivalent to PyTorch's ``state_dict``, but it holds arrays
-    in serialized form.
+    in a serialized form.
 
     This object is one of the record types supported by :class:`RecordDict` and can
     therefore be stored in the ``content`` of a :class:`Message` or the ``state``
