@@ -36,11 +36,13 @@ let r1_distill: ModelConfiguration = .init(
 )
 let r1_distill_llama: ModelConfiguration = .init(id: "mlx-community/DeepSeek-R1-Distill-Llama-8B-4bit")
 let r1_4bit: ModelConfiguration = .init(id: "mlx-community/DeepSeek-R1-4bit")
+let llama3_1_405B: ModelConfiguration = .init(id: "mlx-community/Meta-Llama-3.1-405B-4bit")
 
 let modelMapping: [String: ModelConfiguration] = [
   "meta/llama3.2-1b": llama3_2_1B,
   "meta/llama3.2-3b": llama3_2_3B,
   "deepseek/r1-distill-qwen-32b/4-bit": r1_distill,
   "deepseek/r1-distill-llama-8b/q4": r1_distill_llama,
-  "deepseek/r1-685b/q4": r1_4bit
+  "deepseek/r1-685b/q4": r1_4bit,
+  "meta/llama3.1-405b/q4": llama3_1_405B,
 ]

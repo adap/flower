@@ -354,3 +354,126 @@ class DeepseekV3MLP: Module, UnaryLayer {
     self.downProj(silu(self.gateProj(x)) * self.upProj(x))
   }
 }
+
+//func groupExpertSelect(
+//  gates: MLXArray,
+//  eScoreCorrectionBias: MLXArray,
+//  topK: Int,
+//  nGroup: Int,
+//  topkGroup: Int,
+//  routedScalingFactor: Double,
+//  normTopkProb: Bool
+//) -> ([Int], [Double]) {
+//  var k = topK
+//  var scores = sigmoid(gates)
+//  scores = scores + eScoreCorrectionBias
+//  
+//  let newShape: [Int] = scores.shape.dropLast() + [nGroup, -1]
+//  scores = scores.reshaped(newShape)
+//  
+//  sorted(scores, axis: -1)
+////  def group_expert_select(
+////      gates,
+////      e_score_correction_bias,
+////      top_k,
+////      n_group,
+////      topk_group,
+////      routed_scaling_factor,
+////      norm_topk_prob,
+////  ):
+////
+////      k = top_k
+////      scores = mx.sigmoid(gates.astype(mx.float32))
+////      scores = scores + e_score_correction_bias
+////      scores = mx.unflatten(scores, axis=-1, shape=(n_group, -1))
+////      group_scores = mx.topk(scores, 2, axis=-1).sum(axis=-1, keepdims=True)
+////      k = n_group - topk_group
+////      group_idx = mx.argpartition(group_scores, kth=k - 1, axis=-2)[..., :k, :]
+////      scores = mx.put_along_axis(scores, group_idx, mx.array(0.0), axis=-2)
+////      scores = mx.flatten(scores, -2, -1)
+////
+////      k = top_k
+////      inds = mx.argpartition(-scores, kth=k - 1, axis=-1)[..., :k]
+////      scores = mx.take_along_axis(scores, inds, axis=-1)
+////      if top_k > 1 and norm_topk_prob:
+////          denominator = scores.sum(axis=-1, keepdims=True) + 1e-20
+////          scores = scores / denominator
+////      scores = scores * routed_scaling_factor
+////
+////      return inds, scores
+//
+////  var scores = gates.map { sigmoid($0) }
+////  scores = scores.map { $0 + eScoreCorrectionBias }
+////
+////  let groupSize = scores.count / nGroup
+////  var scoresMatrix = (0..<nGroup).map { Array(scores[$0 * groupSize..<$0 * groupSize + groupSize]) }
+////
+////  var groupScores = scoresMatrix.map { $0.sorted(by: >).prefix(2).reduce(0, +) }
+////
+////  let k = nGroup - topkGroup
+////  let groupIdx = groupScores.enumerated().sorted { $0.element < $1.element }.prefix(k).map {
+////    $0.offset
+////  }
+////
+////  for idx in groupIdx {
+////    scoresMatrix[idx] = Array(repeating: 0.0, count: scoresMatrix[idx].count)
+////  }
+////
+////  scores = scoresMatrix.flatMap { $0 }
+////
+////  let topKIndices = (0..<scores.count).sorted { scores[$0] > scores[$1] }.prefix(topK)
+////  var topKScores = topKIndices.map { scores[$0] }
+////
+////  if topK > 1 && normTopkProb {
+////    let sumScores = topKScores.reduce(0, +) + 1e-20
+////    topKScores = topKScores.map { $0 / sumScores }
+////  }
+////
+////  topKScores = topKScores.map { $0 * routedScalingFactor }
+////
+////  return (topKIndices, topKScores)
+////}
+////
+////class MoEGate {
+////  var config: DeepseekV3Configuration
+////  var topK: Int?
+////  var normTopkProb: Bool
+////  var nRoutedExperts: Int?
+////  var routedScalingFactor: Float
+////  var nGroup: Int?
+////  var topkGroup: Int?
+////  var weight: [[Double]]
+////  var eScoreCorrectionBias: [Double]
+////
+////  init(config: DeepseekV3Configuration) {
+////    self.config = config
+////    self.topK = config.numExpertsPerTok
+////    self.normTopkProb = config.normTopkProb
+////    self.nRoutedExperts = config.nRoutedExperts
+////    self.routedScalingFactor = config.routedScalingFactor
+////    self.nGroup = config.nGroup
+////    self.topkGroup = config.topkGroup
+////
+////    guard config.topkMethod == "noaux_tc" else {
+////      fatalError("Unsupported topk method.")
+////    }
+////
+////    self.weight = Array(repeating: Array(repeating: 0.0, count: config.hiddenSize), count: self.nRoutedExperts ?? 0)
+////    self.eScoreCorrectionBias = Array(repeating: 0.0, count: self.nRoutedExperts ?? 0)
+////  }
+////
+////  func call(_ x: [[Double]]) -> ([Int], [Double]) {
+////    let transposedWeight = transpose(weight)
+////    let multiplied = matrixMultiply(x, transposedWeight)
+////
+////    return groupExpertSelect(
+////      gates: multiplied.flatMap { $0 },
+////      eScoreCorrectionBias: eScoreCorrectionBias.reduce(0, +),
+////      topK: topK ?? 1,
+////      nGroup: nGroup ?? 1,
+////      topkGroup: topkGroup ?? 1,
+////      routedScalingFactor: routedScalingFactor,
+////      normTopkProb: normTopkProb
+////    )
+////  }
+//}
