@@ -314,31 +314,31 @@ class ParametersRecord(TypedDict[str, Array]):
     --------
     Initializing an empty ParametersRecord:
 
-    >>> p_record = ParametersRecord()
+    >>> record = ParametersRecord()
 
     Initializing with a dictionary of :class:`Array`:
 
     >>> arr = Array("float32", [5, 5], "numpy.ndarray", b"serialized_data...")
-    >>> p_record = ParametersRecord({"weight": arr})
+    >>> record = ParametersRecord({"weight": arr})
 
     Initializing with a list of NumPy arrays:
 
     >>> import numpy as np
     >>> arr1 = np.random.randn(3, 3)
     >>> arr2 = np.random.randn(2, 2)
-    >>> p_record = ParametersRecord([arr1, arr2])
+    >>> record = ParametersRecord([arr1, arr2])
 
     Initializing with a PyTorch model state_dict:
 
     >>> import torch.nn as nn
     >>> model = nn.Linear(10, 5)
-    >>> p_record = ParametersRecord(model.state_dict())
+    >>> record = ParametersRecord(model.state_dict())
 
     Initializing with a TensorFlow model weights (a list of NumPy arrays):
 
     >>> import tensorflow as tf
     >>> model = tf.keras.Sequential([tf.keras.layers.Dense(5, input_shape=(10,))])
-    >>> p_record = ParametersRecord(model.get_weights())
+    >>> record = ParametersRecord(model.get_weights())
     """
 
     @overload

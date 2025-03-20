@@ -31,7 +31,7 @@ from flwr.common import ndarray_to_bytes
 
 from ..constant import SType
 from ..typing import NDArray
-from .parametersrecord import Array, ParametersRecord
+from .arrayrecord import Array, ParametersRecord
 
 
 def _get_buffer_from_ndarray(array: NDArray) -> bytes:
