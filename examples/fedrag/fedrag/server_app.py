@@ -4,27 +4,25 @@ import hashlib
 import os
 import random
 import time
-
-import numpy as np
-
 from collections import defaultdict
 from itertools import cycle
-from sklearn.metrics import accuracy_score
 from time import sleep
 
-from flwr.common import ConfigsRecord, Context, MessageType, RecordSet
-from flwr.server import Driver, ServerApp
-
-from fedrag.mirage_qa import MirageQA
+import numpy as np
 from fedrag.llm_querier import LLMQuerier
+from fedrag.mirage_qa import MirageQA
 from fedrag.task import index_exists
+from sklearn.metrics import accuracy_score
+
+from flwr.common import ConfigsRecord, Context, MessageType, RecordSet
+from flwr.server import Grid, ServerApp
 
 
-def node_online_loop(driver: Driver) -> list[int]:
+def node_online_loop(grid: Grid) -> list[int]:
     node_ids = []
     while not node_ids:
         # Get IDs of nodes available
-        node_ids = driver.get_node_ids()
+        node_ids = grid.get_node_ids()
         # Wait if no node is available
         sleep(1)
     return node_ids
@@ -68,7 +66,7 @@ def merge_documents(documents, scores, knn, k_rrf=0, reverse_sort=False) -> list
 
 
 def submit_question(
-    driver: Driver,
+    grid: Grid,
     question: str,
     question_id: str,
     knn: int,
@@ -83,7 +81,7 @@ def submit_question(
         # https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html
         # Which can carry different types of records. We'll use a ConfigsRecord object
         # We need to create a new ConfigsRecord() object for every node, otherwise
-        # if we just override a single key, e.g., corpus_name, the driver will send
+        # if we just override a single key, e.g., corpus_name, the grid will send
         # the same object to all nodes.
         config_record = ConfigsRecord()
         config_record["question"] = question
@@ -94,7 +92,7 @@ def submit_question(
         config_record["corpus_name"] = next(corpus_names_iter)
 
         task_record = RecordSet({"config": config_record})
-        message = driver.create_message(
+        message = grid.create_message(
             content=task_record,
             message_type=MessageType.QUERY,  # target `query` method in ClientApp
             dst_node_id=node_id,
@@ -103,7 +101,7 @@ def submit_question(
         messages.append(message)
 
     # Send messages and wait for all results
-    replies = driver.send_and_receive(messages)
+    replies = grid.send_and_receive(messages)
     print("Received {}/{} results".format(len(replies), len(messages)))
 
     documents, scores = [], []
@@ -119,8 +117,8 @@ app = ServerApp()
 
 
 @app.main()
-def main(driver: Driver, context: Context) -> None:
-    node_ids = node_online_loop(driver)
+def main(grid: Grid, context: Context) -> None:
+    node_ids = node_online_loop(grid)
 
     # k-reciprocal-rank-fusion is used by the server to merge
     # the results returned by the clients
@@ -164,7 +162,7 @@ def main(driver: Driver, context: Context) -> None:
             question = q["question"]
             q_st = time.time()
             docs, scores = submit_question(
-                driver, question, q_id, knn, node_ids, corpus_names_iter
+                grid, question, q_id, knn, node_ids, corpus_names_iter
             )
             merged_docs = merge_documents(docs, scores, knn, k_rrf)
             options = q["options"]

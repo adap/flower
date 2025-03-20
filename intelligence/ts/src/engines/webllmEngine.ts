@@ -141,19 +141,49 @@ export class WebllmEngine extends BaseEngine {
     }
   }
 
-  async isSupported(model: string): Promise<boolean> {
+  async isSupported(model: string): Promise<Result<void>> {
     if (typeof navigator !== 'undefined' && 'gpu' in navigator) {
       const modelConfigRes = await getEngineModelConfig(model, 'webllm');
       if (modelConfigRes.ok) {
         if (modelConfigRes.value.vram) {
           const availableRamRes = await getAvailableRAM();
           if (availableRamRes.ok) {
-            return modelConfigRes.value.vram < availableRamRes.value;
+            if (modelConfigRes.value.vram < availableRamRes.value) {
+              return {
+                ok: true,
+                value: undefined,
+              };
+            } else {
+              return {
+                ok: false,
+                failure: {
+                  code: FailureCode.InsufficientRAMError,
+                  description: `Model ${model} requires at least ${String(modelConfigRes.value.vram)} MB to be loaded, but on ${String(availableRamRes.value)} MB are currently available.`,
+                },
+              };
+            }
           }
         }
-        return true;
+        return {
+          ok: true,
+          value: undefined,
+        };
       }
+      return {
+        ok: false,
+        failure: {
+          code: FailureCode.UnsupportedModelError,
+          description: `Model ${model} is unavailable for local inference.`,
+        },
+      };
     }
-    return false;
+    return {
+      ok: false,
+      failure: {
+        code: FailureCode.EngineSpecificError,
+        description:
+          'A WebGPU compatible browser is required to run inference. More info on https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API#browser_compatibility',
+      },
+    };
   }
 }

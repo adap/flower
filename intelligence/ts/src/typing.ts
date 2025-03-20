@@ -161,6 +161,11 @@ export enum FailureCode {
   NoLocalProviderError,
 
   /**
+   * Indicates that a model requires more RAM than currently available to be loaded.
+   */
+  InsufficientRAMError,
+
+  /**
    * Indicates a remote error (e.g., server-side issues).
    */
   RemoteError = 200,
