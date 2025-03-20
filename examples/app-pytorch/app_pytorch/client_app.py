@@ -10,12 +10,8 @@ from app_pytorch.task import test as test_fn
 
 
 from flwr.client import ClientApp
-from flwr.common import Context, Message, MetricsRecord, RecordDict
-from app_pytorch.task import (
-    Net,
-    pytorch_to_parameter_record,
-    parameters_to_pytorch_state_dict,
-)
+from flwr.common import Context, Message, MetricsRecord, RecordDict, ArrayRecord
+from app_pytorch.task import Net
 
 
 # Flower ClientApp
@@ -57,7 +53,7 @@ def train(msg: Message, context: Context):
     )
 
     # Extract state_dict from model and construct reply message
-    model_record = pytorch_to_parameter_record(model)
+    model_record = ArrayRecord(model.state_dict())
     metrics_record = MetricsRecord({"train_loss": train_loss})
     content = RecordDict({"model": model_record, "train_metrics": metrics_record})
     return msg.create_reply(content=content)
@@ -70,8 +66,7 @@ def setup_client(msg: Message, context: Context, is_train: bool):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Apply global model weights from message
-    state_dict = parameters_to_pytorch_state_dict(msg.content["model"])
-    model.load_state_dict(state_dict)
+    model.load_state_dict(msg.content["model"].to_torch_state_dict())
     model.to(device)
 
     # Load partition

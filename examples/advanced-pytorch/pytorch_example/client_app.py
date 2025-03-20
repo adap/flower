@@ -4,7 +4,7 @@ import torch
 from pytorch_example.task import Net, get_weights, load_data, set_weights, test, train
 
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Array, Context, ParametersRecord, RecordDict
+from flwr.common import Array, Context, ArrayRecord, RecordDict
 
 
 # Define Flower Client and client_fn
@@ -62,24 +62,17 @@ class FlowerClient(NumPyClient):
 
     def _save_layer_weights_to_state(self):
         """Save last layer weights to state."""
-        state_dict_arrays = {}
-        for k, v in self.net.fc2.state_dict().items():
-            state_dict_arrays[k] = Array(v.cpu().numpy())
+        arr_record = ArrayRecord(self.net.fc2.state_dict())
 
         # Add to RecordDict (replace if already exists)
-        self.client_state.parameters_records[self.local_layer_name] = ParametersRecord(
-            state_dict_arrays
-        )
+        self.client_state[self.local_layer_name] = arr_record
 
     def _load_layer_weights_from_state(self):
         """Load last layer weights to state."""
-        if self.local_layer_name not in self.client_state.parameters_records:
+        if self.local_layer_name not in self.client_state.array_records:
             return
 
-        state_dict = {}
-        param_records = self.client_state.parameters_records
-        for k, v in param_records[self.local_layer_name].items():
-            state_dict[k] = torch.from_numpy(v.numpy())
+        state_dict = self.client_state[self.local_layer_name].to_torch_state_dict()
 
         # apply previously saved classification head by this client
         self.net.fc2.load_state_dict(state_dict, strict=True)

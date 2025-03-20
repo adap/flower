@@ -5,13 +5,9 @@ from logging import INFO, WARN
 from time import sleep
 
 import torch
-from app_pytorch.task import (
-    Net,
-    parameters_to_pytorch_state_dict,
-    pytorch_to_parameter_record,
-)
+from app_pytorch.task import Net
 
-from flwr.common import Context, Message, MessageType, RecordDict
+from flwr.common import Context, Message, MessageType, RecordDict, ArrayRecord
 from flwr.common.logger import log
 from flwr.server import Grid, ServerApp
 
@@ -49,7 +45,7 @@ def main(grid: Grid, context: Context) -> None:
         log(INFO, "Sampled %s nodes (out of %s)", len(node_ids), len(all_node_ids))
 
         # Create messages
-        gmodel_record = pytorch_to_parameter_record(global_model)
+        gmodel_record = ArrayRecord(global_model.state_dict())
         recorddict = RecordDict({global_model_key: gmodel_record})
         messages = construct_messages(
             node_ids, recorddict, MessageType.TRAIN, grid, server_round
@@ -64,9 +60,7 @@ def main(grid: Grid, context: Context) -> None:
         avg_train_losses = []
         for msg in replies:
             if msg.has_content():
-                state_dicts.append(
-                    parameters_to_pytorch_state_dict(msg.content[global_model_key])
-                )
+                state_dicts.append(msg.content[global_model_key].to_torch_state_dict())
                 avg_train_losses.append(msg.content["train_metrics"]["train_loss"])
             else:
                 log(WARN, f"message {msg.metadata.message_id} as an error.")
@@ -83,7 +77,7 @@ def main(grid: Grid, context: Context) -> None:
 
         # Sample all nodes
         all_node_ids = grid.get_node_ids()
-        gmodel_record = pytorch_to_parameter_record(global_model)
+        gmodel_record = ArrayRecord(gmodel_record.to_torch_state_dict())
         recorddict = RecordDict({global_model_key: gmodel_record})
         messages = construct_messages(
             node_ids, recorddict, MessageType.EVALUATE, grid, server_round
