@@ -41,6 +41,7 @@ class MlFramework(str, Enum):
     JAX = "JAX"
     MLX = "MLX"
     NUMPY = "NumPy"
+    PYTORCH_MSG_API = "PyTorch (Message API)"
     FLOWERTUNE = "FlowerTune"
     BASELINE = "Flower Baseline"
 
@@ -154,6 +155,9 @@ def new(
     if framework_str == MlFramework.BASELINE:
         framework_str = "baseline"
 
+    if framework_str == MlFramework.PYTORCH_MSG_API:
+        framework_str = "pytorch_msg_api"
+
     print(
         typer.style(
             f"\n🔨 Creating Flower App {app_name}...",
@@ -243,10 +247,17 @@ def new(
             MlFramework.TENSORFLOW.value,
             MlFramework.SKLEARN.value,
             MlFramework.NUMPY.value,
+            "pytorch_msg_api",
         ]
         if framework_str in frameworks_with_tasks:
             files[f"{import_name}/task.py"] = {
                 "template": f"app/code/task.{template_name}.py.tpl"
+            }
+
+        if framework_str == "pytorch_msg_api":
+            # Use custom __init__ that better captures name of framework
+            files[f"{import_name}/__init__.py"] = {
+                "template": f"app/code/__init__.{framework_str}.py.tpl"
             }
 
         if framework_str == "baseline":
