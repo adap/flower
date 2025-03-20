@@ -215,10 +215,14 @@ class RecordSet(RecordDict):
     Use :class:`RecordDict` instead.
     """
 
+    _warning_logged = False
+
     def __init__(self, records: dict[str, RecordType] | None = None) -> None:
-        log(
-            WARN,
-            "The `RecordSet` class has been renamed to `RecordDict` and will "
-            "be removed in a future release. Please update your code accordingly.",
-        )
+        if not RecordSet._warning_logged:
+            RecordSet._warning_logged = True
+            log(
+                WARN,
+                "The `RecordSet` class has been renamed to `RecordDict` and will "
+                "be removed in a future release. Please update your code accordingly.",
+            )
         super().__init__(records)

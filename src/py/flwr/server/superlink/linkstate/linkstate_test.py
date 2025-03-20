@@ -826,7 +826,7 @@ class StateTest(unittest.TestCase):
         state.get_message_ins(node_id=node_id_1, limit=None)
 
         # Create and store reply Messages
-        res_message_0 = in_message_0.create_reply(content=RecordSet())
+        res_message_0 = in_message_0.create_reply(content=RecordDict())
         state.store_message_res(res_message_0)
 
         # Execute
