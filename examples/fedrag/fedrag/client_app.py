@@ -48,4 +48,4 @@ def query(msg: Message, context: Context):
     reply_record = RecordDict({"docs_n_scores": docs_n_scores})
 
     # Return message
-    return msg.create_reply(reply_record)
+    return Message(reply_record, reply_to=msg)

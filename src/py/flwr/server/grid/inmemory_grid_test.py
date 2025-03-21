@@ -117,10 +117,7 @@ class TestInMemoryGrid(unittest.TestCase):
         """Test pushing valid messages."""
         # Prepare
         num_messages = 2
-        msgs = [
-            self.grid.create_message(RecordDict(), "query", 1, "")
-            for _ in range(num_messages)
-        ]
+        msgs = [Message(RecordDict(), 1, "query") for _ in range(num_messages)]
 
         msg_ids = [uuid4() for _ in range(num_messages)]
         self.state.store_message_ins.side_effect = msg_ids
@@ -165,7 +162,7 @@ class TestInMemoryGrid(unittest.TestCase):
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
         # Prepare
-        msgs = [self.grid.create_message(RecordDict(), "query", 0, "")]
+        msgs = [Message(RecordDict(), 0, "query")]
         # Prepare
         msg_ids = [str(uuid4()) for _ in range(2)]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)
@@ -182,7 +179,7 @@ class TestInMemoryGrid(unittest.TestCase):
     def test_send_and_receive_messages_timeout(self) -> None:
         """Test send and receive messages but time out."""
         # Prepare
-        msgs = [self.grid.create_message(RecordDict(), "query", 0, "")]
+        msgs = [Message(RecordDict(), 0, "query")]
         # Prepare
         msg_ids = [str(uuid4()) for _ in range(2)]
         message_res_list = create_message_replies_for_specific_ids(msg_ids)

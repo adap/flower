@@ -370,10 +370,10 @@ class SecAggPlusWorkflow:
         content = RecordDict({RECORD_KEY_CONFIGS: cfgs_record})
 
         def make(nid: int) -> Message:
-            return grid.create_message(
+            return Message(
                 content=content,
-                message_type=MessageType.TRAIN,
                 dst_node_id=nid,
+                message_type=MessageType.TRAIN,
                 group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
             )
 
@@ -418,10 +418,10 @@ class SecAggPlusWorkflow:
             )
             cfgs_record[Key.STAGE] = Stage.SHARE_KEYS
             content = RecordDict({RECORD_KEY_CONFIGS: cfgs_record})
-            return grid.create_message(
+            return Message(
                 content=content,
-                message_type=MessageType.TRAIN,
                 dst_node_id=nid,
+                message_type=MessageType.TRAIN,
                 group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
             )
 
@@ -491,10 +491,10 @@ class SecAggPlusWorkflow:
             cfgs_record = ConfigRecord(cfgs_dict)  # type: ignore
             content = state.nid_to_fitins[nid]
             content.config_records[RECORD_KEY_CONFIGS] = cfgs_record
-            return grid.create_message(
+            return Message(
                 content=content,
-                message_type=MessageType.TRAIN,
                 dst_node_id=nid,
+                message_type=MessageType.TRAIN,
                 group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
             )
 
@@ -567,10 +567,10 @@ class SecAggPlusWorkflow:
             }
             cfgs_record = ConfigRecord(cfgs_dict)  # type: ignore
             content = RecordDict({RECORD_KEY_CONFIGS: cfgs_record})
-            return grid.create_message(
+            return Message(
                 content=content,
-                message_type=MessageType.TRAIN,
                 dst_node_id=nid,
+                message_type=MessageType.TRAIN,
                 group_id=str(current_round),
             )
 
