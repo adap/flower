@@ -243,7 +243,7 @@ class RecordMaker:
         num_entries = self.rng.randint(1, 5)
         types = (str, int, float, bytes, bool)
         return ConfigRecord(
-            configs_dict={
+            config_dict={
                 self.get_str(): self.get_value(self.rng.choice(types))
                 for _ in range(num_entries)
             },

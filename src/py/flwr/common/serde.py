@@ -535,7 +535,7 @@ def config_record_to_proto(record: ConfigRecord) -> ProtoConfigRecord:
 def config_record_from_proto(record_proto: ProtoConfigRecord) -> ConfigRecord:
     """Deserialize ConfigRecord from ProtoBuf."""
     return ConfigRecord(
-        configs_dict=cast(
+        config_dict=cast(
             dict[str, typing.ConfigRecordValues],
             _record_value_dict_from_proto(record_proto.data),
         ),

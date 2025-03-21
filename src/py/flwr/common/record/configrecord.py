@@ -70,7 +70,7 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues]):
 
     Parameters
     ----------
-    configs_dict : Optional[Dict[str, ConfigRecordValues]]
+    config_dict : Optional[Dict[str, ConfigRecordValues]]
         A dictionary that stores basic types (i.e. `str`, `int`, `float`, `bytes` as
         defined in `ConfigsScalar`) and lists of such types (see
         `ConfigsScalarList`).
@@ -111,16 +111,16 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues]):
 
     def __init__(
         self,
-        configs_dict: Optional[dict[str, ConfigRecordValues]] = None,
+        config_dict: Optional[dict[str, ConfigRecordValues]] = None,
         keep_input: bool = True,
     ) -> None:
 
         super().__init__(_check_key, _check_value)
-        if configs_dict:
-            for k in list(configs_dict.keys()):
-                self[k] = configs_dict[k]
+        if config_dict:
+            for k in list(config_dict.keys()):
+                self[k] = config_dict[k]
                 if not keep_input:
-                    del configs_dict[k]
+                    del config_dict[k]
 
     def count_bytes(self) -> int:
         """Return number of Bytes stored in this object.
@@ -195,7 +195,7 @@ class ConfigsRecord(ConfigRecord):
 
     def __init__(
         self,
-        metric_dict: Optional[dict[str, ConfigRecordValues]] = None,
+        config_dict: Optional[dict[str, ConfigRecordValues]] = None,
         keep_input: bool = True,
     ):
         if not ConfigsRecord._warning_logged:
@@ -206,4 +206,4 @@ class ConfigsRecord(ConfigRecord):
                 "Support for `ConfigsRecord` will be removed in a future release. "
                 "Please update your code accordingly.",
             )
-        super().__init__(metric_dict, keep_input)
+        super().__init__(config_dict, keep_input)
