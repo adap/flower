@@ -25,18 +25,18 @@ import pytest
 
 from flwr.common.parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common.recorddict_compat import (
-    parameters_to_parametersrecord,
-    parametersrecord_to_parameters,
+    arrayrecord_to_parameters,
+    parameters_to_arrayrecord,
 )
 from flwr.common.typing import (
     ConfigRecordValues,
-    MetricsRecordValues,
+    MetricRecordValues,
     NDArray,
     NDArrays,
     Parameters,
 )
 
-from . import Array, ConfigRecord, MetricsRecord, ParametersRecord, RecordDict
+from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 
 
 def get_ndarrays() -> NDArrays:
@@ -97,21 +97,19 @@ def test_parameters_to_array_and_back() -> None:
         (True, lambda x, x_copy, y: x.tensors == y.tensors),  # check they are equal
     ],
 )
-def test_parameters_to_parametersrecord_and_back(
+def test_parameters_to_arrayrecord_and_back(
     keep_input: bool,
     validate_freed_fn: Callable[[Parameters, Parameters, Parameters], bool],
 ) -> None:
-    """Test conversion between legacy Parameters and ParametersRecords."""
+    """Test conversion between legacy Parameters and ArrayRecords."""
     ndarrays = get_ndarrays()
 
     parameters = ndarrays_to_parameters(ndarrays)
     parameters_copy = deepcopy(parameters)
 
-    params_record = parameters_to_parametersrecord(
-        parameters=parameters, keep_input=keep_input
-    )
+    arr_record = parameters_to_arrayrecord(parameters=parameters, keep_input=keep_input)
 
-    parameters_ = parametersrecord_to_parameters(params_record, keep_input=keep_input)
+    parameters_ = arrayrecord_to_parameters(arr_record, keep_input=keep_input)
 
     ndarrays_ = parameters_to_ndarrays(parameters=parameters_)
 
@@ -124,28 +122,28 @@ def test_parameters_to_parametersrecord_and_back(
 
 
 def test_set_parameters_while_keeping_intputs() -> None:
-    """Tests keep_input functionality in ParametersRecord."""
+    """Test keep_input functionality in ArrayRecord."""
     # Adding parameters to a record that doesn't erase entries in the input `array_dict`
     array_dict = OrderedDict(
         {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
     )
-    p_record = ParametersRecord(array_dict, keep_input=True)
+    arr_record = ArrayRecord(array_dict, keep_input=True)
 
-    # Creating a second parametersrecord passing the same `array_dict` (not erased)
-    p_record_2 = ParametersRecord(array_dict, keep_input=False)
-    assert p_record == p_record_2
+    # Creating a second ArrayRecord passing the same `array_dict` (not erased)
+    arr_record_2 = ArrayRecord(array_dict, keep_input=False)
+    assert arr_record == arr_record_2
 
-    # Now it should be empty (the second ParametersRecord wasn't flagged to keep it)
+    # Now it should be empty (the second ArrayRecord wasn't flagged to keep it)
     assert len(array_dict) == 0
 
 
 def test_set_parameters_with_correct_types() -> None:
-    """Test adding dictionary of Arrays to ParametersRecord."""
-    p_record = ParametersRecord()
+    """Test adding dictionary of Arrays to ArrayRecord."""
+    arr_record = ArrayRecord()
     array_dict = OrderedDict(
         {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
     )
-    p_record.update(array_dict)
+    arr_record.update(array_dict)
 
 
 @pytest.mark.parametrize(
@@ -162,15 +160,15 @@ def test_set_parameters_with_incorrect_types(
     key_type: type[Union[int, str]],
     value_fn: Callable[[NDArray], Union[NDArray, list[float]]],
 ) -> None:
-    """Test adding dictionary of unsupported types to ParametersRecord."""
-    p_record = ParametersRecord()
+    """Test adding dictionary of unsupported types to ArrayRecord."""
+    arr_record = ArrayRecord()
 
     array_dict = {
         key_type(i): value_fn(ndarray) for i, ndarray in enumerate(get_ndarrays())
     }
 
     with pytest.raises(TypeError):
-        p_record.update(array_dict)  # type: ignore
+        arr_record.update(array_dict)  # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -183,12 +181,12 @@ def test_set_parameters_with_incorrect_types(
         (str, lambda x: []),  # str: empty list
     ],
 )
-def test_set_metrics_to_metricsrecord_with_correct_types(
+def test_set_metrics_to_metricrecord_with_correct_types(
     key_type: type[str],
-    value_fn: Callable[[NDArray], MetricsRecordValues],
+    value_fn: Callable[[NDArray], MetricRecordValues],
 ) -> None:
-    """Test adding metrics of various types to a MetricsRecord."""
-    m_record = MetricsRecord()
+    """Test adding metrics of various types to a MetricRecord."""
+    m_record = MetricRecord()
 
     labels = [1, 2.0]
     arrays = get_ndarrays()
@@ -236,12 +234,12 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
         ),  # float: List[int] (unsupported: supported)
     ],
 )
-def test_set_metrics_to_metricsrecord_with_incorrect_types(
+def test_set_metrics_to_metricrecord_with_incorrect_types(
     key_type: type[Union[str, int, float, bool]],
     value_fn: Callable[[NDArray], Union[NDArray, dict[str, NDArray], list[float]]],
 ) -> None:
-    """Test adding metrics of various unsupported types to a MetricsRecord."""
-    m_record = MetricsRecord()
+    """Test adding metrics of various unsupported types to a MetricRecord."""
+    m_record = MetricRecord()
 
     labels = [1, 2.0]
     arrays = get_ndarrays()
@@ -261,10 +259,10 @@ def test_set_metrics_to_metricsrecord_with_incorrect_types(
         (False),
     ],
 )
-def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
+def test_set_metrics_to_metricrecord_with_and_without_keeping_input(
     keep_input: bool,
 ) -> None:
-    """Test keep_input functionality for MetricsRecord."""
+    """Test keep_input functionality for MetricRecord."""
     # constructing a valid input
     labels = [1, 2.0]
     arrays = get_ndarrays()
@@ -275,7 +273,7 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
     my_metrics_copy = my_metrics.copy()
 
     # Add metric
-    m_record = MetricsRecord(my_metrics, keep_input=keep_input)
+    m_record = MetricRecord(my_metrics, keep_input=keep_input)
 
     # Check metrics are actually added
     # Check that input dict has been emptied when enabled such behaviour
@@ -364,13 +362,13 @@ def test_set_configs_to_configrecord_with_incorrect_types(
         c_record.update(my_configs)  # type: ignore
 
 
-def test_count_bytes_metricsrecord() -> None:
-    """Test counting bytes in MetricsRecord."""
+def test_count_bytes_metricrecord() -> None:
+    """Test counting bytes in MetricRecord."""
     data = {"a": 1, "b": 2.0, "c": [1, 2, 3], "d": [1.0, 2.0, 3.0, 4.0, 5.0]}
     bytes_in_dict = 8 + 8 + 3 * 8 + 5 * 8
     bytes_in_dict += 4  # represnting the keys
 
-    m_record = MetricsRecord()
+    m_record = MetricRecord()
     m_record.update(OrderedDict(data))
     record_bytest_count = m_record.count_bytes()
     assert bytes_in_dict == record_bytest_count
@@ -406,16 +404,16 @@ def test_count_bytes_configrecord() -> None:
 def test_record_is_picklable() -> None:
     """Test if RecordDict and *Record are picklable."""
     # Prepare
-    p_record = ParametersRecord()
-    m_record = MetricsRecord({"aa": 123})
+    arr_record = ArrayRecord()
+    m_record = MetricRecord({"aa": 123})
     c_record = ConfigRecord({"cc": bytes(9)})
     rs = RecordDict()
-    rs.parameters_records["params"] = p_record
-    rs.metrics_records["metrics"] = m_record
+    rs.array_records["arrays"] = arr_record
+    rs.metric_records["metrics"] = m_record
     rs.config_records["configs"] = c_record
 
     # Execute
-    pickle.dumps((p_record, m_record, c_record, rs))
+    pickle.dumps((arr_record, m_record, c_record, rs))
 
 
 def test_recorddict_repr() -> None:
@@ -423,14 +421,14 @@ def test_recorddict_repr() -> None:
     # Prepare
     rs = RecordDict(
         {
-            "params": ParametersRecord(),
-            "metrics": MetricsRecord({"aa": 123}),
+            "arrays": ArrayRecord(),
+            "metrics": MetricRecord({"aa": 123}),
             "configs": ConfigRecord({"cc": bytes(5)}),
         },
     )
     expected = """RecordDict(
-  parameters_records={'params': {}},
-  metrics_records={'metrics': {'aa': 123}},
+  array_records={'arrays': {}},
+  metric_records={'metrics': {'aa': 123}},
   config_records={'configs': {'cc': b'\\x00\\x00\\x00\\x00\\x00'}}
 )"""
 
@@ -442,26 +440,26 @@ def test_recorddict_set_get_del_item() -> None:
     """Test setting, getting, and deleting items in RecordDict."""
     # Prepare
     rs = RecordDict()
-    p_record = ParametersRecord()
-    m_record = MetricsRecord({"aa": 123})
+    arr_record = ArrayRecord()
+    m_record = MetricRecord({"aa": 123})
     c_record = ConfigRecord({"cc": bytes(5)})
 
     # Execute
-    rs["params"] = p_record
+    rs["arrays"] = arr_record
     rs["metrics"] = m_record
     rs["configs"] = c_record
 
     # Assert
-    assert rs["params"] == p_record
+    assert rs["arrays"] == arr_record
     assert rs["metrics"] == m_record
     assert rs["configs"] == c_record
 
     # Execute
-    del rs["params"]
+    del rs["arrays"]
     del rs["metrics"]
     del rs["configs"]
 
     # Assert
-    assert "params" not in rs
+    assert "arrays" not in rs
     assert "metrics" not in rs
     assert "configs" not in rs

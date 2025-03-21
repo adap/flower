@@ -13,7 +13,7 @@ Design stateful ClientApps
 
 .. _context: ref-api/flwr.common.Context.html
 
-.. _metricsrecord: ref-api/flwr.common.MetricsRecord.html
+.. _metricrecord: ref-api/flwr.common.MetricRecord.html
 
 .. _numpyclient: ref-api/flwr.client.NumPyClient.html
 
@@ -149,8 +149,8 @@ in which the `ClientApp` logs these messages might differ slightly between round
 Saving model parameters to the context
 --------------------------------------
 
-Using ConfigRecord_ or MetricsRecord_ to save "simple" components is fine (e.g., float,
-integer, boolean, string, bytes, and lists of these types. Note that MetricsRecord_ only
+Using ConfigRecord_ or MetricRecord_ to save "simple" components is fine (e.g., float,
+integer, boolean, string, bytes, and lists of these types. Note that MetricRecord_ only
 supports float, integer, and lists of these types) Flower has a specific type of record,
 a ParametersRecord_, for storing model parameters or more generally data arrays.
 

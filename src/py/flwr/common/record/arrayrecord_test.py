@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Unit tests for ParametersRecord and Array."""
+"""Unit tests for ArrayRecord and Array."""
 
 
 import sys
@@ -31,7 +31,7 @@ from flwr.common import ndarray_to_bytes
 
 from ..constant import SType
 from ..typing import NDArray
-from .parametersrecord import Array, ParametersRecord
+from .arrayrecord import Array, ArrayRecord
 
 
 def _get_buffer_from_ndarray(array: NDArray) -> bytes:
@@ -172,8 +172,8 @@ class TestArray(unittest.TestCase):
             Array(*args)
 
 
-class TestParametersRecord(unittest.TestCase):
-    """Unit tests for ParametersRecord."""
+class TestArrayRecord(unittest.TestCase):
+    """Unit tests for ArrayRecord."""
 
     def setUp(self) -> None:
         """Set up the test case."""
@@ -197,7 +197,7 @@ class TestParametersRecord(unittest.TestCase):
         ]
     )
     def test_from_numpy_ndarrays(self, ndarrays: list[NDArray]) -> None:
-        """Test creating a ParametersRecord from a list of NumPy arrays."""
+        """Test creating a ArrayRecord from a list of NumPy arrays."""
         with patch.object(Array, "from_numpy_ndarray") as mock_from_numpy:
             # Prepare
             mock_arrays = [Mock(spec=Array) for _ in ndarrays]
@@ -205,7 +205,7 @@ class TestParametersRecord(unittest.TestCase):
             expected_keys = [str(i) for i in range(len(ndarrays))]
 
             # Execute
-            record = ParametersRecord.from_numpy_ndarrays(ndarrays)
+            record = ArrayRecord.from_numpy_ndarrays(ndarrays)
 
             # Assert
             self.assertEqual(list(record.keys()), expected_keys)
@@ -215,7 +215,7 @@ class TestParametersRecord(unittest.TestCase):
             )
 
     def test_from_torch_state_dict_with_torch(self) -> None:
-        """Test creating a ParametersRecord from a PyTorch state_dict."""
+        """Test creating a ArrayRecord from a PyTorch state_dict."""
         # Prepare
         # Mock state_dict with tensor mocks
         state_dict = OrderedDict(
@@ -236,7 +236,7 @@ class TestParametersRecord(unittest.TestCase):
             mock_from_numpy.side_effect = mock_arrays
 
             # Execute
-            record = ParametersRecord.from_torch_state_dict(state_dict)
+            record = ArrayRecord.from_torch_state_dict(state_dict)
 
             # Assert
             self.assertEqual(list(record.keys()), list(state_dict.keys()))
@@ -250,16 +250,16 @@ class TestParametersRecord(unittest.TestCase):
             self.assertEqual(list(record.values()), mock_arrays)
 
     def test_from_torch_state_dict_without_torch(self) -> None:
-        """Test `ParametersRecord.from_torch_state_dict` without PyTorch."""
+        """Test `ArrayRecord.from_torch_state_dict` without PyTorch."""
         with patch.dict("sys.modules", {}, clear=True):
             with self.assertRaises(RuntimeError) as cm:
-                ParametersRecord.from_torch_state_dict(OrderedDict())
+                ArrayRecord.from_torch_state_dict(OrderedDict())
             self.assertIn("PyTorch is required", str(cm.exception))
 
     def test_to_numpy_ndarrays(self) -> None:
-        """Test converting a ParametersRecord to a list of NumPy arrays."""
+        """Test converting a ArrayRecord to a list of NumPy arrays."""
         # Prepare
-        record = ParametersRecord()
+        record = ArrayRecord()
         numpy_arrays = [np.array([1, 2]), np.array([3, 4])]
         mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
         for mock_arr, arr in zip(mock_arrays, numpy_arrays):
@@ -276,12 +276,12 @@ class TestParametersRecord(unittest.TestCase):
             mock_arr.numpy.assert_called_once()
 
     def test_to_state_dict_with_torch(self) -> None:
-        """Test converting a ParametersRecord to a PyTorch state_dict."""
+        """Test converting a ArrayRecord to a PyTorch state_dict."""
         # Prepare
         # Mock torch.from_numpy method
         tensors = [TorchTensor(), TorchTensor()]
         self.torch_mock.from_numpy = Mock(side_effect=tensors)
-        record = ParametersRecord()
+        record = ArrayRecord()
         ndarrays = [np.array([1, 2]), np.array([3, 4])]
         mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
         for mock_arr, arr in zip(mock_arrays, ndarrays):
@@ -301,16 +301,16 @@ class TestParametersRecord(unittest.TestCase):
         self.assertEqual(list(state_dict.values()), tensors)
 
     def test_to_state_dict_without_torch(self) -> None:
-        """Test `ParametersRecord.to_torch_state_dict` without PyTorch."""
+        """Test `ArrayRecord.to_torch_state_dict` without PyTorch."""
         with patch.dict("sys.modules", {}, clear=True):
-            record = ParametersRecord()
+            record = ArrayRecord()
             with self.assertRaises(RuntimeError) as cm:
                 record.to_torch_state_dict()
             self.assertIn("PyTorch is required", str(cm.exception))
 
     def test_init_no_args(self) -> None:
         """Test initializing with no arguments."""
-        _ = ParametersRecord()
+        _ = ArrayRecord()
 
     @parameterized.expand(  # type: ignore
         [
@@ -325,14 +325,14 @@ class TestParametersRecord(unittest.TestCase):
     ) -> None:
         """Test initializing with NumPy arrays."""
         with patch.object(
-            ParametersRecord,
+            ArrayRecord,
             "from_numpy_ndarrays",
-            return_value=Mock(spec=ParametersRecord),
+            return_value=Mock(spec=ArrayRecord),
         ) as mock_from_numpy:
             if use_keyword:
-                _ = ParametersRecord(numpy_ndarrays=ndarrays)
+                _ = ArrayRecord(numpy_ndarrays=ndarrays)
             else:
-                _ = ParametersRecord(ndarrays)
+                _ = ArrayRecord(ndarrays)
             mock_from_numpy.assert_called_once_with(ndarrays, keep_input=True)
 
     @parameterized.expand([(True,), (False,)])  # type: ignore
@@ -344,9 +344,9 @@ class TestParametersRecord(unittest.TestCase):
 
         # Execute
         if use_keyword:
-            record = ParametersRecord(array_dict=arr_dict, keep_input=False)
+            record = ArrayRecord(array_dict=arr_dict, keep_input=False)
         else:
-            record = ParametersRecord(arr_dict, keep_input=False)
+            record = ArrayRecord(arr_dict, keep_input=False)
 
         # Assert
         self.assertEqual(record["x"], arr)
@@ -372,15 +372,15 @@ class TestParametersRecord(unittest.TestCase):
         # Execute
         # Keep input=True
         if keyword:
-            _ = ParametersRecord(**{keyword: input_arg}, keep_input=True)
+            _ = ArrayRecord(**{keyword: input_arg}, keep_input=True)
         else:
-            _ = ParametersRecord(input_arg, keep_input=True)
+            _ = ArrayRecord(input_arg, keep_input=True)
         input_size_after1 = len(input_arg)
         # Keep input=False
         if keyword:
-            _ = ParametersRecord(**{keyword: input_arg}, keep_input=False)
+            _ = ArrayRecord(**{keyword: input_arg}, keep_input=False)
         else:
-            _ = ParametersRecord(input_arg, keep_input=False)
+            _ = ArrayRecord(input_arg, keep_input=False)
         input_size_after2 = len(input_arg)
 
         # Assert
@@ -396,9 +396,9 @@ class TestParametersRecord(unittest.TestCase):
 
         # Execute
         if use_keyword:
-            record = ParametersRecord(array_dict=arr_dict, keep_input=True)
+            record = ArrayRecord(array_dict=arr_dict, keep_input=True)
         else:
-            record = ParametersRecord(arr_dict, keep_input=True)
+            record = ArrayRecord(arr_dict, keep_input=True)
 
         # Assert
         self.assertEqual(record["x"], arr_dict["x"])
@@ -411,14 +411,14 @@ class TestParametersRecord(unittest.TestCase):
         """Test initializing with a state_dict."""
         state_dict = OrderedDict({"layer.weight": MOCK_TORCH_TENSOR})
         with patch.object(
-            ParametersRecord,
+            ArrayRecord,
             "from_torch_state_dict",
-            return_value=Mock(spec=ParametersRecord),
+            return_value=Mock(spec=ArrayRecord),
         ) as mock_from_state_dict:
             if use_keyword:
-                _ = ParametersRecord(torch_state_dict=state_dict)
+                _ = ArrayRecord(torch_state_dict=state_dict)
             else:
-                _ = ParametersRecord(state_dict)
+                _ = ArrayRecord(state_dict)
 
             # The method should be called exactly once with the provided dict
             mock_from_state_dict.assert_called_once_with(state_dict, keep_input=True)
@@ -446,10 +446,8 @@ class TestParametersRecord(unittest.TestCase):
         self, args: tuple[Any, ...], kwargs: dict[str, Any]
     ) -> None:
         """Test initializing with unrecognized arguments."""
-        with self.assertRaisesRegex(
-            TypeError, "Invalid arguments for ParametersRecord.*"
-        ):
-            ParametersRecord(*args, **kwargs)
+        with self.assertRaisesRegex(TypeError, "Invalid arguments for ArrayRecord.*"):
+            ArrayRecord(*args, **kwargs)
 
 
 @pytest.mark.parametrize(
@@ -461,7 +459,7 @@ class TestParametersRecord(unittest.TestCase):
     ],
 )
 def test_count_bytes(shape: list[int], dtype: str) -> None:
-    """Test bytes in a ParametersRecord are computed correctly."""
+    """Test bytes in a ArrayRecord are computed correctly."""
     original_array = np.random.randn(*shape).astype(np.dtype(dtype))
 
     buff = ndarray_to_bytes(original_array)
@@ -475,6 +473,6 @@ def test_count_bytes(shape: list[int], dtype: str) -> None:
         data=buffer,
     )
     key_name = "data"
-    p_record = ParametersRecord(OrderedDict({key_name: array_instance}))
+    arr_record = ArrayRecord(OrderedDict({key_name: array_instance}))
 
-    assert len(buff) + len(key_name) == p_record.count_bytes()
+    assert len(buff) + len(key_name) == arr_record.count_bytes()

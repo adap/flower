@@ -45,13 +45,13 @@ Value = Union[
     list[str],
 ]
 
-# Value types for common.MetricsRecord
-MetricsScalar = Union[int, float]
-MetricsScalarList = Union[list[int], list[float]]
-MetricsRecordValues = Union[MetricsScalar, MetricsScalarList]
+# Value types for common.MetricRecord
+MetricScalar = Union[int, float]
+MetricScalarList = Union[list[int], list[float]]
+MetricRecordValues = Union[MetricScalar, MetricScalarList]
 # Value types for common.ConfigRecord
-ConfigScalar = Union[MetricsScalar, str, bytes, bool]
-ConfigScalarList = Union[MetricsScalarList, list[str], list[bytes], list[bool]]
+ConfigScalar = Union[MetricScalar, str, bytes, bool]
+ConfigScalarList = Union[MetricScalarList, list[str], list[bytes], list[bool]]
 ConfigRecordValues = Union[ConfigScalar, ConfigScalarList]
 
 Metrics = dict[str, Scalar]

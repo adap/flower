@@ -285,8 +285,8 @@ class SecAggPlusWorkflow:
         # Obtain fit instructions
         cfg = context.state.config_records[MAIN_CONFIGS_RECORD]
         current_round = cast(int, cfg[WorkflowKey.CURRENT_ROUND])
-        parameters = compat.parametersrecord_to_parameters(
-            context.state.parameters_records[MAIN_PARAMS_RECORD],
+        parameters = compat.arrayrecord_to_parameters(
+            context.state.array_records[MAIN_PARAMS_RECORD],
             keep_input=True,
         )
         proxy_fitins_lst = context.strategy.configure_fit(
@@ -676,10 +676,8 @@ class SecAggPlusWorkflow:
 
         # Update the parameters and write history
         if parameters_aggregated:
-            paramsrecord = compat.parameters_to_parametersrecord(
-                parameters_aggregated, True
-            )
-            context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
+            arr_record = compat.parameters_to_arrayrecord(parameters_aggregated, True)
+            context.state.array_records[MAIN_PARAMS_RECORD] = arr_record
             context.history.add_metrics_distributed_fit(
                 server_round=current_round, metrics=metrics_aggregated
             )
