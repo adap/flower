@@ -5,7 +5,7 @@ import path from 'path';
 export default defineConfig({
   test: {
     coverage: {
-      exclude: ['docs/**', 'examples/**', ...coverageConfigDefaults.exclude],
+      exclude: ['docs/**', 'create/**', 'e2e/**', 'examples/**', ...coverageConfigDefaults.exclude],
       reporter: ['lcov'],
     },
     exclude: [...defaultExclude],
@@ -18,13 +18,15 @@ export default defineConfig({
       fileName: (format) => `flowerintelligence.${format}.js`,
     },
     rollupOptions: {
-      external: ['@huggingface/transformers', '@mlc-ai/web-llm', 'crypto'],
-      output: {
-        globals: {
-          '@huggingface/transformers': 'transformers',
-          '@mlc-ai/web-llm': 'webllm',
-        },
-      },
+      external: [
+        '@huggingface/transformers',
+        '@mlc-ai/web-llm',
+        'crypto',
+        'fs',
+        'fs/promises',
+        'path',
+        'os',
+      ],
     },
   },
 });

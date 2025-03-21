@@ -35,7 +35,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-instance-attributes
 class FlowerClient(NumPyClient):
-    """Standard Flower client for CNN training."""
+    """Flower client for LLM fine-tuning."""
 
     def __init__(
         self,

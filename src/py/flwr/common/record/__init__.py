@@ -19,13 +19,14 @@ from .configsrecord import ConfigsRecord
 from .conversion_utils import array_from_numpy
 from .metricsrecord import MetricsRecord
 from .parametersrecord import Array, ParametersRecord
-from .recordset import RecordSet
+from .recorddict import RecordDict, RecordSet
 
 __all__ = [
     "Array",
     "ConfigsRecord",
     "MetricsRecord",
     "ParametersRecord",
+    "RecordDict",
     "RecordSet",
     "array_from_numpy",
 ]

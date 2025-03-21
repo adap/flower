@@ -61,6 +61,7 @@ PING_CALL_TIMEOUT = 5
 PING_BASE_MULTIPLIER = 0.8
 PING_RANDOM_RANGE = (-0.1, 0.1)
 PING_MAX_INTERVAL = 1e300
+PING_PATIENCE = 2
 
 # IDs
 RUN_ID_NUM_BYTES = 8
@@ -120,6 +121,9 @@ TIMESTAMP_HEADER = "flwr-timestamp"
 TIMESTAMP_TOLERANCE = 10  # General tolerance for timestamp verification
 SYSTEM_TIME_TOLERANCE = 5  # Allowance for system time drift
 
+# Constants for ParametersRecord
+GC_THRESHOLD = 200_000_000  # 200 MB
+
 
 class MessageType:
     """Message type."""
@@ -127,6 +131,7 @@ class MessageType:
     TRAIN = "train"
     EVALUATE = "evaluate"
     QUERY = "query"
+    SYSTEM = "system"
 
     def __new__(cls) -> MessageType:
         """Prevent instantiation."""
@@ -162,6 +167,7 @@ class ErrorCode:
     CLIENT_APP_RAISED_EXCEPTION = 2
     MESSAGE_UNAVAILABLE = 3
     REPLY_MESSAGE_UNAVAILABLE = 4
+    NODE_UNAVAILABLE = 5
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
@@ -217,14 +223,8 @@ class AuthType:
 class EventLogWriterType:
     """Event log writer types."""
 
-    FALSE = "false"
     STDOUT = "stdout"
 
     def __new__(cls) -> EventLogWriterType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
-
-    @classmethod
-    def choices(cls) -> list[str]:
-        """Return a list of available log writer choices."""
-        return [cls.FALSE, cls.STDOUT]

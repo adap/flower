@@ -30,7 +30,7 @@ from typing import Any, Optional
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
 from flwr.client import ClientApp
-from flwr.common import Context, EventType, RecordSet, event, log, now
+from flwr.common import Context, EventType, RecordDict, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
 from flwr.common.constant import RUN_ID_NUM_BYTES, Status
 from flwr.common.logger import (
@@ -39,7 +39,7 @@ from flwr.common.logger import (
     warn_deprecated_feature_with_example,
 )
 from flwr.common.typing import Run, RunStatus, UserConfig
-from flwr.server.driver import Driver, InMemoryDriver
+from flwr.server.grid import Grid, InMemoryGrid
 from flwr.server.run_serverapp import run as _run
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
@@ -168,7 +168,7 @@ def run_simulation(
         messages sent by the `ServerApp`.
 
     num_supernodes : int
-        Number of nodes that run a ClientApp. They can be sampled by a Driver in the
+        Number of nodes that run a ClientApp. They can be sampled by a Grid in the
         ServerApp and receive a Message describing what the ClientApp should perform.
 
     backend_name : str (default: ray)
@@ -225,7 +225,7 @@ def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
     server_app_run_config: UserConfig,
-    driver: Driver,
+    grid: Grid,
     app_dir: str,
     f_stop: threading.Event,
     has_exception: threading.Event,
@@ -239,7 +239,7 @@ def run_serverapp_th(
         tf_gpu_growth: bool,
         stop_event: threading.Event,
         exception_event: threading.Event,
-        _driver: Driver,
+        _grid: Grid,
         _server_app_dir: str,
         _server_app_run_config: UserConfig,
         _server_app_attr: Optional[str],
@@ -260,13 +260,13 @@ def run_serverapp_th(
                 run_id=run_id,
                 node_id=0,
                 node_config={},
-                state=RecordSet(),
+                state=RecordDict(),
                 run_config=_server_app_run_config,
             )
 
             # Run ServerApp
             updated_context = _run(
-                driver=_driver,
+                grid=_grid,
                 context=context,
                 server_app_dir=_server_app_dir,
                 server_app_attr=_server_app_attr,
@@ -291,7 +291,7 @@ def run_serverapp_th(
             enable_tf_gpu_growth,
             f_stop,
             has_exception,
-            driver,
+            grid,
             app_dir,
             server_app_run_config,
             server_app_attr,
@@ -333,7 +333,7 @@ def _main_loop(
         run_id=run.run_id,
         node_id=0,
         node_config=UserConfig(),
-        state=RecordSet(),
+        state=RecordDict(),
         run_config=UserConfig(),
     )
     try:
@@ -347,9 +347,9 @@ def _main_loop(
         if server_app_run_config is None:
             server_app_run_config = {}
 
-        # Initialize Driver
-        driver = InMemoryDriver(state_factory=state_factory)
-        driver.set_run(run_id=run.run_id)
+        # Initialize Grid
+        grid = InMemoryGrid(state_factory=state_factory)
+        grid.set_run(run_id=run.run_id)
         output_context_queue: Queue[Context] = Queue()
 
         # Get and run ServerApp thread
@@ -357,7 +357,7 @@ def _main_loop(
             server_app_attr=server_app_attr,
             server_app=server_app,
             server_app_run_config=server_app_run_config,
-            driver=driver,
+            grid=grid,
             app_dir=app_dir,
             f_stop=f_stop,
             has_exception=server_app_thread_has_exception,

@@ -7,15 +7,15 @@ from logging import INFO
 
 import numpy as np
 
-from flwr.common import Context, Message, MessageType, RecordSet
+from flwr.common import Context, Message, MessageType, RecordDict
 from flwr.common.logger import log
-from flwr.server import Driver, ServerApp
+from flwr.server import Grid, ServerApp
 
 app = ServerApp()
 
 
 @app.main()
-def main(driver: Driver, context: Context) -> None:
+def main(grid: Grid, context: Context) -> None:
     """This `ServerApp` construct a histogram from partial-histograms reported by the
     `ClientApp`s."""
 
@@ -30,7 +30,7 @@ def main(driver: Driver, context: Context) -> None:
         # Loop and wait until enough nodes are available.
         all_node_ids: list[int] = []
         while len(all_node_ids) < min_nodes:
-            all_node_ids = list(driver.get_node_ids())
+            all_node_ids = list(grid.get_node_ids())
             if len(all_node_ids) >= min_nodes:
                 # Sample nodes
                 num_to_sample = int(len(all_node_ids) * fraction_sample)
@@ -42,11 +42,11 @@ def main(driver: Driver, context: Context) -> None:
         log(INFO, "Sampled %s nodes (out of %s)", len(node_ids), len(all_node_ids))
 
         # Create messages
-        recordset = RecordSet()
+        recorddict = RecordDict()
         messages = []
         for node_id in node_ids:  # one message for each node
-            message = driver.create_message(
-                content=recordset,
+            message = grid.create_message(
+                content=recorddict,
                 message_type=MessageType.QUERY,  # target `query` method in ClientApp
                 dst_node_id=node_id,
                 group_id=str(server_round),
@@ -54,7 +54,7 @@ def main(driver: Driver, context: Context) -> None:
             messages.append(message)
 
         # Send messages and wait for all results
-        replies = driver.send_and_receive(messages)
+        replies = grid.send_and_receive(messages)
         log(INFO, "Received %s/%s results", len(replies), len(messages))
 
         # Aggregate partial histograms

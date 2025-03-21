@@ -3,7 +3,7 @@
 import os
 
 from flwr.client import ClientApp
-from flwr.common import ConfigsRecord, Context, Message, RecordSet
+from flwr.common import ConfigsRecord, Context, Message, RecordDict
 
 from fedrag.retriever import Retriever
 
@@ -45,7 +45,7 @@ def query(msg: Message, context: Context):
             "scores": scores,
         }
     )
-    reply_record = RecordSet({"docs_n_scores": docs_n_scores})
+    reply_record = RecordDict({"docs_n_scores": docs_n_scores})
 
     # Return message
     return msg.create_reply(reply_record)

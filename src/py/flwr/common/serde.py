@@ -28,16 +28,16 @@ from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata
-from flwr.proto.recordset_pb2 import Array as ProtoArray
-from flwr.proto.recordset_pb2 import BoolList, BytesList
-from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
-from flwr.proto.recordset_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
-from flwr.proto.recordset_pb2 import DoubleList
-from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
-from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
-from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
-from flwr.proto.recordset_pb2 import SintList, StringList, UintList
+from flwr.proto.recorddict_pb2 import Array as ProtoArray
+from flwr.proto.recorddict_pb2 import BoolList, BytesList
+from flwr.proto.recorddict_pb2 import ConfigsRecord as ProtoConfigsRecord
+from flwr.proto.recorddict_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
+from flwr.proto.recorddict_pb2 import DoubleList
+from flwr.proto.recorddict_pb2 import MetricsRecord as ProtoMetricsRecord
+from flwr.proto.recorddict_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
+from flwr.proto.recorddict_pb2 import ParametersRecord as ProtoParametersRecord
+from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
+from flwr.proto.recorddict_pb2 import SintList, StringList, UintList
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.proto.run_pb2 import RunStatus as ProtoRunStatus
 from flwr.proto.transport_pb2 import (
@@ -57,10 +57,10 @@ from . import (
     Context,
     MetricsRecord,
     ParametersRecord,
-    RecordSet,
+    RecordDict,
     typing,
 )
-from .message import Error, Message, Metadata
+from .message import Error, Message, Metadata, make_message
 from .record.typeddict import TypedDict
 
 #  === Parameters message ===
@@ -558,33 +558,33 @@ def error_from_proto(error_proto: ProtoError) -> Error:
     return Error(code=error_proto.code, reason=reason)
 
 
-# === RecordSet message ===
+# === RecordDict message ===
 
 
-def recordset_to_proto(recordset: RecordSet) -> ProtoRecordSet:
-    """Serialize RecordSet to ProtoBuf."""
-    return ProtoRecordSet(
+def recorddict_to_proto(recorddict: RecordDict) -> ProtoRecordDict:
+    """Serialize RecordDict to ProtoBuf."""
+    return ProtoRecordDict(
         parameters={
             k: parameters_record_to_proto(v)
-            for k, v in recordset.parameters_records.items()
+            for k, v in recorddict.parameters_records.items()
         },
         metrics={
-            k: metrics_record_to_proto(v) for k, v in recordset.metrics_records.items()
+            k: metrics_record_to_proto(v) for k, v in recorddict.metrics_records.items()
         },
         configs={
-            k: configs_record_to_proto(v) for k, v in recordset.configs_records.items()
+            k: configs_record_to_proto(v) for k, v in recorddict.configs_records.items()
         },
     )
 
 
-def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordSet:
-    """Deserialize RecordSet from ProtoBuf."""
-    ret = RecordSet()
-    for k, p_record_proto in recordset_proto.parameters.items():
+def recorddict_from_proto(recorddict_proto: ProtoRecordDict) -> RecordDict:
+    """Deserialize RecordDict from ProtoBuf."""
+    ret = RecordDict()
+    for k, p_record_proto in recorddict_proto.parameters.items():
         ret[k] = parameters_record_from_proto(p_record_proto)
-    for k, m_record_proto in recordset_proto.metrics.items():
+    for k, m_record_proto in recorddict_proto.metrics.items():
         ret[k] = metrics_record_from_proto(m_record_proto)
-    for k, c_record_proto in recordset_proto.configs.items():
+    for k, c_record_proto in recorddict_proto.configs.items():
         ret[k] = configs_record_from_proto(c_record_proto)
     return ret
 
@@ -657,7 +657,7 @@ def metadata_to_proto(metadata: Metadata) -> ProtoMetadata:
         message_id=metadata.message_id,
         src_node_id=metadata.src_node_id,
         dst_node_id=metadata.dst_node_id,
-        reply_to_message=metadata.reply_to_message,
+        reply_to_message_id=metadata.reply_to_message_id,
         group_id=metadata.group_id,
         ttl=metadata.ttl,
         message_type=metadata.message_type,
@@ -673,8 +673,9 @@ def metadata_from_proto(metadata_proto: ProtoMetadata) -> Metadata:
         message_id=metadata_proto.message_id,
         src_node_id=metadata_proto.src_node_id,
         dst_node_id=metadata_proto.dst_node_id,
-        reply_to_message=metadata_proto.reply_to_message,
+        reply_to_message_id=metadata_proto.reply_to_message_id,
         group_id=metadata_proto.group_id,
+        created_at=metadata_proto.created_at,
         ttl=metadata_proto.ttl,
         message_type=metadata_proto.message_type,
     )
@@ -689,7 +690,7 @@ def message_to_proto(message: Message) -> ProtoMessage:
     proto = ProtoMessage(
         metadata=metadata_to_proto(message.metadata),
         content=(
-            recordset_to_proto(message.content) if message.has_content() else None
+            recorddict_to_proto(message.content) if message.has_content() else None
         ),
         error=error_to_proto(message.error) if message.has_error() else None,
     )
@@ -698,11 +699,10 @@ def message_to_proto(message: Message) -> ProtoMessage:
 
 def message_from_proto(message_proto: ProtoMessage) -> Message:
     """Deserialize `Message` from ProtoBuf."""
-    created_at = message_proto.metadata.created_at
-    message = Message(
+    return make_message(
         metadata=metadata_from_proto(message_proto.metadata),
         content=(
-            recordset_from_proto(message_proto.content)
+            recorddict_from_proto(message_proto.content)
             if message_proto.HasField("content")
             else None
         ),
@@ -712,10 +712,6 @@ def message_from_proto(message_proto: ProtoMessage) -> Message:
             else None
         ),
     )
-    # `.created_at` is set upon Message object construction
-    # we need to manually set it to the original value
-    message.metadata.created_at = created_at
-    return message
 
 
 # === Context messages ===
@@ -727,7 +723,7 @@ def context_to_proto(context: Context) -> ProtoContext:
         run_id=context.run_id,
         node_id=context.node_id,
         node_config=user_config_to_proto(context.node_config),
-        state=recordset_to_proto(context.state),
+        state=recorddict_to_proto(context.state),
         run_config=user_config_to_proto(context.run_config),
     )
     return proto
@@ -739,7 +735,7 @@ def context_from_proto(context_proto: ProtoContext) -> Context:
         run_id=context_proto.run_id,
         node_id=context_proto.node_id,
         node_config=user_config_from_proto(context_proto.node_config),
-        state=recordset_from_proto(context_proto.state),
+        state=recorddict_from_proto(context_proto.state),
         run_config=user_config_from_proto(context_proto.run_config),
     )
     return context

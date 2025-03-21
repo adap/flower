@@ -495,8 +495,9 @@ def start_client_internal(
                     context = run_info_store.retrieve_context(run_id=run_id)
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error
-                    reply_message = message.create_error_reply(
-                        error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
+                    reply_message = Message(
+                        Error(code=ErrorCode.UNKNOWN, reason="Unknown"),
+                        reply_to=message,
                     )
 
                     # Handle app loading and task message
@@ -593,8 +594,9 @@ def start_client_internal(
                         log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
 
                         # Create error message
-                        reply_message = message.create_error_reply(
-                            error=Error(code=e_code, reason=reason)
+                        reply_message = Message(
+                            Error(code=e_code, reason=reason),
+                            reply_to=message,
                         )
                     else:
                         # No exception, update node state

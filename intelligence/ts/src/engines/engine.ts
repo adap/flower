@@ -35,7 +35,7 @@ export interface Engine {
     encrypt?: boolean
   ): Promise<ChatResponseResult>;
   fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>>;
-  isSupported(model: string): Promise<Result<string>>;
+  isSupported(model: string): Promise<Result<void>>;
 }
 
 export abstract class BaseEngine implements Engine {
@@ -64,7 +64,7 @@ export abstract class BaseEngine implements Engine {
     };
   }
 
-  async isSupported(_model: string): Promise<Result<string>> {
+  async isSupported(_model: string): Promise<Result<void>> {
     await Promise.resolve();
     return {
       ok: false,

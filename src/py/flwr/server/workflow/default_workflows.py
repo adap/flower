@@ -20,7 +20,7 @@ import timeit
 from logging import INFO, WARN
 from typing import Optional, Union, cast
 
-import flwr.common.recordset_compat as compat
+import flwr.common.recorddict_compat as compat
 from flwr.common import (
     Code,
     ConfigsRecord,
@@ -36,7 +36,7 @@ from flwr.common.constant import MessageType, MessageTypeLegacy
 from ..client_proxy import ClientProxy
 from ..compat.app_utils import start_update_client_manager_thread
 from ..compat.legacy_context import LegacyContext
-from ..driver import Driver
+from ..grid import Grid
 from ..typing import Workflow
 from .constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD, Key
 
@@ -56,7 +56,7 @@ class DefaultWorkflow:
         self.fit_workflow: Workflow = fit_workflow
         self.evaluate_workflow: Workflow = evaluate_workflow
 
-    def __call__(self, driver: Driver, context: Context) -> None:
+    def __call__(self, grid: Grid, context: Context) -> None:
         """Execute the workflow."""
         if not isinstance(context, LegacyContext):
             raise TypeError(
@@ -65,7 +65,7 @@ class DefaultWorkflow:
 
         # Start the thread updating nodes
         thread, f_stop, c_done = start_update_client_manager_thread(
-            driver, context.client_manager
+            grid, context.client_manager
         )
 
         # Wait until the node registration done
@@ -73,7 +73,7 @@ class DefaultWorkflow:
 
         # Initialize parameters
         log(INFO, "[INIT]")
-        default_init_params_workflow(driver, context)
+        default_init_params_workflow(grid, context)
 
         # Run federated learning for num_rounds
         start_time = timeit.default_timer()
@@ -87,13 +87,13 @@ class DefaultWorkflow:
             cfg[Key.CURRENT_ROUND] = current_round
 
             # Fit round
-            self.fit_workflow(driver, context)
+            self.fit_workflow(grid, context)
 
             # Centralized evaluation
-            default_centralized_evaluation_workflow(driver, context)
+            default_centralized_evaluation_workflow(grid, context)
 
             # Evaluate round
-            self.evaluate_workflow(driver, context)
+            self.evaluate_workflow(grid, context)
 
         # Bookkeeping and log results
         end_time = timeit.default_timer()
@@ -119,7 +119,7 @@ class DefaultWorkflow:
         thread.join()
 
 
-def default_init_params_workflow(driver: Driver, context: Context) -> None:
+def default_init_params_workflow(grid: Grid, context: Context) -> None:
     """Execute the default workflow for parameters initialization."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
@@ -137,10 +137,10 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
         log(INFO, "Requesting initial parameters from one random client")
         random_client = context.client_manager.sample(1)[0]
         # Send GetParametersIns and get the response
-        content = compat.getparametersins_to_recordset(GetParametersIns({}))
-        messages = driver.send_and_receive(
+        content = compat.getparametersins_to_recorddict(GetParametersIns({}))
+        messages = grid.send_and_receive(
             [
-                driver.create_message(
+                grid.create_message(
                     content=content,
                     message_type=MessageTypeLegacy.GET_PARAMETERS,
                     dst_node_id=random_client.node_id,
@@ -152,7 +152,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
 
         if (
             msg.has_content()
-            and compat._extract_status_from_recordset(  # pylint: disable=W0212
+            and compat._extract_status_from_recorddict(  # pylint: disable=W0212
                 "getparametersres", msg.content
             ).code
             == Code.OK
@@ -186,7 +186,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
         log(INFO, "Evaluation returned no results (`None`)")
 
 
-def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None:
+def default_centralized_evaluation_workflow(_: Grid, context: Context) -> None:
     """Execute the default workflow for centralized evaluation."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
@@ -218,9 +218,7 @@ def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None
         )
 
 
-def default_fit_workflow(  # pylint: disable=R0914
-    driver: Driver, context: Context
-) -> None:
+def default_fit_workflow(grid: Grid, context: Context) -> None:  # pylint: disable=R0914
     """Execute the default workflow for a single fit round."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
@@ -255,8 +253,8 @@ def default_fit_workflow(  # pylint: disable=R0914
 
     # Build out messages
     out_messages = [
-        driver.create_message(
-            content=compat.fitins_to_recordset(fitins, True),
+        grid.create_message(
+            content=compat.fitins_to_recorddict(fitins, True),
             message_type=MessageType.TRAIN,
             dst_node_id=proxy.node_id,
             group_id=str(current_round),
@@ -266,7 +264,7 @@ def default_fit_workflow(  # pylint: disable=R0914
 
     # Send instructions to clients and
     # collect `fit` results from all clients participating in this round
-    messages = list(driver.send_and_receive(out_messages))
+    messages = list(grid.send_and_receive(out_messages))
     del out_messages
     num_failures = len([msg for msg in messages if msg.has_error()])
 
@@ -284,7 +282,7 @@ def default_fit_workflow(  # pylint: disable=R0914
     for msg in messages:
         if msg.has_content():
             proxy = node_id_to_proxy[msg.metadata.src_node_id]
-            fitres = compat.recordset_to_fitres(msg.content, False)
+            fitres = compat.recorddict_to_fitres(msg.content, False)
             if fitres.status.code == Code.OK:
                 results.append((proxy, fitres))
             else:
@@ -307,7 +305,7 @@ def default_fit_workflow(  # pylint: disable=R0914
 
 
 # pylint: disable-next=R0914
-def default_evaluate_workflow(driver: Driver, context: Context) -> None:
+def default_evaluate_workflow(grid: Grid, context: Context) -> None:
     """Execute the default workflow for a single evaluate round."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
@@ -341,8 +339,8 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
 
     # Build out messages
     out_messages = [
-        driver.create_message(
-            content=compat.evaluateins_to_recordset(evalins, True),
+        grid.create_message(
+            content=compat.evaluateins_to_recorddict(evalins, True),
             message_type=MessageType.EVALUATE,
             dst_node_id=proxy.node_id,
             group_id=str(current_round),
@@ -352,7 +350,7 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
 
     # Send instructions to clients and
     # collect `evaluate` results from all clients participating in this round
-    messages = list(driver.send_and_receive(out_messages))
+    messages = list(grid.send_and_receive(out_messages))
     del out_messages
     num_failures = len([msg for msg in messages if msg.has_error()])
 
@@ -370,7 +368,7 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     for msg in messages:
         if msg.has_content():
             proxy = node_id_to_proxy[msg.metadata.src_node_id]
-            evalres = compat.recordset_to_evaluateres(msg.content)
+            evalres = compat.recorddict_to_evaluateres(msg.content)
             if evalres.status.code == Code.OK:
                 results.append((proxy, evalres))
             else:
