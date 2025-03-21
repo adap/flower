@@ -73,11 +73,13 @@ Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart
 ..
     :width: 80%
 
-Build a Flower app
-~~~~~~~~~~~~~~~~~~
+How-to Guides
+~~~~~~~~~~~~~
+
 
 .. toctree::
     :titlesonly:
+    :caption: Build
 
     build
 
