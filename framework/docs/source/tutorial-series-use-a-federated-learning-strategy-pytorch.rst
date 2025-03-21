@@ -416,6 +416,6 @@ Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack
 There’s a dedicated ``#questions`` channel if you need help, but we’d also love to hear
 who you are in ``#introductions``!
 
-The `Flower Federated Learning Tutorial - Part 3
-<https://flower.ai/docs/framework/tutorial-build-a-strategy-from-scratch-pytorch.html>`__
-shows how to build a fully custom ``Strategy`` from scratch.
+The :doc: `Flower Federated Learning Tutorial - Part 3
+<tutorial-series-build-a-strategy-from-scratch-pytorch>` shows how to build a fully
+custom ``Strategy`` from scratch.
