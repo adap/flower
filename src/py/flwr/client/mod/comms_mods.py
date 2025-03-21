@@ -41,34 +41,33 @@ def message_size_mod(
 
     return call_next(msg, ctxt)
 
-
-def parameters_size_mod(
+def arrays_size_mod(
     msg: Message, ctxt: Context, call_next: ClientAppCallable
 ) -> Message:
-    """Parameters size mod.
+    """Arrays size mod.
 
-    This mod logs the number of parameters transmitted in ``ArrayRecord``s of
-    the message as well as their size in bytes.
+    This mod logs the number of array elements transmitted in ``ArrayRecord``s of
+    the message as well as their sizes in bytes.
     """
     model_size_stats = {}
-    parameters_size_in_bytes = 0
+    arrays_size_in_bytes = 0
     for record_name, arr_record in msg.content.array_records.items():
         arr_record_bytes = arr_record.count_bytes()
-        parameters_size_in_bytes += arr_record_bytes
-        parameter_count = 0
+        arrays_size_in_bytes += arr_record_bytes
+        element_count = 0
         for array in arr_record.values():
-            parameter_count += (
+            element_count += (
                 int(np.prod(array.shape)) if array.shape else array.numpy().size
             )
 
         model_size_stats[f"{record_name}"] = {
-            "parameters": parameter_count,
+            "elements": element_count,
             "bytes": arr_record_bytes,
         }
 
     if model_size_stats:
         log(INFO, model_size_stats)
 
-    log(INFO, "Total parameters transmitted: %i bytes", parameters_size_in_bytes)
+    log(INFO, "Total array elements transmitted: %i bytes", arrays_size_in_bytes)
 
     return call_next(msg, ctxt)
