@@ -180,7 +180,7 @@ class TestClientAppIoServicer(unittest.TestCase):
 
         # Assert
         self.mock_stub.PullClientAppInputs.assert_called_once()
-        self.assertEqual(len(message.content.parameters_records), 3)
+        self.assertEqual(len(message.content.array_records), 3)
         self.assertEqual(len(message.content.metrics_records), 2)
         self.assertEqual(len(message.content.configs_records), 1)
         self.assertEqual(context.node_id, 123)

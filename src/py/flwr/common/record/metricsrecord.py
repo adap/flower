@@ -41,7 +41,7 @@ def _check_value(value: MetricsRecordValues) -> None:
         # If your lists are large (e.g. 1M+ elements) this will be slow
         # 1s to check 10M element list on a M2 Pro
         # In such settings, you'd be better of treating such metric as
-        # an array and pass it to a ParametersRecord.
+        # an array and pass it to an ArrayRecord.
         # Empty lists are valid
         if len(value) > 0:
             is_valid(value[0])
@@ -110,7 +110,7 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
     >>> record["something-unsupported"] = {'a': 123} # Will throw a `TypeError`
 
     If you need a more versatily type of record try :code:`ConfigsRecord` or
-    :code:`ParametersRecord`.
+    :code:`ArrayRecord`.
     """
 
     def __init__(
