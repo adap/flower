@@ -21,7 +21,7 @@ from unittest.mock import Mock, patch
 
 import grpc
 
-from flwr.common import DEFAULT_TTL, RecordDict
+from flwr.common import RecordDict
 from flwr.common.message import Error, Message
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -170,7 +170,7 @@ class TestGrpcGrid(unittest.TestCase):
 
         mock_response.messages_list = message_res_list
         self.mock_stub.PullMessages.return_value = mock_response
-        msgs = [self.grid.create_message(RecordDict(), "query", 0, "", DEFAULT_TTL)]
+        msgs = [Message(RecordDict(), 0, "query")]
 
         # Execute
         ret_msgs = list(self.grid.send_and_receive(msgs))
@@ -187,7 +187,7 @@ class TestGrpcGrid(unittest.TestCase):
         self.mock_stub.PushMessages.return_value = mock_response
         mock_response = Mock(messages_list=[])
         self.mock_stub.PullMessages.return_value = mock_response
-        msgs = [self.grid.create_message(RecordDict(), "query", 0, "", DEFAULT_TTL)]
+        msgs = [Message(RecordDict(), 0, "query")]
 
         # Execute
         with patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01)):
