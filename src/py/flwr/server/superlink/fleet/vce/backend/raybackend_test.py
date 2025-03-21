@@ -27,7 +27,7 @@ from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import (
     DEFAULT_TTL,
     Config,
-    ConfigsRecord,
+    ConfigRecord,
     Context,
     GetPropertiesIns,
     Message,
@@ -56,7 +56,7 @@ class DummyClient(NumPyClient):
         result = float(config["factor"]) * pi
 
         # store something in context
-        self.client_state.configs_records["result"] = ConfigsRecord({"result": result})
+        self.client_state.config_records["result"] = ConfigRecord({"result": result})
 
         return {"result": result}
 
@@ -158,11 +158,11 @@ class TestRayBackend(TestCase):
         # Verify message content is as expected
         content = out_mssg.content
         assert (
-            content.configs_records["getpropertiesres.properties"]["result"]
+            content.config_records["getpropertiesres.properties"]["result"]
             == expected_output
         )
         # Verify context is correct
-        obtained_result_in_context = updated_context.state.configs_records["result"][
+        obtained_result_in_context = updated_context.state.config_records["result"][
             "result"
         ]
         assert obtained_result_in_context == expected_output

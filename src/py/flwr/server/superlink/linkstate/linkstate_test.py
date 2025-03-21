@@ -28,7 +28,7 @@ from parameterized import parameterized
 
 from flwr.common import (
     DEFAULT_TTL,
-    ConfigsRecord,
+    ConfigRecord,
     Context,
     Error,
     Message,
@@ -72,7 +72,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord()
         )
 
         # Execute
@@ -89,10 +89,10 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         run_id1 = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord()
         )
         run_id2 = state.create_run(
-            None, None, "fffffff", {"mock_key": "mock_value"}, ConfigsRecord()
+            None, None, "fffffff", {"mock_key": "mock_value"}, ConfigRecord()
         )
 
         # Execute
@@ -118,10 +118,10 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         _ = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord()
         )
         run_id2 = state.create_run(
-            None, None, "fffffff", {"mock_key": "mock_value"}, ConfigsRecord()
+            None, None, "fffffff", {"mock_key": "mock_value"}, ConfigRecord()
         )
         state.update_run_status(run_id2, RunStatus(Status.STARTING, "", ""))
 
@@ -142,10 +142,10 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         run_id1 = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord()
         )
         run_id2 = state.create_run(
-            None, None, "fffffff", {"mock_key": "mock_value"}, ConfigsRecord()
+            None, None, "fffffff", {"mock_key": "mock_value"}, ConfigRecord()
         )
         state.update_run_status(run_id2, RunStatus(Status.STARTING, "", ""))
         state.update_run_status(run_id2, RunStatus(Status.RUNNING, "", ""))
@@ -167,7 +167,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         run_id = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord()
         )
 
         # Execute and assert
@@ -196,7 +196,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         run_id = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord()
         )
         run_statuses = [
             RunStatus(Status.PENDING, "", ""),
@@ -253,7 +253,7 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         dt = datetime.now(tz=timezone.utc)
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         msg = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
@@ -283,7 +283,7 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         invalid_node_id = 61016 if node_id != 61016 else 61017
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         # A message for a node that doesn't exist
         msg = message_from_proto(
             create_ins_message(
@@ -306,7 +306,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         msg0 = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -377,7 +377,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id_0 = state.create_run(None, None, "8g13kl7", {}, ConfigsRecord())
+        run_id_0 = state.create_run(None, None, "8g13kl7", {}, ConfigRecord())
         # Insert Message with the same run_id
         msg0 = message_from_proto(
             create_ins_message(
@@ -395,7 +395,7 @@ class StateTest(unittest.TestCase):
         )
         # Insert a Message with a different run_id
         # then, ensure it does not appear in result
-        run_id_1 = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id_1 = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         msg2 = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -436,7 +436,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         msg = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -459,7 +459,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         msg = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -512,7 +512,7 @@ class StateTest(unittest.TestCase):
         """Test retrieving all node_ids and empty initial state."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
 
         # Execute
         retrieved_node_ids = state.get_nodes(run_id)
@@ -524,7 +524,7 @@ class StateTest(unittest.TestCase):
         """Test creating a client node."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         node_ids = []
 
         # Execute
@@ -541,7 +541,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
 
         # Execute
         node_id = state.create_node(ping_interval=10)
@@ -558,7 +558,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         node_id = state.create_node(ping_interval=10)
         state.set_node_public_key(node_id, public_key)
 
@@ -586,7 +586,7 @@ class StateTest(unittest.TestCase):
         """Test deleting a client node."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         node_id = state.create_node(ping_interval=10)
 
         # Execute
@@ -601,7 +601,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         node_id = state.create_node(ping_interval=10)
         state.set_node_public_key(node_id, public_key)
 
@@ -620,7 +620,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         public_key = b"mock"
         wrong_public_key = b"mock_mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
 
         # Execute
         node_id = state.create_node(ping_interval=10)
@@ -636,7 +636,7 @@ class StateTest(unittest.TestCase):
         """Test retrieving all node_ids with invalid run_id."""
         # Prepare
         state: LinkState = self.state_factory()
-        state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         invalid_run_id = 61016
         state.create_node(ping_interval=10)
 
@@ -651,7 +651,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         msg0 = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -682,7 +682,7 @@ class StateTest(unittest.TestCase):
         replies."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         node_id = state.create_node(1e3)
 
         msg0 = message_from_proto(
@@ -768,7 +768,7 @@ class StateTest(unittest.TestCase):
         """
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         node_ids = [state.create_node(ping_interval=10) for _ in range(100)]
         for node_id in node_ids[:70]:
             state.acknowledge_ping(node_id, ping_interval=30)
@@ -802,7 +802,7 @@ class StateTest(unittest.TestCase):
         """Test if get_message_res return Message containing node unavailable error."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         node_id_0 = state.create_node(ping_interval=10)
         node_id_1 = state.create_node(ping_interval=10)
 
@@ -860,7 +860,7 @@ class StateTest(unittest.TestCase):
         expired."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         node_id = state.create_node(1e3)
         # Create and store a message
         msg = message_from_proto(
@@ -919,7 +919,7 @@ class StateTest(unittest.TestCase):
 
             # Prepare
             state: LinkState = self.state_factory()
-            run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+            run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
             node_id = state.create_node(1e3)
 
             # Create message, tweak created_at and store
@@ -951,7 +951,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         # Create message, tweak created_at, ttl and store
         msg = message_from_proto(
             create_ins_message(
@@ -975,7 +975,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
 
         # A message that will expire before it gets pulled
         msg1 = message_from_proto(
@@ -1000,7 +1000,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
 
         msg = message_from_proto(
             create_ins_message(
@@ -1035,7 +1035,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
 
         msg = message_from_proto(
             create_ins_message(
@@ -1068,7 +1068,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
 
         msg = message_from_proto(
             create_ins_message(
@@ -1104,7 +1104,7 @@ class StateTest(unittest.TestCase):
             state=RecordDict(),
             run_config={"test": "test"},
         )
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
 
         # Execute
         init = state.get_serverapp_context(run_id)
@@ -1156,7 +1156,7 @@ class StateTest(unittest.TestCase):
         """Test adding and retrieving serverapp logs."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         log_entry_1 = "Log entry 1"
         log_entry_2 = "Log entry 2"
         timestamp = now().timestamp()
@@ -1176,7 +1176,7 @@ class StateTest(unittest.TestCase):
         """Test retrieving serverapp logs after a specific timestamp."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         log_entry_1 = "Log entry 1"
         log_entry_2 = "Log entry 2"
         state.add_serverapp_log(run_id, log_entry_1)
@@ -1198,7 +1198,7 @@ class StateTest(unittest.TestCase):
         found."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         log_entry = "Log entry"
         state.add_serverapp_log(run_id, log_entry)
         timestamp = now().timestamp()
@@ -1217,7 +1217,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         # A run w/ federation options
-        fed_options = ConfigsRecord({"setting-a": 123, "setting-b": [4, 5, 6]})
+        fed_options = ConfigRecord({"setting-a": 123, "setting-b": [4, 5, 6]})
         run_id = state.create_run(
             None,
             None,
@@ -1255,7 +1255,7 @@ def create_ins_message(
             message_type="query",
             created_at=now().timestamp(),
         ),
-        content=ProtoRecordDict(parameters={}, metrics={}, configs={}),
+        content=ProtoRecordDict(arrays={}, metrics={}, configs={}),
     )
 
 

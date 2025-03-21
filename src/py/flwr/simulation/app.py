@@ -47,7 +47,7 @@ from flwr.common.logger import (
     stop_log_uploader,
 )
 from flwr.common.serde import (
-    configs_record_from_proto,
+    config_record_from_proto,
     context_from_proto,
     context_to_proto,
     fab_from_proto,
@@ -184,7 +184,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             fed_opt_res: GetFederationOptionsResponse = conn._stub.GetFederationOptions(
                 GetFederationOptionsRequest(run_id=run.run_id)
             )
-            federation_options = configs_record_from_proto(
+            federation_options = config_record_from_proto(
                 fed_opt_res.federation_options
             )
 

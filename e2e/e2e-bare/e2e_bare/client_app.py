@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 
 from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import ConfigsRecord, Context, RecordDict
+from flwr.common import ConfigRecord, Context, RecordDict
 
 SUBSET_SIZE = 1000
 STATE_VAR = "timestamp"
@@ -25,14 +25,14 @@ class FlowerClient(NumPyClient):
         """Record timestamp to client's state."""
         t_stamp = datetime.now().timestamp()
         value = str(t_stamp)
-        if STATE_VAR in self.state.configs_records.keys():
-            value = self.state.configs_records[STATE_VAR][STATE_VAR]  # type: ignore
+        if STATE_VAR in self.state.config_records.keys():
+            value = self.state.config_records[STATE_VAR][STATE_VAR]  # type: ignore
             value += f",{t_stamp}"
 
-        self.state.configs_records[STATE_VAR] = ConfigsRecord({STATE_VAR: value})
+        self.state.config_records[STATE_VAR] = ConfigRecord({STATE_VAR: value})
 
     def _retrieve_timestamp_from_state(self):
-        return self.state.configs_records[STATE_VAR][STATE_VAR]
+        return self.state.config_records[STATE_VAR][STATE_VAR]
 
     def fit(self, parameters, config):
         model_params = parameters

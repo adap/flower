@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from subprocess import Popen
 from typing import Optional
 
-from flwr.common import ConfigsRecord
+from flwr.common import ConfigRecord
 from flwr.common.typing import UserConfig
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
@@ -73,7 +73,7 @@ class Executor(ABC):
         self,
         fab_file: bytes,
         override_config: UserConfig,
-        federation_options: ConfigsRecord,
+        federation_options: ConfigRecord,
     ) -> Optional[int]:
         """Start a run using the given Flower FAB ID and version.
 
@@ -86,7 +86,7 @@ class Executor(ABC):
             The Flower App Bundle file bytes.
         override_config: UserConfig
             The config overrides dict sent by the user (using `flwr run`).
-        federation_options: ConfigsRecord
+        federation_options: ConfigRecord
             The federation options sent by the user (using `flwr run`).
 
         Returns
