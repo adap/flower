@@ -785,6 +785,13 @@ it easier to work with machine learning libraries that have good NumPy interoper
 possible in ``NumPyClient``. In order to do so, it requires us to handle parameter
 serialization and deserialization ourselves.
 
+.. note::
+
+    If you'd like to follow along with tutorial notebooks, check out the :doc:`Tutorial
+    notebooks <notebooks/index>`. Note that the notebooks use the ``run_simulation``
+    approach, whereas the recommended way to run simulations in Flower is using the
+    ``flwr run`` approach as shown in this tutorial.
+
 Next steps
 ----------
 
