@@ -189,7 +189,7 @@ class ClientApp:
         >>> def train(message: Message, context: Context) -> Message:
         >>>     print("Executing default train function")
         >>>     # Create and return an echo reply message
-        >>>     return message.create_reply(content=message.content)
+        >>>     return Message(message.content, reply_to=message)
 
         Registering a train function with a custom action name:
 
@@ -200,7 +200,7 @@ class ClientApp:
         >>> @app.train("custom_action")
         >>> def custom_action(message: Message, context: Context) -> Message:
         >>>     print("Executing train function for custom action")
-        >>>     return message.create_reply(content=message.content)
+        >>>     return Message(message.content, reply_to=message)
 
         Registering a train function with a function-specific Flower Mod:
 
@@ -213,7 +213,7 @@ class ClientApp:
         >>> def train(message: Message, context: Context) -> Message:
         >>>     print("Executing train function with message size mod")
         >>>     # Create and return an echo reply message
-        >>>     return message.create_reply(content=message.content)
+        >>>     return Message(message.content, reply_to=message)
         """
         return _get_decorator(self, MessageType.TRAIN, action, mods)
 
@@ -244,7 +244,7 @@ class ClientApp:
         >>> def evaluate(message: Message, context: Context) -> Message:
         >>>     print("Executing default evaluate function")
         >>>     # Create and return an echo reply message
-        >>>     return message.create_reply(content=message.content)
+        >>>     return Message(message.content, reply_to=message)
 
         Registering an evaluate function with a custom action name:
 
@@ -255,7 +255,7 @@ class ClientApp:
         >>> @app.evaluate("custom_action")
         >>> def custom_action(message: Message, context: Context) -> Message:
         >>>     print("Executing evaluate function for custom action")
-        >>>     return message.create_reply(content=message.content)
+        >>>     return Message(message.content, reply_to=message)
 
         Registering an evaluate function with a function-specific Flower Mod:
 
@@ -268,7 +268,7 @@ class ClientApp:
         >>> def evaluate(message: Message, context: Context) -> Message:
         >>>     print("Executing evaluate function with message size mod")
         >>>     # Create and return an echo reply message
-        >>>     return message.create_reply(content=message.content)
+        >>>     return Message(message.content, reply_to=message)
         """
         return _get_decorator(self, MessageType.EVALUATE, action, mods)
 
@@ -299,7 +299,7 @@ class ClientApp:
         >>> def query(message: Message, context: Context) -> Message:
         >>>     print("Executing default query function")
         >>>     # Create and return an echo reply message
-        >>>     return message.create_reply(content=message.content)
+        >>>     return Message(message.content, reply_to=message)
 
         Registering a query function with a custom action name:
 
@@ -310,7 +310,7 @@ class ClientApp:
         >>> @app.query("custom_action")
         >>> def custom_action(message: Message, context: Context) -> Message:
         >>>     print("Executing query function for custom action")
-        >>>     return message.create_reply(content=message.content)
+        >>>     return Message(message.content, reply_to=message)
 
         Registering a query function with a function-specific Flower Mod:
 
@@ -323,7 +323,7 @@ class ClientApp:
         >>> def query(message: Message, context: Context) -> Message:
         >>>     print("Executing query function with message size mod")
         >>>     # Create and return an echo reply message
-        >>>     return message.create_reply(content=message.content)
+        >>>     return Message(message.content, reply_to=message)
         """
         return _get_decorator(self, MessageType.QUERY, action, mods)
 
@@ -454,8 +454,6 @@ def _registration_error(fn_name: str) -> ValueError:
         >>> def {fn_name}(message: Message, context: Context) -> Message:
         >>>    print("ClientApp {fn_name} running")
         >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(
-        >>>        content=message.content()
-        >>>    )
+        >>>    return Message(message.content, reply_to=message)
         """,
     )
