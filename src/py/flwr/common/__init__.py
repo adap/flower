@@ -33,6 +33,7 @@ from .parameter import parameters_to_ndarrays as parameters_to_ndarrays
 from .record import Array as Array
 from .record import ConfigsRecord as ConfigsRecord
 from .record import MetricRecord as MetricRecord
+from .record import MetricsRecord as MetricsRecord
 from .record import ParametersRecord as ParametersRecord
 from .record import RecordDict as RecordDict
 from .record import RecordSet as RecordSet
@@ -93,6 +94,7 @@ __all__ = [
     "MetricRecordValues",
     "Metrics",
     "MetricsAggregationFn",
+    "MetricsRecord",
     "NDArray",
     "NDArrays",
     "Parameters",

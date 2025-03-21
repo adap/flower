@@ -15,10 +15,12 @@
 """MetricRecord."""
 
 
+from logging import WARN
 from typing import Optional, get_args
 
 from flwr.common.typing import MetricRecordValues, MetricScalar
 
+from ..logger import log
 from .typeddict import TypedDict
 
 
@@ -117,7 +119,7 @@ class MetricRecord(TypedDict[str, MetricRecordValues]):
         self,
         metric_dict: Optional[dict[str, MetricRecordValues]] = None,
         keep_input: bool = True,
-    ):
+    ) -> None:
         super().__init__(_check_key, _check_value)
         if metric_dict:
             for k in list(metric_dict.keys()):
@@ -140,3 +142,47 @@ class MetricRecord(TypedDict[str, MetricRecordValues]):
             # We also count the bytes footprint of the keys
             num_bytes += len(k)
         return num_bytes
+
+
+class MetricsRecord(MetricRecord):
+    """Deprecated class ``MetricsRecord``, use ``MetricRecord`` instead.
+
+    This class exists solely for backward compatibility with legacy
+    code that previously used ``MetricsRecord``. It has been renamed
+    to ``MetricRecord``.
+
+    .. warning::
+        ``MetricsRecord`` is deprecated and will be removed in a future release.
+        Use ``MetricRecord`` instead.
+
+    Examples
+    --------
+    Legacy (deprecated) usage::
+
+        from flwr.common import MetricsRecord
+
+        record = MetricsRecord()
+
+    Updated usage::
+
+        from flwr.common import MetricRecord
+
+        record = MetricRecord()
+    """
+
+    _warning_logged = False
+
+    def __init__(
+        self,
+        metric_dict: Optional[dict[str, MetricRecordValues]] = None,
+        keep_input: bool = True,
+    ):
+        if not MetricsRecord._warning_logged:
+            MetricsRecord._warning_logged = True
+            log(
+                WARN,
+                "The `MetricsRecord` class has been renamed to `MetricRecord`. "
+                "Support for `MetricsRecord` will be removed in a future release. "
+                "Please update your code accordingly.",
+            )
+        super().__init__(metric_dict, keep_input)
