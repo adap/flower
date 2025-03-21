@@ -632,7 +632,6 @@ Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack
 There’s a dedicated ``#questions`` channel if you need help, but we’d also love to hear
 who you are in ``#introductions``!
 
-The `Flower Federated Learning Tutorial - Part 2
-<https://flower.ai/docs/framework/tutorial-use-a-federated-learning-strategy-pytorch.html>`_
-goes into more depth about strategies and all the advanced things you can build with
-them.
+The :doc:`Flower Federated Learning Tutorial - Part 2
+<tutorial-series-use-a-federated-learning-strategy-pytorch>` goes into more depth about
+strategies and all the advanced things you can build with them.

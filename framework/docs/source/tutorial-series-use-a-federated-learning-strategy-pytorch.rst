@@ -2,8 +2,8 @@ Use a federated learning strategy
 =================================
 
 Welcome to the next part of the federated learning tutorial. In previous parts of this
-tutorial, we introduced federated learning with PyTorch and Flower (`part
-1<tutorial-get-started-with-flower-pytorch>`_).
+tutorial, we introduced federated learning with PyTorch and Flower (:doc:`part 1
+<tutorial-series-get-started-with-flower-pytorch>`).
 
 In part 2, we’ll begin to customize the federated learning system we built in part 1
 again, using the Flower framework, Flower Datasets, and PyTorch.
@@ -65,7 +65,7 @@ Next, we install the project and its dependencies, which are specified in the
 .. code-block:: shell
 
     $ cd flower-tutorial
-    $ pip install -e
+    $ pip install -e .
 
 Strategy customization
 ----------------------
