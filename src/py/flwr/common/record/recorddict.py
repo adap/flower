@@ -30,7 +30,6 @@ from .typeddict import TypedDict
 RecordType = Union[ArrayRecord, MetricsRecord, ConfigsRecord]
 
 T = TypeVar("T")
-_warning_logged_parametersrecord = False
 
 
 def _check_key(key: str) -> None:
