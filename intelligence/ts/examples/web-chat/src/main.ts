@@ -1,9 +1,14 @@
 import { FlowerIntelligence, Progress, StreamEvent } from '@flwr/flwr';
 
 const MODEL = 'meta/llama3.2-1b/instruct-fp16';
+// const MODEL = 'meta/llama3.2-1b/instruct-q4';
 // const MODEL= 'meta/llama3.2-3b/instruct-q4';
 // const MODEL= 'meta/llama3.1-8b/instruct-q4';
-// const MODEL= 'deepseek/r1';
+// const MODEL = 'huggingface/smollm2-135m/instruct-fp16';
+// const MODEL = 'huggingface/smollm2-360m/instruct-q4';
+// const MODEL = 'huggingface/smollm2-360m/instruct-fp16';
+// const MODEL = 'huggingface/smollm2-1.7b/instruct-q4';
+// const MODEL = 'deepseek/r1-distill-llama-8b/q4';
 
 const fi = FlowerIntelligence.instance;
 
