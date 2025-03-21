@@ -385,14 +385,28 @@ class MoEGate: Module {
   
   func callAsFunction(_ x: MLXArray) -> (MLXArray, MLXArray) {
     let (bsz, seqLen, h) = (x.dim(0), x.dim(1), x.dim(2))
-    let hiddenStates = x.reshaped(-1, h)
-    //add linear
-    let scores = sigmoid(hiddenStates)
+    
+    var hiddenStates = x.matmul(weight.T)
+    hiddenStates = hiddenStates.reshaped(-1, h)
+    var scores = sigmoid(hiddenStates)
     let scoresForChoice = scores.reshaped(bsz * seqLen, -1) + eScoreCorrectionBias
     let groupScores = scoresForChoice.reshaped(bsz * seqLen, self.nGroup, -1)
-    let topK = sorted(groupScores, axis: -1)[.ellipsis, ..<2].sum(axis: -1, keepDims: true)
+    let topKGroup = sorted(groupScores, axis: -1)[.ellipsis, ..<2].sum(axis: -1, keepDims: true)
+    var k = nGroup - (topkGroup ?? 1)
+    let groupIdx = argPartition(topKGroup, kth: k-1, axis: -2)[.ellipsis, ..<k, 0...]
+    scores = putAlong(scoresForChoice, groupIdx, values: MLXArray(0.0), axis: -2)
+    scores = flattened(scores, start: -2, end: -1)
     
-    return (MLXArray(), MLXArray())
+    k = topK ?? 1
+    let inds = argPartition(-scores, kth: k-1, axis: -1)[.ellipsis, ..<k]
+    scores = takeAlong(scores, inds, axis: -1)
+    if topK ?? 1 > 1, normTopkProb {
+      let denominator = scores.sum(axis:-1, keepDims: true) + 1e-20
+      scores = scores / denominator
+      scores = scores * routedScalingFactor
+    }
+
+    return (inds, scores)
   }
 
 }
