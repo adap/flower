@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-20 00:32+0000\n"
+"POT-Creation-Date: 2025-03-21 00:32+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -10329,6 +10329,7 @@ msgstr "Bases: :py:class:`~abc.ABC`"
 #: ../../source/ref-api/flwr.common.Parameters.rst:15
 #: ../../source/ref-api/flwr.common.ParametersRecord.rst:15
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:15
+#: ../../source/ref-api/flwr.common.RecordDict.rst:15
 #: ../../source/ref-api/flwr.common.RecordSet.rst:15
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:15
 #: ../../source/ref-api/flwr.common.Status.rst:15
@@ -10448,7 +10449,7 @@ msgstr "返回客户端（本身）。"
 #: flwr.common.record.metricsrecord.MetricsRecord
 #: flwr.common.record.parametersrecord.Array
 #: flwr.common.record.parametersrecord.ParametersRecord
-#: flwr.common.record.recordset.RecordSet flwr.server.app.start_server
+#: flwr.common.record.recorddict.RecordDict flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.register
 #: flwr.server.client_manager.ClientManager.unregister
 #: flwr.server.client_manager.SimpleClientManager.register
@@ -10628,7 +10629,8 @@ msgstr "Bases: :py:class:`object`"
 #: flwr.common.record.metricsrecord.MetricsRecord:19
 #: flwr.common.record.parametersrecord.Array:35
 #: flwr.common.record.parametersrecord.ParametersRecord:35
-#: flwr.common.record.recordset.RecordSet:22 flwr.server.app.start_server:46
+#: flwr.common.record.recorddict.RecordDict:22
+#: flwr.common.record.recorddict.RecordSet:12 flwr.server.app.start_server:46
 #: flwr.server.grid.grid.Driver:14 flwr.server.server_app.ServerApp:4
 #: flwr.server.server_app.ServerApp.lifespan:7
 #: flwr.server.server_app.ServerApp.main:4
@@ -11438,18 +11440,18 @@ msgstr ""
 msgid "Convert parameters object to NumPy ndarrays."
 msgstr "将参数对象转换为 NumPy ndarrays。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Array <flwr.common.Array>`\\ \\(\\)"
 msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.record.parametersrecord.Array:1 of
 #, fuzzy
 msgid "Array type."
 msgstr "返回类型"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`ClientMessage <flwr.common.ClientMessage>`\\ "
@@ -11458,27 +11460,27 @@ msgstr ""
 ":py:obj:`ClientMessage <flwr.common.ClientMessage>`\\ "
 "\\(\\[get\\_properties\\_res\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.ClientMessage:1 of
 msgid "ClientMessage is a container used to hold one result message."
 msgstr "ClientMessage 是用于容纳一条结果信息的容器。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Code <flwr.common.Code>`\\ \\(value\\)"
 msgstr ":py:obj:`Code <flwr.common.Code>`\\ \\(value\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.Code:1 of
 msgid "Client status codes."
 msgstr "客户端状态代码。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Config <flwr.common.Config>`\\"
 msgstr ":py:obj:`config <flwr.common.FitIns.config>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 "alias of :py:class:`dict`\\ [:py:class:`str`, :py:class:`bool` | "
@@ -11490,7 +11492,7 @@ msgstr ""
 ":py:class:`float`, :py:class:`~typing.List`\\ [:py:class:`int`], "
 ":py:class:`~typing.List`\\ [:py:class:`float`]]]"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`ConfigsRecord <flwr.common.ConfigsRecord>`\\ "
@@ -11500,47 +11502,47 @@ msgstr ""
 "config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), "
 "...)``"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.record.configsrecord.ConfigsRecord:1 of
 #, fuzzy
 msgid "Configs record."
 msgstr "配置日志记录"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Context <flwr.common.Context>`\\ \\(run\\_id\\, node\\_id\\, "
 "node\\_config\\, state\\, ...\\)"
 msgstr ":py:obj:`Context <flwr.common.Context>`\\ \\(state\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.context.Context:1 of
 #, fuzzy
 msgid "Context of your run."
 msgstr "您的运行状态。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`DisconnectRes <flwr.common.DisconnectRes>`\\ \\(reason\\)"
 msgstr ":py:obj:`DisconnectRes <flwr.common.DisconnectRes>`\\ \\(reason\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.DisconnectRes:1 of
 msgid "DisconnectRes message from client to server."
 msgstr "客户端向服务器发送 DisconnectRes 信息。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 msgstr ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.message.Error:1 of
 #, fuzzy
-msgid "A dataclass that stores information about an error that occurred."
+msgid "The class storing information about an error that occurred."
 msgstr "数据类，用于存储所发生错误的相关信息。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`EvaluateIns <flwr.common.EvaluateIns>`\\ \\(parameters\\, "
@@ -11549,12 +11551,12 @@ msgstr ""
 ":py:obj:`EvaluateIns <flwr.common.EvaluateIns>`\\ \\(parameters\\, "
 "config\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.EvaluateIns:1 of
 msgid "Evaluate instructions for a client."
 msgstr "评估客户端的指示。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`EvaluateRes <flwr.common.EvaluateRes>`\\ \\(status\\, loss\\, "
@@ -11563,32 +11565,32 @@ msgstr ""
 ":py:obj:`EvaluateRes <flwr.common.EvaluateRes>`\\ \\(status\\, loss\\, "
 "num\\_examples\\, metrics\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.EvaluateRes:1 of
 msgid "Evaluate response from a client."
 msgstr "评估客户端的反应。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.telemetry.EventType:1 of
 msgid "Types of telemetry events."
 msgstr "遥测事件类型。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`FitIns <flwr.common.FitIns>`\\ \\(parameters\\, config\\)"
 msgstr ":py:obj:`FitIns <flwr.common.FitIns>`\\ \\(parameters\\, config\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.FitIns:1 of
 msgid "Fit instructions for a client."
 msgstr "为客户提供安装说明。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FitRes <flwr.common.FitRes>`\\ \\(status\\, parameters\\, "
@@ -11597,22 +11599,22 @@ msgstr ""
 ":py:obj:`FitRes <flwr.common.FitRes>`\\ \\(status\\, parameters\\, "
 "num\\_examples\\, metrics\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.FitRes:1 of
 msgid "Fit response from a client."
 msgstr "来自客户端的合适回复。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`GetParametersIns <flwr.common.GetParametersIns>`\\ \\(config\\)"
 msgstr ":py:obj:`GetParametersIns <flwr.common.GetParametersIns>`\\ \\(config\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.GetParametersIns:1 of
 msgid "Parameters request for a client."
 msgstr "客户端的参数请求。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`GetParametersRes <flwr.common.GetParametersRes>`\\ \\(status\\, "
@@ -11621,22 +11623,22 @@ msgstr ""
 ":py:obj:`GetParametersRes <flwr.common.GetParametersRes>`\\ \\(status\\, "
 "parameters\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.GetParametersRes:1 of
 msgid "Response when asked to return parameters."
 msgstr "要求返回参数时的响应。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`GetPropertiesIns <flwr.common.GetPropertiesIns>`\\ \\(config\\)"
 msgstr ":py:obj:`GetPropertiesIns <flwr.common.GetPropertiesIns>`\\ \\(config\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.GetPropertiesIns:1 of
 msgid "Properties request for a client."
 msgstr "客户端的属性请求。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`GetPropertiesRes <flwr.common.GetPropertiesRes>`\\ \\(status\\, "
@@ -11645,49 +11647,44 @@ msgstr ""
 ":py:obj:`GetPropertiesRes <flwr.common.GetPropertiesRes>`\\ \\(status\\, "
 "properties\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.GetPropertiesRes:1 of
 msgid "Properties response from a client."
 msgstr "来自客户端的属性响应。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
-msgid ""
-":py:obj:`Message <flwr.common.Message>`\\ \\(metadata\\[\\, content\\, "
-"error\\]\\)"
-msgstr ""
-":py:obj:`Message <flwr.common.Message>`\\ \\(metadata\\[\\, content\\, "
-"error\\]\\)"
+msgid ":py:obj:`Message <flwr.common.Message>`\\ \\(\\)"
+msgstr ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.message.Message:1 of
-#, fuzzy
-msgid "State of your application from the viewpoint of the entity using it."
-msgstr "从使用实体的角度看应用程序的状态。"
+msgid "Represents a message exchanged between ClientApp and ServerApp."
+msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
 msgstr ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.constant.MessageType:1 of
 #, fuzzy
 msgid "Message type."
 msgstr "信息类型。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`MessageTypeLegacy <flwr.common.MessageTypeLegacy>`\\ \\(\\)"
 msgstr ":py:obj:`MessageTypeLegacy <flwr.common.MessageTypeLegacy>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.constant.MessageTypeLegacy:1 of
 #, fuzzy
 msgid "Legacy message type."
 msgstr "传统信息类型。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Metadata <flwr.common.Metadata>`\\ \\(run\\_id\\, "
@@ -11696,18 +11693,18 @@ msgstr ""
 ":py:obj:`Metadata <flwr.common.Metadata>`\\ \\(run\\_id\\, "
 "message\\_id\\, src\\_node\\_id\\, ...\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.message.Metadata:1 of
 #, fuzzy
-msgid "A dataclass holding metadata associated with the current message."
+msgid "The class representing metadata associated with the current message."
 msgstr "数据类型，包含与当前报文相关的元数据。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Metrics <flwr.common.Metrics>`\\"
 msgstr ":py:obj:`metrics <flwr.common.FitRes.metrics>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`MetricsRecord <flwr.common.MetricsRecord>`\\ "
@@ -11716,18 +11713,18 @@ msgstr ""
 ":py:obj:`MetricsRecord <flwr.common.MetricsRecord>`\\ "
 "\\(\\[metrics\\_dict\\, keep\\_input\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.record.metricsrecord.MetricsRecord:1 of
 #, fuzzy
 msgid "Metrics recod."
 msgstr "指标记录。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 "alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
@@ -11736,12 +11733,12 @@ msgstr ""
 "alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
 ":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`NDArrays <flwr.common.NDArrays>`\\"
 msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 "alias of :py:class:`list`\\ [:py:class:`~numpy.ndarray`\\ "
@@ -11751,7 +11748,7 @@ msgstr ""
 "alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
 ":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Parameters <flwr.common.Parameters>`\\ \\(tensors\\, "
@@ -11760,51 +11757,63 @@ msgstr ""
 ":py:obj:`Parameters <flwr.common.Parameters>`\\ \\(tensors\\, "
 "tensor\\_type\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.Parameters:1 of
 msgid "Model parameters."
 msgstr "模型参数。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ \\(\\)"
 msgstr ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.record.parametersrecord.ParametersRecord:1 of
 #, fuzzy
 msgid "Parameters record."
 msgstr "参数"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Properties <flwr.common.Properties>`\\"
 msgstr ":py:obj:`properties <flwr.common.GetPropertiesRes.properties>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`ReconnectIns <flwr.common.ReconnectIns>`\\ \\(seconds\\)"
 msgstr ":py:obj:`ReconnectIns <flwr.common.ReconnectIns>`\\ \\(seconds\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.ReconnectIns:1 of
 msgid "ReconnectIns message from server to client."
 msgstr "服务器发送给客户端的重新连接信息。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`RecordDict <flwr.common.RecordDict>`\\ \\(\\[records\\]\\)"
+msgstr ""
+":py:obj:`RecordSet <flwr.common.RecordSet>`\\ "
+"\\(\\[parameters\\_records\\, ...\\]\\)"
+
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
+#: flwr.common.record.recorddict.RecordDict:1 of
+#, fuzzy
+msgid "RecordDict stores groups of parameters, metrics and configs."
+msgstr "RecordSet 可存储参数、指标和配置组。"
+
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`RecordSet <flwr.common.RecordSet>`\\ \\(\\[records\\]\\)"
 msgstr ""
 ":py:obj:`RecordSet <flwr.common.RecordSet>`\\ "
 "\\(\\[parameters\\_records\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-#: flwr.common.record.recordset.RecordSet:1 of
-#, fuzzy
-msgid "RecordSet stores groups of parameters, metrics and configs."
-msgstr "RecordSet 可存储参数、指标和配置组。"
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
+#: flwr.common.record.recorddict.RecordSet:1 of
+msgid "Deprecated class ``RecordSet``, use ``RecordDict`` instead."
+msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
@@ -11813,17 +11822,17 @@ msgstr ""
 ":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
 "\\(\\[get\\_properties\\_ins\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.ServerMessage:1 of
 msgid "ServerMessage is a container used to hold one instruction message."
 msgstr "ServerMessage 是用于容纳一条指令信息的容器。"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Status <flwr.common.Status>`\\ \\(code\\, message\\)"
 msgstr ":py:obj:`Status <flwr.common.Status>`\\ \\(code\\, message\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.Status:1 of
 msgid "Client status."
 msgstr "客户端状态。"
@@ -11967,6 +11976,7 @@ msgstr "以 NumPy ndarrays 列表形式返回模型参数"
 #: ../../source/ref-api/flwr.common.Metadata.rst:25
 #: ../../source/ref-api/flwr.common.Parameters.rst:25
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
+#: ../../source/ref-api/flwr.common.RecordDict.rst:52
 #: ../../source/ref-api/flwr.common.RecordSet.rst:52
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:25
 #: ../../source/ref-api/flwr.common.Status.rst:25
@@ -12116,8 +12126,9 @@ msgid ""
 "A :code:`ConfigsRecord` is a Python dictionary designed to ensure that "
 "each key-value pair adheres to specified data types. A "
 ":code:`ConfigsRecord` is one of the types of records that a "
-"`flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports "
-"and can therefore be used to construct :code:`common.Message` objects."
+"`flwr.common.RecordDict <flwr.common.RecordDict.html#recorddict>`_ "
+"supports and can therefore be used to construct :code:`common.Message` "
+"objects."
 msgstr ""
 
 #: flwr.common.record.configsrecord.ConfigsRecord:9 of
@@ -12154,10 +12165,10 @@ msgstr ""
 
 #: flwr.common.record.configsrecord.ConfigsRecord:42 of
 msgid ""
-"Just like the other types of records in a :code:`flwr.common.RecordSet`, "
-"types are enforced. If you need to add a custom data structure or object,"
-" we recommend to serialise it into bytes and save it as such (bytes are "
-"allowed in a :code:`ConfigsRecord`)"
+"Just like the other types of records in a :code:`flwr.common.RecordDict`,"
+" types are enforced. If you need to add a custom data structure or "
+"object, we recommend to serialise it into bytes and save it as such "
+"(bytes are allowed in a :code:`ConfigsRecord`)"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -12198,6 +12209,7 @@ msgstr ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
 msgid ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: collections.abc.MutableMapping.pop:1 of
@@ -12210,6 +12222,7 @@ msgstr "如果未找到 key，则返回 d（如果给定），否则引发 KeyEr
 msgid ":py:obj:`popitem <flwr.common.ConfigsRecord.popitem>`\\ \\(\\)"
 msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
 
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: collections.abc.MutableMapping.popitem:1 of
@@ -12232,6 +12245,7 @@ msgstr ""
 ":py:obj:`update <flwr.common.ConfigsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: collections.abc.MutableMapping.update:1 of
@@ -13575,25 +13589,59 @@ msgstr ":py:obj:`properties <flwr.common.GetPropertiesRes.properties>`\\"
 msgid "Message"
 msgstr "服务器端"
 
-#: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.metadata:1
 #: flwr.common.message.Message:3 of
-#, fuzzy
-msgid "A dataclass including information about the message to be executed."
-msgstr "数据类型，包括要执行的信息的相关信息。"
+msgid ""
+"This class encapsulates the payload and metadata necessary for "
+"communication between a ClientApp and a ServerApp."
+msgstr ""
 
-#: flwr.common.message.Message:5 of
+#: flwr.common.message.Message:6 of
 #, fuzzy
 msgid ""
 "Holds records either sent by another entity (e.g. sent by the server-side"
 " logic to a client, or vice-versa) or that will be sent to it."
 msgstr "保存由其他实体发送的记录（如由服务器端逻辑发送到客户端，反之亦然）或将发送到该实体的记录。"
 
-#: flwr.common.message.Message:8 of
+#: flwr.common.message.Message:9 of
 #, fuzzy
 msgid ""
 "A dataclass that captures information about an error that took place when"
 " processing another message."
 msgstr "数据类，用于捕捉处理其他报文时发生的错误信息。"
+
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Message:12
+#: flwr.common.message.Metadata:9 of
+#, fuzzy
+msgid "An identifier for the node receiving this message."
+msgstr "接收此信息的节点的标识符。"
+
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.message_type:1 flwr.common.message.Message:14
+#: flwr.common.message.Metadata:20 of
+#, fuzzy
+msgid "A string that encodes the action to be executed on the receiving end."
+msgstr "编码接收端要执行的操作的字符串。"
+
+#: flwr.common.message.Message:17 of
+msgid ""
+"Time-to-live (TTL) for this message in seconds. If `None` (default), the "
+"TTL is set to 43,200 seconds (12 hours)."
+msgstr ""
+
+#: flwr.common.message.Message:20 flwr.common.message.Metadata:13 of
+#, fuzzy
+msgid ""
+"An identifier for grouping messages. In some settings, this is used as "
+"the FL round."
+msgstr "用于分组报文的标识符。在某些设置中，它被用作 FL 轮。"
+
+#: flwr.common.message.Message:23 of
+msgid ""
+"The instruction message to which this message is a reply. This message "
+"does not retain the original message's content but derives its metadata "
+"from it."
+msgstr ""
 
 #: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
 #, fuzzy
@@ -13673,6 +13721,12 @@ msgstr "该信息捕捉到的错误。"
 msgid ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
 msgstr ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
 
+#: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.metadata:1
+#: of
+#, fuzzy
+msgid "A dataclass including information about the message to be executed."
+msgstr "数据类型，包括要执行的信息的相关信息。"
+
 #: flwr.common.message.Message.create_error_reply:3 of
 #, fuzzy
 msgid "The error that was encountered."
@@ -13715,7 +13769,7 @@ msgstr "**message** -- 具有指定内容和元数据的新 \"信息 \"实例。
 msgid ""
 "The method generates a new `Message` as a reply to this message. It "
 "inherits 'run_id', 'src_node_id', 'dst_node_id', and 'message_type' from "
-"this message and sets 'reply_to_message' to the ID of this message."
+"this message and sets 'reply_to_message_id' to the ID of this message."
 msgstr ""
 "该方法会生成一条新的 \"信息\"，作为对该信息的回复。该方法继承了该消息的 "
 "\"run_id\"、\"src_node_id\"、\"dst_node_id \"和 \"message_type\"，并将 "
@@ -13794,45 +13848,28 @@ msgid "An identifier for the node sending this message."
 msgstr "发送此信息的节点的标识符。"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Metadata:9 of
+#: flwr.common.Metadata.reply_to_message_id:1 flwr.common.message.Metadata:11
+#: of
 #, fuzzy
-msgid "An identifier for the node receiving this message."
-msgstr "接收此信息的节点的标识符。"
-
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.reply_to_message:1 flwr.common.message.Metadata:11 of
-#, fuzzy
-msgid "An identifier for the message this message replies to."
+msgid "An identifier for the message to which this message is a reply."
 msgstr "该信息回复的信息的标识符。"
 
-#: flwr.common.message.Metadata:13 of
-#, fuzzy
-msgid ""
-"An identifier for grouping messages. In some settings, this is used as "
-"the FL round."
-msgstr "用于分组报文的标识符。在某些设置中，它被用作 FL 轮。"
-
+#: flwr.common.Metadata.created_at:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
 #: flwr.common.message.Metadata:16 of
+#, fuzzy
+msgid "Unix timestamp when the message was created."
+msgstr "创建信息时的 Unix 时间戳。"
+
+#: flwr.common.message.Metadata:18 of
 #, fuzzy
 msgid "Time-to-live for this message in seconds."
 msgstr "该信息的有效时间。"
-
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.message_type:1 flwr.common.message.Metadata:18 of
-#, fuzzy
-msgid "A string that encodes the action to be executed on the receiving end."
-msgstr "编码接收端要执行的操作的字符串。"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`created_at <flwr.common.Metadata.created_at>`\\"
 msgstr ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
-
-#: flwr.common.Metadata.created_at:1
-#: flwr.common.Metadata.created_at:1:<autosummary>:1 of
-#, fuzzy
-msgid "Unix timestamp when the message was created."
-msgstr "创建信息时的 Unix 时间戳。"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 #, fuzzy
@@ -13873,7 +13910,7 @@ msgstr ":py:obj:`message_type <flwr.common.Metadata.message_type>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 #, fuzzy
-msgid ":py:obj:`reply_to_message <flwr.common.Metadata.reply_to_message>`\\"
+msgid ":py:obj:`reply_to_message_id <flwr.common.Metadata.reply_to_message_id>`\\"
 msgstr ":py:obj:`reply_to_message <flwr.common.Metadata.reply_to_message>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
@@ -13925,8 +13962,9 @@ msgid ""
 "A :code:`MetricsRecord` is a Python dictionary designed to ensure that "
 "each key-value pair adheres to specified data types. A "
 ":code:`MetricsRecord` is one of the types of records that a "
-"`flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports "
-"and can therefore be used to construct :code:`common.Message` objects."
+"`flwr.common.RecordDict <flwr.common.RecordDict.html#recorddict>`_ "
+"supports and can therefore be used to construct :code:`common.Message` "
+"objects."
 msgstr ""
 
 #: flwr.common.record.metricsrecord.MetricsRecord:9 of
@@ -14076,7 +14114,7 @@ msgstr ""
 
 #: flwr.common.record.parametersrecord.ParametersRecord:8 of
 msgid ""
-"This object is one of the record types supported by :class:`RecordSet` "
+"This object is one of the record types supported by :class:`RecordDict` "
 "and can therefore be stored in the ``content`` of a :class:`Message` or "
 "the ``state`` of a :class:`Context`."
 msgstr ""
@@ -14308,12 +14346,12 @@ msgstr "启用 SSL 连接"
 msgid ":py:obj:`seconds <flwr.common.ReconnectIns.seconds>`\\"
 msgstr ":py:obj:`seconds <flwr.common.ReconnectIns.seconds>`\\"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:2
+#: ../../source/ref-api/flwr.common.RecordDict.rst:2
 #, fuzzy
-msgid "RecordSet"
+msgid "RecordDict"
 msgstr "RecordSet"
 
-#: flwr.common.record.recordset.RecordSet:1 of
+#: flwr.common.record.recorddict.RecordDict:1 of
 #, fuzzy
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
@@ -14325,48 +14363,48 @@ msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
 
-#: flwr.common.record.recordset.RecordSet:3 of
+#: flwr.common.record.recorddict.RecordDict:3 of
 msgid ""
-"A :class:`RecordSet` is the unified mechanism by which parameters, "
+"A :class:`RecordDict` is the unified mechanism by which parameters, "
 "metrics and configs can be either stored as part of a :class:`Context` in"
 " your apps or communicated as part of a :class:`Message` between your "
 "apps."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:8 of
+#: flwr.common.record.recorddict.RecordDict:8 of
 msgid ""
 "A dictionary of :code:`ParametersRecords` that can be used to record and "
 "communicate model parameters and high-dimensional arrays."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:11 of
+#: flwr.common.record.recorddict.RecordDict:11 of
 msgid ""
 "A dictionary of :code:`MetricsRecord` that can be used to record and "
 "communicate scalar-valued metrics that are the result of performing and "
 "action, for example, by a :code:`ClientApp`."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:15 of
+#: flwr.common.record.recorddict.RecordDict:15 of
 msgid ""
 "A dictionary of :code:`ConfigsRecord` that can be used to record and "
 "communicate configuration values to an entity (e.g. to a "
 ":code:`ClientApp`) for it to adjust how an action is performed."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:23 of
+#: flwr.common.record.recorddict.RecordDict:23 of
 msgid ""
-"A :code:`RecordSet` can hold three types of records, each designed with "
-"an specific purpose. What is common to all of them is that they are "
+"A :class:`RecordDict` can hold three types of records, each designed with"
+" an specific purpose. What is common to all of them is that they are "
 "Python dictionaries designed to ensure that each key-value pair adheres "
 "to specified data types."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:28 of
+#: flwr.common.record.recorddict.RecordDict:28 of
 #, fuzzy
 msgid "Let's see an example."
 msgstr "让我们来看几个例子："
 
-#: flwr.common.record.recordset.RecordSet:46 of
+#: flwr.common.record.recorddict.RecordDict:46 of
 msgid ""
 "Adding a :code:`ParametersRecord` follows the same steps as above but "
 "first, the array needs to be serialized and represented as a "
@@ -14376,11 +14414,132 @@ msgid ""
 " array first to :code:`NumPy` and then use the aforementioned function."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:65 of
+#: flwr.common.record.recorddict.RecordDict:65 of
 msgid ""
 "For additional examples on how to construct each of the records types "
 "shown above, please refer to the documentation for :code:`ConfigsRecord`,"
 " :code:`MetricsRecord` and :code:`ParametersRecord`."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`clear <flwr.common.RecordDict.clear>`\\ \\(\\)"
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`get <flwr.common.RecordDict.get>`\\ \\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`items <flwr.common.RecordDict.items>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`keys <flwr.common.RecordDict.keys>`\\ \\(\\)"
+msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`pop <flwr.common.RecordDict.pop>`\\ \\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`popitem <flwr.common.RecordDict.popitem>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`setdefault <flwr.common.RecordDict.setdefault>`\\ "
+"\\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`update <flwr.common.RecordDict.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+msgstr ""
+":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`values <flwr.common.RecordDict.values>`\\ \\(\\)"
+msgstr ":py:obj:`values <flwr.common.MetricsRecord.values>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`configs_records <flwr.common.RecordDict.configs_records>`\\"
+msgstr ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.RecordDict.configs_records:1
+#: flwr.common.RecordSet.configs_records:1 of
+#, fuzzy
+msgid "Dictionary holding only ConfigsRecord instances."
+msgstr "包含 ConfigsRecord 实例的字典。"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`metrics_records <flwr.common.RecordDict.metrics_records>`\\"
+msgstr ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.RecordDict.metrics_records:1
+#: flwr.common.RecordSet.metrics_records:1 of
+#, fuzzy
+msgid "Dictionary holding only MetricsRecord instances."
+msgstr "保存 MetricsRecord 实例的字典。"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`parameters_records <flwr.common.RecordDict.parameters_records>`\\"
+msgstr ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.RecordDict.parameters_records:1
+#: flwr.common.RecordSet.parameters_records:1 of
+#, fuzzy
+msgid "Dictionary holding only ParametersRecord instances."
+msgstr "存放 ParametersRecord 实例的字典。"
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:2
+#, fuzzy
+msgid "RecordSet"
+msgstr "RecordSet"
+
+#: flwr.common.record.recorddict.RecordSet:1 of
+#, fuzzy
+msgid "Bases: :py:class:`~flwr.common.record.recorddict.RecordDict`"
+msgstr "Bases: :py:class:`~flwr.common.context.Context`"
+
+#: flwr.common.record.recorddict.RecordSet:3 of
+msgid ""
+"This class exists solely for backward compatibility with legacy code that"
+" previously used ``RecordSet``. It has been renamed to ``RecordDict`` and"
+" will be removed in a future release."
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordSet:8 of
+#, fuzzy
+msgid ""
+"``RecordSet`` is deprecated and will be removed in a future release. Use "
+"``RecordDict`` instead."
+msgstr "该类已被弃用，将在以后的版本中删除。"
+
+#: flwr.common.record.recorddict.RecordSet:13 flwr.server.grid.grid.Driver:15
+#: of
+msgid "Legacy (deprecated) usage::"
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordSet:19 flwr.server.grid.grid.Driver:21
+#: of
+msgid "Updated usage::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
@@ -14437,33 +14596,15 @@ msgstr ":py:obj:`values <flwr.common.MetricsRecord.values>`\\ \\(\\)"
 msgid ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
 msgstr ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: flwr.common.RecordSet.configs_records:1 of
-#, fuzzy
-msgid "Dictionary holding only ConfigsRecord instances."
-msgstr "包含 ConfigsRecord 实例的字典。"
-
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
 msgstr ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: flwr.common.RecordSet.metrics_records:1 of
-#, fuzzy
-msgid "Dictionary holding only MetricsRecord instances."
-msgstr "保存 MetricsRecord 实例的字典。"
-
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
 msgstr ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
-
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: flwr.common.RecordSet.parameters_records:1 of
-#, fuzzy
-msgid "Dictionary holding only ParametersRecord instances."
-msgstr "存放 ParametersRecord 实例的字典。"
 
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:2
 #, fuzzy
@@ -14872,14 +15013,6 @@ msgid ""
 "``Driver`` is deprecated and will be removed in a future release. Use "
 "`Grid` in the signature of your ServerApp."
 msgstr "该类已被弃用，将在以后的版本中删除。"
-
-#: flwr.server.grid.grid.Driver:15 of
-msgid "Legacy (deprecated) usage::"
-msgstr ""
-
-#: flwr.server.grid.grid.Driver:21 of
-msgid "Updated usage::"
-msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
 #, fuzzy
@@ -33312,7 +33445,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|462a5ddc7b2d4b73819bdeffde19f2fc|"
+msgid "|b6d7f89f3808402b9292d88245973eff|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -33327,7 +33460,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|1cd9d5b3c0f743849d81024f6bb79f0f|"
+msgid "|cb5e4b961f084019b6ce414c35f3f37a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -33351,7 +33484,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|23545c677a484fa3aabfa186b446bcea|"
+msgid "|97ea8cf65d1f407590d4c61e1d5352aa|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -33369,7 +33502,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|af0433fa018d41a0b0599dbd696e5de3|"
+msgid "|96ac0b873a014a3abcf6dbe09c62d4c6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -33386,7 +33519,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|b68387deaa794ce2b323a08910c92d22|"
+msgid "|ef28711094124e239fc69cf7283466e5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -33401,7 +33534,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|a64fb69d1b6e4581a9a7f0cfc7310e22|"
+msgid "|87a5b00db468471aaaaadc5477704e15|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -33422,7 +33555,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|84867c1c32224df1916988ad35c2c80d|"
+msgid "|af29375956aa473f944c9fb6ea0bfc92|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -33437,7 +33570,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|bcfb9adf14aa48a394d8afd097ba15f1|"
+msgid "|d9bea29a75c7465da99a0f29b6d5735a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -33597,7 +33730,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|88026b46352a48688bffdb17496ae6c6|"
+msgid "|35eb9147612b492c97879287bad7b231|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -33622,7 +33755,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|1a75b5702f854894ae170dddd7bdcd1d|"
+msgid "|27e06a29cff64206af6d3695238c5977|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -33648,7 +33781,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|9553a34443934a26921e584c98a51f38|"
+msgid "|6bd42f6566f949a8a157fcb68272490d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -33671,7 +33804,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|848dd486de4e45349dc126455021891b|"
+msgid "|688be4d36b13400fa5c454e2ef1500f5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -33718,7 +33851,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|be39f3bca1a0445495c0bd6a2da84e34|"
+msgid "|58b84ee017db4b3ba25506c9bf503c4c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -33826,7 +33959,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|91a73d3573224a32ba04b015071bba4a|"
+msgid "|cffbf5f7fb6146e887e89765d6f590bd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -43315,5 +43448,119 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|1eb9389cb6ea4e34ae4b98476a69ae90|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`Message <flwr.common.Message>`\\ "
+#~ "\\(metadata\\[\\, content\\, error\\]\\)"
+#~ msgstr ""
+#~ ":py:obj:`Message <flwr.common.Message>`\\ "
+#~ "\\(metadata\\[\\, content\\, error\\]\\)"
+
+#~ msgid "State of your application from the viewpoint of the entity using it."
+#~ msgstr "从使用实体的角度看应用程序的状态。"
+
+#~ msgid ""
+#~ "A :code:`ConfigsRecord` is a Python "
+#~ "dictionary designed to ensure that each"
+#~ " key-value pair adheres to specified"
+#~ " data types. A :code:`ConfigsRecord` is "
+#~ "one of the types of records that"
+#~ " a `flwr.common.RecordSet "
+#~ "<flwr.common.RecordSet.html#recordset>`_ supports and "
+#~ "can therefore be used to construct "
+#~ ":code:`common.Message` objects."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Just like the other types of "
+#~ "records in a :code:`flwr.common.RecordSet`, "
+#~ "types are enforced. If you need to"
+#~ " add a custom data structure or "
+#~ "object, we recommend to serialise it "
+#~ "into bytes and save it as such "
+#~ "(bytes are allowed in a "
+#~ ":code:`ConfigsRecord`)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :code:`MetricsRecord` is a Python "
+#~ "dictionary designed to ensure that each"
+#~ " key-value pair adheres to specified"
+#~ " data types. A :code:`MetricsRecord` is "
+#~ "one of the types of records that"
+#~ " a `flwr.common.RecordSet "
+#~ "<flwr.common.RecordSet.html#recordset>`_ supports and "
+#~ "can therefore be used to construct "
+#~ ":code:`common.Message` objects."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This object is one of the record"
+#~ " types supported by :class:`RecordSet` and"
+#~ " can therefore be stored in the "
+#~ "``content`` of a :class:`Message` or the"
+#~ " ``state`` of a :class:`Context`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :class:`RecordSet` is the unified "
+#~ "mechanism by which parameters, metrics "
+#~ "and configs can be either stored "
+#~ "as part of a :class:`Context` in "
+#~ "your apps or communicated as part "
+#~ "of a :class:`Message` between your apps."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :code:`RecordSet` can hold three types"
+#~ " of records, each designed with an"
+#~ " specific purpose. What is common to"
+#~ " all of them is that they are"
+#~ " Python dictionaries designed to ensure "
+#~ "that each key-value pair adheres "
+#~ "to specified data types."
+#~ msgstr ""
+
+#~ msgid "|462a5ddc7b2d4b73819bdeffde19f2fc|"
+#~ msgstr ""
+
+#~ msgid "|1cd9d5b3c0f743849d81024f6bb79f0f|"
+#~ msgstr ""
+
+#~ msgid "|23545c677a484fa3aabfa186b446bcea|"
+#~ msgstr ""
+
+#~ msgid "|af0433fa018d41a0b0599dbd696e5de3|"
+#~ msgstr ""
+
+#~ msgid "|b68387deaa794ce2b323a08910c92d22|"
+#~ msgstr ""
+
+#~ msgid "|a64fb69d1b6e4581a9a7f0cfc7310e22|"
+#~ msgstr ""
+
+#~ msgid "|84867c1c32224df1916988ad35c2c80d|"
+#~ msgstr ""
+
+#~ msgid "|bcfb9adf14aa48a394d8afd097ba15f1|"
+#~ msgstr ""
+
+#~ msgid "|88026b46352a48688bffdb17496ae6c6|"
+#~ msgstr ""
+
+#~ msgid "|1a75b5702f854894ae170dddd7bdcd1d|"
+#~ msgstr ""
+
+#~ msgid "|9553a34443934a26921e584c98a51f38|"
+#~ msgstr ""
+
+#~ msgid "|848dd486de4e45349dc126455021891b|"
+#~ msgstr ""
+
+#~ msgid "|be39f3bca1a0445495c0bd6a2da84e34|"
+#~ msgstr ""
+
+#~ msgid "|91a73d3573224a32ba04b015071bba4a|"
 #~ msgstr ""
 
