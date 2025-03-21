@@ -34,14 +34,8 @@ def message_size_mod(
     """
     message_size_in_bytes = 0
 
-    for p_record in msg.content.parameters_records.values():
-        message_size_in_bytes += p_record.count_bytes()
-
-    for c_record in msg.content.configs_records.values():
-        message_size_in_bytes += c_record.count_bytes()
-
-    for m_record in msg.content.metric_records.values():
-        message_size_in_bytes += m_record.count_bytes()
+    for record in msg.content.parameters_records.values():
+        message_size_in_bytes += record.count_bytes()
 
     log(INFO, "Message size: %i bytes", message_size_in_bytes)
 
