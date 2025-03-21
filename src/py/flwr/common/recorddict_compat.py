@@ -185,7 +185,7 @@ def _embed_status_into_recorddict(
         "code": int(status.code.value),
         "message": status.message,
     }
-    # we add it to a `ConfigRecord`` because the `status.message`` is a string
+    # we add it to a `ConfigRecord` because the `status.message` is a string
     # and `str` values aren't supported in `MetricsRecords`
     recorddict.config_records[f"{res_str}.status"] = ConfigRecord(status_dict)
     return recorddict
