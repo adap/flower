@@ -179,9 +179,9 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         assert prox.node_id * pi == res.properties["result"]
         assert (
             str(prox.node_id * pi)
-            == prox.proxy_state.retrieve_context(run_id).state.config_records[
+            == prox.proxy_state.retrieve_context(run_id).state.config_records["result"][
                 "result"
-            ]["result"]
+            ]
         )
     ray.shutdown()
 

@@ -39,11 +39,7 @@ from flwr.common.config import (
 )
 from flwr.common.constant import CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
-from flwr.common.serde import (
-    config_record_to_proto,
-    fab_to_proto,
-    user_config_to_proto,
-)
+from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub

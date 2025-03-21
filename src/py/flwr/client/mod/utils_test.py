@@ -120,9 +120,7 @@ class TestMakeApp(unittest.TestCase):
         trace = mock_mod_names + ["app"]
         self.assertEqual(footprint, trace + list(reversed(mock_mod_names)))
         # pylint: disable-next=no-member
-        self.assertEqual(
-            "".join(message.content.config_records.keys()), "".join(trace)
-        )
+        self.assertEqual("".join(message.content.config_records.keys()), "".join(trace))
         self.assertEqual(
             "".join(out_message.content.config_records.keys()),
             "".join(reversed(trace)),
