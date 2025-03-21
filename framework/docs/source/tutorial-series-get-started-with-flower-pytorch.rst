@@ -166,10 +166,10 @@ into a new Python script ``plot.py`` and execute it with ``python plot.py``:
     fig.tight_layout()
     plt.show()
 
-The output above shows a random batch of images from the ``trainloader`` from the first
-of ten partitions. It also prints the labels associated with each image (i.e., one of
-the ten possible labels we’ve seen above). If you run the script again, you should see
-another batch of images.
+The output from running the script above shows a random batch of images from the
+``trainloader`` from the first of ten partitions. It also prints the labels associated
+with each image (i.e., one of the ten possible labels we’ve seen above). If you run the
+script again, you should see another batch of images.
 
 Step 1: Centralized Training with PyTorch
 -----------------------------------------
@@ -304,12 +304,12 @@ the gradients back to the server, not the full model parameters).
 We need two helper functions to get the updated model parameters from the local model
 and to update the local model with parameters received from the server: ``get_weights``
 and ``set_weights``. The following two functions do just that for the PyTorch model
-above.
+above and are predefined in ``task.py``.
 
 The details of how this works are not really important here (feel free to consult the
 PyTorch documentation if you want to learn more). In essence, we use ``state_dict`` to
 access PyTorch model parameter tensors. The parameter tensors are then converted to/from
-a list of NumPy ndarray’s (which the Flower ``NumPyClient`` knows how to
+a list of NumPy ``ndarray``\s (which the Flower ``NumPyClient`` knows how to
 serialize/deserialize):
 
 .. code-block:: python
@@ -403,8 +403,8 @@ call this function ``client_fn``. Flower calls ``client_fn`` whenever it needs a
 instance of one particular client to call ``fit`` or ``evaluate`` (those instances are
 usually discarded after use, so they should not keep any local state). In federated
 learning experiments using Flower, clients are identified by a partition ID, or
-``partition-id``. This ``partition-id`` is used to load different local data partitions
-for different clients, as can be seen below. The value of ``partition-id`` is retrieved
+``partition_id``. This ``partition_id`` is used to load different local data partitions
+for different clients, as can be seen below. The value of ``partition_id`` is retrieved
 from the ``node_config`` dictionary in the ``Context`` object, which holds the
 information that persists throughout each training round.
 
@@ -512,7 +512,7 @@ defined in the ``[tool.flwr.federations.local-simulation]`` section in the
 
 .. code-block:: shell
 
-    # Override some arguments
+    # Run the simulation with 5 server rounds and 3 local epochs
     $ flwr run . --run-config "num-server-rounds=5 local-epochs=3"
 
 Behind the scenes
