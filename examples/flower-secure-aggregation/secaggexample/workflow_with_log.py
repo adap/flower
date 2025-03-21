@@ -84,9 +84,7 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
     ) -> bool:
         ret = super().setup_stage(grid, context, state)
         self.node_ids = list(state.active_node_ids)
-        state.nid_to_fitins[self.node_ids[0]].configs_records["fitins.config"][
-            "drop"
-        ] = True
+        state.nid_to_fitins[self.node_ids[0]]["fitins.config"]["drop"] = True
         return ret
 
     def collect_masked_vectors_stage(
