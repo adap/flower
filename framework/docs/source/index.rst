@@ -24,7 +24,7 @@ Flower Framework
 
 The user guide is targeted at researchers and developers who want to use Flower to bring
 existing machine learning workloads into a federated setting. One of Flower's design
-goals was to make this simple. Read on to learn more!
+goals was to make this simple. Read on to learn more.
 
 Tutorials
 ~~~~~~~~~
@@ -43,21 +43,9 @@ A learning-oriented series of federated learning tutorials, the best place to st
 
 .. toctree::
     :maxdepth: 1
-    :caption: Quickstart tutorials
     :hidden:
 
-    tutorial-quickstart-pytorch
-    tutorial-quickstart-tensorflow
-    tutorial-quickstart-mlx
-    tutorial-quickstart-huggingface
-    tutorial-quickstart-jax
-    tutorial-quickstart-pandas
-    tutorial-quickstart-fastai
-    tutorial-quickstart-pytorch-lightning
-    tutorial-quickstart-scikitlearn
-    tutorial-quickstart-xgboost
-    tutorial-quickstart-android
-    tutorial-quickstart-ios
+    tutorial-quickstart
 
 QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`TensorFlow
 <tutorial-quickstart-tensorflow>` | :doc:`MLX <tutorial-quickstart-mlx>` | :doc:`🤗
@@ -67,116 +55,67 @@ Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart
 <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` |
 :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
 
-How-to guides
-~~~~~~~~~~~~~
+..
+    We also made video tutorials for PyTorch:
 
-Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
+..
+    .. youtube:: jOmmuzMIQ4c
 
-.. toctree::
-    :maxdepth: 1
-    :caption: How-to guides
+..
+    :width: 80%
 
-    how-to-install-flower
-    how-to-configure-clients
-    how-to-design-stateful-clients
-    how-to-use-strategies
-    how-to-implement-strategies
-    how-to-aggregate-evaluation-results
-    how-to-save-and-load-model-checkpoints
-    how-to-run-simulations
-    how-to-run-flower-with-deployment-engine
-    how-to-enable-tls-connections
-    how-to-authenticate-supernodes
-    how-to-configure-logging
-    how-to-use-built-in-mods
-    how-to-use-differential-privacy
-    how-to-implement-fedbn
-    how-to-run-flower-on-azure
-    how-to-use-cli-json-output
-    docker/index
-    how-to-upgrade-to-flower-1.0
-    how-to-upgrade-to-flower-1.13
+..
+    And TensorFlow:
 
-Explanations
-~~~~~~~~~~~~
+..
+    .. youtube:: FGTc2TQq7VM
 
-Understanding-oriented concept guides explain and discuss key topics and underlying
-ideas behind Flower and collaborative AI.
+..
+    :width: 80%
+
+Build a Flower app
+~~~~~~~~~~~~~~~~~~
 
 .. toctree::
-    :maxdepth: 1
-    :caption: Explanations
+    :titlesonly:
 
-    explanation-federated-evaluation
-    explanation-differential-privacy
-    explanation-flower-architecture
+    build
 
-References
-~~~~~~~~~~
-
-Information-oriented API reference and other reference material.
-
-.. autosummary::
-    :toctree: ref-api
-    :template: autosummary/module.rst
-    :caption: API reference
-    :recursive:
-
-    flwr
+Simulate using the Flower Simulation Engine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. toctree::
+    :titlesonly:
+
+    simulate
+
+Deploy using the Flower Deployment Engine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. toctree::
+    :titlesonly:
+
+    deploy
+
+Reference
+~~~~~~~~~
+
+.. toctree::
+    :titlesonly:
     :maxdepth: 2
 
-    ref-api-cli
+    reference
 
-.. toctree::
-    :maxdepth: 1
-    :caption: Reference docs
-
-    ref-example-projects
-    ref-telemetry
-    ref-changelog
-    ref-flower-network-communication
-    ref-exit-codes-dir
-    ref-faq
-
-Contributor docs
-----------------
+Contribute
+~~~~~~~~~~
 
 The Flower community welcomes contributions. The following docs are intended to help
 along the way.
 
 .. toctree::
-    :maxdepth: 1
-    :caption: Contributor tutorials
+    :titlesonly:
 
-    contributor-tutorial-contribute-on-github
-    contributor-tutorial-get-started-as-a-contributor
-
-.. toctree::
-    :maxdepth: 1
-    :caption: Contributor how-to guides
-
-    contributor-how-to-install-development-versions
-    contributor-how-to-set-up-a-virtual-env
-    contributor-how-to-develop-in-vscode-dev-containers
-    contributor-how-to-write-documentation
-    contributor-how-to-release-flower
-    contributor-how-to-contribute-translations
-    contributor-how-to-build-docker-images
-
-.. toctree::
-    :maxdepth: 1
-    :caption: Contributor explanations
-
-    contributor-explanation-public-and-private-apis
-
-.. toctree::
-    :maxdepth: 1
-    :caption: Contributor references
-
-    contributor-ref-good-first-contributions
-    contributor-ref-secure-aggregation-protocols
+    contribute
 
 ..
     Indices and tables
