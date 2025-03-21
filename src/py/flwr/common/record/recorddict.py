@@ -228,6 +228,7 @@ class RecordSet(RecordDict):
     """
 
     _warning_logged = False
+    _warning_logged_metrics = False
 
     def __init__(self, records: dict[str, RecordType] | None = None) -> None:
         if not RecordSet._warning_logged:
@@ -239,3 +240,19 @@ class RecordSet(RecordDict):
                 "Please update your code accordingly.",
             )
         super().__init__(records)
+
+    @property
+    def metrics_records(self) -> TypedDict[str, MetricRecord]:
+        """Deprecated property.
+
+        Use ``metric_records`` instead.
+        """
+        if not RecordSet._warning_logged_metrics:
+            RecordSet._warning_logged_metrics = True
+            log(
+                WARN,
+                "`RecordSet.metrics_records` has been deprecated "
+                "and will be removed in a future release. Please use "
+                "`RecordDict.metric_records` instead.",
+            )
+        return self.metric_records
