@@ -41,6 +41,7 @@ def message_size_mod(
 
     return call_next(msg, ctxt)
 
+
 def arrays_size_mod(
     msg: Message, ctxt: Context, call_next: ClientAppCallable
 ) -> Message:

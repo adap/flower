@@ -30,6 +30,7 @@ from .typeddict import TypedDict
 RecordType = Union[ArrayRecord, MetricsRecord, ConfigsRecord]
 
 T = TypeVar("T")
+_warning_logged_parametersrecord = False
 
 
 def _check_key(key: str) -> None:
@@ -157,6 +158,23 @@ class RecordDict(TypedDict[str, RecordType]):
             if isinstance(record, ArrayRecord):
                 synced_dict[key] = record
         return synced_dict
+
+    @property
+    def parameters_records(self) -> TypedDict[str, ArrayRecord]:
+        """Deprecated property.
+
+        Use ``array_records`` instead.
+        """
+        global _warning_logged_parametersrecord
+        if not _warning_logged_parametersrecord:
+            _warning_logged_parametersrecord = True
+            log(
+                WARN,
+                "`RecordDict.parameters_records` has been renamed to "
+                "`RecordDict.array_records`. Support for `parameters_records` "
+                "will be removed in a future release. Please update your code.",
+            )
+        return self.array_records
 
     @property
     def metrics_records(self) -> TypedDict[str, MetricsRecord]:
