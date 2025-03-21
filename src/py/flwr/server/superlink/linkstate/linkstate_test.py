@@ -1255,7 +1255,7 @@ def create_ins_message(
             message_type="query",
             created_at=now().timestamp(),
         ),
-        content=ProtoRecordDict(parameters={}, metrics={}, configs={}),
+        content=ProtoRecordDict(arrays={}, metrics={}, configs={}),
     )
 
 

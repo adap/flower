@@ -31,6 +31,7 @@ from .parameter import ndarray_to_bytes as ndarray_to_bytes
 from .parameter import ndarrays_to_parameters as ndarrays_to_parameters
 from .parameter import parameters_to_ndarrays as parameters_to_ndarrays
 from .record import Array as Array
+from .record import ArrayRecord as ArrayRecord
 from .record import ConfigsRecord as ConfigsRecord
 from .record import MetricRecord as MetricRecord
 from .record import MetricsRecord as MetricsRecord
@@ -67,6 +68,7 @@ from .typing import Status as Status
 
 __all__ = [
     "Array",
+    "ArrayRecord",
     "ClientMessage",
     "Code",
     "Config",

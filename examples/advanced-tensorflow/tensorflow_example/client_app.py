@@ -4,7 +4,7 @@ import keras
 from tensorflow_example.task import load_data, load_model
 
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Array, Context, ParametersRecord, RecordDict
+from flwr.common import Array, ArrayRecord, Context, RecordDict
 
 
 # Define Flower Client and client_fn
@@ -67,19 +67,14 @@ class FlowerClient(NumPyClient):
             state_dict_arrays[f"{layer_name}.{variable.name}"] = Array(variable.numpy())
 
         # Add to RecordDict (replace if already exists)
-        self.client_state.parameters_records[self.local_layer_name] = ParametersRecord(
-            state_dict_arrays
-        )
+        self.client_state[self.local_layer_name] = ArrayRecord(state_dict_arrays)
 
     def _load_layer_weights_from_state(self, model):
         """Load last layer weights to state."""
-        if self.local_layer_name not in self.client_state.parameters_records:
+        if self.local_layer_name not in self.client_state.array_records:
             return
 
-        param_records = self.client_state.parameters_records
-        list_weights = []
-        for v in param_records[self.local_layer_name].values():
-            list_weights.append(v.numpy())
+        list_weights = self.client_state[self.local_layer_name].to_numpy_ndarrays()
 
         # Apply weights
         model.get_layer("dense").set_weights(list_weights)

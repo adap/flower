@@ -29,13 +29,13 @@ from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recorddict_pb2 import Array as ProtoArray
+from flwr.proto.recorddict_pb2 import ArrayRecord as ProtoArrayRecord
 from flwr.proto.recorddict_pb2 import BoolList, BytesList
 from flwr.proto.recorddict_pb2 import ConfigsRecord as ProtoConfigsRecord
 from flwr.proto.recorddict_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
 from flwr.proto.recorddict_pb2 import DoubleList
 from flwr.proto.recorddict_pb2 import MetricRecord as ProtoMetricRecord
 from flwr.proto.recorddict_pb2 import MetricRecordValue as ProtoMetricRecordValue
-from flwr.proto.recorddict_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.proto.recorddict_pb2 import SintList, StringList, UintList
 from flwr.proto.run_pb2 import Run as ProtoRun
@@ -53,10 +53,10 @@ from flwr.proto.transport_pb2 import (
 # pylint: enable=E0611
 from . import (
     Array,
+    ArrayRecord,
     ConfigsRecord,
     Context,
     MetricRecord,
-    ParametersRecord,
     RecordDict,
     typing,
 )
@@ -483,19 +483,19 @@ def array_from_proto(array_proto: ProtoArray) -> Array:
     )
 
 
-def parameters_record_to_proto(record: ParametersRecord) -> ProtoParametersRecord:
-    """Serialize ParametersRecord to ProtoBuf."""
-    return ProtoParametersRecord(
+def array_record_to_proto(record: ArrayRecord) -> ProtoArrayRecord:
+    """Serialize ArrayRecord to ProtoBuf."""
+    return ProtoArrayRecord(
         data_keys=record.keys(),
         data_values=map(array_to_proto, record.values()),
     )
 
 
-def parameters_record_from_proto(
-    record_proto: ProtoParametersRecord,
-) -> ParametersRecord:
-    """Deserialize ParametersRecord from ProtoBuf."""
-    return ParametersRecord(
+def array_record_from_proto(
+    record_proto: ProtoArrayRecord,
+) -> ArrayRecord:
+    """Deserialize ArrayRecord from ProtoBuf."""
+    return ArrayRecord(
         array_dict=OrderedDict(
             zip(record_proto.data_keys, map(array_from_proto, record_proto.data_values))
         ),
@@ -564,9 +564,8 @@ def error_from_proto(error_proto: ProtoError) -> Error:
 def recorddict_to_proto(recorddict: RecordDict) -> ProtoRecordDict:
     """Serialize RecordDict to ProtoBuf."""
     return ProtoRecordDict(
-        parameters={
-            k: parameters_record_to_proto(v)
-            for k, v in recorddict.parameters_records.items()
+        arrays={
+            k: array_record_to_proto(v) for k, v in recorddict.array_records.items()
         },
         metrics={
             k: metric_record_to_proto(v) for k, v in recorddict.metric_records.items()
@@ -580,8 +579,8 @@ def recorddict_to_proto(recorddict: RecordDict) -> ProtoRecordDict:
 def recorddict_from_proto(recorddict_proto: ProtoRecordDict) -> RecordDict:
     """Deserialize RecordDict from ProtoBuf."""
     ret = RecordDict()
-    for k, p_record_proto in recorddict_proto.parameters.items():
-        ret[k] = parameters_record_from_proto(p_record_proto)
+    for k, arr_record_proto in recorddict_proto.arrays.items():
+        ret[k] = array_record_from_proto(arr_record_proto)
     for k, m_record_proto in recorddict_proto.metrics.items():
         ret[k] = metric_record_from_proto(m_record_proto)
     for k, c_record_proto in recorddict_proto.configs.items():

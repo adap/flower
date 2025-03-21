@@ -4,8 +4,7 @@ from logging import INFO
 
 from secaggexample.task import get_weights, make_net
 
-import flwr.common.recorddict_compat as compat
-from flwr.common import Context, log, parameters_to_ndarrays
+from flwr.common import Context, log
 from flwr.common.secure_aggregation.quantization import quantize
 from flwr.server import Grid, LegacyContext
 from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
@@ -65,9 +64,7 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
 
         super().__call__(grid, context)
 
-        paramsrecord = context.state.parameters_records[MAIN_PARAMS_RECORD]
-        parameters = compat.parametersrecord_to_parameters(paramsrecord, True)
-        ndarrays = parameters_to_ndarrays(parameters)
+        ndarrays = context.state[MAIN_PARAMS_RECORD].to_numpy_ndarrays()
         log(
             INFO,
             "Weighted average of parameters (dequantized): %s...",
