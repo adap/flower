@@ -497,3 +497,70 @@ class DeepseekV3Model: Module {
     return norm(h)
   }
 }
+
+class Model: Module {
+  var args: DeepseekV3Configuration
+  var modelType: String
+  var model: DeepseekV3Model
+  var lmHead: Linear
+
+  init(config: DeepseekV3Configuration) {
+    self.args = config
+    self.modelType = config.modelType
+    self.model = DeepseekV3Model(config: config)
+    self.lmHead = Linear(config.hiddenSize, config.vocabSize, bias: false)
+  }
+
+  func callAsFunction(_ inputs: MLXArray, cache: [KVCache]? = nil, mask: MLXArray? = nil) -> MLXArray {
+    let out = model(inputs, cache: cache, mask: mask)
+    return lmHead(out)
+  }
+
+  func sanitize(weights: [String: MLXArray]) -> [String: MLXArray] {
+    var newWeights = weights
+
+    func dequant(weight: MLXArray, scaleInv: MLXArray) -> MLXArray {
+      let bs = 128
+      let (m, n) = (weight.shape[0], weight.shape[1])
+      let padBottom = (bs - m % bs) % bs
+      let padSide = (bs - n % bs) % bs
+      
+      var padded = padded(weight, widths:[.init((0, padBottom)), .init((0, padSide))])
+      padded = padded.reshaped([ (m + padBottom) / bs, bs, (n + padSide) / bs, bs ])
+      let scaled = padded * scaleInv[0..., .newAxis, 0..., .newAxis]
+      return scaled.reshaped([m + padBottom, n + padSide])[0..<m, 0..<n]
+    }
+
+    for (key, value) in weights {
+      if key.contains("weight_scale_inv") {
+        let scaleKey = key
+        let weightKey = key.replacingOccurrences(of: "_scale_inv", with: "")
+        let dequantized = dequant(weight: weights[weightKey]!, scaleInv: value)
+        newWeights[weightKey] = dequantized
+      }
+    }
+
+    for l in 0..<args.numHiddenLayers {
+      let prefix = "model.layers.\(l)"
+      for (wName, projName) in [("w1", "gate_proj"), ("w2", "down_proj"), ("w3", "up_proj")] {
+        for key in ["weight", "scales", "biases"] {
+          let firstKey = "\(prefix).mlp.experts.0.\(projName).\(key)"
+          if weights[firstKey] != nil {
+            let joined = (0..<(args.nRoutedExperts ?? 1)).map {
+              weights["\(prefix).mlp.experts.\($0).\(projName).\(key)"]!
+            }
+            newWeights["\(prefix).mlp.switch_mlp.\(projName).\(key)"] = stacked(joined)
+          }
+        }
+      }
+    }
+
+    return newWeights.filter { key, _ in
+      !key.starts(with: "model.layers.61") && !key.contains("rotary_emb.inv_freq")
+    }
+  }
+
+  var layers: ArraySlice<DeepseekV3DecoderLayer?> {
+    model.layers[model.startIdx..<model.endIdx]
+  }
+}
