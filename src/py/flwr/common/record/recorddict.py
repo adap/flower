@@ -144,8 +144,6 @@ class RecordDict(TypedDict[str, RecordType]):
     :code:`MetricsRecord` and :code:`ArrayRecord`.
     """
 
-    _warning_logged_parametersrecord = False
-
     def __init__(self, records: dict[str, RecordType] | None = None) -> None:
         super().__init__(_check_key, _check_value)
         if records is not None:
@@ -160,22 +158,6 @@ class RecordDict(TypedDict[str, RecordType]):
             if isinstance(record, ArrayRecord):
                 synced_dict[key] = record
         return synced_dict
-
-    @property
-    def parameters_records(self) -> TypedDict[str, ArrayRecord]:
-        """Deprecated property.
-
-        Use ``array_records`` instead.
-        """
-        if not RecordDict._warning_logged_parametersrecord:
-            RecordDict._warning_logged_parametersrecord = True
-            log(
-                WARN,
-                "`RecordDict.parameters_records` has been renamed to "
-                "`RecordDict.array_records`. Support for `parameters_records` "
-                "will be removed in a future release. Please update your code.",
-            )
-        return self.array_records
 
     @property
     def metrics_records(self) -> TypedDict[str, MetricsRecord]:
@@ -243,6 +225,7 @@ class RecordSet(RecordDict):
     """
 
     _warning_logged = False
+    _warning_logged_params = False
 
     def __init__(self, records: dict[str, RecordType] | None = None) -> None:
         if not RecordSet._warning_logged:
@@ -254,3 +237,19 @@ class RecordSet(RecordDict):
                 "Please update your code accordingly.",
             )
         super().__init__(records)
+
+    @property
+    def parameters_records(self) -> TypedDict[str, ArrayRecord]:
+        """Deprecated property.
+
+        Use ``array_records`` instead.
+        """
+        if not RecordSet._warning_logged_params:
+            RecordSet._warning_logged_params = True
+            log(
+                WARN,
+                "`RecordSet.parameters_records` has been deprecated "
+                "and will be removed in a future release. Please use "
+                "`RecordDict.array_records` instead.",
+            )
+        return self.array_records
