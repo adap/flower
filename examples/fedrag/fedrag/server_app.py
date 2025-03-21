@@ -2,7 +2,6 @@
 
 import hashlib
 import os
-import random
 import time
 from collections import defaultdict
 from itertools import cycle
@@ -168,14 +167,13 @@ def main(grid: Grid, context: Context) -> None:
             options = q["options"]
             answer = q["answer"]
 
-            response, predicted_answer = llm_querier.answer(
+            prompt, predicted_answer = llm_querier.answer(
                 question, merged_docs, options, dataset_name
             )
 
             # If the model did not predict any value,
             # then discard the question
             if predicted_answer is not None:
-                predicted_answer = random.choice(list(options.keys()))
                 expected_answers[dataset_name].append(answer)
                 predicted_answers[dataset_name].append(predicted_answer)
                 q_et = time.time()
