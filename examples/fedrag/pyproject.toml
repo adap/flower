@@ -48,9 +48,11 @@ k-rrf = 60
 # used by clients to retrieve top-k relevant documents and at the server
 # to select the final top-k documents after the merge operation
 k-nn = 8
-# The LLM's Hugging Face path that will be used to for the RAG query
-# e.g., "meta-llama/Llama-3.2-1B-Instruct" or "meta-llama/Llama-3.2-3B-Instruct"
-# We use HF's SmolLM model because for Llama we need first to accept the terms
+# The LLM model used by the server to execute the RAG query.
+# We assign the Hugging Face name of the LLM model,
+# e.g., "HuggingFaceTB/SmolLM2-1.7B-Instruct" or "meta-llama/Llama-3.2-1B-Instruct"
+# By default, we use Hugging Face's SmolLM2-1.7B model. For Llama models, please
+# make sure that you have accepted the terms and been granted access to the model.
 server-llm-hfpath = "HuggingFaceTB/SmolLM2-1.7B-Instruct"
 # Whether the server should use a GPU to load the llm and run the inference
 server-llm-use-gpu = "false"
