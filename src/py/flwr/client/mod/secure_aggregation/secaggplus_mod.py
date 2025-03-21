@@ -22,7 +22,7 @@ from typing import Any, cast
 
 from flwr.client.typing import ClientAppCallable
 from flwr.common import (
-    ConfigsRecord,
+    ConfigRecord,
     Context,
     Message,
     Parameters,
@@ -63,7 +63,7 @@ from flwr.common.secure_aggregation.secaggplus_utils import (
     share_keys_plaintext_concat,
     share_keys_plaintext_separate,
 )
-from flwr.common.typing import ConfigsRecordValues
+from flwr.common.typing import ConfigRecordValues
 
 
 @dataclass
@@ -97,7 +97,7 @@ class SecAggPlusState:
     ss2_dict: dict[int, bytes] = field(default_factory=dict)
     public_keys_dict: dict[int, tuple[bytes, bytes]] = field(default_factory=dict)
 
-    def __init__(self, **kwargs: ConfigsRecordValues) -> None:
+    def __init__(self, **kwargs: ConfigRecordValues) -> None:
         for k, v in kwargs.items():
             if k.endswith(":V"):
                 continue
@@ -115,7 +115,7 @@ class SecAggPlusState:
                     new_v = dict(zip(keys, values))
             self.__setattr__(k, new_v)
 
-    def to_dict(self) -> dict[str, ConfigsRecordValues]:
+    def to_dict(self) -> dict[str, ConfigRecordValues]:
         """Convert the state to a dictionary."""
         ret = vars(self)
         for k in list(ret.keys()):
@@ -144,13 +144,13 @@ def secaggplus_mod(
         return call_next(msg, ctxt)
 
     # Retrieve local state
-    if RECORD_KEY_STATE not in ctxt.state.configs_records:
-        ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord({})
-    state_dict = ctxt.state.configs_records[RECORD_KEY_STATE]
+    if RECORD_KEY_STATE not in ctxt.state.config_records:
+        ctxt.state.config_records[RECORD_KEY_STATE] = ConfigRecord({})
+    state_dict = ctxt.state.config_records[RECORD_KEY_STATE]
     state = SecAggPlusState(**state_dict)
 
     # Retrieve incoming configs
-    configs = msg.content.configs_records[RECORD_KEY_CONFIGS]
+    configs = msg.content.config_records[RECORD_KEY_CONFIGS]
 
     # Check the validity of the next stage
     check_stage(state.current_stage, configs)
@@ -183,19 +183,19 @@ def secaggplus_mod(
         raise ValueError(f"Unknown SecAgg/SecAgg+ stage: {state.current_stage}")
 
     # Save state
-    ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
+    ctxt.state.config_records[RECORD_KEY_STATE] = ConfigRecord(state.to_dict())
 
     # Return message
-    out_content.configs_records[RECORD_KEY_CONFIGS] = ConfigsRecord(res, False)
+    out_content.config_records[RECORD_KEY_CONFIGS] = ConfigRecord(res, False)
     return Message(out_content, reply_to=msg)
 
 
-def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
+def check_stage(current_stage: str, configs: ConfigRecord) -> None:
     """Check the validity of the next stage."""
     # Check the existence of Config.STAGE
     if Key.STAGE not in configs:
         raise KeyError(
-            f"The required key '{Key.STAGE}' is missing from the ConfigsRecord."
+            f"The required key '{Key.STAGE}' is missing from the ConfigRecord."
         )
 
     # Check the value type of the Config.STAGE
@@ -223,7 +223,7 @@ def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
 
 
 # pylint: disable-next=too-many-branches
-def check_configs(stage: str, configs: ConfigsRecord) -> None:
+def check_configs(stage: str, configs: ConfigRecord) -> None:
     """Check the validity of the configs."""
     # Check configs for the setup stage
     if stage == Stage.SETUP:
@@ -239,7 +239,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
             if key not in configs:
                 raise KeyError(
                     f"Stage {Stage.SETUP}: the required key '{key}' is "
-                    "missing from the ConfigsRecord."
+                    "missing from the ConfigRecord."
                 )
             # Bool is a subclass of int in Python,
             # so `isinstance(v, int)` will return True even if v is a boolean.
@@ -272,7 +272,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 raise KeyError(
                     f"Stage {Stage.COLLECT_MASKED_VECTORS}: "
                     f"the required key '{key}' is "
-                    "missing from the ConfigsRecord."
+                    "missing from the ConfigRecord."
                 )
             if not isinstance(configs[key], list) or any(
                 elm
@@ -295,7 +295,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 raise KeyError(
                     f"Stage {Stage.UNMASK}: "
                     f"the required key '{key}' is "
-                    "missing from the ConfigsRecord."
+                    "missing from the ConfigRecord."
                 )
             if not isinstance(configs[key], list) or any(
                 elm
@@ -313,8 +313,8 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
 
 
 def _setup(
-    state: SecAggPlusState, configs: ConfigsRecord
-) -> dict[str, ConfigsRecordValues]:
+    state: SecAggPlusState, configs: ConfigRecord
+) -> dict[str, ConfigRecordValues]:
     # Assigning parameter values to object fields
     sec_agg_param_dict = configs
     state.sample_num = cast(int, sec_agg_param_dict[Key.SAMPLE_NUMBER])
@@ -349,8 +349,8 @@ def _setup(
 
 # pylint: disable-next=too-many-locals
 def _share_keys(
-    state: SecAggPlusState, configs: ConfigsRecord
-) -> dict[str, ConfigsRecordValues]:
+    state: SecAggPlusState, configs: ConfigRecord
+) -> dict[str, ConfigRecordValues]:
     named_bytes_tuples = cast(dict[str, tuple[bytes, bytes]], configs)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
     log(DEBUG, "Node %d: starting stage 1...", state.nid)
@@ -412,10 +412,10 @@ def _share_keys(
 # pylint: disable-next=too-many-locals
 def _collect_masked_vectors(
     state: SecAggPlusState,
-    configs: ConfigsRecord,
+    configs: ConfigRecord,
     num_examples: int,
     updated_parameters: Parameters,
-) -> dict[str, ConfigsRecordValues]:
+) -> dict[str, ConfigRecordValues]:
     log(DEBUG, "Node %d: starting stage 2...", state.nid)
     available_clients: list[int] = []
     ciphertexts = cast(list[bytes], configs[Key.CIPHERTEXT_LIST])
@@ -498,8 +498,8 @@ def _collect_masked_vectors(
 
 
 def _unmask(
-    state: SecAggPlusState, configs: ConfigsRecord
-) -> dict[str, ConfigsRecordValues]:
+    state: SecAggPlusState, configs: ConfigRecord
+) -> dict[str, ConfigRecordValues]:
     log(DEBUG, "Node %d: starting stage 3...", state.nid)
 
     active_nids = cast(list[int], configs[Key.ACTIVE_NODE_ID_LIST])

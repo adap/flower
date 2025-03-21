@@ -30,8 +30,8 @@ from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recorddict_pb2 import Array as ProtoArray
 from flwr.proto.recorddict_pb2 import BoolList, BytesList
-from flwr.proto.recorddict_pb2 import ConfigsRecord as ProtoConfigsRecord
-from flwr.proto.recorddict_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
+from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
+from flwr.proto.recorddict_pb2 import ConfigRecordValue as ProtoConfigRecordValue
 from flwr.proto.recorddict_pb2 import DoubleList
 from flwr.proto.recorddict_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recorddict_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
@@ -53,7 +53,7 @@ from flwr.proto.transport_pb2 import (
 # pylint: enable=E0611
 from . import (
     Array,
-    ConfigsRecord,
+    ConfigRecord,
     Context,
     MetricsRecord,
     ParametersRecord,
@@ -521,22 +521,22 @@ def metrics_record_from_proto(record_proto: ProtoMetricsRecord) -> MetricsRecord
     )
 
 
-def configs_record_to_proto(record: ConfigsRecord) -> ProtoConfigsRecord:
-    """Serialize ConfigsRecord to ProtoBuf."""
-    return ProtoConfigsRecord(
+def config_record_to_proto(record: ConfigRecord) -> ProtoConfigRecord:
+    """Serialize ConfigRecord to ProtoBuf."""
+    return ProtoConfigRecord(
         data=_record_value_dict_to_proto(
             record,
             [bool, int, float, str, bytes],
-            ProtoConfigsRecordValue,
+            ProtoConfigRecordValue,
         )
     )
 
 
-def configs_record_from_proto(record_proto: ProtoConfigsRecord) -> ConfigsRecord:
-    """Deserialize ConfigsRecord from ProtoBuf."""
-    return ConfigsRecord(
+def config_record_from_proto(record_proto: ProtoConfigRecord) -> ConfigRecord:
+    """Deserialize ConfigRecord from ProtoBuf."""
+    return ConfigRecord(
         configs_dict=cast(
-            dict[str, typing.ConfigsRecordValues],
+            dict[str, typing.ConfigRecordValues],
             _record_value_dict_from_proto(record_proto.data),
         ),
         keep_input=False,
@@ -572,7 +572,7 @@ def recorddict_to_proto(recorddict: RecordDict) -> ProtoRecordDict:
             k: metrics_record_to_proto(v) for k, v in recorddict.metrics_records.items()
         },
         configs={
-            k: configs_record_to_proto(v) for k, v in recorddict.configs_records.items()
+            k: config_record_to_proto(v) for k, v in recorddict.config_records.items()
         },
     )
 
@@ -585,7 +585,7 @@ def recorddict_from_proto(recorddict_proto: ProtoRecordDict) -> RecordDict:
     for k, m_record_proto in recorddict_proto.metrics.items():
         ret[k] = metrics_record_from_proto(m_record_proto)
     for k, c_record_proto in recorddict_proto.configs.items():
-        ret[k] = configs_record_from_proto(c_record_proto)
+        ret[k] = config_record_from_proto(c_record_proto)
     return ret
 
 

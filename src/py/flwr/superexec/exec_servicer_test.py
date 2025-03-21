@@ -20,7 +20,7 @@ import unittest
 from datetime import datetime
 from unittest.mock import MagicMock, Mock
 
-from flwr.common import ConfigsRecord, now
+from flwr.common import ConfigRecord, now
 from flwr.common.constant import Status, SubStatus
 from flwr.common.typing import RunStatus
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -80,7 +80,7 @@ class TestExecServicer(unittest.TestCase):
         run_ids = set()
         for _ in range(3):
             run_id = self.state.create_run(
-                "mock fabid", "mock fabver", "fake hash", {}, ConfigsRecord()
+                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord()
             )
             run_ids.add(run_id)
 
@@ -97,7 +97,7 @@ class TestExecServicer(unittest.TestCase):
         # Prepare
         for _ in range(3):
             run_id = self.state.create_run(
-                "mock fabid", "mock fabver", "fake hash", {}, ConfigsRecord()
+                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord()
             )
 
         # Execute
@@ -112,7 +112,7 @@ class TestExecServicer(unittest.TestCase):
         """Test StopRun method of ExecServicer."""
         # Prepare
         run_id = self.state.create_run(
-            "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigsRecord()
+            "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigRecord()
         )
         self.servicer.executor = MagicMock()
         expected_run_status = RunStatus(Status.FINISHED, SubStatus.STOPPED, "")

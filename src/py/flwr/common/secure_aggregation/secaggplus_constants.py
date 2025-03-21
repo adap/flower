@@ -42,7 +42,7 @@ class Stage:
 
 
 class Key:
-    """Keys for the configs in the ConfigsRecord."""
+    """Keys for the configs in the ConfigRecord."""
 
     STAGE = "stage"
     SAMPLE_NUMBER = "sample_num"

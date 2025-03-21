@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""ConfigsRecord."""
+"""ConfigRecord."""
 
 
 from typing import Optional, get_args
 
-from flwr.common.typing import ConfigsRecordValues, ConfigsScalar
+from flwr.common.typing import ConfigRecordValues, ConfigScalar
 
 from .typeddict import TypedDict
 
@@ -28,13 +28,13 @@ def _check_key(key: str) -> None:
         raise TypeError(f"Key must be of type `str` but `{type(key)}` was passed.")
 
 
-def _check_value(value: ConfigsRecordValues) -> None:
-    def is_valid(__v: ConfigsScalar) -> None:
+def _check_value(value: ConfigRecordValues) -> None:
+    def is_valid(__v: ConfigScalar) -> None:
         """Check if value is of expected type."""
-        if not isinstance(__v, get_args(ConfigsScalar)):
+        if not isinstance(__v, get_args(ConfigScalar)):
             raise TypeError(
                 "Not all values are of valid type."
-                f" Expected `{ConfigsRecordValues}` but `{type(__v)}` was passed."
+                f" Expected `{ConfigRecordValues}` but `{type(__v)}` was passed."
             )
 
     if isinstance(value, list):
@@ -51,24 +51,24 @@ def _check_value(value: ConfigsRecordValues) -> None:
             if not all(isinstance(v, value_type) for v in value):
                 raise TypeError(
                     "All values in a list must be of the same valid type. "
-                    f"One of {ConfigsScalar}."
+                    f"One of {ConfigScalar}."
                 )
     else:
         is_valid(value)
 
 
-class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
+class ConfigRecord(TypedDict[str, ConfigRecordValues]):
     """Configs record.
 
-    A :code:`ConfigsRecord` is a Python dictionary designed to ensure that
-    each key-value pair adheres to specified data types. A :code:`ConfigsRecord`
+    A :code:`ConfigRecord` is a Python dictionary designed to ensure that
+    each key-value pair adheres to specified data types. A :code:`ConfigRecord`
     is one of the types of records that a
     `flwr.common.RecordDict <flwr.common.RecordDict.html#recorddict>`_ supports and
     can therefore be used to construct :code:`common.Message` objects.
 
     Parameters
     ----------
-    configs_dict : Optional[Dict[str, ConfigsRecordValues]]
+    configs_dict : Optional[Dict[str, ConfigRecordValues]]
         A dictionary that stores basic types (i.e. `str`, `int`, `float`, `bytes` as
         defined in `ConfigsScalar`) and lists of such types (see
         `ConfigsScalarList`).
@@ -80,20 +80,20 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
 
     Examples
     --------
-    The usage of a :code:`ConfigsRecord` is envisioned for sending configuration values
+    The usage of a :code:`ConfigRecord` is envisioned for sending configuration values
     telling the target node how to perform a certain action (e.g. train/evaluate a model
     ). You can use standard Python built-in types such as :code:`float`, :code:`str`
     , :code:`bytes`. All types allowed are defined in
-    :code:`flwr.common.ConfigsRecordValues`. While lists are supported, we
+    :code:`flwr.common.ConfigRecordValues`. While lists are supported, we
     encourage you to use a :code:`ParametersRecord` instead if these are of high
     dimensionality.
 
-    Let's see some examples of how to construct a :code:`ConfigsRecord` from scratch:
+    Let's see some examples of how to construct a :code:`ConfigRecord` from scratch:
 
-    >>> from flwr.common import ConfigsRecord
+    >>> from flwr.common import ConfigRecord
     >>>
-    >>> # A `ConfigsRecord` is a specialized Python dictionary
-    >>> record = ConfigsRecord({"lr": 0.1, "batch-size": 128})
+    >>> # A `ConfigRecord` is a specialized Python dictionary
+    >>> record = ConfigRecord({"lr": 0.1, "batch-size": 128})
     >>> # You can add more content to an existing record
     >>> record["compute-average"] = True
     >>> # It also supports lists
@@ -104,12 +104,12 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
     Just like the other types of records in a :code:`flwr.common.RecordDict`, types are
     enforced. If you need to add a custom data structure or object, we recommend to
     serialise it into bytes and save it as such (bytes are allowed in a
-    :code:`ConfigsRecord`)
+    :code:`ConfigRecord`)
     """
 
     def __init__(
         self,
-        configs_dict: Optional[dict[str, ConfigsRecordValues]] = None,
+        configs_dict: Optional[dict[str, ConfigRecordValues]] = None,
         keep_input: bool = True,
     ) -> None:
 
@@ -126,7 +126,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
         This function counts booleans as occupying 1 Byte.
         """
 
-        def get_var_bytes(value: ConfigsScalar) -> int:
+        def get_var_bytes(value: ConfigScalar) -> int:
             """Return Bytes of value passed."""
             var_bytes = 0
             if isinstance(value, bool):

@@ -20,7 +20,7 @@ from itertools import product
 from typing import Callable
 
 from flwr.client.mod import make_ffn
-from flwr.common import ConfigsRecord, Context, Message, RecordDict
+from flwr.common import ConfigRecord, Context, Message, RecordDict
 from flwr.common.constant import MessageType
 from flwr.common.secure_aggregation.secaggplus_constants import (
     RECORD_KEY_CONFIGS,
@@ -28,14 +28,14 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
     Key,
     Stage,
 )
-from flwr.common.typing import ConfigsRecordValues
+from flwr.common.typing import ConfigRecordValues
 
 from .secaggplus_mod import SecAggPlusState, check_configs, secaggplus_mod
 
 
 def get_test_handler(
     ctxt: Context,
-) -> Callable[[dict[str, ConfigsRecordValues]], ConfigsRecord]:
+) -> Callable[[dict[str, ConfigRecordValues]], ConfigRecord]:
     """."""
 
     def empty_ffn(_msg: Message, _2: Context) -> Message:
@@ -43,20 +43,20 @@ def get_test_handler(
 
     app = make_ffn(empty_ffn, [secaggplus_mod])
 
-    def func(configs: dict[str, ConfigsRecordValues]) -> ConfigsRecord:
+    def func(configs: dict[str, ConfigRecordValues]) -> ConfigRecord:
         in_msg = Message(
-            RecordDict({RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
+            RecordDict({RECORD_KEY_CONFIGS: ConfigRecord(configs)}),
             dst_node_id=123,
             message_type=MessageType.TRAIN,
         )
         out_msg = app(in_msg, ctxt)
-        return out_msg.content.configs_records[RECORD_KEY_CONFIGS]
+        return out_msg.content.config_records[RECORD_KEY_CONFIGS]
 
     return func
 
 
 def _make_ctxt() -> Context:
-    cfg = ConfigsRecord(SecAggPlusState().to_dict())
+    cfg = ConfigRecord(SecAggPlusState().to_dict())
     return Context(
         run_id=234,
         node_id=123,
@@ -70,10 +70,10 @@ def _make_set_state_fn(
     ctxt: Context,
 ) -> Callable[[str], None]:
     def set_stage(stage: str) -> None:
-        state_dict = ctxt.state.configs_records[RECORD_KEY_STATE]
+        state_dict = ctxt.state.config_records[RECORD_KEY_STATE]
         state = SecAggPlusState(**state_dict)
         state.current_stage = stage
-        ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
+        ctxt.state.config_records[RECORD_KEY_STATE] = ConfigRecord(state.to_dict())
 
     return set_stage
 
@@ -143,7 +143,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
             (Key.MOD_RANGE, int),
         ]
 
-        type_to_test_value: dict[type, ConfigsRecordValues] = {
+        type_to_test_value: dict[type, ConfigRecordValues] = {
             int: 10,
             bool: True,
             float: 1.0,
@@ -151,14 +151,14 @@ class TestSecAggPlusHandler(unittest.TestCase):
             bytes: b"test",
         }
 
-        valid_configs: dict[str, ConfigsRecordValues] = {
+        valid_configs: dict[str, ConfigRecordValues] = {
             key: type_to_test_value[value_type]
             for key, value_type in valid_key_type_pairs
         }
 
         # Test valid configs
         try:
-            check_configs(Stage.SETUP, ConfigsRecord(valid_configs))
+            check_configs(Stage.SETUP, ConfigRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(f"check_configs() raised {type(exc)} unexpectedly!")
@@ -193,7 +193,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
         handler = get_test_handler(ctxt)
         set_stage = _make_set_state_fn(ctxt)
 
-        valid_configs: dict[str, ConfigsRecordValues] = {
+        valid_configs: dict[str, ConfigRecordValues] = {
             "1": [b"public key 1", b"public key 2"],
             "2": [b"public key 1", b"public key 2"],
             "3": [b"public key 1", b"public key 2"],
@@ -201,7 +201,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid configs
         try:
-            check_configs(Stage.SHARE_KEYS, ConfigsRecord(valid_configs))
+            check_configs(Stage.SHARE_KEYS, ConfigRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(f"check_configs() raised {type(exc)} unexpectedly!")
@@ -210,7 +210,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
         valid_configs[Key.STAGE] = Stage.SHARE_KEYS
 
         # Test invalid configs
-        invalid_values: list[ConfigsRecordValues] = [
+        invalid_values: list[ConfigRecordValues] = [
             b"public key 1",
             [b"public key 1"],
             [b"public key 1", b"public key 2", b"public key 3"],
@@ -230,14 +230,14 @@ class TestSecAggPlusHandler(unittest.TestCase):
         handler = get_test_handler(ctxt)
         set_stage = _make_set_state_fn(ctxt)
 
-        valid_configs: dict[str, ConfigsRecordValues] = {
+        valid_configs: dict[str, ConfigRecordValues] = {
             Key.CIPHERTEXT_LIST: [b"ctxt!", b"ctxt@", b"ctxt#", b"ctxt?"],
             Key.SOURCE_LIST: [32, 51324, 32324123, -3],
         }
 
         # Test valid configs
         try:
-            check_configs(Stage.COLLECT_MASKED_VECTORS, ConfigsRecord(valid_configs))
+            check_configs(Stage.COLLECT_MASKED_VECTORS, ConfigRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(f"check_configs() raised {type(exc)} unexpectedly!")
@@ -274,14 +274,14 @@ class TestSecAggPlusHandler(unittest.TestCase):
         handler = get_test_handler(ctxt)
         set_stage = _make_set_state_fn(ctxt)
 
-        valid_configs: dict[str, ConfigsRecordValues] = {
+        valid_configs: dict[str, ConfigRecordValues] = {
             Key.ACTIVE_NODE_ID_LIST: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             Key.DEAD_NODE_ID_LIST: [32, 51324, 32324123, -3],
         }
 
         # Test valid configs
         try:
-            check_configs(Stage.UNMASK, ConfigsRecord(valid_configs))
+            check_configs(Stage.UNMASK, ConfigRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(f"check_configs() raised {type(exc)} unexpectedly!")

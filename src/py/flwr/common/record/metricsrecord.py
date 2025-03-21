@@ -109,7 +109,7 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
     >>> # Add unsupported value
     >>> record["something-unsupported"] = {'a': 123} # Will throw a `TypeError`
 
-    If you need a more versatily type of record try :code:`ConfigsRecord` or
+    If you need a more versatily type of record try :code:`ConfigRecord` or
     :code:`ParametersRecord`.
     """
 

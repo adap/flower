@@ -19,7 +19,7 @@ from os import urandom
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import ConfigsRecord, Context, Error, Message, Metadata, now, serde
+from flwr.common import ConfigRecord, Context, Error, Message, Metadata, now, serde
 from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     ErrorCode,
@@ -32,7 +32,7 @@ from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Context as ProtoContext
-from flwr.proto.recorddict_pb2 import ConfigsRecord as ProtoConfigsRecord
+from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
 
 # pylint: enable=E0611
 VALID_RUN_STATUS_TRANSITIONS = {
@@ -172,15 +172,15 @@ def context_from_bytes(context_bytes: bytes) -> Context:
     return serde.context_from_proto(ProtoContext.FromString(context_bytes))
 
 
-def configsrecord_to_bytes(configs_record: ConfigsRecord) -> bytes:
-    """Serialize a `ConfigsRecord` to bytes."""
-    return serde.configs_record_to_proto(configs_record).SerializeToString()
+def configrecord_to_bytes(config_record: ConfigRecord) -> bytes:
+    """Serialize a `ConfigRecord` to bytes."""
+    return serde.config_record_to_proto(config_record).SerializeToString()
 
 
-def configsrecord_from_bytes(configsrecord_bytes: bytes) -> ConfigsRecord:
-    """Deserialize `ConfigsRecord` from bytes."""
-    return serde.configs_record_from_proto(
-        ProtoConfigsRecord.FromString(configsrecord_bytes)
+def configrecord_from_bytes(configrecord_bytes: bytes) -> ConfigRecord:
+    """Deserialize `ConfigRecord` from bytes."""
+    return serde.config_record_from_proto(
+        ProtoConfigRecord.FromString(configrecord_bytes)
     )
 
 

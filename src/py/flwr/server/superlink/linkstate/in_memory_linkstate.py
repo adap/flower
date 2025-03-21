@@ -32,7 +32,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.record import ConfigsRecord
+from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
@@ -69,7 +69,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Map run_id to RunRecord
         self.run_ids: dict[int, RunRecord] = {}
         self.contexts: dict[int, Context] = {}
-        self.federation_options: dict[int, ConfigsRecord] = {}
+        self.federation_options: dict[int, ConfigRecord] = {}
         self.message_ins_store: dict[UUID, Message] = {}
         self.message_res_store: dict[UUID, Message] = {}
         self.message_ins_id_to_message_res_id: dict[UUID, UUID] = {}
@@ -399,7 +399,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
-        federation_options: ConfigsRecord,
+        federation_options: ConfigRecord,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
@@ -528,7 +528,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         return pending_run_id
 
-    def get_federation_options(self, run_id: int) -> Optional[ConfigsRecord]:
+    def get_federation_options(self, run_id: int) -> Optional[ConfigRecord]:
         """Retrieve the federation options for the specified `run_id`."""
         with self.lock:
             if run_id not in self.run_ids:

@@ -19,10 +19,10 @@ from collections import OrderedDict
 from collections.abc import Mapping
 from typing import Union, cast, get_args
 
-from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordDict
+from . import Array, ConfigRecord, MetricsRecord, ParametersRecord, RecordDict
 from .typing import (
     Code,
-    ConfigsRecordValues,
+    ConfigRecordValues,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -126,15 +126,15 @@ def parameters_to_parametersrecord(
 
 
 def _check_mapping_from_recordscalartype_to_scalar(
-    record_data: Mapping[str, Union[ConfigsRecordValues, MetricsRecordValues]]
+    record_data: Mapping[str, Union[ConfigRecordValues, MetricsRecordValues]]
 ) -> dict[str, Scalar]:
     """Check mapping `common.*RecordValues` into `common.Scalar` is possible."""
     for value in record_data.values():
         if not isinstance(value, get_args(Scalar)):
             raise TypeError(
                 "There is not a 1:1 mapping between `common.Scalar` types and those "
-                "supported in `common.ConfigsRecordValues` or "
-                "`common.ConfigsRecordValues`. Consider casting your values to a type "
+                "supported in `common.ConfigRecordValues` or "
+                "`common.ConfigRecordValues`. Consider casting your values to a type "
                 "supported by the `common.RecordDict` infrastructure. "
                 f"You used type: {type(value)}"
             )
@@ -155,7 +155,7 @@ def _recorddict_to_fit_or_evaluate_ins_components(
     )
 
     # get config dict
-    config_record = recorddict.configs_records[f"{ins_str}.config"]
+    config_record = recorddict.config_records[f"{ins_str}.config"]
     # pylint: disable-next=protected-access
     config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
@@ -171,7 +171,7 @@ def _fit_or_evaluate_ins_to_recorddict(
     parametersrecord = parameters_to_parametersrecord(ins.parameters, keep_input)
     recorddict.parameters_records[f"{ins_str}.parameters"] = parametersrecord
 
-    recorddict.configs_records[f"{ins_str}.config"] = ConfigsRecord(
+    recorddict.config_records[f"{ins_str}.config"] = ConfigRecord(
         ins.config  # type: ignore
     )
 
@@ -181,18 +181,18 @@ def _fit_or_evaluate_ins_to_recorddict(
 def _embed_status_into_recorddict(
     res_str: str, status: Status, recorddict: RecordDict
 ) -> RecordDict:
-    status_dict: dict[str, ConfigsRecordValues] = {
+    status_dict: dict[str, ConfigRecordValues] = {
         "code": int(status.code.value),
         "message": status.message,
     }
-    # we add it to a `ConfigsRecord`` because the `status.message`` is a string
+    # we add it to a `ConfigRecord`` because the `status.message`` is a string
     # and `str` values aren't supported in `MetricsRecords`
-    recorddict.configs_records[f"{res_str}.status"] = ConfigsRecord(status_dict)
+    recorddict.config_records[f"{res_str}.status"] = ConfigRecord(status_dict)
     return recorddict
 
 
 def _extract_status_from_recorddict(res_str: str, recorddict: RecordDict) -> Status:
-    status = recorddict.configs_records[f"{res_str}.status"]
+    status = recorddict.config_records[f"{res_str}.status"]
     code = cast(int, status["code"])
     return Status(code=Code(code), message=str(status["message"]))
 
@@ -223,9 +223,9 @@ def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
     num_examples = cast(
         int, recorddict.metrics_records[f"{ins_str}.num_examples"]["num_examples"]
     )
-    configs_record = recorddict.configs_records[f"{ins_str}.metrics"]
+    config_record = recorddict.config_records[f"{ins_str}.metrics"]
     # pylint: disable-next=protected-access
-    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record)
+    metrics = _check_mapping_from_recordscalartype_to_scalar(config_record)
     status = _extract_status_from_recorddict(ins_str, recorddict)
 
     return FitRes(
@@ -239,7 +239,7 @@ def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
 
     res_str = "fitres"
 
-    recorddict.configs_records[f"{res_str}.metrics"] = ConfigsRecord(
+    recorddict.config_records[f"{res_str}.metrics"] = ConfigRecord(
         fitres.metrics  # type: ignore
     )
     recorddict.metrics_records[f"{res_str}.num_examples"] = MetricsRecord(
@@ -283,10 +283,10 @@ def recorddict_to_evaluateres(recorddict: RecordDict) -> EvaluateRes:
     num_examples = cast(
         int, recorddict.metrics_records[f"{ins_str}.num_examples"]["num_examples"]
     )
-    configs_record = recorddict.configs_records[f"{ins_str}.metrics"]
+    config_record = recorddict.config_records[f"{ins_str}.metrics"]
 
     # pylint: disable-next=protected-access
-    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record)
+    metrics = _check_mapping_from_recordscalartype_to_scalar(config_record)
     status = _extract_status_from_recorddict(ins_str, recorddict)
 
     return EvaluateRes(
@@ -310,7 +310,7 @@ def evaluateres_to_recorddict(evaluateres: EvaluateRes) -> RecordDict:
     )
 
     # metrics
-    recorddict.configs_records[f"{res_str}.metrics"] = ConfigsRecord(
+    recorddict.config_records[f"{res_str}.metrics"] = ConfigRecord(
         evaluateres.metrics,  # type: ignore
     )
 
@@ -324,7 +324,7 @@ def evaluateres_to_recorddict(evaluateres: EvaluateRes) -> RecordDict:
 
 def recorddict_to_getparametersins(recorddict: RecordDict) -> GetParametersIns:
     """Derive GetParametersIns from a RecordDict object."""
-    config_record = recorddict.configs_records["getparametersins.config"]
+    config_record = recorddict.config_records["getparametersins.config"]
     # pylint: disable-next=protected-access
     config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
@@ -335,7 +335,7 @@ def getparametersins_to_recorddict(getparameters_ins: GetParametersIns) -> Recor
     """Construct a RecordDict from a GetParametersIns object."""
     recorddict = RecordDict()
 
-    recorddict.configs_records["getparametersins.config"] = ConfigsRecord(
+    recorddict.config_records["getparametersins.config"] = ConfigRecord(
         getparameters_ins.config,  # type: ignore
     )
     return recorddict
@@ -375,7 +375,7 @@ def recorddict_to_getparametersres(
 
 def recorddict_to_getpropertiesins(recorddict: RecordDict) -> GetPropertiesIns:
     """Derive GetPropertiesIns from a RecordDict object."""
-    config_record = recorddict.configs_records["getpropertiesins.config"]
+    config_record = recorddict.config_records["getpropertiesins.config"]
     # pylint: disable-next=protected-access
     config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
@@ -385,7 +385,7 @@ def recorddict_to_getpropertiesins(recorddict: RecordDict) -> GetPropertiesIns:
 def getpropertiesins_to_recorddict(getpropertiesins: GetPropertiesIns) -> RecordDict:
     """Construct a RecordDict from a GetPropertiesRes object."""
     recorddict = RecordDict()
-    recorddict.configs_records["getpropertiesins.config"] = ConfigsRecord(
+    recorddict.config_records["getpropertiesins.config"] = ConfigRecord(
         getpropertiesins.config,  # type: ignore
     )
     return recorddict
@@ -394,7 +394,7 @@ def getpropertiesins_to_recorddict(getpropertiesins: GetPropertiesIns) -> Record
 def recorddict_to_getpropertiesres(recorddict: RecordDict) -> GetPropertiesRes:
     """Derive GetPropertiesRes from a RecordDict object."""
     res_str = "getpropertiesres"
-    config_record = recorddict.configs_records[f"{res_str}.properties"]
+    config_record = recorddict.config_records[f"{res_str}.properties"]
     # pylint: disable-next=protected-access
     properties = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
@@ -407,7 +407,7 @@ def getpropertiesres_to_recorddict(getpropertiesres: GetPropertiesRes) -> Record
     """Construct a RecordDict from a GetPropertiesRes object."""
     recorddict = RecordDict()
     res_str = "getpropertiesres"
-    recorddict.configs_records[f"{res_str}.properties"] = ConfigsRecord(
+    recorddict.config_records[f"{res_str}.properties"] = ConfigRecord(
         getpropertiesres.properties,  # type: ignore
     )
     # status

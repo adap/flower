@@ -35,12 +35,12 @@ from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.config import (
     flatten_dict,
     parse_config_args,
-    user_config_to_configsrecord,
+    user_config_to_configrecord,
 )
 from flwr.common.constant import CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import (
-    configs_record_to_proto,
+    config_record_to_proto,
     fab_to_proto,
     user_config_to_proto,
 )
@@ -171,14 +171,14 @@ def _run_with_exec_api(
 
     fab = Fab(fab_hash, content)
 
-    # Construct a `ConfigsRecord` out of a flattened `UserConfig`
+    # Construct a `ConfigRecord` out of a flattened `UserConfig`
     fed_conf = flatten_dict(federation_config.get("options", {}))
-    c_record = user_config_to_configsrecord(fed_conf)
+    c_record = user_config_to_configrecord(fed_conf)
 
     req = StartRunRequest(
         fab=fab_to_proto(fab),
         override_config=user_config_to_proto(parse_config_args(config_overrides)),
-        federation_options=configs_record_to_proto(c_record),
+        federation_options=config_record_to_proto(c_record),
     )
     with unauthenticated_exc_handler():
         res = stub.StartRun(req)

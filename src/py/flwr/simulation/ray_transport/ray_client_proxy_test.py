@@ -25,7 +25,7 @@ from flwr.client.client_app import ClientApp
 from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import (
     Config,
-    ConfigsRecord,
+    ConfigRecord,
     Context,
     Message,
     MessageTypeLegacy,
@@ -61,7 +61,7 @@ class DummyClient(NumPyClient):
         """Return properties by doing a simple calculation."""
         result = self.node_id * pi
         # store something in context
-        self.client_state.configs_records["result"] = ConfigsRecord(
+        self.client_state.config_records["result"] = ConfigRecord(
             {"result": str(result)}
         )
         return {"result": result}
@@ -179,7 +179,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         assert prox.node_id * pi == res.properties["result"]
         assert (
             str(prox.node_id * pi)
-            == prox.proxy_state.retrieve_context(run_id).state.configs_records[
+            == prox.proxy_state.retrieve_context(run_id).state.config_records[
                 "result"
             ]["result"]
         )

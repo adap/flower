@@ -28,7 +28,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from flwr.common import (
     DEFAULT_TTL,
     GRPC_MAX_MESSAGE_LENGTH,
-    ConfigsRecord,
+    ConfigRecord,
     Message,
     Metadata,
     RecordDict,
@@ -166,7 +166,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
             message_type = MessageType.EVALUATE
         elif field == "reconnect_ins":
             recorddict = RecordDict()
-            recorddict.configs_records["config"] = ConfigsRecord(
+            recorddict.config_records["config"] = ConfigRecord(
                 {"seconds": proto.reconnect_ins.seconds}
             )
             message_type = "reconnect"
@@ -216,7 +216,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
             msg_proto = ClientMessage(evaluate_res=serde.evaluate_res_to_proto(evalres))
         elif message_type == "reconnect":
             reason = cast(
-                Reason.ValueType, recorddict.configs_records["config"]["reason"]
+                Reason.ValueType, recorddict.config_records["config"]["reason"]
             )
             msg_proto = ClientMessage(
                 disconnect_res=ClientMessage.DisconnectRes(reason=reason)

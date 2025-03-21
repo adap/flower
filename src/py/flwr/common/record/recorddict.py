@@ -22,12 +22,12 @@ from textwrap import indent
 from typing import TypeVar, Union, cast
 
 from ..logger import log
-from .configrecord import ConfigsRecord
+from .configrecord import ConfigRecord
 from .metricsrecord import MetricsRecord
 from .parametersrecord import ParametersRecord
 from .typeddict import TypedDict
 
-RecordType = Union[ParametersRecord, MetricsRecord, ConfigsRecord]
+RecordType = Union[ParametersRecord, MetricsRecord, ConfigRecord]
 
 T = TypeVar("T")
 
@@ -41,10 +41,10 @@ def _check_key(key: str) -> None:
 
 
 def _check_value(value: RecordType) -> None:
-    if not isinstance(value, (ParametersRecord, MetricsRecord, ConfigsRecord)):
+    if not isinstance(value, (ParametersRecord, MetricsRecord, ConfigRecord)):
         raise TypeError(
             f"Expected `{ParametersRecord.__name__}`, `{MetricsRecord.__name__}`, "
-            f"or `{ConfigsRecord.__name__}` but received "
+            f"or `{ConfigRecord.__name__}` but received "
             f"`{type(value).__name__}` for the value."
         )
 
@@ -59,7 +59,7 @@ class _SyncedDict(TypedDict[str, T]):
 
     def __init__(self, ref_recorddict: RecordDict, allowed_type: type[T]) -> None:
         if not issubclass(
-            allowed_type, (ParametersRecord, MetricsRecord, ConfigsRecord)
+            allowed_type, (ParametersRecord, MetricsRecord, ConfigRecord)
         ):
             raise TypeError(f"{allowed_type} is not a valid type.")
         super().__init__(_check_key, self.check_value)
@@ -100,8 +100,8 @@ class RecordDict(TypedDict[str, RecordType]):
         A dictionary of :code:`MetricsRecord` that can be used to record
         and communicate scalar-valued metrics that are the result of performing
         and action, for example, by a :code:`ClientApp`.
-    configs_records : Optional[Dict[str, ConfigsRecord]]
-        A dictionary of :code:`ConfigsRecord` that can be used to record
+    config_records : Optional[Dict[str, ConfigRecord]]
+        A dictionary of :code:`ConfigRecord` that can be used to record
         and communicate configuration values to an entity (e.g. to a
         :code:`ClientApp`)
         for it to adjust how an action is performed.
@@ -116,13 +116,13 @@ class RecordDict(TypedDict[str, RecordType]):
     Let's see an example.
 
     >>>  from flwr.common import RecordDict
-    >>>  from flwr.common import ConfigsRecord, MetricsRecord, ParametersRecord
+    >>>  from flwr.common import ConfigRecord, MetricsRecord, ParametersRecord
     >>>
     >>>  # Let's begin with an empty record
     >>>  my_records = RecordDict()
     >>>
-    >>>  # We can create a ConfigsRecord
-    >>>  c_record = ConfigsRecord({"lr": 0.1, "batch-size": 128})
+    >>>  # We can create a ConfigRecord
+    >>>  c_record = ConfigRecord({"lr": 0.1, "batch-size": 128})
     >>>  # Adding it to the record_set would look like this
     >>>  my_records["my_config"] = c_record
     >>>
@@ -151,7 +151,7 @@ class RecordDict(TypedDict[str, RecordType]):
     >>>  my_records["my_parameters"] = p_record
 
     For additional examples on how to construct each of the records types shown
-    above, please refer to the documentation for :code:`ConfigsRecord`,
+    above, please refer to the documentation for :code:`ConfigRecord`,
     :code:`MetricsRecord` and :code:`ParametersRecord`.
     """
 
@@ -180,17 +180,17 @@ class RecordDict(TypedDict[str, RecordType]):
         return synced_dict
 
     @property
-    def configs_records(self) -> TypedDict[str, ConfigsRecord]:
-        """Dictionary holding only ConfigsRecord instances."""
-        synced_dict = _SyncedDict[ConfigsRecord](self, ConfigsRecord)
+    def config_records(self) -> TypedDict[str, ConfigRecord]:
+        """Dictionary holding only ConfigRecord instances."""
+        synced_dict = _SyncedDict[ConfigRecord](self, ConfigRecord)
         for key, record in self.items():
-            if isinstance(record, ConfigsRecord):
+            if isinstance(record, ConfigRecord):
                 synced_dict[key] = record
         return synced_dict
 
     def __repr__(self) -> str:
         """Return a string representation of this instance."""
-        flds = ("parameters_records", "metrics_records", "configs_records")
+        flds = ("parameters_records", "metrics_records", "config_records")
         fld_views = [f"{fld}={dict(getattr(self, fld))!r}" for fld in flds]
         view = indent(",\n".join(fld_views), "  ")
         return f"{self.__class__.__qualname__}(\n{view}\n)"
