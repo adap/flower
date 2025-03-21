@@ -313,7 +313,7 @@ jobs:
     needs: [changes, wheel]
     strategy:
       matrix:
-        framework: ["numpy", "pytorch", "tensorflow", "jax", "sklearn"]
+        framework: ["numpy", "pytorch", "tensorflow", "jax", "sklearn", "pytorch (message api)"]
 
     name: Template / ${{ matrix.framework }}
 
