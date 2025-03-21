@@ -52,7 +52,7 @@ def main(grid: Grid, context: Context) -> None:
         gmodel_record = pytorch_to_parameter_record(global_model)
         recorddict = RecordDict({global_model_key: gmodel_record})
         messages = construct_messages(
-            node_ids, recorddict, MessageType.TRAIN, grid, server_round
+            node_ids, recorddict, MessageType.TRAIN, server_round
         )
 
         # Send messages and wait for all results
@@ -86,7 +86,7 @@ def main(grid: Grid, context: Context) -> None:
         gmodel_record = pytorch_to_parameter_record(global_model)
         recorddict = RecordDict({global_model_key: gmodel_record})
         messages = construct_messages(
-            node_ids, recorddict, MessageType.EVALUATE, grid, server_round
+            node_ids, recorddict, MessageType.EVALUATE, server_round
         )
 
         # Send messages and wait for all results
@@ -109,13 +109,12 @@ def construct_messages(
     node_ids: list[int],
     record: RecordDict,
     message_type: MessageType,
-    grid: Grid,
     server_round: int,
 ) -> list[Message]:
 
     messages = []
     for node_id in node_ids:  # one message for each node
-        message = grid.create_message(
+        message = Message(
             content=record,
             message_type=message_type,  # target method in ClientApp
             dst_node_id=node_id,

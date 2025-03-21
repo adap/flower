@@ -143,12 +143,12 @@ Assuming the following registration:
 
     @app.train(mods=[example_mod_3, example_mod_4])
     def train(msg, ctx):
-        return msg.create_reply(fl.common.RecordDict())
+        return Message(fl.common.RecordDict(), reply_to=msg)
 
 
     @app.evaluate()
     def evaluate(msg, ctx):
-        return msg.create_reply(fl.common.RecordDict())
+        return Message(fl.common.RecordDict(), reply_to=msg)
 
 The execution order for an incoming **train** message is as follows:
 
