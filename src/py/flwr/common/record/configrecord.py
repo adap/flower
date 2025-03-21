@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""ConfigsRecord."""
+"""ConfigRecord."""
 
 
+from logging import WARN
 from typing import Optional, get_args
 
-from flwr.common.typing import ConfigsRecordValues, ConfigsScalar
+from flwr.common.typing import ConfigRecordValues, ConfigScalar
 
+from ..logger import log
 from .typeddict import TypedDict
 
 
@@ -28,13 +30,13 @@ def _check_key(key: str) -> None:
         raise TypeError(f"Key must be of type `str` but `{type(key)}` was passed.")
 
 
-def _check_value(value: ConfigsRecordValues) -> None:
-    def is_valid(__v: ConfigsScalar) -> None:
+def _check_value(value: ConfigRecordValues) -> None:
+    def is_valid(__v: ConfigScalar) -> None:
         """Check if value is of expected type."""
-        if not isinstance(__v, get_args(ConfigsScalar)):
+        if not isinstance(__v, get_args(ConfigScalar)):
             raise TypeError(
                 "Not all values are of valid type."
-                f" Expected `{ConfigsRecordValues}` but `{type(__v)}` was passed."
+                f" Expected `{ConfigRecordValues}` but `{type(__v)}` was passed."
             )
 
     if isinstance(value, list):
@@ -51,24 +53,24 @@ def _check_value(value: ConfigsRecordValues) -> None:
             if not all(isinstance(v, value_type) for v in value):
                 raise TypeError(
                     "All values in a list must be of the same valid type. "
-                    f"One of {ConfigsScalar}."
+                    f"One of {ConfigScalar}."
                 )
     else:
         is_valid(value)
 
 
-class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
+class ConfigRecord(TypedDict[str, ConfigRecordValues]):
     """Configs record.
 
-    A :code:`ConfigsRecord` is a Python dictionary designed to ensure that
-    each key-value pair adheres to specified data types. A :code:`ConfigsRecord`
+    A :code:`ConfigRecord` is a Python dictionary designed to ensure that
+    each key-value pair adheres to specified data types. A :code:`ConfigRecord`
     is one of the types of records that a
     `flwr.common.RecordDict <flwr.common.RecordDict.html#recorddict>`_ supports and
     can therefore be used to construct :code:`common.Message` objects.
 
     Parameters
     ----------
-    configs_dict : Optional[Dict[str, ConfigsRecordValues]]
+    config_dict : Optional[Dict[str, ConfigRecordValues]]
         A dictionary that stores basic types (i.e. `str`, `int`, `float`, `bytes` as
         defined in `ConfigsScalar`) and lists of such types (see
         `ConfigsScalarList`).
@@ -80,20 +82,20 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
 
     Examples
     --------
-    The usage of a :code:`ConfigsRecord` is envisioned for sending configuration values
+    The usage of a :code:`ConfigRecord` is envisioned for sending configuration values
     telling the target node how to perform a certain action (e.g. train/evaluate a model
     ). You can use standard Python built-in types such as :code:`float`, :code:`str`
     , :code:`bytes`. All types allowed are defined in
-    :code:`flwr.common.ConfigsRecordValues`. While lists are supported, we
+    :code:`flwr.common.ConfigRecordValues`. While lists are supported, we
     encourage you to use a :code:`ArrayRecord` instead if these are of high
     dimensionality.
 
-    Let's see some examples of how to construct a :code:`ConfigsRecord` from scratch:
+    Let's see some examples of how to construct a :code:`ConfigRecord` from scratch:
 
-    >>> from flwr.common import ConfigsRecord
+    >>> from flwr.common import ConfigRecord
     >>>
-    >>> # A `ConfigsRecord` is a specialized Python dictionary
-    >>> record = ConfigsRecord({"lr": 0.1, "batch-size": 128})
+    >>> # A `ConfigRecord` is a specialized Python dictionary
+    >>> record = ConfigRecord({"lr": 0.1, "batch-size": 128})
     >>> # You can add more content to an existing record
     >>> record["compute-average"] = True
     >>> # It also supports lists
@@ -104,21 +106,21 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
     Just like the other types of records in a :code:`flwr.common.RecordDict`, types are
     enforced. If you need to add a custom data structure or object, we recommend to
     serialise it into bytes and save it as such (bytes are allowed in a
-    :code:`ConfigsRecord`)
+    :code:`ConfigRecord`)
     """
 
     def __init__(
         self,
-        configs_dict: Optional[dict[str, ConfigsRecordValues]] = None,
+        config_dict: Optional[dict[str, ConfigRecordValues]] = None,
         keep_input: bool = True,
     ) -> None:
 
         super().__init__(_check_key, _check_value)
-        if configs_dict:
-            for k in list(configs_dict.keys()):
-                self[k] = configs_dict[k]
+        if config_dict:
+            for k in list(config_dict.keys()):
+                self[k] = config_dict[k]
                 if not keep_input:
-                    del configs_dict[k]
+                    del config_dict[k]
 
     def count_bytes(self) -> int:
         """Return number of Bytes stored in this object.
@@ -126,7 +128,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
         This function counts booleans as occupying 1 Byte.
         """
 
-        def get_var_bytes(value: ConfigsScalar) -> int:
+        def get_var_bytes(value: ConfigScalar) -> int:
             """Return Bytes of value passed."""
             var_bytes = 0
             if isinstance(value, bool):
@@ -161,3 +163,47 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
             num_bytes += len(k)
 
         return num_bytes
+
+
+class ConfigsRecord(ConfigRecord):
+    """Deprecated class ``ConfigsRecord``, use ``ConfigRecord`` instead.
+
+    This class exists solely for backward compatibility with legacy
+    code that previously used ``ConfigsRecord``. It has been renamed
+    to ``ConfigRecord``.
+
+    .. warning::
+        ``ConfigsRecord`` is deprecated and will be removed in a future release.
+        Use ``ConfigRecord`` instead.
+
+    Examples
+    --------
+    Legacy (deprecated) usage::
+
+        from flwr.common import ConfigsRecord
+
+        record = ConfigsRecord()
+
+    Updated usage::
+
+        from flwr.common import ConfigRecord
+
+        record = ConfigRecord()
+    """
+
+    _warning_logged = False
+
+    def __init__(
+        self,
+        config_dict: Optional[dict[str, ConfigRecordValues]] = None,
+        keep_input: bool = True,
+    ):
+        if not ConfigsRecord._warning_logged:
+            ConfigsRecord._warning_logged = True
+            log(
+                WARN,
+                "The `ConfigsRecord` class has been renamed to `ConfigRecord`. "
+                "Support for `ConfigsRecord` will be removed in a future release. "
+                "Please update your code accordingly.",
+            )
+        super().__init__(config_dict, keep_input)

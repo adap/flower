@@ -21,7 +21,7 @@ from typing import cast
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common import (
     DEFAULT_TTL,
-    ConfigsRecord,
+    ConfigRecord,
     Context,
     Message,
     Metadata,
@@ -51,13 +51,13 @@ def make_mock_mod(name: str, footprint: list[str]) -> Mod:
     def mod(message: Message, context: Context, app: ClientAppCallable) -> Message:
         footprint.append(name)
         # add empty ConfigRecord to in_message for this mod
-        message.content.configs_records[name] = ConfigsRecord()
+        message.content.config_records[name] = ConfigRecord()
         _increment_context_counter(context)
         out_message: Message = app(message, context)
         footprint.append(name)
         _increment_context_counter(context)
         # add empty ConfigRegcord to out_message for this mod
-        out_message.content.configs_records[name] = ConfigsRecord()
+        out_message.content.config_records[name] = ConfigRecord()
         return out_message
 
     return mod
@@ -68,9 +68,9 @@ def make_mock_app(name: str, footprint: list[str]) -> ClientAppCallable:
 
     def app(message: Message, context: Context) -> Message:
         footprint.append(name)
-        message.content.configs_records[name] = ConfigsRecord()
+        message.content.config_records[name] = ConfigRecord()
         out_message = make_message(metadata=message.metadata, content=RecordDict())
-        out_message.content.configs_records[name] = ConfigsRecord()
+        out_message.content.config_records[name] = ConfigRecord()
         print(context)
         return out_message
 
@@ -120,11 +120,9 @@ class TestMakeApp(unittest.TestCase):
         trace = mock_mod_names + ["app"]
         self.assertEqual(footprint, trace + list(reversed(mock_mod_names)))
         # pylint: disable-next=no-member
+        self.assertEqual("".join(message.content.config_records.keys()), "".join(trace))
         self.assertEqual(
-            "".join(message.content.configs_records.keys()), "".join(trace)
-        )
-        self.assertEqual(
-            "".join(out_message.content.configs_records.keys()),
+            "".join(out_message.content.config_records.keys()),
             "".join(reversed(trace)),
         )
         self.assertEqual(state.metric_records[METRIC][COUNTER], 2 * len(mock_mods))
@@ -145,9 +143,9 @@ class TestMakeApp(unittest.TestCase):
             _2: ClientAppCallable,
         ) -> Message:
             footprint.append("filter")
-            message.content.configs_records["filter"] = ConfigsRecord()
+            message.content.config_records["filter"] = ConfigRecord()
             out_message = make_message(metadata=message.metadata, content=RecordDict())
-            out_message.content.configs_records["filter"] = ConfigsRecord()
+            out_message.content.config_records["filter"] = ConfigRecord()
             # Skip calling app
             return out_message
 
@@ -158,5 +156,5 @@ class TestMakeApp(unittest.TestCase):
         # Assert
         self.assertEqual(footprint, ["filter"])
         # pylint: disable-next=no-member
-        self.assertEqual(list(message.content.configs_records.keys())[0], "filter")
-        self.assertEqual(list(out_message.content.configs_records.keys())[0], "filter")
+        self.assertEqual(list(message.content.config_records.keys())[0], "filter")
+        self.assertEqual(list(out_message.content.config_records.keys())[0], "filter")

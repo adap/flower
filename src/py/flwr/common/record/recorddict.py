@@ -23,11 +23,11 @@ from typing import TypeVar, Union, cast
 
 from ..logger import log
 from .arrayrecord import ArrayRecord
-from .configsrecord import ConfigsRecord
+from .configrecord import ConfigRecord
 from .metricrecord import MetricRecord
 from .typeddict import TypedDict
 
-RecordType = Union[ArrayRecord, MetricRecord, ConfigsRecord]
+RecordType = Union[ArrayRecord, MetricRecord, ConfigRecord]
 
 T = TypeVar("T")
 
@@ -41,10 +41,10 @@ def _check_key(key: str) -> None:
 
 
 def _check_value(value: RecordType) -> None:
-    if not isinstance(value, (ArrayRecord, MetricRecord, ConfigsRecord)):
+    if not isinstance(value, (ArrayRecord, MetricRecord, ConfigRecord)):
         raise TypeError(
             f"Expected `{ArrayRecord.__name__}`, `{MetricRecord.__name__}`, "
-            f"or `{ConfigsRecord.__name__}` but received "
+            f"or `{ConfigRecord.__name__}` but received "
             f"`{type(value).__name__}` for the value."
         )
 
@@ -58,7 +58,7 @@ class _SyncedDict(TypedDict[str, T]):
     """
 
     def __init__(self, ref_recorddict: RecordDict, allowed_type: type[T]) -> None:
-        if not issubclass(allowed_type, (ArrayRecord, MetricRecord, ConfigsRecord)):
+        if not issubclass(allowed_type, (ArrayRecord, MetricRecord, ConfigRecord)):
             raise TypeError(f"{allowed_type} is not a valid type.")
         super().__init__(_check_key, self.check_value)
         self.recorddict = ref_recorddict
@@ -106,13 +106,13 @@ class RecordDict(TypedDict[str, RecordType]):
     Let's see an example.
 
     >>>  from flwr.common import RecordDict
-    >>>  from flwr.common import ArrayRecord, ConfigsRecord, MetricRecord
+    >>>  from flwr.common import ArrayRecord, ConfigRecord, MetricRecord
     >>>
     >>>  # Let's begin with an empty record
     >>>  my_records = RecordDict()
     >>>
-    >>>  # We can create a ConfigsRecord
-    >>>  c_record = ConfigsRecord({"lr": 0.1, "batch-size": 128})
+    >>>  # We can create a ConfigRecord
+    >>>  c_record = ConfigRecord({"lr": 0.1, "batch-size": 128})
     >>>  # Adding it to the RecordDict would look like this
     >>>  my_records["my_config"] = c_record
     >>>
@@ -139,7 +139,7 @@ class RecordDict(TypedDict[str, RecordType]):
     >>>  my_records["my_parameters"] = arr_record
 
     For additional examples on how to construct each of the records types shown
-    above, please refer to the documentation for :code:`ConfigsRecord`,
+    above, please refer to the documentation for :code:`ConfigRecord`,
     :code:`MetricRecord` and :code:`ArrayRecord`.
     """
 
@@ -168,17 +168,17 @@ class RecordDict(TypedDict[str, RecordType]):
         return synced_dict
 
     @property
-    def configs_records(self) -> TypedDict[str, ConfigsRecord]:
-        """Dictionary holding only ConfigsRecord instances."""
-        synced_dict = _SyncedDict[ConfigsRecord](self, ConfigsRecord)
+    def config_records(self) -> TypedDict[str, ConfigRecord]:
+        """Dictionary holding only ConfigRecord instances."""
+        synced_dict = _SyncedDict[ConfigRecord](self, ConfigRecord)
         for key, record in self.items():
-            if isinstance(record, ConfigsRecord):
+            if isinstance(record, ConfigRecord):
                 synced_dict[key] = record
         return synced_dict
 
     def __repr__(self) -> str:
         """Return a string representation of this instance."""
-        flds = ("array_records", "metric_records", "configs_records")
+        flds = ("array_records", "metric_records", "config_records")
         fld_views = [f"{fld}={dict(getattr(self, fld))!r}" for fld in flds]
         view = indent(",\n".join(fld_views), "  ")
         return f"{self.__class__.__qualname__}(\n{view}\n)"
@@ -226,6 +226,7 @@ class RecordSet(RecordDict):
     _warning_logged = False
     _warning_logged_params = False
     _warning_logged_metrics = False
+    _warning_logged_configs = False
 
     def __init__(self, records: dict[str, RecordType] | None = None) -> None:
         if not RecordSet._warning_logged:
@@ -269,3 +270,19 @@ class RecordSet(RecordDict):
                 "`RecordDict.metric_records` instead.",
             )
         return self.metric_records
+
+    @property
+    def configs_records(self) -> TypedDict[str, ConfigRecord]:
+        """Deprecated property.
+
+        Use ``config_records`` instead.
+        """
+        if not RecordSet._warning_logged_configs:
+            RecordSet._warning_logged_configs = True
+            log(
+                WARN,
+                "`RecordSet.configs_records` has been deprecated "
+                "and will be removed in a future release. Please use "
+                "`RecordDict.config_records` instead.",
+            )
+        return self.config_records

@@ -26,7 +26,7 @@ from flwr.common.constant import PARTITION_ID_KEY
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
-from flwr.common.typing import ConfigsRecordValues
+from flwr.common.typing import ConfigRecordValues
 from flwr.simulation.ray_transport.ray_actor import BasicActorPool, ClientAppActor
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
@@ -104,7 +104,7 @@ class RayBackend(Backend):
         if not ray.is_initialized():
             ray_init_args: dict[
                 str,
-                ConfigsRecordValues,
+                ConfigRecordValues,
             ] = {}
 
             if backend_config.get(self.init_args_key):

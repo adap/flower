@@ -182,7 +182,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.mock_stub.PullClientAppInputs.assert_called_once()
         self.assertEqual(len(message.content.array_records), 3)
         self.assertEqual(len(message.content.metric_records), 2)
-        self.assertEqual(len(message.content.configs_records), 1)
+        self.assertEqual(len(message.content.config_records), 1)
         self.assertEqual(context.node_id, 123)
         self.assertEqual(run.run_id, 61016)
         self.assertEqual(run.fab_id, "mock/mock")

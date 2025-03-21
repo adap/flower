@@ -16,7 +16,7 @@
 
 
 from .arrayrecord import Array, ArrayRecord, ParametersRecord
-from .configsrecord import ConfigsRecord
+from .configrecord import ConfigRecord, ConfigsRecord
 from .conversion_utils import array_from_numpy
 from .metricrecord import MetricRecord, MetricsRecord
 from .recorddict import RecordDict, RecordSet
@@ -24,6 +24,7 @@ from .recorddict import RecordDict, RecordSet
 __all__ = [
     "Array",
     "ArrayRecord",
+    "ConfigRecord",
     "ConfigsRecord",
     "MetricRecord",
     "MetricsRecord",

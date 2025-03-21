@@ -29,14 +29,14 @@ from flwr.common.recorddict_compat import (
     parameters_to_arrayrecord,
 )
 from flwr.common.typing import (
-    ConfigsRecordValues,
+    ConfigRecordValues,
     MetricRecordValues,
     NDArray,
     NDArrays,
     Parameters,
 )
 
-from . import Array, ArrayRecord, ConfigsRecord, MetricRecord, RecordDict
+from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 
 
 def get_ndarrays() -> NDArrays:
@@ -300,11 +300,11 @@ def test_set_metrics_to_metricrecord_with_and_without_keeping_input(
         (str, lambda x: []),  # str: emptyt list
     ],
 )
-def test_set_configs_to_configsrecord_with_correct_types(
+def test_set_configs_to_configrecord_with_correct_types(
     key_type: type[str],
-    value_fn: Callable[[NDArray], ConfigsRecordValues],
+    value_fn: Callable[[NDArray], ConfigRecordValues],
 ) -> None:
-    """Test adding configs of various types to a ConfigsRecord."""
+    """Test adding configs of various types to a ConfigRecord."""
     labels = [1, 2.0]
     arrays = get_ndarrays()
 
@@ -312,7 +312,7 @@ def test_set_configs_to_configsrecord_with_correct_types(
         {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
     )
 
-    c_record = ConfigsRecord(my_configs)
+    c_record = ConfigRecord(my_configs)
 
     # check values are actually there
     assert c_record == my_configs
@@ -344,12 +344,12 @@ def test_set_configs_to_configsrecord_with_correct_types(
         ),  # float: List[int] (unsupported: supported)
     ],
 )
-def test_set_configs_to_configsrecord_with_incorrect_types(
+def test_set_configs_to_configrecord_with_incorrect_types(
     key_type: type[Union[str, int, float]],
     value_fn: Callable[[NDArray], Union[NDArray, dict[str, NDArray], list[float]]],
 ) -> None:
-    """Test adding configs of various unsupported types to a ConfigsRecord."""
-    c_record = ConfigsRecord()
+    """Test adding configs of various unsupported types to a ConfigRecord."""
+    c_record = ConfigRecord()
 
     labels = [1, 2.0]
     arrays = get_ndarrays()
@@ -374,8 +374,8 @@ def test_count_bytes_metricrecord() -> None:
     assert bytes_in_dict == record_bytest_count
 
 
-def test_count_bytes_configsrecord() -> None:
-    """Test counting bytes in ConfigsRecord."""
+def test_count_bytes_configrecord() -> None:
+    """Test counting bytes in ConfigRecord."""
     data = {"a": 1, "b": 2.0, "c": [1, 2, 3], "d": [1.0, 2.0, 3.0, 4.0, 5.0]}
     bytes_in_dict = 8 + 8 + 3 * 8 + 5 * 8
     bytes_in_dict += 4  # represnting the keys
@@ -394,7 +394,7 @@ def test_count_bytes_configsrecord() -> None:
 
     bytes_in_dict = int(bytes_in_dict)
 
-    c_record = ConfigsRecord()
+    c_record = ConfigRecord()
     c_record.update(OrderedDict(data))
 
     record_bytest_count = c_record.count_bytes()
@@ -406,11 +406,11 @@ def test_record_is_picklable() -> None:
     # Prepare
     arr_record = ArrayRecord()
     m_record = MetricRecord({"aa": 123})
-    c_record = ConfigsRecord({"cc": bytes(9)})
+    c_record = ConfigRecord({"cc": bytes(9)})
     rs = RecordDict()
     rs.array_records["arrays"] = arr_record
     rs.metric_records["metrics"] = m_record
-    rs.configs_records["configs"] = c_record
+    rs.config_records["configs"] = c_record
 
     # Execute
     pickle.dumps((arr_record, m_record, c_record, rs))
@@ -423,13 +423,13 @@ def test_recorddict_repr() -> None:
         {
             "arrays": ArrayRecord(),
             "metrics": MetricRecord({"aa": 123}),
-            "configs": ConfigsRecord({"cc": bytes(5)}),
+            "configs": ConfigRecord({"cc": bytes(5)}),
         },
     )
     expected = """RecordDict(
   array_records={'arrays': {}},
   metric_records={'metrics': {'aa': 123}},
-  configs_records={'configs': {'cc': b'\\x00\\x00\\x00\\x00\\x00'}}
+  config_records={'configs': {'cc': b'\\x00\\x00\\x00\\x00\\x00'}}
 )"""
 
     # Assert
@@ -442,7 +442,7 @@ def test_recorddict_set_get_del_item() -> None:
     rs = RecordDict()
     arr_record = ArrayRecord()
     m_record = MetricRecord({"aa": 123})
-    c_record = ConfigsRecord({"cc": bytes(5)})
+    c_record = ConfigRecord({"cc": bytes(5)})
 
     # Execute
     rs["arrays"] = arr_record

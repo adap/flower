@@ -32,6 +32,7 @@ from .parameter import ndarrays_to_parameters as ndarrays_to_parameters
 from .parameter import parameters_to_ndarrays as parameters_to_ndarrays
 from .record import Array as Array
 from .record import ArrayRecord as ArrayRecord
+from .record import ConfigRecord as ConfigRecord
 from .record import ConfigsRecord as ConfigsRecord
 from .record import MetricRecord as MetricRecord
 from .record import MetricsRecord as MetricsRecord
@@ -44,7 +45,7 @@ from .telemetry import event as event
 from .typing import ClientMessage as ClientMessage
 from .typing import Code as Code
 from .typing import Config as Config
-from .typing import ConfigsRecordValues as ConfigsRecordValues
+from .typing import ConfigRecordValues as ConfigRecordValues
 from .typing import DisconnectRes as DisconnectRes
 from .typing import EvaluateIns as EvaluateIns
 from .typing import EvaluateRes as EvaluateRes
@@ -72,8 +73,9 @@ __all__ = [
     "ClientMessage",
     "Code",
     "Config",
+    "ConfigRecord",
+    "ConfigRecordValues",
     "ConfigsRecord",
-    "ConfigsRecordValues",
     "Context",
     "DEFAULT_TTL",
     "DisconnectRes",

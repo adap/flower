@@ -139,7 +139,7 @@ class MetricRecordValue(google.protobuf.message.Message):
     def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","uint64","double_list","sint_list","uint_list"]]: ...
 global___MetricRecordValue = MetricRecordValue
 
-class ConfigsRecordValue(google.protobuf.message.Message):
+class ConfigRecordValue(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     DOUBLE_FIELD_NUMBER: builtins.int
     SINT64_FIELD_NUMBER: builtins.int
@@ -193,7 +193,7 @@ class ConfigsRecordValue(google.protobuf.message.Message):
     def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint_list",b"sint_list","string",b"string","string_list",b"string_list","uint64",b"uint64","uint_list",b"uint_list","value",b"value"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint_list",b"sint_list","string",b"string","string_list",b"string_list","uint64",b"uint64","uint_list",b"uint_list","value",b"value"]) -> None: ...
     def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","uint64","bool","string","bytes","double_list","sint_list","uint_list","bool_list","string_list","bytes_list"]]: ...
-global___ConfigsRecordValue = ConfigsRecordValue
+global___ConfigRecordValue = ConfigRecordValue
 
 class ArrayRecord(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -238,7 +238,7 @@ class MetricRecord(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["data",b"data"]) -> None: ...
 global___MetricRecord = MetricRecord
 
-class ConfigsRecord(google.protobuf.message.Message):
+class ConfigRecord(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class DataEntry(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -246,24 +246,24 @@ class ConfigsRecord(google.protobuf.message.Message):
         VALUE_FIELD_NUMBER: builtins.int
         key: typing.Text
         @property
-        def value(self) -> global___ConfigsRecordValue: ...
+        def value(self) -> global___ConfigRecordValue: ...
         def __init__(self,
             *,
             key: typing.Text = ...,
-            value: typing.Optional[global___ConfigsRecordValue] = ...,
+            value: typing.Optional[global___ConfigRecordValue] = ...,
             ) -> None: ...
         def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
     DATA_FIELD_NUMBER: builtins.int
     @property
-    def data(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___ConfigsRecordValue]: ...
+    def data(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___ConfigRecordValue]: ...
     def __init__(self,
         *,
-        data: typing.Optional[typing.Mapping[typing.Text, global___ConfigsRecordValue]] = ...,
+        data: typing.Optional[typing.Mapping[typing.Text, global___ConfigRecordValue]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["data",b"data"]) -> None: ...
-global___ConfigsRecord = ConfigsRecord
+global___ConfigRecord = ConfigRecord
 
 class RecordDict(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -303,11 +303,11 @@ class RecordDict(google.protobuf.message.Message):
         VALUE_FIELD_NUMBER: builtins.int
         key: typing.Text
         @property
-        def value(self) -> global___ConfigsRecord: ...
+        def value(self) -> global___ConfigRecord: ...
         def __init__(self,
             *,
             key: typing.Text = ...,
-            value: typing.Optional[global___ConfigsRecord] = ...,
+            value: typing.Optional[global___ConfigRecord] = ...,
             ) -> None: ...
         def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
@@ -320,12 +320,12 @@ class RecordDict(google.protobuf.message.Message):
     @property
     def metrics(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___MetricRecord]: ...
     @property
-    def configs(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___ConfigsRecord]: ...
+    def configs(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___ConfigRecord]: ...
     def __init__(self,
         *,
         arrays: typing.Optional[typing.Mapping[typing.Text, global___ArrayRecord]] = ...,
         metrics: typing.Optional[typing.Mapping[typing.Text, global___MetricRecord]] = ...,
-        configs: typing.Optional[typing.Mapping[typing.Text, global___ConfigsRecord]] = ...,
+        configs: typing.Optional[typing.Mapping[typing.Text, global___ConfigRecord]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["arrays",b"arrays","configs",b"configs","metrics",b"metrics"]) -> None: ...
 global___RecordDict = RecordDict

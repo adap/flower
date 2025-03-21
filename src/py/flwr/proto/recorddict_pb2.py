@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1b\x66lwr/proto/recorddict.proto\x12\nflwr.proto\"\x1a\n\nDoubleList\x12\x0c\n\x04vals\x18\x01 \x03(\x01\"\x18\n\x08SintList\x12\x0c\n\x04vals\x18\x01 \x03(\x12\"\x18\n\x08UintList\x12\x0c\n\x04vals\x18\x01 \x03(\x04\"\x18\n\x08\x42oolList\x12\x0c\n\x04vals\x18\x01 \x03(\x08\"\x1a\n\nStringList\x12\x0c\n\x04vals\x18\x01 \x03(\t\"\x19\n\tBytesList\x12\x0c\n\x04vals\x18\x01 \x03(\x0c\"B\n\x05\x41rray\x12\r\n\x05\x64type\x18\x01 \x01(\t\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\r\n\x05stype\x18\x03 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\x0c\"\xd7\x01\n\x11MetricRecordValue\x12\x10\n\x06\x64ouble\x18\x01 \x01(\x01H\x00\x12\x10\n\x06sint64\x18\x02 \x01(\x12H\x00\x12\x10\n\x06uint64\x18\x03 \x01(\x04H\x00\x12-\n\x0b\x64ouble_list\x18\x15 \x01(\x0b\x32\x16.flwr.proto.DoubleListH\x00\x12)\n\tsint_list\x18\x16 \x01(\x0b\x32\x14.flwr.proto.SintListH\x00\x12)\n\tuint_list\x18\x17 \x01(\x0b\x32\x14.flwr.proto.UintListH\x00\x42\x07\n\x05value\"\x92\x03\n\x12\x43onfigsRecordValue\x12\x10\n\x06\x64ouble\x18\x01 \x01(\x01H\x00\x12\x10\n\x06sint64\x18\x02 \x01(\x12H\x00\x12\x10\n\x06uint64\x18\x03 \x01(\x04H\x00\x12\x0e\n\x04\x62ool\x18\x04 \x01(\x08H\x00\x12\x10\n\x06string\x18\x05 \x01(\tH\x00\x12\x0f\n\x05\x62ytes\x18\x06 \x01(\x0cH\x00\x12-\n\x0b\x64ouble_list\x18\x15 \x01(\x0b\x32\x16.flwr.proto.DoubleListH\x00\x12)\n\tsint_list\x18\x16 \x01(\x0b\x32\x14.flwr.proto.SintListH\x00\x12)\n\tuint_list\x18\x17 \x01(\x0b\x32\x14.flwr.proto.UintListH\x00\x12)\n\tbool_list\x18\x18 \x01(\x0b\x32\x14.flwr.proto.BoolListH\x00\x12-\n\x0bstring_list\x18\x19 \x01(\x0b\x32\x16.flwr.proto.StringListH\x00\x12+\n\nbytes_list\x18\x1a \x01(\x0b\x32\x15.flwr.proto.BytesListH\x00\x42\x07\n\x05value\"H\n\x0b\x41rrayRecord\x12\x11\n\tdata_keys\x18\x01 \x03(\t\x12&\n\x0b\x64\x61ta_values\x18\x02 \x03(\x0b\x32\x11.flwr.proto.Array\"\x8c\x01\n\x0cMetricRecord\x12\x30\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\".flwr.proto.MetricRecord.DataEntry\x1aJ\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12,\n\x05value\x18\x02 \x01(\x0b\x32\x1d.flwr.proto.MetricRecordValue:\x02\x38\x01\"\x8f\x01\n\rConfigsRecord\x12\x31\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32#.flwr.proto.ConfigsRecord.DataEntry\x1aK\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12-\n\x05value\x18\x02 \x01(\x0b\x32\x1e.flwr.proto.ConfigsRecordValue:\x02\x38\x01\"\x89\x03\n\nRecordDict\x12\x32\n\x06\x61rrays\x18\x01 \x03(\x0b\x32\".flwr.proto.RecordDict.ArraysEntry\x12\x34\n\x07metrics\x18\x02 \x03(\x0b\x32#.flwr.proto.RecordDict.MetricsEntry\x12\x34\n\x07\x63onfigs\x18\x03 \x03(\x0b\x32#.flwr.proto.RecordDict.ConfigsEntry\x1a\x46\n\x0b\x41rraysEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12&\n\x05value\x18\x02 \x01(\x0b\x32\x17.flwr.proto.ArrayRecord:\x02\x38\x01\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flwr.proto.MetricRecord:\x02\x38\x01\x1aI\n\x0c\x43onfigsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12(\n\x05value\x18\x02 \x01(\x0b\x32\x19.flwr.proto.ConfigsRecord:\x02\x38\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1b\x66lwr/proto/recorddict.proto\x12\nflwr.proto\"\x1a\n\nDoubleList\x12\x0c\n\x04vals\x18\x01 \x03(\x01\"\x18\n\x08SintList\x12\x0c\n\x04vals\x18\x01 \x03(\x12\"\x18\n\x08UintList\x12\x0c\n\x04vals\x18\x01 \x03(\x04\"\x18\n\x08\x42oolList\x12\x0c\n\x04vals\x18\x01 \x03(\x08\"\x1a\n\nStringList\x12\x0c\n\x04vals\x18\x01 \x03(\t\"\x19\n\tBytesList\x12\x0c\n\x04vals\x18\x01 \x03(\x0c\"B\n\x05\x41rray\x12\r\n\x05\x64type\x18\x01 \x01(\t\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\r\n\x05stype\x18\x03 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\x0c\"\xd7\x01\n\x11MetricRecordValue\x12\x10\n\x06\x64ouble\x18\x01 \x01(\x01H\x00\x12\x10\n\x06sint64\x18\x02 \x01(\x12H\x00\x12\x10\n\x06uint64\x18\x03 \x01(\x04H\x00\x12-\n\x0b\x64ouble_list\x18\x15 \x01(\x0b\x32\x16.flwr.proto.DoubleListH\x00\x12)\n\tsint_list\x18\x16 \x01(\x0b\x32\x14.flwr.proto.SintListH\x00\x12)\n\tuint_list\x18\x17 \x01(\x0b\x32\x14.flwr.proto.UintListH\x00\x42\x07\n\x05value\"\x91\x03\n\x11\x43onfigRecordValue\x12\x10\n\x06\x64ouble\x18\x01 \x01(\x01H\x00\x12\x10\n\x06sint64\x18\x02 \x01(\x12H\x00\x12\x10\n\x06uint64\x18\x03 \x01(\x04H\x00\x12\x0e\n\x04\x62ool\x18\x04 \x01(\x08H\x00\x12\x10\n\x06string\x18\x05 \x01(\tH\x00\x12\x0f\n\x05\x62ytes\x18\x06 \x01(\x0cH\x00\x12-\n\x0b\x64ouble_list\x18\x15 \x01(\x0b\x32\x16.flwr.proto.DoubleListH\x00\x12)\n\tsint_list\x18\x16 \x01(\x0b\x32\x14.flwr.proto.SintListH\x00\x12)\n\tuint_list\x18\x17 \x01(\x0b\x32\x14.flwr.proto.UintListH\x00\x12)\n\tbool_list\x18\x18 \x01(\x0b\x32\x14.flwr.proto.BoolListH\x00\x12-\n\x0bstring_list\x18\x19 \x01(\x0b\x32\x16.flwr.proto.StringListH\x00\x12+\n\nbytes_list\x18\x1a \x01(\x0b\x32\x15.flwr.proto.BytesListH\x00\x42\x07\n\x05value\"H\n\x0b\x41rrayRecord\x12\x11\n\tdata_keys\x18\x01 \x03(\t\x12&\n\x0b\x64\x61ta_values\x18\x02 \x03(\x0b\x32\x11.flwr.proto.Array\"\x8c\x01\n\x0cMetricRecord\x12\x30\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\".flwr.proto.MetricRecord.DataEntry\x1aJ\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12,\n\x05value\x18\x02 \x01(\x0b\x32\x1d.flwr.proto.MetricRecordValue:\x02\x38\x01\"\x8c\x01\n\x0c\x43onfigRecord\x12\x30\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\".flwr.proto.ConfigRecord.DataEntry\x1aJ\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12,\n\x05value\x18\x02 \x01(\x0b\x32\x1d.flwr.proto.ConfigRecordValue:\x02\x38\x01\"\x88\x03\n\nRecordDict\x12\x32\n\x06\x61rrays\x18\x01 \x03(\x0b\x32\".flwr.proto.RecordDict.ArraysEntry\x12\x34\n\x07metrics\x18\x02 \x03(\x0b\x32#.flwr.proto.RecordDict.MetricsEntry\x12\x34\n\x07\x63onfigs\x18\x03 \x03(\x0b\x32#.flwr.proto.RecordDict.ConfigsEntry\x1a\x46\n\x0b\x41rraysEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12&\n\x05value\x18\x02 \x01(\x0b\x32\x17.flwr.proto.ArrayRecord:\x02\x38\x01\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flwr.proto.MetricRecord:\x02\x38\x01\x1aH\n\x0c\x43onfigsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flwr.proto.ConfigRecord:\x02\x38\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,8 +23,8 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_METRICRECORD_DATAENTRY']._options = None
   _globals['_METRICRECORD_DATAENTRY']._serialized_options = b'8\001'
-  _globals['_CONFIGSRECORD_DATAENTRY']._options = None
-  _globals['_CONFIGSRECORD_DATAENTRY']._serialized_options = b'8\001'
+  _globals['_CONFIGRECORD_DATAENTRY']._options = None
+  _globals['_CONFIGRECORD_DATAENTRY']._serialized_options = b'8\001'
   _globals['_RECORDDICT_ARRAYSENTRY']._options = None
   _globals['_RECORDDICT_ARRAYSENTRY']._serialized_options = b'8\001'
   _globals['_RECORDDICT_METRICSENTRY']._options = None
@@ -47,24 +47,24 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_ARRAY']._serialized_end=270
   _globals['_METRICRECORDVALUE']._serialized_start=273
   _globals['_METRICRECORDVALUE']._serialized_end=488
-  _globals['_CONFIGSRECORDVALUE']._serialized_start=491
-  _globals['_CONFIGSRECORDVALUE']._serialized_end=893
-  _globals['_ARRAYRECORD']._serialized_start=895
-  _globals['_ARRAYRECORD']._serialized_end=967
-  _globals['_METRICRECORD']._serialized_start=970
-  _globals['_METRICRECORD']._serialized_end=1110
-  _globals['_METRICRECORD_DATAENTRY']._serialized_start=1036
-  _globals['_METRICRECORD_DATAENTRY']._serialized_end=1110
-  _globals['_CONFIGSRECORD']._serialized_start=1113
-  _globals['_CONFIGSRECORD']._serialized_end=1256
-  _globals['_CONFIGSRECORD_DATAENTRY']._serialized_start=1181
-  _globals['_CONFIGSRECORD_DATAENTRY']._serialized_end=1256
-  _globals['_RECORDDICT']._serialized_start=1259
-  _globals['_RECORDDICT']._serialized_end=1652
-  _globals['_RECORDDICT_ARRAYSENTRY']._serialized_start=1433
-  _globals['_RECORDDICT_ARRAYSENTRY']._serialized_end=1503
-  _globals['_RECORDDICT_METRICSENTRY']._serialized_start=1505
-  _globals['_RECORDDICT_METRICSENTRY']._serialized_end=1577
-  _globals['_RECORDDICT_CONFIGSENTRY']._serialized_start=1579
-  _globals['_RECORDDICT_CONFIGSENTRY']._serialized_end=1652
+  _globals['_CONFIGRECORDVALUE']._serialized_start=491
+  _globals['_CONFIGRECORDVALUE']._serialized_end=892
+  _globals['_ARRAYRECORD']._serialized_start=894
+  _globals['_ARRAYRECORD']._serialized_end=966
+  _globals['_METRICRECORD']._serialized_start=969
+  _globals['_METRICRECORD']._serialized_end=1109
+  _globals['_METRICRECORD_DATAENTRY']._serialized_start=1035
+  _globals['_METRICRECORD_DATAENTRY']._serialized_end=1109
+  _globals['_CONFIGRECORD']._serialized_start=1112
+  _globals['_CONFIGRECORD']._serialized_end=1252
+  _globals['_CONFIGRECORD_DATAENTRY']._serialized_start=1178
+  _globals['_CONFIGRECORD_DATAENTRY']._serialized_end=1252
+  _globals['_RECORDDICT']._serialized_start=1255
+  _globals['_RECORDDICT']._serialized_end=1647
+  _globals['_RECORDDICT_ARRAYSENTRY']._serialized_start=1429
+  _globals['_RECORDDICT_ARRAYSENTRY']._serialized_end=1499
+  _globals['_RECORDDICT_METRICSENTRY']._serialized_start=1501
+  _globals['_RECORDDICT_METRICSENTRY']._serialized_end=1573
+  _globals['_RECORDDICT_CONFIGSENTRY']._serialized_start=1575
+  _globals['_RECORDDICT_CONFIGSENTRY']._serialized_end=1647
 # @@protoc_insertion_point(module_scope)

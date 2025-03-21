@@ -34,7 +34,7 @@ from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.recorddict_pb2 import Array as ProtoArray
 from flwr.proto.recorddict_pb2 import ArrayRecord as ProtoArrayRecord
-from flwr.proto.recorddict_pb2 import ConfigsRecord as ProtoConfigsRecord
+from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
 from flwr.proto.recorddict_pb2 import MetricRecord as ProtoMetricRecord
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.proto.run_pb2 import Run as ProtoRun
@@ -43,7 +43,7 @@ from flwr.proto.run_pb2 import Run as ProtoRun
 from . import (
     Array,
     ArrayRecord,
-    ConfigsRecord,
+    ConfigRecord,
     Context,
     MetricRecord,
     RecordDict,
@@ -57,8 +57,8 @@ from .serde import (
     array_to_proto,
     clientappstatus_from_proto,
     clientappstatus_to_proto,
-    configs_record_from_proto,
-    configs_record_to_proto,
+    config_record_from_proto,
+    config_record_to_proto,
     context_from_proto,
     context_to_proto,
     fab_from_proto,
@@ -238,12 +238,12 @@ class RecordMaker:
             keep_input=False,
         )
 
-    def configs_record(self) -> ConfigsRecord:
-        """Create a ConfigsRecord."""
+    def config_record(self) -> ConfigRecord:
+        """Create a ConfigRecord."""
         num_entries = self.rng.randint(1, 5)
         types = (str, int, float, bytes, bool)
-        return ConfigsRecord(
-            configs_dict={
+        return ConfigRecord(
+            config_dict={
                 self.get_str(): self.get_value(self.rng.choice(types))
                 for _ in range(num_entries)
             },
@@ -254,7 +254,7 @@ class RecordMaker:
         self,
         num_array_records: int,
         num_metric_records: int,
-        num_configs_records: int,
+        num_config_records: int,
     ) -> RecordDict:
         """Create a RecordDict."""
         ret = RecordDict()
@@ -262,8 +262,8 @@ class RecordMaker:
             ret[self.get_str()] = self.array_record()
         for _ in range(num_metric_records):
             ret[self.get_str()] = self.metric_record()
-        for _ in range(num_configs_records):
-            ret[self.get_str()] = self.configs_record()
+        for _ in range(num_config_records):
+            ret[self.get_str()] = self.config_record()
         return ret
 
     def metadata(self) -> Metadata:
@@ -337,20 +337,20 @@ def test_metric_record_serialization_deserialization() -> None:
     assert original == deserialized
 
 
-def test_configs_record_serialization_deserialization() -> None:
-    """Test serialization and deserialization of ConfigsRecord."""
+def test_config_record_serialization_deserialization() -> None:
+    """Test serialization and deserialization of ConfigRecord."""
     # Prepare
     maker = RecordMaker()
-    original = maker.configs_record()
+    original = maker.config_record()
     original["uint64"] = (1 << 63) + 101
     original["list of uint64"] = [maker.get_value("uint") for _ in range(100)]
 
     # Execute
-    proto = configs_record_to_proto(original)
-    deserialized = configs_record_from_proto(proto)
+    proto = config_record_to_proto(original)
+    deserialized = config_record_from_proto(proto)
 
     # Assert
-    assert isinstance(proto, ProtoConfigsRecord)
+    assert isinstance(proto, ProtoConfigRecord)
     assert original == deserialized
 
 
