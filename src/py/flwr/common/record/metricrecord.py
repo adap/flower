@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""MetricsRecord."""
+"""MetricRecord."""
 
 
 from typing import Optional, get_args
 
-from flwr.common.typing import MetricsRecordValues, MetricsScalar
+from flwr.common.typing import MetricRecordValues, MetricScalar
 
 from .typeddict import TypedDict
 
@@ -28,13 +28,13 @@ def _check_key(key: str) -> None:
         raise TypeError(f"Key must be of type `str` but `{type(key)}` was passed.")
 
 
-def _check_value(value: MetricsRecordValues) -> None:
-    def is_valid(__v: MetricsScalar) -> None:
+def _check_value(value: MetricRecordValues) -> None:
+    def is_valid(__v: MetricScalar) -> None:
         """Check if value is of expected type."""
-        if not isinstance(__v, get_args(MetricsScalar)) or isinstance(__v, bool):
+        if not isinstance(__v, get_args(MetricScalar)) or isinstance(__v, bool):
             raise TypeError(
                 "Not all values are of valid type."
-                f" Expected `{MetricsRecordValues}` but `{type(__v)}` was passed."
+                f" Expected `{MetricRecordValues}` but `{type(__v)}` was passed."
             )
 
     if isinstance(value, list):
@@ -51,26 +51,26 @@ def _check_value(value: MetricsRecordValues) -> None:
             if not all(isinstance(v, value_type) for v in value):
                 raise TypeError(
                     "All values in a list must be of the same valid type. "
-                    f"One of {MetricsScalar}."
+                    f"One of {MetricScalar}."
                 )
     else:
         is_valid(value)
 
 
-class MetricsRecord(TypedDict[str, MetricsRecordValues]):
+class MetricRecord(TypedDict[str, MetricRecordValues]):
     """Metrics recod.
 
-    A :code:`MetricsRecord` is a Python dictionary designed to ensure that
-    each key-value pair adheres to specified data types. A :code:`MetricsRecord`
+    A :code:`MetricRecord` is a Python dictionary designed to ensure that
+    each key-value pair adheres to specified data types. A :code:`MetricRecord`
     is one of the types of records that a
     `flwr.common.RecordDict <flwr.common.RecordDict.html#recorddict>`_ supports and
     can therefore be used to construct :code:`common.Message` objects.
 
     Parameters
     ----------
-    metrics_dict : Optional[Dict[str, MetricsRecordValues]]
+    metric_dict : Optional[Dict[str, MetricRecordValues]]
         A dictionary that stores basic types (i.e. `int`, `float` as defined
-        in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
+        in `MetricScalar`) and list of such types (see `MetricScalarList`).
     keep_input : bool (default: True)
         A boolean indicating whether metrics should be deleted from the input
         dictionary immediately after adding them to the record. When set
@@ -79,7 +79,7 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
 
     Examples
     --------
-    The usage of a :code:`MetricsRecord` is envisioned for communicating results
+    The usage of a :code:`MetricRecord` is envisioned for communicating results
     obtained when a node performs an action. A few typical examples include:
     communicating the training accuracy after a model is trained locally by a
     :code:`ClientApp`, reporting the validation loss obtained at a :code:`ClientApp`,
@@ -87,25 +87,25 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
     Common to these examples is that the output can be typically represented by
     a single scalar (:code:`int`, :code:`float`) or list of scalars.
 
-    Let's see some examples of how to construct a :code:`MetricsRecord` from scratch:
+    Let's see some examples of how to construct a :code:`MetricRecord` from scratch:
 
-    >>> from flwr.common import MetricsRecord
+    >>> from flwr.common import MetricRecord
     >>>
-    >>> # A `MetricsRecord` is a specialized Python dictionary
-    >>> record = MetricsRecord({"accuracy": 0.94})
+    >>> # A `MetricRecord` is a specialized Python dictionary
+    >>> record = MetricRecord({"accuracy": 0.94})
     >>> # You can add more content to an existing record
     >>> record["loss"] = 0.01
     >>> # It also supports lists
     >>> record["loss-historic"] = [0.9, 0.5, 0.01]
 
     Since types are enforced, the types of the objects inserted are checked. For a
-    :code:`MetricsRecord`, value types allowed are those in defined in
-    :code:`flwr.common.MetricsRecordValues`. Similarly, only :code:`str` keys are
+    :code:`MetricRecord`, value types allowed are those in defined in
+    :code:`flwr.common.MetricRecordValues`. Similarly, only :code:`str` keys are
     allowed.
 
-    >>> from flwr.common import MetricsRecord
+    >>> from flwr.common import MetricRecord
     >>>
-    >>> record = MetricsRecord() # an empty record
+    >>> record = MetricRecord() # an empty record
     >>> # Add unsupported value
     >>> record["something-unsupported"] = {'a': 123} # Will throw a `TypeError`
 
@@ -115,15 +115,15 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
 
     def __init__(
         self,
-        metrics_dict: Optional[dict[str, MetricsRecordValues]] = None,
+        metric_dict: Optional[dict[str, MetricRecordValues]] = None,
         keep_input: bool = True,
     ):
         super().__init__(_check_key, _check_value)
-        if metrics_dict:
-            for k in list(metrics_dict.keys()):
-                self[k] = metrics_dict[k]
+        if metric_dict:
+            for k in list(metric_dict.keys()):
+                self[k] = metric_dict[k]
                 if not keep_input:
-                    del metrics_dict[k]
+                    del metric_dict[k]
 
     def count_bytes(self) -> int:
         """Return number of Bytes stored in this object."""

@@ -23,11 +23,11 @@ from typing import TypeVar, Union, cast
 
 from ..logger import log
 from .configsrecord import ConfigsRecord
-from .metricrecord import MetricsRecord
+from .metricrecord import MetricRecord
 from .parametersrecord import ParametersRecord
 from .typeddict import TypedDict
 
-RecordType = Union[ParametersRecord, MetricsRecord, ConfigsRecord]
+RecordType = Union[ParametersRecord, MetricRecord, ConfigsRecord]
 
 T = TypeVar("T")
 
@@ -41,9 +41,9 @@ def _check_key(key: str) -> None:
 
 
 def _check_value(value: RecordType) -> None:
-    if not isinstance(value, (ParametersRecord, MetricsRecord, ConfigsRecord)):
+    if not isinstance(value, (ParametersRecord, MetricRecord, ConfigsRecord)):
         raise TypeError(
-            f"Expected `{ParametersRecord.__name__}`, `{MetricsRecord.__name__}`, "
+            f"Expected `{ParametersRecord.__name__}`, `{MetricRecord.__name__}`, "
             f"or `{ConfigsRecord.__name__}` but received "
             f"`{type(value).__name__}` for the value."
         )
@@ -59,7 +59,7 @@ class _SyncedDict(TypedDict[str, T]):
 
     def __init__(self, ref_recorddict: RecordDict, allowed_type: type[T]) -> None:
         if not issubclass(
-            allowed_type, (ParametersRecord, MetricsRecord, ConfigsRecord)
+            allowed_type, (ParametersRecord, MetricRecord, ConfigsRecord)
         ):
             raise TypeError(f"{allowed_type} is not a valid type.")
         super().__init__(_check_key, self.check_value)
@@ -96,8 +96,8 @@ class RecordDict(TypedDict[str, RecordType]):
     parameters_records : Optional[Dict[str, ParametersRecord]]
         A dictionary of :code:`ParametersRecords` that can be used to record
         and communicate model parameters and high-dimensional arrays.
-    metrics_records : Optional[Dict[str, MetricsRecord]]
-        A dictionary of :code:`MetricsRecord` that can be used to record
+    metric_records : Optional[Dict[str, MetricRecord]]
+        A dictionary of :code:`MetricRecord` that can be used to record
         and communicate scalar-valued metrics that are the result of performing
         and action, for example, by a :code:`ClientApp`.
     configs_records : Optional[Dict[str, ConfigsRecord]]
@@ -116,7 +116,7 @@ class RecordDict(TypedDict[str, RecordType]):
     Let's see an example.
 
     >>>  from flwr.common import RecordDict
-    >>>  from flwr.common import ConfigsRecord, MetricsRecord, ParametersRecord
+    >>>  from flwr.common import ConfigsRecord, MetricRecord, ParametersRecord
     >>>
     >>>  # Let's begin with an empty record
     >>>  my_records = RecordDict()
@@ -126,8 +126,8 @@ class RecordDict(TypedDict[str, RecordType]):
     >>>  # Adding it to the record_set would look like this
     >>>  my_records["my_config"] = c_record
     >>>
-    >>>  # We can create a MetricsRecord following a similar process
-    >>>  m_record = MetricsRecord({"accuracy": 0.93, "losses": [0.23, 0.1]})
+    >>>  # We can create a MetricRecord following a similar process
+    >>>  m_record = MetricRecord({"accuracy": 0.93, "losses": [0.23, 0.1]})
     >>>  # Adding it to the record_set would look like this
     >>>  my_records["my_metrics"] = m_record
 
@@ -152,7 +152,7 @@ class RecordDict(TypedDict[str, RecordType]):
 
     For additional examples on how to construct each of the records types shown
     above, please refer to the documentation for :code:`ConfigsRecord`,
-    :code:`MetricsRecord` and :code:`ParametersRecord`.
+    :code:`MetricRecord` and :code:`ParametersRecord`.
     """
 
     def __init__(self, records: dict[str, RecordType] | None = None) -> None:
@@ -171,11 +171,11 @@ class RecordDict(TypedDict[str, RecordType]):
         return synced_dict
 
     @property
-    def metrics_records(self) -> TypedDict[str, MetricsRecord]:
-        """Dictionary holding only MetricsRecord instances."""
-        synced_dict = _SyncedDict[MetricsRecord](self, MetricsRecord)
+    def metric_records(self) -> TypedDict[str, MetricRecord]:
+        """Dictionary holding only MetricRecord instances."""
+        synced_dict = _SyncedDict[MetricRecord](self, MetricRecord)
         for key, record in self.items():
-            if isinstance(record, MetricsRecord):
+            if isinstance(record, MetricRecord):
                 synced_dict[key] = record
         return synced_dict
 
@@ -190,7 +190,7 @@ class RecordDict(TypedDict[str, RecordType]):
 
     def __repr__(self) -> str:
         """Return a string representation of this instance."""
-        flds = ("parameters_records", "metrics_records", "configs_records")
+        flds = ("parameters_records", "metric_records", "configs_records")
         fld_views = [f"{fld}={dict(getattr(self, fld))!r}" for fld in flds]
         view = indent(",\n".join(fld_views), "  ")
         return f"{self.__class__.__qualname__}(\n{view}\n)"

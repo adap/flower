@@ -19,7 +19,7 @@ from collections import OrderedDict
 from collections.abc import Mapping
 from typing import Union, cast, get_args
 
-from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordDict
+from . import Array, ConfigsRecord, MetricRecord, ParametersRecord, RecordDict
 from .typing import (
     Code,
     ConfigsRecordValues,
@@ -31,7 +31,7 @@ from .typing import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
-    MetricsRecordValues,
+    MetricRecordValues,
     Parameters,
     Scalar,
     Status,
@@ -126,7 +126,7 @@ def parameters_to_parametersrecord(
 
 
 def _check_mapping_from_recordscalartype_to_scalar(
-    record_data: Mapping[str, Union[ConfigsRecordValues, MetricsRecordValues]]
+    record_data: Mapping[str, Union[ConfigsRecordValues, MetricRecordValues]]
 ) -> dict[str, Scalar]:
     """Check mapping `common.*RecordValues` into `common.Scalar` is possible."""
     for value in record_data.values():
@@ -186,7 +186,7 @@ def _embed_status_into_recorddict(
         "message": status.message,
     }
     # we add it to a `ConfigsRecord`` because the `status.message`` is a string
-    # and `str` values aren't supported in `MetricsRecords`
+    # and `str` values aren't supported in `MetricRecords`
     recorddict.configs_records[f"{res_str}.status"] = ConfigsRecord(status_dict)
     return recorddict
 
@@ -221,7 +221,7 @@ def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
     )
 
     num_examples = cast(
-        int, recorddict.metrics_records[f"{ins_str}.num_examples"]["num_examples"]
+        int, recorddict.metric_records[f"{ins_str}.num_examples"]["num_examples"]
     )
     configs_record = recorddict.configs_records[f"{ins_str}.metrics"]
     # pylint: disable-next=protected-access
@@ -242,7 +242,7 @@ def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
     recorddict.configs_records[f"{res_str}.metrics"] = ConfigsRecord(
         fitres.metrics  # type: ignore
     )
-    recorddict.metrics_records[f"{res_str}.num_examples"] = MetricsRecord(
+    recorddict.metric_records[f"{res_str}.num_examples"] = MetricRecord(
         {"num_examples": fitres.num_examples},
     )
     recorddict.parameters_records[f"{res_str}.parameters"] = (
@@ -278,10 +278,10 @@ def recorddict_to_evaluateres(recorddict: RecordDict) -> EvaluateRes:
     """Derive EvaluateRes from a RecordDict object."""
     ins_str = "evaluateres"
 
-    loss = cast(int, recorddict.metrics_records[f"{ins_str}.loss"]["loss"])
+    loss = cast(int, recorddict.metric_records[f"{ins_str}.loss"]["loss"])
 
     num_examples = cast(
-        int, recorddict.metrics_records[f"{ins_str}.num_examples"]["num_examples"]
+        int, recorddict.metric_records[f"{ins_str}.num_examples"]["num_examples"]
     )
     configs_record = recorddict.configs_records[f"{ins_str}.metrics"]
 
@@ -300,12 +300,12 @@ def evaluateres_to_recorddict(evaluateres: EvaluateRes) -> RecordDict:
 
     res_str = "evaluateres"
     # loss
-    recorddict.metrics_records[f"{res_str}.loss"] = MetricsRecord(
+    recorddict.metric_records[f"{res_str}.loss"] = MetricRecord(
         {"loss": evaluateres.loss},
     )
 
     # num_examples
-    recorddict.metrics_records[f"{res_str}.num_examples"] = MetricsRecord(
+    recorddict.metric_records[f"{res_str}.num_examples"] = MetricRecord(
         {"num_examples": evaluateres.num_examples},
     )
 
