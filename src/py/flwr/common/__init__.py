@@ -33,6 +33,7 @@ from .parameter import parameters_to_ndarrays as parameters_to_ndarrays
 from .record import Array as Array
 from .record import ArrayRecord as ArrayRecord
 from .record import ConfigsRecord as ConfigsRecord
+from .record import MetricRecord as MetricRecord
 from .record import MetricsRecord as MetricsRecord
 from .record import ParametersRecord as ParametersRecord
 from .record import RecordDict as RecordDict
@@ -53,9 +54,9 @@ from .typing import GetParametersIns as GetParametersIns
 from .typing import GetParametersRes as GetParametersRes
 from .typing import GetPropertiesIns as GetPropertiesIns
 from .typing import GetPropertiesRes as GetPropertiesRes
+from .typing import MetricRecordValues as MetricRecordValues
 from .typing import Metrics as Metrics
 from .typing import MetricsAggregationFn as MetricsAggregationFn
-from .typing import MetricsRecordValues as MetricsRecordValues
 from .typing import NDArray as NDArray
 from .typing import NDArrays as NDArrays
 from .typing import Parameters as Parameters
@@ -91,10 +92,11 @@ __all__ = [
     "MessageType",
     "MessageTypeLegacy",
     "Metadata",
+    "MetricRecord",
+    "MetricRecordValues",
     "Metrics",
     "MetricsAggregationFn",
     "MetricsRecord",
-    "MetricsRecordValues",
     "NDArray",
     "NDArrays",
     "Parameters",

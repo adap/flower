@@ -25,7 +25,7 @@ from flwr.common import (
     Context,
     Message,
     Metadata,
-    MetricsRecord,
+    MetricRecord,
     RecordDict,
     now,
 )
@@ -39,10 +39,10 @@ COUNTER = "counter"
 
 def _increment_context_counter(context: Context) -> None:
     # Read from context
-    current_counter = cast(int, context.state.metrics_records[METRIC][COUNTER])
+    current_counter = cast(int, context.state.metric_records[METRIC][COUNTER])
     # update and override context
     current_counter += 1
-    context.state.metrics_records[METRIC] = MetricsRecord({COUNTER: current_counter})
+    context.state.metric_records[METRIC] = MetricRecord({COUNTER: current_counter})
 
 
 def make_mock_mod(name: str, footprint: list[str]) -> Mod:
@@ -106,7 +106,7 @@ class TestMakeApp(unittest.TestCase):
         mock_mods = [make_mock_mod(name, footprint) for name in mock_mod_names]
 
         state = RecordDict()
-        state.metrics_records[METRIC] = MetricsRecord({COUNTER: 0.0})
+        state.metric_records[METRIC] = MetricRecord({COUNTER: 0.0})
         context = Context(
             run_id=1, node_id=0, node_config={}, state=state, run_config={}
         )
@@ -127,7 +127,7 @@ class TestMakeApp(unittest.TestCase):
             "".join(out_message.content.configs_records.keys()),
             "".join(reversed(trace)),
         )
-        self.assertEqual(state.metrics_records[METRIC][COUNTER], 2 * len(mock_mods))
+        self.assertEqual(state.metric_records[METRIC][COUNTER], 2 * len(mock_mods))
 
     def test_filter(self) -> None:
         """Test if a mod can filter incoming Message."""
