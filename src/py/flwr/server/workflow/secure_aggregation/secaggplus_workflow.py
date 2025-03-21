@@ -366,8 +366,8 @@ class SecAggPlusWorkflow:
         state.sampled_node_ids = state.active_node_ids
 
         # Send setup configuration to clients
-        cfgs_record = ConfigRecord(sa_params_dict)  # type: ignore
-        content = RecordDict({RECORD_KEY_CONFIGS: cfgs_record})
+        cfg_record = ConfigRecord(sa_params_dict)  # type: ignore
+        content = RecordDict({RECORD_KEY_CONFIGS: cfg_record})
 
         def make(nid: int) -> Message:
             return Message(
@@ -413,11 +413,11 @@ class SecAggPlusWorkflow:
 
         def make(nid: int) -> Message:
             neighbours = state.nid_to_neighbours[nid] & state.active_node_ids
-            cfgs_record = ConfigRecord(
+            cfg_record = ConfigRecord(
                 {str(nid): state.nid_to_publickeys[nid] for nid in neighbours}
             )
-            cfgs_record[Key.STAGE] = Stage.SHARE_KEYS
-            content = RecordDict({RECORD_KEY_CONFIGS: cfgs_record})
+            cfg_record[Key.STAGE] = Stage.SHARE_KEYS
+            content = RecordDict({RECORD_KEY_CONFIGS: cfg_record})
             return Message(
                 content=content,
                 dst_node_id=nid,
@@ -483,14 +483,14 @@ class SecAggPlusWorkflow:
 
         # Send secret key shares to clients (plus FitIns) and collect masked vectors
         def make(nid: int) -> Message:
-            cfgs_dict = {
+            cfg_dict = {
                 Key.STAGE: Stage.COLLECT_MASKED_VECTORS,
                 Key.CIPHERTEXT_LIST: state.forward_ciphertexts[nid],
                 Key.SOURCE_LIST: state.forward_srcs[nid],
             }
-            cfgs_record = ConfigRecord(cfgs_dict)  # type: ignore
+            cfg_record = ConfigRecord(cfg_dict)  # type: ignore
             content = state.nid_to_fitins[nid]
-            content.config_records[RECORD_KEY_CONFIGS] = cfgs_record
+            content.config_records[RECORD_KEY_CONFIGS] = cfg_record
             return Message(
                 content=content,
                 dst_node_id=nid,
@@ -560,13 +560,13 @@ class SecAggPlusWorkflow:
         # Send secure IDs of active and dead clients and collect key shares from clients
         def make(nid: int) -> Message:
             neighbours = state.nid_to_neighbours[nid]
-            cfgs_dict = {
+            cfg_dict = {
                 Key.STAGE: Stage.UNMASK,
                 Key.ACTIVE_NODE_ID_LIST: list(neighbours & active_nids),
                 Key.DEAD_NODE_ID_LIST: list(neighbours & dead_nids),
             }
-            cfgs_record = ConfigRecord(cfgs_dict)  # type: ignore
-            content = RecordDict({RECORD_KEY_CONFIGS: cfgs_record})
+            cfg_record = ConfigRecord(cfg_dict)  # type: ignore
+            content = RecordDict({RECORD_KEY_CONFIGS: cfg_record})
             return Message(
                 content=content,
                 dst_node_id=nid,

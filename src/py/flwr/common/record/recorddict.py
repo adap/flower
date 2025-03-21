@@ -228,6 +228,7 @@ class RecordSet(RecordDict):
     """
 
     _warning_logged = False
+    _warning_logged_configs = False
 
     def __init__(self, records: dict[str, RecordType] | None = None) -> None:
         if not RecordSet._warning_logged:
@@ -239,3 +240,19 @@ class RecordSet(RecordDict):
                 "Please update your code accordingly.",
             )
         super().__init__(records)
+
+    @property
+    def configs_records(self) -> TypedDict[str, ConfigRecord]:
+        """Deprecated property.
+
+        Use ``config_records`` instead.
+        """
+        if not RecordSet._warning_logged_configs:
+            RecordSet._warning_logged_configs = True
+            log(
+                WARN,
+                "`RecordSet.configs_records` has been deprecated "
+                "and will be removed in a future release. Please use "
+                "`RecordDict.config_records` instead.",
+            )
+        return self.config_records
