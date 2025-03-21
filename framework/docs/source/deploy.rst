@@ -1,5 +1,5 @@
-Deploy using the Flower Deployment Engine
-=========================================
+Deploy
+======
 
 How-to guides
 -------------

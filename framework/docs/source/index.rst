@@ -73,43 +73,49 @@ Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart
 ..
     :width: 80%
 
-How-to Guides
-~~~~~~~~~~~~~
-
-Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
+Build a Flower app
+~~~~~~~~~~~~~~~~~~
 
 .. toctree::
     :titlesonly:
-    :caption: How-to Guides
 
-    Build <build>
-    Simulate <simulate>
-    Deploy <deploy>
-    Contribute <contribute>
+    build
 
-Explanations
-~~~~~~~~~~~~
-
-Understanding-oriented concept guides explain and discuss key topics and underlying
-ideas behind Flower and collaborative AI.
+Simulate using the Flower Simulation Engine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. toctree::
-    :maxdepth: 1
-    :caption: Explanations
+    :titlesonly:
 
-    explanation-federated-evaluation
-    explanation-differential-privacy
-    explanation-flower-architecture
+    simulate
 
-References
-~~~~~~~~~~
+Deploy using the Flower Deployment Engine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. toctree::
+    :titlesonly:
+
+    deploy
+
+Reference
+~~~~~~~~~
 
 .. toctree::
     :titlesonly:
     :maxdepth: 2
-    :caption: References
 
     reference
+
+Contribute
+~~~~~~~~~~
+
+The Flower community welcomes contributions. The following docs are intended to help
+along the way.
+
+.. toctree::
+    :titlesonly:
+
+    contribute
 
 ..
     Indices and tables

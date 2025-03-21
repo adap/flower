@@ -1,5 +1,5 @@
-Build a Flower app
-==================
+Build
+=====
 
 How-to guides
 -------------

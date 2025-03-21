@@ -1,5 +1,5 @@
-Simulate using the Flower Simulation Engine
-===========================================
+Simulate
+========
 
 How-to guides
 -------------
