@@ -166,7 +166,8 @@ def test_client_without_get_properties() -> None:
             dst_node_id=0,
             reply_to_message_id=message.metadata.message_id,
             created_at=now().timestamp(),
-            ttl=actual_msg.metadata.ttl,  # computed based on [message].create_reply()
+            # Computed based on Message(..., reply_to=[message])
+            ttl=actual_msg.metadata.ttl,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=expected_rs,
@@ -234,7 +235,8 @@ def test_client_with_get_properties() -> None:
             dst_node_id=0,
             reply_to_message_id=message.metadata.message_id,
             created_at=now().timestamp(),
-            ttl=actual_msg.metadata.ttl,  # computed based on [message].create_reply()
+            # Computed based on Message(..., reply_to=[message])
+            ttl=actual_msg.metadata.ttl,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=expected_rs,

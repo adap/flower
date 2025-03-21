@@ -19,14 +19,13 @@ import unittest
 import unittest.mock
 from collections.abc import Iterable
 from typing import Any, Callable, Optional, Union, cast
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import numpy as np
 
 import flwr
-from flwr.common import Error, Message, Metadata, RecordDict, now
+from flwr.common import Error, Message, RecordDict
 from flwr.common import recorddict_compat as compat
-from flwr.common.message import make_message
 from flwr.common.typing import (
     Code,
     Config,
@@ -62,13 +61,21 @@ class GridClientProxyTestCase(unittest.TestCase):
         """Set up mocks for tests."""
         grid = Mock()
         grid.get_node_ids.return_value = [1]
-        grid.create_message.side_effect = self._create_message_dummy
         client = GridClientProxy(node_id=NODE_ID, grid=grid, run_id=61016)
 
+        self.patcher = patch(
+            "flwr.server.compat.grid_client_proxy.Message",
+            side_effect=self._mock_message_init,
+        )
         self.grid = grid
         self.client = client
         self.created_msg: Optional[Message] = None
         self.called_times: int = 0
+        self.patcher.start()
+
+    def tearDown(self) -> None:
+        """Tear down mocks."""
+        self.patcher.stop()
 
     def test_get_properties(self) -> None:
         """Test positive case."""
@@ -199,32 +206,22 @@ class GridClientProxyTestCase(unittest.TestCase):
         )
         self._common_assertions(ins)
 
-    def _create_message_dummy(  # pylint: disable=R0913,too-many-positional-arguments
+    def _mock_message_init(  # pylint: disable=R0913,too-many-positional-arguments
         self,
         content: RecordDict,
-        message_type: str,
         dst_node_id: int,
-        group_id: str,
+        message_type: str,
         ttl: Optional[float] = None,
+        group_id: Optional[str] = None,
     ) -> Message:
         """Create a new message.
 
         This is a method for the Mock object.
         """
         self.called_times += 1
-        ttl_ = 123456 if ttl is None else ttl
-        metadata = Metadata(
-            run_id=RUN_ID,
-            message_id="",  # Will be set by the server
-            src_node_id=0,
-            dst_node_id=dst_node_id,
-            reply_to_message_id="",
-            group_id=group_id,
-            created_at=now().timestamp(),
-            ttl=ttl_,
-            message_type=message_type,
+        self.created_msg = Message(
+            content, dst_node_id, message_type, ttl=ttl, group_id=group_id
         )
-        self.created_msg = make_message(metadata=metadata, content=content)
         return self.created_msg
 
     def _exec_send_and_receive(
