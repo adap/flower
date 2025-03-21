@@ -42,6 +42,7 @@ from flwr.common.message import make_message
 from flwr.common.recorddict_compat import getpropertiesins_to_recorddict
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
+from flwr.simulation.ray_transport.ray_actor import pool_size_from_resources
 
 
 class DummyClient(NumPyClient):
@@ -201,3 +202,35 @@ class TestRayBackend(TestCase):
         nodes = ray.nodes()
 
         assert nodes[0]["Resources"]["CPU"] == backend_config_2["init_args"]["num_cpus"]
+
+    def test_case_with_no_cpu_resources_on_node(self) -> None:
+        """Test mixed environment with zero and non-zero CPU nodes."""
+        try:
+            # Start Ray with head node (zero CPU)
+            ray.init(num_cpus=0)
+
+            # Mock ray.nodes() to return both head node and worker node
+            original_nodes = ray.nodes
+
+            head_node = ray.nodes()[0].copy()
+
+            ray.nodes = lambda: [
+                head_node,  # Head node initialized with no cpu
+                {"Resources": {"CPU": 8}},  # Worker node with 8 CPUs
+            ]
+
+            try:
+                # Test the pool size calculation
+                client_resources: dict[str, Union[int, float]] = {
+                    "num_cpus": 2,
+                    "num_gpus": 0,
+                }
+                pool_size = pool_size_from_resources(client_resources)
+                # Should calculate based on the worker node (8 CPUs)
+                self.assertEqual(pool_size, 4)  # 8 / 2 CPUs required for each task
+            finally:
+                # Restore original functions
+                ray.nodes = original_nodes
+
+        finally:
+            ray.shutdown()

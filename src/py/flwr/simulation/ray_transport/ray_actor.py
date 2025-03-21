@@ -105,8 +105,10 @@ def pool_size_from_resources(client_resources: dict[str, Union[int, float]]) -> 
         if not node_resources:
             continue
 
-        num_cpus = node_resources["CPU"]
-        num_gpus = node_resources.get("GPU", 0)  # There might not be GPU
+        # Fallback to zero when resource quantity is not configured on the ray node
+        # e.g.: node without GPU; head node set up not to run tasks (zero resources)
+        num_cpus = node_resources.get("CPU", 0)
+        num_gpus = node_resources.get("GPU", 0)
         num_actors = int(num_cpus / client_resources["num_cpus"])
 
         # If a GPU is present and client resources do require one
