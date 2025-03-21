@@ -56,4 +56,4 @@ def query(msg: Message, context: Context):
 
     reply_content = RecordDict({"query_results": MetricsRecord(metrics)})
 
-    return msg.create_reply(reply_content)
+    return Message(reply_content, reply_to=msg)

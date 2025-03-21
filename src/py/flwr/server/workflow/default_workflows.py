@@ -28,6 +28,7 @@ from flwr.common import (
     EvaluateRes,
     FitRes,
     GetParametersIns,
+    Message,
     ParametersRecord,
     log,
 )
@@ -140,10 +141,10 @@ def default_init_params_workflow(grid: Grid, context: Context) -> None:
         content = compat.getparametersins_to_recorddict(GetParametersIns({}))
         messages = grid.send_and_receive(
             [
-                grid.create_message(
+                Message(
                     content=content,
-                    message_type=MessageTypeLegacy.GET_PARAMETERS,
                     dst_node_id=random_client.node_id,
+                    message_type=MessageTypeLegacy.GET_PARAMETERS,
                     group_id="0",
                 )
             ]
@@ -253,10 +254,10 @@ def default_fit_workflow(grid: Grid, context: Context) -> None:  # pylint: disab
 
     # Build out messages
     out_messages = [
-        grid.create_message(
+        Message(
             content=compat.fitins_to_recorddict(fitins, True),
-            message_type=MessageType.TRAIN,
             dst_node_id=proxy.node_id,
+            message_type=MessageType.TRAIN,
             group_id=str(current_round),
         )
         for proxy, fitins in client_instructions
@@ -339,10 +340,10 @@ def default_evaluate_workflow(grid: Grid, context: Context) -> None:
 
     # Build out messages
     out_messages = [
-        grid.create_message(
+        Message(
             content=compat.evaluateins_to_recorddict(evalins, True),
-            message_type=MessageType.EVALUATE,
             dst_node_id=proxy.node_id,
+            message_type=MessageType.EVALUATE,
             group_id=str(current_round),
         )
         for proxy, evalins in client_instructions
