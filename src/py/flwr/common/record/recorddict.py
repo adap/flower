@@ -144,6 +144,8 @@ class RecordDict(TypedDict[str, RecordType]):
     :code:`MetricsRecord` and :code:`ArrayRecord`.
     """
 
+    _warning_logged_parametersrecord = False
+
     def __init__(self, records: dict[str, RecordType] | None = None) -> None:
         super().__init__(_check_key, _check_value)
         if records is not None:
@@ -165,9 +167,8 @@ class RecordDict(TypedDict[str, RecordType]):
 
         Use ``array_records`` instead.
         """
-        global _warning_logged_parametersrecord
-        if not _warning_logged_parametersrecord:
-            _warning_logged_parametersrecord = True
+        if not RecordDict._warning_logged_parametersrecord:
+            RecordDict._warning_logged_parametersrecord = True
             log(
                 WARN,
                 "`RecordDict.parameters_records` has been renamed to "
