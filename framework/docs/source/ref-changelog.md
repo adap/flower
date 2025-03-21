@@ -1,6 +1,140 @@
 # Changelog
 
-## Unreleased
+## v1.17.0 (2025-03-24)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Aline Almeida`, `Charles Beauville`, `Chong Shen Ng`, `Daniel Hinjos García`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Robert Steiner`, `Yan Gao` <!---TOKEN_v1.17.0-->
+
+### Custom message handler
+- **feat(framework) Enable custom message handler** ([#5093](https://github.com/adap/flower/pull/5093))
+
+### One-liner conversion
+- **feat(framework) Allow one-liner conversion for** `ParametersRecord` ([#4922](https://github.com/adap/flower/pull/4922))
+- **feat(framework) Allow passing** `torch.Tensor` **to** `Array` **constructor** ([#4920](https://github.com/adap/flower/pull/4920))
+
+### Revamp `Message` constructor
+- **feat(framework) Revamp** `Message` **constructor** ([#5137](https://github.com/adap/flower/pull/5137))
+- **refactor(framework) Update all** `Message` **-related usages accordingly** ([#5153](https://github.com/adap/flower/pull/5153))
+
+### Rename components
+
+- **refactor(framework) Rename** `RecordSet` **to** `RecordDict` ([#5140](https://github.com/adap/flower/pull/5140))
+- **refactor(framework) Rename all** `Driver` **instances to** `Grid` ([#5133](https://github.com/adap/flower/pull/5133))
+- **refactor(framework) Add backwards compatibility for** `Driver` **and deprecation notice** ([#5139](https://github.com/adap/flower/pull/5139))
+- **refactor(framework) Rename** `driver/` **to** `grid/` **and** `driver.py` **to** `grid.py` ([#5129](https://github.com/adap/flower/pull/5129))
+
+### Stable low-level Message API
+- **feat(framework) Remove preview feature warning in** `Message API` ([#5120](https://github.com/adap/flower/pull/5120))
+
+### Node availability check
+- **feat(framework) Add node availability check** ([#4968](https://github.com/adap/flower/pull/4968))
+
+### Event log
+- **feat(framework) Add try-obtain** `FleetServicer` **event log plugin** ([#4998](https://github.com/adap/flower/pull/4998))
+- **feat(framework) Add** `FleetServicer` **log interceptor** ([#4997](https://github.com/adap/flower/pull/4997))
+- **feat(framework) Add** `ExecServicer` **event log interceptor** ([#4951](https://github.com/adap/flower/pull/4951))
+- **feat(framework) Add try-obtain** `ExecServicer` **event log plugin** ([#4950](https://github.com/adap/flower/pull/4950))
+- **fix(framework) Catch** `BaseException` **in** `EventLogInterceptor` ([#5108](https://github.com/adap/flower/pull/5108))
+
+### Add CareQA medical benchmark
+- **feat(datasets) Add CareQA medical benchmark** ([#4966](https://github.com/adap/flower/pull/4966))
+
+### Documentation improvements
+- **docs(framework) Update Docker Readmes** ([#5079](https://github.com/adap/flower/pull/5079))
+- **docs(:skip) Update Flower Summit 2025 link** ([#5123](https://github.com/adap/flower/pull/5123))
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5066](https://github.com/adap/flower/pull/5066))
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5143](https://github.com/adap/flower/pull/5143))
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5118](https://github.com/adap/flower/pull/5118))
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5148](https://github.com/adap/flower/pull/5148))
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5134](https://github.com/adap/flower/pull/5134))
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5080](https://github.com/adap/flower/pull/5080))
+
+
+- **refactor(examples) Remove** `mlcube` **quickstart example and update redirect** ([#5069](https://github.com/adap/flower/pull/5069))
+- **refactor(examples) Update the** `RecordSet.__init__` **usage in examples** ([#5032](https://github.com/adap/flower/pull/5032))
+  
+
+### Incompatible changes
+
+
+### CI/CD
+- **ci(:skip) Fix CI** ([#5125](https://github.com/adap/flower/pull/5125))
+- **ci(framework) Skip E2E tests when no changes** ([#5062](https://github.com/adap/flower/pull/5062))
+- **ci(framework) Run only on changes** ([#5056](https://github.com/adap/flower/pull/5056))
+- **ci(:skip) Bump versions to** `1.17.0` ([#5048](https://github.com/adap/flower/pull/5048))
+- **ci(framework) Fix conditions** ([#5065](https://github.com/adap/flower/pull/5065))
+- **ci(framework) Skip jobs instead of ignoring them** ([#5061](https://github.com/adap/flower/pull/5061))
+- **ci(:skip) Add** `Unreleased` **header to the changelog** ([#5057](https://github.com/adap/flower/pull/5057))
+- **ci(framework) Skip by steps instead of jobs** ([#5064](https://github.com/adap/flower/pull/5064))
+- **ci(framework) Pin setuptools to 70.3.0** ([#5144](https://github.com/adap/flower/pull/5144))
+
+### Bugfixes
+- **fix(framework) Fix the wrong docstring of** `RecordDict` ([#5155](https://github.com/adap/flower/pull/5155))
+- **fix(framework) Update doc string of FlowerClient in FlowerTune template** ([#5076](https://github.com/adap/flower/pull/5076))
+TODO: Maybe need to mention this fix
+- **fix(framework) Handle ray nodes with no CPU resources** ([#5132](https://github.com/adap/flower/pull/5132))
+
+### General Improvements
+- **refactor(framework) Remove repeated PRs in the changelog** ([#5074](https://github.com/adap/flower/pull/5074))
+- **refactor(framework) Remove TTL warnings in** `driver.create_message` ([#5126](https://github.com/adap/flower/pull/5126))
+- **refactor(framework) Add helpful error message to** `Driver.push/pull_messages` **when gRPC limit is reached** ([#5122](https://github.com/adap/flower/pull/5122))
+- **fix(examples) Fix FedRAG references formatting** ([#5149](https://github.com/adap/flower/pull/5149))
+
+
+
+### TODO DELETE FI PRs
+- **feat(intelligence) Add RAM check** ([#5114](https://github.com/adap/flower/pull/5114))
+- **feat(intelligence) Add Swift tests and CI checks** ([#5041](https://github.com/adap/flower/pull/5041))
+- **feat(intelligence) Add Swift Docs** ([#5068](https://github.com/adap/flower/pull/5068))
+- **feat(intelligence) Improve web-chat example** ([#5082](https://github.com/adap/flower/pull/5082))
+- **feat(intelligence) Add templates and create project** ([#5117](https://github.com/adap/flower/pull/5117))
+- **feat(intelligence) Separate TS and Swift CI** ([#5090](https://github.com/adap/flower/pull/5090))
+- **feat(intelligence) Change typing and add** `Sendable` ([#5099](https://github.com/adap/flower/pull/5099))
+- **feat(intelligence) Add model name caching** ([#5077](https://github.com/adap/flower/pull/5077))
+- **feat(intelligence) Add Swift examples** ([#5081](https://github.com/adap/flower/pull/5081))
+- **docs(intelligence) Add Swift supported models** ([#5104](https://github.com/adap/flower/pull/5104))
+- **docs(intelligence) Add fetchModel explainer** ([#5078](https://github.com/adap/flower/pull/5078))
+- **docs(intelligence) Fix deepseek model link** ([#5105](https://github.com/adap/flower/pull/5105))
+- **docs(intelligence) Add building from source doc** ([#5088](https://github.com/adap/flower/pull/5088))
+- **docs(intelligence) Update project README** ([#5109](https://github.com/adap/flower/pull/5109))
+- **docs(intelligence) Improve TypeScript ref** ([#5072](https://github.com/adap/flower/pull/5072))
+- **docs(intelligence) Update models reference** ([#5156](https://github.com/adap/flower/pull/5156))
+- **docs(intelligence) Add examples to docs** ([#5086](https://github.com/adap/flower/pull/5086))
+- **refactor(intelligence) Improve model name caching** ([#5110](https://github.com/adap/flower/pull/5110))
+- **refactor(intelligence) Bump version to 0.2.0** ([#5052](https://github.com/adap/flower/pull/5052))
+- **ci(intelligence) Set Swift lint to fail on warnings** ([#5102](https://github.com/adap/flower/pull/5102))
+- **ci(intelligence) Bump to 1.7.0 post 1.6.0 release** ([#5142](https://github.com/adap/flower/pull/5142))
+- **ci(intelligence) Bump version to 0.1.5** ([#5096](https://github.com/adap/flower/pull/5096))
+- **ci(intelligence) Update example lock files** ([#5097](https://github.com/adap/flower/pull/5097))
+- **fix(intelligence) Ignore Node dependencies in browsers** ([#5107](https://github.com/adap/flower/pull/5107))
+- **fix(intelligence) Remove context-window-size for webllm** ([#5127](https://github.com/adap/flower/pull/5127))
+- **ci(intelligence) Fix tests** ([#5091](https://github.com/adap/flower/pull/5091))
+- **refactor(intelligence) Improve local error description** ([#5136](https://github.com/adap/flower/pull/5136))
+- **fix(intelligence) Remove crypto from browser ignored deps** ([#5111](https://github.com/adap/flower/pull/5111))
+- **refactor(intelligence) Update README** ([#5141](https://github.com/adap/flower/pull/5141))
+- **refactor(intelligence) Fix browser extension example** ([#5116](https://github.com/adap/flower/pull/5116))
+- **ci(intelligence) Fix open vulnerabilities in example** ([#5071](https://github.com/adap/flower/pull/5071))
+- **ci(intelligence) Update dependencies** ([#5121](https://github.com/adap/flower/pull/5121))
+- **ci(intelligence) Remove unused dependency** ([#5083](https://github.com/adap/flower/pull/5083))
+- **ci(intelligence) Bump versions post 0.1.5 release** ([#5112](https://github.com/adap/flower/pull/5112))
+- **refactor(intelligence) Update the SDK name constant** ([#5087](https://github.com/adap/flower/pull/5087))
+- **refactor(intelligence) Remove unused build config** ([#5085](https://github.com/adap/flower/pull/5085))
+- **refactor(intelligence) Bump version to 0.1.3** ([#5055](https://github.com/adap/flower/pull/5055))
+- **ci(intelligence) Bump version to 0.1.4** ([#5095](https://github.com/adap/flower/pull/5095))
+- **refactor(intelligence) Stop using** `pnpm` **in examples** ([#5131](https://github.com/adap/flower/pull/5131))
+- **refactor(intelligence) Update examples** ([#5060](https://github.com/adap/flower/pull/5060))
+- **refactor(intelligence) Use engine name only in engines** ([#5075](https://github.com/adap/flower/pull/5075))
+- **refactor(intelligence) Revert SDK name change** ([#5092](https://github.com/adap/flower/pull/5092))
+- **ci(intelligence) Add version bumping script** ([#5059](https://github.com/adap/flower/pull/5059))
+- **ci(intelligence) Fix docs CI** ([#5101](https://github.com/adap/flower/pull/5101))
+- **docs(intelligence) Update docs version** ([#5098](https://github.com/adap/flower/pull/5098))
+- **docs(intelligence) Add formatting** ([#5100](https://github.com/adap/flower/pull/5100))
+- **docs(framework) Fix versioned script** ([#5058](https://github.com/adap/flower/pull/5058))
+
+
 
 ## v1.16.0 (2025-03-11)
 
