@@ -52,7 +52,7 @@ class SqliteStateTest(unittest.TestCase):
             "run_id",
             "src_node_id",
             "dst_node_id",
-            "reply_to_message",
+            "reply_to_message_id",
             "created_at",
             "delivered_at",
             "ttl",

@@ -12,26 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower ClientProxy implementation for Driver API."""
+"""Flower ClientProxy implementation using Grid."""
 
 
 from typing import Optional
 
 from flwr import common
-from flwr.common import Message, MessageType, MessageTypeLegacy, RecordSet
-from flwr.common import recordset_compat as compat
+from flwr.common import Message, MessageType, MessageTypeLegacy, RecordDict
+from flwr.common import recorddict_compat as compat
 from flwr.server.client_proxy import ClientProxy
 
-from ..grid.grid import Driver
+from ..grid.grid import Grid
 
 
-class DriverClientProxy(ClientProxy):
-    """Flower client proxy which delegates work using the Driver API."""
+class GridClientProxy(ClientProxy):
+    """Flower client proxy which delegates work using Grid."""
 
-    def __init__(self, node_id: int, driver: Driver, run_id: int):
+    def __init__(self, node_id: int, grid: Grid, run_id: int):
         super().__init__(str(node_id))
         self.node_id = node_id
-        self.driver = driver
+        self.grid = grid
         self.run_id = run_id
 
     def get_properties(
@@ -41,14 +41,14 @@ class DriverClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
-        # Ins to RecordSet
-        out_recordset = compat.getpropertiesins_to_recordset(ins)
+        # Ins to RecordDict
+        out_recorddict = compat.getpropertiesins_to_recorddict(ins)
         # Fetch response
-        in_recordset = self._send_receive_recordset(
-            out_recordset, MessageTypeLegacy.GET_PROPERTIES, timeout, group_id
+        in_recorddict = self._send_receive_recorddict(
+            out_recorddict, MessageTypeLegacy.GET_PROPERTIES, timeout, group_id
         )
-        # RecordSet to Res
-        return compat.recordset_to_getpropertiesres(in_recordset)
+        # RecordDict to Res
+        return compat.recorddict_to_getpropertiesres(in_recorddict)
 
     def get_parameters(
         self,
@@ -57,40 +57,40 @@ class DriverClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        # Ins to RecordSet
-        out_recordset = compat.getparametersins_to_recordset(ins)
+        # Ins to RecordDict
+        out_recorddict = compat.getparametersins_to_recorddict(ins)
         # Fetch response
-        in_recordset = self._send_receive_recordset(
-            out_recordset, MessageTypeLegacy.GET_PARAMETERS, timeout, group_id
+        in_recorddict = self._send_receive_recorddict(
+            out_recorddict, MessageTypeLegacy.GET_PARAMETERS, timeout, group_id
         )
-        # RecordSet to Res
-        return compat.recordset_to_getparametersres(in_recordset, False)
+        # RecordDict to Res
+        return compat.recorddict_to_getparametersres(in_recorddict, False)
 
     def fit(
         self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-        # Ins to RecordSet
-        out_recordset = compat.fitins_to_recordset(ins, keep_input=True)
+        # Ins to RecordDict
+        out_recorddict = compat.fitins_to_recorddict(ins, keep_input=True)
         # Fetch response
-        in_recordset = self._send_receive_recordset(
-            out_recordset, MessageType.TRAIN, timeout, group_id
+        in_recorddict = self._send_receive_recorddict(
+            out_recorddict, MessageType.TRAIN, timeout, group_id
         )
-        # RecordSet to Res
-        return compat.recordset_to_fitres(in_recordset, keep_input=False)
+        # RecordDict to Res
+        return compat.recorddict_to_fitres(in_recorddict, keep_input=False)
 
     def evaluate(
         self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-        # Ins to RecordSet
-        out_recordset = compat.evaluateins_to_recordset(ins, keep_input=True)
+        # Ins to RecordDict
+        out_recorddict = compat.evaluateins_to_recorddict(ins, keep_input=True)
         # Fetch response
-        in_recordset = self._send_receive_recordset(
-            out_recordset, MessageType.EVALUATE, timeout, group_id
+        in_recorddict = self._send_receive_recorddict(
+            out_recorddict, MessageType.EVALUATE, timeout, group_id
         )
-        # RecordSet to Res
-        return compat.recordset_to_evaluateres(in_recordset)
+        # RecordDict to Res
+        return compat.recorddict_to_evaluateres(in_recorddict)
 
     def reconnect(
         self,
@@ -101,17 +101,17 @@ class DriverClientProxy(ClientProxy):
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
 
-    def _send_receive_recordset(
+    def _send_receive_recorddict(
         self,
-        recordset: RecordSet,
+        recorddict: RecordDict,
         message_type: str,
         timeout: Optional[float],
         group_id: Optional[int],
-    ) -> RecordSet:
+    ) -> RecordDict:
 
         # Create message
-        message = self.driver.create_message(
-            content=recordset,
+        message = self.grid.create_message(
+            content=recorddict,
             message_type=message_type,
             dst_node_id=self.node_id,
             group_id=str(group_id) if group_id else "",
@@ -119,7 +119,7 @@ class DriverClientProxy(ClientProxy):
         )
 
         # Send message and wait for reply
-        messages = list(self.driver.send_and_receive(messages=[message]))
+        messages = list(self.grid.send_and_receive(messages=[message]))
 
         # A single reply is expected
         if len(messages) != 1:

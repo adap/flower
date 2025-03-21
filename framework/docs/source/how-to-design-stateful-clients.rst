@@ -19,7 +19,7 @@ Design stateful ClientApps
 
 .. _parametersrecord: ref-api/flwr.common.ParametersRecord.html
 
-.. _recordset: ref-api/flwr.common.RecordSet.html#recordset
+.. _recorddict: ref-api/flwr.common.RecordDict.html#recorddict
 
 By design, ClientApp_ objects are stateless. This means that the ``ClientApp`` object is
 recreated each time a new ``Message`` is to be processed. This behaviour is identical
@@ -255,7 +255,7 @@ example for how to do this.
     # Instantiate model as usual
     model = Net()
 
-    # Save all elements of the state_dict into a single RecordSet
+    # Save all elements of the state_dict into a single RecordDict
     p_record = ParametersRecord()
     for k, v in model.state_dict().items():
         # Convert to NumPy, then to Array. Add to record

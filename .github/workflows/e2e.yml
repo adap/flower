@@ -46,7 +46,9 @@ jobs:
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        run: python -m poetry install
+        run: |
+          python -m poetry install --all-extras
+          python -m pip install -U setuptools==70.3.0
       - name: Build wheel
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./dev/build.sh

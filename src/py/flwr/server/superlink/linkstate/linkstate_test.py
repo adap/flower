@@ -26,7 +26,15 @@ from uuid import UUID
 
 from parameterized import parameterized
 
-from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, Error, RecordSet, now
+from flwr.common import (
+    DEFAULT_TTL,
+    ConfigsRecord,
+    Context,
+    Error,
+    Message,
+    RecordDict,
+    now,
+)
 from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -36,10 +44,9 @@ from flwr.common.serde import message_from_proto, message_to_proto
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
-from flwr.proto.message_pb2 import Message, Metadata
-
-# pylint: disable=E0611
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.message_pb2 import Message as ProtoMessage
+from flwr.proto.message_pb2 import Metadata as ProtoMetadata
+from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
 from flwr.server.superlink.linkstate import (
@@ -334,17 +341,17 @@ class StateTest(unittest.TestCase):
         # Get Message to mark them delivered
         msg_ins_list = state.get_message_ins(node_id=node_id, limit=None)
 
-        # Insert one reply Message and retrive it to mark it as delivered
-        msg_res_0 = msg_ins_list[0].create_error_reply(Error(0))
+        # Insert one reply Message and retrieve it to mark it as delivered
+        msg_res_0 = Message(Error(0), reply_to=msg_ins_list[0])
 
         _ = state.store_message_res(message=msg_res_0)
         retrieved_msg_res_0 = state.get_message_res(
-            message_ids={UUID(msg_res_0.metadata.reply_to_message)}
+            message_ids={UUID(msg_res_0.metadata.reply_to_message_id)}
         )[0]
         assert retrieved_msg_res_0.error.code == 0
 
         # Insert one reply Message, but don't retrieve it
-        msg_res_1 = msg_ins_list[1].create_reply(content=RecordSet())
+        msg_res_1 = Message(RecordDict(), reply_to=msg_ins_list[1])
         _ = state.store_message_res(message=msg_res_1)
 
         # Situation now:
@@ -698,8 +705,8 @@ class StateTest(unittest.TestCase):
         _ = state.store_message_ins(message=msg1)
 
         # Store replies
-        state.store_message_res(msg0.create_reply(content=RecordSet()))
-        state.store_message_res(msg1.create_reply(content=RecordSet()))
+        state.store_message_res(Message(RecordDict(), reply_to=msg0))
+        state.store_message_res(Message(RecordDict(), reply_to=msg1))
 
         # Execute
         num = state.num_message_res()
@@ -754,7 +761,11 @@ class StateTest(unittest.TestCase):
         assert node_public_keys == public_keys
 
     def test_acknowledge_ping(self) -> None:
-        """Test if acknowledge_ping works and if get_nodes return online nodes."""
+        """Test if acknowledge_ping works and get_nodes return online nodes.
+
+        We permit one missed ping (PING_PATIENCE × ping_interval) before marking the
+        node offline, where PING_PATIENCE = 2.
+        """
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
@@ -766,7 +777,11 @@ class StateTest(unittest.TestCase):
 
         # Execute
         current_time = time.time()
-        with patch("time.time", side_effect=lambda: current_time + 50):
+        # Test with current_time + 70s
+        # node_ids[:70] remain online until current_time + PING_PATIENCE * 30s = 60s,
+        # node_ids[70:] remain online until current_time + PING_PATIENCE * 90s = 180s.
+        # As a result, only node_ids[70:] will be returned by get_nodes().
+        with patch("time.time", side_effect=lambda: current_time + 70):
             actual_node_ids = state.get_nodes(run_id)
 
         # Assert
@@ -782,6 +797,63 @@ class StateTest(unittest.TestCase):
 
         # Assert
         assert not is_successful
+
+    def test_node_unavailable_error(self) -> None:
+        """Test if get_message_res return Message containing node unavailable error."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        node_id_0 = state.create_node(ping_interval=10)
+        node_id_1 = state.create_node(ping_interval=10)
+
+        # Run acknowledge ping
+        state.acknowledge_ping(node_id_0, ping_interval=90)
+        state.acknowledge_ping(node_id_1, ping_interval=30)
+
+        # Create and store Messages
+        in_message_0 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id_0,
+                run_id=run_id,
+            )
+        )
+        in_message_1 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id_1,
+                run_id=run_id,
+            )
+        )
+        message_id_0 = state.store_message_ins(in_message_0)
+        message_id_1 = state.store_message_ins(in_message_1)
+        assert message_id_0 is not None and message_id_1 is not None
+
+        # Get Message to mark them delivered
+        state.get_message_ins(node_id=node_id_0, limit=None)
+        state.get_message_ins(node_id=node_id_1, limit=None)
+
+        # Create and store reply Messages
+        res_message_0 = in_message_0.create_reply(content=RecordDict())
+        state.store_message_res(res_message_0)
+
+        # Execute
+        current_time = time.time()
+        # Test with current_time + 100s
+        # node_id_0 remain online until current_time + PING_PATIENCE * 90s = 180s,
+        # node_id_1 remain online until current_time + PING_PATIENCE * 30s = 60s.
+        # As a result, a reply message with NODE_UNAVAILABLE
+        # error will generate for node_id_1.
+        with patch("time.time", side_effect=lambda: current_time + 100):
+            res_message_list = state.get_message_res({message_id_0, message_id_1})
+
+        # Assert
+        assert len(res_message_list) == 2
+        # Note: res_message_list[0] corresponds to node_id_1
+        # due to the order change from get_message_res()
+        err_message = res_message_list[0]
+        assert err_message.has_error()
+        assert err_message.error.code == ErrorCode.NODE_UNAVAILABLE
 
     def test_store_message_res_message_ins_expired(self) -> None:
         """Test behavior of store_message_res when the Message it replies to is
@@ -799,7 +871,7 @@ class StateTest(unittest.TestCase):
         state.store_message_ins(message=msg)
 
         msg_to_reply_to = state.get_message_ins(node_id=node_id, limit=2)[0]
-        reply_msg = msg_to_reply_to.create_reply(content=RecordSet())
+        reply_msg = Message(RecordDict(), reply_to=msg_to_reply_to)
 
         # This patch respresents a very slow communication/ClientApp execution
         # that triggers TTL
@@ -861,7 +933,7 @@ class StateTest(unittest.TestCase):
             msg.metadata.ttl = msg_ins_ttl
             state.store_message_ins(message=msg)
 
-            reply_msg = msg.create_reply(content=RecordSet())
+            reply_msg = Message(RecordDict(), reply_to=msg)
             reply_msg.metadata.created_at = msg_res_created_at
             reply_msg.metadata.ttl = msg_res_ttl
 
@@ -976,7 +1048,7 @@ class StateTest(unittest.TestCase):
         # Fetch ins message
         ins_msg = state.get_message_ins(node_id=node_id, limit=1)[0]
         # Create reply and insert
-        res_msg = ins_msg.create_reply(content=RecordSet())
+        res_msg = Message(RecordDict(), reply_to=ins_msg)
         state.store_message_res(res_msg)
         assert state.num_message_res() == 1
 
@@ -1011,7 +1083,7 @@ class StateTest(unittest.TestCase):
         assert state.num_message_ins() == 1
 
         # Create reply, modify src_node_id and insert
-        res_msg = ins_msg.create_reply(content=RecordSet())
+        res_msg = Message(RecordDict(), reply_to=ins_msg)
         # pylint: disable=W0212
         res_msg.metadata._src_node_id = node_id + 1  # type: ignore
         msg_res_id = state.store_message_res(res_msg)
@@ -1029,7 +1101,7 @@ class StateTest(unittest.TestCase):
             run_id=1,
             node_id=SUPERLINK_NODE_ID,
             node_config={"mock": "mock"},
-            state=RecordSet(),
+            state=RecordDict(),
             run_config={"test": "test"},
         )
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
@@ -1051,7 +1123,7 @@ class StateTest(unittest.TestCase):
             run_id=1,
             node_id=1234,
             node_config={"mock": "mock"},
-            state=RecordSet(),
+            state=RecordDict(),
             run_config={"test": "test"},
         )
 
@@ -1170,10 +1242,10 @@ def create_ins_message(
     src_node_id: int,
     dst_node_id: int,
     run_id: int,
-) -> Message:
+) -> ProtoMessage:
     """Create a Message for testing."""
-    return Message(
-        metadata=Metadata(
+    return ProtoMessage(
+        metadata=ProtoMetadata(
             run_id=run_id,
             message_id="",
             src_node_id=src_node_id,
@@ -1183,7 +1255,7 @@ def create_ins_message(
             message_type="query",
             created_at=now().timestamp(),
         ),
-        content=ProtoRecordSet(parameters={}, metrics={}, configs={}),
+        content=ProtoRecordDict(parameters={}, metrics={}, configs={}),
     )
 
 
@@ -1192,7 +1264,7 @@ def create_res_message(
     dst_node_id: int,
     run_id: int,
     error: Optional[Error] = None,
-) -> Message:
+) -> ProtoMessage:
     """Create a (reply) Message for testing."""
     in_msg_proto = create_ins_message(
         src_node_id=dst_node_id, dst_node_id=src_node_id, run_id=run_id
@@ -1200,9 +1272,9 @@ def create_res_message(
     in_msg = message_from_proto(in_msg_proto)
 
     if error:
-        out_msg = in_msg.create_error_reply(error=error)
+        out_msg = Message(error, reply_to=in_msg)
     else:
-        out_msg = in_msg.create_reply(content=RecordSet())
+        out_msg = Message(RecordDict(), reply_to=in_msg)
 
     return message_to_proto(out_msg)
 

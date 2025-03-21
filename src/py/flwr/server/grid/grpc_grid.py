@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower gRPC Driver."""
+"""Flower gRPC Grid."""
 
 
 import time
@@ -22,13 +22,13 @@ from typing import Optional, cast
 
 import grpc
 
-from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common import Message, RecordDict
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Run
@@ -45,11 +45,11 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
-from .grid import Driver
+from .grid import Grid
 
 ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED = """
 
-[Driver.push_messages] gRPC error occurred:
+[Grid.push_messages] gRPC error occurred:
 
 The 2GB gRPC limit has been reached. Consider reducing the number of messages pushed
 at once, or push messages individually, for example:
@@ -57,13 +57,13 @@ at once, or push messages individually, for example:
 > msgs = [msg1, msg2, msg3]
 > msg_ids = []
 > for msg in msgs:
->     msg_id = driver.push_messages([msg])
+>     msg_id = grid.push_messages([msg])
 >     msg_ids.extend(msg_id)
 """
 
 ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED = """
 
-[Driver.pull_messages] gRPC error occurred:
+[Grid.pull_messages] gRPC error occurred:
 
 The 2GB gRPC limit has been reached. Consider reducing the number of messages pulled
 at once, or pull messages individually, for example:
@@ -71,13 +71,13 @@ at once, or pull messages individually, for example:
 > msgs_ids = [msg_id1, msg_id2, msg_id3]
 > msgs = []
 > for msg_id in msg_ids:
->     msg = driver.pull_messages([msg_id])
+>     msg = grid.pull_messages([msg_id])
 >     msgs.extend(msg)
 """
 
 
-class GrpcDriver(Driver):
-    """`GrpcDriver` provides an interface to the ServerAppIo API.
+class GrpcGrid(Grid):
+    """`GrpcGrid` provides an interface to the ServerAppIo API.
 
     Parameters
     ----------
@@ -101,6 +101,7 @@ class GrpcDriver(Driver):
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
         self._retry_invoker = _make_simple_grpc_retry_invoker()
+        super().__init__()
 
     @property
     def _is_connected(self) -> bool:
@@ -160,18 +161,15 @@ class GrpcDriver(Driver):
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            # Assume self._run being initialized
-            message.metadata.run_id == cast(Run, self._run).run_id
-            and message.metadata.src_node_id == self.node.node_id
-            and message.metadata.message_id == ""
-            and message.metadata.reply_to_message == ""
+            message.metadata.message_id == ""
+            and message.metadata.reply_to_message_id == ""
             and message.metadata.ttl > 0
         ):
             raise ValueError(f"Invalid message: {message}")
 
     def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
-        content: RecordSet,
+        content: RecordDict,
         message_type: str,
         dst_node_id: int,
         group_id: str,
@@ -182,22 +180,15 @@ class GrpcDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        ttl_ = DEFAULT_TTL if ttl is None else ttl
-        metadata = Metadata(
-            run_id=cast(Run, self._run).run_id,
-            message_id="",  # Will be set by the server
-            src_node_id=self.node.node_id,
-            dst_node_id=dst_node_id,
-            reply_to_message="",
-            group_id=group_id,
-            ttl=ttl_,
-            message_type=message_type,
+        warn_deprecated_feature(
+            "`Driver.create_message` / `Grid.create_message` is deprecated."
+            "Use `Message` constructor instead."
         )
-        return Message(metadata=metadata, content=content)
+        return Message(content, dst_node_id, message_type, ttl=ttl, group_id=group_id)
 
     def get_node_ids(self) -> Iterable[int]:
         """Get node IDs."""
-        # Call GrpcDriverStub method
+        # Call GrpcServerAppIoStub method
         res: GetNodesResponse = self._stub.GetNodes(
             GetNodesRequest(run_id=cast(Run, self._run).run_id)
         )
@@ -210,8 +201,12 @@ class GrpcDriver(Driver):
         to the node specified in `dst_node_id`.
         """
         # Construct Messages
+        run_id = cast(Run, self._run).run_id
         message_proto_list: list[ProtoMessage] = []
         for msg in messages:
+            # Populate metadata
+            msg.metadata.__dict__["_run_id"] = run_id
+            msg.metadata.__dict__["_src_node_id"] = self.node.node_id
             # Check message
             self._check_message(msg)
             # Convert to proto
@@ -220,11 +215,9 @@ class GrpcDriver(Driver):
             message_proto_list.append(msg_proto)
 
         try:
-            # Call GrpcDriverStub method
+            # Call GrpcServerAppIoStub method
             res: PushInsMessagesResponse = self._stub.PushMessages(
-                PushInsMessagesRequest(
-                    messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
-                )
+                PushInsMessagesRequest(messages_list=message_proto_list, run_id=run_id)
             )
             if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
                 message_proto_list
@@ -288,7 +281,7 @@ class GrpcDriver(Driver):
             res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
             msg_ids.difference_update(
-                {msg.metadata.reply_to_message for msg in res_msgs}
+                {msg.metadata.reply_to_message_id for msg in res_msgs}
             )
             if len(msg_ids) == 0:
                 break

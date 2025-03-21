@@ -10,7 +10,7 @@ from app_pytorch.task import test as test_fn
 
 
 from flwr.client import ClientApp
-from flwr.common import Context, Message, MetricsRecord, RecordSet
+from flwr.common import Context, Message, MetricsRecord, RecordDict
 from app_pytorch.task import (
     Net,
     pytorch_to_parameter_record,
@@ -37,7 +37,7 @@ def evaluate(msg: Message, context: Context):
 
     # Construct reply
     metrics_record = MetricsRecord({"eval_acc": eval_acc})
-    content = RecordSet({"eval_metrics": metrics_record})
+    content = RecordDict({"eval_metrics": metrics_record})
     return msg.create_reply(content=content)
 
 
@@ -59,7 +59,7 @@ def train(msg: Message, context: Context):
     # Extract state_dict from model and construct reply message
     model_record = pytorch_to_parameter_record(model)
     metrics_record = MetricsRecord({"train_loss": train_loss})
-    content = RecordSet({"model": model_record, "train_metrics": metrics_record})
+    content = RecordDict({"model": model_record, "train_metrics": metrics_record})
     return msg.create_reply(content=content)
 
 

@@ -111,30 +111,31 @@ Flower public API of private packages
 
 We also use this to define the public API of private subpackages. Public, in this
 context, means the API that other ``flwr`` subpackages should use. For example,
-``flwr.server.driver`` is a private subpackage (it's not exported via
+``flwr.server.grid`` is a private subpackage (it's not exported via
 ``src/py/flwr/server/__init__.py``'s ``__all__``).
 
-Still, the private sub-package ``flwr.server.driver`` defines a "public" API using
-``__all__`` in ``src/py/flwr/server/driver/__init__.py``:
+Still, the private sub-package ``flwr.server.grid`` defines a "public" API using
+``__all__`` in ``src/py/flwr/server/grid/__init__.py``:
 
 .. code-block:: python
 
-    from .driver import Driver
-    from .grpc_driver import GrpcDriver
-    from .inmemory_driver import InMemoryDriver
+    from .grid import Driver, Grid
+    from .grpc_grid import GrpcGrid
+    from .inmemory_grid import InMemoryGrid
 
     __all__ = [
         "Driver",
-        "GrpcDriver",
-        "InMemoryDriver",
+        "Grid",
+        "GrpcGrid",
+        "InMemoryGrid",
     ]
 
-The interesting part is that both ``GrpcDriver`` and ``InMemoryDriver`` are never used
-by Flower framework users, only by other parts of the Flower framework codebase. Those
-other parts of the codebase import, for example, ``InMemoryDriver`` using ``from
-flwr.server.driver import InMemoryDriver`` (i.e., the ``InMemoryDriver`` exported via
-``__all__``), not ``from flwr.server.driver.in_memory_driver import InMemoryDriver``
-(``in_memory_driver.py`` is the module containing the actual ``InMemoryDriver`` class
+The interesting part is that both ``GrpcGrid`` and ``InMemoryGrid`` are never used by
+Flower framework users, only by other parts of the Flower framework codebase. Those
+other parts of the codebase import, for example, ``InMemoryGrid`` using ``from
+flwr.server.driver import InMemoryGrid`` (i.e., the ``InMemoryGrid`` exported via
+``__all__``), not ``from flwr.server.driver.in_memory_driver import InMemoryGrid``
+(``in_memory_driver.py`` is the module containing the actual ``InMemoryGrid`` class
 definition).
 
 This is because ``flwr.server.driver`` defines a public interface for other ``flwr``
