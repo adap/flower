@@ -82,9 +82,9 @@ class _SyncedDict(TypedDict[str, T]):
 
 
 class RecordDict(TypedDict[str, RecordType]):
-    """RecordDict stores groups of parameters, metrics and configs.
+    """RecordDict stores groups of arrays, metrics and configs.
 
-    A :class:`RecordDict` is the unified mechanism by which parameters,
+    A :class:`RecordDict` is the unified mechanism by which arrays,
     metrics and configs can be either stored as part of a :class:`Context`
     in your apps or communicated as part of a :class:`Message` between
     your apps.
