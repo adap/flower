@@ -221,7 +221,10 @@ class TestRayBackend(TestCase):
 
             try:
                 # Test the pool size calculation
-                client_resources = {"num_cpus": 2, "num_gpus": 0}
+                client_resources: dict[str, Union[int, float]] = {
+                    "num_cpus": 2,
+                    "num_gpus": 0,
+                }
                 pool_size = pool_size_from_resources(client_resources)
                 # Should calculate based on the worker node (8 CPUs)
                 self.assertEqual(pool_size, 4)  # 8 / 2 CPUs required for each task
