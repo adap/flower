@@ -33,6 +33,7 @@ from .parameter import parameters_to_ndarrays as parameters_to_ndarrays
 from .record import Array as Array
 from .record import ArrayRecord as ArrayRecord
 from .record import ConfigRecord as ConfigRecord
+from .record import ConfigsRecord as ConfigsRecord
 from .record import MetricRecord as MetricRecord
 from .record import MetricsRecord as MetricsRecord
 from .record import ParametersRecord as ParametersRecord
@@ -74,6 +75,7 @@ __all__ = [
     "Config",
     "ConfigRecord",
     "ConfigRecordValues",
+    "ConfigsRecord",
     "Context",
     "DEFAULT_TTL",
     "DisconnectRes",

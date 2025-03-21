@@ -15,10 +15,12 @@
 """ConfigRecord."""
 
 
+from logging import WARN
 from typing import Optional, get_args
 
 from flwr.common.typing import ConfigRecordValues, ConfigScalar
 
+from ..logger import log
 from .typeddict import TypedDict
 
 
@@ -161,3 +163,47 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues]):
             num_bytes += len(k)
 
         return num_bytes
+
+
+class ConfigsRecord(ConfigRecord):
+    """Deprecated class ``ConfigsRecord``, use ``ConfigRecord`` instead.
+
+    This class exists solely for backward compatibility with legacy
+    code that previously used ``ConfigsRecord``. It has been renamed
+    to ``ConfigRecord``.
+
+    .. warning::
+        ``ConfigsRecord`` is deprecated and will be removed in a future release.
+        Use ``ConfigRecord`` instead.
+
+    Examples
+    --------
+    Legacy (deprecated) usage::
+
+        from flwr.common import ConfigsRecord
+
+        record = ConfigsRecord()
+
+    Updated usage::
+
+        from flwr.common import ConfigRecord
+
+        record = ConfigRecord()
+    """
+
+    _warning_logged = False
+
+    def __init__(
+        self,
+        metric_dict: Optional[dict[str, ConfigRecordValues]] = None,
+        keep_input: bool = True,
+    ):
+        if not ConfigsRecord._warning_logged:
+            ConfigsRecord._warning_logged = True
+            log(
+                WARN,
+                "The `ConfigsRecord` class has been renamed to `ConfigRecord`. "
+                "Support for `ConfigsRecord` will be removed in a future release. "
+                "Please update your code accordingly.",
+            )
+        super().__init__(metric_dict, keep_input)
