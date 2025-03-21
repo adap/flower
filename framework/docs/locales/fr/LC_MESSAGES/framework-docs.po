@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-20 00:32+0000\n"
+"POT-Creation-Date: 2025-03-21 00:32+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -10469,6 +10469,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.Parameters.rst:15
 #: ../../source/ref-api/flwr.common.ParametersRecord.rst:15
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:15
+#: ../../source/ref-api/flwr.common.RecordDict.rst:15
 #: ../../source/ref-api/flwr.common.RecordSet.rst:15
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:15
 #: ../../source/ref-api/flwr.common.Status.rst:15
@@ -10584,7 +10585,7 @@ msgstr ""
 #: flwr.common.record.metricsrecord.MetricsRecord
 #: flwr.common.record.parametersrecord.Array
 #: flwr.common.record.parametersrecord.ParametersRecord
-#: flwr.common.record.recordset.RecordSet flwr.server.app.start_server
+#: flwr.common.record.recorddict.RecordDict flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.register
 #: flwr.server.client_manager.ClientManager.unregister
 #: flwr.server.client_manager.SimpleClientManager.register
@@ -10766,7 +10767,8 @@ msgstr ""
 #: flwr.common.record.metricsrecord.MetricsRecord:19
 #: flwr.common.record.parametersrecord.Array:35
 #: flwr.common.record.parametersrecord.ParametersRecord:35
-#: flwr.common.record.recordset.RecordSet:22 flwr.server.app.start_server:46
+#: flwr.common.record.recorddict.RecordDict:22
+#: flwr.common.record.recorddict.RecordSet:12 flwr.server.app.start_server:46
 #: flwr.server.grid.grid.Driver:14 flwr.server.server_app.ServerApp:4
 #: flwr.server.server_app.ServerApp.lifespan:7
 #: flwr.server.server_app.ServerApp.main:4
@@ -11494,51 +11496,51 @@ msgstr ""
 msgid "Convert parameters object to NumPy ndarrays."
 msgstr "Convertit l'objet des paramètres en ndarrays NumPy."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Array <flwr.common.Array>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.record.parametersrecord.Array:1 of
 msgid "Array type."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 ":py:obj:`ClientMessage <flwr.common.ClientMessage>`\\ "
 "\\(\\[get\\_properties\\_res\\, ...\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.ClientMessage:1 of
 msgid "ClientMessage is a container used to hold one result message."
 msgstr ""
 "ClientMessage est un conteneur utilisé pour contenir un message de "
 "résultat."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`Code <flwr.common.Code>`\\ \\(value\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.Code:1 of
 msgid "Client status codes."
 msgstr "Codes d'état du client."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Config <flwr.common.Config>`\\"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 "alias of :py:class:`dict`\\ [:py:class:`str`, :py:class:`bool` | "
 ":py:class:`bytes` | :py:class:`float` | :py:class:`int` | "
 ":py:class:`str`]"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`ConfigsRecord <flwr.common.ConfigsRecord>`\\ "
@@ -11548,276 +11550,285 @@ msgstr ""
 "config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), "
 "...)``"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.record.configsrecord.ConfigsRecord:1 of
 #, fuzzy
 msgid "Configs record."
 msgstr "Configurer les clients"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Context <flwr.common.Context>`\\ \\(run\\_id\\, node\\_id\\, "
 "node\\_config\\, state\\, ...\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.context.Context:1 of
 msgid "Context of your run."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`DisconnectRes <flwr.common.DisconnectRes>`\\ \\(reason\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.DisconnectRes:1 of
 msgid "DisconnectRes message from client to server."
 msgstr "Message DisconnectRes envoyé par le client au serveur."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.message.Error:1 of
-msgid "A dataclass that stores information about an error that occurred."
+msgid "The class storing information about an error that occurred."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 ":py:obj:`EvaluateIns <flwr.common.EvaluateIns>`\\ \\(parameters\\, "
 "config\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.EvaluateIns:1 of
 msgid "Evaluate instructions for a client."
 msgstr "Évaluer les instructions pour un client."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 ":py:obj:`EvaluateRes <flwr.common.EvaluateRes>`\\ \\(status\\, loss\\, "
 "num\\_examples\\, metrics\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.EvaluateRes:1 of
 msgid "Evaluate response from a client."
 msgstr "Évaluer la réponse d'un client."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.telemetry.EventType:1 of
 msgid "Types of telemetry events."
 msgstr "Types d'événements télémétriques."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`FitIns <flwr.common.FitIns>`\\ \\(parameters\\, config\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.FitIns:1 of
 msgid "Fit instructions for a client."
 msgstr "Instructions d'ajustement pour un client."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 ":py:obj:`FitRes <flwr.common.FitRes>`\\ \\(status\\, parameters\\, "
 "num\\_examples\\, metrics\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.FitRes:1 of
 msgid "Fit response from a client."
 msgstr "Réponse adaptée d'un client."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`GetParametersIns <flwr.common.GetParametersIns>`\\ \\(config\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.GetParametersIns:1 of
 msgid "Parameters request for a client."
 msgstr "Demande de paramètres pour un client."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 ":py:obj:`GetParametersRes <flwr.common.GetParametersRes>`\\ \\(status\\, "
 "parameters\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.GetParametersRes:1 of
 msgid "Response when asked to return parameters."
 msgstr "Réponse lorsqu'on te demande de renvoyer des paramètres."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`GetPropertiesIns <flwr.common.GetPropertiesIns>`\\ \\(config\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.GetPropertiesIns:1 of
 msgid "Properties request for a client."
 msgstr "Demande de propriétés pour un client."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 ":py:obj:`GetPropertiesRes <flwr.common.GetPropertiesRes>`\\ \\(status\\, "
 "properties\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.GetPropertiesRes:1 of
 msgid "Properties response from a client."
 msgstr "Réponse des propriétés d'un client."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-msgid ""
-":py:obj:`Message <flwr.common.Message>`\\ \\(metadata\\[\\, content\\, "
-"error\\]\\)"
-msgstr ""
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`Message <flwr.common.Message>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.message.Message:1 of
-msgid "State of your application from the viewpoint of the entity using it."
+msgid "Represents a message exchanged between ClientApp and ServerApp."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.constant.MessageType:1 of
 msgid "Message type."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`MessageTypeLegacy <flwr.common.MessageTypeLegacy>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.constant.MessageTypeLegacy:1 of
 msgid "Legacy message type."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 ":py:obj:`Metadata <flwr.common.Metadata>`\\ \\(run\\_id\\, "
 "message\\_id\\, src\\_node\\_id\\, ...\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.message.Metadata:1 of
-msgid "A dataclass holding metadata associated with the current message."
+msgid "The class representing metadata associated with the current message."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Metrics <flwr.common.Metrics>`\\"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 ":py:obj:`MetricsRecord <flwr.common.MetricsRecord>`\\ "
 "\\(\\[metrics\\_dict\\, keep\\_input\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.record.metricsrecord.MetricsRecord:1 of
 #, fuzzy
 msgid "Metrics recod."
 msgstr "Paramètres du modèle."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 "alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
 ":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`NDArrays <flwr.common.NDArrays>`\\"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 "alias of :py:class:`list`\\ [:py:class:`~numpy.ndarray`\\ "
 "[:py:obj:`~typing.Any`, :py:class:`~numpy.dtype`\\ "
 "[:py:obj:`~typing.Any`]]]"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 ":py:obj:`Parameters <flwr.common.Parameters>`\\ \\(tensors\\, "
 "tensor\\_type\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.Parameters:1 of
 msgid "Model parameters."
 msgstr "Paramètres du modèle."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.record.parametersrecord.ParametersRecord:1 of
 #, fuzzy
 msgid "Parameters record."
 msgstr "Paramètres du modèle."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Properties <flwr.common.Properties>`\\"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`ReconnectIns <flwr.common.ReconnectIns>`\\ \\(seconds\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.ReconnectIns:1 of
 msgid "ReconnectIns message from server to client."
 msgstr "Message de reconnexion du serveur au client."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`RecordDict <flwr.common.RecordDict>`\\ \\(\\[records\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
+#: flwr.common.record.recorddict.RecordDict:1 of
+msgid "RecordDict stores groups of parameters, metrics and configs."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`RecordSet <flwr.common.RecordSet>`\\ \\(\\[records\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-#: flwr.common.record.recordset.RecordSet:1 of
-msgid "RecordSet stores groups of parameters, metrics and configs."
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
+#: flwr.common.record.recorddict.RecordSet:1 of
+msgid "Deprecated class ``RecordSet``, use ``RecordDict`` instead."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ""
 ":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
 "\\(\\[get\\_properties\\_ins\\, ...\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.ServerMessage:1 of
 msgid "ServerMessage is a container used to hold one instruction message."
 msgstr ""
 "ServerMessage est un conteneur utilisé pour contenir un message "
 "d'instruction."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 msgid ":py:obj:`Status <flwr.common.Status>`\\ \\(code\\, message\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:69:<autosummary>:1
 #: flwr.common.typing.Status:1 of
 msgid "Client status."
 msgstr "Statut du client."
@@ -11955,6 +11966,7 @@ msgstr "renvoie le poids du modèle sous la forme d'une liste de ndarrays NumPy"
 #: ../../source/ref-api/flwr.common.Metadata.rst:25
 #: ../../source/ref-api/flwr.common.Parameters.rst:25
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
+#: ../../source/ref-api/flwr.common.RecordDict.rst:52
 #: ../../source/ref-api/flwr.common.RecordSet.rst:52
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:25
 #: ../../source/ref-api/flwr.common.Status.rst:25
@@ -12072,8 +12084,9 @@ msgid ""
 "A :code:`ConfigsRecord` is a Python dictionary designed to ensure that "
 "each key-value pair adheres to specified data types. A "
 ":code:`ConfigsRecord` is one of the types of records that a "
-"`flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports "
-"and can therefore be used to construct :code:`common.Message` objects."
+"`flwr.common.RecordDict <flwr.common.RecordDict.html#recorddict>`_ "
+"supports and can therefore be used to construct :code:`common.Message` "
+"objects."
 msgstr ""
 
 #: flwr.common.record.configsrecord.ConfigsRecord:9 of
@@ -12110,10 +12123,10 @@ msgstr ""
 
 #: flwr.common.record.configsrecord.ConfigsRecord:42 of
 msgid ""
-"Just like the other types of records in a :code:`flwr.common.RecordSet`, "
-"types are enforced. If you need to add a custom data structure or object,"
-" we recommend to serialise it into bytes and save it as such (bytes are "
-"allowed in a :code:`ConfigsRecord`)"
+"Just like the other types of records in a :code:`flwr.common.RecordDict`,"
+" types are enforced. If you need to add a custom data structure or "
+"object, we recommend to serialise it into bytes and save it as such "
+"(bytes are allowed in a :code:`ConfigsRecord`)"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -12151,6 +12164,7 @@ msgstr ""
 msgid ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: collections.abc.MutableMapping.pop:1 of
@@ -12162,6 +12176,7 @@ msgstr ""
 msgid ":py:obj:`popitem <flwr.common.ConfigsRecord.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: collections.abc.MutableMapping.popitem:1 of
@@ -12181,6 +12196,7 @@ msgid ""
 "\\]\\*\\*F\\)"
 msgstr ""
 
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: collections.abc.MutableMapping.update:1 of
@@ -13326,21 +13342,53 @@ msgstr ""
 msgid "Message"
 msgstr "Côté serveur"
 
-#: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.metadata:1
 #: flwr.common.message.Message:3 of
-msgid "A dataclass including information about the message to be executed."
+msgid ""
+"This class encapsulates the payload and metadata necessary for "
+"communication between a ClientApp and a ServerApp."
 msgstr ""
 
-#: flwr.common.message.Message:5 of
+#: flwr.common.message.Message:6 of
 msgid ""
 "Holds records either sent by another entity (e.g. sent by the server-side"
 " logic to a client, or vice-versa) or that will be sent to it."
 msgstr ""
 
-#: flwr.common.message.Message:8 of
+#: flwr.common.message.Message:9 of
 msgid ""
 "A dataclass that captures information about an error that took place when"
 " processing another message."
+msgstr ""
+
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Message:12
+#: flwr.common.message.Metadata:9 of
+msgid "An identifier for the node receiving this message."
+msgstr ""
+
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.message_type:1 flwr.common.message.Message:14
+#: flwr.common.message.Metadata:20 of
+msgid "A string that encodes the action to be executed on the receiving end."
+msgstr ""
+
+#: flwr.common.message.Message:17 of
+msgid ""
+"Time-to-live (TTL) for this message in seconds. If `None` (default), the "
+"TTL is set to 43,200 seconds (12 hours)."
+msgstr ""
+
+#: flwr.common.message.Message:20 flwr.common.message.Metadata:13 of
+msgid ""
+"An identifier for grouping messages. In some settings, this is used as "
+"the FL round."
+msgstr ""
+
+#: flwr.common.message.Message:23 of
+msgid ""
+"The instruction message to which this message is a reply. This message "
+"does not retain the original message's content but derives its metadata "
+"from it."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
@@ -13405,6 +13453,11 @@ msgstr ""
 msgid ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
 msgstr ""
 
+#: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.metadata:1
+#: of
+msgid "A dataclass including information about the message to be executed."
+msgstr ""
+
 #: flwr.common.message.Message.create_error_reply:3 of
 msgid "The error that was encountered."
 msgstr ""
@@ -13439,7 +13492,7 @@ msgstr ""
 msgid ""
 "The method generates a new `Message` as a reply to this message. It "
 "inherits 'run_id', 'src_node_id', 'dst_node_id', and 'message_type' from "
-"this message and sets 'reply_to_message' to the ID of this message."
+"this message and sets 'reply_to_message_id' to the ID of this message."
 msgstr ""
 
 #: flwr.common.message.Message.create_reply:7 of
@@ -13503,39 +13556,25 @@ msgid "An identifier for the node sending this message."
 msgstr ""
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Metadata:9 of
-msgid "An identifier for the node receiving this message."
+#: flwr.common.Metadata.reply_to_message_id:1 flwr.common.message.Metadata:11
+#: of
+msgid "An identifier for the message to which this message is a reply."
 msgstr ""
 
+#: flwr.common.Metadata.created_at:1
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.reply_to_message:1 flwr.common.message.Metadata:11 of
-msgid "An identifier for the message this message replies to."
-msgstr ""
-
-#: flwr.common.message.Metadata:13 of
-msgid ""
-"An identifier for grouping messages. In some settings, this is used as "
-"the FL round."
-msgstr ""
-
 #: flwr.common.message.Metadata:16 of
-msgid "Time-to-live for this message in seconds."
+msgid "Unix timestamp when the message was created."
 msgstr ""
 
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.message_type:1 flwr.common.message.Metadata:18 of
-msgid "A string that encodes the action to be executed on the receiving end."
+#: flwr.common.message.Metadata:18 of
+msgid "Time-to-live for this message in seconds."
 msgstr ""
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`created_at <flwr.common.Metadata.created_at>`\\"
 msgstr "serveur.stratégie.Stratégie"
-
-#: flwr.common.Metadata.created_at:1
-#: flwr.common.Metadata.created_at:1:<autosummary>:1 of
-msgid "Unix timestamp when the message was created."
-msgstr ""
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 #, fuzzy
@@ -13569,8 +13608,9 @@ msgid ":py:obj:`message_type <flwr.common.Metadata.message_type>`\\"
 msgstr ""
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
-msgid ":py:obj:`reply_to_message <flwr.common.Metadata.reply_to_message>`\\"
-msgstr ""
+#, fuzzy
+msgid ":py:obj:`reply_to_message_id <flwr.common.Metadata.reply_to_message_id>`\\"
+msgstr "serveur.stratégie.Stratégie"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`run_id <flwr.common.Metadata.run_id>`\\"
@@ -13611,8 +13651,9 @@ msgid ""
 "A :code:`MetricsRecord` is a Python dictionary designed to ensure that "
 "each key-value pair adheres to specified data types. A "
 ":code:`MetricsRecord` is one of the types of records that a "
-"`flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports "
-"and can therefore be used to construct :code:`common.Message` objects."
+"`flwr.common.RecordDict <flwr.common.RecordDict.html#recorddict>`_ "
+"supports and can therefore be used to construct :code:`common.Message` "
+"objects."
 msgstr ""
 
 #: flwr.common.record.metricsrecord.MetricsRecord:9 of
@@ -13746,7 +13787,7 @@ msgstr ""
 
 #: flwr.common.record.parametersrecord.ParametersRecord:8 of
 msgid ""
-"This object is one of the record types supported by :class:`RecordSet` "
+"This object is one of the record types supported by :class:`RecordDict` "
 "and can therefore be stored in the ``content`` of a :class:`Message` or "
 "the ``state`` of a :class:`Context`."
 msgstr ""
@@ -13963,11 +14004,11 @@ msgstr "Collecte centralisée des données"
 msgid ":py:obj:`seconds <flwr.common.ReconnectIns.seconds>`\\"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:2
-msgid "RecordSet"
+#: ../../source/ref-api/flwr.common.RecordDict.rst:2
+msgid "RecordDict"
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:1 of
+#: flwr.common.record.recorddict.RecordDict:1 of
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, "
@@ -13976,47 +14017,47 @@ msgid ""
 ":py:class:`~flwr.common.record.configsrecord.ConfigsRecord`]"
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:3 of
+#: flwr.common.record.recorddict.RecordDict:3 of
 msgid ""
-"A :class:`RecordSet` is the unified mechanism by which parameters, "
+"A :class:`RecordDict` is the unified mechanism by which parameters, "
 "metrics and configs can be either stored as part of a :class:`Context` in"
 " your apps or communicated as part of a :class:`Message` between your "
 "apps."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:8 of
+#: flwr.common.record.recorddict.RecordDict:8 of
 msgid ""
 "A dictionary of :code:`ParametersRecords` that can be used to record and "
 "communicate model parameters and high-dimensional arrays."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:11 of
+#: flwr.common.record.recorddict.RecordDict:11 of
 msgid ""
 "A dictionary of :code:`MetricsRecord` that can be used to record and "
 "communicate scalar-valued metrics that are the result of performing and "
 "action, for example, by a :code:`ClientApp`."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:15 of
+#: flwr.common.record.recorddict.RecordDict:15 of
 msgid ""
 "A dictionary of :code:`ConfigsRecord` that can be used to record and "
 "communicate configuration values to an entity (e.g. to a "
 ":code:`ClientApp`) for it to adjust how an action is performed."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:23 of
+#: flwr.common.record.recorddict.RecordDict:23 of
 msgid ""
-"A :code:`RecordSet` can hold three types of records, each designed with "
-"an specific purpose. What is common to all of them is that they are "
+"A :class:`RecordDict` can hold three types of records, each designed with"
+" an specific purpose. What is common to all of them is that they are "
 "Python dictionaries designed to ensure that each key-value pair adheres "
 "to specified data types."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:28 of
+#: flwr.common.record.recorddict.RecordDict:28 of
 msgid "Let's see an example."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:46 of
+#: flwr.common.record.recorddict.RecordDict:46 of
 msgid ""
 "Adding a :code:`ParametersRecord` follows the same steps as above but "
 "first, the array needs to be serialized and represented as a "
@@ -14026,11 +14067,124 @@ msgid ""
 " array first to :code:`NumPy` and then use the aforementioned function."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:65 of
+#: flwr.common.record.recorddict.RecordDict:65 of
 msgid ""
 "For additional examples on how to construct each of the records types "
 "shown above, please refer to the documentation for :code:`ConfigsRecord`,"
 " :code:`MetricsRecord` and :code:`ParametersRecord`."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`clear <flwr.common.RecordDict.clear>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`get <flwr.common.RecordDict.get>`\\ \\(k\\[\\,d\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`items <flwr.common.RecordDict.items>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`keys <flwr.common.RecordDict.keys>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`pop <flwr.common.RecordDict.pop>`\\ \\(k\\[\\,d\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`popitem <flwr.common.RecordDict.popitem>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`setdefault <flwr.common.RecordDict.setdefault>`\\ "
+"\\(k\\[\\,d\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`update <flwr.common.RecordDict.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`values <flwr.common.RecordDict.values>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`configs_records <flwr.common.RecordDict.configs_records>`\\"
+msgstr "serveur.stratégie.Stratégie"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.RecordDict.configs_records:1
+#: flwr.common.RecordSet.configs_records:1 of
+msgid "Dictionary holding only ConfigsRecord instances."
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`metrics_records <flwr.common.RecordDict.metrics_records>`\\"
+msgstr "serveur.stratégie.Stratégie"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.RecordDict.metrics_records:1
+#: flwr.common.RecordSet.metrics_records:1 of
+msgid "Dictionary holding only MetricsRecord instances."
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`parameters_records <flwr.common.RecordDict.parameters_records>`\\"
+msgstr "serveur.stratégie.Stratégie"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.RecordDict.parameters_records:1
+#: flwr.common.RecordSet.parameters_records:1 of
+msgid "Dictionary holding only ParametersRecord instances."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:2
+msgid "RecordSet"
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordSet:1 of
+msgid "Bases: :py:class:`~flwr.common.record.recorddict.RecordDict`"
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordSet:3 of
+msgid ""
+"This class exists solely for backward compatibility with legacy code that"
+" previously used ``RecordSet``. It has been renamed to ``RecordDict`` and"
+" will be removed in a future release."
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordSet:8 of
+msgid ""
+"``RecordSet`` is deprecated and will be removed in a future release. Use "
+"``RecordDict`` instead."
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordSet:13 flwr.server.grid.grid.Driver:15
+#: of
+msgid "Legacy (deprecated) usage::"
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordSet:19 flwr.server.grid.grid.Driver:21
+#: of
+msgid "Updated usage::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
@@ -14084,27 +14238,12 @@ msgstr "serveur.stratégie.Stratégie"
 msgid ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: flwr.common.RecordSet.configs_records:1 of
-msgid "Dictionary holding only ConfigsRecord instances."
-msgstr ""
-
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 msgid ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: flwr.common.RecordSet.metrics_records:1 of
-msgid "Dictionary holding only MetricsRecord instances."
-msgstr ""
-
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 msgid ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
-msgstr ""
-
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: flwr.common.RecordSet.parameters_records:1 of
-msgid "Dictionary holding only ParametersRecord instances."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:2
@@ -14460,14 +14599,6 @@ msgstr ""
 msgid ""
 "``Driver`` is deprecated and will be removed in a future release. Use "
 "`Grid` in the signature of your ServerApp."
-msgstr ""
-
-#: flwr.server.grid.grid.Driver:15 of
-msgid "Legacy (deprecated) usage::"
-msgstr ""
-
-#: flwr.server.grid.grid.Driver:21 of
-msgid "Updated usage::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
@@ -32482,7 +32613,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|462a5ddc7b2d4b73819bdeffde19f2fc|"
+msgid "|b6d7f89f3808402b9292d88245973eff|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -32501,7 +32632,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|1cd9d5b3c0f743849d81024f6bb79f0f|"
+msgid "|cb5e4b961f084019b6ce414c35f3f37a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -32533,7 +32664,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|23545c677a484fa3aabfa186b446bcea|"
+msgid "|97ea8cf65d1f407590d4c61e1d5352aa|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -32554,7 +32685,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|af0433fa018d41a0b0599dbd696e5de3|"
+msgid "|96ac0b873a014a3abcf6dbe09c62d4c6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -32576,7 +32707,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|b68387deaa794ce2b323a08910c92d22|"
+msgid "|ef28711094124e239fc69cf7283466e5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -32597,7 +32728,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|a64fb69d1b6e4581a9a7f0cfc7310e22|"
+msgid "|87a5b00db468471aaaaadc5477704e15|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -32623,7 +32754,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|84867c1c32224df1916988ad35c2c80d|"
+msgid "|af29375956aa473f944c9fb6ea0bfc92|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -32642,7 +32773,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|bcfb9adf14aa48a394d8afd097ba15f1|"
+msgid "|d9bea29a75c7465da99a0f29b6d5735a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -32873,7 +33004,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|88026b46352a48688bffdb17496ae6c6|"
+msgid "|35eb9147612b492c97879287bad7b231|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -32908,7 +33039,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|1a75b5702f854894ae170dddd7bdcd1d|"
+msgid "|27e06a29cff64206af6d3695238c5977|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -32941,7 +33072,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|9553a34443934a26921e584c98a51f38|"
+msgid "|6bd42f6566f949a8a157fcb68272490d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -32972,7 +33103,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|848dd486de4e45349dc126455021891b|"
+msgid "|688be4d36b13400fa5c454e2ef1500f5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -33032,7 +33163,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|be39f3bca1a0445495c0bd6a2da84e34|"
+msgid "|58b84ee017db4b3ba25506c9bf503c4c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -33176,7 +33307,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|91a73d3573224a32ba04b015071bba4a|"
+msgid "|cffbf5f7fb6146e887e89765d6f590bd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -48782,5 +48913,141 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|1eb9389cb6ea4e34ae4b98476a69ae90|"
+#~ msgstr ""
+
+#~ msgid "A dataclass that stores information about an error that occurred."
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`Message <flwr.common.Message>`\\ "
+#~ "\\(metadata\\[\\, content\\, error\\]\\)"
+#~ msgstr ""
+
+#~ msgid "State of your application from the viewpoint of the entity using it."
+#~ msgstr ""
+
+#~ msgid "A dataclass holding metadata associated with the current message."
+#~ msgstr ""
+
+#~ msgid "RecordSet stores groups of parameters, metrics and configs."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :code:`ConfigsRecord` is a Python "
+#~ "dictionary designed to ensure that each"
+#~ " key-value pair adheres to specified"
+#~ " data types. A :code:`ConfigsRecord` is "
+#~ "one of the types of records that"
+#~ " a `flwr.common.RecordSet "
+#~ "<flwr.common.RecordSet.html#recordset>`_ supports and "
+#~ "can therefore be used to construct "
+#~ ":code:`common.Message` objects."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Just like the other types of "
+#~ "records in a :code:`flwr.common.RecordSet`, "
+#~ "types are enforced. If you need to"
+#~ " add a custom data structure or "
+#~ "object, we recommend to serialise it "
+#~ "into bytes and save it as such "
+#~ "(bytes are allowed in a "
+#~ ":code:`ConfigsRecord`)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The method generates a new `Message` "
+#~ "as a reply to this message. It "
+#~ "inherits 'run_id', 'src_node_id', 'dst_node_id', "
+#~ "and 'message_type' from this message and"
+#~ " sets 'reply_to_message' to the ID of"
+#~ " this message."
+#~ msgstr ""
+
+#~ msgid "An identifier for the message this message replies to."
+#~ msgstr ""
+
+#~ msgid ":py:obj:`reply_to_message <flwr.common.Metadata.reply_to_message>`\\"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :code:`MetricsRecord` is a Python "
+#~ "dictionary designed to ensure that each"
+#~ " key-value pair adheres to specified"
+#~ " data types. A :code:`MetricsRecord` is "
+#~ "one of the types of records that"
+#~ " a `flwr.common.RecordSet "
+#~ "<flwr.common.RecordSet.html#recordset>`_ supports and "
+#~ "can therefore be used to construct "
+#~ ":code:`common.Message` objects."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This object is one of the record"
+#~ " types supported by :class:`RecordSet` and"
+#~ " can therefore be stored in the "
+#~ "``content`` of a :class:`Message` or the"
+#~ " ``state`` of a :class:`Context`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :class:`RecordSet` is the unified "
+#~ "mechanism by which parameters, metrics "
+#~ "and configs can be either stored "
+#~ "as part of a :class:`Context` in "
+#~ "your apps or communicated as part "
+#~ "of a :class:`Message` between your apps."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :code:`RecordSet` can hold three types"
+#~ " of records, each designed with an"
+#~ " specific purpose. What is common to"
+#~ " all of them is that they are"
+#~ " Python dictionaries designed to ensure "
+#~ "that each key-value pair adheres "
+#~ "to specified data types."
+#~ msgstr ""
+
+#~ msgid "|462a5ddc7b2d4b73819bdeffde19f2fc|"
+#~ msgstr ""
+
+#~ msgid "|1cd9d5b3c0f743849d81024f6bb79f0f|"
+#~ msgstr ""
+
+#~ msgid "|23545c677a484fa3aabfa186b446bcea|"
+#~ msgstr ""
+
+#~ msgid "|af0433fa018d41a0b0599dbd696e5de3|"
+#~ msgstr ""
+
+#~ msgid "|b68387deaa794ce2b323a08910c92d22|"
+#~ msgstr ""
+
+#~ msgid "|a64fb69d1b6e4581a9a7f0cfc7310e22|"
+#~ msgstr ""
+
+#~ msgid "|84867c1c32224df1916988ad35c2c80d|"
+#~ msgstr ""
+
+#~ msgid "|bcfb9adf14aa48a394d8afd097ba15f1|"
+#~ msgstr ""
+
+#~ msgid "|88026b46352a48688bffdb17496ae6c6|"
+#~ msgstr ""
+
+#~ msgid "|1a75b5702f854894ae170dddd7bdcd1d|"
+#~ msgstr ""
+
+#~ msgid "|9553a34443934a26921e584c98a51f38|"
+#~ msgstr ""
+
+#~ msgid "|848dd486de4e45349dc126455021891b|"
+#~ msgstr ""
+
+#~ msgid "|be39f3bca1a0445495c0bd6a2da84e34|"
+#~ msgstr ""
+
+#~ msgid "|91a73d3573224a32ba04b015071bba4a|"
 #~ msgstr ""
 
