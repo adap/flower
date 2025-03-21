@@ -91,18 +91,10 @@ class RecordDict(TypedDict[str, RecordType]):
 
     Parameters
     ----------
-    array_records : Optional[Dict[str, ArrayRecord]]
-        A dictionary of :code:`ArrayRecords` that can be used to record
-        and communicate model parameters and high-dimensional arrays.
-    metrics_records : Optional[Dict[str, MetricsRecord]]
-        A dictionary of :code:`MetricsRecord` that can be used to record
-        and communicate scalar-valued metrics that are the result of performing
-        and action, for example, by a :code:`ClientApp`.
-    configs_records : Optional[Dict[str, ConfigsRecord]]
-        A dictionary of :code:`ConfigsRecord` that can be used to record
-        and communicate configuration values to an entity (e.g. to a
-        :code:`ClientApp`)
-        for it to adjust how an action is performed.
+    records : Optional[dict[str, RecordType]]
+        A dictionary mapping string keys to record instances, where each value
+        is either a :class:`ParametersRecord`, :class:`MetricsRecord`,
+        or :class:`ConfigsRecord`.
 
     Examples
     --------
