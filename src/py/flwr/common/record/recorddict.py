@@ -22,7 +22,7 @@ from textwrap import indent
 from typing import TypeVar, Union, cast
 
 from ..logger import log
-from .configsrecord import ConfigsRecord
+from .configrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parametersrecord import ParametersRecord
 from .typeddict import TypedDict
