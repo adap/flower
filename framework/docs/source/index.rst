@@ -35,7 +35,6 @@ A learning-oriented series of federated learning tutorials, the best place to st
     :maxdepth: 1
     :caption: Tutorial
 
-    tute1
     tutorial-series-what-is-federated-learning
     tutorial-series-get-started-with-flower-pytorch
     tutorial-series-use-a-federated-learning-strategy-pytorch

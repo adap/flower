@@ -24,3 +24,7 @@ with running Flower in a more interactive way.
     :maxdepth: 1
 
     tutorial-series-what-is-federated-learning
+    tutorial-series-get-started-with-flower-pytorch
+    tutorial-series-use-a-federated-learning-strategy-pytorch
+    tutorial-series-build-a-strategy-from-scratch-pytorch
+    tutorial-series-customize-the-client-pytorch
