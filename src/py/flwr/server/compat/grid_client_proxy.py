@@ -110,7 +110,7 @@ class GridClientProxy(ClientProxy):
     ) -> RecordDict:
 
         # Create message
-        message = self.grid.create_message(
+        message = Message(
             content=recorddict,
             message_type=message_type,
             dst_node_id=self.node_id,

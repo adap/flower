@@ -38,7 +38,7 @@ def evaluate(msg: Message, context: Context):
     # Construct reply
     metrics_record = MetricsRecord({"eval_acc": eval_acc})
     content = RecordDict({"eval_metrics": metrics_record})
-    return msg.create_reply(content=content)
+    return Message(content=content, reply_to=msg)
 
 
 @app.train()
@@ -60,7 +60,7 @@ def train(msg: Message, context: Context):
     model_record = pytorch_to_parameter_record(model)
     metrics_record = MetricsRecord({"train_loss": train_loss})
     content = RecordDict({"model": model_record, "train_metrics": metrics_record})
-    return msg.create_reply(content=content)
+    return Message(content=content, reply_to=msg)
 
 
 def setup_client(msg: Message, context: Context, is_train: bool):
