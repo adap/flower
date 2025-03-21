@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		210A876B2D8B57A000AFC33C /* ChatInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210A876A2D8B57A000AFC33C /* ChatInput.swift */; };
 		210A876D2D8C033D00AFC33C /* DeepseekV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210A876C2D8C033600AFC33C /* DeepseekV3.swift */; };
+		210A876F2D8D603000AFC33C /* SwitchLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210A876E2D8D603000AFC33C /* SwitchLayers.swift */; };
 		2186CA8CA6ACBFEE8600CBAF /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 3E665FFF8BA4124A79C92D43 /* Flwr */; };
 		5CAC536F19AE5062E58881B8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2940C21F680D4AD885318A0 /* ContentView.swift */; };
 		5DC300C4103CB296DE06A824 /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 7D6D86FB026C80EFB61189EB /* Flwr */; };
@@ -34,6 +35,7 @@
 		209DA0E56757DEB5DBE65F60 /* hello-world-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hello-world-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		210A876A2D8B57A000AFC33C /* ChatInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInput.swift; sourceTree = "<group>"; };
 		210A876C2D8C033600AFC33C /* DeepseekV3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepseekV3.swift; sourceTree = "<group>"; };
+		210A876E2D8D603000AFC33C /* SwitchLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchLayers.swift; sourceTree = "<group>"; };
 		296E3A51313266F8A35C159B /* HelloWorldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloWorldApp.swift; sourceTree = "<group>"; };
 		3F7619F5AE1EB828BF4A53B4 /* LlmChat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LlmChat.entitlements; sourceTree = "<group>"; };
 		4567A9812B7FAC92EE118B9A /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -150,6 +152,7 @@
 			children = (
 				1C6B5008CFD38CD572321504 /* ChatView.swift */,
 				52B5FAC31AB75945DC79736E /* ContentView.swift */,
+				210A876E2D8D603000AFC33C /* SwitchLayers.swift */,
 				210A876C2D8C033600AFC33C /* DeepseekV3.swift */,
 				3F7619F5AE1EB828BF4A53B4 /* LlmChat.entitlements */,
 				210A876A2D8B57A000AFC33C /* ChatInput.swift */,
@@ -329,6 +332,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				900C90FBA86B9299077BA5B9 /* ChatView.swift in Sources */,
+				210A876F2D8D603000AFC33C /* SwitchLayers.swift in Sources */,
 				FBCE3B1A7ABDF2695FAE7F73 /* ContentView.swift in Sources */,
 				210A876B2D8B57A000AFC33C /* ChatInput.swift in Sources */,
 				C8035BEE0E74205A7F8CB276 /* LlmChatApp.swift in Sources */,

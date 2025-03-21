@@ -355,4 +355,145 @@ class DeepseekV3MLP: Module, UnaryLayer {
   }
 }
 
+class MoEGate: Module {
+  var config: DeepseekV3Configuration
+  var topK: Int?
+  var normTopkProb: Bool
+  var nRoutedExperts: Int?
+  var routedScalingFactor: Float
+  var nGroup: Int
+  var topkGroup: Int?
+  var weight: MLXArray
+  var eScoreCorrectionBias: MLXArray
 
+  init(config: DeepseekV3Configuration) {
+    self.config = config
+    self.topK = config.numExpertsPerTok
+    self.normTopkProb = config.normTopkProb
+    self.nRoutedExperts = config.nRoutedExperts
+    self.routedScalingFactor = config.routedScalingFactor
+    self.nGroup = config.nGroup ?? 1
+    self.topkGroup = config.topkGroup
+
+    guard config.topkMethod == "noaux_tc" else {
+      fatalError("Unsupported topk method.")
+    }
+
+    self.weight = MLXArray()
+    self.eScoreCorrectionBias = MLXArray()
+  }
+  
+  func callAsFunction(_ x: MLXArray) -> (MLXArray, MLXArray) {
+    let (bsz, seqLen, h) = (x.dim(0), x.dim(1), x.dim(2))
+    let hiddenStates = x.reshaped(-1, h)
+    //add linear
+    let scores = sigmoid(hiddenStates)
+    let scoresForChoice = scores.reshaped(bsz * seqLen, -1) + eScoreCorrectionBias
+    let groupScores = scoresForChoice.reshaped(bsz * seqLen, self.nGroup, -1)
+    let topK = sorted(groupScores, axis: -1)[.ellipsis, ..<2].sum(axis: -1, keepDims: true)
+    
+    return (MLXArray(), MLXArray())
+  }
+
+}
+
+class DeepseekV3MoE: Module, UnaryLayer {
+  var config: DeepseekV3Configuration
+  var numExpertsPerTok: Int
+  var switchMLP: SwitchGLU
+  var gate: MoEGate
+  var sharedExperts: DeepseekV3MLP?
+
+  init(config: DeepseekV3Configuration) {
+    self.config = config
+    self.numExpertsPerTok = config.numExpertsPerTok ?? 1
+
+    self.switchMLP = SwitchGLU(
+      inputDims: config.hiddenSize,
+      hiddenDims: config.moeIntermediateSize,
+      numExperts: config.nRoutedExperts ?? 1,
+      activation: clippedSilu
+    )
+
+    self.gate = MoEGate(config: config)
+
+    if let sharedExpertCount = config.nSharedExperts {
+      let intermediateSize = config.moeIntermediateSize * sharedExpertCount
+      self.sharedExperts = DeepseekV3MLP(config: config, intermediateSize: intermediateSize)
+    }
+  }
+
+  func callAsFunction(_ x: MLXArray) -> MLXArray {
+    let (indices, scores) = gate(x)
+    var y = switchMLP(x, indices)
+    y = (y * scores[.ellipsis, .newAxis]).sum(axis: -2)
+
+    if let shared = sharedExperts {
+      y = y + shared(x)
+    }
+    return y
+  }
+}
+
+class DeepseekV3DecoderLayer: Module {
+  var selfAttn: DeepseekV3Attention
+  var mlp: UnaryLayer
+  var inputLayerNorm: RMSNorm
+  var postAttentionLayerNorm: RMSNorm
+
+  init(config: DeepseekV3Configuration, layerIdx: Int) {
+    self.selfAttn = DeepseekV3Attention(config: config)
+
+    if config.nRoutedExperts != nil,
+       layerIdx >= config.firstKDenseReplace,
+       layerIdx % config.moeLayerFreq == 0 {
+      self.mlp = DeepseekV3MoE(config: config)
+    } else {
+      self.mlp = DeepseekV3MLP(config: config)
+    }
+
+    self.inputLayerNorm = RMSNorm(dimensions: config.hiddenSize, eps: config.rmsNormEps)
+    self.postAttentionLayerNorm = RMSNorm(dimensions: config.hiddenSize, eps: config.rmsNormEps)
+  }
+
+  func callAsFunction(_ x: MLXArray, mask: MLXArray? = nil, cache: KVCache? = nil) -> MLXArray {
+    let r = selfAttn(inputLayerNorm(x), mask: mask, cache: cache)
+    let h = x + r
+    let r2 = mlp(postAttentionLayerNorm(h))
+    return h + r2
+  }
+}
+
+class DeepseekV3Model: Module {
+  var config: DeepseekV3Configuration
+  var vocabSize: Int
+  var embedTokens: Embedding
+  var layers: [DeepseekV3DecoderLayer?]
+  var startIdx: Int
+  var endIdx: Int
+  var numLayers: Int
+  var norm: RMSNorm
+  var pipelineRank: Int
+  var pipelineSize: Int
+
+  init(config: DeepseekV3Configuration) {
+    self.config = config
+    self.vocabSize = config.vocabSize
+    self.embedTokens = Embedding(embeddingCount: config.vocabSize, dimensions: config.hiddenSize)
+    self.layers = (0..<config.numHiddenLayers).map { DeepseekV3DecoderLayer(config: config, layerIdx: $0) }
+    self.startIdx = 0
+    self.endIdx = layers.count
+    self.numLayers = endIdx
+    self.norm = RMSNorm(dimensions: config.hiddenSize, eps: config.rmsNormEps)
+    self.pipelineRank = 0
+    self.pipelineSize = 1
+  }
+
+  func callAsFunction(_ x: MLXArray, cache: [KVCache]?, mask: MLXArray? = nil) -> MLXArray {
+    var h = embedTokens(x)
+    
+    let attentionMask = mask ?? createAttentionMask(h: h, cache: cache)
+
+    return norm(h)
+  }
+}
