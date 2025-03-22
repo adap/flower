@@ -16,7 +16,7 @@ import Tokenizers
 
 /// Creates a function that loads a configuration file and instantiates a model with the proper configuration
 private func create<C: Codable, M>(
-  _ configurationType: C.Type, _ modelInit: @escaping @Sendable (C) -> M
+    _ configurationType: C.Type, _ modelInit: @escaping @Sendable (C) -> M
 ) -> @Sendable (URL) throws -> M {
     { url in
         let configuration = try JSONDecoder().decode(
@@ -28,20 +28,10 @@ private func create<C: Codable, M>(
 /// Registry of model type, e.g 'llama', to functions that can instantiate the model from configuration.
 ///
 /// Typically called via ``LLMModelFactory/load(hub:configuration:progressHandler:)``.
-public class ModelTypeRegistry: @unchecked Sendable {
-
-    /// Creates an empty registry.
-    public init() {
-        self.creators = [:]
-    }
-
-    /// Creates a registry with given creators.
-    public init(creators: [String: @Sendable (URL) throws -> any LanguageModel]) {
-        self.creators = creators
-    }
+public class LLMTypeRegistry: ModelTypeRegistry, @unchecked Sendable {
 
     /// Shared instance with default model types.
-    public static let shared: ModelTypeRegistry = .init(creators: all())
+    public static let shared: LLMTypeRegistry = .init(creators: all())
 
     /// All predefined model types.
     private static func all() -> [String: @Sendable (URL) throws -> any LanguageModel] {
@@ -62,32 +52,6 @@ public class ModelTypeRegistry: @unchecked Sendable {
         ]
     }
 
-    // Note: using NSLock as we have very small (just dictionary get/set)
-    // critical sections and expect no contention.  this allows the methods
-    // to remain synchronous.
-    private let lock = NSLock()
-    private var creators: [String: @Sendable (URL) throws -> any LanguageModel]
-
-    /// Add a new model to the type registry.
-    public func registerModelType(
-        _ type: String, creator: @Sendable @escaping (URL) throws -> any LanguageModel
-    ) {
-        lock.withLock {
-            creators[type] = creator
-        }
-    }
-
-    /// Given a `modelType` and configuration file instantiate a new `LanguageModel`.
-    public func createModel(configuration: URL, modelType: String) throws -> LanguageModel {
-        let creator = lock.withLock {
-            creators[modelType]
-        }
-        guard let creator else {
-            throw ModelFactoryError.unsupportedModelType(modelType)
-        }
-        return try creator(configuration)
-    }
-
 }
 
 /// Registry of models and any overrides that go with them, e.g. prompt augmentation.
@@ -96,28 +60,16 @@ public class ModelTypeRegistry: @unchecked Sendable {
 /// The python tokenizers have a very rich set of implementations and configuration.  The
 /// swift-tokenizers code handles a good chunk of that and this is a place to augment that
 /// implementation, if needed.
-public class ModelRegistry: @unchecked Sendable {
-
-    /// Creates an empty registry.
-    public init() {
-        self.registry = Dictionary()
-    }
-
-    /// Creates a new registry with from given model configurations.
-    public init(modelConfigurations: [ModelConfiguration]) {
-        self.registry = Dictionary(uniqueKeysWithValues: modelConfigurations.map { ($0.name, $0) })
-    }
+public class LLMRegistry: AbstractModelRegistry, @unchecked Sendable {
 
     /// Shared instance with default model configurations.
-    public static let shared = ModelRegistry(modelConfigurations: all())
-
-    private let lock = NSLock()
-    private var registry: [String: ModelConfiguration]
+    public static let shared = LLMRegistry(modelConfigurations: all())
   
-    static public let deepseek_r1_4bit = ModelConfiguration(
-      id: "mlx-community/DeepSeek-R1-4bit",
-      defaultPrompt: "Tell me about the history of Spain."
-    )
+  static public let deepseek_r1_4bit = ModelConfiguration(
+    id: "mlx-community/DeepSeek-R1-4bit",
+    defaultPrompt: "Tell me about the history of Spain."
+  )
+
     static public let smolLM_135M_4bit = ModelConfiguration(
         id: "mlx-community/SmolLM-135M-Instruct-4bit",
         defaultPrompt: "Tell me about the history of Spain."
@@ -230,7 +182,6 @@ public class ModelRegistry: @unchecked Sendable {
 
     private static func all() -> [ModelConfiguration] {
         [
-          deepseek_r1_4bit,
             codeLlama13b4bit,
             deepSeekR1_7B_4bit,
             gemma2bQuantized,
@@ -250,33 +201,14 @@ public class ModelRegistry: @unchecked Sendable {
             qwen2_5_7b,
             qwen2_5_1_5b,
             smolLM_135M_4bit,
+            deepseek_r1_4bit
         ]
     }
 
-    public func register(configurations: [ModelConfiguration]) {
-        lock.withLock {
-            for c in configurations {
-                registry[c.name] = c
-            }
-        }
-    }
-
-    public func configuration(id: String) -> ModelConfiguration {
-        lock.withLock {
-            if let c = registry[id] {
-                return c
-            } else {
-                return ModelConfiguration(id: id)
-            }
-        }
-    }
-
-    public var models: some Collection<ModelConfiguration> & Sendable {
-        lock.withLock {
-            return registry.values
-        }
-    }
 }
+
+@available(*, deprecated, renamed: "LLMRegistry", message: "Please use LLMRegistry directly.")
+public typealias ModelRegistry = LLMRegistry
 
 private struct LLMUserInputProcessor: UserInputProcessor {
 
@@ -318,23 +250,20 @@ private struct LLMUserInputProcessor: UserInputProcessor {
 /// ```
 public final class DeepseekLLMModelFactory: ModelFactory {
 
-    public init(typeRegistry: ModelTypeRegistry, modelRegistry: ModelRegistry) {
+    public init(typeRegistry: ModelTypeRegistry, modelRegistry: AbstractModelRegistry) {
         self.typeRegistry = typeRegistry
         self.modelRegistry = modelRegistry
     }
 
     /// Shared instance with default behavior.
-    public static let shared = DeepseekLLMModelFactory(typeRegistry: .shared, modelRegistry: .shared)
+    public static let shared = DeepseekLLMModelFactory(
+        typeRegistry: LLMTypeRegistry.shared, modelRegistry: LLMRegistry.shared)
 
     /// registry of model type, e.g. configuration value `llama` -> configuration and init methods
     public let typeRegistry: ModelTypeRegistry
 
     /// registry of model id to configuration, e.g. `mlx-community/Llama-3.2-3B-Instruct-4bit`
-    public let modelRegistry: ModelRegistry
-
-    public func configuration(id: String) -> ModelConfiguration {
-        modelRegistry.configuration(id: id)
-    }
+    public let modelRegistry: AbstractModelRegistry
 
     public func _load(
         hub: HubApi, configuration: ModelConfiguration,
