@@ -38,7 +38,7 @@ class MlxEngine: Engine {
     case .idle:
       MLX.GPU.set(cacheLimit: 20 * 1024 * 1024)
 
-      let modelContainer = try await LLMModelFactory.shared.loadContainer(
+      let modelContainer = try await DeepseekLLMModelFactory.shared.loadContainer(
         configuration: modelConfiguration
       ) { [modelConfiguration] progress in
         print("Downloading \(modelConfiguration.name): \(Int(progress.fractionCompleted * 100))%")
