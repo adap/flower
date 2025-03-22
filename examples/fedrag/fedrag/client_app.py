@@ -1,11 +1,10 @@
 """fedrag: A Flower Federated RAG app."""
 
-import os
-
 from flwr.client import ClientApp
 from flwr.common import ConfigRecord, Context, Message, RecordDict
 
 from fedrag.retriever import Retriever
+
 
 # Flower ClientApp
 app = ClientApp()
