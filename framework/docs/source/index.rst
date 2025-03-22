@@ -85,7 +85,6 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     Build <build>
     Simulate <simulate>
     Deploy <deploy>
-    Contribute <contribute>
 
 Explanations
 ~~~~~~~~~~~~
@@ -110,6 +109,18 @@ References
     :caption: References
 
     reference
+
+Contribute
+~~~~~~~~~~
+
+The Flower community welcomes contributions. The following docs are intended to help along the way.
+
+.. toctree::
+    :titlesonly:
+    :caption: Contributor docs
+
+    Contribute <contribute>
+
 
 ..
     Indices and tables
