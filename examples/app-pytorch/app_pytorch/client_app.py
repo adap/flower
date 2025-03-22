@@ -6,7 +6,7 @@ from app_pytorch.task import test as test_fn
 from app_pytorch.task import train as train_fn
 
 from flwr.client import ClientApp
-from flwr.common import ArrayRecord, Context, Message, MetricsRecord, RecordDict
+from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 
 # Flower ClientApp
 app = ClientApp()
@@ -26,8 +26,8 @@ def evaluate(msg: Message, context: Context):
     )
 
     # Construct reply
-    metrics_record = MetricsRecord({"eval_acc": eval_acc})
-    content = RecordDict({"eval_metrics": metrics_record})
+    metric_record = MetricRecord({"eval_acc": eval_acc})
+    content = RecordDict({"eval_metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
 
@@ -48,8 +48,8 @@ def train(msg: Message, context: Context):
 
     # Extract state_dict from model and construct reply message
     model_record = ArrayRecord(model.state_dict())
-    metrics_record = MetricsRecord({"train_loss": train_loss})
-    content = RecordDict({"model": model_record, "train_metrics": metrics_record})
+    metric_record = MetricRecord({"train_loss": train_loss})
+    content = RecordDict({"model": model_record, "train_metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
 

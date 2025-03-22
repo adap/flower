@@ -24,7 +24,7 @@ import flwr.common.recorddict_compat as compat
 from flwr.common import (
     ArrayRecord,
     Code,
-    ConfigsRecord,
+    ConfigRecord,
     Context,
     EvaluateRes,
     FitRes,
@@ -78,9 +78,9 @@ class DefaultWorkflow:
 
         # Run federated learning for num_rounds
         start_time = timeit.default_timer()
-        cfg = ConfigsRecord()
+        cfg = ConfigRecord()
         cfg[Key.START_TIME] = start_time
-        context.state.configs_records[MAIN_CONFIGS_RECORD] = cfg
+        context.state.config_records[MAIN_CONFIGS_RECORD] = cfg
 
         for current_round in range(1, context.config.num_rounds + 1):
             log(INFO, "")
@@ -191,7 +191,7 @@ def default_centralized_evaluation_workflow(_: Grid, context: Context) -> None:
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
     # Retrieve current_round and start_time from the context
-    cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+    cfg = context.state.config_records[MAIN_CONFIGS_RECORD]
     current_round = cast(int, cfg[Key.CURRENT_ROUND])
     start_time = cast(float, cfg[Key.START_TIME])
 
@@ -223,7 +223,7 @@ def default_fit_workflow(grid: Grid, context: Context) -> None:  # pylint: disab
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
     # Get current_round and parameters
-    cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+    cfg = context.state.config_records[MAIN_CONFIGS_RECORD]
     current_round = cast(int, cfg[Key.CURRENT_ROUND])
     arr_record = context.state.array_records[MAIN_PARAMS_RECORD]
     parameters = compat.arrayrecord_to_parameters(arr_record, keep_input=True)
@@ -306,7 +306,7 @@ def default_evaluate_workflow(grid: Grid, context: Context) -> None:
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
     # Get current_round and parameters
-    cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+    cfg = context.state.config_records[MAIN_CONFIGS_RECORD]
     current_round = cast(int, cfg[Key.CURRENT_ROUND])
     arr_record = context.state.array_records[MAIN_PARAMS_RECORD]
     parameters = compat.arrayrecord_to_parameters(arr_record, keep_input=True)
