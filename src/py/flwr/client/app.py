@@ -422,7 +422,15 @@ def start_client_internal(
                     # Call create_node fn to register node
                     # and store node_id in state
                     node_name = node_config.get("name", "")
-                    if (node_id := create_node(node_name=node_name)) is None:
+                    node_city = node_config.get("city", "")
+                    node_country = node_config.get("country", "")
+                    if (
+                        node_id := create_node(
+                            node_name=node_name,
+                            node_city=node_city,
+                            node_country=node_country,
+                        )
+                    ) is None:
                         raise ValueError(
                             "Failed to register SuperNode with the SuperLink"
                         )

@@ -65,9 +65,9 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         )
         log(
             INFO,
-            "[Fleet.CreateNode] Created node_id=%s (name: %s)",
+            "[Fleet.CreateNode] Created node_id=%s (metadata: %s)",
             response.node.node_id,
-            request.name,
+            request.metadata,
         )
         log(DEBUG, "[Fleet.CreateNode] Response: %s", MessageToDict(response))
         return response

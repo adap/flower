@@ -61,7 +61,7 @@ def create_node(
     # Create node
     node_id = state.create_node(
         ping_interval=request.ping_interval,
-        metadata={"address": peer, "name": request.name},
+        metadata={"address": peer, **request.metadata},
     )
     return CreateNodeResponse(node=Node(node_id=node_id))
 

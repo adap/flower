@@ -18,39 +18,43 @@ from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
 from flwr.proto import message_pb2 as flwr_dot_proto_dot_message__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66lwr/proto/fleet.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x14\x66lwr/proto/run.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x18\x66lwr/proto/message.proto\"8\n\x11\x43reateNodeRequest\x12\x15\n\rping_interval\x18\x01 \x01(\x01\x12\x0c\n\x04name\x18\x02 \x01(\t\"4\n\x12\x43reateNodeResponse\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\"3\n\x11\x44\x65leteNodeRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\"\x14\n\x12\x44\x65leteNodeResponse\"D\n\x0bPingRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x15\n\rping_interval\x18\x02 \x01(\x01\"\x1f\n\x0cPingResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"J\n\x13PullMessagesRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x13\n\x0bmessage_ids\x18\x02 \x03(\t\"l\n\x14PullMessagesResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12*\n\rmessages_list\x18\x02 \x03(\x0b\x32\x13.flwr.proto.Message\"a\n\x13PushMessagesRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12*\n\rmessages_list\x18\x02 \x03(\x0b\x32\x13.flwr.proto.Message\"\xb0\x01\n\x14PushMessagesResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12>\n\x07results\x18\x02 \x03(\x0b\x32-.flwr.proto.PushMessagesResponse.ResultsEntry\x1a.\n\x0cResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"\x1e\n\tReconnect\x12\x11\n\treconnect\x18\x01 \x01(\x04\x32\x92\x04\n\x05\x46leet\x12M\n\nCreateNode\x12\x1d.flwr.proto.CreateNodeRequest\x1a\x1e.flwr.proto.CreateNodeResponse\"\x00\x12M\n\nDeleteNode\x12\x1d.flwr.proto.DeleteNodeRequest\x1a\x1e.flwr.proto.DeleteNodeResponse\"\x00\x12;\n\x04Ping\x12\x17.flwr.proto.PingRequest\x1a\x18.flwr.proto.PingResponse\"\x00\x12S\n\x0cPullMessages\x12\x1f.flwr.proto.PullMessagesRequest\x1a .flwr.proto.PullMessagesResponse\"\x00\x12S\n\x0cPushMessages\x12\x1f.flwr.proto.PushMessagesRequest\x1a .flwr.proto.PushMessagesResponse\"\x00\x12\x41\n\x06GetRun\x12\x19.flwr.proto.GetRunRequest\x1a\x1a.flwr.proto.GetRunResponse\"\x00\x12\x41\n\x06GetFab\x12\x19.flwr.proto.GetFabRequest\x1a\x1a.flwr.proto.GetFabResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66lwr/proto/fleet.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x14\x66lwr/proto/run.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x18\x66lwr/proto/message.proto\"\x9a\x01\n\x11\x43reateNodeRequest\x12\x15\n\rping_interval\x18\x01 \x01(\x01\x12=\n\x08metadata\x18\x02 \x03(\x0b\x32+.flwr.proto.CreateNodeRequest.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"4\n\x12\x43reateNodeResponse\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\"3\n\x11\x44\x65leteNodeRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\"\x14\n\x12\x44\x65leteNodeResponse\"D\n\x0bPingRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x15\n\rping_interval\x18\x02 \x01(\x01\"\x1f\n\x0cPingResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"J\n\x13PullMessagesRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x13\n\x0bmessage_ids\x18\x02 \x03(\t\"l\n\x14PullMessagesResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12*\n\rmessages_list\x18\x02 \x03(\x0b\x32\x13.flwr.proto.Message\"a\n\x13PushMessagesRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12*\n\rmessages_list\x18\x02 \x03(\x0b\x32\x13.flwr.proto.Message\"\xb0\x01\n\x14PushMessagesResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12>\n\x07results\x18\x02 \x03(\x0b\x32-.flwr.proto.PushMessagesResponse.ResultsEntry\x1a.\n\x0cResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"\x1e\n\tReconnect\x12\x11\n\treconnect\x18\x01 \x01(\x04\x32\x92\x04\n\x05\x46leet\x12M\n\nCreateNode\x12\x1d.flwr.proto.CreateNodeRequest\x1a\x1e.flwr.proto.CreateNodeResponse\"\x00\x12M\n\nDeleteNode\x12\x1d.flwr.proto.DeleteNodeRequest\x1a\x1e.flwr.proto.DeleteNodeResponse\"\x00\x12;\n\x04Ping\x12\x17.flwr.proto.PingRequest\x1a\x18.flwr.proto.PingResponse\"\x00\x12S\n\x0cPullMessages\x12\x1f.flwr.proto.PullMessagesRequest\x1a .flwr.proto.PullMessagesResponse\"\x00\x12S\n\x0cPushMessages\x12\x1f.flwr.proto.PushMessagesRequest\x1a .flwr.proto.PushMessagesResponse\"\x00\x12\x41\n\x06GetRun\x12\x19.flwr.proto.GetRunRequest\x1a\x1a.flwr.proto.GetRunResponse\"\x00\x12\x41\n\x06GetFab\x12\x19.flwr.proto.GetFabRequest\x1a\x1a.flwr.proto.GetFabResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'flwr.proto.fleet_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
+  _globals['_CREATENODEREQUEST_METADATAENTRY']._options = None
+  _globals['_CREATENODEREQUEST_METADATAENTRY']._serialized_options = b'8\001'
   _globals['_PUSHMESSAGESRESPONSE_RESULTSENTRY']._options = None
   _globals['_PUSHMESSAGESRESPONSE_RESULTSENTRY']._serialized_options = b'8\001'
-  _globals['_CREATENODEREQUEST']._serialized_start=131
-  _globals['_CREATENODEREQUEST']._serialized_end=187
-  _globals['_CREATENODERESPONSE']._serialized_start=189
-  _globals['_CREATENODERESPONSE']._serialized_end=241
-  _globals['_DELETENODEREQUEST']._serialized_start=243
-  _globals['_DELETENODEREQUEST']._serialized_end=294
-  _globals['_DELETENODERESPONSE']._serialized_start=296
-  _globals['_DELETENODERESPONSE']._serialized_end=316
-  _globals['_PINGREQUEST']._serialized_start=318
-  _globals['_PINGREQUEST']._serialized_end=386
-  _globals['_PINGRESPONSE']._serialized_start=388
-  _globals['_PINGRESPONSE']._serialized_end=419
-  _globals['_PULLMESSAGESREQUEST']._serialized_start=421
-  _globals['_PULLMESSAGESREQUEST']._serialized_end=495
-  _globals['_PULLMESSAGESRESPONSE']._serialized_start=497
-  _globals['_PULLMESSAGESRESPONSE']._serialized_end=605
-  _globals['_PUSHMESSAGESREQUEST']._serialized_start=607
-  _globals['_PUSHMESSAGESREQUEST']._serialized_end=704
-  _globals['_PUSHMESSAGESRESPONSE']._serialized_start=707
-  _globals['_PUSHMESSAGESRESPONSE']._serialized_end=883
-  _globals['_PUSHMESSAGESRESPONSE_RESULTSENTRY']._serialized_start=837
-  _globals['_PUSHMESSAGESRESPONSE_RESULTSENTRY']._serialized_end=883
-  _globals['_RECONNECT']._serialized_start=885
-  _globals['_RECONNECT']._serialized_end=915
-  _globals['_FLEET']._serialized_start=918
-  _globals['_FLEET']._serialized_end=1448
+  _globals['_CREATENODEREQUEST']._serialized_start=132
+  _globals['_CREATENODEREQUEST']._serialized_end=286
+  _globals['_CREATENODEREQUEST_METADATAENTRY']._serialized_start=239
+  _globals['_CREATENODEREQUEST_METADATAENTRY']._serialized_end=286
+  _globals['_CREATENODERESPONSE']._serialized_start=288
+  _globals['_CREATENODERESPONSE']._serialized_end=340
+  _globals['_DELETENODEREQUEST']._serialized_start=342
+  _globals['_DELETENODEREQUEST']._serialized_end=393
+  _globals['_DELETENODERESPONSE']._serialized_start=395
+  _globals['_DELETENODERESPONSE']._serialized_end=415
+  _globals['_PINGREQUEST']._serialized_start=417
+  _globals['_PINGREQUEST']._serialized_end=485
+  _globals['_PINGRESPONSE']._serialized_start=487
+  _globals['_PINGRESPONSE']._serialized_end=518
+  _globals['_PULLMESSAGESREQUEST']._serialized_start=520
+  _globals['_PULLMESSAGESREQUEST']._serialized_end=594
+  _globals['_PULLMESSAGESRESPONSE']._serialized_start=596
+  _globals['_PULLMESSAGESRESPONSE']._serialized_end=704
+  _globals['_PUSHMESSAGESREQUEST']._serialized_start=706
+  _globals['_PUSHMESSAGESREQUEST']._serialized_end=803
+  _globals['_PUSHMESSAGESRESPONSE']._serialized_start=806
+  _globals['_PUSHMESSAGESRESPONSE']._serialized_end=982
+  _globals['_PUSHMESSAGESRESPONSE_RESULTSENTRY']._serialized_start=936
+  _globals['_PUSHMESSAGESRESPONSE_RESULTSENTRY']._serialized_end=982
+  _globals['_RECONNECT']._serialized_start=984
+  _globals['_RECONNECT']._serialized_end=1014
+  _globals['_FLEET']._serialized_start=1017
+  _globals['_FLEET']._serialized_end=1547
 # @@protoc_insertion_point(module_scope)
