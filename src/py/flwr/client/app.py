@@ -425,7 +425,7 @@ def start_client_internal(
                     node_city = node_config.get("city", "")
                     node_country = node_config.get("country", "")
                     coo_n = node_config.get("N", "")
-                    coo_e = node_config.get("W", "")
+                    coo_e = node_config.get("E", "")
                     if (
                         node_id := create_node(
                             node_name=node_name,
