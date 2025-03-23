@@ -5,7 +5,7 @@
 Build Flower apps
 
 How-to guides
--------------
+=============
 
 Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
 

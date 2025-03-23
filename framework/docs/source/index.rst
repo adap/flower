@@ -73,7 +73,6 @@ Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart
 ..
     :width: 80%
 
-
 Build a Flower app
 ~~~~~~~~~~~~~~~~~~
 
@@ -81,7 +80,6 @@ Build a Flower app
     :titlesonly:
 
     Build <build>
-
 
 Simulate using the Flower Simulation Engine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
