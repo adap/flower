@@ -26,20 +26,37 @@ class NodeInfo(google.protobuf.message.Message):
             ) -> None: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
+    class LocEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        value: builtins.float
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: builtins.float = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
     NODE_ID_FIELD_NUMBER: builtins.int
     IS_ONLINE_FIELD_NUMBER: builtins.int
     METADATA_FIELD_NUMBER: builtins.int
+    LOC_FIELD_NUMBER: builtins.int
     node_id: builtins.int
     is_online: builtins.bool
     @property
     def metadata(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
+    @property
+    def loc(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, builtins.float]: ...
     def __init__(self,
         *,
         node_id: builtins.int = ...,
         is_online: builtins.bool = ...,
         metadata: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
+        loc: typing.Optional[typing.Mapping[typing.Text, builtins.float]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["is_online",b"is_online","metadata",b"metadata","node_id",b"node_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["is_online",b"is_online","loc",b"loc","metadata",b"metadata","node_id",b"node_id"]) -> None: ...
 global___NodeInfo = NodeInfo
 
 class Node(google.protobuf.message.Message):

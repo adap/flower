@@ -21,6 +21,7 @@ message NodeInfo {
   uint64 node_id = 1;
   bool is_online = 2;
   map<string, string> metadata = 3;
+  map<string, double> loc = 4;
 }
 
 message Node { uint64 node_id = 1; }
