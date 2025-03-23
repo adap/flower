@@ -25,17 +25,3 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-use-cli-json-output
     how-to-upgrade-to-flower-1.0
     how-to-upgrade-to-flower-1.13
-
-Explanations
-------------
-
-Understanding-oriented concept guides explain and discuss key topics and underlying
-ideas behind Flower and collaborative AI.
-
-.. toctree::
-    :maxdepth: 1
-    :caption: Explanations
-
-    explanation-federated-evaluation
-    explanation-differential-privacy
-    explanation-flower-architecture
