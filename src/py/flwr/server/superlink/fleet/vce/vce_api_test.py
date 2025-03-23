@@ -30,7 +30,7 @@ from flwr.client.client_app import LoadClientAppError
 from flwr.common import (
     DEFAULT_TTL,
     Config,
-    ConfigsRecord,
+    ConfigRecord,
     Context,
     GetPropertiesIns,
     MessageTypeLegacy,
@@ -63,7 +63,7 @@ class DummyClient(NumPyClient):
         result = float(config["factor"]) * pi
 
         # store something in context
-        self.client_state.configs_records["result"] = ConfigsRecord({"result": result})
+        self.client_state.config_records["result"] = ConfigRecord({"result": result})
 
         return {"result": result}
 
@@ -322,6 +322,6 @@ class TestFleetSimulationEngineRayBackend(TestCase):
             # Verify message content is as expected
             content = message_res.content
             assert (
-                content.configs_records["getpropertiesres.properties"]["result"]
+                content.config_records["getpropertiesres.properties"]["result"]
                 == expected_results[UUID(message_res.metadata.reply_to_message_id)]
             )

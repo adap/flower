@@ -73,13 +73,15 @@ Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart
 ..
     :width: 80%
 
+
 Build a Flower app
 ~~~~~~~~~~~~~~~~~~
 
 .. toctree::
     :titlesonly:
 
-    build
+    Build <build>
+
 
 Simulate using the Flower Simulation Engine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,7 +89,7 @@ Simulate using the Flower Simulation Engine
 .. toctree::
     :titlesonly:
 
-    simulate
+    Simulate <simulate>
 
 Deploy using the Flower Deployment Engine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,14 +97,29 @@ Deploy using the Flower Deployment Engine
 .. toctree::
     :titlesonly:
 
-    deploy
+    Deploy <deploy>
 
-Reference
-~~~~~~~~~
+Explanations
+~~~~~~~~~~~~
+
+Understanding-oriented concept guides explain and discuss key topics and underlying
+ideas behind Flower and collaborative AI.
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Explanations
+
+    explanation-federated-evaluation
+    explanation-differential-privacy
+    explanation-flower-architecture
+
+References
+~~~~~~~~~~
 
 .. toctree::
     :titlesonly:
     :maxdepth: 2
+    :caption: References
 
     reference
 
@@ -114,8 +131,9 @@ along the way.
 
 .. toctree::
     :titlesonly:
+    :caption: Contributor docs
 
-    contribute
+    Contribute <contribute>
 
 ..
     Indices and tables

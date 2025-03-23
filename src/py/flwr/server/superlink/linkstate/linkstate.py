@@ -20,7 +20,7 @@ from typing import Optional
 from uuid import UUID
 
 from flwr.common import Context, Message
-from flwr.common.record import ConfigsRecord
+from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 
@@ -164,7 +164,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
-        federation_options: ConfigsRecord,
+        federation_options: ConfigRecord,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
 
@@ -236,7 +236,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_federation_options(self, run_id: int) -> Optional[ConfigsRecord]:
+    def get_federation_options(self, run_id: int) -> Optional[ConfigRecord]:
         """Retrieve the federation options for the specified `run_id`.
 
         Parameters
@@ -246,7 +246,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Returns
         -------
-        Optional[ConfigsRecord]
+        Optional[ConfigRecord]
             The federation options for the run if it exists; None otherwise.
         """
 

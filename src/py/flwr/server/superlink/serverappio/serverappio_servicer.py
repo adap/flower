@@ -22,7 +22,7 @@ from uuid import UUID
 
 import grpc
 
-from flwr.common import ConfigsRecord, Message
+from flwr.common import ConfigRecord, Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -127,7 +127,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             request.fab_version,
             fab_hash,
             user_config_from_proto(request.override_config),
-            ConfigsRecord(),
+            ConfigRecord(),
         )
         return CreateRunResponse(run_id=run_id)
 

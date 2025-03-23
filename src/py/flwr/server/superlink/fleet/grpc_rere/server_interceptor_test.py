@@ -22,7 +22,7 @@ from typing import Any, Callable
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigsRecord, now
+from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     PUBLIC_KEY_HEADER,
@@ -187,7 +187,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_push_messages(self, metadata: list[Any]) -> Any:
         """Test PushMessages."""
         node_id = self._create_node_and_set_public_key()
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         # Transition status to running. PushMessages is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
@@ -200,7 +200,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_get_run(self, metadata: list[Any]) -> Any:
         """Test GetRun."""
         node_id = self._create_node_and_set_public_key()
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         # Transition status to running. GetRun is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
@@ -217,7 +217,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test GetFab."""
         fab_hash = self.ffs.put(b"mock fab content", {})
         node_id = self._create_node_and_set_public_key()
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         # Transition status to running. GetFabRequest is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
