@@ -2,8 +2,8 @@
 .. meta::
     :description: Run scalable federated learning simulations with the Flower Simulation Runtime. Follow step-by-step guides to set up, configure, and execute simulations easily.
 
-Simulate using the Flower Simulation Engine
-===========================================
+Simulate using the Flower Simulation Runtime
+============================================
 
 How-to guides
 -------------
