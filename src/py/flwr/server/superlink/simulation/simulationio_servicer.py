@@ -24,7 +24,7 @@ from grpc import ServicerContext
 from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import (
-    configs_record_to_proto,
+    config_record_to_proto,
     context_from_proto,
     context_to_proto,
     fab_to_proto,
@@ -182,5 +182,5 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
             )
             return GetFederationOptionsResponse()
         return GetFederationOptionsResponse(
-            federation_options=configs_record_to_proto(federation_options)
+            federation_options=config_record_to_proto(federation_options)
         )

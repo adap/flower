@@ -113,7 +113,7 @@ def _get_valid_getparametersins() -> GetParametersIns:
         "a": 1.0,
         "b": 3,
         "c": True,
-    }  # valid since both Ins/Res communicate over ConfigsRecord
+    }  # valid since both Ins/Res communicate over ConfigRecord
 
     return GetParametersIns(config_dict)
 
@@ -136,7 +136,7 @@ def _get_valid_getpropertiesres() -> GetPropertiesRes:
         "a": 1.0,
         "b": 3,
         "c": True,
-    }  # valid since both Ins/Res communicate over ConfigsRecord
+    }  # valid since both Ins/Res communicate over ConfigRecord
 
     return GetPropertiesRes(
         status=Status(code=Code(0), message=""), properties=config_dict

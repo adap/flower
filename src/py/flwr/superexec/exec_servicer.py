@@ -28,7 +28,7 @@ from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.constant import LOG_STREAM_INTERVAL, Status, SubStatus
 from flwr.common.logger import log
 from flwr.common.serde import (
-    configs_record_from_proto,
+    config_record_from_proto,
     run_to_proto,
     user_config_from_proto,
 )
@@ -79,7 +79,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         run_id = self.executor.start_run(
             request.fab.content,
             user_config_from_proto(request.override_config),
-            configs_record_from_proto(request.federation_options),
+            config_record_from_proto(request.federation_options),
         )
 
         if run_id is None:

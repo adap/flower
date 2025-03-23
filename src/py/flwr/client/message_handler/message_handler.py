@@ -26,7 +26,7 @@ from flwr.client.client import (
 )
 from flwr.client.numpy_client import NumPyClient
 from flwr.client.typing import ClientFnExt
-from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordDict, log
+from flwr.common import ConfigRecord, Context, Message, Metadata, RecordDict, log
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.recorddict_compat import (
     evaluateres_to_recorddict,
@@ -72,7 +72,7 @@ def handle_control_message(message: Message) -> tuple[Optional[Message], int]:
     if message.metadata.message_type == "reconnect":
         # Retrieve ReconnectIns from RecordDict
         recorddict = message.content
-        seconds = cast(int, recorddict.configs_records["config"]["seconds"])
+        seconds = cast(int, recorddict.config_records["config"]["seconds"])
         # Construct ReconnectIns and call _reconnect
         disconnect_msg, sleep_duration = _reconnect(
             ServerMessage.ReconnectIns(seconds=seconds)
@@ -80,7 +80,7 @@ def handle_control_message(message: Message) -> tuple[Optional[Message], int]:
         # Store DisconnectRes in RecordDict
         reason = cast(int, disconnect_msg.disconnect_res.reason)
         recorddict = RecordDict()
-        recorddict.configs_records["config"] = ConfigsRecord({"reason": reason})
+        recorddict.config_records["config"] = ConfigRecord({"reason": reason})
         out_message = Message(recorddict, reply_to=message)
         # Return Message and sleep duration
         return out_message, sleep_duration

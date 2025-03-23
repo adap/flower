@@ -2,7 +2,6 @@
 
 import hashlib
 import os
-import random
 import time
 from collections import defaultdict
 from itertools import cycle
@@ -14,7 +13,7 @@ from fedrag.mirage_qa import MirageQA
 from fedrag.task import index_exists
 from sklearn.metrics import accuracy_score
 
-from flwr.common import ConfigsRecord, Context, Message, MessageType, RecordDict
+from flwr.common import ConfigRecord, Context, Message, MessageType, RecordDict
 from flwr.server import Grid, ServerApp
 
 
@@ -79,11 +78,11 @@ def submit_question(
     for node_idx, node_id in enumerate(node_ids):
         # The payload of a Message is of type RecordDict
         # https://flower.ai/docs/framework/ref-api/flwr.common.RecordDict.html
-        # which can carry different types of records. We'll use a ConfigsRecord object
-        # We need to create a new ConfigsRecord() object for every node, otherwise
+        # which can carry different types of records. We'll use a ConfigRecord object
+        # We need to create a new ConfigRecord() object for every node, otherwise
         # if we just override a single key, e.g., corpus_name, the grid will send
         # the same object to all nodes.
-        config_record = ConfigsRecord()
+        config_record = ConfigRecord()
         config_record["question"] = question
         config_record["question_id"] = question_id
         config_record["knn"] = knn
@@ -168,14 +167,13 @@ def main(grid: Grid, context: Context) -> None:
             options = q["options"]
             answer = q["answer"]
 
-            response, predicted_answer = llm_querier.answer(
+            prompt, predicted_answer = llm_querier.answer(
                 question, merged_docs, options, dataset_name
             )
 
             # If the model did not predict any value,
             # then discard the question
             if predicted_answer is not None:
-                predicted_answer = random.choice(list(options.keys()))
                 expected_answers[dataset_name].append(answer)
                 predicted_answers[dataset_name].append(predicted_answer)
                 q_et = time.time()

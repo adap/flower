@@ -17,7 +17,7 @@
 
 from ..logger import warn_deprecated_feature
 from ..typing import NDArray
-from .parametersrecord import Array
+from .arrayrecord import Array
 
 WARN_DEPRECATED_MESSAGE = (
     "`array_from_numpy` is deprecated. Instead, use the `Array(ndarray)` class "
