@@ -36,7 +36,7 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.message import make_message
-from flwr.common.record import ConfigsRecord
+from flwr.common.record import ConfigRecord
 from flwr.common.serde import (
     error_from_proto,
     error_to_proto,
@@ -55,8 +55,8 @@ from flwr.server.utils.validator import validate_message
 from .linkstate import LinkState
 from .utils import (
     check_node_availability_for_in_message,
-    configsrecord_from_bytes,
-    configsrecord_to_bytes,
+    configrecord_from_bytes,
+    configrecord_to_bytes,
     context_from_bytes,
     context_to_bytes,
     convert_sint64_to_uint64,
@@ -727,7 +727,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
-        federation_options: ConfigsRecord,
+        federation_options: ConfigRecord,
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
@@ -753,7 +753,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 fab_version,
                 fab_hash,
                 override_config_json,
-                configsrecord_to_bytes(federation_options),
+                configrecord_to_bytes(federation_options),
             ]
             data += [
                 now().isoformat(),
@@ -911,7 +911,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return pending_run_id
 
-    def get_federation_options(self, run_id: int) -> Optional[ConfigsRecord]:
+    def get_federation_options(self, run_id: int) -> Optional[ConfigRecord]:
         """Retrieve the federation options for the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
@@ -924,7 +924,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         row = rows[0]
-        return configsrecord_from_bytes(row["federation_options"])
+        return configrecord_from_bytes(row["federation_options"])
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat.

@@ -21,9 +21,9 @@ from typing import Callable
 from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.message import Message
-from flwr.common.typing import ConfigsRecordValues
+from flwr.common.typing import ConfigRecordValues
 
-BackendConfig = dict[str, dict[str, ConfigsRecordValues]]
+BackendConfig = dict[str, dict[str, ConfigRecordValues]]
 
 
 class Backend(ABC):

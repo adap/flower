@@ -22,7 +22,7 @@ from typing import Optional
 from typing_extensions import override
 
 from flwr.cli.config_utils import get_fab_metadata
-from flwr.common import ConfigsRecord, Context, RecordDict
+from flwr.common import ConfigRecord, Context, RecordDict
 from flwr.common.logger import log
 from flwr.common.typing import Fab, UserConfig
 from flwr.server.superlink.ffs import Ffs
@@ -76,7 +76,7 @@ class SimulationEngine(Executor):
         self,
         fab_file: bytes,
         override_config: UserConfig,
-        federation_options: ConfigsRecord,
+        federation_options: ConfigRecord,
     ) -> Optional[int]:
         """Start run using the Flower Simulation Engine."""
         try:

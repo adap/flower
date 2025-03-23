@@ -1,11 +1,10 @@
 """fedrag: A Flower Federated RAG app."""
 
-import os
-
 from flwr.client import ClientApp
-from flwr.common import ConfigsRecord, Context, Message, RecordDict
+from flwr.common import ConfigRecord, Context, Message, RecordDict
 
 from fedrag.retriever import Retriever
+
 
 # Flower ClientApp
 app = ClientApp()
@@ -39,7 +38,7 @@ def query(msg: Message, context: Context):
     )
 
     # Create reply record with retrieved documents.
-    docs_n_scores = ConfigsRecord(
+    docs_n_scores = ConfigRecord(
         {
             "documents": documents,
             "scores": scores,
@@ -48,4 +47,4 @@ def query(msg: Message, context: Context):
     reply_record = RecordDict({"docs_n_scores": docs_n_scores})
 
     # Return message
-    return msg.create_reply(reply_record)
+    return Message(reply_record, reply_to=msg)

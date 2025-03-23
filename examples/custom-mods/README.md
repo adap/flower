@@ -99,9 +99,9 @@ if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
 
     time_diff = time.time() - start_time
 
-    metrics = reply.content.configs_records
+    metrics = reply.content.config_records
 
-    results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
+    results_to_log = dict(metrics.get("fitres.metrics", ConfigRecord()))
     results_to_log["fit_time"] = time_diff
 ```
 
@@ -143,9 +143,9 @@ def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message
 
         time_diff = time.time() - start_time
 
-        metrics = reply.content.configs_records
+        metrics = reply.content.config_records
 
-        results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
+        results_to_log = dict(metrics.get("fitres.metrics", ConfigRecord()))
 
         results_to_log["fit_time"] = time_diff
 
@@ -193,9 +193,9 @@ def get_wandb_mod(name: str) -> Mod:
 
             time_diff = time.time() - start_time
 
-            metrics = reply.content.configs_records
+            metrics = reply.content.config_records
 
-            results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
+            results_to_log = dict(metrics.get("fitres.metrics", ConfigRecord()))
 
             results_to_log["fit_time"] = time_diff
 
@@ -244,7 +244,7 @@ def get_tensorboard_mod(logdir) -> Mod:
             writer = tf.summary.create_file_writer(os.path.join(logdir_run, node_id))
 
             metrics = dict(
-                reply.content.configs_records.get("fitres.metrics", ConfigsRecord())
+                reply.content.config_records.get("fitres.metrics", ConfigRecord())
             )
 
             with writer.as_default(step=server_round):

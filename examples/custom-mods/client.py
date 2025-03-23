@@ -6,7 +6,7 @@ import flwr as fl
 import tensorflow as tf
 import wandb
 from flwr.client.typing import ClientAppCallable, Mod
-from flwr.common import ConfigsRecord
+from flwr.common import ConfigRecord
 from flwr.common.constant import MessageType
 from flwr.common.context import Context
 from flwr.common.message import Message
@@ -78,9 +78,9 @@ def get_wandb_mod(name: str) -> Mod:
 
         # if the `ClientApp` just processed a "fit" message, let's log some metrics to W&B
         if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
-            metrics = reply.content.configs_records
+            metrics = reply.content.config_records
 
-            results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
+            results_to_log = dict(metrics.get("fitres.metrics", ConfigRecord()))
 
             results_to_log["fit_time"] = time_diff
 
@@ -116,7 +116,7 @@ def get_tensorboard_mod(logdir) -> Mod:
             writer = tf.summary.create_file_writer(os.path.join(logdir_run, node_id))
 
             metrics = dict(
-                reply.content.configs_records.get("fitres.metrics", ConfigsRecord())
+                reply.content.config_records.get("fitres.metrics", ConfigRecord())
             )
 
             with writer.as_default(step=server_round):

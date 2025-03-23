@@ -18,16 +18,16 @@
 from typing import cast
 
 from flwr.client.run_info_store import DeprecatedRunInfoStore
-from flwr.common import ConfigsRecord, Context
+from flwr.common import ConfigRecord, Context
 
 
 def _run_dummy_task(context: Context) -> Context:
     counter_value: str = "1"
-    if "counter" in context.state.configs_records.keys():
-        counter_value = cast(str, context.state.configs_records["counter"]["count"])
+    if "counter" in context.state.config_records.keys():
+        counter_value = cast(str, context.state.config_records["counter"]["count"])
         counter_value += "1"
 
-    context.state.configs_records["counter"] = ConfigsRecord({"count": counter_value})
+    context.state.config_records["counter"] = ConfigRecord({"count": counter_value})
 
     return context
 
@@ -58,6 +58,6 @@ def test_multirun_in_node_state() -> None:
     # Verify values
     for run_id, run_info in node_info_store.run_infos.items():
         assert (
-            run_info.context.state.configs_records["counter"]["count"]
+            run_info.context.state.config_records["counter"]["count"]
             == expected_values[run_id]
         )

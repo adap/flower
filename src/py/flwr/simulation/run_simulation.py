@@ -180,7 +180,7 @@ def run_simulation(
         for values parsed to initialisation of backend, `client_resources`
         to define the resources for clients, and `actor` to define the actor
         parameters. Values supported in <value> are those included by
-        `flwr.common.typing.ConfigsRecordValues`.
+        `flwr.common.typing.ConfigRecordValues`.
 
     enable_tf_gpu_growth : bool (default: False)
         A boolean to indicate whether to enable GPU growth on the main thread. This is
@@ -546,7 +546,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         default="{}",
         help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
         "configure a backend. Values supported in <value> are those included by "
-        "`flwr.common.typing.ConfigsRecordValues`. ",
+        "`flwr.common.typing.ConfigRecordValues`. ",
     )
     parser.add_argument(
         "--enable-tf-gpu-growth",
