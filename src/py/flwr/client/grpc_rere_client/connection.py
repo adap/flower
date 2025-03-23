@@ -193,7 +193,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             ping_stop_event.wait(next_interval)
 
     def create_node(
-        node_name: str, node_city: str, node_country: str, coo_n: str, coo_w: str
+        node_name: str, node_city: str, node_country: str, coo_n: str, coo_e: str
     ) -> Optional[int]:
         """Set create_node."""
         # Call FleetAPI
@@ -204,7 +204,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
                 "city": node_city,
                 "country": node_country,
                 "coo_n": coo_n,
-                "coo_w": coo_w,
+                "coo_e": coo_e,
             },
         )
         create_node_response = retry_invoker.invoke(

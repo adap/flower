@@ -425,14 +425,14 @@ def start_client_internal(
                     node_city = node_config.get("city", "")
                     node_country = node_config.get("country", "")
                     coo_n = node_config.get("N", "")
-                    coo_w = node_config.get("W", "")
+                    coo_e = node_config.get("W", "")
                     if (
                         node_id := create_node(
                             node_name=node_name,
                             node_city=node_city,
                             node_country=node_country,
                             coo_n=coo_n,
-                            coo_w=coo_w,
+                            coo_e=coo_e,
                         )
                     ) is None:
                         raise ValueError(
