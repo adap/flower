@@ -23,7 +23,7 @@ from flwr import common
 from flwr.client import ClientFnExt
 from flwr.client.client_app import ClientApp
 from flwr.client.run_info_store import DeprecatedRunInfoStore
-from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common import DEFAULT_TTL, Message, Metadata, RecordDict, now
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -31,15 +31,16 @@ from flwr.common.constant import (
     MessageTypeLegacy,
 )
 from flwr.common.logger import log
-from flwr.common.recordset_compat import (
-    evaluateins_to_recordset,
-    fitins_to_recordset,
-    getparametersins_to_recordset,
-    getpropertiesins_to_recordset,
-    recordset_to_evaluateres,
-    recordset_to_fitres,
-    recordset_to_getparametersres,
-    recordset_to_getpropertiesres,
+from flwr.common.message import make_message
+from flwr.common.recorddict_compat import (
+    evaluateins_to_recorddict,
+    fitins_to_recorddict,
+    getparametersins_to_recorddict,
+    getpropertiesins_to_recorddict,
+    recorddict_to_evaluateres,
+    recorddict_to_fitres,
+    recorddict_to_getparametersres,
+    recorddict_to_getpropertiesres,
 )
 from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActorPool
@@ -109,23 +110,24 @@ class RayActorClientProxy(ClientProxy):
 
         return out_mssg
 
-    def _wrap_recordset_in_message(
+    def _wrap_recorddict_in_message(
         self,
-        recordset: RecordSet,
+        recorddict: RecordDict,
         message_type: str,
         timeout: Optional[float],
         group_id: Optional[int],
     ) -> Message:
-        """Wrap a RecordSet inside a Message."""
-        return Message(
-            content=recordset,
+        """Wrap a RecordDict inside a Message."""
+        return make_message(
+            content=recorddict,
             metadata=Metadata(
                 run_id=0,
                 message_id="",
                 group_id=str(group_id) if group_id is not None else "",
                 src_node_id=0,
                 dst_node_id=self.node_id,
-                reply_to_message="",
+                reply_to_message_id="",
+                created_at=now().timestamp(),
                 ttl=timeout if timeout else DEFAULT_TTL,
                 message_type=message_type,
             ),
@@ -138,9 +140,9 @@ class RayActorClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
-        recordset = getpropertiesins_to_recordset(ins)
-        message = self._wrap_recordset_in_message(
-            recordset,
+        recorddict = getpropertiesins_to_recorddict(ins)
+        message = self._wrap_recorddict_in_message(
+            recorddict,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
             timeout=timeout,
             group_id=group_id,
@@ -148,7 +150,7 @@ class RayActorClientProxy(ClientProxy):
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_getpropertiesres(message_out.content)
+        return recorddict_to_getpropertiesres(message_out.content)
 
     def get_parameters(
         self,
@@ -157,9 +159,9 @@ class RayActorClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        recordset = getparametersins_to_recordset(ins)
-        message = self._wrap_recordset_in_message(
-            recordset,
+        recorddict = getparametersins_to_recorddict(ins)
+        message = self._wrap_recorddict_in_message(
+            recorddict,
             message_type=MessageTypeLegacy.GET_PARAMETERS,
             timeout=timeout,
             group_id=group_id,
@@ -167,17 +169,17 @@ class RayActorClientProxy(ClientProxy):
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_getparametersres(message_out.content, keep_input=False)
+        return recorddict_to_getparametersres(message_out.content, keep_input=False)
 
     def fit(
         self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-        recordset = fitins_to_recordset(
+        recorddict = fitins_to_recorddict(
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
-        message = self._wrap_recordset_in_message(
-            recordset,
+        message = self._wrap_recorddict_in_message(
+            recorddict,
             message_type=MessageType.TRAIN,
             timeout=timeout,
             group_id=group_id,
@@ -185,17 +187,17 @@ class RayActorClientProxy(ClientProxy):
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_fitres(message_out.content, keep_input=False)
+        return recorddict_to_fitres(message_out.content, keep_input=False)
 
     def evaluate(
         self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-        recordset = evaluateins_to_recordset(
+        recorddict = evaluateins_to_recorddict(
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
-        message = self._wrap_recordset_in_message(
-            recordset,
+        message = self._wrap_recorddict_in_message(
+            recorddict,
             message_type=MessageType.EVALUATE,
             timeout=timeout,
             group_id=group_id,
@@ -203,7 +205,7 @@ class RayActorClientProxy(ClientProxy):
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_evaluateres(message_out.content)
+        return recorddict_to_evaluateres(message_out.content)
 
     def reconnect(
         self,

@@ -130,9 +130,7 @@ def worker(
                 e_code = ErrorCode.UNKNOWN
 
             reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-            out_mssg = message.create_error_reply(
-                error=Error(code=e_code, reason=reason)
-            )
+            out_mssg = Message(Error(code=e_code, reason=reason), reply_to=message)
 
         finally:
             if out_mssg:

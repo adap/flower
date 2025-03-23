@@ -21,7 +21,7 @@ import unittest
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigsRecord, Context
+from flwr.common import ConfigRecord, Context
 from flwr.common.constant import SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS, Status
 from flwr.common.serde import context_to_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
@@ -90,14 +90,14 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_push_simulation_outputs_successful_if_running(self) -> None:
         """Test `PushSimulationOutputs` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 
         maker = RecordMaker()
         context = Context(
             run_id=run_id,
             node_id=0,
             node_config=maker.user_config(),
-            state=maker.recordset(1, 1, 1),
+            state=maker.recorddict(1, 1, 1),
             run_config=maker.user_config(),
         )
 
@@ -141,14 +141,14 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PushSimulationOutputs` not successful if RunStatus is not running."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 
         maker = RecordMaker()
         context = Context(
             run_id=run_id,
             node_id=0,
             node_config=maker.user_config(),
-            state=maker.recordset(1, 1, 1),
+            state=maker.recorddict(1, 1, 1),
             run_config=maker.user_config(),
         )
 
@@ -169,7 +169,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `UpdateRunStatus` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         _ = self.state.get_run_status({run_id})[run_id]
         next_run_status = RunStatus(Status.STARTING, "", "")
 
@@ -194,7 +194,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_update_run_status_not_successful_if_finished(self) -> None:
         """Test `UpdateRunStatus` not successful."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         _ = self.state.get_run_status({run_id})[run_id]
         _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
         run_status = self.state.get_run_status({run_id})[run_id]

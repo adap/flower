@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-16 00:35+0000\n"
+"POT-Creation-Date: 2025-03-22 00:31+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -176,30 +176,29 @@ msgstr ""
 msgid ""
 "We also use this to define the public API of private subpackages. Public,"
 " in this context, means the API that other ``flwr`` subpackages should "
-"use. For example, ``flwr.server.driver`` is a private subpackage (it's "
-"not exported via ``src/py/flwr/server/__init__.py``'s ``__all__``)."
+"use. For example, ``flwr.server.grid`` is a private subpackage (it's not "
+"exported via ``src/py/flwr/server/__init__.py``'s ``__all__``)."
 msgstr ""
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:117
 msgid ""
-"Still, the private sub-package ``flwr.server.driver`` defines a "
-"\"public\" API using ``__all__`` in "
-"``src/py/flwr/server/driver/__init__.py``:"
+"Still, the private sub-package ``flwr.server.grid`` defines a \"public\" "
+"API using ``__all__`` in ``src/py/flwr/server/grid/__init__.py``:"
 msgstr ""
 
-#: ../../source/contributor-explanation-public-and-private-apis.rst:132
+#: ../../source/contributor-explanation-public-and-private-apis.rst:133
 msgid ""
-"The interesting part is that both ``GrpcDriver`` and ``InMemoryDriver`` "
-"are never used by Flower framework users, only by other parts of the "
-"Flower framework codebase. Those other parts of the codebase import, for "
-"example, ``InMemoryDriver`` using ``from flwr.server.driver import "
-"InMemoryDriver`` (i.e., the ``InMemoryDriver`` exported via ``__all__``),"
-" not ``from flwr.server.driver.in_memory_driver import InMemoryDriver`` "
+"The interesting part is that both ``GrpcGrid`` and ``InMemoryGrid`` are "
+"never used by Flower framework users, only by other parts of the Flower "
+"framework codebase. Those other parts of the codebase import, for "
+"example, ``InMemoryGrid`` using ``from flwr.server.driver import "
+"InMemoryGrid`` (i.e., the ``InMemoryGrid`` exported via ``__all__``), not"
+" ``from flwr.server.driver.in_memory_driver import InMemoryGrid`` "
 "(``in_memory_driver.py`` is the module containing the actual "
-"``InMemoryDriver`` class definition)."
+"``InMemoryGrid`` class definition)."
 msgstr ""
 
-#: ../../source/contributor-explanation-public-and-private-apis.rst:140
+#: ../../source/contributor-explanation-public-and-private-apis.rst:141
 msgid ""
 "This is because ``flwr.server.driver`` defines a public interface for "
 "other ``flwr`` subpackages. This allows codeowners of "
@@ -5972,7 +5971,7 @@ msgstr ""
 #: ../../source/how-to-design-stateful-clients.rst:89
 msgid ""
 "Initialise the appropiate record type (in this example we use "
-"ConfigsRecord_) and save/read your entry when required."
+"ConfigRecord_) and save/read your entry when required."
 msgstr ""
 
 #: ../../source/how-to-design-stateful-clients.rst:127
@@ -5989,12 +5988,11 @@ msgstr ""
 
 #: ../../source/how-to-design-stateful-clients.rst:152
 msgid ""
-"Using ConfigsRecord_ or MetricsRecord_ to save \"simple\" components is "
+"Using ConfigRecord_ or MetricRecord_ to save \"simple\" components is "
 "fine (e.g., float, integer, boolean, string, bytes, and lists of these "
-"types. Note that MetricsRecord_ only supports float, integer, and lists "
-"of these types) Flower has a specific type of record, a "
-"ParametersRecord_, for storing model parameters or more generally data "
-"arrays."
+"types. Note that MetricRecord_ only supports float, integer, and lists of"
+" these types) Flower has a specific type of record, a ParametersRecord_, "
+"for storing model parameters or more generally data arrays."
 msgstr ""
 
 #: ../../source/how-to-design-stateful-clients.rst:157
@@ -10195,7 +10193,7 @@ msgid "flwr"
 msgstr "flwr"
 
 #: ../../source/ref-api/flwr.client.rst:43 ../../source/ref-api/flwr.rst:25
-#: ../../source/ref-api/flwr.server.rst:48
+#: ../../source/ref-api/flwr.server.rst:49
 msgid "Modules"
 msgstr "Modules"
 
@@ -10223,7 +10221,7 @@ msgid ":py:obj:`flwr.server <flwr.server>`\\"
 msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1 flwr.server:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1 flwr.server:1
 #: flwr.server.server.Server:1 of
 msgid "Flower server."
 msgstr "Flower 서버."
@@ -10326,9 +10324,8 @@ msgid "Flower Built-in Mods."
 msgstr "Flower 내장 모드."
 
 #: flwr.client.client.Client:1 flwr.client.numpy_client.NumPyClient:1
-#: flwr.server.client_manager.ClientManager:1
-#: flwr.server.driver.driver.Driver:1 flwr.server.strategy.strategy.Strategy:1
-#: of
+#: flwr.server.client_manager.ClientManager:1 flwr.server.grid.grid.Grid:1
+#: flwr.server.strategy.strategy.Strategy:1 of
 msgid "Bases: :py:class:`~abc.ABC`"
 msgstr "Bases: :py:class:`~abc.ABC`"
 
@@ -10337,7 +10334,9 @@ msgstr "Bases: :py:class:`~abc.ABC`"
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:15
 #: ../../source/ref-api/flwr.client.mod.LocalDpMod.rst:15
 #: ../../source/ref-api/flwr.common.Array.rst:15
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:15
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:15
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:15
 #: ../../source/ref-api/flwr.common.ConfigsRecord.rst:15
 #: ../../source/ref-api/flwr.common.Context.rst:15
 #: ../../source/ref-api/flwr.common.DisconnectRes.rst:15
@@ -10355,15 +10354,18 @@ msgstr "Bases: :py:class:`~abc.ABC`"
 #: ../../source/ref-api/flwr.common.MessageType.rst:15
 #: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:15
 #: ../../source/ref-api/flwr.common.Metadata.rst:15
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:15
 #: ../../source/ref-api/flwr.common.MetricsRecord.rst:15
 #: ../../source/ref-api/flwr.common.Parameters.rst:15
 #: ../../source/ref-api/flwr.common.ParametersRecord.rst:15
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:15
+#: ../../source/ref-api/flwr.common.RecordDict.rst:15
 #: ../../source/ref-api/flwr.common.RecordSet.rst:15
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:15
 #: ../../source/ref-api/flwr.common.Status.rst:15
 #: ../../source/ref-api/flwr.server.ClientManager.rst:15
 #: ../../source/ref-api/flwr.server.Driver.rst:15
+#: ../../source/ref-api/flwr.server.Grid.rst:15
 #: ../../source/ref-api/flwr.server.History.rst:15
 #: ../../source/ref-api/flwr.server.LegacyContext.rst:15
 #: ../../source/ref-api/flwr.server.Server.rst:15
@@ -10467,21 +10469,21 @@ msgstr "클라이언트(자체)를 반환합니다."
 #: flwr.common.context.Context flwr.common.message.Error
 #: flwr.common.message.Message flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Metadata
-#: flwr.common.record.configsrecord.ConfigsRecord
-#: flwr.common.record.metricsrecord.MetricsRecord
-#: flwr.common.record.parametersrecord.Array
-#: flwr.common.record.parametersrecord.ParametersRecord
-#: flwr.common.record.recordset.RecordSet flwr.server.app.start_server
+#: flwr.common.record.arrayrecord.Array
+#: flwr.common.record.arrayrecord.ArrayRecord
+#: flwr.common.record.configrecord.ConfigRecord
+#: flwr.common.record.metricrecord.MetricRecord
+#: flwr.common.record.recorddict.RecordDict flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.register
 #: flwr.server.client_manager.ClientManager.unregister
 #: flwr.server.client_manager.SimpleClientManager.register
 #: flwr.server.client_manager.SimpleClientManager.unregister
 #: flwr.server.client_manager.SimpleClientManager.wait_for
-#: flwr.server.driver.driver.Driver.create_message
-#: flwr.server.driver.driver.Driver.pull_messages
-#: flwr.server.driver.driver.Driver.push_messages
-#: flwr.server.driver.driver.Driver.send_and_receive
-#: flwr.server.driver.driver.Driver.set_run
+#: flwr.server.grid.grid.Grid.create_message
+#: flwr.server.grid.grid.Grid.pull_messages
+#: flwr.server.grid.grid.Grid.push_messages
+#: flwr.server.grid.grid.Grid.send_and_receive
+#: flwr.server.grid.grid.Grid.set_run
 #: flwr.server.serverapp_components.ServerAppComponents
 #: flwr.server.strategy.bulyan.Bulyan
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping
@@ -10534,10 +10536,10 @@ msgstr "서버에서 받은 (전역) 모델 파라미터와 로컬 평가 프로
 #: flwr.server.client_manager.SimpleClientManager.num_available
 #: flwr.server.client_manager.SimpleClientManager.register
 #: flwr.server.client_manager.SimpleClientManager.wait_for
-#: flwr.server.driver.driver.Driver.create_message
-#: flwr.server.driver.driver.Driver.pull_messages
-#: flwr.server.driver.driver.Driver.push_messages
-#: flwr.server.driver.driver.Driver.send_and_receive
+#: flwr.server.grid.grid.Grid.create_message
+#: flwr.server.grid.grid.Grid.pull_messages
+#: flwr.server.grid.grid.Grid.push_messages
+#: flwr.server.grid.grid.Grid.send_and_receive
 #: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_evaluate
 #: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_fit
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
@@ -10570,10 +10572,10 @@ msgstr "로컬 데이터 세트의 손실 및 평가에 사용된 로컬 데이�
 #: flwr.server.client_manager.SimpleClientManager.num_available
 #: flwr.server.client_manager.SimpleClientManager.register
 #: flwr.server.client_manager.SimpleClientManager.wait_for
-#: flwr.server.driver.driver.Driver.create_message
-#: flwr.server.driver.driver.Driver.pull_messages
-#: flwr.server.driver.driver.Driver.push_messages
-#: flwr.server.driver.driver.Driver.send_and_receive
+#: flwr.server.grid.grid.Grid.create_message
+#: flwr.server.grid.grid.Grid.pull_messages
+#: flwr.server.grid.grid.Grid.push_messages
+#: flwr.server.grid.grid.Grid.send_and_receive
 #: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_evaluate
 #: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_fit
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
@@ -10622,16 +10624,16 @@ msgstr "현재 클라이언트 속성입니다."
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
 #: flwr.common.context.Context:1 flwr.common.message.Error:1
 #: flwr.common.message.Message:1 flwr.common.message.Metadata:1
-#: flwr.common.record.parametersrecord.Array:1
-#: flwr.common.typing.ClientMessage:1 flwr.common.typing.DisconnectRes:1
-#: flwr.common.typing.EvaluateIns:1 flwr.common.typing.EvaluateRes:1
-#: flwr.common.typing.FitIns:1 flwr.common.typing.FitRes:1
-#: flwr.common.typing.GetParametersIns:1 flwr.common.typing.GetParametersRes:1
-#: flwr.common.typing.GetPropertiesIns:1 flwr.common.typing.GetPropertiesRes:1
-#: flwr.common.typing.Parameters:1 flwr.common.typing.ReconnectIns:1
-#: flwr.common.typing.ServerMessage:1 flwr.common.typing.Status:1
-#: flwr.server.history.History:1 flwr.server.server.Server:1
-#: flwr.server.server_app.ServerApp:1 flwr.server.server_config.ServerConfig:1
+#: flwr.common.record.arrayrecord.Array:1 flwr.common.typing.ClientMessage:1
+#: flwr.common.typing.DisconnectRes:1 flwr.common.typing.EvaluateIns:1
+#: flwr.common.typing.EvaluateRes:1 flwr.common.typing.FitIns:1
+#: flwr.common.typing.FitRes:1 flwr.common.typing.GetParametersIns:1
+#: flwr.common.typing.GetParametersRes:1 flwr.common.typing.GetPropertiesIns:1
+#: flwr.common.typing.GetPropertiesRes:1 flwr.common.typing.Parameters:1
+#: flwr.common.typing.ReconnectIns:1 flwr.common.typing.ServerMessage:1
+#: flwr.common.typing.Status:1 flwr.server.history.History:1
+#: flwr.server.server.Server:1 flwr.server.server_app.ServerApp:1
+#: flwr.server.server_config.ServerConfig:1
 #: flwr.server.serverapp_components.ServerAppComponents:1
 #: flwr.server.workflow.default_workflows.DefaultWorkflow:1
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:1
@@ -10646,12 +10648,16 @@ msgstr "Bases: :py:class:`object`"
 #: flwr.client.client_app.ClientApp.query:12
 #: flwr.client.client_app.ClientApp.train:12
 #: flwr.client.mod.localdp_mod.LocalDpMod:22
-#: flwr.common.record.configsrecord.ConfigsRecord:20
-#: flwr.common.record.metricsrecord.MetricsRecord:19
-#: flwr.common.record.parametersrecord.Array:30
-#: flwr.common.record.parametersrecord.ParametersRecord:22
-#: flwr.common.record.recordset.RecordSet:22 flwr.server.app.start_server:46
-#: flwr.server.server_app.ServerApp:4
+#: flwr.common.record.arrayrecord.Array:35
+#: flwr.common.record.arrayrecord.ArrayRecord:36
+#: flwr.common.record.arrayrecord.ParametersRecord:12
+#: flwr.common.record.configrecord.ConfigRecord:20
+#: flwr.common.record.configrecord.ConfigsRecord:12
+#: flwr.common.record.metricrecord.MetricRecord:19
+#: flwr.common.record.metricrecord.MetricsRecord:12
+#: flwr.common.record.recorddict.RecordDict:14
+#: flwr.common.record.recorddict.RecordSet:12 flwr.server.app.start_server:46
+#: flwr.server.grid.grid.Driver:14 flwr.server.server_app.ServerApp:4
 #: flwr.server.server_app.ServerApp.lifespan:7
 #: flwr.server.server_app.ServerApp.main:4
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:29
@@ -10980,6 +10986,21 @@ msgid "Client-side adaptive clipping modifier."
 msgstr "클라이언트 측 적응형 클리핑 수정자."
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`arrays_size_mod <flwr.client.mod.arrays_size_mod>`\\ \\(msg\\, "
+"ctxt\\, call\\_next\\)"
+msgstr ""
+":py:obj:`parameters_size_mod <flwr.client.mod.parameters_size_mod>`\\ "
+"\\(msg\\, ctxt\\, call\\_next\\)"
+
+#: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
+#: flwr.client.mod.comms_mods.arrays_size_mod:1 of
+#, fuzzy
+msgid "Arrays size mod."
+msgstr "매개변수 크기 mod."
+
+#: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 msgid ""
 ":py:obj:`fixedclipping_mod <flwr.client.mod.fixedclipping_mod>`\\ "
 "\\(msg\\, ctxt\\, call\\_next\\)"
@@ -11013,19 +11034,6 @@ msgstr ""
 #: flwr.client.mod.comms_mods.message_size_mod:1 of
 msgid "Message size mod."
 msgstr "메시지 크기 수정."
-
-#: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-msgid ""
-":py:obj:`parameters_size_mod <flwr.client.mod.parameters_size_mod>`\\ "
-"\\(msg\\, ctxt\\, call\\_next\\)"
-msgstr ""
-":py:obj:`parameters_size_mod <flwr.client.mod.parameters_size_mod>`\\ "
-"\\(msg\\, ctxt\\, call\\_next\\)"
-
-#: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: flwr.client.mod.comms_mods.parameters_size_mod:1 of
-msgid "Parameters size mod."
-msgstr "매개변수 크기 mod."
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 msgid ""
@@ -11143,7 +11151,7 @@ msgstr "또한 새 클리핑 값을 계산하기 위해 서버로 KEY_NORM_BIT�
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:15
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:13
-#: flwr.server.driver.driver.Driver.send_and_receive:18
+#: flwr.server.grid.grid.Grid.send_and_receive:18
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:54
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:61
 #: of
@@ -11158,6 +11166,18 @@ msgstr "여러 개를 사용할 때는 모드의 순서를 고려하세요."
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:18 of
 msgid "Typically, adaptiveclipping_mod should be the last to operate on params."
 msgstr "일반적으로 adaptiveclipping_mod는 매개변수에서 가장 마지막으로 작동해야 합니다."
+
+#: ../../source/ref-api/flwr.client.mod.arrays_size_mod.rst:2
+#, fuzzy
+msgid "arrays\\_size\\_mod"
+msgstr "parameters\\_size\\_mod"
+
+#: flwr.client.mod.comms_mods.arrays_size_mod:3 of
+#, fuzzy
+msgid ""
+"This mod logs the number of array elements transmitted in "
+"``ArrayRecord``s of the message as well as their sizes in bytes."
+msgstr "이 모드는 메시지에서 전송된 매개변수의 수와 그 크기를 바이트 단위로 기록합니다."
 
 #: ../../source/ref-api/flwr.client.mod.fixedclipping_mod.rst:2
 msgid "fixedclipping\\_mod"
@@ -11184,16 +11204,6 @@ msgstr "message\\_size\\_mod"
 #: flwr.client.mod.comms_mods.message_size_mod:3 of
 msgid "This mod logs the size in bytes of the message being transmited."
 msgstr "이 모드는 전송되는 메시지의 크기를 바이트 단위로 기록합니다."
-
-#: ../../source/ref-api/flwr.client.mod.parameters_size_mod.rst:2
-msgid "parameters\\_size\\_mod"
-msgstr "parameters\\_size\\_mod"
-
-#: flwr.client.mod.comms_mods.parameters_size_mod:3 of
-msgid ""
-"This mod logs the number of parameters transmitted in the message as well"
-" as their size in bytes."
-msgstr "이 모드는 메시지에서 전송된 매개변수의 수와 그 크기를 바이트 단위로 기록합니다."
 
 #: ../../source/ref-api/flwr.client.mod.secagg_mod.rst:2
 msgid "secagg\\_mod"
@@ -11336,10 +11346,10 @@ msgstr "공통"
 msgid ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
-#: flwr.common.record.conversion_utils.array_from_numpy:1
-#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1 of
+#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1
+#: flwr.common.record.conversion_utils.array_from_numpy:1 of
 msgid "Create Array from NumPy ndarray."
 msgstr "NumPy에서 배열을 만듭니다."
 
@@ -11438,17 +11448,28 @@ msgstr ""
 msgid "Convert parameters object to NumPy ndarrays."
 msgstr "매개변수 객체를 NumPy 배열로 변환합니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Array <flwr.common.Array>`\\ \\(\\)"
 msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-#: flwr.common.record.parametersrecord.Array:1 of
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#: flwr.common.record.arrayrecord.Array:1 of
 msgid "Array type."
 msgstr "배열 유형."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`ArrayRecord <flwr.common.ArrayRecord>`\\ \\(\\)"
+msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
+
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#: flwr.common.record.arrayrecord.ArrayRecord:1 of
+#, fuzzy
+msgid "Array record."
+msgstr "매개변수 기록."
+
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 ":py:obj:`ClientMessage <flwr.common.ClientMessage>`\\ "
 "\\(\\[get\\_properties\\_res\\, ...\\]\\)"
@@ -11456,26 +11477,26 @@ msgstr ""
 ":py:obj:`ClientMessage <flwr.common.ClientMessage>`\\ "
 "\\(\\[get\\_properties\\_res\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.ClientMessage:1 of
 msgid "ClientMessage is a container used to hold one result message."
 msgstr "ClientMessage는 하나의 결과 메시지를 저장하는 데 사용되는 컨테이너입니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`Code <flwr.common.Code>`\\ \\(value\\)"
 msgstr ":py:obj:`Code <flwr.common.Code>`\\ \\(value\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.Code:1 of
 msgid "Client status codes."
 msgstr "클라이언트 상태 코드."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Config <flwr.common.Config>`\\"
 msgstr ":py:obj:`config <flwr.common.FitIns.config>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
 msgid ""
 "alias of :py:class:`dict`\\ [:py:class:`str`, :py:class:`bool` | "
@@ -11487,51 +11508,67 @@ msgstr ""
 ":py:class:`~typing.List`\\ [:py:class:`int`] | :py:class:`~typing.List`\\"
 " [:py:class:`float`]]"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#, fuzzy
 msgid ""
-":py:obj:`ConfigsRecord <flwr.common.ConfigsRecord>`\\ "
-"\\(\\[configs\\_dict\\, keep\\_input\\]\\)"
+":py:obj:`ConfigRecord <flwr.common.ConfigRecord>`\\ "
+"\\(\\[config\\_dict\\, keep\\_input\\]\\)"
 msgstr ""
 ":py:obj:`ConfigsRecord <flwr.common.ConfigsRecord>`\\ "
 "\\(\\[configs\\_dict\\, keep\\_input\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-#: flwr.common.record.configsrecord.ConfigsRecord:1 of
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#: flwr.common.record.configrecord.ConfigRecord:1 of
 msgid "Configs record."
 msgstr "레코드를 설정합니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`ConfigsRecord <flwr.common.ConfigsRecord>`\\ "
+"\\(\\[config\\_dict\\, keep\\_input\\]\\)"
+msgstr ""
+":py:obj:`ConfigsRecord <flwr.common.ConfigsRecord>`\\ "
+"\\(\\[configs\\_dict\\, keep\\_input\\]\\)"
+
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#: flwr.common.record.configrecord.ConfigsRecord:1 of
+msgid "Deprecated class ``ConfigsRecord``, use ``ConfigRecord`` instead."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Context <flwr.common.Context>`\\ \\(run\\_id\\, node\\_id\\, "
 "node\\_config\\, state\\, ...\\)"
 msgstr ":py:obj:`Context <flwr.common.Context>`\\ \\(state\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.context.Context:1 of
 #, fuzzy
 msgid "Context of your run."
 msgstr "실행 상태."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`DisconnectRes <flwr.common.DisconnectRes>`\\ \\(reason\\)"
 msgstr ":py:obj:`DisconnectRes <flwr.common.DisconnectRes>`\\ \\(reason\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.DisconnectRes:1 of
 msgid "DisconnectRes message from client to server."
 msgstr "클라이언트에서 서버로 연결 해제 메시지를 보냅니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 msgstr ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.message.Error:1 of
-msgid "A dataclass that stores information about an error that occurred."
+#, fuzzy
+msgid "The class storing information about an error that occurred."
 msgstr "발생한 오류에 대한 정보를 저장하는 데이터 클래스입니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 ":py:obj:`EvaluateIns <flwr.common.EvaluateIns>`\\ \\(parameters\\, "
 "config\\)"
@@ -11539,12 +11576,12 @@ msgstr ""
 ":py:obj:`EvaluateIns <flwr.common.EvaluateIns>`\\ \\(parameters\\, "
 "config\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.EvaluateIns:1 of
 msgid "Evaluate instructions for a client."
 msgstr "클라이언트에 대한 지침을 평가합니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 ":py:obj:`EvaluateRes <flwr.common.EvaluateRes>`\\ \\(status\\, loss\\, "
 "num\\_examples\\, metrics\\)"
@@ -11552,30 +11589,30 @@ msgstr ""
 ":py:obj:`EvaluateRes <flwr.common.EvaluateRes>`\\ \\(status\\, loss\\, "
 "num\\_examples\\, metrics\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.EvaluateRes:1 of
 msgid "Evaluate response from a client."
 msgstr "클라이언트의 응답을 평가합니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.telemetry.EventType:1 of
 msgid "Types of telemetry events."
 msgstr "원격 분석 이벤트의 유형."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`FitIns <flwr.common.FitIns>`\\ \\(parameters\\, config\\)"
 msgstr ":py:obj:`FitIns <flwr.common.FitIns>`\\ \\(parameters\\, config\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.FitIns:1 of
 msgid "Fit instructions for a client."
 msgstr "고객을 위한 맞춤 지침."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 ":py:obj:`FitRes <flwr.common.FitRes>`\\ \\(status\\, parameters\\, "
 "num\\_examples\\, metrics\\)"
@@ -11583,21 +11620,21 @@ msgstr ""
 ":py:obj:`FitRes <flwr.common.FitRes>`\\ \\(status\\, parameters\\, "
 "num\\_examples\\, metrics\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.FitRes:1 of
 msgid "Fit response from a client."
 msgstr "클라이언트의 적합성 응답."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`GetParametersIns <flwr.common.GetParametersIns>`\\ \\(config\\)"
 msgstr ":py:obj:`GetParametersIns <flwr.common.GetParametersIns>`\\ \\(config\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.GetParametersIns:1 of
 msgid "Parameters request for a client."
 msgstr "클라이언트에 대한 매개변수 요청입니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 ":py:obj:`GetParametersRes <flwr.common.GetParametersRes>`\\ \\(status\\, "
 "parameters\\)"
@@ -11605,21 +11642,21 @@ msgstr ""
 ":py:obj:`GetParametersRes <flwr.common.GetParametersRes>`\\ \\(status\\, "
 "parameters\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.GetParametersRes:1 of
 msgid "Response when asked to return parameters."
 msgstr "매개변수 반환 요청 시 응답합니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`GetPropertiesIns <flwr.common.GetPropertiesIns>`\\ \\(config\\)"
 msgstr ":py:obj:`GetPropertiesIns <flwr.common.GetPropertiesIns>`\\ \\(config\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.GetPropertiesIns:1 of
 msgid "Properties request for a client."
 msgstr "클라이언트에 대한 속성 요청."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 ":py:obj:`GetPropertiesRes <flwr.common.GetPropertiesRes>`\\ \\(status\\, "
 "properties\\)"
@@ -11627,43 +11664,40 @@ msgstr ""
 ":py:obj:`GetPropertiesRes <flwr.common.GetPropertiesRes>`\\ \\(status\\, "
 "properties\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.GetPropertiesRes:1 of
 msgid "Properties response from a client."
 msgstr "클라이언트의 속성 응답을 확인합니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-msgid ""
-":py:obj:`Message <flwr.common.Message>`\\ \\(metadata\\[\\, content\\, "
-"error\\]\\)"
-msgstr ""
-":py:obj:`Message <flwr.common.Message>`\\ \\(metadata\\[\\, content\\, "
-"error\\]\\)"
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`Message <flwr.common.Message>`\\ \\(\\)"
+msgstr ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.message.Message:1 of
-msgid "State of your application from the viewpoint of the entity using it."
-msgstr "애플리케이션을 사용하는 엔티티의 관점에서 애플리케이션의 상태입니다."
+msgid "Represents a message exchanged between ClientApp and ServerApp."
+msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
 msgstr ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.constant.MessageType:1 of
 msgid "Message type."
 msgstr "메시지 타입."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`MessageTypeLegacy <flwr.common.MessageTypeLegacy>`\\ \\(\\)"
 msgstr ":py:obj:`MessageTypeLegacy <flwr.common.MessageTypeLegacy>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.constant.MessageTypeLegacy:1 of
 msgid "Legacy message type."
 msgstr "레거시 메시지 타입."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 ":py:obj:`Metadata <flwr.common.Metadata>`\\ \\(run\\_id\\, "
 "message\\_id\\, src\\_node\\_id\\, ...\\)"
@@ -11671,35 +11705,51 @@ msgstr ""
 ":py:obj:`Metadata <flwr.common.Metadata>`\\ \\(run\\_id\\, "
 "message\\_id\\, src\\_node\\_id\\, ...\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.message.Metadata:1 of
-msgid "A dataclass holding metadata associated with the current message."
+#, fuzzy
+msgid "The class representing metadata associated with the current message."
 msgstr "현재 메시지와 관련된 메타데이터를 보유한 데이터 클래스입니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
-msgid ":py:obj:`Metrics <flwr.common.Metrics>`\\"
-msgstr ":py:obj:`metrics <flwr.common.FitRes.metrics>`\\"
-
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
 msgid ""
-":py:obj:`MetricsRecord <flwr.common.MetricsRecord>`\\ "
-"\\(\\[metrics\\_dict\\, keep\\_input\\]\\)"
+":py:obj:`MetricRecord <flwr.common.MetricRecord>`\\ "
+"\\(\\[metric\\_dict\\, keep\\_input\\]\\)"
 msgstr ""
 ":py:obj:`MetricsRecord <flwr.common.MetricsRecord>`\\ "
 "\\(\\[metrics\\_dict\\, keep\\_input\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-#: flwr.common.record.metricsrecord.MetricsRecord:1 of
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#: flwr.common.record.metricrecord.MetricRecord:1 of
 #, fuzzy
 msgid "Metrics recod."
 msgstr "메트릭 기록."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`Metrics <flwr.common.Metrics>`\\"
+msgstr ":py:obj:`metrics <flwr.common.FitRes.metrics>`\\"
+
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`MetricsRecord <flwr.common.MetricsRecord>`\\ "
+"\\(\\[metric\\_dict\\, keep\\_input\\]\\)"
+msgstr ""
+":py:obj:`MetricsRecord <flwr.common.MetricsRecord>`\\ "
+"\\(\\[metrics\\_dict\\, keep\\_input\\]\\)"
+
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#: flwr.common.record.metricrecord.MetricsRecord:1 of
+msgid "Deprecated class ``MetricsRecord``, use ``MetricRecord`` instead."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 "alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
 ":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
@@ -11707,12 +11757,12 @@ msgstr ""
 "alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
 ":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`NDArrays <flwr.common.NDArrays>`\\"
 msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
 msgid ""
 "alias of :py:class:`list`\\ [:py:class:`~numpy.ndarray`\\ "
@@ -11722,7 +11772,7 @@ msgstr ""
 "alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
 ":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 ":py:obj:`Parameters <flwr.common.Parameters>`\\ \\(tensors\\, "
 "tensor\\_type\\)"
@@ -11730,51 +11780,63 @@ msgstr ""
 ":py:obj:`Parameters <flwr.common.Parameters>`\\ \\(tensors\\, "
 "tensor\\_type\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.Parameters:1 of
 msgid "Model parameters."
 msgstr "모델 매개변수."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#, fuzzy
 msgid ""
-":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ "
-"\\(\\[array\\_dict\\, keep\\_input\\]\\)"
+":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ \\(\\*args\\,"
+" \\*\\*kwargs\\)"
+msgstr ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
+
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#: flwr.common.record.arrayrecord.ParametersRecord:1 of
+msgid "Deprecated class ``ParametersRecord``, use ``ArrayRecord`` instead."
 msgstr ""
-":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ "
-"\\(\\[array\\_dict\\, keep\\_input\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-#: flwr.common.record.parametersrecord.ParametersRecord:1 of
-msgid "Parameters record."
-msgstr "매개변수 기록."
-
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Properties <flwr.common.Properties>`\\"
 msgstr ":py:obj:`properties <flwr.common.GetPropertiesRes.properties>`\\"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`ReconnectIns <flwr.common.ReconnectIns>`\\ \\(seconds\\)"
 msgstr ":py:obj:`ReconnectIns <flwr.common.ReconnectIns>`\\ \\(seconds\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.ReconnectIns:1 of
 msgid "ReconnectIns message from server to client."
 msgstr "서버에서 클라이언트로 메시지를 다시 연결합니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`RecordDict <flwr.common.RecordDict>`\\ \\(\\[records\\]\\)"
+msgstr ""
+":py:obj:`RecordSet <flwr.common.RecordSet>`\\ "
+"\\(\\[parameters\\_records\\, ...\\]\\)"
+
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#: flwr.common.record.recorddict.RecordDict:1 of
+#, fuzzy
+msgid "RecordDict stores groups of arrays, metrics and configs."
+msgstr "RecordSet은 매개변수, 메트릭 및 설정 그룹을 저장합니다."
+
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`RecordSet <flwr.common.RecordSet>`\\ \\(\\[records\\]\\)"
 msgstr ""
 ":py:obj:`RecordSet <flwr.common.RecordSet>`\\ "
 "\\(\\[parameters\\_records\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
-#: flwr.common.record.recordset.RecordSet:1 of
-msgid "RecordSet stores groups of parameters, metrics and configs."
-msgstr "RecordSet은 매개변수, 메트릭 및 설정 그룹을 저장합니다."
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#: flwr.common.record.recorddict.RecordSet:1 of
+msgid "Deprecated class ``RecordSet``, use ``RecordDict`` instead."
+msgstr ""
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 ":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
 "\\(\\[get\\_properties\\_ins\\, ...\\]\\)"
@@ -11782,16 +11844,16 @@ msgstr ""
 ":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
 "\\(\\[get\\_properties\\_ins\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.ServerMessage:1 of
 msgid "ServerMessage is a container used to hold one instruction message."
 msgstr "ServerMessage는 하나의 instruction 메시지를 저장하는 데 사용되는 컨테이너입니다."
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ":py:obj:`Status <flwr.common.Status>`\\ \\(code\\, message\\)"
 msgstr ":py:obj:`Status <flwr.common.Status>`\\ \\(code\\, message\\)"
 
-#: ../../source/ref-api/flwr.common.rst:68:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.typing.Status:1 of
 msgid "Client status."
 msgstr "클라이언트 상태."
@@ -11800,90 +11862,122 @@ msgstr "클라이언트 상태."
 msgid "Array"
 msgstr "배열"
 
-#: flwr.common.record.parametersrecord.Array:3 of
+#: flwr.common.record.arrayrecord.Array:3 of
 #, fuzzy
 msgid ""
 "A dataclass containing serialized data from an array-like or tensor-like "
 "object along with metadata about it. The class can be initialized in one "
-"of two ways:"
+"of three ways:"
 msgstr "배열형 또는 텐서형 객체의 직렬화된 데이터와 그에 대한 일부 메타데이터를 포함하는 데이터 클래스입니다."
 
-#: flwr.common.record.parametersrecord.Array:6 of
+#: flwr.common.record.arrayrecord.Array:6 of
 msgid "By specifying explicit values for `dtype`, `shape`, `stype`, and `data`."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:7 of
+#: flwr.common.record.arrayrecord.Array:7 of
 msgid "By providing a NumPy ndarray (via the `ndarray` argument)."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:9 of
+#: flwr.common.record.arrayrecord.Array:8 of
+msgid "By providing a PyTorch tensor (via the `torch_tensor` argument)."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.Array:10 of
 msgid ""
-"In scenario (2), the `dtype`, `shape`, `stype`, and `data` are "
+"In scenarios (2)-(3), the `dtype`, `shape`, `stype`, and `data` are "
 "automatically derived from the input. In scenario (1), these fields must "
 "be specified manually."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:12 of
+#: flwr.common.record.arrayrecord.Array:13 of
 #, fuzzy
 msgid ""
 "A string representing the data type of the serialized object (e.g. "
-"`\"float32\"`). Only required if you are not passing in a ndarray."
+"`\"float32\"`). Only required if you are not passing in a ndarray or a "
+"tensor."
 msgstr "직렬화된 객체의 데이터 유형을 나타내는 문자열(예: `np.float32`)"
 
-#: flwr.common.record.parametersrecord.Array:15 of
+#: flwr.common.record.arrayrecord.Array:16 of
 #, fuzzy
 msgid ""
 "A list representing the shape of the unserialized array-like object. Only"
-" required if you are not passing in a ndarray."
+" required if you are not passing in a ndarray or a tensor."
 msgstr ""
 "직렬화되지 않은 배열과 같은 객체의 모양을 나타내는 목록입니다. 직렬화 방법에 따라 데이터를 역직렬화하는 데 사용되거나 단순히 "
 "메타데이터 필드로 사용됩니다."
 
-#: flwr.common.record.parametersrecord.Array:18 of
+#: flwr.common.record.arrayrecord.Array:19 of
 #, fuzzy
 msgid ""
 "A string indicating the serialization mechanism used to generate the "
 "bytes in `data` from an array-like or tensor-like object. Only required "
-"if you are not passing in a ndarray."
+"if you are not passing in a ndarray or a tensor."
 msgstr "배열형 또는 텐서형 객체에서 `데이터`의 바이트를 생성하는 데 사용되는 직렬화 메커니즘의 유형을 나타내는 문자열입니다."
 
-#: flwr.common.record.parametersrecord.Array:22 of
+#: flwr.common.record.arrayrecord.Array:23 of
+#, fuzzy
 msgid ""
 "A buffer of bytes containing the data. Only required if you are not "
-"passing in a ndarray."
+"passing in a ndarray or a tensor."
 msgstr ""
+"직렬화되지 않은 배열과 같은 객체의 모양을 나타내는 목록입니다. 직렬화 방법에 따라 데이터를 역직렬화하는 데 사용되거나 단순히 "
+"메타데이터 필드로 사용됩니다."
 
-#: flwr.common.record.parametersrecord.Array:25 of
+#: flwr.common.record.arrayrecord.Array:26 of
 msgid ""
 "A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data` "
 "fields are derived automatically from it."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:31 of
+#: flwr.common.record.arrayrecord.Array:29 of
+msgid ""
+"A PyTorch tensor. If provided, it will be **detached and moved to CPU** "
+"before conversion, and the `dtype`, `shape`, `stype`, and `data` fields "
+"will be derived automatically from it."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.Array:36 of
 msgid "Initializing by specifying all fields directly:"
 msgstr ""
 
-#: flwr.common.record.parametersrecord.Array:40 of
+#: flwr.common.record.arrayrecord.Array:45 of
 msgid "Initializing with a NumPy ndarray:"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
+#: flwr.common.record.arrayrecord.Array:50 of
+msgid "Initializing with a PyTorch tensor:"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_numpy_ndarray <flwr.common.Array.from_numpy_ndarray>`\\ "
 "\\(ndarray\\)"
 msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`from_torch_tensor <flwr.common.Array.from_torch_tensor>`\\ "
+"\\(tensor\\)"
+msgstr ":py:obj:`ndarray_to_bytes <flwr.common.ndarray_to_bytes>`\\ \\(ndarray\\)"
+
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: flwr.common.record.arrayrecord.Array.from_torch_tensor:1 of
+#, fuzzy
+msgid "Create Array from PyTorch tensor."
+msgstr "NumPy에서 배열을 만듭니다."
+
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
 msgid ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 msgstr ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:29:<autosummary>:1
-#: flwr.common.record.parametersrecord.Array.numpy:1 of
+#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: flwr.common.record.arrayrecord.Array.numpy:1 of
 msgid "Return the array as a NumPy array."
 msgstr "배열을 NumPy 배열로 반환합니다."
 
-#: ../../source/ref-api/flwr.common.Array.rst:31
+#: ../../source/ref-api/flwr.common.Array.rst:34
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:25
 #: ../../source/ref-api/flwr.common.Code.rst:19
 #: ../../source/ref-api/flwr.common.Context.rst:25
@@ -11904,35 +11998,306 @@ msgstr "배열을 NumPy 배열로 반환합니다."
 #: ../../source/ref-api/flwr.common.Metadata.rst:25
 #: ../../source/ref-api/flwr.common.Parameters.rst:25
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
+#: ../../source/ref-api/flwr.common.RecordDict.rst:52
 #: ../../source/ref-api/flwr.common.RecordSet.rst:52
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:25
 #: ../../source/ref-api/flwr.common.Status.rst:25
 #: ../../source/ref-api/flwr.server.Driver.rst:43
+#: ../../source/ref-api/flwr.server.Grid.rst:43
 #: ../../source/ref-api/flwr.server.LegacyContext.rst:25
 #: ../../source/ref-api/flwr.server.ServerAppComponents.rst:25
 #: ../../source/ref-api/flwr.server.ServerConfig.rst:25
 msgid "Attributes"
 msgstr "속성"
 
-#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
-#: of
+#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
 msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 msgstr ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 
-#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
-#: of
+#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
 msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
 msgstr ":py:obj:`shape <flwr.common.Array.shape>`\\"
 
-#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
-#: of
+#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
 msgid ":py:obj:`stype <flwr.common.Array.stype>`\\"
 msgstr ":py:obj:`stype <flwr.common.Array.stype>`\\"
 
-#: flwr.common.record.parametersrecord.Array.from_numpy_ndarray:1:<autosummary>:1
-#: of
+#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
 msgid ":py:obj:`data <flwr.common.Array.data>`\\"
 msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
+
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:2
+#, fuzzy
+msgid "ArrayRecord"
+msgstr "ParametersRecord"
+
+#: flwr.common.record.arrayrecord.ArrayRecord:1 of
+#, fuzzy
+msgid ""
+"Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
+"[:py:class:`str`, :py:class:`~flwr.common.record.arrayrecord.Array`]"
+msgstr ""
+"Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
+"[:py:class:`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
+
+#: flwr.common.record.arrayrecord.ArrayRecord:3 of
+msgid ""
+"A typed dictionary (``str`` to :class:`Array`) that can store named "
+"arrays, including model parameters, gradients, embeddings or non-"
+"parameter arrays. Internally, this behaves similarly to an "
+"``OrderedDict[str, Array]``. An ``ArrayRecord`` can be viewed as an "
+"equivalent to PyTorch's ``state_dict``, but it holds arrays in a "
+"serialized form."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:9 of
+msgid ""
+"This object is one of the record types supported by :class:`RecordDict` "
+"and can therefore be stored in the ``content`` of a :class:`Message` or "
+"the ``state`` of a :class:`Context`."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:13 of
+msgid "This class can be instantiated in multiple ways:"
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:15 of
+msgid "By providing nothing (empty container)."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:16 of
+msgid ""
+"By providing a dictionary of :class:`Array` (via the ``array_dict`` "
+"argument)."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:17 of
+msgid ""
+"By providing a list of NumPy ``ndarray`` (via the ``numpy_ndarrays`` "
+"argument)."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:18 of
+msgid ""
+"By providing a PyTorch ``state_dict`` (via the ``torch_state_dict`` "
+"argument)."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:20 of
+msgid ""
+"An existing dictionary containing named :class:`Array` instances. If "
+"provided, these entries will be used directly to populate the record."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:23 of
+msgid ""
+"A list of NumPy arrays. Each array will be automatically converted into "
+"an :class:`Array` and stored in this record with generated keys."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:26 of
+msgid ""
+"A PyTorch ``state_dict`` (``str`` keys to ``torch.Tensor`` values). Each "
+"tensor will be converted into an :class:`Array` and stored in this "
+"record."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:29 of
+msgid ""
+"If ``False``, entries from the input are removed after being added to "
+"this record to free up memory. If ``True``, the input remains unchanged. "
+"Regardless of this value, no duplicate memory is used if the input is a "
+"dictionary of :class:`Array`, i.e., ``array_dict``."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:37 of
+#, fuzzy
+msgid "Initializing an empty ArrayRecord:"
+msgstr "Dictionary holding ParametersRecord instances."
+
+#: flwr.common.record.arrayrecord.ArrayRecord:41 of
+msgid "Initializing with a dictionary of :class:`Array`:"
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:46 of
+msgid "Initializing with a list of NumPy arrays:"
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:53 of
+msgid "Initializing with a PyTorch model state_dict:"
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord:59 of
+msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`clear <flwr.common.ArrayRecord.clear>`\\ \\(\\)"
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`count_bytes <flwr.common.ArrayRecord.count_bytes>`\\ \\(\\)"
+msgstr ":py:obj:`count_bytes <flwr.common.ParametersRecord.count_bytes>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.record.arrayrecord.ArrayRecord.count_bytes:1
+#: flwr.common.record.configrecord.ConfigRecord.count_bytes:1
+#: flwr.common.record.metricrecord.MetricRecord.count_bytes:1 of
+msgid "Return number of Bytes stored in this object."
+msgstr "이 객체에 저장된 바이트 수를 반환합니다."
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`from_array_dict <flwr.common.ArrayRecord.from_array_dict>`\\ "
+"\\(array\\_dict\\, \\*\\[\\, keep\\_input\\]\\)"
+msgstr ""
+":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ "
+"\\(\\[array\\_dict\\, keep\\_input\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.record.arrayrecord.ArrayRecord.from_array_dict:1 of
+#, fuzzy
+msgid "Create ArrayRecord from a dictionary of :class:`Array`."
+msgstr "NumPy에서 배열을 만듭니다."
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`from_numpy_ndarrays "
+"<flwr.common.ArrayRecord.from_numpy_ndarrays>`\\ \\(ndarrays\\, \\*\\[\\,"
+" keep\\_input\\]\\)"
+msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.record.arrayrecord.ArrayRecord.from_numpy_ndarrays:1 of
+#, fuzzy
+msgid "Create ArrayRecord from a list of NumPy ``ndarray``."
+msgstr "NumPy에서 배열을 만듭니다."
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`from_torch_state_dict "
+"<flwr.common.ArrayRecord.from_torch_state_dict>`\\ \\(state\\_dict\\, "
+"\\*\\[\\, ...\\]\\)"
+msgstr ":py:obj:`get <flwr.common.ParametersRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.record.arrayrecord.ArrayRecord.from_torch_state_dict:1 of
+#, fuzzy
+msgid "Create ArrayRecord from PyTorch ``state_dict``."
+msgstr "NumPy에서 배열을 만듭니다."
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`get <flwr.common.ArrayRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`items <flwr.common.ArrayRecord.items>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`keys <flwr.common.ArrayRecord.keys>`\\ \\(\\)"
+msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`pop <flwr.common.ArrayRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: collections.abc.MutableMapping.pop:1 of
+msgid "If key is not found, d is returned if given, otherwise KeyError is raised."
+msgstr "키를 찾을 수 없으면 주어진 경우 d가 반환되고, 그렇지 않으면 KeyError가 발생합니다."
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`popitem <flwr.common.ArrayRecord.popitem>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: collections.abc.MutableMapping.popitem:1 of
+msgid "as a 2-tuple; but raise KeyError if D is empty."
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`setdefault <flwr.common.ArrayRecord.setdefault>`\\ "
+"\\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`to_numpy_ndarrays <flwr.common.ArrayRecord.to_numpy_ndarrays>`\\"
+" \\(\\*\\[\\, keep\\_input\\]\\)"
+msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.record.arrayrecord.ArrayRecord.to_numpy_ndarrays:1 of
+#, fuzzy
+msgid "Return the ArrayRecord as a list of NumPy ``ndarray``."
+msgstr "**parameters** -- 로컬 모델 파라미터를 NumPy 배열 목록으로 표시합니다."
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`to_torch_state_dict "
+"<flwr.common.ArrayRecord.to_torch_state_dict>`\\ \\(\\*\\[\\, "
+"keep\\_input\\]\\)"
+msgstr ""
+":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ "
+"\\(\\[array\\_dict\\, keep\\_input\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.record.arrayrecord.ArrayRecord.to_torch_state_dict:1 of
+#, fuzzy
+msgid "Return the ArrayRecord as a PyTorch ``state_dict``."
+msgstr "**parameters** -- 로컬 모델 파라미터를 NumPy 배열 목록으로 표시합니다."
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`update <flwr.common.ArrayRecord.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+msgstr ""
+":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: collections.abc.MutableMapping.update:1 of
+msgid ""
+"If E present and has a .keys() method, does:     for k in E: D[k] = E[k] "
+"If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = "
+"v In either case, this is followed by: for k, v in F.items(): D[k] = v"
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`values <flwr.common.ArrayRecord.values>`\\ \\(\\)"
+msgstr ""
+":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+
+#: flwr.common.record.arrayrecord.ArrayRecord.count_bytes:3 of
+msgid ""
+"Note that a small amount of Bytes might also be included in this counting"
+" that correspond to metadata of the serialized object (e.g. of NumPy "
+"array) needed for deseralization."
+msgstr "역직렬화에 필요한 직렬화된 객체의 메타데이터(예: NumPy 배열)에 해당하는 소량의 바이트도 이 카운팅에 포함될 수 있습니다."
 
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:2
 msgid "ClientMessage"
@@ -12007,11 +12372,12 @@ msgstr ""
 msgid "Config"
 msgstr "구성"
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:2
-msgid "ConfigsRecord"
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:2
+#, fuzzy
+msgid "ConfigRecord"
 msgstr "컨피그 레코드"
 
-#: flwr.common.record.configsrecord.ConfigsRecord:1 of
+#: flwr.common.record.configrecord.ConfigRecord:1 of
 #, fuzzy
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
@@ -12028,23 +12394,24 @@ msgstr ""
 ":py:class:`~typing.List`\\ [:py:class:`str`] | :py:class:`~typing.List`\\"
 " [:py:class:`bytes`] | :py:class:`~typing.List`\\ [:py:class:`bool`]]"
 
-#: flwr.common.record.configsrecord.ConfigsRecord:3 of
+#: flwr.common.record.configrecord.ConfigRecord:3 of
 msgid ""
-"A :code:`ConfigsRecord` is a Python dictionary designed to ensure that "
+"A :code:`ConfigRecord` is a Python dictionary designed to ensure that "
 "each key-value pair adheres to specified data types. A "
-":code:`ConfigsRecord` is one of the types of records that a "
-"`flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports "
-"and can therefore be used to construct :code:`common.Message` objects."
+":code:`ConfigRecord` is one of the types of records that a "
+"`flwr.common.RecordDict <flwr.common.RecordDict.html#recorddict>`_ "
+"supports and can therefore be used to construct :code:`common.Message` "
+"objects."
 msgstr ""
 
-#: flwr.common.record.configsrecord.ConfigsRecord:9 of
+#: flwr.common.record.configrecord.ConfigRecord:9 of
 msgid ""
 "A dictionary that stores basic types (i.e. `str`, `int`, `float`, `bytes`"
 " as defined in `ConfigsScalar`) and lists of such types (see "
 "`ConfigsScalarList`)."
 msgstr ""
 
-#: flwr.common.record.configsrecord.ConfigsRecord:13 of
+#: flwr.common.record.configrecord.ConfigRecord:13 of
 msgid ""
 "A boolean indicating whether config passed should be deleted from the "
 "input dictionary immediately after adding them to the record. When set to"
@@ -12052,29 +12419,126 @@ msgid ""
 "to False."
 msgstr ""
 
-#: flwr.common.record.configsrecord.ConfigsRecord:21 of
+#: flwr.common.record.configrecord.ConfigRecord:21 of
 msgid ""
-"The usage of a :code:`ConfigsRecord` is envisioned for sending "
+"The usage of a :code:`ConfigRecord` is envisioned for sending "
 "configuration values telling the target node how to perform a certain "
 "action (e.g. train/evaluate a model ). You can use standard Python built-"
 "in types such as :code:`float`, :code:`str` , :code:`bytes`. All types "
-"allowed are defined in :code:`flwr.common.ConfigsRecordValues`. While "
-"lists are supported, we encourage you to use a :code:`ParametersRecord` "
+"allowed are defined in :code:`flwr.common.ConfigRecordValues`. While "
+"lists are supported, we encourage you to use a :code:`ArrayRecord` "
 "instead if these are of high dimensionality."
 msgstr ""
 
-#: flwr.common.record.configsrecord.ConfigsRecord:29 of
+#: flwr.common.record.configrecord.ConfigRecord:29 of
 msgid ""
-"Let's see some examples of how to construct a :code:`ConfigsRecord` from "
+"Let's see some examples of how to construct a :code:`ConfigRecord` from "
 "scratch:"
 msgstr ""
 
-#: flwr.common.record.configsrecord.ConfigsRecord:42 of
+#: flwr.common.record.configrecord.ConfigRecord:42 of
 msgid ""
-"Just like the other types of records in a :code:`flwr.common.RecordSet`, "
-"types are enforced. If you need to add a custom data structure or object,"
-" we recommend to serialise it into bytes and save it as such (bytes are "
-"allowed in a :code:`ConfigsRecord`)"
+"Just like the other types of records in a :code:`flwr.common.RecordDict`,"
+" types are enforced. If you need to add a custom data structure or "
+"object, we recommend to serialise it into bytes and save it as such "
+"(bytes are allowed in a :code:`ConfigRecord`)"
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`clear <flwr.common.ConfigRecord.clear>`\\ \\(\\)"
+msgstr ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`count_bytes <flwr.common.ConfigRecord.count_bytes>`\\ \\(\\)"
+msgstr ":py:obj:`count_bytes <flwr.common.ConfigsRecord.count_bytes>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`get <flwr.common.ConfigRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`items <flwr.common.ConfigRecord.items>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`keys <flwr.common.ConfigRecord.keys>`\\ \\(\\)"
+msgstr ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`pop <flwr.common.ConfigRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`popitem <flwr.common.ConfigRecord.popitem>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`setdefault <flwr.common.ConfigRecord.setdefault>`\\ "
+"\\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`update <flwr.common.ConfigRecord.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+msgstr ""
+":py:obj:`update <flwr.common.ConfigsRecord.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`values <flwr.common.ConfigRecord.values>`\\ \\(\\)"
+msgstr ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
+
+#: flwr.common.record.configrecord.ConfigRecord.count_bytes:3 of
+msgid "This function counts booleans as occupying 1 Byte."
+msgstr "이 함수는 booleans을 1바이트를 차지하는 것으로 계산합니다."
+
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:2
+msgid "ConfigsRecord"
+msgstr "컨피그 레코드"
+
+#: flwr.common.record.configrecord.ConfigsRecord:1 of
+msgid "Bases: :py:class:`~flwr.common.record.configrecord.ConfigRecord`"
+msgstr ""
+
+#: flwr.common.record.configrecord.ConfigsRecord:3 of
+msgid ""
+"This class exists solely for backward compatibility with legacy code that"
+" previously used ``ConfigsRecord``. It has been renamed to "
+"``ConfigRecord``."
+msgstr ""
+
+#: flwr.common.record.configrecord.ConfigsRecord:8 of
+msgid ""
+"``ConfigsRecord`` is deprecated and will be removed in a future release. "
+"Use ``ConfigRecord`` instead."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ParametersRecord:13
+#: flwr.common.record.configrecord.ConfigsRecord:13
+#: flwr.common.record.metricrecord.MetricsRecord:13
+#: flwr.common.record.recorddict.RecordSet:13 flwr.server.grid.grid.Driver:15
+#: of
+msgid "Legacy (deprecated) usage::"
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ParametersRecord:19
+#: flwr.common.record.configrecord.ConfigsRecord:19
+#: flwr.common.record.metricrecord.MetricsRecord:19
+#: flwr.common.record.recorddict.RecordSet:19 flwr.server.grid.grid.Driver:21
+#: of
+msgid "Updated usage::"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -12084,13 +12548,6 @@ msgstr ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 msgid ":py:obj:`count_bytes <flwr.common.ConfigsRecord.count_bytes>`\\ \\(\\)"
 msgstr ":py:obj:`count_bytes <flwr.common.ConfigsRecord.count_bytes>`\\ \\(\\)"
-
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: flwr.common.record.configsrecord.ConfigsRecord.count_bytes:1
-#: flwr.common.record.metricsrecord.MetricsRecord.count_bytes:1
-#: flwr.common.record.parametersrecord.ParametersRecord.count_bytes:1 of
-msgid "Return number of Bytes stored in this object."
-msgstr "이 객체에 저장된 바이트 수를 반환합니다."
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 #, fuzzy
@@ -12109,22 +12566,10 @@ msgstr ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
 msgid ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: collections.abc.MutableMapping.pop:1 of
-msgid "If key is not found, d is returned if given, otherwise KeyError is raised."
-msgstr "키를 찾을 수 없으면 주어진 경우 d가 반환되고, 그렇지 않으면 KeyError가 발생합니다."
-
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.ConfigsRecord.popitem>`\\ \\(\\)"
 msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
-
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: collections.abc.MutableMapping.popitem:1 of
-msgid "as a 2-tuple; but raise KeyError if D is empty."
-msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 #, fuzzy
@@ -12141,22 +12586,9 @@ msgstr ""
 ":py:obj:`update <flwr.common.ConfigsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: collections.abc.MutableMapping.update:1 of
-msgid ""
-"If E present and has a .keys() method, does:     for k in E: D[k] = E[k] "
-"If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = "
-"v In either case, this is followed by: for k, v in F.items(): D[k] = v"
-msgstr ""
-
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 msgid ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
 msgstr ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
-
-#: flwr.common.record.configsrecord.ConfigsRecord.count_bytes:3 of
-msgid "This function counts booleans as occupying 1 Byte."
-msgstr "이 함수는 booleans을 1바이트를 차지하는 것으로 계산합니다."
 
 #: ../../source/ref-api/flwr.common.Context.rst:2
 msgid "Context"
@@ -13350,22 +13782,54 @@ msgstr ":py:obj:`properties <flwr.common.GetPropertiesRes.properties>`\\"
 msgid "Message"
 msgstr "Message"
 
-#: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.metadata:1
 #: flwr.common.message.Message:3 of
-msgid "A dataclass including information about the message to be executed."
-msgstr "실행할 메시지에 대한 정보를 포함한 데이터 클래스입니다."
+msgid ""
+"This class encapsulates the payload and metadata necessary for "
+"communication between a ClientApp and a ServerApp."
+msgstr ""
 
-#: flwr.common.message.Message:5 of
+#: flwr.common.message.Message:6 of
 msgid ""
 "Holds records either sent by another entity (e.g. sent by the server-side"
 " logic to a client, or vice-versa) or that will be sent to it."
 msgstr "다른 엔터티(예: 서버 측 로직이 클라이언트로 전송하거나 그 반대로 전송하는 등)가 전송했거나 전송할 레코드를 보유합니다."
 
-#: flwr.common.message.Message:8 of
+#: flwr.common.message.Message:9 of
 msgid ""
 "A dataclass that captures information about an error that took place when"
 " processing another message."
 msgstr "다른 메시지를 처리할 때 발생한 오류에 대한 정보를 캡처하는 데이터 클래스입니다."
+
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Message:12
+#: flwr.common.message.Metadata:9 of
+msgid "An identifier for the node receiving this message."
+msgstr "이 메시지를 수신하는 노드의 식별자입니다."
+
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.message_type:1 flwr.common.message.Message:14
+#: flwr.common.message.Metadata:20 of
+msgid "A string that encodes the action to be executed on the receiving end."
+msgstr "수신 측에서 실행할 작업을 인코딩하는 문자열입니다."
+
+#: flwr.common.message.Message:17 of
+msgid ""
+"Time-to-live (TTL) for this message in seconds. If `None` (default), the "
+"TTL is set to 43,200 seconds (12 hours)."
+msgstr ""
+
+#: flwr.common.message.Message:20 flwr.common.message.Metadata:13 of
+msgid ""
+"An identifier for grouping messages. In some settings, this is used as "
+"the FL round."
+msgstr "메시지를 그룹화하기 위한 식별자입니다. 일부 설정에서는 FL 라운드로 사용됩니다."
+
+#: flwr.common.message.Message:23 of
+msgid ""
+"The instruction message to which this message is a reply. This message "
+"does not retain the original message's content but derives its metadata "
+"from it."
+msgstr ""
 
 #: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
 msgid ""
@@ -13432,6 +13896,11 @@ msgstr "이 메시지가 캡처한 오류입니다."
 msgid ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
 msgstr ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
 
+#: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.metadata:1
+#: of
+msgid "A dataclass including information about the message to be executed."
+msgstr "실행할 메시지에 대한 정보를 포함한 데이터 클래스입니다."
+
 #: flwr.common.message.Message.create_error_reply:3 of
 msgid "The error that was encountered."
 msgstr "오류가 발생했습니다."
@@ -13468,10 +13937,11 @@ msgid "**message** -- A Message containing only the relevant error and metadata.
 msgstr ""
 
 #: flwr.common.message.Message.create_reply:3 of
+#, fuzzy
 msgid ""
 "The method generates a new `Message` as a reply to this message. It "
 "inherits 'run_id', 'src_node_id', 'dst_node_id', and 'message_type' from "
-"this message and sets 'reply_to_message' to the ID of this message."
+"this message and sets 'reply_to_message_id' to the ID of this message."
 msgstr ""
 "이 메서드는 이 메시지에 대한 응답으로 새로운 '메시지'를 생성합니다. 이 메시지에서 'run_id', 'src_node_id', "
 "'dst_node_id', 'message_type'을 상속하고 'reply_to_message'를 이 메시지의 ID로 설정합니다."
@@ -13537,38 +14007,25 @@ msgid "An identifier for the node sending this message."
 msgstr "이 메시지를 보내는 노드의 식별자입니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Metadata:9 of
-msgid "An identifier for the node receiving this message."
-msgstr "이 메시지를 수신하는 노드의 식별자입니다."
-
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.reply_to_message:1 flwr.common.message.Metadata:11 of
-msgid "An identifier for the message this message replies to."
+#: flwr.common.Metadata.reply_to_message_id:1 flwr.common.message.Metadata:11
+#: of
+#, fuzzy
+msgid "An identifier for the message to which this message is a reply."
 msgstr "이 메시지가 회신하는 메시지의 식별자입니다."
 
-#: flwr.common.message.Metadata:13 of
-msgid ""
-"An identifier for grouping messages. In some settings, this is used as "
-"the FL round."
-msgstr "메시지를 그룹화하기 위한 식별자입니다. 일부 설정에서는 FL 라운드로 사용됩니다."
-
+#: flwr.common.Metadata.created_at:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
 #: flwr.common.message.Metadata:16 of
+msgid "Unix timestamp when the message was created."
+msgstr "메시지가 생성된 때의 Unix timestamp입니다."
+
+#: flwr.common.message.Metadata:18 of
 msgid "Time-to-live for this message in seconds."
 msgstr "이 메시지의 유효 시간(초)입니다."
-
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.message_type:1 flwr.common.message.Metadata:18 of
-msgid "A string that encodes the action to be executed on the receiving end."
-msgstr "수신 측에서 실행할 작업을 인코딩하는 문자열입니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`created_at <flwr.common.Metadata.created_at>`\\"
 msgstr ":py:obj:`created_at <flwr.common.Metadata.created_at>`\\"
-
-#: flwr.common.Metadata.created_at:1
-#: flwr.common.Metadata.created_at:1:<autosummary>:1 of
-msgid "Unix timestamp when the message was created."
-msgstr "메시지가 생성된 때의 Unix timestamp입니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 #, fuzzy
@@ -13603,7 +14060,8 @@ msgid ":py:obj:`message_type <flwr.common.Metadata.message_type>`\\"
 msgstr ":py:obj:`message_type <flwr.common.Metadata.message_type>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
-msgid ":py:obj:`reply_to_message <flwr.common.Metadata.reply_to_message>`\\"
+#, fuzzy
+msgid ":py:obj:`reply_to_message_id <flwr.common.Metadata.reply_to_message_id>`\\"
 msgstr ":py:obj:`reply_to_message <flwr.common.Metadata.reply_to_message>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
@@ -13623,16 +14081,12 @@ msgstr ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
 msgid "Time-to-live for this message."
 msgstr "이 메시지를 기다리는 시간입니다."
 
-#: ../../source/ref-api/flwr.common.Metrics.rst:2
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:2
 #, fuzzy
-msgid "Metrics"
+msgid "MetricRecord"
 msgstr "MetricsRecord"
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:2
-msgid "MetricsRecord"
-msgstr "MetricsRecord"
-
-#: flwr.common.record.metricsrecord.MetricsRecord:1 of
+#: flwr.common.record.metricrecord.MetricRecord:1 of
 #, fuzzy
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
@@ -13645,22 +14099,23 @@ msgstr ""
 ":py:class:`~typing.List`\\ [:py:class:`int`] | :py:class:`~typing.List`\\"
 " [:py:class:`float`]]"
 
-#: flwr.common.record.metricsrecord.MetricsRecord:3 of
+#: flwr.common.record.metricrecord.MetricRecord:3 of
 msgid ""
-"A :code:`MetricsRecord` is a Python dictionary designed to ensure that "
+"A :code:`MetricRecord` is a Python dictionary designed to ensure that "
 "each key-value pair adheres to specified data types. A "
-":code:`MetricsRecord` is one of the types of records that a "
-"`flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports "
-"and can therefore be used to construct :code:`common.Message` objects."
+":code:`MetricRecord` is one of the types of records that a "
+"`flwr.common.RecordDict <flwr.common.RecordDict.html#recorddict>`_ "
+"supports and can therefore be used to construct :code:`common.Message` "
+"objects."
 msgstr ""
 
-#: flwr.common.record.metricsrecord.MetricsRecord:9 of
+#: flwr.common.record.metricrecord.MetricRecord:9 of
 msgid ""
 "A dictionary that stores basic types (i.e. `int`, `float` as defined in "
-"`MetricsScalar`) and list of such types (see `MetricsScalarList`)."
+"`MetricScalar`) and list of such types (see `MetricScalarList`)."
 msgstr ""
 
-#: flwr.common.record.metricsrecord.MetricsRecord:12 of
+#: flwr.common.record.metricrecord.MetricRecord:12 of
 msgid ""
 "A boolean indicating whether metrics should be deleted from the input "
 "dictionary immediately after adding them to the record. When set to True,"
@@ -13668,9 +14123,9 @@ msgid ""
 "False."
 msgstr ""
 
-#: flwr.common.record.metricsrecord.MetricsRecord:20 of
+#: flwr.common.record.metricrecord.MetricRecord:20 of
 msgid ""
-"The usage of a :code:`MetricsRecord` is envisioned for communicating "
+"The usage of a :code:`MetricRecord` is envisioned for communicating "
 "results obtained when a node performs an action. A few typical examples "
 "include: communicating the training accuracy after a model is trained "
 "locally by a :code:`ClientApp`, reporting the validation loss obtained at"
@@ -13680,24 +14135,108 @@ msgid ""
 ":code:`float`) or list of scalars."
 msgstr ""
 
-#: flwr.common.record.metricsrecord.MetricsRecord:28 of
+#: flwr.common.record.metricrecord.MetricRecord:28 of
 msgid ""
-"Let's see some examples of how to construct a :code:`MetricsRecord` from "
+"Let's see some examples of how to construct a :code:`MetricRecord` from "
 "scratch:"
 msgstr ""
 
-#: flwr.common.record.metricsrecord.MetricsRecord:39 of
+#: flwr.common.record.metricrecord.MetricRecord:39 of
 msgid ""
 "Since types are enforced, the types of the objects inserted are checked. "
-"For a :code:`MetricsRecord`, value types allowed are those in defined in "
-":code:`flwr.common.MetricsRecordValues`. Similarly, only :code:`str` keys"
-" are allowed."
+"For a :code:`MetricRecord`, value types allowed are those in defined in "
+":code:`flwr.common.MetricRecordValues`. Similarly, only :code:`str` keys "
+"are allowed."
 msgstr ""
 
-#: flwr.common.record.metricsrecord.MetricsRecord:50 of
+#: flwr.common.record.metricrecord.MetricRecord:50 of
 msgid ""
-"If you need a more versatily type of record try :code:`ConfigsRecord` or "
-":code:`ParametersRecord`."
+"If you need a more versatily type of record try :code:`ConfigRecord` or "
+":code:`ArrayRecord`."
+msgstr ""
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`clear <flwr.common.MetricRecord.clear>`\\ \\(\\)"
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`count_bytes <flwr.common.MetricRecord.count_bytes>`\\ \\(\\)"
+msgstr ":py:obj:`count_bytes <flwr.common.MetricsRecord.count_bytes>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`get <flwr.common.MetricRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`items <flwr.common.MetricRecord.items>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`keys <flwr.common.MetricRecord.keys>`\\ \\(\\)"
+msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`pop <flwr.common.MetricRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`popitem <flwr.common.MetricRecord.popitem>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`setdefault <flwr.common.MetricRecord.setdefault>`\\ "
+"\\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`update <flwr.common.MetricRecord.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+msgstr ""
+":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`values <flwr.common.MetricRecord.values>`\\ \\(\\)"
+msgstr ""
+":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+
+#: ../../source/ref-api/flwr.common.Metrics.rst:2
+#, fuzzy
+msgid "Metrics"
+msgstr "MetricsRecord"
+
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:2
+msgid "MetricsRecord"
+msgstr "MetricsRecord"
+
+#: flwr.common.record.metricrecord.MetricsRecord:1 of
+msgid "Bases: :py:class:`~flwr.common.record.metricrecord.MetricRecord`"
+msgstr ""
+
+#: flwr.common.record.metricrecord.MetricsRecord:3 of
+msgid ""
+"This class exists solely for backward compatibility with legacy code that"
+" previously used ``MetricsRecord``. It has been renamed to "
+"``MetricRecord``."
+msgstr ""
+
+#: flwr.common.record.metricrecord.MetricsRecord:8 of
+msgid ""
+"``MetricsRecord`` is deprecated and will be removed in a future release. "
+"Use ``MetricRecord`` instead."
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -13772,79 +14311,21 @@ msgstr ":py:obj:`tensor_type <flwr.common.Parameters.tensor_type>`\\"
 msgid "ParametersRecord"
 msgstr "ParametersRecord"
 
-#: flwr.common.record.parametersrecord.ParametersRecord:1 of
-msgid ""
-"Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
-"[:py:class:`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
-msgstr ""
-"Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
-"[:py:class:`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
-
-#: flwr.common.record.parametersrecord.ParametersRecord:3 of
-#, fuzzy
-msgid ""
-"A dataclass storing named Arrays in order. This means that it holds "
-"entries as an OrderedDict[str, Array]. ParametersRecord objects can be "
-"viewed as an equivalent to PyTorch's state_dict, but holding serialised "
-"tensors instead. A :code:`ParametersRecord`  is one of the types of "
-"records that a `flwr.common.RecordSet "
-"<flwr.common.RecordSet.html#recordset>`_ supports and can therefore be "
-"used to construct :code:`common.Message` objects."
-msgstr ""
-"Arrays라는 이름의 데이터 클래스를 순서대로 저장합니다. 즉, OrderedDict[str, Array]로 항목을 보유합니다. "
-"ParametersRecord 객체는 파이토치의 state_dict와 동등한 것으로 볼 수 있지만, 대신 직렬화된 텐서를 "
-"보유합니다."
-
-#: flwr.common.record.parametersrecord.ParametersRecord:10 of
-msgid "A dictionary that stores serialized array-like or tensor-like objects."
+#: flwr.common.record.arrayrecord.ParametersRecord:1 of
+msgid "Bases: :py:class:`~flwr.common.record.arrayrecord.ArrayRecord`"
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:12 of
+#: flwr.common.record.arrayrecord.ParametersRecord:3 of
 msgid ""
-"A boolean indicating whether parameters should be deleted from the input "
-"dictionary immediately after adding them to the record. If False, the "
-"dictionary passed to `set_parameters()` will be empty once exiting from "
-"that function. This is the desired behaviour when working with very large"
-" models/tensors/arrays. However, if you plan to continue working with "
-"your parameters after adding it to the record, set this flag to True. "
-"When set to True, the data is duplicated in memory."
+"This class exists solely for backward compatibility with legacy code that"
+" previously used ``ParametersRecord``. It has been renamed to "
+"``ArrayRecord``."
 msgstr ""
 
-#: flwr.common.record.parametersrecord.ParametersRecord:23 of
+#: flwr.common.record.arrayrecord.ParametersRecord:8 of
 msgid ""
-"The usage of :code:`ParametersRecord` is envisioned for storing data "
-"arrays (e.g. parameters of a machine learning model). These first need to"
-" be serialized into a :code:`flwr.common.Array` data structure."
-msgstr ""
-
-#: flwr.common.record.parametersrecord.ParametersRecord:27 of
-#, fuzzy
-msgid "Let's see some examples:"
-msgstr "몇 가지 예를 살펴보겠습니다:"
-
-#: flwr.common.record.parametersrecord.ParametersRecord:49 of
-msgid ""
-"Now that the NumPy array is embedded into a :code:`ParametersRecord` it "
-"could be sent if added as part of a :code:`common.Message` or it could be"
-" saved as a persistent state of a :code:`ClientApp` via its context. "
-"Regardless of the usecase, we will sooner or later want to recover the "
-"array in its original NumPy representation. For the example above, where "
-"the array was serialized using the built-in utility function, "
-"deserialization can be done as follows:"
-msgstr ""
-
-#: flwr.common.record.parametersrecord.ParametersRecord:64 of
-msgid ""
-"If you need finer control on how your arrays are serialized and "
-"deserialized, you can construct :code:`Array` objects directly like this:"
-msgstr ""
-
-#: flwr.common.record.parametersrecord.ParametersRecord:82 of
-msgid ""
-"Note that different arrays (e.g. from PyTorch, Tensorflow) might require "
-"different serialization mechanism. Howerver, they often support a "
-"conversion to NumPy, therefore allowing to use the same or similar steps "
-"as in the example above."
+"``ParametersRecord`` is deprecated and will be removed in a future "
+"release. Use ``ArrayRecord`` instead."
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -13854,6 +14335,32 @@ msgstr ":py:obj:`clear <flwr.common.ParametersRecord.clear>`\\ \\(\\)"
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 msgid ":py:obj:`count_bytes <flwr.common.ParametersRecord.count_bytes>`\\ \\(\\)"
 msgstr ":py:obj:`count_bytes <flwr.common.ParametersRecord.count_bytes>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`from_array_dict "
+"<flwr.common.ParametersRecord.from_array_dict>`\\ \\(array\\_dict\\, "
+"\\*\\[\\, keep\\_input\\]\\)"
+msgstr ""
+":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ "
+"\\(\\[array\\_dict\\, keep\\_input\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`from_numpy_ndarrays "
+"<flwr.common.ParametersRecord.from_numpy_ndarrays>`\\ \\(ndarrays\\, "
+"\\*\\[\\, keep\\_input\\]\\)"
+msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`from_torch_state_dict "
+"<flwr.common.ParametersRecord.from_torch_state_dict>`\\ "
+"\\(state\\_dict\\, \\*\\[\\, ...\\]\\)"
+msgstr ":py:obj:`get <flwr.common.ParametersRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 #, fuzzy
@@ -13885,6 +14392,24 @@ msgid ""
 msgstr ":py:obj:`get <flwr.common.ParametersRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`to_numpy_ndarrays "
+"<flwr.common.ParametersRecord.to_numpy_ndarrays>`\\ \\(\\*\\[\\, "
+"keep\\_input\\]\\)"
+msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`to_torch_state_dict "
+"<flwr.common.ParametersRecord.to_torch_state_dict>`\\ \\(\\*\\[\\, "
+"keep\\_input\\]\\)"
+msgstr ""
+":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ "
+"\\(\\[array\\_dict\\, keep\\_input\\]\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`update <flwr.common.ParametersRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
@@ -13895,13 +14420,6 @@ msgstr ""
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
 msgid ":py:obj:`values <flwr.common.ParametersRecord.values>`\\ \\(\\)"
 msgstr ":py:obj:`values <flwr.common.ParametersRecord.values>`\\ \\(\\)"
-
-#: flwr.common.record.parametersrecord.ParametersRecord.count_bytes:3 of
-msgid ""
-"Note that a small amount of Bytes might also be included in this counting"
-" that correspond to metadata of the serialized object (e.g. of NumPy "
-"array) needed for deseralization."
-msgstr "역직렬화에 필요한 직렬화된 객체의 메타데이터(예: NumPy 배열)에 해당하는 소량의 바이트도 이 카운팅에 포함될 수 있습니다."
 
 #: ../../source/ref-api/flwr.common.Properties.rst:2
 #, fuzzy
@@ -13916,78 +14434,174 @@ msgstr "ReconnectIns"
 msgid ":py:obj:`seconds <flwr.common.ReconnectIns.seconds>`\\"
 msgstr ":py:obj:`seconds <flwr.common.ReconnectIns.seconds>`\\"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:2
-msgid "RecordSet"
+#: ../../source/ref-api/flwr.common.RecordDict.rst:2
+#, fuzzy
+msgid "RecordDict"
 msgstr "RecordSet"
 
-#: flwr.common.record.recordset.RecordSet:1 of
+#: flwr.common.record.recorddict.RecordDict:1 of
 #, fuzzy
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
-"[:py:class:`str`, "
-":py:class:`~flwr.common.record.parametersrecord.ParametersRecord` | "
-":py:class:`~flwr.common.record.metricsrecord.MetricsRecord` | "
-":py:class:`~flwr.common.record.configsrecord.ConfigsRecord`]"
+"[:py:class:`str`, :py:class:`~flwr.common.record.arrayrecord.ArrayRecord`"
+" | :py:class:`~flwr.common.record.metricrecord.MetricRecord` | "
+":py:class:`~flwr.common.record.configrecord.ConfigRecord`]"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
 
-#: flwr.common.record.recordset.RecordSet:3 of
+#: flwr.common.record.recorddict.RecordDict:3 of
 msgid ""
-"A :class:`RecordSet` is the unified mechanism by which parameters, "
-"metrics and configs can be either stored as part of a :class:`Context` in"
-" your apps or communicated as part of a :class:`Message` between your "
-"apps."
+"A :class:`RecordDict` is the unified mechanism by which arrays, metrics "
+"and configs can be either stored as part of a :class:`Context` in your "
+"apps or communicated as part of a :class:`Message` between your apps."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:8 of
+#: flwr.common.record.recorddict.RecordDict:8 of
 msgid ""
-"A dictionary of :code:`ParametersRecords` that can be used to record and "
-"communicate model parameters and high-dimensional arrays."
+"A dictionary mapping string keys to record instances, where each value is"
+" either a :class:`ParametersRecord`, :class:`MetricsRecord`, or "
+":class:`ConfigsRecord`."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:11 of
+#: flwr.common.record.recorddict.RecordDict:15 of
 msgid ""
-"A dictionary of :code:`MetricsRecord` that can be used to record and "
-"communicate scalar-valued metrics that are the result of performing and "
-"action, for example, by a :code:`ClientApp`."
-msgstr ""
-
-#: flwr.common.record.recordset.RecordSet:15 of
-msgid ""
-"A dictionary of :code:`ConfigsRecord` that can be used to record and "
-"communicate configuration values to an entity (e.g. to a "
-":code:`ClientApp`) for it to adjust how an action is performed."
-msgstr ""
-
-#: flwr.common.record.recordset.RecordSet:23 of
-msgid ""
-"A :code:`RecordSet` can hold three types of records, each designed with "
-"an specific purpose. What is common to all of them is that they are "
+"A :class:`RecordDict` can hold three types of records, each designed with"
+" an specific purpose. What is common to all of them is that they are "
 "Python dictionaries designed to ensure that each key-value pair adheres "
 "to specified data types."
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:28 of
+#: flwr.common.record.recorddict.RecordDict:20 of
 #, fuzzy
 msgid "Let's see an example."
 msgstr "몇 가지 예를 살펴보겠습니다:"
 
-#: flwr.common.record.recordset.RecordSet:46 of
+#: flwr.common.record.recorddict.RecordDict:38 of
 msgid ""
-"Adding a :code:`ParametersRecord` follows the same steps as above but "
-"first, the array needs to be serialized and represented as a "
-":code:`flwr.common.Array`. If the array is a :code:`NumPy` array, you can"
-" use the built-in utility function `array_from_numpy "
-"<flwr.common.array_from_numpy.html>`_. It is often possible to convert an"
-" array first to :code:`NumPy` and then use the aforementioned function."
+"Adding an :code:`ArrayRecord` follows the same steps as above but first, "
+"the array needs to be serialized and represented as a "
+":code:`flwr.common.Array`. For example:"
 msgstr ""
 
-#: flwr.common.record.recordset.RecordSet:65 of
+#: flwr.common.record.recorddict.RecordDict:55 of
 msgid ""
 "For additional examples on how to construct each of the records types "
-"shown above, please refer to the documentation for :code:`ConfigsRecord`,"
-" :code:`MetricsRecord` and :code:`ParametersRecord`."
+"shown above, please refer to the documentation for :code:`ConfigRecord`, "
+":code:`MetricRecord` and :code:`ArrayRecord`."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`clear <flwr.common.RecordDict.clear>`\\ \\(\\)"
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`get <flwr.common.RecordDict.get>`\\ \\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`items <flwr.common.RecordDict.items>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`keys <flwr.common.RecordDict.keys>`\\ \\(\\)"
+msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`pop <flwr.common.RecordDict.pop>`\\ \\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`popitem <flwr.common.RecordDict.popitem>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`setdefault <flwr.common.RecordDict.setdefault>`\\ "
+"\\(k\\[\\,d\\]\\)"
+msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`update <flwr.common.RecordDict.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+msgstr ""
+":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`values <flwr.common.RecordDict.values>`\\ \\(\\)"
+msgstr ""
+":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
+"\\]\\*\\*F\\)"
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`array_records <flwr.common.RecordDict.array_records>`\\"
+msgstr ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
+
+#: flwr.common.RecordDict.array_records:1
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1
+#: flwr.common.RecordSet.array_records:1
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
+#, fuzzy
+msgid "Dictionary holding only ArrayRecord instances."
+msgstr "Dictionary holding ParametersRecord instances."
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`config_records <flwr.common.RecordDict.config_records>`\\"
+msgstr ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1
+#: flwr.common.RecordDict.config_records:1
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1
+#: flwr.common.RecordSet.config_records:1 of
+#, fuzzy
+msgid "Dictionary holding only ConfigRecord instances."
+msgstr "Dictionary holding ConfigsRecord instances."
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`metric_records <flwr.common.RecordDict.metric_records>`\\"
+msgstr ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1
+#: flwr.common.RecordDict.metric_records:1
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1
+#: flwr.common.RecordSet.metric_records:1 of
+#, fuzzy
+msgid "Dictionary holding only MetricRecord instances."
+msgstr "Dictionary holding MetricsRecord instances."
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:2
+msgid "RecordSet"
+msgstr "RecordSet"
+
+#: flwr.common.record.recorddict.RecordSet:1 of
+msgid "Bases: :py:class:`~flwr.common.record.recorddict.RecordDict`"
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordSet:3 of
+msgid ""
+"This class exists solely for backward compatibility with legacy code that"
+" previously used ``RecordSet``. It has been renamed to ``RecordDict`` and"
+" will be removed in a future release."
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordSet:8 of
+msgid ""
+"``RecordSet`` is deprecated and will be removed in a future release. Use "
+"``RecordDict`` instead."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
@@ -14041,35 +14655,51 @@ msgstr ""
 ":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`array_records <flwr.common.RecordSet.array_records>`\\"
+msgstr ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
+
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`config_records <flwr.common.RecordSet.config_records>`\\"
+msgstr ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
+
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
 msgid ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
 msgstr ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: flwr.common.RecordSet.configs_records:1 of
-#, fuzzy
-msgid "Dictionary holding only ConfigsRecord instances."
-msgstr "Dictionary holding ConfigsRecord instances."
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1
+#: flwr.common.RecordSet.configs_records:1
+#: flwr.common.RecordSet.metrics_records:1
+#: flwr.common.RecordSet.parameters_records:1 of
+msgid "Deprecated property."
+msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`metric_records <flwr.common.RecordSet.metric_records>`\\"
+msgstr ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
+
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
 msgid ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
 msgstr ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: flwr.common.RecordSet.metrics_records:1 of
-#, fuzzy
-msgid "Dictionary holding only MetricsRecord instances."
-msgstr "Dictionary holding MetricsRecord instances."
-
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
 msgid ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
 msgstr ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: flwr.common.RecordSet.parameters_records:1 of
-#, fuzzy
-msgid "Dictionary holding only ParametersRecord instances."
-msgstr "Dictionary holding ParametersRecord instances."
+#: flwr.common.RecordSet.configs_records:3 of
+msgid "Use ``config_records`` instead."
+msgstr ""
+
+#: flwr.common.RecordSet.metrics_records:3 of
+msgid "Use ``metric_records`` instead."
+msgstr ""
+
+#: flwr.common.RecordSet.parameters_records:3 of
+msgid "Use ``array_records`` instead."
+msgstr ""
 
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:2
 msgid "ServerMessage"
@@ -14173,64 +14803,74 @@ msgstr ""
 msgid "Start a Flower server using the gRPC transport layer."
 msgstr "gRPC transport layer를 사용하여 Flower 서버를 실행하세요."
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ":py:obj:`ClientManager <flwr.server.ClientManager>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.client_manager.ClientManager:1 of
 msgid "Abstract base class for managing Flower clients."
 msgstr "Flower 클라이언트를 관리하기 위한 Abstract base class."
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ":py:obj:`Driver <flwr.server.Driver>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
-#: flwr.server.driver.driver.Driver:1 of
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
+#: flwr.server.grid.grid.Driver:1 of
+msgid "Deprecated abstract base class ``Driver``, use ``Grid`` instead."
+msgstr ""
+
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #, fuzzy
-msgid "Abstract base Driver class for the ServerAppIo API."
+msgid ":py:obj:`Grid <flwr.server.Grid>`\\ \\(\\)"
+msgstr ":py:obj:`flwr.server <flwr.server>`\\"
+
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
+#: flwr.server.grid.grid.Grid:1 of
+#, fuzzy
+msgid "Abstract base class Grid to send/receive messages."
 msgstr "Driver API를 위한 Abstract base Driver class."
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ":py:obj:`History <flwr.server.History>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.history.History:1 of
 msgid "History class for training and/or evaluation metrics collection."
 msgstr "메트릭 콜렉션을 훈련 및 평가하기 위한 History class."
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`LegacyContext <flwr.server.LegacyContext>`\\ \\(context\\[\\, "
 "config\\, strategy\\, ...\\]\\)"
 msgstr ":py:obj:`Context <flwr.common.Context>`\\ \\(state\\)"
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.compat.legacy_context.LegacyContext:1 of
 msgid "Legacy Context."
 msgstr "레거시 콘텍스트."
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ""
 ":py:obj:`Server <flwr.server.Server>`\\ \\(\\*\\, client\\_manager\\[\\, "
 "strategy\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ""
 ":py:obj:`ServerApp <flwr.server.ServerApp>`\\ \\(\\[server\\, config\\, "
 "strategy\\, ...\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.server_app.ServerApp:1 of
 msgid "Flower ServerApp."
 msgstr "Flower 서버."
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`ServerAppComponents <flwr.server.ServerAppComponents>`\\ "
@@ -14239,47 +14879,47 @@ msgstr ""
 ":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
 "\\(\\[get\\_properties\\_ins\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.serverapp_components.ServerAppComponents:1 of
 msgid "Components to construct a ServerApp."
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ""
 ":py:obj:`ServerConfig <flwr.server.ServerConfig>`\\ \\(\\[num\\_rounds\\,"
 " round\\_timeout\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.server_config.ServerConfig:1 of
 msgid "Flower server config."
 msgstr "Flower 서버 설정."
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ":py:obj:`SimpleClientManager <flwr.server.SimpleClientManager>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.rst:37:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.client_manager.SimpleClientManager:1 of
 msgid "Provides a pool of available clients."
 msgstr "사용 가능한 클라이언트 그룹 제공."
 
-#: ../../source/ref-api/flwr.server.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:57:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`flwr.server.strategy <flwr.server.strategy>`\\"
 msgstr ":py:obj:`state <flwr.common.Context.state>`\\"
 
-#: ../../source/ref-api/flwr.server.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:57:<autosummary>:1
 #: flwr.server.strategy:1 of
 msgid "Contains the strategy abstraction and different implementations."
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:57:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`flwr.server.workflow <flwr.server.workflow>`\\"
 msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
-#: ../../source/ref-api/flwr.server.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.server.rst:57:<autosummary>:1
 #: flwr.server.workflow:1 of
 msgid "Workflows."
 msgstr ""
@@ -14390,6 +15030,25 @@ msgstr "클라이언트 모델의 민감도입니다."
 msgid "Driver"
 msgstr ""
 
+#: flwr.server.grid.grid.Driver:1 of
+msgid "Bases: :py:class:`~flwr.server.grid.grid.Grid`"
+msgstr ""
+
+#: flwr.server.grid.grid.Driver:3 of
+msgid ""
+"This class is provided solely for backward compatibility with legacy code"
+" that previously relied on the ``Driver`` class. It has been deprecated "
+"in favor of the updated abstract base class ``Grid``, which now "
+"encompasses all communication-related functionality and improvements "
+"between the ServerApp and the SuperLink."
+msgstr ""
+
+#: flwr.server.grid.grid.Driver:10 of
+msgid ""
+"``Driver`` is deprecated and will be removed in a future release. Use "
+"`Grid` in the signature of your ServerApp."
+msgstr ""
+
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
 msgid ""
 ":py:obj:`create_message <flwr.server.Driver.create_message>`\\ "
@@ -14397,7 +15056,8 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.create_message:1 of
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: flwr.server.grid.grid.Grid.create_message:1 of
 msgid "Create a new message with specified parameters."
 msgstr ""
 
@@ -14406,7 +15066,8 @@ msgid ":py:obj:`get_node_ids <flwr.server.Driver.get_node_ids>`\\ \\(\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.get_node_ids:1 of
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: flwr.server.grid.grid.Grid.get_node_ids:1 of
 msgid "Get node IDs."
 msgstr ""
 
@@ -14417,7 +15078,8 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.pull_messages:1 of
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: flwr.server.grid.grid.Grid.pull_messages:1 of
 msgid "Pull messages based on message IDs."
 msgstr ""
 
@@ -14428,7 +15090,8 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.push_messages:1 of
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: flwr.server.grid.grid.Grid.push_messages:1 of
 msgid "Push messages to specified node IDs."
 msgstr ""
 
@@ -14439,7 +15102,8 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.send_and_receive:1 of
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: flwr.server.grid.grid.Grid.send_and_receive:1 of
 msgid "Push messages to specified node IDs and pull the reply messages."
 msgstr ""
 
@@ -14449,131 +15113,179 @@ msgid ":py:obj:`set_run <flwr.server.Driver.set_run>`\\ \\(run\\_id\\)"
 msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: flwr.server.driver.driver.Driver.set_run:1 of
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: flwr.server.grid.grid.Grid.set_run:1 of
 msgid "Request a run to the SuperLink with a given `run_id`."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:1:<autosummary>:1 of
+#: flwr.server.grid.grid.Grid.create_message:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`run <flwr.server.Driver.run>`\\"
 msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
-#: flwr.server.Driver.run:1
-#: flwr.server.driver.driver.Driver.create_message:1:<autosummary>:1 of
+#: flwr.server.Driver.run:1 flwr.server.Grid.run:1
+#: flwr.server.grid.grid.Grid.create_message:1:<autosummary>:1 of
 #, fuzzy
 msgid "Run information."
 msgstr "시뮬레이션 실행"
 
-#: flwr.server.driver.driver.Driver.create_message:3 of
+#: flwr.server.grid.grid.Grid.create_message:3 of
 msgid ""
-"This method constructs a new `Message` with given content and metadata. "
-"The `run_id` and `src_node_id` will be set automatically."
+"This method constructs a new ``Message`` with given content and metadata."
+" The ``run_id`` and ``src_node_id`` will be set automatically."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:6 of
+#: flwr.server.grid.grid.Grid.create_message:6 of
 msgid ""
 "The content for the new message. This holds records that are to be sent "
 "to the destination node."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:9 of
+#: flwr.server.grid.grid.Grid.create_message:9 of
 msgid ""
 "The type of the message, defining the action to be executed on the "
 "receiving end."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:12 of
+#: flwr.server.grid.grid.Grid.create_message:12 of
 msgid "The ID of the destination node to which the message is being sent."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:14 of
+#: flwr.server.grid.grid.Grid.create_message:14 of
+#, fuzzy
 msgid ""
 "The ID of the group to which this message is associated. In some "
-"settings, this is used as the FL round."
-msgstr ""
+"settings, this is used as the federated learning round."
+msgstr "메시지를 그룹화하기 위한 식별자입니다. 일부 설정에서는 FL 라운드로 사용됩니다."
 
-#: flwr.server.driver.driver.Driver.create_message:17 of
+#: flwr.server.grid.grid.Grid.create_message:17 of
 msgid ""
 "Time-to-live for the round trip of this message, i.e., the time from "
 "sending this message to receiving a reply. It specifies in seconds the "
 "duration for which the message and its potential reply are considered "
-"valid. If unset, the default TTL (i.e., `common.DEFAULT_TTL`) will be "
+"valid. If unset, the default TTL (i.e., ``common.DEFAULT_TTL``) will be "
 "used."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.create_message:23 of
+#: flwr.server.grid.grid.Grid.create_message:23 of
 msgid ""
 "**message** -- A new `Message` instance with the specified content and "
 "metadata."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.pull_messages:3 of
+#: flwr.server.grid.grid.Grid.pull_messages:3 of
 msgid ""
 "This method is used to collect messages from the SuperLink that "
 "correspond to a set of given message IDs."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.pull_messages:6 of
+#: flwr.server.grid.grid.Grid.pull_messages:6 of
 msgid "An iterable of message IDs for which reply messages are to be retrieved."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.pull_messages:9 of
+#: flwr.server.grid.grid.Grid.pull_messages:9 of
 msgid "**messages** -- An iterable of messages received."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.push_messages:3 of
+#: flwr.server.grid.grid.Grid.push_messages:3 of
 msgid ""
 "This method takes an iterable of messages and sends each message to the "
-"node specified in `dst_node_id`."
+"node specified in ``dst_node_id``."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.push_messages:6
-#: flwr.server.driver.driver.Driver.send_and_receive:7 of
+#: flwr.server.grid.grid.Grid.push_messages:6
+#: flwr.server.grid.grid.Grid.send_and_receive:7 of
 msgid "An iterable of messages to be sent."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.push_messages:9 of
+#: flwr.server.grid.grid.Grid.push_messages:9 of
 msgid ""
 "**message_ids** -- An iterable of IDs for the messages that were sent, "
 "which can be used to pull replies."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.send_and_receive:3 of
+#: flwr.server.grid.grid.Grid.send_and_receive:3 of
 msgid ""
 "This method sends a list of messages to their destination node IDs and "
 "then waits for the replies. It continues to pull replies until either all"
 " replies are received or the specified timeout duration is exceeded."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.send_and_receive:9 of
+#: flwr.server.grid.grid.Grid.send_and_receive:9 of
 msgid ""
 "The timeout duration in seconds. If specified, the method will wait for "
 "replies for this duration. If `None`, there is no time limit and the "
 "method will wait until replies for all messages are received."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.send_and_receive:14 of
+#: flwr.server.grid.grid.Grid.send_and_receive:14 of
 msgid "**replies** -- An iterable of reply messages received from the SuperLink."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.send_and_receive:19 of
+#: flwr.server.grid.grid.Grid.send_and_receive:19 of
 msgid ""
-"This method uses `push_messages` to send the messages and `pull_messages`"
-" to collect the replies. If `timeout` is set, the method may not return "
-"replies for all sent messages. A message remains valid until its TTL, "
-"which is not affected by `timeout`."
+"This method uses ``push_messages`` to send the messages and "
+"``pull_messages`` to collect the replies. If ``timeout`` is set, the "
+"method may not return replies for all sent messages. A message remains "
+"valid until its TTL, which is not affected by ``timeout``."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.set_run:3 of
+#: flwr.server.grid.grid.Grid.set_run:3 of
 msgid ""
-"If a Run with the specified `run_id` exists, a local Run object will be "
-"created. It enables further functionality in the driver, such as sending "
-"`Messages`."
+"If a ``Run`` with the specified ``run_id`` exists, a local ``Run`` object"
+" will be created. It enables further functionality in the grid, such as "
+"sending ``Message``s."
 msgstr ""
 
-#: flwr.server.driver.driver.Driver.set_run:7 of
-msgid "The `run_id` of the Run this Driver object operates in."
+#: flwr.server.grid.grid.Grid.set_run:7 of
+msgid "The ``run_id`` of the ``Run`` this ``Grid`` object operates in."
 msgstr ""
+
+#: ../../source/ref-api/flwr.server.Grid.rst:2
+msgid "Grid"
+msgstr ""
+
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`create_message <flwr.server.Grid.create_message>`\\ "
+"\\(content\\, message\\_type\\, ...\\[\\, ttl\\]\\)"
+msgstr ""
+":py:obj:`create_reply <flwr.common.Message.create_reply>`\\ "
+"\\(content\\[\\, ttl\\]\\)"
+
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`get_node_ids <flwr.server.Grid.get_node_ids>`\\ \\(\\)"
+msgstr ":py:obj:`src_node_id <flwr.common.Metadata.src_node_id>`\\"
+
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`pull_messages <flwr.server.Grid.pull_messages>`\\ "
+"\\(message\\_ids\\)"
+msgstr ":py:obj:`flwr.server <flwr.server>`\\"
+
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`push_messages <flwr.server.Grid.push_messages>`\\ \\(messages\\)"
+msgstr ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+msgid ""
+":py:obj:`send_and_receive <flwr.server.Grid.send_and_receive>`\\ "
+"\\(messages\\, \\*\\[\\, timeout\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`set_run <flwr.server.Grid.set_run>`\\ \\(run\\_id\\)"
+msgstr ":py:obj:`flwr.server <flwr.server>`\\"
+
+#: flwr.server.grid.grid.Grid.create_message:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`run <flwr.server.Grid.run>`\\"
+msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
 #: ../../source/ref-api/flwr.server.History.rst:2
 msgid "History"
@@ -14763,11 +15475,12 @@ msgid "Replace server strategy."
 msgstr ""
 
 #: flwr.server.server_app.ServerApp:5 of
-msgid "Use the `ServerApp` with an existing `Strategy`:"
-msgstr ""
+#, fuzzy
+msgid "Use the ``ServerApp`` with an existing ``Strategy``:"
+msgstr "기존 전략 사용"
 
 #: flwr.server.server_app.ServerApp:17 of
-msgid "Use the `ServerApp` with a custom main function:"
+msgid "Use the ``ServerApp`` with a custom main function:"
 msgstr ""
 
 #: flwr.server.server_app.ServerApp.lifespan:1:<autosummary>:1 of
@@ -17797,7 +18510,7 @@ msgstr ""
 msgid ""
 ":py:obj:`collect_masked_vectors_stage "
 "<flwr.server.workflow.SecAggPlusWorkflow.collect_masked_vectors_stage>`\\"
-" \\(driver\\, ...\\)"
+" \\(grid\\, context\\, ...\\)"
 msgstr ""
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1
@@ -17810,7 +18523,7 @@ msgstr ""
 #: of
 msgid ""
 ":py:obj:`setup_stage "
-"<flwr.server.workflow.SecAggPlusWorkflow.setup_stage>`\\ \\(driver\\, "
+"<flwr.server.workflow.SecAggPlusWorkflow.setup_stage>`\\ \\(grid\\, "
 "context\\, state\\)"
 msgstr ""
 
@@ -17824,8 +18537,8 @@ msgstr ""
 #: of
 msgid ""
 ":py:obj:`share_keys_stage "
-"<flwr.server.workflow.SecAggPlusWorkflow.share_keys_stage>`\\ "
-"\\(driver\\, context\\, state\\)"
+"<flwr.server.workflow.SecAggPlusWorkflow.share_keys_stage>`\\ \\(grid\\, "
+"context\\, state\\)"
 msgstr ""
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
@@ -17838,7 +18551,7 @@ msgstr ""
 #: of
 msgid ""
 ":py:obj:`unmask_stage "
-"<flwr.server.workflow.SecAggPlusWorkflow.unmask_stage>`\\ \\(driver\\, "
+"<flwr.server.workflow.SecAggPlusWorkflow.unmask_stage>`\\ \\(grid\\, "
 "context\\, state\\)"
 msgstr ""
 
@@ -17913,21 +18626,21 @@ msgstr ""
 msgid ""
 ":py:obj:`collect_masked_vectors_stage "
 "<flwr.server.workflow.SecAggWorkflow.collect_masked_vectors_stage>`\\ "
-"\\(driver\\, ...\\)"
+"\\(grid\\, context\\, ...\\)"
 msgstr ""
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: of
 msgid ""
 ":py:obj:`setup_stage <flwr.server.workflow.SecAggWorkflow.setup_stage>`\\"
-" \\(driver\\, context\\, state\\)"
+" \\(grid\\, context\\, state\\)"
 msgstr ""
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: of
 msgid ""
 ":py:obj:`share_keys_stage "
-"<flwr.server.workflow.SecAggWorkflow.share_keys_stage>`\\ \\(driver\\, "
+"<flwr.server.workflow.SecAggWorkflow.share_keys_stage>`\\ \\(grid\\, "
 "context\\, state\\)"
 msgstr ""
 
@@ -17935,7 +18648,7 @@ msgstr ""
 #: of
 msgid ""
 ":py:obj:`unmask_stage "
-"<flwr.server.workflow.SecAggWorkflow.unmask_stage>`\\ \\(driver\\, "
+"<flwr.server.workflow.SecAggWorkflow.unmask_stage>`\\ \\(grid\\, "
 "context\\, state\\)"
 msgstr ""
 
@@ -18035,7 +18748,7 @@ msgstr ""
 
 #: flwr.simulation.run_simulation.run_simulation:9 of
 msgid ""
-"Number of nodes that run a ClientApp. They can be sampled by a Driver in "
+"Number of nodes that run a ClientApp. They can be sampled by a Grid in "
 "the ServerApp and receive a Message describing what the ClientApp should "
 "perform."
 msgstr ""
@@ -18051,7 +18764,7 @@ msgid ""
 "for values parsed to initialisation of backend, `client_resources` to "
 "define the resources for clients, and `actor` to define the actor "
 "parameters. Values supported in <value> are those included by "
-"`flwr.common.typing.ConfigsRecordValues`."
+"`flwr.common.typing.ConfigRecordValues`."
 msgstr ""
 
 #: flwr.simulation.run_simulation.run_simulation:21 of
@@ -29015,7 +29728,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|6423c63301254f07bf93b90f0f627340|"
+msgid "|46c1cee57f3b48b0826837c9ca24bb70|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -29032,7 +29745,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|921b9e2224d8462fba7e9157686102f8|"
+msgid "|55b99ed6645549a38fedbca1511c6982|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -29058,7 +29771,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|66ca4b87ee3e495389a0de3504b4cf04|"
+msgid "|dbf325234cc54792862992a51d558acb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -29076,7 +29789,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|eec7936921d14f04885827df45ff1c04|"
+msgid "|5b34655e2fc743078d8c3382c3d0511a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -29095,7 +29808,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|36e7408103ee4f158b4e1e835728f86a|"
+msgid "|7683104db7e7499884b2199518a8e71d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -29112,7 +29825,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|b0c827a728c24730b9d61063da20f281|"
+msgid "|9646296ec388473d95a2c52534611fe7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -29135,7 +29848,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|77ef7c9994bb4bcca3d1dcda1924bdcd|"
+msgid "|0b8c81d07c8b4e4b86ab37eaa45197be|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -29152,7 +29865,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|ed58eec163c14d1a8a501bac2511a797|"
+msgid "|071d15eeb3fe457f9119b104763aad4f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -29331,7 +30044,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|af8a7f17a37f45948c49f9ab2d2d81d9|"
+msgid "|5ad5aa46a4844f4ea18a1e611e66db54|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -29359,7 +30072,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|6cc75f03a88d47b4b688da695bce38d5|"
+msgid "|8c9a5d290e534161a2e14ede889bcb1b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -29386,7 +30099,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|fd8d87bd3690448ab443a574ba0f7bff|"
+msgid "|c9562154b9a446b1bb7d924d55c4e074|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -29412,7 +30125,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|8cae3c4603a746aa99a152e2ecb33b43|"
+msgid "|a18099299bfa4828a3ac984a2de970c2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -29462,7 +30175,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|57fd4aa1641e458cb6fc78fe1ca31c08|"
+msgid "|ed7d7dbbcf174cd284c15801b0e6f51f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -29582,7 +30295,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|1b03cf8b3d9845dc960d71eaa08299cc|"
+msgid "|334758e020494858a71c419d752d05a5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -38465,5 +39178,706 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|dd64555e826940ffa0bb245a88fa0aa8|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In scenario (2), the `dtype`, `shape`,"
+#~ " `stype`, and `data` are automatically "
+#~ "derived from the input. In scenario "
+#~ "(1), these fields must be specified "
+#~ "manually."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A buffer of bytes containing the "
+#~ "data. Only required if you are not"
+#~ " passing in a ndarray."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A dataclass storing named Arrays in "
+#~ "order. This means that it holds "
+#~ "entries as an OrderedDict[str, Array]. "
+#~ "ParametersRecord objects can be viewed "
+#~ "as an equivalent to PyTorch's "
+#~ "state_dict, but holding serialised tensors "
+#~ "instead. A :code:`ParametersRecord`  is one"
+#~ " of the types of records that a"
+#~ " `flwr.common.RecordSet "
+#~ "<flwr.common.RecordSet.html#recordset>`_ supports and "
+#~ "can therefore be used to construct "
+#~ ":code:`common.Message` objects."
+#~ msgstr ""
+#~ "Arrays라는 이름의 데이터 클래스를 순서대로 저장합니다. "
+#~ "즉, OrderedDict[str, Array]로 항목을 보유합니다. "
+#~ "ParametersRecord 객체는 파이토치의 state_dict와 동등한 "
+#~ "것으로 볼 수 있지만, 대신 직렬화된 텐서를 "
+#~ "보유합니다."
+
+#~ msgid "A dictionary that stores serialized array-like or tensor-like objects."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A boolean indicating whether parameters "
+#~ "should be deleted from the input "
+#~ "dictionary immediately after adding them "
+#~ "to the record. If False, the "
+#~ "dictionary passed to `set_parameters()` will"
+#~ " be empty once exiting from that "
+#~ "function. This is the desired behaviour"
+#~ " when working with very large "
+#~ "models/tensors/arrays. However, if you plan"
+#~ " to continue working with your "
+#~ "parameters after adding it to the "
+#~ "record, set this flag to True. "
+#~ "When set to True, the data is "
+#~ "duplicated in memory."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The usage of :code:`ParametersRecord` is "
+#~ "envisioned for storing data arrays (e.g."
+#~ " parameters of a machine learning "
+#~ "model). These first need to be "
+#~ "serialized into a :code:`flwr.common.Array` "
+#~ "data structure."
+#~ msgstr ""
+
+#~ msgid "Let's see some examples:"
+#~ msgstr "몇 가지 예를 살펴보겠습니다:"
+
+#~ msgid ""
+#~ "Now that the NumPy array is "
+#~ "embedded into a :code:`ParametersRecord` it"
+#~ " could be sent if added as part"
+#~ " of a :code:`common.Message` or it "
+#~ "could be saved as a persistent "
+#~ "state of a :code:`ClientApp` via its "
+#~ "context. Regardless of the usecase, we"
+#~ " will sooner or later want to "
+#~ "recover the array in its original "
+#~ "NumPy representation. For the example "
+#~ "above, where the array was serialized"
+#~ " using the built-in utility function,"
+#~ " deserialization can be done as "
+#~ "follows:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you need finer control on how"
+#~ " your arrays are serialized and "
+#~ "deserialized, you can construct :code:`Array`"
+#~ " objects directly like this:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that different arrays (e.g. from"
+#~ " PyTorch, Tensorflow) might require "
+#~ "different serialization mechanism. Howerver, "
+#~ "they often support a conversion to "
+#~ "NumPy, therefore allowing to use the "
+#~ "same or similar steps as in the"
+#~ " example above."
+#~ msgstr ""
+
+#~ msgid "|6423c63301254f07bf93b90f0f627340|"
+#~ msgstr ""
+
+#~ msgid "|921b9e2224d8462fba7e9157686102f8|"
+#~ msgstr ""
+
+#~ msgid "|66ca4b87ee3e495389a0de3504b4cf04|"
+#~ msgstr ""
+
+#~ msgid "|eec7936921d14f04885827df45ff1c04|"
+#~ msgstr ""
+
+#~ msgid "|36e7408103ee4f158b4e1e835728f86a|"
+#~ msgstr ""
+
+#~ msgid "|b0c827a728c24730b9d61063da20f281|"
+#~ msgstr ""
+
+#~ msgid "|77ef7c9994bb4bcca3d1dcda1924bdcd|"
+#~ msgstr ""
+
+#~ msgid "|ed58eec163c14d1a8a501bac2511a797|"
+#~ msgstr ""
+
+#~ msgid "|af8a7f17a37f45948c49f9ab2d2d81d9|"
+#~ msgstr ""
+
+#~ msgid "|6cc75f03a88d47b4b688da695bce38d5|"
+#~ msgstr ""
+
+#~ msgid "|fd8d87bd3690448ab443a574ba0f7bff|"
+#~ msgstr ""
+
+#~ msgid "|8cae3c4603a746aa99a152e2ecb33b43|"
+#~ msgstr ""
+
+#~ msgid "|57fd4aa1641e458cb6fc78fe1ca31c08|"
+#~ msgstr ""
+
+#~ msgid "|1b03cf8b3d9845dc960d71eaa08299cc|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "We also use this to define the "
+#~ "public API of private subpackages. "
+#~ "Public, in this context, means the "
+#~ "API that other ``flwr`` subpackages "
+#~ "should use. For example, "
+#~ "``flwr.server.driver`` is a private subpackage"
+#~ " (it's not exported via "
+#~ "``src/py/flwr/server/__init__.py``'s ``__all__``)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Still, the private sub-package "
+#~ "``flwr.server.driver`` defines a \"public\" "
+#~ "API using ``__all__`` in "
+#~ "``src/py/flwr/server/driver/__init__.py``:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The interesting part is that both "
+#~ "``GrpcDriver`` and ``InMemoryDriver`` are "
+#~ "never used by Flower framework users,"
+#~ " only by other parts of the "
+#~ "Flower framework codebase. Those other "
+#~ "parts of the codebase import, for "
+#~ "example, ``InMemoryDriver`` using ``from "
+#~ "flwr.server.driver import InMemoryDriver`` (i.e.,"
+#~ " the ``InMemoryDriver`` exported via "
+#~ "``__all__``), not ``from "
+#~ "flwr.server.driver.in_memory_driver import "
+#~ "InMemoryDriver`` (``in_memory_driver.py`` is the "
+#~ "module containing the actual "
+#~ "``InMemoryDriver`` class definition)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This method constructs a new `Message`"
+#~ " with given content and metadata. The"
+#~ " `run_id` and `src_node_id` will be "
+#~ "set automatically."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ID of the group to which "
+#~ "this message is associated. In some "
+#~ "settings, this is used as the FL"
+#~ " round."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Time-to-live for the round trip"
+#~ " of this message, i.e., the time "
+#~ "from sending this message to receiving"
+#~ " a reply. It specifies in seconds "
+#~ "the duration for which the message "
+#~ "and its potential reply are considered"
+#~ " valid. If unset, the default TTL "
+#~ "(i.e., `common.DEFAULT_TTL`) will be used."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This method takes an iterable of "
+#~ "messages and sends each message to "
+#~ "the node specified in `dst_node_id`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This method uses `push_messages` to send"
+#~ " the messages and `pull_messages` to "
+#~ "collect the replies. If `timeout` is "
+#~ "set, the method may not return "
+#~ "replies for all sent messages. A "
+#~ "message remains valid until its TTL, "
+#~ "which is not affected by `timeout`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If a Run with the specified "
+#~ "`run_id` exists, a local Run object "
+#~ "will be created. It enables further "
+#~ "functionality in the driver, such as "
+#~ "sending `Messages`."
+#~ msgstr ""
+
+#~ msgid "The `run_id` of the Run this Driver object operates in."
+#~ msgstr ""
+
+#~ msgid "Use the `ServerApp` with an existing `Strategy`:"
+#~ msgstr ""
+
+#~ msgid "Use the `ServerApp` with a custom main function:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`collect_masked_vectors_stage "
+#~ "<flwr.server.workflow.SecAggPlusWorkflow.collect_masked_vectors_stage>`\\"
+#~ " \\(driver\\, ...\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`setup_stage "
+#~ "<flwr.server.workflow.SecAggPlusWorkflow.setup_stage>`\\ "
+#~ "\\(driver\\, context\\, state\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`share_keys_stage "
+#~ "<flwr.server.workflow.SecAggPlusWorkflow.share_keys_stage>`\\ "
+#~ "\\(driver\\, context\\, state\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`unmask_stage "
+#~ "<flwr.server.workflow.SecAggPlusWorkflow.unmask_stage>`\\ "
+#~ "\\(driver\\, context\\, state\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`collect_masked_vectors_stage "
+#~ "<flwr.server.workflow.SecAggWorkflow.collect_masked_vectors_stage>`\\"
+#~ " \\(driver\\, ...\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`setup_stage "
+#~ "<flwr.server.workflow.SecAggWorkflow.setup_stage>`\\ "
+#~ "\\(driver\\, context\\, state\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`share_keys_stage "
+#~ "<flwr.server.workflow.SecAggWorkflow.share_keys_stage>`\\ "
+#~ "\\(driver\\, context\\, state\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`unmask_stage "
+#~ "<flwr.server.workflow.SecAggWorkflow.unmask_stage>`\\ "
+#~ "\\(driver\\, context\\, state\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Number of nodes that run a "
+#~ "ClientApp. They can be sampled by "
+#~ "a Driver in the ServerApp and "
+#~ "receive a Message describing what the"
+#~ " ClientApp should perform."
+#~ msgstr ""
+
+#~ msgid "|4586b350eba14c60a377118db345b088|"
+#~ msgstr ""
+
+#~ msgid "|14cd96a1aadb4e16b87ba7d9a15a7145|"
+#~ msgstr ""
+
+#~ msgid "|c6fb95522f7a4cad910b0dd4c48714e3|"
+#~ msgstr ""
+
+#~ msgid "|6d473f9cc3fe400fb5fbcdde11177250|"
+#~ msgstr ""
+
+#~ msgid "|e2dfc41bbd2a469297964671f6a065b6|"
+#~ msgstr ""
+
+#~ msgid "|5d889cc375d94f758e7cf6a6c777ad58|"
+#~ msgstr ""
+
+#~ msgid "|de6c7a9943164f498001e7fffecf2408|"
+#~ msgstr ""
+
+#~ msgid "|419d6b7fd9214ac9a756b608a928bfac|"
+#~ msgstr ""
+
+#~ msgid "|f69cdf2c229a4090b99e8d3c8010400c|"
+#~ msgstr ""
+
+#~ msgid "|678788e3434c4a91adfbb11320b5f7ea|"
+#~ msgstr ""
+
+#~ msgid "|383d325b915449e2a6ce550956a1fb50|"
+#~ msgstr ""
+
+#~ msgid "|581fe037e8364291889e459d66dba7de|"
+#~ msgstr ""
+
+#~ msgid "|91e211659a464c70864b2440158893a1|"
+#~ msgstr ""
+
+#~ msgid "|1eb9389cb6ea4e34ae4b98476a69ae90|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`Message <flwr.common.Message>`\\ "
+#~ "\\(metadata\\[\\, content\\, error\\]\\)"
+#~ msgstr ""
+#~ ":py:obj:`Message <flwr.common.Message>`\\ "
+#~ "\\(metadata\\[\\, content\\, error\\]\\)"
+
+#~ msgid "State of your application from the viewpoint of the entity using it."
+#~ msgstr "애플리케이션을 사용하는 엔티티의 관점에서 애플리케이션의 상태입니다."
+
+#~ msgid ""
+#~ "A :code:`ConfigsRecord` is a Python "
+#~ "dictionary designed to ensure that each"
+#~ " key-value pair adheres to specified"
+#~ " data types. A :code:`ConfigsRecord` is "
+#~ "one of the types of records that"
+#~ " a `flwr.common.RecordSet "
+#~ "<flwr.common.RecordSet.html#recordset>`_ supports and "
+#~ "can therefore be used to construct "
+#~ ":code:`common.Message` objects."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Just like the other types of "
+#~ "records in a :code:`flwr.common.RecordSet`, "
+#~ "types are enforced. If you need to"
+#~ " add a custom data structure or "
+#~ "object, we recommend to serialise it "
+#~ "into bytes and save it as such "
+#~ "(bytes are allowed in a "
+#~ ":code:`ConfigsRecord`)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :code:`MetricsRecord` is a Python "
+#~ "dictionary designed to ensure that each"
+#~ " key-value pair adheres to specified"
+#~ " data types. A :code:`MetricsRecord` is "
+#~ "one of the types of records that"
+#~ " a `flwr.common.RecordSet "
+#~ "<flwr.common.RecordSet.html#recordset>`_ supports and "
+#~ "can therefore be used to construct "
+#~ ":code:`common.Message` objects."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This object is one of the record"
+#~ " types supported by :class:`RecordSet` and"
+#~ " can therefore be stored in the "
+#~ "``content`` of a :class:`Message` or the"
+#~ " ``state`` of a :class:`Context`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :class:`RecordSet` is the unified "
+#~ "mechanism by which parameters, metrics "
+#~ "and configs can be either stored "
+#~ "as part of a :class:`Context` in "
+#~ "your apps or communicated as part "
+#~ "of a :class:`Message` between your apps."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :code:`RecordSet` can hold three types"
+#~ " of records, each designed with an"
+#~ " specific purpose. What is common to"
+#~ " all of them is that they are"
+#~ " Python dictionaries designed to ensure "
+#~ "that each key-value pair adheres "
+#~ "to specified data types."
+#~ msgstr ""
+
+#~ msgid "|462a5ddc7b2d4b73819bdeffde19f2fc|"
+#~ msgstr ""
+
+#~ msgid "|1cd9d5b3c0f743849d81024f6bb79f0f|"
+#~ msgstr ""
+
+#~ msgid "|23545c677a484fa3aabfa186b446bcea|"
+#~ msgstr ""
+
+#~ msgid "|af0433fa018d41a0b0599dbd696e5de3|"
+#~ msgstr ""
+
+#~ msgid "|b68387deaa794ce2b323a08910c92d22|"
+#~ msgstr ""
+
+#~ msgid "|a64fb69d1b6e4581a9a7f0cfc7310e22|"
+#~ msgstr ""
+
+#~ msgid "|84867c1c32224df1916988ad35c2c80d|"
+#~ msgstr ""
+
+#~ msgid "|bcfb9adf14aa48a394d8afd097ba15f1|"
+#~ msgstr ""
+
+#~ msgid "|88026b46352a48688bffdb17496ae6c6|"
+#~ msgstr ""
+
+#~ msgid "|1a75b5702f854894ae170dddd7bdcd1d|"
+#~ msgstr ""
+
+#~ msgid "|9553a34443934a26921e584c98a51f38|"
+#~ msgstr ""
+
+#~ msgid "|848dd486de4e45349dc126455021891b|"
+#~ msgstr ""
+
+#~ msgid "|be39f3bca1a0445495c0bd6a2da84e34|"
+#~ msgstr ""
+
+#~ msgid "|91a73d3573224a32ba04b015071bba4a|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Initialise the appropiate record type "
+#~ "(in this example we use ConfigsRecord_)"
+#~ " and save/read your entry when "
+#~ "required."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Using ConfigsRecord_ or MetricsRecord_ to "
+#~ "save \"simple\" components is fine "
+#~ "(e.g., float, integer, boolean, string, "
+#~ "bytes, and lists of these types. "
+#~ "Note that MetricsRecord_ only supports "
+#~ "float, integer, and lists of these "
+#~ "types) Flower has a specific type "
+#~ "of record, a ParametersRecord_, for "
+#~ "storing model parameters or more "
+#~ "generally data arrays."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :code:`ConfigsRecord` is a Python "
+#~ "dictionary designed to ensure that each"
+#~ " key-value pair adheres to specified"
+#~ " data types. A :code:`ConfigsRecord` is "
+#~ "one of the types of records that"
+#~ " a `flwr.common.RecordDict "
+#~ "<flwr.common.RecordDict.html#recorddict>`_ supports and"
+#~ " can therefore be used to construct"
+#~ " :code:`common.Message` objects."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The usage of a :code:`ConfigsRecord` is"
+#~ " envisioned for sending configuration "
+#~ "values telling the target node how "
+#~ "to perform a certain action (e.g. "
+#~ "train/evaluate a model ). You can "
+#~ "use standard Python built-in types "
+#~ "such as :code:`float`, :code:`str` , "
+#~ ":code:`bytes`. All types allowed are "
+#~ "defined in :code:`flwr.common.ConfigsRecordValues`. "
+#~ "While lists are supported, we encourage"
+#~ " you to use a :code:`ParametersRecord` "
+#~ "instead if these are of high "
+#~ "dimensionality."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`ConfigsRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Just like the other types of "
+#~ "records in a :code:`flwr.common.RecordDict`, "
+#~ "types are enforced. If you need to"
+#~ " add a custom data structure or "
+#~ "object, we recommend to serialise it "
+#~ "into bytes and save it as such "
+#~ "(bytes are allowed in a "
+#~ ":code:`ConfigsRecord`)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :code:`MetricsRecord` is a Python "
+#~ "dictionary designed to ensure that each"
+#~ " key-value pair adheres to specified"
+#~ " data types. A :code:`MetricsRecord` is "
+#~ "one of the types of records that"
+#~ " a `flwr.common.RecordDict "
+#~ "<flwr.common.RecordDict.html#recorddict>`_ supports and"
+#~ " can therefore be used to construct"
+#~ " :code:`common.Message` objects."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A dictionary that stores basic types "
+#~ "(i.e. `int`, `float` as defined in "
+#~ "`MetricsScalar`) and list of such types"
+#~ " (see `MetricsScalarList`)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The usage of a :code:`MetricsRecord` is"
+#~ " envisioned for communicating results "
+#~ "obtained when a node performs an "
+#~ "action. A few typical examples include:"
+#~ " communicating the training accuracy after"
+#~ " a model is trained locally by "
+#~ "a :code:`ClientApp`, reporting the validation"
+#~ " loss obtained at a :code:`ClientApp`, "
+#~ "or, more generally, the output of "
+#~ "executing a query by the "
+#~ ":code:`ClientApp`. Common to these examples"
+#~ " is that the output can be "
+#~ "typically represented by a single scalar"
+#~ " (:code:`int`, :code:`float`) or list of"
+#~ " scalars."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`MetricsRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Since types are enforced, the types "
+#~ "of the objects inserted are checked. "
+#~ "For a :code:`MetricsRecord`, value types "
+#~ "allowed are those in defined in "
+#~ ":code:`flwr.common.MetricsRecordValues`. Similarly, only"
+#~ " :code:`str` keys are allowed."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you need a more versatily type"
+#~ " of record try :code:`ConfigsRecord` or "
+#~ ":code:`ParametersRecord`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A typed dictionary (``str`` to "
+#~ ":class:`Array`) that can store named "
+#~ "parameters as serialized tensors. Internally,"
+#~ " this behaves similarly to an "
+#~ "``OrderedDict[str, Array]``. A ``ParametersRecord``"
+#~ " can be viewed as an equivalent "
+#~ "to PyTorch's ``state_dict``, but it "
+#~ "holds arrays in serialized form."
+#~ msgstr ""
+
+#~ msgid "Create ParametersRecord from a dictionary of :class:`Array`."
+#~ msgstr ""
+
+#~ msgid "Create ParametersRecord from PyTorch ``state_dict``."
+#~ msgstr ""
+
+#~ msgid "Return the ParametersRecord as a PyTorch ``state_dict``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A :class:`RecordDict` is the unified "
+#~ "mechanism by which parameters, metrics "
+#~ "and configs can be either stored "
+#~ "as part of a :class:`Context` in "
+#~ "your apps or communicated as part "
+#~ "of a :class:`Message` between your apps."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A dictionary of :code:`ParametersRecords` that"
+#~ " can be used to record and "
+#~ "communicate model parameters and high-"
+#~ "dimensional arrays."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A dictionary of :code:`MetricsRecord` that "
+#~ "can be used to record and "
+#~ "communicate scalar-valued metrics that "
+#~ "are the result of performing and "
+#~ "action, for example, by a "
+#~ ":code:`ClientApp`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A dictionary of :code:`ConfigsRecord` that "
+#~ "can be used to record and "
+#~ "communicate configuration values to an "
+#~ "entity (e.g. to a :code:`ClientApp`) for"
+#~ " it to adjust how an action is"
+#~ " performed."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Adding a :code:`ParametersRecord` follows the"
+#~ " same steps as above but first, "
+#~ "the array needs to be serialized "
+#~ "and represented as a "
+#~ ":code:`flwr.common.Array`. If the array is "
+#~ "a :code:`NumPy` array, you can use "
+#~ "the built-in utility function "
+#~ "`array_from_numpy <flwr.common.array_from_numpy.html>`_. "
+#~ "It is often possible to convert an"
+#~ " array first to :code:`NumPy` and "
+#~ "then use the aforementioned function."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For additional examples on how to "
+#~ "construct each of the records types "
+#~ "shown above, please refer to the "
+#~ "documentation for :code:`ConfigsRecord`, "
+#~ ":code:`MetricsRecord` and :code:`ParametersRecord`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "'A dictionary to configure a backend."
+#~ " Separate dictionaries to configure "
+#~ "different elements of backend. Supported "
+#~ "top-level keys are `init_args` for "
+#~ "values parsed to initialisation of "
+#~ "backend, `client_resources` to define the "
+#~ "resources for clients, and `actor` to"
+#~ " define the actor parameters. Values "
+#~ "supported in <value> are those included"
+#~ " by `flwr.common.typing.ConfigsRecordValues`."
+#~ msgstr ""
+
+#~ msgid "|b6d7f89f3808402b9292d88245973eff|"
+#~ msgstr ""
+
+#~ msgid "|cb5e4b961f084019b6ce414c35f3f37a|"
+#~ msgstr ""
+
+#~ msgid "|97ea8cf65d1f407590d4c61e1d5352aa|"
+#~ msgstr ""
+
+#~ msgid "|96ac0b873a014a3abcf6dbe09c62d4c6|"
+#~ msgstr ""
+
+#~ msgid "|ef28711094124e239fc69cf7283466e5|"
+#~ msgstr ""
+
+#~ msgid "|87a5b00db468471aaaaadc5477704e15|"
+#~ msgstr ""
+
+#~ msgid "|af29375956aa473f944c9fb6ea0bfc92|"
+#~ msgstr ""
+
+#~ msgid "|d9bea29a75c7465da99a0f29b6d5735a|"
+#~ msgstr ""
+
+#~ msgid "|35eb9147612b492c97879287bad7b231|"
+#~ msgstr ""
+
+#~ msgid "|27e06a29cff64206af6d3695238c5977|"
+#~ msgstr ""
+
+#~ msgid "|6bd42f6566f949a8a157fcb68272490d|"
+#~ msgstr ""
+
+#~ msgid "|688be4d36b13400fa5c454e2ef1500f5|"
+#~ msgstr ""
+
+#~ msgid "|58b84ee017db4b3ba25506c9bf503c4c|"
+#~ msgstr ""
+
+#~ msgid "|cffbf5f7fb6146e887e89765d6f590bd|"
 #~ msgstr ""
 

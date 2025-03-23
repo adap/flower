@@ -22,7 +22,7 @@ from uuid import UUID
 
 import grpc
 
-from flwr.common import ConfigsRecord, Message
+from flwr.common import ConfigRecord, Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -127,7 +127,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             request.fab_version,
             fab_hash,
             user_config_from_proto(request.override_config),
-            ConfigsRecord(),
+            ConfigRecord(),
         )
         return CreateRunResponse(run_id=run_id)
 
@@ -206,7 +206,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Delete the instruction Messages and their replies if found
         message_ins_ids_to_delete = {
-            UUID(msg_res.metadata.reply_to_message) for msg_res in messages_res
+            UUID(msg_res.metadata.reply_to_message_id) for msg_res in messages_res
         }
 
         state.delete_messages(message_ins_ids=message_ins_ids_to_delete)

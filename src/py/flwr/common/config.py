@@ -34,7 +34,7 @@ from flwr.common.constant import (
 )
 from flwr.common.typing import Run, UserConfig, UserConfigValue
 
-from . import ConfigsRecord, object_ref
+from . import ConfigRecord, object_ref
 
 T_dict = TypeVar("T_dict", bound=dict[str, Any])  # pylint: disable=invalid-name
 
@@ -260,9 +260,9 @@ def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
     )
 
 
-def user_config_to_configsrecord(config: UserConfig) -> ConfigsRecord:
-    """Construct a `ConfigsRecord` out of a `UserConfig`."""
-    c_record = ConfigsRecord()
+def user_config_to_configrecord(config: UserConfig) -> ConfigRecord:
+    """Construct a `ConfigRecord` out of a `UserConfig`."""
+    c_record = ConfigRecord()
     for k, v in config.items():
         c_record[k] = v
 

@@ -2,8 +2,8 @@
 
 import warnings
 
-# Suppress FAISS-specific warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="faiss")
+# Suppress deprecation warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 import os
 import json

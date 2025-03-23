@@ -22,7 +22,7 @@ from typing import Optional
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigsRecord, Context, Error, RecordSet
+from flwr.common import ConfigRecord, Context, Error, Message, RecordDict
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SUPERLINK_NODE_ID,
@@ -31,7 +31,7 @@ from flwr.common.constant import (
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
-from flwr.proto.message_pb2 import Message  # pylint: disable=E0611
+from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
@@ -165,7 +165,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_get_node_if_running(self) -> None:
         """Test `GetNode` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 
         # Transition status to running. GetNodesRequest is only allowed
         # in running status.
@@ -201,7 +201,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `GetNodes` not sucessful if RunStatus is pending."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 
         self._transition_run_status(run_id, num_transitions)
 
@@ -212,7 +212,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushMessages` success."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         message_ins = create_ins_message(
             src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
@@ -230,7 +230,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def _assert_push_ins_messages_not_allowed(
-        self, message: Message, run_id: int
+        self, message: ProtoMessage, run_id: int
     ) -> None:
         """Assert `PushInsMessages` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
@@ -254,7 +254,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushInsMessages` not successful if RunStatus is not running."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         message_ins = create_ins_message(
             src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
@@ -267,7 +267,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_pull_messages_if_running(self) -> None:
         """Test `PullMessages` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         # Transition status to running. PullResMessagesRequest is only
         # allowed in running status.
         self._transition_run_status(run_id, 2)
@@ -283,18 +283,18 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     @parameterized.expand(
         [
             # Reply with Message
-            (RecordSet(), None),
+            (RecordDict(), None),
             # Reply with Error
             (None, Error(code=0)),
         ]
     )  # type: ignore
     def test_successful_pull_messages_deletes_messages_in_linkstate(
-        self, content: Optional[RecordSet], error: Optional[Error]
+        self, content: Optional[RecordDict], error: Optional[Error]
     ) -> None:
         """Test `PullMessages` deletes messages from LinkState."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 
         # Transition status to running.
         self._transition_run_status(run_id, 2)
@@ -309,10 +309,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         msg_ = self.state.get_message_ins(node_id=node_id, limit=1)[0]
 
         if content is not None:
-            reply_msg = msg_.create_reply(content=content)
+            reply_msg = Message(content, reply_to=msg_)
         else:
             assert error is not None
-            reply_msg = msg_.create_error_reply(error=error)
+            reply_msg = Message(error, reply_to=msg_)
 
         self.state.store_message_res(message=reply_msg)
 
@@ -349,7 +349,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PullMessages` not successful if RunStatus is not running."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 
         self._transition_run_status(run_id, num_transitions)
 
@@ -359,14 +359,14 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_push_serverapp_outputs_successful_if_running(self) -> None:
         """Test `PushServerAppOutputs` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 
         maker = RecordMaker()
         context = Context(
             run_id=run_id,
             node_id=0,
             node_config=maker.user_config(),
-            state=maker.recordset(1, 1, 1),
+            state=maker.recorddict(1, 1, 1),
             run_config=maker.user_config(),
         )
 
@@ -410,14 +410,14 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PushServerAppOutputs` not successful if RunStatus is not running."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 
         maker = RecordMaker()
         context = Context(
             run_id=run_id,
             node_id=0,
             node_config=maker.user_config(),
-            state=maker.recordset(1, 1, 1),
+            state=maker.recorddict(1, 1, 1),
             run_config=maker.user_config(),
         )
 
@@ -438,7 +438,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `UpdateRunStatus` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         _ = self.state.get_run_status({run_id})[run_id]
         next_run_status = RunStatus(Status.STARTING, "", "")
 
@@ -463,7 +463,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_update_run_status_not_successful_if_finished(self) -> None:
         """Test `UpdateRunStatus` not successful."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         _ = self.state.get_run_status({run_id})[run_id]
         _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
         run_status = self.state.get_run_status({run_id})[run_id]

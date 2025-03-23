@@ -31,9 +31,13 @@ from .parameter import ndarray_to_bytes as ndarray_to_bytes
 from .parameter import ndarrays_to_parameters as ndarrays_to_parameters
 from .parameter import parameters_to_ndarrays as parameters_to_ndarrays
 from .record import Array as Array
+from .record import ArrayRecord as ArrayRecord
+from .record import ConfigRecord as ConfigRecord
 from .record import ConfigsRecord as ConfigsRecord
+from .record import MetricRecord as MetricRecord
 from .record import MetricsRecord as MetricsRecord
 from .record import ParametersRecord as ParametersRecord
+from .record import RecordDict as RecordDict
 from .record import RecordSet as RecordSet
 from .record import array_from_numpy as array_from_numpy
 from .telemetry import EventType as EventType
@@ -41,7 +45,7 @@ from .telemetry import event as event
 from .typing import ClientMessage as ClientMessage
 from .typing import Code as Code
 from .typing import Config as Config
-from .typing import ConfigsRecordValues as ConfigsRecordValues
+from .typing import ConfigRecordValues as ConfigRecordValues
 from .typing import DisconnectRes as DisconnectRes
 from .typing import EvaluateIns as EvaluateIns
 from .typing import EvaluateRes as EvaluateRes
@@ -51,9 +55,9 @@ from .typing import GetParametersIns as GetParametersIns
 from .typing import GetParametersRes as GetParametersRes
 from .typing import GetPropertiesIns as GetPropertiesIns
 from .typing import GetPropertiesRes as GetPropertiesRes
+from .typing import MetricRecordValues as MetricRecordValues
 from .typing import Metrics as Metrics
 from .typing import MetricsAggregationFn as MetricsAggregationFn
-from .typing import MetricsRecordValues as MetricsRecordValues
 from .typing import NDArray as NDArray
 from .typing import NDArrays as NDArrays
 from .typing import Parameters as Parameters
@@ -65,11 +69,13 @@ from .typing import Status as Status
 
 __all__ = [
     "Array",
+    "ArrayRecord",
     "ClientMessage",
     "Code",
     "Config",
+    "ConfigRecord",
+    "ConfigRecordValues",
     "ConfigsRecord",
-    "ConfigsRecordValues",
     "Context",
     "DEFAULT_TTL",
     "DisconnectRes",
@@ -88,16 +94,18 @@ __all__ = [
     "MessageType",
     "MessageTypeLegacy",
     "Metadata",
+    "MetricRecord",
+    "MetricRecordValues",
     "Metrics",
     "MetricsAggregationFn",
     "MetricsRecord",
-    "MetricsRecordValues",
     "NDArray",
     "NDArrays",
     "Parameters",
     "ParametersRecord",
     "Properties",
     "ReconnectIns",
+    "RecordDict",
     "RecordSet",
     "Scalar",
     "ServerMessage",

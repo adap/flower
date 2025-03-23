@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""RecordSet from legacy messages tests."""
+"""RecordDict from legacy messages tests."""
 
 
 from copy import deepcopy
@@ -22,23 +22,23 @@ import numpy as np
 import pytest
 
 from .parameter import ndarrays_to_parameters
-from .recordset_compat import (
-    evaluateins_to_recordset,
-    evaluateres_to_recordset,
-    fitins_to_recordset,
-    fitres_to_recordset,
-    getparametersins_to_recordset,
-    getparametersres_to_recordset,
-    getpropertiesins_to_recordset,
-    getpropertiesres_to_recordset,
-    recordset_to_evaluateins,
-    recordset_to_evaluateres,
-    recordset_to_fitins,
-    recordset_to_fitres,
-    recordset_to_getparametersins,
-    recordset_to_getparametersres,
-    recordset_to_getpropertiesins,
-    recordset_to_getpropertiesres,
+from .recorddict_compat import (
+    evaluateins_to_recorddict,
+    evaluateres_to_recorddict,
+    fitins_to_recorddict,
+    fitres_to_recorddict,
+    getparametersins_to_recorddict,
+    getparametersres_to_recorddict,
+    getpropertiesins_to_recorddict,
+    getpropertiesres_to_recorddict,
+    recorddict_to_evaluateins,
+    recorddict_to_evaluateres,
+    recorddict_to_fitins,
+    recorddict_to_fitres,
+    recorddict_to_getparametersins,
+    recorddict_to_getparametersres,
+    recorddict_to_getpropertiesins,
+    recorddict_to_getpropertiesres,
 )
 from .typing import (
     Code,
@@ -65,8 +65,8 @@ def get_ndarrays() -> NDArrays:
 
 
 ##################################################
-#  Testing conversion: *Ins --> RecordSet --> *Ins
-#  Testing conversion: *Res <-- RecordSet <-- *Res
+#  Testing conversion: *Ins --> RecordDict --> *Ins
+#  Testing conversion: *Res <-- RecordDict <-- *Res
 ##################################################
 
 
@@ -113,7 +113,7 @@ def _get_valid_getparametersins() -> GetParametersIns:
         "a": 1.0,
         "b": 3,
         "c": True,
-    }  # valid since both Ins/Res communicate over ConfigsRecord
+    }  # valid since both Ins/Res communicate over ConfigRecord
 
     return GetParametersIns(config_dict)
 
@@ -136,7 +136,7 @@ def _get_valid_getpropertiesres() -> GetPropertiesRes:
         "a": 1.0,
         "b": 3,
         "c": True,
-    }  # valid since both Ins/Res communicate over ConfigsRecord
+    }  # valid since both Ins/Res communicate over ConfigRecord
 
     return GetPropertiesRes(
         status=Status(code=Code(0), message=""), properties=config_dict
@@ -160,19 +160,19 @@ def _get_valid_getpropertiesres() -> GetPropertiesRes:
         (True, lambda x, x_copy, y: x == y, _get_valid_fitins_with_empty_ndarrays),
     ],
 )
-def test_fitins_to_recordset_and_back(
+def test_fitins_to_recorddict_and_back(
     keep_input: bool,
     validate_freed_fn: Callable[[FitIns, FitIns, FitIns], bool],
     fn: Callable[[], FitIns],
 ) -> None:
-    """Test conversion FitIns --> RecordSet --> FitIns."""
+    """Test conversion FitIns --> RecordDict --> FitIns."""
     fitins = fn()
 
     fitins_copy = deepcopy(fitins)
 
-    recordset = fitins_to_recordset(fitins, keep_input=keep_input)
+    recorddict = fitins_to_recorddict(fitins, keep_input=keep_input)
 
-    fitins_ = recordset_to_fitins(recordset, keep_input=keep_input)
+    fitins_ = recorddict_to_fitins(recorddict, keep_input=keep_input)
 
     assert validate_freed_fn(fitins, fitins_copy, fitins_)
 
@@ -190,16 +190,16 @@ def test_fitins_to_recordset_and_back(
         ),
     ],
 )
-def test_fitres_to_recordset_and_back(
+def test_fitres_to_recorddict_and_back(
     keep_input: bool, validate_freed_fn: Callable[[FitRes, FitRes, FitRes], bool]
 ) -> None:
-    """Test conversion FitRes --> RecordSet --> FitRes."""
+    """Test conversion FitRes --> RecordDict --> FitRes."""
     fitres = _get_valid_fitres()
 
     fitres_copy = deepcopy(fitres)
 
-    recordset = fitres_to_recordset(fitres, keep_input=keep_input)
-    fitres_ = recordset_to_fitres(recordset, keep_input=keep_input)
+    recorddict = fitres_to_recorddict(fitres, keep_input=keep_input)
+    fitres_ = recorddict_to_fitres(recorddict, keep_input=keep_input)
 
     assert validate_freed_fn(fitres, fitres_copy, fitres_)
 
@@ -217,66 +217,66 @@ def test_fitres_to_recordset_and_back(
         ),
     ],
 )
-def test_evaluateins_to_recordset_and_back(
+def test_evaluateins_to_recorddict_and_back(
     keep_input: bool,
     validate_freed_fn: Callable[[EvaluateIns, EvaluateIns, EvaluateIns], bool],
 ) -> None:
-    """Test conversion EvaluateIns --> RecordSet --> EvaluateIns."""
+    """Test conversion EvaluateIns --> RecordDict --> EvaluateIns."""
     evaluateins = _get_valid_evaluateins()
 
     evaluateins_copy = deepcopy(evaluateins)
 
-    recordset = evaluateins_to_recordset(evaluateins, keep_input=keep_input)
+    recorddict = evaluateins_to_recorddict(evaluateins, keep_input=keep_input)
 
-    evaluateins_ = recordset_to_evaluateins(recordset, keep_input=keep_input)
+    evaluateins_ = recorddict_to_evaluateins(recorddict, keep_input=keep_input)
 
     assert validate_freed_fn(evaluateins, evaluateins_copy, evaluateins_)
 
 
-def test_evaluateres_to_recordset_and_back() -> None:
-    """Test conversion EvaluateRes --> RecordSet --> EvaluateRes."""
+def test_evaluateres_to_recorddict_and_back() -> None:
+    """Test conversion EvaluateRes --> RecordDict --> EvaluateRes."""
     evaluateres = _get_valid_evaluateres()
 
     evaluateres_copy = deepcopy(evaluateres)
 
-    recordset = evaluateres_to_recordset(evaluateres)
-    evaluateres_ = recordset_to_evaluateres(recordset)
+    recorddict = evaluateres_to_recorddict(evaluateres)
+    evaluateres_ = recorddict_to_evaluateres(recorddict)
 
     assert evaluateres_copy == evaluateres_
 
 
-def test_get_properties_ins_to_recordset_and_back() -> None:
-    """Test conversion GetPropertiesIns --> RecordSet --> GetPropertiesIns."""
+def test_get_properties_ins_to_recorddict_and_back() -> None:
+    """Test conversion GetPropertiesIns --> RecordDict --> GetPropertiesIns."""
     getproperties_ins = _get_valid_getpropertiesins()
 
     getproperties_ins_copy = deepcopy(getproperties_ins)
 
-    recordset = getpropertiesins_to_recordset(getproperties_ins)
-    getproperties_ins_ = recordset_to_getpropertiesins(recordset)
+    recorddict = getpropertiesins_to_recorddict(getproperties_ins)
+    getproperties_ins_ = recorddict_to_getpropertiesins(recorddict)
 
     assert getproperties_ins_copy == getproperties_ins_
 
 
-def test_get_properties_res_to_recordset_and_back() -> None:
-    """Test conversion GetPropertiesRes --> RecordSet --> GetPropertiesRes."""
+def test_get_properties_res_to_recorddict_and_back() -> None:
+    """Test conversion GetPropertiesRes --> RecordDict --> GetPropertiesRes."""
     getproperties_res = _get_valid_getpropertiesres()
 
     getproperties_res_copy = deepcopy(getproperties_res)
 
-    recordset = getpropertiesres_to_recordset(getproperties_res)
-    getproperties_res_ = recordset_to_getpropertiesres(recordset)
+    recorddict = getpropertiesres_to_recorddict(getproperties_res)
+    getproperties_res_ = recorddict_to_getpropertiesres(recorddict)
 
     assert getproperties_res_copy == getproperties_res_
 
 
-def test_get_parameters_ins_to_recordset_and_back() -> None:
-    """Test conversion GetParametersIns --> RecordSet --> GetParametersIns."""
+def test_get_parameters_ins_to_recorddict_and_back() -> None:
+    """Test conversion GetParametersIns --> RecordDict --> GetParametersIns."""
     getparameters_ins = _get_valid_getparametersins()
 
     getparameters_ins_copy = deepcopy(getparameters_ins)
 
-    recordset = getparametersins_to_recordset(getparameters_ins)
-    getparameters_ins_ = recordset_to_getparametersins(recordset)
+    recorddict = getparametersins_to_recorddict(getparameters_ins)
+    getparameters_ins_ = recorddict_to_getparametersins(recorddict)
 
     assert getparameters_ins_copy == getparameters_ins_
 
@@ -294,20 +294,22 @@ def test_get_parameters_ins_to_recordset_and_back() -> None:
         ),
     ],
 )
-def test_get_parameters_res_to_recordset_and_back(
+def test_get_parameters_res_to_recorddict_and_back(
     keep_input: bool,
     validate_freed_fn: Callable[
         [GetParametersRes, GetParametersRes, GetParametersRes], bool
     ],
 ) -> None:
-    """Test conversion GetParametersRes --> RecordSet --> GetParametersRes."""
+    """Test conversion GetParametersRes --> RecordDict --> GetParametersRes."""
     getparameteres_res = _get_valid_getparametersres()
 
     getparameters_res_copy = deepcopy(getparameteres_res)
 
-    recordset = getparametersres_to_recordset(getparameteres_res, keep_input=keep_input)
-    getparameteres_res_ = recordset_to_getparametersres(
-        recordset, keep_input=keep_input
+    recorddict = getparametersres_to_recorddict(
+        getparameteres_res, keep_input=keep_input
+    )
+    getparameteres_res_ = recorddict_to_getparametersres(
+        recorddict, keep_input=keep_input
     )
 
     assert validate_freed_fn(

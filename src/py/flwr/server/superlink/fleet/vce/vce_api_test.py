@@ -30,18 +30,18 @@ from flwr.client.client_app import LoadClientAppError
 from flwr.common import (
     DEFAULT_TTL,
     Config,
-    ConfigsRecord,
+    ConfigRecord,
     Context,
     GetPropertiesIns,
-    Message,
     MessageTypeLegacy,
     Metadata,
-    RecordSet,
+    RecordDict,
     Scalar,
     now,
 )
 from flwr.common.constant import Status
-from flwr.common.recordset_compat import getpropertiesins_to_recordset
+from flwr.common.message import make_message
+from flwr.common.recorddict_compat import getpropertiesins_to_recorddict
 from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
@@ -55,7 +55,7 @@ from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, state: RecordSet) -> None:
+    def __init__(self, state: RecordDict) -> None:
         self.client_state = state
 
     def get_properties(self, config: Config) -> dict[str, Scalar]:
@@ -63,7 +63,7 @@ class DummyClient(NumPyClient):
         result = float(config["factor"]) * pi
 
         # store something in context
-        self.client_state.configs_records["result"] = ConfigsRecord({"result": result})
+        self.client_state.config_records["result"] = ConfigRecord({"result": result})
 
         return {"result": result}
 
@@ -142,16 +142,17 @@ def register_messages_into_state(
         # Construct a Message
         mult_factor = 2024 + i
         getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
-        recordset = getpropertiesins_to_recordset(getproperties_ins)
-        message = Message(
-            content=recordset,
+        recorddict = getpropertiesins_to_recorddict(getproperties_ins)
+        message = make_message(
+            content=recorddict,
             metadata=Metadata(
                 run_id=run_id,
                 message_id="",
                 group_id="",
                 src_node_id=0,
                 dst_node_id=dst_node_id,  # indicate destination node
-                reply_to_message="",
+                reply_to_message_id="",
+                created_at=now().timestamp(),
                 ttl=DEFAULT_TTL,
                 message_type=MessageTypeLegacy.GET_PROPERTIES,
             ),
@@ -321,6 +322,6 @@ class TestFleetSimulationEngineRayBackend(TestCase):
             # Verify message content is as expected
             content = message_res.content
             assert (
-                content.configs_records["getpropertiesres.properties"]["result"]
-                == expected_results[UUID(message_res.metadata.reply_to_message)]
+                content.config_records["getpropertiesres.properties"]["result"]
+                == expected_results[UUID(message_res.metadata.reply_to_message_id)]
             )

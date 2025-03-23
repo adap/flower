@@ -23,7 +23,7 @@ from typing import Optional
 from typing_extensions import override
 
 from flwr.cli.config_utils import get_fab_metadata
-from flwr.common import ConfigsRecord, Context, RecordSet
+from flwr.common import ConfigRecord, Context, RecordDict
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     Status,
@@ -141,7 +141,7 @@ class DeploymentEngine(Executor):
         fab_id, fab_version = get_fab_metadata(fab.content)
 
         run_id = self.linkstate.create_run(
-            fab_id, fab_version, fab_hash, override_config, ConfigsRecord()
+            fab_id, fab_version, fab_hash, override_config, ConfigRecord()
         )
         return run_id
 
@@ -149,7 +149,7 @@ class DeploymentEngine(Executor):
         """Register a Context for a Run."""
         # Create an empty context for the Run
         context = Context(
-            run_id=run_id, node_id=0, node_config={}, state=RecordSet(), run_config={}
+            run_id=run_id, node_id=0, node_config={}, state=RecordDict(), run_config={}
         )
 
         # Register the context at the LinkState
@@ -160,7 +160,7 @@ class DeploymentEngine(Executor):
         self,
         fab_file: bytes,
         override_config: UserConfig,
-        federation_options: ConfigsRecord,
+        federation_options: ConfigRecord,
     ) -> Optional[int]:
         """Start run using the Flower Deployment Engine."""
         run_id = None

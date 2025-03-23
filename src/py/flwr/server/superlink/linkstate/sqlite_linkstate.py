@@ -30,30 +30,33 @@ from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
+    PING_PATIENCE,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.record import ConfigsRecord
+from flwr.common.message import make_message
+from flwr.common.record import ConfigRecord
 from flwr.common.serde import (
     error_from_proto,
     error_to_proto,
-    recordset_from_proto,
-    recordset_to_proto,
+    recorddict_from_proto,
+    recorddict_to_proto,
 )
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
 from flwr.proto.error_pb2 import Error as ProtoError
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
 from flwr.server.utils.validator import validate_message
 
 from .linkstate import LinkState
 from .utils import (
-    configsrecord_from_bytes,
-    configsrecord_to_bytes,
+    check_node_availability_for_in_message,
+    configrecord_from_bytes,
+    configrecord_to_bytes,
     context_from_bytes,
     context_to_bytes,
     convert_sint64_to_uint64,
@@ -129,7 +132,7 @@ CREATE TABLE IF NOT EXISTS message_ins(
     run_id                  INTEGER,
     src_node_id             INTEGER,
     dst_node_id             INTEGER,
-    reply_to_message        TEXT,
+    reply_to_message_id     TEXT,
     created_at              REAL,
     delivered_at            TEXT,
     ttl                     REAL,
@@ -148,7 +151,7 @@ CREATE TABLE IF NOT EXISTS message_res(
     run_id                  INTEGER,
     src_node_id             INTEGER,
     dst_node_id             INTEGER,
-    reply_to_message        TEXT,
+    reply_to_message_id     TEXT,
     created_at              REAL,
     delivered_at            TEXT,
     ttl                     REAL,
@@ -371,7 +374,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         res_metadata = message.metadata
-        msg_ins_id = res_metadata.reply_to_message
+        msg_ins_id = res_metadata.reply_to_message_id
         msg_ins = self.get_valid_message_ins(msg_ins_id)
         if msg_ins is None:
             log(
@@ -442,6 +445,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
     def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
         """Get reply Messages for the given Message IDs."""
+        # pylint: disable-msg=too-many-locals
         ret: dict[UUID, Message] = {}
 
         # Verify Message IDs
@@ -465,11 +469,34 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             current_time=current,
         )
 
+        # Check node availability
+        dst_node_ids: set[int] = set()
+        for message_id in message_ids:
+            in_message = found_message_ins_dict[message_id]
+            sint_node_id = convert_uint64_to_sint64(in_message.metadata.dst_node_id)
+            dst_node_ids.add(sint_node_id)
+        query = f"""
+                    SELECT node_id, online_until
+                    FROM node
+                    WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))});
+                """
+        rows = self.query(query, tuple(dst_node_ids))
+        tmp_ret_dict = check_node_availability_for_in_message(
+            inquired_in_message_ids=message_ids,
+            found_in_message_dict=found_message_ins_dict,
+            node_id_to_online_until={
+                convert_sint64_to_uint64(row["node_id"]): row["online_until"]
+                for row in rows
+            },
+            current_time=current,
+        )
+        ret.update(tmp_ret_dict)
+
         # Find all reply Messages
         query = f"""
             SELECT *
             FROM message_res
-            WHERE reply_to_message IN ({",".join(["?"] * len(message_ids))})
+            WHERE reply_to_message_id IN ({",".join(["?"] * len(message_ids))})
             AND delivered_at = "";
         """
         rows = self.query(query, tuple(str(message_id) for message_id in message_ids))
@@ -542,7 +569,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Delete reply Message
         query_2 = f"""
             DELETE FROM message_res
-            WHERE reply_to_message IN ({placeholders});
+            WHERE reply_to_message_id IN ({placeholders});
         """
 
         with self.conn:
@@ -584,6 +611,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             "VALUES (?, ?, ?, ?)"
         )
 
+        # Mark the node online util time.time() + ping_interval
         try:
             self.query(
                 query,
@@ -699,7 +727,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
-        federation_options: ConfigsRecord,
+        federation_options: ConfigRecord,
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
@@ -725,7 +753,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 fab_version,
                 fab_hash,
                 override_config_json,
-                configsrecord_to_bytes(federation_options),
+                configrecord_to_bytes(federation_options),
             ]
             data += [
                 now().isoformat(),
@@ -883,7 +911,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return pending_run_id
 
-    def get_federation_options(self, run_id: int) -> Optional[ConfigsRecord]:
+    def get_federation_options(self, run_id: int) -> Optional[ConfigRecord]:
         """Retrieve the federation options for the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
@@ -896,10 +924,14 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         row = rows[0]
-        return configsrecord_from_bytes(row["federation_options"])
+        return configrecord_from_bytes(row["federation_options"])
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        """Acknowledge a ping received from a node, serving as a heartbeat.
+
+        It allows for one missed ping (in a PING_PATIENCE * ping_interval) before
+        marking the node as offline, where PING_PATIENCE = 2 in default.
+        """
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
         # Check if the node exists in the `node` table
@@ -909,7 +941,14 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Update `online_until` and `ping_interval` for the given `node_id`
         query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?"
-        self.query(query, (time.time() + ping_interval, ping_interval, sint64_node_id))
+        self.query(
+            query,
+            (
+                time.time() + PING_PATIENCE * ping_interval,
+                ping_interval,
+                sint64_node_id,
+            ),
+        )
         return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
@@ -1026,7 +1065,7 @@ def message_to_dict(message: Message) -> dict[str, Any]:
         "run_id": message.metadata.run_id,
         "src_node_id": message.metadata.src_node_id,
         "dst_node_id": message.metadata.dst_node_id,
-        "reply_to_message": message.metadata.reply_to_message,
+        "reply_to_message_id": message.metadata.reply_to_message_id,
         "created_at": message.metadata.created_at,
         "delivered_at": message.metadata.delivered_at,
         "ttl": message.metadata.ttl,
@@ -1036,7 +1075,7 @@ def message_to_dict(message: Message) -> dict[str, Any]:
     }
 
     if message.has_content():
-        result["content"] = recordset_to_proto(message.content).SerializeToString()
+        result["content"] = recorddict_to_proto(message.content).SerializeToString()
     else:
         result["error"] = error_to_proto(message.error).SerializeToString()
 
@@ -1047,20 +1086,15 @@ def dict_to_message(message_dict: dict[str, Any]) -> Message:
     """Transform dict to Message."""
     content, error = None, None
     if (b_content := message_dict.pop("content")) is not None:
-        content = recordset_from_proto(ProtoRecordSet.FromString(b_content))
+        content = recorddict_from_proto(ProtoRecordDict.FromString(b_content))
     if (b_error := message_dict.pop("error")) is not None:
         error = error_from_proto(ProtoError.FromString(b_error))
 
     # Metadata constructor doesn't allow passing created_at. We set it later
     metadata = Metadata(
-        **{
-            k: v
-            for k, v in message_dict.items()
-            if k not in ["created_at", "delivered_at"]
-        }
+        **{k: v for k, v in message_dict.items() if k not in ["delivered_at"]}
     )
-    msg = Message(metadata=metadata, content=content, error=error)
-    msg.metadata.__dict__["_created_at"] = message_dict["created_at"]
+    msg = make_message(metadata=metadata, content=content, error=error)
     msg.metadata.delivered_at = message_dict["delivered_at"]
     return msg
 
