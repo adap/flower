@@ -1,3 +1,7 @@
+:og:description: Join the Flower community! Explore tutorials and guides to contribute code, documentation, translations, and more to advance federated learning with Flower.
+.. meta::
+    :description: Join the Flower community! Explore tutorials and guides to contribute code, documentation, translations, and more to advance federated learning with Flower.
+
 Contribute
 ==========
 
