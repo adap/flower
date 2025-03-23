@@ -89,6 +89,8 @@ class GrpcGrid(Grid):
         established to an SSL-enabled Flower server.
     """
 
+    _deprecation_warning_logged = False
+
     def __init__(  # pylint: disable=too-many-arguments
         self,
         serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
@@ -180,10 +182,12 @@ class GrpcGrid(Grid):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        warn_deprecated_feature(
-            "`Driver.create_message` / `Grid.create_message` is deprecated."
-            "Use `Message` constructor instead."
-        )
+        if not GrpcGrid._deprecation_warning_logged:
+            GrpcGrid._deprecation_warning_logged = True
+            warn_deprecated_feature(
+                "`Driver.create_message` / `Grid.create_message` is deprecated."
+                "Use `Message` constructor instead."
+            )
         return Message(content, dst_node_id, message_type, ttl=ttl, group_id=group_id)
 
     def get_node_ids(self) -> Iterable[int]:
