@@ -386,6 +386,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             node_info = NodeInfo(
                 node_id=node_id, is_online=is_online, metadata=metadata, loc={'coo_e': loc_e, 'coo_n': loc_n}
             )
+            # add back
+            metadata["coo_n"] = loc_n
+            metadata["coo_e"] = loc_e
             nodes_info.append(node_info)
 
         return nodes_info
