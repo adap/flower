@@ -97,27 +97,12 @@ Deploy using the Flower Deployment Engine
 
     Deploy <deploy>
 
-Explanations
-~~~~~~~~~~~~
-
-Understanding-oriented concept guides explain and discuss key topics and underlying
-ideas behind Flower and collaborative AI.
-
-.. toctree::
-    :maxdepth: 1
-    :caption: Explanations
-
-    explanation-federated-evaluation
-    explanation-differential-privacy
-    explanation-flower-architecture
-
-References
-~~~~~~~~~~
+Reference
+~~~~~~~~~
 
 .. toctree::
     :titlesonly:
     :maxdepth: 2
-    :caption: References
 
     reference
 
@@ -129,7 +114,6 @@ along the way.
 
 .. toctree::
     :titlesonly:
-    :caption: Contributor docs
 
     Contribute <contribute>
 
