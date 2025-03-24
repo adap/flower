@@ -76,7 +76,7 @@ def main():
         adapter_path=args.adapter_path,
         tokenizer_config={"trust_remote_code": True},
     )
-
+    print("[READY]", flush=True)
     prompt_cache = make_prompt_cache(model, args.max_kv_size)
 
     for line in sys.stdin:

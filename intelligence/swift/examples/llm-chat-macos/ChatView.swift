@@ -41,6 +41,14 @@ struct ChatView: View {
     "meta/llama3.1-405b/q4",
     "deepseek/r1-685b/q4",
   ]
+  let modelmapping = [
+    "meta/llama3.2-1b": "mlx-community/Llama-3.2-1B-Instruct-bf16",
+    "meta/llama3.2-3b": "mlx-community/Llama-3.2-3B-Instruct",
+    "deepseek/r1-distill-qwen-32b/4-bit": "mlx-community/DeepSeek-R1-Distill-Qwen-32B-4bit",
+    "deepseek/r1-distill-llama-8b/q4": "mlx-community/DeepSeek-R1-Distill-Llama-8B-4bit",
+    "meta/llama3.1-405b/q4": "mlx-community/Meta-Llama-3.1-405B-4bit",
+    "deepseek/r1-685b/q4": "mlx-community/DeepSeek-R1-4bit",
+  ]
 
   var body: some View {
     VStack {
