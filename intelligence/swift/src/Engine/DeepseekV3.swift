@@ -149,7 +149,13 @@ func yarnLinearRampMask(minVal: Float, maxVal: Float, dim: Int) -> MLXArray {
 
 class DeepseekV3YarnRotaryEmbedding: Module {
   var mscale: Float
-  let _freqs: MLXArray
+  let dim: Int
+  let maxPositionEmbeddings: Int
+  let base: Float
+  let scalingFactor: Float
+  let originalMaxPositionEmbeddings: Int
+  let betaFast: Float
+  let betaSlow: Float
   
   init(
     dim: Int,
@@ -165,6 +171,16 @@ class DeepseekV3YarnRotaryEmbedding: Module {
     self.mscale =
       yarnGetMScale(scale: scalingFactor, mscale: mscale)
       / yarnGetMScale(scale: scalingFactor, mscale: mscaleAllDim)
+    self.dim = dim
+    self.maxPositionEmbeddings = maxPositionEmbeddings
+    self.base = base
+    self.scalingFactor = scalingFactor
+    self.originalMaxPositionEmbeddings = originalMaxPositionEmbeddings
+    self.betaFast = betaFast
+    self.betaSlow = betaSlow
+  }
+
+  func callAsFunction(_ x: MLXArray, offset: Int = 0) -> MLXArray {
     let freqExtra = base ** (MLXArray(stride(from: 0, to: dim, by: 2)) / dim)
     let freqInter = scalingFactor * base ** (MLXArray(stride(from: 0, to: dim, by: 2)) / dim)
     let (low, high) = yarnFindCorrectionRange(
@@ -173,18 +189,15 @@ class DeepseekV3YarnRotaryEmbedding: Module {
 
     let freqMask = 1.0 - yarnLinearRampMask(minVal: low, maxVal: high, dim: dim / 2)
 
-    self._freqs = (freqInter * freqExtra) / (freqInter * freqMask + freqExtra * (1 - freqMask))
-  }
-
-  func callAsFunction(_ x: MLXArray, offset: Int = 0) -> MLXArray {
-    MLXFast.RoPE(
+    let freqs = (freqInter * freqExtra) / (freqInter * freqMask + freqExtra * (1 - freqMask))
+    return MLXFast.RoPE(
       self.mscale != 1.0 ? self.mscale * x : x,
       dimensions: x.shape[-1],
       traditional: true,
       base: nil,
       scale: 1.0,
       offset: offset,
-      freqs: _freqs
+      freqs: freqs
     )
   }
 }
