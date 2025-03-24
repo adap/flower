@@ -207,7 +207,7 @@ class DeepseekV3Attention: Module {
   var qHeadDim: Int
   var scale: Float
 
-  var rope: DeepseekV3YarnRotaryEmbedding
+  let rope: DeepseekV3YarnRotaryEmbedding
   @ModuleInfo(key: "q_proj") var qProj: Linear?
   @ModuleInfo(key: "q_a_proj") var qAProj: Linear?
   @ModuleInfo(key: "q_a_layernorm") var qALayerNorm: RMSNorm?
