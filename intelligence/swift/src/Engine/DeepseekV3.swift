@@ -149,7 +149,8 @@ func yarnLinearRampMask(minVal: Float, maxVal: Float, dim: Int) -> MLXArray {
 
 class DeepseekV3YarnRotaryEmbedding: Module {
   var mscale: Float
-  var _freqs: MLXArray
+  let _freqs: MLXArray
+  
   init(
     dim: Int,
     maxPositionEmbeddings: Int = 2048,
