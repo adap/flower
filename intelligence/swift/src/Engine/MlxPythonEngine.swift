@@ -13,22 +13,10 @@
 // limitations under the License.
 // ==============================================================================
 
-import FlowerIntelligence
-import SwiftUI
+import Foundation
 
-struct ContentView: View {
-  var body: some View {
-    ChatView()
-      .padding()
-      .task {
-//        let fi = FlowerIntelligence.instance
-//        await fi.fetchModel(model: "deepseek/r1-685b/q4") {
-//          print("\($0.description): \($0.percentage), \($0.loadedBytes), \($0.totalBytes)")
-//        }
-      }
-  }
-}
-
-#Preview {
-    ContentView()
+class MlxPythonEngine: Engine {
+  private var process: Process?
+  private var inputPipe: Pipe?
+  private var outputPipe: Pipe?
 }
