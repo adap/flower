@@ -21,6 +21,10 @@ We would like to give our special thanks to all the contributors who made the ne
   def my_function_for_my_custom_message(message: Message, context: Context):
       # Echo the message
       return Message(message.content, reply_to=message)
+
+  @app.query("dummy")
+  def my_function_for_another_custom_message(message: Message, context: Context):
+      ...
   ```
 
 - **Rename core Message API components for clarity and consistency** ([#5140](https://github.com/adap/flower/pull/5140), [#5133](https://github.com/adap/flower/pull/5133), [#5139](https://github.com/adap/flower/pull/5139), [#5129](https://github.com/adap/flower/pull/5129), [#5150](https://github.com/adap/flower/pull/5150), [#5151](https://github.com/adap/flower/pull/5151), [#5146](https://github.com/adap/flower/pull/5146), [#5152](https://github.com/adap/flower/pull/5152))
