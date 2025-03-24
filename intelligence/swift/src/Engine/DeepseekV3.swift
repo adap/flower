@@ -403,8 +403,6 @@ class MoEGate: Module {
     
     var hiddenStates = x.matmul(weight.T)
     print(hiddenStates.shape)
-    hiddenStates = hiddenStates.reshaped(-1, h)
-    print(hiddenStates.shape)
     var scores = sigmoid(hiddenStates)
     print(scores.shape)
     let scoresForChoice = scores.reshaped(bsz * seqLen, -1) + e_score_correction_bias
