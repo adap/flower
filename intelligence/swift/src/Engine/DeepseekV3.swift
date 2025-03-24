@@ -417,7 +417,9 @@ class MoEGate: Module {
     let groupIdx = argPartition(topKGroup, kth: k-1, axis: -2)[.ellipsis, ..<k, 0...]
     print("group idx shape \(groupIdx.shape)")
     scores = putAlong(groupScores, groupIdx, values: MLXArray(0.0), axis: -2)
+    print("scores shape ", scores.shape)
     scores = flattened(scores, start: -2, end: -1)
+    print("scores shape ", scores.shape)
     
     k = topK ?? 1
     let inds = argPartition(-scores, kth: k-1, axis: -1)[.ellipsis, ..<k]
@@ -427,7 +429,8 @@ class MoEGate: Module {
       scores = scores / denominator
       scores = scores * routedScalingFactor
     }
-
+    print("scores shape ", scores.shape)
+    print("inds shape ", inds.shape)
     return (inds, scores)
   }
 }
