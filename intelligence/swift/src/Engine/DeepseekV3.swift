@@ -402,18 +402,19 @@ class MoEGate: Module {
     print("shape: \(x.shape)")
     let (bsz, seqLen, h) = (x.dim(0), x.dim(1), x.dim(2))
     
-    var hiddenStates = x.matmul(weight.T)
+    let hiddenStates = x.matmul(weight.T)
     print(hiddenStates.shape)
     var scores = sigmoid(hiddenStates)
-    print(scores.shape)
-    let scoresForChoice = scores.reshaped(bsz * seqLen, -1) + e_score_correction_bias
+    print("scores shape ", scores.shape)
+    let scoresForChoice = scores + e_score_correction_bias
     print(scoresForChoice.shape)
-    let groupScores = scoresForChoice.reshaped(bsz * seqLen, self.nGroup, -1)
+    let groupScores = scoresForChoice.reshaped(bsz, seqLen, self.nGroup, -1)
     print(groupScores.shape)
     let topKGroup = sorted(groupScores, axis: -1)[.ellipsis, ..<2].sum(axis: -1, keepDims: true)
-    print(topKGroup.shape)
+    print("group scores topK shape \(topKGroup.shape)")
     var k = nGroup - (topkGroup ?? 1)
     let groupIdx = argPartition(topKGroup, kth: k-1, axis: -2)[.ellipsis, ..<k, 0...]
+    print("group idx shape \(topKGroup.shape)")
     scores = putAlong(scoresForChoice, groupIdx, values: MLXArray(0.0), axis: -2)
     scores = flattened(scores, start: -2, end: -1)
     

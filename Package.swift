@@ -15,7 +15,7 @@ let package = Package(
   dependencies: [
     // Dependencies declare other packages that this package depends on.
     // .package(url: /* package url */, from: "1.0.0"),
-    .package(url: "https://github.com/ml-explore/mlx-swift", from: "0.12.1"),
+    .package(url: "https://github.com/ml-explore/mlx-swift", from: "0.23.1"),
     .package(url: "https://github.com/huggingface/swift-transformers", from: "0.1.8"),
     .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0"),
     .package(url: "https://github.com/ml-explore/mlx-swift-examples/", branch: "main"),
