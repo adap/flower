@@ -379,7 +379,7 @@ class MoEGate: Module {
   var topkGroup: Int?
   
   var weight: MLXArray
-  var eScoreCorrectionBias: MLXArray
+  var e_score_correction_bias: MLXArray
 
   init(config: DeepseekV3Configuration) {
     self.config = config
@@ -395,7 +395,7 @@ class MoEGate: Module {
     }
 
     self.weight = zeros([self.nRoutedExperts ?? 1, config.hiddenSize])
-    self.eScoreCorrectionBias = zeros([self.nRoutedExperts ?? 1])
+    self.e_score_correction_bias = zeros([self.nRoutedExperts ?? 1])
   }
   
   func callAsFunction(_ x: MLXArray) -> (MLXArray, MLXArray) {
@@ -404,7 +404,7 @@ class MoEGate: Module {
     var hiddenStates = x.matmul(weight.T)
     hiddenStates = hiddenStates.reshaped(-1, h)
     var scores = sigmoid(hiddenStates)
-    let scoresForChoice = scores.reshaped(bsz * seqLen, -1) + eScoreCorrectionBias
+    let scoresForChoice = scores.reshaped(bsz * seqLen, -1) + e_score_correction_bias
     let groupScores = scoresForChoice.reshaped(bsz * seqLen, self.nGroup, -1)
     let topKGroup = sorted(groupScores, axis: -1)[.ellipsis, ..<2].sum(axis: -1, keepDims: true)
     var k = nGroup - (topkGroup ?? 1)
