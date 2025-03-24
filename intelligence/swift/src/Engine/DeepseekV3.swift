@@ -414,9 +414,10 @@ class MoEGate: Module {
     print("group scores topK shape \(topKGroup.shape)")
     var k = nGroup - (topkGroup ?? 1)
     print("k ", k)
-    let groupIdx = argPartition(topKGroup, kth: k-1, axis: -2)[.ellipsis, ..<k, 0...]
+    var groupIdx = argPartition(topKGroup, kth: k-1, axis: -2)[.ellipsis, ..<k, 0...]
     print("group idx shape \(groupIdx.shape)")
-    scores = putAlong(groupScores, groupIdx.reshaped([1,78,4,1]), values: MLXArray(0.0), axis: -2)
+    groupIdx = broadcast(groupIdx, to: [1,78,k,32])
+    scores = putAlong(groupScores, groupIdx, values: MLXArray(0.0), axis: -2)
     print("scores shape ", scores.shape)
     scores = flattened(scores, start: -2, end: -1)
     print("scores shape ", scores.shape)
