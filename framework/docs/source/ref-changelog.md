@@ -8,6 +8,8 @@ We would like to give our special thanks to all the contributors who made the ne
 
 `Aline Almeida`, `Charles Beauville`, `Chong Shen Ng`, `Daniel Hinjos García`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Robert Steiner`, `Yan Gao` <!---TOKEN_v1.17.0-->
 
+### What's new?
+
 - **Allow registration of functions for custom message types** ([#5093](https://github.com/adap/flower/pull/5093))
 
   Enables support for custom message types in `ServerApp` by allowing the `message_type` field to be set as `"<action_type>.<action_name>"`, where `<action_type>` is one of `train`, `evaluate`, or `query`, and `<action_name>` is a valid Python identifier. Developers can now register handler functions for these custom message types using decorators as follows:
