@@ -12,14 +12,15 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Allow registration of functions for custom message types** ([#5093](https://github.com/adap/flower/pull/5093))
 
-  Enables support for custom message types in `ServerApp` by allowing the `message_type` field to be set as `"<action_type>.<action_name>"`, where `<action_type>` is one of `train`, `evaluate`, or `query`, and `<action_name>` is a valid Python identifier. Developers can now register handler functions for these custom message types using decorators as follows:
+  Enables support for custom message types in `ServerApp` by allowing the `message_type` field to be set as `"<action_type>.<action_name>"`, where `<action_type>` is one of `train`, `evaluate`, or `query`, and `<action_name>` is a valid Python identifier.  Developers can now register handler functions for these custom message types using the decorator `@app.<action_type>("<action_name>")`. For example, the following function is called when the `ServerApp` sends a message with `message_type` set to `"query.echo"`:
 
   ```python
   app = ClientApp()
 
-  @app.<action_type>("<action_name>")
+  @app.query("echo")
   def my_function_for_my_custom_message(message: Message, context: Context):
-      ...
+      # Echo the message
+      return Message(message.content, reply_to=message)
   ```
 
 - **Rename core Message API components for clarity and consistency** ([#5140](https://github.com/adap/flower/pull/5140), [#5133](https://github.com/adap/flower/pull/5133), [#5139](https://github.com/adap/flower/pull/5139), [#5129](https://github.com/adap/flower/pull/5129), [#5150](https://github.com/adap/flower/pull/5150), [#5151](https://github.com/adap/flower/pull/5151), [#5146](https://github.com/adap/flower/pull/5146), [#5152](https://github.com/adap/flower/pull/5152))
@@ -47,7 +48,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Stabilize low-level Message API** ([#5120](https://github.com/adap/flower/pull/5120))
 
-  With all the changes above, the low-level Message API is now officially stable. All preview feature warnings have been removed, marking the completion of its transition out of experimental status.
+  With all the changes above, the stability of the low-level Message API has been significantly improved. All preview feature warnings have been removed, marking the completion of its transition out of experimental status.
 
 - **Add node availability check to reduce wait time** ([#4968](https://github.com/adap/flower/pull/4968))
 
@@ -72,56 +73,6 @@ We would like to give our special thanks to all the contributors who made the ne
 - **General Improvements** ([#5074](https://github.com/adap/flower/pull/5074), [#5126](https://github.com/adap/flower/pull/5126), [#5122](https://github.com/adap/flower/pull/5122), [#5149](https://github.com/adap/flower/pull/5149), [#5157](https://github.com/adap/flower/pull/5157))
 
   As always, many parts of the Flower framework and quality infrastructure were improved and updated.
-
-### TODO DELETE FI PRs
-
-- **feat(intelligence) Add RAM check** ([#5114](https://github.com/adap/flower/pull/5114))
-- **feat(intelligence) Add Swift tests and CI checks** ([#5041](https://github.com/adap/flower/pull/5041))
-- **feat(intelligence) Add Swift Docs** ([#5068](https://github.com/adap/flower/pull/5068))
-- **feat(intelligence) Improve web-chat example** ([#5082](https://github.com/adap/flower/pull/5082))
-- **feat(intelligence) Add templates and create project** ([#5117](https://github.com/adap/flower/pull/5117))
-- **feat(intelligence) Separate TS and Swift CI** ([#5090](https://github.com/adap/flower/pull/5090))
-- **feat(intelligence) Change typing and add** `Sendable` ([#5099](https://github.com/adap/flower/pull/5099))
-- **feat(intelligence) Add model name caching** ([#5077](https://github.com/adap/flower/pull/5077))
-- **feat(intelligence) Add Swift examples** ([#5081](https://github.com/adap/flower/pull/5081))
-- **docs(intelligence) Add Swift supported models** ([#5104](https://github.com/adap/flower/pull/5104))
-- **docs(intelligence) Add fetchModel explainer** ([#5078](https://github.com/adap/flower/pull/5078))
-- **docs(intelligence) Fix deepseek model link** ([#5105](https://github.com/adap/flower/pull/5105))
-- **docs(intelligence) Add building from source doc** ([#5088](https://github.com/adap/flower/pull/5088))
-- **docs(intelligence) Update project README** ([#5109](https://github.com/adap/flower/pull/5109))
-- **docs(intelligence) Improve TypeScript ref** ([#5072](https://github.com/adap/flower/pull/5072))
-- **docs(intelligence) Update models reference** ([#5156](https://github.com/adap/flower/pull/5156))
-- **docs(intelligence) Add examples to docs** ([#5086](https://github.com/adap/flower/pull/5086))
-- **refactor(intelligence) Improve model name caching** ([#5110](https://github.com/adap/flower/pull/5110))
-- **refactor(intelligence) Bump version to 0.2.0** ([#5052](https://github.com/adap/flower/pull/5052))
-- **ci(intelligence) Set Swift lint to fail on warnings** ([#5102](https://github.com/adap/flower/pull/5102))
-- **ci(intelligence) Bump to 1.7.0 post 1.6.0 release** ([#5142](https://github.com/adap/flower/pull/5142))
-- **ci(intelligence) Bump version to 0.1.5** ([#5096](https://github.com/adap/flower/pull/5096))
-- **ci(intelligence) Update example lock files** ([#5097](https://github.com/adap/flower/pull/5097))
-- **fix(intelligence) Ignore Node dependencies in browsers** ([#5107](https://github.com/adap/flower/pull/5107))
-- **fix(intelligence) Remove context-window-size for webllm** ([#5127](https://github.com/adap/flower/pull/5127))
-- **ci(intelligence) Fix tests** ([#5091](https://github.com/adap/flower/pull/5091))
-- **refactor(intelligence) Improve local error description** ([#5136](https://github.com/adap/flower/pull/5136))
-- **fix(intelligence) Remove crypto from browser ignored deps** ([#5111](https://github.com/adap/flower/pull/5111))
-- **refactor(intelligence) Update README** ([#5141](https://github.com/adap/flower/pull/5141))
-- **refactor(intelligence) Fix browser extension example** ([#5116](https://github.com/adap/flower/pull/5116))
-- **ci(intelligence) Fix open vulnerabilities in example** ([#5071](https://github.com/adap/flower/pull/5071))
-- **ci(intelligence) Update dependencies** ([#5121](https://github.com/adap/flower/pull/5121))
-- **ci(intelligence) Remove unused dependency** ([#5083](https://github.com/adap/flower/pull/5083))
-- **ci(intelligence) Bump versions post 0.1.5 release** ([#5112](https://github.com/adap/flower/pull/5112))
-- **refactor(intelligence) Update the SDK name constant** ([#5087](https://github.com/adap/flower/pull/5087))
-- **refactor(intelligence) Remove unused build config** ([#5085](https://github.com/adap/flower/pull/5085))
-- **refactor(intelligence) Bump version to 0.1.3** ([#5055](https://github.com/adap/flower/pull/5055))
-- **ci(intelligence) Bump version to 0.1.4** ([#5095](https://github.com/adap/flower/pull/5095))
-- **refactor(intelligence) Stop using** `pnpm` **in examples** ([#5131](https://github.com/adap/flower/pull/5131))
-- **refactor(intelligence) Update examples** ([#5060](https://github.com/adap/flower/pull/5060))
-- **refactor(intelligence) Use engine name only in engines** ([#5075](https://github.com/adap/flower/pull/5075))
-- **refactor(intelligence) Revert SDK name change** ([#5092](https://github.com/adap/flower/pull/5092))
-- **ci(intelligence) Add version bumping script** ([#5059](https://github.com/adap/flower/pull/5059))
-- **ci(intelligence) Fix docs CI** ([#5101](https://github.com/adap/flower/pull/5101))
-- **docs(intelligence) Update docs version** ([#5098](https://github.com/adap/flower/pull/5098))
-- **docs(intelligence) Add formatting** ([#5100](https://github.com/adap/flower/pull/5100))
-- **docs(framework) Fix versioned script** ([#5058](https://github.com/adap/flower/pull/5058))
 
 ## v1.16.0 (2025-03-11)
 
