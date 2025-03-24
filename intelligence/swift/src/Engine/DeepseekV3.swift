@@ -517,13 +517,13 @@ class DeepseekV3ModelInner: Module {
     self.pipelineSize = 1
   }
 
-  func callAsFunction(_ x: MLXArray, cache: [KVCache]?, mask: MLXArray? = nil) -> MLXArray {
+  func callAsFunction(_ x: MLXArray, cache: [KVCache]?) -> MLXArray {
     var h = embedTokens(x)
     
-    let attentionMask = mask ?? createAttentionMask(h: h, cache: cache)
+    let attentionMask = createAttentionMask(h: h, cache: cache)
 
     for (i, layer) in layers.enumerated() {
-        h = layer(h, mask: mask, cache: cache?[i])
+        h = layer(h, mask: attentionMask, cache: cache?[i])
     }
 
     return norm(h)
@@ -545,8 +545,8 @@ class DeepseekV3Model: Module, LLMModel, KVCacheDimensionProvider, LoRAModel {
     self._lmHead.wrappedValue = Linear(args.hiddenSize, args.vocabSize, bias: false)
   }
 
-  func callAsFunction(_ inputs: MLXArray, cache: [KVCache]? = nil, mask: MLXArray? = nil) -> MLXArray {
-    let out = model(inputs, cache: cache, mask: mask)
+  func callAsFunction(_ inputs: MLXArray, cache: [KVCache]? = nil) -> MLXArray {
+    let out = model(inputs, cache: cache)
     return lmHead(out)
   }
 
