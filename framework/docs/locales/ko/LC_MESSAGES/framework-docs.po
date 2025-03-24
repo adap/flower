@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-22 00:31+0000\n"
+"POT-Creation-Date: 2025-03-24 00:34+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -18,6 +18,90 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
+
+#: ../../source/build.rst:-1
+msgid ""
+"Learn how to build Flower apps with step-by-step guides on installation, "
+"configuration, strategy implementation, model checkpoints, and more."
+msgstr ""
+
+#: ../../source/build.rst:6
+#, fuzzy
+msgid "Build Flower apps"
+msgstr "Flower 서버."
+
+#: ../../source/build.rst:9 ../../source/contribute.rst:24
+#: ../../source/deploy.rst:9 ../../source/simulate.rst:9
+msgid "How-to guides"
+msgstr "사용 방법 가이드"
+
+#: ../../source/build.rst:11 ../../source/contribute.rst:26
+#: ../../source/deploy.rst:11 ../../source/index.rst:79
+#: ../../source/simulate.rst:11
+msgid ""
+"Problem-oriented how-to guides show step-by-step how to achieve a "
+"specific goal."
+msgstr "문제 중심의 방법 가이드는 특정 목표를 달성하는 방법을 단계별로 보여줍니다."
+
+#: ../../source/contribute.rst:16
+msgid "Contributor tutorials"
+msgstr "기여자 튜토리얼"
+
+#: ../../source/contribute.rst:45
+msgid "Contributor explanations"
+msgstr "기여자 설명"
+
+#: ../../source/contribute.rst:56
+msgid "Contributor references"
+msgstr "기여자 참조"
+
+#: ../../source/contribute.rst:-1
+msgid ""
+"Join the Flower community! Explore tutorials and guides to contribute "
+"code, documentation, translations, and more to advance federated learning"
+" with Flower."
+msgstr ""
+
+#: ../../source/contribute.rst:6 ../../source/index.rst:114
+#: ../../source/index.rst:119
+#, fuzzy
+msgid "Contribute"
+msgstr "속성"
+
+#: ../../source/contribute.rst:8 ../../source/index.rst:116
+msgid ""
+"The Flower community welcomes contributions. The following docs are "
+"intended to help along the way."
+msgstr "Flower 커뮤니티는 여러분의 기여를 환영합니다. 다음 문서는 그 과정에서 도움을 드리기 위한 문서입니다."
+
+#: ../../source/contribute.rst:12 ../../source/index.rst:30
+msgid "Tutorials"
+msgstr "튜토리얼"
+
+#: ../../source/contribute.rst:14
+#, fuzzy
+msgid "A learning-oriented series of tutorials, the best place to start."
+msgstr "학습 중심의 연합 학습 튜토리얼 시리즈로, 시작하기에 가장 좋은 곳입니다."
+
+#: ../../source/contribute.rst:40 ../../source/index.rst:90
+#: ../../source/index.rst:95
+msgid "Explanations"
+msgstr "설명"
+
+#: ../../source/contribute.rst:42 ../../source/index.rst:92
+msgid ""
+"Understanding-oriented concept guides explain and discuss key topics and "
+"underlying ideas behind Flower and collaborative AI."
+msgstr "이해 중심의 개념 가이드에서는 Flower와 협업 AI의 주요 주제와 기본 아이디어를 설명하고 토론합니다."
+
+#: ../../source/contribute.rst:52 ../../source/index.rst:104
+#: ../../source/index.rst:106 ../../source/reference.rst:5
+msgid "References"
+msgstr "참조"
+
+#: ../../source/contribute.rst:54 ../../source/reference.rst:7
+msgid "Information-oriented API reference and other reference material."
+msgstr "정보 지향 API 참조 및 기타 참고 자료."
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:2
 msgid "Public and private APIs"
@@ -2466,6 +2550,17 @@ msgstr ""
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:194
 msgid "This will generate HTML documentation in ``doc/build/html``."
 msgstr "그러면 ``doc/build/html``에 HTML 문서가 생성됩니다."
+
+#: ../../source/deploy.rst:-1
+msgid ""
+"Deploy with the Flower Deployment Runtime using step-by-step guides on "
+"TLS, authentication, logging, Docker, Azure, and more for secure, "
+"scalable solutions."
+msgstr ""
+
+#: ../../source/deploy.rst:6
+msgid "Deploy using the Flower Deployment Runtime"
+msgstr ""
 
 #: ../../source/docker/enable-tls.rst:-1
 msgid ""
@@ -9670,41 +9765,28 @@ msgstr ""
 msgid "Tutorial"
 msgstr "튜토리얼"
 
-#: ../../source/index.rst:44
-msgid "Quickstart tutorials"
-msgstr "빠른 시작 튜토리얼"
+#: ../../source/index.rst:81
+msgid "Build"
+msgstr ""
 
-#: ../../source/index.rst:71 ../../source/index.rst:75
-msgid "How-to guides"
+#: ../../source/index.rst:81
+#, fuzzy
+msgid "Simulate"
+msgstr "시뮬레이션 실행"
+
+#: ../../source/index.rst:81
+#, fuzzy
+msgid "Deploy"
+msgstr "배포"
+
+#: ../../source/index.rst:77 ../../source/index.rst:81
+#, fuzzy
+msgid "How-to Guides"
 msgstr "사용 방법 가이드"
 
-#: ../../source/index.rst:101 ../../source/index.rst:106
-msgid "Explanations"
-msgstr "설명"
-
-#: None:-1
-msgid "API reference"
-msgstr "API 참조"
-
-#: ../../source/index.rst:132
-msgid "Reference docs"
-msgstr "참조 문서"
-
-#: ../../source/index.rst:149
-msgid "Contributor tutorials"
-msgstr "기여자 튜토리얼"
-
-#: ../../source/index.rst:156
-msgid "Contributor how-to guides"
-msgstr "기여자 사용법 가이드"
-
-#: ../../source/index.rst:168
-msgid "Contributor explanations"
-msgstr "기여자 설명"
-
-#: ../../source/index.rst:174
-msgid "Contributor references"
-msgstr "기여자 참조"
+#: ../../source/index.rst:119
+msgid "Contributor docs"
+msgstr "기여자 문서"
 
 #: ../../source/index.rst:-1
 msgid ""
@@ -9748,14 +9830,10 @@ msgid ""
 "The user guide is targeted at researchers and developers who want to use "
 "Flower to bring existing machine learning workloads into a federated "
 "setting. One of Flower's design goals was to make this simple. Read on to"
-" learn more!"
+" learn more."
 msgstr ""
 "이 사용자 가이드는 Flower를 사용해 기존 머신 러닝 워크로드를 연합된 환경으로 가져오고자 하는 연구자와 개발자를 대상으로 "
 "합니다. Flower의 설계 목표 중 하나는 이를 간단하게 만드는 것이었습니다. 자세히 알아보려면 계속 읽어보세요."
-
-#: ../../source/index.rst:30
-msgid "Tutorials"
-msgstr "튜토리얼"
 
 #: ../../source/index.rst:32
 msgid ""
@@ -9763,7 +9841,7 @@ msgid ""
 "place to start."
 msgstr "학습 중심의 연합 학습 튜토리얼 시리즈로, 시작하기에 가장 좋은 곳입니다."
 
-#: ../../source/index.rst:62
+#: ../../source/index.rst:50
 #, fuzzy
 msgid ""
 "QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | "
@@ -9785,44 +9863,6 @@ msgstr ""
 "scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` | "
 ":doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-"
 "quickstart-ios>`"
-
-#: ../../source/index.rst:73
-msgid ""
-"Problem-oriented how-to guides show step-by-step how to achieve a "
-"specific goal."
-msgstr "문제 중심의 방법 가이드는 특정 목표를 달성하는 방법을 단계별로 보여줍니다."
-
-#: ../../source/index.rst:103
-msgid ""
-"Understanding-oriented concept guides explain and discuss key topics and "
-"underlying ideas behind Flower and collaborative AI."
-msgstr "이해 중심의 개념 가이드에서는 Flower와 협업 AI의 주요 주제와 기본 아이디어를 설명하고 토론합니다."
-
-#: ../../source/index.rst:115
-msgid "References"
-msgstr "참조"
-
-#: ../../source/index.rst:117
-msgid "Information-oriented API reference and other reference material."
-msgstr "정보 지향 API 참조 및 기타 참고 자료."
-
-#: ../../source/index.rst:126:<autosummary>:1
-msgid ":py:obj:`flwr <flwr>`\\"
-msgstr ":py:obj:`flwr <flwr>`\\"
-
-#: ../../source/index.rst:126:<autosummary>:1 flwr:1 of
-msgid "Flower main package."
-msgstr "Flower 메인 패키지."
-
-#: ../../source/index.rst:144
-msgid "Contributor docs"
-msgstr "기여자 문서"
-
-#: ../../source/index.rst:146
-msgid ""
-"The Flower community welcomes contributions. The following docs are "
-"intended to help along the way."
-msgstr "Flower 커뮤니티는 여러분의 기여를 환영합니다. 다음 문서는 그 과정에서 도움을 드리기 위한 문서입니다."
 
 #: ../../source/ref-api-cli.rst:2
 msgid "Flower CLI reference"
@@ -10191,6 +10231,10 @@ msgstr "flower 시뮬레이션"
 #: ../../source/ref-api/flwr.rst:2
 msgid "flwr"
 msgstr "flwr"
+
+#: ../../source/reference.rst:16:<autosummary>:1 flwr:1 of
+msgid "Flower main package."
+msgstr "Flower 메인 패키지."
 
 #: ../../source/ref-api/flwr.client.rst:43 ../../source/ref-api/flwr.rst:25
 #: ../../source/ref-api/flwr.server.rst:49
@@ -26712,6 +26756,39 @@ msgid ""
 "(`telemetry@flower.ai`)."
 msgstr ""
 
+#: None:-1
+msgid "API reference"
+msgstr "API 참조"
+
+#: ../../source/reference.rst:22
+msgid "Reference docs"
+msgstr "참조 문서"
+
+#: ../../source/reference.rst:2
+#, fuzzy
+msgid "Reference"
+msgstr "참조"
+
+#: ../../source/reference.rst:16:<autosummary>:1
+msgid ":py:obj:`flwr <flwr>`\\"
+msgstr ":py:obj:`flwr <flwr>`\\"
+
+#: ../../source/simulate.rst:-1
+msgid ""
+"Run scalable federated learning simulations with the Flower Simulation "
+"Runtime. Follow step-by-step guides to set up, configure, and execute "
+"simulations easily."
+msgstr ""
+
+#: ../../source/simulate.rst:6
+#, fuzzy
+msgid "Simulate using the Flower Simulation Runtime"
+msgstr "멀티 노드 Flower 시뮬레이션"
+
+#: ../../source/tutorial-quickstart.rst:2
+msgid "Quickstart tutorials"
+msgstr "빠른 시작 튜토리얼"
+
 #: ../../source/tutorial-quickstart-android.rst:-1
 msgid ""
 "Read this Federated Learning quickstart tutorial for creating an Android "
@@ -29728,7 +29805,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|46c1cee57f3b48b0826837c9ca24bb70|"
+msgid "|206dd64c5da04db0bb2db93bbcd6f89b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -29745,7 +29822,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|55b99ed6645549a38fedbca1511c6982|"
+msgid "|d135fd8de2b64f0496180c8020debaac|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -29771,7 +29848,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|dbf325234cc54792862992a51d558acb|"
+msgid "|4e22564b974748f795c963f0319373f6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -29789,7 +29866,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|5b34655e2fc743078d8c3382c3d0511a|"
+msgid "|1aaa0816eaee46a984362e32c1ae30c4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -29808,7 +29885,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|7683104db7e7499884b2199518a8e71d|"
+msgid "|617269e9f7004bdea6491c76a651ed9d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -29825,7 +29902,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|9646296ec388473d95a2c52534611fe7|"
+msgid "|771bc1e18acb4c0ba0af598c2eda03f1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -29848,7 +29925,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|0b8c81d07c8b4e4b86ab37eaa45197be|"
+msgid "|50e44ed8cf634e72826249d84af65fc8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -29865,7 +29942,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|071d15eeb3fe457f9119b104763aad4f|"
+msgid "|e6d7a63ce00144078fcbf8421048fe3b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -30044,7 +30121,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|5ad5aa46a4844f4ea18a1e611e66db54|"
+msgid "|18866b10ba3d4c5787e63505ac52267f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -30072,7 +30149,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|8c9a5d290e534161a2e14ede889bcb1b|"
+msgid "|0215d475c1674a8e904fe52d9b170e9b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -30099,7 +30176,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|c9562154b9a446b1bb7d924d55c4e074|"
+msgid "|676a3d07780c471ab85b643908f15bce|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -30125,7 +30202,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|a18099299bfa4828a3ac984a2de970c2|"
+msgid "|b9587e6e17ad464a884acd4acc46bb40|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -30175,7 +30252,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|ed7d7dbbcf174cd284c15801b0e6f51f|"
+msgid "|77356653b95542f1916bcd325ae70634|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -30295,7 +30372,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|334758e020494858a71c419d752d05a5|"
+msgid "|2717bf202b09498b90f9eacc1728f1d4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -39879,5 +39956,50 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|cffbf5f7fb6146e887e89765d6f590bd|"
+#~ msgstr ""
+
+#~ msgid "Contributor how-to guides"
+#~ msgstr "기여자 사용법 가이드"
+
+#~ msgid "|46c1cee57f3b48b0826837c9ca24bb70|"
+#~ msgstr ""
+
+#~ msgid "|55b99ed6645549a38fedbca1511c6982|"
+#~ msgstr ""
+
+#~ msgid "|dbf325234cc54792862992a51d558acb|"
+#~ msgstr ""
+
+#~ msgid "|5b34655e2fc743078d8c3382c3d0511a|"
+#~ msgstr ""
+
+#~ msgid "|7683104db7e7499884b2199518a8e71d|"
+#~ msgstr ""
+
+#~ msgid "|9646296ec388473d95a2c52534611fe7|"
+#~ msgstr ""
+
+#~ msgid "|0b8c81d07c8b4e4b86ab37eaa45197be|"
+#~ msgstr ""
+
+#~ msgid "|071d15eeb3fe457f9119b104763aad4f|"
+#~ msgstr ""
+
+#~ msgid "|5ad5aa46a4844f4ea18a1e611e66db54|"
+#~ msgstr ""
+
+#~ msgid "|8c9a5d290e534161a2e14ede889bcb1b|"
+#~ msgstr ""
+
+#~ msgid "|c9562154b9a446b1bb7d924d55c4e074|"
+#~ msgstr ""
+
+#~ msgid "|a18099299bfa4828a3ac984a2de970c2|"
+#~ msgstr ""
+
+#~ msgid "|ed7d7dbbcf174cd284c15801b0e6f51f|"
+#~ msgstr ""
+
+#~ msgid "|334758e020494858a71c419d752d05a5|"
 #~ msgstr ""
 

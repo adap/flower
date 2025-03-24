@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-22 00:31+0000\n"
+"POT-Creation-Date: 2025-03-24 00:34+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -18,6 +18,89 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
+
+#: ../../source/build.rst:-1
+msgid ""
+"Learn how to build Flower apps with step-by-step guides on installation, "
+"configuration, strategy implementation, model checkpoints, and more."
+msgstr ""
+
+#: ../../source/build.rst:6
+#, fuzzy
+msgid "Build Flower apps"
+msgstr "O nome do repositório da imagem base."
+
+#: ../../source/build.rst:9 ../../source/contribute.rst:24
+#: ../../source/deploy.rst:9 ../../source/simulate.rst:9
+msgid "How-to guides"
+msgstr ""
+
+#: ../../source/build.rst:11 ../../source/contribute.rst:26
+#: ../../source/deploy.rst:11 ../../source/index.rst:79
+#: ../../source/simulate.rst:11
+msgid ""
+"Problem-oriented how-to guides show step-by-step how to achieve a "
+"specific goal."
+msgstr ""
+
+#: ../../source/contribute.rst:16
+msgid "Contributor tutorials"
+msgstr ""
+
+#: ../../source/contribute.rst:45
+msgid "Contributor explanations"
+msgstr ""
+
+#: ../../source/contribute.rst:56
+msgid "Contributor references"
+msgstr ""
+
+#: ../../source/contribute.rst:-1
+msgid ""
+"Join the Flower community! Explore tutorials and guides to contribute "
+"code, documentation, translations, and more to advance federated learning"
+" with Flower."
+msgstr ""
+
+#: ../../source/contribute.rst:6 ../../source/index.rst:114
+#: ../../source/index.rst:119
+#, fuzzy
+msgid "Contribute"
+msgstr "Contribua com traduções"
+
+#: ../../source/contribute.rst:8 ../../source/index.rst:116
+msgid ""
+"The Flower community welcomes contributions. The following docs are "
+"intended to help along the way."
+msgstr ""
+
+#: ../../source/contribute.rst:12 ../../source/index.rst:30
+msgid "Tutorials"
+msgstr ""
+
+#: ../../source/contribute.rst:14
+msgid "A learning-oriented series of tutorials, the best place to start."
+msgstr ""
+
+#: ../../source/contribute.rst:40 ../../source/index.rst:90
+#: ../../source/index.rst:95
+msgid "Explanations"
+msgstr ""
+
+#: ../../source/contribute.rst:42 ../../source/index.rst:92
+msgid ""
+"Understanding-oriented concept guides explain and discuss key topics and "
+"underlying ideas behind Flower and collaborative AI."
+msgstr ""
+
+#: ../../source/contribute.rst:52 ../../source/index.rst:104
+#: ../../source/index.rst:106 ../../source/reference.rst:5
+msgid "References"
+msgstr ""
+
+#: ../../source/contribute.rst:54 ../../source/reference.rst:7
+msgid "Information-oriented API reference and other reference material."
+msgstr ""
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:2
 msgid "Public and private APIs"
@@ -2292,6 +2375,17 @@ msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:194
 msgid "This will generate HTML documentation in ``doc/build/html``."
+msgstr ""
+
+#: ../../source/deploy.rst:-1
+msgid ""
+"Deploy with the Flower Deployment Runtime using step-by-step guides on "
+"TLS, authentication, logging, Docker, Azure, and more for secure, "
+"scalable solutions."
+msgstr ""
+
+#: ../../source/deploy.rst:6
+msgid "Deploy using the Flower Deployment Runtime"
 msgstr ""
 
 #: ../../source/docker/enable-tls.rst:-1
@@ -8766,40 +8860,24 @@ msgstr ""
 msgid "Tutorial"
 msgstr ""
 
-#: ../../source/index.rst:44
-msgid "Quickstart tutorials"
+#: ../../source/index.rst:81
+msgid "Build"
 msgstr ""
 
-#: ../../source/index.rst:71 ../../source/index.rst:75
-msgid "How-to guides"
+#: ../../source/index.rst:81
+msgid "Simulate"
 msgstr ""
 
-#: ../../source/index.rst:101 ../../source/index.rst:106
-msgid "Explanations"
+#: ../../source/index.rst:81
+msgid "Deploy"
 msgstr ""
 
-#: None:-1
-msgid "API reference"
+#: ../../source/index.rst:77 ../../source/index.rst:81
+msgid "How-to Guides"
 msgstr ""
 
-#: ../../source/index.rst:132
-msgid "Reference docs"
-msgstr ""
-
-#: ../../source/index.rst:149
-msgid "Contributor tutorials"
-msgstr ""
-
-#: ../../source/index.rst:156
-msgid "Contributor how-to guides"
-msgstr ""
-
-#: ../../source/index.rst:168
-msgid "Contributor explanations"
-msgstr ""
-
-#: ../../source/index.rst:174
-msgid "Contributor references"
+#: ../../source/index.rst:119
+msgid "Contributor docs"
 msgstr ""
 
 #: ../../source/index.rst:-1
@@ -8842,11 +8920,7 @@ msgid ""
 "The user guide is targeted at researchers and developers who want to use "
 "Flower to bring existing machine learning workloads into a federated "
 "setting. One of Flower's design goals was to make this simple. Read on to"
-" learn more!"
-msgstr ""
-
-#: ../../source/index.rst:30
-msgid "Tutorials"
+" learn more."
 msgstr ""
 
 #: ../../source/index.rst:32
@@ -8855,7 +8929,7 @@ msgid ""
 "place to start."
 msgstr ""
 
-#: ../../source/index.rst:62
+#: ../../source/index.rst:50
 msgid ""
 "QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | "
 ":doc:`TensorFlow <tutorial-quickstart-tensorflow>` | :doc:`MLX <tutorial-"
@@ -8866,44 +8940,6 @@ msgid ""
 "lightning>` | :doc:`scikit-learn <tutorial-quickstart-scikitlearn>` | "
 ":doc:`XGBoost <tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-"
 "quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`"
-msgstr ""
-
-#: ../../source/index.rst:73
-msgid ""
-"Problem-oriented how-to guides show step-by-step how to achieve a "
-"specific goal."
-msgstr ""
-
-#: ../../source/index.rst:103
-msgid ""
-"Understanding-oriented concept guides explain and discuss key topics and "
-"underlying ideas behind Flower and collaborative AI."
-msgstr ""
-
-#: ../../source/index.rst:115
-msgid "References"
-msgstr ""
-
-#: ../../source/index.rst:117
-msgid "Information-oriented API reference and other reference material."
-msgstr ""
-
-#: ../../source/index.rst:126:<autosummary>:1
-msgid ":py:obj:`flwr <flwr>`\\"
-msgstr ""
-
-#: ../../source/index.rst:126:<autosummary>:1 flwr:1 of
-msgid "Flower main package."
-msgstr ""
-
-#: ../../source/index.rst:144
-msgid "Contributor docs"
-msgstr ""
-
-#: ../../source/index.rst:146
-msgid ""
-"The Flower community welcomes contributions. The following docs are "
-"intended to help along the way."
 msgstr ""
 
 #: ../../source/ref-api-cli.rst:2
@@ -9257,6 +9293,10 @@ msgstr "``FLWR_VERSION``"
 
 #: ../../source/ref-api/flwr.rst:2
 msgid "flwr"
+msgstr ""
+
+#: ../../source/reference.rst:16:<autosummary>:1 flwr:1 of
+msgid "Flower main package."
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:43 ../../source/ref-api/flwr.rst:25
@@ -25252,6 +25292,37 @@ msgid ""
 "(`telemetry@flower.ai`)."
 msgstr ""
 
+#: None:-1
+msgid "API reference"
+msgstr ""
+
+#: ../../source/reference.rst:22
+msgid "Reference docs"
+msgstr ""
+
+#: ../../source/reference.rst:2
+msgid "Reference"
+msgstr ""
+
+#: ../../source/reference.rst:16:<autosummary>:1
+msgid ":py:obj:`flwr <flwr>`\\"
+msgstr ""
+
+#: ../../source/simulate.rst:-1
+msgid ""
+"Run scalable federated learning simulations with the Flower Simulation "
+"Runtime. Follow step-by-step guides to set up, configure, and execute "
+"simulations easily."
+msgstr ""
+
+#: ../../source/simulate.rst:6
+msgid "Simulate using the Flower Simulation Runtime"
+msgstr ""
+
+#: ../../source/tutorial-quickstart.rst:2
+msgid "Quickstart tutorials"
+msgstr ""
+
 #: ../../source/tutorial-quickstart-android.rst:-1
 msgid ""
 "Read this Federated Learning quickstart tutorial for creating an Android "
@@ -28232,7 +28303,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|46c1cee57f3b48b0826837c9ca24bb70|"
+msgid "|206dd64c5da04db0bb2db93bbcd6f89b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -28247,7 +28318,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|55b99ed6645549a38fedbca1511c6982|"
+msgid "|d135fd8de2b64f0496180c8020debaac|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -28269,7 +28340,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|dbf325234cc54792862992a51d558acb|"
+msgid "|4e22564b974748f795c963f0319373f6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -28285,7 +28356,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|5b34655e2fc743078d8c3382c3d0511a|"
+msgid "|1aaa0816eaee46a984362e32c1ae30c4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -28301,7 +28372,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|7683104db7e7499884b2199518a8e71d|"
+msgid "|617269e9f7004bdea6491c76a651ed9d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -28316,7 +28387,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|9646296ec388473d95a2c52534611fe7|"
+msgid "|771bc1e18acb4c0ba0af598c2eda03f1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -28336,7 +28407,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|0b8c81d07c8b4e4b86ab37eaa45197be|"
+msgid "|50e44ed8cf634e72826249d84af65fc8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -28351,7 +28422,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|071d15eeb3fe457f9119b104763aad4f|"
+msgid "|e6d7a63ce00144078fcbf8421048fe3b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -28491,7 +28562,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|5ad5aa46a4844f4ea18a1e611e66db54|"
+msgid "|18866b10ba3d4c5787e63505ac52267f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -28515,7 +28586,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|8c9a5d290e534161a2e14ede889bcb1b|"
+msgid "|0215d475c1674a8e904fe52d9b170e9b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -28539,7 +28610,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|c9562154b9a446b1bb7d924d55c4e074|"
+msgid "|676a3d07780c471ab85b643908f15bce|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -28562,7 +28633,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|a18099299bfa4828a3ac984a2de970c2|"
+msgid "|b9587e6e17ad464a884acd4acc46bb40|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -28600,7 +28671,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|ed7d7dbbcf174cd284c15801b0e6f51f|"
+msgid "|77356653b95542f1916bcd325ae70634|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -28694,7 +28765,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|334758e020494858a71c419d752d05a5|"
+msgid "|2717bf202b09498b90f9eacc1728f1d4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -44036,5 +44107,60 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|cffbf5f7fb6146e887e89765d6f590bd|"
+#~ msgstr ""
+
+#~ msgid "Contributor how-to guides"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The user guide is targeted at "
+#~ "researchers and developers who want to"
+#~ " use Flower to bring existing machine"
+#~ " learning workloads into a federated "
+#~ "setting. One of Flower's design goals"
+#~ " was to make this simple. Read "
+#~ "on to learn more!"
+#~ msgstr ""
+
+#~ msgid "|46c1cee57f3b48b0826837c9ca24bb70|"
+#~ msgstr ""
+
+#~ msgid "|55b99ed6645549a38fedbca1511c6982|"
+#~ msgstr ""
+
+#~ msgid "|dbf325234cc54792862992a51d558acb|"
+#~ msgstr ""
+
+#~ msgid "|5b34655e2fc743078d8c3382c3d0511a|"
+#~ msgstr ""
+
+#~ msgid "|7683104db7e7499884b2199518a8e71d|"
+#~ msgstr ""
+
+#~ msgid "|9646296ec388473d95a2c52534611fe7|"
+#~ msgstr ""
+
+#~ msgid "|0b8c81d07c8b4e4b86ab37eaa45197be|"
+#~ msgstr ""
+
+#~ msgid "|071d15eeb3fe457f9119b104763aad4f|"
+#~ msgstr ""
+
+#~ msgid "|5ad5aa46a4844f4ea18a1e611e66db54|"
+#~ msgstr ""
+
+#~ msgid "|8c9a5d290e534161a2e14ede889bcb1b|"
+#~ msgstr ""
+
+#~ msgid "|c9562154b9a446b1bb7d924d55c4e074|"
+#~ msgstr ""
+
+#~ msgid "|a18099299bfa4828a3ac984a2de970c2|"
+#~ msgstr ""
+
+#~ msgid "|ed7d7dbbcf174cd284c15801b0e6f51f|"
+#~ msgstr ""
+
+#~ msgid "|334758e020494858a71c419d752d05a5|"
 #~ msgstr ""
 
