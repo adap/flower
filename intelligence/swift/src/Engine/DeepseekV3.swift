@@ -399,6 +399,7 @@ class MoEGate: Module {
   }
   
   func callAsFunction(_ x: MLXArray) -> (MLXArray, MLXArray) {
+    print("shape: \(x.shape)")
     let (bsz, seqLen, h) = (x.dim(0), x.dim(1), x.dim(2))
     
     var hiddenStates = x.matmul(weight.T)
