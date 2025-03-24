@@ -8,84 +8,71 @@ We would like to give our special thanks to all the contributors who made the ne
 
 `Aline Almeida`, `Charles Beauville`, `Chong Shen Ng`, `Daniel Hinjos García`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Robert Steiner`, `Yan Gao` <!---TOKEN_v1.17.0-->
 
-### Custom message handler
-- **feat(framework) Enable custom message handler** ([#5093](https://github.com/adap/flower/pull/5093))
+- **Allow registration of functions for custom message types** ([#5093](https://github.com/adap/flower/pull/5093))
 
-### One-liner conversion
-- **feat(framework) Allow one-liner conversion for** `ParametersRecord` ([#4922](https://github.com/adap/flower/pull/4922))
-- **feat(framework) Allow passing** `torch.Tensor` **to** `Array` **constructor** ([#4920](https://github.com/adap/flower/pull/4920))
+  Enables support for custom message types in `ServerApp` by allowing the `message_type` field to be set as `"<action_type>.<action_name>"`, where `<action_type>` is one of `train`, `evaluate`, or `query`, and `<action_name>` is a valid Python identifier. Developers can now register handler functions for these custom message types using decorators as follows:
 
-### Revamp `Message` constructor
-- **feat(framework) Revamp** `Message` **constructor** ([#5137](https://github.com/adap/flower/pull/5137))
-- **refactor(framework) Update all** `Message` **-related usages accordingly** ([#5153](https://github.com/adap/flower/pull/5153))
+  ```python
+  app = ClientApp()
 
-### Rename components
+  @app.<action_type>("<action_name>")
+  def my_function_for_my_custom_message(message: Message, context: Context):
+      ...
+  ```
 
-- **refactor(framework) Rename** `RecordSet` **to** `RecordDict` ([#5140](https://github.com/adap/flower/pull/5140))
-- **refactor(framework) Rename all** `Driver` **instances to** `Grid` ([#5133](https://github.com/adap/flower/pull/5133))
-- **refactor(framework) Add backwards compatibility for** `Driver` **and deprecation notice** ([#5139](https://github.com/adap/flower/pull/5139))
-- **refactor(framework) Rename** `driver/` **to** `grid/` **and** `driver.py` **to** `grid.py` ([#5129](https://github.com/adap/flower/pull/5129))
+- **Rename core Message API components for clarity and consistency** ([#5140](https://github.com/adap/flower/pull/5140), [#5133](https://github.com/adap/flower/pull/5133), [#5139](https://github.com/adap/flower/pull/5139), [#5129](https://github.com/adap/flower/pull/5129), [#5150](https://github.com/adap/flower/pull/5150), [#5151](https://github.com/adap/flower/pull/5151), [#5146](https://github.com/adap/flower/pull/5146), [#5152](https://github.com/adap/flower/pull/5152))
 
-### Stable low-level Message API
-- **feat(framework) Remove preview feature warning in** `Message API` ([#5120](https://github.com/adap/flower/pull/5120))
+  To improve clarity and ensure consistency across the Message API, the following renamings have been made:
 
-### Node availability check
-- **feat(framework) Add node availability check** ([#4968](https://github.com/adap/flower/pull/4968))
+  - `Driver` → `Grid`
+  - `RecordSet` → `RecordDict`
+  - `ParametersRecord` → `ArrayRecord`
+  - `MetricsRecord` → `MetricRecord`
+  - `ConfigsRecord` → `ConfigRecord`
 
-### Event log
-- **feat(framework) Add try-obtain** `FleetServicer` **event log plugin** ([#4998](https://github.com/adap/flower/pull/4998))
-- **feat(framework) Add** `FleetServicer` **log interceptor** ([#4997](https://github.com/adap/flower/pull/4997))
-- **feat(framework) Add** `ExecServicer` **event log interceptor** ([#4951](https://github.com/adap/flower/pull/4951))
-- **feat(framework) Add try-obtain** `ExecServicer` **event log plugin** ([#4950](https://github.com/adap/flower/pull/4950))
-- **fix(framework) Catch** `BaseException` **in** `EventLogInterceptor` ([#5108](https://github.com/adap/flower/pull/5108))
+  Backward compatibility is maintained for all the above changes, and deprecation notices have been introduced to support a smooth transition.
 
-### Add CareQA medical benchmark
-- **feat(datasets) Add CareQA medical benchmark** ([#4966](https://github.com/adap/flower/pull/4966))
+- **Enable seamless conversions between `ArrayRecord`/`Array` and NumPy/PyTorch types** ([#4922](https://github.com/adap/flower/pull/4922), [#4920](https://github.com/adap/flower/pull/4920))
 
-### Documentation improvements
-- **docs(framework) Update Docker Readmes** ([#5079](https://github.com/adap/flower/pull/5079))
-- **docs(:skip) Update Flower Summit 2025 link** ([#5123](https://github.com/adap/flower/pull/5123))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5066](https://github.com/adap/flower/pull/5066))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5143](https://github.com/adap/flower/pull/5143))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5118](https://github.com/adap/flower/pull/5118))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5148](https://github.com/adap/flower/pull/5148))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5134](https://github.com/adap/flower/pull/5134))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5080](https://github.com/adap/flower/pull/5080))
+  One-liner conversions are now supported between `Array` and `numpy.ndarray` or `torch.Tensor`, and between `ArrayRecord` (formerly `ParametersRecord`) and PyTorch `state_dict` or a list of `numpy.ndarray`. This simplifies workflows involving model parameters and tensor data structures. Example usage includes `ArrayRecord(model.state_dict())` and `array_record.to_torch_state_dict()`. Refer to the [ArrayRecord](https://flower.ai/docs/framework/ref-api/flwr.common.ArrayRecord.html) and [Array](https://flower.ai/docs/framework/ref-api/flwr.common.Array.html) documentation for details.
 
+- **Revamp message creation using `Message` constructor** ([#5137](https://github.com/adap/flower/pull/5137), [#5153](https://github.com/adap/flower/pull/5153))
 
-- **refactor(examples) Remove** `mlcube` **quickstart example and update redirect** ([#5069](https://github.com/adap/flower/pull/5069))
-- **refactor(examples) Update the** `RecordSet.__init__` **usage in examples** ([#5032](https://github.com/adap/flower/pull/5032))
-  
+  Revamps the `Message` creation workflow by enabling direct instantiation via the `Message(...)` constructor. This deprecates the previous APIs and simplifies message creation:
 
-### Incompatible changes
+  - `Driver.create_message(...)` → `Message(...)`
+  - `<some_message>.create_reply(...)` → `Message(..., reply_to=<some_message>)`
 
+- **Stabilize low-level Message API** ([#5120](https://github.com/adap/flower/pull/5120))
 
-### CI/CD
-- **ci(:skip) Fix CI** ([#5125](https://github.com/adap/flower/pull/5125))
-- **ci(framework) Skip E2E tests when no changes** ([#5062](https://github.com/adap/flower/pull/5062))
-- **ci(framework) Run only on changes** ([#5056](https://github.com/adap/flower/pull/5056))
-- **ci(:skip) Bump versions to** `1.17.0` ([#5048](https://github.com/adap/flower/pull/5048))
-- **ci(framework) Fix conditions** ([#5065](https://github.com/adap/flower/pull/5065))
-- **ci(framework) Skip jobs instead of ignoring them** ([#5061](https://github.com/adap/flower/pull/5061))
-- **ci(:skip) Add** `Unreleased` **header to the changelog** ([#5057](https://github.com/adap/flower/pull/5057))
-- **ci(framework) Skip by steps instead of jobs** ([#5064](https://github.com/adap/flower/pull/5064))
-- **ci(framework) Pin setuptools to 70.3.0** ([#5144](https://github.com/adap/flower/pull/5144))
+  With all the changes above, the low-level Message API is now officially stable. All preview feature warnings have been removed, marking the completion of its transition out of experimental status.
 
-### Bugfixes
-- **fix(framework) Fix the wrong docstring of** `RecordDict` ([#5155](https://github.com/adap/flower/pull/5155))
-- **fix(framework) Update doc string of FlowerClient in FlowerTune template** ([#5076](https://github.com/adap/flower/pull/5076))
-TODO: Maybe need to mention this fix
-- **fix(framework) Handle ray nodes with no CPU resources** ([#5132](https://github.com/adap/flower/pull/5132))
+- **Add node availability check to reduce wait time** ([#4968](https://github.com/adap/flower/pull/4968))
 
-### General Improvements
-- **refactor(framework) Remove repeated PRs in the changelog** ([#5074](https://github.com/adap/flower/pull/5074))
-- **refactor(framework) Remove TTL warnings in** `driver.create_message` ([#5126](https://github.com/adap/flower/pull/5126))
-- **refactor(framework) Add helpful error message to** `Driver.push/pull_messages` **when gRPC limit is reached** ([#5122](https://github.com/adap/flower/pull/5122))
-- **fix(examples) Fix FedRAG references formatting** ([#5149](https://github.com/adap/flower/pull/5149))
+  Adds a node availability check to SuperLink. If the target SuperNode is offline, SuperLink automatically generates an error reply message when the ServerApp attempts to pull the reply. This mechanism helps avoid unnecessary delays in each round caused by waiting for responses from unavailable nodes.
 
+- **Enable extensible event logging for FleetServicer and ExecServicer** ([#4998](https://github.com/adap/flower/pull/4998), [#4997](https://github.com/adap/flower/pull/4997), [#4951](https://github.com/adap/flower/pull/4951), [#4950](https://github.com/adap/flower/pull/4950), [#5108](https://github.com/adap/flower/pull/5108))
 
+  Introduces the necessary hooks and infrastructure to support RPC event logging for `FleetServicer` and `ExecServicer`. This enables advanced auditing and observability of RPC calls made by `flwr CLI` users and SuperNodes, when appropriate event log plugins are available.
+
+- **Add CareQA benchmark for medical LLM evaluation** ([#4966](https://github.com/adap/flower/pull/4966))
+
+  Adds the CareQA dataset as a new benchmark for evaluating medical knowledge in LLMs. CareQA consists of 5,621 QA pairs from official Spanish healthcare exams (2020–2024), translated to English and covering multiple disciplines. This enhances the diversity of datasets used in the Flower Medical LLM Leaderboard.
+
+- **Fix docstrings and improve handling of Ray nodes without CPU resources** ([#5155](https://github.com/adap/flower/pull/5155), [#5076](https://github.com/adap/flower/pull/5076), [#5132](https://github.com/adap/flower/pull/5132))
+
+  Fixes inaccurate or outdated docstrings in `RecordDict` and the `FlowerClient` used in FlowerTune templates, improving documentation clarity. Also adds handling for Ray nodes that report zero CPU resources, preventing potential runtime issues.
+
+- **Improve documentation and examples** ([#5162](https://github.com/adap/flower/pull/5162), [#5079](https://github.com/adap/flower/pull/5079), [#5123](https://github.com/adap/flower/pull/5123), [#5066](https://github.com/adap/flower/pull/5066), [#5143](https://github.com/adap/flower/pull/5143), [#5118](https://github.com/adap/flower/pull/5118), [#5148](https://github.com/adap/flower/pull/5148), [#5134](https://github.com/adap/flower/pull/5134), [#5080](https://github.com/adap/flower/pull/5080), [#5160](https://github.com/adap/flower/pull/5160), [#5069](https://github.com/adap/flower/pull/5069), [#5032](https://github.com/adap/flower/pull/5032))
+
+- **Update CI/CD** ([#5125](https://github.com/adap/flower/pull/5125), [#5062](https://github.com/adap/flower/pull/5062), [#5056](https://github.com/adap/flower/pull/5056), [#5048](https://github.com/adap/flower/pull/5048), [#5065](https://github.com/adap/flower/pull/5065), [#5061](https://github.com/adap/flower/pull/5061), [#5057](https://github.com/adap/flower/pull/5057), [#5064](https://github.com/adap/flower/pull/5064), [#5144](https://github.com/adap/flower/pull/5144))
+
+- **General Improvements** ([#5074](https://github.com/adap/flower/pull/5074), [#5126](https://github.com/adap/flower/pull/5126), [#5122](https://github.com/adap/flower/pull/5122), [#5149](https://github.com/adap/flower/pull/5149), [#5157](https://github.com/adap/flower/pull/5157))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
 ### TODO DELETE FI PRs
+
 - **feat(intelligence) Add RAM check** ([#5114](https://github.com/adap/flower/pull/5114))
 - **feat(intelligence) Add Swift tests and CI checks** ([#5041](https://github.com/adap/flower/pull/5041))
 - **feat(intelligence) Add Swift Docs** ([#5068](https://github.com/adap/flower/pull/5068))
@@ -133,8 +120,6 @@ TODO: Maybe need to mention this fix
 - **docs(intelligence) Update docs version** ([#5098](https://github.com/adap/flower/pull/5098))
 - **docs(intelligence) Add formatting** ([#5100](https://github.com/adap/flower/pull/5100))
 - **docs(framework) Fix versioned script** ([#5058](https://github.com/adap/flower/pull/5058))
-
-
 
 ## v1.16.0 (2025-03-11)
 
