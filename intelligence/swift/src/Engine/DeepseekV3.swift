@@ -394,8 +394,8 @@ class MoEGate: Module {
       fatalError("Unsupported topk method.")
     }
 
-    self.weight = MLXArray()
-    self.eScoreCorrectionBias = MLXArray()
+    self.weight = zeros([self.nRoutedExperts ?? 1, config.hiddenSize])
+    self.eScoreCorrectionBias = zeros([self.nRoutedExperts ?? 1])
   }
   
   func callAsFunction(_ x: MLXArray) -> (MLXArray, MLXArray) {
@@ -521,6 +521,10 @@ class DeepseekV3ModelInner: Module {
     var h = embedTokens(x)
     
     let attentionMask = mask ?? createAttentionMask(h: h, cache: cache)
+
+    for (i, layer) in layers.enumerated() {
+        h = layer(h, mask: mask, cache: cache?[i])
+    }
 
     return norm(h)
   }
