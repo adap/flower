@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-22 00:31+0000\n"
+"POT-Creation-Date: 2025-03-24 00:34+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -18,6 +18,90 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
+
+#: ../../source/build.rst:-1
+msgid ""
+"Learn how to build Flower apps with step-by-step guides on installation, "
+"configuration, strategy implementation, model checkpoints, and more."
+msgstr ""
+
+#: ../../source/build.rst:6
+#, fuzzy
+msgid "Build Flower apps"
+msgstr "Flower 服务器。"
+
+#: ../../source/build.rst:9 ../../source/contribute.rst:24
+#: ../../source/deploy.rst:9 ../../source/simulate.rst:9
+msgid "How-to guides"
+msgstr "操作指南"
+
+#: ../../source/build.rst:11 ../../source/contribute.rst:26
+#: ../../source/deploy.rst:11 ../../source/index.rst:79
+#: ../../source/simulate.rst:11
+msgid ""
+"Problem-oriented how-to guides show step-by-step how to achieve a "
+"specific goal."
+msgstr "以问题为导向的 \"如何做 \"指南逐步展示如何实现特定目标。"
+
+#: ../../source/contribute.rst:16
+msgid "Contributor tutorials"
+msgstr "贡献者教程"
+
+#: ../../source/contribute.rst:45
+msgid "Contributor explanations"
+msgstr "贡献者解释"
+
+#: ../../source/contribute.rst:56
+msgid "Contributor references"
+msgstr "贡献者参考资料"
+
+#: ../../source/contribute.rst:-1
+msgid ""
+"Join the Flower community! Explore tutorials and guides to contribute "
+"code, documentation, translations, and more to advance federated learning"
+" with Flower."
+msgstr ""
+
+#: ../../source/contribute.rst:6 ../../source/index.rst:114
+#: ../../source/index.rst:119
+#, fuzzy
+msgid "Contribute"
+msgstr "属性"
+
+#: ../../source/contribute.rst:8 ../../source/index.rst:116
+msgid ""
+"The Flower community welcomes contributions. The following docs are "
+"intended to help along the way."
+msgstr "Flower 社区欢迎您的贡献。以下文档旨在为您提供帮助。"
+
+#: ../../source/contribute.rst:12 ../../source/index.rst:30
+msgid "Tutorials"
+msgstr "教程"
+
+#: ../../source/contribute.rst:14
+#, fuzzy
+msgid "A learning-oriented series of tutorials, the best place to start."
+msgstr "以学习为导向的联邦学习教程系列，最好的起点。"
+
+#: ../../source/contribute.rst:40 ../../source/index.rst:90
+#: ../../source/index.rst:95
+msgid "Explanations"
+msgstr "说明"
+
+#: ../../source/contribute.rst:42 ../../source/index.rst:92
+msgid ""
+"Understanding-oriented concept guides explain and discuss key topics and "
+"underlying ideas behind Flower and collaborative AI."
+msgstr "以理解为导向的概念指南解释并讨论了Flower和协作式人工智能背后的关键主题和基本思想。"
+
+#: ../../source/contribute.rst:52 ../../source/index.rst:104
+#: ../../source/index.rst:106 ../../source/reference.rst:5
+msgid "References"
+msgstr "参考资料"
+
+#: ../../source/contribute.rst:54 ../../source/reference.rst:7
+msgid "Information-oriented API reference and other reference material."
+msgstr "以信息为导向的 API 参考资料和其他参考资料。"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:2
 msgid "Public and private APIs"
@@ -2487,6 +2571,17 @@ msgstr ""
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:194
 msgid "This will generate HTML documentation in ``doc/build/html``."
 msgstr "这将在 ``doc/build/html`` 中生成 HTML 文档。"
+
+#: ../../source/deploy.rst:-1
+msgid ""
+"Deploy with the Flower Deployment Runtime using step-by-step guides on "
+"TLS, authentication, logging, Docker, Azure, and more for secure, "
+"scalable solutions."
+msgstr ""
+
+#: ../../source/deploy.rst:6
+msgid "Deploy using the Flower Deployment Runtime"
+msgstr ""
 
 #: ../../source/docker/enable-tls.rst:-1
 msgid ""
@@ -9625,41 +9720,28 @@ msgstr ""
 msgid "Tutorial"
 msgstr "教程"
 
-#: ../../source/index.rst:44
-msgid "Quickstart tutorials"
-msgstr "快速入门教程"
+#: ../../source/index.rst:81
+msgid "Build"
+msgstr ""
 
-#: ../../source/index.rst:71 ../../source/index.rst:75
-msgid "How-to guides"
+#: ../../source/index.rst:81
+#, fuzzy
+msgid "Simulate"
+msgstr "运行模拟"
+
+#: ../../source/index.rst:81
+#, fuzzy
+msgid "Deploy"
+msgstr "调配"
+
+#: ../../source/index.rst:77 ../../source/index.rst:81
+#, fuzzy
+msgid "How-to Guides"
 msgstr "操作指南"
 
-#: ../../source/index.rst:101 ../../source/index.rst:106
-msgid "Explanations"
-msgstr "说明"
-
-#: None:-1
-msgid "API reference"
-msgstr "应用程序接口参考"
-
-#: ../../source/index.rst:132
-msgid "Reference docs"
-msgstr "参考文档"
-
-#: ../../source/index.rst:149
-msgid "Contributor tutorials"
-msgstr "贡献者教程"
-
-#: ../../source/index.rst:156
-msgid "Contributor how-to guides"
-msgstr "投稿指南"
-
-#: ../../source/index.rst:168
-msgid "Contributor explanations"
-msgstr "贡献者解释"
-
-#: ../../source/index.rst:174
-msgid "Contributor references"
-msgstr "贡献者参考资料"
+#: ../../source/index.rst:119
+msgid "Contributor docs"
+msgstr "贡献者文档"
 
 #: ../../source/index.rst:-1
 msgid ""
@@ -9703,14 +9785,10 @@ msgid ""
 "The user guide is targeted at researchers and developers who want to use "
 "Flower to bring existing machine learning workloads into a federated "
 "setting. One of Flower's design goals was to make this simple. Read on to"
-" learn more!"
+" learn more."
 msgstr ""
 "该用户指南面向希望使用 Flower 将现有机器学习工作负载引入联邦环境的研究人员和开发人员。Flower "
 "的设计目标之一就是让这一切变得简单。请继续阅读，了解更多信息。"
-
-#: ../../source/index.rst:30
-msgid "Tutorials"
-msgstr "教程"
 
 #: ../../source/index.rst:32
 msgid ""
@@ -9718,7 +9796,7 @@ msgid ""
 "place to start."
 msgstr "以学习为导向的联邦学习教程系列，最好的起点。"
 
-#: ../../source/index.rst:62
+#: ../../source/index.rst:50
 #, fuzzy
 msgid ""
 "QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | "
@@ -9740,46 +9818,6 @@ msgstr ""
 ":`scikit-learn <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost "
 "<tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-"
 "android>` | :doc:`iOS <tutorial-quickstart-ios>`"
-
-#: ../../source/index.rst:73
-msgid ""
-"Problem-oriented how-to guides show step-by-step how to achieve a "
-"specific goal."
-msgstr "以问题为导向的 \"如何做 \"指南逐步展示如何实现特定目标。"
-
-#: ../../source/index.rst:103
-msgid ""
-"Understanding-oriented concept guides explain and discuss key topics and "
-"underlying ideas behind Flower and collaborative AI."
-msgstr "以理解为导向的概念指南解释并讨论了Flower和协作式人工智能背后的关键主题和基本思想。"
-
-#: ../../source/index.rst:115
-msgid "References"
-msgstr "参考资料"
-
-#: ../../source/index.rst:117
-msgid "Information-oriented API reference and other reference material."
-msgstr "以信息为导向的 API 参考资料和其他参考资料。"
-
-#: ../../source/index.rst:126:<autosummary>:1
-#, fuzzy
-msgid ":py:obj:`flwr <flwr>`\\"
-msgstr ":py:obj:`flwr <flwr>`\\"
-
-#: ../../source/index.rst:126:<autosummary>:1 flwr:1 of
-#, fuzzy
-msgid "Flower main package."
-msgstr "Flower 主包装。"
-
-#: ../../source/index.rst:144
-msgid "Contributor docs"
-msgstr "贡献者文档"
-
-#: ../../source/index.rst:146
-msgid ""
-"The Flower community welcomes contributions. The following docs are "
-"intended to help along the way."
-msgstr "Flower 社区欢迎您的贡献。以下文档旨在为您提供帮助。"
 
 #: ../../source/ref-api-cli.rst:2
 msgid "Flower CLI reference"
@@ -10151,6 +10189,11 @@ msgstr "运行模拟"
 #, fuzzy
 msgid "flwr"
 msgstr "Flower"
+
+#: ../../source/reference.rst:16:<autosummary>:1 flwr:1 of
+#, fuzzy
+msgid "Flower main package."
+msgstr "Flower 主包装。"
 
 #: ../../source/ref-api/flwr.client.rst:43 ../../source/ref-api/flwr.rst:25
 #: ../../source/ref-api/flwr.server.rst:49
@@ -30344,6 +30387,40 @@ msgstr ""
 "我们希望听到您的意见。如果您对如何改进我们处理匿名使用指标的方式有任何反馈或想法，请通过 [Slack](https://flower.ai"
 "/join-slack/) （频道 `#telemetry`）或电子邮件 (`telemetry@flower.ai`)与我们联系。"
 
+#: None:-1
+msgid "API reference"
+msgstr "应用程序接口参考"
+
+#: ../../source/reference.rst:22
+msgid "Reference docs"
+msgstr "参考文档"
+
+#: ../../source/reference.rst:2
+#, fuzzy
+msgid "Reference"
+msgstr "参考资料"
+
+#: ../../source/reference.rst:16:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`flwr <flwr>`\\"
+msgstr ":py:obj:`flwr <flwr>`\\"
+
+#: ../../source/simulate.rst:-1
+msgid ""
+"Run scalable federated learning simulations with the Flower Simulation "
+"Runtime. Follow step-by-step guides to set up, configure, and execute "
+"simulations easily."
+msgstr ""
+
+#: ../../source/simulate.rst:6
+#, fuzzy
+msgid "Simulate using the Flower Simulation Runtime"
+msgstr "多节点 Flower 模拟"
+
+#: ../../source/tutorial-quickstart.rst:2
+msgid "Quickstart tutorials"
+msgstr "快速入门教程"
+
 #: ../../source/tutorial-quickstart-android.rst:-1
 msgid ""
 "Read this Federated Learning quickstart tutorial for creating an Android "
@@ -33795,7 +33872,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|46c1cee57f3b48b0826837c9ca24bb70|"
+msgid "|206dd64c5da04db0bb2db93bbcd6f89b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -33810,7 +33887,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|55b99ed6645549a38fedbca1511c6982|"
+msgid "|d135fd8de2b64f0496180c8020debaac|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -33834,7 +33911,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|dbf325234cc54792862992a51d558acb|"
+msgid "|4e22564b974748f795c963f0319373f6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -33852,7 +33929,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|5b34655e2fc743078d8c3382c3d0511a|"
+msgid "|1aaa0816eaee46a984362e32c1ae30c4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -33869,7 +33946,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|7683104db7e7499884b2199518a8e71d|"
+msgid "|617269e9f7004bdea6491c76a651ed9d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -33884,7 +33961,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|9646296ec388473d95a2c52534611fe7|"
+msgid "|771bc1e18acb4c0ba0af598c2eda03f1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -33905,7 +33982,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|0b8c81d07c8b4e4b86ab37eaa45197be|"
+msgid "|50e44ed8cf634e72826249d84af65fc8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -33920,7 +33997,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|071d15eeb3fe457f9119b104763aad4f|"
+msgid "|e6d7a63ce00144078fcbf8421048fe3b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -34080,7 +34157,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|5ad5aa46a4844f4ea18a1e611e66db54|"
+msgid "|18866b10ba3d4c5787e63505ac52267f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -34105,7 +34182,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|8c9a5d290e534161a2e14ede889bcb1b|"
+msgid "|0215d475c1674a8e904fe52d9b170e9b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -34131,7 +34208,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|c9562154b9a446b1bb7d924d55c4e074|"
+msgid "|676a3d07780c471ab85b643908f15bce|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -34154,7 +34231,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|a18099299bfa4828a3ac984a2de970c2|"
+msgid "|b9587e6e17ad464a884acd4acc46bb40|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -34201,7 +34278,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|ed7d7dbbcf174cd284c15801b0e6f51f|"
+msgid "|77356653b95542f1916bcd325ae70634|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -34309,7 +34386,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|334758e020494858a71c419d752d05a5|"
+msgid "|2717bf202b09498b90f9eacc1728f1d4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -44172,5 +44249,50 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|cffbf5f7fb6146e887e89765d6f590bd|"
+#~ msgstr ""
+
+#~ msgid "Contributor how-to guides"
+#~ msgstr "投稿指南"
+
+#~ msgid "|46c1cee57f3b48b0826837c9ca24bb70|"
+#~ msgstr ""
+
+#~ msgid "|55b99ed6645549a38fedbca1511c6982|"
+#~ msgstr ""
+
+#~ msgid "|dbf325234cc54792862992a51d558acb|"
+#~ msgstr ""
+
+#~ msgid "|5b34655e2fc743078d8c3382c3d0511a|"
+#~ msgstr ""
+
+#~ msgid "|7683104db7e7499884b2199518a8e71d|"
+#~ msgstr ""
+
+#~ msgid "|9646296ec388473d95a2c52534611fe7|"
+#~ msgstr ""
+
+#~ msgid "|0b8c81d07c8b4e4b86ab37eaa45197be|"
+#~ msgstr ""
+
+#~ msgid "|071d15eeb3fe457f9119b104763aad4f|"
+#~ msgstr ""
+
+#~ msgid "|5ad5aa46a4844f4ea18a1e611e66db54|"
+#~ msgstr ""
+
+#~ msgid "|8c9a5d290e534161a2e14ede889bcb1b|"
+#~ msgstr ""
+
+#~ msgid "|c9562154b9a446b1bb7d924d55c4e074|"
+#~ msgstr ""
+
+#~ msgid "|a18099299bfa4828a3ac984a2de970c2|"
+#~ msgstr ""
+
+#~ msgid "|ed7d7dbbcf174cd284c15801b0e6f51f|"
+#~ msgstr ""
+
+#~ msgid "|334758e020494858a71c419d752d05a5|"
 #~ msgstr ""
 
