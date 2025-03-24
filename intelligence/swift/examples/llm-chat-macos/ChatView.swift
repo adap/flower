@@ -15,7 +15,6 @@
 
 import FlowerIntelligence
 import SwiftUI
-import Foundation
 
 struct ChatMessage: Identifiable {
   let id = UUID()
@@ -28,35 +27,30 @@ struct ChatMessage: Identifiable {
 
 struct ChatView: View {
   @Environment(\.colorScheme) var colorScheme
-  @State private var chatViewModel = ChatViewModel()
+  @State private var messages: [ChatMessage] = [
+    ChatMessage(
+      role: "system",
+      content:
+        "You are a helpful, respectful and honest assistant, except that you're currently drunk after having a few too many cocktails. You will try your very best to answer questions and respond to prompts, but you'll get sidetracked easily and have unrealistic, sometimes not-entirely-coherent ideas and you reply with a lot of emojis."
+    )
+  ]
   @State private var userInput: String = ""
+  @State private var isLoading: Bool = false
   @State private var isHovered: Bool = false
 
   @State private var selectedModel: String = "meta/llama3.2-1b"
   let availableModels = [
-    "meta/llama3.2-1b",
-    "meta/llama3.2-3b",
-    "deepseek/r1-distill-qwen-32b/4-bit",
-    "deepseek/r1-distill-llama-8b/q4",
-    "meta/llama3.1-405b/q4",
-    "deepseek/r1-685b/q4",
-  ]
-  let modelmapping = [
-    "meta/llama3.2-1b": "mlx-community/Llama-3.2-1B-Instruct-bf16",
-    "meta/llama3.2-3b": "mlx-community/Llama-3.2-3B-Instruct",
-    "deepseek/r1-distill-qwen-32b/4-bit": "mlx-community/DeepSeek-R1-Distill-Qwen-32B-4bit",
-    "deepseek/r1-distill-llama-8b/q4": "mlx-community/DeepSeek-R1-Distill-Llama-8B-4bit",
-    "meta/llama3.1-405b/q4": "mlx-community/Meta-Llama-3.1-405B-4bit",
-    "deepseek/r1-685b/q4": "mlx-community/DeepSeek-R1-4bit",
+    "meta/llama3.2-1b", "meta/llama3.2-3b", "deepseek/r1-distill-qwen-32b/4-bit",
+    "deepseek/r1-distill-llama-8b/q4", "meta/llama3.1-405b/q4", "deepseek/r1-685b/q4"
   ]
 
   var body: some View {
     VStack {
       ScrollView {
         VStack(alignment: .leading, spacing: 10) {
-          ForEach(chatViewModel.messages.indices, id: \.self) { index in
-            ChatBubble(message: chatViewModel.messages[index]) { updatedContent in
-              chatViewModel.messages[index] = ChatMessage(role: "system", content: updatedContent)
+          ForEach(messages.indices, id: \.self) { index in
+            ChatBubble(message: messages[index]) { updatedContent in
+              messages[index] = ChatMessage(role: "system", content: updatedContent)
             }
           }
         }
@@ -81,8 +75,6 @@ struct ChatView: View {
         selectedModel: $selectedModel,
         availableModels: availableModels
       )
-    }.task {
-      chatViewModel.start()
     }
   }
 
@@ -90,13 +82,34 @@ struct ChatView: View {
     guard !userInput.isEmpty else { return }
 
     let userMessage = ChatMessage(role: "user", content: userInput)
-    chatViewModel.messages.append(userMessage)
+    messages.append(userMessage)
 
     userInput = ""
     let assistantAnswer = ChatMessage(role: "assistant", content: "")
-    chatViewModel.messages.append(assistantAnswer)
+    messages.append(assistantAnswer)
 
-    chatViewModel.send(userMessage.message.content)
+    let fi = FlowerIntelligence.instance
+    let result = await fi.chat(
+      options: (
+        messages.map { $0.message },
+        ChatOptions(
+          model: selectedModel, stream: true,
+          onStreamEvent: { stream in
+            DispatchQueue.main.async {
+              _ = messages.removeLast()
+              let newMessage = ChatMessage(
+                role: "assistant", content: stream.chunk)
+              messages.append(newMessage)
+            }
+          })
+      ))
+    messages.removeLast()
+    switch result {
+    case .success(let success):
+      messages.append(ChatMessage(role: success.role, content: success.content))
+    case .failure(let failure):
+      print(failure)
+    }
   }
 }
 
@@ -120,7 +133,7 @@ struct ChatBubble: View {
         VStack(alignment: .leading) {
           HStack {
             Text("System instructions")
-
+              
             Button(action: {
               isEditing.toggle()
               if !isEditing {
@@ -153,22 +166,9 @@ struct ChatBubble: View {
 
         Spacer()
       } else {
-        let parts = message.message.content.components(separatedBy: "</think>")
-          VStack(alignment: .leading, spacing: 4) {
-            if parts.count > 1 {
-              Text(parts[0])
-                .italic()
-                .foregroundColor(.gray)
-                .padding(8)
-                .background(Color.yellow.opacity(0.2))
-                .cornerRadius(10)
-            }
-            
-            Text(parts.last ?? "")
-              .padding(8)
-          }
+        Text(message.message.content)
           .padding()
-          .frame(maxWidth: 300, alignment: .leading)
+          .frame(alignment: .leading)
         Spacer()
       }
     }
