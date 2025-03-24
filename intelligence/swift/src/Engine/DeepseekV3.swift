@@ -413,9 +413,10 @@ class MoEGate: Module {
     let topKGroup = sorted(groupScores, axis: -1)[.ellipsis, ..<2].sum(axis: -1, keepDims: true)
     print("group scores topK shape \(topKGroup.shape)")
     var k = nGroup - (topkGroup ?? 1)
+    print("k ", k)
     let groupIdx = argPartition(topKGroup, kth: k-1, axis: -2)[.ellipsis, ..<k, 0...]
     print("group idx shape \(topKGroup.shape)")
-    scores = putAlong(scoresForChoice, groupIdx, values: MLXArray(0.0), axis: -2)
+    scores = putAlong(groupScores, groupIdx, values: MLXArray(0.0), axis: -2)
     scores = flattened(scores, start: -2, end: -1)
     
     k = topK ?? 1
