@@ -192,7 +192,7 @@ class DeepseekV3YarnRotaryEmbedding: Module {
     let freqs = (freqInter * freqExtra) / (freqInter * freqMask + freqExtra * (1 - freqMask))
     return MLXFast.RoPE(
       self.mscale != 1.0 ? self.mscale * x : x,
-      dimensions: x.shape[-1],
+      dimensions: x.shape.last ?? 0,
       traditional: true,
       base: nil,
       scale: 1.0,
