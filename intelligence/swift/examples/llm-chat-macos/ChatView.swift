@@ -158,11 +158,9 @@ struct ChatBubble: View {
             
             Text(parts.last ?? "")
               .padding(8)
-              .background(Color.blue.opacity(0.1))
-              .cornerRadius(10)
           }
           .padding()
-          .frame(alignment: .leading)
+          .frame(maxWidth: 300, alignment: .leading)
         Spacer()
       }
     }

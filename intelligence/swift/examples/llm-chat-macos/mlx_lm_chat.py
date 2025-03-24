@@ -12,9 +12,9 @@ from mlx_lm.utils import load
 DEFAULT_TEMP = 0.0
 DEFAULT_TOP_P = 1.0
 DEFAULT_SEED = None
-DEFAULT_MAX_TOKENS = 256
+DEFAULT_MAX_TOKENS = 512
 DEFAULT_MODEL = "mlx-community/Llama-3.2-3B-Instruct-4bit"
-
+DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant."
 
 def setup_arg_parser():
     """Set up and return the argument parser."""
@@ -55,12 +55,18 @@ def setup_arg_parser():
         default=DEFAULT_MAX_TOKENS,
         help="Maximum number of tokens to generate",
     )
+    parser.add_argument(
+        "--system-prompt",
+        type=str,
+        default=DEFAULT_SYSTEM_PROMPT,
+        help="System prompt to guide the assistant's behavior."
+    )
     return parser
-
 
 def main():
     parser = setup_arg_parser()
     args = parser.parse_args()
+    begin = True
 
     if args.seed is not None:
         mx.random.seed(args.seed)
@@ -77,10 +83,25 @@ def main():
         query = line.strip()
         if query == "":
             continue
+        if query.startswith("r/"):
+            new_prompt = query[2:].strip()
+            if new_prompt:
+                args.system_prompt = new_prompt
+            prompt_cache = make_prompt_cache(model, args.max_kv_size)
+            begin = True
         if query == "q":
             break
 
-        messages = [{"role": "user", "content": query}]
+        if begin:
+            messages = [
+                {"role": "system", "content": args.system_prompt},
+                {"role": "user", "content": query},
+            ]
+            begin = False
+        else:
+            messages = [
+                {"role": "user", "content": query},
+            ]
         prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
         print("[START]", flush=True)
         for response in stream_generate(
