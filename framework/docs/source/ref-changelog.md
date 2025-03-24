@@ -12,19 +12,26 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Allow registration of functions for custom message types** ([#5093](https://github.com/adap/flower/pull/5093))
 
-  Enables support for custom message types in `ServerApp` by allowing the `message_type` field to be set as `"<action_type>.<action_name>"`, where `<action_type>` is one of `train`, `evaluate`, or `query`, and `<action_name>` is a valid Python identifier.  Developers can now register handler functions for these custom message types using the decorator `@app.<action_type>("<action_name>")`. For example, the following function is called when the `ServerApp` sends a message with `message_type` set to `"query.echo"`:
+  Enables support for custom message types in `ServerApp` by allowing the `message_type` field to be set as `"<action_type>.<action_name>"`, where `<action_type>` is one of `train`, `evaluate`, or `query`, and `<action_name>` is a valid Python identifier.  Developers can now register handler functions for these custom message types using the decorator `@app.<action_type>("<action_name>")`. For example, the `my_echo_fn` function is called when the `ServerApp` sends a message with `message_type` set to `"query.echo"`, and the `get_mean_value` function is called when it's `"query.mean"`:
 
   ```python
   app = ClientApp()
 
   @app.query("echo")
-  def my_function_for_my_custom_message(message: Message, context: Context):
-      # Echo the message
+  def my_echo_fn(message: Message, context: Context):
+      # Echo the incoming message
       return Message(message.content, reply_to=message)
 
-  @app.query("dummy")
-  def my_function_for_another_custom_message(message: Message, context: Context):
-      ...
+  @app.query("mean")
+  def get_mean_value(message: Message, context: Context):
+      # Calculate the mean value
+      mean = ...  # Replace with actual computation
+
+      # Wrap the result in a MetricRecord, then in a RecordDict
+      metrics = MetricRecord({"mean": mean})
+      content = RecordDict({"metrics": metrics})
+
+      return Message(content, reply_to=message)
   ```
 
 - **Rename core Message API components for clarity and consistency** ([#5140](https://github.com/adap/flower/pull/5140), [#5133](https://github.com/adap/flower/pull/5133), [#5139](https://github.com/adap/flower/pull/5139), [#5129](https://github.com/adap/flower/pull/5129), [#5150](https://github.com/adap/flower/pull/5150), [#5151](https://github.com/adap/flower/pull/5151), [#5146](https://github.com/adap/flower/pull/5146), [#5152](https://github.com/adap/flower/pull/5152))
