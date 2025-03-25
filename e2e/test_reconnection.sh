@@ -45,63 +45,63 @@ sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
 echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
 sleep 1
 
+echo "Starting SuperLink"
 timeout 10m flower-superlink --insecure $db_arg $rest_arg &
 sl_pids=$(pgrep -f "flower-superlink")
-echo "Starting SuperLink"
 sleep 3
 
+echo "Starting first client"
 timeout 10m flower-supernode --insecure $rest_arg --superlink $server_address \
   --clientappio-api-address="localhost:9094" &
 cl1_pid=$!
-echo "Starting first client"
 sleep 3
 
+echo "Starting second client"
 timeout 10m flower-supernode --insecure $rest_arg --superlink $server_address \
   --clientappio-api-address="localhost:9095" &
 cl2_pid=$!
-echo "Starting second client"
 sleep 3
 
 # Kill superlink, this should send the clients into their retry loops
-check_and_kill "$sl_pids"
 echo "Killing Superlink"
+check_and_kill "$sl_pids"
 sleep 3
 
 # Restart superlink, the clients should now be able to reconnect to it
+echo "Restarting Superlink"
 timeout 10m flower-superlink --insecure $db_arg $rest_arg 2>&1 | tee flwr_output.log &
 sl_pids=$(pgrep -f "flower-superlink")
-echo "Restarting Superlink"
 sleep 20
 
 # Kill second client, this should send a DeleteNode message to the Superlink
-kill $cl1_pid
 echo "Killing second client"
+check_and_kill "$cl1_pid"
 sleep 5
 
 # Starting new client, this is so we have enough clients to execute `flwr run`
+echo "Starting new client"
 timeout 10m flower-supernode --insecure $rest_arg --superlink $server_address \
   --clientappio-api-address "localhost:9094" &
 cl1_pid=$!
-echo "Starting new client"
 sleep 5
 
 # We execute `flwr run` to begin the training
-timeout 2m flwr run "." e2e &
 echo "Executing flwr run to start training"
+timeout 2m flwr run "." e2e &
 sleep 10
 
 # Kill first client as soon as the training starts, the flwr-serverapp should just 
 # receive a failure in this case and continue the rounds when enough clients are 
 # connected
-kill $cl1_pid
 echo "Killing first client"
+check_and_kill "$cl1_pid"
 sleep 3
 
 # Restart first client so enough clients are connected to continue the FL rounds
+echo "Starting new client"
 timeout 5m flower-supernode --insecure $rest_arg --superlink $server_address \
   --clientappio-api-address "localhost:9094" &
 cl1_pid=$!
-echo "Starting new client"
 sleep 5
 
 # Initialize a flag to track if training is successful
@@ -114,7 +114,7 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     if grep -q "Run finished" flwr_output.log; then
         echo "Training worked correctly!"
         found_success=true
-        kill $cl1_pid; kill $cl2_pid
+        check_and_kill "$cl1_pid" "$cl2_pid"
         sleep 3
         check_and_kill "$sl_pids"
     else
@@ -127,7 +127,7 @@ done
 
 if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
-    kill $cl1_pid; kill $cl2_pid
+    check_and_kill "$cl1_pid" "$cl2_pid"
     sleep 3
     check_and_kill "$sl_pids"
 fi
