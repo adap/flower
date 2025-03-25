@@ -19,7 +19,7 @@ import SwiftUI
 struct HelloWorldApp: App {
   var body: some Scene {
     WindowGroup {
-      ContentView()
+      ChatView()
     }
   }
 }

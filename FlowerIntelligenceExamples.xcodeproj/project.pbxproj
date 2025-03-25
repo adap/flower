@@ -7,13 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		210A876B2D8B57A000AFC33C /* ChatInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210A876A2D8B57A000AFC33C /* ChatInput.swift */; };
-		2114A8CA2D9194A9009B929F /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2114A8C92D9194A5009B929F /* ChatViewModel.swift */; };
+		1A064C4ADCBB998CE5441058 /* mlx_lm_chat.py in Resources */ = {isa = PBXBuildFile; fileRef = 3951DE0B01A786BCF918ABC7 /* mlx_lm_chat.py */; };
+		1EBFDC596AC6BCA140137471 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BB89085A891555A99B32E7 /* ChatViewModel.swift */; };
+		217888052D92D40A00373E92 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217888042D92D40A00373E92 /* ChatView.swift */; };
+		217888072D92D42500373E92 /* ChatInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217888062D92D42500373E92 /* ChatInput.swift */; };
+		2178880C2D92F54000373E92 /* ChatListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2178880B2D92F53C00373E92 /* ChatListView.swift */; };
 		2186CA8CA6ACBFEE8600CBAF /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 3E665FFF8BA4124A79C92D43 /* Flwr */; };
+		21F9A1142D930C0A00851907 /* HelloWorld.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21F9A1132D930C0A00851907 /* HelloWorld.xcassets */; };
+		38B3B1A91024A98AC1E4D817 /* torch_moe.py in Resources */ = {isa = PBXBuildFile; fileRef = 71457F4FB05BF5BE0CD4B3E5 /* torch_moe.py */; };
 		5CAC536F19AE5062E58881B8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2940C21F680D4AD885318A0 /* ContentView.swift */; };
 		5DC300C4103CB296DE06A824 /* Flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 7D6D86FB026C80EFB61189EB /* Flwr */; };
+		6198C3C26A8FAB86F92053AD /* run_mlx_lm.sh in Resources */ = {isa = PBXBuildFile; fileRef = 579F9BF31A279104A9114398 /* run_mlx_lm.sh */; };
+		7142EDE0DC913C037798FAD3 /* torch.cpython-310.pyc in Resources */ = {isa = PBXBuildFile; fileRef = FA23AAA41FFED81E33303FE2 /* torch.cpython-310.pyc */; };
 		7221A91C5429BB5C5999651F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567A9812B7FAC92EE118B9A /* main.swift */; };
 		7EAA9DAC191A77EFA73EC91E /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73DE71AB0FD4B6E3EBFBEABE /* main.swift */; };
+		8A9011374B50417B724B12F5 /* ChatInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816541878953776355E6F615 /* ChatInput.swift */; };
 		900C90FBA86B9299077BA5B9 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C6B5008CFD38CD572321504 /* ChatView.swift */; };
 		94560A238130C4CA6D2B9B45 /* HelloWorldApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296E3A51313266F8A35C159B /* HelloWorldApp.swift */; };
 		9DE9C7C44622683467968E1E /* LlmChat.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D9BC3F96391A873AB367FA2E /* LlmChat.xcassets */; };
@@ -26,26 +34,48 @@
 		FBCE3B1A7ABDF2695FAE7F73 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5FAC31AB75945DC79736E /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		217888092D92EE0200373E92 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		0C4C13DB49CC2D34E1DEE6D9 /* HelloWorld.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HelloWorld.entitlements; sourceTree = "<group>"; };
 		0DE0A6E7938CF574C2C9A974 /* llm-chat-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "llm-chat-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C6B5008CFD38CD572321504 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		1CFAE91D5BDAD075A7A05F54 /* streaming-cli */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = "streaming-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
 		209DA0E56757DEB5DBE65F60 /* hello-world-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hello-world-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		210A876A2D8B57A000AFC33C /* ChatInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInput.swift; sourceTree = "<group>"; };
-		2114A8C92D9194A5009B929F /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+		217888042D92D40A00373E92 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		217888062D92D42500373E92 /* ChatInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInput.swift; sourceTree = "<group>"; };
+		217888082D92EDEC00373E92 /* HelloWorld.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = HelloWorld.xcassets; sourceTree = "<group>"; };
+		2178880B2D92F53C00373E92 /* ChatListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListView.swift; sourceTree = "<group>"; };
+		21F9A1132D930C0A00851907 /* HelloWorld.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = HelloWorld.xcassets; path = "intelligence/swift/examples/hello-world-ios/HelloWorld.xcassets"; sourceTree = "<group>"; };
 		296E3A51313266F8A35C159B /* HelloWorldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloWorldApp.swift; sourceTree = "<group>"; };
+		2D954AF73BA9923B2830006B /* HelloWorld.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HelloWorld.entitlements; sourceTree = "<group>"; };
+		3951DE0B01A786BCF918ABC7 /* mlx_lm_chat.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = mlx_lm_chat.py; sourceTree = "<group>"; };
 		3F7619F5AE1EB828BF4A53B4 /* LlmChat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LlmChat.entitlements; sourceTree = "<group>"; };
 		4567A9812B7FAC92EE118B9A /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		52B5FAC31AB75945DC79736E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		55B49A9ED91BA12AFC62D827 /* HelloWorldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloWorldApp.swift; sourceTree = "<group>"; };
+		579F9BF31A279104A9114398 /* run_mlx_lm.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = run_mlx_lm.sh; sourceTree = "<group>"; };
+		71457F4FB05BF5BE0CD4B3E5 /* torch_moe.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = torch_moe.py; sourceTree = "<group>"; };
 		73DE71AB0FD4B6E3EBFBEABE /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		816541878953776355E6F615 /* ChatInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInput.swift; sourceTree = "<group>"; };
 		934858BBEF5ADB70C512E30D /* flower */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flower; path = .; sourceTree = SOURCE_ROOT; };
 		B11C7918194D38B4A7A23ED5 /* LlmChatApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlmChatApp.swift; sourceTree = "<group>"; };
-		C9281C5167C5E54E063AF6E7 /* hello-world-ios.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "hello-world-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9281C5167C5E54E063AF6E7 /* hello-world-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hello-world-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D30966334263E4C2CC2D4C50 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D6BB89085A891555A99B32E7 /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		D9BC3F96391A873AB367FA2E /* LlmChat.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = LlmChat.xcassets; sourceTree = "<group>"; };
 		F2940C21F680D4AD885318A0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		FA23AAA41FFED81E33303FE2 /* torch.cpython-310.pyc */ = {isa = PBXFileReference; lastKnownFileType = file; path = "torch.cpython-310.pyc"; sourceTree = "<group>"; };
 		FF119EE4A193B8B6726ABDCD /* hello-world-cli */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = "hello-world-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -96,6 +126,7 @@
 		1A2DFFC8E6229E47601E89E5 = {
 			isa = PBXGroup;
 			children = (
+				21F9A1132D930C0A00851907 /* HelloWorld.xcassets */,
 				6531429BF80886042F53831F /* hello-world-cli */,
 				BFEEA94F9A196387270F00A6 /* hello-world-ios */,
 				F522D79061B553BCA6ACEFCD /* hello-world-macos */,
@@ -104,6 +135,14 @@
 				F3C87B0B5E818D02A5C88CCC /* streaming-cli */,
 				6DD262CB76DFE2C64FA80EE7 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		5DFC6D691621BF750EF2565B /* __pycache__ */ = {
+			isa = PBXGroup;
+			children = (
+				FA23AAA41FFED81E33303FE2 /* torch.cpython-310.pyc */,
+			);
+			path = __pycache__;
 			sourceTree = "<group>";
 		};
 		6531429BF80886042F53831F /* hello-world-cli */ = {
@@ -139,6 +178,11 @@
 			isa = PBXGroup;
 			children = (
 				D30966334263E4C2CC2D4C50 /* ContentView.swift */,
+				217888042D92D40A00373E92 /* ChatView.swift */,
+				2178880B2D92F53C00373E92 /* ChatListView.swift */,
+				217888062D92D42500373E92 /* ChatInput.swift */,
+				217888082D92EDEC00373E92 /* HelloWorld.xcassets */,
+				2D954AF73BA9923B2830006B /* HelloWorld.entitlements */,
 				296E3A51313266F8A35C159B /* HelloWorldApp.swift */,
 			);
 			name = "hello-world-ios";
@@ -148,13 +192,17 @@
 		DC74C9C54881F31E441652E4 /* llm-chat-macos */ = {
 			isa = PBXGroup;
 			children = (
+				816541878953776355E6F615 /* ChatInput.swift */,
 				1C6B5008CFD38CD572321504 /* ChatView.swift */,
-				2114A8C92D9194A5009B929F /* ChatViewModel.swift */,
+				D6BB89085A891555A99B32E7 /* ChatViewModel.swift */,
 				52B5FAC31AB75945DC79736E /* ContentView.swift */,
 				3F7619F5AE1EB828BF4A53B4 /* LlmChat.entitlements */,
-				210A876A2D8B57A000AFC33C /* ChatInput.swift */,
 				D9BC3F96391A873AB367FA2E /* LlmChat.xcassets */,
 				B11C7918194D38B4A7A23ED5 /* LlmChatApp.swift */,
+				3951DE0B01A786BCF918ABC7 /* mlx_lm_chat.py */,
+				579F9BF31A279104A9114398 /* run_mlx_lm.sh */,
+				71457F4FB05BF5BE0CD4B3E5 /* torch_moe.py */,
+				5DFC6D691621BF750EF2565B /* __pycache__ */,
 			);
 			name = "llm-chat-macos";
 			path = "intelligence/swift/examples/llm-chat-macos";
@@ -247,6 +295,8 @@
 			buildPhases = (
 				EEC90EFD1F3664EDAABEF13C /* Sources */,
 				4F0E56493109B547D90327A1 /* Frameworks */,
+				217888092D92EE0200373E92 /* CopyFiles */,
+				21F9A1122D930BE000851907 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -286,6 +336,9 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
+				KnownAssetTags = (
+					New,
+				);
 				LastUpgradeCheck = 1430;
 			};
 			buildConfigurationList = 214E63BC8C8FE8C124B3549F /* Build configuration list for PBXProject "FlowerIntelligenceExamples" */;
@@ -313,11 +366,23 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		21F9A1122D930BE000851907 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21F9A1142D930C0A00851907 /* HelloWorld.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CDEB20C8A087BC76CCCA2C19 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				9DE9C7C44622683467968E1E /* LlmChat.xcassets in Resources */,
+				1A064C4ADCBB998CE5441058 /* mlx_lm_chat.py in Resources */,
+				6198C3C26A8FAB86F92053AD /* run_mlx_lm.sh in Resources */,
+				7142EDE0DC913C037798FAD3 /* torch.cpython-310.pyc in Resources */,
+				38B3B1A91024A98AC1E4D817 /* torch_moe.py in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,10 +393,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8A9011374B50417B724B12F5 /* ChatInput.swift in Sources */,
 				900C90FBA86B9299077BA5B9 /* ChatView.swift in Sources */,
+				1EBFDC596AC6BCA140137471 /* ChatViewModel.swift in Sources */,
 				FBCE3B1A7ABDF2695FAE7F73 /* ContentView.swift in Sources */,
-				210A876B2D8B57A000AFC33C /* ChatInput.swift in Sources */,
-				2114A8CA2D9194A9009B929F /* ChatViewModel.swift in Sources */,
 				C8035BEE0E74205A7F8CB276 /* LlmChatApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -366,6 +431,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				D9A621DB4A76F15371CBF493 /* ContentView.swift in Sources */,
+				2178880C2D92F54000373E92 /* ChatListView.swift in Sources */,
+				217888052D92D40A00373E92 /* ChatView.swift in Sources */,
+				217888072D92D42500373E92 /* ChatInput.swift in Sources */,
 				94560A238130C4CA6D2B9B45 /* HelloWorldApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -439,12 +507,21 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "intelligence/swift/examples/hello-world-ios/HelloWorld.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				INFOPLIST_FILE = "intelligence/swift/examples/hello-world-ios/Info.plist";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 675G8K7K5D;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.hello-world-ios";
 				PRODUCT_NAME = "hello-world-ios";
 				SDKROOT = iphoneos;
@@ -456,12 +533,21 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "intelligence/swift/examples/hello-world-ios/HelloWorld.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				INFOPLIST_FILE = "intelligence/swift/examples/hello-world-ios/Info.plist";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 675G8K7K5D;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "ai.flower.hello-world-ios";
 				PRODUCT_NAME = "hello-world-ios";
 				SDKROOT = iphoneos;
@@ -490,7 +576,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "intelligence/swift/examples/llm-chat-macos/LlmChat.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 675G8K7K5D;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -630,7 +715,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "intelligence/swift/examples/llm-chat-macos/LlmChat.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 675G8K7K5D;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

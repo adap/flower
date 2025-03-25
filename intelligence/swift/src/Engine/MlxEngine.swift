@@ -36,7 +36,7 @@ class MlxEngine: Engine {
   {
     switch loadState {
     case .idle:
-      MLX.GPU.set(cacheLimit: 20 * 1024 * 1024)
+      
 
       let modelContainer = try await DeepseekLLMModelFactory.shared.loadContainer(
         configuration: modelConfiguration

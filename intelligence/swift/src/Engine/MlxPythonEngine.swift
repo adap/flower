@@ -14,9 +14,3 @@
 // ==============================================================================
 
 import Foundation
-
-class MlxPythonEngine: Engine {
-  private var process: Process?
-  private var inputPipe: Pipe?
-  private var outputPipe: Pipe?
-}

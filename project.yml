@@ -66,5 +66,6 @@ targets:
     settings:
       base:
         PRODUCT_NAME: hello-world-ios
-        INFOPLIST_FILE: "intelligence/swift/examples/hello-world-ios/Info.plist"
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_ENTITLEMENTS: "intelligence/swift/examples/hello-world-ios/HelloWorld.entitlements"
         TARGETED_DEVICE_FAMILY: "1" 
