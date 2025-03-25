@@ -416,7 +416,7 @@ class MoEGate: Module {
     print("k ", k)
     var groupIdx = argPartition(topKGroup, kth: k-1, axis: -2)[.ellipsis, ..<k, 0...]
     print("group idx shape \(groupIdx.shape)")
-    groupIdx = broadcast(groupIdx, to: [1,78,k,32])
+    groupIdx = broadcast(groupIdx, to: [bsz, seqLen, k,(nRoutedExperts ?? 1) / nGroup])
     scores = putAlong(groupScores, groupIdx, values: MLXArray(0.0), axis: -2)
     print("scores shape ", scores.shape)
     scores = flattened(scores, start: -2, end: -1)
@@ -578,16 +578,19 @@ class DeepseekV3Model: Module, LLMModel, KVCacheDimensionProvider, LoRAModel {
 
     for (key, value) in weights {
       if key.contains("weight_scale_inv") {
-        let scaleKey = key
         let weightKey = key.replacingOccurrences(of: "_scale_inv", with: "")
-        let dequantized = dequant(weight: weights[weightKey]!, scaleInv: value)
-        newWeights[weightKey] = dequantized
+        if let weight = weights[weightKey] {
+          let dequantized = dequant(weight: weight, scaleInv: value)
+          newWeights[weightKey] = dequantized
+        }
+      } else if newWeights[key] == nil {
+        newWeights[key] = value
       }
     }
 
     for l in 0..<args.numHiddenLayers {
       let prefix = "model.layers.\(l)"
-      for (wName, projName) in [("w1", "gate_proj"), ("w2", "down_proj"), ("w3", "up_proj")] {
+      for (_, projName) in [("w1", "gate_proj"), ("w2", "down_proj"), ("w3", "up_proj")] {
         for key in ["weight", "scales", "biases"] {
           let firstKey = "\(prefix).mlp.experts.0.\(projName).\(key)"
           if weights[firstKey] != nil {

@@ -21,10 +21,10 @@ struct ContentView: View {
     ChatView()
       .padding()
       .task {
-        let fi = FlowerIntelligence.instance
-        await fi.fetchModel(model: "deepseek/r1-685b/q4") {
-          print("\($0.description): \($0.percentage), \($0.loadedBytes), \($0.totalBytes)")
-        }
+//        let fi = FlowerIntelligence.instance
+//        await fi.fetchModel(model: "deepseek/r1-685b/q4") {
+//          print("\($0.description): \($0.percentage), \($0.loadedBytes), \($0.totalBytes)")
+//        }
       }
   }
 }
