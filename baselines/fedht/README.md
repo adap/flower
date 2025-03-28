@@ -81,14 +81,14 @@ python -m fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500
   <img src="_static/acc_results_mnist_centralized_5.png" width="49%" />
 </p>
 
-Based on the loss and accuracy results shown in the figures above, we see that FedIter-HT is comparable to FedAvg from a performance perspective, with 500 parameters kept in each layer. We also further explore the performance degradation as the number of parameters kept decreases. The figures below show results for multiple FedAvg and Fed-HT iterations (5 runs for each); plus/minus three standard deviations are shown with the shaded portions in the figure. 
+Based on the loss and accuracy results shown in the figures above, we see that FedIter-HT is comparable to FedAvg from a performance perspective, with 500 parameters kept in each layer. We also further explore the performance degradation as the number of parameters kept decreases. The figures below show results for multiple FedAvg and Fed-HT iterations (5 runs for each); plus/minus three standard deviations are shown with the shaded portions in the figure. Each curve is identified with a 'sparsity ratio' which is the numbers of parameters kept divided by the total number of parameters (ignoring bias parameters).
 
 <p float="left">
   <img src="_static/loss_results_mnist_centralized_1_crossval.png" width="49%" />
   <img src="_static/acc_results_mnist_centralized_1_crossval.png" width="49%" />
 </p>
 
-We can see, at least visually, that significant performance degradation seems to occur around 100 output parameters in each layer. We also see an increase in variance as the number of parameters kept decreases. Additionally, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model. Results differ slightly from published work due to differing hyperparameters.
+We can see, at least visually, no discernible difference between the performance of FedAvg and FedHT with a sparsity ratio of 0.638. Significant performance degradation seems to occur around a sparsity ratio of 0.128. We also see an increase in variance as the sparsity ratio decreases. Additionally, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model. Results differ slightly from published work due to differing hyperparameters.
 
 The above results can be recreated by running the [run\_exp.sh](https://github.com/chancejohnstone/flower/blob/main/baselines/fedht/run_exp.sh) script. Plots can be generated using the [fedht\_plot.py](https://github.com/chancejohnstone/flower/blob/main/baselines/fedht/fedht_plot.py) script.
 
