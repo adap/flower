@@ -1,4 +1,4 @@
-from flwr.serverless.experiments.utils.federated_learning_runner import FederatedLearningRunner
+from flwr.serverless.experiments.utils.keras_federated_learning_runner import KerasFederatedLearningRunner
 
 
 # main function
@@ -92,7 +92,7 @@ if __name__ == "__main__":
             f"\n***** Starting trial {i + 1} of {len(config_overides)} with config: {str(config)[:80]}...\n"
         )
         
-        federated_learning_runner = FederatedLearningRunner(
+        federated_learning_runner = KerasFederatedLearningRunner(
             config=config,
         )
         federated_learning_runner.run()

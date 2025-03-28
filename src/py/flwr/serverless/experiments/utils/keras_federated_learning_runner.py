@@ -22,7 +22,7 @@ from flwr.serverless.experiments.utils.base_experiment_runner import BaseExperim
 from flwr.serverless.experiments.utils.custom_wandb_callback import CustomWandbCallback
 
 
-class FederatedLearningRunner(BaseExperimentRunner):
+class KerasFederatedLearningRunner(BaseExperimentRunner):
     def __init__(
         self,
         config,
