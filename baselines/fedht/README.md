@@ -13,6 +13,8 @@ dataset: [MNIST]
 
 **Authors:** Qianqian Tong, Guannan Liang, Tan Zhu, Jinbo Bi
 
+**Contributors:** Chancellor Johnstone <chancellor.johnstone@gmail.com>, Javier Fernandez-Marquez 
+
 **Abstract:** Nonconvex sparse learning plays an essential role in many areas, such as signal processing and deep network compression. Iterative hard thresholding (IHT) methods are the state-of-the-art for nonconvex sparse learning due to their capability of recovering true support and scalability with large datasets. Theoretical analysis of IHT is currently based on centralized IID data. In realistic large-scale situations, however, data are distributed, hardly IID, and private to local edge computing devices. It is thus necessary to examine the property of IHT in federated settings, which update in parallel on local devices and communicate with a central server only once in a while without sharing local data. In this paper, we propose two IHT methods: Federated Hard Thresholding (Fed-HT) and Federated Iterative Hard Thresholding (FedIter-HT). We prove that both algorithms enjoy a linear convergence rate and have strong guarantees to recover the optimal sparse estimator, similar to traditional IHT methods, but now with decentralized non-IID data. Empirical results demonstrate that the Fed-HT and FedIter-HT outperform their competitor - a distributed IHT, in terms of decreasing the objective values with lower requirements on communication rounds and bandwidth.
 
 # Environment Setup
@@ -44,7 +46,6 @@ A federated logistic regression classification model is implemented using the we
 | ------------------| ---------------------------------|----------|---------|
 | `MNIST`           | `Multinomial Regression`         |724       | 10      |
 
-**Contributors:** Chancellor Johnstone <chancellor.johnstone@gmail.com>
 
 **Training Hyperparameters:** The hyperparameters can be found in `conf/base_<dataset_name>.yaml` files. The configuration files can be adjusted inline when calling the function from the terminal. The hardthresholding parameter can be adjusted through the `num_keep`. FedIter-HT can be implemented by setting `iterht=True`, but the default sets `iterht=False`. 
 
