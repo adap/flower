@@ -1,4 +1,4 @@
-name: E2E
+name: Framework E2E
 
 on:
   push:

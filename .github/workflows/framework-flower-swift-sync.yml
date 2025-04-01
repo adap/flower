@@ -1,4 +1,4 @@
-name: Sync flower-swift
+name: Framework Sync flower-swift
 
 on:
   push:

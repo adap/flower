@@ -1,4 +1,4 @@
-name: Build Docker Images Main Branch
+name: Framework Build Docker Images Main Branch
 
 on:
   push:

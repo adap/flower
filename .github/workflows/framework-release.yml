@@ -1,4 +1,4 @@
-name: Publish `flwr` release on PyPI
+name: Framework Publish `flwr` PyPI Release 
 
 on:
   release:
