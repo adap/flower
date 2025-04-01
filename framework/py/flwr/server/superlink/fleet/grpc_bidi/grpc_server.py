@@ -96,18 +96,18 @@ def start_grpc_server(  # pylint: disable=too-many-arguments,R0917
 
     Examples
     --------
-    Starting a SSL-enabled server.
+    Starting a SSL-enabled server::
 
-    >>> from pathlib import Path
-    >>> start_grpc_server(
-    >>>     client_manager=ClientManager(),
-    >>>     server_address="localhost:8080",
-    >>>     certificates=(
-    >>>         Path("/crts/root.pem").read_bytes(),
-    >>>         Path("/crts/localhost.crt").read_bytes(),
-    >>>         Path("/crts/localhost.key").read_bytes(),
-    >>>     ),
-    >>> )
+        from pathlib import Path
+        start_grpc_server(
+            client_manager=ClientManager(),
+            server_address="localhost:8080",
+            certificates=(
+                Path("/crts/root.pem").read_bytes(),
+                Path("/crts/localhost.crt").read_bytes(),
+                Path("/crts/localhost.key").read_bytes(),
+            ),
+        )
     """
     servicer = FlowerServiceServicer(client_manager)
     add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
