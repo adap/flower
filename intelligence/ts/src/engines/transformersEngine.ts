@@ -13,27 +13,16 @@
 // limitations under the License.
 // =============================================================================
 
-import {
-  InterruptableStoppingCriteria,
-  StoppingCriteriaList,
-  Tensor,
-  TextGenerationPipeline,
-  TextStreamer,
-  pipeline,
-} from '@huggingface/transformers';
-
-import type { ProgressInfo, TextGenerationConfig } from '@huggingface/transformers';
 import { FailureCode, Message, Result, Progress, ChatResponseResult } from '../typing';
-
 import { getAvailableRAM } from '../env';
 import { BaseEngine } from './engine';
 import { getEngineModelConfig } from './common/model';
 
-const stoppingCriteria = new InterruptableStoppingCriteria();
 const choice = 0;
 
 export class TransformersEngine extends BaseEngine {
-  private generationPipelines: Record<string, TextGenerationPipeline> = {};
+  // Using `any` here since we now load the transformers types dynamically.
+  private generationPipelines: Record<string, any> = {};
 
   async chat(
     messages: Message[],
@@ -54,6 +43,20 @@ export class TransformersEngine extends BaseEngine {
       };
     }
     try {
+      // Dynamically import the transformers module
+      const transformers = (await import(
+        '@huggingface/transformers'
+      ));
+      const {
+        pipeline,
+        InterruptableStoppingCriteria,
+        StoppingCriteriaList,
+        TextStreamer,
+        Tensor,
+      } = transformers;
+      const stoppingCriteria = new InterruptableStoppingCriteria();
+
+      // Load and cache the pipeline dynamically if not already loaded for the model.
       if (!(model in this.generationPipelines)) {
         const modelElems = modelConfigRes.value.name.split('|');
         const modelId = modelElems[0];
@@ -69,9 +72,9 @@ export class TransformersEngine extends BaseEngine {
         add_generation_prompt: true,
         return_dict: true,
       }) as {
-        input_ids: Tensor | number[] | number[][];
-        attention_mask: Tensor | number[] | number[][];
-        token_type_ids?: Tensor | number[] | number[][] | undefined;
+        input_ids: typeof Tensor | number[] | number[][];
+        attention_mask: typeof Tensor | number[] | number[][];
+        token_type_ids?: typeof Tensor | number[] | number[][] | undefined;
       };
 
       let streamer = undefined;
@@ -98,22 +101,22 @@ export class TransformersEngine extends BaseEngine {
           max_new_tokens: maxCompletionTokens ?? 1024,
           temperature: temperature ?? 1,
           return_dict_in_generate: true,
-        } as TextGenerationConfig,
+        },
         stopping_criteria: stoppingCriteriaList,
         ...(streamer && { streamer }),
-      })) as { past_key_values: object; sequences: Tensor };
+      })) as { past_key_values: object; sequences: typeof Tensor };
 
       const decoded = tokenizer.batch_decode(sequences, {
         skip_special_tokens: true,
       });
 
       let promptLengths: number[] | undefined;
-      const inputIds = inputs.input_ids as Tensor;
+      const inputIds = inputs.input_ids as any;
       const inputDim = inputIds.dims.at(-1);
       if (typeof inputDim === 'number' && inputDim > 0) {
         promptLengths = tokenizer
           .batch_decode(inputIds, { skip_special_tokens: true })
-          .map((x) => x.length);
+          .map((x: string) => x.length);
       }
 
       if (promptLengths) {
@@ -152,17 +155,22 @@ export class TransformersEngine extends BaseEngine {
       };
     }
     try {
+      // Dynamically import the transformers module
+      const transformers = (await import(
+        '@huggingface/transformers'
+      ));
+      const { pipeline } = transformers;
       if (!(model in this.generationPipelines)) {
         const modelElems = modelConfigRes.value.name.split('|');
         const modelId = modelElems[0];
 
         this.generationPipelines.model = await pipeline('text-generation', modelId, {
-          progress_callback: (progressInfo: ProgressInfo) => {
+          progress_callback: (progressInfo: any) => {
             let percentage = 0;
             let total = 0;
             let loaded = 0;
             let description = progressInfo.status as string;
-            if (progressInfo.status == 'progress') {
+            if (progressInfo.status === 'progress') {
               percentage = progressInfo.progress;
               total = progressInfo.total;
               loaded = progressInfo.loaded;
