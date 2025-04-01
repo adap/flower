@@ -18,8 +18,6 @@ import { isNode } from '../../env';
 import { FailureCode, Result } from '../../typing';
 import { CacheStorage, NodeCacheStorage, WebCacheStorage } from './storage';
 
-const STALE_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours.
-
 interface ModelConfigResponse {
   is_supported: boolean;
   engine_model?: string;
@@ -110,8 +108,11 @@ export async function getEngineModelConfig(
 
   const cachedEntry = await cacheStorage.getItem(`${model}_${engine}`);
   if (cachedEntry) {
-    // If the cached entry is stale, trigger a background update.
-    if (now - cachedEntry.lastUpdate > STALE_TIMEOUT_MS) {
+    const lastUpdateDay = new Date(cachedEntry.lastUpdate).toDateString();
+    const currentDay = new Date(now).toDateString();
+
+    // If the cached entry was updated on a different day, trigger a background update.
+    if (lastUpdateDay !== currentDay) {
       updateModelConfig(model, engine).catch((err: unknown) => {
         console.warn(`Background update failed for model ${model}:`, String(err));
       });
