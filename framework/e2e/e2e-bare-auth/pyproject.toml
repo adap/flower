@@ -3,16 +3,11 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "e2e-fastai"
+name = "e2e-bare-auth"
 version = "1.0.0"
-description = "Fastai Federated Learning E2E test with Flower"
+description = "Auth-enabled bare Federated Learning test with Flower"
 license = "Apache-2.0"
-dependencies = [
-    "flwr[simulation] @ {root:parent:parent:uri}",
-    "fastai>=2.7.12,<3.0.0",
-    "torch>=2.0.0,!=2.0.1,<2.1.0",
-    "spacy==3.7.6",
-]
+dependencies = ["flwr @ {root:parent:parent:parent:uri}"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
@@ -24,8 +19,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "e2e_fastai.server_app:app"
-clientapp = "e2e_fastai.client_app:app"
+serverapp = "e2e_bare_auth.server_app:app"
+clientapp = "e2e_bare_auth.client_app:app"
 
 [tool.flwr.app.config]
 
