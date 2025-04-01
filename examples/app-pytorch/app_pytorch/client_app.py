@@ -1,22 +1,12 @@
 """app-pytorch: A Flower / PyTorch app."""
 
 import torch
-
-from flwr.client import ClientApp
-from flwr.common import Context
 from app_pytorch.task import Net, load_data
-from app_pytorch.task import train as train_fn
 from app_pytorch.task import test as test_fn
-
+from app_pytorch.task import train as train_fn
 
 from flwr.client import ClientApp
-from flwr.common import Context, Message, MetricsRecord, RecordSet
-from app_pytorch.task import (
-    Net,
-    pytorch_to_parameter_record,
-    parameters_to_pytorch_state_dict,
-)
-
+from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 
 # Flower ClientApp
 app = ClientApp()
@@ -36,9 +26,9 @@ def evaluate(msg: Message, context: Context):
     )
 
     # Construct reply
-    metrics_record = MetricsRecord({"eval_acc": eval_acc})
-    content = RecordSet({"eval_metrics": metrics_record})
-    return msg.create_reply(content=content)
+    metric_record = MetricRecord({"eval_acc": eval_acc})
+    content = RecordDict({"eval_metrics": metric_record})
+    return Message(content=content, reply_to=msg)
 
 
 @app.train()
@@ -57,10 +47,10 @@ def train(msg: Message, context: Context):
     )
 
     # Extract state_dict from model and construct reply message
-    model_record = pytorch_to_parameter_record(model)
-    metrics_record = MetricsRecord({"train_loss": train_loss})
-    content = RecordSet({"model": model_record, "train_metrics": metrics_record})
-    return msg.create_reply(content=content)
+    model_record = ArrayRecord(model.state_dict())
+    metric_record = MetricRecord({"train_loss": train_loss})
+    content = RecordDict({"model": model_record, "train_metrics": metric_record})
+    return Message(content=content, reply_to=msg)
 
 
 def setup_client(msg: Message, context: Context, is_train: bool):
@@ -70,8 +60,7 @@ def setup_client(msg: Message, context: Context, is_train: bool):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Apply global model weights from message
-    state_dict = parameters_to_pytorch_state_dict(msg.content["model"])
-    model.load_state_dict(state_dict)
+    model.load_state_dict(msg.content["model"].to_torch_state_dict())
     model.to(device)
 
     # Load partition

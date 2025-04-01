@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "pnpm i && pnpm build && node dist/index.js"
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@flwr/flwr": "^0.1.4"
+    "@flwr/flwr": "^0.1.6"
   },
   "devDependencies": {
     "@types/node": "^22.7.9",

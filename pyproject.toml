@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.17.0"
+version = "1.18.0"
 description = "Flower: A Friendly Federated AI Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -146,6 +146,10 @@ extend_exclude = [
     "framework/docs/source/tutorial-quickstart-huggingface.rst",
     "framework/docs/source/_templates/autosummary/*",
     "framework/docs/source/ref-api/*",
+    "intelligence/docs/source/ts-ref-api/*",
+    "intelligence/docs/source/swift-ref-api/*",
+    "intelligence/docs/source/_templates/autosummary/*",
+    "intelligence/docs/source/conf.py",
 ]
 
 [tool.isort]

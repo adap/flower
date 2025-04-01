@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://flower.ai/">
-    <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
+    <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflwr-head.4d68867a.png&w=384&q=75" width="140px" alt="Flower Website" />
   </a>
 </p>
 
@@ -21,8 +21,10 @@
 
 - `unstable`
   - points to the last successful build of the `main` branch
-- `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.17.0.dev20250311`
+- `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.18.0.dev20250325`
   - uses Python 3.11 and Ubuntu 24.04
+- `1.17.0`, `1.17.0-py3.11-alpine3.19`
+- `1.17.0-py3.11-ubuntu24.04`
 - `1.16.0`, `1.16.0-py3.11-alpine3.19`
 - `1.16.0-py3.11-ubuntu24.04`
 - `1.15.2`, `1.15.2-py3.11-alpine3.19`

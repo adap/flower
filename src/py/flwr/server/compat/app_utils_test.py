@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for utility functions for the `start_driver`."""
+"""Tests for utility functions for the `start_grid`."""
 
 
 import time
@@ -33,10 +33,10 @@ class TestUtils(unittest.TestCase):
         # Prepare
         expected_node_ids = list(range(100))
         updated_expected_node_ids = list(range(80, 120))
-        driver = Mock()
-        driver.grpc_driver = Mock()
-        driver.run_id = 123
-        driver.get_node_ids.return_value = expected_node_ids
+        grid = Mock()
+        grid.grpc_grid = Mock()
+        grid.run_id = 123
+        grid.get_node_ids.return_value = expected_node_ids
         client_manager = SimpleClientManager()
         original_wait = Event.wait
 
@@ -49,7 +49,7 @@ class TestUtils(unittest.TestCase):
         # Patching Event.wait with our custom function
         with patch.object(Event, "wait", new=custom_wait):
             thread, f_stop, c_done = start_update_client_manager_thread(
-                driver, client_manager
+                grid, client_manager
             )
             # Wait until the node registration done
             c_done.wait()
@@ -58,7 +58,7 @@ class TestUtils(unittest.TestCase):
             # Retrieve all nodes in `client_manager`
             node_ids = {proxy.node_id for proxy in client_manager.all().values()}
             # Update the GetNodesResponse and wait until the `client_manager` is updated
-            driver.get_node_ids.return_value = updated_expected_node_ids
+            grid.get_node_ids.return_value = updated_expected_node_ids
             time.sleep(0.1)
             # Retrieve all nodes in `client_manager`
             updated_node_ids = {

@@ -27,16 +27,18 @@ from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
+    PING_PATIENCE,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.record import ConfigsRecord
+from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
 
 from .utils import (
+    check_node_availability_for_in_message,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
@@ -67,7 +69,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Map run_id to RunRecord
         self.run_ids: dict[int, RunRecord] = {}
         self.contexts: dict[int, Context] = {}
-        self.federation_options: dict[int, ConfigsRecord] = {}
+        self.federation_options: dict[int, ConfigRecord] = {}
         self.message_ins_store: dict[UUID, Message] = {}
         self.message_res_store: dict[UUID, Message] = {}
         self.message_ins_id_to_message_res_id: dict[UUID, UUID] = {}
@@ -156,7 +158,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         res_metadata = message.metadata
         with self.lock:
             # Check if the Message it is replying to exists and is valid
-            msg_ins_id = res_metadata.reply_to_message
+            msg_ins_id = res_metadata.reply_to_message_id
             msg_ins = self.message_ins_store.get(UUID(msg_ins_id))
 
             # Ensure that dst_node_id of original Message matches the src_node_id of
@@ -232,12 +234,27 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             current = time.time()
 
-            # Verify Messge IDs
+            # Verify Message IDs
             ret = verify_message_ids(
                 inquired_message_ids=message_ids,
                 found_message_ins_dict=self.message_ins_store,
                 current_time=current,
             )
+
+            # Check node availability
+            dst_node_ids = {
+                self.message_ins_store[message_id].metadata.dst_node_id
+                for message_id in message_ids
+            }
+            tmp_ret_dict = check_node_availability_for_in_message(
+                inquired_in_message_ids=message_ids,
+                found_in_message_dict=self.message_ins_store,
+                node_id_to_online_until={
+                    node_id: self.node_ids[node_id][0] for node_id in dst_node_ids
+                },
+                current_time=current,
+            )
+            ret.update(tmp_ret_dict)
 
             # Find all reply Messages
             message_res_found: list[Message] = []
@@ -317,6 +334,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
+            # Mark the node online util time.time() + ping_interval
             self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
             return node_id
 
@@ -381,7 +399,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
-        federation_options: ConfigsRecord,
+        federation_options: ConfigRecord,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
@@ -510,7 +528,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         return pending_run_id
 
-    def get_federation_options(self, run_id: int) -> Optional[ConfigsRecord]:
+    def get_federation_options(self, run_id: int) -> Optional[ConfigRecord]:
         """Retrieve the federation options for the specified `run_id`."""
         with self.lock:
             if run_id not in self.run_ids:
@@ -519,10 +537,17 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return self.federation_options[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        """Acknowledge a ping received from a node, serving as a heartbeat.
+
+        It allows for one missed ping (in a PING_PATIENCE * ping_interval) before
+        marking the node as offline, where PING_PATIENCE = 2 in default.
+        """
         with self.lock:
             if node_id in self.node_ids:
-                self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+                self.node_ids[node_id] = (
+                    time.time() + PING_PATIENCE * ping_interval,
+                    ping_interval,
+                )
                 return True
         return False
 

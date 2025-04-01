@@ -35,7 +35,7 @@ app = fl.server.ServerApp()
 
 
 @app.main()
-def main(driver, context):
+def main(grid, context):
     # Construct the LegacyContext
     context = fl.server.LegacyContext(
         context=context,
@@ -46,7 +46,7 @@ def main(driver, context):
     workflow = fl.server.workflow.DefaultWorkflow()
 
     # Execute
-    workflow(driver, context)
+    workflow(grid, context)
 
     hist = context.history
     assert (

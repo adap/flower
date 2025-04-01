@@ -4,11 +4,11 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "start": "pnpm i && pnpm build && node dist/index.js"
+    "start": "node src/index.js"
   },
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@flwr/flwr": "^0.1.4"
+    "@flwr/flwr": "^0.1.6"
   }
 }

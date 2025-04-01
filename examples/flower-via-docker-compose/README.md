@@ -8,7 +8,7 @@ framework: [Docker, tensorflow]
 # Leveraging Flower and Docker for Device Heterogeneity Management in Federated Learning
 
 <p align="center">
-  <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
+  <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflwr-head.4d68867a.png&w=384&q=75" width="140px" alt="Flower Website" />
   <img src="https://github.com/ChoosyDevs/Choosy/assets/59146613/73d15990-453b-4da6-b8d6-df0f956a127c" width="140px" alt="Docker Logo" />
 </p>
 

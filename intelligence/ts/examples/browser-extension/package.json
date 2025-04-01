@@ -9,11 +9,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint --fix src",
-    "lint:check": "eslint src",
-    "ibuild": "pnpm i && pnpm build"
+    "lint:check": "eslint src"
   },
   "dependencies": {
-    "@flwr/flwr": "^0.1.4",
+    "@flwr/flwr": "^0.1.6",
     "@mozilla/readability": "^0.6.0",
     "webextension-polyfill": "^0.12.0"
   },

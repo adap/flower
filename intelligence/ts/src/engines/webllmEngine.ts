@@ -28,8 +28,9 @@ import {
   StreamEvent,
   Tool,
 } from '../typing';
+import { getAvailableRAM } from '../env';
 import { BaseEngine } from './engine';
-import { getEngineModelName } from './common';
+import { getEngineModelConfig } from './common/model';
 
 async function runQuery(
   engine: MLCEngineInterface,
@@ -72,8 +73,8 @@ export class WebllmEngine extends BaseEngine {
     onStreamEvent?: (event: StreamEvent) => void,
     _tools?: Tool[]
   ): Promise<ChatResponseResult> {
-    const modelNameRes = await getEngineModelName(model, 'webllm');
-    if (!modelNameRes.ok) {
+    const modelConfigRes = await getEngineModelConfig(model, 'webllm');
+    if (!modelConfigRes.ok) {
       return {
         ok: false,
         failure: {
@@ -84,13 +85,7 @@ export class WebllmEngine extends BaseEngine {
     }
     try {
       if (!(model in this.#loadedEngines)) {
-        this.#loadedEngines.model = await CreateMLCEngine(
-          modelNameRes.value,
-          {},
-          {
-            context_window_size: 2048,
-          }
-        );
+        this.#loadedEngines.model = await CreateMLCEngine(modelConfigRes.value.name);
       }
       const result = await runQuery(
         this.#loadedEngines.model,
@@ -119,8 +114,8 @@ export class WebllmEngine extends BaseEngine {
   }
 
   async fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>> {
-    const modelNameRes = await getEngineModelName(model, 'webllm');
-    if (!modelNameRes.ok) {
+    const modelConfigRes = await getEngineModelConfig(model, 'webllm');
+    if (!modelConfigRes.ok) {
       return {
         ok: false,
         failure: {
@@ -131,17 +126,11 @@ export class WebllmEngine extends BaseEngine {
     }
     try {
       if (!(model in this.#loadedEngines)) {
-        this.#loadedEngines.model = await CreateMLCEngine(
-          modelNameRes.value,
-          {
-            initProgressCallback: (report: InitProgressReport) => {
-              callback({ percentage: report.progress, description: report.text });
-            },
+        this.#loadedEngines.model = await CreateMLCEngine(modelConfigRes.value.name, {
+          initProgressCallback: (report: InitProgressReport) => {
+            callback({ percentage: report.progress, description: report.text });
           },
-          {
-            context_window_size: 2048,
-          }
-        );
+        });
       }
       return { ok: true, value: undefined };
     } catch (error) {
@@ -152,8 +141,49 @@ export class WebllmEngine extends BaseEngine {
     }
   }
 
-  async isSupported(model: string): Promise<boolean> {
-    const modelNameRes = await getEngineModelName(model, 'webllm');
-    return modelNameRes.ok;
+  async isSupported(model: string): Promise<Result<void>> {
+    if (typeof navigator !== 'undefined' && 'gpu' in navigator) {
+      const modelConfigRes = await getEngineModelConfig(model, 'webllm');
+      if (modelConfigRes.ok) {
+        if (modelConfigRes.value.vram) {
+          const availableRamRes = await getAvailableRAM();
+          if (availableRamRes.ok) {
+            if (modelConfigRes.value.vram < availableRamRes.value) {
+              return {
+                ok: true,
+                value: undefined,
+              };
+            } else {
+              return {
+                ok: false,
+                failure: {
+                  code: FailureCode.InsufficientRAMError,
+                  description: `Model ${model} requires at least ${String(modelConfigRes.value.vram)} MB to be loaded, but on ${String(availableRamRes.value)} MB are currently available.`,
+                },
+              };
+            }
+          }
+        }
+        return {
+          ok: true,
+          value: undefined,
+        };
+      }
+      return {
+        ok: false,
+        failure: {
+          code: FailureCode.UnsupportedModelError,
+          description: `Model ${model} is unavailable for local inference.`,
+        },
+      };
+    }
+    return {
+      ok: false,
+      failure: {
+        code: FailureCode.EngineSpecificError,
+        description:
+          'A WebGPU compatible browser is required to run inference. More info on https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API#browser_compatibility',
+      },
+    };
   }
 }

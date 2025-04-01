@@ -21,7 +21,7 @@ import unittest
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigsRecord
+from flwr.common import ConfigRecord
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     SUPERLINK_NODE_ID,
@@ -99,7 +99,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushMessages` success."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         # Transition status to running. PushMessages RPC is only allowed in
         # running status.
         self._transition_run_status(run_id, 2)
@@ -147,7 +147,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushMessages` not successful if RunStatus is not running."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
@@ -157,7 +157,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `GetRun` success."""
         # Prepare
         self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         # Transition status to running. GetRun RPC is only allowed in running status.
         self._transition_run_status(run_id, 2)
         request = GetRunRequest(run_id=run_id)
@@ -189,7 +189,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_get_run_not_successful_if_not_running(self, num_transitions: int) -> None:
         """Test `GetRun` not successful if RunStatus is not running."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
@@ -201,7 +201,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         node_id = self.state.create_node(ping_interval=30)
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
-        run_id = self.state.create_run("", "", fab_hash, {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord())
 
         # Transition status to running. GetFab RPC is only allowed in running status.
         self._transition_run_status(run_id, 2)
@@ -243,7 +243,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         node_id = self.state.create_node(ping_interval=30)
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
-        run_id = self.state.create_run("", "", fab_hash, {}, ConfigsRecord())
+        run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord())
 
         self._transition_run_status(run_id, num_transitions)
 

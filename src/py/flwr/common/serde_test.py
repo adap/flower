@@ -22,49 +22,53 @@ from typing import Any, Callable, Optional, TypeVar, Union, cast
 
 import pytest
 
+from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.common.date import now
+from flwr.common.message import make_message
+
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2
 from flwr.proto import transport_pb2 as pb2
 from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
-from flwr.proto.recordset_pb2 import Array as ProtoArray
-from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
-from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
-from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.recorddict_pb2 import Array as ProtoArray
+from flwr.proto.recorddict_pb2 import ArrayRecord as ProtoArrayRecord
+from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
+from flwr.proto.recorddict_pb2 import MetricRecord as ProtoMetricRecord
+from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.proto.run_pb2 import Run as ProtoRun
 
 # pylint: enable=E0611
 from . import (
     Array,
-    ConfigsRecord,
+    ArrayRecord,
+    ConfigRecord,
     Context,
-    MetricsRecord,
-    ParametersRecord,
-    RecordSet,
+    MetricRecord,
+    RecordDict,
     typing,
 )
-from .message import Error, Message, Metadata
+from .message import Error, Metadata
 from .serde import (
     array_from_proto,
+    array_record_from_proto,
+    array_record_to_proto,
     array_to_proto,
     clientappstatus_from_proto,
     clientappstatus_to_proto,
-    configs_record_from_proto,
-    configs_record_to_proto,
+    config_record_from_proto,
+    config_record_to_proto,
     context_from_proto,
     context_to_proto,
     fab_from_proto,
     fab_to_proto,
     message_from_proto,
     message_to_proto,
-    metrics_record_from_proto,
-    metrics_record_to_proto,
-    parameters_record_from_proto,
-    parameters_record_to_proto,
-    recordset_from_proto,
-    recordset_to_proto,
+    metric_record_from_proto,
+    metric_record_to_proto,
+    recorddict_from_proto,
+    recorddict_to_proto,
     run_from_proto,
     run_to_proto,
     scalar_from_proto,
@@ -186,6 +190,17 @@ class RecordMaker:
             raise NotImplementedError(f"Unsupported dtype: {dtype}")
         return cast(T, ret)
 
+    def get_message_type(self) -> str:
+        """Create a message type."""
+        # Create a legacy message type
+        if self.rng.random() < 0.5:
+            return self.rng.choice(["get_parameters", "get_properties", "reconnect"])
+
+        # Create a message type
+        category = self.rng.choice(["train", "evaluate", "query"])
+        suffix = self.rng.choice(["", ".custom_action", ".mock_action"])
+        return f"{category}{suffix}"
+
     def array(self) -> Array:
         """Create a Array."""
         dtypes = ("float", "int")
@@ -203,52 +218,52 @@ class RecordMaker:
         data = self.randbytes(self.rng.randint(*min_max_bytes_size))
         return Array(dtype=dtype, shape=shape, stype=stype, data=data)
 
-    def parameters_record(self) -> ParametersRecord:
-        """Create a ParametersRecord."""
+    def array_record(self) -> ArrayRecord:
+        """Create a ArrayRecord."""
         num_arrays = self.rng.randint(1, 5)
         arrays = OrderedDict(
             [(self.get_str(), self.array()) for i in range(num_arrays)]
         )
-        return ParametersRecord(arrays, keep_input=False)
+        return ArrayRecord(arrays, keep_input=False)
 
-    def metrics_record(self) -> MetricsRecord:
-        """Create a MetricsRecord."""
+    def metric_record(self) -> MetricRecord:
+        """Create a MetricRecord."""
         num_entries = self.rng.randint(1, 5)
         types = (float, int)
-        return MetricsRecord(
-            metrics_dict={
+        return MetricRecord(
+            metric_dict={
                 self.get_str(): self.get_value(self.rng.choice(types))
                 for _ in range(num_entries)
             },
             keep_input=False,
         )
 
-    def configs_record(self) -> ConfigsRecord:
-        """Create a ConfigsRecord."""
+    def config_record(self) -> ConfigRecord:
+        """Create a ConfigRecord."""
         num_entries = self.rng.randint(1, 5)
         types = (str, int, float, bytes, bool)
-        return ConfigsRecord(
-            configs_dict={
+        return ConfigRecord(
+            config_dict={
                 self.get_str(): self.get_value(self.rng.choice(types))
                 for _ in range(num_entries)
             },
             keep_input=False,
         )
 
-    def recordset(
+    def recorddict(
         self,
-        num_params_records: int,
-        num_metrics_records: int,
-        num_configs_records: int,
-    ) -> RecordSet:
-        """Create a RecordSet."""
-        ret = RecordSet()
-        for _ in range(num_params_records):
-            ret[self.get_str()] = self.parameters_record()
-        for _ in range(num_metrics_records):
-            ret[self.get_str()] = self.metrics_record()
-        for _ in range(num_configs_records):
-            ret[self.get_str()] = self.configs_record()
+        num_array_records: int,
+        num_metric_records: int,
+        num_config_records: int,
+    ) -> RecordDict:
+        """Create a RecordDict."""
+        ret = RecordDict()
+        for _ in range(num_array_records):
+            ret[self.get_str()] = self.array_record()
+        for _ in range(num_metric_records):
+            ret[self.get_str()] = self.metric_record()
+        for _ in range(num_config_records):
+            ret[self.get_str()] = self.config_record()
         return ret
 
     def metadata(self) -> Metadata:
@@ -259,9 +274,10 @@ class RecordMaker:
             group_id=self.get_str(30),
             src_node_id=self.rng.randint(0, 1 << 63),
             dst_node_id=self.rng.randint(0, 1 << 63),
-            reply_to_message=self.get_str(64),
+            reply_to_message_id=self.get_str(64),
+            created_at=now().timestamp(),
             ttl=self.rng.randint(1, 1 << 30),
-            message_type=self.get_str(10),
+            message_type=self.get_message_type(),
         )
 
     def user_config(self) -> typing.UserConfig:
@@ -289,67 +305,67 @@ def test_array_serialization_deserialization() -> None:
     assert original == deserialized
 
 
-def test_parameters_record_serialization_deserialization() -> None:
-    """Test serialization and deserialization of ParametersRecord."""
+def test_array_record_serialization_deserialization() -> None:
+    """Test serialization and deserialization of ArrayRecord."""
     # Prepare
     maker = RecordMaker()
-    original = maker.parameters_record()
+    original = maker.array_record()
 
     # Execute
-    proto = parameters_record_to_proto(original)
-    deserialized = parameters_record_from_proto(proto)
+    proto = array_record_to_proto(original)
+    deserialized = array_record_from_proto(proto)
 
     # Assert
-    assert isinstance(proto, ProtoParametersRecord)
+    assert isinstance(proto, ProtoArrayRecord)
     assert original == deserialized
 
 
-def test_metrics_record_serialization_deserialization() -> None:
-    """Test serialization and deserialization of MetricsRecord."""
+def test_metric_record_serialization_deserialization() -> None:
+    """Test serialization and deserialization of MetricRecord."""
     # Prepare
     maker = RecordMaker()
-    original = maker.metrics_record()
+    original = maker.metric_record()
     original["uint64"] = (1 << 63) + 321
     original["list of uint64"] = [maker.get_value("uint") for _ in range(30)]
 
     # Execute
-    proto = metrics_record_to_proto(original)
-    deserialized = metrics_record_from_proto(proto)
+    proto = metric_record_to_proto(original)
+    deserialized = metric_record_from_proto(proto)
 
     # Assert
-    assert isinstance(proto, ProtoMetricsRecord)
+    assert isinstance(proto, ProtoMetricRecord)
     assert original == deserialized
 
 
-def test_configs_record_serialization_deserialization() -> None:
-    """Test serialization and deserialization of ConfigsRecord."""
+def test_config_record_serialization_deserialization() -> None:
+    """Test serialization and deserialization of ConfigRecord."""
     # Prepare
     maker = RecordMaker()
-    original = maker.configs_record()
+    original = maker.config_record()
     original["uint64"] = (1 << 63) + 101
     original["list of uint64"] = [maker.get_value("uint") for _ in range(100)]
 
     # Execute
-    proto = configs_record_to_proto(original)
-    deserialized = configs_record_from_proto(proto)
+    proto = config_record_to_proto(original)
+    deserialized = config_record_from_proto(proto)
 
     # Assert
-    assert isinstance(proto, ProtoConfigsRecord)
+    assert isinstance(proto, ProtoConfigRecord)
     assert original == deserialized
 
 
-def test_recordset_serialization_deserialization() -> None:
-    """Test serialization and deserialization of RecordSet."""
+def test_recorddict_serialization_deserialization() -> None:
+    """Test serialization and deserialization of RecordDict."""
     # Prepare
     maker = RecordMaker(state=0)
-    original = maker.recordset(2, 2, 1)
+    original = maker.recorddict(2, 2, 1)
 
     # Execute
-    proto = recordset_to_proto(original)
-    deserialized = recordset_from_proto(proto)
+    proto = recorddict_to_proto(original)
+    deserialized = recorddict_from_proto(proto)
 
     # Assert
-    assert isinstance(proto, ProtoRecordSet)
+    assert isinstance(proto, ProtoRecordDict)
     assert original == deserialized
 
 
@@ -357,7 +373,7 @@ def test_recordset_serialization_deserialization() -> None:
     "content_fn, error_fn",
     [
         (
-            lambda maker: maker.recordset(1, 1, 1),
+            lambda maker: maker.recorddict(1, 1, 1),
             None,
         ),  # check when only content is set
         (None, lambda code: Error(code=code)),  # check when only error is set
@@ -368,7 +384,7 @@ def test_message_serialization_deserialization(
         [
             RecordMaker,
         ],
-        RecordSet,
+        RecordDict,
     ],
     error_fn: Callable[[int], Error],
 ) -> None:
@@ -376,9 +392,9 @@ def test_message_serialization_deserialization(
     # Prepare
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
-    metadata.dst_node_id = 0  # Assume driver node
+    metadata.dst_node_id = SUPERLINK_NODE_ID  # Assume SuperLink node ID
 
-    original = Message(
+    original = make_message(
         metadata=metadata,
         content=None if content_fn is None else content_fn(maker),
         error=None if error_fn is None else error_fn(0),
@@ -407,7 +423,7 @@ def test_context_serialization_deserialization() -> None:
         run_id=0,
         node_id=1,
         node_config=maker.user_config(),
-        state=maker.recordset(1, 1, 1),
+        state=maker.recorddict(1, 1, 1),
         run_config=maker.user_config(),
     )
 

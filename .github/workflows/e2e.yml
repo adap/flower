@@ -46,7 +46,9 @@ jobs:
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        run: python -m poetry install
+        run: |
+          python -m poetry install --all-extras
+          python -m pip install -U setuptools==70.3.0
       - name: Build wheel
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./dev/build.sh
@@ -205,7 +207,7 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: ${{ (matrix.directory == 'e2e-fastai') && '3.10' || '3.9' }}
       - name: Install build tools
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |

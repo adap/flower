@@ -4,7 +4,7 @@ isort:skip_file
 """
 import builtins
 import flwr.proto.error_pb2
-import flwr.proto.recordset_pb2
+import flwr.proto.recorddict_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -22,13 +22,13 @@ class Message(google.protobuf.message.Message):
     @property
     def metadata(self) -> global___Metadata: ...
     @property
-    def content(self) -> flwr.proto.recordset_pb2.RecordSet: ...
+    def content(self) -> flwr.proto.recorddict_pb2.RecordDict: ...
     @property
     def error(self) -> flwr.proto.error_pb2.Error: ...
     def __init__(self,
         *,
         metadata: typing.Optional[global___Metadata] = ...,
-        content: typing.Optional[flwr.proto.recordset_pb2.RecordSet] = ...,
+        content: typing.Optional[flwr.proto.recorddict_pb2.RecordDict] = ...,
         error: typing.Optional[flwr.proto.error_pb2.Error] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["content",b"content","error",b"error","metadata",b"metadata"]) -> builtins.bool: ...
@@ -77,7 +77,7 @@ class Context(google.protobuf.message.Message):
     @property
     def node_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     @property
-    def state(self) -> flwr.proto.recordset_pb2.RecordSet: ...
+    def state(self) -> flwr.proto.recorddict_pb2.RecordDict: ...
     @property
     def run_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     def __init__(self,
@@ -85,7 +85,7 @@ class Context(google.protobuf.message.Message):
         run_id: builtins.int = ...,
         node_id: builtins.int = ...,
         node_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
-        state: typing.Optional[flwr.proto.recordset_pb2.RecordSet] = ...,
+        state: typing.Optional[flwr.proto.recorddict_pb2.RecordDict] = ...,
         run_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["state",b"state"]) -> builtins.bool: ...
@@ -98,7 +98,7 @@ class Metadata(google.protobuf.message.Message):
     MESSAGE_ID_FIELD_NUMBER: builtins.int
     SRC_NODE_ID_FIELD_NUMBER: builtins.int
     DST_NODE_ID_FIELD_NUMBER: builtins.int
-    REPLY_TO_MESSAGE_FIELD_NUMBER: builtins.int
+    REPLY_TO_MESSAGE_ID_FIELD_NUMBER: builtins.int
     GROUP_ID_FIELD_NUMBER: builtins.int
     TTL_FIELD_NUMBER: builtins.int
     MESSAGE_TYPE_FIELD_NUMBER: builtins.int
@@ -107,7 +107,7 @@ class Metadata(google.protobuf.message.Message):
     message_id: typing.Text
     src_node_id: builtins.int
     dst_node_id: builtins.int
-    reply_to_message: typing.Text
+    reply_to_message_id: typing.Text
     group_id: typing.Text
     ttl: builtins.float
     message_type: typing.Text
@@ -118,11 +118,11 @@ class Metadata(google.protobuf.message.Message):
         message_id: typing.Text = ...,
         src_node_id: builtins.int = ...,
         dst_node_id: builtins.int = ...,
-        reply_to_message: typing.Text = ...,
+        reply_to_message_id: typing.Text = ...,
         group_id: typing.Text = ...,
         ttl: builtins.float = ...,
         message_type: typing.Text = ...,
         created_at: builtins.float = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["created_at",b"created_at","dst_node_id",b"dst_node_id","group_id",b"group_id","message_id",b"message_id","message_type",b"message_type","reply_to_message",b"reply_to_message","run_id",b"run_id","src_node_id",b"src_node_id","ttl",b"ttl"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["created_at",b"created_at","dst_node_id",b"dst_node_id","group_id",b"group_id","message_id",b"message_id","message_type",b"message_type","reply_to_message_id",b"reply_to_message_id","run_id",b"run_id","src_node_id",b"src_node_id","ttl",b"ttl"]) -> None: ...
 global___Metadata = Metadata
