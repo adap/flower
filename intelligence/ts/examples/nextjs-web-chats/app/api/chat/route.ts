@@ -6,6 +6,10 @@ export async function POST(req: Request) {
     const message = await chatWithHistory(question);
     return new Response(JSON.stringify({ message }), { status: 200 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500 });
+    console.error('Error in /api/chat:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to process the request. Please try again later.' }),
+      { status: 500 }
+    );
   }
 }

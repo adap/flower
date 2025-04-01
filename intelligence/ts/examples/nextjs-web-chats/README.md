@@ -59,3 +59,25 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
   - Calls the FlowerIntelligence client from `@flwr/flwr` on each request without appending messages to a global history.
   - Renders a transient chat UI where each new interaction is processed without prior context.
 - **Use Case:** Ideal for scenarios where a stateless chat experience is desired, such as quick tests or single-turn interactions without historical context.
+
+## Troubleshooting
+
+### Known Issue: Transformers.js Engine Fails to Load Model
+
+If you encounter the following error:
+
+```
+Transformers.js engine failed with: Error: Load model from flower/intelligence/ts/examples/nextjs-web-chats/node_modules/@huggingface/transformers/.cache/onnx-community/Llama-3.2-1B-Instruct/onnx/model_q4.onnx failed: Protobuf parsing failed.
+```
+
+This is a known issue with the `@huggingface/transformers` cache. To resolve it, delete the `.cache` folder:
+
+```bash
+rm -rf node_modules/@huggingface/transformers/.cache
+```
+
+After deleting the cache, restart the application:
+
+```bash
+npm run dev
+```

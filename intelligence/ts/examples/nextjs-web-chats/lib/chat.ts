@@ -8,14 +8,23 @@ export const history: Message[] = [
 ];
 
 export async function chatWithHistory(question: string): Promise<string> {
-  history.push({ role: 'user', content: question });
-  const response: ChatResponseResult = await fi.chat({
-    messages: history,
-  });
-  if (response.ok) {
+  try {
+    history.push({ role: 'user', content: question });
+    const response: ChatResponseResult = await fi.chat({
+      messages: history,
+    });
+    if (!response || (response.ok && !response.message)) {
+      throw new Error('Invalid response structure from the chat service.');
+    }
+    if (!response.ok) {
+      console.error(response);
+      throw new Error('Failed to get a valid response.');
+    }
+
     history.push(response.message);
     return response.message.content;
-  } else {
-    throw new Error('Failed to get a valid response.');
+  } catch (error) {
+    console.error('Error in chatWithHistory:', error);
+    throw new Error('Failed to get a valid response from the chat service.');
   }
 }
