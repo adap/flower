@@ -1,4 +1,4 @@
-name: Draft release
+name: Framework Draft Release
 
 on:
   push:
