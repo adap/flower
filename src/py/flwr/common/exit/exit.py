@@ -37,13 +37,13 @@ def flwr_exit(
 ) -> NoReturn:
     """Handle application exit with an optional message.
 
-    The exit message logged and displayed will follow this structure:
+    The exit message logged and displayed will follow this structure::
 
-    >>> Exit Code: <code>
-    >>> <message>
-    >>> <short-help-message>
-    >>>
-    >>> For more information, visit: <help-page-url>
+        Exit Code: <code>
+        <message>
+        <short-help-message>
+
+        For more information, visit: <help-page-url>
 
     - `<code>`: The unique exit code representing the termination reason.
     - `<message>`: Optional context or additional information about the exit.

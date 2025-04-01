@@ -57,12 +57,12 @@ class LocalDpMod:
 
     Examples
     --------
-    Create an instance of the local DP mod and add it to the client-side mods:
+    Create an instance of the local DP mod and add it to the client-side mods::
 
-    >>> local_dp_mod = LocalDpMod( ... )
-    >>> app = fl.client.ClientApp(
-    >>>     client_fn=client_fn, mods=[local_dp_mod]
-    >>> )
+        local_dp_mod = LocalDpMod( ... )
+        app = fl.client.ClientApp(
+            client_fn=client_fn, mods=[local_dp_mod]
+        )
     """
 
     def __init__(

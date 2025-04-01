@@ -52,6 +52,30 @@ GRID_USAGE_EXAMPLE = """
                     # Your existing ServerApp code ...
 """
 
+BOTH_MAIN_FN_SERVER_FN_PROVIDED_ERROR_MSG = (
+    "Use either a custom main function or a `Strategy`, but not both."
+    """
+
+Use the `ServerApp` with an existing `Strategy`:
+
+    server_config = ServerConfig(num_rounds=3)
+    strategy = FedAvg()
+
+    app = ServerApp(
+        server_config=server_config,
+        strategy=strategy,
+    )
+
+Use the `ServerApp` with a custom main function:
+
+    app = ServerApp()
+
+    @app.main()
+    def main(grid: Grid, context: Context) -> None:
+        print("ServerApp running")
+"""
+)
+
 DRIVER_DEPRECATION_MSG = """
             The `Driver` class is deprecated, it will be removed in a future release.
 """
@@ -70,25 +94,25 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
     Examples
     --------
-    Use the ``ServerApp`` with an existing ``Strategy``:
+    Use the ``ServerApp`` with an existing ``Strategy``::
 
-    >>> def server_fn(context: Context):
-    >>>     server_config = ServerConfig(num_rounds=3)
-    >>>     strategy = FedAvg()
-    >>>     return ServerAppComponents(
-    >>>         strategy=strategy,
-    >>>         server_config=server_config,
-    >>>     )
-    >>>
-    >>> app = ServerApp(server_fn=server_fn)
+        def server_fn(context: Context):
+            server_config = ServerConfig(num_rounds=3)
+            strategy = FedAvg()
+            return ServerAppComponents(
+                strategy=strategy,
+                server_config=server_config,
+            )
 
-    Use the ``ServerApp`` with a custom main function:
+        app = ServerApp(server_fn=server_fn)
 
-    >>> app = ServerApp()
-    >>>
-    >>> @app.main()
-    >>> def main(grid: Grid, context: Context) -> None:
-    >>>    print("ServerApp running")
+    Use the ``ServerApp`` with a custom main function::
+
+        app = ServerApp()
+
+        @app.main()
+        def main(grid: Grid, context: Context) -> None:
+           print("ServerApp running")
     """
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -156,38 +180,19 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
         Examples
         --------
-        >>> app = ServerApp()
-        >>>
-        >>> @app.main()
-        >>> def main(grid: Grid, context: Context) -> None:
-        >>>    print("ServerApp running")
+        ::
+
+            app = ServerApp()
+
+            @app.main()
+            def main(grid: Grid, context: Context) -> None:
+                print("ServerApp running")
         """
 
         def main_decorator(main_fn: ServerAppCallable) -> ServerAppCallable:
             """Register the main fn with the ServerApp object."""
             if self._server or self._config or self._strategy or self._client_manager:
-                raise ValueError(
-                    """Use either a custom main function or a `Strategy`, but not both.
-
-                    Use the `ServerApp` with an existing `Strategy`:
-
-                    >>> server_config = ServerConfig(num_rounds=3)
-                    >>> strategy = FedAvg()
-                    >>>
-                    >>> app = ServerApp(
-                    >>>     server_config=server_config,
-                    >>>     strategy=strategy,
-                    >>> )
-
-                    Use the `ServerApp` with a custom main function:
-
-                    >>> app = ServerApp()
-                    >>>
-                    >>> @app.main()
-                    >>> def main(grid: Grid, context: Context) -> None:
-                    >>>    print("ServerApp running")
-                    """,
-                )
+                raise ValueError(BOTH_MAIN_FN_SERVER_FN_PROVIDED_ERROR_MSG)
 
             sig = inspect.signature(main_fn)
             param = list(sig.parameters.values())[0]
@@ -219,17 +224,19 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
 
         Examples
         --------
-        >>> app = ServerApp()
-        >>>
-        >>> @app.lifespan()
-        >>> def lifespan(context: Context) -> None:
-        >>>     # Perform initialization tasks before the app starts
-        >>>     print("Initializing ServerApp")
-        >>>
-        >>>     yield  # ServerApp is running
-        >>>
-        >>>     # Perform cleanup tasks after the app stops
-        >>>     print("Cleaning up ServerApp")
+        ::
+
+            app = ServerApp()
+
+            @app.lifespan()
+            def lifespan(context: Context) -> None:
+                # Perform initialization tasks before the app starts
+                print("Initializing ServerApp")
+
+                yield  # ServerApp is running
+
+                # Perform cleanup tasks after the app stops
+                print("Cleaning up ServerApp")
         """
 
         def lifespan_decorator(
