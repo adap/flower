@@ -13,14 +13,17 @@ A Next.js application (using the App Router, TypeScript, and TailwindCSS) demons
 
 ## Setup & Installation
 
-   ```bash
-   npm install
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Chat Pages Specificities
+
 ### 1. **API Chat (/api-chat)**
+
 - **Approach:** Client component that sends questions to an API route.
 - **Functionality:**
   - Uses local state to maintain the chat log.
@@ -29,6 +32,7 @@ A Next.js application (using the App Router, TypeScript, and TailwindCSS) demons
 - **Use Case:** Ideal for separating client and server logic with API calls.
 
 ### 2. **Server-side Chat (/server-side-chat)**
+
 - **Approach:** Server-rendered page using server actions.
 - **Functionality:**
   - Renders chat history on the server.
@@ -39,6 +43,7 @@ A Next.js application (using the App Router, TypeScript, and TailwindCSS) demons
 - **Use Case:** Perfect when you need server-side rendering for SEO or performance while still retaining interactive elements.
 
 ### 3. **Client-side Chat (/client-side-chat)**
+
 - **Approach:** Fully client-side component that directly consumes the @flwr/flwr client.
 - **Functionality:**
   - Uses React hooks (state and effects) to handle messages.
@@ -47,6 +52,7 @@ A Next.js application (using the App Router, TypeScript, and TailwindCSS) demons
 - **Use Case:** Ideal when you want to handle all interactions on the client for a more dynamic experience.
 
 ### 4. **Client-side No History Chat (/client-side-no-history-chat)**
+
 - **Approach:** Fully client-side component that directly consumes the @flwr/flwr client without utilizing a shared or persistent conversation history.
 - **Functionality:**
   - Uses React hooks (state and effects) to manage messages independently for each session.
