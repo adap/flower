@@ -45,6 +45,12 @@ export default async function ServerSideChatPage() {
           ))}
       </div>
 
+      {/* Explanation for no visual feedback */}
+      <div className="p-4 text-sm text-gray-500 dark:text-gray-400">
+        Note: There is no visual feedback while the server processes your question. Please wait for
+        the response to appear.
+      </div>
+
       {/* Chat Form */}
       <ChatForm action={submitChat} />
     </div>
