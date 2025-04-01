@@ -1,4 +1,4 @@
-name: Framework
+name: Framework Python
 
 on:
   push:

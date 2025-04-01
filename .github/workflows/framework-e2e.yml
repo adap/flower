@@ -1,4 +1,4 @@
-name: E2E
+name: Framework E2E
 
 on:
   push:
@@ -33,7 +33,7 @@ jobs:
               - 'framework/**/*'
               - 'src/**/*'
               - '.github/workflows/framework.yml'
-              - '.github/workflows/e2e.yml'
+              - '.github/workflows/framework-e2e.yml'
 
   wheel:
     runs-on: ubuntu-22.04
