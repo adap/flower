@@ -1,4 +1,4 @@
-name: Framework Cache cleanup
+name: Framework Cache Cleanup
 
 on:
   workflow_dispatch
