@@ -131,17 +131,20 @@ struct ChatBubble: View {
                 .foregroundColor(.gray)
             }
           }.padding(.bottom, 4)
-
-          if isEditing {
-            TextEditor(text: $editedMessage)
-              .padding()
-              .textEditorStyle(.plain)
-              .lineSpacing(5)
-              .font(.custom("HelveticaNeue", size: 14))
-              .background(Color.white)
-              .cornerRadius(10)
-          } else {
-            Text(message.message.content)
+          
+          HStack {
+            if isEditing {
+              TextEditor(text: $editedMessage)
+                .padding()
+                .textEditorStyle(.plain)
+                .lineSpacing(5)
+                .font(.custom("HelveticaNeue", size: 14))
+                .background(Color.white)
+                .cornerRadius(10)
+            } else {
+              Text(message.message.content)
+            }
+            Spacer(minLength: 200)
           }
         }
         .padding()
@@ -168,8 +171,8 @@ struct ChatBubble: View {
               .padding(8)
           }
           .padding()
-          .frame(maxWidth: 300, alignment: .leading)
-        Spacer()
+          .frame(alignment: .leading)
+        Spacer(minLength: 200)
       }
     }
   }

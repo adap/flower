@@ -179,7 +179,7 @@ struct ChatBubble: View {
           .frame(alignment: .leading)
         Spacer()
       }
-    }
+    }.padding(.trailing)
   }
 }
 

@@ -88,7 +88,7 @@ struct ChatListView: View {
       content:
         "You are a helpful, respectful and honest assistant, except that you answer in Python language."
     ),ChatMessage(
-      role: "system",
+      role: "user",
       content:
         "You are a helpful, respectful and honest assistant, except that you answer in Python language."
     ),ChatMessage(

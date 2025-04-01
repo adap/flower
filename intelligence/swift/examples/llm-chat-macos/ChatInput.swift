@@ -32,6 +32,9 @@ struct ChatInput: View {
 
                 TextField("Type a message...", text: $userInput)
                     .textFieldStyle(PlainTextFieldStyle())
+                    .onSubmit {
+                      sendMessage()
+                    }
 
                 Button(action: {
                     sendMessage()
