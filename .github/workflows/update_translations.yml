@@ -75,7 +75,7 @@ jobs:
 
       - name: Create Pull Request
         if: steps.calculate_diff.outputs.additions > 228 && steps.calculate_diff.outputs.deletions > 60
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ env.branch-name }}
