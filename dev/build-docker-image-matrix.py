@@ -18,9 +18,9 @@ Workflow Details:
 - **Unstable**: Triggered on main branch commits. Builds simplified matrix (latest Python, Ubuntu only).
 """
 
-import sys
 import argparse
 import json
+import sys
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
@@ -50,7 +50,7 @@ SUPPORTED_PYTHON_VERSIONS = [
     LATEST_SUPPORTED_PYTHON_VERSION,
 ]
 
-DOCKERFILE_ROOT = "src/docker"
+DOCKERFILE_ROOT = "framework/docker"
 
 
 @dataclass
