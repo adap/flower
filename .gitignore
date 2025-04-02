@@ -21,7 +21,7 @@ baselines/datasets/leaf
 Documentation
 
 # Exclude ee package
-src/py/flwr/ee
+framework/py/flwr/ee
 
 # macOS
 .DS_Store
