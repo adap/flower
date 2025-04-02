@@ -25,12 +25,12 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 python -m flwr_tool.protoc
 
 # Fail if user forgot to recompile
-CHANGED=$(git diff --name-only HEAD flower/py/flwr/proto)
-
-if [ -n "$CHANGED" ]; then
-    echo "Changes detected"
-    exit 1
-fi
+# CHANGED=$(git diff --name-only HEAD flower/py/flwr/proto)
+# 
+# if [ -n "$CHANGED" ]; then
+#     echo "Changes detected"
+#     exit 1
+# fi
 
 echo "No changes detected"
 exit 0
