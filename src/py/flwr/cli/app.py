@@ -20,6 +20,7 @@ from typer.main import get_command
 
 from .build import build
 from .install import install
+from .list_apps import list_apps
 from .log import log
 from .login import login
 from .ls import ls
@@ -39,6 +40,7 @@ app = typer.Typer(
 app.command()(new)
 app.command()(run)
 app.command()(build)
+app.command()(list_apps)
 app.command()(install)
 app.command()(log)
 app.command()(ls)
