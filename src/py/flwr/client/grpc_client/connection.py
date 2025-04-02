@@ -21,7 +21,7 @@ from contextlib import contextmanager
 from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Optional, Union, cast
+from typing import Callable, Optional, Sequence, Union, cast
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -60,6 +60,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
     authentication_keys: Optional[  # pylint: disable=unused-argument
         tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
+    client_metadata: Optional[Sequence[tuple[str, Union[str, bytes]]]] = None, # pylint: disable=unused-argument
 ) -> Iterator[
     tuple[
         Callable[[], Optional[Message]],
@@ -97,6 +98,10 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
         established to an SSL-enabled Flower server.
     authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
         Client authentication is not supported for this transport type.
+    client_metadata : Optional[Sequence[tuple[str, Union[str, bytes]]]] (default: None)
+        Metadata to be sent to the server in the form of key-value pairs. If provided, 
+        GprcClientProxy retrieves this metadata, which can then be accessed through 
+        client_manager. This attribute can only be used in grpc-bidi.
 
     Returns
     -------
@@ -135,7 +140,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
     )
     stub = FlowerServiceStub(channel)
 
-    server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
+    server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None), metadata=client_metadata)
 
     def receive() -> Message:
         # Receive ServerMessage proto

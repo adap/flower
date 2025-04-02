@@ -21,7 +21,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from copy import copy
 from logging import ERROR, INFO, WARN
-from typing import Callable, Optional, TypeVar, Union
+from typing import Callable, Optional, Sequence, TypeVar, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
@@ -87,6 +87,9 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     authentication_keys: Optional[  # pylint: disable=unused-argument
         tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
+    client_metadata: Optional[
+        Sequence[tuple[str, Union[str, bytes]]]
+    ] = None, # pylint: disable=unused-argument
 ) -> Iterator[
     tuple[
         Callable[[], Optional[Message]],
@@ -122,6 +125,8 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         Flower server. Bytes won't work for the REST API.
     authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
         Client authentication is not supported for this transport type.
+    client_metadata : Optional[Sequence[tuple[str, Union[str, bytes]]]] (default: None)
+        Unused argument present for compatibilty.
 
     Returns
     -------
