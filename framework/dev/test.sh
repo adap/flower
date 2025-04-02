@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 echo "=== test.sh ==="
 
@@ -12,55 +12,55 @@ echo "RUN_FULL_TEST: $RUN_FULL_TEST"
 echo "- Start Python checks"
 
 echo "- clang-format:  start"
-clang-format --Werror --dry-run src/proto/flwr/proto/*
+clang-format --Werror --dry-run proto/flwr/proto/*
 echo "- clang-format:  done"
 
 echo "- isort: start"
 if $RUN_FULL_TEST; then
-    python -m isort --check-only --skip src/py/flwr/proto src/py/flwr framework/e2e
+    python -m isort --check-only --skip py/flwr/proto py/flwr e2e
 else
-    python -m isort --check-only --skip src/py/flwr/proto src/py/flwr
+    python -m isort --check-only --skip py/flwr/proto py/flwr
 fi
 echo "- isort: done"
 
 echo "- black: start"
 if $RUN_FULL_TEST; then
-    python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr framework/e2e
+    python -m black --exclude "src\/py\/flwr\/proto" --check py/flwr e2e
 else
-    python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr
+    python -m black --exclude "src\/py\/flwr\/proto" --check py/flwr
 fi
 echo "- black: done"
 
 echo "- init_py_check: start"
-python -m flwr_tool.init_py_check src/py/flwr src/py/flwr_tool
+python -m flwr_tool.init_py_check py/flwr py/flwr_tool
 echo "- init_py_check: done"
 
 echo "- docformatter: start"
-python -m docformatter -c -r src/py/flwr framework/e2e -e src/py/flwr/proto
+python -m docformatter -c -r py/flwr e2e -e py/flwr/proto
 echo "- docformatter:  done"
 
 echo "- docsig: start"
-docsig src/py/flwr
+docsig py/flwr
 echo "- docsig:  done"
 
 echo "- ruff: start"
-python -m ruff check src/py/flwr
+python -m ruff check py/flwr
 echo "- ruff: done"
 
 echo "- mypy: start"
-python -m mypy src/py
+python -m mypy py
 echo "- mypy: done"
 
 echo "- pylint: start"
-python -m pylint --ignore=src/py/flwr/proto src/py/flwr
+python -m pylint --ignore=py/flwr/proto py/flwr
 echo "- pylint: done"
 
 echo "- flake8: start"
-python -m flake8 src/py/flwr
+python -m flake8 py/flwr
 echo "- flake8: done"
 
 echo "- pytest: start"
-python -m pytest --cov=src/py/flwr
+python -m pytest --cov=py/flwr
 echo "- pytest: done"
 
 echo "- All Python checks passed"
@@ -69,7 +69,7 @@ echo "- Start Markdown checks"
 
 if $RUN_FULL_TEST; then
     echo "- mdformat: start"
-    python -m mdformat --check --number framework/docs/source
+    python -m mdformat --check --number docs/source
     echo "- mdformat: done"
 fi
 
@@ -87,7 +87,7 @@ echo "- Start rST checks"
 
 if $RUN_FULL_TEST; then
     echo "- docstrfmt: start"
-    docstrfmt --check framework/docs/source
+    docstrfmt --check docs/source
     echo "- docstrfmt: done"
 fi
 
@@ -97,7 +97,7 @@ echo "- Start license checks"
 
 if $RUN_FULL_TEST; then
     echo "- copyright: start"
-    python -m flwr_tool.check_copyright src/py/flwr
+    python -m flwr_tool.check_copyright py/flwr
     echo "- copyright: done"
 fi
 

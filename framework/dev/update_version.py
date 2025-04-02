@@ -19,10 +19,10 @@ REPLACE_NEXT_VERSION = {
     ],
     "examples/docs/source/conf.py": ['release = "{version}"'],
     "baselines/docs/source/conf.py": ['release = "{version}"'],
-    "src/docker/complete/compose.yml": ["FLWR_VERSION:-{version}"],
-    "src/docker/distributed/client/compose.yml": ["FLWR_VERSION:-{version}"],
-    "src/docker/distributed/server/compose.yml": ["FLWR_VERSION:-{version}"],
-    "src/py/flwr/cli/new/templates/app/pyproject.*.toml.tpl": [
+    "framework/docker/complete/compose.yml": ["FLWR_VERSION:-{version}"],
+    "framework/docker/distributed/client/compose.yml": ["FLWR_VERSION:-{version}"],
+    "framework/docker/distributed/server/compose.yml": ["FLWR_VERSION:-{version}"],
+    "framework/py/flwr/cli/new/templates/app/pyproject.*.toml.tpl": [
         "flwr[simulation]>={version}",
     ],
 }
