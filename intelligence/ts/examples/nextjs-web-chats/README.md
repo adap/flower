@@ -107,3 +107,32 @@ After deleting the cache, restart the application:
 ```bash
 npm run dev
 ```
+
+### Known Issue: CORS Error on Localhost
+
+If you encounter a CORS error while running the application locally, it means the browser is blocking requests to a different origin. To resolve this:
+
+1. **Use a Proxy**:
+
+   - Configure a proxy in your `next.config.ts` to forward API requests to the correct origin:
+
+   ```ts
+   import type { NextConfig } from 'next';
+
+   const nextConfig: NextConfig = {
+     async rewrites() {
+       return [
+         {
+           source: '/api/:path*',
+           destination: 'http://localhost:3000/api/:path*', // Replace with your API server's origin
+         },
+       ];
+     },
+   };
+
+   export default nextConfig;
+   ```
+
+2. **Temporary Workaround**:
+
+   - Use a browser extension like "CORS Unblock" for testing purposes (not recommended for production).
