@@ -28,11 +28,11 @@ class Grid(ABC):
 
     @abstractmethod
     def set_run(self, run_id: int) -> None:
-        """Request a run to the SuperLink with a given `run_id`.
+        """Request a run to the SuperLink with a given ``run_id``.
 
         If a ``Run`` with the specified ``run_id`` exists, a local ``Run``
         object will be created. It enables further functionality
-        in the grid, such as sending ``Message``s.
+        in the grid, such as sending ``Message`` objects.
 
         Parameters
         ----------

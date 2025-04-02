@@ -1,5 +1,6 @@
 # Copyright 2025 Flower Labs GmbH. All Rights Reserved.
-"""Fix provided directory and sub-directories for unsorted __all__ in __init__.py files.
+"""Fix provided directory and sub-directories for unsorted __all__ in
+__init__.py files.
 
 Example:
     python -m flwr_tool.init_py_fix src/py/flwr

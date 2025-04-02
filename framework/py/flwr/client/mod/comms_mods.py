@@ -47,8 +47,8 @@ def arrays_size_mod(
 ) -> Message:
     """Arrays size mod.
 
-    This mod logs the number of array elements transmitted in ``ArrayRecord``s of
-    the message as well as their sizes in bytes.
+    This mod logs the number of array elements transmitted in ``ArrayRecord`` objects
+    of the message as well as their sizes in bytes.
     """
     model_size_stats = {}
     arrays_size_in_bytes = 0
