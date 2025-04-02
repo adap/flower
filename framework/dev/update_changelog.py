@@ -37,8 +37,8 @@ except ModuleNotFoundError:
 
 
 REPO_NAME = "adap/flower"
-BASE_DIR = Path(__file__).parents[2]  # Path to the root of the repository
-CHANGELOG_FILE = BASE_DIR / "framework" / "docs" / "source" / "ref-changelog.md"
+ROOT_DIR = Path(__file__).parents[2]  # Path to the root of the repository
+CHANGELOG_FILE = ROOT_DIR / "framework" / "docs" / "source" / "ref-changelog.md"
 CHANGELOG_SECTION_HEADER = "### Changelog entry"
 
 # Load the TOML configuration
