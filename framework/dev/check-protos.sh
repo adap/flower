@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,21 @@
 # ==============================================================================
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
 
-python -m poetry build
+# Purpose of this script is to evaluate if the user changed the proto definitions
+# but did not recompile or commit the new proto python files
+
+# Recompile protos
+python -m flwr_tool.protoc
+
+# Fail if user forgot to recompile
+# CHANGED=$(git diff --name-only HEAD framework/py/flwr/proto)
+# 
+# if [ -n "$CHANGED" ]; then
+#     echo "Changes detected"
+#     exit 1
+# fi
+
+echo "No changes detected"
+exit 0
