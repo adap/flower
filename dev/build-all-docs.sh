@@ -17,3 +17,6 @@ python dev/build-example-docs.py
 
 cd "$ROOT"
 ./datasets/dev/build-flwr-datasets-docs.sh
+
+cd "$ROOT"
+./framework/dev/build-docs.sh
