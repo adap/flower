@@ -25,9 +25,9 @@ echo "- isort: done"
 
 echo "- black: start"
 if $RUN_FULL_TEST; then
-    python -m black --exclude "src\/py\/flwr\/proto" --check py/flwr e2e
+    python -m black --exclude "py\/flwr\/proto" --check py/flwr e2e
 else
-    python -m black --exclude "src\/py\/flwr\/proto" --check py/flwr
+    python -m black --exclude "py\/flwr\/proto" --check py/flwr
 fi
 echo "- black: done"
 
