@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,7 +57,8 @@ def get_project_dir(
     fab_hash: str,
     flwr_dir: Optional[Union[str, Path]] = None,
 ) -> Path:
-    """Return the project directory based on the given fab_id and fab_version."""
+    """Return the project directory based on the given fab_id and
+    fab_version."""
     # Check the fab_id
     if fab_id.count("/") != 1:
         raise ValueError(
@@ -125,7 +126,8 @@ def fuse_dicts(
 def get_fused_config_from_dir(
     project_dir: Path, override_config: UserConfig
 ) -> UserConfig:
-    """Merge the overrides from a given dict with the config from a Flower App."""
+    """Merge the overrides from a given dict with the config from a Flower
+    App."""
     default_config = get_project_config(project_dir)["tool"]["flwr"]["app"].get(
         "config", {}
     )
@@ -149,8 +151,9 @@ def get_fused_config_from_fab(fab_file: Union[Path, bytes], run: Run) -> UserCon
 def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
     """Merge the overrides from a `Run` with the config from a FAB.
 
-    Get the config using the fab_id and the fab_version, remove the nesting by adding
-    the nested keys as prefixes separated by dots, and fuse it with the override dict.
+    Get the config using the fab_id and the fab_version, remove the
+    nesting by adding the nested keys as prefixes separated by dots, and
+    fuse it with the override dict.
     """
     # Return empty dict if fab_id or fab_version is empty
     if not run.fab_id or not run.fab_version:

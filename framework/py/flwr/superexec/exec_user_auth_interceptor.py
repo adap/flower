@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -66,9 +66,10 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor authentication logic.
 
-        Intercept all unary-unary/unary-stream calls from users and authenticate users
-        by validating auth metadata sent by the user. Continue RPC call if user is
-        authenticated, else, terminate RPC call by setting context to abort.
+        Intercept all unary-unary/unary-stream calls from users and
+        authenticate users by validating auth metadata sent by the user.
+        Continue RPC call if user is authenticated, else, terminate RPC
+        call by setting context to abort.
         """
         # One of the method handlers in
         # `flwr.superexec.exec_servicer.ExecServicer`

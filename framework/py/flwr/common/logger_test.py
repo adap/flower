@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ def test_mirror_output_to_queue() -> None:
 
 
 def test_restore_output() -> None:
-    """Test that stdout and stderr are restored after calling restore_output."""
+    """Test that stdout and stderr are restored after calling
+    restore_output."""
     # Prepare
     log_queue: Queue[Optional[str]] = Queue()
 

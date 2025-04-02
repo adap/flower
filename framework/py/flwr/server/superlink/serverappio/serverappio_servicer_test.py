@@ -251,7 +251,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_push_ins_messages_not_successful_if_not_running(
         self, num_transitions: int
     ) -> None:
-        """Test `PushInsMessages` not successful if RunStatus is not running."""
+        """Test `PushInsMessages` not successful if RunStatus is not
+        running."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord())
@@ -408,7 +409,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_push_serverapp_outputs_not_successful_if_not_running(
         self, num_transitions: int
     ) -> None:
-        """Test `PushServerAppOutputs` not successful if RunStatus is not running."""
+        """Test `PushServerAppOutputs` not successful if RunStatus is not
+        running."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 

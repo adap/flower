@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -239,8 +239,8 @@ def has_valid_sub_status(status: RunStatus) -> bool:
 def create_message_error_unavailable_res_message(
     ins_metadata: Metadata, error_type: str
 ) -> Message:
-    """Generate an error Message that the SuperLink returns carrying the specified
-    error."""
+    """Generate an error Message that the SuperLink returns carrying the
+    specified error."""
     current_time = now().timestamp()
     ttl = max(ins_metadata.ttl - (current_time - ins_metadata.created_at), 0)
     metadata = Metadata(
@@ -273,8 +273,8 @@ def create_message_error_unavailable_res_message(
 
 
 def create_message_error_unavailable_ins_message(reply_to_message_id: UUID) -> Message:
-    """Error to indicate that the enquired Message had expired before reply arrived or
-    that it isn't found."""
+    """Error to indicate that the enquired Message had expired before reply
+    arrived or that it isn't found."""
     metadata = Metadata(
         run_id=0,  # Unknown
         message_id=str(uuid4()),
@@ -350,7 +350,8 @@ def verify_found_message_replies(
     current_time: Optional[float] = None,
     update_set: bool = True,
 ) -> dict[UUID, Message]:
-    """Verify found Message replies and generate error Message for invalid ones.
+    """Verify found Message replies and generate error Message for invalid
+    ones.
 
     Parameters
     ----------
@@ -395,9 +396,10 @@ def check_node_availability_for_in_message(
     current_time: Optional[float] = None,
     update_set: bool = True,
 ) -> dict[UUID, Message]:
-    """Check node availability for given Message and generate error reply Message if
-    unavailable. A Message error indicating node unavailability will be generated for
-    each given Message whose destination node is offline or non-existent.
+    """Check node availability for given Message and generate error reply
+    Message if unavailable. A Message error indicating node unavailability will
+    be generated for each given Message whose destination node is offline or
+    non-existent.
 
     Parameters
     ----------

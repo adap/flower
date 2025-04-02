@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -139,7 +139,8 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_push_simulation_outputs_not_successful_if_not_running(
         self, num_transitions: int
     ) -> None:
-        """Test `PushSimulationOutputs` not successful if RunStatus is not running."""
+        """Test `PushSimulationOutputs` not successful if RunStatus is not
+        running."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 

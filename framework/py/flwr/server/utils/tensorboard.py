@@ -1,4 +1,4 @@
-# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -87,7 +87,8 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
             return strategy_class
 
         class TBWrapper(strategy_class):  # type: ignore
-            """Strategy wrapper that hooks into some methods for TensorBoard logging."""
+            """Strategy wrapper that hooks into some methods for TensorBoard
+            logging."""
 
             def aggregate_evaluate(
                 self,
@@ -95,7 +96,8 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
                 results: list[tuple[ClientProxy, EvaluateRes]],
                 failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
             ) -> tuple[Optional[float], dict[str, Scalar]]:
-                """Hooks into aggregate_evaluate for TensorBoard logging purpose."""
+                """Hooks into aggregate_evaluate for TensorBoard logging
+                purpose."""
                 # Execute decorated function and extract results for logging
                 # They will be returned at the end of this function but also
                 # used for logging

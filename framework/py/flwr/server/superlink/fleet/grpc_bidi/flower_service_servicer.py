@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -87,7 +87,8 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         request_iterator: Iterator[ClientMessage],
         context: grpc.ServicerContext,
     ) -> Iterator[ServerMessage]:
-        """Facilitate bi-directional streaming of messages between server and client.
+        """Facilitate bi-directional streaming of messages between server and
+        client.
 
         Invoked by each gRPC client which participates in the network.
 

@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +44,8 @@ class FedXgbNnAvg(FedAvg):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Federated XGBoost [Ma et al., 2023] strategy.
 
-        Implementation based on https://arxiv.org/abs/2304.07537.
+        Implementation based on
+        https://arxiv.org/abs/2304.07537.
         """
         super().__init__(*args, **kwargs)
         warn_deprecated_feature("`FedXgbNnAvg` strategy")

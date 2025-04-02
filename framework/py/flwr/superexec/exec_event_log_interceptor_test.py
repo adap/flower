@@ -48,7 +48,8 @@ class DummyLogPlugin(EventLogWriterPlugin):
         user_info: Optional[UserInfo],
         method_name: str,
     ) -> LogEntry:
-        """Compose pre-event log entry from the provided request and context."""
+        """Compose pre-event log entry from the provided request and
+        context."""
         return LogEntry(
             timestamp="before_timestamp",
             actor=Actor(
@@ -68,7 +69,8 @@ class DummyLogPlugin(EventLogWriterPlugin):
         method_name: str,
         response: Optional[Union[GrpcMessage, BaseException]],
     ) -> LogEntry:
-        """Compose post-event log entry from the provided response and context."""
+        """Compose post-event log entry from the provided response and
+        context."""
         return LogEntry(
             timestamp="after_timestamp",
             actor=Actor(
@@ -86,7 +88,8 @@ class DummyLogPlugin(EventLogWriterPlugin):
 
 
 class TestExecEventLogInterceptor(unittest.TestCase):
-    """Test the ExecEventLogInterceptor logging for different RPC call types."""
+    """Test the ExecEventLogInterceptor logging for different RPC call
+    types."""
 
     def setUp(self) -> None:
         """Initialize."""
@@ -149,7 +152,8 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         self.assertEqual(self.log_plugin.logs, expected_logs)
 
     def test_unary_unary_interceptor_exception(self) -> None:
-        """Test unary-unary RPC call when the handler raises a BaseException."""
+        """Test unary-unary RPC call when the handler raises a
+        BaseException."""
         handler_call_details = MagicMock()
         handler_call_details.method = "exception_method"
         expected_method_name = handler_call_details.method
@@ -201,7 +205,8 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         self.assertEqual(self.log_plugin.logs, expected_logs)
 
     def test_unary_stream_interceptor_exception(self) -> None:
-        """Test unary-stream RPC call when the stream handler raises a BaseException."""
+        """Test unary-stream RPC call when the stream handler raises a
+        BaseException."""
         handler_call_details = MagicMock()
         handler_call_details.method = "stream_exception_method"
         expected_method_name = handler_call_details.method

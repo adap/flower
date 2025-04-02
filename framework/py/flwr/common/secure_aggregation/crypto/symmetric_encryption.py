@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -70,10 +70,12 @@ def bytes_to_public_key(public_key_bytes: bytes) -> ec.EllipticCurvePublicKey:
 def generate_shared_key(
     private_key: ec.EllipticCurvePrivateKey, public_key: ec.EllipticCurvePublicKey
 ) -> bytes:
-    """Generate a shared key from a private key (i.e., a secret key) and a public key.
+    """Generate a shared key from a private key (i.e., a secret key) and a
+    public key.
 
-    Generate shared key by exchange function and key derivation function Key derivation
-    function is needed to obtain final shared key of exactly 32 bytes
+    Generate shared key by exchange function and key derivation function
+    Key derivation function is needed to obtain final shared key of
+    exactly 32 bytes
     """
     # Generate a 32 byte urlsafe(for fernet) shared key
     # from own private key and another public key

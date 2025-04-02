@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -84,7 +84,8 @@ class GrpcBridge:
     def _transition(self, next_status: Status) -> None:
         """Validate status transition and set next status.
 
-        The caller of the transition method will have to aquire conditional variable.
+        The caller of the transition method will have to aquire
+        conditional variable.
         """
         if next_status == Status.CLOSED:
             self._status = next_status

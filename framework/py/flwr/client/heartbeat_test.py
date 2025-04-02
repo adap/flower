@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,7 +45,8 @@ class TestStartPingLoopWithFailures(unittest.TestCase):
         self.assertFalse(thread.is_alive())
 
     def test_ping_loop_with_failures_terminates(self) -> None:
-        """Test if the ping loop thread with failures terminates when flagged."""
+        """Test if the ping loop thread with failures terminates when
+        flagged."""
         # Prepare
         exc = grpc.RpcError()
         exc.code = MagicMock(return_value=grpc.StatusCode.UNAVAILABLE)

@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ PROTO_FILES = glob.glob(f"{IN_PATH}/flwr/**/*.proto")
 
 
 def compile_all() -> None:
-    """Compile all protos in the `src/proto` directory.
+    """Compile all protos in the `framework/proto` directory.
 
-    The directory structure of the `src/proto` directory will be mirrored in `src/py`.
+    The directory structure of the `framework/proto` directory will be mirrored in `framework/py`.
     This is needed as otherwise `grpc_tools.protoc` will have broken imports.
     """
     command = [

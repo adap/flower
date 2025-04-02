@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ def check_abort(
     abort_status_list: list[str],
     state: LinkState,
 ) -> Union[str, None]:
-    """Check if the status of the provided `run_id` is in `abort_status_list`."""
+    """Check if the status of the provided `run_id` is in
+    `abort_status_list`."""
     run_status: RunStatus = state.get_run_status({run_id})[run_id]
 
     if run_status.status in abort_status_list:
@@ -60,6 +61,7 @@ def abort_if(
     state: LinkState,
     context: grpc.ServicerContext,
 ) -> None:
-    """Abort context if status of the provided `run_id` is in `abort_status_list`."""
+    """Abort context if status of the provided `run_id` is in
+    `abort_status_list`."""
     msg = check_abort(run_id, abort_status_list, state)
     abort_grpc_context(msg, context)

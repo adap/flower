@@ -50,7 +50,8 @@ def _check_value(value: RecordType) -> None:
 
 
 class _SyncedDict(TypedDict[str, T]):
-    """A synchronized dictionary that mirrors changes to an underlying RecordDict.
+    """A synchronized dictionary that mirrors changes to an underlying
+    RecordDict.
 
     This dictionary ensures that any modifications (set or delete operations)
     are automatically reflected in the associated `RecordDict`. Only values of

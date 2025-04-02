@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -79,7 +79,8 @@ dummy_client_app = ClientApp(
 
 
 def terminate_simulation(f_stop: threading.Event, sleep_duration: int) -> None:
-    """Set event to terminate Simulation Engine after `sleep_duration` seconds."""
+    """Set event to terminate Simulation Engine after `sleep_duration`
+    seconds."""
     sleep(sleep_duration)
     f_stop.set()
 
@@ -88,7 +89,8 @@ def init_state_factory_nodes_mapping(
     num_nodes: int,
     num_messages: int,
 ) -> tuple[LinkStateFactory, NodeToPartitionMapping, dict[UUID, float]]:
-    """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
+    """Instatiate StateFactory, register nodes and pre-insert messages in the
+    state."""
     # Register a state and a run_id in it
     run_id = 1234
     state_factory = LinkStateFactory(":flwr-in-memory-state:")
@@ -277,8 +279,9 @@ class TestFleetSimulationEngineRayBackend(TestCase):
     def test_erroneous_arguments_existing_mapping_but_no_state_factory(self) -> None:
         """Test ValueError if a node mapping is passed but no state.
 
-        Passing a node mapping indicates that (externally) nodes have registered with a
-        state factory. Therefore, that state factory should be passed too.
+        Passing a node mapping indicates that (externally) nodes have
+        registered with a state factory. Therefore, that state factory
+        should be passed too.
         """
         with self.assertRaises(ValueError):
             start_and_shutdown(nodes_mapping={0: 1})
@@ -291,10 +294,10 @@ class TestFleetSimulationEngineRayBackend(TestCase):
     def test_start_and_shutdown_with_message_in_state(self) -> None:
         """Run Simulation Engine with some Message in State.
 
-        This test creates a few nodes and submits a few messages that need to be
-        executed by the Backend. In order for that to happen the asyncio
-        producer/consumer logic must function. This also severs to evaluate a valid
-        ClientApp.
+        This test creates a few nodes and submits a few messages that
+        need to be executed by the Backend. In order for that to happen
+        the asyncio producer/consumer logic must function. This also
+        severs to evaluate a valid ClientApp.
         """
         num_messages = 229
         num_nodes = 59

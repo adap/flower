@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -647,7 +647,8 @@ class StateTest(unittest.TestCase):
         assert len(retrieved_node_ids) == 0
 
     def test_num_message_ins(self) -> None:
-        """Test if num_message_ins returns correct number of not delivered Messages."""
+        """Test if num_message_ins returns correct number of not delivered
+        Messages."""
         # Prepare
         state: LinkState = self.state_factory()
         node_id = state.create_node(1e3)
@@ -678,8 +679,8 @@ class StateTest(unittest.TestCase):
         assert num == 2
 
     def test_num_message_res(self) -> None:
-        """Test if num_message_res returns correct number of not delivered Message
-        replies."""
+        """Test if num_message_res returns correct number of not delivered
+        Message replies."""
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
@@ -763,8 +764,8 @@ class StateTest(unittest.TestCase):
     def test_acknowledge_ping(self) -> None:
         """Test if acknowledge_ping works and get_nodes return online nodes.
 
-        We permit one missed ping (PING_PATIENCE × ping_interval) before marking the
-        node offline, where PING_PATIENCE = 2.
+        We permit one missed ping (PING_PATIENCE × ping_interval) before
+        marking the node offline, where PING_PATIENCE = 2.
         """
         # Prepare
         state: LinkState = self.state_factory()
@@ -799,7 +800,8 @@ class StateTest(unittest.TestCase):
         assert not is_successful
 
     def test_node_unavailable_error(self) -> None:
-        """Test if get_message_res return Message containing node unavailable error."""
+        """Test if get_message_res return Message containing node unavailable
+        error."""
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
@@ -970,8 +972,8 @@ class StateTest(unittest.TestCase):
             assert len(message_list) == 0
 
     def test_get_message_res_expired_message_ins(self) -> None:
-        """Test get_message_res to return error Message if the inquired message has
-        expired."""
+        """Test get_message_res to return error Message if the inquired message
+        has expired."""
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
@@ -996,7 +998,8 @@ class StateTest(unittest.TestCase):
             assert res_msg.error.code == ErrorCode.MESSAGE_UNAVAILABLE
 
     def test_get_message_res_reply_not_ready(self) -> None:
-        """Test get_message_res to return nothing since reply Message isn't present."""
+        """Test get_message_res to return nothing since reply Message isn't
+        present."""
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
@@ -1017,8 +1020,8 @@ class StateTest(unittest.TestCase):
         assert state.num_message_res() == 0
 
     def test_get_message_res_returns_empty_for_missing_message_ins(self) -> None:
-        """Test that get_message_res returns an empty result when the corresponding
-        Message does not exist."""
+        """Test that get_message_res returns an empty result when the
+        corresponding Message does not exist."""
         # Prepare
         state = self.state_factory()
         message_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
@@ -1063,8 +1066,9 @@ class StateTest(unittest.TestCase):
         assert state.num_message_res() == 1
 
     def test_store_message_res_fail_if_dst_src_node_id_mismatch(self) -> None:
-        """Test store_message_res to fail if there is a mismatch between the dst_node_id
-        of orginal Message and the src_node_id of the reply Message."""
+        """Test store_message_res to fail if there is a mismatch between the
+        dst_node_id of orginal Message and the src_node_id of the reply
+        Message."""
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
@@ -1194,8 +1198,8 @@ class StateTest(unittest.TestCase):
         assert log_entry_2 == retrieved_logs
 
     def test_get_serverapp_log_after_timestamp_no_logs(self) -> None:
-        """Test retrieving serverapp logs after a specific timestamp but no logs are
-        found."""
+        """Test retrieving serverapp logs after a specific timestamp but no
+        logs are found."""
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())

@@ -39,7 +39,8 @@ class EventLogWriterPlugin(ABC):
         user_info: Optional[UserInfo],
         method_name: str,
     ) -> LogEntry:
-        """Compose pre-event log entry from the provided request and context."""
+        """Compose pre-event log entry from the provided request and
+        context."""
 
     @abstractmethod
     def compose_log_after_event(  # pylint: disable=too-many-arguments,R0917
@@ -50,7 +51,8 @@ class EventLogWriterPlugin(ABC):
         method_name: str,
         response: Optional[Union[GrpcMessage, BaseException]],
     ) -> LogEntry:
-        """Compose post-event log entry from the provided response and context."""
+        """Compose post-event log entry from the provided response and
+        context."""
 
     @abstractmethod
     def write_log(

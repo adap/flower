@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -254,7 +254,8 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[tuple[float, dict[str, Scalar]]]:
-        """Evaluate model parameters using an evaluation function from the strategy."""
+        """Evaluate model parameters using an evaluation function from the
+        strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
 
@@ -466,5 +467,6 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[tuple[float, dict[str, Scalar]]]:
-        """Evaluate model parameters using an evaluation function from the strategy."""
+        """Evaluate model parameters using an evaluation function from the
+        strategy."""
         return self.strategy.evaluate(server_round, parameters)

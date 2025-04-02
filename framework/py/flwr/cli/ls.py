@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -88,7 +88,8 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """List the details of one provided run ID or all runs in a Flower federation.
+    """List the details of one provided run ID or all runs in a Flower
+    federation.
 
     The following details are displayed:
 

@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,5 +26,6 @@ def secagg_mod(
     ctxt: Context,
     call_next: ClientAppCallable,
 ) -> Message:
-    """Handle incoming message and return results, following the SecAgg protocol."""
+    """Handle incoming message and return results, following the SecAgg
+    protocol."""
     return secaggplus_mod(msg, ctxt, call_next)

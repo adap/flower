@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -212,7 +212,8 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
     ) -> Callable[
         [Callable[[Context], Iterator[None]]], Callable[[Context], Iterator[None]]
     ]:
-        """Return a decorator that registers the lifespan fn with the server app.
+        """Return a decorator that registers the lifespan fn with the server
+        app.
 
         The decorated function should accept a `Context` object and use `yield`
         to define enter and exit behavior.

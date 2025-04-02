@@ -40,9 +40,9 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor logging logic.
 
-        Intercept all unary-unary/unary-stream calls from users and log the event.
-        Continue RPC call if event logger is enabled on the SuperLink, else, terminate
-        RPC call by setting context to abort.
+        Intercept all unary-unary/unary-stream calls from users and log
+        the event. Continue RPC call if event logger is enabled on the
+        SuperLink, else, terminate RPC call by setting context to abort.
         """
         # One of the method handlers in
         # `flwr.superexec.exec_servicer.ExecServicer`

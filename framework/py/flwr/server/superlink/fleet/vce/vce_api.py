@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ NodeToPartitionMapping = dict[int, int]
 def _register_nodes(
     num_nodes: int, state_factory: LinkStateFactory
 ) -> NodeToPartitionMapping:
-    """Register nodes with the StateFactory and create node-id:partition-id mapping."""
+    """Register nodes with the StateFactory and create node-id:partition-id
+    mapping."""
     nodes_mapping: NodeToPartitionMapping = {}
     state = state_factory.state()
     for i in range(num_nodes):
@@ -64,7 +65,8 @@ def _register_node_info_stores(
     run: Run,
     app_dir: Optional[str] = None,
 ) -> dict[int, DeprecatedRunInfoStore]:
-    """Create DeprecatedRunInfoStore objects and register the context for the run."""
+    """Create DeprecatedRunInfoStore objects and register the context for the
+    run."""
     node_info_store: dict[int, DeprecatedRunInfoStore] = {}
     num_partitions = len(set(nodes_mapping.values()))
     for node_id, partition_id in nodes_mapping.items():
@@ -92,8 +94,8 @@ def worker(
     backend: Backend,
     f_stop: threading.Event,
 ) -> None:
-    """Process messages from the queue, execute them, update context, and enqueue
-    replies."""
+    """Process messages from the queue, execute them, update context, and
+    enqueue replies."""
     while not f_stop.is_set():
         out_mssg = None
         try:

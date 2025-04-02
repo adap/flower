@@ -1,4 +1,4 @@
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -121,7 +121,8 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         results: list[tuple[ClientProxy, FitRes]],
         failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
     ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
-        """Aggregate training results as in DPFedAvgFixed and update clip norms."""
+        """Aggregate training results as in DPFedAvgFixed and update clip
+        norms."""
         if failures:
             return None, {}
         new_global_model = super().aggregate_fit(server_round, results, failures)

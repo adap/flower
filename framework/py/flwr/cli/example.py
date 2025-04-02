@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ from .utils import prompt_options
 def example() -> None:
     """Clone a Flower example.
 
-    All examples available in the Flower repository are available through this command.
+    All examples available in the Flower repository are available
+    through this command.
     """
     # Load list of examples directly from GitHub
     url = "https://api.github.com/repos/adap/flower/git/trees/main"

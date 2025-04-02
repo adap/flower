@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -62,9 +62,9 @@ def start_ping_loop(
 ) -> threading.Thread:
     """Start a ping loop in a separate thread.
 
-    This function initializes a new thread that runs a ping loop, allowing for
-    asynchronous ping operations. The loop can be terminated through the provided stop
-    event.
+    This function initializes a new thread that runs a ping loop,
+    allowing for asynchronous ping operations. The loop can be
+    terminated through the provided stop event.
     """
     thread = threading.Thread(
         target=_ping_loop, args=(ping_fn, stop_event), daemon=True

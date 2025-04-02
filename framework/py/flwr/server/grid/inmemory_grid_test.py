@@ -196,7 +196,8 @@ class TestInMemoryGrid(unittest.TestCase):
         self.assertEqual(len(ret_msgs), 0)
 
     def test_message_store_consistency_after_push_pull_sqlitestate(self) -> None:
-        """Test messages are deleted in sqlite state once messages are pulled."""
+        """Test messages are deleted in sqlite state once messages are
+        pulled."""
         # Prepare
         state = LinkStateFactory("").state()
         run_id = state.create_run("", "", "", {}, ConfigRecord())
@@ -222,7 +223,8 @@ class TestInMemoryGrid(unittest.TestCase):
         self.assertEqual(num_msg_ins, 0)
 
     def test_message_store_consistency_after_push_pull_inmemory_state(self) -> None:
-        """Test messages are deleted in in-memory state once messages are pulled."""
+        """Test messages are deleted in in-memory state once messages are
+        pulled."""
         # Prepare
         state_factory = LinkStateFactory(":flwr-in-memory-state:")
         state = state_factory.state()

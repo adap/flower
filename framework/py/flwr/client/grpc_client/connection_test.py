@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -98,8 +98,8 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
 def test_integration_connection() -> None:
     """Create a server and establish a connection to it.
 
-    Purpose of this integration test is to simulate multiple clients with multiple
-    roundtrips between server and client.
+    Purpose of this integration test is to simulate multiple clients
+    with multiple roundtrips between server and client.
     """
     # Prepare
     port = unused_tcp_port()

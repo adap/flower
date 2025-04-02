@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -62,8 +62,8 @@ def register_exit_handlers(
     def graceful_exit_handler(signalnum: int, _frame: FrameType) -> None:
         """Exit handler to be registered with `signal.signal`.
 
-        When called will reset signal handler to original signal handler from
-        default_handlers.
+        When called will reset signal handler to original signal handler
+        from default_handlers.
         """
         # Reset to default handler
         signal.signal(signalnum, default_handlers[signalnum])  # type: ignore

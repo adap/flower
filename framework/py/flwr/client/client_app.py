@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -82,7 +82,8 @@ def _empty_lifespan(_: Context) -> Iterator[None]:
 
 
 class ClientAppException(Exception):
-    """Exception raised when an exception is raised while executing a ClientApp."""
+    """Exception raised when an exception is raised while executing a
+    ClientApp."""
 
     def __init__(self, message: str):
         ex_name = self.__class__.__name__
@@ -332,7 +333,8 @@ class ClientApp:
     ) -> Callable[
         [Callable[[Context], Iterator[None]]], Callable[[Context], Iterator[None]]
     ]:
-        """Return a decorator that registers the lifespan fn with the client app.
+        """Return a decorator that registers the lifespan fn with the client
+        app.
 
         The decorated function should accept a `Context` object and use `yield`
         to define enter and exit behavior.

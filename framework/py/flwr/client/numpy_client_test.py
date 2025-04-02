@@ -1,4 +1,4 @@
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,13 +40,15 @@ class OverridingClient(NumPyClient):
     def fit(
         self, parameters: NDArrays, config: dict[str, Scalar]
     ) -> tuple[NDArrays, int, dict[str, Scalar]]:
-        """Simulate training by returning empty weights, 0 samples, empty metrics."""
+        """Simulate training by returning empty weights, 0 samples, empty
+        metrics."""
         return [], 0, {}
 
     def evaluate(
         self, parameters: NDArrays, config: dict[str, Scalar]
     ) -> tuple[float, int, dict[str, Scalar]]:
-        """Simulate evaluate by returning 0.0 loss, 0 samples, empty metrics."""
+        """Simulate evaluate by returning 0.0 loss, 0 samples, empty
+        metrics."""
         return 0.0, 0, {}
 
 

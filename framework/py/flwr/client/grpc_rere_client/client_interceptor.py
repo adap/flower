@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
     ) -> grpc.Call:
         """Flower client interceptor.
 
-        Intercept unary call from client and add necessary authentication header in the
-        RPC metadata.
+        Intercept unary call from client and add necessary
+        authentication header in the RPC metadata.
         """
         metadata = list(client_call_details.metadata or [])
 

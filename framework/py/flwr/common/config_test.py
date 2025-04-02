@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ def test_get_flwr_dir_with_provided_path() -> None:
 
 
 def test_get_flwr_dir_without_provided_path() -> None:
-    """Test get_flwr_dir without a provided path, using default home directory."""
+    """Test get_flwr_dir without a provided path, using default home
+    directory."""
     with patch.dict(os.environ, {"HOME": "/home/user"}):
         assert get_flwr_dir() == Path("/home/user/.flwr")
 
@@ -288,7 +289,8 @@ def test_parse_config_args_overrides() -> None:
 
 
 def test_parse_config_args_from_toml_file() -> None:
-    """Test if a toml passed to --run-config it is loaded and fused correctly."""
+    """Test if a toml passed to --run-config it is loaded and fused
+    correctly."""
     # Will be saved as a temp .toml file
     toml_config = """
         num-server-rounds = 10

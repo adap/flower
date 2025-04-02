@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -71,8 +71,9 @@ class CliUserAuthInterceptor(
     ) -> grpc.Call:
         """Intercept a unary-unary call for user authentication.
 
-        This method intercepts a unary-unary RPC call initiated from the CLI and adds
-        the required authentication tokens to the RPC metadata.
+        This method intercepts a unary-unary RPC call initiated from the
+        CLI and adds the required authentication tokens to the RPC
+        metadata.
         """
         return self._authenticated_call(continuation, client_call_details, request)
 
@@ -84,7 +85,8 @@ class CliUserAuthInterceptor(
     ) -> grpc.Call:
         """Intercept a unary-stream call for user authentication.
 
-        This method intercepts a unary-stream RPC call initiated from the CLI and adds
-        the required authentication tokens to the RPC metadata.
+        This method intercepts a unary-stream RPC call initiated from
+        the CLI and adds the required authentication tokens to the RPC
+        metadata.
         """
         return self._authenticated_call(continuation, client_call_details, request)

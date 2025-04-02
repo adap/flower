@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,7 +53,8 @@ T = TypeVar("T", bound=GrpcMessage)
 
 
 class GrpcAdapter:
-    """Adapter class to send and receive gRPC messages via the ``GrpcAdapterStub``.
+    """Adapter class to send and receive gRPC messages via the
+    ``GrpcAdapterStub``.
 
     This class utilizes the ``GrpcAdapterStub`` to send and receive gRPC messages
     which are defined and used by the Fleet API, as defined in ``fleet.proto``.

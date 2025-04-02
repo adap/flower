@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,22 +36,24 @@ class Backend(ABC):
     def build(self, app_fn: Callable[[], ClientApp]) -> None:
         """Build backend.
 
-        Different components need to be in place before workers in a backend are ready
-        to accept jobs. When this method finishes executing, the backend should be fully
-        ready to run jobs.
+        Different components need to be in place before workers in a
+        backend are ready to accept jobs. When this method finishes
+        executing, the backend should be fully ready to run jobs.
         """
 
     @property
     def num_workers(self) -> int:
         """Return number of workers in the backend.
 
-        This is the number of Messages that can be processed concurrently.
+        This is the number of Messages that can be processed
+        concurrently.
         """
         return 0
 
     @abstractmethod
     def is_worker_idle(self) -> bool:
-        """Report whether a backend worker is idle and can therefore run a ClientApp."""
+        """Report whether a backend worker is idle and can therefore run a
+        ClientApp."""
 
     @abstractmethod
     def terminate(self) -> None:

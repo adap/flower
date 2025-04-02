@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -80,7 +80,8 @@ def render_template(template: str, data: dict[str, str]) -> str:
 
 
 def create_file(file_path: Path, content: str) -> None:
-    """Create file including all nessecary directories and write content into file."""
+    """Create file including all nessecary directories and write content into
+    file."""
     file_path.parent.mkdir(exist_ok=True)
     file_path.write_text(content, encoding="utf-8")
 

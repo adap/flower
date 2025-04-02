@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -77,9 +77,10 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor authentication logic.
 
-        Intercept all unary calls from nodes and authenticate nodes by validating auth
-        metadata sent by the node. Continue RPC call if node is authenticated, else,
-        terminate RPC call by setting context to abort.
+        Intercept all unary calls from nodes and authenticate nodes by
+        validating auth metadata sent by the node. Continue RPC call if
+        node is authenticated, else, terminate RPC call by setting
+        context to abort.
         """
         # Filter out non-Fleet service calls
         if not handler_call_details.method.startswith("/flwr.proto.Fleet/"):

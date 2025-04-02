@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ def format_timedelta(td: datetime.timedelta) -> str:
 
 
 def isoformat8601_utc(dt: datetime.datetime) -> str:
-    """Return the datetime formatted as an ISO 8601 string with a trailing 'Z'."""
+    """Return the datetime formatted as an ISO 8601 string with a trailing
+    'Z'."""
     if dt.tzinfo != datetime.timezone.utc:
         raise ValueError("Expected datetime with timezone set to UTC")
     return dt.isoformat(timespec="seconds").replace("+00:00", "Z")

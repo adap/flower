@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ from typing import Optional
 class ServerConfig:
     """Flower server config.
 
-    All attributes have default values which allows users to configure just the ones
-    they care about.
+    All attributes have default values which allows users to configure
+    just the ones they care about.
     """
 
     num_rounds: int = 1

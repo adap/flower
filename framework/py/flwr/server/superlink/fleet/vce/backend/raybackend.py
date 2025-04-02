@@ -1,4 +1,4 @@
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,7 +43,8 @@ class RayBackend(Backend):
         self,
         backend_config: BackendConfig,
     ) -> None:
-        """Prepare RayBackend by initialising Ray and creating the ActorPool."""
+        """Prepare RayBackend by initialising Ray and creating the
+        ActorPool."""
         log(DEBUG, "Initialising: %s", self.__class__.__name__)
         log(DEBUG, "Backend config: %s", backend_config)
 

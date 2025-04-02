@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,7 +38,8 @@ def create_message(  # pylint: disable=R0913, R0917
 ) -> Message:
     """Create a Message for testing.
 
-    By default, it creates a valid instruction message containing a RecordDict.
+    By default, it creates a valid instruction message containing a
+    RecordDict.
     """
     metadata = Metadata(
         run_id=0,

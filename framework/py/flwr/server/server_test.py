@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -69,7 +69,8 @@ class SuccessClient(ClientProxy):
     def fit(
         self, ins: FitIns, timeout: Optional[float], group_id: Optional[int]
     ) -> FitRes:
-        """Simulate fit by returning a success FitRes with simple set of weights."""
+        """Simulate fit by returning a success FitRes with simple set of
+        weights."""
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
         return FitRes(
@@ -82,7 +83,8 @@ class SuccessClient(ClientProxy):
     def evaluate(
         self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[int]
     ) -> EvaluateRes:
-        """Simulate evaluate by returning a success EvaluateRes with loss 1.0."""
+        """Simulate evaluate by returning a success EvaluateRes with loss
+        1.0."""
         return EvaluateRes(
             status=Status(code=Code.OK, message="Success"),
             loss=1.0,
@@ -93,7 +95,8 @@ class SuccessClient(ClientProxy):
     def reconnect(
         self, ins: ReconnectIns, timeout: Optional[float], group_id: Optional[int]
     ) -> DisconnectRes:
-        """Simulate reconnect by returning a DisconnectRes with UNKNOWN reason."""
+        """Simulate reconnect by returning a DisconnectRes with UNKNOWN
+        reason."""
         return DisconnectRes(reason="UNKNOWN")
 
 

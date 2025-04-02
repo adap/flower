@@ -124,7 +124,8 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
 def _check_mapping_from_recordscalartype_to_scalar(
     record_data: Mapping[str, Union[ConfigRecordValues, MetricRecordValues]]
 ) -> dict[str, Scalar]:
-    """Check mapping `common.*RecordValues` into `common.Scalar` is possible."""
+    """Check mapping `common.*RecordValues` into `common.Scalar` is
+    possible."""
     for value in record_data.values():
         if not isinstance(value, get_args(Scalar)):
             raise TypeError(
