@@ -85,8 +85,8 @@ class ClientAppActor(VirtualClientEngineActor):
 def pool_size_from_resources(client_resources: dict[str, Union[int, float]]) -> int:
     """Calculate number of Actors that fit in the cluster.
 
-    For this we consider the resources available on each node and those
-    required per client.
+    For this we consider the resources available on each node and those required per
+    client.
     """
     total_num_actors = 0
 
@@ -205,9 +205,8 @@ class VirtualClientEngineActorPool(ActorPool):
     def add_actors_to_pool(self, num_actors: int) -> None:
         """Add actors to the pool.
 
-        This expands the pool after it has been created iif new
-        resources are added to your Ray cluster (e.g. you add a new
-        node).
+        This expands the pool after it has been created iif new resources are added to
+        your Ray cluster (e.g. you add a new node).
         """
         with self.lock:
             new_actors = [self.create_actor_fn() for _ in range(num_actors)]
@@ -217,9 +216,8 @@ class VirtualClientEngineActorPool(ActorPool):
     def submit(self, fn: Any, value: tuple[ClientAppFn, Message, str, Context]) -> None:
         """Take an idle actor and assign it to run a client app and Message.
 
-        Submit a job to an actor by first removing it from the list of
-        idle actors, then check if this actor was flagged to be removed
-        from the pool.
+        Submit a job to an actor by first removing it from the list of idle actors, then
+        check if this actor was flagged to be removed from the pool.
         """
         app_fn, mssg, cid, context = value
         actor = self._idle_actors.pop()
@@ -274,12 +272,10 @@ class VirtualClientEngineActorPool(ActorPool):
         return self._cid_to_future[cid]["ready"]  # type: ignore
 
     def _fetch_future_result(self, cid: str) -> tuple[Message, Context]:
-        """Fetch result and updated context for a VirtualClient from Object
-        Store.
+        """Fetch result and updated context for a VirtualClient from Object Store.
 
-        The job submitted by the ClientProxy interfacing with client
-        with cid=cid is ready. Here we fetch it from the object store
-        and return.
+        The job submitted by the ClientProxy interfacing with client with cid=cid is
+        ready. Here we fetch it from the object store and return.
         """
         try:
             future: ObjectRef[Any] = self._cid_to_future[cid]["future"]  # type: ignore
@@ -335,8 +331,8 @@ class VirtualClientEngineActorPool(ActorPool):
     def _check_actor_fits_in_pool(self) -> bool:
         """Determine if available resources haven't changed.
 
-        If true, allow the actor to be added back to the pool. Else
-        don't allow it (effectively reducing the size of the pool).
+        If true, allow the actor to be added back to the pool. Else don't allow it
+        (effectively reducing the size of the pool).
         """
         num_actors_updated = pool_size_from_resources(self.client_resources)
 
@@ -358,8 +354,7 @@ class VirtualClientEngineActorPool(ActorPool):
         return True
 
     def process_unordered_future(self, timeout: Optional[float] = None) -> None:
-        """Similar to parent's get_next_unordered() but without final
-        ray.get()."""
+        """Similar to parent's get_next_unordered() but without final ray.get()."""
         if not self.has_next():  # type: ignore
             raise StopIteration("No more results to get")
 
@@ -441,8 +436,8 @@ class BasicActorPool:
     def add_actors_to_pool(self, num_actors: int) -> None:
         """Add actors to the pool.
 
-        This method may be executed also if new resources are added to
-        your Ray cluster (e.g. you add a new node).
+        This method may be executed also if new resources are added to your Ray cluster
+        (e.g. you add a new node).
         """
         for _ in range(num_actors):
             self.pool.append(self.create_actor_fn())  # type: ignore

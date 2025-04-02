@@ -66,10 +66,9 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor authentication logic.
 
-        Intercept all unary-unary/unary-stream calls from users and
-        authenticate users by validating auth metadata sent by the user.
-        Continue RPC call if user is authenticated, else, terminate RPC
-        call by setting context to abort.
+        Intercept all unary-unary/unary-stream calls from users and authenticate users
+        by validating auth metadata sent by the user. Continue RPC call if user is
+        authenticated, else, terminate RPC call by setting context to abort.
         """
         # One of the method handlers in
         # `flwr.superexec.exec_servicer.ExecServicer`

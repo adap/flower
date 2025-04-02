@@ -254,8 +254,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[tuple[float, dict[str, Scalar]]]:
-        """Evaluate model parameters using an evaluation function from the
-        strategy."""
+        """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
 
@@ -467,6 +466,5 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[tuple[float, dict[str, Scalar]]]:
-        """Evaluate model parameters using an evaluation function from the
-        strategy."""
+        """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)

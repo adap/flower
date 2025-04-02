@@ -63,8 +63,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
     def test_get_parameters(self) -> None:
         """Test the get_parameters method of the client class.
 
-        Note that this test is currently quite simple and should be
-        improved.
+        Note that this test is currently quite simple and should be improved.
         """
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
@@ -81,8 +80,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
     def test_fit(self) -> None:
         """Test the fit method of the client class.
 
-        Note that this test is currently quite simple and should be
-        improved.
+        Note that this test is currently quite simple and should be improved.
         """
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
@@ -100,8 +98,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
     def test_evaluate(self) -> None:
         """Test the evaluate method of the client class.
 
-        Note that this test is currently quite simple and should be
-        improved.
+        Note that this test is currently quite simple and should be improved.
         """
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
@@ -120,8 +117,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
     def test_get_properties(self) -> None:
         """Test the get_properties method of the client class.
 
-        Note that this test is currently quite simple and should be
-        improved.
+        Note that this test is currently quite simple and should be improved.
         """
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock_get_proprieties)

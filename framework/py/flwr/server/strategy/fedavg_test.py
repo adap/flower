@@ -133,8 +133,7 @@ def test_fedavg_num_evaluation_clients_minimum() -> None:
 
 
 def test_inplace_aggregate_fit_equivalence() -> None:
-    """Test aggregate_fit equivalence between FedAvg and its inplace
-    version."""
+    """Test aggregate_fit equivalence between FedAvg and its inplace version."""
     # Prepare
     weights0_0 = np.random.randn(100, 64)
     weights0_1 = np.random.randn(314, 628, 3)

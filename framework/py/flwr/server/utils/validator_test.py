@@ -38,8 +38,7 @@ def create_message(  # pylint: disable=R0913, R0917
 ) -> Message:
     """Create a Message for testing.
 
-    By default, it creates a valid instruction message containing a
-    RecordDict.
+    By default, it creates a valid instruction message containing a RecordDict.
     """
     metadata = Metadata(
         run_id=0,

@@ -77,10 +77,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor authentication logic.
 
-        Intercept all unary calls from nodes and authenticate nodes by
-        validating auth metadata sent by the node. Continue RPC call if
-        node is authenticated, else, terminate RPC call by setting
-        context to abort.
+        Intercept all unary calls from nodes and authenticate nodes by validating auth
+        metadata sent by the node. Continue RPC call if node is authenticated, else,
+        terminate RPC call by setting context to abort.
         """
         # Filter out non-Fleet service calls
         if not handler_call_details.method.startswith("/flwr.proto.Fleet/"):

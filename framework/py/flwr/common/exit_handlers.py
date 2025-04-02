@@ -62,8 +62,8 @@ def register_exit_handlers(
     def graceful_exit_handler(signalnum: int, _frame: FrameType) -> None:
         """Exit handler to be registered with `signal.signal`.
 
-        When called will reset signal handler to original signal handler
-        from default_handlers.
+        When called will reset signal handler to original signal handler from
+        default_handlers.
         """
         # Reset to default handler
         signal.signal(signalnum, default_handlers[signalnum])  # type: ignore

@@ -21,8 +21,7 @@ from .client_proxy import ClientProxy
 
 
 class Criterion(ABC):
-    """Abstract class which allows subclasses to implement criterion
-    sampling."""
+    """Abstract class which allows subclasses to implement criterion sampling."""
 
     @abstractmethod
     def select(self, client: ClientProxy) -> bool:

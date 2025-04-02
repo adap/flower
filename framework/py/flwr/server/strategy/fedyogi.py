@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization using Yogi (FedYogi) [Reddi et al., 2020]
-strategy.
+"""Adaptive Federated Optimization using Yogi (FedYogi) [Reddi et al., 2020] strategy.
 
 Paper: arxiv.org/abs/2003.00295
 """

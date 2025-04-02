@@ -539,9 +539,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat.
 
-        It allows for one missed ping (in a PING_PATIENCE *
-        ping_interval) before marking the node as offline, where
-        PING_PATIENCE = 2 in default.
+        It allows for one missed ping (in a PING_PATIENCE * ping_interval) before
+        marking the node as offline, where PING_PATIENCE = 2 in default.
         """
         with self.lock:
             if node_id in self.node_ids:

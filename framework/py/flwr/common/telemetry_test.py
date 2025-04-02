@@ -76,8 +76,7 @@ class TelemetryTest(unittest.TestCase):
     def test_get_source_id(self) -> None:
         """Test if _get_source_id returns an ID successfully.
 
-        This test might fail if the UNIX user invoking the test has no
-        home directory.
+        This test might fail if the UNIX user invoking the test has no home directory.
         """
         # Prepare
         # nothing to prepare
@@ -126,8 +125,7 @@ class TelemetryTest(unittest.TestCase):
         self.assertEqual(partner_id, generated_id)
 
     def test_get_partner_id_no_env(self) -> None:
-        """Test if _get_partner_id returns unavailable without an env
-        variable."""
+        """Test if _get_partner_id returns unavailable without an env variable."""
         # Prepare
         os.environ["FLWR_TELEMETRY_PARTNER_ID"] = ""
         expected_value = "unavailable"
@@ -139,8 +137,7 @@ class TelemetryTest(unittest.TestCase):
         self.assertEqual(partner_id, expected_value)
 
     def test_get_partner_id_invalid(self) -> None:
-        """Test if _get_partner_id returns invalid with an incorrect env
-        variable."""
+        """Test if _get_partner_id returns invalid with an incorrect env variable."""
         # Prepare
         os.environ["FLWR_TELEMETRY_PARTNER_ID"] = "not a valid ID"
         expected_value = "invalid"

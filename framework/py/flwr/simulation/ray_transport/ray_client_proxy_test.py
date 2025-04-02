@@ -110,8 +110,7 @@ def prep(
 def test_cid_consistency_one_at_a_time() -> None:
     """Test that ClientProxies get the result of client job they submit.
 
-    Submit one job and waits for completion. Then submits the next and
-    so on
+    Submit one job and waits for completion. Then submits the next and so on
     """
     proxies, _, _ = prep()
 
@@ -140,9 +139,8 @@ def test_cid_consistency_one_at_a_time() -> None:
 def test_cid_consistency_all_submit_first_run_consistency() -> None:
     """Test that ClientProxies get the result of client job they submit.
 
-    All jobs are submitted at the same time. Then fetched one at a time.
-    This also tests DeprecatedRunInfoStore (at each Proxy) and RunState
-    basic functionality.
+    All jobs are submitted at the same time. Then fetched one at a time. This also tests
+    DeprecatedRunInfoStore (at each Proxy) and RunState basic functionality.
     """
     proxies, _, _ = prep()
     run_id = 0
@@ -189,8 +187,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
 
 
 def test_cid_consistency_without_proxies() -> None:
-    """Test cid consistency of jobs submitted/retrieved to/from pool w/o
-    ClientProxy."""
+    """Test cid consistency of jobs submitted/retrieved to/from pool w/o ClientProxy."""
     _, pool, mapping = prep()
     node_ids = list(mapping.keys())
 

@@ -45,8 +45,7 @@ class TestStartPingLoopWithFailures(unittest.TestCase):
         self.assertFalse(thread.is_alive())
 
     def test_ping_loop_with_failures_terminates(self) -> None:
-        """Test if the ping loop thread with failures terminates when
-        flagged."""
+        """Test if the ping loop thread with failures terminates when flagged."""
         # Prepare
         exc = grpc.RpcError()
         exc.code = MagicMock(return_value=grpc.StatusCode.UNAVAILABLE)

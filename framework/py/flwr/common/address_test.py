@@ -164,8 +164,7 @@ class DummyContext:
     ],
 )
 def test_servicer_ipv4_correct(peer_str: str, expected: str) -> None:
-    """Test if a correct IPv4 address is correctly parsed from
-    grpc.ServicerContext."""
+    """Test if a correct IPv4 address is correctly parsed from grpc.ServicerContext."""
     # Prepare dummy context with the given peer string.
     context = DummyContext(peer_str)
 
@@ -185,8 +184,7 @@ def test_servicer_ipv4_correct(peer_str: str, expected: str) -> None:
     ],
 )
 def test_servicer_ipv6_correct(peer_str: str, expected: str) -> None:
-    """Test if a correct IPv6 address is correctly parsed from
-    grpc.ServicerContext."""
+    """Test if a correct IPv6 address is correctly parsed from grpc.ServicerContext."""
     # Prepare dummy context with the given peer string.
     context = DummyContext(peer_str)
 
@@ -210,8 +208,7 @@ def test_servicer_ipv6_correct(peer_str: str, expected: str) -> None:
     ],
 )
 def test_servicer_incorrect_format(peer_str: str) -> None:
-    """Test if an invalid grpc.ServicerContext.peer() string returns a
-    ValueError."""
+    """Test if an invalid grpc.ServicerContext.peer() string returns a ValueError."""
     # Prepare dummy context with the given peer string.
     context = DummyContext(peer_str)
 

@@ -139,8 +139,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_push_simulation_outputs_not_successful_if_not_running(
         self, num_transitions: int
     ) -> None:
-        """Test `PushSimulationOutputs` not successful if RunStatus is not
-        running."""
+        """Test `PushSimulationOutputs` not successful if RunStatus is not running."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 

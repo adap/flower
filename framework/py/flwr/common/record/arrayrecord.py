@@ -571,9 +571,9 @@ class ArrayRecord(TypedDict[str, Array]):
     def count_bytes(self) -> int:
         """Return number of Bytes stored in this object.
 
-        Note that a small amount of Bytes might also be included in this
-        counting that correspond to metadata of the serialized object
-        (e.g. of NumPy array) needed for deseralization.
+        Note that a small amount of Bytes might also be included in this counting that
+        correspond to metadata of the serialized object (e.g. of NumPy array) needed for
+        deseralization.
         """
         num_bytes = 0
 

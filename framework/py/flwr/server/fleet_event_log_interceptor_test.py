@@ -46,8 +46,7 @@ class DummyFleetLogPlugin(EventLogWriterPlugin):
         user_info: Optional[UserInfo],
         method_name: str,
     ) -> LogEntry:
-        """Compose pre-event log entry from the provided request and
-        context."""
+        """Compose pre-event log entry from the provided request and context."""
         return LogEntry(
             timestamp="before_timestamp",
             actor=Actor(
@@ -67,8 +66,7 @@ class DummyFleetLogPlugin(EventLogWriterPlugin):
         method_name: str,
         response: Optional[Union[GrpcMessage, BaseException]],
     ) -> LogEntry:
-        """Compose post-event log entry from the provided response and
-        context."""
+        """Compose post-event log entry from the provided response and context."""
         return LogEntry(
             timestamp="after_timestamp",
             actor=Actor(
@@ -140,8 +138,7 @@ class TestFleetEventLogInterceptor(unittest.TestCase):
         self.assertEqual(self.log_plugin.logs, expected_logs)
 
     def test_unary_unary_interceptor_exception(self) -> None:
-        """Test unary-unary RPC call logging when the handler raises a
-        BaseException."""
+        """Test unary-unary RPC call logging when the handler raises a BaseException."""
         handler_call_details = MagicMock()
         handler_call_details.method = "exception_method"
         expected_method_name = handler_call_details.method

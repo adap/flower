@@ -229,8 +229,8 @@ class GridClientProxyTestCase(unittest.TestCase):
         res: Union[GetParametersRes, GetPropertiesRes, FitRes, EvaluateRes, None],
         error_reply: bool = False,
     ) -> Callable[[Iterable[Message]], Iterable[Message]]:
-        """Get the generate_replies function that sets the return value of
-        grid's send_and_receive when called."""
+        """Get the generate_replies function that sets the return value of grid's
+        send_and_receive when called."""
 
         def generate_replies(messages: Iterable[Message]) -> Iterable[Message]:
             msg = list(messages)[0]

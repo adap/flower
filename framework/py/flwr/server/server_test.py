@@ -69,8 +69,7 @@ class SuccessClient(ClientProxy):
     def fit(
         self, ins: FitIns, timeout: Optional[float], group_id: Optional[int]
     ) -> FitRes:
-        """Simulate fit by returning a success FitRes with simple set of
-        weights."""
+        """Simulate fit by returning a success FitRes with simple set of weights."""
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
         return FitRes(
@@ -95,8 +94,7 @@ class SuccessClient(ClientProxy):
     def reconnect(
         self, ins: ReconnectIns, timeout: Optional[float], group_id: Optional[int]
     ) -> DisconnectRes:
-        """Simulate reconnect by returning a DisconnectRes with UNKNOWN
-        reason."""
+        """Simulate reconnect by returning a DisconnectRes with UNKNOWN reason."""
         return DisconnectRes(reason="UNKNOWN")
 
 

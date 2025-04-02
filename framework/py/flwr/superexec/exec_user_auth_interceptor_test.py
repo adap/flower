@@ -55,8 +55,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         self.expected_user_info = UserInfo(user_id="user_id", user_name="user_name")
 
     def tearDown(self) -> None:
-        """Reset shared_user_info to its previous state to prevent state
-        leakage."""
+        """Reset shared_user_info to its previous state to prevent state leakage."""
         shared_user_info.reset(self.token)
 
     @parameterized.expand(
@@ -68,8 +67,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
     def test_unary_unary_authentication_successful(self, request: GrpcMessage) -> None:
         """Test unary-unary RPC call successful for a login request.
 
-        Occurs for requests that are GetLoginDetailsRequest or
-        GetAuthTokensRequest.
+        Occurs for requests that are GetLoginDetailsRequest or GetAuthTokensRequest.
         """
         # Prepare
         dummy_request = request
@@ -103,11 +101,9 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         ]
     )  # type: ignore
     def test_unary_rpc_authentication_unsuccessful(self, request: GrpcMessage) -> None:
-        """Test unary-unary/stream RPC call not successful when authentication
-        fails.
+        """Test unary-unary/stream RPC call not successful when authentication fails.
 
-        Occurs for requests that are not GetLoginDetailsRequest or
-        GetAuthTokensRequest.
+        Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
         """
         # Prepare
         dummy_request = request
@@ -149,8 +145,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
     def test_unary_validate_tokens_successful(self, request: GrpcMessage) -> None:
         """Test unary-unary/stream RPC call is successful when token is valid.
 
-        Occurs for requests that are not GetLoginDetailsRequest or
-        GetAuthTokensRequest.
+        Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
         """
         # Prepare
         dummy_request = request
@@ -203,11 +198,9 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         ]
     )  # type: ignore
     def test_unary_refresh_tokens_successful(self, request: GrpcMessage) -> None:
-        """Test unary-unary/stream RPC call is successful when tokens are
-        refreshed.
+        """Test unary-unary/stream RPC call is successful when tokens are refreshed.
 
-        Occurs for requests that are not GetLoginDetailsRequest or
-        GetAuthTokensRequest.
+        Occurs for requests that are not GetLoginDetailsRequest or GetAuthTokensRequest.
         """
         # Prepare
         dummy_request = request

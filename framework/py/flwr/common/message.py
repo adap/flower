@@ -168,8 +168,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
 
     @property
     def message_type(self) -> str:
-        """A string that encodes the action to be executed on the receiving
-        end."""
+        """A string that encodes the action to be executed on the receiving end."""
         return cast(str, self.__dict__["_message_type"])
 
     @message_type.setter
@@ -392,8 +391,7 @@ class Message:
 
     @property
     def metadata(self) -> Metadata:
-        """A dataclass including information about the message to be
-        executed."""
+        """A dataclass including information about the message to be executed."""
         return cast(Metadata, self.__dict__["_metadata"])
 
     @property
@@ -521,8 +519,8 @@ def make_message(
 def _limit_reply_ttl(
     current: float, reply_ttl: float | None, reply_to: Message
 ) -> float:
-    """Limit the TTL of a reply message such that it does exceed the expiration
-    time of the message it replies to."""
+    """Limit the TTL of a reply message such that it does exceed the expiration time of
+    the message it replies to."""
     # Calculate the maximum allowed TTL
     max_allowed_ttl = reply_to.metadata.created_at + reply_to.metadata.ttl - current
 

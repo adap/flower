@@ -58,8 +58,7 @@ def prompt_text(
 
 
 def prompt_options(text: str, options: list[str]) -> str:
-    """Ask user to select one of the given options and return the selected
-    item."""
+    """Ask user to select one of the given options and return the selected item."""
     # Turn options into a list with index as in " [ 0] quickstart-pytorch"
     options_formatted = [
         " [ "
@@ -96,8 +95,8 @@ def prompt_options(text: str, options: list[str]) -> str:
 def is_valid_project_name(name: str) -> bool:
     """Check if the given string is a valid Python project name.
 
-    A valid project name must start with a letter and can only contain
-    letters, digits, and hyphens.
+    A valid project name must start with a letter and can only contain letters, digits,
+    and hyphens.
     """
     if not name:
         return False
@@ -117,10 +116,9 @@ def is_valid_project_name(name: str) -> bool:
 def sanitize_project_name(name: str) -> str:
     """Sanitize the given string to make it a valid Python project name.
 
-    This version replaces spaces, dots, slashes, and underscores with
-    dashes, removes any characters not allowed in Python project names,
-    makes the string lowercase, and ensures it starts with a valid
-    character.
+    This version replaces spaces, dots, slashes, and underscores with dashes, removes
+    any characters not allowed in Python project names, makes the string lowercase, and
+    ensures it starts with a valid character.
     """
     # Replace whitespace with '_'
     name_with_hyphens = re.sub(r"[ ./_]", "-", name)
@@ -294,9 +292,8 @@ def init_channel(
 def unauthenticated_exc_handler() -> Iterator[None]:
     """Context manager to handle gRPC UNAUTHENTICATED errors.
 
-    It catches grpc.RpcError exceptions with UNAUTHENTICATED status,
-    informs the user, and exits the application. All other exceptions
-    will be allowed to escape.
+    It catches grpc.RpcError exceptions with UNAUTHENTICATED status, informs the user,
+    and exits the application. All other exceptions will be allowed to escape.
     """
     try:
         yield

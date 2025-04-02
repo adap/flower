@@ -40,8 +40,7 @@ def test_mirror_output_to_queue() -> None:
 
 
 def test_restore_output() -> None:
-    """Test that stdout and stderr are restored after calling
-    restore_output."""
+    """Test that stdout and stderr are restored after calling restore_output."""
     # Prepare
     log_queue: Queue[Optional[str]] = Queue()
 

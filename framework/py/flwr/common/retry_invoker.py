@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""`RetryInvoker` to augment other callables with error handling and
-retries."""
+"""`RetryInvoker` to augment other callables with error handling and retries."""
 
 
 import itertools

@@ -138,8 +138,7 @@ def secaggplus_mod(
     ctxt: Context,
     call_next: ClientAppCallable,
 ) -> Message:
-    """Handle incoming message and return results, following the SecAgg+
-    protocol."""
+    """Handle incoming message and return results, following the SecAgg+ protocol."""
     # Ignore non-fit messages
     if msg.metadata.message_type != MessageType.TRAIN:
         return call_next(msg, ctxt)

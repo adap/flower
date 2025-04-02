@@ -243,8 +243,8 @@ class GrpcGrid(Grid):
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
 
-        This method is used to collect messages from the SuperLink that
-        correspond to a set of given message IDs.
+        This method is used to collect messages from the SuperLink that correspond to a
+        set of given message IDs.
         """
         try:
             # Pull Messages
@@ -271,10 +271,9 @@ class GrpcGrid(Grid):
     ) -> Iterable[Message]:
         """Push messages to specified node IDs and pull the reply messages.
 
-        This method sends a list of messages to their destination node
-        IDs and then waits for the replies. It continues to pull replies
-        until either all replies are received or the specified timeout
-        duration is exceeded.
+        This method sends a list of messages to their destination node IDs and then
+        waits for the replies. It continues to pull replies until either all replies are
+        received or the specified timeout duration is exceeded.
         """
         # Push messages
         msg_ids = set(self.push_messages(messages))

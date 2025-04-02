@@ -80,8 +80,7 @@ def render_template(template: str, data: dict[str, str]) -> str:
 
 
 def create_file(file_path: Path, content: str) -> None:
-    """Create file including all nessecary directories and write content into
-    file."""
+    """Create file including all nessecary directories and write content into file."""
     file_path.parent.mkdir(exist_ok=True)
     file_path.write_text(content, encoding="utf-8")
 

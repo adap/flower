@@ -62,9 +62,9 @@ def start_ping_loop(
 ) -> threading.Thread:
     """Start a ping loop in a separate thread.
 
-    This function initializes a new thread that runs a ping loop,
-    allowing for asynchronous ping operations. The loop can be
-    terminated through the provided stop event.
+    This function initializes a new thread that runs a ping loop, allowing for
+    asynchronous ping operations. The loop can be terminated through the provided stop
+    event.
     """
     thread = threading.Thread(
         target=_ping_loop, args=(ping_fn, stop_event), daemon=True

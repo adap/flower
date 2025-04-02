@@ -43,8 +43,7 @@ class RayBackend(Backend):
         self,
         backend_config: BackendConfig,
     ) -> None:
-        """Prepare RayBackend by initialising Ray and creating the
-        ActorPool."""
+        """Prepare RayBackend by initialising Ray and creating the ActorPool."""
         log(DEBUG, "Initialising: %s", self.__class__.__name__)
         log(DEBUG, "Backend config: %s", backend_config)
 

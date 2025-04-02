@@ -27,8 +27,7 @@ from .utils import prompt_options
 def example() -> None:
     """Clone a Flower example.
 
-    All examples available in the Flower repository are available
-    through this command.
+    All examples available in the Flower repository are available through this command.
     """
     # Load list of examples directly from GitHub
     url = "https://api.github.com/repos/adap/flower/git/trees/main"

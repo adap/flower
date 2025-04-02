@@ -364,7 +364,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
-    """Raise a `ValueError` with a detailed message if a validation error
-    occurs."""
+    """Raise a `ValueError` with a detailed message if a validation error occurs."""
     if validation_error:
         raise ValueError(f"Malformed {request_name}: {detail}")

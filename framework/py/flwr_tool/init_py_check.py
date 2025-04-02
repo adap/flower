@@ -15,8 +15,7 @@ from typing import Tuple
 
 
 def get_init_dir_list_and_warnings(absolute_path: str) -> Tuple[list[str], list[str]]:
-    """Search given path and return list of dirs containing __init__.py
-    files."""
+    """Search given path and return list of dirs containing __init__.py files."""
     path = os.walk(absolute_path)
     warning_list = []
     dir_list = []
@@ -52,9 +51,8 @@ def check_missing_init_files(absolute_path: str) -> list[str]:
 def get_all_var_list(init_dir: str) -> Tuple[Path, list[str], list[str]]:
     """Get the __all__ list of a __init__.py file.
 
-    The function returns the path of the '__init__.py' file of the given
-    dir, as well as the list itself, and the list of lines corresponding
-    to the list.
+    The function returns the path of the '__init__.py' file of the given dir, as well as
+    the list itself, and the list of lines corresponding to the list.
     """
     init_file = Path(init_dir) / "__init__.py"
     all_lines = []

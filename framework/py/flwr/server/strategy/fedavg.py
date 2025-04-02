@@ -139,8 +139,7 @@ class FedAvg(Strategy):
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> tuple[int, int]:
-        """Return the sample size and the required number of available
-        clients."""
+        """Return the sample size and the required number of available clients."""
         num_clients = int(num_available_clients * self.fraction_fit)
         return max(num_clients, self.min_fit_clients), self.min_available_clients
 

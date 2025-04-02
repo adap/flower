@@ -81,8 +81,7 @@ class DPFedAvgFixed(Strategy):
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> list[tuple[ClientProxy, FitIns]]:
-        """Configure the next round of training incorporating Differential
-        Privacy (DP).
+        """Configure the next round of training incorporating Differential Privacy (DP).
 
         Configuration of the next training round includes information related to DP,
         such as clip norm and noise stddev.
@@ -179,6 +178,5 @@ class DPFedAvgFixed(Strategy):
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[tuple[float, dict[str, Scalar]]]:
-        """Evaluate model parameters using an evaluation function from the
-        strategy."""
+        """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)

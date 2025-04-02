@@ -42,8 +42,7 @@ class TestGrpcGrid(unittest.TestCase):
     """Tests for `GrpcGrid` class."""
 
     def setUp(self) -> None:
-        """Initialize mock GrpcServerAppIoStub and Grid instance before each
-        test."""
+        """Initialize mock GrpcServerAppIoStub and Grid instance before each test."""
 
         def _mock_fn(req: GetRunRequest) -> GetRunResponse:
             return GetRunResponse(
