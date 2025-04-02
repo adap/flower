@@ -65,3 +65,6 @@ jobs:
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./framework/dev/test.sh
+      - name: Check benchmarks and examples
+        if: ${{ needs.changes.outputs.framework == 'true' }}
+        run: ./dev/test.sh

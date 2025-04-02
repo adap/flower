@@ -1,4 +1,5 @@
 #!/bin/bash
+# Test benchmarks and examples
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
@@ -27,7 +28,7 @@ echo "- All Markdown checks passed"
 echo "- Start TOML checks"
 
 echo "- taplo: start"
-taplo fmt --check
+taplo fmt --check benchmarks examples
 echo "- taplo: done"
 
 echo "- All TOML checks passed"
