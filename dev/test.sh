@@ -17,7 +17,7 @@ echo "- clang-format:  done"
 
 echo "- isort: start"
 if $RUN_FULL_TEST; then
-    python -m isort --check-only --skip src/py/flwr/proto src/py/flwr benchmarks e2e
+    python -m isort --check-only --skip src/py/flwr/proto src/py/flwr benchmarks framework/e2e
 else
     python -m isort --check-only --skip src/py/flwr/proto src/py/flwr
 fi
@@ -25,7 +25,7 @@ echo "- isort: done"
 
 echo "- black: start"
 if $RUN_FULL_TEST; then
-    python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr benchmarks examples e2e
+    python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr benchmarks examples framework/e2e
 else
     python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr
 fi
@@ -36,7 +36,7 @@ python -m flwr_tool.init_py_check src/py/flwr src/py/flwr_tool
 echo "- init_py_check: done"
 
 echo "- docformatter: start"
-python -m docformatter -c -r src/py/flwr e2e -e src/py/flwr/proto
+python -m docformatter -c -r src/py/flwr framework/e2e -e src/py/flwr/proto
 echo "- docformatter:  done"
 
 echo "- docsig: start"
