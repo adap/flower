@@ -52,5 +52,41 @@ extension Engine {
       message: "FetchModel function is not implemented yet"
     )
   }
+  
+  func fetchModelConfig(model: String, engine: String) async throws -> ModelConfigResponse {
+    let requestBody = ModelConfigRequest(model: model, engineName: engine, sdk: sdk, sdkVersion: version)
+    guard let url = URL(string: "\(remoteUrl)\(fetchModelConfigPath)") else {
+      throw Failure(
+        code: .connectionError,
+        message: URLError(.badURL).localizedDescription
+      )
+    }
+    return try await NetworkService.getElement(on: url)
+  }
+}
 
+struct ModelConfigRequest: Codable {
+    let model: String
+    let engineName: String
+    let sdk: String
+    let sdkVersion: String
+
+    enum CodingKeys: String, CodingKey {
+        case model
+        case engineName = "engine_name"
+        case sdk
+        case sdkVersion = "sdk_version"
+    }
+}
+
+struct ModelConfigResponse: Codable {
+    let isSupported: Bool
+    let engineModel: String
+    let model: String
+
+    enum CodingKeys: String, CodingKey {
+        case isSupported = "is_supported"
+        case engineModel = "engine_model"
+        case model
+    }
 }
