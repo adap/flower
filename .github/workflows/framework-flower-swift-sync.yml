@@ -1,9 +1,6 @@
 name: Framework Sync flower-swift
 
-on:
-  push:
-    branches: ['main']
-    paths: ['src/swift/flwr/**']
+on: []
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
