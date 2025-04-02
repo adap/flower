@@ -49,7 +49,7 @@ def _update_python_versions(
                 ),
             ],
             # Python files
-            "**/*.py": [
+            "(src|baselines|examples)/**/*.py": [
                 # Update version assignments
                 (
                     r'(["\'])' + version_pattern + r'(["\'])',
@@ -116,7 +116,16 @@ def _update_python_versions(
                 ),
             ],
             # pyproject.toml files
-            "**/pyproject.toml": [
+            "(examples|baselines)/**/pyproject.toml": [
+                # Update python version constraints
+                (
+                    r'(python\s*=\s*">=)'
+                    + re.escape(old_version)
+                    + r'(,\s*<\d+\.\d+")',
+                    r"\g<1>" + new_major_minor + r"\g<2>",
+                ),
+            ],
+            "pyproject.toml": [
                 # Update python version constraints
                 (
                     r'(python\s*=\s*">=)'
@@ -135,7 +144,7 @@ def _update_python_versions(
                 ),
             ],
             # Python files
-            "**/*.py": [
+            "(src|examples|baselines)/**/*.py": [
                 # Update version assignments
                 (
                     r'(["\'])' + re.escape(old_version) + r'(\.\d+)?(["\'])',
