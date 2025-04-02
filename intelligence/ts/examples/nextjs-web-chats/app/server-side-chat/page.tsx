@@ -1,24 +1,11 @@
-import { chatWithHistory, history } from '@/lib/chat';
-import { revalidatePath } from 'next/cache';
+import { history } from '@/lib/chat';
+import { submitChat } from '@/lib/serverActions';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ChatForm from './ChatForm';
 
 // Ensure the page is always rendered dynamically.
 export const dynamic = 'force-dynamic';
-
-// Server Action to handle form submission.
-export async function submitChat(formData: FormData) {
-  'use server';
-  const question = formData.get('question') as string;
-  if (!question?.trim()) return;
-  try {
-    await chatWithHistory(question);
-  } catch (error) {
-    console.error(error);
-  }
-  revalidatePath('/server-side-chat');
-}
 
 export default async function ServerSideChatPage() {
   return (

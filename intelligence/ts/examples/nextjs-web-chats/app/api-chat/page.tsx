@@ -31,7 +31,7 @@ export default function ApiChatPage() {
       } else {
         setChatLog((prev) => [...prev, { role: 'bot', content: data.error || 'Error occurred.' }]);
       }
-    } catch (error) {
+    } catch {
       setChatLog((prev) => [...prev, { role: 'bot', content: 'Network error, please try again.' }]);
     }
     setInput('');

@@ -36,7 +36,7 @@ export default function ChatPage() {
           content: res.ok ? data.message : data.error || 'Error occurred.',
         },
       ]);
-    } catch (error) {
+    } catch {
       // Network error fallback
       setChatLog((prev) => [...prev, { role: 'bot', content: 'Network error, please try again.' }]);
     } finally {

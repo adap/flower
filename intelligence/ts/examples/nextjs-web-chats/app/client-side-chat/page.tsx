@@ -46,7 +46,7 @@ export default function ClientSideChatPage() {
       } else {
         history.push({ role: 'bot', content: 'Failed to get a valid response.' });
       }
-    } catch (error) {
+    } catch {
       setChatLog([
         ...history
           .filter((msg) => msg.role !== 'system')

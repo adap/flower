@@ -13,12 +13,38 @@ A Next.js application (using the App Router, TypeScript, and TailwindCSS) demons
 
 ## Setup & Installation
 
+### Running locally
+
 ```bash
 npm install
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### Running with Docker
+
+To run the website using the `Dockerfile`, follow these steps:
+
+1. **Build the Docker image**
+
+   ```bash
+   docker build -f Dockerfile -t nextjs-web-chats .
+   ```
+
+2. **First time - Run the Docker container from the image**
+
+   ```bash
+   docker run --rm --name nextjs-web-chats -p 3000:3000 nextjs-web-chats
+   ```
+
+   -> Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+3. **Next time - Start container with live console feedback**
+
+   ```bash
+   docker start -a nextjs-web-chats
+   ```
 
 ## Chat Pages Specificities
 
