@@ -17,12 +17,3 @@ python dev/build-example-docs.py
 
 cd "$ROOT"
 ./datasets/dev/build-flwr-datasets-docs.sh
-
-cd "$ROOT"
-cd framework/docs 
-
-if [ "$1" = true ]; then
-    ./build-versioned-docs.sh
-else
-    make html
-fi

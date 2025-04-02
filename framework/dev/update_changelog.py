@@ -16,11 +16,11 @@
 """Update the changelog using PR titles."""
 
 
-import pathlib
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
+from pathlib import Path
 from sys import argv
 from typing import Optional
 
@@ -37,13 +37,12 @@ except ModuleNotFoundError:
 
 
 REPO_NAME = "adap/flower"
-CHANGELOG_FILE = "framework/docs/source/ref-changelog.md"
+BASE_DIR = Path(__file__).parents[2]  # Path to the root of the repository
+CHANGELOG_FILE = BASE_DIR / "framework" / "docs" / "source" / "ref-changelog.md"
 CHANGELOG_SECTION_HEADER = "### Changelog entry"
 
 # Load the TOML configuration
-with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
-    "rb"
-) as toml_f:
+with (Path(__file__).parent.resolve() / "changelog_config.toml").open("rb") as toml_f:
     CONFIG = tomllib.load(toml_f)
 
 # Extract types, project, and scope from the config
@@ -299,8 +298,10 @@ def _update_changelog(prs: set[PullRequest], tag: str, new_tag: str) -> bool:
 
 def _check_repeated_prs(content: str) -> None:
     """Check for repeated PRs in the changelog."""
-    found_pairs = re.findall(r"\[#(\d+)\]\(https://github.com/adap/flower/pull/(\d+)\)", content)
-    
+    found_pairs = re.findall(
+        r"\[#(\d+)\]\(https://github.com/adap/flower/pull/(\d+)\)", content
+    )
+
     count_prs = {}
     for pr, pr_http in found_pairs:
         if pr_http != pr:
