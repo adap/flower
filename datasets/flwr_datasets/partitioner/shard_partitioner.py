@@ -137,7 +137,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     [5550, 5940, 5940, 5940, 5940, 5940, 5940, 5940, 5940, 6930]
     """
 
-    def __init__(  # pylint: disable=R0913
+    def __init__(  # pylint: disable=R0913, R0917
         self,
         num_partitions: int,
         partition_by: str,

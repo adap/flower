@@ -23,7 +23,7 @@ from datasets import Dataset
 from flwr_datasets.partitioner.shard_partitioner import ShardPartitioner
 
 
-def _dummy_setup(
+def _dummy_setup(  # pylint: disable=R0917
     num_rows: int,
     partition_by: str,
     num_partitions: int,
