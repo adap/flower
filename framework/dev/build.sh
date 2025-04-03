@@ -16,6 +16,10 @@
 # ==============================================================================
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+# Copy README.md into framework/ and remove it after the build
+cp ../README.md README.md && trap "rm README.md" EXIT
+
+# Build the package
 python -m poetry build

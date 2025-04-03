@@ -1,6 +1,6 @@
 [flake8]
 max-line-length = 88
-exclude = framework/py/flwr/proto
+exclude = py/flwr/proto
 ignore = E302,W503,E203
 per-file-ignores =
-    framework/py/flwr/server/strategy/*.py:E501
+    py/flwr/server/strategy/*.py:E501

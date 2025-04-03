@@ -16,7 +16,7 @@
 # ==============================================================================
 
 set -e
-cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/../../
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/../
 
 # This script will build and publish a nightly release of Flower under the condition
 # that at least one commit was made in the last 24 hours.
@@ -28,6 +28,7 @@ cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/../../
 if [[ $(git log --since="24 hours ago" --pretty=oneline) ]]; then
     sed -i -E "s/^name = \"(.+)\"/name = \"\1-nightly\"/" pyproject.toml
     sed -i -E "s/^version = \"(.+)\"/version = \"\1.dev$(date '+%Y%m%d')\"/" pyproject.toml
+    cp ../README.md README.md && trap "rm README.md" EXIT
     python -m poetry build
     python -m poetry publish -u __token__ -p $PYPI_TOKEN
 else
