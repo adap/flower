@@ -43,10 +43,6 @@ python -m flake8 flwr_datasets/
 echo "- flake8: done"
 
 echo "- pytest: start"
-a="hf"
-b="UmKcKExOSFVDicgWXj"
-c="lExWgxUSbJIQjaaN"
-huggingface-cli login --token "${a}_$b$c"
 python -m pytest flwr_datasets/
 echo "- pytest: done"
 
