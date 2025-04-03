@@ -53,9 +53,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/huggingface
-          key: hf-datasets-${{ matrix.python }}-${{ hashFiles('datasets/**') }}
-          restore-keys: |
-            hf-datasets-${{ matrix.python }}-
+          key: hf-datasets-${{ hashFiles('datasets/**') }}
+          restore-keys: hf-datasets-
       - name: Set Hugging Face token
         run: echo "Nothing"
       - name: Test (formatting + unit tests)
