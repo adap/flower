@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - "src/py/flwr_tool/**"
+      - "framework/py/flwr_tool/**"
   pull_request:
     branches:
       - main
     paths:
-      - "src/py/flwr_tool/**"
+      - "framework/py/flwr_tool/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}

@@ -45,8 +45,8 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-packages = [{ include = "flwr", from = "src/py" }]
-exclude = ["src/py/**/*_test.py"]
+packages = [{ include = "flwr", from = "framework/py" }]
+exclude = ["framework/py/**/*_test.py"]
 
 [tool.poetry.scripts]
 # `flwr` CLI
@@ -166,7 +166,7 @@ disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = ["src/py/flwr", "src/py/flwr_tool"]
+testpaths = ["framework/py/flwr", "framework/py/flwr_tool"]
 filterwarnings = "ignore::DeprecationWarning"
 
 [tool.pytest-watcher]
@@ -234,8 +234,8 @@ ignore = ["B024", "B027", "D205", "D209"]
 convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
-"src/py/flwr/server/strategy/*.py" = ["E501"]
+"framework/py/flwr/server/strategy/*.py" = ["E501"]
 
 [tool.docsig]
 ignore-no-params = true
-exclude = 'src/py/flwr/proto/.*|src/py/flwr/.*_test\.py|src/py/flwr/cli/new/templates/.*\.tpl'
+exclude = 'framework/py/flwr/proto/.*|framework/py/flwr/.*_test\.py|framework/py/flwr/cli/new/templates/.*\.tpl'

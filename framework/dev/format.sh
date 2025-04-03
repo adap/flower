@@ -5,16 +5,16 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
 taplo fmt
 
 # Python
-python -m flwr_tool.check_copyright src/py/flwr
-python -m flwr_tool.init_py_fix src/py/flwr
-python -m isort --skip src/py/flwr/proto src/py
-python -m black -q --exclude src/py/flwr/proto src/py
-python -m docformatter -i -r src/py/flwr -e src/py/flwr/proto
-python -m docformatter -i -r src/py/flwr_tool
-python -m ruff check --fix src/py/flwr
+python -m flwr_tool.check_copyright framework/py/flwr
+python -m flwr_tool.init_py_fix framework/py/flwr
+python -m isort --skip framework/py/flwr/proto framework/py
+python -m black -q --exclude framework/py/flwr/proto framework/py
+python -m docformatter -i -r framework/py/flwr -e framework/py/flwr/proto
+python -m docformatter -i -r framework/py/flwr_tool
+python -m ruff check --fix framework/py/flwr
 
 # Protos
-find src/proto/flwr/proto -name *.proto | grep "\.proto" | xargs clang-format -i
+find framework/proto/flwr/proto -name *.proto | grep "\.proto" | xargs clang-format -i
 
 # E2E
 python -m isort framework/e2e
