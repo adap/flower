@@ -37,8 +37,6 @@ This example shows how a regular PyTorch project can be federated using Flower:
 
 - `PyTorch: From Centralized To Federated (Code)
   <https://github.com/adap/flower/tree/main/examples/pytorch-from-centralized-to-federated>`_
-- :doc:`PyTorch: From Centralized To Federated (Tutorial)
-  <example-pytorch-from-centralized-to-federated>`
 
 Federated Learning on Raspberry Pi and Nvidia Jetson
 ----------------------------------------------------

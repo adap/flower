@@ -30,7 +30,6 @@ jobs:
           filters: |
             framework:
               - 'framework/**/*'
-              - 'src/**/*'
               - '.github/workflows/framework.yml'
 
   test_core:
