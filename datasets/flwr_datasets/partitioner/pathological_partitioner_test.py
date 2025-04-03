@@ -131,7 +131,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
     )
     def test_deterministic_class_assignment(
         self, num_partitions, num_classes_per_partition, num_samples, num_unique_classes
-    ):
+    ) -> None:
         """Test deterministic assignment of classes to partitions."""
         dataset = _dummy_dataset_setup(num_samples, "labels", num_unique_classes)
         partitioner = PathologicalPartitioner(

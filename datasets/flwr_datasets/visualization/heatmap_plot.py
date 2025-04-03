@@ -25,8 +25,7 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
 
-# pylint: disable=too-many-arguments,too-many-locals
-def _plot_heatmap(
+def _plot_heatmap(  # pylint: disable=R0913, R0917
     dataframe: pd.DataFrame,
     axis: Optional[Axes],
     figsize: Optional[tuple[float, float]],
