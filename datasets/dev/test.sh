@@ -46,7 +46,7 @@ echo "- pytest: start"
 a="hf"
 b="UmKcKExOSFVDicgWXj"
 c="lExWgxUSbJIQjaaN"
-export HUGGINGFACE_HUB_TOKEN="${a}_$b$c"
+huggingface-cli login --token "${a}_$b$c"
 python -m pytest flwr_datasets/
 echo "- pytest: done"
 
