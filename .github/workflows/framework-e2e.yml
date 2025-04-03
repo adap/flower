@@ -51,10 +51,10 @@ jobs:
           python -m pip install -U setuptools==70.3.0
       - name: Build wheel
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        run: ./dev/build.sh
+        run: ./framework/dev/build.sh
       - name: Test wheel
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        run: ./dev/test-wheel.sh
+        run: ./framework/dev/test-wheel.sh
       - name: Upload wheel
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         id: upload

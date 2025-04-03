@@ -33,6 +33,8 @@ EXAMPLES = {
     ],
 }
 
+ROOT_DIR = Path(__file__).parents[2]
+
 
 def _get_next_version(curr_version, increment):
     """Calculate the next version based on the type of release."""
@@ -57,7 +59,7 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
     """Update the version strings in the specified files."""
     wrong = False
     for pattern in file_patterns:
-        files = list(Path(__file__).parents[1].glob(pattern))
+        files = list(ROOT_DIR.glob(pattern))
         for file_path in files:
             if not file_path.is_file():
                 continue
@@ -80,7 +82,7 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
 
 
 if __name__ == "__main__":
-    conf_path = Path("framework/docs/source/conf.py")
+    conf_path = ROOT_DIR / "framework/docs/source/conf.py"
 
     if not conf_path.is_file():
         raise FileNotFoundError(f"{conf_path} not found!")

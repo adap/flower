@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
 
 # Extract the latest release notes from the changelog, which starts at the line containing 
 # the latest version tag and ends one line before the previous version tag.
