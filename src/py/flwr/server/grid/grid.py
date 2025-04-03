@@ -28,7 +28,7 @@ class Grid(ABC):
 
     @abstractmethod
     def set_run(self, run_id: int) -> None:
-        """Request a run to the SuperLink with a given `run_id`.
+        """Request a run to the SuperLink with a given ``run_id``.
 
         If a ``Run`` with the specified ``run_id`` exists, a local ``Run``
         object will be created. It enables further functionality
@@ -172,7 +172,7 @@ class Driver(Grid):
 
     .. warning::
         ``Driver`` is deprecated and will be removed in a future release.
-        Use `Grid` in the signature of your ServerApp.
+        Use ``Grid`` in the signature of your ServerApp.
 
     Examples
     --------

@@ -90,18 +90,18 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues]):
     encourage you to use a :code:`ArrayRecord` instead if these are of high
     dimensionality.
 
-    Let's see some examples of how to construct a :code:`ConfigRecord` from scratch:
+    Let's see some examples of how to construct a :code:`ConfigRecord` from scratch::
 
-    >>> from flwr.common import ConfigRecord
-    >>>
-    >>> # A `ConfigRecord` is a specialized Python dictionary
-    >>> record = ConfigRecord({"lr": 0.1, "batch-size": 128})
-    >>> # You can add more content to an existing record
-    >>> record["compute-average"] = True
-    >>> # It also supports lists
-    >>> record["loss-fn-coefficients"] = [0.4, 0.25, 0.35]
-    >>> # And string values (among other types)
-    >>> record["path-to-S3"] = "s3://bucket_name/folder1/fileA.json"
+        from flwr.common import ConfigRecord
+
+        # A `ConfigRecord` is a specialized Python dictionary
+        record = ConfigRecord({"lr": 0.1, "batch-size": 128})
+        # You can add more content to an existing record
+        record["compute-average"] = True
+        # It also supports lists
+        record["loss-fn-coefficients"] = [0.4, 0.25, 0.35]
+        # And string values (among other types)
+        record["path-to-S3"] = "s3://bucket_name/folder1/fileA.json"
 
     Just like the other types of records in a :code:`flwr.common.RecordDict`, types are
     enforced. If you need to add a custom data structure or object, we recommend to

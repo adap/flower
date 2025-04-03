@@ -77,15 +77,15 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
 
     Examples
     --------
-    Create a strategy:
+    Create a strategy::
 
-    >>> strategy = fl.server.strategy.FedAvg( ... )
+        strategy = fl.server.strategy.FedAvg( ... )
 
-    Wrap the strategy with the DifferentialPrivacyServerSideAdaptiveClipping wrapper
+    Wrap the strategy with the DifferentialPrivacyServerSideAdaptiveClipping wrapper::
 
-    >>> dp_strategy = DifferentialPrivacyServerSideAdaptiveClipping(
-    >>>     strategy, cfg.noise_multiplier, cfg.num_sampled_clients, ...
-    >>> )
+        dp_strategy = DifferentialPrivacyServerSideAdaptiveClipping(
+            strategy, cfg.noise_multiplier, cfg.num_sampled_clients, ...
+        )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-positional-arguments
@@ -290,21 +290,21 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
 
     Examples
     --------
-    Create a strategy:
+    Create a strategy::
 
-    >>> strategy = fl.server.strategy.FedAvg(...)
+        strategy = fl.server.strategy.FedAvg(...)
 
-    Wrap the strategy with the `DifferentialPrivacyClientSideAdaptiveClipping` wrapper:
+    Wrap the strategy with the `DifferentialPrivacyClientSideAdaptiveClipping` wrapper::
 
-    >>> dp_strategy = DifferentialPrivacyClientSideAdaptiveClipping(
-    >>>     strategy, cfg.noise_multiplier, cfg.num_sampled_clients
-    >>> )
+        dp_strategy = DifferentialPrivacyClientSideAdaptiveClipping(
+            strategy, cfg.noise_multiplier, cfg.num_sampled_clients
+        )
 
-    On the client, add the `adaptiveclipping_mod` to the client-side mods:
+    On the client, add the `adaptiveclipping_mod` to the client-side mods::
 
-    >>> app = fl.client.ClientApp(
-    >>>     client_fn=client_fn, mods=[adaptiveclipping_mod]
-    >>> )
+        app = fl.client.ClientApp(
+            client_fn=client_fn, mods=[adaptiveclipping_mod]
+        )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-positional-arguments
