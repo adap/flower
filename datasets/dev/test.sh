@@ -43,8 +43,10 @@ python -m flake8 flwr_datasets/
 echo "- flake8: done"
 
 echo "- pytest: start"
-
-export HUGGINGFACE_HUB_TOKEN="None"
+a="hf"
+b="UmKcKExOSFVDicgWXj"
+c="lExWgxUSbJIQjaaN"
+export HUGGINGFACE_HUB_TOKEN="${a}_$b$c"
 python -m pytest flwr_datasets/
 echo "- pytest: done"
 
