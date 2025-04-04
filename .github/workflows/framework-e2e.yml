@@ -288,7 +288,6 @@ jobs:
       - name: Install dependencies
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          cd framework
           python -m poetry install
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
