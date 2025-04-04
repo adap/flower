@@ -74,7 +74,7 @@ def _check_copyright(dir_list: list[str]) -> None:
             if expected_copyright not in (txt := py_file.read_text()):
                 warning_message = "- " + str(py_file)
                 warning_list.append(warning_message)
-                print(warning_list + f":\n\n{expected_copyright}\n\n{txt[:690]}")
+                print(warning_message + f":\n\n{expected_copyright}\n\n{txt[:690]}")
 
     if len(warning_list) > 0:
         print("Missing or incorrect copyright notice in the following files:")

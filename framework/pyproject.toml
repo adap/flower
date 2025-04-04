@@ -88,6 +88,7 @@ rest = ["starlette", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]
 devtool = { path = "../dev" }
+docsig = "==0.64.0"
 
 [tool.docstrfmt]
 extend_exclude = [
