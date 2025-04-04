@@ -150,5 +150,7 @@ select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
 ignore = ["B024", "B027"]
 
+[tool.docstrfmt]
+
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
