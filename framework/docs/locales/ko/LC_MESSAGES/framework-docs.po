@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-25 00:32+0000\n"
+"POT-Creation-Date: 2025-04-04 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -5633,35 +5633,30 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:89
+#, fuzzy
 msgid ""
 "``--auth-list-public-keys``: Specify the path to a CSV file storing the "
 "public keys of all SuperNodes that should be allowed to connect with the "
-"SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:90
-#, fuzzy
-msgid ""
-"A valid CSV file storing known node public keys should list the keys in "
-"OpenSSH format, separated by commas. Refer to the code sample, which "
-"contains a CSV file with two known node public keys."
+"SuperLink. A valid CSV file storing known node public keys should list "
+"the keys in OpenSSH format, separated by commas. Refer to the code "
+"sample, which contains a CSV file with two known node public keys."
 msgstr ""
 "알려진 노드 공개키를 저장하는 유효한 CSV 파일은 쉼표로 구분하고 주석 없이 OpenSSH 형식으로 키를 나열해야 합니다. 예를 "
 "들어, 두 개의 알려진 노드 공개키가 포함된 CSV 파일이 포함된 코드 샘플을 참조하세요."
 
-#: ../../source/how-to-authenticate-supernodes.rst:93
+#: ../../source/how-to-authenticate-supernodes.rst:92
 #, fuzzy
 msgid "Enable node authentication in SuperNode"
 msgstr ":code:`SuperNode`에서 노드 인증을 활성화합니다"
 
-#: ../../source/how-to-authenticate-supernodes.rst:95
+#: ../../source/how-to-authenticate-supernodes.rst:94
 msgid ""
 "Connecting a SuperNode to a SuperLink that has node authentication "
 "enabled requires passing two additional arguments (i.e. the public and "
 "private keys of the SuperNode) in addition to the TLS certificate."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:112
+#: ../../source/how-to-authenticate-supernodes.rst:111
 msgid "``--auth-supernode-private-key``: the private key of this SuperNode."
 msgstr ""
 
@@ -5671,17 +5666,17 @@ msgid ""
 "should be the same that was added to othe CSV used by the SuperLink)."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:115
+#: ../../source/how-to-authenticate-supernodes.rst:114
 msgid ""
 "Follow the same procedure to launch the second SuperNode by passing its "
 "corresponding key pair:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:130
+#: ../../source/how-to-authenticate-supernodes.rst:129
 msgid "Security notice"
 msgstr "보안 공지"
 
-#: ../../source/how-to-authenticate-supernodes.rst:132
+#: ../../source/how-to-authenticate-supernodes.rst:131
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
 " SuperNode. Therefore, it is imperative to safeguard and safely store the"
@@ -5695,14 +5690,14 @@ msgstr ""
 " 보안 위험을 피하기 위해 자격 증명을 보호하고 안전하게 보관하는 것이 필수적입니다. 노드 인증 메커니즘에는 사람의 상호 작용도 "
 "포함되므로 모든 통신이 신뢰할 수 있는 통신 방법을 사용하여 안전한 방식으로 이루어지도록 하세요."
 
-#: ../../source/how-to-authenticate-supernodes.rst:139
+#: ../../source/how-to-authenticate-supernodes.rst:138
 #: ../../source/how-to-enable-tls-connections.rst:138
 #: ../../source/how-to-use-built-in-mods.rst:174
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:287
 msgid "Conclusion"
 msgstr "결론"
 
-#: ../../source/how-to-authenticate-supernodes.rst:141
+#: ../../source/how-to-authenticate-supernodes.rst:140
 #, fuzzy
 msgid ""
 "You should now have learned how to start a long-running Flower SuperLink "
@@ -5713,7 +5708,7 @@ msgstr ""
 "클라이언트(:code:`SuperNode`)를 시작하는 방법을 배웠을 것입니다. 또한 보안 위험을 최소화하기 위해 개인키의 중요성을"
 " 알고 안전하게 보관해야 합니다."
 
-#: ../../source/how-to-authenticate-supernodes.rst:147
+#: ../../source/how-to-authenticate-supernodes.rst:146
 #: ../../source/how-to-enable-tls-connections.rst:148
 msgid ""
 "Refer to the :doc:`docker/index` documentation to learn how to setup a "
@@ -11219,8 +11214,8 @@ msgstr "parameters\\_size\\_mod"
 #: flwr.client.mod.comms_mods.arrays_size_mod:3 of
 #, fuzzy
 msgid ""
-"This mod logs the number of array elements transmitted in "
-"``ArrayRecord``s of the message as well as their sizes in bytes."
+"This mod logs the number of array elements transmitted in ``ArrayRecord``"
+" objects of the message as well as their sizes in bytes."
 msgstr "이 모드는 메시지에서 전송된 매개변수의 수와 그 크기를 바이트 단위로 기록합니다."
 
 #: ../../source/ref-api/flwr.client.mod.fixedclipping_mod.rst:2
@@ -15159,7 +15154,7 @@ msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
 #: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
 #: flwr.server.grid.grid.Grid.set_run:1 of
-msgid "Request a run to the SuperLink with a given `run_id`."
+msgid "Request a run to the SuperLink with a given ``run_id``."
 msgstr ""
 
 #: flwr.server.grid.grid.Grid.create_message:1:<autosummary>:1 of
@@ -15278,7 +15273,7 @@ msgstr ""
 msgid ""
 "If a ``Run`` with the specified ``run_id`` exists, a local ``Run`` object"
 " will be created. It enables further functionality in the grid, such as "
-"sending ``Message``s."
+"sending ``Message`` objects."
 msgstr ""
 
 #: flwr.server.grid.grid.Grid.set_run:7 of
@@ -18798,7 +18793,7 @@ msgid ""
 msgstr ""
 
 #: flwr.simulation.run_simulation.run_simulation:12 of
-msgid "A simulation backend that runs `ClientApp`s."
+msgid "A simulation backend that runs `ClientApp` objects."
 msgstr ""
 
 #: flwr.simulation.run_simulation.run_simulation:14 of
@@ -26143,29 +26138,23 @@ msgid ""
 "centralized-to-federated>`_"
 msgstr ""
 
-#: ../../source/ref-example-projects.rst:40
-msgid ""
-":doc:`PyTorch: From Centralized To Federated (Tutorial) <example-pytorch-"
-"from-centralized-to-federated>`"
-msgstr ""
-
-#: ../../source/ref-example-projects.rst:44
+#: ../../source/ref-example-projects.rst:42
 msgid "Federated Learning on Raspberry Pi and Nvidia Jetson"
 msgstr ""
 
-#: ../../source/ref-example-projects.rst:46
+#: ../../source/ref-example-projects.rst:44
 msgid ""
 "This example shows how Flower can be used to build a federated learning "
 "system that run across Raspberry Pi and Nvidia Jetson:"
 msgstr ""
 
-#: ../../source/ref-example-projects.rst:49
+#: ../../source/ref-example-projects.rst:47
 msgid ""
 "`Federated Learning on Raspberry Pi and Nvidia Jetson (Code) "
 "<https://github.com/adap/flower/tree/main/examples/embedded-devices>`_"
 msgstr ""
 
-#: ../../source/ref-example-projects.rst:51
+#: ../../source/ref-example-projects.rst:49
 msgid ""
 "`Federated Learning on Raspberry Pi and Nvidia Jetson (Blog Post) "
 "<https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
@@ -30046,7 +30035,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|50dc70ec1a934c9392b49ee2ab55d803|"
+msgid "|5b43e524a56845a7a04ac533f71490b7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30063,7 +30052,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|d07049edbba148dd97dd3080491f2ae7|"
+msgid "|c43b20a2e8df4f7996fd88d0df547618|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30089,7 +30078,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|5bc3219a90ed4b59aed96f1ac1a40002|"
+msgid "|388efeddbe16428d8c43014e45c82903|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30107,7 +30096,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|de3f42c539be48249739b7dbe08c8fa3|"
+msgid "|1ec44e5d35a042c8b984c8038fe157dc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -30126,7 +30115,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|9f9f2a7adeb941db84f8f9a6d3f07e9b|"
+msgid "|a997fbfcff26482da18b3684d3cb4c27|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -30143,7 +30132,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|d6d33b77bb5245e28dbce90ceb23b82b|"
+msgid "|e797885f6cb24233b9dd9ab25d69a1b7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -30166,7 +30155,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|b14d23b166744f2690a147859055eb11|"
+msgid "|54d6df8a735241f89b812d1491e54aac|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -30183,7 +30172,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|dc936f126a4b40a6aa3b5f6c46c47ff0|"
+msgid "|6fb2be3b45f64c6884b9c39aa9a28768|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -30362,7 +30351,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|c0b47a9970cf4cd3ae45baf64c891ca0|"
+msgid "|533c62b48c9447998c803ee0b9fb7693|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -30390,7 +30379,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|6c479d9f8f484708afce183472a700e2|"
+msgid "|2eeacfbe0f5a4b269e1fe7bd97248547|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -30417,7 +30406,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|325757228b544ff393baf66965f58c92|"
+msgid "|d330184525b94704913e06995c5751d5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -30443,7 +30432,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|deb296df2c28457aa8f6957487e2ba20|"
+msgid "|695c8ea7ae004d2f88c579e2c7643c6b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -30493,7 +30482,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|cf8321d0d84c409d857ecd4736171334|"
+msgid "|28b051f1a2b6411cbc416727d362fb1d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -30613,7 +30602,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
+msgid "|d2d2f7c9abde4411873b1b690f3b5e08|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -40284,5 +40273,75 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|2717bf202b09498b90f9eacc1728f1d4|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--auth-list-public-keys``: Specify the"
+#~ " path to a CSV file storing the"
+#~ " public keys of all SuperNodes that"
+#~ " should be allowed to connect with"
+#~ " the SuperLink."
+#~ msgstr ""
+
+#~ msgid "Request a run to the SuperLink with a given `run_id`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If a ``Run`` with the specified "
+#~ "``run_id`` exists, a local ``Run`` "
+#~ "object will be created. It enables "
+#~ "further functionality in the grid, such"
+#~ " as sending ``Message``s."
+#~ msgstr ""
+
+#~ msgid "A simulation backend that runs `ClientApp`s."
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":doc:`PyTorch: From Centralized To Federated"
+#~ " (Tutorial) <example-pytorch-from-"
+#~ "centralized-to-federated>`"
+#~ msgstr ""
+
+#~ msgid "|50dc70ec1a934c9392b49ee2ab55d803|"
+#~ msgstr ""
+
+#~ msgid "|d07049edbba148dd97dd3080491f2ae7|"
+#~ msgstr ""
+
+#~ msgid "|5bc3219a90ed4b59aed96f1ac1a40002|"
+#~ msgstr ""
+
+#~ msgid "|de3f42c539be48249739b7dbe08c8fa3|"
+#~ msgstr ""
+
+#~ msgid "|9f9f2a7adeb941db84f8f9a6d3f07e9b|"
+#~ msgstr ""
+
+#~ msgid "|d6d33b77bb5245e28dbce90ceb23b82b|"
+#~ msgstr ""
+
+#~ msgid "|b14d23b166744f2690a147859055eb11|"
+#~ msgstr ""
+
+#~ msgid "|dc936f126a4b40a6aa3b5f6c46c47ff0|"
+#~ msgstr ""
+
+#~ msgid "|c0b47a9970cf4cd3ae45baf64c891ca0|"
+#~ msgstr ""
+
+#~ msgid "|6c479d9f8f484708afce183472a700e2|"
+#~ msgstr ""
+
+#~ msgid "|325757228b544ff393baf66965f58c92|"
+#~ msgstr ""
+
+#~ msgid "|deb296df2c28457aa8f6957487e2ba20|"
+#~ msgstr ""
+
+#~ msgid "|cf8321d0d84c409d857ecd4736171334|"
+#~ msgstr ""
+
+#~ msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
 #~ msgstr ""
 
