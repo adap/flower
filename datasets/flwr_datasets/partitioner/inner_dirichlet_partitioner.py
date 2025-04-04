@@ -66,7 +66,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
     >>> print(partition[0])  # Print the first example
     """
 
-    def __init__(  # pylint: disable=R0913
+    def __init__(  # pylint: disable=R0913, R0917
         self,
         partition_sizes: Union[list[int], NDArrayInt],
         partition_by: str,
