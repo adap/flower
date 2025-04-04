@@ -71,10 +71,9 @@ def _check_copyright(dir_list: list[str]) -> None:
             creation_year = _get_file_creation_year(str(py_file.absolute()))
             expected_copyright = COPYRIGHT_FORMAT.format(creation_year)
 
-            if expected_copyright not in (txt := py_file.read_text()):
+            if expected_copyright not in  py_file.read_text():
                 warning_message = "- " + str(py_file)
                 warning_list.append(warning_message)
-                print(warning_message + f":\n\n{expected_copyright}\n\n{txt[:690]}")
 
     if len(warning_list) > 0:
         print("Missing or incorrect copyright notice in the following files:")
