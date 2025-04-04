@@ -45,8 +45,8 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-packages = [{ include = "flwr", from = "framework/py" }]
-exclude = ["framework/py/**/*_test.py"]
+packages = [{ include = "flwr", from = "py" }]
+exclude = ["py/**/*_test.py"]
 
 [tool.poetry.scripts]
 # `flwr` CLI
@@ -142,14 +142,14 @@ docsig = "==0.64.0"
 
 [tool.docstrfmt]
 extend_exclude = [
-    "framework/docs/source/conf.py",
-    "framework/docs/source/tutorial-quickstart-huggingface.rst",
-    "framework/docs/source/_templates/autosummary/*",
-    "framework/docs/source/ref-api/*",
-    "intelligence/docs/source/ts-ref-api/*",
-    "intelligence/docs/source/swift-ref-api/*",
-    "intelligence/docs/source/_templates/autosummary/*",
-    "intelligence/docs/source/conf.py",
+    "docs/source/conf.py",
+    "docs/source/tutorial-quickstart-huggingface.rst",
+    "docs/source/_templates/autosummary/*",
+    "docs/source/ref-api/*",
+    "../intelligence/docs/source/ts-ref-api/*",
+    "../intelligence/docs/source/swift-ref-api/*",
+    "../intelligence/docs/source/_templates/autosummary/*",
+    "../intelligence/docs/source/conf.py",
 ]
 
 [tool.isort]
@@ -166,7 +166,7 @@ disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = ["framework/py/flwr", "framework/py/flwr_tool"]
+testpaths = ["py/flwr", "py/flwr_tool"]
 filterwarnings = "ignore::DeprecationWarning"
 
 [tool.pytest-watcher]
@@ -234,8 +234,8 @@ ignore = ["B024", "B027", "D205", "D209"]
 convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
-"framework/py/flwr/server/strategy/*.py" = ["E501"]
+"py/flwr/server/strategy/*.py" = ["E501"]
 
 [tool.docsig]
 ignore-no-params = true
-exclude = 'framework/py/flwr/proto/.*|framework/py/flwr/.*_test\.py|framework/py/flwr/cli/new/templates/.*\.tpl'
+exclude = 'py/flwr/proto/.*|py/flwr/.*_test\.py|py/flwr/cli/new/templates/.*\.tpl'

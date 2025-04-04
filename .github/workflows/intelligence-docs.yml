@@ -30,9 +30,13 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
-        run: python -m poetry install --all-extras
+        run: |
+          cd framework
+          python -m poetry install --all-extras
       - name: Check docs format
-        run: docstrfmt --check intelligence/docs/source
+        run: |
+          cd framework
+          docstrfmt --check ../intelligence/docs/source
   build_ts_docs:
     runs-on: ubuntu-22.04
     name: Build TypeScript Docs
@@ -110,7 +114,9 @@ jobs:
         run: sudo apt install pandoc
       - name: Install Flower dependencies (mandatory only)
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
-        run: python -m poetry install --extras "simulation"
+        run: |
+          cd framework
+          python -m poetry install --extras "simulation"
       - name: Download TS docs
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         uses: actions/download-artifact@v4
