@@ -146,6 +146,10 @@ extend_exclude = [
     "docs/source/tutorial-quickstart-huggingface.rst",
     "docs/source/_templates/autosummary/*",
     "docs/source/ref-api/*",
+    "../intelligence/docs/source/ts-ref-api/*",
+    "../intelligence/docs/source/swift-ref-api/*",
+    "../intelligence/docs/source/_templates/autosummary/*",
+    "../intelligence/docs/source/conf.py",
 ]
 
 [tool.isort]
