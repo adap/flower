@@ -63,12 +63,12 @@ tqdm ="^4.66.1"
 matplotlib = "^3.7.5"
 seaborn = "^0.13.0"
 
-[tool.poetry.dev-dependencies]
-devtool = { path = "../dev" }
-
 [tool.poetry.extras]
 vision = ["pillow"]
 audio = ["soundfile", "librosa"]
+
+[tool.poetry.group.dev.dependencies]
+devtool = { path = "../dev" }
 
 [tool.isort]
 line_length = 88
