@@ -18,9 +18,9 @@ echo "- init_py_check: start"
 python -m devtool.init_py_check flwr_datasets/
 echo "- init_py_check: done"
 
-echo "- check_copyright: start"
+echo "- copyright: start"
 python -m devtool.check_copyright flwr_datasets/
-echo "- check_copyright: done"
+echo "- copyright: done"
 
 echo "- docformatter: start"
 python -m docformatter -c -r flwr_datasets/

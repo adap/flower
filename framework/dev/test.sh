@@ -97,7 +97,7 @@ echo "- Start license checks"
 
 if $RUN_FULL_TEST; then
     echo "- copyright: start"
-    python -m flwr_tool.check_copyright py/flwr
+    python -m devtool.check_copyright py/flwr
     echo "- copyright: done"
 fi
 
