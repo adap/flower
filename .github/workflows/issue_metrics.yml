@@ -1,0 +1,34 @@
+name: Real Daily Issue Metrics
+on:
+  schedule:
+    # Run every week Sunday 11pm UTC
+    - cron: '0 23 * * 0'
+  workflow_dispatch:      # Allow manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: issue metrics
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: read
+    steps:
+      - name: Run issue-metrics tool
+        uses: github/issue-metrics@v3
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+          SEARCH_QUERY: 'repo:adap/flower is:open is:issue -reason:"not planned"'
+          HIDE_LABEL_COUNT: "false"
+          LABELS_TO_MEASURE: "bug,documentation,feature request,part: misc framework,part: baselines,part: communication,part: flwr-dataset,part: examples,state: open,state: resolved,state: under review,state: revision needed,state: stale,good first issue,needs clarification,needs reproduction details"
+          NON_MENTIONING_LINKS: "false"
+          REPORT_TITLE: "Issue Metrics"
+
+      - name: Create issue
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: Daily Issue Metrics Report
+          token: ${{ secrets.GITHUB_TOKEN }}
+          content-filepath: ./issue_metrics.md
