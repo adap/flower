@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-25 00:32+0000\n"
+"POT-Creation-Date: 2025-04-04 00:08+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -5640,35 +5640,30 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:89
+#, fuzzy
 msgid ""
 "``--auth-list-public-keys``: Specify the path to a CSV file storing the "
 "public keys of all SuperNodes that should be allowed to connect with the "
-"SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:90
-#, fuzzy
-msgid ""
-"A valid CSV file storing known node public keys should list the keys in "
-"OpenSSH format, separated by commas. Refer to the code sample, which "
-"contains a CSV file with two known node public keys."
+"SuperLink. A valid CSV file storing known node public keys should list "
+"the keys in OpenSSH format, separated by commas. Refer to the code "
+"sample, which contains a CSV file with two known node public keys."
 msgstr ""
 "存储已知节点公开密钥的有效 CSV 文件应以 OpenSSH "
 "格式列出密钥，以逗号分隔，不含任何注释。有关示例，请参阅我们的代码示例，其中包含一个包含两个已知节点公钥的 CSV 文件。"
 
-#: ../../source/how-to-authenticate-supernodes.rst:93
+#: ../../source/how-to-authenticate-supernodes.rst:92
 #, fuzzy
 msgid "Enable node authentication in SuperNode"
 msgstr "在 :code:`SuperNode` 中启用节点验证"
 
-#: ../../source/how-to-authenticate-supernodes.rst:95
+#: ../../source/how-to-authenticate-supernodes.rst:94
 msgid ""
 "Connecting a SuperNode to a SuperLink that has node authentication "
 "enabled requires passing two additional arguments (i.e. the public and "
 "private keys of the SuperNode) in addition to the TLS certificate."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:112
+#: ../../source/how-to-authenticate-supernodes.rst:111
 msgid "``--auth-supernode-private-key``: the private key of this SuperNode."
 msgstr ""
 
@@ -5678,18 +5673,18 @@ msgid ""
 "should be the same that was added to othe CSV used by the SuperLink)."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:115
+#: ../../source/how-to-authenticate-supernodes.rst:114
 msgid ""
 "Follow the same procedure to launch the second SuperNode by passing its "
 "corresponding key pair:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:130
+#: ../../source/how-to-authenticate-supernodes.rst:129
 #, fuzzy
 msgid "Security notice"
 msgstr "安全通知"
 
-#: ../../source/how-to-authenticate-supernodes.rst:132
+#: ../../source/how-to-authenticate-supernodes.rst:131
 #, fuzzy
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
@@ -5703,14 +5698,14 @@ msgstr ""
 "系统的安全性依赖于超级链接和每个超级节点的凭证。因此，必须保护和安全存储凭证，以避免公钥基础设施 (PKI) "
 "假冒攻击等安全风险。节点验证机制还涉及人机交互，因此请确保使用可信的通信方法，以安全的方式进行所有通信。"
 
-#: ../../source/how-to-authenticate-supernodes.rst:139
+#: ../../source/how-to-authenticate-supernodes.rst:138
 #: ../../source/how-to-enable-tls-connections.rst:138
 #: ../../source/how-to-use-built-in-mods.rst:174
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:287
 msgid "Conclusion"
 msgstr "总结"
 
-#: ../../source/how-to-authenticate-supernodes.rst:141
+#: ../../source/how-to-authenticate-supernodes.rst:140
 #, fuzzy
 msgid ""
 "You should now have learned how to start a long-running Flower SuperLink "
@@ -5720,7 +5715,7 @@ msgstr ""
 "现在，您应该已经学会了如何启动长期运行的 Flower "
 "服务器（:code:`SuperLink`）和客户端（:code:`SuperNode`）并启用节点身份验证。您还应该知道私钥的重要性，并将其安全存储，以尽量减少安全风险。"
 
-#: ../../source/how-to-authenticate-supernodes.rst:147
+#: ../../source/how-to-authenticate-supernodes.rst:146
 #: ../../source/how-to-enable-tls-connections.rst:148
 msgid ""
 "Refer to the :doc:`docker/index` documentation to learn how to setup a "
@@ -11201,8 +11196,8 @@ msgstr "参数"
 
 #: flwr.client.mod.comms_mods.arrays_size_mod:3 of
 msgid ""
-"This mod logs the number of array elements transmitted in "
-"``ArrayRecord``s of the message as well as their sizes in bytes."
+"This mod logs the number of array elements transmitted in ``ArrayRecord``"
+" objects of the message as well as their sizes in bytes."
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.fixedclipping_mod.rst:2
@@ -15492,7 +15487,7 @@ msgstr ":py:obj:`run_driver_api <flwr.server.run_driver_api>`\\ \\(\\)"
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
 #: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
 #: flwr.server.grid.grid.Grid.set_run:1 of
-msgid "Request a run to the SuperLink with a given `run_id`."
+msgid "Request a run to the SuperLink with a given ``run_id``."
 msgstr ""
 
 #: flwr.server.grid.grid.Grid.create_message:1:<autosummary>:1 of
@@ -15629,7 +15624,7 @@ msgstr ""
 msgid ""
 "If a ``Run`` with the specified ``run_id`` exists, a local ``Run`` object"
 " will be created. It enables further functionality in the grid, such as "
-"sending ``Message``s."
+"sending ``Message`` objects."
 msgstr ""
 
 #: flwr.server.grid.grid.Grid.set_run:7 of
@@ -20215,7 +20210,7 @@ msgstr "运行 ClientApp 的节点数。它们可被 ServerApp 中的驱动程�
 
 #: flwr.simulation.run_simulation.run_simulation:12 of
 #, fuzzy
-msgid "A simulation backend that runs `ClientApp`s."
+msgid "A simulation backend that runs `ClientApp` objects."
 msgstr "运行 \"客户端应用程序 \"的模拟后台。"
 
 #: flwr.simulation.run_simulation.run_simulation:14 of
@@ -29772,26 +29767,17 @@ msgstr ""
 "PyTorch： 从集中式到联邦式（代码） <https://github.com/adap/flower/tree/main/examples"
 "/pytorch-from-centralized-to-federated>`_"
 
-#: ../../source/ref-example-projects.rst:40
-#, fuzzy
-msgid ""
-":doc:`PyTorch: From Centralized To Federated (Tutorial) <example-pytorch-"
-"from-centralized-to-federated>`"
-msgstr ""
-"PyTorch： 从集中式到联邦式（教程） <https://flower.ai/docs/framework/example-pytorch-"
-"from-centralized-to-federated.html>`_"
-
-#: ../../source/ref-example-projects.rst:44
+#: ../../source/ref-example-projects.rst:42
 msgid "Federated Learning on Raspberry Pi and Nvidia Jetson"
 msgstr "树莓派和 Nvidia Jetson 上的联邦学习"
 
-#: ../../source/ref-example-projects.rst:46
+#: ../../source/ref-example-projects.rst:44
 msgid ""
 "This example shows how Flower can be used to build a federated learning "
 "system that run across Raspberry Pi and Nvidia Jetson:"
 msgstr "本示例展示了如何利用 Flower 建立一个跨 Raspberry Pi 和 Nvidia Jetson 运行的联邦学习系统："
 
-#: ../../source/ref-example-projects.rst:49
+#: ../../source/ref-example-projects.rst:47
 msgid ""
 "`Federated Learning on Raspberry Pi and Nvidia Jetson (Code) "
 "<https://github.com/adap/flower/tree/main/examples/embedded-devices>`_"
@@ -29799,7 +29785,7 @@ msgstr ""
 "Raspberry Pi 和 Nvidia Jetson 上的联邦学习（代码） "
 "<https://github.com/adap/flower/tree/main/examples/embedded-devices>`_"
 
-#: ../../source/ref-example-projects.rst:51
+#: ../../source/ref-example-projects.rst:49
 msgid ""
 "`Federated Learning on Raspberry Pi and Nvidia Jetson (Blog Post) "
 "<https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
@@ -34170,7 +34156,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|50dc70ec1a934c9392b49ee2ab55d803|"
+msgid "|5b43e524a56845a7a04ac533f71490b7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -34185,7 +34171,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|d07049edbba148dd97dd3080491f2ae7|"
+msgid "|c43b20a2e8df4f7996fd88d0df547618|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -34209,7 +34195,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|5bc3219a90ed4b59aed96f1ac1a40002|"
+msgid "|388efeddbe16428d8c43014e45c82903|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -34227,7 +34213,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|de3f42c539be48249739b7dbe08c8fa3|"
+msgid "|1ec44e5d35a042c8b984c8038fe157dc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -34244,7 +34230,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|9f9f2a7adeb941db84f8f9a6d3f07e9b|"
+msgid "|a997fbfcff26482da18b3684d3cb4c27|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -34259,7 +34245,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|d6d33b77bb5245e28dbce90ceb23b82b|"
+msgid "|e797885f6cb24233b9dd9ab25d69a1b7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -34280,7 +34266,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|b14d23b166744f2690a147859055eb11|"
+msgid "|54d6df8a735241f89b812d1491e54aac|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -34295,7 +34281,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|dc936f126a4b40a6aa3b5f6c46c47ff0|"
+msgid "|6fb2be3b45f64c6884b9c39aa9a28768|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -34455,7 +34441,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|c0b47a9970cf4cd3ae45baf64c891ca0|"
+msgid "|533c62b48c9447998c803ee0b9fb7693|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -34480,7 +34466,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|6c479d9f8f484708afce183472a700e2|"
+msgid "|2eeacfbe0f5a4b269e1fe7bd97248547|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -34506,7 +34492,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|325757228b544ff393baf66965f58c92|"
+msgid "|d330184525b94704913e06995c5751d5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -34529,7 +34515,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|deb296df2c28457aa8f6957487e2ba20|"
+msgid "|695c8ea7ae004d2f88c579e2c7643c6b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -34576,7 +34562,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|cf8321d0d84c409d857ecd4736171334|"
+msgid "|28b051f1a2b6411cbc416727d362fb1d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -34684,7 +34670,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
+msgid "|d2d2f7c9abde4411873b1b690f3b5e08|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -44634,5 +44620,82 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|2717bf202b09498b90f9eacc1728f1d4|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--auth-list-public-keys``: Specify the"
+#~ " path to a CSV file storing the"
+#~ " public keys of all SuperNodes that"
+#~ " should be allowed to connect with"
+#~ " the SuperLink."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This mod logs the number of array"
+#~ " elements transmitted in ``ArrayRecord``s "
+#~ "of the message as well as their"
+#~ " sizes in bytes."
+#~ msgstr ""
+
+#~ msgid "Request a run to the SuperLink with a given `run_id`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If a ``Run`` with the specified "
+#~ "``run_id`` exists, a local ``Run`` "
+#~ "object will be created. It enables "
+#~ "further functionality in the grid, such"
+#~ " as sending ``Message``s."
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":doc:`PyTorch: From Centralized To Federated"
+#~ " (Tutorial) <example-pytorch-from-"
+#~ "centralized-to-federated>`"
+#~ msgstr ""
+#~ "PyTorch： 从集中式到联邦式（教程） <https://flower.ai/docs/framework"
+#~ "/example-pytorch-from-centralized-to-"
+#~ "federated.html>`_"
+
+#~ msgid "|50dc70ec1a934c9392b49ee2ab55d803|"
+#~ msgstr ""
+
+#~ msgid "|d07049edbba148dd97dd3080491f2ae7|"
+#~ msgstr ""
+
+#~ msgid "|5bc3219a90ed4b59aed96f1ac1a40002|"
+#~ msgstr ""
+
+#~ msgid "|de3f42c539be48249739b7dbe08c8fa3|"
+#~ msgstr ""
+
+#~ msgid "|9f9f2a7adeb941db84f8f9a6d3f07e9b|"
+#~ msgstr ""
+
+#~ msgid "|d6d33b77bb5245e28dbce90ceb23b82b|"
+#~ msgstr ""
+
+#~ msgid "|b14d23b166744f2690a147859055eb11|"
+#~ msgstr ""
+
+#~ msgid "|dc936f126a4b40a6aa3b5f6c46c47ff0|"
+#~ msgstr ""
+
+#~ msgid "|c0b47a9970cf4cd3ae45baf64c891ca0|"
+#~ msgstr ""
+
+#~ msgid "|6c479d9f8f484708afce183472a700e2|"
+#~ msgstr ""
+
+#~ msgid "|325757228b544ff393baf66965f58c92|"
+#~ msgstr ""
+
+#~ msgid "|deb296df2c28457aa8f6957487e2ba20|"
+#~ msgstr ""
+
+#~ msgid "|cf8321d0d84c409d857ecd4736171334|"
+#~ msgstr ""
+
+#~ msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
 #~ msgstr ""
 
