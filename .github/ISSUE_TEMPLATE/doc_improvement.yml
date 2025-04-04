@@ -1,4 +1,4 @@
-name: Improve Documentation
+name: 📚 Improve Documentation
 description: Create an issue/PR to help us improve the documentation. You can use the issue to report an improvement or directly open a PR with the suggested change. 
 labels: ['documentation']
 
@@ -19,3 +19,4 @@ body:
     label: Suggest your improvement.
     description: >
       What information do you want to change/add?
+      
