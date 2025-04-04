@@ -23,10 +23,6 @@ concurrency:
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
-defaults:
-  run:
-    working-directory: datasets
-
 jobs:
   test_core:
     runs-on: ubuntu-22.04
@@ -58,4 +54,4 @@ jobs:
       - name: Set Hugging Face token
         run: huggingface-cli login --token ${{ secrets.HF_TOKEN }}
       - name: Test (formatting + unit tests)
-        run: ./dev/test.sh
+        run: ./datasets/dev/test.sh
