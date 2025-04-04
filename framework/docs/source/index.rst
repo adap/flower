@@ -40,6 +40,7 @@ A learning-oriented series of federated learning tutorials, the best place to st
     tutorial-series-use-a-federated-learning-strategy-pytorch
     tutorial-series-build-a-strategy-from-scratch-pytorch
     tutorial-series-customize-the-client-pytorch
+    notebooks/index
 
 .. toctree::
     :maxdepth: 1
