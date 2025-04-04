@@ -34,7 +34,9 @@ jobs:
           cd framework
           python -m poetry install --all-extras
       - name: Check docs format
-        run: docstrfmt --check intelligence/docs/source
+        run: |
+          cd framework
+          docstrfmt --check ../intelligence/docs/source
   build_ts_docs:
     runs-on: ubuntu-22.04
     name: Build TypeScript Docs

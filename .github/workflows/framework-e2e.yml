@@ -64,7 +64,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          cd ./dist
+          cd ./framework/dist
           echo "WHL_PATH=$(ls *.whl)" >> "$GITHUB_OUTPUT"
           sha_short=$(git rev-parse --short HEAD)
           echo "SHORT_SHA=$sha_short" >> "$GITHUB_OUTPUT"
