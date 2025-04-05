@@ -68,7 +68,9 @@ vision = ["pillow"]
 audio = ["soundfile", "librosa"]
 
 [tool.poetry.group.dev.dependencies]
-devtool = { path = "../dev" }
+devtool = [
+    { path = "../dev", develop = true }
+]
 
 [tool.isort]
 line_length = 88
@@ -151,6 +153,7 @@ fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
 ignore = ["B024", "B027"]
 
 [tool.docstrfmt]
+extend_exclude = []
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
