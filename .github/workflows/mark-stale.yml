@@ -1,0 +1,26 @@
+name: Mark Stale Issues
+
+on:
+  schedule:
+    # Runs every day at midnight UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch: # Allows manual runs
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Mark stale issues and pull requests
+        uses: actions/stale@v8
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Default settings for most issues
+          days-before-stale: 21
+          stale-issue-label: "stale"
+          # days-before-close: 7 # Optional
+
+          # Feature request-specific settings
+          only-labels: "feature request"
+          days-before-stale-for-labels: 90 # 90 days for feature requests
