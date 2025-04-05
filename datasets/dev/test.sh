@@ -42,6 +42,10 @@ echo "- flake8: start"
 python -m flake8 flwr_datasets/
 echo "- flake8: done"
 
+echo "- taplo: start"
+taplo fmt --check
+echo "- taplo: done"
+
 echo "- pytest: start"
 python -m pytest flwr_datasets/
 echo "- pytest: done"

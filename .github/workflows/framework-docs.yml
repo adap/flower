@@ -32,14 +32,10 @@ jobs:
       - name: Install Flower dependencies (mandatory only)
         run: |
           cd framework
-          cat ../dev/pyproject.toml
           python -m poetry install
       - name: Install Flower Datasets
         run: |
           cd datasets
-          pwd
-          ls -la
-          cat ../dev/pyproject.toml
           python -m poetry install
       - name: Build docs
         run: ./dev/build-docs.sh ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}

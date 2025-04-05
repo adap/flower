@@ -8,7 +8,7 @@ version = "0.0.0"
 description = "Tools for developers."
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
-packages = [{include = "devtool"}]
+packages = [{include = "devtool", from = "./"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"

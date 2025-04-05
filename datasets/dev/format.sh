@@ -18,6 +18,8 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+taplo fmt
+
 # Python
 echo "Formatting started: Python"
 python -m devtool.check_copyright flwr_datasets/

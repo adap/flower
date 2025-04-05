@@ -87,9 +87,7 @@ simulation = ["ray"]
 rest = ["starlette", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]
-devtool = [
-    { path = "../dev", develop = true }
-]
+devtool = [{ path = "../dev", develop = true }]
 docsig = "==0.64.0"
 
 [tool.docstrfmt]
