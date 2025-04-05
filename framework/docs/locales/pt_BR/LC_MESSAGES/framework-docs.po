@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-25 00:32+0000\n"
+"POT-Creation-Date: 2025-04-05 00:07+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -5218,28 +5218,23 @@ msgstr ""
 msgid ""
 "``--auth-list-public-keys``: Specify the path to a CSV file storing the "
 "public keys of all SuperNodes that should be allowed to connect with the "
-"SuperLink."
+"SuperLink. A valid CSV file storing known node public keys should list "
+"the keys in OpenSSH format, separated by commas. Refer to the code "
+"sample, which contains a CSV file with two known node public keys."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:90
-msgid ""
-"A valid CSV file storing known node public keys should list the keys in "
-"OpenSSH format, separated by commas. Refer to the code sample, which "
-"contains a CSV file with two known node public keys."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:93
+#: ../../source/how-to-authenticate-supernodes.rst:92
 msgid "Enable node authentication in SuperNode"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:95
+#: ../../source/how-to-authenticate-supernodes.rst:94
 msgid ""
 "Connecting a SuperNode to a SuperLink that has node authentication "
 "enabled requires passing two additional arguments (i.e. the public and "
 "private keys of the SuperNode) in addition to the TLS certificate."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:112
+#: ../../source/how-to-authenticate-supernodes.rst:111
 msgid "``--auth-supernode-private-key``: the private key of this SuperNode."
 msgstr ""
 
@@ -5249,17 +5244,17 @@ msgid ""
 "should be the same that was added to othe CSV used by the SuperLink)."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:115
+#: ../../source/how-to-authenticate-supernodes.rst:114
 msgid ""
 "Follow the same procedure to launch the second SuperNode by passing its "
 "corresponding key pair:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:130
+#: ../../source/how-to-authenticate-supernodes.rst:129
 msgid "Security notice"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:132
+#: ../../source/how-to-authenticate-supernodes.rst:131
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
 " SuperNode. Therefore, it is imperative to safeguard and safely store the"
@@ -5270,21 +5265,21 @@ msgid ""
 "methods."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:139
+#: ../../source/how-to-authenticate-supernodes.rst:138
 #: ../../source/how-to-enable-tls-connections.rst:138
 #: ../../source/how-to-use-built-in-mods.rst:174
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:287
 msgid "Conclusion"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:141
+#: ../../source/how-to-authenticate-supernodes.rst:140
 msgid ""
 "You should now have learned how to start a long-running Flower SuperLink "
 "and SuperNode with node authentication enabled. You should also know the "
 "significance of the private key and store it securely to minimize risks."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:147
+#: ../../source/how-to-authenticate-supernodes.rst:146
 #: ../../source/how-to-enable-tls-connections.rst:148
 msgid ""
 "Refer to the :doc:`docker/index` documentation to learn how to setup a "
@@ -10209,8 +10204,8 @@ msgstr ""
 
 #: flwr.client.mod.comms_mods.arrays_size_mod:3 of
 msgid ""
-"This mod logs the number of array elements transmitted in "
-"``ArrayRecord``s of the message as well as their sizes in bytes."
+"This mod logs the number of array elements transmitted in ``ArrayRecord``"
+" objects of the message as well as their sizes in bytes."
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.fixedclipping_mod.rst:2
@@ -13746,7 +13741,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
 #: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
 #: flwr.server.grid.grid.Grid.set_run:1 of
-msgid "Request a run to the SuperLink with a given `run_id`."
+msgid "Request a run to the SuperLink with a given ``run_id``."
 msgstr ""
 
 #: flwr.server.grid.grid.Grid.create_message:1:<autosummary>:1 of
@@ -13862,7 +13857,7 @@ msgstr ""
 msgid ""
 "If a ``Run`` with the specified ``run_id`` exists, a local ``Run`` object"
 " will be created. It enables further functionality in the grid, such as "
-"sending ``Message``s."
+"sending ``Message`` objects."
 msgstr ""
 
 #: flwr.server.grid.grid.Grid.set_run:7 of
@@ -17347,7 +17342,7 @@ msgid ""
 msgstr ""
 
 #: flwr.simulation.run_simulation.run_simulation:12 of
-msgid "A simulation backend that runs `ClientApp`s."
+msgid "A simulation backend that runs `ClientApp` objects."
 msgstr ""
 
 #: flwr.simulation.run_simulation.run_simulation:14 of
@@ -24685,29 +24680,23 @@ msgid ""
 "centralized-to-federated>`_"
 msgstr ""
 
-#: ../../source/ref-example-projects.rst:40
-msgid ""
-":doc:`PyTorch: From Centralized To Federated (Tutorial) <example-pytorch-"
-"from-centralized-to-federated>`"
-msgstr ""
-
-#: ../../source/ref-example-projects.rst:44
+#: ../../source/ref-example-projects.rst:42
 msgid "Federated Learning on Raspberry Pi and Nvidia Jetson"
 msgstr ""
 
-#: ../../source/ref-example-projects.rst:46
+#: ../../source/ref-example-projects.rst:44
 msgid ""
 "This example shows how Flower can be used to build a federated learning "
 "system that run across Raspberry Pi and Nvidia Jetson:"
 msgstr ""
 
-#: ../../source/ref-example-projects.rst:49
+#: ../../source/ref-example-projects.rst:47
 msgid ""
 "`Federated Learning on Raspberry Pi and Nvidia Jetson (Code) "
 "<https://github.com/adap/flower/tree/main/examples/embedded-devices>`_"
 msgstr ""
 
-#: ../../source/ref-example-projects.rst:51
+#: ../../source/ref-example-projects.rst:49
 msgid ""
 "`Federated Learning on Raspberry Pi and Nvidia Jetson (Blog Post) "
 "<https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
@@ -28543,7 +28532,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|50dc70ec1a934c9392b49ee2ab55d803|"
+msgid "|032f3d0ce284449a96f4495764ddc63c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -28558,7 +28547,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|d07049edbba148dd97dd3080491f2ae7|"
+msgid "|b8a0ecff8eec4d43b5249a8270f76134|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -28580,7 +28569,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|5bc3219a90ed4b59aed96f1ac1a40002|"
+msgid "|08cf990432264870b1e06a04ad254e6b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -28596,7 +28585,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|de3f42c539be48249739b7dbe08c8fa3|"
+msgid "|49c81566718242cb8729df8d3c2175ca|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -28612,7 +28601,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|9f9f2a7adeb941db84f8f9a6d3f07e9b|"
+msgid "|1e1fecf652ac4f52bb864098ac5116ee|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -28627,7 +28616,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|d6d33b77bb5245e28dbce90ceb23b82b|"
+msgid "|c12e0c758eff494aaa5a7d654adf7ac4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -28647,7 +28636,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|b14d23b166744f2690a147859055eb11|"
+msgid "|deb6e5bc196e42f090346ddf14f53229|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -28662,7 +28651,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|dc936f126a4b40a6aa3b5f6c46c47ff0|"
+msgid "|b343ddd716004243b2c58aed83aab921|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -28802,7 +28791,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|c0b47a9970cf4cd3ae45baf64c891ca0|"
+msgid "|a8c6feecd48f4f788555b60934b24bff|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -28826,7 +28815,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|6c479d9f8f484708afce183472a700e2|"
+msgid "|e426db8f2b9a416ab52c4b55de780ea7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -28850,7 +28839,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|325757228b544ff393baf66965f58c92|"
+msgid "|0fada641b63d4b2ba280c8f069ec8c5b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -28873,7 +28862,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|deb296df2c28457aa8f6957487e2ba20|"
+msgid "|45bc036708fe403997f631dcfb5e3b0e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -28911,7 +28900,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|cf8321d0d84c409d857ecd4736171334|"
+msgid "|f7e461c40bea4d68a55bef21d2a918e8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -29005,7 +28994,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
+msgid "|e7697a3db86c499d8ee3d3174232bfc1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -44444,5 +44433,91 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|2717bf202b09498b90f9eacc1728f1d4|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--auth-list-public-keys``: Specify the"
+#~ " path to a CSV file storing the"
+#~ " public keys of all SuperNodes that"
+#~ " should be allowed to connect with"
+#~ " the SuperLink."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A valid CSV file storing known "
+#~ "node public keys should list the "
+#~ "keys in OpenSSH format, separated by "
+#~ "commas. Refer to the code sample, "
+#~ "which contains a CSV file with two"
+#~ " known node public keys."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This mod logs the number of array"
+#~ " elements transmitted in ``ArrayRecord``s "
+#~ "of the message as well as their"
+#~ " sizes in bytes."
+#~ msgstr ""
+
+#~ msgid "Request a run to the SuperLink with a given `run_id`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If a ``Run`` with the specified "
+#~ "``run_id`` exists, a local ``Run`` "
+#~ "object will be created. It enables "
+#~ "further functionality in the grid, such"
+#~ " as sending ``Message``s."
+#~ msgstr ""
+
+#~ msgid "A simulation backend that runs `ClientApp`s."
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":doc:`PyTorch: From Centralized To Federated"
+#~ " (Tutorial) <example-pytorch-from-"
+#~ "centralized-to-federated>`"
+#~ msgstr ""
+
+#~ msgid "|50dc70ec1a934c9392b49ee2ab55d803|"
+#~ msgstr ""
+
+#~ msgid "|d07049edbba148dd97dd3080491f2ae7|"
+#~ msgstr ""
+
+#~ msgid "|5bc3219a90ed4b59aed96f1ac1a40002|"
+#~ msgstr ""
+
+#~ msgid "|de3f42c539be48249739b7dbe08c8fa3|"
+#~ msgstr ""
+
+#~ msgid "|9f9f2a7adeb941db84f8f9a6d3f07e9b|"
+#~ msgstr ""
+
+#~ msgid "|d6d33b77bb5245e28dbce90ceb23b82b|"
+#~ msgstr ""
+
+#~ msgid "|b14d23b166744f2690a147859055eb11|"
+#~ msgstr ""
+
+#~ msgid "|dc936f126a4b40a6aa3b5f6c46c47ff0|"
+#~ msgstr ""
+
+#~ msgid "|c0b47a9970cf4cd3ae45baf64c891ca0|"
+#~ msgstr ""
+
+#~ msgid "|6c479d9f8f484708afce183472a700e2|"
+#~ msgstr ""
+
+#~ msgid "|325757228b544ff393baf66965f58c92|"
+#~ msgstr ""
+
+#~ msgid "|deb296df2c28457aa8f6957487e2ba20|"
+#~ msgstr ""
+
+#~ msgid "|cf8321d0d84c409d857ecd4736171334|"
+#~ msgstr ""
+
+#~ msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
 #~ msgstr ""
 
