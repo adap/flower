@@ -32,7 +32,7 @@ jobs:
       - name: Install Flower dependencies (mandatory only)
         run: |
           cd framework
-          python -m poetry install --extras "simulation"
+          python -m poetry install
       - name: Install Flower Datasets
         run: |
           cd datasets
