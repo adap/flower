@@ -97,7 +97,7 @@ python -m feddebug.main device=cpu
 
 Output of the last round will show the FedDebug output as follows:
 
-```console
+```log
 ... 
 [2024-10-24 12:25:48,758][flwr][INFO] - ***FedDebug Output Round 5 ***
 [2024-10-24 12:25:48,758][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
@@ -129,7 +129,7 @@ python -m feddebug.main device=cpu total_malicious_clients=2 dataset.name=cifar1
 ```
 In this scenario, clients 0 and 1 are now malicious. The output will show the FedDebug output as follows:
 
-```console
+```log
 ...
 [2024-10-24 12:28:14,125][flwr][INFO] - ***FedDebug Output Round 5 ***
 [2024-10-24 12:28:14,125][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0', '1']
@@ -160,7 +160,7 @@ python -m feddebug.main device=cuda model=resnet18 distribution=non_iid
 
 ```
 Output
-```console
+```log
 ...
 [2024-10-24 12:13:40,679][flwr][INFO] - ***FedDebug Output Round 5 ***
 [2024-10-24 12:13:40,679][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
@@ -185,7 +185,7 @@ You can also test the impact of the neuron activation threshold on localization 
 python -m feddebug.main device=cuda model=resnet18 feddebug.na_t=0.7
 ```
 
-```console
+```log
 ...
 [2024-10-24 12:21:26,923][flwr][INFO] - ***FedDebug Output Round 2 ***
 [2024-10-24 12:21:26,923][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
