@@ -32,19 +32,11 @@ sphinx-reredirects = "==0.1.5"
 nbsphinx = "==0.9.5"
 nbstripout = "==0.6.1"
 sphinx-argparse = "==0.4.0"
-pipreqs = "==0.4.13"
 mdformat = "==0.7.18"
 mdformat-gfm = "==0.3.6"
 mdformat-frontmatter = "==2.0.1"
 mdformat-beautysh = "==0.1.1"
-twine = "==5.1.1"
-types-PyYAML = "^6.0.2"
-pyroma = "==4.2"
-check-wheel-contents = "==0.4.0"
 GitPython = "==3.1.32"
-PyGithub = "==2.1.1"
-licensecheck = "==2024"
-pre-commit = "==3.5.0"
 sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
 docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2" }
@@ -59,7 +51,6 @@ extend_exclude = [
 
 [tool.isort]
 profile = "black"
-known_first_party = ["flwr", "flwr_tool"]
 
 [tool.black]
 line-length = 88

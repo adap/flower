@@ -36,7 +36,7 @@ jobs:
       - name: Install Flower Datasets
         run: |
           cd datasets
-          python -m poetry install
+          python -m poetry install --only main
       - name: Build docs
         run: ./dev/build-docs.sh ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
       - name: Deploy docs
