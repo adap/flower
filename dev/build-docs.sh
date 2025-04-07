@@ -20,4 +20,4 @@ cd "$ROOT"
 ./datasets/dev/build-flwr-datasets-docs.sh
 
 cd "$ROOT"
-./framework/dev/build-docs.sh
+./framework/dev/build-docs.sh true
