@@ -22,6 +22,10 @@ echo "- init_py_check: start"
 python -m flwr_tool.init_py_check flwr_datasets/
 echo "- init_py_check: done"
 
+echo "- copyright: start"
+python -m flwr_tool.check_copyright flwr_datasets/
+echo "- copyright: done"
+
 echo "- docformatter: start"
 python -m docformatter -c -r flwr_datasets/
 echo "- docformatter:  done"
@@ -41,6 +45,10 @@ echo "- pylint: done"
 echo "- flake8: start"
 python -m flake8 flwr_datasets/
 echo "- flake8: done"
+
+echo "- taplo: start"
+taplo fmt --check
+echo "- taplo: done"
 
 echo "- pytest: start"
 python -m pytest flwr_datasets/
