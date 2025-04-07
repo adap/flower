@@ -1,5 +1,4 @@
 include = ["**/*.toml"]
-exclude = ["baselines/**", "datasets/**"]
 
 [formatting]
 align_comments = false

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 echo "=== test-wheel.sh ==="
 
@@ -16,6 +16,7 @@ python -m twine check --strict ./dist/*
 echo "Twine wheel check: done"
 
 echo "Pyroma wheel check: start"
+cp ../README.md README.md && trap "rm README.md" EXIT
 if [ -z "$(python -m pyroma ./ | grep 'Final rating: 10/10')" ]; then
   exit 1
 fi
