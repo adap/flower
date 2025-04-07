@@ -12,25 +12,11 @@ packages = [{include = "devtool", from = "./"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-types-dataclasses = "==0.6.6"
-types-protobuf = "==4.21.0.7"
-types-requests = "==2.31.0.20240125"
-types-setuptools = "==69.0.0.20240125"
 clang-format = "==17.0.6"
 isort = "==5.13.2"
-black = { version = "==24.2.0", extras = ["jupyter"] }
+black = { version = "==24.2.0" }
 taplo = "==0.9.3"
 docformatter = "==1.7.5"
-mypy = "==1.8.0"
-pylint = "==3.3.1"
-flake8 = "==5.0.4"
-parameterized = "==0.9.0"
-pytest = "==7.4.4"
-pytest-cov = "==4.1.0"
-pytest-watcher = "==0.4.3"
-grpcio-tools = "==1.62.3"
-mypy-protobuf = "==3.2.0"
-jupyterlab = "==4.0.12"
 rope = "==1.13.0"
 semver = "==3.0.2"
 sphinx = "==7.4.7"
@@ -45,7 +31,6 @@ furo = "==2024.8.6"
 sphinx-reredirects = "==0.1.5"
 nbsphinx = "==0.9.5"
 nbstripout = "==0.6.1"
-ruff = "==0.4.5"
 sphinx-argparse = "==0.4.0"
 pipreqs = "==0.4.13"
 mdformat = "==0.7.18"
@@ -80,74 +65,6 @@ known_first_party = ["flwr", "flwr_tool"]
 line-length = 88
 target-version = ["py39", "py310", "py311"]
 
-[tool.pylint."MESSAGES CONTROL"]
-disable = "duplicate-code,too-few-public-methods,useless-import-alias"
-
-[tool.pytest.ini_options]
-minversion = "6.2"
-addopts = "-qq"
-testpaths = ["./"]
-
-[tool.pytest-watcher]
-now = false
-clear = true
-delay = 0.2
-runner = "pytest"
-runner_args = ["-s", "-vvvvv"]
-patterns = ["*.py"]
-ignore_patterns = []
-
-[tool.mypy]
-plugins = ["numpy.typing.mypy_plugin"]
-ignore_missing_imports = true
-strict = true
-
-[[tool.mypy.overrides]]
-module = ["importlib.metadata.*", "importlib_metadata.*"]
-follow_imports = "skip"
-follow_imports_for_stubs = true
-disallow_untyped_calls = false
-
-[[tool.mypy.overrides]]
-module = "torch.*"
-follow_imports = "skip"
-follow_imports_for_stubs = true
-
 [tool.docformatter]
 wrap-summaries = 88
 wrap-descriptions = 88
-
-[tool.ruff]
-target-version = "py39"
-line-length = 88
-exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".hg",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "venv",
-    "proto",
-]
-
-[tool.ruff.lint]
-select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
-fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
-ignore = ["B024", "B027", "D205", "D209"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "numpy"
