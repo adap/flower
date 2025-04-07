@@ -87,7 +87,6 @@ simulation = ["ray"]
 rest = ["starlette", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]
-python = "^3.9"
 types-dataclasses = "==0.6.6"
 types-protobuf = "==4.21.0.7"
 types-requests = "==2.31.0.20240125"
