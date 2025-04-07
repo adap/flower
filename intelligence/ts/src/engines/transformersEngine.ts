@@ -196,9 +196,6 @@ export class TransformersEngine extends BaseEngine {
       if (modelConfigRes.value.vram) {
         const availableRamRes = await getAvailableRAM();
         if (availableRamRes.ok) {
-          console.log(
-            `Available: ${availableRamRes.value}, required: ${modelConfigRes.value.vram}`
-          );
           if (modelConfigRes.value.vram < availableRamRes.value) {
             return {
               ok: true,
