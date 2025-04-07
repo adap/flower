@@ -31,11 +31,11 @@ jobs:
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
         run: |
-          cd framework
+          cd dev
           python -m poetry install --all-extras
       - name: Check docs format
         run: |
-          cd framework
+          cd dev
           docstrfmt --check ../intelligence/docs/source
   build_ts_docs:
     runs-on: ubuntu-22.04
