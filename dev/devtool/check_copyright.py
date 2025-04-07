@@ -71,7 +71,7 @@ def _check_copyright(dir_list: list[str]) -> None:
             creation_year = _get_file_creation_year(str(py_file.absolute()))
             expected_copyright = COPYRIGHT_FORMAT.format(creation_year)
 
-            if expected_copyright not in  py_file.read_text():
+            if expected_copyright not in py_file.read_text():
                 warning_message = "- " + str(py_file)
                 warning_list.append(warning_message)
 
