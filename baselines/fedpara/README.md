@@ -153,7 +153,7 @@ python -m fedpara.main --config-name mnist_fedper
 python -m fedpara.main --config-name mnist_pfedpara
 ```
 
-#### Communication Cost:
+### Communication Cost:
 Communication costs as measured as described in the paper:
 *"FL evaluation typically measures the required rounds to achieve the target accuracy as communication costs, but we instead assess total transferred bit sizes, 2 ×
 (#participants)×(model size)×(#rounds)"*

@@ -24,7 +24,7 @@ dataset: [Ambient Context, Speech Commands]
 
 **Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 16 CPU cores and 32 GB memory would be able to run experiments with small number of clients in a reasonable amount of time. For context, a machine with 24 cores and a RTX3090Ti ran the Speech Commands experiment in Table 3 with 10 clients in 1h. For this experiment 30GB of RAM was used and clients required ~1.4GB of VRAM each. The same experiment but with the Ambient Context dataset too 13minutes.
 
-**Contributors:** Raj Parekh [GitHub](https://github.com/Raj-Parekh24), [Mail](rajparekhwc@gmail.com)
+**Contributors:** Raj Parekh [GitHub](https://github.com/Raj-Parekh24), [Mail](mailto:rajparekhwc@gmail.com)
 
 ## Environment Setup
 ```bash

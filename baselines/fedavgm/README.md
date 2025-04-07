@@ -53,7 +53,7 @@ Important to highlight the rationale with this CNN model stated on FedAvgM paper
 | CIFAR-10 | 10 | `num_clients` | Latent Dirichlet Allocation (LDA) | `concentration` |
 | Fashion-MNIST | 10 | `num_clients` | Latent Dirichlet Allocation (LDA) | `concentration` |
 
-**Data distribution:** The following figure illustrates the use of multiple `concentration` values to generate the data distribution over 30 clients for CIFAR-10 (10 classes) - [source code](fedavgm/utils.py):
+**Data distribution:** The following figure illustrates the use of multiple `concentration` values to generate the data distribution over 30 clients for CIFAR-10 (10 classes) - [source code](https://github.com/adap/flower/blob/main/baselines/fedavgm/fedavgm/utils.py):
 
 ![](_static/concentration_cifar10_v2.png)
 
