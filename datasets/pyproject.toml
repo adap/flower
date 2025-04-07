@@ -13,44 +13,40 @@ homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
 documentation = "https://flower.ai/docs/datasets"
 keywords = [
-    "flower",
-    "fl",
-    "federated learning",
-    "federated analytics",
-    "federated evaluation",
-    "machine learning",
-    "dataset",
+  "flower",
+  "fl",
+  "federated learning",
+  "federated analytics",
+  "federated evaluation",
+  "machine learning",
+  "dataset",
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: MacOS :: MacOS X",
-    "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Software Development",
-    "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed",
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Software Development",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
 ]
-packages = [
-    { include = "flwr_datasets", from = "./" },
-]
-exclude = [
-    "./**/*_test.py",
-]
+packages = [{ include = "flwr_datasets", from = "./" }]
+exclude = ["./**/*_test.py"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -59,7 +55,7 @@ datasets = ">=2.14.6 <=3.1.0"
 pillow = { version = ">=6.2.1", optional = true }
 soundfile = { version = ">=0.12.1", optional = true }
 librosa = { version = ">=0.10.0.post2", optional = true }
-tqdm ="^4.66.1"
+tqdm = "^4.66.1"
 matplotlib = "^3.7.5"
 seaborn = "^0.13.0"
 
@@ -100,22 +96,15 @@ disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = [
-    "./",
-]
+testpaths = ["./"]
 
 [tool.mypy]
-plugins = [
-    "numpy.typing.mypy_plugin",
-]
+plugins = ["numpy.typing.mypy_plugin"]
 ignore_missing_imports = true
 strict = true
 
 [[tool.mypy.overrides]]
-module = [
-    "importlib.metadata.*",
-    "importlib_metadata.*",
-]
+module = ["importlib.metadata.*", "importlib_metadata.*"]
 follow_imports = "skip"
 follow_imports_for_stubs = true
 disallow_untyped_calls = false
@@ -133,27 +122,27 @@ wrap-descriptions = 88
 target-version = "py39"
 line-length = 88
 exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".hg",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "venv",
-    "proto",
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+  "proto",
 ]
 
 [tool.ruff.lint]
