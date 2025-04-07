@@ -29,7 +29,7 @@ jobs:
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
         run: sudo apt install pandoc
-      - name: Install Flower and Flower Datasets with dependencies
+      - name: Install Flower Framework and Flower Datasets with dependencies
         run: |
           cd framework
           python -m poetry add ../datasets
