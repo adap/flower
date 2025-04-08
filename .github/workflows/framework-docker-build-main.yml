@@ -25,7 +25,7 @@ jobs:
         run: |
           echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
           echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
-          FLWR_VERSION_REF="git+${{ github.server_url }}/${{ github.repository }}.git@${{ github.sha }}"
+          FLWR_VERSION_REF="git+${{ github.server_url }}/${{ github.repository }}.git@${{ github.sha }}/#subdirectory=framework"
           python framework/dev/build-docker-image-matrix.py --flwr-version "${FLWR_VERSION_REF}" --matrix unstable > matrix.json
           echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 
