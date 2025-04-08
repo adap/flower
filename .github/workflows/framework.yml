@@ -30,7 +30,6 @@ jobs:
           filters: |
             framework:
               - 'framework/**/*'
-              - 'src/**/*'
               - '.github/workflows/framework.yml'
 
   test_core:
@@ -58,10 +57,15 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install dependencies (mandatory only)
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        run: python -m poetry install --all-extras
+        run: |
+          cd framework 
+          python -m poetry install --all-extras
       - name: Check if protos need recompilation
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        run: ./dev/check-protos.sh
+        run: ./framework/dev/check-protos.sh
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
+        if: ${{ needs.changes.outputs.framework == 'true' }}
+        run: ./framework/dev/test.sh
+      - name: Check benchmarks and examples
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./dev/test.sh

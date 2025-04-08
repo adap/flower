@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     [5550, 5940, 5940, 5940, 5940, 5940, 5940, 5940, 5940, 6930]
     """
 
-    def __init__(  # pylint: disable=R0913
+    def __init__(  # pylint: disable=R0913, R0917
         self,
         num_partitions: int,
         partition_by: str,
