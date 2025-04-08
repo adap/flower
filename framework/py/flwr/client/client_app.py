@@ -95,8 +95,8 @@ class ClientApp:
 
     Examples
     --------
-    Assuming a typical ``Client`` implementation named ``FlowerClient``, you can wrap it in
-    a ``ClientApp`` as follows::
+    Assuming a typical ``Client`` implementation named ``FlowerClient``, you can wrap
+    it in a ``ClientApp`` as follows::
 
         class FlowerClient(NumPyClient):
             # ...
