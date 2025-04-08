@@ -103,40 +103,40 @@ class RecordDict(TypedDict[str, RecordType]):
     are Python dictionaries designed to ensure that each key-value pair
     adheres to specified data types.
 
-    Let's see an example.
+    Let's see an example::
 
-    >>>  from flwr.common import RecordDict
-    >>>  from flwr.common import ArrayRecord, ConfigRecord, MetricRecord
-    >>>
-    >>>  # Let's begin with an empty record
-    >>>  my_records = RecordDict()
-    >>>
-    >>>  # We can create a ConfigRecord
-    >>>  c_record = ConfigRecord({"lr": 0.1, "batch-size": 128})
-    >>>  # Adding it to the RecordDict would look like this
-    >>>  my_records["my_config"] = c_record
-    >>>
-    >>>  # We can create a MetricRecord following a similar process
-    >>>  m_record = MetricRecord({"accuracy": 0.93, "losses": [0.23, 0.1]})
-    >>>  # Adding it to the RecordDict would look like this
-    >>>  my_records["my_metrics"] = m_record
+        from flwr.common import RecordDict
+        from flwr.common import ArrayRecord, ConfigRecord, MetricRecord
+
+        # Let's begin with an empty record
+        my_records = RecordDict()
+
+        # We can create a ConfigRecord
+        c_record = ConfigRecord({"lr": 0.1, "batch-size": 128})
+        # Adding it to the RecordDict would look like this
+        my_records["my_config"] = c_record
+
+        # We can create a MetricRecord following a similar process
+        m_record = MetricRecord({"accuracy": 0.93, "losses": [0.23, 0.1]})
+        # Adding it to the RecordDict would look like this
+        my_records["my_metrics"] = m_record
 
     Adding an :code:`ArrayRecord` follows the same steps as above but first,
     the array needs to be serialized and represented as a :code:`flwr.common.Array`.
-    For example:
+    For example::
 
-    >>>  from flwr.common import Array
-    >>>  # Creating an ArrayRecord would look like this
-    >>>  arr_np = np.random.randn(3, 3)
-    >>>
-    >>>  # You can use the built-in tool to serialize the array
-    >>>  arr = Array(arr_np)
-    >>>
-    >>>  # Finally, create the record
-    >>>  arr_record = ArrayRecord({"my_array": arr})
-    >>>
-    >>>  # Adding it to the RecordDict would look like this
-    >>>  my_records["my_parameters"] = arr_record
+        from flwr.common import Array
+        # Creating an ArrayRecord would look like this
+        arr_np = np.random.randn(3, 3)
+
+        # You can use the built-in tool to serialize the array
+        arr = Array(arr_np)
+
+        # Finally, create the record
+        arr_record = ArrayRecord({"my_array": arr})
+
+        # Adding it to the RecordDict would look like this
+        my_records["my_parameters"] = arr_record
 
     For additional examples on how to construct each of the records types shown
     above, please refer to the documentation for :code:`ConfigRecord`,
