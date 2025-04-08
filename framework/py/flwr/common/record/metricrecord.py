@@ -60,7 +60,7 @@ def _check_value(value: MetricRecordValues) -> None:
 
 
 class MetricRecord(TypedDict[str, MetricRecordValues]):
-    """Metric recod.
+    """Metric record.
 
     A :code:`MetricRecord` is a Python dictionary designed to ensure that
     each key-value pair adheres to specified data types. A :code:`MetricRecord`
