@@ -13,13 +13,15 @@ homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
 documentation = "https://flower.ai/docs/datasets"
 keywords = [
-    "flower",
-    "fl",
-    "federated learning",
-    "federated analytics",
-    "federated evaluation",
-    "machine learning",
-    "dataset",
+    "Artificial Intelligence",
+    "Dataset",
+    "Federated AI",
+    "Federated Analytics",
+    "Federated Datasets",
+    "Federated Evaluation",
+    "Federated Learning",
+    "Flower",
+    "Machine Learning",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
