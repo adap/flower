@@ -2,8 +2,6 @@ name: Framework Build Docker Images Main Branch
 
 on:
   push:
-    branches:
-      - 'main'
 
 jobs:
   parameters:
