@@ -104,7 +104,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
 
     Examples
     --------
-    Establishing a SSL-enabled connection to the server::
+    Establishing a TLS-enabled connection to the server::
 
         from pathlib import Path
         with grpc_connection(
