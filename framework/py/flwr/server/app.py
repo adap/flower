@@ -187,7 +187,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
 
         start_server()
 
-    Starting an SSL-enabled server::
+    Starting a TLS-enabled server::
 
         start_server(
             certificates=(

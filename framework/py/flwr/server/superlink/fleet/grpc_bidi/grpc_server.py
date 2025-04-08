@@ -96,7 +96,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments,R0917
 
     Examples
     --------
-    Starting a SSL-enabled server::
+    Starting a TLS-enabled server::
 
         from pathlib import Path
         start_grpc_server(

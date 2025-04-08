@@ -165,7 +165,7 @@ def start_client(
             client_fn=client_fn,
         )
 
-    Starting an SSL-enabled gRPC client using system certificates::
+    Starting a TLS-enabled gRPC client using system certificates::
 
         def client_fn(context: Context):
             return FlowerClient().to_client()
@@ -176,7 +176,7 @@ def start_client(
             insecure=False,
         )
 
-    Starting an SSL-enabled gRPC client using provided certificates::
+    Starting a TLS-enabled gRPC client using provided certificates::
 
         from pathlib import Path
 
@@ -691,7 +691,7 @@ def start_numpy_client(
             client=FlowerClient(),
         )
 
-    Starting an SSL-enabled gRPC client using system certificates::
+    Starting a TLS-enabled gRPC client using system certificates::
 
         start_numpy_client(
             server_address=localhost:8080,
@@ -699,7 +699,7 @@ def start_numpy_client(
             insecure=False,
         )
 
-    Starting an SSL-enabled gRPC client using provided certificates::
+    Starting a TLS-enabled gRPC client using provided certificates::
 
         from pathlib import Path
 
