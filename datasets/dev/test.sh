@@ -2,10 +2,6 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-# Append path to PYTHONPATH that makes flwr_tool.init_py_check discoverable
-PARENT_DIR=$(dirname "$(pwd)") # Go one dir up from flower/datasets
-export PYTHONPATH="${PYTHONPATH}:${PARENT_DIR}/framework/py"
-
 echo "=== test.sh ==="
 
 echo "- Start Python checks"
@@ -19,11 +15,11 @@ python -m black --check flwr_datasets/
 echo "- black: done"
 
 echo "- init_py_check: start"
-python -m flwr_tool.init_py_check flwr_datasets/
+python -m devtool.init_py_check flwr_datasets/
 echo "- init_py_check: done"
 
 echo "- copyright: start"
-python -m flwr_tool.check_copyright flwr_datasets/
+python -m devtool.check_copyright flwr_datasets/
 echo "- copyright: done"
 
 echo "- docformatter: start"
