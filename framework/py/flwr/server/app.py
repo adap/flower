@@ -183,19 +183,19 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
 
     Examples
     --------
-    Starting an insecure server:
+    Starting an insecure server::
 
-    >>> start_server()
+        start_server()
 
-    Starting an SSL-enabled server:
+    Starting a TLS-enabled server::
 
-    >>> start_server(
-    >>>     certificates=(
-    >>>         Path("/crts/root.pem").read_bytes(),
-    >>>         Path("/crts/localhost.crt").read_bytes(),
-    >>>         Path("/crts/localhost.key").read_bytes()
-    >>>     )
-    >>> )
+        start_server(
+            certificates=(
+                Path("/crts/root.pem").read_bytes(),
+                Path("/crts/localhost.crt").read_bytes(),
+                Path("/crts/localhost.key").read_bytes()
+            )
+        )
     """
     msg = (
         "flwr.server.start_server() is deprecated."

@@ -172,7 +172,7 @@ class Driver(Grid):
 
     .. warning::
         ``Driver`` is deprecated and will be removed in a future release.
-        Use `Grid` in the signature of your ServerApp.
+        Use ``Grid`` in the signature of your ServerApp.
 
     Examples
     --------
