@@ -15,10 +15,10 @@ a new version of Flower, the following things need to happen (in that order):
    improve its formatting or wording. This script will also replace the ``##
    Unreleased`` header with the new version number and current date, and add a thank-you
    message for contributors. Open a pull request with these changes.
-2. Once the pull request is merged, tag the release commit with the version number as
-   soon as the PR is merged: ``git tag v<NEW_VERSION>`` (notice the ``v`` added before
-   the version number), then ``git push --tags``. This will create a draft release on
-   GitHub containing the correct artifacts and the relevant part of the changelog.
+2. Once the pull request is merged, tag the release commit with the version number:
+   ``git tag v<NEW_VERSION>`` (notice the ``v`` added before the version number), then
+   ``git push --tags``. This will create a draft release on GitHub containing the
+   correct artifacts and the relevant part of the changelog.
 3. Check the draft release on GitHub, and if everything is good, publish it.
 
 After the release
