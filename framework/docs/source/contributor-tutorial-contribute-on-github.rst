@@ -144,10 +144,8 @@ And with Flower's repository:
 
        .. code-block:: shell
 
-           $ ./dev/format.sh # to format your code
-           $ ./dev/test.sh # to test that your code can be accepted
-           $ ./baselines/dev/format.sh # same as above but for code added to baselines
-           $ ./baselines/dev/test.sh # same as above but for code added to baselines
+           $ ./framework/dev/format.sh # to format your code
+           $ ./framework/dev/test.sh # to test that your code can be accepted
 4. **Stage changes**
        Before creating a commit that will update your history, you must specify to Git
        which files it needs to take into account.
