@@ -1,0 +1,35 @@
+name: Auto-Assign and Label New Issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Assign WilliamLindskog and add triage label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = context.payload.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Add assignee
+            await github.rest.issues.addAssignees({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              assignees: ["WilliamLindskog"]
+            });
+
+            // Add label
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              labels: ["state: triage"]
+            });
