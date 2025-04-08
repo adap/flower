@@ -139,6 +139,7 @@ sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
 docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2" }
 docsig = "==0.64.0"
+devtool = [{ path = "./devtool", develop = true }]
 
 [tool.docstrfmt]
 extend_exclude = [
@@ -146,10 +147,6 @@ extend_exclude = [
     "docs/source/tutorial-quickstart-huggingface.rst",
     "docs/source/_templates/autosummary/*",
     "docs/source/ref-api/*",
-    "../intelligence/docs/source/ts-ref-api/*",
-    "../intelligence/docs/source/swift-ref-api/*",
-    "../intelligence/docs/source/_templates/autosummary/*",
-    "../intelligence/docs/source/conf.py",
 ]
 
 [tool.isort]

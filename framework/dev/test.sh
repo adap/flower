@@ -32,7 +32,7 @@ fi
 echo "- black: done"
 
 echo "- init_py_check: start"
-python -m flwr_tool.init_py_check py/flwr py/flwr_tool
+python -m devtool.init_py_check py/flwr py/flwr_tool
 echo "- init_py_check: done"
 
 echo "- docformatter: start"
@@ -97,7 +97,7 @@ echo "- Start license checks"
 
 if $RUN_FULL_TEST; then
     echo "- copyright: start"
-    python -m flwr_tool.check_copyright py/flwr
+    python -m devtool.check_copyright py/flwr
     echo "- copyright: done"
 fi
 
