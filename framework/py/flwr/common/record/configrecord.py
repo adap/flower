@@ -60,7 +60,7 @@ def _check_value(value: ConfigRecordValues) -> None:
 
 
 class ConfigRecord(TypedDict[str, ConfigRecordValues]):
-    """Configs record.
+    """Config record.
 
     A :code:`ConfigRecord` is a Python dictionary designed to ensure that
     each key-value pair adheres to specified data types. A :code:`ConfigRecord`
