@@ -53,7 +53,7 @@ Create Flower Dev Environment
            $ git clone git@github.com:adap/flower.git
            $ cd flower
 
-2. Create and activate a Python virtual environment for development, See `Set up a
+2. Create and activate a Python virtual environment for development. See `Set up a
    virtual env <contributor-how-to-set-up-a-virtual-env.rst>`_ for detailed
    instructions.
 
