@@ -1,4 +1,4 @@
-name: Auto-Assign and Label New Issues
+name: Add triage label to new issues
 
 on:
   issues:
@@ -10,7 +10,7 @@ jobs:
     permissions:
       issues: write
     steps:
-      - name: Assign WilliamLindskog and add triage label
+      - name: Add triage label to new issues
         uses: actions/github-script@v7
         with:
           script: |
