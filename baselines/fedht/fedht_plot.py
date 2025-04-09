@@ -30,7 +30,7 @@ def plot_results(input, metric, labels: str, color: str = ['g','b','r','k','y','
         plt.ylim(0.0,1.0)
     else:
         plt.ylim(0.4,1.5)
-    plt.legend()
+    plt.legend(fontsize=9)
     plt.grid(True)
     plt.show()
 
@@ -65,7 +65,7 @@ def calculate_stats(group_results):
     return stats
 
 
-def plot_crossval_results(input, metric, labels: str, color: str = ['g','b','r','k','y','m','c']):
+def plot_crossval_results(input, metric, labels: str, color: str = ['k','r','b','g','y','m','c']):
     numkeep_pattern = r'numkeep(\d+)'
     group_results = {}
     for i, v in enumerate(input):
@@ -105,7 +105,7 @@ def plot_crossval_results(input, metric, labels: str, color: str = ['g','b','r',
         plt.ylim(0.0,1.0)
     else:
         plt.ylim(0.4,1.5)
-    plt.legend()
+    plt.legend(fontsize=9)
     plt.grid(True)
     plt.show()
 
@@ -161,18 +161,42 @@ crossval_input = ['mnist_fedavg_local1_lr1e-05_wd0.0_numkeep500_fold1.pkl',
                   'mnist_fedht_local1_lr1e-05_wd0.0_numkeep25_fold4.pkl',
                   'mnist_fedht_local1_lr1e-05_wd0.0_numkeep25_fold5.pkl']
 
+crossval_input = ['mnist_fedavg_local1_lr1e-05_wd0.0_numkeep500_fold1.pkl',
+                  'mnist_fedavg_local1_lr1e-05_wd0.0_numkeep500_fold2.pkl',
+                  'mnist_fedavg_local1_lr1e-05_wd0.0_numkeep500_fold3.pkl',
+                  'mnist_fedavg_local1_lr1e-05_wd0.0_numkeep500_fold4.pkl',
+                  'mnist_fedavg_local1_lr1e-05_wd0.0_numkeep500_fold5.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep500_fold1.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep500_fold2.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep500_fold3.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep500_fold4.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep500_fold5.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep100_fold1.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep100_fold2.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep100_fold3.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep100_fold4.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep100_fold5.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep50_fold1.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep50_fold2.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep50_fold3.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep50_fold4.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep50_fold5.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep25_fold1.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep25_fold2.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep25_fold3.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep25_fold4.pkl',
+                  'mnist_fedht_local1_lr1e-05_wd0.0_numkeep25_fold5.pkl']
+
+num_features = 784
+tau_vec = [500, 100, 50, 25]
 plot_crossval_results(crossval_input, 'losses_centralized', ['FedAvg',
-                                                             'Fed-HT (numkeep = 700)',
-                                                             'Fed-HT (numkeep = 500)',
-                                                             'Fed-HT (numkeep = 250)',
-                                                             'Fed-HT (numkeep = 100)',
-                                                             'Fed-HT (numkeep = 50)',
-                                                             'Fed-HT (numkeep = 25)'])
+                                                             f'Fed-HT (sparsity ratio = {round(1-tau_vec[0]/num_features,3)})',
+                                                             f'Fed-HT (sparsity ratio = {round(1-tau_vec[1]/num_features,3)})',
+                                                             f'Fed-HT (sparsity ratio = {round(1-tau_vec[2]/num_features,3)})',
+                                                             f'Fed-HT (sparsity ratio = {round(1-tau_vec[3]/num_features,3)})'])
 plot_crossval_results(crossval_input, 'accuracy', ['FedAvg',
-                                                             'Fed-HT (numkeep = 700)',
-                                                             'Fed-HT (numkeep = 500)',
-                                                             'Fed-HT (numkeep = 250)',
-                                                             'Fed-HT (numkeep = 100)',
-                                                             'Fed-HT (numkeep = 50)',
-                                                             'Fed-HT (numkeep = 25)'])
+                                                    f'Fed-HT (sparsity ratio = {round(1-tau_vec[0]/num_features,3)})',
+                                                    f'Fed-HT (sparsity ratio = {round(1-tau_vec[1]/num_features,3)})',
+                                                    f'Fed-HT (sparsity ratio = {round(1-tau_vec[2]/num_features,3)})',
+                                                    f'Fed-HT (sparsity ratio = {round(1-tau_vec[3]/num_features,3)})'])
 
