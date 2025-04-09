@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
+from flwr.common import Context
 
 
 # model code initially pulled from fedprox baseline
@@ -27,17 +28,17 @@ class LogisticRegression(nn.Module):
 
 
 # define train function that will be called by each client to train the model
-def train(model, trainloader: DataLoader, cfg: DictConfig, device: torch.device) -> None:
+def train(model, trainloader: DataLoader, context: Context, device: torch.device) -> None:
     """Train model."""
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
-        model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay
+        model.parameters(), lr=context.run_config["learning_rate"], weight_decay=context.run_config["weight_decay"]
     )
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     # train
-    for _epoch in range(cfg.num_local_epochs):
+    for _epoch in range(context.run_config["num_local_epochs"]):
         for _i, data in enumerate(trainloader):
 
             inputs, labels = data["image"].to(device), data["label"].to(device)

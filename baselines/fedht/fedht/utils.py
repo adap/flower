@@ -2,6 +2,11 @@
 
 import numpy as np
 from torch.utils.data import Dataset
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import PathologicalPartitioner
+from flwr.client import Client, NumPyClient, ClientApp
+from flwr.common import Context
+from torch.utils.data import DataLoader
 
 
 class MyDataset(Dataset):
@@ -113,3 +118,38 @@ def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
         ystack = np.vstack(ytest[:, i])
 
     return z.copy(), y.copy(), zstack.copy(), ystack.copy()
+
+def load_data(context: Context) -> Client:
+
+    batch_size = context.run_config["batch_size"]
+    partition_id = context.node_config["partition-id"]
+
+    # load MNIST data
+    global dataset
+    if dataset is None:
+        partitioner = PathologicalPartitioner(
+            num_partitions=context.node_config["num-partitions"],
+            partition_by="label",
+            num_classes_per_partition=2,
+            class_assignment_mode="first-deterministic",
+        )
+
+        dataset = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
+    
+    # test_dataset = dataset.load_split("test").with_format("numpy")
+    # testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+
+    # Load the partition data
+    train_dataset = dataset.load_partition(int(partition_id), "train").with_format(
+        "numpy"
+    )
+    num_obs = train_dataset.num_rows
+
+    test_dataset = dataset.load_partition(int(partition_id), "train").with_format(
+        "numpy"
+    )
+
+    trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+
+    return trainloader, testloader, num_obs
