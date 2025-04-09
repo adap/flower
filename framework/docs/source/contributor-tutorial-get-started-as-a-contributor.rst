@@ -53,11 +53,14 @@ Create Flower Dev Environment
            $ git clone git@github.com:adap/flower.git
            $ cd flower
 
-2. Create and activate a Python virtual environment for development. One way to do this
-   is by using `pyenv <https://github.com/pyenv/pyenv>`_ and `pyenv-virtualenv
-   <https://github.com/pyenv/pyenv-virtualenv>`_. You can also optionally install a
-   specific Python version using pyenv if you haven't already installed your desired
-   version:
+2. Create and activate a Python virtual environment for development, See `Set up a
+   virtual env <contributor-how-to-set-up-a-virtual-env.rst>`_ for detailed
+   instructions.
+
+   One way to do this is by using `pyenv <https://github.com/pyenv/pyenv>`_ and
+   `pyenv-virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_. You can also
+   optionally install a specific Python version using pyenv if you haven't already
+   installed your desired version:
 
        ::
 
