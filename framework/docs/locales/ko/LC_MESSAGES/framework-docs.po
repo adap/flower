@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-07 00:08+0000\n"
+"POT-Creation-Date: 2025-04-09 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -10708,9 +10708,10 @@ msgid "Examples"
 msgstr "예시"
 
 #: flwr.client.client_app.ClientApp:5 of
+#, fuzzy
 msgid ""
-"Assuming a typical `Client` implementation named `FlowerClient`, you can "
-"wrap it in a `ClientApp` as follows:"
+"Assuming a typical ``Client`` implementation named ``FlowerClient``, you "
+"can wrap it in a ``ClientApp`` as follows::"
 msgstr ""
 "일반적인 `Client` 구현의 이름이 `FlowerClient`라고 가정하면, 다음과 같이 `ClientApp`으로 래핑할 수 "
 "있습니다:"
@@ -10780,16 +10781,19 @@ msgid "A decorator that registers an evaluate function with the ``ClientApp``."
 msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:13 of
-msgid "Registering an evaluate function:"
-msgstr ""
+#, fuzzy
+msgid "Registering an evaluate function::"
+msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:23 of
-msgid "Registering an evaluate function with a custom action name:"
-msgstr ""
+#, fuzzy
+msgid "Registering an evaluate function with a custom action name::"
+msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:34 of
-msgid "Registering an evaluate function with a function-specific Flower Mod:"
-msgstr ""
+#, fuzzy
+msgid "Registering an evaluate function with a function-specific Flower Mod::"
+msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.lifespan:3
 #: flwr.server.server_app.ServerApp.lifespan:3 of
@@ -10804,16 +10808,19 @@ msgid "A decorator that registers a query function with the ``ClientApp``."
 msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.query:13 of
-msgid "Registering a query function:"
-msgstr ""
+#, fuzzy
+msgid "Registering a query function::"
+msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.query:23 of
-msgid "Registering a query function with a custom action name:"
-msgstr ""
+#, fuzzy
+msgid "Registering a query function with a custom action name::"
+msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.query:34 of
-msgid "Registering a query function with a function-specific Flower Mod:"
-msgstr ""
+#, fuzzy
+msgid "Registering a query function with a function-specific Flower Mod::"
+msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.train:8 of
 #, fuzzy
@@ -10821,16 +10828,19 @@ msgid "A decorator that registers a train function with the ``ClientApp``."
 msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.train:13 of
-msgid "Registering a train function:"
-msgstr ""
+#, fuzzy
+msgid "Registering a train function::"
+msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.train:23 of
-msgid "Registering a train function with a custom action name:"
-msgstr ""
+#, fuzzy
+msgid "Registering a train function with a custom action name::"
+msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.train:34 of
-msgid "Registering a train function with a function-specific Flower Mod:"
-msgstr ""
+#, fuzzy
+msgid "Registering a train function with a function-specific Flower Mod::"
+msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:2
 msgid "NumPyClient"
@@ -11158,7 +11168,10 @@ msgstr ""
 "엄격하게 보장된다는 의미입니다."
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:23 of
-msgid "Create an instance of the local DP mod and add it to the client-side mods:"
+#, fuzzy
+msgid ""
+"Create an instance of the local DP mod and add it to the client-side "
+"mods::"
 msgstr "로컬 DP 모드의 인스턴스를 생성하고 클라이언트 측 모드에 추가합니다:"
 
 #: ../../source/ref-api/flwr.client.mod.adaptiveclipping_mod.rst:2
@@ -11347,15 +11360,18 @@ msgstr ""
 "없습니다."
 
 #: flwr.client.app.start_client:52 flwr.client.app.start_numpy_client:37 of
-msgid "Starting a gRPC client with an insecure server connection:"
+#, fuzzy
+msgid "Starting a gRPC client with an insecure server connection::"
 msgstr "안전하지 않은 서버 연결로 gRPC 클라이언트 시작하기:"
 
 #: flwr.client.app.start_client:59 flwr.client.app.start_numpy_client:44 of
-msgid "Starting an SSL-enabled gRPC client using system certificates:"
+#, fuzzy
+msgid "Starting a TLS-enabled gRPC client using system certificates::"
 msgstr "시스템 인증서를 사용하여 SSL 사용 gRPC 클라이언트를 시작합니다:"
 
 #: flwr.client.app.start_client:70 flwr.client.app.start_numpy_client:52 of
-msgid "Starting an SSL-enabled gRPC client using provided certificates:"
+#, fuzzy
+msgid "Starting a TLS-enabled gRPC client using provided certificates::"
 msgstr "제공된 인증서를 사용하여 SSL 지원 gRPC 클라이언트를 시작합니다:"
 
 #: ../../source/ref-api/flwr.client.start_numpy_client.rst:2
@@ -11558,7 +11574,8 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.record.configrecord.ConfigRecord:1 of
-msgid "Configs record."
+#, fuzzy
+msgid "Config record."
 msgstr "레코드를 설정합니다."
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -11762,7 +11779,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.record.metricrecord.MetricRecord:1 of
 #, fuzzy
-msgid "Metrics recod."
+msgid "Metric record."
 msgstr "메트릭 기록."
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -11976,15 +11993,16 @@ msgid ""
 msgstr ""
 
 #: flwr.common.record.arrayrecord.Array:36 of
-msgid "Initializing by specifying all fields directly:"
+msgid "Initializing by specifying all fields directly::"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.Array:45 of
-msgid "Initializing with a NumPy ndarray:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a NumPy ndarray::"
+msgstr "Dictionary holding ParametersRecord instances."
 
 #: flwr.common.record.arrayrecord.Array:50 of
-msgid "Initializing with a PyTorch tensor:"
+msgid "Initializing with a PyTorch tensor::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
@@ -12151,23 +12169,25 @@ msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:37 of
 #, fuzzy
-msgid "Initializing an empty ArrayRecord:"
+msgid "Initializing an empty ArrayRecord::"
 msgstr "Dictionary holding ParametersRecord instances."
 
 #: flwr.common.record.arrayrecord.ArrayRecord:41 of
-msgid "Initializing with a dictionary of :class:`Array`:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a dictionary of :class:`Array`::"
+msgstr "NumPy에서 배열을 만듭니다."
 
 #: flwr.common.record.arrayrecord.ArrayRecord:46 of
-msgid "Initializing with a list of NumPy arrays:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a list of NumPy arrays::"
+msgstr "Dictionary holding ParametersRecord instances."
 
 #: flwr.common.record.arrayrecord.ArrayRecord:53 of
-msgid "Initializing with a PyTorch model state_dict:"
+msgid "Initializing with a PyTorch model state_dict::"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:59 of
-msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
+msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays)::"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -12472,7 +12492,7 @@ msgstr ""
 #: flwr.common.record.configrecord.ConfigRecord:29 of
 msgid ""
 "Let's see some examples of how to construct a :code:`ConfigRecord` from "
-"scratch:"
+"scratch::"
 msgstr ""
 
 #: flwr.common.record.configrecord.ConfigRecord:42 of
@@ -14177,7 +14197,7 @@ msgstr ""
 #: flwr.common.record.metricrecord.MetricRecord:28 of
 msgid ""
 "Let's see some examples of how to construct a :code:`MetricRecord` from "
-"scratch:"
+"scratch::"
 msgstr ""
 
 #: flwr.common.record.metricrecord.MetricRecord:39 of
@@ -14185,7 +14205,7 @@ msgid ""
 "Since types are enforced, the types of the objects inserted are checked. "
 "For a :code:`MetricRecord`, value types allowed are those in defined in "
 ":code:`flwr.common.MetricRecordValues`. Similarly, only :code:`str` keys "
-"are allowed."
+"are allowed::"
 msgstr ""
 
 #: flwr.common.record.metricrecord.MetricRecord:50 of
@@ -14513,14 +14533,14 @@ msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:20 of
 #, fuzzy
-msgid "Let's see an example."
+msgid "Let's see an example::"
 msgstr "몇 가지 예를 살펴보겠습니다:"
 
 #: flwr.common.record.recorddict.RecordDict:38 of
 msgid ""
 "Adding an :code:`ArrayRecord` follows the same steps as above but first, "
 "the array needs to be serialized and represented as a "
-":code:`flwr.common.Array`. For example:"
+":code:`flwr.common.Array`. For example::"
 msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:55 of
@@ -15085,7 +15105,7 @@ msgstr ""
 #: flwr.server.grid.grid.Driver:10 of
 msgid ""
 "``Driver`` is deprecated and will be removed in a future release. Use "
-"`Grid` in the signature of your ServerApp."
+"``Grid`` in the signature of your ServerApp."
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
@@ -15515,12 +15535,13 @@ msgstr ""
 
 #: flwr.server.server_app.ServerApp:5 of
 #, fuzzy
-msgid "Use the ``ServerApp`` with an existing ``Strategy``:"
+msgid "Use the ``ServerApp`` with an existing ``Strategy``::"
 msgstr "기존 전략 사용"
 
 #: flwr.server.server_app.ServerApp:17 of
-msgid "Use the ``ServerApp`` with a custom main function:"
-msgstr ""
+#, fuzzy
+msgid "Use the ``ServerApp`` with a custom main function::"
+msgstr "기존 전략 사용"
 
 #: flwr.server.server_app.ServerApp.lifespan:1:<autosummary>:1 of
 #, fuzzy
@@ -15751,11 +15772,12 @@ msgid "**hist** -- Object containing training and evaluation metrics."
 msgstr ""
 
 #: flwr.server.app.start_server:47 of
-msgid "Starting an insecure server:"
-msgstr ""
+#, fuzzy
+msgid "Starting an insecure server::"
+msgstr "안전하지 않은 서버 연결로 gRPC 클라이언트 시작하기:"
 
 #: flwr.server.app.start_server:51 of
-msgid "Starting an SSL-enabled server:"
+msgid "Starting a TLS-enabled server::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:2
@@ -16657,19 +16679,21 @@ msgstr ""
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:22
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:15
 #: of
-msgid "Create a strategy:"
-msgstr ""
+#, fuzzy
+msgid "Create a strategy::"
+msgstr "새 페이지 만들기"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:34
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the "
-"`DifferentialPrivacyClientSideAdaptiveClipping` wrapper:"
-msgstr ""
+"`DifferentialPrivacyClientSideAdaptiveClipping` wrapper::"
+msgstr "이 모드는 서버 측 전략 래퍼인 차분 프라이버시 클라이언트 측 적응형 클리핑과 함께 사용해야 합니다."
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:40
 #: of
-msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods:"
+msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods::"
 msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping.aggregate_evaluate:1:<autosummary>:1
@@ -16756,14 +16780,15 @@ msgstr ""
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:26
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the `DifferentialPrivacyClientSideFixedClipping` "
-"wrapper:"
-msgstr ""
+"wrapper::"
+msgstr "이 모드는 서버 측 전략 래퍼인 DifferentialPrivacyClientSideFixedClipping과 함께 사용해야 합니다."
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:32
 #: of
-msgid "On the client, add the `fixedclipping_mod` to the client-side mods:"
+msgid "On the client, add the `fixedclipping_mod` to the client-side mods::"
 msgstr ""
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping.aggregate_evaluate:1:<autosummary>:1
@@ -16834,10 +16859,11 @@ msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:27
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the DifferentialPrivacyServerSideAdaptiveClipping "
-"wrapper"
-msgstr ""
+"wrapper::"
+msgstr "이 모드는 서버 측 전략 래퍼인 차분 프라이버시 클라이언트 측 적응형 클리핑과 함께 사용해야 합니다."
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping.aggregate_evaluate:1:<autosummary>:1
 #: of
@@ -16893,10 +16919,11 @@ msgstr ""
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:19
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping "
-"wrapper"
-msgstr ""
+"wrapper::"
+msgstr "이 모드는 서버 측 전략 래퍼인 DifferentialPrivacyClientSideFixedClipping과 함께 사용해야 합니다."
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping.aggregate_evaluate:1:<autosummary>:1
 #: of
@@ -30035,7 +30062,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|662665a552f64c9bb53cbf01198765cc|"
+msgid "|1dbe7ef5f86045228c22d76d20494c1c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30052,7 +30079,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|7f4c9c8c2d7045208ac1e513f75b8a32|"
+msgid "|0c52a329791a42c9891adee11a3c9ec6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30078,7 +30105,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|548e011b458142e5be8cf6497d03e22e|"
+msgid "|0af7f9c988464e6d9988f938f7722cb1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30096,7 +30123,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|32d5d8c2e9314a91a9a17bb04a7fde41|"
+msgid "|c4fec40358df4c91b8dacba706affdfc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -30115,7 +30142,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|c5c8eabc28c741e79ab46c61271c18ba|"
+msgid "|fffd51185653489082b5587359813c79|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -30132,7 +30159,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|aebc2e212169439683d3134c7dbda324|"
+msgid "|b9f3e0459a704a459d52ae3fca9c72d3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -30155,7 +30182,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|5b888e20d5f64ec38bf924db4b999a3c|"
+msgid "|5e4f22fdf7cb4373882354252e21f385|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -30172,7 +30199,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|f5dd3e6215104689a365dd7e01e421d0|"
+msgid "|6e225ec341c643a58ce12c7c1c4f531d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -30351,7 +30378,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|e90c03c1caab4f229359c1e8877da2a2|"
+msgid "|371d89f1268b4ba9af58576635ca724e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -30379,7 +30406,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|3e26e26712bb475ba024442148c1171a|"
+msgid "|b64a9a44fd5745cc91b6aa9fdca1aa28|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -30406,7 +30433,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|650f8f02c84f4af381ab58cd7394aff1|"
+msgid "|b9efd6eda007427a92190b989d035b45|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -30432,7 +30459,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|bfab5d09d0bd46dba040500475755079|"
+msgid "|61474cd6cd8642968bd5f0d963fa56df|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -30482,7 +30509,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|1412b6b05b744c159b9531f3a1202d46|"
+msgid "|ff52a36f0cad426bb452cfa49b73350a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -30602,7 +30629,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|918baeda7d744d0dbd5d55f6c8083a6a|"
+msgid "|3d62057de8c64752921d1eab65741d54|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -40343,5 +40370,169 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function:"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid "Initializing by specifying all fields directly:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a NumPy ndarray:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a PyTorch tensor:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a dictionary of :class:`Array`:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a list of NumPy arrays:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a PyTorch model state_dict:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`ConfigRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`MetricRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Since types are enforced, the types "
+#~ "of the objects inserted are checked. "
+#~ "For a :code:`MetricRecord`, value types "
+#~ "allowed are those in defined in "
+#~ ":code:`flwr.common.MetricRecordValues`. Similarly, only"
+#~ " :code:`str` keys are allowed."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Adding an :code:`ArrayRecord` follows the "
+#~ "same steps as above but first, the"
+#~ " array needs to be serialized and "
+#~ "represented as a :code:`flwr.common.Array`. "
+#~ "For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``Driver`` is deprecated and will be "
+#~ "removed in a future release. Use "
+#~ "`Grid` in the signature of your "
+#~ "ServerApp."
+#~ msgstr ""
+
+#~ msgid "Use the ``ServerApp`` with a custom main function:"
+#~ msgstr ""
+
+#~ msgid "Starting an insecure server:"
+#~ msgstr ""
+
+#~ msgid "Starting an SSL-enabled server:"
+#~ msgstr ""
+
+#~ msgid "Create a strategy:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "`DifferentialPrivacyClientSideAdaptiveClipping` wrapper:"
+#~ msgstr ""
+
+#~ msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "`DifferentialPrivacyClientSideFixedClipping` wrapper:"
+#~ msgstr ""
+
+#~ msgid "On the client, add the `fixedclipping_mod` to the client-side mods:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "DifferentialPrivacyServerSideAdaptiveClipping wrapper"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "DifferentialPrivacyServerSideFixedClipping wrapper"
+#~ msgstr ""
+
+#~ msgid "|662665a552f64c9bb53cbf01198765cc|"
+#~ msgstr ""
+
+#~ msgid "|7f4c9c8c2d7045208ac1e513f75b8a32|"
+#~ msgstr ""
+
+#~ msgid "|548e011b458142e5be8cf6497d03e22e|"
+#~ msgstr ""
+
+#~ msgid "|32d5d8c2e9314a91a9a17bb04a7fde41|"
+#~ msgstr ""
+
+#~ msgid "|c5c8eabc28c741e79ab46c61271c18ba|"
+#~ msgstr ""
+
+#~ msgid "|aebc2e212169439683d3134c7dbda324|"
+#~ msgstr ""
+
+#~ msgid "|5b888e20d5f64ec38bf924db4b999a3c|"
+#~ msgstr ""
+
+#~ msgid "|f5dd3e6215104689a365dd7e01e421d0|"
+#~ msgstr ""
+
+#~ msgid "|e90c03c1caab4f229359c1e8877da2a2|"
+#~ msgstr ""
+
+#~ msgid "|3e26e26712bb475ba024442148c1171a|"
+#~ msgstr ""
+
+#~ msgid "|650f8f02c84f4af381ab58cd7394aff1|"
+#~ msgstr ""
+
+#~ msgid "|bfab5d09d0bd46dba040500475755079|"
+#~ msgstr ""
+
+#~ msgid "|1412b6b05b744c159b9531f3a1202d46|"
+#~ msgstr ""
+
+#~ msgid "|918baeda7d744d0dbd5d55f6c8083a6a|"
 #~ msgstr ""
 
