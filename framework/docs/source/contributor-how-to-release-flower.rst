@@ -26,8 +26,7 @@ After the release
 
 Create a pull request which contains the following changes:
 
-1. Run ``./framework/dev/update_version.py`` to bump all version numbers across the
-   repository.
+1. Increase the minor version in ``pyproject.toml`` by one and update all files which contain the current version number (if necessary) by running ``./framework/dev/update_version.py``.
 2. Add a new ``## Unreleased`` section at the top of
    ``./framework/docs/source/ref-changelog.md`` to prepare for future changes.
 
