@@ -20,6 +20,7 @@ import MLXLMCommon
 
 let remoteUrl = "https://api.flower.ai"
 let chatCompletionPath = "/v1/chat/completions"
+let fetchModelConfigPath = "/v1/fetch-model-config"
 let hashAlgorithm = SHA256.self
 let hkdfInfo = Data("ecdh key exchange".utf8)
 let aesKeyLength = 32
@@ -35,3 +36,6 @@ let modelMapping: [String: ModelConfiguration] = [
   "meta/llama3.2-1b": llama3_2_1B,
   "meta/llama3.2-3b": llama3_2_3B,
 ]
+
+let sdk = "Swift"
+let version = "0.1.7"
