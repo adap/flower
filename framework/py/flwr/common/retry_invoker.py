@@ -166,15 +166,15 @@ class RetryInvoker:
 
     Examples
     --------
-    Initialize a `RetryInvoker` with exponential backoff and invoke a function:
+    Initialize a `RetryInvoker` with exponential backoff and invoke a function::
 
-    >>> invoker = RetryInvoker(
-    ...     exponential,  # Or use `lambda: exponential(3, 2)` to pass arguments
-    ...     grpc.RpcError,
-    ...     max_tries=3,
-    ...     max_time=None,
-    ... )
-    >>> invoker.invoke(my_func, arg1, arg2, kw1=kwarg1)
+        invoker = RetryInvoker(
+            exponential,  # Or use `lambda: exponential(3, 2)` to pass arguments
+            grpc.RpcError,
+            max_tries=3,
+            max_time=None,
+        )
+        invoker.invoke(my_func, arg1, arg2, kw1=kwarg1)
     """
 
     # pylint: disable-next=too-many-arguments

@@ -64,15 +64,15 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 
     Examples
     --------
-    Create a strategy:
+    Create a strategy::
 
-    >>> strategy = fl.server.strategy.FedAvg( ... )
+        strategy = fl.server.strategy.FedAvg( ... )
 
-    Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
+    Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper::
 
-    >>> dp_strategy = DifferentialPrivacyServerSideFixedClipping(
-    >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
-    >>> )
+        dp_strategy = DifferentialPrivacyServerSideFixedClipping(
+            strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+        )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -228,21 +228,21 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
 
     Examples
     --------
-    Create a strategy:
+    Create a strategy::
 
-    >>> strategy = fl.server.strategy.FedAvg(...)
+        strategy = fl.server.strategy.FedAvg(...)
 
-    Wrap the strategy with the `DifferentialPrivacyClientSideFixedClipping` wrapper:
+    Wrap the strategy with the `DifferentialPrivacyClientSideFixedClipping` wrapper::
 
-    >>> dp_strategy = DifferentialPrivacyClientSideFixedClipping(
-    >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
-    >>> )
+        dp_strategy = DifferentialPrivacyClientSideFixedClipping(
+            strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+        )
 
-    On the client, add the `fixedclipping_mod` to the client-side mods:
+    On the client, add the `fixedclipping_mod` to the client-side mods::
 
-    >>> app = fl.client.ClientApp(
-    >>>     client_fn=client_fn, mods=[fixedclipping_mod]
-    >>> )
+        app = fl.client.ClientApp(
+            client_fn=client_fn, mods=[fixedclipping_mod]
+        )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
