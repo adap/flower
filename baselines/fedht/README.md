@@ -89,7 +89,7 @@ Based on the loss and accuracy results shown in the figures above, we see that F
   <img src="_static/acc_results_mnist_centralized_1_crossval.png" width="49%" />
 </p>
 
-We can see, at least visually, no discernible difference between the performance of FedAvg and FedHT with a sparsity ratio of 0.638. Significant performance degradation seems to occur around a sparsity ratio of 0.128. We also see an increase in variance as the sparsity ratio decreases. Additionally, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model. Results differ slightly from published work due to differing hyperparameters.
+We can see, at least visually, no discernible difference between the performance of FedAvg and FedHT with a sparsity ratio of 0.362 (36.2% of parameters are zero). Significant performance degradation seems to occur around a sparsity ratio of 0.872. We also see an increase in variance as the sparsity ratio decreases. Additionally, these plots do not show potential gains made with respect to 1) communicaton efficiency due to the sparse nature of Fed-HT and FedIter-HT or 2) interpretability due to a more parsimonious classification model. Results differ slightly from published work due to differing hyperparameters.
 
 The above results can be recreated by running the [run\_exp.sh](https://github.com/chancejohnstone/flower/blob/main/baselines/fedht/run_exp.sh) script. Plots can be generated using the [fedht\_plot.py](https://github.com/chancejohnstone/flower/blob/main/baselines/fedht/fedht_plot.py) script.
 
