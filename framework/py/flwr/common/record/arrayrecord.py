@@ -96,24 +96,24 @@ class Array:
 
     Examples
     --------
-    Initializing by specifying all fields directly:
+    Initializing by specifying all fields directly::
 
-    >>> arr1 = Array(
-    >>>     dtype="float32",
-    >>>     shape=[3, 3],
-    >>>     stype="numpy.ndarray",
-    >>>     data=b"serialized_data...",
-    >>> )
+        arr1 = Array(
+            dtype="float32",
+            shape=[3, 3],
+            stype="numpy.ndarray",
+            data=b"serialized_data...",
+        )
 
-    Initializing with a NumPy ndarray:
+    Initializing with a NumPy ndarray::
 
-    >>> import numpy as np
-    >>> arr2 = Array(np.random.randn(3, 3))
+        import numpy as np
+        arr2 = Array(np.random.randn(3, 3))
 
-    Initializing with a PyTorch tensor:
+    Initializing with a PyTorch tensor::
 
-    >>> import torch
-    >>> arr3 = Array(torch.randn(3, 3))
+        import torch
+        arr3 = Array(torch.randn(3, 3))
     """
 
     dtype: str
@@ -315,33 +315,33 @@ class ArrayRecord(TypedDict[str, Array]):
 
     Examples
     --------
-    Initializing an empty ArrayRecord:
+    Initializing an empty ArrayRecord::
 
-    >>> record = ArrayRecord()
+        record = ArrayRecord()
 
-    Initializing with a dictionary of :class:`Array`:
+    Initializing with a dictionary of :class:`Array`::
 
-    >>> arr = Array("float32", [5, 5], "numpy.ndarray", b"serialized_data...")
-    >>> record = ArrayRecord({"weight": arr})
+        arr = Array("float32", [5, 5], "numpy.ndarray", b"serialized_data...")
+        record = ArrayRecord({"weight": arr})
 
-    Initializing with a list of NumPy arrays:
+    Initializing with a list of NumPy arrays::
 
-    >>> import numpy as np
-    >>> arr1 = np.random.randn(3, 3)
-    >>> arr2 = np.random.randn(2, 2)
-    >>> record = ArrayRecord([arr1, arr2])
+        import numpy as np
+        arr1 = np.random.randn(3, 3)
+        arr2 = np.random.randn(2, 2)
+        record = ArrayRecord([arr1, arr2])
 
-    Initializing with a PyTorch model state_dict:
+    Initializing with a PyTorch model state_dict::
 
-    >>> import torch.nn as nn
-    >>> model = nn.Linear(10, 5)
-    >>> record = ArrayRecord(model.state_dict())
+        import torch.nn as nn
+        model = nn.Linear(10, 5)
+        record = ArrayRecord(model.state_dict())
 
-    Initializing with a TensorFlow model weights (a list of NumPy arrays):
+    Initializing with a TensorFlow model weights (a list of NumPy arrays)::
 
-    >>> import tensorflow as tf
-    >>> model = tf.keras.Sequential([tf.keras.layers.Dense(5, input_shape=(10,))])
-    >>> record = ArrayRecord(model.get_weights())
+        import tensorflow as tf
+        model = tf.keras.Sequential([tf.keras.layers.Dense(5, input_shape=(10,))])
+        record = ArrayRecord(model.get_weights())
     """
 
     @overload

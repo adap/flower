@@ -139,7 +139,7 @@ sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
 docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2" }
 docsig = "==0.64.0"
-devtool = [{ path = "../dev", develop = true }]
+devtool = [{ path = "./devtool", develop = true }]
 
 [tool.docstrfmt]
 extend_exclude = [

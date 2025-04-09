@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-04-07 00:08+0000\n"
+"POT-Creation-Date: 2025-04-09 00:08+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -10827,8 +10827,8 @@ msgstr "Exemples de PyTorch"
 
 #: flwr.client.client_app.ClientApp:5 of
 msgid ""
-"Assuming a typical `Client` implementation named `FlowerClient`, you can "
-"wrap it in a `ClientApp` as follows:"
+"Assuming a typical ``Client`` implementation named ``FlowerClient``, you "
+"can wrap it in a ``ClientApp`` as follows::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
@@ -10891,15 +10891,15 @@ msgid "A decorator that registers an evaluate function with the ``ClientApp``."
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:13 of
-msgid "Registering an evaluate function:"
+msgid "Registering an evaluate function::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:23 of
-msgid "Registering an evaluate function with a custom action name:"
+msgid "Registering an evaluate function with a custom action name::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:34 of
-msgid "Registering an evaluate function with a function-specific Flower Mod:"
+msgid "Registering an evaluate function with a function-specific Flower Mod::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.lifespan:3
@@ -10914,15 +10914,15 @@ msgid "A decorator that registers a query function with the ``ClientApp``."
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.query:13 of
-msgid "Registering a query function:"
+msgid "Registering a query function::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.query:23 of
-msgid "Registering a query function with a custom action name:"
+msgid "Registering a query function with a custom action name::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.query:34 of
-msgid "Registering a query function with a function-specific Flower Mod:"
+msgid "Registering a query function with a function-specific Flower Mod::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.train:8 of
@@ -10930,15 +10930,15 @@ msgid "A decorator that registers a train function with the ``ClientApp``."
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.train:13 of
-msgid "Registering a train function:"
+msgid "Registering a train function::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.train:23 of
-msgid "Registering a train function with a custom action name:"
+msgid "Registering a train function with a custom action name::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.train:34 of
-msgid "Registering a train function with a function-specific Flower Mod:"
+msgid "Registering a train function with a function-specific Flower Mod::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:2
@@ -11231,7 +11231,9 @@ msgid ""
 msgstr ""
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:23 of
-msgid "Create an instance of the local DP mod and add it to the client-side mods:"
+msgid ""
+"Create an instance of the local DP mod and add it to the client-side "
+"mods::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.adaptiveclipping_mod.rst:2
@@ -11407,15 +11409,16 @@ msgid ""
 msgstr ""
 
 #: flwr.client.app.start_client:52 flwr.client.app.start_numpy_client:37 of
-msgid "Starting a gRPC client with an insecure server connection:"
-msgstr ""
+#, fuzzy
+msgid "Starting a gRPC client with an insecure server connection::"
+msgstr "Démarrer le serveur"
 
 #: flwr.client.app.start_client:59 flwr.client.app.start_numpy_client:44 of
-msgid "Starting an SSL-enabled gRPC client using system certificates:"
+msgid "Starting a TLS-enabled gRPC client using system certificates::"
 msgstr ""
 
 #: flwr.client.app.start_client:70 flwr.client.app.start_numpy_client:52 of
-msgid "Starting an SSL-enabled gRPC client using provided certificates:"
+msgid "Starting a TLS-enabled gRPC client using provided certificates::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.start_numpy_client.rst:2
@@ -11608,7 +11611,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.record.configrecord.ConfigRecord:1 of
 #, fuzzy
-msgid "Configs record."
+msgid "Config record."
 msgstr "Configurer les clients"
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -11799,7 +11802,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.record.metricrecord.MetricRecord:1 of
 #, fuzzy
-msgid "Metrics recod."
+msgid "Metric record."
 msgstr "Paramètres du modèle."
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -11993,15 +11996,16 @@ msgid ""
 msgstr ""
 
 #: flwr.common.record.arrayrecord.Array:36 of
-msgid "Initializing by specifying all fields directly:"
+msgid "Initializing by specifying all fields directly::"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.Array:45 of
-msgid "Initializing with a NumPy ndarray:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a NumPy ndarray::"
+msgstr "Initialise le modèle global"
 
 #: flwr.common.record.arrayrecord.Array:50 of
-msgid "Initializing with a PyTorch tensor:"
+msgid "Initializing with a PyTorch tensor::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
@@ -12169,23 +12173,25 @@ msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:37 of
 #, fuzzy
-msgid "Initializing an empty ArrayRecord:"
+msgid "Initializing an empty ArrayRecord::"
 msgstr "Initialise le modèle global"
 
 #: flwr.common.record.arrayrecord.ArrayRecord:41 of
-msgid "Initializing with a dictionary of :class:`Array`:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a dictionary of :class:`Array`::"
+msgstr "Convertit l'objet des paramètres en ndarrays NumPy."
 
 #: flwr.common.record.arrayrecord.ArrayRecord:46 of
-msgid "Initializing with a list of NumPy arrays:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a list of NumPy arrays::"
+msgstr "Initialise le modèle global"
 
 #: flwr.common.record.arrayrecord.ArrayRecord:53 of
-msgid "Initializing with a PyTorch model state_dict:"
+msgid "Initializing with a PyTorch model state_dict::"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:59 of
-msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
+msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays)::"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -12466,7 +12472,7 @@ msgstr ""
 #: flwr.common.record.configrecord.ConfigRecord:29 of
 msgid ""
 "Let's see some examples of how to construct a :code:`ConfigRecord` from "
-"scratch:"
+"scratch::"
 msgstr ""
 
 #: flwr.common.record.configrecord.ConfigRecord:42 of
@@ -14093,7 +14099,7 @@ msgstr ""
 #: flwr.common.record.metricrecord.MetricRecord:28 of
 msgid ""
 "Let's see some examples of how to construct a :code:`MetricRecord` from "
-"scratch:"
+"scratch::"
 msgstr ""
 
 #: flwr.common.record.metricrecord.MetricRecord:39 of
@@ -14101,7 +14107,7 @@ msgid ""
 "Since types are enforced, the types of the objects inserted are checked. "
 "For a :code:`MetricRecord`, value types allowed are those in defined in "
 ":code:`flwr.common.MetricRecordValues`. Similarly, only :code:`str` keys "
-"are allowed."
+"are allowed::"
 msgstr ""
 
 #: flwr.common.record.metricrecord.MetricRecord:50 of
@@ -14411,14 +14417,14 @@ msgid ""
 msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:20 of
-msgid "Let's see an example."
+msgid "Let's see an example::"
 msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:38 of
 msgid ""
 "Adding an :code:`ArrayRecord` follows the same steps as above but first, "
 "the array needs to be serialized and represented as a "
-":code:`flwr.common.Array`. For example:"
+":code:`flwr.common.Array`. For example::"
 msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:55 of
@@ -14979,7 +14985,7 @@ msgstr ""
 #: flwr.server.grid.grid.Driver:10 of
 msgid ""
 "``Driver`` is deprecated and will be removed in a future release. Use "
-"`Grid` in the signature of your ServerApp."
+"``Grid`` in the signature of your ServerApp."
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
@@ -15434,12 +15440,12 @@ msgstr "stratégie.du.serveur"
 
 #: flwr.server.server_app.ServerApp:5 of
 #, fuzzy
-msgid "Use the ``ServerApp`` with an existing ``Strategy``:"
+msgid "Use the ``ServerApp`` with an existing ``Strategy``::"
 msgstr "Utilise une stratégie existante"
 
 #: flwr.server.server_app.ServerApp:17 of
 #, fuzzy
-msgid "Use the ``ServerApp`` with a custom main function:"
+msgid "Use the ``ServerApp`` with a custom main function::"
 msgstr "Utilise une stratégie existante"
 
 #: flwr.server.server_app.ServerApp.lifespan:1:<autosummary>:1 of
@@ -15679,12 +15685,12 @@ msgstr ""
 
 #: flwr.server.app.start_server:47 of
 #, fuzzy
-msgid "Starting an insecure server:"
+msgid "Starting an insecure server::"
 msgstr "Démarrer le serveur"
 
 #: flwr.server.app.start_server:51 of
 #, fuzzy
-msgid "Starting an SSL-enabled server:"
+msgid "Starting a TLS-enabled server::"
 msgstr "Démarrer le serveur"
 
 #: ../../source/ref-api/flwr.server.strategy.rst:2
@@ -16605,19 +16611,20 @@ msgstr ""
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:15
 #: of
 #, fuzzy
-msgid "Create a strategy:"
+msgid "Create a strategy::"
 msgstr "stratégie.du.serveur"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:34
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the "
-"`DifferentialPrivacyClientSideAdaptiveClipping` wrapper:"
-msgstr ""
+"`DifferentialPrivacyClientSideAdaptiveClipping` wrapper::"
+msgstr "Confidentialité différentielle"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:40
 #: of
-msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods:"
+msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods::"
 msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping.aggregate_evaluate:1:<autosummary>:1
@@ -16706,14 +16713,15 @@ msgstr ""
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:26
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the `DifferentialPrivacyClientSideFixedClipping` "
-"wrapper:"
-msgstr ""
+"wrapper::"
+msgstr "Confidentialité différentielle"
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:32
 #: of
-msgid "On the client, add the `fixedclipping_mod` to the client-side mods:"
+msgid "On the client, add the `fixedclipping_mod` to the client-side mods::"
 msgstr ""
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping.aggregate_evaluate:1:<autosummary>:1
@@ -16785,10 +16793,11 @@ msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:27
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the DifferentialPrivacyServerSideAdaptiveClipping "
-"wrapper"
-msgstr ""
+"wrapper::"
+msgstr "Confidentialité différentielle"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping.aggregate_evaluate:1:<autosummary>:1
 #: of
@@ -16845,10 +16854,11 @@ msgstr "Confidentialité différentielle"
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:19
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping "
-"wrapper"
-msgstr ""
+"wrapper::"
+msgstr "Confidentialité différentielle"
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping.aggregate_evaluate:1:<autosummary>:1
 #: of
@@ -33322,7 +33332,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|662665a552f64c9bb53cbf01198765cc|"
+msgid "|1dbe7ef5f86045228c22d76d20494c1c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -33341,7 +33351,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|7f4c9c8c2d7045208ac1e513f75b8a32|"
+msgid "|0c52a329791a42c9891adee11a3c9ec6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -33373,7 +33383,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|548e011b458142e5be8cf6497d03e22e|"
+msgid "|0af7f9c988464e6d9988f938f7722cb1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -33394,7 +33404,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|32d5d8c2e9314a91a9a17bb04a7fde41|"
+msgid "|c4fec40358df4c91b8dacba706affdfc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -33416,7 +33426,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|c5c8eabc28c741e79ab46c61271c18ba|"
+msgid "|fffd51185653489082b5587359813c79|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -33437,7 +33447,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|aebc2e212169439683d3134c7dbda324|"
+msgid "|b9f3e0459a704a459d52ae3fca9c72d3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -33463,7 +33473,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|5b888e20d5f64ec38bf924db4b999a3c|"
+msgid "|5e4f22fdf7cb4373882354252e21f385|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -33482,7 +33492,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|f5dd3e6215104689a365dd7e01e421d0|"
+msgid "|6e225ec341c643a58ce12c7c1c4f531d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -33713,7 +33723,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|e90c03c1caab4f229359c1e8877da2a2|"
+msgid "|371d89f1268b4ba9af58576635ca724e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -33748,7 +33758,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|3e26e26712bb475ba024442148c1171a|"
+msgid "|b64a9a44fd5745cc91b6aa9fdca1aa28|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -33781,7 +33791,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|650f8f02c84f4af381ab58cd7394aff1|"
+msgid "|b9efd6eda007427a92190b989d035b45|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -33812,7 +33822,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|bfab5d09d0bd46dba040500475755079|"
+msgid "|61474cd6cd8642968bd5f0d963fa56df|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -33872,7 +33882,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|1412b6b05b744c159b9531f3a1202d46|"
+msgid "|ff52a36f0cad426bb452cfa49b73350a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -34016,7 +34026,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|918baeda7d744d0dbd5d55f6c8083a6a|"
+msgid "|3d62057de8c64752921d1eab65741d54|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -50233,5 +50243,178 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Assuming a typical `Client` implementation "
+#~ "named `FlowerClient`, you can wrap it"
+#~ " in a `ClientApp` as follows:"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function:"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Create an instance of the local DP"
+#~ " mod and add it to the "
+#~ "client-side mods:"
+#~ msgstr ""
+
+#~ msgid "Starting an SSL-enabled gRPC client using system certificates:"
+#~ msgstr ""
+
+#~ msgid "Starting an SSL-enabled gRPC client using provided certificates:"
+#~ msgstr ""
+
+#~ msgid "Initializing by specifying all fields directly:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a NumPy ndarray:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a PyTorch tensor:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a dictionary of :class:`Array`:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a list of NumPy arrays:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a PyTorch model state_dict:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`ConfigRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`MetricRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Since types are enforced, the types "
+#~ "of the objects inserted are checked. "
+#~ "For a :code:`MetricRecord`, value types "
+#~ "allowed are those in defined in "
+#~ ":code:`flwr.common.MetricRecordValues`. Similarly, only"
+#~ " :code:`str` keys are allowed."
+#~ msgstr ""
+
+#~ msgid "Let's see an example."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Adding an :code:`ArrayRecord` follows the "
+#~ "same steps as above but first, the"
+#~ " array needs to be serialized and "
+#~ "represented as a :code:`flwr.common.Array`. "
+#~ "For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``Driver`` is deprecated and will be "
+#~ "removed in a future release. Use "
+#~ "`Grid` in the signature of your "
+#~ "ServerApp."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "`DifferentialPrivacyClientSideAdaptiveClipping` wrapper:"
+#~ msgstr ""
+
+#~ msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "`DifferentialPrivacyClientSideFixedClipping` wrapper:"
+#~ msgstr ""
+
+#~ msgid "On the client, add the `fixedclipping_mod` to the client-side mods:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "DifferentialPrivacyServerSideAdaptiveClipping wrapper"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "DifferentialPrivacyServerSideFixedClipping wrapper"
+#~ msgstr ""
+
+#~ msgid "|662665a552f64c9bb53cbf01198765cc|"
+#~ msgstr ""
+
+#~ msgid "|7f4c9c8c2d7045208ac1e513f75b8a32|"
+#~ msgstr ""
+
+#~ msgid "|548e011b458142e5be8cf6497d03e22e|"
+#~ msgstr ""
+
+#~ msgid "|32d5d8c2e9314a91a9a17bb04a7fde41|"
+#~ msgstr ""
+
+#~ msgid "|c5c8eabc28c741e79ab46c61271c18ba|"
+#~ msgstr ""
+
+#~ msgid "|aebc2e212169439683d3134c7dbda324|"
+#~ msgstr ""
+
+#~ msgid "|5b888e20d5f64ec38bf924db4b999a3c|"
+#~ msgstr ""
+
+#~ msgid "|f5dd3e6215104689a365dd7e01e421d0|"
+#~ msgstr ""
+
+#~ msgid "|e90c03c1caab4f229359c1e8877da2a2|"
+#~ msgstr ""
+
+#~ msgid "|3e26e26712bb475ba024442148c1171a|"
+#~ msgstr ""
+
+#~ msgid "|650f8f02c84f4af381ab58cd7394aff1|"
+#~ msgstr ""
+
+#~ msgid "|bfab5d09d0bd46dba040500475755079|"
+#~ msgstr ""
+
+#~ msgid "|1412b6b05b744c159b9531f3a1202d46|"
+#~ msgstr ""
+
+#~ msgid "|918baeda7d744d0dbd5d55f6c8083a6a|"
 #~ msgstr ""
 
