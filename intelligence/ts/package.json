@@ -26,6 +26,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "browser": "./dist/flowerintelligence.bundled.es.js",
       "import": "./dist/flowerintelligence.es.js",
       "require": "./dist/flowerintelligence.cjs.js"
     }
@@ -34,7 +35,7 @@
     "build:docs": "typedoc",
     "build:types": "tsc --emitDeclarationOnly",
     "build:watch": "tsc --watch && vite build",
-    "build": "tsc && vite build && pnpm build:types",
+    "build": "./dev/build.sh",
     "demo": "cd examples/hello-world-ts && pnpm i && pnpm build && pnpm start && cd ../..",
     "demo:js": "cd examples/hello-world-js && pnpm i && pnpm start && cd ../..",
     "demo:stream": "cd examples/streaming && pnpm i && pnpm build && pnpm start && cd ../..",
