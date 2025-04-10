@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-07 00:08+0000\n"
+"POT-Creation-Date: 2025-04-10 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -1044,138 +1044,127 @@ msgid "During the release"
 msgstr "릴리즈 동안에"
 
 #: ../../source/contributor-how-to-release-flower.rst:10
+#, fuzzy
 msgid ""
-"The version number of a release is stated in ``pyproject.toml``. To "
-"release a new version of Flower, the following things need to happen (in "
-"that order):"
+"The version number of a release is stated in "
+"``./framework/pyproject.toml``. To release a new version of Flower, the "
+"following things need to happen (in that order):"
 msgstr ""
 "릴리즈의 버전 번호는 ``pyproject.toml``에 명시되어 있습니다. Flower의 새 버전을 릴리즈하려면 다음 작업이 "
 "순서대로 수행되어야 합니다:"
 
 #: ../../source/contributor-how-to-release-flower.rst:13
+msgid ""
+"Run ``python3 ./framework/dev/update_changelog.py <YOUR_GH_TOKEN>`` to "
+"add all new changes to the changelog. You can make manual edits to the "
+"changelog afterward to improve its formatting or wording. This script "
+"will also replace the ``## Unreleased`` header with the new version "
+"number and current date, and add a thank-you message for contributors. "
+"Open a pull request with these changes."
+msgstr ""
+
+#: ../../source/contributor-how-to-release-flower.rst:18
 #, fuzzy
 msgid ""
-"Run ``python3 ./dev/update_changelog.py <YOUR_GH_TOKEN>`` in order to add"
-" every new change to the changelog (feel free to make manual changes to "
-"the changelog afterwards until it looks good)."
-msgstr ""
-"모든 새로운 변경 사항을 변경 로그에 추가하기 위해``python3 "
-"src/py/flwr_tool/update_changelog.py <YOUR_GH_TOKEN>``을 실행합니다 (변경 로그가 "
-"만족스러워질 때까지 수동으로 변경해도 됩니다)."
-
-#: ../../source/contributor-how-to-release-flower.rst:16
-msgid ""
-"Once the changelog has been updated with all the changes, run ``./dev"
-"/prepare-release-changelog.sh v<NEW_VERSION>``, where ``<NEW_VERSION>`` "
-"is the version stated in ``pyproject.toml`` (notice the ``v`` added "
-"before it). This will replace the ``Unreleased`` header of the changelog "
-"by the version and current date, and it will add a thanking message for "
-"the contributors. Open a pull request with those changes."
-msgstr ""
-"모든 변경 사항으로 변경 로그가 업데이트되면,``./dev/prepare-release-changelog.sh "
-"v<NEW_VERSION>``을 실행합니다. 여기서 ``<NEW_VERSION>``은 ``pyproject.toml``에 명시된 "
-"버전 번호입니다 (앞에 ``v``가 추가된 것을 주의하세요). 이 명령어는 변경 로그의 ``Unreleased``헤더를 해당 버전과"
-" 현재 날짜로 교체하고, 기여자들에게 감사 메시지가 추가됩니다. 이러한 변경 사항으로 pull request합니다."
-
-#: ../../source/contributor-how-to-release-flower.rst:22
-msgid ""
 "Once the pull request is merged, tag the release commit with the version "
-"number as soon as the PR is merged: ``git tag v<NEW_VERSION>`` (notice "
-"the ``v`` added before the version number), then ``git push --tags``. "
-"This will create a draft release on GitHub containing the correct "
-"artifacts and the relevant part of the changelog."
+"number: ``git tag v<NEW_VERSION>`` (notice the ``v`` added before the "
+"version number), then ``git push --tags``. This will create a draft "
+"release on GitHub containing the correct artifacts and the relevant part "
+"of the changelog."
 msgstr ""
 "pull request가 병합되면, PR이 병합되는 즉시 버전 번호로 릴리즈 커밋에 태그를 지정합니다:``git tag "
 "v<NEW_VERSION>`` (버전 번호 앞에 ``v``가 추가된 것을 확인), 그 다음 ``git push --tags``. "
 "이렇게 하면 올바른 아티팩트와 변경 로그의 관련 부분이 포함된 초안 릴리즈가 GitHub에 생성됩니다."
 
-#: ../../source/contributor-how-to-release-flower.rst:26
+#: ../../source/contributor-how-to-release-flower.rst:22
 msgid "Check the draft release on GitHub, and if everything is good, publish it."
 msgstr "GitHub에서 릴리즈 초안을 확인하고, 모든 것이 양호하면 게시하세요."
 
-#: ../../source/contributor-how-to-release-flower.rst:29
+#: ../../source/contributor-how-to-release-flower.rst:25
 msgid "After the release"
 msgstr "릴리즈 후에"
 
-#: ../../source/contributor-how-to-release-flower.rst:31
+#: ../../source/contributor-how-to-release-flower.rst:27
 msgid "Create a pull request which contains the following changes:"
 msgstr "다음 변경 사항이 포함된 pull request를 만듭니다:"
 
-#: ../../source/contributor-how-to-release-flower.rst:33
-msgid "Increase the minor version in ``pyproject.toml`` by one."
-msgstr "``pyproject.toml``의 마이너 버전을 하나씩 늘립니다."
+#: ../../source/contributor-how-to-release-flower.rst:29
+msgid ""
+"Increase the minor version in ``pyproject.toml`` by one and update all "
+"files which contain the current version number (if necessary) by running "
+"``./framework/dev/update_version.py``."
+msgstr ""
 
-#: ../../source/contributor-how-to-release-flower.rst:34
-msgid "Update all files which contain the current version number if necessary."
-msgstr "필요한 경우 현재 버전 번호가 포함된 모든 파일을 업데이트합니다."
+#: ../../source/contributor-how-to-release-flower.rst:32
+msgid ""
+"Add a new ``## Unreleased`` section at the top of "
+"``./framework/docs/source/ref-changelog.md`` to prepare for future "
+"changes."
+msgstr ""
 
 #: ../../source/contributor-how-to-release-flower.rst:35
-msgid "Add a new ``Unreleased`` section in ``changelog.md``."
-msgstr "``changelog.md``에 ``Unreleased`` 섹션을 새로 추가합니다."
-
-#: ../../source/contributor-how-to-release-flower.rst:37
 msgid ""
 "Merge the pull request on the same day (i.e., before a new nightly "
 "release gets published to PyPI)."
 msgstr "pull request를 같은 날(즉, 새로운 nightly 릴리즈가 PyPI에 게시되기 전에) 병합하세요."
 
-#: ../../source/contributor-how-to-release-flower.rst:41
+#: ../../source/contributor-how-to-release-flower.rst:39
 msgid "Publishing a pre-release"
 msgstr "사전 릴리즈 게시"
 
-#: ../../source/contributor-how-to-release-flower.rst:44
+#: ../../source/contributor-how-to-release-flower.rst:42
 msgid "Pre-release naming"
 msgstr "사전 릴리즈 이름"
 
-#: ../../source/contributor-how-to-release-flower.rst:46
+#: ../../source/contributor-how-to-release-flower.rst:44
 msgid ""
 "PyPI supports pre-releases (alpha, beta, release candidate). Pre-releases"
 " MUST use one of the following naming patterns:"
 msgstr "PyPI는 사전 릴리즈(알파, 베타, 릴리스 후보)를 지원합니다. 사전 릴리즈는 반드시 다음 명명 패턴 중 하나를 사용해야 합니다:"
 
-#: ../../source/contributor-how-to-release-flower.rst:49
+#: ../../source/contributor-how-to-release-flower.rst:47
 msgid "Alpha: ``MAJOR.MINOR.PATCHaN``"
 msgstr "Alpha: ``MAJOR.MINOR.PATCHaN``"
 
-#: ../../source/contributor-how-to-release-flower.rst:50
+#: ../../source/contributor-how-to-release-flower.rst:48
 msgid "Beta: ``MAJOR.MINOR.PATCHbN``"
 msgstr "Beta: ``MAJOR.MINOR.PATCHbN``"
 
-#: ../../source/contributor-how-to-release-flower.rst:51
+#: ../../source/contributor-how-to-release-flower.rst:49
 msgid "Release candidate (RC): ``MAJOR.MINOR.PATCHrcN``"
 msgstr "Release candidate (RC): ``MAJOR.MINOR.PATCHrcN``"
 
-#: ../../source/contributor-how-to-release-flower.rst:53
+#: ../../source/contributor-how-to-release-flower.rst:51
 msgid "Examples include:"
 msgstr "예시:"
 
-#: ../../source/contributor-how-to-release-flower.rst:55
+#: ../../source/contributor-how-to-release-flower.rst:53
 msgid "``1.0.0a0``"
 msgstr "``1.0.0a0``"
 
-#: ../../source/contributor-how-to-release-flower.rst:56
+#: ../../source/contributor-how-to-release-flower.rst:54
 msgid "``1.0.0b0``"
 msgstr "``1.0.0b0``"
 
-#: ../../source/contributor-how-to-release-flower.rst:57
+#: ../../source/contributor-how-to-release-flower.rst:55
 msgid "``1.0.0rc0``"
 msgstr "``1.0.0rc0``"
 
-#: ../../source/contributor-how-to-release-flower.rst:58
+#: ../../source/contributor-how-to-release-flower.rst:56
 msgid "``1.0.0rc1``"
 msgstr "``1.0.0rc1``"
 
-#: ../../source/contributor-how-to-release-flower.rst:60
+#: ../../source/contributor-how-to-release-flower.rst:58
 msgid ""
 "This is in line with PEP-440 and the recommendations from the Python "
 "Packaging Authority (PyPA):"
 msgstr "이는 PEP-440 및 Python Packaging Authority (PyPA)의 권장 사항과 일치합니다:"
 
-#: ../../source/contributor-how-to-release-flower.rst:63
+#: ../../source/contributor-how-to-release-flower.rst:61
 msgid "`PEP-440 <https://peps.python.org/pep-0440/>`_"
 msgstr "`PEP-440 <https://peps.python.org/pep-0440/>`_"
 
-#: ../../source/contributor-how-to-release-flower.rst:64
+#: ../../source/contributor-how-to-release-flower.rst:62
 msgid ""
 "`PyPA Choosing a versioning scheme "
 "<https://packaging.python.org/en/latest/guides/distributing-packages-"
@@ -1184,7 +1173,7 @@ msgstr ""
 "`PyPA 버전 관리 체계 선택하기 <https://packaging.python.org/en/latest/guides"
 "/distributing-packages-using-setuptools/#choosing-a-versioning-scheme>`_"
 
-#: ../../source/contributor-how-to-release-flower.rst:67
+#: ../../source/contributor-how-to-release-flower.rst:65
 msgid ""
 "Note that the approach defined by PyPA is not compatible with SemVer "
 "2.0.0 spec, for details consult the `Semantic Versioning Specification "
@@ -1195,15 +1184,15 @@ msgstr ""
 "관리 사양 <https://semver.org/spec/v2.0.0.html#spec-item-11>`_ (특히 항목 11이 "
 "우선순위)을 참조하세요."
 
-#: ../../source/contributor-how-to-release-flower.rst:73
+#: ../../source/contributor-how-to-release-flower.rst:71
 msgid "Pre-release classification"
 msgstr "사전 릴리즈 분류"
 
-#: ../../source/contributor-how-to-release-flower.rst:75
+#: ../../source/contributor-how-to-release-flower.rst:73
 msgid "Should the next pre-release be called alpha, beta, or release candidate?"
 msgstr "다음 사전 릴리즈를 알파, 베타 또는 릴리스 후보라고 불러야 하나요?"
 
-#: ../../source/contributor-how-to-release-flower.rst:77
+#: ../../source/contributor-how-to-release-flower.rst:75
 msgid ""
 "RC: feature complete, no known issues (apart from issues that are "
 "classified as \"won't fix\" for the next stable release) - if no issues "
@@ -1212,11 +1201,11 @@ msgstr ""
 "RC: 기능 완료, 알려진 문제 없음(다음 stable 릴리즈에서 \"수정되지 않음\"으로 분류된 문제 제외) - 문제가 나타나지 "
 "않으면 다음 stable 릴리즈가 됩니다"
 
-#: ../../source/contributor-how-to-release-flower.rst:80
+#: ../../source/contributor-how-to-release-flower.rst:78
 msgid "Beta: feature complete, allowed to have known issues"
 msgstr "베타: 기능 완료, 알려진 문제 발생 가능"
 
-#: ../../source/contributor-how-to-release-flower.rst:81
+#: ../../source/contributor-how-to-release-flower.rst:79
 msgid "Alpha: not feature complete, allowed to have known issues"
 msgstr "알파: 기능 미완성, 알려진 문제가 있을 수 있음"
 
@@ -1330,18 +1319,6 @@ msgstr ""
 msgid "and activate the virtual environment with:"
 msgstr "그 후 가상 환경을 활성화합니다:"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:83
-msgid "And then?"
-msgstr "그다음은?"
-
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:85
-msgid ""
-"As soon as you created your virtual environment you clone one of the "
-"`Flower examples <https://github.com/adap/flower/tree/main/examples/>`_."
-msgstr ""
-"가상 환경을 생성하자마자 'Flower examples "
-"<https://github.com/adap/flower/tree/main/examples/>`_ 중 하나를 클론합니다."
-
 #: ../../source/contributor-how-to-write-documentation.rst:2
 msgid "Write documentation"
 msgstr "문서 작성"
@@ -1360,7 +1337,6 @@ msgstr ""
 "텍스트(``.rst`` 파일)와 Markdown(``.md`` 파일)을 모두 지원합니다."
 
 #: ../../source/contributor-how-to-write-documentation.rst:10
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:196
 msgid ""
 "Note that, in order to build the documentation locally (with ``poetry run"
 " make html``, like described below), `Pandoc "
@@ -1795,7 +1771,7 @@ msgstr "**변경하기**"
 msgid "Write great code and create wonderful changes using your favorite editor!"
 msgstr "선호하는 편집기를 사용하여 멋진 코드를 작성하고 훌륭한 변화를 만들어 보세요!"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:149
+#: ../../source/contributor-tutorial-contribute-on-github.rst:147
 msgid "**Test and format your code**"
 msgstr "**코드 테스트 및 서식 지정**"
 
@@ -1812,21 +1788,21 @@ msgstr ""
 msgid "To do so, we have written a few scripts that you can execute:"
 msgstr "이를 위해 실행할 수 있는 몇 가지 스크립트를 작성했습니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:162
+#: ../../source/contributor-tutorial-contribute-on-github.rst:160
 msgid "**Stage changes**"
 msgstr "**변경사항 스테이징**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:152
+#: ../../source/contributor-tutorial-contribute-on-github.rst:150
 msgid ""
 "Before creating a commit that will update your history, you must specify "
 "to Git which files it needs to take into account."
 msgstr "기록을 업데이트할 커밋을 만들기 전에 어떤 파일을 고려해야 하는지 Git에 지정해야 합니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:155
+#: ../../source/contributor-tutorial-contribute-on-github.rst:153
 msgid "This can be done with:"
 msgstr "이 작업을 수행할 수 있습니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:161
+#: ../../source/contributor-tutorial-contribute-on-github.rst:159
 #, fuzzy
 msgid ""
 "To check which files have been modified compared to the last version "
@@ -1836,18 +1812,18 @@ msgstr ""
 "마지막 버전(마지막 커밋)과 비교하여 수정된 파일을 확인하고 커밋을 위해 스테이징된 파일을 확인하려면 :code:`git "
 "status` 명령을 사용하면 됩니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:173
+#: ../../source/contributor-tutorial-contribute-on-github.rst:171
 msgid "**Commit changes**"
 msgstr "**변경사항 커밋**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:165
+#: ../../source/contributor-tutorial-contribute-on-github.rst:163
 #, fuzzy
 msgid ""
 "Once you have added all the files you wanted to commit using ``git add``,"
 " you can finally create your commit using this command:"
 msgstr ":code:`git add`를 사용하여 커밋하려는 모든 파일을 추가한 후, 마지막으로 이 명령을 사용하여 커밋을 생성할 수 있습니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:172
+#: ../../source/contributor-tutorial-contribute-on-github.rst:170
 #, fuzzy
 msgid ""
 "The \\<commit_message\\> is there to explain to others what the commit "
@@ -1857,11 +1833,11 @@ msgstr ""
 "커밋의 내용을 다른 사람에게 설명하기 위해 \\<commit_message\\>가 있습니다. 명령형 스타일로 작성해야 하며 간결해야"
 " 합니다. 예를 들면 :code:`git commit -m \"Add images to README\"`."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:185
+#: ../../source/contributor-tutorial-contribute-on-github.rst:183
 msgid "**Push the changes to the fork**"
 msgstr "**변경 사항을 포크에 푸시**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:176
+#: ../../source/contributor-tutorial-contribute-on-github.rst:174
 msgid ""
 "Once we have committed our changes, we have effectively updated our local"
 " history, but GitHub has no way of knowing this unless we push our "
@@ -1870,41 +1846,41 @@ msgstr ""
 "변경 사항을 커밋하면 로컬 히스토리를 효과적으로 업데이트한 것이지만, 변경 사항을 원본의 원격 주소로 푸시하지 않는 한 "
 "GitHub는 이를 알 방법이 없습니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:184
+#: ../../source/contributor-tutorial-contribute-on-github.rst:182
 msgid ""
 "Once this is done, you will see on the GitHub that your forked repo was "
 "updated with the changes you have made."
 msgstr "이 작업이 완료되면 변경한 내용으로 포크된 레포지토리가 업데이트된 것을 GitHub에서 확인할 수 있습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:188
+#: ../../source/contributor-tutorial-contribute-on-github.rst:186
 msgid "Creating and merging a pull request (PR)"
 msgstr "pull request(PR) 만들기 및 병합하기"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:226
+#: ../../source/contributor-tutorial-contribute-on-github.rst:224
 msgid "**Create the PR**"
 msgstr "**PR 만들기**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:191
+#: ../../source/contributor-tutorial-contribute-on-github.rst:189
 msgid ""
 "Once you have pushed changes, on the GitHub webpage of your repository "
 "you should see the following message:"
 msgstr "변경 사항을 푸시하고 나면 레포지토리의 GitHub 웹페이지에 다음 메시지가 표시됩니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:196
+#: ../../source/contributor-tutorial-contribute-on-github.rst:194
 msgid "Otherwise you can always find this option in the ``Branches`` page."
 msgstr "그렇지 않으면 언제든지 ``Branches`` 페이지에서 이 옵션을 찾을 수 있습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:198
+#: ../../source/contributor-tutorial-contribute-on-github.rst:196
 msgid ""
 "Once you click the ``Compare & pull request`` button, you should see "
 "something similar to this:"
 msgstr "``Compare & pull request`` 버튼을 클릭하면 이와 비슷한 화면이 표시됩니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:203
+#: ../../source/contributor-tutorial-contribute-on-github.rst:201
 msgid "At the top you have an explanation of which branch will be merged where:"
 msgstr "상단에는 어느 지점이 어디에 병합될 것인지에 대한 설명이 있습니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:207
+#: ../../source/contributor-tutorial-contribute-on-github.rst:205
 msgid ""
 "In this example you can see that the request is to merge the branch "
 "``doc-fixes`` from my forked repository to branch ``main`` from the "
@@ -1913,7 +1889,7 @@ msgstr ""
 "이 예제에서는 내 포크된 레포지토리의 ``doc-fixes`` 브랜치를 Flower 레포지토리의 ``main`` 브랜치에 병합하라는"
 " 요청을 볼 수 있습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:210
+#: ../../source/contributor-tutorial-contribute-on-github.rst:208
 msgid ""
 "The title should be changed to adhere to the :ref:`pr_title_format` "
 "guidelines, otherwise it won't be possible to merge the PR. So in this "
@@ -1922,7 +1898,7 @@ msgstr ""
 "제목은 :ref:`pr_title_format` 가이드라인을 준수하도록 변경해야 하며, 그렇지 않으면 PR을 병합할 수 없습니다. "
 "따라서 이 경우 올바른 제목은 ``docs(framework:skip) Fix typos``이 될 수 있습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:214
+#: ../../source/contributor-tutorial-contribute-on-github.rst:212
 msgid ""
 "The input box in the middle is there for you to describe what your PR "
 "does and to link it to existing issues. We have placed comments (that "
@@ -1932,11 +1908,11 @@ msgstr ""
 "가운데에 있는 입력 상자는 PR의 기능을 설명하고 기존 이슈에 연결할 수 있는 곳입니다. 프로세스를 안내하기 위해 코멘트(PR이 "
 "열리면 렌더링되지 않음)를 배치했습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:218
+#: ../../source/contributor-tutorial-contribute-on-github.rst:216
 msgid "It is important to follow the instructions described in comments."
 msgstr "코멘트에 설명된 지침을 따르는 것이 중요합니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:220
+#: ../../source/contributor-tutorial-contribute-on-github.rst:218
 msgid ""
 "At the bottom you will find the button to open the PR. This will notify "
 "reviewers that a new PR has been opened and that they should look over it"
@@ -1945,94 +1921,94 @@ msgstr ""
 "하단에는 PR을 여는 버튼이 있습니다. 이렇게 하면 검토자에게 새 PR이 열렸으며 병합하거나 변경을 요청하기 위해 검토해야 함을 "
 "알립니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:224
+#: ../../source/contributor-tutorial-contribute-on-github.rst:222
 msgid ""
 "If your PR is not yet ready for review, and you don't want to notify "
 "anyone, you have the option to create a draft pull request:"
 msgstr "PR이 아직 검토할 준비가 되지 않았고 다른 사람에게 알리고 싶지 않은 경우 pull request 초안을 만드는 옵션이 있습니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:230
+#: ../../source/contributor-tutorial-contribute-on-github.rst:228
 msgid "**Making new changes**"
 msgstr "**new changes 만들기**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:229
+#: ../../source/contributor-tutorial-contribute-on-github.rst:227
 msgid ""
 "Once the PR has been opened (as draft or not), you can still push new "
 "commits to it the same way we did before, by making changes to the branch"
 " associated with the PR."
 msgstr "PR이 초안으로 열렸든 아니든, PR과 연결된 브랜치를 변경하여 이전과 같은 방식으로 새 커밋을 푸시할 수 있습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:253
+#: ../../source/contributor-tutorial-contribute-on-github.rst:251
 msgid "**Review the PR**"
 msgstr "**PR 검토하기**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:233
+#: ../../source/contributor-tutorial-contribute-on-github.rst:231
 msgid ""
 "Once the PR has been opened or once the draft PR has been marked as "
 "ready, a review from code owners will be automatically requested:"
 msgstr "PR이 열리거나 초안 PR이 준비됨으로 표시되면 코드 소유자의 검토가 자동으로 요청됩니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:238
+#: ../../source/contributor-tutorial-contribute-on-github.rst:236
 msgid ""
 "Code owners will then look into the code, ask questions, request changes "
 "or validate the PR."
 msgstr "그러면 코드 소유자는 코드를 살펴보고, 질문하고, 변경을 요청하거나 PR의 유효성을 검사합니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:241
+#: ../../source/contributor-tutorial-contribute-on-github.rst:239
 msgid "Merging will be blocked if there are ongoing requested changes."
 msgstr "진행 중인 변경 요청이 있는 경우 병합이 차단됩니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:245
+#: ../../source/contributor-tutorial-contribute-on-github.rst:243
 msgid ""
 "To resolve them, just push the necessary changes to the branch associated"
 " with the PR:"
 msgstr "이를 해결하려면 PR과 연결된 브랜치에 필요한 변경 사항을 푸시하면 됩니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:250
+#: ../../source/contributor-tutorial-contribute-on-github.rst:248
 msgid "And resolve the conversation:"
 msgstr "그리고 소통을 통해 해결하세요:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:254
+#: ../../source/contributor-tutorial-contribute-on-github.rst:252
 msgid ""
 "Once all the conversations have been resolved, you can re-request a "
 "review."
 msgstr "모든 대화가 해결되면 검토를 다시 요청할 수 있습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:274
+#: ../../source/contributor-tutorial-contribute-on-github.rst:272
 msgid "**Once the PR is merged**"
 msgstr "**PR이 병합되면**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:256
+#: ../../source/contributor-tutorial-contribute-on-github.rst:254
 msgid ""
 "If all the automatic tests have passed and reviewers have no more changes"
 " to request, they can approve the PR and merge it."
 msgstr "모든 자동 테스트가 통과되고 검토자가 더 이상 요청할 변경 사항이 없는 경우 PR을 승인하고 병합할 수 있습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:261
+#: ../../source/contributor-tutorial-contribute-on-github.rst:259
 msgid ""
 "Once it is merged, you can delete the branch on GitHub (a button should "
 "appear to do so) and also delete it locally by doing:"
 msgstr "병합이 완료되면 GitHub에서 브랜치를 삭제할 수 있으며(삭제 버튼이 표시되어야 함), 로컬에서도 삭제할 수 있습니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:269
+#: ../../source/contributor-tutorial-contribute-on-github.rst:267
 msgid "Then you should update your forked repository by doing:"
 msgstr "그런 다음 다음을 수행하여 포크된 레포지토리를 업데이트해야 합니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:277
+#: ../../source/contributor-tutorial-contribute-on-github.rst:275
 msgid "Example of first contribution"
 msgstr "첫 번째 기여의 예"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:280
+#: ../../source/contributor-tutorial-contribute-on-github.rst:278
 msgid "Problem"
 msgstr "문제"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:282
+#: ../../source/contributor-tutorial-contribute-on-github.rst:280
 msgid ""
 "For our documentation, we've started to use the `Diàtaxis framework "
 "<https://diataxis.fr/>`_."
 msgstr "저희 문서에는 'Diàtaxis 프레임워크 <https://diataxis.fr/>`_'를 사용하기 시작했습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:285
+#: ../../source/contributor-tutorial-contribute-on-github.rst:283
 msgid ""
 "Our \"How to\" guides should have titles that continue the sentence \"How"
 " to …\", for example, \"How to upgrade to Flower 1.0\"."
@@ -2040,19 +2016,19 @@ msgstr ""
 "'How to' 가이드의 제목은 \"How to …\"라는 문장을 이어가는 제목이어야 합니다(예: \"How to upgrade "
 "to Flower 1.0\")."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:288
+#: ../../source/contributor-tutorial-contribute-on-github.rst:286
 msgid ""
 "Most of our guides do not follow this new format yet, and changing their "
 "title is (unfortunately) more involved than one might think."
 msgstr "대부분의 가이드는 아직 이 새로운 형식을 따르지 않으며, 안타깝게도 제목을 변경하는 작업은 생각보다 복잡합니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:291
+#: ../../source/contributor-tutorial-contribute-on-github.rst:289
 msgid ""
 "This issue is about changing the title of a doc from present continuous "
 "to present simple."
 msgstr "이번 이슈는 문서 제목을 현재 연속형에서 현재 단순형으로 변경하는 것에 관한 것입니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:294
+#: ../../source/contributor-tutorial-contribute-on-github.rst:292
 msgid ""
 "Let's take the example of \"Saving Progress\" which we changed to \"Save "
 "Progress\". Does this pass our check?"
@@ -2060,19 +2036,19 @@ msgstr ""
 "\"How to saving progress\"을 \"How to save progress\"으로 변경한 예를 들어 보겠습니다. "
 "이것이 우리의 점검을 통과했나요?"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:297
+#: ../../source/contributor-tutorial-contribute-on-github.rst:295
 msgid "Before: \"How to saving progress\" ❌"
 msgstr "Before: \"How to saving progress\" ❌"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:299
+#: ../../source/contributor-tutorial-contribute-on-github.rst:297
 msgid "After: \"How to save progress\" ✅"
 msgstr "After: \"How to save progress\" ✅"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:302
+#: ../../source/contributor-tutorial-contribute-on-github.rst:300
 msgid "Solution"
 msgstr "해결법"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:304
+#: ../../source/contributor-tutorial-contribute-on-github.rst:302
 msgid ""
 "This is a tiny change, but it'll allow us to test your end-to-end setup. "
 "After cloning and setting up the Flower repo, here's what you should do:"
@@ -2080,17 +2056,17 @@ msgstr ""
 "이것은 사소한 변경이지만 end-to-end 설정을 테스트할 수 있습니다. Flower 레포지토리를 복제하고 설정한 후에는 다음과 "
 "같이 하세요:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:307
+#: ../../source/contributor-tutorial-contribute-on-github.rst:305
 msgid "Find the source file in ``framework/docs/source``"
 msgstr "``framework/docs/source``에서 소스 파일을 찾습니다"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:308
+#: ../../source/contributor-tutorial-contribute-on-github.rst:306
 msgid ""
 "Make the change in the ``.rst`` file (beware, the dashes under the title "
 "should be the same length as the title itself)"
 msgstr "``.rst`` 파일에서 변경합니다(제목 아래의 대시는 제목 자체의 길이와 같아야 합니다)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:310
+#: ../../source/contributor-tutorial-contribute-on-github.rst:308
 msgid ""
 "Build the docs and `check the result <contributor-how-to-write-"
 "documentation.html#edit-an-existing-page>`_"
@@ -2098,11 +2074,11 @@ msgstr ""
 "문서를 빌드하고 '결과 확인 <contributor-how-to-write-documentation.html#edit-an-"
 "existing-page>`_'합니다"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:314
+#: ../../source/contributor-tutorial-contribute-on-github.rst:312
 msgid "Rename file"
 msgstr "파일 이름 바꾸기"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:316
+#: ../../source/contributor-tutorial-contribute-on-github.rst:314
 msgid ""
 "You might have noticed that the file name still reflects the old wording."
 " If we just change the file, then we break all existing links to it - it "
@@ -2112,19 +2088,19 @@ msgstr ""
 "파일 이름에 여전히 이전 문구가 반영되어 있는 것을 보셨을 것입니다. 파일만 변경하면 파일에 대한 기존 링크가 모두 끊어지는데, "
 "링크를 끊으면 검색 엔진 순위에 영향을 줄 수 있으므로 이를 방지하는 것이 **매우 중요**합니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:320
+#: ../../source/contributor-tutorial-contribute-on-github.rst:318
 msgid "Here's how to change the file name:"
 msgstr "파일 이름을 변경하는 방법은 다음과 같습니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:322
+#: ../../source/contributor-tutorial-contribute-on-github.rst:320
 msgid "Change the file name to ``save-progress.rst``"
 msgstr "파일 이름을 ``save-progress.rst``로 변경합니다"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:323
+#: ../../source/contributor-tutorial-contribute-on-github.rst:321
 msgid "Add a redirect rule to ``framework/docs/source/conf.py``"
 msgstr "'framework/docs/source/conf.py'에 리디렉션 규칙을 추가합니다"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:325
+#: ../../source/contributor-tutorial-contribute-on-github.rst:323
 msgid ""
 "This will cause a redirect from ``saving-progress.html`` to ``save-"
 "progress.html``, old links will continue to work."
@@ -2132,11 +2108,11 @@ msgstr ""
 "이렇게 하면 ``saving-progress.html``에서 ``save-progress.html``로 리디렉션되며, 이전 링크는 "
 "계속 작동합니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:329
+#: ../../source/contributor-tutorial-contribute-on-github.rst:327
 msgid "Apply changes in the index file"
 msgstr "인덱스 파일에 변경 사항 적용"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:331
+#: ../../source/contributor-tutorial-contribute-on-github.rst:329
 msgid ""
 "For the lateral navigation bar to work properly, it is very important to "
 "update the ``index.rst`` file as well. This is where we define the whole "
@@ -2145,39 +2121,39 @@ msgstr ""
 "횡방향 내비게이션 바가 제대로 작동하려면 ``index.rst`` 파일도 업데이트하는 것이 매우 중요합니다. 이 파일은 탐색 모음의"
 " 전체 배열을 정의하는 곳입니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:335
+#: ../../source/contributor-tutorial-contribute-on-github.rst:333
 msgid "Find and modify the file name in ``index.rst``"
 msgstr "``index.rst``에서 파일 이름을 찾아 수정합니다"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:338
+#: ../../source/contributor-tutorial-contribute-on-github.rst:336
 msgid "Open PR"
 msgstr "PR 열기"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:340
+#: ../../source/contributor-tutorial-contribute-on-github.rst:338
 msgid ""
 "Commit the changes (commit messages are always imperative: \"Do "
 "something\", in this case \"Change …\")"
 msgstr "변경 사항을 커밋합니다(커밋 메시지는 항상 필수 메시지입니다:\"Do something\"(이 경우 는 \"Change …\" )"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:342
+#: ../../source/contributor-tutorial-contribute-on-github.rst:340
 msgid "Push the changes to your fork"
 msgstr "변경 사항을 포크에 푸시합니다"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:343
+#: ../../source/contributor-tutorial-contribute-on-github.rst:341
 msgid ""
 "Open a PR (as shown above) with title ``docs(framework) Update how-to "
 "guide title``"
 msgstr "``docs(framework) Update how-to guide title`` 제목으로 PR(위와 같이)을 엽니다"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:344
+#: ../../source/contributor-tutorial-contribute-on-github.rst:342
 msgid "Wait for it to be approved!"
 msgstr "승인될 때까지 기다리세요!"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:345
+#: ../../source/contributor-tutorial-contribute-on-github.rst:343
 msgid "Congrats! 🥳 You're now officially a Flower contributor!"
 msgstr "축하합니다! 이제 공식적으로 Flower 기여자가 되셨습니다!"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:348
+#: ../../source/contributor-tutorial-contribute-on-github.rst:346
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.ipynb:573
 #: ../../source/tutorial-series-customize-the-client-pytorch.ipynb:1012
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.ipynb:811
@@ -2186,13 +2162,13 @@ msgstr "축하합니다! 이제 공식적으로 Flower 기여자가 되셨습니
 msgid "Next steps"
 msgstr "다음 단계"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:350
+#: ../../source/contributor-tutorial-contribute-on-github.rst:348
 msgid ""
 "Once you have made your first PR, and want to contribute more, be sure to"
 " check out the following :"
 msgstr "첫 번째 PR을 작성하고 더 많은 기여를 하고 싶다면 다음을 확인하세요:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:353
+#: ../../source/contributor-tutorial-contribute-on-github.rst:351
 #, fuzzy
 msgid ""
 ":doc:`Good first contributions <contributor-ref-good-first-"
@@ -2202,25 +2178,25 @@ msgstr ""
 ":doc:`훌륭한 첫 번째 기여 <contributor-ref-good-first-contributions>`, 특히 "
 ":code:`baselines` 기여를 살펴봐야 합니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:357
+#: ../../source/contributor-tutorial-contribute-on-github.rst:355
 msgid "Appendix"
 msgstr "부록"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:362
+#: ../../source/contributor-tutorial-contribute-on-github.rst:360
 msgid "PR title format"
 msgstr "PR 제목 형식"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:364
+#: ../../source/contributor-tutorial-contribute-on-github.rst:362
 msgid "We enforce the following PR title format:"
 msgstr "다음과 같은 PR 제목 형식을 적용합니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:370
+#: ../../source/contributor-tutorial-contribute-on-github.rst:368
 msgid ""
 "(or ``<type>(<project>:skip) <subject>`` to ignore the PR in the "
 "changelog)"
 msgstr "(또는 ``<type>(<project>:skip) <subject>``를 사용하면 변경 로그에서 PR을 무시합니다.)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:372
+#: ../../source/contributor-tutorial-contribute-on-github.rst:370
 #, python-brace-format
 msgid ""
 "Where ``<type>`` needs to be in ``{ci, fix, feat, docs, refactor, "
@@ -2234,49 +2210,49 @@ msgstr ""
 "':skip' 플래그를 사용해야 하는 여러 프로젝트를 수정하는 경우}``로 입력해야 하며, ``<subject>``는 대문자로 "
 "시작해야 합니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:377
+#: ../../source/contributor-tutorial-contribute-on-github.rst:375
 msgid "Valid examples:"
 msgstr "유효한 예시입니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:379
+#: ../../source/contributor-tutorial-contribute-on-github.rst:377
 msgid "``feat(framework) Add flwr build CLI command``"
 msgstr "``feat(framework) Add flwr build CLI command``"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:380
+#: ../../source/contributor-tutorial-contribute-on-github.rst:378
 msgid "``refactor(examples:skip) Improve quickstart-pytorch logging``"
 msgstr "``refactor(examples:skip) Improve quickstart-pytorch logging``"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:381
+#: ../../source/contributor-tutorial-contribute-on-github.rst:379
 msgid "``ci(*:skip) Enforce PR title format``"
 msgstr "``ci(*:skip) Enforce PR title format``"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:383
+#: ../../source/contributor-tutorial-contribute-on-github.rst:381
 msgid "Invalid examples:"
 msgstr "잘못된 예시입니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:385
+#: ../../source/contributor-tutorial-contribute-on-github.rst:383
 msgid "``feat(framework): Add flwr build CLI command`` (extra ``:``)"
 msgstr "``feat(framework): Add flwr build CLI command`` ( ``:``제외)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:386
+#: ../../source/contributor-tutorial-contribute-on-github.rst:384
 msgid ""
 "``feat(*) Add flwr build CLI command`` (missing ``skip`` flag along with "
 "``*``)"
 msgstr "``feat(*) Add flwr build CLI command`` (``skip`` flag와 함께 ``*``누락)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:387
+#: ../../source/contributor-tutorial-contribute-on-github.rst:385
 msgid "``feat(skip) Add flwr build CLI command`` (missing ``<project>``)"
 msgstr "``feat(skip) Add flwr build CLI command`` (``<project>``누락)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:388
+#: ../../source/contributor-tutorial-contribute-on-github.rst:386
 msgid "``feat(framework) add flwr build CLI command`` (non capitalised verb)"
 msgstr "``feat(framework) add flwr build CLI command`` (대문자로 표기되지 않은 동사)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:389
+#: ../../source/contributor-tutorial-contribute-on-github.rst:387
 msgid "``feat(framework) Add flwr build CLI command.`` (dot at the end)"
 msgstr "``feat(framework) Add flwr build CLI command.`` (끝에 마침표)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:390
+#: ../../source/contributor-tutorial-contribute-on-github.rst:388
 msgid "``Add flwr build CLI command.`` (missing ``<type>(<project>)``)"
 msgstr "``Add flwr build CLI command.`` ( ``<type>(<project>)``누락)"
 
@@ -2373,51 +2349,37 @@ msgid ""
 msgstr "1. GitHub: 에서 ``Flower 레포지토리 <https://github.com/adap/flower>`_를 복제합니다::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:56
-#, fuzzy
 msgid ""
-"Let's create the Python environment for all-things Flower. If you wish to"
-" use ``pyenv``, we provide two convenience scripts that you can use. If "
-"you prefer using something else than ``pyenv``, create a new environment,"
-" activate and skip to the last point where all packages are installed."
+"Create and activate a Python virtual environment for development. See "
+"`Set up a virtual env <contributor-how-to-set-up-a-virtual-env.rst>`_ for"
+" detailed instructions."
 msgstr ""
-"Flower의 모든 것을 위한 파이썬 환경을 만들어 보겠습니다.:code:`pyenv`를 사용하고자 하는 경우 사용할 수 있는 두 "
-"가지 편의 스크립트를 제공합니다.:code:`pyenv`가 아닌 다른 것을 사용하려면 새 환경을 생성하고 활성화한 후 모든 패키지가"
-" 설치된 마지막 지점으로 건너뛰세요."
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:61
-#, fuzzy
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:60
 msgid ""
-"If you don't have ``pyenv`` installed, the following script that will "
-"install it, set it up, and create the virtual environment (with "
-":substitution-code:`Python |python_full_version|` by default):"
+"One way to do this is by using `pyenv <https://github.com/pyenv/pyenv>`_ "
+"and `pyenv-virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_. You "
+"can also optionally install a specific Python version using pyenv if you "
+"haven't already installed your desired version:"
 msgstr ""
-":code:`pyenv`가 설치되어 있지 않은 경우 다음 스크립트를 사용하여 설치, 설정 및 가상 환경을 생성합니다(기본적으로 "
-":code:`Python 3.9.20` 사용):"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:69
-#, fuzzy
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:71
 msgid ""
-"If you already have ``pyenv`` installed (along with the ``pyenv-"
-"virtualenv`` plugin), you can use the following convenience script (with "
-":substitution-code:`Python |python_full_version|` by default):"
+"Install Poetry, which is used to manage dependencies and development "
+"workflows:"
 msgstr ""
-":code:`pyenv`가 이미 설치되어 있는 경우( :code:`pyenv-virtualenv` 플러그인과 함께) 다음과 같은 "
-"편의 스크립트를 사용할 수 있습니다(기본적으로 코드:`Python 3.9.20` 사용):"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:77
-#, fuzzy
 msgid ""
-"3. Install the Flower package in development mode (think ``pip install "
-"-e``) along with all necessary dependencies:"
+"Navigate to the ``framework`` directory and install the Flower project in"
+" development mode, including all optional dependencies:"
 msgstr ""
-"3. 필요한 모든 dependencies와 함께 개발 모드에서 Flower 패키지를 설치합니다(예:code:`pip install "
-"-e`)::"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:85
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:86
 msgid "Convenience Scripts"
 msgstr "편의 스크립트"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:87
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:88
 #, fuzzy
 msgid ""
 "The Flower repository contains a number of convenience scripts to make "
@@ -2428,76 +2390,73 @@ msgstr ""
 "Flower 레포지토리에는 반복적인 개발 작업을 더 쉽고 오류를 줄이기 위한 여러 가지 편의 스크립트가 포함되어 있습니다. 전체 "
 "목록은 :code:`/dev` 하위 디렉터리를 참조하세요. 다음 스크립트는 가장 중요한 스크립트 중 하나입니다:"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:92
-msgid "Create/Delete Virtual Environment"
-msgstr "가상 환경 생성/삭제"
-
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:101
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:93
 msgid "Compile ProtoBuf Definitions"
 msgstr "ProtoBuf 정의 컴파일"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:108
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:100
 msgid "Auto-Format Code"
 msgstr "자동 포맷 코드"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:115
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:107
 msgid "Run Linters and Tests"
 msgstr "린터 및 테스트 실행"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:122
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:114
 msgid "Add a pre-commit hook"
 msgstr "사전 커밋 훅 추가"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:124
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:116
+#, fuzzy
 msgid ""
 "Developers may integrate a pre-commit hook into their workflow utilizing "
 "the `pre-commit <https://pre-commit.com/#install>`_ library. The pre-"
 "commit hook is configured to execute two primary operations: "
-"``./dev/format.sh`` and ``./dev/test.sh`` scripts."
+"``./framework/dev/format.sh`` and ``./framework/dev/test.sh`` scripts."
 msgstr ""
 "개발자는 `pre-commit <https://pre-commit.com/#install>`_ 라이브러리를 사용하여 사전 커밋 훅을"
 " 워크플로에 통합할 수 있습니다. 사전 커밋 훅은 두 가지 기본 작업을 실행하도록 구성됩니다:``./dev/format.sh`` 및"
 " ``./dev/test.sh`` 스크립트."
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:128
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:121
 msgid "There are multiple ways developers can use this:"
 msgstr "개발자가 이것을 사용할 수 있는 여러가지 방법이 있습니다:"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:130
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:123
 msgid "Install the pre-commit hook to your local git directory by simply running:"
 msgstr "간단하게 실행하여 로컬 git 디렉터리에 사전 커밋 훅을 설치하세요:"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:136
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:129
 msgid ""
 "Each ``git commit`` will trigger the execution of formatting and "
 "linting/test scripts."
 msgstr "각 ``git 커밋``은 포맷 및 린팅/테스트 스크립트의 실행을 트리거합니다."
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:138
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:131
 #, fuzzy
 msgid ""
 "If in a hurry, bypass the hook using ``--no-verify`` with the ``git "
 "commit`` command."
 msgstr "급한 경우 ``git commit`` 명령과 함께 `--no-verify``를 사용하여 훅을 넘기세요:"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:145
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:138
 msgid ""
 "For developers who prefer not to install the hook permanently, it is "
 "possible to execute a one-time check prior to committing changes by using"
 " the following command:"
 msgstr "훅을 영구적으로 설치하지 않으려는 개발자의 경우 다음 명령을 사용하여 변경 사항을 커밋하기 전에 일회성 검사를 실행할 수 있습니다:"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:152
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:145
 msgid ""
 "This executes the formatting and linting checks/tests on all the files "
 "without modifying the default behavior of ``git commit``."
 msgstr "이렇게 하면 ``git commit``의 기본 동작을 수정하지 않고 모든 파일에 대해 포맷 및 린팅 검사/테스트를 실행합니다."
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:156
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:149
 msgid "Run Github Actions (CI) locally"
 msgstr "로컬에서 Github Action(CI) 실행하기"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:158
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:151
 #, fuzzy
 msgid ""
 "Developers could run the full set of Github Actions workflows under their"
@@ -2509,47 +2468,57 @@ msgstr ""
 "Actions 워크플로우 세트를 실행할 수 있습니다. 링크된 레포지토리 아래의 설치 지침을 참조하여 Flower 메인 클론 "
 "레포지토리 폴더 아래에서 다음 명령을 실행하세요::"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:167
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:160
 msgid ""
 "The Flower default workflow would run by setting up the required Docker "
 "machines underneath."
 msgstr "Flower 기본 워크플로우는 아래에 필요한 Docker 머신을 설정하여 실행합니다."
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:171
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:164
 msgid "Build Release"
 msgstr "릴리즈 빌드"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:173
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:166
 #, fuzzy
 msgid ""
 "Flower uses Poetry to build releases. The necessary command is wrapped in"
 " a simple script:"
 msgstr "Flower는 Poetry를 사용하여 릴리즈를 빌드합니다. 필요한 명령은 간단한 스크립트로 래핑됩니다::"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:180
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:173
 #, fuzzy
 msgid ""
 "The resulting ``.whl`` and ``.tar.gz`` releases will be stored in the "
-"``/dist`` subdirectory."
+"``./framework/dist`` subdirectory."
 msgstr "결과물인 :code:`.whl` 및 :code:`.tar.gz` 릴리즈는 :code:`/dist` 하위 디렉터리에 저장됩니다."
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:184
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:177
 msgid "Build Documentation"
 msgstr "문서 빌드"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:186
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:179
 #, fuzzy
 msgid ""
-"Flower's documentation uses `Sphinx <https://www.sphinx-doc.org/>`_. "
-"There's no convenience script to re-build the documentation yet, but it's"
-" pretty easy:"
+"Flower's documentation uses `Sphinx <https://www.sphinx-doc.org/>`_. To "
+"build the documentation locally, run the following script:"
 msgstr ""
 "Flower의 문서는 `Sphinx <https://www.sphinx-doc.org/>`_를 사용합니다. 아직 문서를 다시 작성할"
 " 수 있는 편리한 스크립트는 없지만 다음과 같이 쉽게 작성할 수 있습니다:"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:194
-msgid "This will generate HTML documentation in ``doc/build/html``."
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:186
+#, fuzzy
+msgid "This will generate HTML documentation in ``./framework/doc/build/html``."
 msgstr "그러면 ``doc/build/html``에 HTML 문서가 생성됩니다."
+
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:188
+#, fuzzy
+msgid ""
+"Note that, in order to build the documentation locally, `Pandoc "
+"<https://pandoc.org/installing.html>`_ needs to be installed on the "
+"system."
+msgstr ""
+"로컬에서 문서를 작성하려면(아래 설명과 같이 ``poetry run make html``로) `Pandoc "
+"<https://pandoc.org/installing.html>`_이 시스템에 설치되어 있어야 합니다."
 
 #: ../../source/deploy.rst:-1
 msgid ""
@@ -10708,9 +10677,10 @@ msgid "Examples"
 msgstr "예시"
 
 #: flwr.client.client_app.ClientApp:5 of
+#, fuzzy
 msgid ""
-"Assuming a typical `Client` implementation named `FlowerClient`, you can "
-"wrap it in a `ClientApp` as follows:"
+"Assuming a typical ``Client`` implementation named ``FlowerClient``, you "
+"can wrap it in a ``ClientApp`` as follows::"
 msgstr ""
 "일반적인 `Client` 구현의 이름이 `FlowerClient`라고 가정하면, 다음과 같이 `ClientApp`으로 래핑할 수 "
 "있습니다:"
@@ -10780,16 +10750,19 @@ msgid "A decorator that registers an evaluate function with the ``ClientApp``."
 msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:13 of
-msgid "Registering an evaluate function:"
-msgstr ""
+#, fuzzy
+msgid "Registering an evaluate function::"
+msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:23 of
-msgid "Registering an evaluate function with a custom action name:"
-msgstr ""
+#, fuzzy
+msgid "Registering an evaluate function with a custom action name::"
+msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:34 of
-msgid "Registering an evaluate function with a function-specific Flower Mod:"
-msgstr ""
+#, fuzzy
+msgid "Registering an evaluate function with a function-specific Flower Mod::"
+msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.lifespan:3
 #: flwr.server.server_app.ServerApp.lifespan:3 of
@@ -10804,16 +10777,19 @@ msgid "A decorator that registers a query function with the ``ClientApp``."
 msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.query:13 of
-msgid "Registering a query function:"
-msgstr ""
+#, fuzzy
+msgid "Registering a query function::"
+msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.query:23 of
-msgid "Registering a query function with a custom action name:"
-msgstr ""
+#, fuzzy
+msgid "Registering a query function with a custom action name::"
+msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.query:34 of
-msgid "Registering a query function with a function-specific Flower Mod:"
-msgstr ""
+#, fuzzy
+msgid "Registering a query function with a function-specific Flower Mod::"
+msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.train:8 of
 #, fuzzy
@@ -10821,16 +10797,19 @@ msgid "A decorator that registers a train function with the ``ClientApp``."
 msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.train:13 of
-msgid "Registering a train function:"
-msgstr ""
+#, fuzzy
+msgid "Registering a train function::"
+msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.train:23 of
-msgid "Registering a train function with a custom action name:"
-msgstr ""
+#, fuzzy
+msgid "Registering a train function with a custom action name::"
+msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.train:34 of
-msgid "Registering a train function with a function-specific Flower Mod:"
-msgstr ""
+#, fuzzy
+msgid "Registering a train function with a function-specific Flower Mod::"
+msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:2
 msgid "NumPyClient"
@@ -11158,7 +11137,10 @@ msgstr ""
 "엄격하게 보장된다는 의미입니다."
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:23 of
-msgid "Create an instance of the local DP mod and add it to the client-side mods:"
+#, fuzzy
+msgid ""
+"Create an instance of the local DP mod and add it to the client-side "
+"mods::"
 msgstr "로컬 DP 모드의 인스턴스를 생성하고 클라이언트 측 모드에 추가합니다:"
 
 #: ../../source/ref-api/flwr.client.mod.adaptiveclipping_mod.rst:2
@@ -11347,15 +11329,18 @@ msgstr ""
 "없습니다."
 
 #: flwr.client.app.start_client:52 flwr.client.app.start_numpy_client:37 of
-msgid "Starting a gRPC client with an insecure server connection:"
+#, fuzzy
+msgid "Starting a gRPC client with an insecure server connection::"
 msgstr "안전하지 않은 서버 연결로 gRPC 클라이언트 시작하기:"
 
 #: flwr.client.app.start_client:59 flwr.client.app.start_numpy_client:44 of
-msgid "Starting an SSL-enabled gRPC client using system certificates:"
+#, fuzzy
+msgid "Starting a TLS-enabled gRPC client using system certificates::"
 msgstr "시스템 인증서를 사용하여 SSL 사용 gRPC 클라이언트를 시작합니다:"
 
 #: flwr.client.app.start_client:70 flwr.client.app.start_numpy_client:52 of
-msgid "Starting an SSL-enabled gRPC client using provided certificates:"
+#, fuzzy
+msgid "Starting a TLS-enabled gRPC client using provided certificates::"
 msgstr "제공된 인증서를 사용하여 SSL 지원 gRPC 클라이언트를 시작합니다:"
 
 #: ../../source/ref-api/flwr.client.start_numpy_client.rst:2
@@ -11558,7 +11543,8 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.record.configrecord.ConfigRecord:1 of
-msgid "Configs record."
+#, fuzzy
+msgid "Config record."
 msgstr "레코드를 설정합니다."
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -11762,7 +11748,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.record.metricrecord.MetricRecord:1 of
 #, fuzzy
-msgid "Metrics recod."
+msgid "Metric record."
 msgstr "메트릭 기록."
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -11976,15 +11962,16 @@ msgid ""
 msgstr ""
 
 #: flwr.common.record.arrayrecord.Array:36 of
-msgid "Initializing by specifying all fields directly:"
+msgid "Initializing by specifying all fields directly::"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.Array:45 of
-msgid "Initializing with a NumPy ndarray:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a NumPy ndarray::"
+msgstr "Dictionary holding ParametersRecord instances."
 
 #: flwr.common.record.arrayrecord.Array:50 of
-msgid "Initializing with a PyTorch tensor:"
+msgid "Initializing with a PyTorch tensor::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
@@ -12151,23 +12138,25 @@ msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:37 of
 #, fuzzy
-msgid "Initializing an empty ArrayRecord:"
+msgid "Initializing an empty ArrayRecord::"
 msgstr "Dictionary holding ParametersRecord instances."
 
 #: flwr.common.record.arrayrecord.ArrayRecord:41 of
-msgid "Initializing with a dictionary of :class:`Array`:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a dictionary of :class:`Array`::"
+msgstr "NumPy에서 배열을 만듭니다."
 
 #: flwr.common.record.arrayrecord.ArrayRecord:46 of
-msgid "Initializing with a list of NumPy arrays:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a list of NumPy arrays::"
+msgstr "Dictionary holding ParametersRecord instances."
 
 #: flwr.common.record.arrayrecord.ArrayRecord:53 of
-msgid "Initializing with a PyTorch model state_dict:"
+msgid "Initializing with a PyTorch model state_dict::"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:59 of
-msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
+msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays)::"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -12472,7 +12461,7 @@ msgstr ""
 #: flwr.common.record.configrecord.ConfigRecord:29 of
 msgid ""
 "Let's see some examples of how to construct a :code:`ConfigRecord` from "
-"scratch:"
+"scratch::"
 msgstr ""
 
 #: flwr.common.record.configrecord.ConfigRecord:42 of
@@ -14177,7 +14166,7 @@ msgstr ""
 #: flwr.common.record.metricrecord.MetricRecord:28 of
 msgid ""
 "Let's see some examples of how to construct a :code:`MetricRecord` from "
-"scratch:"
+"scratch::"
 msgstr ""
 
 #: flwr.common.record.metricrecord.MetricRecord:39 of
@@ -14185,7 +14174,7 @@ msgid ""
 "Since types are enforced, the types of the objects inserted are checked. "
 "For a :code:`MetricRecord`, value types allowed are those in defined in "
 ":code:`flwr.common.MetricRecordValues`. Similarly, only :code:`str` keys "
-"are allowed."
+"are allowed::"
 msgstr ""
 
 #: flwr.common.record.metricrecord.MetricRecord:50 of
@@ -14513,14 +14502,14 @@ msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:20 of
 #, fuzzy
-msgid "Let's see an example."
+msgid "Let's see an example::"
 msgstr "몇 가지 예를 살펴보겠습니다:"
 
 #: flwr.common.record.recorddict.RecordDict:38 of
 msgid ""
 "Adding an :code:`ArrayRecord` follows the same steps as above but first, "
 "the array needs to be serialized and represented as a "
-":code:`flwr.common.Array`. For example:"
+":code:`flwr.common.Array`. For example::"
 msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:55 of
@@ -15085,7 +15074,7 @@ msgstr ""
 #: flwr.server.grid.grid.Driver:10 of
 msgid ""
 "``Driver`` is deprecated and will be removed in a future release. Use "
-"`Grid` in the signature of your ServerApp."
+"``Grid`` in the signature of your ServerApp."
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
@@ -15515,12 +15504,13 @@ msgstr ""
 
 #: flwr.server.server_app.ServerApp:5 of
 #, fuzzy
-msgid "Use the ``ServerApp`` with an existing ``Strategy``:"
+msgid "Use the ``ServerApp`` with an existing ``Strategy``::"
 msgstr "기존 전략 사용"
 
 #: flwr.server.server_app.ServerApp:17 of
-msgid "Use the ``ServerApp`` with a custom main function:"
-msgstr ""
+#, fuzzy
+msgid "Use the ``ServerApp`` with a custom main function::"
+msgstr "기존 전략 사용"
 
 #: flwr.server.server_app.ServerApp.lifespan:1:<autosummary>:1 of
 #, fuzzy
@@ -15751,11 +15741,12 @@ msgid "**hist** -- Object containing training and evaluation metrics."
 msgstr ""
 
 #: flwr.server.app.start_server:47 of
-msgid "Starting an insecure server:"
-msgstr ""
+#, fuzzy
+msgid "Starting an insecure server::"
+msgstr "안전하지 않은 서버 연결로 gRPC 클라이언트 시작하기:"
 
 #: flwr.server.app.start_server:51 of
-msgid "Starting an SSL-enabled server:"
+msgid "Starting a TLS-enabled server::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:2
@@ -16657,19 +16648,21 @@ msgstr ""
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:22
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:15
 #: of
-msgid "Create a strategy:"
-msgstr ""
+#, fuzzy
+msgid "Create a strategy::"
+msgstr "새 페이지 만들기"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:34
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the "
-"`DifferentialPrivacyClientSideAdaptiveClipping` wrapper:"
-msgstr ""
+"`DifferentialPrivacyClientSideAdaptiveClipping` wrapper::"
+msgstr "이 모드는 서버 측 전략 래퍼인 차분 프라이버시 클라이언트 측 적응형 클리핑과 함께 사용해야 합니다."
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:40
 #: of
-msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods:"
+msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods::"
 msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping.aggregate_evaluate:1:<autosummary>:1
@@ -16756,14 +16749,15 @@ msgstr ""
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:26
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the `DifferentialPrivacyClientSideFixedClipping` "
-"wrapper:"
-msgstr ""
+"wrapper::"
+msgstr "이 모드는 서버 측 전략 래퍼인 DifferentialPrivacyClientSideFixedClipping과 함께 사용해야 합니다."
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:32
 #: of
-msgid "On the client, add the `fixedclipping_mod` to the client-side mods:"
+msgid "On the client, add the `fixedclipping_mod` to the client-side mods::"
 msgstr ""
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping.aggregate_evaluate:1:<autosummary>:1
@@ -16834,10 +16828,11 @@ msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:27
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the DifferentialPrivacyServerSideAdaptiveClipping "
-"wrapper"
-msgstr ""
+"wrapper::"
+msgstr "이 모드는 서버 측 전략 래퍼인 차분 프라이버시 클라이언트 측 적응형 클리핑과 함께 사용해야 합니다."
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping.aggregate_evaluate:1:<autosummary>:1
 #: of
@@ -16893,10 +16888,11 @@ msgstr ""
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:19
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping "
-"wrapper"
-msgstr ""
+"wrapper::"
+msgstr "이 모드는 서버 측 전략 래퍼인 DifferentialPrivacyClientSideFixedClipping과 함께 사용해야 합니다."
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping.aggregate_evaluate:1:<autosummary>:1
 #: of
@@ -30035,7 +30031,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|662665a552f64c9bb53cbf01198765cc|"
+msgid "|2e3a8dd8625a48a080386b56f6143b3c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30052,7 +30048,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|7f4c9c8c2d7045208ac1e513f75b8a32|"
+msgid "|7c96683b1c2042c796e76c4ef095f4a6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30078,7 +30074,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|548e011b458142e5be8cf6497d03e22e|"
+msgid "|eccacc874336420ab6a338024bdcdcf0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30096,7 +30092,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|32d5d8c2e9314a91a9a17bb04a7fde41|"
+msgid "|c26cd0ddba7d45c58daefc7741c3c21c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -30115,7 +30111,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|c5c8eabc28c741e79ab46c61271c18ba|"
+msgid "|55ad49291b07427b9cd15cf45ca12c66|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -30132,7 +30128,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|aebc2e212169439683d3134c7dbda324|"
+msgid "|1ecea76fb58d490593e0ebaae474b0b4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -30155,7 +30151,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|5b888e20d5f64ec38bf924db4b999a3c|"
+msgid "|ac0ae32f88a343aca8bff2bd6d7be924|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -30172,7 +30168,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|f5dd3e6215104689a365dd7e01e421d0|"
+msgid "|ec672277bede4c358eab8bf606c0bc18|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -30351,7 +30347,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|e90c03c1caab4f229359c1e8877da2a2|"
+msgid "|4dfc1ccf0f52485cb630e2c42205e8cd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -30379,7 +30375,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|3e26e26712bb475ba024442148c1171a|"
+msgid "|054b39036f4241779cee8b856535ef8c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -30406,7 +30402,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|650f8f02c84f4af381ab58cd7394aff1|"
+msgid "|f36b0843a8404bd994c12d417791639e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -30432,7 +30428,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|bfab5d09d0bd46dba040500475755079|"
+msgid "|267ba4ef820c4a18ba17a3cf6baa2328|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -30482,7 +30478,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|1412b6b05b744c159b9531f3a1202d46|"
+msgid "|cd58650e67ea4d51a6796f6290adc7a3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -30602,7 +30598,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|918baeda7d744d0dbd5d55f6c8083a6a|"
+msgid "|42fe13229c9e47459cd10173391681fd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -40343,5 +40339,324 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function:"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid "Initializing by specifying all fields directly:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a NumPy ndarray:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a PyTorch tensor:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a dictionary of :class:`Array`:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a list of NumPy arrays:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a PyTorch model state_dict:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`ConfigRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`MetricRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Since types are enforced, the types "
+#~ "of the objects inserted are checked. "
+#~ "For a :code:`MetricRecord`, value types "
+#~ "allowed are those in defined in "
+#~ ":code:`flwr.common.MetricRecordValues`. Similarly, only"
+#~ " :code:`str` keys are allowed."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Adding an :code:`ArrayRecord` follows the "
+#~ "same steps as above but first, the"
+#~ " array needs to be serialized and "
+#~ "represented as a :code:`flwr.common.Array`. "
+#~ "For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``Driver`` is deprecated and will be "
+#~ "removed in a future release. Use "
+#~ "`Grid` in the signature of your "
+#~ "ServerApp."
+#~ msgstr ""
+
+#~ msgid "Use the ``ServerApp`` with a custom main function:"
+#~ msgstr ""
+
+#~ msgid "Starting an insecure server:"
+#~ msgstr ""
+
+#~ msgid "Starting an SSL-enabled server:"
+#~ msgstr ""
+
+#~ msgid "Create a strategy:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "`DifferentialPrivacyClientSideAdaptiveClipping` wrapper:"
+#~ msgstr ""
+
+#~ msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "`DifferentialPrivacyClientSideFixedClipping` wrapper:"
+#~ msgstr ""
+
+#~ msgid "On the client, add the `fixedclipping_mod` to the client-side mods:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "DifferentialPrivacyServerSideAdaptiveClipping wrapper"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "DifferentialPrivacyServerSideFixedClipping wrapper"
+#~ msgstr ""
+
+#~ msgid "|662665a552f64c9bb53cbf01198765cc|"
+#~ msgstr ""
+
+#~ msgid "|7f4c9c8c2d7045208ac1e513f75b8a32|"
+#~ msgstr ""
+
+#~ msgid "|548e011b458142e5be8cf6497d03e22e|"
+#~ msgstr ""
+
+#~ msgid "|32d5d8c2e9314a91a9a17bb04a7fde41|"
+#~ msgstr ""
+
+#~ msgid "|c5c8eabc28c741e79ab46c61271c18ba|"
+#~ msgstr ""
+
+#~ msgid "|aebc2e212169439683d3134c7dbda324|"
+#~ msgstr ""
+
+#~ msgid "|5b888e20d5f64ec38bf924db4b999a3c|"
+#~ msgstr ""
+
+#~ msgid "|f5dd3e6215104689a365dd7e01e421d0|"
+#~ msgstr ""
+
+#~ msgid "|e90c03c1caab4f229359c1e8877da2a2|"
+#~ msgstr ""
+
+#~ msgid "|3e26e26712bb475ba024442148c1171a|"
+#~ msgstr ""
+
+#~ msgid "|650f8f02c84f4af381ab58cd7394aff1|"
+#~ msgstr ""
+
+#~ msgid "|bfab5d09d0bd46dba040500475755079|"
+#~ msgstr ""
+
+#~ msgid "|1412b6b05b744c159b9531f3a1202d46|"
+#~ msgstr ""
+
+#~ msgid "|918baeda7d744d0dbd5d55f6c8083a6a|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Run ``python3 ./dev/update_changelog.py "
+#~ "<YOUR_GH_TOKEN>`` in order to add every"
+#~ " new change to the changelog (feel"
+#~ " free to make manual changes to "
+#~ "the changelog afterwards until it looks"
+#~ " good)."
+#~ msgstr ""
+#~ "모든 새로운 변경 사항을 변경 로그에 추가하기 "
+#~ "위해``python3 src/py/flwr_tool/update_changelog.py "
+#~ "<YOUR_GH_TOKEN>``을 실행합니다 (변경 로그가 만족스러워질 "
+#~ "때까지 수동으로 변경해도 됩니다)."
+
+#~ msgid ""
+#~ "Once the changelog has been updated "
+#~ "with all the changes, run ``./dev"
+#~ "/prepare-release-changelog.sh v<NEW_VERSION>``, "
+#~ "where ``<NEW_VERSION>`` is the version "
+#~ "stated in ``pyproject.toml`` (notice the "
+#~ "``v`` added before it). This will "
+#~ "replace the ``Unreleased`` header of the"
+#~ " changelog by the version and current"
+#~ " date, and it will add a "
+#~ "thanking message for the contributors. "
+#~ "Open a pull request with those "
+#~ "changes."
+#~ msgstr ""
+#~ "모든 변경 사항으로 변경 로그가 업데이트되면,``./dev"
+#~ "/prepare-release-changelog.sh v<NEW_VERSION>``을 "
+#~ "실행합니다. 여기서 ``<NEW_VERSION>``은 ``pyproject.toml``에"
+#~ " 명시된 버전 번호입니다 (앞에 ``v``가 추가된 것을"
+#~ " 주의하세요). 이 명령어는 변경 로그의 "
+#~ "``Unreleased``헤더를 해당 버전과 현재 날짜로 교체하고,"
+#~ " 기여자들에게 감사 메시지가 추가됩니다. 이러한 변경 "
+#~ "사항으로 pull request합니다."
+
+#~ msgid "Increase the minor version in ``pyproject.toml`` by one."
+#~ msgstr "``pyproject.toml``의 마이너 버전을 하나씩 늘립니다."
+
+#~ msgid "Update all files which contain the current version number if necessary."
+#~ msgstr "필요한 경우 현재 버전 번호가 포함된 모든 파일을 업데이트합니다."
+
+#~ msgid "Add a new ``Unreleased`` section in ``changelog.md``."
+#~ msgstr "``changelog.md``에 ``Unreleased`` 섹션을 새로 추가합니다."
+
+#~ msgid "And then?"
+#~ msgstr "그다음은?"
+
+#~ msgid ""
+#~ "As soon as you created your "
+#~ "virtual environment you clone one of "
+#~ "the `Flower examples "
+#~ "<https://github.com/adap/flower/tree/main/examples/>`_."
+#~ msgstr ""
+#~ "가상 환경을 생성하자마자 'Flower examples "
+#~ "<https://github.com/adap/flower/tree/main/examples/>`_ 중 "
+#~ "하나를 클론합니다."
+
+#~ msgid ""
+#~ "Let's create the Python environment for"
+#~ " all-things Flower. If you wish "
+#~ "to use ``pyenv``, we provide two "
+#~ "convenience scripts that you can use."
+#~ " If you prefer using something else"
+#~ " than ``pyenv``, create a new "
+#~ "environment, activate and skip to the"
+#~ " last point where all packages are"
+#~ " installed."
+#~ msgstr ""
+#~ "Flower의 모든 것을 위한 파이썬 환경을 만들어 "
+#~ "보겠습니다.:code:`pyenv`를 사용하고자 하는 경우 사용할 수"
+#~ " 있는 두 가지 편의 스크립트를 "
+#~ "제공합니다.:code:`pyenv`가 아닌 다른 것을 사용하려면 새"
+#~ " 환경을 생성하고 활성화한 후 모든 패키지가 설치된"
+#~ " 마지막 지점으로 건너뛰세요."
+
+#~ msgid ""
+#~ "If you don't have ``pyenv`` installed,"
+#~ " the following script that will "
+#~ "install it, set it up, and create"
+#~ " the virtual environment (with "
+#~ ":substitution-code:`Python |python_full_version|` by"
+#~ " default):"
+#~ msgstr ""
+#~ ":code:`pyenv`가 설치되어 있지 않은 경우 다음 "
+#~ "스크립트를 사용하여 설치, 설정 및 가상 환경을 "
+#~ "생성합니다(기본적으로 :code:`Python 3.9.20` 사용):"
+
+#~ msgid ""
+#~ "If you already have ``pyenv`` installed"
+#~ " (along with the ``pyenv-virtualenv`` "
+#~ "plugin), you can use the following "
+#~ "convenience script (with :substitution-"
+#~ "code:`Python |python_full_version|` by default):"
+#~ msgstr ""
+#~ ":code:`pyenv`가 이미 설치되어 있는 경우( :code"
+#~ ":`pyenv-virtualenv` 플러그인과 함께) 다음과 같은 "
+#~ "편의 스크립트를 사용할 수 있습니다(기본적으로 코드:`Python "
+#~ "3.9.20` 사용):"
+
+#~ msgid ""
+#~ "3. Install the Flower package in "
+#~ "development mode (think ``pip install "
+#~ "-e``) along with all necessary "
+#~ "dependencies:"
+#~ msgstr ""
+#~ "3. 필요한 모든 dependencies와 함께 개발 모드에서"
+#~ " Flower 패키지를 설치합니다(예:code:`pip install "
+#~ "-e`)::"
+
+#~ msgid "Create/Delete Virtual Environment"
+#~ msgstr "가상 환경 생성/삭제"
+
+#~ msgid "|1dbe7ef5f86045228c22d76d20494c1c|"
+#~ msgstr ""
+
+#~ msgid "|0c52a329791a42c9891adee11a3c9ec6|"
+#~ msgstr ""
+
+#~ msgid "|0af7f9c988464e6d9988f938f7722cb1|"
+#~ msgstr ""
+
+#~ msgid "|c4fec40358df4c91b8dacba706affdfc|"
+#~ msgstr ""
+
+#~ msgid "|fffd51185653489082b5587359813c79|"
+#~ msgstr ""
+
+#~ msgid "|b9f3e0459a704a459d52ae3fca9c72d3|"
+#~ msgstr ""
+
+#~ msgid "|5e4f22fdf7cb4373882354252e21f385|"
+#~ msgstr ""
+
+#~ msgid "|6e225ec341c643a58ce12c7c1c4f531d|"
+#~ msgstr ""
+
+#~ msgid "|371d89f1268b4ba9af58576635ca724e|"
+#~ msgstr ""
+
+#~ msgid "|b64a9a44fd5745cc91b6aa9fdca1aa28|"
+#~ msgstr ""
+
+#~ msgid "|b9efd6eda007427a92190b989d035b45|"
+#~ msgstr ""
+
+#~ msgid "|61474cd6cd8642968bd5f0d963fa56df|"
+#~ msgstr ""
+
+#~ msgid "|ff52a36f0cad426bb452cfa49b73350a|"
+#~ msgstr ""
+
+#~ msgid "|3d62057de8c64752921d1eab65741d54|"
 #~ msgstr ""
 

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-04-07 00:08+0000\n"
+"POT-Creation-Date: 2025-04-10 00:08+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -1087,10 +1087,11 @@ msgid "During the release"
 msgstr "Lors de la sortie"
 
 #: ../../source/contributor-how-to-release-flower.rst:10
+#, fuzzy
 msgid ""
-"The version number of a release is stated in ``pyproject.toml``. To "
-"release a new version of Flower, the following things need to happen (in "
-"that order):"
+"The version number of a release is stated in "
+"``./framework/pyproject.toml``. To release a new version of Flower, the "
+"following things need to happen (in that order):"
 msgstr ""
 "Le numéro de version d'une version est indiqué dans ``pyproject.toml``. "
 "Pour publier une nouvelle version de Flower, les choses suivantes doivent"
@@ -1098,57 +1099,50 @@ msgstr ""
 
 #: ../../source/contributor-how-to-release-flower.rst:13
 msgid ""
-"Run ``python3 ./dev/update_changelog.py <YOUR_GH_TOKEN>`` in order to add"
-" every new change to the changelog (feel free to make manual changes to "
-"the changelog afterwards until it looks good)."
+"Run ``python3 ./framework/dev/update_changelog.py <YOUR_GH_TOKEN>`` to "
+"add all new changes to the changelog. You can make manual edits to the "
+"changelog afterward to improve its formatting or wording. This script "
+"will also replace the ``## Unreleased`` header with the new version "
+"number and current date, and add a thank-you message for contributors. "
+"Open a pull request with these changes."
 msgstr ""
 
-#: ../../source/contributor-how-to-release-flower.rst:16
+#: ../../source/contributor-how-to-release-flower.rst:18
 msgid ""
-"Once the changelog has been updated with all the changes, run ``./dev"
-"/prepare-release-changelog.sh v<NEW_VERSION>``, where ``<NEW_VERSION>`` "
-"is the version stated in ``pyproject.toml`` (notice the ``v`` added "
-"before it). This will replace the ``Unreleased`` header of the changelog "
-"by the version and current date, and it will add a thanking message for "
-"the contributors. Open a pull request with those changes."
+"Once the pull request is merged, tag the release commit with the version "
+"number: ``git tag v<NEW_VERSION>`` (notice the ``v`` added before the "
+"version number), then ``git push --tags``. This will create a draft "
+"release on GitHub containing the correct artifacts and the relevant part "
+"of the changelog."
 msgstr ""
 
 #: ../../source/contributor-how-to-release-flower.rst:22
-msgid ""
-"Once the pull request is merged, tag the release commit with the version "
-"number as soon as the PR is merged: ``git tag v<NEW_VERSION>`` (notice "
-"the ``v`` added before the version number), then ``git push --tags``. "
-"This will create a draft release on GitHub containing the correct "
-"artifacts and the relevant part of the changelog."
-msgstr ""
-
-#: ../../source/contributor-how-to-release-flower.rst:26
 msgid "Check the draft release on GitHub, and if everything is good, publish it."
 msgstr ""
 
-#: ../../source/contributor-how-to-release-flower.rst:29
+#: ../../source/contributor-how-to-release-flower.rst:25
 msgid "After the release"
 msgstr "Après la publication"
 
-#: ../../source/contributor-how-to-release-flower.rst:31
+#: ../../source/contributor-how-to-release-flower.rst:27
 msgid "Create a pull request which contains the following changes:"
 msgstr "Crée une demande de pull qui contient les modifications suivantes :"
 
-#: ../../source/contributor-how-to-release-flower.rst:33
-msgid "Increase the minor version in ``pyproject.toml`` by one."
-msgstr "Augmente la version mineure de ``pyproject.toml`` d'une unité."
-
-#: ../../source/contributor-how-to-release-flower.rst:34
-msgid "Update all files which contain the current version number if necessary."
+#: ../../source/contributor-how-to-release-flower.rst:29
+msgid ""
+"Increase the minor version in ``pyproject.toml`` by one and update all "
+"files which contain the current version number (if necessary) by running "
+"``./framework/dev/update_version.py``."
 msgstr ""
-"Mets à jour tous les fichiers qui contiennent le numéro de version actuel"
-" si nécessaire."
+
+#: ../../source/contributor-how-to-release-flower.rst:32
+msgid ""
+"Add a new ``## Unreleased`` section at the top of "
+"``./framework/docs/source/ref-changelog.md`` to prepare for future "
+"changes."
+msgstr ""
 
 #: ../../source/contributor-how-to-release-flower.rst:35
-msgid "Add a new ``Unreleased`` section in ``changelog.md``."
-msgstr "Ajoute une nouvelle section ``Unreleased`` dans ``changelog.md``."
-
-#: ../../source/contributor-how-to-release-flower.rst:37
 msgid ""
 "Merge the pull request on the same day (i.e., before a new nightly "
 "release gets published to PyPI)."
@@ -1156,15 +1150,15 @@ msgstr ""
 "Fusionne la pull request le jour même (c'est-à-dire avant qu'une nouvelle"
 " version nightly ne soit publiée sur PyPI)."
 
-#: ../../source/contributor-how-to-release-flower.rst:41
+#: ../../source/contributor-how-to-release-flower.rst:39
 msgid "Publishing a pre-release"
 msgstr "Publier une pré-version"
 
-#: ../../source/contributor-how-to-release-flower.rst:44
+#: ../../source/contributor-how-to-release-flower.rst:42
 msgid "Pre-release naming"
 msgstr "Nom de la pré-version"
 
-#: ../../source/contributor-how-to-release-flower.rst:46
+#: ../../source/contributor-how-to-release-flower.rst:44
 msgid ""
 "PyPI supports pre-releases (alpha, beta, release candidate). Pre-releases"
 " MUST use one of the following naming patterns:"
@@ -1173,39 +1167,39 @@ msgstr ""
 "Les préversions DOIVENT utiliser l'un des modèles de dénomination "
 "suivants :"
 
-#: ../../source/contributor-how-to-release-flower.rst:49
+#: ../../source/contributor-how-to-release-flower.rst:47
 msgid "Alpha: ``MAJOR.MINOR.PATCHaN``"
 msgstr "Alpha : ``MAJOR.MINOR.PATCHaN``"
 
-#: ../../source/contributor-how-to-release-flower.rst:50
+#: ../../source/contributor-how-to-release-flower.rst:48
 msgid "Beta: ``MAJOR.MINOR.PATCHbN``"
 msgstr "Bêta : ``MAJOR.MINOR.PATCHbN``"
 
-#: ../../source/contributor-how-to-release-flower.rst:51
+#: ../../source/contributor-how-to-release-flower.rst:49
 msgid "Release candidate (RC): ``MAJOR.MINOR.PATCHrcN``"
 msgstr "Candidat à la publication (RC) : ``MAJOR.MINOR.PATCHrcN``"
 
-#: ../../source/contributor-how-to-release-flower.rst:53
+#: ../../source/contributor-how-to-release-flower.rst:51
 msgid "Examples include:"
 msgstr "Voici quelques exemples :"
 
-#: ../../source/contributor-how-to-release-flower.rst:55
+#: ../../source/contributor-how-to-release-flower.rst:53
 msgid "``1.0.0a0``"
 msgstr "``1.0.0a0``"
 
-#: ../../source/contributor-how-to-release-flower.rst:56
+#: ../../source/contributor-how-to-release-flower.rst:54
 msgid "``1.0.0b0``"
 msgstr "``1.0.0b0``"
 
-#: ../../source/contributor-how-to-release-flower.rst:57
+#: ../../source/contributor-how-to-release-flower.rst:55
 msgid "``1.0.0rc0``"
 msgstr "``1.0.0rc0``"
 
-#: ../../source/contributor-how-to-release-flower.rst:58
+#: ../../source/contributor-how-to-release-flower.rst:56
 msgid "``1.0.0rc1``"
 msgstr "1.0.0rc1"
 
-#: ../../source/contributor-how-to-release-flower.rst:60
+#: ../../source/contributor-how-to-release-flower.rst:58
 msgid ""
 "This is in line with PEP-440 and the recommendations from the Python "
 "Packaging Authority (PyPA):"
@@ -1213,11 +1207,11 @@ msgstr ""
 "Ceci est conforme au PEP-440 et aux recommandations de l'Autorité de "
 "l'emballage Python (PyPA) :"
 
-#: ../../source/contributor-how-to-release-flower.rst:63
+#: ../../source/contributor-how-to-release-flower.rst:61
 msgid "`PEP-440 <https://peps.python.org/pep-0440/>`_"
 msgstr "`PEP-440 <https://peps.python.org/pep-0440/>`_"
 
-#: ../../source/contributor-how-to-release-flower.rst:64
+#: ../../source/contributor-how-to-release-flower.rst:62
 msgid ""
 "`PyPA Choosing a versioning scheme "
 "<https://packaging.python.org/en/latest/guides/distributing-packages-"
@@ -1227,7 +1221,7 @@ msgstr ""
 "<https://packaging.python.org/en/latest/guides/distributing-packages-"
 "using-setuptools/#choosing-a-versioning-scheme>`_"
 
-#: ../../source/contributor-how-to-release-flower.rst:67
+#: ../../source/contributor-how-to-release-flower.rst:65
 msgid ""
 "Note that the approach defined by PyPA is not compatible with SemVer "
 "2.0.0 spec, for details consult the `Semantic Versioning Specification "
@@ -1239,17 +1233,17 @@ msgstr ""
 "Versioning Specification <https://semver.org/spec/v2.0.0.html#spec-"
 "item-11>`_ (en particulier le point 11 sur la préséance)."
 
-#: ../../source/contributor-how-to-release-flower.rst:73
+#: ../../source/contributor-how-to-release-flower.rst:71
 msgid "Pre-release classification"
 msgstr "Classification avant publication"
 
-#: ../../source/contributor-how-to-release-flower.rst:75
+#: ../../source/contributor-how-to-release-flower.rst:73
 msgid "Should the next pre-release be called alpha, beta, or release candidate?"
 msgstr ""
 "La prochaine préversion doit-elle être appelée alpha, bêta ou release "
 "candidate ?"
 
-#: ../../source/contributor-how-to-release-flower.rst:77
+#: ../../source/contributor-how-to-release-flower.rst:75
 msgid ""
 "RC: feature complete, no known issues (apart from issues that are "
 "classified as \"won't fix\" for the next stable release) - if no issues "
@@ -1260,11 +1254,11 @@ msgstr ""
 "version stable) - si aucun problème n'apparaît, cette version deviendra "
 "la prochaine version stable"
 
-#: ../../source/contributor-how-to-release-flower.rst:80
+#: ../../source/contributor-how-to-release-flower.rst:78
 msgid "Beta: feature complete, allowed to have known issues"
 msgstr "Bêta : fonctionnalité complète, autorisée à avoir des problèmes connus"
 
-#: ../../source/contributor-how-to-release-flower.rst:81
+#: ../../source/contributor-how-to-release-flower.rst:79
 msgid "Alpha: not feature complete, allowed to have known issues"
 msgstr ""
 "Alpha : les fonctionnalités ne sont pas complètes, les problèmes connus "
@@ -1389,18 +1383,6 @@ msgstr ""
 msgid "and activate the virtual environment with:"
 msgstr "et active l'environnement virtuel avec :"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:83
-msgid "And then?"
-msgstr "Et ensuite ?"
-
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:85
-msgid ""
-"As soon as you created your virtual environment you clone one of the "
-"`Flower examples <https://github.com/adap/flower/tree/main/examples/>`_."
-msgstr ""
-"Dès que tu as créé ton environnement virtuel, tu clones l'un des exemples"
-" de `Flower <https://github.com/adap/flower/tree/main/examples/>`_."
-
 #: ../../source/contributor-how-to-write-documentation.rst:2
 msgid "Write documentation"
 msgstr "Rédiger de la documentation"
@@ -1420,7 +1402,6 @@ msgstr ""
 "reStructuredText (fichiers `.rst`) et Markdown (fichiers `.md`)."
 
 #: ../../source/contributor-how-to-write-documentation.rst:10
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:196
 #, fuzzy
 msgid ""
 "Note that, in order to build the documentation locally (with ``poetry run"
@@ -1925,7 +1906,7 @@ msgstr ""
 "Écris du bon code et crée de merveilleuses modifications à l'aide de ton "
 "éditeur préféré !"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:149
+#: ../../source/contributor-tutorial-contribute-on-github.rst:147
 msgid "**Test and format your code**"
 msgstr "**Teste et mets en forme ton code**"
 
@@ -1943,11 +1924,11 @@ msgstr ""
 msgid "To do so, we have written a few scripts that you can execute:"
 msgstr "Pour ce faire, nous avons écrit quelques scripts que tu peux exécuter :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:162
+#: ../../source/contributor-tutorial-contribute-on-github.rst:160
 msgid "**Stage changes**"
 msgstr "**Changements de scène**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:152
+#: ../../source/contributor-tutorial-contribute-on-github.rst:150
 msgid ""
 "Before creating a commit that will update your history, you must specify "
 "to Git which files it needs to take into account."
@@ -1955,11 +1936,11 @@ msgstr ""
 "Avant de créer un commit qui mettra à jour ton historique, tu dois "
 "spécifier à Git les fichiers qu'il doit prendre en compte."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:155
+#: ../../source/contributor-tutorial-contribute-on-github.rst:153
 msgid "This can be done with:"
 msgstr "Cela peut se faire avec :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:161
+#: ../../source/contributor-tutorial-contribute-on-github.rst:159
 #, fuzzy
 msgid ""
 "To check which files have been modified compared to the last version "
@@ -1970,11 +1951,11 @@ msgstr ""
 "version (last commit) et pour voir quels fichiers sont mis à disposition "
 "pour le commit, tu peux utiliser la commande :code:`git status`."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:173
+#: ../../source/contributor-tutorial-contribute-on-github.rst:171
 msgid "**Commit changes**"
 msgstr "**Commit changes**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:165
+#: ../../source/contributor-tutorial-contribute-on-github.rst:163
 #, fuzzy
 msgid ""
 "Once you have added all the files you wanted to commit using ``git add``,"
@@ -1984,7 +1965,7 @@ msgstr ""
 "l'aide de :code:`git add`, tu peux enfin créer ta livraison à l'aide de "
 "cette commande :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:172
+#: ../../source/contributor-tutorial-contribute-on-github.rst:170
 #, fuzzy
 msgid ""
 "The \\<commit_message\\> is there to explain to others what the commit "
@@ -1995,11 +1976,11 @@ msgstr ""
 "commit. Il doit être écrit dans un style impératif et être concis. Un "
 "exemple serait :code:`git commit -m \"Ajouter des images au README\"`."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:185
+#: ../../source/contributor-tutorial-contribute-on-github.rst:183
 msgid "**Push the changes to the fork**"
 msgstr "**Pousser les changements vers la fourche**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:176
+#: ../../source/contributor-tutorial-contribute-on-github.rst:174
 msgid ""
 "Once we have committed our changes, we have effectively updated our local"
 " history, but GitHub has no way of knowing this unless we push our "
@@ -2010,7 +1991,7 @@ msgstr ""
 "moyen de le savoir à moins que nous ne poussions nos modifications vers "
 "l'adresse distante de notre origine :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:184
+#: ../../source/contributor-tutorial-contribute-on-github.rst:182
 msgid ""
 "Once this is done, you will see on the GitHub that your forked repo was "
 "updated with the changes you have made."
@@ -2018,15 +1999,15 @@ msgstr ""
 "Une fois que c'est fait, tu verras sur GitHub que ton repo forké a été "
 "mis à jour avec les modifications que tu as apportées."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:188
+#: ../../source/contributor-tutorial-contribute-on-github.rst:186
 msgid "Creating and merging a pull request (PR)"
 msgstr "Créer et fusionner une pull request (PR)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:226
+#: ../../source/contributor-tutorial-contribute-on-github.rst:224
 msgid "**Create the PR**"
 msgstr "**Créer le PR**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:191
+#: ../../source/contributor-tutorial-contribute-on-github.rst:189
 msgid ""
 "Once you have pushed changes, on the GitHub webpage of your repository "
 "you should see the following message:"
@@ -2034,12 +2015,12 @@ msgstr ""
 "Une fois que tu as poussé les modifications, sur la page web GitHub de "
 "ton dépôt, tu devrais voir le message suivant :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:196
+#: ../../source/contributor-tutorial-contribute-on-github.rst:194
 #, fuzzy
 msgid "Otherwise you can always find this option in the ``Branches`` page."
 msgstr "Sinon, tu peux toujours trouver cette option dans la page `Branches`."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:198
+#: ../../source/contributor-tutorial-contribute-on-github.rst:196
 #, fuzzy
 msgid ""
 "Once you click the ``Compare & pull request`` button, you should see "
@@ -2048,13 +2029,13 @@ msgstr ""
 "Une fois que tu as cliqué sur le bouton `Compare & pull request`, tu "
 "devrais voir quelque chose de similaire à ceci :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:203
+#: ../../source/contributor-tutorial-contribute-on-github.rst:201
 msgid "At the top you have an explanation of which branch will be merged where:"
 msgstr ""
 "En haut, tu as une explication de quelle branche sera fusionnée à quel "
 "endroit :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:207
+#: ../../source/contributor-tutorial-contribute-on-github.rst:205
 msgid ""
 "In this example you can see that the request is to merge the branch "
 "``doc-fixes`` from my forked repository to branch ``main`` from the "
@@ -2064,14 +2045,14 @@ msgstr ""
 "branche ``doc-fixes`` de mon dépôt forké à la branche ``main`` du dépôt "
 "Flower."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:210
+#: ../../source/contributor-tutorial-contribute-on-github.rst:208
 msgid ""
 "The title should be changed to adhere to the :ref:`pr_title_format` "
 "guidelines, otherwise it won't be possible to merge the PR. So in this "
 "case, a correct title might be ``docs(framework:skip) Fix typos``."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:214
+#: ../../source/contributor-tutorial-contribute-on-github.rst:212
 msgid ""
 "The input box in the middle is there for you to describe what your PR "
 "does and to link it to existing issues. We have placed comments (that "
@@ -2083,11 +2064,11 @@ msgstr ""
 "commentaires (qui ne seront pas rendus une fois le PR ouvert) pour te "
 "guider tout au long du processus."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:218
+#: ../../source/contributor-tutorial-contribute-on-github.rst:216
 msgid "It is important to follow the instructions described in comments."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:220
+#: ../../source/contributor-tutorial-contribute-on-github.rst:218
 msgid ""
 "At the bottom you will find the button to open the PR. This will notify "
 "reviewers that a new PR has been opened and that they should look over it"
@@ -2097,7 +2078,7 @@ msgstr ""
 "qui informera les réviseurs qu'un nouveau PR a été ouvert et qu'ils "
 "doivent le consulter pour le fusionner ou demander des modifications."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:224
+#: ../../source/contributor-tutorial-contribute-on-github.rst:222
 msgid ""
 "If your PR is not yet ready for review, and you don't want to notify "
 "anyone, you have the option to create a draft pull request:"
@@ -2106,11 +2087,11 @@ msgstr ""
 " personne, tu as la possibilité de créer un brouillon de demande de "
 "traction :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:230
+#: ../../source/contributor-tutorial-contribute-on-github.rst:228
 msgid "**Making new changes**"
 msgstr "**Faire de nouveaux changements**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:229
+#: ../../source/contributor-tutorial-contribute-on-github.rst:227
 msgid ""
 "Once the PR has been opened (as draft or not), you can still push new "
 "commits to it the same way we did before, by making changes to the branch"
@@ -2120,11 +2101,11 @@ msgstr ""
 "toujours y pousser de nouveaux commits de la même manière qu'auparavant, "
 "en apportant des modifications à la branche associée au PR."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:253
+#: ../../source/contributor-tutorial-contribute-on-github.rst:251
 msgid "**Review the PR**"
 msgstr "**Review the PR**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:233
+#: ../../source/contributor-tutorial-contribute-on-github.rst:231
 msgid ""
 "Once the PR has been opened or once the draft PR has been marked as "
 "ready, a review from code owners will be automatically requested:"
@@ -2133,7 +2114,7 @@ msgstr ""
 " étant prêt, une révision des propriétaires de code sera automatiquement "
 "demandée :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:238
+#: ../../source/contributor-tutorial-contribute-on-github.rst:236
 msgid ""
 "Code owners will then look into the code, ask questions, request changes "
 "or validate the PR."
@@ -2141,11 +2122,11 @@ msgstr ""
 "Les propriétaires du code vont alors se pencher sur le code, poser des "
 "questions, demander des modifications ou valider le RP."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:241
+#: ../../source/contributor-tutorial-contribute-on-github.rst:239
 msgid "Merging will be blocked if there are ongoing requested changes."
 msgstr "La fusion sera bloquée s'il y a des changements demandés en cours."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:245
+#: ../../source/contributor-tutorial-contribute-on-github.rst:243
 msgid ""
 "To resolve them, just push the necessary changes to the branch associated"
 " with the PR:"
@@ -2153,11 +2134,11 @@ msgstr ""
 "Pour les résoudre, il suffit de pousser les changements nécessaires vers "
 "la branche associée au PR :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:250
+#: ../../source/contributor-tutorial-contribute-on-github.rst:248
 msgid "And resolve the conversation:"
 msgstr "Et résous la conversation :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:254
+#: ../../source/contributor-tutorial-contribute-on-github.rst:252
 msgid ""
 "Once all the conversations have been resolved, you can re-request a "
 "review."
@@ -2165,11 +2146,11 @@ msgstr ""
 "Une fois que toutes les conversations ont été résolues, tu peux "
 "redemander un examen."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:274
+#: ../../source/contributor-tutorial-contribute-on-github.rst:272
 msgid "**Once the PR is merged**"
 msgstr "**Une fois que le PR est fusionné**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:256
+#: ../../source/contributor-tutorial-contribute-on-github.rst:254
 msgid ""
 "If all the automatic tests have passed and reviewers have no more changes"
 " to request, they can approve the PR and merge it."
@@ -2178,7 +2159,7 @@ msgstr ""
 " de modifications à demander, ils peuvent approuver le PR et le "
 "fusionner."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:261
+#: ../../source/contributor-tutorial-contribute-on-github.rst:259
 msgid ""
 "Once it is merged, you can delete the branch on GitHub (a button should "
 "appear to do so) and also delete it locally by doing:"
@@ -2187,19 +2168,19 @@ msgstr ""
 "(un bouton devrait apparaître pour le faire) et aussi la supprimer "
 "localement en faisant :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:269
+#: ../../source/contributor-tutorial-contribute-on-github.rst:267
 msgid "Then you should update your forked repository by doing:"
 msgstr "Ensuite, tu dois mettre à jour ton dépôt forké en faisant :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:277
+#: ../../source/contributor-tutorial-contribute-on-github.rst:275
 msgid "Example of first contribution"
 msgstr "Exemple de première contribution"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:280
+#: ../../source/contributor-tutorial-contribute-on-github.rst:278
 msgid "Problem"
 msgstr "Problème"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:282
+#: ../../source/contributor-tutorial-contribute-on-github.rst:280
 #, fuzzy
 msgid ""
 "For our documentation, we've started to use the `Diàtaxis framework "
@@ -2208,7 +2189,7 @@ msgstr ""
 "Pour notre documentation, nous avons commencé à utiliser le cadre "
 "`Diàtaxis <https://diataxis.fr/>`_."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:285
+#: ../../source/contributor-tutorial-contribute-on-github.rst:283
 #, fuzzy
 msgid ""
 "Our \"How to\" guides should have titles that continue the sentence \"How"
@@ -2218,7 +2199,7 @@ msgstr ""
 "la phrase \"Comment faire pour...\", par exemple, \"Comment passer à "
 "Flower 1.0\"."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:288
+#: ../../source/contributor-tutorial-contribute-on-github.rst:286
 msgid ""
 "Most of our guides do not follow this new format yet, and changing their "
 "title is (unfortunately) more involved than one might think."
@@ -2227,7 +2208,7 @@ msgstr ""
 "changer leur titre est (malheureusement) plus compliqué qu'on ne le "
 "pense."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:291
+#: ../../source/contributor-tutorial-contribute-on-github.rst:289
 #, fuzzy
 msgid ""
 "This issue is about changing the title of a doc from present continuous "
@@ -2236,7 +2217,7 @@ msgstr ""
 "Cette question porte sur le changement du titre d'un document du présent "
 "continu au présent simple."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:294
+#: ../../source/contributor-tutorial-contribute-on-github.rst:292
 #, fuzzy
 msgid ""
 "Let's take the example of \"Saving Progress\" which we changed to \"Save "
@@ -2246,21 +2227,21 @@ msgstr ""
 "remplacé par \"Sauvegarder la progression\". Est-ce que cela passe notre "
 "contrôle ?"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:297
+#: ../../source/contributor-tutorial-contribute-on-github.rst:295
 #, fuzzy
 msgid "Before: \"How to saving progress\" ❌"
 msgstr "Avant : \"Comment sauvegarder les progrès\" ❌"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:299
+#: ../../source/contributor-tutorial-contribute-on-github.rst:297
 #, fuzzy
 msgid "After: \"How to save progress\" ✅"
 msgstr "Après : \"Comment sauvegarder la progression\" ✅"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:302
+#: ../../source/contributor-tutorial-contribute-on-github.rst:300
 msgid "Solution"
 msgstr "Solution"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:304
+#: ../../source/contributor-tutorial-contribute-on-github.rst:302
 #, fuzzy
 msgid ""
 "This is a tiny change, but it'll allow us to test your end-to-end setup. "
@@ -2270,12 +2251,12 @@ msgstr ""
 "configuration de bout en bout. Après avoir cloné et configuré le repo "
 "Flower, voici ce que tu dois faire :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:307
+#: ../../source/contributor-tutorial-contribute-on-github.rst:305
 #, fuzzy
 msgid "Find the source file in ``framework/docs/source``"
 msgstr "Trouve le fichier source dans `framework/docs/source`"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:308
+#: ../../source/contributor-tutorial-contribute-on-github.rst:306
 #, fuzzy
 msgid ""
 "Make the change in the ``.rst`` file (beware, the dashes under the title "
@@ -2284,7 +2265,7 @@ msgstr ""
 "Effectue la modification dans le fichier `.rst` (attention, les tirets "
 "sous le titre doivent être de la même longueur que le titre lui-même)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:310
+#: ../../source/contributor-tutorial-contribute-on-github.rst:308
 #, fuzzy
 msgid ""
 "Build the docs and `check the result <contributor-how-to-write-"
@@ -2293,11 +2274,11 @@ msgstr ""
 "Construis les documents et vérifie le résultat : `<https://flower.ai/docs"
 "/writing-documentation.html#edit-an-existing-page>`_"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:314
+#: ../../source/contributor-tutorial-contribute-on-github.rst:312
 msgid "Rename file"
 msgstr "Renommer le fichier"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:316
+#: ../../source/contributor-tutorial-contribute-on-github.rst:314
 msgid ""
 "You might have noticed that the file name still reflects the old wording."
 " If we just change the file, then we break all existing links to it - it "
@@ -2310,22 +2291,22 @@ msgstr ""
 "important** d'éviter cela, car briser des liens peut nuire à notre "
 "classement dans les moteurs de recherche."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:320
+#: ../../source/contributor-tutorial-contribute-on-github.rst:318
 #, fuzzy
 msgid "Here's how to change the file name:"
 msgstr "Voici comment changer le nom du fichier :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:322
+#: ../../source/contributor-tutorial-contribute-on-github.rst:320
 #, fuzzy
 msgid "Change the file name to ``save-progress.rst``"
 msgstr "Change le nom du fichier en `save-progress.rst`"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:323
+#: ../../source/contributor-tutorial-contribute-on-github.rst:321
 #, fuzzy
 msgid "Add a redirect rule to ``framework/docs/source/conf.py``"
 msgstr "Ajouter une règle de redirection à `framework/docs/source/conf.py`"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:325
+#: ../../source/contributor-tutorial-contribute-on-github.rst:323
 #, fuzzy
 msgid ""
 "This will cause a redirect from ``saving-progress.html`` to ``save-"
@@ -2334,11 +2315,11 @@ msgstr ""
 "Cela entraînera une redirection de `saving-progress.html` vers `save-"
 "progress.html`, les anciens liens continueront à fonctionner."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:329
+#: ../../source/contributor-tutorial-contribute-on-github.rst:327
 msgid "Apply changes in the index file"
 msgstr "Applique les changements dans le fichier d'index"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:331
+#: ../../source/contributor-tutorial-contribute-on-github.rst:329
 #, fuzzy
 msgid ""
 "For the lateral navigation bar to work properly, it is very important to "
@@ -2349,16 +2330,16 @@ msgstr ""
 "très important de mettre également à jour le fichier `index.rst`. C'est "
 "là que nous définissons toute l'arborescence de la barre de navigation."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:335
+#: ../../source/contributor-tutorial-contribute-on-github.rst:333
 #, fuzzy
 msgid "Find and modify the file name in ``index.rst``"
 msgstr "Trouve et modifie le nom du fichier dans `index.rst`"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:338
+#: ../../source/contributor-tutorial-contribute-on-github.rst:336
 msgid "Open PR"
 msgstr "Open PR"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:340
+#: ../../source/contributor-tutorial-contribute-on-github.rst:338
 #, fuzzy
 msgid ""
 "Commit the changes (commit messages are always imperative: \"Do "
@@ -2367,27 +2348,27 @@ msgstr ""
 "Valide les modifications (les messages de validation sont toujours "
 "impératifs : \"Fais quelque chose\", dans ce cas \"Modifie...\")"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:342
+#: ../../source/contributor-tutorial-contribute-on-github.rst:340
 msgid "Push the changes to your fork"
 msgstr "Transmets les changements à ta fourchette"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:343
+#: ../../source/contributor-tutorial-contribute-on-github.rst:341
 msgid ""
 "Open a PR (as shown above) with title ``docs(framework) Update how-to "
 "guide title``"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:344
+#: ../../source/contributor-tutorial-contribute-on-github.rst:342
 msgid "Wait for it to be approved!"
 msgstr "Attends qu'elle soit approuvée !"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:345
+#: ../../source/contributor-tutorial-contribute-on-github.rst:343
 msgid "Congrats! 🥳 You're now officially a Flower contributor!"
 msgstr ""
 "Félicitations 🥳 Tu es désormais officiellement une contributrice de "
 "Flower !"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:348
+#: ../../source/contributor-tutorial-contribute-on-github.rst:346
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.ipynb:573
 #: ../../source/tutorial-series-customize-the-client-pytorch.ipynb:1012
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.ipynb:811
@@ -2396,7 +2377,7 @@ msgstr ""
 msgid "Next steps"
 msgstr "Prochaines étapes"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:350
+#: ../../source/contributor-tutorial-contribute-on-github.rst:348
 msgid ""
 "Once you have made your first PR, and want to contribute more, be sure to"
 " check out the following :"
@@ -2404,7 +2385,7 @@ msgstr ""
 "Une fois que tu auras fait ton premier RP, et que tu voudras contribuer "
 "davantage, ne manque pas de consulter les sites suivants :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:353
+#: ../../source/contributor-tutorial-contribute-on-github.rst:351
 #, fuzzy
 msgid ""
 ":doc:`Good first contributions <contributor-ref-good-first-"
@@ -2415,25 +2396,25 @@ msgstr ""
 "/contributor-ref-good-first-contributions.html>`_, où vous devriez "
 "particulièrement regarder les contributions :code:`baselines`."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:357
+#: ../../source/contributor-tutorial-contribute-on-github.rst:355
 msgid "Appendix"
 msgstr "Annexe"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:362
+#: ../../source/contributor-tutorial-contribute-on-github.rst:360
 msgid "PR title format"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:364
+#: ../../source/contributor-tutorial-contribute-on-github.rst:362
 msgid "We enforce the following PR title format:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:370
+#: ../../source/contributor-tutorial-contribute-on-github.rst:368
 msgid ""
 "(or ``<type>(<project>:skip) <subject>`` to ignore the PR in the "
 "changelog)"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:372
+#: ../../source/contributor-tutorial-contribute-on-github.rst:370
 #, python-brace-format
 msgid ""
 "Where ``<type>`` needs to be in ``{ci, fix, feat, docs, refactor, "
@@ -2443,51 +2424,51 @@ msgid ""
 "verb in the imperative mood."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:377
+#: ../../source/contributor-tutorial-contribute-on-github.rst:375
 #, fuzzy
 msgid "Valid examples:"
 msgstr "Exemples de PyTorch"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:379
+#: ../../source/contributor-tutorial-contribute-on-github.rst:377
 msgid "``feat(framework) Add flwr build CLI command``"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:380
+#: ../../source/contributor-tutorial-contribute-on-github.rst:378
 msgid "``refactor(examples:skip) Improve quickstart-pytorch logging``"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:381
+#: ../../source/contributor-tutorial-contribute-on-github.rst:379
 msgid "``ci(*:skip) Enforce PR title format``"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:383
+#: ../../source/contributor-tutorial-contribute-on-github.rst:381
 #, fuzzy
 msgid "Invalid examples:"
 msgstr "Exemples de PyTorch"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:385
+#: ../../source/contributor-tutorial-contribute-on-github.rst:383
 msgid "``feat(framework): Add flwr build CLI command`` (extra ``:``)"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:386
+#: ../../source/contributor-tutorial-contribute-on-github.rst:384
 msgid ""
 "``feat(*) Add flwr build CLI command`` (missing ``skip`` flag along with "
 "``*``)"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:387
+#: ../../source/contributor-tutorial-contribute-on-github.rst:385
 msgid "``feat(skip) Add flwr build CLI command`` (missing ``<project>``)"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:388
+#: ../../source/contributor-tutorial-contribute-on-github.rst:386
 msgid "``feat(framework) add flwr build CLI command`` (non capitalised verb)"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:389
+#: ../../source/contributor-tutorial-contribute-on-github.rst:387
 msgid "``feat(framework) Add flwr build CLI command.`` (dot at the end)"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:390
+#: ../../source/contributor-tutorial-contribute-on-github.rst:388
 msgid "``Add flwr build CLI command.`` (missing ``<type>(<project>)``)"
 msgstr ""
 
@@ -2589,49 +2570,41 @@ msgstr ""
 " depuis GitHub::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:56
-msgid ""
-"Let's create the Python environment for all-things Flower. If you wish to"
-" use ``pyenv``, we provide two convenience scripts that you can use. If "
-"you prefer using something else than ``pyenv``, create a new environment,"
-" activate and skip to the last point where all packages are installed."
-msgstr ""
-
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:61
 #, fuzzy
 msgid ""
-"If you don't have ``pyenv`` installed, the following script that will "
-"install it, set it up, and create the virtual environment (with "
-":substitution-code:`Python |python_full_version|` by default):"
+"Create and activate a Python virtual environment for development. See "
+"`Set up a virtual env <contributor-how-to-set-up-a-virtual-env.rst>`_ for"
+" detailed instructions."
 msgstr ""
-"Si vous n'avez pas :code:`pyenv` installé, vous pouvez utiliser le script"
-" suivant qui l'installera, le configurera et créera l'environnement "
-"virtuel (avec :code:`Python 3.9.20` par défaut)::"
+"Il est recommandé de créer un environnement virtuel et de tout exécuter "
+"dans ce `virtualenv <https://flower.ai/docs/recommended-env-"
+"setup.html>`_."
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:69
-#, fuzzy
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:60
 msgid ""
-"If you already have ``pyenv`` installed (along with the ``pyenv-"
-"virtualenv`` plugin), you can use the following convenience script (with "
-":substitution-code:`Python |python_full_version|` by default):"
+"One way to do this is by using `pyenv <https://github.com/pyenv/pyenv>`_ "
+"and `pyenv-virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_. You "
+"can also optionally install a specific Python version using pyenv if you "
+"haven't already installed your desired version:"
 msgstr ""
-"Si vous n'avez pas :code:`pyenv` installé, vous pouvez utiliser le script"
-" suivant qui l'installera, le configurera et créera l'environnement "
-"virtuel (avec :code:`Python 3.9.20` par défaut)::"
+
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:71
+msgid ""
+"Install Poetry, which is used to manage dependencies and development "
+"workflows:"
+msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:77
-#, fuzzy
 msgid ""
-"3. Install the Flower package in development mode (think ``pip install "
-"-e``) along with all necessary dependencies:"
+"Navigate to the ``framework`` directory and install the Flower project in"
+" development mode, including all optional dependencies:"
 msgstr ""
-"Troisièmement, installez le paquet Flower en mode de développement ( "
-":code :`pip install -e`) avec toutes les dépendances nécessaires :"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:85
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:86
 msgid "Convenience Scripts"
 msgstr "Scripts pratiques"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:87
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:88
 #, fuzzy
 msgid ""
 "The Flower repository contains a number of convenience scripts to make "
@@ -2644,72 +2617,68 @@ msgstr ""
 "problématiques. Voir le sous-répertoire :code :`/dev` pour une liste "
 "complète. Les scripts suivants sont parmis les plus importants :"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:92
-msgid "Create/Delete Virtual Environment"
-msgstr "Créer/Supprimer l'environment virtuel"
-
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:101
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:93
 msgid "Compile ProtoBuf Definitions"
 msgstr "Compiler les définitions ProtoBuf"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:108
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:100
 msgid "Auto-Format Code"
 msgstr "Formatter le code"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:115
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:107
 msgid "Run Linters and Tests"
 msgstr "Vérifier le format et tester le code"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:122
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:114
 msgid "Add a pre-commit hook"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:124
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:116
 msgid ""
 "Developers may integrate a pre-commit hook into their workflow utilizing "
 "the `pre-commit <https://pre-commit.com/#install>`_ library. The pre-"
 "commit hook is configured to execute two primary operations: "
-"``./dev/format.sh`` and ``./dev/test.sh`` scripts."
+"``./framework/dev/format.sh`` and ``./framework/dev/test.sh`` scripts."
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:128
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:121
 msgid "There are multiple ways developers can use this:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:130
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:123
 msgid "Install the pre-commit hook to your local git directory by simply running:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:136
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:129
 msgid ""
 "Each ``git commit`` will trigger the execution of formatting and "
 "linting/test scripts."
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:138
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:131
 msgid ""
 "If in a hurry, bypass the hook using ``--no-verify`` with the ``git "
 "commit`` command."
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:145
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:138
 msgid ""
 "For developers who prefer not to install the hook permanently, it is "
 "possible to execute a one-time check prior to committing changes by using"
 " the following command:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:152
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:145
 msgid ""
 "This executes the formatting and linting checks/tests on all the files "
 "without modifying the default behavior of ``git commit``."
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:156
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:149
 msgid "Run Github Actions (CI) locally"
 msgstr "Exécuter les GitHub Actions (CI) localement"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:158
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:151
 #, fuzzy
 msgid ""
 "Developers could run the full set of Github Actions workflows under their"
@@ -2723,7 +2692,7 @@ msgstr ""
 "fois installé, exécuter la commande suivante dans le dossier principale "
 "de Flower :"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:167
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:160
 msgid ""
 "The Flower default workflow would run by setting up the required Docker "
 "machines underneath."
@@ -2731,12 +2700,12 @@ msgstr ""
 "Le workflow par défaut de Flower sera exécuté en configurant les machines"
 " Docker requises en arrière plan."
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:171
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:164
 #, fuzzy
 msgid "Build Release"
 msgstr "Inédit"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:173
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:166
 #, fuzzy
 msgid ""
 "Flower uses Poetry to build releases. The necessary command is wrapped in"
@@ -2745,30 +2714,40 @@ msgstr ""
 "Flower utilise Poetry pour construire les nouvelles versions. La commande"
 " nécessaire est comprise dans un script simple ::"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:180
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:173
 #, fuzzy
 msgid ""
 "The resulting ``.whl`` and ``.tar.gz`` releases will be stored in the "
-"``/dist`` subdirectory."
+"``./framework/dist`` subdirectory."
 msgstr ""
 "Les versions résultantes :code:`.whl` et :code:`.tar.gz` seront stockées "
 "dans le sous-répertoire:code:`/dist`."
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:184
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:177
 #, fuzzy
 msgid "Build Documentation"
 msgstr "Amélioration de la documentation"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:186
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:179
 msgid ""
-"Flower's documentation uses `Sphinx <https://www.sphinx-doc.org/>`_. "
-"There's no convenience script to re-build the documentation yet, but it's"
-" pretty easy:"
+"Flower's documentation uses `Sphinx <https://www.sphinx-doc.org/>`_. To "
+"build the documentation locally, run the following script:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:194
-msgid "This will generate HTML documentation in ``doc/build/html``."
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:186
+msgid "This will generate HTML documentation in ``./framework/doc/build/html``."
 msgstr ""
+
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:188
+#, fuzzy
+msgid ""
+"Note that, in order to build the documentation locally, `Pandoc "
+"<https://pandoc.org/installing.html>`_ needs to be installed on the "
+"system."
+msgstr ""
+"Noter que, pour compiler la documentation localement (avec ``poetry run "
+"make html``, comme décrit plus bas), `Pandoc "
+"<https://pandoc.org/installing.html>_` doit être installé sur le système."
 
 #: ../../source/deploy.rst:-1
 msgid ""
@@ -10827,8 +10806,8 @@ msgstr "Exemples de PyTorch"
 
 #: flwr.client.client_app.ClientApp:5 of
 msgid ""
-"Assuming a typical `Client` implementation named `FlowerClient`, you can "
-"wrap it in a `ClientApp` as follows:"
+"Assuming a typical ``Client`` implementation named ``FlowerClient``, you "
+"can wrap it in a ``ClientApp`` as follows::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
@@ -10891,15 +10870,15 @@ msgid "A decorator that registers an evaluate function with the ``ClientApp``."
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:13 of
-msgid "Registering an evaluate function:"
+msgid "Registering an evaluate function::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:23 of
-msgid "Registering an evaluate function with a custom action name:"
+msgid "Registering an evaluate function with a custom action name::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.evaluate:34 of
-msgid "Registering an evaluate function with a function-specific Flower Mod:"
+msgid "Registering an evaluate function with a function-specific Flower Mod::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.lifespan:3
@@ -10914,15 +10893,15 @@ msgid "A decorator that registers a query function with the ``ClientApp``."
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.query:13 of
-msgid "Registering a query function:"
+msgid "Registering a query function::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.query:23 of
-msgid "Registering a query function with a custom action name:"
+msgid "Registering a query function with a custom action name::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.query:34 of
-msgid "Registering a query function with a function-specific Flower Mod:"
+msgid "Registering a query function with a function-specific Flower Mod::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.train:8 of
@@ -10930,15 +10909,15 @@ msgid "A decorator that registers a train function with the ``ClientApp``."
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.train:13 of
-msgid "Registering a train function:"
+msgid "Registering a train function::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.train:23 of
-msgid "Registering a train function with a custom action name:"
+msgid "Registering a train function with a custom action name::"
 msgstr ""
 
 #: flwr.client.client_app.ClientApp.train:34 of
-msgid "Registering a train function with a function-specific Flower Mod:"
+msgid "Registering a train function with a function-specific Flower Mod::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:2
@@ -11231,7 +11210,9 @@ msgid ""
 msgstr ""
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:23 of
-msgid "Create an instance of the local DP mod and add it to the client-side mods:"
+msgid ""
+"Create an instance of the local DP mod and add it to the client-side "
+"mods::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.adaptiveclipping_mod.rst:2
@@ -11407,15 +11388,16 @@ msgid ""
 msgstr ""
 
 #: flwr.client.app.start_client:52 flwr.client.app.start_numpy_client:37 of
-msgid "Starting a gRPC client with an insecure server connection:"
-msgstr ""
+#, fuzzy
+msgid "Starting a gRPC client with an insecure server connection::"
+msgstr "Démarrer le serveur"
 
 #: flwr.client.app.start_client:59 flwr.client.app.start_numpy_client:44 of
-msgid "Starting an SSL-enabled gRPC client using system certificates:"
+msgid "Starting a TLS-enabled gRPC client using system certificates::"
 msgstr ""
 
 #: flwr.client.app.start_client:70 flwr.client.app.start_numpy_client:52 of
-msgid "Starting an SSL-enabled gRPC client using provided certificates:"
+msgid "Starting a TLS-enabled gRPC client using provided certificates::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.start_numpy_client.rst:2
@@ -11608,7 +11590,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.record.configrecord.ConfigRecord:1 of
 #, fuzzy
-msgid "Configs record."
+msgid "Config record."
 msgstr "Configurer les clients"
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -11799,7 +11781,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.record.metricrecord.MetricRecord:1 of
 #, fuzzy
-msgid "Metrics recod."
+msgid "Metric record."
 msgstr "Paramètres du modèle."
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -11993,15 +11975,16 @@ msgid ""
 msgstr ""
 
 #: flwr.common.record.arrayrecord.Array:36 of
-msgid "Initializing by specifying all fields directly:"
+msgid "Initializing by specifying all fields directly::"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.Array:45 of
-msgid "Initializing with a NumPy ndarray:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a NumPy ndarray::"
+msgstr "Initialise le modèle global"
 
 #: flwr.common.record.arrayrecord.Array:50 of
-msgid "Initializing with a PyTorch tensor:"
+msgid "Initializing with a PyTorch tensor::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
@@ -12169,23 +12152,25 @@ msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:37 of
 #, fuzzy
-msgid "Initializing an empty ArrayRecord:"
+msgid "Initializing an empty ArrayRecord::"
 msgstr "Initialise le modèle global"
 
 #: flwr.common.record.arrayrecord.ArrayRecord:41 of
-msgid "Initializing with a dictionary of :class:`Array`:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a dictionary of :class:`Array`::"
+msgstr "Convertit l'objet des paramètres en ndarrays NumPy."
 
 #: flwr.common.record.arrayrecord.ArrayRecord:46 of
-msgid "Initializing with a list of NumPy arrays:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a list of NumPy arrays::"
+msgstr "Initialise le modèle global"
 
 #: flwr.common.record.arrayrecord.ArrayRecord:53 of
-msgid "Initializing with a PyTorch model state_dict:"
+msgid "Initializing with a PyTorch model state_dict::"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:59 of
-msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
+msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays)::"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -12466,7 +12451,7 @@ msgstr ""
 #: flwr.common.record.configrecord.ConfigRecord:29 of
 msgid ""
 "Let's see some examples of how to construct a :code:`ConfigRecord` from "
-"scratch:"
+"scratch::"
 msgstr ""
 
 #: flwr.common.record.configrecord.ConfigRecord:42 of
@@ -14093,7 +14078,7 @@ msgstr ""
 #: flwr.common.record.metricrecord.MetricRecord:28 of
 msgid ""
 "Let's see some examples of how to construct a :code:`MetricRecord` from "
-"scratch:"
+"scratch::"
 msgstr ""
 
 #: flwr.common.record.metricrecord.MetricRecord:39 of
@@ -14101,7 +14086,7 @@ msgid ""
 "Since types are enforced, the types of the objects inserted are checked. "
 "For a :code:`MetricRecord`, value types allowed are those in defined in "
 ":code:`flwr.common.MetricRecordValues`. Similarly, only :code:`str` keys "
-"are allowed."
+"are allowed::"
 msgstr ""
 
 #: flwr.common.record.metricrecord.MetricRecord:50 of
@@ -14411,14 +14396,14 @@ msgid ""
 msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:20 of
-msgid "Let's see an example."
+msgid "Let's see an example::"
 msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:38 of
 msgid ""
 "Adding an :code:`ArrayRecord` follows the same steps as above but first, "
 "the array needs to be serialized and represented as a "
-":code:`flwr.common.Array`. For example:"
+":code:`flwr.common.Array`. For example::"
 msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:55 of
@@ -14979,7 +14964,7 @@ msgstr ""
 #: flwr.server.grid.grid.Driver:10 of
 msgid ""
 "``Driver`` is deprecated and will be removed in a future release. Use "
-"`Grid` in the signature of your ServerApp."
+"``Grid`` in the signature of your ServerApp."
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
@@ -15434,12 +15419,12 @@ msgstr "stratégie.du.serveur"
 
 #: flwr.server.server_app.ServerApp:5 of
 #, fuzzy
-msgid "Use the ``ServerApp`` with an existing ``Strategy``:"
+msgid "Use the ``ServerApp`` with an existing ``Strategy``::"
 msgstr "Utilise une stratégie existante"
 
 #: flwr.server.server_app.ServerApp:17 of
 #, fuzzy
-msgid "Use the ``ServerApp`` with a custom main function:"
+msgid "Use the ``ServerApp`` with a custom main function::"
 msgstr "Utilise une stratégie existante"
 
 #: flwr.server.server_app.ServerApp.lifespan:1:<autosummary>:1 of
@@ -15679,12 +15664,12 @@ msgstr ""
 
 #: flwr.server.app.start_server:47 of
 #, fuzzy
-msgid "Starting an insecure server:"
+msgid "Starting an insecure server::"
 msgstr "Démarrer le serveur"
 
 #: flwr.server.app.start_server:51 of
 #, fuzzy
-msgid "Starting an SSL-enabled server:"
+msgid "Starting a TLS-enabled server::"
 msgstr "Démarrer le serveur"
 
 #: ../../source/ref-api/flwr.server.strategy.rst:2
@@ -16605,19 +16590,20 @@ msgstr ""
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:15
 #: of
 #, fuzzy
-msgid "Create a strategy:"
+msgid "Create a strategy::"
 msgstr "stratégie.du.serveur"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:34
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the "
-"`DifferentialPrivacyClientSideAdaptiveClipping` wrapper:"
-msgstr ""
+"`DifferentialPrivacyClientSideAdaptiveClipping` wrapper::"
+msgstr "Confidentialité différentielle"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:40
 #: of
-msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods:"
+msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods::"
 msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping.aggregate_evaluate:1:<autosummary>:1
@@ -16706,14 +16692,15 @@ msgstr ""
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:26
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the `DifferentialPrivacyClientSideFixedClipping` "
-"wrapper:"
-msgstr ""
+"wrapper::"
+msgstr "Confidentialité différentielle"
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:32
 #: of
-msgid "On the client, add the `fixedclipping_mod` to the client-side mods:"
+msgid "On the client, add the `fixedclipping_mod` to the client-side mods::"
 msgstr ""
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping.aggregate_evaluate:1:<autosummary>:1
@@ -16785,10 +16772,11 @@ msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:27
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the DifferentialPrivacyServerSideAdaptiveClipping "
-"wrapper"
-msgstr ""
+"wrapper::"
+msgstr "Confidentialité différentielle"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping.aggregate_evaluate:1:<autosummary>:1
 #: of
@@ -16845,10 +16833,11 @@ msgstr "Confidentialité différentielle"
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:19
 #: of
+#, fuzzy
 msgid ""
 "Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping "
-"wrapper"
-msgstr ""
+"wrapper::"
+msgstr "Confidentialité différentielle"
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping.aggregate_evaluate:1:<autosummary>:1
 #: of
@@ -33322,7 +33311,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|662665a552f64c9bb53cbf01198765cc|"
+msgid "|2e3a8dd8625a48a080386b56f6143b3c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -33341,7 +33330,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|7f4c9c8c2d7045208ac1e513f75b8a32|"
+msgid "|7c96683b1c2042c796e76c4ef095f4a6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -33373,7 +33362,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|548e011b458142e5be8cf6497d03e22e|"
+msgid "|eccacc874336420ab6a338024bdcdcf0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -33394,7 +33383,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|32d5d8c2e9314a91a9a17bb04a7fde41|"
+msgid "|c26cd0ddba7d45c58daefc7741c3c21c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -33416,7 +33405,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|c5c8eabc28c741e79ab46c61271c18ba|"
+msgid "|55ad49291b07427b9cd15cf45ca12c66|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -33437,7 +33426,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|aebc2e212169439683d3134c7dbda324|"
+msgid "|1ecea76fb58d490593e0ebaae474b0b4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -33463,7 +33452,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|5b888e20d5f64ec38bf924db4b999a3c|"
+msgid "|ac0ae32f88a343aca8bff2bd6d7be924|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -33482,7 +33471,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|f5dd3e6215104689a365dd7e01e421d0|"
+msgid "|ec672277bede4c358eab8bf606c0bc18|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -33713,7 +33702,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|e90c03c1caab4f229359c1e8877da2a2|"
+msgid "|4dfc1ccf0f52485cb630e2c42205e8cd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -33748,7 +33737,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|3e26e26712bb475ba024442148c1171a|"
+msgid "|054b39036f4241779cee8b856535ef8c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -33781,7 +33770,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|650f8f02c84f4af381ab58cd7394aff1|"
+msgid "|f36b0843a8404bd994c12d417791639e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -33812,7 +33801,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|bfab5d09d0bd46dba040500475755079|"
+msgid "|267ba4ef820c4a18ba17a3cf6baa2328|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -33872,7 +33861,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|1412b6b05b744c159b9531f3a1202d46|"
+msgid "|cd58650e67ea4d51a6796f6290adc7a3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -34016,7 +34005,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|918baeda7d744d0dbd5d55f6c8083a6a|"
+msgid "|42fe13229c9e47459cd10173391681fd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -50233,5 +50222,356 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Assuming a typical `Client` implementation "
+#~ "named `FlowerClient`, you can wrap it"
+#~ " in a `ClientApp` as follows:"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function:"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering an evaluate function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Create an instance of the local DP"
+#~ " mod and add it to the "
+#~ "client-side mods:"
+#~ msgstr ""
+
+#~ msgid "Starting an SSL-enabled gRPC client using system certificates:"
+#~ msgstr ""
+
+#~ msgid "Starting an SSL-enabled gRPC client using provided certificates:"
+#~ msgstr ""
+
+#~ msgid "Initializing by specifying all fields directly:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a NumPy ndarray:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a PyTorch tensor:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a dictionary of :class:`Array`:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a list of NumPy arrays:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a PyTorch model state_dict:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`ConfigRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`MetricRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Since types are enforced, the types "
+#~ "of the objects inserted are checked. "
+#~ "For a :code:`MetricRecord`, value types "
+#~ "allowed are those in defined in "
+#~ ":code:`flwr.common.MetricRecordValues`. Similarly, only"
+#~ " :code:`str` keys are allowed."
+#~ msgstr ""
+
+#~ msgid "Let's see an example."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Adding an :code:`ArrayRecord` follows the "
+#~ "same steps as above but first, the"
+#~ " array needs to be serialized and "
+#~ "represented as a :code:`flwr.common.Array`. "
+#~ "For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``Driver`` is deprecated and will be "
+#~ "removed in a future release. Use "
+#~ "`Grid` in the signature of your "
+#~ "ServerApp."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "`DifferentialPrivacyClientSideAdaptiveClipping` wrapper:"
+#~ msgstr ""
+
+#~ msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "`DifferentialPrivacyClientSideFixedClipping` wrapper:"
+#~ msgstr ""
+
+#~ msgid "On the client, add the `fixedclipping_mod` to the client-side mods:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "DifferentialPrivacyServerSideAdaptiveClipping wrapper"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Wrap the strategy with the "
+#~ "DifferentialPrivacyServerSideFixedClipping wrapper"
+#~ msgstr ""
+
+#~ msgid "|662665a552f64c9bb53cbf01198765cc|"
+#~ msgstr ""
+
+#~ msgid "|7f4c9c8c2d7045208ac1e513f75b8a32|"
+#~ msgstr ""
+
+#~ msgid "|548e011b458142e5be8cf6497d03e22e|"
+#~ msgstr ""
+
+#~ msgid "|32d5d8c2e9314a91a9a17bb04a7fde41|"
+#~ msgstr ""
+
+#~ msgid "|c5c8eabc28c741e79ab46c61271c18ba|"
+#~ msgstr ""
+
+#~ msgid "|aebc2e212169439683d3134c7dbda324|"
+#~ msgstr ""
+
+#~ msgid "|5b888e20d5f64ec38bf924db4b999a3c|"
+#~ msgstr ""
+
+#~ msgid "|f5dd3e6215104689a365dd7e01e421d0|"
+#~ msgstr ""
+
+#~ msgid "|e90c03c1caab4f229359c1e8877da2a2|"
+#~ msgstr ""
+
+#~ msgid "|3e26e26712bb475ba024442148c1171a|"
+#~ msgstr ""
+
+#~ msgid "|650f8f02c84f4af381ab58cd7394aff1|"
+#~ msgstr ""
+
+#~ msgid "|bfab5d09d0bd46dba040500475755079|"
+#~ msgstr ""
+
+#~ msgid "|1412b6b05b744c159b9531f3a1202d46|"
+#~ msgstr ""
+
+#~ msgid "|918baeda7d744d0dbd5d55f6c8083a6a|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Run ``python3 ./dev/update_changelog.py "
+#~ "<YOUR_GH_TOKEN>`` in order to add every"
+#~ " new change to the changelog (feel"
+#~ " free to make manual changes to "
+#~ "the changelog afterwards until it looks"
+#~ " good)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Once the changelog has been updated "
+#~ "with all the changes, run ``./dev"
+#~ "/prepare-release-changelog.sh v<NEW_VERSION>``, "
+#~ "where ``<NEW_VERSION>`` is the version "
+#~ "stated in ``pyproject.toml`` (notice the "
+#~ "``v`` added before it). This will "
+#~ "replace the ``Unreleased`` header of the"
+#~ " changelog by the version and current"
+#~ " date, and it will add a "
+#~ "thanking message for the contributors. "
+#~ "Open a pull request with those "
+#~ "changes."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Once the pull request is merged, "
+#~ "tag the release commit with the "
+#~ "version number as soon as the PR"
+#~ " is merged: ``git tag v<NEW_VERSION>`` "
+#~ "(notice the ``v`` added before the "
+#~ "version number), then ``git push "
+#~ "--tags``. This will create a draft "
+#~ "release on GitHub containing the correct"
+#~ " artifacts and the relevant part of"
+#~ " the changelog."
+#~ msgstr ""
+
+#~ msgid "Increase the minor version in ``pyproject.toml`` by one."
+#~ msgstr "Augmente la version mineure de ``pyproject.toml`` d'une unité."
+
+#~ msgid "Update all files which contain the current version number if necessary."
+#~ msgstr ""
+#~ "Mets à jour tous les fichiers qui"
+#~ " contiennent le numéro de version "
+#~ "actuel si nécessaire."
+
+#~ msgid "Add a new ``Unreleased`` section in ``changelog.md``."
+#~ msgstr "Ajoute une nouvelle section ``Unreleased`` dans ``changelog.md``."
+
+#~ msgid "And then?"
+#~ msgstr "Et ensuite ?"
+
+#~ msgid ""
+#~ "As soon as you created your "
+#~ "virtual environment you clone one of "
+#~ "the `Flower examples "
+#~ "<https://github.com/adap/flower/tree/main/examples/>`_."
+#~ msgstr ""
+#~ "Dès que tu as créé ton "
+#~ "environnement virtuel, tu clones l'un "
+#~ "des exemples de `Flower "
+#~ "<https://github.com/adap/flower/tree/main/examples/>`_."
+
+#~ msgid ""
+#~ "Let's create the Python environment for"
+#~ " all-things Flower. If you wish "
+#~ "to use ``pyenv``, we provide two "
+#~ "convenience scripts that you can use."
+#~ " If you prefer using something else"
+#~ " than ``pyenv``, create a new "
+#~ "environment, activate and skip to the"
+#~ " last point where all packages are"
+#~ " installed."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you don't have ``pyenv`` installed,"
+#~ " the following script that will "
+#~ "install it, set it up, and create"
+#~ " the virtual environment (with "
+#~ ":substitution-code:`Python |python_full_version|` by"
+#~ " default):"
+#~ msgstr ""
+#~ "Si vous n'avez pas :code:`pyenv` "
+#~ "installé, vous pouvez utiliser le script"
+#~ " suivant qui l'installera, le configurera"
+#~ " et créera l'environnement virtuel (avec"
+#~ " :code:`Python 3.9.20` par défaut)::"
+
+#~ msgid ""
+#~ "If you already have ``pyenv`` installed"
+#~ " (along with the ``pyenv-virtualenv`` "
+#~ "plugin), you can use the following "
+#~ "convenience script (with :substitution-"
+#~ "code:`Python |python_full_version|` by default):"
+#~ msgstr ""
+#~ "Si vous n'avez pas :code:`pyenv` "
+#~ "installé, vous pouvez utiliser le script"
+#~ " suivant qui l'installera, le configurera"
+#~ " et créera l'environnement virtuel (avec"
+#~ " :code:`Python 3.9.20` par défaut)::"
+
+#~ msgid ""
+#~ "3. Install the Flower package in "
+#~ "development mode (think ``pip install "
+#~ "-e``) along with all necessary "
+#~ "dependencies:"
+#~ msgstr ""
+#~ "Troisièmement, installez le paquet Flower "
+#~ "en mode de développement ( :code "
+#~ ":`pip install -e`) avec toutes les "
+#~ "dépendances nécessaires :"
+
+#~ msgid "Create/Delete Virtual Environment"
+#~ msgstr "Créer/Supprimer l'environment virtuel"
+
+#~ msgid ""
+#~ "Developers may integrate a pre-commit"
+#~ " hook into their workflow utilizing "
+#~ "the `pre-commit <https://pre-"
+#~ "commit.com/#install>`_ library. The pre-commit"
+#~ " hook is configured to execute two"
+#~ " primary operations: ``./dev/format.sh`` and "
+#~ "``./dev/test.sh`` scripts."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Flower's documentation uses `Sphinx "
+#~ "<https://www.sphinx-doc.org/>`_. There's no "
+#~ "convenience script to re-build the "
+#~ "documentation yet, but it's pretty easy:"
+#~ msgstr ""
+
+#~ msgid "This will generate HTML documentation in ``doc/build/html``."
+#~ msgstr ""
+
+#~ msgid "|1dbe7ef5f86045228c22d76d20494c1c|"
+#~ msgstr ""
+
+#~ msgid "|0c52a329791a42c9891adee11a3c9ec6|"
+#~ msgstr ""
+
+#~ msgid "|0af7f9c988464e6d9988f938f7722cb1|"
+#~ msgstr ""
+
+#~ msgid "|c4fec40358df4c91b8dacba706affdfc|"
+#~ msgstr ""
+
+#~ msgid "|fffd51185653489082b5587359813c79|"
+#~ msgstr ""
+
+#~ msgid "|b9f3e0459a704a459d52ae3fca9c72d3|"
+#~ msgstr ""
+
+#~ msgid "|5e4f22fdf7cb4373882354252e21f385|"
+#~ msgstr ""
+
+#~ msgid "|6e225ec341c643a58ce12c7c1c4f531d|"
+#~ msgstr ""
+
+#~ msgid "|371d89f1268b4ba9af58576635ca724e|"
+#~ msgstr ""
+
+#~ msgid "|b64a9a44fd5745cc91b6aa9fdca1aa28|"
+#~ msgstr ""
+
+#~ msgid "|b9efd6eda007427a92190b989d035b45|"
+#~ msgstr ""
+
+#~ msgid "|61474cd6cd8642968bd5f0d963fa56df|"
+#~ msgstr ""
+
+#~ msgid "|ff52a36f0cad426bb452cfa49b73350a|"
+#~ msgstr ""
+
+#~ msgid "|3d62057de8c64752921d1eab65741d54|"
 #~ msgstr ""
 
