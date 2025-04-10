@@ -15,8 +15,8 @@ def load_data(partition_id: int, num_partitions: int):
     if fds is None:
         partitioner = IidPartitioner(num_partitions=num_partitions)
         fds = FederatedDataset(
-            dataset="mnist",
-            partitioners={"ylecun/mnist": partitioner},
+            dataset="ylecun/mnist",
+            partitioners={"train": partitioner},
         )
 
     dataset = fds.load_partition(partition_id, "train").with_format("numpy")
