@@ -36,7 +36,11 @@ python -m devtool.init_py_check py/flwr py/flwr_tool
 echo "- init_py_check: done"
 
 echo "- docformatter: start"
-python -m docformatter -c -r py/flwr e2e -e py/flwr/proto
+if $RUN_FULL_TEST; then
+    python -m docformatter -c -r py/flwr e2e -e py/flwr/proto
+else
+    python -m docformatter -c -r py/flwr -e py/flwr/proto
+fi
 echo "- docformatter:  done"
 
 echo "- docsig: start"
@@ -44,7 +48,7 @@ docsig py/flwr
 echo "- docsig:  done"
 
 echo "- ruff: start"
-python -m ruff check py/flwr
+python -m ruff check py/flwr --no-respect-gitignore
 echo "- ruff: done"
 
 echo "- mypy: start"
