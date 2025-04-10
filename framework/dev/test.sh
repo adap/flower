@@ -48,7 +48,7 @@ docsig py/flwr
 echo "- docsig:  done"
 
 echo "- ruff: start"
-python -m ruff check py/flwr
+python -m ruff check py/flwr --no-respect-gitignore
 echo "- ruff: done"
 
 echo "- mypy: start"
