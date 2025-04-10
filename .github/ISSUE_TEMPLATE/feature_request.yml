@@ -1,22 +1,33 @@
-name: Feature request
-description: Suggest a new baseline, strategy, example, ...
-labels: ['feature request']
+name: Label Issue Based on Dropdown
 
-body:
-- type: markdown
-  attributes:
-    value: >
-      #### If you want to propose a new feature, please check the PRs if someone already works on this feature.
-- type: textarea
-  attributes:
-    label: Describe the type of feature and its functionality.
-  validations:
-    required: true
-- type: textarea
-  attributes:
-    label: Describe step by step what files and adjustments are you planning to include.
-  validations:
-    required: true
-- type: textarea
-  attributes:
-    label: Is there something else you want to add?
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  add-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse dropdown and apply label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueBody = context.payload.issue.body.toLowerCase();
+
+            let labelToAdd = null;
+            if (issueBody.includes("what type of request is this?") && issueBody.includes("feature")) {
+              labelToAdd = "feature request";
+            } else if (issueBody.includes("documentation")) {
+              labelToAdd = "documentation";
+            } else if (issueBody.includes("new baseline")) {
+              labelToAdd = "new baseline";
+            }
+
+            if (labelToAdd) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: [labelToAdd]
+              });
+            }
