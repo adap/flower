@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - 'intelligence/**/*'
+      - 'intelligence/ts/**'
       - '.github/workflows/intelligence-ts.yml'
   pull_request:
     branches:
       - main
     paths:
-      - 'intelligence/**/*'
+      - 'intelligence/ts/**'
       - '.github/workflows/intelligence-ts.yml'
 
 concurrency:

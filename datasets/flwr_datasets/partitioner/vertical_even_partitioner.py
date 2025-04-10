@@ -81,7 +81,7 @@ class VerticalEvenPartitioner(Partitioner):
     >>> print([partition.column_names for partition in partitions])
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=R0917
         self,
         num_partitions: int,
         active_party_columns: Optional[Union[str, list[str]]] = None,

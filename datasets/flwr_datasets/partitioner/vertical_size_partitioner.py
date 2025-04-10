@@ -91,7 +91,7 @@ class VerticalSizePartitioner(Partitioner):
     >>> print([partition.column_names for partition in partitions])
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=R0917
         self,
         partition_sizes: Union[list[int], list[float]],
         active_party_columns: Optional[Union[str, list[str]]] = None,

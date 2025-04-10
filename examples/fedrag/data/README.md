@@ -84,13 +84,13 @@ corpora are downloaded and the related FAISS indices are built.
 
 # References
 
-1. <a id="ref1"></a> Xiong, G., Jin, Q., Lu, Z. and Zhang, A., 2024, August. Benchmarking retrieval-augmented generation for medicine. In Findings of the Association for Computational Linguistics ACL 2024 (pp. 6233-6251).
+1. <a id="ref1"></a> Xiong, Guangzhi, Qiao Jin, Zhiyong Lu, and Aidong Zhang. "Benchmarking retrieval-augmented generation for medicine." In Findings of the Association for Computational Linguistics ACL 2024, pp. 6233-6251. 2024.
 
 2. <a id="ref2"></a> PubMed corpus was created from articles located at: https://pubmed.ncbi.nlm.nih.gov/
 
 3. <a id="ref3"></a> StatPearls corpus was created by using 9,330 publicly available StatPearls articles through the NCBI Bookshelf: https://www.ncbi.nlm.nih.gov/books/NBK430685/
 
-4. <a id="ref4"></a> Textbooks corpus was used in the work of: " Jin, Di, Eileen Pan, Nassim Oufattole, Wei-Hung Weng, Hanyi Fang, and Peter Szolovits. "What disease does this patient have? a large-scale open domain question answering dataset from medical exams." Applied Sciences 11, no. 14 (2021): 6421 ".
+4. <a id="ref4"></a> Textbooks corpus was used in the work of: Jin, Di, Eileen Pan, Nassim Oufattole, Wei-Hung Weng, Hanyi Fang, and Peter Szolovits. "What disease does this patient have? a large-scale open domain question answering dataset from medical exams." Applied Sciences 11, no. 14 (2021): 6421.
    The corpus is also available at: https://github.com/jind11/MedQA
 
-5. <a id="ref5"></a> Wikipedia corpus was used in the work of: " Nandan Thakur, Nils Reimers, Andreas Ruckle, Abhishek Srivastava, & Iryna Gurevych (2021). BEIR: A Heterogeneous Benchmark for Zero-shot Evaluation of Information Retrieval Models. In Thirty-fifth Conference on Neural Information Processing Systems Datasets and Benchmarks Track (Round 2) ". The corpus is also available at: https://huggingface.co/datasets/wikipedia
+5. <a id="ref5"></a> Wikipedia corpus was used in the work of: Thakur, Nandan, Nils Reimers, Andreas Rücklé, Abhishek Srivastava, and Iryna Gurevych. "BEIR: A heterogenous benchmark for zero-shot evaluation of information retrieval models." In Thirty-fifth Conference on Neural Information Processing Systems Datasets and Benchmarks Track (2021). The corpus is also available at: https://huggingface.co/datasets/wikipedia

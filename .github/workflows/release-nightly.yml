@@ -27,7 +27,7 @@ jobs:
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
-          RESULT=$(./dev/publish-nightly.sh)
+          RESULT=$(./framework/dev/publish-nightly.sh)
           if [ "$RESULT" == "There were no commits in the last 24 hours." ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
           fi
@@ -37,7 +37,7 @@ jobs:
 
           NAME=$(poetry version | awk {'print $1'})
           VERSION=$(poetry version -s)
-          python dev/build-docker-image-matrix.py --flwr-version "${VERSION}" --matrix nightly --flwr-package "${NAME}" > matrix.json
+          python framework/dev/build-docker-image-matrix.py --flwr-version "${VERSION}" --matrix nightly --flwr-package "${NAME}" > matrix.json
           echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 
   build-docker-base-images:
