@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "serverless-pytorch"
+version = "1.0.0"
+description = "Serverless Federated Learning with PyTorch and Flower"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.15.2",
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = ""
+
+[tool.flwr.app.components]
+serverapp = "server_app:app"
+clientapp = "client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 1
+fraction-evaluate = 1.0
+local-epochs = 1
+learning-rate = 0.1
+batch-size = 128
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 2
+
+[tool.flwr.federations.local-simulation-gpu]
+options.num-supernodes = 2
+options.backend.client-resources.num-cpus = 4
+options.backend.client-resources.num-gpus = 1
