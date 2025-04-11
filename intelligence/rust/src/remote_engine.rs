@@ -178,12 +178,22 @@ impl Engine for RemoteEngine {
                 "/v1/chat/completions",
                 &self.base_url,
                 self.get_headers(),
-            )
-            .await?;
+            ).await?;
 
-            // Ensure the response status is OK.
-            if !response.status().is_success() {
-                let status = response.status();
+            // Extract the status before consuming the response.
+            let status = response.status();
+
+            // Now read the entire body as text.
+            let raw_body = response.text().await.map_err(|e| Failure {
+                code: FailureCode::RemoteError,
+                description: format!("Error reading response body: {}", e),
+            })?;
+
+            // Print the raw response.
+            println!("Raw response: {}", raw_body);
+
+            // Now you can use the already-extracted status.
+            if !status.is_success() {
                 let description = format!(
                     "{}: {}",
                     status.as_u16(),
@@ -198,11 +208,11 @@ impl Engine for RemoteEngine {
                 return Err(Failure { code, description });
             }
 
-            let chat_response: ChatCompletionsResponse =
-                response.json().await.map_err(|e| Failure {
-                    code: FailureCode::RemoteError,
-                    description: e.to_string(),
-                })?;
+            // Deserialize the buffered response.
+            let chat_response: ChatCompletionsResponse = serde_json::from_str(&raw_body).map_err(|e| Failure {
+                code: FailureCode::RemoteError,
+                description: format!("Error decoding response body: {}", e),
+            })?;
             self.extract_output(chat_response, encrypt_flag).await
         }
     }
@@ -231,6 +241,11 @@ async fn send_request(
 ) -> FIResult<Response> {
     let client = reqwest::Client::new();
     let url = format!("{}{}", base_url, endpoint);
+
+    println!("URL: {}", url);
+    let json_string = serde_json::to_string_pretty(&request_data)
+        .expect("Failed to serialize request data to JSON");
+    println!("Request: {}", json_string);
 
     let response = client
         .post(&url)
@@ -303,10 +318,8 @@ struct ChoiceMessage {
 
 #[derive(Debug, Deserialize)]
 struct Usage {
-    total_duration: u32,
-    load_duration: u32,
-    prompt_eval_count: u32,
-    prompt_eval_duration: u32,
-    eval_count: u32,
-    eval_duration: u32,
+    prompt_tokens: u32,
+    completion_tokens: u32,
+    total_tokens: u32,
+
 }

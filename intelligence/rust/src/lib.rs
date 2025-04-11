@@ -111,11 +111,6 @@ impl FlowerIntelligence {
         if force_remote {
             return self.get_or_create_remote_engine(None).await;
         }
-        // match self.choose_local_engine(model).await {
-        //     Ok(engine) => Ok(engine),
-        //     Err(local_failure) => self.get_or_create_remote_engine(Some(local_failure)).await,
-        // }
-
         match self.choose_local_engine_index(model).await {
             Ok(index) => {
                 // Create a fresh mutable borrow to return the engine.
