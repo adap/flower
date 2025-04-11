@@ -353,10 +353,18 @@ def test_validate_certificate_in_federation_config(tmp_path: Path) -> None:
         assert not insecure
         assert root_cert == b"dummy_cert"
 
+        # Test insecure is False and root_certificates is None
+        config.pop("root-certificates")
+        # Execute
+        insecure, root_cert = validate_certificate_in_federation_config(
+            tmp_path, config
+        )
+        # Assert
+        assert not insecure
+        assert root_cert is None
+
         # Test insecure is True and root_certificates is None
         config["insecure"] = True
-        config.pop("root-certificates")
-
         # Execute
         insecure, root_cert = validate_certificate_in_federation_config(
             tmp_path, config
@@ -390,12 +398,8 @@ def test_validate_certificate_in_federation_config_fail(tmp_path: Path) -> None:
         os.chdir(tmp_path)
 
         # Test insecure is None and root_certificates is None
-        config["insecure"] = None
-        # Execute and assert
-        run_and_assert_exit(tmp_path, config)
-
-        # Test insecure is False, but root_certificates is None
-        config["insecure"] = False
+        config.pop("root-certificates", None)
+        config.pop("insecure", None)
         # Execute and assert
         run_and_assert_exit(tmp_path, config)
 

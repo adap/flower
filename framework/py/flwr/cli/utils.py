@@ -220,12 +220,13 @@ def try_obtain_cli_auth_plugin(
     if not federation_config.get("enable-user-auth", False):
         return None
 
+    insecure = bool(federation_config.get("insecure"))
     # Check if TLS is enabled. If not, raise an error
-    if federation_config.get("root-certificates") is None:
+    if insecure:
         typer.secho(
             "❌ User authentication requires TLS to be enabled. "
-            "Please provide 'root-certificates' in the federation"
-            " configuration.",
+            "Please set `insecure = false` and provide 'root-certificates' "
+            " in the federation configuration if using self-signed certificates.",
             fg=typer.colors.RED,
             bold=True,
         )
