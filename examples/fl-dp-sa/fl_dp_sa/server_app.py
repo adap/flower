@@ -37,18 +37,21 @@ def main(grid: Grid, context: Context) -> None:
     model_weights = get_weights(Net())
     parameters = ndarrays_to_parameters(model_weights)
 
+    num_sampled_clients = context.run_config["num-sampled-clients"]
+    fraction_fit = 0.2
+    min_fit_clients = int(num_sampled_clients * fraction_fit)
+
     # Note: The fraction_fit value is configured based on the DP hyperparameter `num-sampled-clients`.
     strategy = FedAvg(
-        fraction_fit=0.2,
+        fraction_fit=fraction_fit,
         fraction_evaluate=0.0,
-        min_fit_clients=20,
+        min_fit_clients=min_fit_clients,
         fit_metrics_aggregation_fn=weighted_average,
         initial_parameters=parameters,
     )
 
     noise_multiplier = context.run_config["noise-multiplier"]
     clipping_norm = context.run_config["clipping-norm"]
-    num_sampled_clients = context.run_config["num-sampled-clients"]
 
     strategy = DifferentialPrivacyClientSideFixedClipping(
         strategy,
