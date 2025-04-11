@@ -178,9 +178,11 @@ def validate_certificate_in_federation_config(
 ) -> tuple[bool, Optional[bytes]]:
     """Validate the certificates in the Flower project configuration."""
     insecure_str = federation_config.get("insecure")
+    insecure = bool(insecure_str)
+
     if root_certificates := federation_config.get("root-certificates"):
         root_certificates_bytes = (app / root_certificates).read_bytes()
-        if insecure := bool(insecure_str):
+        if insecure:
             typer.secho(
                 "❌ `root-certificates` were provided but the `insecure` parameter "
                 "is set to `True`.",
@@ -192,14 +194,9 @@ def validate_certificate_in_federation_config(
         root_certificates_bytes = None
         if insecure_str is None:
             typer.secho(
-                "❌ To disable TLS, set `insecure = true` in `pyproject.toml`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-        if not (insecure := bool(insecure_str)):
-            typer.secho(
-                "❌ No certificate were given yet `insecure` is set to `False`.",
+                "❌ No certificate is provided, so TLS settings must be explicit. "
+                "To disable TLS, set `insecure = true` in `pyproject.toml`, otherwise"
+                "to enable TLS, set `insecure = false`.",
                 fg=typer.colors.RED,
                 bold=True,
             )
