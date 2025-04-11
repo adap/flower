@@ -49,11 +49,11 @@ def test_valid_certificates_when_wrong() -> None:
     assert not is_valid
 
 
-class TestCreateChannel(unittest.TestCase):
+class TestCreateChannel(unittest.TestCase):  # pylint: disable=R0902
     """Test the `create_channel` function."""
 
     def setUp(self) -> None:
-        """Initialize"""
+        """Initialize."""
         self.insecure_patcher = patch.object(grpc, "insecure_channel")
         self.mock_insecure_channel = self.insecure_patcher.start()
 
@@ -67,14 +67,14 @@ class TestCreateChannel(unittest.TestCase):
         self.mock_intercept_channel = self.intercept_patcher.start()
 
     def tearDown(self) -> None:
-        """Cleanup"""
+        """Cleanup."""
         self.insecure_patcher.stop()
         self.secure_patcher.stop()
         self.ssl_patcher.stop()
         self.intercept_patcher.stop()
 
     def test_insecure_channel_creation(self) -> None:
-        """Test insecure channel created successfully"""
+        """Test insecure channel created successfully."""
         server_address = "localhost:50051"
 
         # Setup - Configure the insecure channel mock to return a dummy channel
@@ -100,7 +100,7 @@ class TestCreateChannel(unittest.TestCase):
         self.assertEqual(channel, "fake_insecure_channel")
 
     def test_secure_channel_creation(self) -> None:
-        """Test secure channel created successfully"""
+        """Test secure channel created successfully."""
         # Setup
         server_address = "localhost:50051"
         dummy_root_cert = b"dummy_root_cert"
@@ -134,7 +134,7 @@ class TestCreateChannel(unittest.TestCase):
         self.assertEqual(channel, "fake_secure_channel")
 
     def test_create_channel_with_interceptors(self) -> None:
-        """Test secure channel created successfully with interceptors"""
+        """Test secure channel created successfully with interceptors."""
         # Setup
         server_address = "localhost:50051"
         dummy_root_cert = b"dummy_root_cert"
@@ -172,7 +172,7 @@ class TestCreateChannel(unittest.TestCase):
         self.assertEqual(channel, "intercepted_channel")
 
     def test_secure_channel_credentials_failure(self) -> None:
-        """Test misconfigured secure channel raises ValueError"""
+        """Test misconfigured secure channel raises ValueError."""
         # Setup
         server_address = "localhost:50051"
         dummy_root_cert = b"dummy_root_cert"
