@@ -1,5 +1,5 @@
 name: Auto Assign Issues
-# This workflow automatically assigns the user "WilliamLindskog" to new issues when they are opened.
+# This workflow automatically assigns "WilliamLindskog" to new issues when they are opened.
 
 on:
   issues:
