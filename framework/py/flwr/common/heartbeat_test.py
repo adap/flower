@@ -22,6 +22,7 @@ from unittest.mock import Mock
 from .heartbeat import HeartbeatSender
 
 
+# pylint: disable=protected-access
 class TestHeartbeatSender(unittest.TestCase):
     """Test the HeartbeatSender class."""
 
@@ -71,16 +72,9 @@ class TestHeartbeatSender(unittest.TestCase):
 
     def test_ping_fail_and_retry(self) -> None:
         """Test that the ping function is retried on failure."""
-
         # Prepare
-        def wait_gen_factory():
-            def wait_gen():
-                yield 0.01
-
-            return wait_gen
-
-        self.mock_ping_fn.side_effect = [False, True]
-        self.heartbeat_sender._retry_invoker.wait_gen_factory = wait_gen_factory
+        self.mock_ping_fn.side_effect = [False, False, True]
+        self.heartbeat_sender._retry_invoker.wait_function = lambda _: None
 
         # Execute
         self.heartbeat_sender.start()
@@ -88,7 +82,7 @@ class TestHeartbeatSender(unittest.TestCase):
         self.heartbeat_sender.stop()
 
         # Assert
-        self.assertEqual(self.mock_ping_fn.call_count, 2)
+        self.assertEqual(self.mock_ping_fn.call_count, 3)
 
     def test_thread_is_daemon(self) -> None:
         """Test that the thread is a daemon thread."""
