@@ -121,6 +121,9 @@ TIMESTAMP_HEADER = "flwr-timestamp"
 TIMESTAMP_TOLERANCE = 10  # General tolerance for timestamp verification
 SYSTEM_TIME_TOLERANCE = 5  # Allowance for system time drift
 
+# Constants for grpc retry
+GRPC_RETRY_MAX_DELAY = 20  # Maximum delay duration between two consecutive retries.
+
 # Constants for ArrayRecord
 GC_THRESHOLD = 200_000_000  # 200 MB
 
