@@ -15,8 +15,6 @@
 """Contextmanager for a REST request-response channel to the Flower server."""
 
 
-import random
-import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
 from copy import copy
@@ -27,16 +25,11 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
-from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import (
-    PING_BASE_MULTIPLIER,
-    PING_CALL_TIMEOUT,
-    PING_DEFAULT_INTERVAL,
-    PING_RANDOM_RANGE,
-)
+from flwr.common.constant import PING_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
+from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
@@ -160,8 +153,6 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     # Shared variables for inner functions
     metadata: Optional[Metadata] = None
     node: Optional[Node] = None
-    ping_thread: Optional[threading.Thread] = None
-    ping_stop_event = threading.Event()
 
     ###########################################################################
     # ping/create_node/delete_node/receive/send/get_run functions
@@ -214,11 +205,11 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         grpc_res.ParseFromString(res.content)
         return grpc_res
 
-    def ping() -> None:
+    def ping() -> bool:
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
-            return
+            return False
 
         # Construct the ping request
         req = PingRequest(node=node, ping_interval=PING_DEFAULT_INTERVAL)
@@ -226,18 +217,17 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Send the request
         res = _request(req, PingResponse, PATH_PING, retry=False)
         if res is None:
-            return
+            return False
 
         # Check if success
         if not res.success:
-            raise RuntimeError("Ping failed unexpectedly.")
+            raise RuntimeError(
+                "Ping failed unexpectedly. The SuperLink does not "
+                "recognize this SuperNode."
+            )
+        return True
 
-        # Wait
-        rd = random.uniform(*PING_RANDOM_RANGE)
-        next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
-        next_interval *= PING_BASE_MULTIPLIER + rd
-        if not ping_stop_event.is_set():
-            ping_stop_event.wait(next_interval)
+    heartbeat_sender = HeartbeatSender(ping)
 
     def create_node() -> Optional[int]:
         """Set create_node."""
@@ -248,10 +238,10 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         if res is None:
             return None
 
-        # Remember the node and the ping-loop thread
-        nonlocal node, ping_thread
+        # Remember the node and start the heartbeat sender
+        nonlocal node
         node = res.node
-        ping_thread = start_ping_loop(ping, ping_stop_event)
+        heartbeat_sender.start()
         return node.node_id
 
     def delete_node() -> None:
@@ -261,10 +251,8 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Node instance missing")
             return
 
-        # Stop the ping-loop thread
-        ping_stop_event.set()
-        if ping_thread is not None:
-            ping_thread.join()
+        # Stop heartbeat sender
+        heartbeat_sender.stop()
 
         # Send DeleteNode request
         req = DeleteNodeRequest(node=node)
