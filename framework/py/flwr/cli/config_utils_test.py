@@ -353,8 +353,17 @@ def test_validate_certificate_in_federation_config(tmp_path: Path) -> None:
         assert not insecure
         assert root_cert == b"dummy_cert"
 
-        # Test insecure is True and root_certificates is None
+        # Test insecure is False and root_certificates is None
         config.pop("root-certificates")
+        # Execute
+        insecure, root_cert = validate_certificate_in_federation_config(
+            tmp_path, config
+        )
+        # Assert
+        assert not insecure
+        assert root_cert is None
+
+        # Test insecure is True and root_certificates is None
         config["insecure"] = True
         # Execute
         insecure, root_cert = validate_certificate_in_federation_config(
