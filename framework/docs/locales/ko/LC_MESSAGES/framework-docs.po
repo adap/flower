@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-10 00:08+0000\n"
+"POT-Creation-Date: 2025-04-12 00:07+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -6437,7 +6437,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-implement-fedbn.rst:103
-#: ../../source/how-to-run-flower-on-azure.rst:218
+#: ../../source/how-to-run-flower-on-azure.rst:216
 msgid "Next Steps"
 msgstr "다음 단계"
 
@@ -7209,12 +7209,12 @@ msgid ""
 " resources: |authenticate_supernodes|_, |enable_tls_connections|_"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:198
+#: ../../source/how-to-run-flower-on-azure.rst:196
 #, fuzzy
 msgid "Run Flower App"
 msgstr "Flower 서버."
 
-#: ../../source/how-to-run-flower-on-azure.rst:200
+#: ../../source/how-to-run-flower-on-azure.rst:198
 msgid ""
 "Finally, after all running Flower processes have been initialized on the "
 "Microsoft Azure cluster, in our local machine, we first need to install "
@@ -7224,17 +7224,17 @@ msgid ""
 "``pyproject.toml`` file, and then add the following sections:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:215
+#: ../../source/how-to-run-flower-on-azure.rst:213
 msgid "Then from our local machine we need to run ``flwr run . my-federation``."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:222
+#: ../../source/how-to-run-flower-on-azure.rst:220
 msgid ""
 "This guide is not suitable for production environments due to missing "
 "authentication and TLS security."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:225
+#: ../../source/how-to-run-flower-on-azure.rst:223
 msgid ""
 "To enable authentication and establish secure connections, please refer "
 "to the following resources: |authenticate_supernodes|_, "
@@ -30031,7 +30031,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|2e3a8dd8625a48a080386b56f6143b3c|"
+msgid "|35abe9fd99c947f1ada188587b79300e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30048,7 +30048,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|7c96683b1c2042c796e76c4ef095f4a6|"
+msgid "|4113569203ae40448098ee4d094f3898|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30074,7 +30074,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|eccacc874336420ab6a338024bdcdcf0|"
+msgid "|387a5b42b212438499d45e9545122a3f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30092,7 +30092,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|c26cd0ddba7d45c58daefc7741c3c21c|"
+msgid "|9980c661d483419486cc5c92296ea5a3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -30111,7 +30111,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|55ad49291b07427b9cd15cf45ca12c66|"
+msgid "|13990a7326864e5ca3f17c6d3d2df761|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -30128,7 +30128,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|1ecea76fb58d490593e0ebaae474b0b4|"
+msgid "|ee72a0d726ec4a78a5feadbbde4376d2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -30151,7 +30151,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|ac0ae32f88a343aca8bff2bd6d7be924|"
+msgid "|fe6cc4783d4741d2949b5145c2d1848e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -30168,7 +30168,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|ec672277bede4c358eab8bf606c0bc18|"
+msgid "|a933b3b132b24a3594cde735e8b43079|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -30347,7 +30347,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|4dfc1ccf0f52485cb630e2c42205e8cd|"
+msgid "|68c15a5030284837b7e016a137c19180|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -30375,7 +30375,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|054b39036f4241779cee8b856535ef8c|"
+msgid "|01c13ed6a53447308c58f88229ef9beb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -30402,7 +30402,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|f36b0843a8404bd994c12d417791639e|"
+msgid "|fe377cbc92784c30985c932bbf566a02|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -30428,7 +30428,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|267ba4ef820c4a18ba17a3cf6baa2328|"
+msgid "|d3a955bbdbb24d4a9e050066191f8dc2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -30478,7 +30478,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|cd58650e67ea4d51a6796f6290adc7a3|"
+msgid "|39aeb361f8c546f48d1284c50feeb527|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -30598,7 +30598,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|42fe13229c9e47459cd10173391681fd|"
+msgid "|6fca30cdace54e97b95aaec19b3a3e1d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -40658,5 +40658,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|3d62057de8c64752921d1eab65741d54|"
+#~ msgstr ""
+
+#~ msgid "|2e3a8dd8625a48a080386b56f6143b3c|"
+#~ msgstr ""
+
+#~ msgid "|7c96683b1c2042c796e76c4ef095f4a6|"
+#~ msgstr ""
+
+#~ msgid "|eccacc874336420ab6a338024bdcdcf0|"
+#~ msgstr ""
+
+#~ msgid "|c26cd0ddba7d45c58daefc7741c3c21c|"
+#~ msgstr ""
+
+#~ msgid "|55ad49291b07427b9cd15cf45ca12c66|"
+#~ msgstr ""
+
+#~ msgid "|1ecea76fb58d490593e0ebaae474b0b4|"
+#~ msgstr ""
+
+#~ msgid "|ac0ae32f88a343aca8bff2bd6d7be924|"
+#~ msgstr ""
+
+#~ msgid "|ec672277bede4c358eab8bf606c0bc18|"
+#~ msgstr ""
+
+#~ msgid "|4dfc1ccf0f52485cb630e2c42205e8cd|"
+#~ msgstr ""
+
+#~ msgid "|054b39036f4241779cee8b856535ef8c|"
+#~ msgstr ""
+
+#~ msgid "|f36b0843a8404bd994c12d417791639e|"
+#~ msgstr ""
+
+#~ msgid "|267ba4ef820c4a18ba17a3cf6baa2328|"
+#~ msgstr ""
+
+#~ msgid "|cd58650e67ea4d51a6796f6290adc7a3|"
+#~ msgstr ""
+
+#~ msgid "|42fe13229c9e47459cd10173391681fd|"
 #~ msgstr ""
 
