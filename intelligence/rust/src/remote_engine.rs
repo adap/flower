@@ -12,13 +12,13 @@ use async_trait::async_trait;
 use base64::{engine::general_purpose, Engine as _};
 use chrono::DateTime;
 use chrono::Utc;
-use fancy_regex::Regex;
 use futures_util::StreamExt;
 use rand::RngCore;
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
 use reqwest::Response;
 use ring::{agreement, hkdf, rand as ring_rand};
 use serde::{Deserialize, Serialize};
+use serde_json::Deserializer;
 use std::sync::Arc;
 use x509_parser::prelude::*;
 use yasna::models::ObjectIdentifier;
@@ -103,61 +103,51 @@ impl RemoteEngine {
         )
         .await?;
 
-        // Prepare a regex to split JSON objects that are concatenated in the stream.
-        let re = Regex::new(r"(?<=})\s*(?={)").unwrap();
-
         let mut accumulated_response = String::new();
         let mut stream = response.bytes_stream();
 
+        // Process each incoming chunk
         while let Some(chunk_result) = stream.next().await {
             let chunk = chunk_result.map_err(|e| Failure {
                 code: FailureCode::RemoteError,
                 description: e.to_string(),
             })?;
-            // Convert the byte chunk to a String.
             let chunk_text = String::from_utf8_lossy(&chunk).to_string();
-            // Split the chunk into potential JSON segments.
-            let data_array: Vec<&str> = re
-                .split(&chunk_text)
-                .map(|res| res.map_err(|e| format!("Regex split error: {:?}", e)))
-                .collect::<Result<Vec<_>, String>>()
-                .map_err(|s| Failure {
-                    code: FailureCode::RemoteError,
-                    description: s,
-                })?;
 
-            for data in data_array {
-                // Try to parse the segment as a StreamResponse.
-                let parsed: Result<StreamResponse, _> = serde_json::from_str(data);
-                if let Ok(stream_response) = parsed {
-                    for choice in stream_response.choices {
-                        if let Some(delta_content) = choice.delta.content {
-                            // If encryption is enabled, attempt to decrypt the content.
-                            let content = if encrypt {
-                                match self.crypto_handler.decrypt_message(&delta_content).await {
-                                    Ok(decrypted) => decrypted,
-                                    Err(err_msg) => {
-                                        return Err(Failure {
+            // Use serde_json's streaming deserializer to iterate over concatenated JSON objects.
+            let mut de = Deserializer::from_str(&chunk_text).into_iter::<StreamResponse>();
+
+            while let Some(item) = de.next() {
+                match item {
+                    Ok(stream_response) => {
+                        for choice in stream_response.choices {
+                            if let Some(delta_content) = choice.delta.content {
+                                let content = if encrypt {
+                                    // If encryption is enabled, decrypt the chunk.
+                                    self.crypto_handler
+                                        .decrypt_message(&delta_content)
+                                        .await
+                                        .map_err(|err_msg| Failure {
                                             code: FailureCode::EncryptionError,
                                             description: err_msg,
-                                        });
-                                    }
+                                        })?
+                                } else {
+                                    delta_content
+                                };
+
+                                // Call the callback immediately without newline.
+                                if let Some(callback) = &on_stream_event {
+                                    callback(StreamEvent {
+                                        chunk: content.clone(),
+                                    });
                                 }
-                            } else {
-                                delta_content
-                            };
-                            // Invoke the stream callback if provided.
-                            if let Some(callback) = &on_stream_event {
-                                callback(StreamEvent {
-                                    chunk: content.clone(),
-                                });
+                                accumulated_response.push_str(&content);
                             }
-                            // Append the resulting chunk to the accumulated response.
-                            accumulated_response.push_str(&content);
                         }
                     }
-                } else {
-                    eprintln!("Error parsing JSON chunk: {}", data);
+                    Err(e) => {
+                        eprintln!("Error parsing JSON chunk: {:?}", e);
+                    }
                 }
             }
         }
