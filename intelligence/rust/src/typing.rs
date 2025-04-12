@@ -11,6 +11,7 @@ pub enum FailureCode {
     UnavailableError,
     TimeoutError,
     RemoteError,
+    EncryptionError,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -25,17 +26,14 @@ pub type FIResult<T> = std::result::Result<T, Failure>;
 pub struct Message {
     pub role: String,
     pub content: String,
-    // If you have a tool_calls field, also require Serialize/Deserialize:
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tool_calls: Option<Vec<ToolCall>>,
 }
 
-/// Dummy type representing progress.
 pub struct Progress {
     pub description: String,
 }
 
-/// Dummy type representing a stream event.
 pub struct StreamEvent {
     pub chunk: String,
 }
@@ -63,5 +61,4 @@ pub struct ChatOptions {
     pub encrypt: Option<bool>,
 }
 
-/// For chat operations, we return a success `Message` or a `Failure`.
 pub type ChatResponseResult = FIResult<Message>;

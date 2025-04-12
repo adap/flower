@@ -31,14 +31,14 @@ pub struct SimpleEngine;
 impl Engine for SimpleEngine {
     async fn chat(
         &mut self,
-        messages: Vec<typing::Message>,
+        _messages: Vec<typing::Message>,
         model: String,
-        temperature: Option<f64>,
-        max_completion_tokens: Option<u32>,
-        stream: Option<bool>,
-        on_stream_event: Option<Arc<dyn Fn(typing::StreamEvent) + Send + Sync>>,
-        tools: Option<Vec<typing::Tool>>,
-        encrypt: Option<bool>,
+        _temperature: Option<f64>,
+        _max_completion_tokens: Option<u32>,
+        _stream: Option<bool>,
+        _on_stream_event: Option<Arc<dyn Fn(typing::StreamEvent) + Send + Sync>>,
+        _tools: Option<Vec<typing::Tool>>,
+        _encrypt: Option<bool>,
     ) -> typing::ChatResponseResult {
         Ok(typing::Message {
             role: "assistant".into(),
@@ -49,7 +49,7 @@ impl Engine for SimpleEngine {
 
     async fn fetch_model(
         &mut self,
-        model: String,
+        _model: String,
         callback: Arc<dyn Fn(typing::Progress) + Send + Sync>,
     ) -> typing::FIResult<()> {
         callback(typing::Progress {
@@ -58,15 +58,7 @@ impl Engine for SimpleEngine {
         Ok(())
     }
 
-    async fn is_supported(&self, model: String) -> typing::FIResult<()> {
-        // For this dummy engine, assume it supports models containing "transformers".
-        if model.contains("transformers") {
-            Ok(())
-        } else {
-            Err(typing::Failure {
-                code: typing::FailureCode::LocalEngineChatError,
-                description: "Model not supported by SimpleEngine".into(),
-            })
-        }
+    async fn is_supported(&self, _model: String) -> typing::FIResult<()> {
+        Ok(())
     }
 }

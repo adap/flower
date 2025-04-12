@@ -1,7 +1,6 @@
 mod constants;
 mod engine;
 mod remote_engine;
-mod typing;
 
 use constants::DEFAULT_MODEL;
 use engine::{Engine, SimpleEngine};
@@ -17,6 +16,7 @@ pub struct FlowerIntelligence {
     remote_handoff: bool,
     api_key: Option<String>,
 }
+pub mod typing;
 
 impl FlowerIntelligence {
     pub fn new() -> Self {

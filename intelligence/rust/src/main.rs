@@ -1,4 +1,5 @@
-use intelligence::FlowerIntelligence;
+use intelligence::{typing::ChatOptions, FlowerIntelligence};
+use std::env;
 use tokio::sync::Mutex;
 
 #[tokio::main]
@@ -7,12 +8,28 @@ async fn main() {
     let mut fi = fi_mutex.lock().await;
 
     fi.set_remote_handoff(true);
-    fi.set_api_key("API_KEY".to_string());
 
-    let chat_result = fi.chat("Why is the sky blue?", None).await;
+    let api_key = env::var("FI_API_KEY").ok();
+    if let Some(key) = api_key {
+        fi.set_api_key(key);
+    }
+
+    let options = ChatOptions {
+        model: Some("meta/llama3.2-3b/instruct-q4".to_string()),
+        temperature: Some(0.7),
+        max_completion_tokens: Some(100),
+        stream: Some(false),
+        on_stream_event: None,
+        tools: None,
+        force_remote: Some(true),
+        force_local: Some(false),
+        encrypt: Some(true),
+    };
+
+    let chat_result = fi.chat("Why is the sky blue?", Some(options)).await;
     match chat_result {
         Ok(response) => {
-            println!("chat test passed. Response: {}", response.content);
+            println!("{}", response.content);
             assert_eq!(response.role, "assistant");
         }
         Err(e) => {
@@ -20,5 +37,4 @@ async fn main() {
             std::process::exit(1);
         }
     }
-    println!("All tests in main passed successfully.");
 }
