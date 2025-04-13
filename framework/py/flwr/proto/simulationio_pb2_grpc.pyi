@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import abc
+import flwr.proto.heartbeat_pb2
 import flwr.proto.log_pb2
 import flwr.proto.run_pb2
 import flwr.proto.simulationio_pb2
@@ -39,6 +40,11 @@ class SimulationIoStub:
         flwr.proto.run_pb2.GetRunStatusRequest,
         flwr.proto.run_pb2.GetRunStatusResponse]
     """Get Run Status"""
+
+    Ping: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.PingRequest,
+        flwr.proto.heartbeat_pb2.PingResponse]
+    """Ping"""
 
 
 class SimulationIoServicer(metaclass=abc.ABCMeta):
@@ -88,6 +94,14 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.run_pb2.GetRunStatusResponse:
         """Get Run Status"""
+        pass
+
+    @abc.abstractmethod
+    def Ping(self,
+        request: flwr.proto.heartbeat_pb2.PingRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.heartbeat_pb2.PingResponse:
+        """Ping"""
         pass
 
 

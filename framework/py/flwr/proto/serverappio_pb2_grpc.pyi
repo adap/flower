@@ -4,6 +4,7 @@ isort:skip_file
 """
 import abc
 import flwr.proto.fab_pb2
+import flwr.proto.heartbeat_pb2
 import flwr.proto.log_pb2
 import flwr.proto.run_pb2
 import flwr.proto.serverappio_pb2
@@ -65,6 +66,11 @@ class ServerAppIoStub:
         flwr.proto.log_pb2.PushLogsRequest,
         flwr.proto.log_pb2.PushLogsResponse]
     """Push ServerApp logs"""
+
+    Ping: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.PingRequest,
+        flwr.proto.heartbeat_pb2.PingResponse]
+    """Ping"""
 
 
 class ServerAppIoServicer(metaclass=abc.ABCMeta):
@@ -154,6 +160,14 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.log_pb2.PushLogsResponse:
         """Push ServerApp logs"""
+        pass
+
+    @abc.abstractmethod
+    def Ping(self,
+        request: flwr.proto.heartbeat_pb2.PingRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.heartbeat_pb2.PingResponse:
+        """Ping"""
         pass
 
 

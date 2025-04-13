@@ -3,6 +3,7 @@
 import grpc
 
 from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
+from flwr.proto import heartbeat_pb2 as flwr_dot_proto_dot_heartbeat__pb2
 from flwr.proto import log_pb2 as flwr_dot_proto_dot_log__pb2
 from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 from flwr.proto import serverappio_pb2 as flwr_dot_proto_dot_serverappio__pb2
@@ -71,6 +72,11 @@ class ServerAppIoStub(object):
                 '/flwr.proto.ServerAppIo/PushLogs',
                 request_serializer=flwr_dot_proto_dot_log__pb2.PushLogsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_log__pb2.PushLogsResponse.FromString,
+                )
+        self.Ping = channel.unary_unary(
+                '/flwr.proto.ServerAppIo/Ping',
+                request_serializer=flwr_dot_proto_dot_heartbeat__pb2.PingRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_heartbeat__pb2.PingResponse.FromString,
                 )
 
 
@@ -154,6 +160,13 @@ class ServerAppIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Ping(self, request, context):
+        """Ping
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ServerAppIoServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -211,6 +224,11 @@ def add_ServerAppIoServicer_to_server(servicer, server):
                     servicer.PushLogs,
                     request_deserializer=flwr_dot_proto_dot_log__pb2.PushLogsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_log__pb2.PushLogsResponse.SerializeToString,
+            ),
+            'Ping': grpc.unary_unary_rpc_method_handler(
+                    servicer.Ping,
+                    request_deserializer=flwr_dot_proto_dot_heartbeat__pb2.PingRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_heartbeat__pb2.PingResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -406,5 +424,22 @@ class ServerAppIo(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/PushLogs',
             flwr_dot_proto_dot_log__pb2.PushLogsRequest.SerializeToString,
             flwr_dot_proto_dot_log__pb2.PushLogsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Ping(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/Ping',
+            flwr_dot_proto_dot_heartbeat__pb2.PingRequest.SerializeToString,
+            flwr_dot_proto_dot_heartbeat__pb2.PingResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

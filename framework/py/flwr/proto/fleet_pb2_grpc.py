@@ -4,6 +4,7 @@ import grpc
 
 from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
 from flwr.proto import fleet_pb2 as flwr_dot_proto_dot_fleet__pb2
+from flwr.proto import heartbeat_pb2 as flwr_dot_proto_dot_heartbeat__pb2
 from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 
 
@@ -28,8 +29,8 @@ class FleetStub(object):
                 )
         self.Ping = channel.unary_unary(
                 '/flwr.proto.Fleet/Ping',
-                request_serializer=flwr_dot_proto_dot_fleet__pb2.PingRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_fleet__pb2.PingResponse.FromString,
+                request_serializer=flwr_dot_proto_dot_heartbeat__pb2.PingRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_heartbeat__pb2.PingResponse.FromString,
                 )
         self.PullMessages = channel.unary_unary(
                 '/flwr.proto.Fleet/PullMessages',
@@ -120,8 +121,8 @@ def add_FleetServicer_to_server(servicer, server):
             ),
             'Ping': grpc.unary_unary_rpc_method_handler(
                     servicer.Ping,
-                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.PingRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_fleet__pb2.PingResponse.SerializeToString,
+                    request_deserializer=flwr_dot_proto_dot_heartbeat__pb2.PingRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_heartbeat__pb2.PingResponse.SerializeToString,
             ),
             'PullMessages': grpc.unary_unary_rpc_method_handler(
                     servicer.PullMessages,
@@ -199,8 +200,8 @@ class Fleet(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/Ping',
-            flwr_dot_proto_dot_fleet__pb2.PingRequest.SerializeToString,
-            flwr_dot_proto_dot_fleet__pb2.PingResponse.FromString,
+            flwr_dot_proto_dot_heartbeat__pb2.PingRequest.SerializeToString,
+            flwr_dot_proto_dot_heartbeat__pb2.PingResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
