@@ -1,13 +1,45 @@
-# Flower Intelligence Encrypted Example
+---
+tags: [node, minimal, remote, encryption, Flower Confidential Remote Compute, typescript]
+---
 
-In order to run this example, update the following values inside `src/index.ts`:
+# Flower Confidential Remote Compute example
 
-```typescript
-fi.apiKey = 'REPLACE_HERE';
-```
+## Project setup
 
-Run example:
+You must first download the example with the following command:
 
 ```bash
-pnpm start
+git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/intelligence/ts/examples/encrypted . && rm -rf _tmp && cd encrypted
+```
+
+You can then install the project dependencies with:
+
+```bash
+npm i
+```
+
+```{warning}
+In order to run this example, you need to update `fi.apiKey = 'REPLACE_HERE'` inside `src/index.ts` with a valid API key (if you don't have one, you can register [here](https://flower.ai/intelligence/)).
+```
+
+## Build
+
+Then, you need to build the project:
+
+```bash
+npm run build
+```
+
+## Run
+
+In order to run the example once the project has been built:
+
+```bash
+node dist/index.js
+```
+
+or
+
+```bash
+npm run start
 ```

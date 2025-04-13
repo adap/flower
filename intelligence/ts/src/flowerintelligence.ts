@@ -16,13 +16,18 @@
 import { Engine } from './engines/engine';
 import { RemoteEngine } from './engines/remoteEngine';
 import { TransformersEngine } from './engines/transformersEngine';
-import { ChatOptions, ChatResponseResult, FailureCode, Message, Progress, Result } from './typing';
+import {
+  ChatOptions,
+  ChatResponseResult,
+  Failure,
+  FailureCode,
+  Message,
+  Progress,
+  Result,
+} from './typing';
 import { WebllmEngine } from './engines/webllmEngine';
 import { DEFAULT_MODEL } from './constants';
-
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-const isNode = typeof process !== 'undefined' && process.versions.node != null;
-/* eslint-enable @typescript-eslint/no-unnecessary-condition */
+import { isNode } from './env';
 
 /**
  * Class representing the core intelligence service for Flower Labs.
@@ -75,7 +80,7 @@ export class FlowerIntelligence {
   /**
    * Downloads and loads a model into memory.
    * @param model Model name to use for the chat.
-   * @param callback A callback to handle the progress of the download
+   * @param callback A callback function taking a {@link Progress} object to handle the loading event.
    * @returns A {@link Result} containing either a {@link Failure} (containing `code: number` and `description: string`) if `ok` is false or a value of `void`, if `ok` is true (meaning the loading was successful).
    */
   async fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>> {
@@ -83,8 +88,7 @@ export class FlowerIntelligence {
     if (!engineResult.ok) {
       return engineResult;
     } else {
-      const [engine, modelId] = engineResult.value;
-      return await engine.fetchModel(modelId, callback);
+      return await engineResult.value.fetchModel(model, callback);
     }
   }
 
@@ -153,8 +157,9 @@ export class FlowerIntelligence {
       ({ messages, ...options } = inputOrOptions);
     }
 
+    const model = options.model ?? DEFAULT_MODEL;
     const engineResult = await this.getEngine(
-      options.model ?? DEFAULT_MODEL,
+      model,
       options.forceRemote ?? false,
       options.forceLocal ?? false
     );
@@ -163,10 +168,9 @@ export class FlowerIntelligence {
       return engineResult;
     }
 
-    const [engine, modelId] = engineResult.value;
-    return await engine.chat(
+    return await engineResult.value.chat(
       messages,
-      modelId,
+      model,
       options.temperature,
       options.maxCompletionTokens,
       options.stream,
@@ -180,14 +184,14 @@ export class FlowerIntelligence {
     modelId: string,
     forceRemote: boolean,
     forceLocal: boolean
-  ): Promise<Result<[Engine, string]>> {
+  ): Promise<Result<Engine>> {
     const argsResult = this.validateArgs(forceRemote, forceLocal);
     if (!argsResult.ok) {
       return argsResult;
     }
 
     if (forceRemote) {
-      return this.getOrCreateRemoteEngine(modelId);
+      return this.getOrCreateRemoteEngine();
     }
 
     const localEngineResult = await this.chooseLocalEngine(modelId);
@@ -195,34 +199,63 @@ export class FlowerIntelligence {
       return localEngineResult;
     }
 
-    return this.getOrCreateRemoteEngine(modelId);
+    return this.getOrCreateRemoteEngine(localEngineResult);
   }
 
-  private async chooseLocalEngine(modelId: string): Promise<Result<[Engine, string]>> {
-    const compatibleEngines = (
-      await Promise.all(
-        this.#availableLocalEngines.map(async (engine) => {
-          const supportedResult = await engine.isSupported(modelId);
-          return supportedResult.ok ? [engine, supportedResult.value] : null;
-        })
-      )
-    ).filter((item): item is [Engine, string] => item !== null);
+  private async chooseLocalEngine(modelId: string): Promise<Result<Engine>> {
+    const results = await Promise.all(
+      this.#availableLocalEngines.map(async (engine) => {
+        const supportResult = await engine.isSupported(modelId);
+        return { engine, supportResult };
+      })
+    );
+    const compatibleEngines = results
+      .filter(({ supportResult }) => supportResult.ok)
+      .map(({ engine }) => engine);
 
     if (compatibleEngines.length > 0) {
       // Currently we just select the first compatible localEngine without further check
       return { ok: true, value: compatibleEngines[0] };
     } else {
+      // We extract the failures from the results that didn't return a true `ok`
+      const failures = results
+        .filter(
+          (result): result is { engine: Engine; supportResult: { ok: false; failure: Failure } } =>
+            !result.supportResult.ok
+        )
+        .map(({ supportResult }) => supportResult.failure);
+
+      // We then compute which failure has the highest FailureCode
+      // usually corresponding to the most specific error
+      const highestFailure = failures.reduce(
+        (max, failure) => (failure.code > max.code ? failure : max),
+        failures[0]
+      );
       return {
         ok: false,
-        failure: {
-          code: FailureCode.NoLocalProviderError,
-          description: `No available local engine for ${modelId}.`,
-        },
+        failure: highestFailure,
       };
     }
   }
 
-  private getOrCreateRemoteEngine(modelId: string): Result<[Engine, string]> {
+  private getOrCreateRemoteEngine(localFailure?: Result<Engine>): Result<Engine> {
+    if (
+      localFailure &&
+      !localFailure.ok &&
+      (!FlowerIntelligence.#remoteHandoff || !FlowerIntelligence.#apiKey)
+    ) {
+      let description = localFailure.failure.description;
+      description += FlowerIntelligence.#remoteHandoff
+        ? '\nAdditionally, a valid API key for Remote Handoff was not provided.'
+        : '\nAdditionally, Remote Handoff was not enabled.';
+      return {
+        ok: false,
+        failure: {
+          code: localFailure.failure.code,
+          description,
+        },
+      };
+    }
     if (!FlowerIntelligence.#remoteHandoff) {
       return {
         ok: false,
@@ -242,7 +275,7 @@ export class FlowerIntelligence {
       };
     }
     this.#remoteEngine = this.#remoteEngine ?? new RemoteEngine(FlowerIntelligence.#apiKey);
-    return { ok: true, value: [this.#remoteEngine, modelId] };
+    return { ok: true, value: this.#remoteEngine };
   }
 
   private validateArgs(forceRemote: boolean, forceLocal: boolean): Result<void> {

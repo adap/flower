@@ -23,10 +23,14 @@ pnpm-lock.yaml
 *.sln
 *.sw?
 
+coverage
+create
+dev
 docs
 examples
 e2e
-coverage
+src
+templates
 .env
 .prettierignore
 .prettierrc.json
@@ -34,3 +38,4 @@ eslint.config.mjs
 tsconfig.json
 typedoc.json
 vite.config.ts
+vite.config.bundled.ts

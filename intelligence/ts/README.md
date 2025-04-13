@@ -2,14 +2,12 @@
 
 Check out the full documentation [here](https://flower.ai/docs/intelligence), and the project website [here](https://flower.ai/intelligence).
 
-You can use `npm` or `pnpm` (or probably `yarn`), but this `README.md` shows examples using `pnpm`
-
 ## Install
 
 To install via NPM, run:
 
 ```sh
-pnpm i @flwr/flwr
+npm i @flwr/flwr
 ```
 
 Alternatively, you can use it in vanilla JS, without any bundler, by using a CDN or static hosting. For example, using ES Modules, you can import the library with:
@@ -23,10 +21,7 @@ Alternatively, you can use it in vanilla JS, without any bundler, by using a CDN
 ## Hello, Flower Intelligence!
 
 ```javascript
-// If installed with NPM
-// import { FlowerIntelligence } from '@flwr/flwr';
-
-import { FlowerIntelligence } from 'https://cdn.jsdelivr.net/npm/@flwr/flwr';
+import { FlowerIntelligence } from '@flwr/flwr';
 
 const fi = FlowerIntelligence.instance;
 
@@ -51,17 +46,17 @@ await main().then().catch();
 
 ## Demo
 
-You can also quickly try out the library with the `examples/hello-world` example:
+You can also quickly try out the library with the [`examples/hello-world-ts`](https://github.com/adap/flower/tree/main/intelligence/ts/examples/hello-world-ts) example (which is a minimal TypeScript project):
 
 ```sh
-pnpm demo
+git clone --depth=1 https://github.com/adap/flower.git _tmp && \
+mv _tmp/intelligence/ts/examples/hello-world-ts . && \
+rm -rf _tmp && \
+cd hello-world-ts
+
+npm i
+npm run build
+npm run start
 ```
 
-This script will build the library and run the example demo. You can modify the
-prompt used inside `examples/hello-world/index.mjs`.
-
-You can also use `pnpm demo:js-proj` or `pnpm demo:ts-proj` to respectively
-run a simple JavaScript project example or a simple TypeScript project example.
-Those projects can be found respectively in `examples/simple-js-project` and
-`examples/simple-ts-project`. Note that, contrary to `examples/hello-world`,
-those project are valid `pnpm`/`npm` projects.
+You'll find a list of other examples [here](https://github.com/adap/flower/tree/main/intelligence/ts/examples).

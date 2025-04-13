@@ -1,7 +1,6 @@
 import { FlowerIntelligence, type StreamEvent } from '@flwr/flwr';
-import { storage, tabs, runtime } from 'webextension-polyfill';
+import { storage } from 'webextension-polyfill';
 import { FLWR_ICON } from './icons';
-import { REMOTE_HANDOFF_CACHE_KEY } from './constants';
 
 const fi = FlowerIntelligence.instance;
 fi.remoteHandoff = true;
@@ -14,8 +13,7 @@ interface Message {
 
 const SYSTEM_PROMPT: Message = {
   role: 'system',
-  content:
-    'You are a helpful browser assistant. You might get context on the current webpage as well as summaries of previous visited webpages. Feel free to use this. You should try to be concise.',
+  content: 'You are a helpful browser assistant.',
 };
 
 function getElement(selector: string): HTMLElement {
@@ -119,36 +117,9 @@ async function sendMessage() {
   const initialButtonContent = elements.sendButton.innerHTML; // Store initial button content
   elements.sendButton.innerHTML = '<div class="loader"></div>'; // Show loader in the button
 
-  const fullContext = await getCurrentContext();
-  let currContextPrompt = '';
-
-  const { currentContent, summary, contextUrls: _ } = fullContext;
-  if (summary.length > 0) {
-    currContextPrompt = `For context, here are summaries of the previous webpages I visited:\n${summary}\n\n`;
-    if (!messageHistory.some((msg) => msg.content.includes(currContextPrompt))) {
-      if (currentContent.length > 0) {
-        currContextPrompt = `${currContextPrompt}And, here is the content of the current page I am on:\n${currentContent}.\n\nQuestion: `;
-      } else {
-        currContextPrompt = `${currContextPrompt}\n\nQuestion: `;
-      }
-    } else {
-      if (currentContent.length > 0) {
-        currContextPrompt = `Here is the content of the current page I am on:\n${currentContent}.\n\nQuestion: `;
-      } else {
-        currContextPrompt = '';
-      }
-    }
-  } else {
-    if (currentContent.length > 0) {
-      currContextPrompt = `Here is the content of the current page I am on:\n${currentContent}.\n\nQuestion: `;
-    } else {
-      currContextPrompt = '';
-    }
-  }
-
   addMessageToHistory({
     role: 'user',
-    content: `${currContextPrompt}${messageText}`,
+    content: messageText,
   });
 
   // Make a deep copy of the context before streaming response
@@ -163,10 +134,7 @@ async function sendMessage() {
     renderHistory();
   };
 
-  const remoteCacheRes = await storage.local.get(REMOTE_HANDOFF_CACHE_KEY);
-  if (REMOTE_HANDOFF_CACHE_KEY in remoteCacheRes) {
-    fi.remoteHandoff = Boolean(remoteCacheRes[REMOTE_HANDOFF_CACHE_KEY]);
-  }
+  fi.remoteHandoff = false;
 
   if (!fi.remoteHandoff) {
     console.log('Running locally...');
@@ -174,10 +142,9 @@ async function sendMessage() {
 
   await fi.chat({
     messages: [SYSTEM_PROMPT, ...context],
-    model: 'meta/llama3.2-1b/fp16',
+    model: 'meta/llama3.2-1b/instruct-fp16',
     stream: true,
     onStreamEvent: updateAssistantResponse,
-    forceRemote: true,
   });
 
   // Save the full conversation history to storage after streaming is complete
@@ -282,32 +249,3 @@ elements.clearHistoryButton.addEventListener('click', () => {
     elements.dropdownMenu.style.display = 'none';
   })();
 });
-
-async function getCurrentContext() {
-  try {
-    await updateContext();
-    const { cachedContext } = (await storage.local.get('cachedContext')) as {
-      cachedContext: {
-        currentContent: string;
-        summary: string;
-        contextUrls: string[];
-      };
-    };
-    return cachedContext;
-  } catch {
-    return {
-      currentContent: '',
-      summary: '',
-      contextUrls: [],
-    };
-  }
-}
-
-async function updateContext() {
-  const openedTabs = await tabs.query({ active: true, currentWindow: true });
-  const activeTab = openedTabs[0];
-  await runtime.sendMessage({
-    type: 'updateCurrentPage',
-    currentUrl: activeTab.url,
-  });
-}

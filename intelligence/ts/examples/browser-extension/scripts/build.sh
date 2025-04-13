@@ -2,11 +2,6 @@
 rm -rf dist/*
 mkdir -p dist/assets
 
-# Build `background.js` as a library
-vite build --config vite.config.background.js
-cp -R dist/background/*.js dist/
-rm -rf dist/background
-
 # Build `options.js` as a library
 vite build --config vite.config.options.js
 cp -R dist/options/*.js dist/

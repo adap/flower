@@ -18,7 +18,7 @@ import { vi } from 'vitest';
 vi.mock('./constants', () => ({
   DEFAULT_MODEL: 'meta/llama3.2-1b/instruct-fp16',
   REMOTE_URL: process.env.FI_DEV_REMOTE_URL,
-  VERSION: '0.1.3',
+  VERSION: '0.1.8',
   SDK: 'TS',
 }));
 
@@ -43,15 +43,19 @@ describe('FlowerIntelligence', () => {
       const getEngineRes = await fi['getEngine']('meta/llama3.2-1b/instruct-fp16', true, false);
       expect(getEngineRes.ok).toBe(true);
       if (getEngineRes.ok) {
-        expect(getEngineRes.value[0]).toBeInstanceOf(RemoteEngine);
+        expect(getEngineRes.value).toBeInstanceOf(RemoteEngine);
       }
     });
 
     it('should return a local engine when the model can run locally', async () => {
-      const getEngineRes = await fi['getEngine']('meta/llama3.2-1b/instruct-fp16', false, false);
+      const getEngineRes = await fi['getEngine'](
+        'huggingface/smollm2-360m/instruct-q4',
+        false,
+        false
+      );
       expect(getEngineRes.ok).toBe(true);
       if (getEngineRes.ok) {
-        expect(getEngineRes.value[0]).toBeInstanceOf(TransformersEngine);
+        expect(getEngineRes.value).toBeInstanceOf(TransformersEngine);
       }
     });
 
@@ -85,10 +89,10 @@ describe('FlowerIntelligence', () => {
 
   describe('chooseLocalEngine', () => {
     it('should return a local engine for a valid provider', async () => {
-      const chooseEngineRes = await fi['chooseLocalEngine']('meta/llama3.2-1b/instruct-fp16');
+      const chooseEngineRes = await fi['chooseLocalEngine']('huggingface/smollm2-360m/instruct-q4');
       expect(chooseEngineRes.ok).toBe(true);
       if (chooseEngineRes.ok) {
-        expect(chooseEngineRes.value[0]).toBeInstanceOf(TransformersEngine);
+        expect(chooseEngineRes.value).toBeInstanceOf(TransformersEngine);
       }
     });
   });
