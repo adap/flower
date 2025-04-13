@@ -104,7 +104,11 @@ def save_results_as_pickle(
 
 def save_results_and_config(history, run_config):
     """Save history and clean scaler dir."""
-    results_path = PROJECT_DIR / run_config.results_save_dir / run_config.algorithm_name
+    results_path = (
+        PROJECT_DIR
+        / run_config["results-save-dir"]
+        / run_config["algorithm-name"]
+    )
     save_results_as_pickle(
         history=history, file_path=results_path, default_filename="history.pkl"
     )

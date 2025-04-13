@@ -12,7 +12,6 @@ dependencies = [
     "flwr-datasets[vision]>=0.5.0",
     "torch==2.5.1",
     "torchvision==0.20.1",
-    "easydict==1.13.0",
 ]
 
 [tool.hatch.metadata]
@@ -37,7 +36,7 @@ profile = "black"
 known_first_party = ["flwr"]
 
 [tool.black]
-line-length = 88
+line-length = 79
 target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pytest.ini_options]
@@ -74,12 +73,12 @@ follow_imports = "skip"
 follow_imports_for_stubs = true
 
 [tool.docformatter]
-wrap-summaries = 88
-wrap-descriptions = 88
+wrap-summaries = 79
+wrap-descriptions = 79
 
 [tool.ruff]
 target-version = "py38"
-line-length = 88
+line-length = 79
 select = ["D", "E", "F", "W", "B", "ISC", "C4"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
 ignore = ["B024", "B027"]
@@ -123,11 +122,7 @@ clientapp = "fedbn.client_app:app"
 [tool.flwr.app.config]
 algorithm-name = "FedBN"
 num-server-rounds = 10
-num-clients = 5 # This is here so that we can access the number of clients during training. Does not change the actual amount of clients.
-# any multiple of 5 between 5 and 50 (both included)
-# this value should be choosen taking dataset.percent into consideration
-# for example if percent=0.2 then at most we can have 25 clients, each
-# using two data partitions of the same dataset.
+num-clients = 5 
 local-epochs = 1
 to-include = "MNIST,SVHN,USPS,SynthDigits,MNIST_M"
 batch-size = 32
@@ -143,6 +138,10 @@ fraction-fit = 1.0
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 5
+options.num-supernodes = 5 # This is here so that we can access the number of clients during training. Does not change the actual amount of clients.
+# any multiple of 5 between 5 and 50 (both included)
+# this value should be choosen taking dataset.percent into consideration
+# for example if percent=0.2 then at most we can have 25 clients, each
+# using two data partitions of the same dataset.
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0.0

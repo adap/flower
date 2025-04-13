@@ -1,34 +1,12 @@
 """fedbn: A Flower Baseline."""
 
-from collections import defaultdict
 
-from easydict import EasyDict
-
-
-def context_to_easydict(context):
-    """Parser to generate internal config files once you are given are context.
-
-    This is to facilitate easier sharing and better config management rather than using
-    a dict.
-    """
-    configs_to_parse = {
-        "run_config": _extract_run_configs_per_type(context.run_config),
-        "node_config": _extract_run_configs_per_type(context.node_config),
-    }
-    configs_to_parse = EasyDict(configs_to_parse)
-    configs_to_parse.run_config.to_include = (
-        configs_to_parse.run_config.to_include.split(",")
-    )
-    return configs_to_parse
-
-
-def _extract_run_configs_per_type(config):
-    parsed_configs = defaultdict(defaultdict)
-
-    for key, value in config.items():
-        if "." in key:
-            category, name = key.split(".")
-            parsed_configs[category][name.replace("-", "_")] = value
-        else:
-            parsed_configs[key.replace("-", "_")] = value
-    return parsed_configs
+def extract_weights(net, algorithm_name):
+    """Extract model parameters as numpy arrays from state_dict."""
+    if algorithm_name == "FedAvg":
+        return [val.cpu().numpy() for _, val in net.state_dict().items()]
+    return [
+        val.cpu().numpy()
+        for name, val in net.state_dict().items()
+        if "bn" not in name
+    ]

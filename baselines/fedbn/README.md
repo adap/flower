@@ -71,7 +71,7 @@ To construct the Python environment, simply run:
 
 ```bash
 # Create the virtual environment
-pyenv virtualenv 3.10.14 fedbn
+pyenv virtualenv 3.11.11 fedbn
 
 # Activate it
 pyenv activate fedbn

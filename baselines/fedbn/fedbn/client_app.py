@@ -7,9 +7,9 @@ import torch
 
 from fedbn.dataset import get_data
 from fedbn.model import CNNModel, test, train
-from fedbn.utils import context_to_easydict
+from fedbn.utils import extract_weights
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context, NDArrays, ParametersRecord, array_from_numpy
+from flwr.common import Context, NDArrays, ParametersRecord, Array
 
 
 class FlowerClient(NumPyClient):
@@ -17,7 +17,13 @@ class FlowerClient(NumPyClient):
 
     # pylint: disable=unused-argument
     def __init__(
-        self, net, trainloader, testloader, dataset_name, learning_rate, **kwargs
+        self,
+        net,
+        trainloader,
+        testloader,
+        dataset_name,
+        learning_rate,
+        **kwargs,
     ):
         self.trainloader = trainloader
         self.testloader = testloader
@@ -32,7 +38,7 @@ class FlowerClient(NumPyClient):
         using BNlayers.
         """
         # Return all model parameters as a list of NumPy ndarrays
-        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+        return extract_weights(self.net, "FedAvg")
 
     def set_weights(self, parameters: NDArrays) -> None:
         """Set model parameters from a list of NumPy ndarrays Exclude the BN.
@@ -79,7 +85,11 @@ class FlowerClient(NumPyClient):
         return (
             float(loss),
             len(self.testloader),
-            {"loss": loss, "accuracy": accuracy, "dataset_name": self.dataset_name},
+            {
+                "loss": loss,
+                "accuracy": accuracy,
+                "dataset_name": self.dataset_name,
+            },
         )
 
 
@@ -95,22 +105,17 @@ class FedBNFlowerClient(FlowerClient):
         # case as with params in BN layers of FedBN clients) is lost
         # once a client completes its training. This is the case unless
         # we preserve the batch norm states in the Context.
-        if self.client_state:
-            # Ensure statefulness of error feedback buffer via the Context object.
-            if "local_batch_norm" not in self.client_state.parameters_records:
-                self.client_state.parameters_records["local_batch_norm"] = (
-                    ParametersRecord(
-                        OrderedDict(
-                            {"initialisation": array_from_numpy(np.array([-1]))}
-                        )
-                    )
-                )
+        if not self.client_state.parameters_records:
+            # Ensure statefulness of error feedback buffer.
+            self.client_state.parameters_records["local_batch_norm"] = ParametersRecord(
+                OrderedDict({"initialisation": Array(np.array([-1]))})
+            )
 
     def _save_bn_statedict(self) -> None:
         """Save contents of state_dict related to BN layers."""
         bn_state = OrderedDict(
             {
-                name: array_from_numpy(val.cpu().numpy())
+                name: Array(val.cpu().numpy())
                 for name, val in self.net.state_dict().items()
                 if "bn" in name
             }
@@ -120,23 +125,18 @@ class FedBNFlowerClient(FlowerClient):
         )
 
     def get_weights(self) -> NDArrays:
-        """Return model parameters as a list of NumPy ndarrays w or w/o using BN.
+        """Return model parameters as a list of NumPy ndarrays without BN.
 
         layers.
         """
         # First update bn_state_dir
         self._save_bn_statedict()
-        # Excluding parameters of BN layers when using FedBN
-        return [
-            val.cpu().numpy()
-            for name, val in self.net.state_dict().items()
-            if "bn" not in name
-        ]
+        return extract_weights(self.net, "FedBN")
 
     def set_weights(self, parameters: NDArrays) -> None:
-        """Set model parameters from a list of NumPy ndarrays Exclude the bn layer if.
+        """Set model parameters from a list of NumPy ndarrays Exclude the bn.
 
-        available.
+        layer if available.
         """
         keys = [k for k in self.net.state_dict().keys() if "bn" not in k]
         params_dict = zip(keys, parameters)
@@ -160,15 +160,15 @@ class FedBNFlowerClient(FlowerClient):
 def client_fn(context: Context):
     """Construct a Client that will be run in a ClientApp."""
     # Load model and data
-    cfg = context_to_easydict(context).run_config
-    net = CNNModel(num_classes=cfg.num_classes)
+    run_config = context.run_config
+    net = CNNModel(num_classes=run_config["num-classes"])
     partition_id = int(context.node_config["partition-id"])
-    trainloader, valloader, dataset_name = (get_data(cfg))[partition_id]
+    trainloader, valloader, dataset_name = (get_data(context))[partition_id]
 
     # Return Client instance
     client_type, client_state = (
         (FlowerClient, None)
-        if cfg.algorithm_name == "FedAvg"
+        if run_config["algorithm-name"] == "FedAvg"
         else (FedBNFlowerClient, context.state)
     )
     return client_type(
@@ -176,7 +176,7 @@ def client_fn(context: Context):
         trainloader=trainloader,
         testloader=valloader,
         dataset_name=dataset_name,
-        learning_rate=cfg.learning_rate,
+        learning_rate=run_config["learning-rate"],
         client_state=client_state,
     ).to_client()
 
