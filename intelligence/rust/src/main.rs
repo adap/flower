@@ -1,3 +1,4 @@
+use dotenv::dotenv;
 use intelligence::{typing::ChatOptions, FlowerIntelligence};
 use std::env;
 use tokio::sync::Mutex;
@@ -9,23 +10,28 @@ async fn main() {
 
     fi.set_remote_handoff(true);
 
+    dotenv().ok();
     let api_key = env::var("FI_API_KEY").ok();
     if let Some(key) = api_key {
         fi.set_api_key(key);
     }
 
-    let options = ChatOptions {
-        model: Some("meta/llama3.2-3b/instruct-q4".to_string()),
-        temperature: Some(0.7),
-        max_completion_tokens: Some(1000),
-        stream: Some(false),
-        on_stream_event: None,
-        tools: None,
-        force_remote: Some(true),
-        force_local: Some(false),
-        encrypt: Some(true),
-    };
-    let chat_result = fi.chat("Why is the sky blue?", Some(options)).await;
+    let chat_result = fi
+        .chat(
+            "Why is the sky blue?",
+            Some(ChatOptions {
+                model: Some("meta/llama3.2-3b/instruct-q4".to_string()),
+                temperature: Some(0.7),
+                max_completion_tokens: Some(1000),
+                stream: Some(false),
+                on_stream_event: None,
+                tools: None,
+                force_remote: Some(true),
+                force_local: Some(false),
+                encrypt: Some(true),
+            }),
+        )
+        .await;
 
     match chat_result {
         Ok(response) => {
