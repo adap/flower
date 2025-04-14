@@ -343,17 +343,7 @@ def test_validate_certificate_in_federation_config(tmp_path: Path) -> None:
         assert not insecure
         assert root_cert == b"dummy_cert"
 
-        # Test insecure is False and root_certificates is present
-        config["insecure"] = False
-        # Execute
-        insecure, root_cert = validate_certificate_in_federation_config(
-            tmp_path, config
-        )
-        # Assert
-        assert not insecure
-        assert root_cert == b"dummy_cert"
-
-        # Test insecure is False and root_certificates is None
+        # Test insecure is not declared and root_certificates is None
         config.pop("root-certificates")
         # Execute
         insecure, root_cert = validate_certificate_in_federation_config(
@@ -397,15 +387,19 @@ def test_validate_certificate_in_federation_config_fail(tmp_path: Path) -> None:
         # Change into the temporary directory
         os.chdir(tmp_path)
 
-        # Test insecure is None and root_certificates is None
-        config.pop("root-certificates", None)
-        config.pop("insecure", None)
-        # Execute and assert
-        run_and_assert_exit(tmp_path, config)
-
         # Test insecure is True, but root_certificates is not None
         config["root-certificates"] = "dummy_cert.pem"
         config["insecure"] = True
+        # Execute and assert
+        run_and_assert_exit(tmp_path, config)
+
+        # Test insecure is False
+        config["insecure"] = False
+        # Execute and assert
+        run_and_assert_exit(tmp_path, config)
+
+        # Test insecure is another value
+        config["insecure"] = "invalid_value"
         # Execute and assert
         run_and_assert_exit(tmp_path, config)
     finally:

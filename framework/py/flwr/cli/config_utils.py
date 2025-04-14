@@ -176,9 +176,40 @@ def validate_federation_in_project_config(
 def validate_certificate_in_federation_config(
     app: Path, federation_config: dict[str, Any]
 ) -> tuple[bool, Optional[bytes]]:
-    """Validate the certificates in the Flower project configuration."""
-    insecure_str = federation_config.get("insecure")
-    insecure = bool(insecure_str)
+    """Validate the certificates in the Flower project configuration.
+
+    Accepted configurations:
+      1. TLS disabled:
+         - `address` is provided and `insecure = true`.
+      2. TLS enabled with explicit certificates:
+         - `address" and `root-certificates = "path/to/cert.pem"`.
+           `insecure` defaults to `false`.
+      3. TLS enabled with defaults:
+         - `address` only. `insecure` defaults to `false`.
+    """
+    insecure_value = federation_config.get("insecure")
+    # Determine the insecure flag
+    if insecure_value is None:
+        # Not provided, default to False (TLS enabled)
+        insecure = False
+    elif isinstance(insecure_value, bool):
+        if insecure_value is True:
+            insecure = True
+        else:
+            typer.secho(
+                "❌ Invalid value for `insecure`: if provided, it must be `true` "
+                "(not false).",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+    else:
+        typer.secho(
+            "❌ Invalid type for `insecure`: expected a boolean (true) if provided.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
 
     if root_certificates := federation_config.get("root-certificates"):
         root_certificates_bytes = (app / root_certificates).read_bytes()
@@ -192,15 +223,6 @@ def validate_certificate_in_federation_config(
             raise typer.Exit(code=1)
     else:
         root_certificates_bytes = None
-        if insecure_str is None:
-            typer.secho(
-                "❌ No certificate is provided, so TLS settings must be explicit. "
-                "To disable TLS, set `insecure = true` in `pyproject.toml`, otherwise"
-                "to enable TLS, set `insecure = false`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
 
     return insecure, root_certificates_bytes
 
