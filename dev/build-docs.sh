@@ -13,8 +13,8 @@ echo "Building baseline docs"
 cd "$ROOT"
 ./dev/build-baseline-docs.sh
 
-cd "$ROOT"
-python dev/build-example-docs.py
+cd $ROOT
+flwr-dev build-examples
 
 cd "$ROOT"
 ./datasets/dev/build-flwr-datasets-docs.sh
