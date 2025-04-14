@@ -123,7 +123,7 @@ def gen_client_fn(  # pylint: disable=too-many-arguments
     learning_rate: float,
     learning_rate_decay: float,
     models: List[DictConfig],
-) -> Callable[[str], FlowerClient]:
+) -> Callable[[str], fl.client.Client]:
     """Generate the client function that creates the Flower Clients.
 
     Parameters
@@ -150,7 +150,7 @@ def gen_client_fn(  # pylint: disable=too-many-arguments
         client function that creates Flower Clients
     """
 
-    def client_fn(cid: str) -> FlowerClient:
+    def client_fn(cid: str) -> fl.client.Client:
         """Create a Flower client representing a single organization."""
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -176,6 +176,6 @@ def gen_client_fn(  # pylint: disable=too-many-arguments
             learning_rate_decay,
             prev_grads,
             int(cid),
-        )
+        ).to_client()
 
     return client_fn

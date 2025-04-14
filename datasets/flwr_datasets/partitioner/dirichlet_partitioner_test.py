@@ -104,7 +104,7 @@ class TestDirichletPartitionerFailure(unittest.TestCase):
     """Test DirichletPartitioner failures (exceptions) by incorrect usage."""
 
     @parameterized.expand([(-2,), (-1,), (3,), (4,), (100,)])  # type: ignore
-    def test_load_invalid_partition_index(self, partition_id):
+    def test_load_invalid_partition_index(self, partition_id) -> None:
         """Test if raises when the load_partition is above the num_partitions."""
         _, partitioner = _dummy_setup(3, 0.5, 100, "labels")
         with self.assertRaises(KeyError):
@@ -129,7 +129,7 @@ class TestDirichletPartitionerFailure(unittest.TestCase):
             (np.array([0.5, 0.5, -0.5, -0.5, 0.5]), 5),
         ]
     )
-    def test_negative_values_in_alpha(self, alpha, num_partitions):
+    def test_negative_values_in_alpha(self, alpha, num_partitions) -> None:
         """Test if giving the negative value of alpha raises error."""
         num_rows, partition_by = 100, "labels"
         with self.assertRaises(ValueError):
@@ -146,7 +146,7 @@ class TestDirichletPartitionerFailure(unittest.TestCase):
             (np.array([0.5, 0.5, 0.5, 0.5]), 3),
         ]
     )
-    def test_incorrect_alpha_shape(self, alpha, num_partitions):
+    def test_incorrect_alpha_shape(self, alpha, num_partitions) -> None:
         """Test alpha list len not matching the num_partitions."""
         with self.assertRaises(ValueError):
             DirichletPartitioner(
@@ -156,7 +156,7 @@ class TestDirichletPartitionerFailure(unittest.TestCase):
     @parameterized.expand(  # type: ignore
         [(0,), (-1,), (11,), (100,)]
     )  # num_partitions,
-    def test_invalid_num_partitions(self, num_partitions):
+    def test_invalid_num_partitions(self, num_partitions) -> None:
         """Test if 0 is invalid num_partitions."""
         with self.assertRaises(ValueError):
             _, partitioner = _dummy_setup(

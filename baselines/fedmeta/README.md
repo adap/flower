@@ -74,6 +74,10 @@ poetry shell
 ## Running the Experiments
 
 **Download Dataset:** Go [LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf) and Use the command below! You can download dataset (FEMNIST and SHAKESPEARE). 
+
+> \[!NOTE\]
+> Since the leaf code was written a while ago, you might need to downgrade your pillow package to `9.5.0` before you can run the processing scripts below.
+
 ```bash
 # clone LEAF repo
 git clone https://github.com/TalwalkarLab/leaf.git

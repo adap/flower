@@ -23,10 +23,6 @@ concurrency:
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
-defaults:
-  run:
-    working-directory: datasets
-
 jobs:
   test_core:
     runs-on: ubuntu-22.04
@@ -43,11 +39,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python }}
       - name: Install dependencies (mandatory only)
-        run: python -m poetry install --all-extras
+        run: |
+          cd datasets
+          python -m poetry install --all-extras
+      - name: Cache Hugging Face datasets
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/huggingface
+          key: hf-datasets-v1
+          restore-keys: hf-datasets-
+      - name: Set Hugging Face token
+        run: huggingface-cli login --token ${{ secrets.HF_TOKEN }}
       - name: Test (formatting + unit tests)
-        run: ./dev/test.sh
+        run: ./datasets/dev/test.sh

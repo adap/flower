@@ -4,8 +4,8 @@ url: https://arxiv.org/abs/1812.06127
 labels: [image classification, cross-device, stragglers]
 dataset: [MNIST]
 ---
-
 # FedProx: Federated Optimization in Heterogeneous Networks
+
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
@@ -19,20 +19,18 @@ dataset: [MNIST]
 ## About this baseline
 **What's implemented:** The code in this directory replicates the experiments in *Federated Optimization in Heterogeneous Networks* (Li et al., 2018) for MNIST, which proposed the FedProx algorithm. Concretely, it replicates the results for MNIST in Figure 1 and 7.
 
-**Datasets:** MNIST from PyTorch's Torchvision
+**Datasets:** MNIST
 
 **Hardware Setup:** These experiments were run on a desktop machine with 24 CPU threads. Any machine with 4 CPU cores or more would be able to run it in a reasonable amount of time. Note: we install PyTorch with GPU support but by default, the entire experiment runs on CPU-only mode.
 
-**Contributors:** Charles Beauville and Javier Fernandez-Marques
+**Contributors:** Charles Beauville, Javier Fernandez-Marques and Andrej Jovanović
 
 
 ## Experimental Setup
 
 **Task:** Image classification
 
-**Model:** This directory implements two models:
-* A logistic regression model used in the FedProx paper for MNIST (see `models/LogisticRegression`). This is the model used by default.
-* A two-layer CNN network as used in the FedAvg paper (see `models/Net`)
+**Model:** A logistic regression model used in the FedProx paper for MNIST (see `model`). This is the model used by default.
 
 **Dataset:** This baseline only includes the MNIST dataset. By default, it will be partitioned into 1000 clients following a pathological split where each client has examples of two (out of ten) class labels. The number of examples in each client is derived by sampling from a powerlaw distribution. The settings are as follows:
 
@@ -41,7 +39,7 @@ dataset: [MNIST]
 | MNIST | 10 | 1000 | pathological with power law | 2 classes per client |
 
 **Training Hyperparameters:**
-The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
+The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `flwr run .` directly)
 
 | Description | Default Value |
 | ----------- | ----- |
@@ -60,50 +58,47 @@ To construct the Python environment, simply run:
 
 ```bash
 # Set directory to use python 3.10 (install with `pyenv install <version>` if you don't have it)
-pyenv local 3.10.12
+pyenv virtualenv 3.10.14 fedprox
 
 # Tell poetry to use python3.10
-poetry env use 3.10.12
+pyenv activate fedprox
 
 # Install
-poetry install
+pip install -e .
 ```
 
 ## Running the Experiments
 
-To run this FedProx with MNIST baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
+To run this FedProx with MNIST baseline, first ensure you have activated your environment as above, then:
 
 ```bash
-python -m fedprox.main # this will run using the default settings in the `conf/config.yaml`
+flwr run .  # this will run using the default settings in the `pyproject.toml`
 
 # you can override settings directly from the command line
-python -m fedprox.main mu=1 num_rounds=200 # will set proximal mu to 1 and the number of rounds to 200
+flwr run . --run-config "algorithm.mu=2 dataset.mu=2 algorithm.num_server_rounds=200" # will set proximal mu to 2 and the number of rounds to 200
 
 # if you run this baseline with a larger model, you might want to use the GPU (not used by default).
-# you can enable this by overriding the `server_device` and `client_resources` config. For example
+# you can enable this by overriding the federation config. For example
 # the below will run the server model on the GPU and 4 clients will be allowed to run concurrently on a GPU (assuming you also meet the CPU criteria for clients)
-python -m fedprox.main server_device=cuda client_resources.num_gpus=0.25
+flwr run . gpu-simulation
 ```
 
 To run using FedAvg:
 ```bash
 # this will use a variation of FedAvg that drops the clients that were flagged as stragglers
 # This is done so to match the experimental setup in the FedProx paper
-python -m fedprox.main --config-name fedavg
-
-# this config can also be overridden from the CLI
+flwr run . --run-config conf/fedavg_sf_0.9.toml 
 ```
 
 ## Expected results
 
-With the following command, we run both FedProx and FedAvg configurations while iterating through different values of `mu` and `stragglers_fraction`. We ran each experiment five times (this is achieved by artificially adding an extra element to the config but it doesn't have an impact on the FL setting `'+repeat_num=range(5)'`)
+With the following command, we run both FedProx and FedAvg configurations while iterating through different values of `mu` and `stragglers_fraction`. We ran each experiment five times to ensure that the results are significant
 
 ```bash
-python -m fedprox.main --multirun mu=0.0,2.0 stragglers_fraction=0.0,0.5,0.9 '+repeat_num=range(5)'
-# note that for FedAvg we don't want to change the proximal term mu since it should be kept at 0.0
-python -m fedprox.main --config-name fedavg --multirun stragglers_fraction=0.0,0.5,0.9 '+repeat_num=range(5)'
+bash ./run_experiments.sh
 ```
+The configurations of the specific experiments within this one large ran can be found in the `conf` directory.
 
-The above commands would generate results that you can plot and would look like the plot shown below. This plot was generated using the jupyter notebook in the `docs/` directory of this baseline after running the `--multirun` commands above.
+The above commands would generate results that you can plot and would look like the plot shown below. This plot was generated using the jupyter notebook in the `docs/` directory of this baseline after running the command above.
 
 ![](_static/FedProx_mnist.png)

@@ -1,0 +1,51 @@
+name: Framework Update Docker READMEs
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'framework/docker/**/README.md'
+
+jobs:
+    collect:
+      if: ${{ github.repository == 'adap/flower' }}
+      name: Collect Docker READMEs
+      runs-on: ubuntu-22.04
+      timeout-minutes: 10
+      outputs:
+        readme_files: ${{ steps.filter.outputs.readme_files }}
+      steps:
+        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+        - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+          id: filter
+          with:
+            list-files: "json"
+            filters: |
+              readme:
+                - added|modified: 'framework/docker/**/README.md'
+
+    update:
+      if: ${{ needs.collect.outputs.readme_files != '' && toJson(fromJson(needs.collect.outputs.readme_files)) != '[]' }}
+      name: Update Docker READMEs
+      runs-on: ubuntu-22.04
+      timeout-minutes: 10
+      needs: collect
+      strategy:
+        matrix:
+          readme_path: ${{ fromJSON(needs.collect.outputs.readme_files) }}
+
+      steps:
+        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+        - id: repository
+          run: echo "name=$(basename $(dirname ${{ matrix.readme_path }}))" >> "$GITHUB_OUTPUT"
+
+        - name: Docker Hub Description
+          uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # v4.0.0
+          with:
+            repository: flwr/${{ steps.repository.outputs.name }}
+            readme-filepath: ${{ matrix.readme_path }}
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
