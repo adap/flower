@@ -1,9 +1,5 @@
-use intelligence::{
-    typing::{ChatOptions, StreamEvent},
-    FlowerIntelligence,
-};
-use std::io::{self, Write};
-use std::{env, sync::Arc};
+use intelligence::{typing::ChatOptions, FlowerIntelligence};
+use std::env;
 use tokio::sync::Mutex;
 
 #[tokio::main]
@@ -18,35 +14,19 @@ async fn main() {
         fi.set_api_key(key);
     }
 
-    // let options = ChatOptions {
-    //     model: Some("meta/llama3.2-3b/instruct-q4".to_string()),
-    //     temperature: Some(0.7),
-    //     max_completion_tokens: Some(100),
-    //     stream: Some(false),
-    //     on_stream_event: None,
-    //     tools: None,
-    //     force_remote: Some(true),
-    //     force_local: Some(false),
-    //     encrypt: Some(true),
-    // };
     let options = ChatOptions {
         model: Some("meta/llama3.2-3b/instruct-q4".to_string()),
         temperature: Some(0.7),
         max_completion_tokens: Some(1000),
-        stream: Some(true),
-        on_stream_event: Some(Arc::new(|event: StreamEvent| {
-            // Print the chunk without adding a newline.
-            print!("{}", event.chunk);
-            // Flush stdout to ensure immediate output.
-            io::stdout().flush().unwrap();
-        })),
+        stream: Some(false),
+        on_stream_event: None,
         tools: None,
         force_remote: Some(true),
         force_local: Some(false),
         encrypt: Some(true),
     };
-
     let chat_result = fi.chat("Why is the sky blue?", Some(options)).await;
+
     match chat_result {
         Ok(response) => {
             println!("{}", response.content);
