@@ -181,11 +181,13 @@ def validate_certificate_in_federation_config(
     Accepted configurations:
       1. TLS disabled:
          - `address` is provided and `insecure = true`.
-      2. TLS enabled with explicit certificates:
-         - `address" and `root-certificates = "path/to/cert.pem"`.
-           `insecure` defaults to `false`.
-      3. TLS enabled with defaults:
-         - `address` only. `insecure` defaults to `false`.
+      2. TLS enabled with self-signed certificates:
+         - `address` and `root-certificates` are provided. `insecure` not set.
+         - `address` and `root-certificates` are provided. `insecure` set to `false`.
+      3. TLS enabled with system root certificates:
+         - Only `address` is provided. `root-certificates` and `insecure` not set.
+         - `address` is provided and `insecure` set to `false`. `root-certificates` not
+           set.
     """
     insecure_value = federation_config.get("insecure")
     # Determine the insecure flag
