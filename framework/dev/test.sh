@@ -59,10 +59,6 @@ echo "- pylint: start"
 python -m pylint --ignore=py/flwr/proto py/flwr
 echo "- pylint: done"
 
-echo "- flake8: start"
-python -m flake8 py/flwr
-echo "- flake8: done"
-
 echo "- pytest: start"
 python -m pytest --cov=py/flwr
 echo "- pytest: done"

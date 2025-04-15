@@ -195,3 +195,6 @@ app/src/main/assets
 
 # Pyright
 pyrightconfig.json
+
+# ruff Python linter
+.ruff_cache/

@@ -14,9 +14,10 @@
 # ==============================================================================
 """Flower command line interface."""
 
-
 import typer
 from typer.main import get_command
+
+from flwr.common.version import package_version
 
 from .build import build
 from .install import install
@@ -34,6 +35,7 @@ app = typer.Typer(
         bold=True,
     ),
     no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
 
 app.command()(new)
@@ -46,6 +48,23 @@ app.command()(stop)
 app.command()(login)
 
 typer_click_object = get_command(app)
+
+
+@app.callback(invoke_without_command=True)
+def version_callback(
+    ver: bool = typer.Option(
+        None,
+        "-V",
+        "--version",
+        is_eager=True,
+        help="Show the version and exit.",
+    ),
+) -> None:
+    """Print version."""
+    if ver:
+        typer.secho(f"Flower version: {package_version}", fg="blue")
+        raise typer.Exit()
+
 
 if __name__ == "__main__":
     app()
