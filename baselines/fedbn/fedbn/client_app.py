@@ -9,7 +9,7 @@ from fedbn.dataset import get_data
 from fedbn.model import CNNModel, test, train
 from fedbn.utils import extract_weights
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Array, Context, NDArrays, ParametersRecord
+from flwr.common import Array, ArrayRecord, Context, NDArrays
 
 
 class FlowerClient(NumPyClient):
@@ -107,12 +107,10 @@ class FedBNFlowerClient(FlowerClient):
         # case as with params in BN layers of FedBN clients) is lost
         # once a client completes its training. This is the case unless
         # we preserve the batch norm states in the Context.
-        if not self.client_state.parameters_records:
+        if not self.client_state.array_records:
             # Ensure statefulness of error feedback buffer.
-            self.client_state.parameters_records["local_batch_norm"] = (
-                ParametersRecord(
-                    OrderedDict({"initialisation": Array(np.array([-1]))})
-                )
+            self.client_state.array_records["local_batch_norm"] = ArrayRecord(
+                OrderedDict({"initialisation": Array(np.array([-1]))})
             )
 
     def _save_bn_statedict(self) -> None:
@@ -124,8 +122,8 @@ class FedBNFlowerClient(FlowerClient):
                 if "bn" in name
             }
         )
-        self.client_state.parameters_records["local_batch_norm"] = (
-            ParametersRecord(bn_state)
+        self.client_state.array_records["local_batch_norm"] = ArrayRecord(
+            bn_state
         )
 
     def get_weights(self) -> NDArrays:
@@ -150,13 +148,11 @@ class FedBNFlowerClient(FlowerClient):
         # Now also load from bn_state_dir
         if (
             "initialisation"
-            not in self.client_state.parameters_records[
-                "local_batch_norm"
-            ].keys()
+            not in self.client_state.array_records["local_batch_norm"].keys()
         ):  # It won't exist in the first round
             batch_norm_state = {
                 k: torch.tensor(v.numpy())
-                for k, v in self.client_state.parameters_records[
+                for k, v in self.client_state.array_records[
                     "local_batch_norm"
                 ].items()
             }
