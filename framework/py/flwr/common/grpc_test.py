@@ -133,7 +133,7 @@ class TestCreateChannel(unittest.TestCase):  # pylint: disable=R0902
         # Assert that the returned channel is what secure_channel returned
         self.assertEqual(channel, "fake_secure_channel")
 
-    def test_create_channel_with_interceptors(self) -> None:
+    def test_secure_channel_creation_with_interceptors(self) -> None:
         """Test secure channel created successfully with interceptors."""
         # Setup
         server_address = "localhost:50051"
