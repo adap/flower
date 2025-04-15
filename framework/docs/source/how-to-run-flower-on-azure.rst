@@ -185,13 +185,11 @@ and then at each client (``SuperNode``).
     # Client-1 VM (SuperNode-1)
     flower-supernode \
       --insecure \
-      --clientappio-api-address="0.0.0.0:9094" \  # SuperNode listening port
       --superlink="SUPERLINK_PUBLIC_IP:9092"  # SuperLink public ip and port
 
     # Client-2 VM (SuperNode-2)
     flower-supernode \
       --insecure \
-      --clientappio-api-address="0.0.0.0:9095" \  # SuperNode listening port
       --superlink="SUPERLINK_PUBLIC_IP:9092"  # SuperLink public ip and port
 
 Run Flower App

@@ -1,60 +1,89 @@
-"""MNIST dataset utilities for federated learning."""
+"""fedprox: A Flower Baseline."""
 
-from typing import Optional, Tuple
+import numpy as np
+from datasets import load_dataset
+from easydict import EasyDict
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import DistributionPartitioner
+from torch.utils.data import DataLoader
+from torchvision.transforms import Compose, Normalize, ToTensor
 
-import torch
-from omegaconf import DictConfig
-from torch.utils.data import DataLoader, random_split
+FDS = None  # Cache FederatedDataset
 
-from fedprox.dataset_preparation import _partition_data
+MNIST_TRANSFORMS = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
 
 
-def load_datasets(  # pylint: disable=too-many-arguments
-    config: DictConfig,
-    num_clients: int,
-    val_ratio: float = 0.1,
-    batch_size: Optional[int] = 32,
-    seed: Optional[int] = 42,
-) -> Tuple[DataLoader, DataLoader, DataLoader]:
-    """Create the dataloaders to be fed into the model.
+def apply_transforms(batch):
+    """Apply transforms to the partition from FederatedDataset."""
+    batch["image"] = [MNIST_TRANSFORMS(img) for img in batch["image"]]
+    return batch
 
-    Parameters
-    ----------
-    config: DictConfig
-        Parameterises the dataset partitioning process
-    num_clients : int
-        The number of clients that hold a part of the data
-    val_ratio : float, optional
-        The ratio of training data that will be used for validation (between 0 and 1),
-        by default 0.1
-    batch_size : int, optional
-        The size of the batches to be fed into the model, by default 32
-    seed : int, optional
-        Used to set a fix seed to replicate experiments, by default 42
+
+def load_data(
+    dataset_config: EasyDict,
+    partition_id: int,
+    num_partitions: int,
+):
+    """Load and partition MNIST data."""
+    # Only initialize `FederatedDataset` once
+    global FDS  # pylint: disable=global-statement
+    if FDS is None:
+        # Generate a vector from a log-normal probability distribution
+        rng = np.random.default_rng(dataset_config.seed)
+        distribution_array = rng.lognormal(
+            dataset_config.mu,
+            dataset_config.sigma,
+            (num_partitions * dataset_config.num_unique_labels_per_partition),
+        )
+        distribution_array = distribution_array.reshape(
+            (dataset_config.num_unique_labels, -1)
+        )
+        labels_per_partition = dataset_config.num_unique_labels_per_partition
+        samples_per_label = dataset_config.preassigned_num_samples_per_label
+        partitioner = DistributionPartitioner(
+            distribution_array=distribution_array,
+            num_partitions=num_partitions,
+            num_unique_labels_per_partition=labels_per_partition,
+            partition_by="label",  # MNIST dataset has a target column `label`
+            preassigned_num_samples_per_label=samples_per_label,
+        )
+        FDS = FederatedDataset(
+            dataset="ylecun/mnist",
+            partitioners={"train": partitioner},
+        )
+
+    partition = FDS.load_partition(partition_id)
+    # Divide data on each node: 90% train, 10% test
+    partition_train_test = partition.train_test_split(
+        test_size=dataset_config.val_ratio, seed=dataset_config.seed
+    )
+    # The validation set is never used because we do centralized evaluation
+    # on the server on the held-out test dataset.
+    partition_train_test = partition_train_test.with_transform(apply_transforms)
+    return (
+        DataLoader(
+            partition_train_test["train"],
+            batch_size=dataset_config.batch_size,
+            shuffle=True,
+        ),
+        DataLoader(
+            partition_train_test["test"],
+            batch_size=dataset_config.batch_size,
+        ),
+    )
+
+
+def prepare_test_loader(dataset_config: EasyDict):
+    """Generate the dataloader for the MNIST test set.
+
+    Args:
+        dataset_config (dict): The dataset configuration.
 
     Returns
     -------
-    Tuple[DataLoader, DataLoader, DataLoader]
-        The DataLoader for training, the DataLoader for validation, the DataLoader
-        for testing.
+        DataLoader: The MNIST test set dataloader.
     """
-    print(f"Dataset partitioning config: {config}")
-    datasets, testset = _partition_data(
-        num_clients,
-        iid=config.iid,
-        balance=config.balance,
-        power_law=config.power_law,
-        seed=seed,
+    test_dataset = load_dataset(path="ylecun/mnist")["test"].with_transform(
+        apply_transforms
     )
-    # Split each partition into train/val and create DataLoader
-    trainloaders = []
-    valloaders = []
-    for dataset in datasets:
-        len_val = int(len(dataset) / (1 / val_ratio))
-        lengths = [len(dataset) - len_val, len_val]
-        ds_train, ds_val = random_split(
-            dataset, lengths, torch.Generator().manual_seed(seed)
-        )
-        trainloaders.append(DataLoader(ds_train, batch_size=batch_size, shuffle=True))
-        valloaders.append(DataLoader(ds_val, batch_size=batch_size))
-    return trainloaders, valloaders, DataLoader(testset, batch_size=batch_size)
+    return DataLoader(test_dataset, batch_size=dataset_config.batch_size)

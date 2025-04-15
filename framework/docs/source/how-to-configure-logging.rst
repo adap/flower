@@ -6,7 +6,7 @@ Configure logging
 =================
 
 By default, the Flower logger uses logging level ``INFO``. This can be changed via the
-``PYTHONLOGLEVEL`` environment variable to any other levels that Python's `logging
+``FLWR_LOG_LEVEL`` environment variable to any other levels that Python's `logging
 module <https://docs.python.org/3/library/logging.html#logging-levels>`_ supports. For
 example, to launch your ``SuperLink`` showing ``DEBUG`` logs do:
 
@@ -14,7 +14,7 @@ example, to launch your ``SuperLink`` showing ``DEBUG`` logs do:
     :emphasize-lines: 2,11,12
 
     # Launch the SuperLink with TLS (or use --insecure)
-    PYTHONLOGLEVEL=DEBUG flower-superlink \
+    FLWR_LOG_LEVEL=DEBUG flower-superlink \
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key
@@ -28,7 +28,15 @@ example, to launch your ``SuperLink`` showing ``DEBUG`` logs do:
 
 .. note::
 
-    You can make use of the ``PYTHONLOGLEVEL`` environment variable when executing other
+    You can make use of the ``FLWR_LOG_LEVEL`` environment variable when executing other
     Flower commands to provision the different components in a Flower Federation (see
     :doc:`how-to-run-flower-with-deployment-engine`) or using the `flwr CLI
     <ref-api-cli.html>`_.
+
+Configure gRPC logging
+----------------------
+
+Flower uses `gRPC <https://grpc.io/>`_ to communicate between each component (see
+:doc:`ref-flower-network-communication`). You can set the verbosity level of ``gRPC``
+logs using `gRPC environment variables
+<https://github.com/grpc/grpc/blob/master/doc/environment_variables.md>`_.

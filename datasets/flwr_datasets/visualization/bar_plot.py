@@ -25,8 +25,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 
-# pylint: disable=too-many-arguments,too-many-locals,too-many-branches
-def _plot_bar(
+def _plot_bar(  # pylint: disable=R0912, R0913, R0914, R0917
     dataframe: pd.DataFrame,
     axis: Optional[Axes],
     figsize: Optional[tuple[float, float]],
