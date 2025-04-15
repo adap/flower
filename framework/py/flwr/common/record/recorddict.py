@@ -29,6 +29,21 @@ from .typeddict import TypedDict
 
 RecordType = Union[ArrayRecord, MetricRecord, ConfigRecord]
 
+
+class _WarningTracker:
+    """A class to track warnings for deprecated properties."""
+
+    def __init__(self) -> None:
+        # These variables are used to ensure that the deprecation warnings
+        # for the deprecated properties/class are logged only once.
+        self.recordset_logged = False
+        self.parameters_records_logged = False
+        self.metrics_records_logged = False
+        self.configs_records_logged = False
+
+
+_warning_tracker = _WarningTracker()
+
 T = TypeVar("T")
 
 
@@ -196,6 +211,54 @@ class RecordDict(TypedDict[str, RecordType]):
                 type(value).__name__,
             )
 
+    @property
+    def parameters_records(self) -> TypedDict[str, ArrayRecord]:
+        """Deprecated property.
+
+        Use ``array_records`` instead.
+        """
+        if _warning_tracker.parameters_records_logged:
+            _warning_tracker.parameters_records_logged = True
+            log(
+                WARN,
+                "`RecordDict.parameters_records` has been deprecated "
+                "and will be removed in a future release. Please use "
+                "`RecordDict.array_records` instead.",
+            )
+        return self.array_records
+
+    @property
+    def metrics_records(self) -> TypedDict[str, MetricRecord]:
+        """Deprecated property.
+
+        Use ``metric_records`` instead.
+        """
+        if not _warning_tracker.metrics_records_logged:
+            _warning_tracker.metrics_records_logged = True
+            log(
+                WARN,
+                "`RecordDict.metrics_records` has been deprecated "
+                "and will be removed in a future release. Please use "
+                "`RecordDict.metric_records` instead.",
+            )
+        return self.metric_records
+
+    @property
+    def configs_records(self) -> TypedDict[str, ConfigRecord]:
+        """Deprecated property.
+
+        Use ``config_records`` instead.
+        """
+        if not _warning_tracker.configs_records_logged:
+            _warning_tracker.configs_records_logged = True
+            log(
+                WARN,
+                "`RecordDict.configs_records` has been deprecated "
+                "and will be removed in a future release. Please use "
+                "`RecordDict.config_records` instead.",
+            )
+        return self.config_records
+
 
 class RecordSet(RecordDict):
     """Deprecated class ``RecordSet``, use ``RecordDict`` instead.
@@ -223,14 +286,9 @@ class RecordSet(RecordDict):
         my_content = RecordDict()
     """
 
-    _warning_logged = False
-    _warning_logged_params = False
-    _warning_logged_metrics = False
-    _warning_logged_configs = False
-
     def __init__(self, records: dict[str, RecordType] | None = None) -> None:
-        if not RecordSet._warning_logged:
-            RecordSet._warning_logged = True
+        if not _warning_tracker.recordset_logged:
+            _warning_tracker.recordset_logged = True
             log(
                 WARN,
                 "The `RecordSet` class has been renamed to `RecordDict`. "
@@ -238,51 +296,3 @@ class RecordSet(RecordDict):
                 "Please update your code accordingly.",
             )
         super().__init__(records)
-
-    @property
-    def parameters_records(self) -> TypedDict[str, ArrayRecord]:
-        """Deprecated property.
-
-        Use ``array_records`` instead.
-        """
-        if not RecordSet._warning_logged_params:
-            RecordSet._warning_logged_params = True
-            log(
-                WARN,
-                "`RecordSet.parameters_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.array_records` instead.",
-            )
-        return self.array_records
-
-    @property
-    def metrics_records(self) -> TypedDict[str, MetricRecord]:
-        """Deprecated property.
-
-        Use ``metric_records`` instead.
-        """
-        if not RecordSet._warning_logged_metrics:
-            RecordSet._warning_logged_metrics = True
-            log(
-                WARN,
-                "`RecordSet.metrics_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.metric_records` instead.",
-            )
-        return self.metric_records
-
-    @property
-    def configs_records(self) -> TypedDict[str, ConfigRecord]:
-        """Deprecated property.
-
-        Use ``config_records`` instead.
-        """
-        if not RecordSet._warning_logged_configs:
-            RecordSet._warning_logged_configs = True
-            log(
-                WARN,
-                "`RecordSet.configs_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.config_records` instead.",
-            )
-        return self.config_records
