@@ -112,7 +112,9 @@ flwr run . --run-config "num_rounds=100 batch_size=16"
 # run with FedAvg clients leaving the rest default
 flwr run . --run-config "algorithm-name='FedAvg'"
 ```
-Changing the clients is a bit more complex. Specifically, we need to change the number of clients in two places. In the federation config and in the run config. The former actually controls the number of clients that are sampled, where the latter is just a reference so that the code can make use of this since the federation size is not passed explicitly to the run context.
+
+⚠️ Changing the clients is a bit more complex compared to baselines using [flower-datasets](https://flower.ai/docs/datasets/). Specifically, we need to **change the number of clients in two places**. In the federation config and in the run config. The former actually controls the number of clients that are sampled, where the latter is just a reference so that the code can make use of this since the federation size is not passed explicitly to the run context.
+
 ```bash
 # increase the number of clients like this (note this should be a multiple
 # of the number of dataset you involve in the experiment -- 5 by default)
@@ -129,6 +131,7 @@ flwr run . --run-config 'num-clients=20' --federation-config 'num-supernodes=20'
 # can't be -- unless you add support for it -- partitioned into smaller ones)
 flwr run . --run-config "percent=0.2" # max allowed is 25 clients
 ```
+
 ## Limitations
 
 The pre-processing of the five datasets provided by the authors, imposes some limitations on the number of clients that can be spawned for the experiment. Naturally, this limitation can be circumvented if you edit the code, and in particular the `dataset.DigitsDataset` constructor. The aforementioned limitation happens because each dataset is partitioned into 10 disjoint sets and a 'DigitsDataset' can only be constructed by concatenating any set of such partitions (at least one, at most all 10). _How does the limitation manifest?_ Given that we have 5 datasets, if a client just takes one partition, a FL setup can accommodate 50 clients, one using a different partition. But, if you want for instance each client have 3 partitions of the same dataset (yes, clients can only hold data of one dataset) then the maximum number of clients gets reduced to 20. Following this logic you can see that if a client wants to use all 10 partitions of a given dataset, then only 5 clients can participate in the experiment.

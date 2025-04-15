@@ -9,7 +9,7 @@ from fedbn.dataset import get_data
 from fedbn.model import CNNModel, test, train
 from fedbn.utils import extract_weights
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context, NDArrays, ParametersRecord, Array
+from flwr.common import Array, Context, NDArrays, ParametersRecord
 
 
 class FlowerClient(NumPyClient):
@@ -28,7 +28,9 @@ class FlowerClient(NumPyClient):
         self.trainloader = trainloader
         self.testloader = testloader
         self.dataset_name = dataset_name
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda:0" if torch.cuda.is_available() else "cpu"
+        )
         self.net = net.to(self.device)
         self.learning_rate = learning_rate
 
@@ -107,8 +109,10 @@ class FedBNFlowerClient(FlowerClient):
         # we preserve the batch norm states in the Context.
         if not self.client_state.parameters_records:
             # Ensure statefulness of error feedback buffer.
-            self.client_state.parameters_records["local_batch_norm"] = ParametersRecord(
-                OrderedDict({"initialisation": Array(np.array([-1]))})
+            self.client_state.parameters_records["local_batch_norm"] = (
+                ParametersRecord(
+                    OrderedDict({"initialisation": Array(np.array([-1]))})
+                )
             )
 
     def _save_bn_statedict(self) -> None:
@@ -120,8 +124,8 @@ class FedBNFlowerClient(FlowerClient):
                 if "bn" in name
             }
         )
-        self.client_state.parameters_records["local_batch_norm"] = ParametersRecord(
-            bn_state
+        self.client_state.parameters_records["local_batch_norm"] = (
+            ParametersRecord(bn_state)
         )
 
     def get_weights(self) -> NDArrays:
@@ -146,7 +150,9 @@ class FedBNFlowerClient(FlowerClient):
         # Now also load from bn_state_dir
         if (
             "initialisation"
-            not in self.client_state.parameters_records["local_batch_norm"].keys()
+            not in self.client_state.parameters_records[
+                "local_batch_norm"
+            ].keys()
         ):  # It won't exist in the first round
             batch_norm_state = {
                 k: torch.tensor(v.numpy())

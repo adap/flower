@@ -243,7 +243,7 @@ def get_data(context: Context) -> List[Tuple[DataLoader, DataLoader, str]]:
     ).tolist()
     assert num_clients in possible_client_configs, (
         f"'num-clients' should be in {possible_client_configs}."
-        "\n this is because you include {to_include} datasets "
+        f"\n this is because you include {to_include} datasets "
         f"(i.e. {to_include} and each should be used by the same number"
         " of clients. The values of `num_clients` also depend on the"
         "'dataset.percent' you chose."
