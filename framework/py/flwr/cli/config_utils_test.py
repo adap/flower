@@ -322,15 +322,6 @@ def test_validate_federation_in_project_config_fail() -> None:
     [
         # Test insecure is True and root_certificates is None
         ({"address": "127.0.0.1:9091", "insecure": True}, (True, None)),
-        # Test insecure is True and root_certificates is present
-        (
-            {
-                "address": "127.0.0.1:9091",
-                "root-certificates": "dummy_cert.pem",
-                "insecure": True,
-            },
-            (True, None),
-        ),
         # Test insecure is not declared and root_certificates is present
         (
             {"address": "127.0.0.1:9091", "root-certificates": "dummy_cert.pem"},
@@ -381,6 +372,12 @@ def test_validate_certificate_in_federation_config(
     [
         # Test insecure is set to an invalid value
         {"address": "127.0.0.1:9091", "insecure": "invalid_value"},
+        # Test insecure is True and root_certificates is set
+        {
+            "address": "127.0.0.1:9091",
+            "insecure": True,
+            "root-certificates": "dummy_cert.pem",
+        },
         # Test insecure is False and root_certificates cannot be read
         {
             "address": "127.0.0.1:9091",

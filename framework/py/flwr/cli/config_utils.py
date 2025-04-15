@@ -180,8 +180,8 @@ def validate_certificate_in_federation_config(
 
     Accepted configurations:
       1. TLS disabled:
-         - `address` is provided and `insecure = true`. `root-certificates` will be
-           ignored.
+         - `address` is provided and `insecure = true`. If `root-certificates` is
+           set, exit with an error.
       2. TLS enabled with self-signed certificates:
          - `address` and `root-certificates` are provided. `insecure` not set.
          - `address` and `root-certificates` are provided. `insecure` set to `false`.
@@ -209,24 +209,24 @@ def validate_certificate_in_federation_config(
     # Process root certificates
     if root_certificates := federation_config.get("root-certificates"):
         if insecure:
-            # TLS is disabled: ignore the certificate with a warning
             typer.secho(
-                "⚠️ Warning: `insecure` is set to `true`, so the provided "
-                "`root-certificates` will be ignored.",
-                fg=typer.colors.YELLOW,
+                "❌ `root-certificates` were provided but the `insecure` parameter "
+                "is set to `True`.",
+                fg=typer.colors.RED,
+                bold=True,
             )
-            root_certificates_bytes = None
-        else:
-            # TLS is enabled with self-signed certificates: attempt to read the file
-            try:
-                root_certificates_bytes = (app / root_certificates).read_bytes()
-            except Exception as e:
-                typer.secho(
-                    f"❌ Failed to read certificate file `{root_certificates}`: {e}",
-                    fg=typer.colors.RED,
-                    bold=True,
-                )
-                raise typer.Exit(code=1)
+            raise typer.Exit(code=1)
+
+        # TLS is enabled with self-signed certificates: attempt to read the file
+        try:
+            root_certificates_bytes = (app / root_certificates).read_bytes()
+        except Exception as e:
+            typer.secho(
+                f"❌ Failed to read certificate file `{root_certificates}`: {e}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
     else:
         root_certificates_bytes = None
 
