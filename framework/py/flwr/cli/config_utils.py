@@ -226,7 +226,7 @@ def validate_certificate_in_federation_config(
                 fg=typer.colors.RED,
                 bold=True,
             )
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from e
     else:
         root_certificates_bytes = None
 
