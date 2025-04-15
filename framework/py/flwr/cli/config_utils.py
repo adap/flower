@@ -180,7 +180,8 @@ def validate_certificate_in_federation_config(
 
     Accepted configurations:
       1. TLS disabled:
-         - `address` is provided and `insecure = true`.
+         - `address` is provided and `insecure = true`. `root-certificates` will be
+           ignored.
       2. TLS enabled with self-signed certificates:
          - `address` and `root-certificates` are provided. `insecure` not set.
          - `address` and `root-certificates` are provided. `insecure` set to `false`.
@@ -195,34 +196,37 @@ def validate_certificate_in_federation_config(
         # Not provided, default to False (TLS enabled)
         insecure = False
     elif isinstance(insecure_value, bool):
-        if insecure_value is True:
-            insecure = True
-        else:
-            typer.secho(
-                "❌ Invalid value for `insecure`: if provided, it must be `true` "
-                "(not false).",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
+        insecure = insecure_value
     else:
         typer.secho(
-            "❌ Invalid type for `insecure`: expected a boolean (true) if provided.",
+            "❌ Invalid type for `insecure`: expected a boolean if provided. "
+            "(`insecure = true` or `insecure = false`)",
             fg=typer.colors.RED,
             bold=True,
         )
         raise typer.Exit(code=1)
 
+    # Process root certificates
     if root_certificates := federation_config.get("root-certificates"):
-        root_certificates_bytes = (app / root_certificates).read_bytes()
         if insecure:
+            # TLS is disabled: ignore the certificate with a warning
             typer.secho(
-                "❌ `root-certificates` were provided but the `insecure` parameter "
-                "is set to `True`.",
-                fg=typer.colors.RED,
-                bold=True,
+                "⚠️ Warning: `insecure` is set to `true`, so the provided "
+                "`root-certificates` will be ignored.",
+                fg=typer.colors.YELLOW,
             )
-            raise typer.Exit(code=1)
+            root_certificates_bytes = None
+        else:
+            # TLS is enabled with self-signed certificates: attempt to read the file
+            try:
+                root_certificates_bytes = (app / root_certificates).read_bytes()
+            except Exception as e:
+                typer.secho(
+                    f"❌ Failed to read certificate file `{root_certificates}`: {e}",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1)
     else:
         root_certificates_bytes = None
 

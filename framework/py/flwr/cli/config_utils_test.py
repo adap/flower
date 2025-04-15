@@ -320,15 +320,35 @@ def test_validate_federation_in_project_config_fail() -> None:
 @pytest.mark.parametrize(
     "config,expected",
     [
+        # Test insecure is True and root_certificates is None
+        ({"address": "127.0.0.1:9091", "insecure": True}, (True, None)),
+        # Test insecure is True and root_certificates is present
+        (
+            {
+                "address": "127.0.0.1:9091",
+                "root-certificates": "dummy_cert.pem",
+                "insecure": True,
+            },
+            (True, None),
+        ),
         # Test insecure is not declared and root_certificates is present
         (
             {"address": "127.0.0.1:9091", "root-certificates": "dummy_cert.pem"},
             (False, b"dummy_cert"),
         ),
+        # Test insecure is False and root_certificates is present
+        (
+            {
+                "address": "127.0.0.1:9091",
+                "insecure": False,
+                "root-certificates": "dummy_cert.pem",
+            },
+            (False, b"dummy_cert"),
+        ),
         # Test insecure is not declared and root_certificates is None
         ({"address": "127.0.0.1:9091"}, (False, None)),
-        # Test insecure is True and root_certificates is None
-        ({"address": "127.0.0.1:9091", "insecure": True}, (True, None)),
+        # Test insecure is False and root_certificates is None
+        ({"address": "127.0.0.1:9091", "insecure": False}, (False, None)),
     ],
 )
 def test_validate_certificate_in_federation_config(
@@ -359,16 +379,13 @@ def test_validate_certificate_in_federation_config(
 @pytest.mark.parametrize(
     "config",
     [
-        # Test insecure is True and root-certificates is present
-        {
-            "address": "localhost:8080",
-            "root-certificates": "dummy_cert.pem",
-            "insecure": True,
-        },
-        # Test insecure is False while no certificate is provided
-        {"address": "localhost:8080", "insecure": False},
         # Test insecure is set to an invalid value
-        {"address": "localhost:8080", "insecure": "invalid_value"},
+        {"address": "127.0.0.1:9091", "insecure": "invalid_value"},
+        # Test insecure is False and root_certificates cannot be read
+        {
+            "address": "127.0.0.1:9091",
+            "root-certificates": "non_existent_cert.pem",
+        },
     ],
 )
 def test_validate_certificate_in_federation_config_fail(
@@ -383,12 +400,6 @@ def test_validate_certificate_in_federation_config_fail(
         assert excinfo.value.exit_code == 1
 
     # Prepare
-    # Create a dummy certificate if a certificate path is specified.
-    if "root-certificates" in config:
-        dummy_cert = tmp_path / config["root-certificates"]
-        dummy_cert.write_text("dummy_cert")
-
-    # Current directory
     origin = Path.cwd()
 
     try:
