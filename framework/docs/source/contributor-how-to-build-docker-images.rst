@@ -19,7 +19,7 @@ environment.
 2. Verify the Docker daemon is running.
 
    The build instructions that assemble the images are located in the respective
-   Dockerfiles. You can find them in the subdirectories of ``src/docker``.
+   Dockerfiles. You can find them in the subdirectories of ``framework/docker``.
 
    Flower Docker images are configured via build arguments. Through build arguments, we
    can make the creation of images more flexible. For example, in the base image, we can
