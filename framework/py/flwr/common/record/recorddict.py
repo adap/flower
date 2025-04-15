@@ -36,7 +36,8 @@ class _WarningTracker:
     def __init__(self) -> None:
         # These variables are used to ensure that the deprecation warnings
         # for the deprecated properties/class are logged only once.
-        self.recordset_logged = False
+        self.recordset_init_logged = False
+        self.recorddict_init_logged = False
         self.parameters_records_logged = False
         self.metrics_records_logged = False
         self.configs_records_logged = False
@@ -158,8 +159,34 @@ class RecordDict(TypedDict[str, RecordType]):
     :code:`MetricRecord` and :code:`ArrayRecord`.
     """
 
-    def __init__(self, records: dict[str, RecordType] | None = None) -> None:
+    def __init__(
+        self,
+        records: dict[str, RecordType] | None = None,
+        *,
+        parameters_records: dict[str, ArrayRecord] | None = None,
+        metrics_records: dict[str, MetricRecord] | None = None,
+        configs_records: dict[str, ConfigRecord] | None = None,
+    ) -> None:
         super().__init__(_check_key, _check_value)
+
+        # Warning for deprecated usage
+        if (
+            parameters_records is not None
+            or metrics_records is not None
+            or configs_records is not None
+        ):
+            log(
+                WARN,
+                "The arguments `parameters_records`, `metrics_records`, and "
+                "`configs_records` of `RecordDict` are deprecated and will "
+                "be removed in a future release. "
+                "Please pass all records using the `records` argument instead.",
+            )
+            records = records or {}
+            records.update(parameters_records or {})
+            records.update(metrics_records or {})
+            records.update(configs_records or {})
+
         if records is not None:
             for key, record in records.items():
                 self[key] = record
@@ -286,13 +313,25 @@ class RecordSet(RecordDict):
         my_content = RecordDict()
     """
 
-    def __init__(self, records: dict[str, RecordType] | None = None) -> None:
-        if not _warning_tracker.recordset_logged:
-            _warning_tracker.recordset_logged = True
+    def __init__(
+        self,
+        records: dict[str, RecordType] | None = None,
+        *,
+        parameters_records: dict[str, ArrayRecord] | None = None,
+        metrics_records: dict[str, MetricRecord] | None = None,
+        configs_records: dict[str, ConfigRecord] | None = None,
+    ) -> None:
+        if not _warning_tracker.recordset_init_logged:
+            _warning_tracker.recordset_init_logged = True
             log(
                 WARN,
                 "The `RecordSet` class has been renamed to `RecordDict`. "
                 "Support for `RecordSet` will be removed in a future release. "
                 "Please update your code accordingly.",
             )
-        super().__init__(records)
+        super().__init__(
+            records,
+            parameters_records=parameters_records,
+            metrics_records=metrics_records,
+            configs_records=configs_records,
+        )
