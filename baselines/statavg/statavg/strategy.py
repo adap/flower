@@ -1,17 +1,18 @@
-"""StatAvg strategy."""
+"""statavg: A Flower Baseline."""
 
 import json
 from typing import Dict, List, Optional, Tuple, Union
 
-import flwr as fl
 import numpy as np
+
 from flwr.common import FitIns, FitRes, Parameters, Scalar
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy import FedAvg
 
 
 # Custom class for implementing StatAvg (inherits properties from FedAvg)
-class CustomStatAvg(fl.server.strategy.FedAvg):
+class CustomStatAvg(FedAvg):
     """StatAvg.
 
     The server receives the client local statistics. only at the 1st round, and
@@ -26,6 +27,7 @@ class CustomStatAvg(fl.server.strategy.FedAvg):
         # Define the attribute metrics_aggregated and initialize with arbitrary values
         # this will carry the global aggregated statistics
         self.metrics_aggregated = {"initialization": 0}
+        self.fit_metrics_aggregation_fn = CustomStatAvg.get_average_statistics
 
     def aggregate_fit(
         self,
@@ -41,7 +43,6 @@ class CustomStatAvg(fl.server.strategy.FedAvg):
         parameters_aggregated, self.metrics_aggregated = super().aggregate_fit(
             server_round, results, failures
         )
-
         return parameters_aggregated, self.metrics_aggregated
 
     def configure_fit(
@@ -148,7 +149,7 @@ class CustomStatAvg(fl.server.strategy.FedAvg):
 
 
 # Class for implementing FedAvg including the method aggregate_evaluate
-class FedAvgAggrEv(fl.server.strategy.FedAvg):
+class FedAvgAggrEv(FedAvg):
     """FedAvg with aggregate_evaluate."""
 
     def aggregate_evaluate(
@@ -174,3 +175,13 @@ class FedAvgAggrEv(fl.server.strategy.FedAvg):
 
         # Return aggregated loss and metrics (i.e., aggregated accuracy)
         return aggregated_loss, {"accuracy": aggregated_accuracy}
+
+
+def define_server_strategy(config):
+    """Define the strategy to be used by the simulation."""
+    class_to_return = None
+    if config.strategy_name.lower() == "fedavg":
+        class_to_return = FedAvgAggrEv
+    else:
+        class_to_return = CustomStatAvg
+    return class_to_return
