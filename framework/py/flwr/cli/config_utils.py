@@ -179,16 +179,23 @@ def validate_certificate_in_federation_config(
     """Validate the certificates in the Flower project configuration.
 
     Accepted configurations:
-      1. TLS disabled:
-         - `address` is provided and `insecure = true`. If `root-certificates` is
-           set, exit with an error.
-      2. TLS enabled with self-signed certificates:
-         - `address` and `root-certificates` are provided. `insecure` not set.
-         - `address` and `root-certificates` are provided. `insecure` set to `false`.
-      3. TLS enabled with system root certificates:
+      1. TLS enabled and gRPC will load(*) the trusted certificate bundle:
          - Only `address` is provided. `root-certificates` and `insecure` not set.
          - `address` is provided and `insecure` set to `false`. `root-certificates` not
            set.
+         (*)gRPC uses a multi-step fallback mechanism to load the trusted certificate
+            bundle in the following sequence:
+            a. A configured file path (if set via configuration or environment),
+            b. An override callback (if registered via
+               `grpc_set_ssl_roots_override_callback`),
+            c. The OS trust store (if available),
+            d. A bundled default certificate file.
+      2. TLS enabled with self-signed certificates:
+         - `address` and `root-certificates` are provided. `insecure` not set.
+         - `address` and `root-certificates` are provided. `insecure` set to `false`.
+      3. TLS disabled. This is not recommended and should only be used for prototyping:
+         - `address` is provided and `insecure = true`. If `root-certificates` is
+           set, exit with an error.
     """
     insecure_value = federation_config.get("insecure")
     # Determine the insecure flag
