@@ -53,7 +53,7 @@ jobs:
           path: ~/.cache/huggingface
           key: hf-datasets-v1
           restore-keys: hf-datasets-
-      - name: Set Hugging Face token
-        run: huggingface-cli login --token ${{ secrets.HF_TOKEN }}
+      # - name: Set Hugging Face token
+      #   run: huggingface-cli login --token ${{ secrets.HF_TOKEN }}
       - name: Test (formatting + unit tests)
         run: ./datasets/dev/test.sh
