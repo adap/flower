@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.18.0 (2025-04-16)
+## v1.18.0 (2025-04-22)
 
 ### Thanks to our contributors
 
@@ -8,88 +8,53 @@ We would like to give our special thanks to all the contributors who made the ne
 
 `Alan Silva`, `Andrej Jovanović`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Gustavo Bertoli`, `Heng Pan`, `Javier`, `Khoa Nguyen`, `Mohammad Naseri`, `Robert Steiner`, `Stephane Moroso`, `Taner Topal`, `William Lindskog`, `Yan Gao` <!---TOKEN_v1.18.0-->
 
-
 ### What's new?
 
-### Add Python 3.12 Support
-- **feat(framework) Add Python 3.12 to framework and datasets** ([#5238](https://github.com/adap/flower/pull/5238))
+- **Add support for Python 3.12** ([#5238](https://github.com/adap/flower/pull/5238))
 
-### Allow TLS connection for `flwr` CLI using CA certificates
-- **feat(framework) Add TLS connection for Flower CLI using CA cert** ([#5227](https://github.com/adap/flower/pull/5227))
-- **feat(framework) Extend gRPC channel creation test** ([#5237](https://github.com/adap/flower/pull/5237))
+  Python 3.12 is officially supported for `flwr` and `flwr_datasets`.
 
-### `flwr -V|--version` prints the flower version
-- **feat(framework) Add** `flwr --version` **to print Flower version and the** `-h` **shorthand for CLI help** ([#5236](https://github.com/adap/flower/pull/5236))
+- **Enable TLS connection for `flwr` CLI using CA certificates** ([#5227](https://github.com/adap/flower/pull/5227), [#5237](https://github.com/adap/flower/pull/5237))
 
-### Use datasets from HF `flwrlabs` in FlowerTune templates
-- **refactor(framework) Update the FlowerTune template using the datasets from HF** `flwrlabs` ([#5205](https://github.com/adap/flower/pull/5205)) 
+  `flwr` CLI now supports secure TLS connections to SuperLink instances with valid CA certificates. If no root certificates are provided, the CLI automatically uses the default ones bundled with gRPC.
 
-### Upgrade FedBN baseline to support `flwr` CLI
-- **refactor(baselines) Upgrade FedBN Baseline to new flwr format** ([#5115](https://github.com/adap/flower/pull/5115))
+- **Add `--version` and `-V` flags to display `flwr` version** ([#5236](https://github.com/adap/flower/pull/5236))
 
-### CI/CD Improvements
-- **ci(framework) Edit options for opening a GitHub Issue on Flower Github** ([#5202](https://github.com/adap/flower/pull/5202))
-- **refactor(:skip) Rename Flower framework CI files** ([#5176](https://github.com/adap/flower/pull/5176))
-- **ci(framework) Fix Docker image building job** ([#5200](https://github.com/adap/flower/pull/5200))
-- **ci(baselines) Allow** `build-baseline-docs.sh` **to run on Linux machines** ([#5203](https://github.com/adap/flower/pull/5203))
-- **ci(framework) Assign** `state: triage` **label to new GitHub Issues** ([#5210](https://github.com/adap/flower/pull/5210))
-- **ci(:skip) Add** `Unreleased` **header** ([#5166](https://github.com/adap/flower/pull/5166))
-- **fix(:skip) Make** `ruff` **ignore** `.gitignore` ([#5214](https://github.com/adap/flower/pull/5214))
-- **refactor(:skip) Refactor certificate generation dev script** ([#5212](https://github.com/adap/flower/pull/5212))
-- **refactor(:skip) Include** `e2e` **in full** `docformatter` **check** ([#5209](https://github.com/adap/flower/pull/5209))
-- **ci(framework) Fix docs deployment** ([#5199](https://github.com/adap/flower/pull/5199))
-- **ci(framework) Use subdirectory install for CI job** ([#5204](https://github.com/adap/flower/pull/5204))
-- **ci(datasets) Add TOML check and copyright check to** `datasets` ([#5201](https://github.com/adap/flower/pull/5201))
-- **ci(:skip) Upgrade dev tools for Flower Datasets** ([#5191](https://github.com/adap/flower/pull/5191))
-- **ci(:skip) Bump versions to** `v1.18.0` ([#5167](https://github.com/adap/flower/pull/5167))
+  Users can run `flwr --version` or `flwr -V` to print the current Flower version. The update also adds `-h` as a shorthand for CLI help.
 
-### Improve docs
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5233](https://github.com/adap/flower/pull/5233))
-- **docs(:skip) Remove Flower Summit 2025 banner from docs** ([#5179](https://github.com/adap/flower/pull/5179))
-- **docs(framework) Remove redundant clientappio CLI flag** ([#5216](https://github.com/adap/flower/pull/5216))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5211](https://github.com/adap/flower/pull/5211))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5217](https://github.com/adap/flower/pull/5217))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5198](https://github.com/adap/flower/pull/5198))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5168](https://github.com/adap/flower/pull/5168))
-- **docs(framework) Remove unnecessary section in** `How to set up a virtual env` **documentation** ([#5215](https://github.com/adap/flower/pull/5215))
-- **docs(framework) Update Docker Readmes for 1.17.0** ([#5169](https://github.com/adap/flower/pull/5169))
-- **docs(:skip) Fix Flower logo URL in READMEs** ([#5171](https://github.com/adap/flower/pull/5171))
+- **Use Hugging Face `flwrlabs` datasets in FlowerTune templates** ([#5205](https://github.com/adap/flower/pull/5205))
 
-### General Improvements
-- **feat(framework) Remove** `flake8` **and update** `ruff` **configs** ([#5241](https://github.com/adap/flower/pull/5241))
-- **refactor(framework) Update the code example format in docstrings** ([#5180](https://github.com/adap/flower/pull/5180))
-- **refactor(examples) Avoid hard coding** `min_fit_clients` **for the** `fl-dp-sa` **example** ([#5226](https://github.com/adap/flower/pull/5226))
-- **fix(framework) Resolve security alerts** ([#5173](https://github.com/adap/flower/pull/5173))
-- **refactor(framework) Update dataset path for** `sklearn` **template** ([#5219](https://github.com/adap/flower/pull/5219))
-- **refactor(:skip) Update Flower Datasets keywords and format TOML** ([#5208](https://github.com/adap/flower/pull/5208))
-- **build(deps): bump pytorch-lightning from 1.6.0 to 2.4.0 in /examples/quickstart-pytorch-lightning** ([#5158](https://github.com/adap/flower/pull/5158))
+  FlowerTune templates switch to use datasets hosted under the `flwrlabs` organization on Hugging Face.
 
+- **Upgrade FedBN baseline to support `flwr` CLI** ([#5115](https://github.com/adap/flower/pull/5115))\
+  Refactors the FedBN baseline to use the new Flower CLI, removes Hydra, migrates configs, enables result saving, adds run instructions, and ensures stateful clients.
+
+- **Refactor and optimize CI/CD for repository restructuring** ([#5202](https://github.com/adap/flower/pull/5202), [#5176](https://github.com/adap/flower/pull/5176), [#5200](https://github.com/adap/flower/pull/5200), [#5203](https://github.com/adap/flower/pull/5203), [#5210](https://github.com/adap/flower/pull/5210), [#5166](https://github.com/adap/flower/pull/5166), [#5214](https://github.com/adap/flower/pull/5214), [#5212](https://github.com/adap/flower/pull/5212), [#5209](https://github.com/adap/flower/pull/5209), [#5199](https://github.com/adap/flower/pull/5199), [#5204](https://github.com/adap/flower/pull/5204), [#5201](https://github.com/adap/flower/pull/5201), [#5191](https://github.com/adap/flower/pull/5191), [#5167](https://github.com/adap/flower/pull/5167))
+
+  Improves CI/CD workflows to align with repository changes. Updates issue templates, fixes Docker and docs jobs, enhances script compatibility, adds checks, and bumps tool versions to streamline development and deployment.
+
+- **Improve and clean up documentation** ([#5233](https://github.com/adap/flower/pull/5233), [#5179](https://github.com/adap/flower/pull/5179), [#5216](https://github.com/adap/flower/pull/5216), [#5211](https://github.com/adap/flower/pull/5211), [#5217](https://github.com/adap/flower/pull/5217), [#5198](https://github.com/adap/flower/pull/5198), [#5168](https://github.com/adap/flower/pull/5168), [#5215](https://github.com/adap/flower/pull/5215), [#5169](https://github.com/adap/flower/pull/5169), [#5171](https://github.com/adap/flower/pull/5171))
+
+  Removes outdated content, redundant CLI flags, and unnecessary sections; updates Docker READMEs and virtual environment setup guide; and syncs translation source texts.
+
+- **General Improvements** ([#5241](https://github.com/adap/flower/pull/5241), [#5180](https://github.com/adap/flower/pull/5180), [#5226](https://github.com/adap/flower/pull/5226), [#5173](https://github.com/adap/flower/pull/5173), [#5219](https://github.com/adap/flower/pull/5219), [#5208](https://github.com/adap/flower/pull/5208), [#5158](https://github.com/adap/flower/pull/5158))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
 ### Incompatible changes
 
-### (Only impact contributors) Restructure Flower repository
-- **docs(framework) Update contributor docs accordingly after structuring** ([#5206](https://github.com/adap/flower/pull/5206))
-- **ci(:skip) Add** `devtool` **under** `dev` **for Flower developer tools** ([#5194](https://github.com/adap/flower/pull/5194))
-- **ci(:skip) Move** `pyproject.toml` **to** `framework/` **from the root directory** ([#5192](https://github.com/adap/flower/pull/5192))
-- **ci(:skip) Move framework-related dev scripts from** `./dev/` **to** `./framework/dev/` ([#5185](https://github.com/adap/flower/pull/5185))
-- **refactor(:skip) Move** `src/` **into** `framework/` ([#5184](https://github.com/adap/flower/pull/5184))
-- **refactor(:skip) Move** `e2e` **folder to** `framework/` ([#5177](https://github.com/adap/flower/pull/5177))
-- **ci(:skip) Disable Android and Swift CIs temporarily for folder restructuring** ([#5183](https://github.com/adap/flower/pull/5183))
-- **refactor(:skip) Add symlink to dev tools** ([#5207](https://github.com/adap/flower/pull/5207))
+- **Restructure repository (breaking change for contributors only)** ([#5206](https://github.com/adap/flower/pull/5206), [#5194](https://github.com/adap/flower/pull/5194), [#5192](https://github.com/adap/flower/pull/5192), [#5185](https://github.com/adap/flower/pull/5185), [#5184](https://github.com/adap/flower/pull/5184), [#5177](https://github.com/adap/flower/pull/5177), [#5183](https://github.com/adap/flower/pull/5183), [#5207](https://github.com/adap/flower/pull/5207))
+
+  Restructures the Flower repository by moving all framework-related code, configs, and dev tools into the `framework/` subdirectory. This includes relocating all files under `src/`, dev scripts, `pyproject.toml` and other configs. Contributor documentation has been updated to reflect these changes.
+
+  Switching to the new structure is very straightforward and should require only minimal adjustments for most contributors, though this is a breaking change—refer to the [contributor guide](https://flower.ai/docs/framework/v1.17.0/en/contribute.html) for updated instructions.
 
 ### Other changes
 
-
-
-
-
-
-
 ### Unknown changes
 
-
-
 ### DELETE FI
+
 - **feat(intelligence) Add** `fetchModelConfig` **function** ([#5186](https://github.com/adap/flower/pull/5186))
 - **feat(intelligence) Update cache staleness logic** ([#5181](https://github.com/adap/flower/pull/5181))
 - **feat(intelligence) Create ts web chat examples** ([#5094](https://github.com/adap/flower/pull/5094))
@@ -100,7 +65,6 @@ We would like to give our special thanks to all the contributors who made the ne
 - **build(deps-dev): bump vite from 6.2.4 to 6.2.5 in /intelligence/ts** ([#5195](https://github.com/adap/flower/pull/5195))
 - **build(deps-dev): bump vite from 6.2.3 to 6.2.4 in /intelligence/ts** ([#5175](https://github.com/adap/flower/pull/5175))
 - **build(deps-dev): bump vite from 6.2.5 to 6.2.6 in /intelligence/ts** ([#5231](https://github.com/adap/flower/pull/5231))
-
 
 ## v1.17.0 (2025-03-24)
 
