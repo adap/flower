@@ -150,7 +150,11 @@ def _get_contributors_from_commits(api: Github, commits: list[Commit]) -> set[st
                 return user.name
             print(f"Email mismatch for user {username}: {email} != {user.email}")
         except Exception:  # pylint: disable=broad-exception-caught
-            print(f"FAILED to get user profile from GitHub: {username} <{email}>")
+            print(
+                f"Failed to retrieve GitHub profile for user '{username}' <{email}>. "
+                f"Using '{username}' directly in the changelog."
+            )
+            return username
         return None
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
