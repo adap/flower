@@ -42,7 +42,7 @@ CHANGELOG_FILE = ROOT_DIR / "framework" / "docs" / "source" / "ref-changelog.md"
 CHANGELOG_SECTION_HEADER = "### Changelog entry"
 
 # Load the TOML configuration
-with (Path(__file__).parent.resolve() / "changelog_config.toml").open("rb") as toml_f:
+with (ROOT_DIR / "dev" / "changelog_config.toml").open("rb") as toml_f:
     CONFIG = tomllib.load(toml_f)
 
 # Extract types, project, and scope from the config
