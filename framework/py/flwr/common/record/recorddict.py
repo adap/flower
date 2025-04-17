@@ -248,9 +248,9 @@ class RecordDict(TypedDict[str, RecordType]):
             _warning_tracker.parameters_records_logged = True
             log(
                 WARN,
-                "`RecordDict.parameters_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.array_records` instead.",
+                "The `parameters_records` property of `RecordDict` "
+                "(formerly `RecordSet`) is deprecated and will be removed in a "
+                "future release. Please use the `array_records` property instead.",
             )
         return self.array_records
 
@@ -264,9 +264,9 @@ class RecordDict(TypedDict[str, RecordType]):
             _warning_tracker.metrics_records_logged = True
             log(
                 WARN,
-                "`RecordDict.metrics_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.metric_records` instead.",
+                "The `metrics_records` property of `RecordDict` "
+                "(formerly `RecordSet`) is deprecated and will be removed in a "
+                "future release. Please use the `metric_records` property instead.",
             )
         return self.metric_records
 
@@ -280,9 +280,9 @@ class RecordDict(TypedDict[str, RecordType]):
             _warning_tracker.configs_records_logged = True
             log(
                 WARN,
-                "`RecordDict.configs_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.config_records` instead.",
+                "The `configs_records` property of `RecordDict` "
+                "(formerly `RecordSet`) is deprecated and will be removed in a "
+                "future release. Please use the `config_records` property instead.",
             )
         return self.config_records
 
