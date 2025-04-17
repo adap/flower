@@ -32,7 +32,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Fix bug in Shamir's secret sharing utilities affecting Secure Aggregation** ([#5252](https://github.com/adap/flower/pull/5252))
 
-  Refactors Shamir's secret sharing utilities to fix a bug impacting Secure Aggregation. Thanks to Pinji Chen and Guanheng Liu for their contributions.
+  Refactors Shamir's secret sharing utilities to fix a bug impacting Secure Aggregation. Thanks to [Pinji Chen](mailto:cpj24@mails.tsinghua.edu.cn) and [Guanheng Liu](mailto:coolwind326@gmail.com) for their contributions.
 
 - **Refactor and optimize CI/CD for repository restructuring** ([#5202](https://github.com/adap/flower/pull/5202), [#5176](https://github.com/adap/flower/pull/5176), [#5200](https://github.com/adap/flower/pull/5200), [#5203](https://github.com/adap/flower/pull/5203), [#5210](https://github.com/adap/flower/pull/5210), [#5166](https://github.com/adap/flower/pull/5166), [#5214](https://github.com/adap/flower/pull/5214), [#5212](https://github.com/adap/flower/pull/5212), [#5209](https://github.com/adap/flower/pull/5209), [#5199](https://github.com/adap/flower/pull/5199), [#5204](https://github.com/adap/flower/pull/5204), [#5201](https://github.com/adap/flower/pull/5201), [#5191](https://github.com/adap/flower/pull/5191), [#5167](https://github.com/adap/flower/pull/5167), [#5248](https://github.com/adap/flower/pull/5248))
 
