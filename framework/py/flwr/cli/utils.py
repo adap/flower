@@ -265,7 +265,8 @@ def init_channel(
         # Check if TLS is enabled. If not, raise an error
         if insecure:
             typer.secho(
-                "❌ User authentication requires TLS to be enabled.",
+                "❌ User authentication requires TLS to be enabled. "
+                "Remove `insecure = true` from the federation configuration.",
                 fg=typer.colors.RED,
                 bold=True,
             )
