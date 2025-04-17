@@ -54,6 +54,12 @@ jobs:
           key: hf-datasets-v1
           restore-keys: hf-datasets-
       - name: Set Hugging Face token
-        run: huggingface-cli login --token ${{ secrets.HF_TOKEN }}
+        run: |
+          if [ -n "${{ secrets.HF_TOKEN }}" ]; then
+            echo "Logging into Hugging Face..."
+            huggingface-cli login --token ${{ secrets.HF_TOKEN }}
+          else
+            echo "Skipping Hugging Face login stage (HF_TOKEN not set)"
+          fi
       - name: Test (formatting + unit tests)
         run: ./datasets/dev/test.sh
