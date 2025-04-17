@@ -6,7 +6,7 @@
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Alan Silva`, `Andrej Jovanović`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Gustavo Bertoli`, `Heng Pan`, `Javier`, `Khoa Nguyen`, `Mohammad Naseri`, `Robert Steiner`, `Stephane Moroso`, `Taner Topal`, `William Lindskog`, `Yan Gao` <!---TOKEN_v1.18.0-->
+`Alan Silva`, `Andrej Jovanović`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Guanheng Liu`, `Gustavo Bertoli`, `Heng Pan`, `Javier`, `Khoa Nguyen`, `Mohammad Naseri`, `Pinji Chen`, `Robert Steiner`, `Stephane Moroso`, `Taner Topal`, `William Lindskog`, `Yan Gao` <!---TOKEN_v1.18.0-->
 
 ### What's new?
 
@@ -26,14 +26,19 @@ We would like to give our special thanks to all the contributors who made the ne
 
   FlowerTune templates switch to use datasets hosted under the `flwrlabs` organization on Hugging Face.
 
-- **Upgrade FedBN baseline to support `flwr` CLI** ([#5115](https://github.com/adap/flower/pull/5115))\
+- **Upgrade FedBN baseline to support `flwr` CLI** ([#5115](https://github.com/adap/flower/pull/5115))
+
   Refactors the FedBN baseline to use the new Flower CLI, removes Hydra, migrates configs, enables result saving, adds run instructions, and ensures stateful clients.
+
+- **Fix bug in Shamir's secret sharing utilities affecting Secure Aggregation** ([#5252](https://github.com/adap/flower/pull/5252))
+
+  Refactors Shamir's secret sharing utilities to fix a bug impacting Secure Aggregation. Thanks to Pinji Chen and Guanheng Liu for their contributions.
 
 - **Refactor and optimize CI/CD for repository restructuring** ([#5202](https://github.com/adap/flower/pull/5202), [#5176](https://github.com/adap/flower/pull/5176), [#5200](https://github.com/adap/flower/pull/5200), [#5203](https://github.com/adap/flower/pull/5203), [#5210](https://github.com/adap/flower/pull/5210), [#5166](https://github.com/adap/flower/pull/5166), [#5214](https://github.com/adap/flower/pull/5214), [#5212](https://github.com/adap/flower/pull/5212), [#5209](https://github.com/adap/flower/pull/5209), [#5199](https://github.com/adap/flower/pull/5199), [#5204](https://github.com/adap/flower/pull/5204), [#5201](https://github.com/adap/flower/pull/5201), [#5191](https://github.com/adap/flower/pull/5191), [#5167](https://github.com/adap/flower/pull/5167), [#5248](https://github.com/adap/flower/pull/5248))
 
   Improves CI/CD workflows to align with repository changes. Updates issue templates, fixes Docker and docs jobs, enhances script compatibility, adds checks, and bumps tool versions to streamline development and deployment.
 
-- **Improve and clean up documentation** ([#5233](https://github.com/adap/flower/pull/5233), [#5179](https://github.com/adap/flower/pull/5179), [#5216](https://github.com/adap/flower/pull/5216), [#5211](https://github.com/adap/flower/pull/5211), [#5217](https://github.com/adap/flower/pull/5217), [#5198](https://github.com/adap/flower/pull/5198), [#5168](https://github.com/adap/flower/pull/5168), [#5215](https://github.com/adap/flower/pull/5215), [#5169](https://github.com/adap/flower/pull/5169), [#5171](https://github.com/adap/flower/pull/5171))
+- **Improve and clean up documentation** ([#5233](https://github.com/adap/flower/pull/5233), [#5179](https://github.com/adap/flower/pull/5179), [#5216](https://github.com/adap/flower/pull/5216), [#5211](https://github.com/adap/flower/pull/5211), [#5217](https://github.com/adap/flower/pull/5217), [#5198](https://github.com/adap/flower/pull/5198), [#5168](https://github.com/adap/flower/pull/5168), [#5215](https://github.com/adap/flower/pull/5215), [#5169](https://github.com/adap/flower/pull/5169), [#5171](https://github.com/adap/flower/pull/5171), [#5240](https://github.com/adap/flower/pull/5240))
 
   Removes outdated content, redundant CLI flags, and unnecessary sections; updates Docker READMEs and virtual environment setup guide; and syncs translation source texts.
 
@@ -51,12 +56,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### DELETE FI PRs
 
-- **feat(intelligence) Add** `fetchModelConfig` **function** ([#5186](https://github.com/adap/flower/pull/5186))
-- **feat(intelligence) Update cache staleness logic** ([#5181](https://github.com/adap/flower/pull/5181))
-- **feat(intelligence) Create ts web chat examples** ([#5094](https://github.com/adap/flower/pull/5094))
-- **refactor(intelligence) Bump version to 0.1.8** ([#5221](https://github.com/adap/flower/pull/5221))
-- **ci(intelligence) Update npmignore file** ([#5220](https://github.com/adap/flower/pull/5220))
-- **ci(intelligence) Add bundled distribution for TS SDK** ([#5213](https://github.com/adap/flower/pull/5213))
 - **build(deps-dev): bump vite from 6.2.2 to 6.2.3 in /intelligence/ts** ([#5170](https://github.com/adap/flower/pull/5170))
 - **build(deps-dev): bump vite from 6.2.4 to 6.2.5 in /intelligence/ts** ([#5195](https://github.com/adap/flower/pull/5195))
 - **build(deps-dev): bump vite from 6.2.3 to 6.2.4 in /intelligence/ts** ([#5175](https://github.com/adap/flower/pull/5175))

@@ -272,6 +272,10 @@ def _update_changelog(prs: set[PullRequest], tag: str, new_tag: str) -> bool:
             # Skip if the PR is already in changelog
             if f"#{pr_info.number}]" in content:
                 continue
+            
+            # Skip Flower Intelligence PRs
+            if parsed_title["project"] == "intelligence":
+                continue
 
             # Find section to insert
             pr_type = parsed_title.get("type", "unknown")
