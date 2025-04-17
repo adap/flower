@@ -262,6 +262,14 @@ def init_channel(
     # Initialize the CLI-side user auth interceptor
     interceptors: list[grpc.UnaryUnaryClientInterceptor] = []
     if auth_plugin is not None:
+        if insecure:
+            typer.secho(
+                "❌ User authentication requires TLS to be enabled."
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+
         auth_plugin.load_tokens()
         interceptors.append(CliUserAuthInterceptor(auth_plugin))
 
