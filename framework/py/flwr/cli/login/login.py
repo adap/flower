@@ -22,6 +22,7 @@ import typer
 
 from flwr.cli.config_utils import (
     exit_if_no_address,
+    get_insecure_flag,
     load_and_validate,
     process_loaded_project_config,
     validate_federation_in_project_config,
@@ -76,6 +77,16 @@ def login(  # pylint: disable=R0914
             f"❌ User authentication is not enabled for the federation '{federation}'. "
             "To enable it, set `enable-user-auth = true` in the federation "
             "configuration.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+    # Check if insecure flag is set
+    insecure = get_insecure_flag(federation_config)
+    if insecure:
+        typer.secho(
+            "❌ `flwr login` requires TLS to be enabled. `insecure` must be set to "
+            "`false` in the federation configuration.",
             fg=typer.colors.RED,
             bold=True,
         )
