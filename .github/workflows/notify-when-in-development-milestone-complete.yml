@@ -1,0 +1,78 @@
+name: Notify on Milestone Status (In Development Issues)
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # Daily at 09:00 UTC
+  workflow_dispatch:
+
+jobs:
+  notify-milestone-status:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Check milestone status and notify
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const org = owner;
+            const today = new Date();
+
+            const query = `repo:${owner}/${repo} is:issue is:open comments:>=1 has:milestone -milestone:"Future Release"`;
+            const { data } = await github.rest.search.issuesAndPullRequests({
+              q: query,
+              per_page: 100
+            });
+
+            for (const issue of data.items) {
+              const milestone = issue.milestone;
+              if (!milestone) continue;
+
+              const dueDate = milestone.due_on ? new Date(milestone.due_on) : null;
+              const isOverdue = dueDate && dueDate < today;
+              const isClosed = milestone.state === "closed";
+
+              let milestoneStatus = null;
+              if (isClosed && isOverdue) {
+                milestoneStatus = "closed and overdue";
+              } else if (isClosed) {
+                milestoneStatus = "closed";
+              } else if (isOverdue) {
+                milestoneStatus = "overdue";
+              } else {
+                continue; // Skip milestone that is open and not overdue
+              }
+
+              // Check for org member assignees
+              let orgAssignees = [];
+              for (const assignee of issue.assignees) {
+                const login = assignee.login;
+
+                const { status } = await github.rest.orgs.checkMembershipForUser({
+                  org,
+                  username: login
+                }).catch(() => ({ status: 404 }));
+
+                if (status === 204) {
+                  orgAssignees.push(`@${login}`);
+                }
+              }
+
+              const pingTarget = orgAssignees.length > 0
+                ? orgAssignees.join(", ")
+                : "@WilliamLindskog";
+
+              const body = `Milestone for this \`In Development\` issue is *${milestoneStatus}*. ${pingTarget} — please review whether this issue can now be closed as \`Completed\`.`;
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issue.number,
+                body
+              });
+
+              console.log(`Pinged ${pingTarget} on issue #${issue.number} (milestone: ${milestoneStatus})`);
+            }
