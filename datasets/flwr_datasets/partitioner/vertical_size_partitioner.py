@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """VerticalSizePartitioner class."""
-# flake8: noqa: E501
+# noqa: E501
 # pylint: disable=C0301, R0902, R0913
 from math import floor
 from typing import Literal, Optional, Union, cast
