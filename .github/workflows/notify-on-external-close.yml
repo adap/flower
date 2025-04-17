@@ -1,0 +1,44 @@
+name: Notify on External Issue Closure
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  notify-if-external:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Check if issue was closed by external user
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const closer = context.actor;
+
+            // Ignore GitHub bots
+            if (closer.endsWith("[bot]")) return;
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Check if the user is a collaborator (maintainer, admin, org member with access)
+            const { status } = await github.rest.repos.checkCollaborator({
+              owner,
+              repo,
+              username: closer
+            }).catch(() => ({ status: 404 }));
+
+            if (status !== 204) {
+              // Not a collaborator = external → notify William
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issue.number,
+                body: `@WilliamLindskog, confirm. This issue was closed by community member.`
+              });
+            } else {
+              console.log(`Internal user ${closer} closed the issue. No action needed.`);
+            }
