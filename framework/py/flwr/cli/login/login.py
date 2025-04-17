@@ -85,8 +85,8 @@ def login(  # pylint: disable=R0914
     insecure = get_insecure_flag(federation_config)
     if insecure:
         typer.secho(
-            "❌ `flwr login` requires TLS to be enabled. `insecure` must be set to "
-            "`false` in the federation configuration.",
+            "❌ `flwr login` requires TLS to be enabled. `insecure` must NOT be set to "
+            "`true` in the federation configuration.",
             fg=typer.colors.RED,
             bold=True,
         )
