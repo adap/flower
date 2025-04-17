@@ -239,7 +239,7 @@ def exit_if_no_address(federation_config: dict[str, Any], cmd: str) -> None:
 
 
 def get_insecure_flag(federation_config: dict[str, Any]) -> bool:
-    """Extracts and validates the `insecure` flag from the federation configuration."""
+    """Extract and validate the `insecure` flag from the federation configuration."""
     insecure_value = federation_config.get("insecure")
 
     if insecure_value is None:
