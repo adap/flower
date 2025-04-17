@@ -264,7 +264,7 @@ def init_channel(
     if auth_plugin is not None:
         if insecure:
             typer.secho(
-                "❌ User authentication requires TLS to be enabled."
+                "❌ User authentication requires TLS to be enabled.",
                 fg=typer.colors.RED,
                 bold=True,
             )
