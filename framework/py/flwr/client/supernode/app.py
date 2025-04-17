@@ -47,15 +47,16 @@ from ..app import start_client_internal
 from ..clientapp.utils import get_load_client_app_fn
 
 
-def run_supernode(args: Optional[argparse.Namespace] = None) -> None:
+def run_supernode(arguments: Optional[argparse.Namespace] = None) -> None:
     """Run Flower SuperNode.
 
     Parameters
     ----------
-    args : Optional[argparse.Namespace]
+    arguments : Optional[argparse.Namespace]
         The arguments to pass to the SuperNode. If not provided, the arguments will be
         parsed from the command line.
     """
+    args = arguments
     if args is None:
         args = _parse_args_run_supernode().parse_args()
 

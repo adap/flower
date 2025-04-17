@@ -266,15 +266,16 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
-def run_superlink(args: Optional[argparse.Namespace] = None) -> None:
+def run_superlink(arguments: Optional[argparse.Namespace] = None) -> None:
     """Run Flower SuperLink (ServerAppIo API and Fleet API).
 
     Parameters
     ----------
-    args : Optional[argparse.Namespace]
+    arguments : Optional[argparse.Namespace]
         The arguments to pass to the SuperLink. If not provided, the arguments will be
         parsed from the command line.
     """
+    args = arguments
     if args is None:
         args = _parse_args_run_superlink().parse_args()
 
