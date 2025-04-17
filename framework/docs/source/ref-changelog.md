@@ -12,11 +12,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Add support for Python 3.12** ([#5238](https://github.com/adap/flower/pull/5238))
 
-  Python 3.12 is officially supported for `flwr` and `flwr_datasets`.
+  Python 3.12 is officially supported (Python 3.12 was in preview support since Flower 1.6). Python 3.13 support continues to be in preview until all dependencies officially support Python 3.13.
 
 - **Enable TLS connection for `flwr` CLI using CA certificates** ([#5227](https://github.com/adap/flower/pull/5227), [#5237](https://github.com/adap/flower/pull/5237))
 
-  `flwr` CLI now supports secure TLS connections to SuperLink instances with valid CA certificates. If no root certificates are provided, the CLI automatically uses the default ones bundled with gRPC.
+  `flwr` CLI now supports secure TLS connections to SuperLink instances with valid CA certificates. If no root certificates are provided, the CLI automatically uses the default CA certificates bundled with gRPC.
 
 - **Add `--version` and `-V` flags to display `flwr` version** ([#5236](https://github.com/adap/flower/pull/5236))
 
@@ -52,7 +52,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Restructures the Flower repository by moving all framework-related code, configs, and dev tools into the `framework/` subdirectory. This includes relocating all files under `src/`, dev scripts, `pyproject.toml` and other configs. Contributor documentation has been updated to reflect these changes.
 
-  Switching to the new structure is very straightforward and should require only minimal adjustments for most contributors, though this is a breaking change—refer to the [contributor guide](https://flower.ai/docs/framework/v1.17.0/en/contribute.html) for updated instructions.
+  Switching to the new structure is straightforward and should require only minimal adjustments for most contributors, though this is a breaking change—refer to the [contributor guide](https://flower.ai/docs/framework/v1.17.0/en/contribute.html) for updated instructions.
 
 ### DELETE FI PRs
 
