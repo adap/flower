@@ -220,17 +220,6 @@ def try_obtain_cli_auth_plugin(
     if not federation_config.get("enable-user-auth", False):
         return None
 
-    # Check if TLS is enabled. If not, raise an error
-    if federation_config.get("root-certificates") is None:
-        typer.secho(
-            "❌ User authentication requires TLS to be enabled. "
-            "Please provide 'root-certificates' in the federation"
-            " configuration.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
     config_path = get_user_auth_config_path(root_dir, federation)
 
     # Get the auth type from the config if not provided
