@@ -81,7 +81,7 @@ def login(  # pylint: disable=R0914
             bold=True,
         )
         raise typer.Exit(code=1)
-    # Check if insecure flag is set
+    # Check if insecure flag is set to `True`
     insecure = get_insecure_flag(federation_config)
     if insecure:
         typer.secho(
