@@ -197,21 +197,7 @@ def validate_certificate_in_federation_config(
          - `address` is provided and `insecure = true`. If `root-certificates` is
            set, exit with an error.
     """
-    insecure_value = federation_config.get("insecure")
-    # Determine the insecure flag
-    if insecure_value is None:
-        # Not provided, default to False (TLS enabled)
-        insecure = False
-    elif isinstance(insecure_value, bool):
-        insecure = insecure_value
-    else:
-        typer.secho(
-            "❌ Invalid type for `insecure`: expected a boolean if provided. "
-            "(`insecure = true` or `insecure = false`)",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    insecure = get_insecure_flag(federation_config)
 
     # Process root certificates
     if root_certificates := federation_config.get("root-certificates"):
@@ -250,3 +236,21 @@ def exit_if_no_address(federation_config: dict[str, Any], cmd: str) -> None:
             bold=True,
         )
         raise typer.Exit(code=1)
+
+
+def get_insecure_flag(federation_config: dict[str, Any]) -> bool:
+    """Extract and validate the `insecure` flag from the federation configuration."""
+    insecure_value = federation_config.get("insecure")
+
+    if insecure_value is None:
+        # Not provided, default to False (TLS enabled)
+        return False
+    if isinstance(insecure_value, bool):
+        return insecure_value
+    typer.secho(
+        "❌ Invalid type for `insecure`: expected a boolean if provided. "
+        "(`insecure = true` or `insecure = false`)",
+        fg=typer.colors.RED,
+        bold=True,
+    )
+    raise typer.Exit(code=1)
