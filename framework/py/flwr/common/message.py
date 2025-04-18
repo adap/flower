@@ -36,6 +36,19 @@ MESSAGE_INIT_ERROR_MESSAGE = (
 )
 
 
+class _WarningTracker:
+    """A class to track warnings for deprecated properties."""
+
+    def __init__(self) -> None:
+        # These variables are used to ensure that the deprecation warnings
+        # for the deprecated properties/class are logged only once.
+        self.create_error_reply_logged = False
+        self.create_reply_logged = False
+
+
+_warning_tracker = _WarningTracker()
+
+
 class MessageInitializationError(TypeError):
     """Error raised when initializing a message with invalid arguments."""
 
@@ -456,11 +469,13 @@ class Message:
         message : Message
             A Message containing only the relevant error and metadata.
         """
-        warn_deprecated_feature(
-            "`Message.create_error_reply` is deprecated. "
-            "Instead of calling `some_message.create_error_reply(some_error, ttl=...)`"
-            ", use `Message(some_error, reply_to=some_message, ttl=...)`."
-        )
+        if not _warning_tracker.create_error_reply_logged:
+            _warning_tracker.create_error_reply_logged = True
+            warn_deprecated_feature(
+                "`Message.create_error_reply` is deprecated. "
+                "Instead of calling `some_message.create_error_reply(some_error, "
+                "ttl=...)`, use `Message(some_error, reply_to=some_message, ttl=...)`."
+            )
         if ttl is not None:
             return Message(error, reply_to=self, ttl=ttl)
         return Message(error, reply_to=self)
@@ -488,11 +503,13 @@ class Message:
         Message
             A new `Message` instance representing the reply.
         """
-        warn_deprecated_feature(
-            "`Message.create_reply` is deprecated. "
-            "Instead of calling `some_message.create_reply(some_content, ttl=...)`"
-            ", use `Message(some_content, reply_to=some_message, ttl=...)`."
-        )
+        if not _warning_tracker.create_reply_logged:
+            _warning_tracker.create_reply_logged = True
+            warn_deprecated_feature(
+                "`Message.create_reply` is deprecated. "
+                "Instead of calling `some_message.create_reply(some_content, ttl=...)`"
+                ", use `Message(some_content, reply_to=some_message, ttl=...)`."
+            )
         if ttl is not None:
             return Message(content, reply_to=self, ttl=ttl)
         return Message(content, reply_to=self)
