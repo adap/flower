@@ -220,17 +220,6 @@ def try_obtain_cli_auth_plugin(
     if not federation_config.get("enable-user-auth", False):
         return None
 
-    # Check if TLS is enabled. If not, raise an error
-    if federation_config.get("root-certificates") is None:
-        typer.secho(
-            "❌ User authentication requires TLS to be enabled. "
-            "Please provide 'root-certificates' in the federation"
-            " configuration.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
     config_path = get_user_auth_config_path(root_dir, federation)
 
     # Get the auth type from the config if not provided
@@ -273,6 +262,16 @@ def init_channel(
     # Initialize the CLI-side user auth interceptor
     interceptors: list[grpc.UnaryUnaryClientInterceptor] = []
     if auth_plugin is not None:
+        # Check if TLS is enabled. If not, raise an error
+        if insecure:
+            typer.secho(
+                "❌ User authentication requires TLS to be enabled. "
+                "Remove `insecure = true` from the federation configuration.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+
         auth_plugin.load_tokens()
         interceptors.append(CliUserAuthInterceptor(auth_plugin))
 
