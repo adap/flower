@@ -1,0 +1,62 @@
+name: Ping Stale Under Discussion Issues
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # Daily at 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping-stale-issues:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Ping stale Under Discussion issues
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const org = owner; // Automatically set to current org/user
+            const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+            const query = `repo:${owner}/${repo} is:issue is:open comments:>=1 no:milestone`;
+            const { data } = await github.rest.search.issuesAndPullRequests({
+              q: query,
+              per_page: 100
+            });
+
+            for (const issue of data.items) {
+              const updatedAt = new Date(issue.updated_at);
+              if (updatedAt >= sevenDaysAgo) continue; // skip if recently active
+
+              let orgAssignees = [];
+              for (const assignee of issue.assignees) {
+                const login = assignee.login;
+
+                const { status } = await github.rest.orgs.checkMembershipForUser({
+                  org,
+                  username: login
+                }).catch(() => ({ status: 404 }));
+
+                if (status === 204) {
+                  orgAssignees.push(`@${login}`);
+                }
+              }
+
+              const pingTarget = orgAssignees.length > 0
+                ? orgAssignees.join(", ")
+                : "@WilliamLindskog";
+
+              const body = `Gentle ping ${pingTarget} — this issue has been in \`Under Discussion\` without activity for over 7 days. Please review or update its status.`;
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issue.number,
+                body
+              });
+
+              console.log(`Pinged on issue #${issue.number}: ${pingTarget}`);
+            }
