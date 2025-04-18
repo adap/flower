@@ -23,7 +23,7 @@ import datasets
 from datasets import DatasetDict
 
 
-# flake8: noqa: E501
+# noqa: E501
 # pylint: disable=line-too-long
 class Divider:
     """Dive existing split(s) of the dataset and assign them custom names.
