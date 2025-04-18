@@ -1,0 +1,180 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tracefl-baseline"
+version = "1.0.0"
+description = ""
+license = "Apache-2.0"
+requires-python = ">=3.8"
+dependencies = [
+  # Core FL
+  "flwr[simulation]>=1.15.2",
+  "flwr-datasets[vision]>=0.5.0",
+  
+  # Deep Learning
+  "torch==2.5.1",
+  "torchvision==0.20.1",
+  "transformers[torch]==4.48.1",
+  
+  # Data Handling
+  "medmnist==3.0.2",
+  "datasets==2.19.1",
+  "diskcache==5.6.3",
+  "omegaconf==2.3.0",
+  
+  # Utilities
+  "hydra-core==1.3.2",
+  "pathvalidate==3.2.3",
+  "evaluate==0.4.3",
+  "numpy==1.26.4",
+  "pandas==2.2.2",
+  "scikit-learn==1.4.2",
+  "matplotlib==3.8.3",
+  
+  # Provenance
+  "networkx==3.2.1",
+  "tqdm==4.66.2",
+
+  # toml
+  "toml"
+
+]
+
+
+
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+# Merge dev dependencies from both snippets. 
+# If there's a version conflict, pick whichever you prefer.
+[project.optional-dependencies]
+dev = [
+  # Your existing dev deps
+  "isort==5.13.2",
+  "black==24.2.0",
+  "docformatter==1.7.5",
+  "mypy==1.8.0",
+  "pylint==3.2.6",
+  "flake8==5.0.4",
+  "pytest==6.2.4",
+  "pytest-watch==4.2.0",
+  "ruff==0.1.9",        # or "ruff==0.0.272" if you prefer
+  "types-requests==2.31.0.20240125", # or "==2.27.7" from snippet
+]
+
+[tool.isort]
+profile = "black"
+known_first_party = ["flwr"]
+line_length = 88
+indent = "    "
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311"]
+
+[tool.pytest.ini_options]
+minversion = "6.2"
+addopts = "-qq"
+testpaths = [
+  "flwr_baselines",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = false
+plugins = "numpy.typing.mypy_plugin"
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = "duplicate-code,too-few-public-methods,useless-import-alias"
+good-names = "i,j,k,_,x,y,X,Y,K,N"
+max-args = 10
+max-attributes = 15
+max-locals = 36
+max-branches = 20
+max-statements = 55
+
+[tool.pylint.typecheck]
+generated-members = "numpy.*, torch.*, tensorflow.*"
+
+[[tool.mypy.overrides]]
+module = [
+  "importlib.metadata.*",
+  "importlib_metadata.*",
+]
+follow_imports = "skip"
+follow_imports_for_stubs = true
+disallow_untyped_calls = false
+
+[[tool.mypy.overrides]]
+module = "torch.*"
+follow_imports = "skip"
+follow_imports_for_stubs = true
+
+[tool.docformatter]
+wrap-summaries = 88
+wrap-descriptions = 88
+
+[tool.ruff]
+target-version = "py38"
+line-length = 88
+select = ["D", "E", "F", "W", "B", "ISC", "C4"]
+fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
+ignore = ["B024", "B027"]
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+  "proto",
+]
+
+[tool.ruff.pydocstyle]
+convention = "numpy"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "ibrahimak10"
+
+[tool.flwr.app.components]
+serverapp = "tracefl.server_app:app"
+clientapp = "tracefl.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 2
+fraction-fit = 1
+local-epochs = 1
+min-evaluate = 1
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 2
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0
+options.parallelism = 2
