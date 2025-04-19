@@ -15,14 +15,18 @@
 """Continuous partitioner class that works with Hugging Face Datasets."""
 
 
+# pylint: disable=R0913, R0917
 from typing import Optional
 
 import numpy as np
+
 from datasets import Dataset
 from flwr_datasets.partitioner import Partitioner
 
 
-class ContinuousPartitioner(Partitioner):
+class ContinuousPartitioner(
+    Partitioner
+):  # pylint: disable=too-many-instance-attributes
     """Partitioner based on a continuous dataset property with adjustable strictness.
 
     This partitioner enables non-IID partitioning by sorting the dataset based on a
@@ -66,7 +70,7 @@ class ContinuousPartitioner(Partitioner):
         seed: Optional[int] = 42,
     ) -> None:
         super().__init__()
-        if not (0 <= strictness <= 1):
+        if not 0 <= strictness <= 1:
             raise ValueError("`strictness` must be between 0 and 1")
         if num_partitions <= 0:
             raise ValueError("`num_partitions` must be greater than 0")
@@ -124,7 +128,7 @@ class ContinuousPartitioner(Partitioner):
         property_values = np.array(self.dataset[self._partition_by], dtype=np.float32)
 
         # Check for missing values (None or NaN)
-        if np.any(property_values == None) or np.isnan(property_values).any():
+        if np.any(property_values is None) or np.isnan(property_values).any():
             raise ValueError(
                 f"The column '{self._partition_by}' contains None or NaN values, "
                 "which are not supported by ContinuousPartitioner. "
@@ -135,8 +139,9 @@ class ContinuousPartitioner(Partitioner):
         std = np.std(property_values)
         if std < 1e-6:
             raise ValueError(
-                f"Cannot standardize column '{self._partition_by}' because it has near-zero standard deviation "
-                f"(std={std}). All values are nearly identical, which prevents meaningful partitioning."
+                f"Cannot standardize column '{self._partition_by}' because it has near-zero s.d. "
+                f"(std={std}). All values are nearly identical, which prevents meaningful"
+                " partitioning. Please choose a different column or adjust the dataset."
             )
 
         standardized_values = (property_values - np.mean(property_values)) / std
@@ -151,12 +156,10 @@ class ContinuousPartitioner(Partitioner):
         sorted_indices = np.argsort(blended_values)
         partition_indices = np.array_split(sorted_indices, self._num_partitions)
 
-        # Create dictionary
-        self._partition_id_to_indices = {}
         for pid, indices in enumerate(partition_indices):
-            indices = indices.tolist()
+            indices_list = indices.tolist()
             if self._shuffle:
-                self._rng.shuffle(indices)
-            self._partition_id_to_indices[pid] = indices
+                self._rng.shuffle(indices_list)
+            self._partition_id_to_indices[pid] = indices_list
 
         self._partition_id_to_indices_determined = True

@@ -14,7 +14,7 @@
 # ==============================================================================
 """Test ContinuousPartitioner."""
 
-# pylint: disable=W0212, R0801
+# pylint: disable=W0212, R0801, R0917, R0913
 import unittest
 from typing import Optional
 
@@ -60,8 +60,10 @@ class TestContinuousPartitionerSuccess(unittest.TestCase):
             (5, 1.0, 100),
             (3, 0.5, 50),
         ]
-    )
-    def test_valid_partition_shapes(self, num_partitions: int, strictness: float, num_rows: int) -> None:
+    )  # type: ignore
+    def test_valid_partition_shapes(
+        self, num_partitions: int, strictness: float, num_rows: int
+    ) -> None:
         """Check each partition has non-zero and collectively complete indices."""
         _, partitioner = _dummy_setup(num_partitions, strictness, num_rows)
         partition_sizes = [
@@ -94,12 +96,14 @@ class TestContinuousPartitionerSuccess(unittest.TestCase):
         _, partitioner = _dummy_setup(3, 1.0, 30, shuffle=False)
         for indices in partitioner.partition_id_to_indices.values():
             self.assertTrue(indices == sorted(indices))
-        
+
     def test_strictness_zero_is_pure_noise(self) -> None:
         """With strictness=0, output should be similar to shuffling."""
         _, part1 = _dummy_setup(3, strictness=0.0, num_rows=30, seed=42)
         _, part2 = _dummy_setup(3, strictness=0.0, num_rows=30, seed=43)
-        self.assertNotEqual(part1.partition_id_to_indices, part2.partition_id_to_indices)
+        self.assertNotEqual(
+            part1.partition_id_to_indices, part2.partition_id_to_indices
+        )
 
     def test_partitions_are_disjoint(self) -> None:
         """Ensure no sample index is shared across partitions."""
@@ -116,12 +120,12 @@ class TestContinuousPartitionerSuccess(unittest.TestCase):
     def test_monotonic_increasing_across_partitions_when_sorted(self) -> None:
         """With no shuffling and max strictness, partitions follow increasing order."""
         _, partitioner = _dummy_setup(3, 1.0, 30, shuffle=False)
-        values = []
+        values: list[float] = []
         for pid in range(3):
             indices = partitioner.partition_id_to_indices[pid]
             values.extend(partitioner.dataset["score"][i] for i in indices)
         self.assertEqual(values, sorted(values))
-        
+
 
 class TestContinuousPartitionerFailure(unittest.TestCase):
     """Test ContinuousPartitioner failures by incorrect usage."""
@@ -160,7 +164,7 @@ class TestContinuousPartitionerFailure(unittest.TestCase):
         partitioner.dataset = dataset
         with self.assertRaises(ValueError):
             _ = partitioner.load_partition(0)
-            
+
     def test_zero_stddev_raises(self) -> None:
         """Raise ValueError when all partition_by values are constant."""
         data = {
