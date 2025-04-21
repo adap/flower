@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-12 00:07+0000\n"
+"POT-Creation-Date: 2025-04-18 00:07+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -327,10 +327,11 @@ msgid "Verify the Docker daemon is running."
 msgstr "Docker 데몬이 실행 중인지 확인하십시오."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:21
+#, fuzzy
 msgid ""
 "The build instructions that assemble the images are located in the "
 "respective Dockerfiles. You can find them in the subdirectories of "
-"``src/docker``."
+"``framework/docker``."
 msgstr ""
 "이미지들을 조합하는 빌드 명령어들은 해당 Dockerfile에 있습니다. \"src/docker\" 의 하위 디렉토리에서 찾을 수 "
 "있습니다."
@@ -934,44 +935,52 @@ msgid "Install ``flwr`` from the default GitHub branch (``main``):"
 msgstr "기본 GitHub branch (``main``)에서 ``flwr`` 를 설치하기:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
+#, fuzzy
 msgid ""
-"``pip install flwr@git+https://github.com/adap/flower.git`` (without "
-"extras)"
-msgstr "``pip install flwr@git+https://github.com/adap/flower.git`` (extras 제외)"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:46
-msgid ""
-"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git'``"
-" (with extras)"
-msgstr ""
-"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git'``"
-" (extras 포함)"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:49
-msgid "Install ``flwr`` from a specific GitHub branch (``branch-name``):"
-msgstr "특정 GitHub branch (``branch-name``)에서 ``flwr`` 설치하기:"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:51
-msgid ""
-"``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
+"``pip install "
+"flwr@git+https://github.com/adap/flower.git#subdirectory=framework`` "
 "(without extras)"
 msgstr ""
 "``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
 "(extras 제외)"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:53
+#: ../../source/contributor-how-to-install-development-versions.rst:47
+#, fuzzy
 msgid ""
-"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
-"@branch-name'`` (with extras)"
+"``pip install "
+"'flwr[simulation]@git+https://github.com/adap/flower.git#subdirectory=framework'``"
+" (with extras)"
 msgstr ""
 "``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
 "@branch-name'`` (extras 포함)"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:57
+#: ../../source/contributor-how-to-install-development-versions.rst:51
+msgid "Install ``flwr`` from a specific GitHub branch (``branch-name``):"
+msgstr "특정 GitHub branch (``branch-name``)에서 ``flwr`` 설치하기:"
+
+#: ../../source/contributor-how-to-install-development-versions.rst:53
+#, fuzzy
+msgid ""
+"``pip install flwr@git+https://github.com/adap/flower.git@branch-"
+"name#subdirectory=framework`` (without extras)"
+msgstr ""
+"``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
+"(extras 제외)"
+
+#: ../../source/contributor-how-to-install-development-versions.rst:56
+#, fuzzy
+msgid ""
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
+"@branch-name#subdirectory=framework'`` (with extras)"
+msgstr ""
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
+"@branch-name'`` (extras 포함)"
+
+#: ../../source/contributor-how-to-install-development-versions.rst:61
 msgid "Open Jupyter Notebooks on Google Colab"
 msgstr "Google Colab에서 Jupyter Notebooks 열기"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:59
+#: ../../source/contributor-how-to-install-development-versions.rst:63
 msgid ""
 "Open the notebook ``framework/docs/source/tutorial-series-get-started-"
 "with-flower-pytorch.ipynb``:"
@@ -979,7 +988,7 @@ msgstr ""
 "``framework/docs/source/tutorial-series-get-started-with-flower-"
 "pytorch.ipynb``notebook을 엽니다:"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:62
+#: ../../source/contributor-how-to-install-development-versions.rst:66
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-series-get-started-with-flower-pytorch.ipynb"
@@ -987,7 +996,7 @@ msgstr ""
 "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-series-get-started-with-flower-pytorch.ipynb"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:64
+#: ../../source/contributor-how-to-install-development-versions.rst:68
 msgid ""
 "Open a development version of the same notebook from branch `branch-name`"
 " by changing ``main`` to ``branch-name`` (right after ``blob``):"
@@ -995,7 +1004,7 @@ msgstr ""
 "``main``을 ``branch-name``(``blob`` 바로 뒤)으로 변경하여 동일한 notebook의 개발 버전을 브랜치 "
 "`branch-name`에서 엽니다 :"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:67
+#: ../../source/contributor-how-to-install-development-versions.rst:71
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
 "name/framework/docs/source/tutorial-series-get-started-with-flower-"
@@ -1005,21 +1014,21 @@ msgstr ""
 "name/framework/docs/source/tutorial-series-get-started-with-flower-"
 "pytorch.ipynb"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:69
+#: ../../source/contributor-how-to-install-development-versions.rst:73
 msgid "Install a `whl` on Google Colab:"
 msgstr "Google Colab에서 `whl` 설치하기:"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:71
+#: ../../source/contributor-how-to-install-development-versions.rst:75
 msgid ""
 "In the vertical icon grid on the left hand side, select ``Files`` > "
 "``Upload to session storage``"
 msgstr "왼쪽의 수직 아이콘 그리드에서 ``Files`` > ``Upload to session storage``를 선택하세요"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:73
+#: ../../source/contributor-how-to-install-development-versions.rst:77
 msgid "Upload the whl (e.g., ``flwr-1.8.0-py3-none-any.whl``)"
 msgstr "whl (예:``flwr-1.8.0-py3-none-any.whl``)을 업로드하세요"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:74
+#: ../../source/contributor-how-to-install-development-versions.rst:78
 msgid ""
 "Change ``!pip install -q 'flwr[simulation]' torch torchvision "
 "matplotlib`` to ``!pip install -q 'flwr-1.8.0-py3-none-"
@@ -30031,7 +30040,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|35abe9fd99c947f1ada188587b79300e|"
+msgid "|c3948edd518e4c9887dab02c006a3e36|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30048,7 +30057,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|4113569203ae40448098ee4d094f3898|"
+msgid "|d64d4c79ad9f410bb03cbcd69c6da70e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30074,7 +30083,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|387a5b42b212438499d45e9545122a3f|"
+msgid "|3738e18136fe4bba89dc4c47319cb808|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30092,7 +30101,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|9980c661d483419486cc5c92296ea5a3|"
+msgid "|fc5c4f02bb934b28a37bfd6df154a642|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -30111,7 +30120,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|13990a7326864e5ca3f17c6d3d2df761|"
+msgid "|c869eb32a01d40d78006597420906052|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -30128,7 +30137,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|ee72a0d726ec4a78a5feadbbde4376d2|"
+msgid "|0261ba22f8fa465cb8b7b37d726b3cfe|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -30151,7 +30160,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|fe6cc4783d4741d2949b5145c2d1848e|"
+msgid "|03231a4c1fb8484c8eedcabd132ca5cf|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -30168,7 +30177,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|a933b3b132b24a3594cde735e8b43079|"
+msgid "|977af6151d6d4069b137d77a2fa9df0d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -30347,7 +30356,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|68c15a5030284837b7e016a137c19180|"
+msgid "|d9fc712009944b9ca98d4891d3a27998|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -30375,7 +30384,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|01c13ed6a53447308c58f88229ef9beb|"
+msgid "|759b57b6021d476c8bf25f6d8b7f76df|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -30402,7 +30411,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|fe377cbc92784c30985c932bbf566a02|"
+msgid "|05cd636b195a4eafbe63db37c85fb3e3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -30428,7 +30437,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|d3a955bbdbb24d4a9e050066191f8dc2|"
+msgid "|4eca74e8a0b6465bb11a430b954b8bab|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -30478,7 +30487,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|39aeb361f8c546f48d1284c50feeb527|"
+msgid "|5d9452a565e2456189fea166e5e43a8f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -30598,7 +30607,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|6fca30cdace54e97b95aaec19b3a3e1d|"
+msgid "|41499fa436654887b7ce84b0d0642118|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -40700,5 +40709,62 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|42fe13229c9e47459cd10173391681fd|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``pip install "
+#~ "flwr@git+https://github.com/adap/flower.git`` (without "
+#~ "extras)"
+#~ msgstr "``pip install flwr@git+https://github.com/adap/flower.git`` (extras 제외)"
+
+#~ msgid ""
+#~ "``pip install "
+#~ "'flwr[simulation]@git+https://github.com/adap/flower.git'`` "
+#~ "(with extras)"
+#~ msgstr ""
+#~ "``pip install "
+#~ "'flwr[simulation]@git+https://github.com/adap/flower.git'`` "
+#~ "(extras 포함)"
+
+#~ msgid "|35abe9fd99c947f1ada188587b79300e|"
+#~ msgstr ""
+
+#~ msgid "|4113569203ae40448098ee4d094f3898|"
+#~ msgstr ""
+
+#~ msgid "|387a5b42b212438499d45e9545122a3f|"
+#~ msgstr ""
+
+#~ msgid "|9980c661d483419486cc5c92296ea5a3|"
+#~ msgstr ""
+
+#~ msgid "|13990a7326864e5ca3f17c6d3d2df761|"
+#~ msgstr ""
+
+#~ msgid "|ee72a0d726ec4a78a5feadbbde4376d2|"
+#~ msgstr ""
+
+#~ msgid "|fe6cc4783d4741d2949b5145c2d1848e|"
+#~ msgstr ""
+
+#~ msgid "|a933b3b132b24a3594cde735e8b43079|"
+#~ msgstr ""
+
+#~ msgid "|68c15a5030284837b7e016a137c19180|"
+#~ msgstr ""
+
+#~ msgid "|01c13ed6a53447308c58f88229ef9beb|"
+#~ msgstr ""
+
+#~ msgid "|fe377cbc92784c30985c932bbf566a02|"
+#~ msgstr ""
+
+#~ msgid "|d3a955bbdbb24d4a9e050066191f8dc2|"
+#~ msgstr ""
+
+#~ msgid "|39aeb361f8c546f48d1284c50feeb527|"
+#~ msgstr ""
+
+#~ msgid "|6fca30cdace54e97b95aaec19b3a3e1d|"
 #~ msgstr ""
 

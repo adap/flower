@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-12 00:07+0000\n"
+"POT-Creation-Date: 2025-04-18 00:07+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -332,7 +332,7 @@ msgstr "验证 Docker 守护进程是否正在运行。"
 msgid ""
 "The build instructions that assemble the images are located in the "
 "respective Dockerfiles. You can find them in the subdirectories of "
-"``src/docker``."
+"``framework/docker``."
 msgstr "组装镜像的构建说明位于各自的 Dockerfile 中。你可以在 ``src/docker`` 的子目录中找到它们。"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:24
@@ -944,44 +944,52 @@ msgid "Install ``flwr`` from the default GitHub branch (``main``):"
 msgstr "从 GitHub 的默认分支 (``main`) 安装 ``flwr``："
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
+#, fuzzy
 msgid ""
-"``pip install flwr@git+https://github.com/adap/flower.git`` (without "
-"extras)"
-msgstr "``pip install flwr@git+https://github.com/adap/flower.git`` （不含额外功能）"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:46
-msgid ""
-"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git'``"
-" (with extras)"
-msgstr ""
 "``pip install "
-"'flwr[simulation]@git+https://github.com/adap/flower.git'``（带附加功能）"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:49
-msgid "Install ``flwr`` from a specific GitHub branch (``branch-name``):"
-msgstr "从特定的 GitHub 分支 (`分支名`) 安装 ``flwr``："
-
-#: ../../source/contributor-how-to-install-development-versions.rst:51
-msgid ""
-"``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
+"flwr@git+https://github.com/adap/flower.git#subdirectory=framework`` "
 "(without extras)"
 msgstr ""
 "``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
 "（不含附加功能）"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:53
+#: ../../source/contributor-how-to-install-development-versions.rst:47
+#, fuzzy
 msgid ""
-"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
-"@branch-name'`` (with extras)"
+"``pip install "
+"'flwr[simulation]@git+https://github.com/adap/flower.git#subdirectory=framework'``"
+" (with extras)"
 msgstr ""
 "``pip install "
 "'flwr[simulation]@git+https://github.com/adap/flower.git@分支名'``（带附加功能）"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:57
+#: ../../source/contributor-how-to-install-development-versions.rst:51
+msgid "Install ``flwr`` from a specific GitHub branch (``branch-name``):"
+msgstr "从特定的 GitHub 分支 (`分支名`) 安装 ``flwr``："
+
+#: ../../source/contributor-how-to-install-development-versions.rst:53
+#, fuzzy
+msgid ""
+"``pip install flwr@git+https://github.com/adap/flower.git@branch-"
+"name#subdirectory=framework`` (without extras)"
+msgstr ""
+"``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
+"（不含附加功能）"
+
+#: ../../source/contributor-how-to-install-development-versions.rst:56
+#, fuzzy
+msgid ""
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
+"@branch-name#subdirectory=framework'`` (with extras)"
+msgstr ""
+"``pip install "
+"'flwr[simulation]@git+https://github.com/adap/flower.git@分支名'``（带附加功能）"
+
+#: ../../source/contributor-how-to-install-development-versions.rst:61
 msgid "Open Jupyter Notebooks on Google Colab"
 msgstr "在谷歌 Colab 上打开 Jupyter 笔记本"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:59
+#: ../../source/contributor-how-to-install-development-versions.rst:63
 #, fuzzy
 msgid ""
 "Open the notebook ``framework/docs/source/tutorial-series-get-started-"
@@ -990,7 +998,7 @@ msgstr ""
 "打开笔记本 ``framework/docs/source/tutorial-get-started-with-flower-"
 "pytorch.ipynb``："
 
-#: ../../source/contributor-how-to-install-development-versions.rst:62
+#: ../../source/contributor-how-to-install-development-versions.rst:66
 #, fuzzy
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
@@ -999,7 +1007,7 @@ msgstr ""
 "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-get-started-with-flower-pytorch.ipynb"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:64
+#: ../../source/contributor-how-to-install-development-versions.rst:68
 msgid ""
 "Open a development version of the same notebook from branch `branch-name`"
 " by changing ``main`` to ``branch-name`` (right after ``blob``):"
@@ -1007,7 +1015,7 @@ msgstr ""
 "将 ``main`` 改为 ``branch-name``（紧跟在 ``blob``之后），从分支 `branch-name` "
 "打开同一笔记本的开发版本："
 
-#: ../../source/contributor-how-to-install-development-versions.rst:67
+#: ../../source/contributor-how-to-install-development-versions.rst:71
 #, fuzzy
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
@@ -1017,22 +1025,22 @@ msgstr ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
 "name/framework/docs/source/tutorial-get-started-with-flower-pytorch.ipynb"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:69
+#: ../../source/contributor-how-to-install-development-versions.rst:73
 msgid "Install a `whl` on Google Colab:"
 msgstr "在 Google Colab 上安装 `whl`："
 
-#: ../../source/contributor-how-to-install-development-versions.rst:71
+#: ../../source/contributor-how-to-install-development-versions.rst:75
 msgid ""
 "In the vertical icon grid on the left hand side, select ``Files`` > "
 "``Upload to session storage``"
 msgstr "在左侧的垂直图标网格中，选择 \"文件\">\"上传到会话存储\""
 
-#: ../../source/contributor-how-to-install-development-versions.rst:73
+#: ../../source/contributor-how-to-install-development-versions.rst:77
 #, fuzzy
 msgid "Upload the whl (e.g., ``flwr-1.8.0-py3-none-any.whl``)"
 msgstr "更新 whl (e.g., ``flwr-1.7.0-py3-none-any.whl``)"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:74
+#: ../../source/contributor-how-to-install-development-versions.rst:78
 #, fuzzy
 msgid ""
 "Change ``!pip install -q 'flwr[simulation]' torch torchvision "
@@ -34144,7 +34152,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|35abe9fd99c947f1ada188587b79300e|"
+msgid "|c3948edd518e4c9887dab02c006a3e36|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -34159,7 +34167,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|4113569203ae40448098ee4d094f3898|"
+msgid "|d64d4c79ad9f410bb03cbcd69c6da70e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -34183,7 +34191,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|387a5b42b212438499d45e9545122a3f|"
+msgid "|3738e18136fe4bba89dc4c47319cb808|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -34201,7 +34209,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|9980c661d483419486cc5c92296ea5a3|"
+msgid "|fc5c4f02bb934b28a37bfd6df154a642|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -34218,7 +34226,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|13990a7326864e5ca3f17c6d3d2df761|"
+msgid "|c869eb32a01d40d78006597420906052|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -34233,7 +34241,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|ee72a0d726ec4a78a5feadbbde4376d2|"
+msgid "|0261ba22f8fa465cb8b7b37d726b3cfe|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -34254,7 +34262,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|fe6cc4783d4741d2949b5145c2d1848e|"
+msgid "|03231a4c1fb8484c8eedcabd132ca5cf|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -34269,7 +34277,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|a933b3b132b24a3594cde735e8b43079|"
+msgid "|977af6151d6d4069b137d77a2fa9df0d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -34429,7 +34437,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|68c15a5030284837b7e016a137c19180|"
+msgid "|d9fc712009944b9ca98d4891d3a27998|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -34454,7 +34462,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|01c13ed6a53447308c58f88229ef9beb|"
+msgid "|759b57b6021d476c8bf25f6d8b7f76df|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -34480,7 +34488,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|fe377cbc92784c30985c932bbf566a02|"
+msgid "|05cd636b195a4eafbe63db37c85fb3e3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -34503,7 +34511,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|d3a955bbdbb24d4a9e050066191f8dc2|"
+msgid "|4eca74e8a0b6465bb11a430b954b8bab|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -34550,7 +34558,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|39aeb361f8c546f48d1284c50feeb527|"
+msgid "|5d9452a565e2456189fea166e5e43a8f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -34658,7 +34666,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|6fca30cdace54e97b95aaec19b3a3e1d|"
+msgid "|41499fa436654887b7ce84b0d0642118|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -44981,5 +44989,61 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|42fe13229c9e47459cd10173391681fd|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``pip install "
+#~ "flwr@git+https://github.com/adap/flower.git`` (without "
+#~ "extras)"
+#~ msgstr "``pip install flwr@git+https://github.com/adap/flower.git`` （不含额外功能）"
+
+#~ msgid ""
+#~ "``pip install "
+#~ "'flwr[simulation]@git+https://github.com/adap/flower.git'`` "
+#~ "(with extras)"
+#~ msgstr ""
+#~ "``pip install "
+#~ "'flwr[simulation]@git+https://github.com/adap/flower.git'``（带附加功能）"
+
+#~ msgid "|35abe9fd99c947f1ada188587b79300e|"
+#~ msgstr ""
+
+#~ msgid "|4113569203ae40448098ee4d094f3898|"
+#~ msgstr ""
+
+#~ msgid "|387a5b42b212438499d45e9545122a3f|"
+#~ msgstr ""
+
+#~ msgid "|9980c661d483419486cc5c92296ea5a3|"
+#~ msgstr ""
+
+#~ msgid "|13990a7326864e5ca3f17c6d3d2df761|"
+#~ msgstr ""
+
+#~ msgid "|ee72a0d726ec4a78a5feadbbde4376d2|"
+#~ msgstr ""
+
+#~ msgid "|fe6cc4783d4741d2949b5145c2d1848e|"
+#~ msgstr ""
+
+#~ msgid "|a933b3b132b24a3594cde735e8b43079|"
+#~ msgstr ""
+
+#~ msgid "|68c15a5030284837b7e016a137c19180|"
+#~ msgstr ""
+
+#~ msgid "|01c13ed6a53447308c58f88229ef9beb|"
+#~ msgstr ""
+
+#~ msgid "|fe377cbc92784c30985c932bbf566a02|"
+#~ msgstr ""
+
+#~ msgid "|d3a955bbdbb24d4a9e050066191f8dc2|"
+#~ msgstr ""
+
+#~ msgid "|39aeb361f8c546f48d1284c50feeb527|"
+#~ msgstr ""
+
+#~ msgid "|6fca30cdace54e97b95aaec19b3a3e1d|"
 #~ msgstr ""
 
