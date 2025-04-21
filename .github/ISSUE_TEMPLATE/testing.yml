@@ -1,0 +1,99 @@
+name: Improve Documentation
+description: Create an issue/PR to help us improve the documentation. You can use the issue to report an improvement or directly open a PR with the suggested change. 
+labels: ['documentation']
+
+body:
+- type: markdown
+  attributes:
+    value: >
+      #### We are happy that you want to improve the documentation. Please contact us if you are planning to add a new chapter or blog post.
+- type: textarea
+  attributes:
+    label: Describe what the documentation is missing. 
+    description: >
+      Which part of the documentation needs improvement?
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Suggest your improvement.
+    description: >
+      What information do you want to change/add?
+  validations:
+    required: true
+- type: textarea  
+  attributes:
+    label: Additional information
+    description: >
+      Please provide any additional information that may help us understand your suggestion better.
+  validations:
+    required: false
+- type: dropdown
+  attributes:
+    label: How would you like to contribute?
+    description: >
+      Please select how you would like to contribute to the documentation.
+    options:
+      - label: Open a PR
+        value: open_pr
+      - label: Report an issue
+        value: report_issue
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Additional comments
+    description: >
+      Please provide any additional comments or suggestions you may have.
+  validations:
+    required: false
+- type: checkboxes
+  attributes:
+    label: Preferred method of contact
+    description: >
+      How would you like us to contact you regarding your suggestion?
+    options:
+      - label: Email
+        value: email
+      - label: Slack
+        value: slack
+      - label: GitHub
+        value: github
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Contact information
+    description: >
+      Please provide your contact information (email, Slack handle, GitHub username) so we can reach out to you.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Additional comments
+    description: >
+      Please provide any additional comments or suggestions you may have.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Additional information
+    description: >
+      Please provide any additional information that may help us understand your suggestion better.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Additional comments
+    description: >
+      Please provide any additional comments or suggestions you may have.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Additional information
+    description: >
+      Please provide any additional information that may help us understand your suggestion better.
+  validations:
+    required: false
+- type: textarea
