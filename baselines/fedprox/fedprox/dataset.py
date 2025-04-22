@@ -11,11 +11,15 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 FDS = None  # Cache FederatedDataset
 
 MNIST_TRANSFORMS = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
+CIFAR_TRANSFORMS = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-
-def apply_transforms(batch):
+def apply_transforms(batch, path):
     """Apply transforms to the partition from FederatedDataset."""
-    batch["image"] = [MNIST_TRANSFORMS(img) for img in batch["image"]]
+    if "mnist" in path:
+        batch["image"] = [MNIST_TRANSFORMS(img) for img in batch["image"]]
+    elif "cifar" in path:
+        batch["img"] = [CIFAR_TRANSFORMS(img) for img in batch["img"]]
+
     return batch
 
 
@@ -24,7 +28,7 @@ def load_data(
     partition_id: int,
     num_partitions: int,
 ):
-    """Load and partition MNIST data."""
+    """Load and partition MNIST or CIFAR data."""
     # Only initialize `FederatedDataset` once
     global FDS  # pylint: disable=global-statement
     if FDS is None:
@@ -48,7 +52,7 @@ def load_data(
             preassigned_num_samples_per_label=samples_per_label,
         )
         FDS = FederatedDataset(
-            dataset="ylecun/mnist",
+            dataset=dataset_config.path,
             partitioners={"train": partitioner},
         )
 
@@ -59,7 +63,7 @@ def load_data(
     )
     # The validation set is never used because we do centralized evaluation
     # on the server on the held-out test dataset.
-    partition_train_test = partition_train_test.with_transform(apply_transforms)
+    partition_train_test = partition_train_test.with_transform(lambda batch: apply_transforms(batch, path=dataset_config.path))
     return (
         DataLoader(
             partition_train_test["train"],
@@ -83,7 +87,7 @@ def prepare_test_loader(dataset_config: EasyDict):
     -------
         DataLoader: The MNIST test set dataloader.
     """
-    test_dataset = load_dataset(path="ylecun/mnist")["test"].with_transform(
-        apply_transforms
+    test_dataset = load_dataset(path=dataset_config.path)["test"].with_transform(
+        lambda batch: apply_transforms(batch, path=dataset_config.path)
     )
     return DataLoader(test_dataset, batch_size=dataset_config.batch_size)
