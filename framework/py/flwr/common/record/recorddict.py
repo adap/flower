@@ -29,6 +29,22 @@ from .typeddict import TypedDict
 
 RecordType = Union[ArrayRecord, MetricRecord, ConfigRecord]
 
+
+class _WarningTracker:
+    """A class to track warnings for deprecated properties."""
+
+    def __init__(self) -> None:
+        # These variables are used to ensure that the deprecation warnings
+        # for the deprecated properties/class are logged only once.
+        self.recordset_init_logged = False
+        self.recorddict_init_logged = False
+        self.parameters_records_logged = False
+        self.metrics_records_logged = False
+        self.configs_records_logged = False
+
+
+_warning_tracker = _WarningTracker()
+
 T = TypeVar("T")
 
 
@@ -103,48 +119,74 @@ class RecordDict(TypedDict[str, RecordType]):
     are Python dictionaries designed to ensure that each key-value pair
     adheres to specified data types.
 
-    Let's see an example.
+    Let's see an example::
 
-    >>>  from flwr.common import RecordDict
-    >>>  from flwr.common import ArrayRecord, ConfigRecord, MetricRecord
-    >>>
-    >>>  # Let's begin with an empty record
-    >>>  my_records = RecordDict()
-    >>>
-    >>>  # We can create a ConfigRecord
-    >>>  c_record = ConfigRecord({"lr": 0.1, "batch-size": 128})
-    >>>  # Adding it to the RecordDict would look like this
-    >>>  my_records["my_config"] = c_record
-    >>>
-    >>>  # We can create a MetricRecord following a similar process
-    >>>  m_record = MetricRecord({"accuracy": 0.93, "losses": [0.23, 0.1]})
-    >>>  # Adding it to the RecordDict would look like this
-    >>>  my_records["my_metrics"] = m_record
+        from flwr.common import RecordDict
+        from flwr.common import ArrayRecord, ConfigRecord, MetricRecord
+
+        # Let's begin with an empty record
+        my_records = RecordDict()
+
+        # We can create a ConfigRecord
+        c_record = ConfigRecord({"lr": 0.1, "batch-size": 128})
+        # Adding it to the RecordDict would look like this
+        my_records["my_config"] = c_record
+
+        # We can create a MetricRecord following a similar process
+        m_record = MetricRecord({"accuracy": 0.93, "losses": [0.23, 0.1]})
+        # Adding it to the RecordDict would look like this
+        my_records["my_metrics"] = m_record
 
     Adding an :code:`ArrayRecord` follows the same steps as above but first,
     the array needs to be serialized and represented as a :code:`flwr.common.Array`.
-    For example:
+    For example::
 
-    >>>  from flwr.common import Array
-    >>>  # Creating an ArrayRecord would look like this
-    >>>  arr_np = np.random.randn(3, 3)
-    >>>
-    >>>  # You can use the built-in tool to serialize the array
-    >>>  arr = Array(arr_np)
-    >>>
-    >>>  # Finally, create the record
-    >>>  arr_record = ArrayRecord({"my_array": arr})
-    >>>
-    >>>  # Adding it to the RecordDict would look like this
-    >>>  my_records["my_parameters"] = arr_record
+        from flwr.common import Array
+        # Creating an ArrayRecord would look like this
+        arr_np = np.random.randn(3, 3)
+
+        # You can use the built-in tool to serialize the array
+        arr = Array(arr_np)
+
+        # Finally, create the record
+        arr_record = ArrayRecord({"my_array": arr})
+
+        # Adding it to the RecordDict would look like this
+        my_records["my_parameters"] = arr_record
 
     For additional examples on how to construct each of the records types shown
     above, please refer to the documentation for :code:`ConfigRecord`,
     :code:`MetricRecord` and :code:`ArrayRecord`.
     """
 
-    def __init__(self, records: dict[str, RecordType] | None = None) -> None:
+    def __init__(
+        self,
+        records: dict[str, RecordType] | None = None,
+        *,
+        parameters_records: dict[str, ArrayRecord] | None = None,
+        metrics_records: dict[str, MetricRecord] | None = None,
+        configs_records: dict[str, ConfigRecord] | None = None,
+    ) -> None:
         super().__init__(_check_key, _check_value)
+
+        # Warning for deprecated usage
+        if (
+            parameters_records is not None
+            or metrics_records is not None
+            or configs_records is not None
+        ):
+            log(
+                WARN,
+                "The arguments `parameters_records`, `metrics_records`, and "
+                "`configs_records` of `RecordDict` are deprecated and will "
+                "be removed in a future release. "
+                "Please pass all records using the `records` argument instead.",
+            )
+            records = records or {}
+            records.update(parameters_records or {})
+            records.update(metrics_records or {})
+            records.update(configs_records or {})
+
         if records is not None:
             for key, record in records.items():
                 self[key] = record
@@ -196,6 +238,54 @@ class RecordDict(TypedDict[str, RecordType]):
                 type(value).__name__,
             )
 
+    @property
+    def parameters_records(self) -> TypedDict[str, ArrayRecord]:
+        """Deprecated property.
+
+        Use ``array_records`` instead.
+        """
+        if _warning_tracker.parameters_records_logged:
+            _warning_tracker.parameters_records_logged = True
+            log(
+                WARN,
+                "The `parameters_records` property of `RecordDict` "
+                "(formerly `RecordSet`) is deprecated and will be removed in a "
+                "future release. Please use the `array_records` property instead.",
+            )
+        return self.array_records
+
+    @property
+    def metrics_records(self) -> TypedDict[str, MetricRecord]:
+        """Deprecated property.
+
+        Use ``metric_records`` instead.
+        """
+        if not _warning_tracker.metrics_records_logged:
+            _warning_tracker.metrics_records_logged = True
+            log(
+                WARN,
+                "The `metrics_records` property of `RecordDict` "
+                "(formerly `RecordSet`) is deprecated and will be removed in a "
+                "future release. Please use the `metric_records` property instead.",
+            )
+        return self.metric_records
+
+    @property
+    def configs_records(self) -> TypedDict[str, ConfigRecord]:
+        """Deprecated property.
+
+        Use ``config_records`` instead.
+        """
+        if not _warning_tracker.configs_records_logged:
+            _warning_tracker.configs_records_logged = True
+            log(
+                WARN,
+                "The `configs_records` property of `RecordDict` "
+                "(formerly `RecordSet`) is deprecated and will be removed in a "
+                "future release. Please use the `config_records` property instead.",
+            )
+        return self.config_records
+
 
 class RecordSet(RecordDict):
     """Deprecated class ``RecordSet``, use ``RecordDict`` instead.
@@ -223,66 +313,25 @@ class RecordSet(RecordDict):
         my_content = RecordDict()
     """
 
-    _warning_logged = False
-    _warning_logged_params = False
-    _warning_logged_metrics = False
-    _warning_logged_configs = False
-
-    def __init__(self, records: dict[str, RecordType] | None = None) -> None:
-        if not RecordSet._warning_logged:
-            RecordSet._warning_logged = True
+    def __init__(
+        self,
+        records: dict[str, RecordType] | None = None,
+        *,
+        parameters_records: dict[str, ArrayRecord] | None = None,
+        metrics_records: dict[str, MetricRecord] | None = None,
+        configs_records: dict[str, ConfigRecord] | None = None,
+    ) -> None:
+        if not _warning_tracker.recordset_init_logged:
+            _warning_tracker.recordset_init_logged = True
             log(
                 WARN,
                 "The `RecordSet` class has been renamed to `RecordDict`. "
                 "Support for `RecordSet` will be removed in a future release. "
                 "Please update your code accordingly.",
             )
-        super().__init__(records)
-
-    @property
-    def parameters_records(self) -> TypedDict[str, ArrayRecord]:
-        """Deprecated property.
-
-        Use ``array_records`` instead.
-        """
-        if not RecordSet._warning_logged_params:
-            RecordSet._warning_logged_params = True
-            log(
-                WARN,
-                "`RecordSet.parameters_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.array_records` instead.",
-            )
-        return self.array_records
-
-    @property
-    def metrics_records(self) -> TypedDict[str, MetricRecord]:
-        """Deprecated property.
-
-        Use ``metric_records`` instead.
-        """
-        if not RecordSet._warning_logged_metrics:
-            RecordSet._warning_logged_metrics = True
-            log(
-                WARN,
-                "`RecordSet.metrics_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.metric_records` instead.",
-            )
-        return self.metric_records
-
-    @property
-    def configs_records(self) -> TypedDict[str, ConfigRecord]:
-        """Deprecated property.
-
-        Use ``config_records`` instead.
-        """
-        if not RecordSet._warning_logged_configs:
-            RecordSet._warning_logged_configs = True
-            log(
-                WARN,
-                "`RecordSet.configs_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.config_records` instead.",
-            )
-        return self.config_records
+        super().__init__(
+            records,
+            parameters_records=parameters_records,
+            metrics_records=metrics_records,
+            configs_records=configs_records,
+        )

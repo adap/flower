@@ -158,33 +158,33 @@ def start_client(
 
     Examples
     --------
-    Starting a gRPC client with an insecure server connection:
+    Starting a gRPC client with an insecure server connection::
 
-    >>> start_client(
-    >>>     server_address=localhost:8080,
-    >>>     client_fn=client_fn,
-    >>> )
+        start_client(
+            server_address=localhost:8080,
+            client_fn=client_fn,
+        )
 
-    Starting an SSL-enabled gRPC client using system certificates:
+    Starting a TLS-enabled gRPC client using system certificates::
 
-    >>> def client_fn(context: Context):
-    >>>     return FlowerClient().to_client()
-    >>>
-    >>> start_client(
-    >>>     server_address=localhost:8080,
-    >>>     client_fn=client_fn,
-    >>>     insecure=False,
-    >>> )
+        def client_fn(context: Context):
+            return FlowerClient().to_client()
 
-    Starting an SSL-enabled gRPC client using provided certificates:
+        start_client(
+            server_address=localhost:8080,
+            client_fn=client_fn,
+            insecure=False,
+        )
 
-    >>> from pathlib import Path
-    >>>
-    >>> start_client(
-    >>>     server_address=localhost:8080,
-    >>>     client_fn=client_fn,
-    >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
-    >>> )
+    Starting a TLS-enabled gRPC client using provided certificates::
+
+        from pathlib import Path
+
+        start_client(
+            server_address=localhost:8080,
+            client_fn=client_fn,
+            root_certificates=Path("/crts/root.pem").read_bytes(),
+        )
     """
     msg = (
         "flwr.client.start_client() is deprecated."
@@ -684,30 +684,30 @@ def start_numpy_client(
 
     Examples
     --------
-    Starting a gRPC client with an insecure server connection:
+    Starting a gRPC client with an insecure server connection::
 
-    >>> start_numpy_client(
-    >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
-    >>> )
+        start_numpy_client(
+            server_address=localhost:8080,
+            client=FlowerClient(),
+        )
 
-    Starting an SSL-enabled gRPC client using system certificates:
+    Starting a TLS-enabled gRPC client using system certificates::
 
-    >>> start_numpy_client(
-    >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
-    >>>     insecure=False,
-    >>> )
+        start_numpy_client(
+            server_address=localhost:8080,
+            client=FlowerClient(),
+            insecure=False,
+        )
 
-    Starting an SSL-enabled gRPC client using provided certificates:
+    Starting a TLS-enabled gRPC client using provided certificates::
 
-    >>> from pathlib import Path
-    >>>
-    >>> start_numpy_client(
-    >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
-    >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
-    >>> )
+        from pathlib import Path
+
+        start_numpy_client(
+            server_address=localhost:8080,
+            client=FlowerClient(),
+            root_certificates=Path("/crts/root.pem").read_bytes(),
+        )
     """
     mssg = (
         "flwr.client.start_numpy_client() is deprecated. \n\tInstead, use "

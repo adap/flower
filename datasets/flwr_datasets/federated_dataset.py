@@ -29,7 +29,7 @@ from flwr_datasets.utils import (
 )
 
 
-# flake8: noqa: E501
+# noqa: E501
 # pylint: disable=line-too-long
 class FederatedDataset:
     """Representation of a dataset for federated learning/evaluation/analytics.

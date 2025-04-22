@@ -60,7 +60,7 @@ def _check_value(value: MetricRecordValues) -> None:
 
 
 class MetricRecord(TypedDict[str, MetricRecordValues]):
-    """Metrics recod.
+    """Metric record.
 
     A :code:`MetricRecord` is a Python dictionary designed to ensure that
     each key-value pair adheres to specified data types. A :code:`MetricRecord`
@@ -89,27 +89,27 @@ class MetricRecord(TypedDict[str, MetricRecordValues]):
     Common to these examples is that the output can be typically represented by
     a single scalar (:code:`int`, :code:`float`) or list of scalars.
 
-    Let's see some examples of how to construct a :code:`MetricRecord` from scratch:
+    Let's see some examples of how to construct a :code:`MetricRecord` from scratch::
 
-    >>> from flwr.common import MetricRecord
-    >>>
-    >>> # A `MetricRecord` is a specialized Python dictionary
-    >>> record = MetricRecord({"accuracy": 0.94})
-    >>> # You can add more content to an existing record
-    >>> record["loss"] = 0.01
-    >>> # It also supports lists
-    >>> record["loss-historic"] = [0.9, 0.5, 0.01]
+        from flwr.common import MetricRecord
+
+        # A `MetricRecord` is a specialized Python dictionary
+        record = MetricRecord({"accuracy": 0.94})
+        # You can add more content to an existing record
+        record["loss"] = 0.01
+        # It also supports lists
+        record["loss-historic"] = [0.9, 0.5, 0.01]
 
     Since types are enforced, the types of the objects inserted are checked. For a
     :code:`MetricRecord`, value types allowed are those in defined in
     :code:`flwr.common.MetricRecordValues`. Similarly, only :code:`str` keys are
-    allowed.
+    allowed::
 
-    >>> from flwr.common import MetricRecord
-    >>>
-    >>> record = MetricRecord() # an empty record
-    >>> # Add unsupported value
-    >>> record["something-unsupported"] = {'a': 123} # Will throw a `TypeError`
+        from flwr.common import MetricRecord
+
+        record = MetricRecord() # an empty record
+        # Add unsupported value
+        record["something-unsupported"] = {'a': 123} # Will throw a `TypeError`
 
     If you need a more versatily type of record try :code:`ConfigRecord` or
     :code:`ArrayRecord`.

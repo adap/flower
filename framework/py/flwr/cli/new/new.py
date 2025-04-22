@@ -201,15 +201,15 @@ def new(
         if llm_challenge_str == "generalnlp":
             challenge_name = "General NLP"
             num_clients = "20"
-            dataset_name = "vicgalle/alpaca-gpt4"
+            dataset_name = "flwrlabs/alpaca-gpt4"
         elif llm_challenge_str == "finance":
             challenge_name = "Finance"
             num_clients = "50"
-            dataset_name = "FinGPT/fingpt-sentiment-train"
+            dataset_name = "flwrlabs/fingpt-sentiment-train"
         elif llm_challenge_str == "medical":
             challenge_name = "Medical"
             num_clients = "20"
-            dataset_name = "medalpaca/medical_meadow_medical_flashcards"
+            dataset_name = "flwrlabs/medical-meadow-medical-flashcards"
         else:
             challenge_name = "Code"
             num_clients = "10"

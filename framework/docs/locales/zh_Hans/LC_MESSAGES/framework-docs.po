@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-25 00:32+0000\n"
+"POT-Creation-Date: 2025-04-18 00:07+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -332,7 +332,7 @@ msgstr "验证 Docker 守护进程是否正在运行。"
 msgid ""
 "The build instructions that assemble the images are located in the "
 "respective Dockerfiles. You can find them in the subdirectories of "
-"``src/docker``."
+"``framework/docker``."
 msgstr "组装镜像的构建说明位于各自的 Dockerfile 中。你可以在 ``src/docker`` 的子目录中找到它们。"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:24
@@ -944,44 +944,52 @@ msgid "Install ``flwr`` from the default GitHub branch (``main``):"
 msgstr "从 GitHub 的默认分支 (``main`) 安装 ``flwr``："
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
+#, fuzzy
 msgid ""
-"``pip install flwr@git+https://github.com/adap/flower.git`` (without "
-"extras)"
-msgstr "``pip install flwr@git+https://github.com/adap/flower.git`` （不含额外功能）"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:46
-msgid ""
-"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git'``"
-" (with extras)"
-msgstr ""
 "``pip install "
-"'flwr[simulation]@git+https://github.com/adap/flower.git'``（带附加功能）"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:49
-msgid "Install ``flwr`` from a specific GitHub branch (``branch-name``):"
-msgstr "从特定的 GitHub 分支 (`分支名`) 安装 ``flwr``："
-
-#: ../../source/contributor-how-to-install-development-versions.rst:51
-msgid ""
-"``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
+"flwr@git+https://github.com/adap/flower.git#subdirectory=framework`` "
 "(without extras)"
 msgstr ""
 "``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
 "（不含附加功能）"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:53
+#: ../../source/contributor-how-to-install-development-versions.rst:47
+#, fuzzy
 msgid ""
-"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
-"@branch-name'`` (with extras)"
+"``pip install "
+"'flwr[simulation]@git+https://github.com/adap/flower.git#subdirectory=framework'``"
+" (with extras)"
 msgstr ""
 "``pip install "
 "'flwr[simulation]@git+https://github.com/adap/flower.git@分支名'``（带附加功能）"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:57
+#: ../../source/contributor-how-to-install-development-versions.rst:51
+msgid "Install ``flwr`` from a specific GitHub branch (``branch-name``):"
+msgstr "从特定的 GitHub 分支 (`分支名`) 安装 ``flwr``："
+
+#: ../../source/contributor-how-to-install-development-versions.rst:53
+#, fuzzy
+msgid ""
+"``pip install flwr@git+https://github.com/adap/flower.git@branch-"
+"name#subdirectory=framework`` (without extras)"
+msgstr ""
+"``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
+"（不含附加功能）"
+
+#: ../../source/contributor-how-to-install-development-versions.rst:56
+#, fuzzy
+msgid ""
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
+"@branch-name#subdirectory=framework'`` (with extras)"
+msgstr ""
+"``pip install "
+"'flwr[simulation]@git+https://github.com/adap/flower.git@分支名'``（带附加功能）"
+
+#: ../../source/contributor-how-to-install-development-versions.rst:61
 msgid "Open Jupyter Notebooks on Google Colab"
 msgstr "在谷歌 Colab 上打开 Jupyter 笔记本"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:59
+#: ../../source/contributor-how-to-install-development-versions.rst:63
 #, fuzzy
 msgid ""
 "Open the notebook ``framework/docs/source/tutorial-series-get-started-"
@@ -990,7 +998,7 @@ msgstr ""
 "打开笔记本 ``framework/docs/source/tutorial-get-started-with-flower-"
 "pytorch.ipynb``："
 
-#: ../../source/contributor-how-to-install-development-versions.rst:62
+#: ../../source/contributor-how-to-install-development-versions.rst:66
 #, fuzzy
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
@@ -999,7 +1007,7 @@ msgstr ""
 "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-get-started-with-flower-pytorch.ipynb"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:64
+#: ../../source/contributor-how-to-install-development-versions.rst:68
 msgid ""
 "Open a development version of the same notebook from branch `branch-name`"
 " by changing ``main`` to ``branch-name`` (right after ``blob``):"
@@ -1007,7 +1015,7 @@ msgstr ""
 "将 ``main`` 改为 ``branch-name``（紧跟在 ``blob``之后），从分支 `branch-name` "
 "打开同一笔记本的开发版本："
 
-#: ../../source/contributor-how-to-install-development-versions.rst:67
+#: ../../source/contributor-how-to-install-development-versions.rst:71
 #, fuzzy
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
@@ -1017,22 +1025,22 @@ msgstr ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
 "name/framework/docs/source/tutorial-get-started-with-flower-pytorch.ipynb"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:69
+#: ../../source/contributor-how-to-install-development-versions.rst:73
 msgid "Install a `whl` on Google Colab:"
 msgstr "在 Google Colab 上安装 `whl`："
 
-#: ../../source/contributor-how-to-install-development-versions.rst:71
+#: ../../source/contributor-how-to-install-development-versions.rst:75
 msgid ""
 "In the vertical icon grid on the left hand side, select ``Files`` > "
 "``Upload to session storage``"
 msgstr "在左侧的垂直图标网格中，选择 \"文件\">\"上传到会话存储\""
 
-#: ../../source/contributor-how-to-install-development-versions.rst:73
+#: ../../source/contributor-how-to-install-development-versions.rst:77
 #, fuzzy
 msgid "Upload the whl (e.g., ``flwr-1.8.0-py3-none-any.whl``)"
 msgstr "更新 whl (e.g., ``flwr-1.7.0-py3-none-any.whl``)"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:74
+#: ../../source/contributor-how-to-install-development-versions.rst:78
 #, fuzzy
 msgid ""
 "Change ``!pip install -q 'flwr[simulation]' torch torchvision "
@@ -1058,135 +1066,124 @@ msgid "During the release"
 msgstr "在发布期间"
 
 #: ../../source/contributor-how-to-release-flower.rst:10
+#, fuzzy
 msgid ""
-"The version number of a release is stated in ``pyproject.toml``. To "
-"release a new version of Flower, the following things need to happen (in "
-"that order):"
+"The version number of a release is stated in "
+"``./framework/pyproject.toml``. To release a new version of Flower, the "
+"following things need to happen (in that order):"
 msgstr "版本号在 ``pyproject.toml`` 中说明。要发布 Flower 的新版本，需要完成以下工作（按顺序排列）："
 
 #: ../../source/contributor-how-to-release-flower.rst:13
-#, fuzzy
 msgid ""
-"Run ``python3 ./dev/update_changelog.py <YOUR_GH_TOKEN>`` in order to add"
-" every new change to the changelog (feel free to make manual changes to "
-"the changelog afterwards until it looks good)."
+"Run ``python3 ./framework/dev/update_changelog.py <YOUR_GH_TOKEN>`` to "
+"add all new changes to the changelog. You can make manual edits to the "
+"changelog afterward to improve its formatting or wording. This script "
+"will also replace the ``## Unreleased`` header with the new version "
+"number and current date, and add a thank-you message for contributors. "
+"Open a pull request with these changes."
 msgstr ""
-"运行 ``python3 src/py/flwr_tool/update_changelog.py <YOUR_GH_TOKEN>`` "
-"以将每项新更改添加到更新日志中（之后可对更新日志进行手动更改，直到看起来不错为止）。"
 
-#: ../../source/contributor-how-to-release-flower.rst:16
-#, fuzzy
-msgid ""
-"Once the changelog has been updated with all the changes, run ``./dev"
-"/prepare-release-changelog.sh v<NEW_VERSION>``, where ``<NEW_VERSION>`` "
-"is the version stated in ``pyproject.toml`` (notice the ``v`` added "
-"before it). This will replace the ``Unreleased`` header of the changelog "
-"by the version and current date, and it will add a thanking message for "
-"the contributors. Open a pull request with those changes."
-msgstr ""
-"更新更新日志后，运行``./dev/prepare-release-changelog.sh "
-"v<NEW_VERSION>``，其中``<NEW_VERSION>``是``pyproject.toml``中的版本（注意前面的``v``）。这将用版本和当前日期替换更新日志中的"
-" ``Unreleased`` 标头，并为贡献者添加一条感谢信息。打开一个包含这些更改的拉取请求。"
-
-#: ../../source/contributor-how-to-release-flower.rst:22
+#: ../../source/contributor-how-to-release-flower.rst:18
 #, fuzzy
 msgid ""
 "Once the pull request is merged, tag the release commit with the version "
-"number as soon as the PR is merged: ``git tag v<NEW_VERSION>`` (notice "
-"the ``v`` added before the version number), then ``git push --tags``. "
-"This will create a draft release on GitHub containing the correct "
-"artifacts and the relevant part of the changelog."
+"number: ``git tag v<NEW_VERSION>`` (notice the ``v`` added before the "
+"version number), then ``git push --tags``. This will create a draft "
+"release on GitHub containing the correct artifacts and the relevant part "
+"of the changelog."
 msgstr ""
 "在 PR 合并后立即用版本号标记发布提交：``git tag v0.12.3``，然后``git push --tags``。这将在 GitHub"
 " 上创建一个包含正确工件和更新日志相关部分的发布草案。"
 
-#: ../../source/contributor-how-to-release-flower.rst:26
+#: ../../source/contributor-how-to-release-flower.rst:22
 msgid "Check the draft release on GitHub, and if everything is good, publish it."
 msgstr "检查 GitHub 上的发布稿，如果一切正常，就发布它。"
 
-#: ../../source/contributor-how-to-release-flower.rst:29
+#: ../../source/contributor-how-to-release-flower.rst:25
 msgid "After the release"
 msgstr "发布后"
 
-#: ../../source/contributor-how-to-release-flower.rst:31
+#: ../../source/contributor-how-to-release-flower.rst:27
 msgid "Create a pull request which contains the following changes:"
 msgstr "创建包含以下更改的拉取请求："
 
-#: ../../source/contributor-how-to-release-flower.rst:33
-msgid "Increase the minor version in ``pyproject.toml`` by one."
-msgstr "将 ``pyproject.toml`` 中的次要版本增加一个。"
+#: ../../source/contributor-how-to-release-flower.rst:29
+msgid ""
+"Increase the minor version in ``pyproject.toml`` by one and update all "
+"files which contain the current version number (if necessary) by running "
+"``./framework/dev/update_version.py``."
+msgstr ""
 
-#: ../../source/contributor-how-to-release-flower.rst:34
-msgid "Update all files which contain the current version number if necessary."
-msgstr "如有必要，更新包含当前版本号的所有文件。"
+#: ../../source/contributor-how-to-release-flower.rst:32
+msgid ""
+"Add a new ``## Unreleased`` section at the top of "
+"``./framework/docs/source/ref-changelog.md`` to prepare for future "
+"changes."
+msgstr ""
 
 #: ../../source/contributor-how-to-release-flower.rst:35
-msgid "Add a new ``Unreleased`` section in ``changelog.md``."
-msgstr "在 ``changelog.md`` 中添加新的 ``Unreleased`` 部分。"
-
-#: ../../source/contributor-how-to-release-flower.rst:37
 msgid ""
 "Merge the pull request on the same day (i.e., before a new nightly "
 "release gets published to PyPI)."
 msgstr "在同一天合并拉取请求（即在新版本发布到 PyPI 之前）。"
 
-#: ../../source/contributor-how-to-release-flower.rst:41
+#: ../../source/contributor-how-to-release-flower.rst:39
 msgid "Publishing a pre-release"
 msgstr "发布预发布版本"
 
-#: ../../source/contributor-how-to-release-flower.rst:44
+#: ../../source/contributor-how-to-release-flower.rst:42
 msgid "Pre-release naming"
 msgstr "释放前命名"
 
-#: ../../source/contributor-how-to-release-flower.rst:46
+#: ../../source/contributor-how-to-release-flower.rst:44
 msgid ""
 "PyPI supports pre-releases (alpha, beta, release candidate). Pre-releases"
 " MUST use one of the following naming patterns:"
 msgstr "PyPI 支持预发布版本（alpha、beta、release candidate）。预发布版本必须使用以下命名模式之一："
 
-#: ../../source/contributor-how-to-release-flower.rst:49
+#: ../../source/contributor-how-to-release-flower.rst:47
 msgid "Alpha: ``MAJOR.MINOR.PATCHaN``"
 msgstr "阿尔法 ``MAJOR.MINOR.PATCHaN``"
 
-#: ../../source/contributor-how-to-release-flower.rst:50
+#: ../../source/contributor-how-to-release-flower.rst:48
 msgid "Beta: ``MAJOR.MINOR.PATCHbN``"
 msgstr "贝塔： ``MAJOR.MINOR.PATCHbN``"
 
-#: ../../source/contributor-how-to-release-flower.rst:51
+#: ../../source/contributor-how-to-release-flower.rst:49
 msgid "Release candidate (RC): ``MAJOR.MINOR.PATCHrcN``"
 msgstr "版本代号 (RC)： ``MAJOR.MINOR.PATCHrcN``"
 
-#: ../../source/contributor-how-to-release-flower.rst:53
+#: ../../source/contributor-how-to-release-flower.rst:51
 msgid "Examples include:"
 msgstr "例子包括："
 
-#: ../../source/contributor-how-to-release-flower.rst:55
+#: ../../source/contributor-how-to-release-flower.rst:53
 msgid "``1.0.0a0``"
 msgstr "``1.0.0a0``"
 
-#: ../../source/contributor-how-to-release-flower.rst:56
+#: ../../source/contributor-how-to-release-flower.rst:54
 msgid "``1.0.0b0``"
 msgstr "``1.0.0b0``"
 
-#: ../../source/contributor-how-to-release-flower.rst:57
+#: ../../source/contributor-how-to-release-flower.rst:55
 msgid "``1.0.0rc0``"
 msgstr "``1.0.0rc0``"
 
-#: ../../source/contributor-how-to-release-flower.rst:58
+#: ../../source/contributor-how-to-release-flower.rst:56
 msgid "``1.0.0rc1``"
 msgstr "``1.0.0rc1``"
 
-#: ../../source/contributor-how-to-release-flower.rst:60
+#: ../../source/contributor-how-to-release-flower.rst:58
 msgid ""
 "This is in line with PEP-440 and the recommendations from the Python "
 "Packaging Authority (PyPA):"
 msgstr "这符合 PEP-440 和 Python 包装管理局 (PyPA) 的建议："
 
-#: ../../source/contributor-how-to-release-flower.rst:63
+#: ../../source/contributor-how-to-release-flower.rst:61
 msgid "`PEP-440 <https://peps.python.org/pep-0440/>`_"
 msgstr "`PEP-440 <https://peps.python.org/pep-0440/>`_"
 
-#: ../../source/contributor-how-to-release-flower.rst:64
+#: ../../source/contributor-how-to-release-flower.rst:62
 msgid ""
 "`PyPA Choosing a versioning scheme "
 "<https://packaging.python.org/en/latest/guides/distributing-packages-"
@@ -1195,7 +1192,7 @@ msgstr ""
 "`PyPA 选择版本控制方案 <https://packaging.python.org/en/latest/guides"
 "/distributing-packages-using-setuptools/#choosing-a-versioning-scheme>`_"
 
-#: ../../source/contributor-how-to-release-flower.rst:67
+#: ../../source/contributor-how-to-release-flower.rst:65
 msgid ""
 "Note that the approach defined by PyPA is not compatible with SemVer "
 "2.0.0 spec, for details consult the `Semantic Versioning Specification "
@@ -1206,26 +1203,26 @@ msgstr ""
 "规范不兼容，详情请查阅《语义版本规范》<https://semver.org/spec/v2.0.0.html#spec-"
 "item-11>`_（特别是关于优先级的第 11 项）。"
 
-#: ../../source/contributor-how-to-release-flower.rst:73
+#: ../../source/contributor-how-to-release-flower.rst:71
 msgid "Pre-release classification"
 msgstr "发布前分类"
 
-#: ../../source/contributor-how-to-release-flower.rst:75
+#: ../../source/contributor-how-to-release-flower.rst:73
 msgid "Should the next pre-release be called alpha, beta, or release candidate?"
 msgstr "下一个预发布版应该叫阿尔法版、贝塔版还是候选发布版？"
 
-#: ../../source/contributor-how-to-release-flower.rst:77
+#: ../../source/contributor-how-to-release-flower.rst:75
 msgid ""
 "RC: feature complete, no known issues (apart from issues that are "
 "classified as \"won't fix\" for the next stable release) - if no issues "
 "surface this will become the next stable release"
 msgstr "RC：功能完整，无已知问题（除了下一个稳定版中被列为 \"不会修复 \"的问题）--如果没有问题出现，这将成为下一个稳定版"
 
-#: ../../source/contributor-how-to-release-flower.rst:80
+#: ../../source/contributor-how-to-release-flower.rst:78
 msgid "Beta: feature complete, allowed to have known issues"
 msgstr "贝塔版：功能完整，允许存在已知问题"
 
-#: ../../source/contributor-how-to-release-flower.rst:81
+#: ../../source/contributor-how-to-release-flower.rst:79
 msgid "Alpha: not feature complete, allowed to have known issues"
 msgstr "阿尔法版：功能不完整，允许存在已知问题"
 
@@ -1337,18 +1334,6 @@ msgstr ""
 msgid "and activate the virtual environment with:"
 msgstr "并激活虚拟环境："
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:83
-msgid "And then?"
-msgstr "然后呢？"
-
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:85
-msgid ""
-"As soon as you created your virtual environment you clone one of the "
-"`Flower examples <https://github.com/adap/flower/tree/main/examples/>`_."
-msgstr ""
-"创建虚拟环境后，您可以克隆一个 `Flower 示例 "
-"<https://github.com/adap/flower/tree/main/examples/>`_。"
-
 #: ../../source/contributor-how-to-write-documentation.rst:2
 msgid "Write documentation"
 msgstr "编写文件"
@@ -1367,7 +1352,6 @@ msgstr ""
 "Markdown（``.md`` 文件）。"
 
 #: ../../source/contributor-how-to-write-documentation.rst:10
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:196
 #, fuzzy
 msgid ""
 "Note that, in order to build the documentation locally (with ``poetry run"
@@ -1795,7 +1779,7 @@ msgstr "**进行修改**"
 msgid "Write great code and create wonderful changes using your favorite editor!"
 msgstr "使用您最喜欢的编辑器编写优秀的代码并创建精彩的更改！"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:149
+#: ../../source/contributor-tutorial-contribute-on-github.rst:147
 msgid "**Test and format your code**"
 msgstr "**测试并格式化您的代码**"
 
@@ -1810,21 +1794,21 @@ msgstr "不要忘记测试和格式化您的代码！否则您的代码将无法
 msgid "To do so, we have written a few scripts that you can execute:"
 msgstr "为此，我们编写了一些脚本供您执行："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:162
+#: ../../source/contributor-tutorial-contribute-on-github.rst:160
 msgid "**Stage changes**"
 msgstr "**舞台变化**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:152
+#: ../../source/contributor-tutorial-contribute-on-github.rst:150
 msgid ""
 "Before creating a commit that will update your history, you must specify "
 "to Git which files it needs to take into account."
 msgstr "在创建更新历史记录的提交之前，必须向 Git 说明需要考虑哪些文件。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:155
+#: ../../source/contributor-tutorial-contribute-on-github.rst:153
 msgid "This can be done with:"
 msgstr "这可以通过："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:161
+#: ../../source/contributor-tutorial-contribute-on-github.rst:159
 #, fuzzy
 msgid ""
 "To check which files have been modified compared to the last version "
@@ -1832,18 +1816,18 @@ msgid ""
 "the ``git status`` command."
 msgstr "要查看与上一版本（上次提交）相比哪些文件已被修改，以及哪些文件处于提交阶段，可以使用 :code:`git status` 命令。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:173
+#: ../../source/contributor-tutorial-contribute-on-github.rst:171
 msgid "**Commit changes**"
 msgstr "**提交更改**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:165
+#: ../../source/contributor-tutorial-contribute-on-github.rst:163
 #, fuzzy
 msgid ""
 "Once you have added all the files you wanted to commit using ``git add``,"
 " you can finally create your commit using this command:"
 msgstr "使用 :code:`git add` 添加完所有要提交的文件后，就可以使用此命令创建提交了："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:172
+#: ../../source/contributor-tutorial-contribute-on-github.rst:170
 #, fuzzy
 msgid ""
 "The \\<commit_message\\> is there to explain to others what the commit "
@@ -1853,61 +1837,61 @@ msgstr ""
 "<commit_message\\> 用于向他人解释提交的作用。它应该以命令式风格书写，并且简明扼要。例如 :code:`git commit "
 "-m \"Add images to README\"`。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:185
+#: ../../source/contributor-tutorial-contribute-on-github.rst:183
 msgid "**Push the changes to the fork**"
 msgstr "**将更改推送到分叉**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:176
+#: ../../source/contributor-tutorial-contribute-on-github.rst:174
 msgid ""
 "Once we have committed our changes, we have effectively updated our local"
 " history, but GitHub has no way of knowing this unless we push our "
 "changes to our origin's remote address:"
 msgstr "一旦提交了修改，我们就有效地更新了本地历史记录，但除非我们将修改推送到原点的远程地址，否则 GitHub 无法得知："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:184
+#: ../../source/contributor-tutorial-contribute-on-github.rst:182
 msgid ""
 "Once this is done, you will see on the GitHub that your forked repo was "
 "updated with the changes you have made."
 msgstr "完成此操作后，您将在 GitHub 上看到您的分叉仓库已根据您所做的更改进行了更新。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:188
+#: ../../source/contributor-tutorial-contribute-on-github.rst:186
 msgid "Creating and merging a pull request (PR)"
 msgstr "创建和合并拉取请求 (PR)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:226
+#: ../../source/contributor-tutorial-contribute-on-github.rst:224
 msgid "**Create the PR**"
 msgstr "**创建 PR**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:191
+#: ../../source/contributor-tutorial-contribute-on-github.rst:189
 msgid ""
 "Once you have pushed changes, on the GitHub webpage of your repository "
 "you should see the following message:"
 msgstr "推送更改后，在仓库的 GitHub 网页上应该会看到以下信息："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:196
+#: ../../source/contributor-tutorial-contribute-on-github.rst:194
 #, fuzzy
 msgid "Otherwise you can always find this option in the ``Branches`` page."
 msgstr "否则，您可以在 \"分支 \"页面找到该选项。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:198
+#: ../../source/contributor-tutorial-contribute-on-github.rst:196
 #, fuzzy
 msgid ""
 "Once you click the ``Compare & pull request`` button, you should see "
 "something similar to this:"
 msgstr "点击 \"比较和拉取请求 \"按钮后，您应该会看到类似下面的内容："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:203
+#: ../../source/contributor-tutorial-contribute-on-github.rst:201
 msgid "At the top you have an explanation of which branch will be merged where:"
 msgstr "在顶部，你可以看到关于哪个分支将被合并的说明："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:207
+#: ../../source/contributor-tutorial-contribute-on-github.rst:205
 msgid ""
 "In this example you can see that the request is to merge the branch "
 "``doc-fixes`` from my forked repository to branch ``main`` from the "
 "Flower repository."
 msgstr "在这个例子中，你可以看到请求将我分叉的版本库中的分支 ``doc-fixes`` 合并到 Flower 版本库中的分支 ``main``。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:210
+#: ../../source/contributor-tutorial-contribute-on-github.rst:208
 #, fuzzy
 msgid ""
 "The title should be changed to adhere to the :ref:`pr_title_format` "
@@ -1917,7 +1901,7 @@ msgstr ""
 "应该修改标题以符合 :ref:`pr_title_format` 准则，否则将无法合并 PR。因此，在这种情况下，正确的标题可能是 "
 "``docs(framework:skip)修复错字``。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:214
+#: ../../source/contributor-tutorial-contribute-on-github.rst:212
 msgid ""
 "The input box in the middle is there for you to describe what your PR "
 "does and to link it to existing issues. We have placed comments (that "
@@ -1925,167 +1909,167 @@ msgid ""
 "process."
 msgstr "中间的输入框供您描述 PR 的作用，并将其与现有问题联系起来。我们在此放置了注释（一旦 PR 打开，注释将不会显示），以指导您完成整个过程。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:218
+#: ../../source/contributor-tutorial-contribute-on-github.rst:216
 #, fuzzy
 msgid "It is important to follow the instructions described in comments."
 msgstr "请务必遵守注释中的说明。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:220
+#: ../../source/contributor-tutorial-contribute-on-github.rst:218
 msgid ""
 "At the bottom you will find the button to open the PR. This will notify "
 "reviewers that a new PR has been opened and that they should look over it"
 " to merge or to request changes."
 msgstr "在底部，您可以找到打开 PR 的按钮。这将通知审核人员新的 PR 已经打开，他们应该查看该 PR 以进行合并或要求修改。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:224
+#: ../../source/contributor-tutorial-contribute-on-github.rst:222
 msgid ""
 "If your PR is not yet ready for review, and you don't want to notify "
 "anyone, you have the option to create a draft pull request:"
 msgstr "如果您的 PR 尚未准备好接受审核，而且您不想通知任何人，您可以选择创建一个草案拉取请求："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:230
+#: ../../source/contributor-tutorial-contribute-on-github.rst:228
 msgid "**Making new changes**"
 msgstr "**作出新的改变**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:229
+#: ../../source/contributor-tutorial-contribute-on-github.rst:227
 msgid ""
 "Once the PR has been opened (as draft or not), you can still push new "
 "commits to it the same way we did before, by making changes to the branch"
 " associated with the PR."
 msgstr "一旦 PR 被打开（无论是否作为草案），你仍然可以像以前一样，通过修改与 PR 关联的分支来推送新的提交。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:253
+#: ../../source/contributor-tutorial-contribute-on-github.rst:251
 msgid "**Review the PR**"
 msgstr "**审查 PR**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:233
+#: ../../source/contributor-tutorial-contribute-on-github.rst:231
 msgid ""
 "Once the PR has been opened or once the draft PR has been marked as "
 "ready, a review from code owners will be automatically requested:"
 msgstr "一旦 PR 被打开或 PR 草案被标记为就绪，就会自动要求代码所有者进行审核："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:238
+#: ../../source/contributor-tutorial-contribute-on-github.rst:236
 msgid ""
 "Code owners will then look into the code, ask questions, request changes "
 "or validate the PR."
 msgstr "然后，代码所有者会查看代码、提出问题、要求修改或验证 PR。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:241
+#: ../../source/contributor-tutorial-contribute-on-github.rst:239
 msgid "Merging will be blocked if there are ongoing requested changes."
 msgstr "如果有正在进行的更改请求，合并将被阻止。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:245
+#: ../../source/contributor-tutorial-contribute-on-github.rst:243
 msgid ""
 "To resolve them, just push the necessary changes to the branch associated"
 " with the PR:"
 msgstr "要解决这些问题，只需将必要的更改推送到与 PR 关联的分支即可："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:250
+#: ../../source/contributor-tutorial-contribute-on-github.rst:248
 msgid "And resolve the conversation:"
 msgstr "并解决对话："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:254
+#: ../../source/contributor-tutorial-contribute-on-github.rst:252
 msgid ""
 "Once all the conversations have been resolved, you can re-request a "
 "review."
 msgstr "一旦所有对话都得到解决，您就可以重新申请审核。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:274
+#: ../../source/contributor-tutorial-contribute-on-github.rst:272
 msgid "**Once the PR is merged**"
 msgstr "**一旦 PR 被合并**"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:256
+#: ../../source/contributor-tutorial-contribute-on-github.rst:254
 msgid ""
 "If all the automatic tests have passed and reviewers have no more changes"
 " to request, they can approve the PR and merge it."
 msgstr "如果所有自动测试都已通过，且审核员不再需要修改，他们就可以批准 PR 并将其合并。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:261
+#: ../../source/contributor-tutorial-contribute-on-github.rst:259
 msgid ""
 "Once it is merged, you can delete the branch on GitHub (a button should "
 "appear to do so) and also delete it locally by doing:"
 msgstr "合并后，您可以在 GitHub 上删除该分支（会出现一个删除按钮），也可以在本地删除该分支："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:269
+#: ../../source/contributor-tutorial-contribute-on-github.rst:267
 msgid "Then you should update your forked repository by doing:"
 msgstr "然后，你应该更新你的分叉仓库："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:277
+#: ../../source/contributor-tutorial-contribute-on-github.rst:275
 msgid "Example of first contribution"
 msgstr "首次捐款实例"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:280
+#: ../../source/contributor-tutorial-contribute-on-github.rst:278
 msgid "Problem"
 msgstr "问题"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:282
+#: ../../source/contributor-tutorial-contribute-on-github.rst:280
 #, fuzzy
 msgid ""
 "For our documentation, we've started to use the `Diàtaxis framework "
 "<https://diataxis.fr/>`_."
 msgstr "对于我们的文档，我们已经开始使用 \"Diàtaxis 框架 <https://diataxis.fr/>`_\"。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:285
+#: ../../source/contributor-tutorial-contribute-on-github.rst:283
 #, fuzzy
 msgid ""
 "Our \"How to\" guides should have titles that continue the sentence \"How"
 " to …\", for example, \"How to upgrade to Flower 1.0\"."
 msgstr "我们的 \"如何 \"指南的标题应延续 \"如何...... \"的句式，例如 \"如何升级到 Flower 1.0\"。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:288
+#: ../../source/contributor-tutorial-contribute-on-github.rst:286
 msgid ""
 "Most of our guides do not follow this new format yet, and changing their "
 "title is (unfortunately) more involved than one might think."
 msgstr "我们的大多数指南还没有采用这种新格式，而更改其标题（不幸的是）比人们想象的要复杂得多。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:291
+#: ../../source/contributor-tutorial-contribute-on-github.rst:289
 #, fuzzy
 msgid ""
 "This issue is about changing the title of a doc from present continuous "
 "to present simple."
 msgstr "这个问题是关于将文档标题从现在进行时改为现在进行时。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:294
+#: ../../source/contributor-tutorial-contribute-on-github.rst:292
 #, fuzzy
 msgid ""
 "Let's take the example of \"Saving Progress\" which we changed to \"Save "
 "Progress\". Does this pass our check?"
 msgstr "以 \"保存进度 \"为例，我们将其改为 \"保存进度\"。这是否通过了我们的检查？"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:297
+#: ../../source/contributor-tutorial-contribute-on-github.rst:295
 #, fuzzy
 msgid "Before: \"How to saving progress\" ❌"
 msgstr "之前： \"如何保存进度\" ❌"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:299
+#: ../../source/contributor-tutorial-contribute-on-github.rst:297
 #, fuzzy
 msgid "After: \"How to save progress\" ✅"
 msgstr "之后： \"如何保存进度\"✅"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:302
+#: ../../source/contributor-tutorial-contribute-on-github.rst:300
 msgid "Solution"
 msgstr "解决方案"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:304
+#: ../../source/contributor-tutorial-contribute-on-github.rst:302
 #, fuzzy
 msgid ""
 "This is a tiny change, but it'll allow us to test your end-to-end setup. "
 "After cloning and setting up the Flower repo, here's what you should do:"
 msgstr "这只是一个很小的改动，但可以让我们测试你的端到端设置。克隆并设置好 Flower repo 后，你应该这样做："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:307
+#: ../../source/contributor-tutorial-contribute-on-github.rst:305
 #, fuzzy
 msgid "Find the source file in ``framework/docs/source``"
 msgstr "在 `framework/docs/source` 中查找源文件"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:308
+#: ../../source/contributor-tutorial-contribute-on-github.rst:306
 #, fuzzy
 msgid ""
 "Make the change in the ``.rst`` file (beware, the dashes under the title "
 "should be the same length as the title itself)"
 msgstr "在 `.rst` 文件中进行修改（注意，标题下的破折号应与标题本身的长度相同）"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:310
+#: ../../source/contributor-tutorial-contribute-on-github.rst:308
 #, fuzzy
 msgid ""
 "Build the docs and `check the result <contributor-how-to-write-"
@@ -2094,11 +2078,11 @@ msgstr ""
 "构建文档并检查结果： `<https://flower.ai/docs/writing-documentation.html#edit-an-"
 "existing-page>`_"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:314
+#: ../../source/contributor-tutorial-contribute-on-github.rst:312
 msgid "Rename file"
 msgstr "重命名文件"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:316
+#: ../../source/contributor-tutorial-contribute-on-github.rst:314
 msgid ""
 "You might have noticed that the file name still reflects the old wording."
 " If we just change the file, then we break all existing links to it - it "
@@ -2108,33 +2092,33 @@ msgstr ""
 "您可能已经注意到，文件名仍然反映了旧的措辞。如果我们只是更改文件，那么就会破坏与该文件的所有现有链接--"
 "避免这种情况是***重要的，破坏链接会损害我们的搜索引擎排名。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:320
+#: ../../source/contributor-tutorial-contribute-on-github.rst:318
 #, fuzzy
 msgid "Here's how to change the file name:"
 msgstr "下面是更改文件名的方法："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:322
+#: ../../source/contributor-tutorial-contribute-on-github.rst:320
 #, fuzzy
 msgid "Change the file name to ``save-progress.rst``"
 msgstr "将文件名改为`save-progress.rst`"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:323
+#: ../../source/contributor-tutorial-contribute-on-github.rst:321
 #, fuzzy
 msgid "Add a redirect rule to ``framework/docs/source/conf.py``"
 msgstr "在 `framework/docs/source/conf.py` 中添加重定向规则"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:325
+#: ../../source/contributor-tutorial-contribute-on-github.rst:323
 #, fuzzy
 msgid ""
 "This will cause a redirect from ``saving-progress.html`` to ``save-"
 "progress.html``, old links will continue to work."
 msgstr "这将导致从 `saving-progress.html` 重定向到 `save-progress.html`，旧链接将继续工作。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:329
+#: ../../source/contributor-tutorial-contribute-on-github.rst:327
 msgid "Apply changes in the index file"
 msgstr "应用索引文件中的更改"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:331
+#: ../../source/contributor-tutorial-contribute-on-github.rst:329
 #, fuzzy
 msgid ""
 "For the lateral navigation bar to work properly, it is very important to "
@@ -2142,42 +2126,42 @@ msgid ""
 "arborescence of the navbar."
 msgstr "要使横向导航栏正常工作，更新 `index.rst` 文件也非常重要。我们就是在这里定义整个导航栏的结构。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:335
+#: ../../source/contributor-tutorial-contribute-on-github.rst:333
 #, fuzzy
 msgid "Find and modify the file name in ``index.rst``"
 msgstr "查找并修改 `index.rst` 中的文件名"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:338
+#: ../../source/contributor-tutorial-contribute-on-github.rst:336
 msgid "Open PR"
 msgstr "开放式 PR"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:340
+#: ../../source/contributor-tutorial-contribute-on-github.rst:338
 #, fuzzy
 msgid ""
 "Commit the changes (commit messages are always imperative: \"Do "
 "something\", in this case \"Change …\")"
 msgstr "提交更改（提交信息总是命令式的：\"做某事\"，这里是 \"更改......\"）"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:342
+#: ../../source/contributor-tutorial-contribute-on-github.rst:340
 msgid "Push the changes to your fork"
 msgstr "将更改推送到分叉"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:343
+#: ../../source/contributor-tutorial-contribute-on-github.rst:341
 #, fuzzy
 msgid ""
 "Open a PR (as shown above) with title ``docs(framework) Update how-to "
 "guide title``"
 msgstr "打开一个 PR（如上图所示），标题为\"`docs(framework) Update how-to guide title```\"。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:344
+#: ../../source/contributor-tutorial-contribute-on-github.rst:342
 msgid "Wait for it to be approved!"
 msgstr "等待审批！"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:345
+#: ../../source/contributor-tutorial-contribute-on-github.rst:343
 msgid "Congrats! 🥳 You're now officially a Flower contributor!"
 msgstr "祝贺你 🥳 您现在正式成为 \"Flower \"贡献者！"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:348
+#: ../../source/contributor-tutorial-contribute-on-github.rst:346
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.ipynb:573
 #: ../../source/tutorial-series-customize-the-client-pytorch.ipynb:1012
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.ipynb:811
@@ -2186,13 +2170,13 @@ msgstr "祝贺你 🥳 您现在正式成为 \"Flower \"贡献者！"
 msgid "Next steps"
 msgstr "接下来的步骤"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:350
+#: ../../source/contributor-tutorial-contribute-on-github.rst:348
 msgid ""
 "Once you have made your first PR, and want to contribute more, be sure to"
 " check out the following :"
 msgstr "一旦您完成了第一份 PR，并希望做出更多贡献，请务必查看以下内容："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:353
+#: ../../source/contributor-tutorial-contribute-on-github.rst:351
 #, fuzzy
 msgid ""
 ":doc:`Good first contributions <contributor-ref-good-first-"
@@ -2202,28 +2186,28 @@ msgstr ""
 "`优秀的首次贡献 <https://flower.ai/docs/framework/contributor-ref-good-first-"
 "contributions.html>`_，在这里你应该特别看看 :code:`baselines` 的贡献。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:357
+#: ../../source/contributor-tutorial-contribute-on-github.rst:355
 msgid "Appendix"
 msgstr "附录"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:362
+#: ../../source/contributor-tutorial-contribute-on-github.rst:360
 #, fuzzy
 msgid "PR title format"
 msgstr "PR 标题格式"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:364
+#: ../../source/contributor-tutorial-contribute-on-github.rst:362
 #, fuzzy
 msgid "We enforce the following PR title format:"
 msgstr "我们执行以下 PR 标题格式："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:370
+#: ../../source/contributor-tutorial-contribute-on-github.rst:368
 #, fuzzy
 msgid ""
 "(or ``<type>(<project>:skip) <subject>`` to ignore the PR in the "
 "changelog)"
 msgstr "(或 ``<type>(<project>:skip) <subject>`` 忽略更新日志中的 PR）。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:372
+#: ../../source/contributor-tutorial-contribute-on-github.rst:370
 #, fuzzy, python-brace-format
 msgid ""
 "Where ``<type>`` needs to be in ``{ci, fix, feat, docs, refactor, "
@@ -2236,59 +2220,59 @@ msgstr ""
 "``<project>`` 应该使用 ``{framework, baselines, datasets, examples, 或者 '*' "
 "当修改多个项目时需要使用 ':skip'标记}``, 并且 ``<subject>`` 应该以一个大写的动词开始。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:377
+#: ../../source/contributor-tutorial-contribute-on-github.rst:375
 #, fuzzy
 msgid "Valid examples:"
 msgstr "实例"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:379
+#: ../../source/contributor-tutorial-contribute-on-github.rst:377
 #, fuzzy
 msgid "``feat(framework) Add flwr build CLI command``"
 msgstr "`feat(框架) 添加 flwr build CLI 命令```"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:380
+#: ../../source/contributor-tutorial-contribute-on-github.rst:378
 #, fuzzy
 msgid "``refactor(examples:skip) Improve quickstart-pytorch logging``"
 msgstr "``refactor(examples:skip) Improve quickstart-pytorch logging``."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:381
+#: ../../source/contributor-tutorial-contribute-on-github.rst:379
 #, fuzzy
 msgid "``ci(*:skip) Enforce PR title format``"
 msgstr "`ci(*:skip)执行 PR 标题格式``。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:383
+#: ../../source/contributor-tutorial-contribute-on-github.rst:381
 #, fuzzy
 msgid "Invalid examples:"
 msgstr "模拟示例"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:385
+#: ../../source/contributor-tutorial-contribute-on-github.rst:383
 #, fuzzy
 msgid "``feat(framework): Add flwr build CLI command`` (extra ``:``)"
 msgstr "`feat(框架)： 添加 flwr build CLI 命令``（额外的``:``)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:386
+#: ../../source/contributor-tutorial-contribute-on-github.rst:384
 #, fuzzy
 msgid ""
 "``feat(*) Add flwr build CLI command`` (missing ``skip`` flag along with "
 "``*``)"
 msgstr "`feat(*)添加flwr构建CLI命令``（缺少``skip``标志和``*``）。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:387
+#: ../../source/contributor-tutorial-contribute-on-github.rst:385
 #, fuzzy
 msgid "``feat(skip) Add flwr build CLI command`` (missing ``<project>``)"
 msgstr "`feat(skip)添加flwr构建CLI命令``（缺少``<project>`）。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:388
+#: ../../source/contributor-tutorial-contribute-on-github.rst:386
 #, fuzzy
 msgid "``feat(framework) add flwr build CLI command`` (non capitalised verb)"
 msgstr "`feat(framework)添加 flwr 构建 CLI 命令``（非大写动词）"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:389
+#: ../../source/contributor-tutorial-contribute-on-github.rst:387
 #, fuzzy
 msgid "``feat(framework) Add flwr build CLI command.`` (dot at the end)"
 msgstr "feat(框架) 添加 flwr 构建 CLI 命令。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:390
+#: ../../source/contributor-tutorial-contribute-on-github.rst:388
 #, fuzzy
 msgid "``Add flwr build CLI command.`` (missing ``<type>(<project>)``)"
 msgstr ""
@@ -2395,46 +2379,38 @@ msgstr "首先，从 GitHub 克隆 \"Flower 存储库 <https://github.com/adap/f
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:56
 #, fuzzy
 msgid ""
-"Let's create the Python environment for all-things Flower. If you wish to"
-" use ``pyenv``, we provide two convenience scripts that you can use. If "
-"you prefer using something else than ``pyenv``, create a new environment,"
-" activate and skip to the last point where all packages are installed."
+"Create and activate a Python virtual environment for development. See "
+"`Set up a virtual env <contributor-how-to-set-up-a-virtual-env.rst>`_ for"
+" detailed instructions."
 msgstr ""
-"让我们为 Flower 创建一个 Python 环境。如果您想使用 :code:`pyenv`，我们提供了两个方便的脚本供您使用。如果你不喜欢使用"
-" :code:`pyenv`，请创建一个新环境，激活并跳到最后一点，即安装所有软件包。"
+"建议创建一个虚拟环境，并在此 `virtualenv <https://flower.ai/docs/recommended-env-"
+"setup.html>`_ 中运行所有内容。"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:61
-#, fuzzy
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:60
 msgid ""
-"If you don't have ``pyenv`` installed, the following script that will "
-"install it, set it up, and create the virtual environment (with "
-":substitution-code:`Python |python_full_version|` by default):"
+"One way to do this is by using `pyenv <https://github.com/pyenv/pyenv>`_ "
+"and `pyenv-virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_. You "
+"can also optionally install a specific Python version using pyenv if you "
+"haven't already installed your desired version:"
 msgstr ""
-"如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 :code:`Python "
-"3.9.20）：："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:69
-#, fuzzy
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:71
 msgid ""
-"If you already have ``pyenv`` installed (along with the ``pyenv-"
-"virtualenv`` plugin), you can use the following convenience script (with "
-":substitution-code:`Python |python_full_version|` by default):"
+"Install Poetry, which is used to manage dependencies and development "
+"workflows:"
 msgstr ""
-"如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 :code:`Python "
-"3.9.20）：："
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:77
-#, fuzzy
 msgid ""
-"3. Install the Flower package in development mode (think ``pip install "
-"-e``) along with all necessary dependencies:"
-msgstr "第三，在开发模式下安装 Flower 软件包（想想 :code:`pip install -e`）以及所有必要的依赖项：："
+"Navigate to the ``framework`` directory and install the Flower project in"
+" development mode, including all optional dependencies:"
+msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:85
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:86
 msgid "Convenience Scripts"
 msgstr "便捷脚本"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:87
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:88
 #, fuzzy
 msgid ""
 "The Flower repository contains a number of convenience scripts to make "
@@ -2443,64 +2419,60 @@ msgid ""
 " important ones:"
 msgstr "Flower 软件仓库包含大量便捷脚本，可使重复性开发任务更轻松、更不易出错。完整列表请参见 :code:`/dev` 子目录。以下是最重要的脚本："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:92
-msgid "Create/Delete Virtual Environment"
-msgstr "创建/删除虚拟环境"
-
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:101
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:93
 msgid "Compile ProtoBuf Definitions"
 msgstr "编译 ProtoBuf 定义"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:108
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:100
 msgid "Auto-Format Code"
 msgstr "自动格式化代码"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:115
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:107
 msgid "Run Linters and Tests"
 msgstr "运行分类器和测试"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:122
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:114
 #, fuzzy
 msgid "Add a pre-commit hook"
 msgstr "添加预先提交钩子"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:124
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:116
 #, fuzzy
 msgid ""
 "Developers may integrate a pre-commit hook into their workflow utilizing "
 "the `pre-commit <https://pre-commit.com/#install>`_ library. The pre-"
 "commit hook is configured to execute two primary operations: "
-"``./dev/format.sh`` and ``./dev/test.sh`` scripts."
+"``./framework/dev/format.sh`` and ``./framework/dev/test.sh`` scripts."
 msgstr ""
 "开发人员可利用 `pre-commit <https://pre-commit.com/#install>`_ "
 "库将预提交钩子集成到工作流程中。预提交钩子被配置为执行两个主要操作： `./dev/format.sh`` 和 ``./dev/test.sh``"
 " 脚本。"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:128
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:121
 #, fuzzy
 msgid "There are multiple ways developers can use this:"
 msgstr "开发人员可以通过多种方式使用它："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:130
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:123
 #, fuzzy
 msgid "Install the pre-commit hook to your local git directory by simply running:"
 msgstr "在本地 git 目录中安装预提交钩子，只需运行"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:136
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:129
 #, fuzzy
 msgid ""
 "Each ``git commit`` will trigger the execution of formatting and "
 "linting/test scripts."
 msgstr "每次 \"git 提交 \"都会触发格式化和内核/测试脚本的执行。"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:138
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:131
 #, fuzzy
 msgid ""
 "If in a hurry, bypass the hook using ``--no-verify`` with the ``git "
 "commit`` command."
 msgstr "如果赶时间，可使用 ``--no-verify`` 和 ``git commit` 命令绕过钩子："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:145
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:138
 #, fuzzy
 msgid ""
 "For developers who prefer not to install the hook permanently, it is "
@@ -2508,18 +2480,18 @@ msgid ""
 " the following command:"
 msgstr "对于不想永久安装钩子的开发人员，可以使用以下命令在提交更改之前执行一次性检查："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:152
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:145
 #, fuzzy
 msgid ""
 "This executes the formatting and linting checks/tests on all the files "
 "without modifying the default behavior of ``git commit``."
 msgstr "这将在不修改 ``git commit`` 默认行为的情况下对所有文件执行格式化和词排检查/测试。"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:156
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:149
 msgid "Run Github Actions (CI) locally"
 msgstr "在本地运行 Github 操作 (CI)"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:158
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:151
 #, fuzzy
 msgid ""
 "Developers could run the full set of Github Actions workflows under their"
@@ -2530,47 +2502,57 @@ msgstr ""
 "开发人员可以使用 `Act <https://github.com/nektos/act>_` 在本地环境下运行全套 Github Actions"
 " 工作流程。请参考链接仓库下的安装说明，并在 Flower 主克隆仓库文件夹下运行下一条命令：："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:167
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:160
 msgid ""
 "The Flower default workflow would run by setting up the required Docker "
 "machines underneath."
 msgstr "Flower 默认工作流程将通过在下面设置所需的 Docker 机器来运行。"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:171
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:164
 msgid "Build Release"
 msgstr "版本发布"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:173
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:166
 #, fuzzy
 msgid ""
 "Flower uses Poetry to build releases. The necessary command is wrapped in"
 " a simple script:"
 msgstr "Flower 使用 Poetry 创建发布版本。必要的命令封装在一个简单的脚本中：："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:180
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:173
 #, fuzzy
 msgid ""
 "The resulting ``.whl`` and ``.tar.gz`` releases will be stored in the "
-"``/dist`` subdirectory."
+"``./framework/dist`` subdirectory."
 msgstr "生成的 :code:`.whl` 和 :code:`.tar.gz` 版本将存储在 :code:`/dist` 子目录中。"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:184
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:177
 msgid "Build Documentation"
 msgstr "构建文档"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:186
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:179
 #, fuzzy
 msgid ""
-"Flower's documentation uses `Sphinx <https://www.sphinx-doc.org/>`_. "
-"There's no convenience script to re-build the documentation yet, but it's"
-" pretty easy:"
+"Flower's documentation uses `Sphinx <https://www.sphinx-doc.org/>`_. To "
+"build the documentation locally, run the following script:"
 msgstr ""
 "Flower 的文档使用 `Sphinx <https://www.sphinx-"
 "doc.org/>`_。目前还没有很方便的脚本来重新构建文档，不过这很容易：："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:194
-msgid "This will generate HTML documentation in ``doc/build/html``."
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:186
+#, fuzzy
+msgid "This will generate HTML documentation in ``./framework/doc/build/html``."
 msgstr "这将在 ``doc/build/html`` 中生成 HTML 文档。"
+
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:188
+#, fuzzy
+msgid ""
+"Note that, in order to build the documentation locally, `Pandoc "
+"<https://pandoc.org/installing.html>`_ needs to be installed on the "
+"system."
+msgstr ""
+"请注意，要在本地构建文档（使用 ``poetry run make html``，如下所述），系统上必须安装 ``Pandoc "
+"<https://pandoc.org/installing.html>_`。"
 
 #: ../../source/deploy.rst:-1
 msgid ""
@@ -5640,35 +5622,30 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:89
+#, fuzzy
 msgid ""
 "``--auth-list-public-keys``: Specify the path to a CSV file storing the "
 "public keys of all SuperNodes that should be allowed to connect with the "
-"SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:90
-#, fuzzy
-msgid ""
-"A valid CSV file storing known node public keys should list the keys in "
-"OpenSSH format, separated by commas. Refer to the code sample, which "
-"contains a CSV file with two known node public keys."
+"SuperLink. A valid CSV file storing known node public keys should list "
+"the keys in OpenSSH format, separated by commas. Refer to the code "
+"sample, which contains a CSV file with two known node public keys."
 msgstr ""
 "存储已知节点公开密钥的有效 CSV 文件应以 OpenSSH "
 "格式列出密钥，以逗号分隔，不含任何注释。有关示例，请参阅我们的代码示例，其中包含一个包含两个已知节点公钥的 CSV 文件。"
 
-#: ../../source/how-to-authenticate-supernodes.rst:93
+#: ../../source/how-to-authenticate-supernodes.rst:92
 #, fuzzy
 msgid "Enable node authentication in SuperNode"
 msgstr "在 :code:`SuperNode` 中启用节点验证"
 
-#: ../../source/how-to-authenticate-supernodes.rst:95
+#: ../../source/how-to-authenticate-supernodes.rst:94
 msgid ""
 "Connecting a SuperNode to a SuperLink that has node authentication "
 "enabled requires passing two additional arguments (i.e. the public and "
 "private keys of the SuperNode) in addition to the TLS certificate."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:112
+#: ../../source/how-to-authenticate-supernodes.rst:111
 msgid "``--auth-supernode-private-key``: the private key of this SuperNode."
 msgstr ""
 
@@ -5678,18 +5655,18 @@ msgid ""
 "should be the same that was added to othe CSV used by the SuperLink)."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:115
+#: ../../source/how-to-authenticate-supernodes.rst:114
 msgid ""
 "Follow the same procedure to launch the second SuperNode by passing its "
 "corresponding key pair:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:130
+#: ../../source/how-to-authenticate-supernodes.rst:129
 #, fuzzy
 msgid "Security notice"
 msgstr "安全通知"
 
-#: ../../source/how-to-authenticate-supernodes.rst:132
+#: ../../source/how-to-authenticate-supernodes.rst:131
 #, fuzzy
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
@@ -5703,14 +5680,14 @@ msgstr ""
 "系统的安全性依赖于超级链接和每个超级节点的凭证。因此，必须保护和安全存储凭证，以避免公钥基础设施 (PKI) "
 "假冒攻击等安全风险。节点验证机制还涉及人机交互，因此请确保使用可信的通信方法，以安全的方式进行所有通信。"
 
-#: ../../source/how-to-authenticate-supernodes.rst:139
+#: ../../source/how-to-authenticate-supernodes.rst:138
 #: ../../source/how-to-enable-tls-connections.rst:138
 #: ../../source/how-to-use-built-in-mods.rst:174
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:287
 msgid "Conclusion"
 msgstr "总结"
 
-#: ../../source/how-to-authenticate-supernodes.rst:141
+#: ../../source/how-to-authenticate-supernodes.rst:140
 #, fuzzy
 msgid ""
 "You should now have learned how to start a long-running Flower SuperLink "
@@ -5720,7 +5697,7 @@ msgstr ""
 "现在，您应该已经学会了如何启动长期运行的 Flower "
 "服务器（:code:`SuperLink`）和客户端（:code:`SuperNode`）并启用节点身份验证。您还应该知道私钥的重要性，并将其安全存储，以尽量减少安全风险。"
 
-#: ../../source/how-to-authenticate-supernodes.rst:147
+#: ../../source/how-to-authenticate-supernodes.rst:146
 #: ../../source/how-to-enable-tls-connections.rst:148
 msgid ""
 "Refer to the :doc:`docker/index` documentation to learn how to setup a "
@@ -6473,7 +6450,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-implement-fedbn.rst:103
-#: ../../source/how-to-run-flower-on-azure.rst:218
+#: ../../source/how-to-run-flower-on-azure.rst:216
 msgid "Next Steps"
 msgstr "下一步工作"
 
@@ -7222,12 +7199,12 @@ msgid ""
 " resources: |authenticate_supernodes|_, |enable_tls_connections|_"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:198
+#: ../../source/how-to-run-flower-on-azure.rst:196
 #, fuzzy
 msgid "Run Flower App"
 msgstr "Flower 服务器。"
 
-#: ../../source/how-to-run-flower-on-azure.rst:200
+#: ../../source/how-to-run-flower-on-azure.rst:198
 msgid ""
 "Finally, after all running Flower processes have been initialized on the "
 "Microsoft Azure cluster, in our local machine, we first need to install "
@@ -7237,17 +7214,17 @@ msgid ""
 "``pyproject.toml`` file, and then add the following sections:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:215
+#: ../../source/how-to-run-flower-on-azure.rst:213
 msgid "Then from our local machine we need to run ``flwr run . my-federation``."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:222
+#: ../../source/how-to-run-flower-on-azure.rst:220
 msgid ""
 "This guide is not suitable for production environments due to missing "
 "authentication and TLS security."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:225
+#: ../../source/how-to-run-flower-on-azure.rst:223
 msgid ""
 "To enable authentication and establish secure connections, please refer "
 "to the following resources: |authenticate_supernodes|_, "
@@ -10693,8 +10670,8 @@ msgstr "实例"
 #: flwr.client.client_app.ClientApp:5 of
 #, fuzzy
 msgid ""
-"Assuming a typical `Client` implementation named `FlowerClient`, you can "
-"wrap it in a `ClientApp` as follows:"
+"Assuming a typical ``Client`` implementation named ``FlowerClient``, you "
+"can wrap it in a ``ClientApp`` as follows::"
 msgstr "假定有一个名为 `FlowerClient` 的典型 `Client` 实现，可以将其封装在一个 `ClientApp` 中，如下所示："
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
@@ -10764,17 +10741,17 @@ msgstr "返回一个装饰器，用于向客户端程序注册评估 fn。"
 
 #: flwr.client.client_app.ClientApp.evaluate:13 of
 #, fuzzy
-msgid "Registering an evaluate function:"
+msgid "Registering an evaluate function::"
 msgstr "使用评估函数评估模型参数。"
 
 #: flwr.client.client_app.ClientApp.evaluate:23 of
 #, fuzzy
-msgid "Registering an evaluate function with a custom action name:"
+msgid "Registering an evaluate function with a custom action name::"
 msgstr "使用评估函数评估模型参数。"
 
 #: flwr.client.client_app.ClientApp.evaluate:34 of
 #, fuzzy
-msgid "Registering an evaluate function with a function-specific Flower Mod:"
+msgid "Registering an evaluate function with a function-specific Flower Mod::"
 msgstr "使用评估函数评估模型参数。"
 
 #: flwr.client.client_app.ClientApp.lifespan:3
@@ -10790,16 +10767,19 @@ msgid "A decorator that registers a query function with the ``ClientApp``."
 msgstr "返回一个向客户端应用程序注册查询 fn 的装饰器。"
 
 #: flwr.client.client_app.ClientApp.query:13 of
-msgid "Registering a query function:"
-msgstr ""
+#, fuzzy
+msgid "Registering a query function::"
+msgstr "使用评估函数评估模型参数。"
 
 #: flwr.client.client_app.ClientApp.query:23 of
-msgid "Registering a query function with a custom action name:"
-msgstr ""
+#, fuzzy
+msgid "Registering a query function with a custom action name::"
+msgstr "使用评估函数评估模型参数。"
 
 #: flwr.client.client_app.ClientApp.query:34 of
-msgid "Registering a query function with a function-specific Flower Mod:"
-msgstr ""
+#, fuzzy
+msgid "Registering a query function with a function-specific Flower Mod::"
+msgstr "使用评估函数评估模型参数。"
 
 #: flwr.client.client_app.ClientApp.train:8 of
 #, fuzzy
@@ -10807,16 +10787,19 @@ msgid "A decorator that registers a train function with the ``ClientApp``."
 msgstr "返回一个装饰器，用于在客户端应用程序中注册火车 fn。"
 
 #: flwr.client.client_app.ClientApp.train:13 of
-msgid "Registering a train function:"
-msgstr ""
+#, fuzzy
+msgid "Registering a train function::"
+msgstr "使用评估函数评估模型参数。"
 
 #: flwr.client.client_app.ClientApp.train:23 of
-msgid "Registering a train function with a custom action name:"
-msgstr ""
+#, fuzzy
+msgid "Registering a train function with a custom action name::"
+msgstr "使用评估函数评估模型参数。"
 
 #: flwr.client.client_app.ClientApp.train:34 of
-msgid "Registering a train function with a function-specific Flower Mod:"
-msgstr ""
+#, fuzzy
+msgid "Registering a train function with a function-specific Flower Mod::"
+msgstr "使用评估函数评估模型参数。"
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:2
 msgid "NumPyClient"
@@ -11143,7 +11126,9 @@ msgid ""
 msgstr ""
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:23 of
-msgid "Create an instance of the local DP mod and add it to the client-side mods:"
+msgid ""
+"Create an instance of the local DP mod and add it to the client-side "
+"mods::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.adaptiveclipping_mod.rst:2
@@ -11201,8 +11186,8 @@ msgstr "参数"
 
 #: flwr.client.mod.comms_mods.arrays_size_mod:3 of
 msgid ""
-"This mod logs the number of array elements transmitted in "
-"``ArrayRecord``s of the message as well as their sizes in bytes."
+"This mod logs the number of array elements transmitted in ``ArrayRecord``"
+" objects of the message as well as their sizes in bytes."
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.fixedclipping_mod.rst:2
@@ -11334,17 +11319,18 @@ msgid ""
 msgstr "在出现连接错误时，客户端停止尝试连接服务器之前的最长持续时间。如果设置为 \"无\"，则总时间没有限制。"
 
 #: flwr.client.app.start_client:52 flwr.client.app.start_numpy_client:37 of
-msgid "Starting a gRPC client with an insecure server connection:"
+#, fuzzy
+msgid "Starting a gRPC client with an insecure server connection::"
 msgstr "使用不安全的服务器连接启动 gRPC 客户端："
 
 #: flwr.client.app.start_client:59 flwr.client.app.start_numpy_client:44 of
 #, fuzzy
-msgid "Starting an SSL-enabled gRPC client using system certificates:"
+msgid "Starting a TLS-enabled gRPC client using system certificates::"
 msgstr "启动支持 SSL 的 gRPC 客户端："
 
 #: flwr.client.app.start_client:70 flwr.client.app.start_numpy_client:52 of
 #, fuzzy
-msgid "Starting an SSL-enabled gRPC client using provided certificates:"
+msgid "Starting a TLS-enabled gRPC client using provided certificates::"
 msgstr "启动支持 SSL 的 gRPC 客户端："
 
 #: ../../source/ref-api/flwr.client.start_numpy_client.rst:2
@@ -11564,7 +11550,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.record.configrecord.ConfigRecord:1 of
 #, fuzzy
-msgid "Configs record."
+msgid "Config record."
 msgstr "配置日志记录"
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -11785,7 +11771,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #: flwr.common.record.metricrecord.MetricRecord:1 of
 #, fuzzy
-msgid "Metrics recod."
+msgid "Metric record."
 msgstr "指标记录。"
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -12002,15 +11988,16 @@ msgid ""
 msgstr ""
 
 #: flwr.common.record.arrayrecord.Array:36 of
-msgid "Initializing by specifying all fields directly:"
+msgid "Initializing by specifying all fields directly::"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.Array:45 of
-msgid "Initializing with a NumPy ndarray:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a NumPy ndarray::"
+msgstr "存放 ParametersRecord 实例的字典。"
 
 #: flwr.common.record.arrayrecord.Array:50 of
-msgid "Initializing with a PyTorch tensor:"
+msgid "Initializing with a PyTorch tensor::"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
@@ -12184,23 +12171,25 @@ msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:37 of
 #, fuzzy
-msgid "Initializing an empty ArrayRecord:"
+msgid "Initializing an empty ArrayRecord::"
 msgstr "存放 ParametersRecord 实例的字典。"
 
 #: flwr.common.record.arrayrecord.ArrayRecord:41 of
-msgid "Initializing with a dictionary of :class:`Array`:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a dictionary of :class:`Array`::"
+msgstr "将参数对象转换为 NumPy ndarrays。"
 
 #: flwr.common.record.arrayrecord.ArrayRecord:46 of
-msgid "Initializing with a list of NumPy arrays:"
-msgstr ""
+#, fuzzy
+msgid "Initializing with a list of NumPy arrays::"
+msgstr "存放 ParametersRecord 实例的字典。"
 
 #: flwr.common.record.arrayrecord.ArrayRecord:53 of
-msgid "Initializing with a PyTorch model state_dict:"
+msgid "Initializing with a PyTorch model state_dict::"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:59 of
-msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
+msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays)::"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -12519,7 +12508,7 @@ msgstr ""
 #: flwr.common.record.configrecord.ConfigRecord:29 of
 msgid ""
 "Let's see some examples of how to construct a :code:`ConfigRecord` from "
-"scratch:"
+"scratch::"
 msgstr ""
 
 #: flwr.common.record.configrecord.ConfigRecord:42 of
@@ -14413,7 +14402,7 @@ msgstr ""
 #: flwr.common.record.metricrecord.MetricRecord:28 of
 msgid ""
 "Let's see some examples of how to construct a :code:`MetricRecord` from "
-"scratch:"
+"scratch::"
 msgstr ""
 
 #: flwr.common.record.metricrecord.MetricRecord:39 of
@@ -14421,7 +14410,7 @@ msgid ""
 "Since types are enforced, the types of the objects inserted are checked. "
 "For a :code:`MetricRecord`, value types allowed are those in defined in "
 ":code:`flwr.common.MetricRecordValues`. Similarly, only :code:`str` keys "
-"are allowed."
+"are allowed::"
 msgstr ""
 
 #: flwr.common.record.metricrecord.MetricRecord:50 of
@@ -14770,14 +14759,14 @@ msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:20 of
 #, fuzzy
-msgid "Let's see an example."
+msgid "Let's see an example::"
 msgstr "让我们来看几个例子："
 
 #: flwr.common.record.recorddict.RecordDict:38 of
 msgid ""
 "Adding an :code:`ArrayRecord` follows the same steps as above but first, "
 "the array needs to be serialized and represented as a "
-":code:`flwr.common.Array`. For example:"
+":code:`flwr.common.Array`. For example::"
 msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:55 of
@@ -15404,7 +15393,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "``Driver`` is deprecated and will be removed in a future release. Use "
-"`Grid` in the signature of your ServerApp."
+"``Grid`` in the signature of your ServerApp."
 msgstr "该类已被弃用，将在以后的版本中删除。"
 
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
@@ -15492,7 +15481,7 @@ msgstr ":py:obj:`run_driver_api <flwr.server.run_driver_api>`\\ \\(\\)"
 #: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
 #: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
 #: flwr.server.grid.grid.Grid.set_run:1 of
-msgid "Request a run to the SuperLink with a given `run_id`."
+msgid "Request a run to the SuperLink with a given ``run_id``."
 msgstr ""
 
 #: flwr.server.grid.grid.Grid.create_message:1:<autosummary>:1 of
@@ -15629,7 +15618,7 @@ msgstr ""
 msgid ""
 "If a ``Run`` with the specified ``run_id`` exists, a local ``Run`` object"
 " will be created. It enables further functionality in the grid, such as "
-"sending ``Message``s."
+"sending ``Message`` objects."
 msgstr ""
 
 #: flwr.server.grid.grid.Grid.set_run:7 of
@@ -15934,12 +15923,12 @@ msgstr "server.strategy"
 
 #: flwr.server.server_app.ServerApp:5 of
 #, fuzzy
-msgid "Use the ``ServerApp`` with an existing ``Strategy``:"
+msgid "Use the ``ServerApp`` with an existing ``Strategy``::"
 msgstr "使用现有策略"
 
 #: flwr.server.server_app.ServerApp:17 of
 #, fuzzy
-msgid "Use the ``ServerApp`` with a custom main function:"
+msgid "Use the ``ServerApp`` with a custom main function::"
 msgstr "使用带有自定义主函数的 `ServerApp`："
 
 #: flwr.server.server_app.ServerApp.lifespan:1:<autosummary>:1 of
@@ -16214,11 +16203,13 @@ msgid "**hist** -- Object containing training and evaluation metrics."
 msgstr "**hist** -- 包含训练和评估指标的对象。"
 
 #: flwr.server.app.start_server:47 of
-msgid "Starting an insecure server:"
+#, fuzzy
+msgid "Starting an insecure server::"
 msgstr "启动不安全的服务器："
 
 #: flwr.server.app.start_server:51 of
-msgid "Starting an SSL-enabled server:"
+#, fuzzy
+msgid "Starting a TLS-enabled server::"
 msgstr "启动支持 SSL 的服务器："
 
 #: ../../source/ref-api/flwr.server.strategy.rst:2
@@ -17303,7 +17294,7 @@ msgstr "添加到当前低于估计值的更新计数中的噪声的 stddev。�
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:15
 #: of
 #, fuzzy
-msgid "Create a strategy:"
+msgid "Create a strategy::"
 msgstr "server.strategy"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:34
@@ -17311,13 +17302,13 @@ msgstr "server.strategy"
 #, fuzzy
 msgid ""
 "Wrap the strategy with the "
-"`DifferentialPrivacyClientSideAdaptiveClipping` wrapper:"
+"`DifferentialPrivacyClientSideAdaptiveClipping` wrapper::"
 msgstr "用 \"DifferentialPrivacyClientSideAdaptiveClipping \"包装器对策略进行包装："
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:40
 #: of
 #, fuzzy
-msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods:"
+msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods::"
 msgstr "在客户端，将 \"adaptiveclipping_mod \"添加到客户端模块中："
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping.aggregate_evaluate:1:<autosummary>:1
@@ -17439,13 +17430,13 @@ msgstr "模型更新高斯机制的噪声乘数。建议使用 1.0 或更高的�
 #, fuzzy
 msgid ""
 "Wrap the strategy with the `DifferentialPrivacyClientSideFixedClipping` "
-"wrapper:"
+"wrapper::"
 msgstr "用 \"DifferentialPrivacyClientSideFixedClipping \"包装器包装策略："
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:32
 #: of
 #, fuzzy
-msgid "On the client, add the `fixedclipping_mod` to the client-side mods:"
+msgid "On the client, add the `fixedclipping_mod` to the client-side mods::"
 msgstr "在客户端，将 \"fixedclipping_mod \"添加到客户端模块中："
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping.aggregate_evaluate:1:<autosummary>:1
@@ -17546,7 +17537,7 @@ msgstr "添加到低于估计值的更新计数中的噪声标准偏差。安德
 #, fuzzy
 msgid ""
 "Wrap the strategy with the DifferentialPrivacyServerSideAdaptiveClipping "
-"wrapper"
+"wrapper::"
 msgstr "用 DifferentialPrivacyServerSideAdaptiveClipping 封装器封装策略"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping.aggregate_evaluate:1:<autosummary>:1
@@ -17631,7 +17622,7 @@ msgstr "差分隐私"
 #, fuzzy
 msgid ""
 "Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping "
-"wrapper"
+"wrapper::"
 msgstr "用 DifferentialPrivacyServerSideFixedClipping 封装器封装策略"
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping.aggregate_evaluate:1:<autosummary>:1
@@ -20215,7 +20206,7 @@ msgstr "运行 ClientApp 的节点数。它们可被 ServerApp 中的驱动程�
 
 #: flwr.simulation.run_simulation.run_simulation:12 of
 #, fuzzy
-msgid "A simulation backend that runs `ClientApp`s."
+msgid "A simulation backend that runs `ClientApp` objects."
 msgstr "运行 \"客户端应用程序 \"的模拟后台。"
 
 #: flwr.simulation.run_simulation.run_simulation:14 of
@@ -29772,26 +29763,17 @@ msgstr ""
 "PyTorch： 从集中式到联邦式（代码） <https://github.com/adap/flower/tree/main/examples"
 "/pytorch-from-centralized-to-federated>`_"
 
-#: ../../source/ref-example-projects.rst:40
-#, fuzzy
-msgid ""
-":doc:`PyTorch: From Centralized To Federated (Tutorial) <example-pytorch-"
-"from-centralized-to-federated>`"
-msgstr ""
-"PyTorch： 从集中式到联邦式（教程） <https://flower.ai/docs/framework/example-pytorch-"
-"from-centralized-to-federated.html>`_"
-
-#: ../../source/ref-example-projects.rst:44
+#: ../../source/ref-example-projects.rst:42
 msgid "Federated Learning on Raspberry Pi and Nvidia Jetson"
 msgstr "树莓派和 Nvidia Jetson 上的联邦学习"
 
-#: ../../source/ref-example-projects.rst:46
+#: ../../source/ref-example-projects.rst:44
 msgid ""
 "This example shows how Flower can be used to build a federated learning "
 "system that run across Raspberry Pi and Nvidia Jetson:"
 msgstr "本示例展示了如何利用 Flower 建立一个跨 Raspberry Pi 和 Nvidia Jetson 运行的联邦学习系统："
 
-#: ../../source/ref-example-projects.rst:49
+#: ../../source/ref-example-projects.rst:47
 msgid ""
 "`Federated Learning on Raspberry Pi and Nvidia Jetson (Code) "
 "<https://github.com/adap/flower/tree/main/examples/embedded-devices>`_"
@@ -29799,7 +29781,7 @@ msgstr ""
 "Raspberry Pi 和 Nvidia Jetson 上的联邦学习（代码） "
 "<https://github.com/adap/flower/tree/main/examples/embedded-devices>`_"
 
-#: ../../source/ref-example-projects.rst:51
+#: ../../source/ref-example-projects.rst:49
 msgid ""
 "`Federated Learning on Raspberry Pi and Nvidia Jetson (Blog Post) "
 "<https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
@@ -34170,7 +34152,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|50dc70ec1a934c9392b49ee2ab55d803|"
+msgid "|c3948edd518e4c9887dab02c006a3e36|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -34185,7 +34167,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|d07049edbba148dd97dd3080491f2ae7|"
+msgid "|d64d4c79ad9f410bb03cbcd69c6da70e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -34209,7 +34191,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|5bc3219a90ed4b59aed96f1ac1a40002|"
+msgid "|3738e18136fe4bba89dc4c47319cb808|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -34227,7 +34209,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|de3f42c539be48249739b7dbe08c8fa3|"
+msgid "|fc5c4f02bb934b28a37bfd6df154a642|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -34244,7 +34226,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|9f9f2a7adeb941db84f8f9a6d3f07e9b|"
+msgid "|c869eb32a01d40d78006597420906052|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -34259,7 +34241,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|d6d33b77bb5245e28dbce90ceb23b82b|"
+msgid "|0261ba22f8fa465cb8b7b37d726b3cfe|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -34280,7 +34262,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|b14d23b166744f2690a147859055eb11|"
+msgid "|03231a4c1fb8484c8eedcabd132ca5cf|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -34295,7 +34277,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|dc936f126a4b40a6aa3b5f6c46c47ff0|"
+msgid "|977af6151d6d4069b137d77a2fa9df0d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -34455,7 +34437,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|c0b47a9970cf4cd3ae45baf64c891ca0|"
+msgid "|d9fc712009944b9ca98d4891d3a27998|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -34480,7 +34462,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|6c479d9f8f484708afce183472a700e2|"
+msgid "|759b57b6021d476c8bf25f6d8b7f76df|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -34506,7 +34488,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|325757228b544ff393baf66965f58c92|"
+msgid "|05cd636b195a4eafbe63db37c85fb3e3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -34529,7 +34511,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|deb296df2c28457aa8f6957487e2ba20|"
+msgid "|4eca74e8a0b6465bb11a430b954b8bab|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -34576,7 +34558,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|cf8321d0d84c409d857ecd4736171334|"
+msgid "|5d9452a565e2456189fea166e5e43a8f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -34684,7 +34666,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
+msgid "|41499fa436654887b7ce84b0d0642118|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -44634,5 +44616,434 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|2717bf202b09498b90f9eacc1728f1d4|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--auth-list-public-keys``: Specify the"
+#~ " path to a CSV file storing the"
+#~ " public keys of all SuperNodes that"
+#~ " should be allowed to connect with"
+#~ " the SuperLink."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This mod logs the number of array"
+#~ " elements transmitted in ``ArrayRecord``s "
+#~ "of the message as well as their"
+#~ " sizes in bytes."
+#~ msgstr ""
+
+#~ msgid "Request a run to the SuperLink with a given `run_id`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If a ``Run`` with the specified "
+#~ "``run_id`` exists, a local ``Run`` "
+#~ "object will be created. It enables "
+#~ "further functionality in the grid, such"
+#~ " as sending ``Message``s."
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":doc:`PyTorch: From Centralized To Federated"
+#~ " (Tutorial) <example-pytorch-from-"
+#~ "centralized-to-federated>`"
+#~ msgstr ""
+#~ "PyTorch： 从集中式到联邦式（教程） <https://flower.ai/docs/framework"
+#~ "/example-pytorch-from-centralized-to-"
+#~ "federated.html>`_"
+
+#~ msgid "|50dc70ec1a934c9392b49ee2ab55d803|"
+#~ msgstr ""
+
+#~ msgid "|d07049edbba148dd97dd3080491f2ae7|"
+#~ msgstr ""
+
+#~ msgid "|5bc3219a90ed4b59aed96f1ac1a40002|"
+#~ msgstr ""
+
+#~ msgid "|de3f42c539be48249739b7dbe08c8fa3|"
+#~ msgstr ""
+
+#~ msgid "|9f9f2a7adeb941db84f8f9a6d3f07e9b|"
+#~ msgstr ""
+
+#~ msgid "|d6d33b77bb5245e28dbce90ceb23b82b|"
+#~ msgstr ""
+
+#~ msgid "|b14d23b166744f2690a147859055eb11|"
+#~ msgstr ""
+
+#~ msgid "|dc936f126a4b40a6aa3b5f6c46c47ff0|"
+#~ msgstr ""
+
+#~ msgid "|c0b47a9970cf4cd3ae45baf64c891ca0|"
+#~ msgstr ""
+
+#~ msgid "|6c479d9f8f484708afce183472a700e2|"
+#~ msgstr ""
+
+#~ msgid "|325757228b544ff393baf66965f58c92|"
+#~ msgstr ""
+
+#~ msgid "|deb296df2c28457aa8f6957487e2ba20|"
+#~ msgstr ""
+
+#~ msgid "|cf8321d0d84c409d857ecd4736171334|"
+#~ msgstr ""
+
+#~ msgid "|476b8f5bd0f04b63bdbac6b5edcfee25|"
+#~ msgstr ""
+
+#~ msgid "Registering a query function:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering a query function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function with a custom action name:"
+#~ msgstr ""
+
+#~ msgid "Registering a train function with a function-specific Flower Mod:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Create an instance of the local DP"
+#~ " mod and add it to the "
+#~ "client-side mods:"
+#~ msgstr ""
+
+#~ msgid "Initializing by specifying all fields directly:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a NumPy ndarray:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a PyTorch tensor:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a dictionary of :class:`Array`:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a list of NumPy arrays:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a PyTorch model state_dict:"
+#~ msgstr ""
+
+#~ msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays):"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`ConfigRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's see some examples of how to"
+#~ " construct a :code:`MetricRecord` from "
+#~ "scratch:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Since types are enforced, the types "
+#~ "of the objects inserted are checked. "
+#~ "For a :code:`MetricRecord`, value types "
+#~ "allowed are those in defined in "
+#~ ":code:`flwr.common.MetricRecordValues`. Similarly, only"
+#~ " :code:`str` keys are allowed."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Adding an :code:`ArrayRecord` follows the "
+#~ "same steps as above but first, the"
+#~ " array needs to be serialized and "
+#~ "represented as a :code:`flwr.common.Array`. "
+#~ "For example:"
+#~ msgstr ""
+
+#~ msgid "|662665a552f64c9bb53cbf01198765cc|"
+#~ msgstr ""
+
+#~ msgid "|7f4c9c8c2d7045208ac1e513f75b8a32|"
+#~ msgstr ""
+
+#~ msgid "|548e011b458142e5be8cf6497d03e22e|"
+#~ msgstr ""
+
+#~ msgid "|32d5d8c2e9314a91a9a17bb04a7fde41|"
+#~ msgstr ""
+
+#~ msgid "|c5c8eabc28c741e79ab46c61271c18ba|"
+#~ msgstr ""
+
+#~ msgid "|aebc2e212169439683d3134c7dbda324|"
+#~ msgstr ""
+
+#~ msgid "|5b888e20d5f64ec38bf924db4b999a3c|"
+#~ msgstr ""
+
+#~ msgid "|f5dd3e6215104689a365dd7e01e421d0|"
+#~ msgstr ""
+
+#~ msgid "|e90c03c1caab4f229359c1e8877da2a2|"
+#~ msgstr ""
+
+#~ msgid "|3e26e26712bb475ba024442148c1171a|"
+#~ msgstr ""
+
+#~ msgid "|650f8f02c84f4af381ab58cd7394aff1|"
+#~ msgstr ""
+
+#~ msgid "|bfab5d09d0bd46dba040500475755079|"
+#~ msgstr ""
+
+#~ msgid "|1412b6b05b744c159b9531f3a1202d46|"
+#~ msgstr ""
+
+#~ msgid "|918baeda7d744d0dbd5d55f6c8083a6a|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Run ``python3 ./dev/update_changelog.py "
+#~ "<YOUR_GH_TOKEN>`` in order to add every"
+#~ " new change to the changelog (feel"
+#~ " free to make manual changes to "
+#~ "the changelog afterwards until it looks"
+#~ " good)."
+#~ msgstr ""
+#~ "运行 ``python3 src/py/flwr_tool/update_changelog.py "
+#~ "<YOUR_GH_TOKEN>`` 以将每项新更改添加到更新日志中（之后可对更新日志进行手动更改，直到看起来不错为止）。"
+
+#~ msgid ""
+#~ "Once the changelog has been updated "
+#~ "with all the changes, run ``./dev"
+#~ "/prepare-release-changelog.sh v<NEW_VERSION>``, "
+#~ "where ``<NEW_VERSION>`` is the version "
+#~ "stated in ``pyproject.toml`` (notice the "
+#~ "``v`` added before it). This will "
+#~ "replace the ``Unreleased`` header of the"
+#~ " changelog by the version and current"
+#~ " date, and it will add a "
+#~ "thanking message for the contributors. "
+#~ "Open a pull request with those "
+#~ "changes."
+#~ msgstr ""
+#~ "更新更新日志后，运行``./dev/prepare-release-changelog.sh "
+#~ "v<NEW_VERSION>``，其中``<NEW_VERSION>``是``pyproject.toml``中的版本（注意前面的``v``）。这将用版本和当前日期替换更新日志中的"
+#~ " ``Unreleased`` 标头，并为贡献者添加一条感谢信息。打开一个包含这些更改的拉取请求。"
+
+#~ msgid "Increase the minor version in ``pyproject.toml`` by one."
+#~ msgstr "将 ``pyproject.toml`` 中的次要版本增加一个。"
+
+#~ msgid "Update all files which contain the current version number if necessary."
+#~ msgstr "如有必要，更新包含当前版本号的所有文件。"
+
+#~ msgid "Add a new ``Unreleased`` section in ``changelog.md``."
+#~ msgstr "在 ``changelog.md`` 中添加新的 ``Unreleased`` 部分。"
+
+#~ msgid "And then?"
+#~ msgstr "然后呢？"
+
+#~ msgid ""
+#~ "As soon as you created your "
+#~ "virtual environment you clone one of "
+#~ "the `Flower examples "
+#~ "<https://github.com/adap/flower/tree/main/examples/>`_."
+#~ msgstr ""
+#~ "创建虚拟环境后，您可以克隆一个 `Flower 示例 "
+#~ "<https://github.com/adap/flower/tree/main/examples/>`_。"
+
+#~ msgid ""
+#~ "Let's create the Python environment for"
+#~ " all-things Flower. If you wish "
+#~ "to use ``pyenv``, we provide two "
+#~ "convenience scripts that you can use."
+#~ " If you prefer using something else"
+#~ " than ``pyenv``, create a new "
+#~ "environment, activate and skip to the"
+#~ " last point where all packages are"
+#~ " installed."
+#~ msgstr ""
+#~ "让我们为 Flower 创建一个 Python 环境。如果您想使用 "
+#~ ":code:`pyenv`，我们提供了两个方便的脚本供您使用。如果你不喜欢使用 "
+#~ ":code:`pyenv`，请创建一个新环境，激活并跳到最后一点，即安装所有软件包。"
+
+#~ msgid ""
+#~ "If you don't have ``pyenv`` installed,"
+#~ " the following script that will "
+#~ "install it, set it up, and create"
+#~ " the virtual environment (with "
+#~ ":substitution-code:`Python |python_full_version|` by"
+#~ " default):"
+#~ msgstr ""
+#~ "如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 "
+#~ ":code:`Python 3.9.20）：："
+
+#~ msgid ""
+#~ "If you already have ``pyenv`` installed"
+#~ " (along with the ``pyenv-virtualenv`` "
+#~ "plugin), you can use the following "
+#~ "convenience script (with :substitution-"
+#~ "code:`Python |python_full_version|` by default):"
+#~ msgstr ""
+#~ "如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 "
+#~ ":code:`Python 3.9.20）：："
+
+#~ msgid ""
+#~ "3. Install the Flower package in "
+#~ "development mode (think ``pip install "
+#~ "-e``) along with all necessary "
+#~ "dependencies:"
+#~ msgstr "第三，在开发模式下安装 Flower 软件包（想想 :code:`pip install -e`）以及所有必要的依赖项：："
+
+#~ msgid "Create/Delete Virtual Environment"
+#~ msgstr "创建/删除虚拟环境"
+
+#~ msgid "|1dbe7ef5f86045228c22d76d20494c1c|"
+#~ msgstr ""
+
+#~ msgid "|0c52a329791a42c9891adee11a3c9ec6|"
+#~ msgstr ""
+
+#~ msgid "|0af7f9c988464e6d9988f938f7722cb1|"
+#~ msgstr ""
+
+#~ msgid "|c4fec40358df4c91b8dacba706affdfc|"
+#~ msgstr ""
+
+#~ msgid "|fffd51185653489082b5587359813c79|"
+#~ msgstr ""
+
+#~ msgid "|b9f3e0459a704a459d52ae3fca9c72d3|"
+#~ msgstr ""
+
+#~ msgid "|5e4f22fdf7cb4373882354252e21f385|"
+#~ msgstr ""
+
+#~ msgid "|6e225ec341c643a58ce12c7c1c4f531d|"
+#~ msgstr ""
+
+#~ msgid "|371d89f1268b4ba9af58576635ca724e|"
+#~ msgstr ""
+
+#~ msgid "|b64a9a44fd5745cc91b6aa9fdca1aa28|"
+#~ msgstr ""
+
+#~ msgid "|b9efd6eda007427a92190b989d035b45|"
+#~ msgstr ""
+
+#~ msgid "|61474cd6cd8642968bd5f0d963fa56df|"
+#~ msgstr ""
+
+#~ msgid "|ff52a36f0cad426bb452cfa49b73350a|"
+#~ msgstr ""
+
+#~ msgid "|3d62057de8c64752921d1eab65741d54|"
+#~ msgstr ""
+
+#~ msgid "|2e3a8dd8625a48a080386b56f6143b3c|"
+#~ msgstr ""
+
+#~ msgid "|7c96683b1c2042c796e76c4ef095f4a6|"
+#~ msgstr ""
+
+#~ msgid "|eccacc874336420ab6a338024bdcdcf0|"
+#~ msgstr ""
+
+#~ msgid "|c26cd0ddba7d45c58daefc7741c3c21c|"
+#~ msgstr ""
+
+#~ msgid "|55ad49291b07427b9cd15cf45ca12c66|"
+#~ msgstr ""
+
+#~ msgid "|1ecea76fb58d490593e0ebaae474b0b4|"
+#~ msgstr ""
+
+#~ msgid "|ac0ae32f88a343aca8bff2bd6d7be924|"
+#~ msgstr ""
+
+#~ msgid "|ec672277bede4c358eab8bf606c0bc18|"
+#~ msgstr ""
+
+#~ msgid "|4dfc1ccf0f52485cb630e2c42205e8cd|"
+#~ msgstr ""
+
+#~ msgid "|054b39036f4241779cee8b856535ef8c|"
+#~ msgstr ""
+
+#~ msgid "|f36b0843a8404bd994c12d417791639e|"
+#~ msgstr ""
+
+#~ msgid "|267ba4ef820c4a18ba17a3cf6baa2328|"
+#~ msgstr ""
+
+#~ msgid "|cd58650e67ea4d51a6796f6290adc7a3|"
+#~ msgstr ""
+
+#~ msgid "|42fe13229c9e47459cd10173391681fd|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``pip install "
+#~ "flwr@git+https://github.com/adap/flower.git`` (without "
+#~ "extras)"
+#~ msgstr "``pip install flwr@git+https://github.com/adap/flower.git`` （不含额外功能）"
+
+#~ msgid ""
+#~ "``pip install "
+#~ "'flwr[simulation]@git+https://github.com/adap/flower.git'`` "
+#~ "(with extras)"
+#~ msgstr ""
+#~ "``pip install "
+#~ "'flwr[simulation]@git+https://github.com/adap/flower.git'``（带附加功能）"
+
+#~ msgid "|35abe9fd99c947f1ada188587b79300e|"
+#~ msgstr ""
+
+#~ msgid "|4113569203ae40448098ee4d094f3898|"
+#~ msgstr ""
+
+#~ msgid "|387a5b42b212438499d45e9545122a3f|"
+#~ msgstr ""
+
+#~ msgid "|9980c661d483419486cc5c92296ea5a3|"
+#~ msgstr ""
+
+#~ msgid "|13990a7326864e5ca3f17c6d3d2df761|"
+#~ msgstr ""
+
+#~ msgid "|ee72a0d726ec4a78a5feadbbde4376d2|"
+#~ msgstr ""
+
+#~ msgid "|fe6cc4783d4741d2949b5145c2d1848e|"
+#~ msgstr ""
+
+#~ msgid "|a933b3b132b24a3594cde735e8b43079|"
+#~ msgstr ""
+
+#~ msgid "|68c15a5030284837b7e016a137c19180|"
+#~ msgstr ""
+
+#~ msgid "|01c13ed6a53447308c58f88229ef9beb|"
+#~ msgstr ""
+
+#~ msgid "|fe377cbc92784c30985c932bbf566a02|"
+#~ msgstr ""
+
+#~ msgid "|d3a955bbdbb24d4a9e050066191f8dc2|"
+#~ msgstr ""
+
+#~ msgid "|39aeb361f8c546f48d1284c50feeb527|"
+#~ msgstr ""
+
+#~ msgid "|6fca30cdace54e97b95aaec19b3a3e1d|"
 #~ msgstr ""
 
