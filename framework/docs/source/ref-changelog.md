@@ -52,7 +52,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### Incompatible changes
 
-- **Restructure repository (breaking change for contributors only)** ([#5206](https://github.com/adap/flower/pull/5206), [#5194](https://github.com/adap/flower/pull/5194), [#5192](https://github.com/adap/flower/pull/5192), [#5185](https://github.com/adap/flower/pull/5185), [#5184](https://github.com/adap/flower/pull/5184), [#5177](https://github.com/adap/flower/pull/5177), [#5183](https://github.com/adap/flower/pull/5183), [#5207](https://github.com/adap/flower/pull/5207), [#5267](https://github.com/adap/flower/pull/5267))
+- **Restructure repository (breaking change for contributors only)** ([#5206](https://github.com/adap/flower/pull/5206), [#5194](https://github.com/adap/flower/pull/5194), [#5192](https://github.com/adap/flower/pull/5192), [#5185](https://github.com/adap/flower/pull/5185), [#5184](https://github.com/adap/flower/pull/5184), [#5177](https://github.com/adap/flower/pull/5177), [#5183](https://github.com/adap/flower/pull/5183), [#5207](https://github.com/adap/flower/pull/5207), [#5267](https://github.com/adap/flower/pull/5267), [#5274](https://github.com/adap/flower/pull/5274))
 
   Restructures the Flower repository by moving all framework-related code, configs, and dev tools into the `framework/` subdirectory. This includes relocating all files under `src/`, dev scripts, `pyproject.toml` and other configs. Contributor documentation has been updated to reflect these changes.
 
