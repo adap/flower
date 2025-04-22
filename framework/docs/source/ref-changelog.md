@@ -34,7 +34,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Refactors Shamir's secret sharing utilities to fix a bug impacting Secure Aggregation. Thanks to [Pinji Chen](mailto:cpj24@mails.tsinghua.edu.cn) and [Guanheng Liu](mailto:coolwind326@gmail.com) for their contributions.
 
-- **Ensure backward compatibility for `RecordDict`** ([#5239](https://github.com/adap/flower/pull/5239))
+- **Ensure backward compatibility for `RecordDict`** ([#5239](https://github.com/adap/flower/pull/5239), [#5270](https://github.com/adap/flower/pull/5270))
 
   The `RecordDict` (formerly `RecordSet`) now maintains full backward compatibility. Legacy usages of `RecordSet` and its properties are supported, with deprecation warnings logged when outdated references are used. Users are encouraged to transition to the updated `RecordDict` interface promptly to avoid future issues.
 
