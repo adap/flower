@@ -1,4 +1,4 @@
-name: Publish `flwr` release on PyPI
+name: Framework Publish `flwr` PyPI Release 
 
 on:
   release:
@@ -71,7 +71,7 @@ jobs:
 
       - id: matrix
         run: |
-           python dev/build-docker-image-matrix.py --flwr-version "${{ needs.publish.outputs.flwr-version }}" --matrix stable > matrix.json
+           python framework/dev/build-docker-image-matrix.py --flwr-version "${{ needs.publish.outputs.flwr-version }}" --matrix stable > matrix.json
            echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 
   build-base-images:
