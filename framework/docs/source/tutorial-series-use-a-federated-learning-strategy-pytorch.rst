@@ -193,8 +193,8 @@ Finally, we run the simulation.
 
     $ flwr run .
 
-Sending/receiving arbitrary values to/from clients
---------------------------------------------------
+Sending configurations to clients from strategies
+-------------------------------------------------
 
 In some situations, we want to configure client-side execution (training, evaluation)
 from the server-side. One example for that is the server asking the clients to train for
@@ -255,8 +255,8 @@ epochs. In our ``client_app.py``, replace the ``FlowerClient()`` class and
 
 So how can we send this config dictionary from server to clients? The built-in Flower
 Strategies provide way to do this, and it works similarly to the way server-side
-evaluation works. We provide a function to the strategy, and the strategy calls this
-function for every round of federated learning. Add the following function to your
+evaluation works. We provide a callback to the strategy, and the strategy calls this
+callback for every round of federated learning. Add the following to your
 ``server_app.py``:
 
 .. code-block:: python
@@ -373,8 +373,8 @@ the following:
             fraction_fit=fraction_fit,  # Train on 25 clients (each round)
             fraction_evaluate=0.05,  # Evaluate on 50 clients (each round)
             min_fit_clients=20,
-            min_evaluate_clients=40,
-            min_available_clients=1000,
+            min_evaluate_clients=40,  # Optional config
+            min_available_clients=1000,  # Optional config
             initial_parameters=parameters,
             on_fit_config_fn=fit_config,
         )
