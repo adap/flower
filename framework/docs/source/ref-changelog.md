@@ -14,7 +14,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Python 3.12 is officially supported (Python 3.12 was in preview support since Flower 1.6). Python 3.13 support continues to be in preview until all dependencies officially support Python 3.13.
 
-- **Enable TLS connection for `flwr` CLI using CA certificates** ([#5227](https://github.com/adap/flower/pull/5227), [#5237](https://github.com/adap/flower/pull/5237))
+- **Enable TLS connection for `flwr` CLI using CA certificates** ([#5227](https://github.com/adap/flower/pull/5227), [#5237](https://github.com/adap/flower/pull/5237), [#5253](https://github.com/adap/flower/pull/5253), [#5254](https://github.com/adap/flower/pull/5254))
 
   `flwr` CLI now supports secure TLS connections to SuperLink instances with valid CA certificates. If no root certificates are provided, the CLI automatically uses the default CA certificates bundled with gRPC.
 
@@ -34,15 +34,19 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Refactors Shamir's secret sharing utilities to fix a bug impacting Secure Aggregation. Thanks to [Pinji Chen](mailto:cpj24@mails.tsinghua.edu.cn) and [Guanheng Liu](mailto:coolwind326@gmail.com) for their contributions.
 
+- **Ensure backward compatibility for `RecordDict`** ([#5239](https://github.com/adap/flower/pull/5239))
+
+  The `RecordDict` (formerly `RecordSet`) now maintains full backward compatibility. Legacy usages of `RecordSet` and its properties are supported, with deprecation warnings logged when outdated references are used. Users are encouraged to transition to the updated `RecordDict` interface promptly to avoid future issues.
+
 - **Refactor and optimize CI/CD for repository restructuring** ([#5202](https://github.com/adap/flower/pull/5202), [#5176](https://github.com/adap/flower/pull/5176), [#5200](https://github.com/adap/flower/pull/5200), [#5203](https://github.com/adap/flower/pull/5203), [#5210](https://github.com/adap/flower/pull/5210), [#5166](https://github.com/adap/flower/pull/5166), [#5214](https://github.com/adap/flower/pull/5214), [#5212](https://github.com/adap/flower/pull/5212), [#5209](https://github.com/adap/flower/pull/5209), [#5199](https://github.com/adap/flower/pull/5199), [#5204](https://github.com/adap/flower/pull/5204), [#5201](https://github.com/adap/flower/pull/5201), [#5191](https://github.com/adap/flower/pull/5191), [#5167](https://github.com/adap/flower/pull/5167), [#5248](https://github.com/adap/flower/pull/5248))
 
   Improves CI/CD workflows to align with repository changes. Updates issue templates, fixes Docker and docs jobs, enhances script compatibility, adds checks, and bumps tool versions to streamline development and deployment.
 
-- **Improve and clean up documentation** ([#5233](https://github.com/adap/flower/pull/5233), [#5179](https://github.com/adap/flower/pull/5179), [#5216](https://github.com/adap/flower/pull/5216), [#5211](https://github.com/adap/flower/pull/5211), [#5217](https://github.com/adap/flower/pull/5217), [#5198](https://github.com/adap/flower/pull/5198), [#5168](https://github.com/adap/flower/pull/5168), [#5215](https://github.com/adap/flower/pull/5215), [#5169](https://github.com/adap/flower/pull/5169), [#5171](https://github.com/adap/flower/pull/5171), [#5240](https://github.com/adap/flower/pull/5240))
+- **Improve and clean up documentation** ([#5233](https://github.com/adap/flower/pull/5233), [#5179](https://github.com/adap/flower/pull/5179), [#5216](https://github.com/adap/flower/pull/5216), [#5211](https://github.com/adap/flower/pull/5211), [#5217](https://github.com/adap/flower/pull/5217), [#5198](https://github.com/adap/flower/pull/5198), [#5168](https://github.com/adap/flower/pull/5168), [#5215](https://github.com/adap/flower/pull/5215), [#5169](https://github.com/adap/flower/pull/5169), [#5171](https://github.com/adap/flower/pull/5171), [#5240](https://github.com/adap/flower/pull/5240), [#5259](https://github.com/adap/flower/pull/5259))
 
   Removes outdated content, redundant CLI flags, and unnecessary sections; updates Docker READMEs and virtual environment setup guide; and syncs translation source texts.
 
-- **General Improvements** ([#5241](https://github.com/adap/flower/pull/5241), [#5180](https://github.com/adap/flower/pull/5180), [#5226](https://github.com/adap/flower/pull/5226), [#5173](https://github.com/adap/flower/pull/5173), [#5219](https://github.com/adap/flower/pull/5219), [#5208](https://github.com/adap/flower/pull/5208), [#5158](https://github.com/adap/flower/pull/5158))
+- **General Improvements** ([#5241](https://github.com/adap/flower/pull/5241), [#5180](https://github.com/adap/flower/pull/5180), [#5226](https://github.com/adap/flower/pull/5226), [#5173](https://github.com/adap/flower/pull/5173), [#5219](https://github.com/adap/flower/pull/5219), [#5208](https://github.com/adap/flower/pull/5208), [#5158](https://github.com/adap/flower/pull/5158), [#5255](https://github.com/adap/flower/pull/5255))
 
   As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
@@ -53,13 +57,6 @@ We would like to give our special thanks to all the contributors who made the ne
   Restructures the Flower repository by moving all framework-related code, configs, and dev tools into the `framework/` subdirectory. This includes relocating all files under `src/`, dev scripts, `pyproject.toml` and other configs. Contributor documentation has been updated to reflect these changes.
 
   Switching to the new structure is straightforward and should require only minimal adjustments for most contributors, though this is a breaking change—refer to the [contributor guide](https://flower.ai/docs/framework/v1.17.0/en/contribute.html) for updated instructions.
-
-### DELETE FI PRs
-
-- **build(deps-dev): bump vite from 6.2.2 to 6.2.3 in /intelligence/ts** ([#5170](https://github.com/adap/flower/pull/5170))
-- **build(deps-dev): bump vite from 6.2.4 to 6.2.5 in /intelligence/ts** ([#5195](https://github.com/adap/flower/pull/5195))
-- **build(deps-dev): bump vite from 6.2.3 to 6.2.4 in /intelligence/ts** ([#5175](https://github.com/adap/flower/pull/5175))
-- **build(deps-dev): bump vite from 6.2.5 to 6.2.6 in /intelligence/ts** ([#5231](https://github.com/adap/flower/pull/5231))
 
 ## v1.17.0 (2025-03-24)
 
