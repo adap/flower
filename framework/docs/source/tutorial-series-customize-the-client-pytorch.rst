@@ -43,7 +43,7 @@ First, we install the Flower package ``flwr``:
 .. code-block:: shell
 
     # In a new Python environment
-    $ pip install -U flwr
+    $ pip install -U "flwr[simulation]"
 
 Then, we create a new Flower app called ``flower-tutorial`` using the PyTorch template.
 We also specify a username (``flwrlabs``) for the project:
