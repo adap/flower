@@ -104,18 +104,18 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
 
     Examples
     --------
-    Establishing a SSL-enabled connection to the server:
+    Establishing a TLS-enabled connection to the server::
 
-    >>> from pathlib import Path
-    >>> with grpc_connection(
-    >>>     server_address,
-    >>>     max_message_length=max_message_length,
-    >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
-    >>> ) as conn:
-    >>>     receive, send = conn
-    >>>     server_message = receive()
-    >>>     # do something here
-    >>>     send(client_message)
+        from pathlib import Path
+        with grpc_connection(
+            server_address,
+            max_message_length=max_message_length,
+            root_certificates=Path("/crts/root.pem").read_bytes(),
+        ) as conn:
+            receive, send = conn
+            server_message = receive()
+            # do something here
+            send(client_message)
     """
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()

@@ -32,11 +32,15 @@ fi
 echo "- black: done"
 
 echo "- init_py_check: start"
-python -m flwr_tool.init_py_check py/flwr py/flwr_tool
+python -m devtool.init_py_check py/flwr py/flwr_tool
 echo "- init_py_check: done"
 
 echo "- docformatter: start"
-python -m docformatter -c -r py/flwr e2e -e py/flwr/proto
+if $RUN_FULL_TEST; then
+    python -m docformatter -c -r py/flwr e2e -e py/flwr/proto
+else
+    python -m docformatter -c -r py/flwr -e py/flwr/proto
+fi
 echo "- docformatter:  done"
 
 echo "- docsig: start"
@@ -44,7 +48,7 @@ docsig py/flwr
 echo "- docsig:  done"
 
 echo "- ruff: start"
-python -m ruff check py/flwr
+python -m ruff check py/flwr --no-respect-gitignore
 echo "- ruff: done"
 
 echo "- mypy: start"
@@ -54,10 +58,6 @@ echo "- mypy: done"
 echo "- pylint: start"
 python -m pylint --ignore=py/flwr/proto py/flwr
 echo "- pylint: done"
-
-echo "- flake8: start"
-python -m flake8 py/flwr
-echo "- flake8: done"
 
 echo "- pytest: start"
 python -m pytest --cov=py/flwr
@@ -97,7 +97,7 @@ echo "- Start license checks"
 
 if $RUN_FULL_TEST; then
     echo "- copyright: start"
-    python -m flwr_tool.check_copyright py/flwr
+    python -m devtool.check_copyright py/flwr
     echo "- copyright: done"
 fi
 

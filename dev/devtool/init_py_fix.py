@@ -1,8 +1,21 @@
 # Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
 """Fix provided directory and sub-directories for unsorted __all__ in __init__.py files.
 
 Example:
-    python -m flwr_tool.init_py_fix src/py/flwr
+    python -m devtool.init_py_fix framework/py/flwr
 """
 
 
@@ -11,7 +24,7 @@ import sys
 
 import black
 
-from flwr_tool.init_py_check import get_all_var_list, get_init_dir_list_and_warnings
+from devtool.init_py_check import get_all_var_list, get_init_dir_list_and_warnings
 
 
 def fix_all_init_files(dir_list: list[str]) -> None:

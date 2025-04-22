@@ -37,7 +37,7 @@ from .aggregate import aggregate_bulyan, aggregate_krum
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
+# noqa: E501
 # pylint: disable=line-too-long
 class Bulyan(FedAvg):
     """Bulyan strategy.
