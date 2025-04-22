@@ -20,5 +20,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Flower Intelligence"
-include(":app")
- 
+include(":kotlin")
