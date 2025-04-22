@@ -6,7 +6,7 @@
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Alan Silva`, `Andrej Jovanović`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Guanheng Liu`, `Gustavo Bertoli`, `Heng Pan`, `Javier`, `Khoa Nguyen`, `Mohammad Naseri`, `Pinji Chen`, `Robert Steiner`, `Stephane Moroso`, `Taner Topal`, `William Lindskog`, `Yan Gao` <!---TOKEN_v1.18.0-->
+`Alan Silva`, `Andrej Jovanović`, `Charles Beauville`, `Chong Shen Ng`, `Chunhui XU`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Guanheng Liu`, `Gustavo Bertoli`, `Heng Pan`, `Javier`, `Khoa Nguyen`, `Mohammad Naseri`, `Pinji Chen`, `Robert Steiner`, `Stephane Moroso`, `Taner Topal`, `William Lindskog`, `Yan Gao` <!---TOKEN_v1.18.0-->
 
 ### What's new?
 
@@ -57,6 +57,22 @@ We would like to give our special thanks to all the contributors who made the ne
   Restructures the Flower repository by moving all framework-related code, configs, and dev tools into the `framework/` subdirectory. This includes relocating all files under `src/`, dev scripts, `pyproject.toml` and other configs. Contributor documentation has been updated to reflect these changes.
 
   Switching to the new structure is straightforward and should require only minimal adjustments for most contributors, though this is a breaking change—refer to the [contributor guide](https://flower.ai/docs/framework/v1.17.0/en/contribute.html) for updated instructions.
+
+### New features
+
+### Documentation improvements
+
+### Other changes
+
+### Unknown changes
+
+- **build(deps-dev): bump vite from 6.2.4 to 6.2.5 in /intelligence/ts** ([#5195](https://github.com/adap/flower/pull/5195))
+
+- **build(deps-dev): bump vite from 6.2.3 to 6.2.4 in /intelligence/ts** ([#5175](https://github.com/adap/flower/pull/5175))
+
+- **build(deps-dev): bump vite from 6.2.5 to 6.2.6 in /intelligence/ts** ([#5231](https://github.com/adap/flower/pull/5231))
+
+- **build(deps-dev): bump vite from 6.2.2 to 6.2.3 in /intelligence/ts** ([#5170](https://github.com/adap/flower/pull/5170))
 
 ## v1.17.0 (2025-03-24)
 
