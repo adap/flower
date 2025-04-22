@@ -20,11 +20,9 @@ with running Flower in a more interactive way.
     setup and run Flower simulations please read the
     |flower_how_to_run_simulations_link|_ guide.
 
-.. toctree::
-    :maxdepth: 1
+* [Get started with Flower and PyTorch](https://github.com/adap/flower/blob/refactor-get-started-docs/framework/docs/source/notebooks/tutorial-series-get-started-with-flower-pytorch.ipynb)
+* [Use a Federated Learning Strategy](https://github.com/adap/flower/blob/refactor-get-started-docs/framework/docs/source/notebooks/tutorial-series-use-a-federated-learning-strategy-pytorch.ipynb)
+* [Build a Strategy from Scratch](https://github.com/adap/flower/blob/refactor-get-started-docs/framework/docs/source/notebooks/tutorial-series-build-a-strategy-from-scratch-pytorch.ipynb)
+* [Customize the Client](https://github.com/adap/flower/blob/refactor-get-started-docs/framework/docs/source/notebooks/tutorial-series-customize-the-client-pytorch.ipynb)
 
-    tutorial-series-what-is-federated-learning
-    tutorial-series-get-started-with-flower-pytorch
-    tutorial-series-use-a-federated-learning-strategy-pytorch
-    tutorial-series-build-a-strategy-from-scratch-pytorch
-    tutorial-series-customize-the-client-pytorch
+Additionally, you can follow the 30 mins notebook tutorial on how to run Flower simulation with PyTorch ([link](https://github.com/adap/flower/tree/main/examples/flower-in-30-minutes))
