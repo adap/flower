@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.18.0 (2025-04-22)
+## v1.18.0 (2025-04-23)
 
 ### Thanks to our contributors
 
