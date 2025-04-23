@@ -40,7 +40,7 @@ async fn main() {
                 tools: None,
                 force_remote: Some(true),
                 force_local: Some(false),
-                encrypt: Some(true),
+                encrypt: Some(false),
             }),
         )
         .await;
