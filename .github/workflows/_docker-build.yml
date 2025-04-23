@@ -32,6 +32,9 @@ on:
 permissions:
   contents: read
 
+env:
+  DOCKER_BUILD_SUMMARY: false
+
 # based on https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
 jobs:
   build:
