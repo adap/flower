@@ -31,6 +31,7 @@ jobs:
       id: publish
       env:
         GITHUB_REF: ${{ github.ref }}
+      working-directory: framework
       run: |
         TAG_NAME=$(echo "${GITHUB_REF_NAME}" | cut -c2-)
         echo "flwr-version=$TAG_NAME" >> "$GITHUB_OUTPUT"
