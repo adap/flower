@@ -34,164 +34,160 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 interface RemoteEngineProtocol : Engine {
-    var apiKey: String
+  var apiKey: String
 }
 
 class RemoteEngine(
-    private val baseURL: String = Constants.BASE_URL,
-    override var apiKey: String = ""
+  private val baseURL: String = Constants.BASE_URL,
+  override var apiKey: String = "",
 ) : RemoteEngineProtocol {
 
-    private val client = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
+  private val client =
+    HttpClient(CIO) { install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) } }
+
+  private val authorization: String
+    get() = "Bearer $apiKey"
+
+  override suspend fun chat(
+    messages: List<Message>,
+    model: String?,
+    temperature: Float?,
+    maxCompletionTokens: Int?,
+    stream: Boolean,
+    onStreamEvent: ((StreamEvent) -> Unit)?,
+    tools: List<Tool>?,
+  ): Message {
+    val chosenModel = model ?: "meta/llama3.2-1b"
+
+    val payload =
+      ChatCompletionsRequest(
+        model = chosenModel,
+        messages = messages,
+        temperature = temperature,
+        maxCompletionTokens = maxCompletionTokens,
+        stream = null,
+        tools = tools,
+        encrypt = null,
+      )
+
+    val url = "$baseURL${Constants.CHAT_COMPLETION_PATH}"
+
+    return if (stream) {
+      var accumulatedResponse = ""
+      NetworkService.streamElement(
+        client = client,
+        element = payload,
+        authorization = authorization,
+        url = url,
+      ) { streamElements: List<StreamChoice> ->
+        for (choice in streamElements) {
+          val deltaContent = choice.delta.content
+          onStreamEvent?.invoke(StreamEvent(deltaContent))
+          accumulatedResponse += deltaContent
         }
-    }
-
-    private val authorization: String
-        get() = "Bearer $apiKey"
-
-    override suspend fun chat(
-        messages: List<Message>,
-        model: String?,
-        temperature: Float?,
-        maxCompletionTokens: Int?,
-        stream: Boolean,
-        onStreamEvent: ((StreamEvent) -> Unit)?,
-        tools: List<Tool>?
-    ): Message {
-        val chosenModel = model ?: "meta/llama3.2-1b"
-
-        val payload = ChatCompletionsRequest(
-            model = chosenModel,
-            messages = messages,
-            temperature = temperature,
-            maxCompletionTokens = maxCompletionTokens,
-            stream = null,
-            tools = tools,
-            encrypt = null
+      }
+      Message(role = "assistant", content = accumulatedResponse)
+    } else {
+      val response: ChatCompletionsResponse =
+        NetworkService.postElement(
+          client = client,
+          element = payload,
+          authorization = authorization,
+          url = url,
         )
 
-        val url = "$baseURL${Constants.CHAT_COMPLETION_PATH}"
+      val message =
+        response.choices.firstOrNull()?.message
+          ?: throw Failure(FailureCode.RemoteError, "No message found in response")
 
-        return if (stream) {
-            var accumulatedResponse = ""
-            NetworkService.streamElement(
-                client = client,
-                element = payload,
-                authorization = authorization,
-                url = url
-            ) { streamElements: List<StreamChoice> ->
-                for (choice in streamElements) {
-                    val deltaContent = choice.delta.content
-                    onStreamEvent?.invoke(StreamEvent(deltaContent))
-                    accumulatedResponse += deltaContent
-                }
-            }
-            Message(role = "assistant", content = accumulatedResponse)
-        } else {
-            val response: ChatCompletionsResponse = NetworkService.postElement(
-                client = client,
-                element = payload,
-                authorization = authorization,
-                url = url
-            )
-
-            val message = response.choices.firstOrNull()?.message
-                ?: throw Failure(FailureCode.RemoteError, "No message found in response")
-
-            Message(
-                role = message.role,
-                content = message.content ?: "",
-                toolCalls = message.toolCalls
-            )
-        }
+      Message(role = message.role, content = message.content ?: "", toolCalls = message.toolCalls)
     }
+  }
 
-    override suspend fun fetchModel(model: String, callback: (Progress) -> Unit) {
-        TODO("Not yet implemented")
-    }
+  override suspend fun fetchModel(model: String, callback: (Progress) -> Unit) {
+    TODO("Not yet implemented")
+  }
 }
 
 object NetworkService {
-    suspend inline fun <reified Element : Any> getElement(
-        client: HttpClient,
-        url: String,
-        authorization: String? = null
-    ): Element {
-        val response = client.get(url) {
-            headers {
-                append(HttpHeaders.ContentType, ContentType.Application.Json)
-                authorization?.let { append(HttpHeaders.Authorization, it) }
-            }
+  suspend inline fun <reified Element : Any> getElement(
+    client: HttpClient,
+    url: String,
+    authorization: String? = null,
+  ): Element {
+    val response =
+      client.get(url) {
+        headers {
+          append(HttpHeaders.ContentType, ContentType.Application.Json)
+          authorization?.let { append(HttpHeaders.Authorization, it) }
         }
-        checkStatusCode(response)
-        return response.body()
+      }
+    checkStatusCode(response)
+    return response.body()
+  }
+
+  suspend inline fun <reified Element : Any> postElement(
+    client: HttpClient,
+    element: Any,
+    authorization: String? = null,
+    url: String,
+  ): Element {
+    val response =
+      client.post(url) {
+        contentType(ContentType.Application.Json)
+        authorization?.let { header(HttpHeaders.Authorization, it) }
+        setBody(element)
+      }
+    checkStatusCode(response)
+    return response.body()
+  }
+
+  suspend inline fun <reified StreamElement : Any> streamElement(
+    client: HttpClient,
+    element: Any,
+    authorization: String? = null,
+    url: String,
+    crossinline onStreamEvent: (List<StreamElement>) -> Unit,
+  ) {
+    val response =
+      client.post(url) {
+        contentType(ContentType.Application.Json)
+        authorization?.let { header(HttpHeaders.Authorization, it) }
+        setBody(element)
+      }
+    checkStatusCode(response)
+    val bodyString = response.bodyAsText()
+    val lines = bodyString.split("\n").filter { it.isNotBlank() }
+    for (line in lines) {
+      val streamElement = Json.decodeFromString<List<StreamElement>>(line)
+      onStreamEvent(streamElement)
     }
+  }
 
-    suspend inline fun <reified Element : Any> postElement(
-        client: HttpClient,
-        element: Any,
-        authorization: String? = null,
-        url: String
-    ): Element {
-        val response = client.post(url) {
-            contentType(ContentType.Application.Json)
-            authorization?.let { header(HttpHeaders.Authorization, it) }
-            setBody(element)
-        }
-        checkStatusCode(response)
-        return response.body()
+  fun checkStatusCode(response: HttpResponse) {
+    when (response.status.value) {
+      in 200..299 -> Unit
+      401,
+      403,
+      407 ->
+        throw Failure(
+          FailureCode.AuthenticationError,
+          "Authentication error: ${response.status.value}",
+        )
+
+      404,
+      502,
+      503 ->
+        throw Failure(FailureCode.UnavailableError, "Service unavailable: ${response.status.value}")
+
+      408,
+      504 -> throw Failure(FailureCode.TimeoutError, "Request timed out: ${response.status.value}")
+
+      in 500..599 ->
+        throw Failure(FailureCode.RemoteError, "Server error: ${response.status.value}")
+
+      else ->
+        throw Failure(FailureCode.ConnectionError, "Unexpected error: ${response.status.value}")
     }
-
-    suspend inline fun <reified StreamElement : Any> streamElement(
-        client: HttpClient,
-        element: Any,
-        authorization: String? = null,
-        url: String,
-        crossinline onStreamEvent: (List<StreamElement>) -> Unit
-    ) {
-        val response = client.post(url) {
-            contentType(ContentType.Application.Json)
-            authorization?.let { header(HttpHeaders.Authorization, it) }
-            setBody(element)
-        }
-        checkStatusCode(response)
-        val bodyString = response.bodyAsText()
-        val lines = bodyString.split("\n").filter { it.isNotBlank() }
-        for (line in lines) {
-            val streamElement = Json.decodeFromString<List<StreamElement>>(line)
-            onStreamEvent(streamElement)
-        }
-    }
-
-    fun checkStatusCode(response: HttpResponse) {
-        when (response.status.value) {
-            in 200..299 -> Unit
-            401, 403, 407 -> throw Failure(
-                FailureCode.AuthenticationError,
-                "Authentication error: ${response.status.value}"
-            )
-
-            404, 502, 503 -> throw Failure(
-                FailureCode.UnavailableError,
-                "Service unavailable: ${response.status.value}"
-            )
-
-            408, 504 -> throw Failure(
-                FailureCode.TimeoutError,
-                "Request timed out: ${response.status.value}"
-            )
-
-            in 500..599 -> throw Failure(
-                FailureCode.RemoteError,
-                "Server error: ${response.status.value}"
-            )
-
-            else -> throw Failure(
-                FailureCode.ConnectionError,
-                "Unexpected error: ${response.status.value}"
-            )
-        }
-    }
+  }
 }
