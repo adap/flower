@@ -61,4 +61,6 @@ dependencies {
   androidTestImplementation(libs.androidx.espresso.core)
 }
 
+ktfmt { googleStyle() }
+
 tasks.withType<Test>().configureEach { useJUnitPlatform() }
