@@ -20,12 +20,9 @@ class LogisticRegression(nn.Module):
     https://arxiv.org/pdf/1812.06127.pdf)
     """
 
-    def __init__(self, dataset, num_classes: int) -> None:
+    def __init__(self, num_classes: int) -> None:
         super().__init__()
-        if "cifar" in dataset:
-            self.linear = nn.Linear(32 * 32 * 3, num_classes)
-        else:
-            self.linear = nn.Linear(28 * 28, num_classes)
+        self.linear = nn.Linear(28 * 28, num_classes)
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """Forward pass.
@@ -113,8 +110,8 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
         The model that has been trained for one epoch.
     """
     for batch in trainloader:
-        image_key = "img" if "img" in batch else "image"
-        images, labels = batch[image_key].to(device), batch["label"].to(device)
+        label_key = "character" if "character" in batch else "label" # FEMNIST's label is called "character"
+        images, labels = batch["image"].to(device), batch[label_key].to(device)
         optimizer.zero_grad()
         proximal_term = 0.0
         for local_weights, global_weights in zip(net.parameters(), global_params):
@@ -149,8 +146,8 @@ def test(
     net.eval()
     with torch.no_grad():
         for batch in testloader:
-            image_key = "img" if "img" in batch else "image"
-            images, labels = batch[image_key].to(device), batch["label"].to(device)
+            label_key = "character" if "character" in batch else "label" # FEMNIST's label is called "character"
+            images, labels = batch["image"].to(device), batch[label_key].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
@@ -190,5 +187,5 @@ def instantiate_model(config: EasyDict):
         nn.Module: Instantiated model for experimentation.
     """
     if config.model.name == "LogisticRegression":
-        return LogisticRegression(num_classes=config.model.num_classes, dataset=config.dataset.path)
+        return LogisticRegression(num_classes=config.model.num_classes)
     raise ValueError("This model type is currently not supported.")

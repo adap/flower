@@ -128,22 +128,22 @@ clientapp = "fedprox.client_app:app"
 [tool.flwr.app.config]
 [tool.flwr.app.config.algorithm]
 name = "FedProx"
-num-server-rounds = 100
+num-server-rounds = 200
 fraction-fit = 0.01
 fraction-evaluate= 0.0
 min-evaluate-clients= 0
-min-available-clients= 1000
-min-fit-clients= 1000
+min-available-clients= 200
+min-fit-clients= 200
 local-epochs = 10
 stragglers-fraction = 0.9
 learning-rate = 0.03
 mu = 1.0
-num-clients = 1000 # This parameter is used by the Server only, and does not change the size of the federation.
+num-clients = 200 # This parameter is used by the Server only, and does not change the size of the federation.
 
 [tool.flwr.app.config.dataset]
-path = "ylecun/mnist"
+path = "flwrlabs/femnist"
 power-law = true
-num-unique-labels-per-partition = 2
+num-unique-labels-per-partition = 5
 num-unique-labels = 10
 preassigned-num-samples-per-label = 5
 seed=42
@@ -163,11 +163,11 @@ num-classes = 10
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 1000
+options.num-supernodes = 200
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0.0
 
 [tool.flwr.federations.gpu-simulation]
-options.num-supernodes = 1000
+options.num-supernodes = 200
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0.25

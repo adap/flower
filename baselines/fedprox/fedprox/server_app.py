@@ -99,7 +99,7 @@ def server_fn(context: Context):
         return fit_config_fn
 
     device = torch.device("cpu")
-    testloader = prepare_test_loader(configs.run_config.dataset)
+    testloader = prepare_test_loader(configs.run_config.dataset) # for server-side evaluation
     evaluate_fn = gen_evaluate_fn(
         testloader, device=device, run_config=configs.run_config
     )

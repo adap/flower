@@ -16,11 +16,9 @@ dataset: [MNIST]
 
 ## About this baseline
 
-**What's implemented:** The code in this directory replicates the experiments in *Federated Optimization in Heterogeneous Networks* (Li et al., 2018) for MNIST, which proposed the FedProx algorithm. Concretely, it replicates the results for MNIST in Figure 1 and 7. Another experiment is added on another commonly used dataset -- CIFAR10.
+**What's implemented:** The code in this directory replicates the experiments in *Federated Optimization in Heterogeneous Networks* (Li et al., 2018) for MNIST and FEMNIST, which proposed the FedProx algorithm. Concretely, it replicates the results for both datasets in Figure 1 and 7.
 
-**Datasets:** MNIST (`"ylecun/mnist"`), CIFAR10 (`"uoft-cs/cifar10"`)
-
-The dataset can be changed by setting `path` under `[tool.flwr.app.config.dataset]` in the `pyproject.toml` file.
+**Datasets:** MNIST, FEMNIST
 
 **Hardware Setup:** These experiments were run on a desktop machine with 24 CPU threads. Any machine with 4 CPU cores or more would be able to run it in a reasonable amount of time. Note: we install PyTorch with GPU support but by default, the entire experiment runs on CPU-only mode.
 
@@ -32,12 +30,12 @@ The dataset can be changed by setting `path` under `[tool.flwr.app.config.datase
 
 **Model:** A logistic regression model used in the FedProx paper (see `model`). This is the model used by default.
 
-**Dataset:** This baseline includes both MNIST and CIFAR10 datasets. By default, it will be partitioned into 1000 clients following a pathological split where each client has examples of two (out of ten) class labels. The number of examples in each client is derived by sampling from a powerlaw distribution. The settings are as follows:
+**Dataset:** This baseline includes both MNIST and FEMNIST datasets. For MNIST, it will be partitioned into 1000 clients following a pathological split where each client has examples of two (out of ten) class labels. For FEMNIST, we follow the paper to subsample 10 lower case characters ('a'-'j') from EMNIST and distribute only 5 classes to each client. The number of examples in each client is derived by sampling from a powerlaw distribution. The settings are as follows:
 
-| Dataset | #classes | #partitions |     partitioning method     |  partition settings  |
-| :------ | :------: | :---------: | :-------------------------: | :------------------: |
-| MNIST   |    10    |    1000    | pathological with power law | 2 classes per client |
-| CIFAR10 |    10    |    1000    | pathological with power law | 2 classes per client |
+| Dataset | #classes | #rounds | #partitions |     partitioning method     |  partition settings  |
+| :------ | :------: | :-----: | :---------: | :-------------------------: | :------------------: |
+| MNIST   |    10    |   100   |    1000    | pathological with power law | 2 classes per client |
+| FEMNIST |    10    |   200   |     200     | pathological with power law | 5 classes per client |
 
 **Training Hyperparameters:**
 The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `flwr run .` directly)
@@ -52,6 +50,21 @@ The following table shows the main hyperparameters for this baseline with their 
 | optimizer           | SGD with proximal term                             |
 | proximal mu         | 1.0                                                |
 | stragglers_fraction | 0.9                                                |
+
+**Configurations:**
+
+The following table shows the configurations to be set in `pyproject.toml` for different experiments
+
+|  config.dataset.path  | config.dataset.num-unique-labels | config.dataset.num-unique-labels-per-partition | config.num-server-rounds |
+| :--------------------: | :------------------------------: | :--------------------------------------------: | :----------------------: |
+|   `"ylecun/mnist"`   |                10                |                       2                       |           100           |
+| `"flwrlabs/femnist"` |                10                |                       5                       |           200           |
+
+## FEMNIST Preprocessor
+
+According to the paper, the authors subsample 10 lower case characters ('a'-'j') from EMNIST and called this *federated* version of EMNIST as FEMNIST. Therefore, we constructed a Preprocessor class to achieve the above. 
+
+Note that EMNIST also does not have a test set to begin with, therefore we manually split the dataset using the configured `val_ratio` in the function `prepare_test_loader` to create the centralised test dataset.
 
 ## Environment Setup
 
@@ -102,6 +115,13 @@ bash ./run_experiments.sh
 
 The configurations of the specific experiments within this one large ran can be found in the `conf` directory.
 
-The above commands would generate results that you can plot and would look like the plot shown below. This plot was generated using the jupyter notebook in the `docs/` directory of this baseline after running the command above.
+The above commands would generate results that you can plot and would look like the plots shown below. This plot was generated using the jupyter notebook in the `docs/` directory of this baseline after running the command above.
+
+Results for MNIST:
 
 ![](_static/FedProx_mnist.png)
+
+Results for FEMNIST:
+
+![](_static/FedProx_femnist.png)
+
