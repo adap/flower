@@ -64,13 +64,14 @@ class FlowerIntelligenceTest {
 
     coEvery {
       mockEngine.chat(
-          inputMessages,
-          model = "model",
-          temperature = 0.9f,
-          maxCompletionTokens = 300,
-          stream = false,
-          onStreamEvent = any(),
-          tools = null)
+        inputMessages,
+        model = "model",
+        temperature = 0.9f,
+        maxCompletionTokens = 300,
+        stream = false,
+        onStreamEvent = any(),
+        tools = null,
+      )
     } returns message
 
     val options = ChatOptions(model = "model", temperature = 0.9f, maxCompletionTokens = 300)
@@ -100,17 +101,18 @@ class FlowerIntelligenceTest {
 
     coEvery {
       mockEngine.chat(
-          userMessages,
-          model = "model",
-          temperature = 0.7f,
-          maxCompletionTokens = 150,
-          stream = true,
-          onStreamEvent = null,
-          tools = null)
+        userMessages,
+        model = "model",
+        temperature = 0.7f,
+        maxCompletionTokens = 150,
+        stream = true,
+        onStreamEvent = null,
+        tools = null,
+      )
     } returns response
 
     val options =
-        ChatOptions(model = "model", temperature = 0.7f, maxCompletionTokens = 150, stream = true)
+      ChatOptions(model = "model", temperature = 0.7f, maxCompletionTokens = 150, stream = true)
     val result = FlowerIntelligence.chat(userMessages to options)
 
     assertTrue(result.isSuccess)
