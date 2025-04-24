@@ -15,17 +15,22 @@
 
 package ai.flower.intelligence
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.websocket.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.headers
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.append
+import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 interface RemoteEngineProtocol : Engine {
@@ -163,11 +168,30 @@ object NetworkService {
     fun checkStatusCode(response: HttpResponse) {
         when (response.status.value) {
             in 200..299 -> Unit
-            401, 403, 407 -> throw Failure(FailureCode.AuthenticationError, "Authentication error: ${response.status.value}")
-            404, 502, 503 -> throw Failure(FailureCode.UnavailableError, "Service unavailable: ${response.status.value}")
-            408, 504 -> throw Failure(FailureCode.TimeoutError, "Request timed out: ${response.status.value}")
-            in 500..599 -> throw Failure(FailureCode.RemoteError, "Server error: ${response.status.value}")
-            else -> throw Failure(FailureCode.ConnectionError, "Unexpected error: ${response.status.value}")
+            401, 403, 407 -> throw Failure(
+                FailureCode.AuthenticationError,
+                "Authentication error: ${response.status.value}"
+            )
+
+            404, 502, 503 -> throw Failure(
+                FailureCode.UnavailableError,
+                "Service unavailable: ${response.status.value}"
+            )
+
+            408, 504 -> throw Failure(
+                FailureCode.TimeoutError,
+                "Request timed out: ${response.status.value}"
+            )
+
+            in 500..599 -> throw Failure(
+                FailureCode.RemoteError,
+                "Server error: ${response.status.value}"
+            )
+
+            else -> throw Failure(
+                FailureCode.ConnectionError,
+                "Unexpected error: ${response.status.value}"
+            )
         }
     }
 }
