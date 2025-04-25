@@ -1,33 +1,40 @@
-name: Label Issue Based on Dropdown
+name: Request a Feature
+description: Submit a new feature, documentation improvement, or baseline idea
+title: "[Feature Request]: "
+labels: []
+assignees: []
+type: Feature
 
-on:
-  issues:
-    types: [opened]
+body:
+  - type: dropdown
+    id: type  
+    attributes:
+      label: Type
+      description: What kind of request is this?
+      options:
+        - Feature
+        - Documentation Improvement
+        - New Baseline
+    validations:
+      required: true
 
-jobs:
-  add-label:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Parse dropdown and apply label
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const issueBody = context.payload.issue.body.toLowerCase();
+  - type: textarea
+    attributes:
+      label: Description
+      description: Please describe the feature, improvement, or baseline idea.
+    validations:
+      required: true
 
-            let labelToAdd = null;
-            if (issueBody.includes("what type of request is this?") && issueBody.includes("feature")) {
-              labelToAdd = "feature request";
-            } else if (issueBody.includes("documentation")) {
-              labelToAdd = "documentation";
-            } else if (issueBody.includes("new baseline")) {
-              labelToAdd = "new baseline";
-            }
+  - type: textarea
+    attributes:
+      label: Planned Implementation
+      description: Describe step-by-step what files or changes you'd plan to make.
+    validations:
+      required: false
 
-            if (labelToAdd) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                labels: [labelToAdd]
-              });
-            }
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Anything else we should know?
+    validations:
+      required: false
