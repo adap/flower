@@ -16,15 +16,15 @@
 package ai.flower.intelligence
 
 interface Engine {
-    suspend fun chat(
-        messages: List<Message>,
-        model: String? = null,
-        temperature: Float? = null,
-        maxCompletionTokens: Int? = null,
-        stream: Boolean = false,
-        onStreamEvent: ((StreamEvent) -> Unit)? = null,
-        tools: List<Tool>? = null
-    ): Message
+  suspend fun chat(
+    messages: List<Message>,
+    model: String? = null,
+    temperature: Float? = null,
+    maxCompletionTokens: Int? = null,
+    stream: Boolean = false,
+    onStreamEvent: ((StreamEvent) -> Unit)? = null,
+    tools: List<Tool>? = null,
+  ): Message
 
-    suspend fun fetchModel(model: String, callback: (Progress) -> Unit)
+  suspend fun fetchModel(model: String, callback: (Progress) -> Unit)
 }
