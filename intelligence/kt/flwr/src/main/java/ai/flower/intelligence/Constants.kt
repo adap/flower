@@ -16,8 +16,8 @@
 package ai.flower.intelligence
 
 object Constants {
-    const val BASE_URL = "https://api.flower.ai/"
-    const val CHAT_COMPLETION_PATH = "v1/chat/completions"
-    const val SDK = "kt"
-    const val VERSION = "0.1.8"
+  const val BASE_URL = "https://api.flower.ai/"
+  const val CHAT_COMPLETION_PATH = "v1/chat/completions"
+  const val SDK = "kt"
+  const val VERSION = "0.1.8"
 }
