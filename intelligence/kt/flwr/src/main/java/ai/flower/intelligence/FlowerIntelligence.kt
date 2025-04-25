@@ -32,6 +32,7 @@ object FlowerIntelligence {
         get() = remoteEngine
 
 
+
     suspend fun chat(
         input: String,
         maybeOptions: ChatOptions? = null
@@ -41,10 +42,7 @@ object FlowerIntelligence {
         maybeOptions?.let { options ->
             if (options.forceLocal && options.forceRemote) {
                 return@withContext Result.failure(
-                    Failure(
-                        FailureCode.ConfigError,
-                        "Cannot set both forceRemote and forceLocal to true"
-                    )
+                    Failure(FailureCode.ConfigError, "Cannot set both forceRemote and forceLocal to true")
                 )
             }
             selectedEngine = remoteEngine
@@ -64,12 +62,7 @@ object FlowerIntelligence {
             )
             Result.success(result)
         } catch (e: Exception) {
-            Result.failure(
-                e as? Failure ?: Failure(
-                    FailureCode.UnavailableError,
-                    e.localizedMessage ?: "Unknown error"
-                )
-            )
+            Result.failure(e as? Failure ?: Failure(FailureCode.UnavailableError, e.localizedMessage ?: "Unknown error"))
         }
     }
 
@@ -91,12 +84,7 @@ object FlowerIntelligence {
             )
             Result.success(result)
         } catch (e: Exception) {
-            Result.failure(
-                e as? Failure ?: Failure(
-                    FailureCode.UnavailableError,
-                    e.localizedMessage ?: "Unknown error"
-                )
-            )
+            Result.failure(e as? Failure ?: Failure(FailureCode.UnavailableError, e.localizedMessage ?: "Unknown error"))
         }
     }
 }
