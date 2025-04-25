@@ -16,31 +16,34 @@
 package ai.flower.intelligence
 
 enum class FailureCode(val code: Int) {
-  // Local errors
-  LocalError(100),
-  LocalEngineChatError(101),
-  LocalEngineFetchError(102),
-  NoLocalProviderError(103),
+    // Local errors
+    LocalError(100),
+    LocalEngineChatError(101),
+    LocalEngineFetchError(102),
+    NoLocalProviderError(103),
 
-  // Remote errors
-  RemoteError(200),
-  AuthenticationError(201),
-  UnavailableError(202),
-  TimeoutError(203),
-  ConnectionError(204),
+    // Remote errors
+    RemoteError(200),
+    AuthenticationError(201),
+    UnavailableError(202),
+    TimeoutError(203),
+    ConnectionError(204),
 
-  // Engine errors
-  EngineSpecificError(300),
-  EncryptionError(301),
+    // Engine errors
+    EngineSpecificError(300),
+    EncryptionError(301),
 
-  // Config/Validation errors
-  ConfigError(400),
-  InvalidArgumentsError(401),
-  InvalidRemoteConfigError(402),
-  UnknownModelError(403),
+    // Config/Validation errors
+    ConfigError(400),
+    InvalidArgumentsError(401),
+    InvalidRemoteConfigError(402),
+    UnknownModelError(403),
 
-  // Not implemented
-  NotImplementedError(404),
+    // Not implemented
+    NotImplementedError(404)
 }
 
-class Failure(val code: FailureCode, override val message: String) : Exception(message)
+class Failure(
+    val code: FailureCode,
+    override val message: String
+) : Exception(message)
