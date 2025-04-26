@@ -18,10 +18,11 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const org = owner; // Automatically set to current org/user
-            const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            const org = owner;
+            const now = new Date();
+            const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-            const query = `repo:${owner}/${repo} is:issue is:open comments:>=1 no:milestone`;
+            const query = `repo:${owner}/${repo} is:issue is:open label:"Under Discussion" comments:>=1 no:milestone`;
             const { data } = await github.rest.search.issuesAndPullRequests({
               q: query,
               per_page: 100
@@ -29,7 +30,30 @@ jobs:
 
             for (const issue of data.items) {
               const updatedAt = new Date(issue.updated_at);
-              if (updatedAt >= sevenDaysAgo) continue; // skip if recently active
+              if (updatedAt >= sevenDaysAgo) continue; // Skip if recently updated
+
+              // Fetch latest comments (only 1 for efficiency)
+              const comments = await github.rest.issues.listComments({
+                owner,
+                repo,
+                issue_number: issue.number,
+                per_page: 1,
+                sort: "updated",
+                direction: "desc",
+              });
+
+              if (comments.data.length > 0) {
+                const lastComment = comments.data[0];
+                const lastCommentBody = lastComment.body || "";
+
+                if (lastCommentBody.includes("<!-- bot:stale-ping -->")) {
+                  const lastPingDate = new Date(lastComment.updated_at);
+                  if (lastPingDate >= sevenDaysAgo) {
+                    console.log(`Skipping issue #${issue.number}: recent bot ping.`);
+                    continue; // Last bot ping was within 7 days → skip
+                  }
+                }
+              }
 
               let orgAssignees = [];
               for (const assignee of issue.assignees) {
@@ -49,7 +73,7 @@ jobs:
                 ? orgAssignees.join(", ")
                 : "@WilliamLindskog";
 
-              const body = `Gentle ping ${pingTarget} — this issue has been in \`Under Discussion\` without activity for over 7 days. Please review or update its status.`;
+              const body = `<!-- bot:stale-ping -->\nGentle ping ${pingTarget} — this issue has been in \`Under Discussion\` without activity for over 7 days. Please review or update its status.`;
 
               await github.rest.issues.createComment({
                 owner,
@@ -57,6 +81,4 @@ jobs:
                 issue_number: issue.number,
                 body
               });
-
-              console.log(`Pinged on issue #${issue.number}: ${pingTarget}`);
             }
