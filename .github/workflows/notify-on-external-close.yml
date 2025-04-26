@@ -1,16 +1,16 @@
-name: Notify WilliamLindskog on External Issue Closure
+name: Notify on External Issue Closure
 
 on:
   issues:
     types: [closed]
 
 jobs:
-  notify-william-if-external:
+  notify-assignee-or-william:
     runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:
-      - name: Notify if external user closed the issue
+      - name: Notify assigned Flower maintainer or William if external user closed the issue
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -18,21 +18,40 @@ jobs:
             const issue = context.payload.issue;
             const closer = context.actor;
 
+            // Ignore bot closures
             if (closer.endsWith("[bot]")) return;
 
             const org = context.repo.owner;
 
-            // Check if the user is a member of the org
-            const { status } = await github.rest.orgs.checkMembershipForUser({
+            // Check if the closer is a member of the organization
+            const { status: closerStatus } = await github.rest.orgs.checkMembershipForUser({
               org,
               username: closer
             }).catch(() => ({ status: 404 }));
 
-            if (status !== 204) {
-              // Only notify if external (not an org member)
+            if (closerStatus !== 204) {
+              // Closer is external (not an org member)
+
+              const assignees = issue.assignees || [];
+              let notifyUser = "WilliamLindskog"; // Default fallback to William
+
+              for (const assignee of assignees) {
+                const { status: assigneeStatus } = await github.rest.orgs.checkMembershipForUser({
+                  org,
+                  username: assignee.login
+                }).catch(() => ({ status: 404 }));
+
+                if (assigneeStatus === 204) {
+                  // Found a maintainer (org member) assigned
+                  notifyUser = assignee.login;
+                  break;
+                }
+              }
+
+              // Create the comment to notify
               await github.rest.issues.createComment({
                 ...context.repo,
                 issue_number: issue.number,
-                body: `@WilliamLindskog, confirm. This issue was closed by community member.`
+                body: `@${notifyUser}, please confirm. This issue was closed by a community member.`
               });
             }
