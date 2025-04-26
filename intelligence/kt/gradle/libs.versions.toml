@@ -26,3 +26,5 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version = "0.22.0" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version = "1.23.1" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "11.6.1" }
