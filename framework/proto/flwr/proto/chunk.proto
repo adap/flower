@@ -1,0 +1,47 @@
+// Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
+
+syntax = "proto3";
+
+package flwr.proto;
+
+import "flwr/proto/error.proto";
+import "flwr/proto/recorddict.proto";
+import "flwr/proto/transport.proto";
+import "flwr/proto/node.proto";
+
+// Pushing a Chunk
+message PushChunkRequest {
+  repeated Chunk chunks = 1; // List of chunks carrying Array data of a Message
+  uint64 message_id = 2;     // Identifies the message these Chunks belong to
+  Node node = 3;             // Identifies the node making the request
+}
+message PushChunkResponse { bool ack = 1; }
+
+// Pulling a Chunk
+message PullChunkRequest {
+  uint64 message_id = 1; // We are requesting a chunk from this Message
+  Node node = 2;         // Identifies the node making the request
+}
+message PullChunkResponse {
+  Chunk chunk = 1; // The chunk
+}
+
+message Chunk {
+  string array_id = 1;    // key that identifies the Array in the ArrayRecord
+  string record_id = 2;   // key to identify to which ArrayRecord it belongs
+  uint64 chunk_index = 3; // Array's data might be partition into more
+  bytes data = 4;         // than one Chunk. Therefore we need to know
+} // their order when re-materializing the Array
