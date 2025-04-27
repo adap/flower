@@ -85,11 +85,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     """ServerAppIo API servicer."""
 
     def __init__(
-        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+        self,
+        state_factory: LinkStateFactory,
+        ffs_factory: FfsFactory,
+        chunkstore_factory: ChunkStoreFactory,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
-        self.chunkstore_factory = ChunkStoreFactory(":flwr-in-memory-state:")
+        self.chunkstore_factory = chunkstore_factory
         self.lock = threading.RLock()
 
     def GetNodes(

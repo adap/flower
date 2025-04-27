@@ -16,6 +16,7 @@
 
 
 from logging import DEBUG, INFO
+from uuid import UUID
 
 import grpc
 from google.protobuf.json_format import MessageToDict
@@ -23,6 +24,12 @@ from google.protobuf.json_format import MessageToDict
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
+    PullChunkRequest,
+    PullChunkResponse,
+    PushChunkRequest,
+    PushChunkResponse,
+)
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -37,6 +44,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushMessagesResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.server.superlink.chunkstore import ChunkStoreFactory
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
@@ -47,10 +55,14 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
     def __init__(
-        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+        self,
+        state_factory: LinkStateFactory,
+        ffs_factory: FfsFactory,
+        chunkstore_factory: ChunkStoreFactory,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
+        self.chunkstore_factory = chunkstore_factory
 
     def CreateNode(
         self, request: CreateNodeRequest, context: grpc.ServicerContext
@@ -96,6 +108,19 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state=self.state_factory.state(),
         )
 
+    def PullChunk(
+        self, request: PullChunkRequest, context: grpc.ServicerContext
+    ) -> PullChunkResponse:
+        """."""
+        log(INFO, "[Fleet.PullChunk] node_id=%s", request.node.node_id)
+        log(DEBUG, "[Fleet.PullChunk] Request: %s", MessageToDict(request))
+
+        # TODO: integrity checks (e.g. the requested chunk belongs to that message
+        # that's addressed to this node?)
+        # Retrieve chunk
+        store = self.chunkstore_factory.state()
+        return PullChunkResponse(chunk=store.get_chunk(request.message_id))
+
     def PushMessages(
         self, request: PushMessagesRequest, context: grpc.ServicerContext
     ) -> PushMessagesResponse:
@@ -118,6 +143,21 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             abort_grpc_context(e.message, context)
 
         return res
+
+    def PushChunk(
+        self, request: PushChunkRequest, context: grpc.ServicerContext
+    ) -> PushChunkResponse:
+        """."""
+        log(INFO, "[Fleet.PushChunk] node_id=%s", request.node.node_id)
+        log(DEBUG, "[Fleet.PushChunk] Request: %s", MessageToDict(request))
+        # TODO: integrity checks (the chunk is addressing a message that
+        # exists and was pushed by this node)
+
+        # Store chunk
+        store = self.chunkstore_factory.state()
+        store.store_chunk(message_id=UUID(request.message_id), chunk=request.chunks[0])
+
+        return PushChunkResponse()
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext

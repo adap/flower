@@ -21,6 +21,7 @@ import "flwr/proto/node.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
 import "flwr/proto/message.proto";
+import "flwr/proto/chunk.proto";
 
 service Fleet {
   rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
@@ -41,6 +42,12 @@ service Fleet {
 
   // Get FAB
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
+
+  // Push chunks that are part of a message
+  rpc PushChunk(PushChunkRequest) returns (PushChunkResponse) {}
+
+  // Get chunks belonging to a message
+  rpc PullChunk(PullChunkRequest) returns (PullChunkResponse) {}
 }
 
 // CreateNode messages

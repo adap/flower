@@ -2,6 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
+from flwr.proto import chunk_pb2 as flwr_dot_proto_dot_chunk__pb2
 from flwr.proto import clientappio_pb2 as flwr_dot_proto_dot_clientappio__pb2
 
 
@@ -29,6 +30,16 @@ class ClientAppIoStub(object):
                 request_serializer=flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsResponse.FromString,
                 )
+        self.PushChunk = channel.unary_unary(
+                '/flwr.proto.ClientAppIo/PushChunk',
+                request_serializer=flwr_dot_proto_dot_chunk__pb2.PushChunkRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_chunk__pb2.PushChunkResponse.FromString,
+                )
+        self.PullChunk = channel.unary_unary(
+                '/flwr.proto.ClientAppIo/PullChunk',
+                request_serializer=flwr_dot_proto_dot_chunk__pb2.PullChunkRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_chunk__pb2.PullChunkResponse.FromString,
+                )
 
 
 class ClientAppIoServicer(object):
@@ -55,6 +66,20 @@ class ClientAppIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def PushChunk(self, request, context):
+        """Push chunks that are part of a message
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def PullChunk(self, request, context):
+        """Get chunks belonging to a message
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ClientAppIoServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -72,6 +97,16 @@ def add_ClientAppIoServicer_to_server(servicer, server):
                     servicer.PushClientAppOutputs,
                     request_deserializer=flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsResponse.SerializeToString,
+            ),
+            'PushChunk': grpc.unary_unary_rpc_method_handler(
+                    servicer.PushChunk,
+                    request_deserializer=flwr_dot_proto_dot_chunk__pb2.PushChunkRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_chunk__pb2.PushChunkResponse.SerializeToString,
+            ),
+            'PullChunk': grpc.unary_unary_rpc_method_handler(
+                    servicer.PullChunk,
+                    request_deserializer=flwr_dot_proto_dot_chunk__pb2.PullChunkRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_chunk__pb2.PullChunkResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -131,5 +166,39 @@ class ClientAppIo(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ClientAppIo/PushClientAppOutputs',
             flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsRequest.SerializeToString,
             flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def PushChunk(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ClientAppIo/PushChunk',
+            flwr_dot_proto_dot_chunk__pb2.PushChunkRequest.SerializeToString,
+            flwr_dot_proto_dot_chunk__pb2.PushChunkResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def PullChunk(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ClientAppIo/PullChunk',
+            flwr_dot_proto_dot_chunk__pb2.PullChunkRequest.SerializeToString,
+            flwr_dot_proto_dot_chunk__pb2.PullChunkResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

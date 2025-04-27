@@ -402,7 +402,16 @@ def start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run, get_fab = conn
+            (
+                receive,
+                send,
+                create_node,
+                delete_node,
+                get_run,
+                get_fab,
+                get_chunk,
+                push_chunk,
+            ) = conn
 
             # Register node when connecting the first time
             if run_info_store is None:

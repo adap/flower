@@ -34,7 +34,7 @@ class ChunkStoreFactory:
     def state(self) -> ChunkStore:
         """Return a ChunkStore instance and create it, if necessary."""
         # InMemoryChunkStore
-        if self.database == ":flwr-in-memory-state:":
+        if self.database == ":flwr-in-memory-chunks:":
             if self.store_instance is None:
                 self.store_instance = InMemoryChunkStore()
             log(DEBUG, "Using InMemoryChunkStore")

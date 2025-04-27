@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import abc
+import flwr.proto.chunk_pb2
 import flwr.proto.clientappio_pb2
 import grpc
 
@@ -22,6 +23,16 @@ class ClientAppIoStub:
         flwr.proto.clientappio_pb2.PushClientAppOutputsRequest,
         flwr.proto.clientappio_pb2.PushClientAppOutputsResponse]
     """Send updated Message and Context"""
+
+    PushChunk: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.chunk_pb2.PushChunkRequest,
+        flwr.proto.chunk_pb2.PushChunkResponse]
+    """Push chunks that are part of a message"""
+
+    PullChunk: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.chunk_pb2.PullChunkRequest,
+        flwr.proto.chunk_pb2.PullChunkResponse]
+    """Get chunks belonging to a message"""
 
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
@@ -47,6 +58,22 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.clientappio_pb2.PushClientAppOutputsResponse:
         """Send updated Message and Context"""
+        pass
+
+    @abc.abstractmethod
+    def PushChunk(self,
+        request: flwr.proto.chunk_pb2.PushChunkRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.chunk_pb2.PushChunkResponse:
+        """Push chunks that are part of a message"""
+        pass
+
+    @abc.abstractmethod
+    def PullChunk(self,
+        request: flwr.proto.chunk_pb2.PullChunkRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.chunk_pb2.PullChunkResponse:
+        """Get chunks belonging to a message"""
         pass
 
 

@@ -45,6 +45,11 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 )
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run, RunNotRunningException
+from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
+    Chunk,
+    PullChunkRequest,
+    PushChunkRequest,
+)
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -54,6 +59,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -259,7 +265,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Return the message if available
         return in_message
 
-    def send(message: Message) -> None:
+    def send(message: Message) -> str:
         """Send message reply to server."""
         # Get Node
         if node is None:
@@ -280,10 +286,23 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Serialize Message
         message_proto = message_to_proto(message=message)
         request = PushMessagesRequest(node=node, messages_list=[message_proto])
-        _ = retry_invoker.invoke(stub.PushMessages, request)
+        res: PushMessagesResponse = retry_invoker.invoke(stub.PushMessages, request)
 
         # Cleanup
         metadata = None
+
+        # Return message_id of response
+        return res.results["key"]
+
+    def get_chunk(message_id: str) -> Chunk:
+        """Get a Chunk from a particular message."""
+        request = PullChunkRequest(message_id=message_id, node=node)
+        _ = retry_invoker.invoke(stub.PullChunk, request)
+
+    def push_chunk(message_id: str, chunk: Chunk) -> Chunk:
+        """Push a Chunk that belongs to a particular message."""
+        request = PushChunkRequest(message_id=message_id, node=node, chunks=[chunk])
+        _ = retry_invoker.invoke(stub.PushChunk, request)
 
     def get_run(run_id: int) -> Run:
         # Call FleetAPI
@@ -308,7 +327,16 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node, get_run, get_fab)
+        yield (
+            receive,
+            send,
+            create_node,
+            delete_node,
+            get_run,
+            get_fab,
+            get_chunk,
+            push_chunk,
+        )
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
     # Cleanup

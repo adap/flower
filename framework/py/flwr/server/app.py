@@ -79,6 +79,7 @@ from .history import History
 from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
+from .superlink.chunkstore import ChunkStoreFactory
 from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
@@ -307,6 +308,9 @@ def run_superlink() -> None:
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
 
+    # Initialize ChunkFactory
+    chunk_factory = ChunkStoreFactory(":flwr-in-memory-chunks:")
+
     # Start Exec API
     executor = load_executor(args)
     exec_server: grpc.Server = run_exec_api_grpc(
@@ -343,6 +347,7 @@ def run_superlink() -> None:
             address=serverappio_address,
             state_factory=state_factory,
             ffs_factory=ffs_factory,
+            chunk_factory=chunk_factory,
             certificates=None,  # ServerAppIo API doesn't support SSL yet
         )
         grpc_servers.append(serverappio_server)
@@ -421,6 +426,7 @@ def run_superlink() -> None:
                 address=fleet_address,
                 state_factory=state_factory,
                 ffs_factory=ffs_factory,
+                chunk_factory=chunk_factory,
                 certificates=certificates,
                 interceptors=interceptors,
             )
@@ -672,6 +678,7 @@ def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
+    chunk_factory: ChunkStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
@@ -680,6 +687,7 @@ def _run_fleet_api_grpc_rere(
     fleet_servicer = FleetServicer(
         state_factory=state_factory,
         ffs_factory=ffs_factory,
+        chunkstore_factory=chunk_factory,
     )
     fleet_add_servicer_to_server_fn = add_FleetServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
