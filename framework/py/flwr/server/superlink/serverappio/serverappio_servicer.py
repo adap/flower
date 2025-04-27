@@ -89,7 +89,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
-        self.chunkstore_factory = ChunkStoreFactory()
+        self.chunkstore_factory = ChunkStoreFactory(":flwr-in-memory-state:")
         self.lock = threading.RLock()
 
     def GetNodes(
@@ -187,7 +187,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             ]
         )
 
-    def PushChunks(
+    def PushChunk(
         self, request: PushChunkRequest, context: grpc.ServicerContext
     ) -> PushChunkResponse:
         """Add chunks to the ChunkStore that belong to a message already registered and
@@ -207,8 +207,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Store chunks in the chunkstore
         for chunk in request.chunks:
-            store.store_chunk(request.message_id, chunk)
-
+            store.store_chunk(UUID(request.message_id), chunk)
         return PushChunkResponse()
 
     def PullMessages(
@@ -259,7 +258,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         return PullResMessagesResponse(messages_list=messages_list)
 
-    def PullChunks(
+    def PullChunk(
         self, request: PullChunkRequest, context: grpc.ServicerContext
     ) -> PullChunkResponse:
         """Fetch chunks that belong to a Message."""
@@ -275,7 +274,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         #   of the Message with the specified message-id in the request.
 
         # Get one chunk
-        chunk = store.get_chunk(request.message_id)
+        chunk = store.get_chunk(UUID(request.message_id))
         return PullChunkResponse(chunk=chunk)
 
     def GetRun(

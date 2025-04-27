@@ -51,7 +51,10 @@ class InMemoryChunkStore:
         )  # same technique as with messages
 
         # add to mapping (or initialize if first chunk for message -- not shown)
-        self.message_id_to_chunk_mapping[message_id].add(chunk_uuid)
+        if message_id not in self.message_id_to_chunk_mapping:
+            self.message_id_to_chunk_mapping[message_id] = {chunk_uuid}
+        else:
+            self.message_id_to_chunk_mapping[message_id].add(chunk_uuid)
 
         # store chunk
         self.chunk_store[chunk_uuid] = chunk

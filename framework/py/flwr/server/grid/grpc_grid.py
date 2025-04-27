@@ -17,21 +17,29 @@
 
 import time
 from collections.abc import Iterable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging import DEBUG, ERROR, WARNING
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 import grpc
+from tqdm import tqdm
 
-from flwr.common import Message, RecordDict
+from flwr.common import ArrayRecord, Message, RecordDict
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.message import chunk_viewer, decouple_arrays_from_message
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Run
+from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
+    Chunk,
+    PushChunkRequest,
+    PushChunkResponse,
+)
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
@@ -103,6 +111,7 @@ class GrpcGrid(Grid):
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
         self._retry_invoker = _make_simple_grpc_retry_invoker()
+        self.chunk_executor = ThreadPoolExecutor(max_workers=4)
         super().__init__()
 
     @property
@@ -207,14 +216,22 @@ class GrpcGrid(Grid):
         # Construct Messages
         run_id = cast(Run, self._run).run_id
         message_proto_list: list[ProtoMessage] = []
+        array_records: list[dict[str, ArrayRecord]] = []
         for msg in messages:
             # Populate metadata
             msg.metadata.__dict__["_run_id"] = run_id
             msg.metadata.__dict__["_src_node_id"] = self.node.node_id
             # Check message
             self._check_message(msg)
+
+            # decouple array data in this message from the rest
+            msg_, records = decouple_arrays_from_message(msg)
+
+            # Store for later (will be send in chunks)
+            array_records.append(records)
+
             # Convert to proto
-            msg_proto = message_to_proto(msg)
+            msg_proto = message_to_proto(msg_)
             # Add to list
             message_proto_list.append(msg_proto)
 
@@ -233,12 +250,61 @@ class GrpcGrid(Grid):
                     "passed to `push_messages`). This could be due to a malformed "
                     "message.",
                 )
+
+            # Now push thde chunks
+            for msg_id, msg_array_record in zip(res.message_ids, array_records):
+                chunk_views = chunk_viewer(msg_array_record)
+
+                with ThreadPoolExecutor(max_workers=4) as executor:
+                    futures = [
+                        executor.submit(
+                            self._push_chunk, chunk_view=chunk_view, message_id=msg_id
+                        )
+                        for chunk_view in chunk_views
+                    ]
+
+                    results = []
+                    for future in tqdm(as_completed(futures), total=len(futures)):
+                        results.append(future.result())
+                # for ch_view in chunk_views:
+                #     # materialize Chunk
+                #     chunk = Chunk(
+                #         array_id=ch_view["array_id"],
+                #         record_id=ch_view["record_id"],
+                #         chunk_index=ch_view["chunk_index"],
+                #         data=ch_view[
+                #             "data"
+                #         ].tobytes(),  # <----- materialize chunk (copies data)
+                #     )
+                #     # Push Chunk
+                #     res_chunk: PushChunkResponse = self._stub.PushChunk(
+                #         PushChunkRequest(
+                #             chunks=[chunk], message_id=msg_id, node=self.node
+                #         )
+                #     )
+
             return list(res.message_ids)
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
                 log(ERROR, ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED)
                 return []
             raise
+
+    def _push_chunk(
+        self, message_id: str, chunk_view: list[dict[str, Any]]
+    ) -> PushChunkResponse:
+
+        # materialize Chunk
+        chunk = Chunk(
+            array_id=chunk_view["array_id"],
+            record_id=chunk_view["record_id"],
+            chunk_index=chunk_view["chunk_index"],
+            data=chunk_view["data"].tobytes(),  # <----- materialize chunk (copies data)
+        )
+        # Push Chunk
+        _: PushChunkResponse = self._stub.PushChunk(
+            PushChunkRequest(chunks=[chunk], message_id=message_id, node=self.node)
+        )
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.

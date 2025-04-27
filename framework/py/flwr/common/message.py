@@ -25,8 +25,9 @@ from flwr.common.logger import warn_deprecated_feature
 
 from .constant import MESSAGE_TTL_TOLERANCE, MessageType, MessageTypeLegacy
 from .logger import log
-from .record import RecordDict
+from .record import Array, ArrayRecord, RecordDict
 
+CHUNK_SIZE = 50 * 1024 * 1024  # 50MB
 DEFAULT_TTL = 43200  # This is 12 hours
 MESSAGE_INIT_ERROR_MESSAGE = (
     "Invalid arguments for Message. Expected one of the documented "
@@ -531,6 +532,60 @@ def make_message(
 ) -> Message:
     """Create a message with the provided metadata, content, and error."""
     return Message(metadata=metadata, content=content, error=error)  # type: ignore
+
+
+def decouple_arrays_from_message(
+    message: Message,
+) -> tuple[Message, dict[str, ArrayRecord]]:
+    """."""
+    content_ = RecordDict()
+    array_record_dict: dict[str, ArrayRecord] = {}
+    for k, v in message.content.items():
+        if isinstance(v, ArrayRecord):
+            # Add record but ensure data is empty
+            content_[k] = ArrayRecord(
+                {
+                    k_arr: Array(
+                        dtype=arr.dtype, shape=arr.shape, stype=arr.stype, data=b""
+                    )
+                    for k_arr, arr in v.items()
+                }
+            )
+
+            # Add reference to list of array records
+            array_record_dict[k] = v
+        else:
+            # reference original
+            content_[k] = v
+
+    # update message content
+    message.content = content_
+    return message, array_record_dict
+
+
+def chunk_viewer(
+    records: dict[str, ArrayRecord], chunk_size: int = CHUNK_SIZE
+) -> list[dict[str, object]]:
+    """."""
+    chunks = []
+    for record_id, record in records.items():  # traverse dict of ArrayRecords
+        for array_id, array in record.items():  # for each Array
+            mv = memoryview(array.data)  # essentially a pointer to bytes buffer
+            offset = 0
+            chunk_idx = 0
+            # Split array into chunks of a max size
+            while offset < len(mv):
+                end = min(offset + chunk_size, len(mv))
+                chunk = {
+                    "array_id": array_id,
+                    "record_id": record_id,
+                    "chunk_index": chunk_idx,
+                    "data": mv[offset:end],  # still a memoryview
+                }
+                chunks.append(chunk)
+                offset = end
+                chunk_idx += 1
+    return chunks
 
 
 def _limit_reply_ttl(

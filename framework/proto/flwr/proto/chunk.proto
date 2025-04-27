@@ -25,14 +25,14 @@ import "flwr/proto/node.proto";
 // Pushing a Chunk
 message PushChunkRequest {
   repeated Chunk chunks = 1; // List of chunks carrying Array data of a Message
-  uint64 message_id = 2;     // Identifies the message these Chunks belong to
+  string message_id = 2;     // Identifies the message these Chunks belong to
   Node node = 3;             // Identifies the node making the request
 }
 message PushChunkResponse {}
 
 // Pulling a Chunk
 message PullChunkRequest {
-  uint64 message_id = 1; // We are requesting a chunk from this Message
+  string message_id = 1; // We are requesting a chunk from this Message
   Node node = 2;         // Identifies the node making the request
 }
 message PullChunkResponse {

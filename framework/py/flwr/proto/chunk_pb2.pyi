@@ -22,7 +22,7 @@ class PushChunkRequest(google.protobuf.message.Message):
     def chunks(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Chunk]:
         """List of chunks carrying Array data of a Message"""
         pass
-    message_id: builtins.int
+    message_id: typing.Text
     """Identifies the message these Chunks belong to"""
 
     @property
@@ -32,7 +32,7 @@ class PushChunkRequest(google.protobuf.message.Message):
     def __init__(self,
         *,
         chunks: typing.Optional[typing.Iterable[global___Chunk]] = ...,
-        message_id: builtins.int = ...,
+        message_id: typing.Text = ...,
         node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
@@ -50,7 +50,7 @@ class PullChunkRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MESSAGE_ID_FIELD_NUMBER: builtins.int
     NODE_FIELD_NUMBER: builtins.int
-    message_id: builtins.int
+    message_id: typing.Text
     """We are requesting a chunk from this Message"""
 
     @property
@@ -59,7 +59,7 @@ class PullChunkRequest(google.protobuf.message.Message):
         pass
     def __init__(self,
         *,
-        message_id: builtins.int = ...,
+        message_id: typing.Text = ...,
         node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
