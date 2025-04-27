@@ -31,7 +31,7 @@ from .array import Array
 
 
 def _get_buffer_from_ndarray(array: NDArray) -> bytes:
-    """Return a bytes buffer froma given NumPy array."""
+    """Return a bytes buffer from a given NumPy array."""
     buffer = BytesIO()
     np.save(buffer, array, allow_pickle=False)
     return buffer.getvalue()
