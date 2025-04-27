@@ -21,7 +21,7 @@ import gc
 import sys
 from collections import OrderedDict
 from logging import WARN
-from typing import Any, cast, overload
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
