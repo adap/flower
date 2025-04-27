@@ -18,7 +18,7 @@ from flwr.proto import transport_pb2 as flwr_dot_proto_dot_transport__pb2
 from flwr.proto import node_pb2 as flwr_dot_proto_dot_node__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66lwr/proto/chunk.proto\x12\nflwr.proto\x1a\x16\x66lwr/proto/error.proto\x1a\x1b\x66lwr/proto/recorddict.proto\x1a\x1a\x66lwr/proto/transport.proto\x1a\x15\x66lwr/proto/node.proto\"i\n\x10PushChunkRequest\x12!\n\x06\x63hunks\x18\x01 \x03(\x0b\x32\x11.flwr.proto.Chunk\x12\x12\n\nmessage_id\x18\x02 \x01(\x04\x12\x1e\n\x04node\x18\x03 \x01(\x0b\x32\x10.flwr.proto.Node\" \n\x11PushChunkResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"F\n\x10PullChunkRequest\x12\x12\n\nmessage_id\x18\x01 \x01(\x04\x12\x1e\n\x04node\x18\x02 \x01(\x0b\x32\x10.flwr.proto.Node\"5\n\x11PullChunkResponse\x12 \n\x05\x63hunk\x18\x01 \x01(\x0b\x32\x11.flwr.proto.Chunk\"O\n\x05\x43hunk\x12\x10\n\x08\x61rray_id\x18\x01 \x01(\t\x12\x11\n\trecord_id\x18\x02 \x01(\t\x12\x13\n\x0b\x63hunk_index\x18\x03 \x01(\x04\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\x0c\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66lwr/proto/chunk.proto\x12\nflwr.proto\x1a\x16\x66lwr/proto/error.proto\x1a\x1b\x66lwr/proto/recorddict.proto\x1a\x1a\x66lwr/proto/transport.proto\x1a\x15\x66lwr/proto/node.proto\"i\n\x10PushChunkRequest\x12!\n\x06\x63hunks\x18\x01 \x03(\x0b\x32\x11.flwr.proto.Chunk\x12\x12\n\nmessage_id\x18\x02 \x01(\x04\x12\x1e\n\x04node\x18\x03 \x01(\x0b\x32\x10.flwr.proto.Node\"\x13\n\x11PushChunkResponse\"F\n\x10PullChunkRequest\x12\x12\n\nmessage_id\x18\x01 \x01(\x04\x12\x1e\n\x04node\x18\x02 \x01(\x0b\x32\x10.flwr.proto.Node\"5\n\x11PullChunkResponse\x12 \n\x05\x63hunk\x18\x01 \x01(\x0b\x32\x11.flwr.proto.Chunk\"O\n\x05\x43hunk\x12\x10\n\x08\x61rray_id\x18\x01 \x01(\t\x12\x11\n\trecord_id\x18\x02 \x01(\t\x12\x13\n\x0b\x63hunk_index\x18\x03 \x01(\x04\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\x0c\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -28,11 +28,11 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_PUSHCHUNKREQUEST']._serialized_start=142
   _globals['_PUSHCHUNKREQUEST']._serialized_end=247
   _globals['_PUSHCHUNKRESPONSE']._serialized_start=249
-  _globals['_PUSHCHUNKRESPONSE']._serialized_end=281
-  _globals['_PULLCHUNKREQUEST']._serialized_start=283
-  _globals['_PULLCHUNKREQUEST']._serialized_end=353
-  _globals['_PULLCHUNKRESPONSE']._serialized_start=355
-  _globals['_PULLCHUNKRESPONSE']._serialized_end=408
-  _globals['_CHUNK']._serialized_start=410
-  _globals['_CHUNK']._serialized_end=489
+  _globals['_PUSHCHUNKRESPONSE']._serialized_end=268
+  _globals['_PULLCHUNKREQUEST']._serialized_start=270
+  _globals['_PULLCHUNKREQUEST']._serialized_end=340
+  _globals['_PULLCHUNKRESPONSE']._serialized_start=342
+  _globals['_PULLCHUNKRESPONSE']._serialized_end=395
+  _globals['_CHUNK']._serialized_start=397
+  _globals['_CHUNK']._serialized_end=476
 # @@protoc_insertion_point(module_scope)

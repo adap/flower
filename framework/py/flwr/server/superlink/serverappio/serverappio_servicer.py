@@ -39,6 +39,12 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
+    PullChunkRequest,
+    PullChunkResponse,
+    PushChunkRequest,
+    PushChunkResponse,
+)
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
@@ -67,6 +73,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
 )
+from flwr.server.superlink.chunkstore import ChunkStore, ChunkStoreFactory
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
@@ -82,6 +89,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
+        self.chunkstore_factory = ChunkStoreFactory()
         self.lock = threading.RLock()
 
     def GetNodes(
@@ -179,6 +187,30 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             ]
         )
 
+    def PushChunks(
+        self, request: PushChunkRequest, context: grpc.ServicerContext
+    ) -> PushChunkResponse:
+        """Add chunks to the ChunkStore that belong to a message already registered and
+        stored in the LinkState."""
+        # Get existing instance or open connection (depends on implementation)
+        store: ChunkStore = self.chunkstore_factory.state()
+
+        # integrity checks
+        # TODO:
+        # abort_if(...)
+        # abort if
+        # - message-id specified in request isn't recognized
+        # - node.node_id doesn't match the src_node_id in the metadata field
+        #   of the Message previously pushed (which got assigned the message-id)
+        #   specified in this request. Recall first a Message is pushed, then
+        #   the chunks follow in subsequent requests.
+
+        # Store chunks in the chunkstore
+        for chunk in request.chunks:
+            store.store_chunk(request.message_id, chunk)
+
+        return PushChunkResponse()
+
     def PullMessages(
         self, request: PullResMessagesRequest, context: grpc.ServicerContext
     ) -> PullResMessagesResponse:
@@ -226,6 +258,25 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             messages_list.append(message_to_proto(msg))
 
         return PullResMessagesResponse(messages_list=messages_list)
+
+    def PullChunks(
+        self, request: PullChunkRequest, context: grpc.ServicerContext
+    ) -> PullChunkResponse:
+        """Fetch chunks that belong to a Message."""
+        # Get existing instance or open connection (depends on implementation)
+        store: ChunkStore = self.chunkstore_factory.state()
+
+        # integrity checks
+        # TODO:
+        # abort_if(...)
+        # abort if
+        # - message-id specified in request isn't recognized
+        # - node.node_id doesn't match the dst_node_id in the metadata field
+        #   of the Message with the specified message-id in the request.
+
+        # Get one chunk
+        chunk = store.get_chunk(request.message_id)
+        return PullChunkResponse(chunk=chunk)
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext

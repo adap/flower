@@ -41,13 +41,8 @@ global___PushChunkRequest = PushChunkRequest
 
 class PushChunkResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    ACK_FIELD_NUMBER: builtins.int
-    ack: builtins.bool
     def __init__(self,
-        *,
-        ack: builtins.bool = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["ack",b"ack"]) -> None: ...
 global___PushChunkResponse = PushChunkResponse
 
 class PullChunkRequest(google.protobuf.message.Message):

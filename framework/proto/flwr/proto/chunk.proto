@@ -28,7 +28,7 @@ message PushChunkRequest {
   uint64 message_id = 2;     // Identifies the message these Chunks belong to
   Node node = 3;             // Identifies the node making the request
 }
-message PushChunkResponse { bool ack = 1; }
+message PushChunkResponse {}
 
 // Pulling a Chunk
 message PullChunkRequest {
