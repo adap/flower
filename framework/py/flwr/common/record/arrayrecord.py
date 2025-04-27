@@ -31,6 +31,9 @@ from ..typing import NDArray
 from .array import Array
 from .typeddict import TypedDict
 
+if TYPE_CHECKING:
+    import torch
+
 
 def _raise_array_record_init_error() -> None:
     raise TypeError(
