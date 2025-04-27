@@ -26,11 +26,11 @@ __all__ = [
     "Array",
     "ArrayRecord",
     "ConfigRecord",
-    "ConfigsRecord",  # Deprecated
+    "ConfigsRecord",
     "MetricRecord",
-    "MetricsRecord",  # Deprecated
-    "ParametersRecord",  # Deprecated
+    "MetricsRecord",
+    "ParametersRecord",
     "RecordDict",
-    "RecordSet",  # Deprecated
-    "array_from_numpy",  # Deprecated
+    "RecordSet",
+    "array_from_numpy",
 ]
