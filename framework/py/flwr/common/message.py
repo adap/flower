@@ -23,11 +23,10 @@ from typing import Any, Optional, cast, overload
 from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
 
-from .constant import MESSAGE_TTL_TOLERANCE, MessageType, MessageTypeLegacy
+from .constant import CHUNK_SIZE, MESSAGE_TTL_TOLERANCE, MessageType, MessageTypeLegacy
 from .logger import log
 from .record import Array, ArrayRecord, RecordDict
 
-CHUNK_SIZE = 50 * 1024 * 1024  # 50MB
 DEFAULT_TTL = 43200  # This is 12 hours
 MESSAGE_INIT_ERROR_MESSAGE = (
     "Invalid arguments for Message. Expected one of the documented "

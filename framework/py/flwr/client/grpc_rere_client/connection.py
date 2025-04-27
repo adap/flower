@@ -48,6 +48,7 @@ from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
     Chunk,
     PullChunkRequest,
+    PullChunkResponse,
     PushChunkRequest,
 )
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -294,10 +295,11 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Return message_id of response
         return res.results["key"]
 
-    def get_chunk(message_id: str) -> Chunk:
+    def get_chunk(message_id: str) -> PullChunkResponse:
         """Get a Chunk from a particular message."""
         request = PullChunkRequest(message_id=message_id, node=node)
-        _ = retry_invoker.invoke(stub.PullChunk, request)
+        response: PullChunkResponse = retry_invoker.invoke(stub.PullChunk, request)
+        return response
 
     def push_chunk(message_id: str, chunk: Chunk) -> Chunk:
         """Push a Chunk that belongs to a particular message."""

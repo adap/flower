@@ -20,6 +20,7 @@ import os
 import sys
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import AbstractContextManager
 from logging import ERROR, INFO, WARN
 from os import urandom
@@ -60,6 +61,12 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
+from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
+    Chunk,
+    PullChunkRequest,
+    PullChunkResponse,
+    PushChunkRequest,
+)
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
@@ -392,6 +399,9 @@ def start_client_internal(
 
     runs: dict[int, Run] = {}
 
+    pull_executor = ThreadPoolExecutor(max_workers=4)
+    push_executor = ThreadPoolExecutor(max_workers=4)
+
     while True:
         sleep_duration: int = 0
         with connection(
@@ -412,6 +422,8 @@ def start_client_internal(
                 get_chunk,
                 push_chunk,
             ) = conn
+
+            pull_executor.submit(chunk_pulling_thread, get_chunk, clientappio_servicer)
 
             # Register node when connecting the first time
             if run_info_store is None:
@@ -644,6 +656,17 @@ def start_client_internal(
             sleep_duration,
         )
         time.sleep(sleep_duration)
+
+
+def chunk_pulling_thread(get_chunk_fn, clientappio_servicer: ClientAppIoServicer):
+    """Monitor queue of PullChunk requests."""
+    # TODO: terminate gracefully
+    while True:
+        # Get request made by flwr-clientapp
+        request = clientappio_servicer.pull_requests.get()
+
+        response: PullChunkResponse = get_chunk_fn(message_id=request.message_id)
+        clientappio_servicer.pull_responses.put(response)
 
 
 def start_numpy_client(

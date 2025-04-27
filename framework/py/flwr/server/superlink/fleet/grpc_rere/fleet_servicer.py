@@ -119,7 +119,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         # that's addressed to this node?)
         # Retrieve chunk
         store = self.chunkstore_factory.state()
-        return PullChunkResponse(chunk=store.get_chunk(request.message_id))
+
+        return PullChunkResponse(chunk=store.get_chunk(UUID(request.message_id)))
 
     def PushMessages(
         self, request: PushMessagesRequest, context: grpc.ServicerContext

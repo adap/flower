@@ -17,6 +17,7 @@
 
 from dataclasses import dataclass
 from logging import DEBUG, ERROR
+from queue import Queue
 from typing import Optional, cast
 
 import grpc
@@ -36,6 +37,12 @@ from flwr.common.typing import Fab, Run
 
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2_grpc
+from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
+    PullChunkRequest,
+    PullChunkResponse,
+    PushChunkRequest,
+    PushChunkResponse,
+)
 from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     GetTokenRequest,
     GetTokenResponse,
@@ -74,6 +81,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.clientapp_output: Optional[ClientAppOutputs] = None
         self.token_returned: bool = False
         self.inputs_returned: bool = False
+
+        self.pull_requests: Queue[PullChunkRequest] = Queue(maxsize=10)
+        self.pull_responses: Queue[PullChunkResponse] = Queue(maxsize=10)
+        self.push_requests: Queue[PushChunkRequest] = Queue(maxsize=10)
 
     def GetToken(
         self, request: GetTokenRequest, context: grpc.ServicerContext
@@ -197,6 +208,23 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Return status to ClientApp process
         proto_status = clientappstatus_to_proto(status=status)
         return PushClientAppOutputsResponse(status=proto_status)
+
+    def PullChunk(
+        self, request: PushChunkRequest, context: grpc.ServicerContext
+    ) -> PushChunkResponse:
+        """Get a chunk from this Message through the supernode."""
+        # Add request to queue (waits if full)
+        self.pull_requests.put(request)
+
+        # Wait until one response is in the queue
+        return self.pull_responses.get()
+
+    def PushChunk(
+        self, request: PushChunkRequest, context: grpc.ServicerContext
+    ) -> None:
+        """Push a chunk through the supernode."""
+        # Add request to queue (waits if full)
+        self.push_requests.put(request)
 
     def set_inputs(
         self, clientapp_input: ClientAppInputs, token_returned: bool

@@ -22,13 +22,18 @@ from logging import DEBUG, ERROR, INFO
 from typing import Optional
 
 import grpc
+import numpy as np
 
 from flwr.cli.install import install_from_fab
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.common import Context, Message
+from flwr.common import ArrayRecord, Context, Message, RecordDict
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import get_flwr_dir
-from flwr.common.constant import CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS, ErrorCode
+from flwr.common.constant import (
+    CHUNK_SIZE,
+    CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    ErrorCode,
+)
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
@@ -43,6 +48,12 @@ from flwr.common.serde import (
     run_from_proto,
 )
 from flwr.common.typing import Fab, Run
+from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
+    PullChunkRequest,
+    PullChunkResponse,
+    PushChunkRequest,
+    PushChunkResponse,
+)
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
@@ -84,6 +95,19 @@ def flwr_clientapp() -> None:
     )
 
 
+def total_num_chunks(msg_content: RecordDict) -> int:
+    """The number of chunks that the array payload in a message is split into is
+    deterministic."""
+    num_chunks = 0
+
+    for record in msg_content.values():
+        if isinstance(record, ArrayRecord):
+            for array in record.values():
+                num_bytes = np.prod(array.shape) * np.dtype(array.dtype).itemsize
+                num_chunks += int(np.ceil(num_bytes / CHUNK_SIZE))
+    return num_chunks
+
+
 def run_clientapp(  # pylint: disable=R0914
     clientappio_api_address: str,
     run_once: bool,
@@ -113,6 +137,26 @@ def run_clientapp(  # pylint: disable=R0914
 
             # Pull Message, Context, Run and (optional) FAB from SuperNode
             message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
+
+            # Identify number of total chunks based on Array sizes
+            total_chunks = total_num_chunks(msg_content=message.content)
+            if total_chunks:
+                # Allocate memory for full message
+
+                #! IT'S BETTER TO PULL CHUNKS IN A PER-ARRAY FASHION TO SIMPLIFY REMATERIALIZATION
+
+                # Request one chunk at a time
+                print(f"Requesting {total_chunks} chunks!")
+
+                for i in range(total_chunks):
+                    res: PullChunkResponse = stub.PullChunk(
+                        request=PullChunkRequest(
+                            message_id=message.metadata.message_id, node=None
+                        )
+                    )
+                    print(f"Got chunk {i}/{total_chunks}")
+
+                    # Place memory in the Array it belongs to
 
             # Install FAB, if provided
             if fab:

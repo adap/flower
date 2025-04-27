@@ -123,6 +123,7 @@ SYSTEM_TIME_TOLERANCE = 5  # Allowance for system time drift
 
 # Constants for ArrayRecord
 GC_THRESHOLD = 200_000_000  # 200 MB
+CHUNK_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
 class MessageType:
