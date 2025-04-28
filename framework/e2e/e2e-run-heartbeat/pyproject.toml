@@ -20,7 +20,7 @@ publisher = "flwrlabs"
 
 [tool.flwr.app.components]
 serverapp = "e2e_run_heartbeat.server_app:app"
-clientapp = ""
+clientapp = "e2e_run_heartbeat.client_app:app"
 
 [tool.flwr.app.config]
 
@@ -29,3 +29,7 @@ default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 10
+
+[tool.flwr.federations.e2e]
+address = "127.0.0.1:9093"
+insecure = true
