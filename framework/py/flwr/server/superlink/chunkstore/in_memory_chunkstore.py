@@ -65,6 +65,8 @@ class InMemoryChunkStore:
         ids_chunks_not_fetched = (
             self.message_id_to_chunk_mapping[message_id] - self.retrieved
         )
+        if len(ids_chunks_not_fetched) == 0:
+            return None
         chunk_id_to_return = next(iter(ids_chunks_not_fetched))
         # add chunk UUID to the set of retrieved chunks so it's not pulled again
         self.retrieved.add(chunk_id_to_return)

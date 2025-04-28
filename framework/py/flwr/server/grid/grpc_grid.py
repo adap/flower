@@ -17,7 +17,7 @@
 
 import time
 from collections.abc import Iterable
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, as_completed, wait
 from logging import DEBUG, ERROR, INFO, WARNING
 from typing import Any, Optional, cast
 
@@ -45,6 +45,7 @@ from flwr.common.typing import Run
 from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
     Chunk,
     PullChunkRequest,
+    PullChunkResponse,
     PushChunkRequest,
     PushChunkResponse,
 )
@@ -119,7 +120,6 @@ class GrpcGrid(Grid):
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
         self._retry_invoker = _make_simple_grpc_retry_invoker()
-        self.chunk_executor = ThreadPoolExecutor(max_workers=4)
         super().__init__()
 
     @property
@@ -271,9 +271,10 @@ class GrpcGrid(Grid):
                         for chunk_view in chunk_views
                     ]
 
-                    results = []
-                    for future in tqdm(as_completed(futures), total=len(futures)):
-                        results.append(future.result())
+                    for future in tqdm(
+                        as_completed(futures), total=len(futures), desc="PushChunk"
+                    ):
+                        _ = future.result()
 
             return list(res.message_ids)
         except grpc.RpcError as e:
@@ -298,6 +299,13 @@ class GrpcGrid(Grid):
             PushChunkRequest(chunks=[chunk], message_id=message_id, node=self.node)
         )
 
+    def _pull_chunk(self, message_id: str) -> PullChunkResponse:
+        """."""
+        res: PullChunkResponse = self._stub.PullChunk(
+            request=PullChunkRequest(message_id=message_id, node=self.node)
+        )
+        return res
+
     def _materialize_arays_in_message(self, message: Message) -> None:
         """."""
         # Allocate bytearrays
@@ -309,19 +317,46 @@ class GrpcGrid(Grid):
             # Request one chunk at a time
             log(INFO, f"Requesting {total_chunks} chunks!")
 
-            for i in range(total_chunks):
-                chunk: Chunk = self._stub.PullChunk(
-                    request=PullChunkRequest(
-                        message_id=message.metadata.message_id, node=self.node
-                    )
-                ).chunk
-                print(f"Got chunk {i}/{total_chunks}")
+            inflight_futures = set()
+            num_pulled_chunks = 0
+            with (
+                ThreadPoolExecutor(max_workers=4) as executor,
+                tqdm(total=total_chunks, desc="PullChunk") as pbar,
+            ):
 
-                # Place memory in the Array it belongs to
-                offset = CHUNK_SIZE * chunk.chunk_index
-                bytearrays_dict[chunk.record_id][chunk.array_id][
-                    offset : offset + len(chunk.data)
-                ] = chunk.data
+                # Submit one request
+                future = executor.submit(
+                    self._pull_chunk, message_id=message.metadata.message_id
+                )
+                inflight_futures.add(future)
+
+                while num_pulled_chunks < total_chunks:
+                    done, inflight_futures = wait(
+                        inflight_futures, return_when=FIRST_COMPLETED
+                    )
+
+                    for future in done:
+                        response: PullChunkResponse = future.result()
+                        if (
+                            response.chunk.record_id
+                        ):  # will be unset if a chunk wasn't available to pull
+                            chunk: Chunk = response.chunk
+                            # Place memory in the Array it belongs to
+                            offset = CHUNK_SIZE * chunk.chunk_index
+                            bytearrays_dict[chunk.record_id][chunk.array_id][
+                                offset : offset + len(chunk.data)
+                            ] = chunk.data
+                            num_pulled_chunks += 1
+                            pbar.update(1)  # we got a chunk, update progress bar
+
+                        # Submit a new request if still needed
+                        if num_pulled_chunks < total_chunks:
+                            future_ = executor.submit(
+                                self._pull_chunk, message_id=message.metadata.message_id
+                            )
+                            inflight_futures.add(future_)
+                        else:
+                            break
 
             # Put data in Message (i.e. materialize Message)
             materialize_arrays(

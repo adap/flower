@@ -18,10 +18,12 @@
 import argparse
 import gc
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging import DEBUG, ERROR, INFO
-from typing import Optional
+from typing import Any, Optional
 
 import grpc
+from tqdm import tqdm
 
 from flwr.cli.install import install_from_fab
 from flwr.client.client_app import ClientApp, LoadClientAppError
@@ -57,7 +59,9 @@ from flwr.common.typing import Fab, Run
 from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
     Chunk,
     PullChunkRequest,
+    PullChunkResponse,
     PushChunkRequest,
+    PushChunkResponse,
 )
 
 # pylint: disable=E0611
@@ -140,19 +144,27 @@ def run_clientapp(  # pylint: disable=R0914
                 # Request one chunk at a time
                 log(INFO, f"Requesting {total_chunks} chunks!")
 
-                for i in range(total_chunks):
-                    chunk: Chunk = stub.PullChunk(
-                        request=PullChunkRequest(
-                            message_id=message.metadata.message_id, node=None
+                with ThreadPoolExecutor(max_workers=4) as executor:
+                    futures = [
+                        executor.submit(
+                            stub.PullChunk,
+                            request=PullChunkRequest(
+                                message_id=message.metadata.message_id, node=None
+                            ),
                         )
-                    ).chunk
-                    print(f"Got chunk {i}/{total_chunks}")
+                        for _ in range(total_chunks)
+                    ]
 
-                    # Place memory in the Array it belongs to
-                    offset = CHUNK_SIZE * chunk.chunk_index
-                    bytearrays_dict[chunk.record_id][chunk.array_id][
-                        offset : offset + len(chunk.data)
-                    ] = chunk.data
+                    for future in tqdm(
+                        as_completed(futures), total=len(futures), desc="PullChunk"
+                    ):
+                        res: PullChunkResponse = future.result()
+                        chunk = res.chunk
+                        # Place memory in the Array it belongs to
+                        offset = CHUNK_SIZE * chunk.chunk_index
+                        bytearrays_dict[chunk.record_id][chunk.array_id][
+                            offset : offset + len(chunk.data)
+                        ] = chunk.data
 
                 # Put data in Message (i.e. materialize Message)
                 materialize_arrays(
@@ -224,21 +236,18 @@ def run_clientapp(  # pylint: disable=R0914
             # Send chunks
             chunk_views = chunk_viewer(array_records)
 
-            for i, ch_view in enumerate(chunk_views):
-                # materialize Chunk
-                chunk = Chunk(
-                    array_id=ch_view["array_id"],
-                    record_id=ch_view["record_id"],
-                    chunk_index=ch_view["chunk_index"],
-                    data=ch_view[
-                        "data"
-                    ].tobytes(),  # <----- materialize chunk (copies data)
-                )
-                # Push Chunk
-                print(f"Pushing chunk {i}/{len(chunk_views)}")
-                stub.PushChunk(
-                    request=PushChunkRequest(chunks=[chunk], message_id=str(msg_id))
-                )
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                futures = [
+                    executor.submit(
+                        _push_chunk, stub=stub, chunk_view=chunk_view, message_id=msg_id
+                    )
+                    for chunk_view in chunk_views
+                ]
+
+                for future in tqdm(
+                    as_completed(futures), total=len(futures), desc="PushChunk"
+                ):
+                    _ = future.result()
 
             del client_app, message, context, run, fab, reply_message
             gc.collect()
@@ -258,6 +267,23 @@ def run_clientapp(  # pylint: disable=R0914
         log(ERROR, "GRPC error occurred: %s", str(e))
     finally:
         channel.close()
+
+
+def _push_chunk(
+    stub, message_id: str, chunk_view: list[dict[str, Any]]
+) -> PushChunkResponse:
+
+    # materialize Chunk
+    chunk = Chunk(
+        array_id=chunk_view["array_id"],
+        record_id=chunk_view["record_id"],
+        chunk_index=chunk_view["chunk_index"],
+        data=chunk_view["data"].tobytes(),  # <----- materialize chunk (copies data)
+    )
+    # Push Chunk
+    _: PushChunkResponse = stub.PushChunk(
+        PushChunkRequest(chunks=[chunk], message_id=message_id)
+    )
 
 
 def get_token(stub: grpc.Channel) -> Optional[int]:
