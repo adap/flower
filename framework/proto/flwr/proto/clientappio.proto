@@ -70,7 +70,7 @@ message PushClientAppOutputsRequest {
   Message message = 2;
   Context context = 3;
 }
-message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1;}
+message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1; }
 
-message QueryMessageIdRequest {string msg_hash = 1;}
-message QueryMessageIdResponse {string msg_id = 1;}
+message QueryMessageIdRequest { string msg_hash = 1; }
+message QueryMessageIdResponse { string msg_id = 1; }

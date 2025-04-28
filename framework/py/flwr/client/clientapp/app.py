@@ -22,11 +22,10 @@ from logging import DEBUG, ERROR, INFO
 from typing import Optional
 
 import grpc
-import numpy as np
 
 from flwr.cli.install import install_from_fab
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.common import ArrayRecord, Context, Message, RecordDict
+from flwr.common import Context, Message
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
@@ -37,7 +36,14 @@ from flwr.common.constant import (
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
-from flwr.common.message import Error, chunk_viewer, decouple_arrays_from_message
+from flwr.common.message import (
+    Error,
+    allocate_byte_arrays,
+    chunk_viewer,
+    decouple_arrays_from_message,
+    materialize_arrays,
+    total_num_chunks,
+)
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import (
     context_from_proto,
@@ -95,38 +101,6 @@ def flwr_clientapp() -> None:
     )
 
 
-def total_num_chunks(msg_content: RecordDict) -> int:
-    """Compute number of chunks that the array payload in a message is split into is
-    deterministic."""
-    num_chunks = 0
-
-    for record in msg_content.values():
-        if isinstance(record, ArrayRecord):
-            for array in record.values():
-                num_bytes = np.prod(array.shape) * np.dtype(array.dtype).itemsize
-                num_chunks += int(np.ceil(num_bytes / CHUNK_SIZE))
-    return num_chunks
-
-
-def allocate_byte_arrays(msg_content: RecordDict) -> dict[str, dict[str, bytearray]]:
-    """Allocate bytearrays for all Arrays in RecordDict."""
-    full_bytearray_dict = {}
-    for k, record in msg_content.items():
-        if isinstance(record, ArrayRecord):
-            full_bytearray_dict[k] = record.allocate_bytearrays()
-
-    return full_bytearray_dict
-
-
-def materialize_arrays(
-    msg_content: RecordDict, bytearray_dict: dict[str, dict[str, bytearray]]
-):
-    """."""
-    for k, record in msg_content.items():
-        if isinstance(record, ArrayRecord):
-            record.from_bytesarray(bytearray_dict[k])
-
-
 def run_clientapp(  # pylint: disable=R0914
     clientappio_api_address: str,
     run_once: bool,
@@ -164,7 +138,7 @@ def run_clientapp(  # pylint: disable=R0914
             # Request one chunk and store in bytearray
             if total_chunks:
                 # Request one chunk at a time
-                print(f"Requesting {total_chunks} chunks!")
+                log(INFO, f"Requesting {total_chunks} chunks!")
 
                 for i in range(total_chunks):
                     chunk: Chunk = stub.PullChunk(
@@ -180,10 +154,10 @@ def run_clientapp(  # pylint: disable=R0914
                         offset : offset + len(chunk.data)
                     ] = chunk.data
 
-            # Put data in Message (i.e. materialize Message)
-            materialize_arrays(
-                msg_content=message.content, bytearray_dict=bytearrays_dict
-            )
+                # Put data in Message (i.e. materialize Message)
+                materialize_arrays(
+                    msg_content=message.content, bytearray_dict=bytearrays_dict
+                )
 
             # Install FAB, if provided
             if fab:
@@ -235,8 +209,8 @@ def run_clientapp(  # pylint: disable=R0914
                 stub=stub, token=token, message=reply_msg, context=context
             )
 
-            # Wait until Message is pushed by SuperNode. Only then the id the message got
-            # assigned by the superlink will be accesible via the ClientAppIo API.
+            # Wait until Message is pushed by SuperNode. Only then the id the message
+            # got assigned by the superlink will be accesible via the ClientAppIo API.
             # We need it to construct our PushChunkRequests
             while True:
                 msg_id = stub.QueryMessageId(

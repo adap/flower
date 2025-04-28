@@ -18,7 +18,7 @@
 import time
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from logging import DEBUG, ERROR, WARNING
+from logging import DEBUG, ERROR, INFO, WARNING
 from typing import Any, Optional, cast
 
 import grpc
@@ -26,17 +26,25 @@ from tqdm import tqdm
 
 from flwr.common import ArrayRecord, Message, RecordDict
 from flwr.common.constant import (
+    CHUNK_SIZE,
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log, warn_deprecated_feature
-from flwr.common.message import chunk_viewer, decouple_arrays_from_message
+from flwr.common.message import (
+    allocate_byte_arrays,
+    chunk_viewer,
+    decouple_arrays_from_message,
+    materialize_arrays,
+    total_num_chunks,
+)
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
     Chunk,
+    PullChunkRequest,
     PushChunkRequest,
     PushChunkResponse,
 )
@@ -290,6 +298,36 @@ class GrpcGrid(Grid):
             PushChunkRequest(chunks=[chunk], message_id=message_id, node=self.node)
         )
 
+    def _materialize_arays_in_message(self, message: Message) -> None:
+        """."""
+        # Allocate bytearrays
+        bytearrays_dict = allocate_byte_arrays(msg_content=message.content)
+        # Identify number of total chunks based on Array sizes
+        total_chunks = total_num_chunks(msg_content=message.content)
+        # Request one chunk and store in bytearray
+        if total_chunks:
+            # Request one chunk at a time
+            log(INFO, f"Requesting {total_chunks} chunks!")
+
+            for i in range(total_chunks):
+                chunk: Chunk = self._stub.PullChunk(
+                    request=PullChunkRequest(
+                        message_id=message.metadata.message_id, node=self.node
+                    )
+                ).chunk
+                print(f"Got chunk {i}/{total_chunks}")
+
+                # Place memory in the Array it belongs to
+                offset = CHUNK_SIZE * chunk.chunk_index
+                bytearrays_dict[chunk.record_id][chunk.array_id][
+                    offset : offset + len(chunk.data)
+                ] = chunk.data
+
+            # Put data in Message (i.e. materialize Message)
+            materialize_arrays(
+                msg_content=message.content, bytearray_dict=bytearrays_dict
+            )
+
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
 
@@ -306,6 +344,12 @@ class GrpcGrid(Grid):
             )
             # Convert Message from Protobuf representation
             msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
+
+            # With the above, we got the messages but the Arrays (if any) are empty
+            # We need to pull the chunks
+            for msg in msgs:
+                self._materialize_arays_in_message(msg)
+
             return msgs
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101

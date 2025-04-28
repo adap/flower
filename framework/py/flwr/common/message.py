@@ -22,6 +22,8 @@ import pickle
 from logging import WARNING
 from typing import Any, Optional, cast, overload
 
+import numpy as np
+
 from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
 
@@ -720,3 +722,35 @@ def validate_legacy_message_type(message_type: str) -> bool:
         return True
 
     return False
+
+
+def total_num_chunks(msg_content: RecordDict) -> int:
+    """Compute number of chunks that the array payload in a message is split into is
+    deterministic."""
+    num_chunks = 0
+
+    for record in msg_content.values():
+        if isinstance(record, ArrayRecord):
+            for array in record.values():
+                num_bytes = np.prod(array.shape) * np.dtype(array.dtype).itemsize
+                num_chunks += int(np.ceil(num_bytes / CHUNK_SIZE))
+    return num_chunks
+
+
+def allocate_byte_arrays(msg_content: RecordDict) -> dict[str, dict[str, bytearray]]:
+    """Allocate bytearrays for all Arrays in RecordDict."""
+    full_bytearray_dict = {}
+    for k, record in msg_content.items():
+        if isinstance(record, ArrayRecord):
+            full_bytearray_dict[k] = record.allocate_bytearrays()
+
+    return full_bytearray_dict
+
+
+def materialize_arrays(
+    msg_content: RecordDict, bytearray_dict: dict[str, dict[str, bytearray]]
+):
+    """."""
+    for k, record in msg_content.items():
+        if isinstance(record, ArrayRecord):
+            record.from_bytesarray(bytearray_dict[k])

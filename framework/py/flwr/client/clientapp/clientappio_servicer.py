@@ -18,7 +18,6 @@
 from dataclasses import dataclass
 from logging import DEBUG, ERROR
 from queue import Queue
-from time import sleep
 from typing import Optional, cast
 
 import grpc

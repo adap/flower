@@ -46,7 +46,6 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
-    Chunk,
     PullChunkRequest,
     PullChunkResponse,
     PushChunkRequest,
