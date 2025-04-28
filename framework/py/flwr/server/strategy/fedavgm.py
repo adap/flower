@@ -19,7 +19,7 @@ Paper: arxiv.org/pdf/1909.06335.pdf
 
 
 from logging import WARNING
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, List, Tuple
 
 from flwr.common import (
     FitRes,
@@ -31,12 +31,19 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.logger import log
+from flwr.common.typing import FitIns
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate
 from .fedavg import FedAvg
 
+WARNING_NO_SERVER_OPT = """
+Setting both `server_momentum` and `server_learning_rate` to default values
+cause FedAvgM to work as a vanilla FedAvg strategy. Server optimization with
+momentum is enabled if either `server_momentum` is set to a value greater than
+0.0 or `server_learning_rate` is set to a value lower than 1.0.
+"""
 
 # pylint: disable=line-too-long
 class FedAvgM(FedAvg):
@@ -64,13 +71,18 @@ class FedAvgM(FedAvg):
         Function used to configure validation. Defaults to None.
     accept_failures : bool, optional
         Whether or not accept rounds containing failures. Defaults to True.
-    initial_parameters : Parameters, optional
-        Initial global model parameters.
+    initial_parameters : Optional[Parameters], optional
+    Initial global model parameters. If not provided, the server will
+    automatically use parameters from a randomly sampled client during the
+    first training round.
     server_learning_rate: float
         Server-side learning rate used in server-side optimization.
-        Defaults to 1.0.
+        If either `server_learning_rate` != 1.0 or `server_momentum` !=
+        0.0, enables server-side optimization. Defaults to 1.0.
     server_momentum: float
-        Server-side momentum factor used for FedAvgM. Defaults to 0.0.
+        Server-side momentum factor used in server-side optimization. If
+        either `server_learning_rate` != 1.0 or `server_momentum` != 0.0,
+        enables server-side optimization. Defaults to 0.0.
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
@@ -116,6 +128,8 @@ class FedAvgM(FedAvg):
         self.server_opt: bool = (self.server_momentum != 0.0) or (
             self.server_learning_rate != 1.0
         )
+        if not self.server_opt:
+            log(WARNING, WARNING_NO_SERVER_OPT)
         self.momentum_vector: Optional[NDArrays] = None
 
     def __repr__(self) -> str:
@@ -128,6 +142,15 @@ class FedAvgM(FedAvg):
     ) -> Optional[Parameters]:
         """Initialize global model parameters."""
         return self.initial_parameters
+    
+    def configure_fit(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+        if server_round == 1 and self.initial_parameters is None:
+            # Ensures initial_parameters are set before first fit round
+            self.initial_parameters = parameters
+        return super().configure_fit(server_round, parameters, client_manager)
 
     def aggregate_fit(
         self,
