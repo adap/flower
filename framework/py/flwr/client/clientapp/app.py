@@ -48,12 +48,7 @@ from flwr.common.serde import (
     run_from_proto,
 )
 from flwr.common.typing import Fab, Run
-from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
-    PullChunkRequest,
-    PullChunkResponse,
-    PushChunkRequest,
-    PushChunkResponse,
-)
+from flwr.proto.chunk_pb2 import Chunk, PullChunkRequest  # pylint: disable=E0611
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
@@ -96,7 +91,7 @@ def flwr_clientapp() -> None:
 
 
 def total_num_chunks(msg_content: RecordDict) -> int:
-    """The number of chunks that the array payload in a message is split into is
+    """Compute number of chunks that the array payload in a message is split into is
     deterministic."""
     num_chunks = 0
 
@@ -106,6 +101,25 @@ def total_num_chunks(msg_content: RecordDict) -> int:
                 num_bytes = np.prod(array.shape) * np.dtype(array.dtype).itemsize
                 num_chunks += int(np.ceil(num_bytes / CHUNK_SIZE))
     return num_chunks
+
+
+def allocate_byte_arrays(msg_content: RecordDict) -> dict[str, dict[str, bytearray]]:
+    """Allocate bytearrays for all Arrays in RecordDict."""
+    full_bytearray_dict = {}
+    for k, record in msg_content.items():
+        if isinstance(record, ArrayRecord):
+            full_bytearray_dict[k] = record.allocate_bytearrays()
+
+    return full_bytearray_dict
+
+
+def materialize_arrays(
+    msg_content: RecordDict, bytearray_dict: dict[str, dict[str, bytearray]]
+):
+    """."""
+    for k, record in msg_content.items():
+        if isinstance(record, ArrayRecord):
+            record.from_bytesarray(bytearray_dict[k])
 
 
 def run_clientapp(  # pylint: disable=R0914
@@ -138,25 +152,33 @@ def run_clientapp(  # pylint: disable=R0914
             # Pull Message, Context, Run and (optional) FAB from SuperNode
             message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
 
+            # Allocate bytearrays
+            bytearrays_dict = allocate_byte_arrays(msg_content=message.content)
             # Identify number of total chunks based on Array sizes
             total_chunks = total_num_chunks(msg_content=message.content)
+            # Request one chunk and store in bytearray
             if total_chunks:
-                # Allocate memory for full message
-
-                #! IT'S BETTER TO PULL CHUNKS IN A PER-ARRAY FASHION TO SIMPLIFY REMATERIALIZATION
-
                 # Request one chunk at a time
                 print(f"Requesting {total_chunks} chunks!")
 
                 for i in range(total_chunks):
-                    res: PullChunkResponse = stub.PullChunk(
+                    chunk: Chunk = stub.PullChunk(
                         request=PullChunkRequest(
                             message_id=message.metadata.message_id, node=None
                         )
-                    )
+                    ).chunk
                     print(f"Got chunk {i}/{total_chunks}")
 
                     # Place memory in the Array it belongs to
+                    offset = CHUNK_SIZE * chunk.chunk_index
+                    bytearrays_dict[chunk.record_id][chunk.array_id][
+                        offset : offset + len(chunk.data)
+                    ] = chunk.data
+
+            # Put data in Message (i.e. materialize Message)
+            materialize_arrays(
+                msg_content=message.content, bytearray_dict=bytearrays_dict
+            )
 
             # Install FAB, if provided
             if fab:

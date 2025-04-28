@@ -585,6 +585,20 @@ class ArrayRecord(TypedDict[str, Array]):
 
         return num_bytes
 
+    def allocate_bytearrays(self) -> dict[str, bytearray]:
+        """Allocate memory for all Arrays as detached bytearrays."""
+        bytearrays_dicts = {}
+        for k, array in self.items():
+            num_bytes = int(np.prod(array.shape) * np.dtype(array.dtype).itemsize)
+            bytearrays_dicts[k] = bytearray(num_bytes)
+
+        return bytearrays_dicts
+
+    def from_bytesarray(self, bytesarray_dict: dict[str, bytearray]) -> None:
+        """Assign data in bytearray into each Array's .data."""
+        for k, array in self.items():
+            array.data = bytes(bytesarray_dict[k])
+
 
 class ParametersRecord(ArrayRecord):
     """Deprecated class ``ParametersRecord``, use ``ArrayRecord`` instead.

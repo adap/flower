@@ -61,12 +61,7 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
-from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
-    Chunk,
-    PullChunkRequest,
-    PullChunkResponse,
-    PushChunkRequest,
-)
+from flwr.proto.chunk_pb2 import PullChunkResponse  # pylint: disable=E0611
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
