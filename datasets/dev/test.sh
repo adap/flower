@@ -38,10 +38,6 @@ echo "- pylint: start"
 python -m pylint flwr_datasets/
 echo "- pylint: done"
 
-echo "- flake8: start"
-python -m flake8 flwr_datasets/
-echo "- flake8: done"
-
 echo "- taplo: start"
 taplo fmt --check
 echo "- taplo: done"
