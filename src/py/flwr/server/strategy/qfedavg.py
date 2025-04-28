@@ -201,13 +201,6 @@ class QFedAvg(FedAvg):
 
         if eval_result is not None:
             loss, _ = eval_result
-        elif losses:
-            loss = np.mean(losses)
-            log(
-                WARNING,
-                "Using dynamic fallback loss based on historical data: %s",
-                loss,
-            )
         else:
             loss = 1.0  # Final fallback default
             log(
