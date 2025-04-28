@@ -20,6 +20,7 @@ package flwr.proto;
 import "flwr/proto/fab.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/message.proto";
+import "flwr/proto/chunk.proto";
 
 service ClientAppIo {
   // Get token
@@ -32,6 +33,15 @@ service ClientAppIo {
   // Send updated Message and Context
   rpc PushClientAppOutputs(PushClientAppOutputsRequest)
       returns (PushClientAppOutputsResponse) {}
+
+  // Push chunks that are part of a message
+  rpc PushChunk(PushChunkRequest) returns (PushChunkResponse) {}
+
+  // Get chunks belonging to a message
+  rpc PullChunk(PullChunkRequest) returns (PullChunkResponse) {}
+
+  // Get chunks belonging to a message
+  rpc QueryMessageId(QueryMessageIdRequest) returns (QueryMessageIdResponse) {}
 }
 
 enum ClientAppOutputCode {
@@ -61,3 +71,6 @@ message PushClientAppOutputsRequest {
   Context context = 3;
 }
 message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1; }
+
+message QueryMessageIdRequest { string msg_hash = 1; }
+message QueryMessageIdResponse { string msg_id = 1; }

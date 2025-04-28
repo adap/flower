@@ -130,3 +130,25 @@ class PushClientAppOutputsResponse(google.protobuf.message.Message):
     def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["status",b"status"]) -> None: ...
 global___PushClientAppOutputsResponse = PushClientAppOutputsResponse
+
+class QueryMessageIdRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    MSG_HASH_FIELD_NUMBER: builtins.int
+    msg_hash: typing.Text
+    def __init__(self,
+        *,
+        msg_hash: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["msg_hash",b"msg_hash"]) -> None: ...
+global___QueryMessageIdRequest = QueryMessageIdRequest
+
+class QueryMessageIdResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    MSG_ID_FIELD_NUMBER: builtins.int
+    msg_id: typing.Text
+    def __init__(self,
+        *,
+        msg_id: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["msg_id",b"msg_id"]) -> None: ...
+global___QueryMessageIdResponse = QueryMessageIdResponse

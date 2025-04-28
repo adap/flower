@@ -17,15 +17,19 @@
 
 from __future__ import annotations
 
+import hashlib
+import pickle
 from logging import WARNING
 from typing import Any, Optional, cast, overload
+
+import numpy as np
 
 from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
 
-from .constant import MESSAGE_TTL_TOLERANCE, MessageType, MessageTypeLegacy
+from .constant import CHUNK_SIZE, MESSAGE_TTL_TOLERANCE, MessageType, MessageTypeLegacy
 from .logger import log
-from .record import RecordDict
+from .record import Array, ArrayRecord, RecordDict
 
 DEFAULT_TTL = 43200  # This is 12 hours
 MESSAGE_INIT_ERROR_MESSAGE = (
@@ -450,6 +454,11 @@ class Message:
         """Return True if message has an error, else False."""
         return self.__dict__["_error"] is not None
 
+    def hash(self) -> str:
+        """Return message hash."""
+        serialized = pickle.dumps(self, protocol=pickle.HIGHEST_PROTOCOL)
+        return hashlib.sha256(serialized).hexdigest()
+
     def create_error_reply(self, error: Error, ttl: float | None = None) -> Message:
         """Construct a reply message indicating an error happened.
 
@@ -531,6 +540,60 @@ def make_message(
 ) -> Message:
     """Create a message with the provided metadata, content, and error."""
     return Message(metadata=metadata, content=content, error=error)  # type: ignore
+
+
+def decouple_arrays_from_message(
+    message: Message,
+) -> tuple[Message, dict[str, ArrayRecord]]:
+    """."""
+    content_ = RecordDict()
+    array_record_dict: dict[str, ArrayRecord] = {}
+    for k, v in message.content.items():
+        if isinstance(v, ArrayRecord):
+            # Add record but ensure data is empty
+            content_[k] = ArrayRecord(
+                {
+                    k_arr: Array(
+                        dtype=arr.dtype, shape=arr.shape, stype=arr.stype, data=b""
+                    )
+                    for k_arr, arr in v.items()
+                }
+            )
+
+            # Add reference to list of array records
+            array_record_dict[k] = v
+        else:
+            # reference original
+            content_[k] = v
+
+    # update message content
+    message.content = content_
+    return message, array_record_dict
+
+
+def chunk_viewer(
+    records: dict[str, ArrayRecord], chunk_size: int = CHUNK_SIZE
+) -> list[dict[str, object]]:
+    """."""
+    chunks = []
+    for record_id, record in records.items():  # traverse dict of ArrayRecords
+        for array_id, array in record.items():  # for each Array
+            mv = memoryview(array.data)  # essentially a pointer to bytes buffer
+            offset = 0
+            chunk_idx = 0
+            # Split array into chunks of a max size
+            while offset < len(mv):
+                end = min(offset + chunk_size, len(mv))
+                chunk = {
+                    "array_id": array_id,
+                    "record_id": record_id,
+                    "chunk_index": chunk_idx,
+                    "data": mv[offset:end],  # still a memoryview
+                }
+                chunks.append(chunk)
+                offset = end
+                chunk_idx += 1
+    return chunks
 
 
 def _limit_reply_ttl(
@@ -659,3 +722,35 @@ def validate_legacy_message_type(message_type: str) -> bool:
         return True
 
     return False
+
+
+def total_num_chunks(msg_content: RecordDict) -> int:
+    """Compute number of chunks that the array payload in a message is split into is
+    deterministic."""
+    num_chunks = 0
+
+    for record in msg_content.values():
+        if isinstance(record, ArrayRecord):
+            for array in record.values():
+                num_bytes = np.prod(array.shape) * np.dtype(array.dtype).itemsize
+                num_chunks += int(np.ceil(num_bytes / CHUNK_SIZE))
+    return num_chunks
+
+
+def allocate_byte_arrays(msg_content: RecordDict) -> dict[str, dict[str, bytearray]]:
+    """Allocate bytearrays for all Arrays in RecordDict."""
+    full_bytearray_dict = {}
+    for k, record in msg_content.items():
+        if isinstance(record, ArrayRecord):
+            full_bytearray_dict[k] = record.allocate_bytearrays()
+
+    return full_bytearray_dict
+
+
+def materialize_arrays(
+    msg_content: RecordDict, bytearray_dict: dict[str, dict[str, bytearray]]
+):
+    """."""
+    for k, record in msg_content.items():
+        if isinstance(record, ArrayRecord):
+            record.from_bytesarray(bytearray_dict[k])

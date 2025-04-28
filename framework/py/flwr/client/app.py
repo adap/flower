@@ -20,6 +20,7 @@ import os
 import sys
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import AbstractContextManager
 from logging import ERROR, INFO, WARN
 from os import urandom
@@ -60,6 +61,7 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
+from flwr.proto.chunk_pb2 import PullChunkResponse  # pylint: disable=E0611
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
@@ -392,6 +394,9 @@ def start_client_internal(
 
     runs: dict[int, Run] = {}
 
+    pull_executor = ThreadPoolExecutor(max_workers=4)
+    push_executor = ThreadPoolExecutor(max_workers=4)
+
     while True:
         sleep_duration: int = 0
         with connection(
@@ -402,7 +407,19 @@ def start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run, get_fab = conn
+            (
+                receive,
+                send,
+                create_node,
+                delete_node,
+                get_run,
+                get_fab,
+                get_chunk,
+                push_chunk,
+            ) = conn
+
+            pull_executor.submit(chunk_pulling_thread, get_chunk, clientappio_servicer)
+            push_executor.submit(chunk_pushing_thread, push_chunk, clientappio_servicer)
 
             # Register node when connecting the first time
             if run_info_store is None:
@@ -606,8 +623,18 @@ def start_client_internal(
                         )
 
                     # Send
-                    send(reply_message)
-                    log(INFO, "Sent reply")
+                    msg_id = send(reply_message)
+                    msg_hash = reply_message.hash()
+                    if (
+                        msg_hash
+                        not in clientappio_servicer.pushed_messages_hashes_id_mapping
+                    ):
+                        raise KeyError("message hash not registered! :(")
+                    # Set message id received
+                    clientappio_servicer.pushed_messages_hashes_id_mapping[
+                        reply_message.hash()
+                    ] = msg_id
+                    log(INFO, f"Sent reply {msg_id}")
 
                 except RunNotRunningException:
                     log(INFO, "")
@@ -635,6 +662,26 @@ def start_client_internal(
             sleep_duration,
         )
         time.sleep(sleep_duration)
+
+
+def chunk_pulling_thread(get_chunk_fn, clientappio_servicer: ClientAppIoServicer):
+    """Monitor queue of PullChunk requests."""
+    # TODO: terminate gracefully
+    while True:
+        # Get request made by flwr-clientapp
+        request = clientappio_servicer.pull_requests.get()
+
+        response: PullChunkResponse = get_chunk_fn(message_id=request.message_id)
+        clientappio_servicer.pull_responses.put(response)
+
+
+def chunk_pushing_thread(push_chunk_fn, clientappio_servicer: ClientAppIoServicer):
+    """Monitor queue of Push requests."""
+    # TODO: terminate gracefully
+    while True:
+        # Get request made by flwr-clientapp
+        request = clientappio_servicer.push_requests.get()
+        push_chunk_fn(request)
 
 
 def start_numpy_client(
