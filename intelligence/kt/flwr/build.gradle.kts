@@ -3,8 +3,6 @@ plugins {
   alias(libs.plugins.kotlin.android)
   alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.ktfmt)
-  alias(libs.plugins.detekt)
-  alias(libs.plugins.ktlint)
 }
 
 android {
@@ -43,18 +41,3 @@ dependencies {
 }
 
 ktfmt { googleStyle() }
-
-detekt {
-  buildUponDefaultConfig = true
-  parallel = true
-}
-
-ktlint {
-  version.set("0.50.0")
-  android.set(true)
-  outputColorName.set("RED")
-  reporters {
-    reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
-    reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
-  }
-}

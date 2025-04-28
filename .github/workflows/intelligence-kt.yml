@@ -22,8 +22,8 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  fi_kt_format_lint:
-    name: Format and Lint Check
+  fi_kt_format:
+    name: Format Check
     runs-on: ubuntu-22.04
     defaults:
       run:
