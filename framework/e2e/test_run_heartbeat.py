@@ -123,7 +123,7 @@ def main() -> None:
             is_running = True
             break
         time.sleep(1)
-    assert is_running, "Runs id not start within 6 seconds"
+    assert is_running, "Run IDs did not start within 6 seconds"
 
     # Kill SuperLink process first to simulate restart scenario
     # This prevents ServerApp from notifying SuperLink, isolating the heartbeat test
