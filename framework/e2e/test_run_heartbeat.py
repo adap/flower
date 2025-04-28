@@ -89,7 +89,7 @@ def flwr_ls() -> dict[int, str]:
     assert data["success"], "flwr ls failed"
 
     # Return a dictionary mapping run_id to status
-    return {entry["run_id"]: entry["status"] for entry in data["runs"]}
+    return {entry["run-id"]: entry["status"] for entry in data["runs"]}
 
 
 def main() -> None:
