@@ -51,8 +51,8 @@ RUN LATEST=$(pyenv latest -k ${PYTHON_VERSION}) \
 
 ENV PATH=/usr/local/bin/python/bin:$PATH
 
-ARG PIP_VERSION
-ARG SETUPTOOLS_VERSION
+ARG PIP_VERSION=24.3.1
+ARG SETUPTOOLS_VERSION=75.9.1
 # Keep the version of system Python pip and setuptools in sync with those installed in the
 # virtualenv.
 RUN pip install -U --no-cache-dir pip==${PIP_VERSION} setuptools==${SETUPTOOLS_VERSION} \
@@ -65,7 +65,7 @@ RUN pip install -U --no-cache-dir \
     pip==${PIP_VERSION} \
     setuptools==${SETUPTOOLS_VERSION}
 
-ARG FLWR_VERSION
+ARG FLWR_VERSION=1.18.0
 ARG FLWR_VERSION_REF
 ARG FLWR_PACKAGE=flwr
 # hadolint ignore=DL3013
