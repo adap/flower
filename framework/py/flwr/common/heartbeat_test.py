@@ -28,8 +28,8 @@ class TestHeartbeatSender(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up the test case."""
-        self.mock_ping_fn = Mock(return_value=True)
-        self.heartbeat_sender = HeartbeatSender(self.mock_ping_fn)
+        self.mock_heartbeat_fn = Mock(return_value=True)
+        self.heartbeat_sender = HeartbeatSender(self.mock_heartbeat_fn)
 
     def test_start_the_thread(self) -> None:
         """Test that the thread is started and is alive after calling start()."""
@@ -46,20 +46,20 @@ class TestHeartbeatSender(unittest.TestCase):
         self.assertFalse(self.heartbeat_sender._thread.is_alive())
         self.assertTrue(self.heartbeat_sender._stop_event.is_set())
 
-    def test_ping_function_called(self) -> None:
-        """Test that the ping function is called."""
+    def test_heartbeat_function_called(self) -> None:
+        """Test that the heartbeat function is called."""
         # Execute
         self.heartbeat_sender.start()
         time.sleep(0.1)
 
         # Assert
-        self.mock_ping_fn.assert_called_once()
+        self.mock_heartbeat_fn.assert_called_once()
 
     def test_stop_interrupts_wait(self) -> None:
         """Test that stop() interrupts any ongoing wait."""
         # Prepare
         self.heartbeat_sender.start()
-        time.sleep(0.1)  # Allow some time for pings to be sent
+        time.sleep(0.1)  # Allow some time for heartbeats to be sent
         current = time.time()
 
         # Execute
@@ -67,13 +67,13 @@ class TestHeartbeatSender(unittest.TestCase):
 
         # Assert
         self.assertLess(time.time() - current, 0.1)
-        self.mock_ping_fn.assert_called_once()
+        self.mock_heartbeat_fn.assert_called_once()
         self.assertFalse(self.heartbeat_sender._thread.is_alive())
 
-    def test_ping_fail_and_retry(self) -> None:
-        """Test that the ping function is retried on failure."""
+    def test_heartbeat_fail_and_retry(self) -> None:
+        """Test that the heartbeat function is retried on failure."""
         # Prepare
-        self.mock_ping_fn.side_effect = [False, False, True]
+        self.mock_heartbeat_fn.side_effect = [False, False, True]
         self.heartbeat_sender._retry_invoker.wait_function = lambda _: None
 
         # Execute
@@ -82,7 +82,7 @@ class TestHeartbeatSender(unittest.TestCase):
         self.heartbeat_sender.stop()
 
         # Assert
-        self.assertEqual(self.mock_ping_fn.call_count, 3)
+        self.assertEqual(self.mock_heartbeat_fn.call_count, 3)
 
     def test_thread_is_daemon(self) -> None:
         """Test that the thread is a daemon thread."""

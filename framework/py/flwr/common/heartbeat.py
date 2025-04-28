@@ -28,34 +28,34 @@ from .constant import (
 from .retry_invoker import RetryInvoker, exponential
 
 
-class PingFailure(Exception):
-    """Exception raised when ping fails."""
+class HeartbeatFailure(Exception):
+    """Exception raised when a heartbeat fails."""
 
 
 class HeartbeatSender:
-    """Send periodic heartbeat pings to a server in a background thread.
+    """Periodically send heartbeat signals to a server in a background thread.
 
-    This class uses a user-provided `ping_fn` to send heartbeats. If a ping fails,
-    it is retried using an exponential backoff strategy.
+    This class uses the provided `heartbeat_fn` to send heartbeats. If a heartbeat
+    attempt fails, it will be retried using an exponential backoff strategy.
 
     Parameters
     ----------
-    ping_fn : Callable[[], bool]
-        Function used to send a ping. Should return True if the ping succeeds,
-        or False if it fails. Any internal exceptions (e.g., gRPC errors)
-        should be handled within this function.
+    heartbeat_fn : Callable[[], bool]
+        Function used to send a heartbeat signal. It should return True if the heartbeat
+        succeeds, or False if it fails. Any internal exceptions (e.g., gRPC errors)
+        should be handled within this function to ensure boolean return values.
     """
 
     def __init__(
         self,
-        ping_fn: Callable[[], bool],
+        heartbeat_fn: Callable[[], bool],
     ) -> None:
-        self.ping_fn = ping_fn
+        self.heartbeat_fn = heartbeat_fn
         self._stop_event = threading.Event()
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._retry_invoker = RetryInvoker(
             lambda: exponential(max_delay=20),
-            PingFailure,  # The only exception we want to retry on
+            HeartbeatFailure,  # The only exception we want to retry on
             max_tries=None,
             max_time=None,
             # Allow the stop event to interrupt the wait
@@ -72,24 +72,26 @@ class HeartbeatSender:
         self._thread.join()
 
     def _run(self) -> None:
-        """Run the heartbeat sender."""
+        """Periodically send heartbeats until stopped."""
         while not self._stop_event.is_set():
-            # Ping the server and retry if it fails
-            self._retry_invoker.invoke(self._ping)
+            # Attempt to send a heartbeat with retry on failure
+            self._retry_invoker.invoke(self._heartbeat)
 
-            # Calculate the interval for the next ping
+            # Calculate the interval for the next heartbeat
             # Formula: next_interval = (interval - timeout) * random.uniform(0.7, 0.9)
             rd = random.uniform(*PING_RANDOM_RANGE)
             next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
             next_interval *= PING_BASE_MULTIPLIER + rd
 
-            # Wait for the next ping
+            # Wait for the calculated interval or exit early if stopped
             self._stop_event.wait(next_interval)
 
-    def _ping(self) -> None:
-        """Ping the server and raise an exception if it fails."""
-        # Check if the stop event is set before sending a ping
+    def _heartbeat(self) -> None:
+        """Send a single heartbeat and raise an exception if it fails.
+
+        Call the provided `heartbeat_fn`. If the function returns False,
+        a `HeartbeatFailure` exception is raised to trigger the retry mechanism.
+        """
         if not self._stop_event.is_set():
-            # Trigger retry if ping fails
-            if not self.ping_fn():
-                raise PingFailure
+            if not self.heartbeat_fn():
+                raise HeartbeatFailure
