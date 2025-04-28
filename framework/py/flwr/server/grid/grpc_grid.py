@@ -266,22 +266,6 @@ class GrpcGrid(Grid):
                     results = []
                     for future in tqdm(as_completed(futures), total=len(futures)):
                         results.append(future.result())
-                # for ch_view in chunk_views:
-                #     # materialize Chunk
-                #     chunk = Chunk(
-                #         array_id=ch_view["array_id"],
-                #         record_id=ch_view["record_id"],
-                #         chunk_index=ch_view["chunk_index"],
-                #         data=ch_view[
-                #             "data"
-                #         ].tobytes(),  # <----- materialize chunk (copies data)
-                #     )
-                #     # Push Chunk
-                #     res_chunk: PushChunkResponse = self._stub.PushChunk(
-                #         PushChunkRequest(
-                #             chunks=[chunk], message_id=msg_id, node=self.node
-                #         )
-                #     )
 
             return list(res.message_ids)
         except grpc.RpcError as e:

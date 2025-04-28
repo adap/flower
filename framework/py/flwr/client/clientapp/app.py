@@ -37,7 +37,7 @@ from flwr.common.constant import (
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
-from flwr.common.message import Error
+from flwr.common.message import Error, chunk_viewer, decouple_arrays_from_message
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import (
     context_from_proto,
@@ -48,7 +48,11 @@ from flwr.common.serde import (
     run_from_proto,
 )
 from flwr.common.typing import Fab, Run
-from flwr.proto.chunk_pb2 import Chunk, PullChunkRequest  # pylint: disable=E0611
+from flwr.proto.chunk_pb2 import (  # pylint: disable=E0611
+    Chunk,
+    PullChunkRequest,
+    PushChunkRequest,
+)
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
@@ -58,6 +62,7 @@ from flwr.proto.clientappio_pb2 import (
     PullClientAppInputsResponse,
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
+    QueryMessageIdRequest,
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 
@@ -222,10 +227,44 @@ def run_clientapp(  # pylint: disable=R0914
                     Error(code=e_code, reason=reason), reply_to=message
                 )
 
+            # Decouple Array data from rest of the Message
+            reply_msg, array_records = decouple_arrays_from_message(reply_message)
+
             # Push Message and Context to SuperNode
             _ = push_clientappoutputs(
-                stub=stub, token=token, message=reply_message, context=context
+                stub=stub, token=token, message=reply_msg, context=context
             )
+
+            # Wait until Message is pushed by SuperNode. Only then the id the message got
+            # assigned by the superlink will be accesible via the ClientAppIo API.
+            # We need it to construct our PushChunkRequests
+            while True:
+                msg_id = stub.QueryMessageId(
+                    request=QueryMessageIdRequest(msg_hash=reply_msg.hash())
+                ).msg_id
+                if msg_id == "":
+                    time.sleep(0.5)
+                else:
+                    break
+
+            # Send chunks
+            chunk_views = chunk_viewer(array_records)
+
+            for i, ch_view in enumerate(chunk_views):
+                # materialize Chunk
+                chunk = Chunk(
+                    array_id=ch_view["array_id"],
+                    record_id=ch_view["record_id"],
+                    chunk_index=ch_view["chunk_index"],
+                    data=ch_view[
+                        "data"
+                    ].tobytes(),  # <----- materialize chunk (copies data)
+                )
+                # Push Chunk
+                print(f"Pushing chunk {i}/{len(chunk_views)}")
+                stub.PushChunk(
+                    request=PushChunkRequest(chunks=[chunk], message_id=str(msg_id))
+                )
 
             del client_app, message, context, run, fab, reply_message
             gc.collect()

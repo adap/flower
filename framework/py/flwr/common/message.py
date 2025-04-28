@@ -17,6 +17,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import pickle
 from logging import WARNING
 from typing import Any, Optional, cast, overload
 
@@ -449,6 +451,11 @@ class Message:
     def has_error(self) -> bool:
         """Return True if message has an error, else False."""
         return self.__dict__["_error"] is not None
+
+    def hash(self) -> str:
+        """Return message hash."""
+        serialized = pickle.dumps(self, protocol=pickle.HIGHEST_PROTOCOL)
+        return hashlib.sha256(serialized).hexdigest()
 
     def create_error_reply(self, error: Error, ttl: float | None = None) -> Message:
         """Construct a reply message indicating an error happened.

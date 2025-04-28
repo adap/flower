@@ -18,15 +18,15 @@ from flwr.proto import message_pb2 as flwr_dot_proto_dot_message__pb2
 from flwr.proto import chunk_pb2 as flwr_dot_proto_dot_chunk__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x66lwr/proto/clientappio.proto\x12\nflwr.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x14\x66lwr/proto/run.proto\x1a\x18\x66lwr/proto/message.proto\x1a\x16\x66lwr/proto/chunk.proto\"W\n\x15\x43lientAppOutputStatus\x12-\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x1f.flwr.proto.ClientAppOutputCode\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x11\n\x0fGetTokenRequest\"!\n\x10GetTokenResponse\x12\r\n\x05token\x18\x01 \x01(\x04\"+\n\x1aPullClientAppInputsRequest\x12\r\n\x05token\x18\x01 \x01(\x04\"\xa5\x01\n\x1bPullClientAppInputsResponse\x12$\n\x07message\x18\x01 \x01(\x0b\x32\x13.flwr.proto.Message\x12$\n\x07\x63ontext\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Context\x12\x1c\n\x03run\x18\x03 \x01(\x0b\x32\x0f.flwr.proto.Run\x12\x1c\n\x03\x66\x61\x62\x18\x04 \x01(\x0b\x32\x0f.flwr.proto.Fab\"x\n\x1bPushClientAppOutputsRequest\x12\r\n\x05token\x18\x01 \x01(\x04\x12$\n\x07message\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Message\x12$\n\x07\x63ontext\x18\x03 \x01(\x0b\x32\x13.flwr.proto.Context\"Q\n\x1cPushClientAppOutputsResponse\x12\x31\n\x06status\x18\x01 \x01(\x0b\x32!.flwr.proto.ClientAppOutputStatus*L\n\x13\x43lientAppOutputCode\x12\x0b\n\x07SUCCESS\x10\x00\x12\x15\n\x11\x44\x45\x41\x44LINE_EXCEEDED\x10\x01\x12\x11\n\rUNKNOWN_ERROR\x10\x02\x32\xc5\x03\n\x0b\x43lientAppIo\x12G\n\x08GetToken\x12\x1b.flwr.proto.GetTokenRequest\x1a\x1c.flwr.proto.GetTokenResponse\"\x00\x12h\n\x13PullClientAppInputs\x12&.flwr.proto.PullClientAppInputsRequest\x1a\'.flwr.proto.PullClientAppInputsResponse\"\x00\x12k\n\x14PushClientAppOutputs\x12\'.flwr.proto.PushClientAppOutputsRequest\x1a(.flwr.proto.PushClientAppOutputsResponse\"\x00\x12J\n\tPushChunk\x12\x1c.flwr.proto.PushChunkRequest\x1a\x1d.flwr.proto.PushChunkResponse\"\x00\x12J\n\tPullChunk\x12\x1c.flwr.proto.PullChunkRequest\x1a\x1d.flwr.proto.PullChunkResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x66lwr/proto/clientappio.proto\x12\nflwr.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x14\x66lwr/proto/run.proto\x1a\x18\x66lwr/proto/message.proto\x1a\x16\x66lwr/proto/chunk.proto\"W\n\x15\x43lientAppOutputStatus\x12-\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x1f.flwr.proto.ClientAppOutputCode\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x11\n\x0fGetTokenRequest\"!\n\x10GetTokenResponse\x12\r\n\x05token\x18\x01 \x01(\x04\"+\n\x1aPullClientAppInputsRequest\x12\r\n\x05token\x18\x01 \x01(\x04\"\xa5\x01\n\x1bPullClientAppInputsResponse\x12$\n\x07message\x18\x01 \x01(\x0b\x32\x13.flwr.proto.Message\x12$\n\x07\x63ontext\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Context\x12\x1c\n\x03run\x18\x03 \x01(\x0b\x32\x0f.flwr.proto.Run\x12\x1c\n\x03\x66\x61\x62\x18\x04 \x01(\x0b\x32\x0f.flwr.proto.Fab\"x\n\x1bPushClientAppOutputsRequest\x12\r\n\x05token\x18\x01 \x01(\x04\x12$\n\x07message\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Message\x12$\n\x07\x63ontext\x18\x03 \x01(\x0b\x32\x13.flwr.proto.Context\"Q\n\x1cPushClientAppOutputsResponse\x12\x31\n\x06status\x18\x01 \x01(\x0b\x32!.flwr.proto.ClientAppOutputStatus\")\n\x15QueryMessageIdRequest\x12\x10\n\x08msg_hash\x18\x01 \x01(\t\"(\n\x16QueryMessageIdResponse\x12\x0e\n\x06msg_id\x18\x01 \x01(\t*L\n\x13\x43lientAppOutputCode\x12\x0b\n\x07SUCCESS\x10\x00\x12\x15\n\x11\x44\x45\x41\x44LINE_EXCEEDED\x10\x01\x12\x11\n\rUNKNOWN_ERROR\x10\x02\x32\xa0\x04\n\x0b\x43lientAppIo\x12G\n\x08GetToken\x12\x1b.flwr.proto.GetTokenRequest\x1a\x1c.flwr.proto.GetTokenResponse\"\x00\x12h\n\x13PullClientAppInputs\x12&.flwr.proto.PullClientAppInputsRequest\x1a\'.flwr.proto.PullClientAppInputsResponse\"\x00\x12k\n\x14PushClientAppOutputs\x12\'.flwr.proto.PushClientAppOutputsRequest\x1a(.flwr.proto.PushClientAppOutputsResponse\"\x00\x12J\n\tPushChunk\x12\x1c.flwr.proto.PushChunkRequest\x1a\x1d.flwr.proto.PushChunkResponse\"\x00\x12J\n\tPullChunk\x12\x1c.flwr.proto.PullChunkRequest\x1a\x1d.flwr.proto.PullChunkResponse\"\x00\x12Y\n\x0eQueryMessageId\x12!.flwr.proto.QueryMessageIdRequest\x1a\".flwr.proto.QueryMessageIdResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'flwr.proto.clientappio_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_CLIENTAPPOUTPUTCODE']._serialized_start=699
-  _globals['_CLIENTAPPOUTPUTCODE']._serialized_end=775
+  _globals['_CLIENTAPPOUTPUTCODE']._serialized_start=784
+  _globals['_CLIENTAPPOUTPUTCODE']._serialized_end=860
   _globals['_CLIENTAPPOUTPUTSTATUS']._serialized_start=138
   _globals['_CLIENTAPPOUTPUTSTATUS']._serialized_end=225
   _globals['_GETTOKENREQUEST']._serialized_start=227
@@ -41,6 +41,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_PUSHCLIENTAPPOUTPUTSREQUEST']._serialized_end=614
   _globals['_PUSHCLIENTAPPOUTPUTSRESPONSE']._serialized_start=616
   _globals['_PUSHCLIENTAPPOUTPUTSRESPONSE']._serialized_end=697
-  _globals['_CLIENTAPPIO']._serialized_start=778
-  _globals['_CLIENTAPPIO']._serialized_end=1231
+  _globals['_QUERYMESSAGEIDREQUEST']._serialized_start=699
+  _globals['_QUERYMESSAGEIDREQUEST']._serialized_end=740
+  _globals['_QUERYMESSAGEIDRESPONSE']._serialized_start=742
+  _globals['_QUERYMESSAGEIDRESPONSE']._serialized_end=782
+  _globals['_CLIENTAPPIO']._serialized_start=863
+  _globals['_CLIENTAPPIO']._serialized_end=1407
 # @@protoc_insertion_point(module_scope)

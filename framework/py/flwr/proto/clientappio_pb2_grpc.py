@@ -40,6 +40,11 @@ class ClientAppIoStub(object):
                 request_serializer=flwr_dot_proto_dot_chunk__pb2.PullChunkRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_chunk__pb2.PullChunkResponse.FromString,
                 )
+        self.QueryMessageId = channel.unary_unary(
+                '/flwr.proto.ClientAppIo/QueryMessageId',
+                request_serializer=flwr_dot_proto_dot_clientappio__pb2.QueryMessageIdRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_clientappio__pb2.QueryMessageIdResponse.FromString,
+                )
 
 
 class ClientAppIoServicer(object):
@@ -80,6 +85,13 @@ class ClientAppIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def QueryMessageId(self, request, context):
+        """Get chunks belonging to a message
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ClientAppIoServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -107,6 +119,11 @@ def add_ClientAppIoServicer_to_server(servicer, server):
                     servicer.PullChunk,
                     request_deserializer=flwr_dot_proto_dot_chunk__pb2.PullChunkRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_chunk__pb2.PullChunkResponse.SerializeToString,
+            ),
+            'QueryMessageId': grpc.unary_unary_rpc_method_handler(
+                    servicer.QueryMessageId,
+                    request_deserializer=flwr_dot_proto_dot_clientappio__pb2.QueryMessageIdRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_clientappio__pb2.QueryMessageIdResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -200,5 +217,22 @@ class ClientAppIo(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ClientAppIo/PullChunk',
             flwr_dot_proto_dot_chunk__pb2.PullChunkRequest.SerializeToString,
             flwr_dot_proto_dot_chunk__pb2.PullChunkResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def QueryMessageId(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ClientAppIo/QueryMessageId',
+            flwr_dot_proto_dot_clientappio__pb2.QueryMessageIdRequest.SerializeToString,
+            flwr_dot_proto_dot_clientappio__pb2.QueryMessageIdResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

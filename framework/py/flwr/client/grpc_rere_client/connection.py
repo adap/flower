@@ -293,7 +293,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         metadata = None
 
         # Return message_id of response
-        return res.results["key"]
+        return list(res.results.keys())[0]
 
     def get_chunk(message_id: str) -> PullChunkResponse:
         """Get a Chunk from a particular message."""
@@ -301,10 +301,15 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         response: PullChunkResponse = retry_invoker.invoke(stub.PullChunk, request)
         return response
 
-    def push_chunk(message_id: str, chunk: Chunk) -> Chunk:
+    def push_chunk(request: PushChunkRequest):
         """Push a Chunk that belongs to a particular message."""
-        request = PushChunkRequest(message_id=message_id, node=node, chunks=[chunk])
-        _ = retry_invoker.invoke(stub.PushChunk, request)
+        # We need to set the node info
+        # TODO: for some reason it gets stuck if attempting .node = node setting
+        # request.node = node
+        request_ = PushChunkRequest(
+            chunks=request.chunks, message_id=request.message_id, node=node
+        )
+        _ = retry_invoker.invoke(stub.PushChunk, request_)
 
     def get_run(run_id: int) -> Run:
         # Call FleetAPI

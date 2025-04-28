@@ -34,6 +34,11 @@ class ClientAppIoStub:
         flwr.proto.chunk_pb2.PullChunkResponse]
     """Get chunks belonging to a message"""
 
+    QueryMessageId: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.clientappio_pb2.QueryMessageIdRequest,
+        flwr.proto.clientappio_pb2.QueryMessageIdResponse]
+    """Get chunks belonging to a message"""
+
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -73,6 +78,14 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.chunk_pb2.PullChunkRequest,
         context: grpc.ServicerContext,
     ) -> flwr.proto.chunk_pb2.PullChunkResponse:
+        """Get chunks belonging to a message"""
+        pass
+
+    @abc.abstractmethod
+    def QueryMessageId(self,
+        request: flwr.proto.clientappio_pb2.QueryMessageIdRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.clientappio_pb2.QueryMessageIdResponse:
         """Get chunks belonging to a message"""
         pass
 

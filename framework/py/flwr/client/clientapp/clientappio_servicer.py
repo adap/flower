@@ -18,6 +18,7 @@
 from dataclasses import dataclass
 from logging import DEBUG, ERROR
 from queue import Queue
+from time import sleep
 from typing import Optional, cast
 
 import grpc
@@ -50,6 +51,8 @@ from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     PullClientAppInputsResponse,
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
+    QueryMessageIdRequest,
+    QueryMessageIdResponse,
 )
 
 
@@ -81,6 +84,8 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.clientapp_output: Optional[ClientAppOutputs] = None
         self.token_returned: bool = False
         self.inputs_returned: bool = False
+
+        self.pushed_messages_hashes_id_mapping: dict[str, str] = {}
 
         self.pull_requests: Queue[PullChunkRequest] = Queue(maxsize=10)
         self.pull_responses: Queue[PullChunkResponse] = Queue(maxsize=10)
@@ -152,11 +157,24 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             fab=fab_to_proto(clientapp_input.fab) if clientapp_input.fab else None,
         )
 
+    def register_output_message_hash(self, message: Message):
+        """Register hash of this message.
+
+        With this the SuperNode can communicate the msg_id of the pushed Message back to
+        flwr-clientapp easily.
+        """
+        self.pushed_messages_hashes_id_mapping[message.hash()] = None
+        print(f"registered!: {self.pushed_messages_hashes_id_mapping}")
+
     def PushClientAppOutputs(
         self, request: PushClientAppOutputsRequest, context: grpc.ServicerContext
     ) -> PushClientAppOutputsResponse:
         """Push Message and Context."""
         log(DEBUG, "ClientAppIo.PushClientAppOutputs")
+
+        # TODO: better
+        reply_msg = message_from_proto(request.message)
+        self.register_output_message_hash(reply_msg)
 
         # Fail if no ClientAppInputs are available
         if not self.clientapp_input:
@@ -209,6 +227,13 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         proto_status = clientappstatus_to_proto(status=status)
         return PushClientAppOutputsResponse(status=proto_status)
 
+    def QueryMessageId(
+        self, request: QueryMessageIdRequest, context: grpc.ServicerContext
+    ) -> QueryMessageIdResponse:
+        """Return message_id assinged to a previously sent message."""
+        msg_id = self.pushed_messages_hashes_id_mapping[request.msg_hash]
+        return QueryMessageIdResponse(msg_id="" if msg_id is None else msg_id)
+
     def PullChunk(
         self, request: PushChunkRequest, context: grpc.ServicerContext
     ) -> PushChunkResponse:
@@ -221,10 +246,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
 
     def PushChunk(
         self, request: PushChunkRequest, context: grpc.ServicerContext
-    ) -> None:
+    ) -> PushChunkResponse:
         """Push a chunk through the supernode."""
         # Add request to queue (waits if full)
         self.push_requests.put(request)
+        return PushChunkResponse()
 
     def set_inputs(
         self, clientapp_input: ClientAppInputs, token_returned: bool
