@@ -72,4 +72,5 @@ class InMemoryChunkStore:
         self.retrieved.add(chunk_id_to_return)
 
         # return the chunk
-        return self.chunk_store[chunk_id_to_return]
+        chunk = self.chunk_store.pop(chunk_id_to_return)
+        return chunk
