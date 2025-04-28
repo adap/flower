@@ -14,7 +14,7 @@
 # ==============================================================================
 
 # hadolint global ignore=DL3008
-ARG CUDA_VERSION=12.4.1
+ARG CUDA_VERSION=12.6.2
 ARG DISTRO=ubuntu
 ARG DISTRO_VERSION=24.04
 FROM nvidia/cuda:${CUDA_VERSION}-base-${DISTRO}${DISTRO_VERSION} AS python
