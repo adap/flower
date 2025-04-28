@@ -212,7 +212,7 @@ class QFedAvg(FedAvg):
             loss = 1.0  # Final fallback default
             log(
                 WARNING,
-                "No valid historical losses found, using default loss value: 1.0",
+                "Central evaluation wasn't enabled and therefore loss couldn't be competed. Using default loss value of `1.0` (it won't impact deltas computation)",
             )
 
         for _, fit_res in results:
