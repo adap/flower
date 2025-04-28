@@ -15,7 +15,8 @@
 """Record APIs."""
 
 
-from .arrayrecord import Array, ArrayRecord, ParametersRecord
+from .array import Array
+from .arrayrecord import ArrayRecord, ParametersRecord
 from .configrecord import ConfigRecord, ConfigsRecord
 from .conversion_utils import array_from_numpy
 from .metricrecord import MetricRecord, MetricsRecord
