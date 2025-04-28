@@ -18,7 +18,7 @@
 import argparse
 import gc
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, as_completed, wait
 from logging import DEBUG, ERROR, INFO
 from typing import Any, Optional
 
@@ -144,27 +144,52 @@ def run_clientapp(  # pylint: disable=R0914
                 # Request one chunk at a time
                 log(INFO, f"Requesting {total_chunks} chunks!")
 
-                with ThreadPoolExecutor(max_workers=4) as executor:
-                    futures = [
-                        executor.submit(
-                            stub.PullChunk,
-                            request=PullChunkRequest(
-                                message_id=message.metadata.message_id, node=None
-                            ),
-                        )
-                        for _ in range(total_chunks)
-                    ]
+            inflight_futures = set()
+            num_pulled_chunks = 0
+            with (
+                ThreadPoolExecutor(max_workers=4) as executor,
+                tqdm(total=total_chunks, desc="PullChunk") as pbar,
+            ):
 
-                    for future in tqdm(
-                        as_completed(futures), total=len(futures), desc="PullChunk"
-                    ):
-                        res: PullChunkResponse = future.result()
-                        chunk = res.chunk
-                        # Place memory in the Array it belongs to
-                        offset = CHUNK_SIZE * chunk.chunk_index
-                        bytearrays_dict[chunk.record_id][chunk.array_id][
-                            offset : offset + len(chunk.data)
-                        ] = chunk.data
+                # Submit one request
+                future = executor.submit(
+                    stub.PullChunk,
+                    request=PullChunkRequest(
+                        message_id=message.metadata.message_id, node=None
+                    ),
+                )
+                inflight_futures.add(future)
+
+                while num_pulled_chunks < total_chunks:
+                    done, inflight_futures = wait(
+                        inflight_futures, return_when=FIRST_COMPLETED
+                    )
+
+                    for future in done:
+                        response: PullChunkResponse = future.result()
+                        if (
+                            response.chunk.record_id
+                        ):  # will be unset if a chunk wasn't available to pull
+                            chunk: Chunk = response.chunk
+                            # Place memory in the Array it belongs to
+                            offset = CHUNK_SIZE * chunk.chunk_index
+                            bytearrays_dict[chunk.record_id][chunk.array_id][
+                                offset : offset + len(chunk.data)
+                            ] = chunk.data
+                            num_pulled_chunks += 1
+                            pbar.update(1)  # we got a chunk, update progress bar
+
+                        # Submit a new request if still needed
+                        if num_pulled_chunks < total_chunks:
+                            future_ = executor.submit(
+                                stub.PullChunk,
+                                request=PullChunkRequest(
+                                    message_id=message.metadata.message_id, node=None
+                                ),
+                            )
+                            inflight_futures.add(future_)
+                        else:
+                            break
 
                 # Put data in Message (i.e. materialize Message)
                 materialize_arrays(
