@@ -476,7 +476,7 @@ jobs:
     timeout-minutes: 10
     needs: [changes, wheel]
   
-    name: Test heartbeat for runs.
+    name: Test heartbeat for runs
 
     steps:
       - uses: actions/checkout@v4

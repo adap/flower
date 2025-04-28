@@ -65,7 +65,7 @@ def flwr_run() -> int:
     assert data["success"], "flwr run failed"
 
     # Return the run ID
-    return data["run_id"]
+    return data["run-id"]
 
 
 def flwr_ls() -> dict[int, str]:
