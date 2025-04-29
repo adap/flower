@@ -71,6 +71,17 @@ def build(
     option to bundle an app located at the provided path. For example:
 
     ``flwr build --app ./apps/flower-hello-world``.
+
+    The target build directory can be specified with ``--flwr-dir``:
+
+        ``flwr build --app ./apps/flower-hello-world --flwr-dir ./docs/flwr``
+
+    This will install ``flower-hello-world`` to ``./docs/flwr/``. By default,
+    ``flwr-dir`` is equal to:
+
+        - ``$FLWR_HOME/`` if ``$FLWR_HOME`` is defined
+        - ``$XDG_DATA_HOME/.flwr/`` if ``$XDG_DATA_HOME`` is defined
+        - ``$HOME/.flwr/`` in all other cases
     """
     build_dir = get_flwr_dir() if not flwr_dir else flwr_dir
     build_dir.mkdir(parents=True, exist_ok=True)
