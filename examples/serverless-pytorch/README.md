@@ -33,6 +33,12 @@ Install the `flwr` on the serverless branch:
 pip install git+https://github.com/zzsi/flower.git@serverless
 ```
 
+You may also need to install the following dependencies for downloading the CIFAR-10 dataset:
+
+```bash
+pip install datasets torchvision Pillow
+```
+
 ## Run the project
 
 ```bash

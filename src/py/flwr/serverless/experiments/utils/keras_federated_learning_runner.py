@@ -20,6 +20,8 @@ from flwr.serverless.shared_folder.in_memory_folder import InMemoryFolder
 from flwr.serverless.keras.federated_learning_callback import FlwrFederatedCallback
 from flwr.serverless.experiments.utils.base_experiment_runner import BaseExperimentRunner, Config
 from flwr.serverless.experiments.utils.custom_wandb_callback import CustomWandbCallback
+from flwr.serverless.experiments.model.simple_mnist_model import SimpleMnistModel
+from flwr.serverless.experiments.model.keras_models import ResNetModelBuilder
 
 
 class KerasFederatedLearningRunner(BaseExperimentRunner):
@@ -126,6 +128,22 @@ class KerasFederatedLearningRunner(BaseExperimentRunner):
             return self.create_skewed_partition_split(skew_factor=config.skew_factor)
         else:
             raise ValueError("Data split not supported")
+
+    def create_models(self):
+        if self.dataset == "mnist":
+            assert self.net == "simple", f"Net not supported: {self.net} for mnist"
+        if self.net == "simple":
+            return [SimpleMnistModel(lr=self.lr).run() for _ in range(self.num_nodes)]
+        elif self.net == "resnet50":
+            return [
+                ResNetModelBuilder(lr=self.lr, net="ResNet50", weights="imagenet").run()
+                for _ in range(self.num_nodes)
+            ]
+        elif self.net == "resnet18":
+            return [
+                ResNetModelBuilder(lr=self.lr, net="ResNet18").run()
+                for _ in range(self.num_nodes)
+            ]
 
     def train_federated_models(
         self,

@@ -41,11 +41,16 @@ class TorchFederatedLearningRunner(BaseExperimentRunner):
             print("\nReceived interrupt signal. Shutting down gracefully...")
             self.should_stop = True
             
-        self.original_handler = signal.signal(signal.SIGINT, signal_handler)
+        self.original_handler = signal.getsignal(signal.SIGINT)
+        signal.signal(signal.SIGINT, signal_handler)
 
     def __del__(self):
         # Restore original signal handler when the object is destroyed
-        signal.signal(signal.SIGINT, self.original_handler)
+        if hasattr(self, "original_handler") and self.original_handler is not None:
+            try:
+                signal.signal(signal.SIGINT, self.original_handler)
+            except Exception as e:
+                print(f"Warning: Could not restore signal handler: {e}")
 
     def run(self):
         try:
@@ -95,7 +100,11 @@ class TorchFederatedLearningRunner(BaseExperimentRunner):
                 wandb.finish()
         finally:
             # Restore original signal handler
-            signal.signal(signal.SIGINT, self.original_handler)
+            if self.original_handler is not None:
+                try:
+                    signal.signal(signal.SIGINT, self.original_handler)
+                except Exception as e:
+                    print(f"Warning: Could not restore signal handler: {e}")
 
     def set_strategy(self):
         if self.strategy_name == "fedavg":
