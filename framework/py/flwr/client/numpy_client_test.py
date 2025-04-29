@@ -46,7 +46,7 @@ class OverridingClient(NumPyClient):
         updated_parameters = [np.array([0.1, 0.2]), np.array([0.3, 0.4])]
 
         # Simulate training metrics
-        metrics = {"accuracy": 0.95}
+        metrics: dict[str, Scalar] = {"accuracy": 0.95}
 
         # Return updated parameters, number of examples, and metrics
         return updated_parameters, 0, metrics
