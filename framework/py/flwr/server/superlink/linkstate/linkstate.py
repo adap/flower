@@ -128,7 +128,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Get all instruction Message IDs for the given run_id."""
 
     @abc.abstractmethod
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(self, heartbeat_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod
@@ -267,22 +267,27 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Retrieve all currently stored `node_public_keys` as a set."""
 
     @abc.abstractmethod
-    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat.
+    def acknowledge_heartbeat(self, node_id: int, heartbeat_interval: float) -> bool:
+        """Acknowledge a heartbeat received from a node.
+
+        A node is considered online as long as it sends heartbeats within
+        the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        By default, HEARTBEAT_PATIENCE = 2, allowing for one missed heartbeat
+        before the node is marked as offline.
 
         Parameters
         ----------
         node_id : int
-            The `node_id` from which the ping was received.
-        ping_interval : float
+            The `node_id` from which the heartbeat was received.
+        heartbeat_interval : float
             The interval (in seconds) from the current timestamp within which the next
-            ping from this node must be received. This acts as a hard deadline to ensure
-            an accurate assessment of the node's availability.
+            heartbeat from this node must be received. This acts as a hard deadline to
+            ensure an accurate assessment of the node's availability.
 
         Returns
         -------
         is_acknowledged : bool
-            True if the ping is successfully acknowledged; otherwise, False.
+            True if the heartbeat is successfully acknowledged; otherwise, False.
         """
 
     @abc.abstractmethod
