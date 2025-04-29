@@ -15,7 +15,7 @@
 
 package ai.flower.intelligence
 
-interface Engine {
+internal interface Engine {
   suspend fun chat(
     messages: List<Message>,
     model: String? = null,
