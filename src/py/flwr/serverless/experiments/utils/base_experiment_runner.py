@@ -1,10 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
 
-# from flwr_serverless.keras.example import MnistModelBuilder
-from flwr.serverless.experiments.model.simple_mnist_model import SimpleMnistModel
-from flwr.serverless.experiments.model.keras_models import ResNetModelBuilder
-
 
 @dataclass
 class Config:
@@ -58,30 +54,13 @@ class BaseExperimentRunner:
 
         self.get_original_data()
 
-    # ***currently works only for mnist***
-    def create_models(self):
-        if self.dataset == "mnist":
-            assert self.net == "simple", f"Net not supported: {self.net} for mnist"
-        if self.net == "simple":
-            return [SimpleMnistModel(lr=self.lr).run() for _ in range(self.num_nodes)]
-        elif self.net == "resnet50":
-            return [
-                ResNetModelBuilder(lr=self.lr, net="ResNet50", weights="imagenet").run()
-                for _ in range(self.num_nodes)
-            ]
-        elif self.net == "resnet18":
-            return [
-                ResNetModelBuilder(lr=self.lr, net="ResNet18").run()
-                for _ in range(self.num_nodes)
-            ]
-
     def get_original_data(self):
         dataset = self.dataset
         if dataset == "mnist":
             from tensorflow.keras.datasets import mnist
 
             (self.x_train, self.y_train), (self.x_test, self.y_test) = mnist.load_data()
-        elif dataset == "cifar10":
+        elif dataset == "cifar10_tf":
             from tensorflow.keras.datasets import cifar10
 
             (self.x_train, self.y_train), (
@@ -90,6 +69,20 @@ class BaseExperimentRunner:
             ) = cifar10.load_data()
             self.y_train = np.squeeze(self.y_train, -1)
             self.y_test = np.squeeze(self.y_test, -1)
+        elif dataset == "cifar10":
+            from datasets import load_dataset
+            cifar10_dataset = load_dataset("cifar10")
+            # Convert train data to numpy arrays
+            train_data = cifar10_dataset["train"]
+            self.x_train = np.array([img for img in train_data["img"]], dtype=np.uint8)
+            assert self.x_train.shape == (50000, 32, 32, 3), f"x_train shape: {self.x_train.shape}"
+            self.y_train = np.array(train_data["label"], dtype=np.int64)
+            # Convert test data to numpy arrays  
+            test_data = cifar10_dataset["test"]
+            self.x_test = np.array([img for img in test_data["img"]], dtype=np.uint8)
+            assert self.x_test.shape == (10000, 32, 32, 3), f"x_test shape: {self.x_test.shape}"
+            self.y_test = np.array(test_data["label"], dtype=np.int64)
+            
         assert len(self.y_train.shape) == 1, f"y_train shape: {self.y_train.shape}"
         assert len(self.y_test.shape) == 1, f"y_test shape: {self.y_test.shape}"
 

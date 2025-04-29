@@ -36,16 +36,26 @@ class TorchFederatedLearningRunner(BaseExperimentRunner):
         self.lag = 0.1  # lag between nodes in pseudo-concurrent mode
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.should_stop = False
+        self.original_handler = None
         
-        def signal_handler(signum, frame):
-            print("\nReceived interrupt signal. Shutting down gracefully...")
-            self.should_stop = True
-            
-        self.original_handler = signal.signal(signal.SIGINT, signal_handler)
+        try:
+            def signal_handler(signum, frame):
+                print("\nReceived interrupt signal. Shutting down gracefully...")
+                self.should_stop = True
+                
+            self.original_handler = signal.getsignal(signal.SIGINT)
+            signal.signal(signal.SIGINT, signal_handler)
+        except Exception as e:
+            print(f"Warning: Could not set up signal handler: {e}")
+            self.original_handler = None
 
     def __del__(self):
         # Restore original signal handler when the object is destroyed
-        signal.signal(signal.SIGINT, self.original_handler)
+        if self.original_handler is not None:
+            try:
+                signal.signal(signal.SIGINT, self.original_handler)
+            except Exception as e:
+                print(f"Warning: Could not restore signal handler: {e}")
 
     def run(self):
         try:
@@ -95,7 +105,11 @@ class TorchFederatedLearningRunner(BaseExperimentRunner):
                 wandb.finish()
         finally:
             # Restore original signal handler
-            signal.signal(signal.SIGINT, self.original_handler)
+            if self.original_handler is not None:
+                try:
+                    signal.signal(signal.SIGINT, self.original_handler)
+                except Exception as e:
+                    print(f"Warning: Could not restore signal handler: {e}")
 
     def set_strategy(self):
         if self.strategy_name == "fedavg":
