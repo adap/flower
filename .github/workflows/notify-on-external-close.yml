@@ -6,7 +6,7 @@ on:
 
 jobs:
   notify-assignee-or-william:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       issues: write
     steps:
