@@ -76,7 +76,7 @@ def build(
 
         ``flwr build --app ./apps/flower-hello-world --flwr-dir ./docs/flwr``
 
-    This will install ``flower-hello-world`` to ``./docs/flwr/``. By default,
+    This will build ``flower-hello-world`` to ``./docs/flwr/``. By default,
     ``flwr-dir`` is equal to:
 
         - ``$FLWR_HOME/`` if ``$FLWR_HOME`` is defined
