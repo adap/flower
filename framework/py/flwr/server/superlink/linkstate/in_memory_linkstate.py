@@ -334,7 +334,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
-            # Mark the node online util time.time() + heartbeat_interval
+            # Mark the node online until time.time() + heartbeat_interval
             self.node_ids[node_id] = (
                 time.time() + heartbeat_interval,
                 heartbeat_interval,
