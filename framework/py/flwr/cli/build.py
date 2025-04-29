@@ -130,7 +130,9 @@ def build(
 
     toml_contents = tomli_w.dumps(conf)
 
-    with tempfile.NamedTemporaryFile(suffix=".zip", delete=False, dir=build_dir) as temp_file:
+    with tempfile.NamedTemporaryFile(
+        suffix=".zip", delete=False, dir=build_dir
+    ) as temp_file:
         temp_filename = temp_file.name
 
         with zipfile.ZipFile(temp_filename, "w", zipfile.ZIP_DEFLATED) as fab_file:
