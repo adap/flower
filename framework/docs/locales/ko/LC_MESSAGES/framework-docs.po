@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-24 00:08+0000\n"
+"POT-Creation-Date: 2025-04-29 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -10486,8 +10486,7 @@ msgstr "클라이언트(자체)를 반환합니다."
 #: flwr.common.context.Context flwr.common.message.Error
 #: flwr.common.message.Message flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Metadata
-#: flwr.common.record.arrayrecord.Array
-#: flwr.common.record.arrayrecord.ArrayRecord
+#: flwr.common.record.array.Array flwr.common.record.arrayrecord.ArrayRecord
 #: flwr.common.record.configrecord.ConfigRecord
 #: flwr.common.record.metricrecord.MetricRecord
 #: flwr.common.record.recorddict.RecordDict flwr.server.app.start_server
@@ -10641,7 +10640,7 @@ msgstr "현재 클라이언트 속성입니다."
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
 #: flwr.common.context.Context:1 flwr.common.message.Error:1
 #: flwr.common.message.Message:1 flwr.common.message.Metadata:1
-#: flwr.common.record.arrayrecord.Array:1 flwr.common.typing.ClientMessage:1
+#: flwr.common.record.array.Array:1 flwr.common.typing.ClientMessage:1
 #: flwr.common.typing.DisconnectRes:1 flwr.common.typing.EvaluateIns:1
 #: flwr.common.typing.EvaluateRes:1 flwr.common.typing.FitIns:1
 #: flwr.common.typing.FitRes:1 flwr.common.typing.GetParametersIns:1
@@ -10664,8 +10663,7 @@ msgstr "Bases: :py:class:`object`"
 #: flwr.client.client_app.ClientApp.lifespan:7
 #: flwr.client.client_app.ClientApp.query:12
 #: flwr.client.client_app.ClientApp.train:12
-#: flwr.client.mod.localdp_mod.LocalDpMod:22
-#: flwr.common.record.arrayrecord.Array:35
+#: flwr.client.mod.localdp_mod.LocalDpMod:22 flwr.common.record.array.Array:35
 #: flwr.common.record.arrayrecord.ArrayRecord:36
 #: flwr.common.record.arrayrecord.ParametersRecord:12
 #: flwr.common.record.configrecord.ConfigRecord:20
@@ -11381,7 +11379,7 @@ msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\
 
 #: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
-#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1
+#: flwr.common.record.array.Array.from_numpy_ndarray:1
 #: flwr.common.record.conversion_utils.array_from_numpy:1 of
 msgid "Create Array from NumPy ndarray."
 msgstr "NumPy에서 배열을 만듭니다."
@@ -11487,7 +11485,7 @@ msgid ":py:obj:`Array <flwr.common.Array>`\\ \\(\\)"
 msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
-#: flwr.common.record.arrayrecord.Array:1 of
+#: flwr.common.record.array.Array:1 of
 msgid "Array type."
 msgstr "배열 유형."
 
@@ -11900,7 +11898,7 @@ msgstr "클라이언트 상태."
 msgid "Array"
 msgstr "배열"
 
-#: flwr.common.record.arrayrecord.Array:3 of
+#: flwr.common.record.array.Array:3 of
 #, fuzzy
 msgid ""
 "A dataclass containing serialized data from an array-like or tensor-like "
@@ -11908,26 +11906,26 @@ msgid ""
 "of three ways:"
 msgstr "배열형 또는 텐서형 객체의 직렬화된 데이터와 그에 대한 일부 메타데이터를 포함하는 데이터 클래스입니다."
 
-#: flwr.common.record.arrayrecord.Array:6 of
+#: flwr.common.record.array.Array:6 of
 msgid "By specifying explicit values for `dtype`, `shape`, `stype`, and `data`."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:7 of
+#: flwr.common.record.array.Array:7 of
 msgid "By providing a NumPy ndarray (via the `ndarray` argument)."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:8 of
+#: flwr.common.record.array.Array:8 of
 msgid "By providing a PyTorch tensor (via the `torch_tensor` argument)."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:10 of
+#: flwr.common.record.array.Array:10 of
 msgid ""
 "In scenarios (2)-(3), the `dtype`, `shape`, `stype`, and `data` are "
 "automatically derived from the input. In scenario (1), these fields must "
 "be specified manually."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:13 of
+#: flwr.common.record.array.Array:13 of
 #, fuzzy
 msgid ""
 "A string representing the data type of the serialized object (e.g. "
@@ -11935,7 +11933,7 @@ msgid ""
 "tensor."
 msgstr "직렬화된 객체의 데이터 유형을 나타내는 문자열(예: `np.float32`)"
 
-#: flwr.common.record.arrayrecord.Array:16 of
+#: flwr.common.record.array.Array:16 of
 #, fuzzy
 msgid ""
 "A list representing the shape of the unserialized array-like object. Only"
@@ -11944,7 +11942,7 @@ msgstr ""
 "직렬화되지 않은 배열과 같은 객체의 모양을 나타내는 목록입니다. 직렬화 방법에 따라 데이터를 역직렬화하는 데 사용되거나 단순히 "
 "메타데이터 필드로 사용됩니다."
 
-#: flwr.common.record.arrayrecord.Array:19 of
+#: flwr.common.record.array.Array:19 of
 #, fuzzy
 msgid ""
 "A string indicating the serialization mechanism used to generate the "
@@ -11952,7 +11950,7 @@ msgid ""
 "if you are not passing in a ndarray or a tensor."
 msgstr "배열형 또는 텐서형 객체에서 `데이터`의 바이트를 생성하는 데 사용되는 직렬화 메커니즘의 유형을 나타내는 문자열입니다."
 
-#: flwr.common.record.arrayrecord.Array:23 of
+#: flwr.common.record.array.Array:23 of
 #, fuzzy
 msgid ""
 "A buffer of bytes containing the data. Only required if you are not "
@@ -11961,29 +11959,29 @@ msgstr ""
 "직렬화되지 않은 배열과 같은 객체의 모양을 나타내는 목록입니다. 직렬화 방법에 따라 데이터를 역직렬화하는 데 사용되거나 단순히 "
 "메타데이터 필드로 사용됩니다."
 
-#: flwr.common.record.arrayrecord.Array:26 of
+#: flwr.common.record.array.Array:26 of
 msgid ""
 "A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data` "
 "fields are derived automatically from it."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:29 of
+#: flwr.common.record.array.Array:29 of
 msgid ""
 "A PyTorch tensor. If provided, it will be **detached and moved to CPU** "
 "before conversion, and the `dtype`, `shape`, `stype`, and `data` fields "
 "will be derived automatically from it."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:36 of
+#: flwr.common.record.array.Array:36 of
 msgid "Initializing by specifying all fields directly::"
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:45 of
+#: flwr.common.record.array.Array:45 of
 #, fuzzy
 msgid "Initializing with a NumPy ndarray::"
 msgstr "Dictionary holding ParametersRecord instances."
 
-#: flwr.common.record.arrayrecord.Array:50 of
+#: flwr.common.record.array.Array:50 of
 msgid "Initializing with a PyTorch tensor::"
 msgstr ""
 
@@ -12002,7 +12000,7 @@ msgid ""
 msgstr ":py:obj:`ndarray_to_bytes <flwr.common.ndarray_to_bytes>`\\ \\(ndarray\\)"
 
 #: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
-#: flwr.common.record.arrayrecord.Array.from_torch_tensor:1 of
+#: flwr.common.record.array.Array.from_torch_tensor:1 of
 #, fuzzy
 msgid "Create Array from PyTorch tensor."
 msgstr "NumPy에서 배열을 만듭니다."
@@ -12012,7 +12010,7 @@ msgid ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 msgstr ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
-#: flwr.common.record.arrayrecord.Array.numpy:1 of
+#: flwr.common.record.array.Array.numpy:1 of
 msgid "Return the array as a NumPy array."
 msgstr "배열을 NumPy 배열로 반환합니다."
 
@@ -12049,19 +12047,19 @@ msgstr "배열을 NumPy 배열로 반환합니다."
 msgid "Attributes"
 msgstr "속성"
 
-#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
 msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 msgstr ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 
-#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
 msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
 msgstr ":py:obj:`shape <flwr.common.Array.shape>`\\"
 
-#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
 msgid ":py:obj:`stype <flwr.common.Array.stype>`\\"
 msgstr ":py:obj:`stype <flwr.common.Array.stype>`\\"
 
-#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
 msgid ":py:obj:`data <flwr.common.Array.data>`\\"
 msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
 
@@ -12074,7 +12072,7 @@ msgstr "ParametersRecord"
 #, fuzzy
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
-"[:py:class:`str`, :py:class:`~flwr.common.record.arrayrecord.Array`]"
+"[:py:class:`str`, :py:class:`~flwr.common.record.array.Array`]"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
@@ -30281,7 +30279,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|df330ba2ecc7486095020e6377558bba|"
+msgid "|b489956f3f574a109fad2836faf622e4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30298,7 +30296,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|43ccc14243b84cd79df2d253d80de4fb|"
+msgid "|e8061fdb5ec94141bc7526ea8060a9ab|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30324,7 +30322,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|8da4a971b2b44e108f7a3c0391faca33|"
+msgid "|741286a5ab8b4703919f32525e6b7ffa|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30342,7 +30340,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|56a4b95333534d8092396b254c10bffa|"
+msgid "|0ae5263f7b4d45cca55b69d341f8c83d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -30361,7 +30359,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|d8a1fe22416c4fed8692a8273b281133|"
+msgid "|74ef57e47ce544c8b5700f7c6b213f76|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -30378,7 +30376,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|854f959d4f744c058a3dc32af5ae3d25|"
+msgid "|f49a5dad3448407ea4480d186235b295|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -30401,7 +30399,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|3dc0f4bc03e84fa5ae805329c71c0552|"
+msgid "|142636086022481fba92d32b78caa0f7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -30418,7 +30416,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|27275a6071dc4614aa0734708a543110|"
+msgid "|49cc792ae168402d9917cab825e7def4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -30597,7 +30595,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|726048ff954444ffb3a7c94a9613260a|"
+msgid "|82d2085f891e4906a7f3b2fbd94640b4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -30625,7 +30623,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|c233bf3f187d40e7a2a23b60db60d970|"
+msgid "|0de634679a2b4b958aa20f8d427e4311|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -30652,7 +30650,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|7c46e573e01b4c71bb5ef1cd79042379|"
+msgid "|564c1ebbb05945939f4fcf814facdad4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -30678,7 +30676,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|f374276c878a40208ae57cb64611d663|"
+msgid "|fe2ef144276f40e79a7cf4ecebe97b2e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -30728,7 +30726,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|4d1d8e9719ab4ce7aa48eaf3ba4d3f45|"
+msgid "|0cac13f2a4834bc5917cff64f23c0105|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -30848,7 +30846,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|65f6155df55d44bda98d7cf140a0a4ca|"
+msgid "|d66f63e57bab4d7a9eafcae9a70d238d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -41104,5 +41102,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|a644fa5b1d314256a1ab5ffc3ccd71fe|"
+#~ msgstr ""
+
+#~ msgid "|df330ba2ecc7486095020e6377558bba|"
+#~ msgstr ""
+
+#~ msgid "|43ccc14243b84cd79df2d253d80de4fb|"
+#~ msgstr ""
+
+#~ msgid "|8da4a971b2b44e108f7a3c0391faca33|"
+#~ msgstr ""
+
+#~ msgid "|56a4b95333534d8092396b254c10bffa|"
+#~ msgstr ""
+
+#~ msgid "|d8a1fe22416c4fed8692a8273b281133|"
+#~ msgstr ""
+
+#~ msgid "|854f959d4f744c058a3dc32af5ae3d25|"
+#~ msgstr ""
+
+#~ msgid "|3dc0f4bc03e84fa5ae805329c71c0552|"
+#~ msgstr ""
+
+#~ msgid "|27275a6071dc4614aa0734708a543110|"
+#~ msgstr ""
+
+#~ msgid "|726048ff954444ffb3a7c94a9613260a|"
+#~ msgstr ""
+
+#~ msgid "|c233bf3f187d40e7a2a23b60db60d970|"
+#~ msgstr ""
+
+#~ msgid "|7c46e573e01b4c71bb5ef1cd79042379|"
+#~ msgstr ""
+
+#~ msgid "|f374276c878a40208ae57cb64611d663|"
+#~ msgstr ""
+
+#~ msgid "|4d1d8e9719ab4ce7aa48eaf3ba4d3f45|"
+#~ msgstr ""
+
+#~ msgid "|65f6155df55d44bda98d7cf140a0a4ca|"
 #~ msgstr ""
 
