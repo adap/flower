@@ -15,9 +15,16 @@
 
 package ai.flower.intelligence
 
-internal object Constants {
-  const val BASE_URL = "https://api.flower.ai/"
-  const val CHAT_COMPLETION_PATH = "v1/chat/completions"
-  const val SDK = "kt"
-  const val VERSION = "0.1.8"
+internal interface Engine {
+  suspend fun chat(
+    messages: List<Message>,
+    model: String? = null,
+    temperature: Float? = null,
+    maxCompletionTokens: Int? = null,
+    stream: Boolean = false,
+    onStreamEvent: ((StreamEvent) -> Unit)? = null,
+    tools: List<Tool>? = null,
+  ): Message
+
+  suspend fun fetchModel(model: String, callback: (Progress) -> Unit)
 }
