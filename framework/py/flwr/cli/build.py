@@ -27,6 +27,7 @@ import pathspec
 import tomli_w
 import typer
 
+from flwr.common.config import get_flwr_dir
 from flwr.common.constant import FAB_ALLOWED_EXTENSIONS, FAB_DATE, FAB_HASH_TRUNCATION
 
 from .config_utils import load_and_validate
@@ -58,6 +59,10 @@ def build(
         Optional[Path],
         typer.Option(help="Path of the Flower App to bundle into a FAB"),
     ] = None,
+    flwr_dir: Annotated[
+        Optional[Path],
+        typer.Option(help="The desired install path."),
+    ] = None,
 ) -> tuple[str, str]:
     """Build a Flower App into a Flower App Bundle (FAB).
 
@@ -67,6 +72,9 @@ def build(
 
     ``flwr build --app ./apps/flower-hello-world``.
     """
+    build_dir = get_flwr_dir() if not flwr_dir else flwr_dir
+    build_dir.mkdir(parents=True, exist_ok=True)
+
     if app is None:
         app = Path.cwd()
 
@@ -122,7 +130,7 @@ def build(
 
     toml_contents = tomli_w.dumps(conf)
 
-    with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as temp_file:
+    with tempfile.NamedTemporaryFile(suffix=".zip", delete=False, dir=build_dir) as temp_file:
         temp_filename = temp_file.name
 
         with zipfile.ZipFile(temp_filename, "w", zipfile.ZIP_DEFLATED) as fab_file:
@@ -162,15 +170,16 @@ def build(
 
     # Set the name of the zip file
     fab_filename = get_fab_filename(conf, fab_hash)
+    final_path = os.path.join(build_dir, fab_filename)
 
     # Once the temporary zip file is created, rename it to the final filename
-    shutil.move(temp_filename, fab_filename)
+    shutil.move(temp_filename, final_path)
 
     typer.secho(
         f"🎊 Successfully built {fab_filename}", fg=typer.colors.GREEN, bold=True
     )
 
-    return fab_filename, fab_hash
+    return final_path, fab_hash
 
 
 def _load_gitignore(app: Path) -> pathspec.PathSpec:
