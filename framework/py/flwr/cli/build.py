@@ -172,16 +172,16 @@ def build(
 
     # Set the name of the zip file
     fab_filename = get_fab_filename(conf, fab_hash)
-    final_path = os.path.join(build_dir, fab_filename)
+    fab_final_path = os.path.join(build_dir, fab_filename)
 
     # Once the temporary zip file is created, rename it to the final filename
-    shutil.move(temp_filename, final_path)
+    shutil.move(temp_filename, fab_final_path)
 
     typer.secho(
         f"🎊 Successfully built {fab_filename}", fg=typer.colors.GREEN, bold=True
     )
 
-    return final_path, fab_hash
+    return fab_final_path, fab_hash
 
 
 def _load_gitignore(app: Path) -> pathspec.PathSpec:
