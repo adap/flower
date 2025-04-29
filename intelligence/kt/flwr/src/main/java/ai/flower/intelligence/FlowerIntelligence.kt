@@ -18,10 +18,21 @@ package ai.flower.intelligence
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * FlowerIntelligence is the core intelligence service for Flower Labs.
+ *
+ * It facilitates chat, generation, and summarization tasks, with the option of using
+ * a local or remote engine based on configuration and availability.
+ */
 object FlowerIntelligence {
-  var remoteEngine = RemoteEngine()
-  var remoteHandoff: Boolean = false
+  private var remoteEngine = RemoteEngine()
+  private var remoteHandoff: Boolean = true
 
+  /**
+   * API key for FlowerIntelligence.
+   *
+   * Setting this value also updates the remote engine's API key.
+   */
   var apiKey: String = ""
     set(value) {
       field = value
@@ -31,6 +42,21 @@ object FlowerIntelligence {
   private val engine: Engine
     get() = remoteEngine
 
+  /**
+   * Conducts a chat interaction using a single string input.
+   *
+   * This method automatically wraps the input string as a message from the user.
+   * Additional parameters like temperature or model can be configured via [maybeOptions].
+   *
+   * Example:
+   * ```
+   * val result = FlowerIntelligence.chat("Why is the sky blue?", ChatOptions(temperature = 0.7))
+   * ```
+   *
+   * @param input A string representing the user message.
+   * @param maybeOptions Optional [ChatOptions] to customize the chat behavior.
+   * @return A [Result] containing the reply [Message] on success, or [Failure] on error.
+   */
   suspend fun chat(input: String, maybeOptions: ChatOptions? = null): Result<Message> =
     withContext(Dispatchers.Default) {
       var selectedEngine = engine
@@ -66,6 +92,21 @@ object FlowerIntelligence {
       }
     }
 
+  /**
+   * Conducts a chat interaction using an array of messages and options.
+   *
+   * This method allows for multi-message conversations by accepting a list of [Message] objects
+   * and a [ChatOptions] configuration.
+   *
+   * Example:
+   * ```
+   * val messages = listOf(Message(role = "user", content = "Why is the sky blue?"))
+   * val result = FlowerIntelligence.chat(messages to ChatOptions(model = "meta/llama3.2-1b"))
+   * ```
+   *
+   * @param options A [Pair] containing a list of [Message] and a [ChatOptions] object.
+   * @return A [Result] containing the reply [Message] on success, or [Failure] on error.
+   */
   suspend fun chat(options: Pair<List<Message>, ChatOptions>): Result<Message> =
     withContext(Dispatchers.Default) {
       val (messages, chatOptions) = options
