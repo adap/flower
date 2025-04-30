@@ -22,9 +22,11 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, cast, overload
 
+import msgpack
 import numpy as np
 
 from ..constant import SType
+from ..serializable import Serializable
 from ..typing import NDArray
 
 if TYPE_CHECKING:
@@ -40,7 +42,7 @@ def _raise_array_init_error() -> None:
 
 
 @dataclass
-class Array:
+class Array(Serializable):
     """Array type.
 
     A dataclass containing serialized data from an array-like or tensor-like object
@@ -248,3 +250,39 @@ class Array:
         # Source: https://numpy.org/doc/stable/reference/generated/numpy.load.html
         ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
         return cast(NDArray, ndarray_deserialized)
+
+    def serialize(self) -> bytes:
+        """Serialize an Array.
+
+        Each element in the header is divided by 1 Byte of zeros     16B    <1B>   16B
+        <1B>  16B  <1B>  32B  = 83 Bytes OBJECT-TYPE <  >  DTYPE <  > SHAPE <  > STYPE =
+        <HEADER>
+
+        The final representation is the concatenation of <HEADER> and the content of
+        .data (which is already in Bytes) separated by a Byte of zeros return
+        <HEADER><1B><CONTENT>
+        """
+        class_name = self.__class__.__name__.lower()
+        header: bytes = self.concatenate(
+            [
+                msgpack.dumps(class_name).ljust(16, b"*"),
+                msgpack.dumps(self.dtype).ljust(16, b"*"),
+                msgpack.dumps(self.shape).ljust(16, b"*"),
+                msgpack.dumps(self.stype).ljust(32, b"*"),
+            ]
+        )
+
+        return self.concatenate([header, self.data])
+
+    @classmethod
+    def deserialize(cls, serialized: bytes) -> Array:
+        """Deserialize array bytes and instantiate an Array."""
+        head = 16 + 1
+        dtype = msgpack.loads(serialized[head : head + 16].rstrip(b"*"))
+        head += 16 + 1
+        shape = msgpack.loads(serialized[head : head + 16].rstrip(b"*"))
+        head += 16 + 1
+        stype = msgpack.loads(serialized[head : head + 32].rstrip(b"*"))
+        head += 32 + 1
+        data = serialized[head:]
+        return cls(dtype, shape, stype, data)
