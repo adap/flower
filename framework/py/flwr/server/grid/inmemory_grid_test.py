@@ -23,8 +23,8 @@ from uuid import UUID, uuid4
 
 from flwr.common import ConfigRecord, Message, RecordDict, now
 from flwr.common.constant import (
+    HEARTBEAT_MAX_INTERVAL,
     NODE_ID_NUM_BYTES,
-    PING_MAX_INTERVAL,
     SUPERLINK_NODE_ID,
     Status,
 )
@@ -44,7 +44,7 @@ from .inmemory_grid import InMemoryGrid
 def push_messages(grid: InMemoryGrid, num_nodes: int) -> tuple[Iterable[str], int]:
     """Help push messages to state."""
     for _ in range(num_nodes):
-        node_id = grid.state.create_node(ping_interval=PING_MAX_INTERVAL)
+        node_id = grid.state.create_node(heartbeat_interval=HEARTBEAT_MAX_INTERVAL)
     num_messages = 3
     msgs = [Message(RecordDict(), node_id, "query") for _ in range(num_messages)]
 
