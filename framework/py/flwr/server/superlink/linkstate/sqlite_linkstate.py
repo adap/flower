@@ -92,6 +92,8 @@ CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
     run_id                INTEGER UNIQUE,
+    active_until          REAL,
+    heartbeat_interval    REAL,
     fab_id                TEXT,
     fab_version           TEXT,
     fab_hash              TEXT,
@@ -742,20 +744,21 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
             query = (
                 "INSERT INTO run "
-                "(run_id, fab_id, fab_version, fab_hash, override_config, "
+                "(run_id, active_until, heartbeat_interval, "
+                "fab_id, fab_version, fab_hash, override_config, "
                 "federation_options, pending_at, starting_at, running_at, finished_at, "
                 "sub_status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             override_config_json = json.dumps(override_config)
             data = [
                 sint64_run_id,
+                0,  # The `active_until` is not used until the run is started
+                0,  # This `heartbeat_interval` is not used until the run is started
                 fab_id,
                 fab_version,
                 fab_hash,
                 override_config_json,
                 configrecord_to_bytes(federation_options),
-            ]
-            data += [
                 now().isoformat(),
                 "",
                 "",
@@ -879,22 +882,32 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return False
 
         # Update the status
-        query = "UPDATE run SET %s= ?, sub_status = ?, details = ? "
+        query = "UPDATE run SET %s= ?, sub_status = ?, details = ?, "
+        query += "active_until = ?, heartbeat_interval = ? "
         query += "WHERE run_id = ?;"
 
+        # Prepare data for query
         timestamp_fld = ""
+        current = now()
+        active_until = 0  # Not used for non-running statuses
+        heartbeat_interval = 0  # Not used for non-running statuses
         if new_status.status == Status.STARTING:
             timestamp_fld = "starting_at"
         elif new_status.status == Status.RUNNING:
             timestamp_fld = "running_at"
+            # TODO: use constant for heartbeat_interval
+            heartbeat_interval = 30
+            active_until = current.timestamp() + heartbeat_interval
         elif new_status.status == Status.FINISHED:
             timestamp_fld = "finished_at"
 
         data = (
-            now().isoformat(),
+            current.isoformat(),
             new_status.sub_status,
             new_status.details,
             sint64_run_id,
+            active_until,
+            heartbeat_interval,
         )
         self.query(query % timestamp_fld, data)
         return True
@@ -950,6 +963,16 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             ),
         )
         return True
+
+    def acknowledge_run_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
+        """Acknowledge a heartbeat received from a ServerApp for a given run.
+
+        A run with status `"running"` is considered alive as long as it sends heartbeats
+        within the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        By default, HEARTBEAT_PATIENCE = 2, allowing for one missed heartbeat
+        before the run is marked as `"completed:failed"`.
+        """
+        # TODO: Implement this method
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""

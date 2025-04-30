@@ -46,7 +46,7 @@ from .utils import (
     verify_message_ids,
 )
 
-
+# TODO: Add active_until and heartbeat_interval to RunRecord
 @dataclass
 class RunRecord:  # pylint: disable=R0902
     """The record of a specific run, including its status and timestamps."""
@@ -550,6 +550,16 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 )
                 return True
         return False
+
+    def acknowledge_run_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
+        """Acknowledge a heartbeat received from a ServerApp for a given run.
+
+        A run with status `"running"` is considered alive as long as it sends heartbeats
+        within the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        By default, HEARTBEAT_PATIENCE = 2, allowing for one missed heartbeat
+        before the run is marked as `"completed:failed"`.
+        """
+        # TODO: Implement this method
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""

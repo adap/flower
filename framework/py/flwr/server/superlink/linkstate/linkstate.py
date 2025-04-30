@@ -286,6 +286,29 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def acknowledge_run_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
+        """Acknowledge a heartbeat received from a ServerApp for a given run.
+
+        A run with status `"running"` is considered alive as long as it sends heartbeats
+        within the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        By default, HEARTBEAT_PATIENCE = 2, allowing for one missed heartbeat
+        before the run is marked as `"completed:failed"`.
+
+        Parameters
+        ----------
+        run_id : int
+            The `run_id` from which the heartbeat was received.
+        heartbeat_interval : float
+            The interval (in seconds) from the current timestamp within which the next
+            heartbeat from the ServerApp for this run must be received.
+
+        Returns
+        -------
+        is_acknowledged : bool
+            True if the heartbeat is successfully acknowledged; otherwise, False.
+        """
+
+    @abc.abstractmethod
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`.
 
