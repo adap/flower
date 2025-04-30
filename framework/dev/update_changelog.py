@@ -42,7 +42,7 @@ CHANGELOG_FILE = ROOT_DIR / "framework" / "docs" / "source" / "ref-changelog.md"
 CHANGELOG_SECTION_HEADER = "### Changelog entry"
 
 # Load the TOML configuration
-with (Path(__file__).parent.resolve() / "changelog_config.toml").open("rb") as toml_f:
+with (ROOT_DIR / "dev" / "changelog_config.toml").open("rb") as toml_f:
     CONFIG = tomllib.load(toml_f)
 
 # Extract types, project, and scope from the config
@@ -150,7 +150,11 @@ def _get_contributors_from_commits(api: Github, commits: list[Commit]) -> set[st
                 return user.name
             print(f"Email mismatch for user {username}: {email} != {user.email}")
         except Exception:  # pylint: disable=broad-exception-caught
-            print(f"FAILED to get user profile from GitHub: {username} <{email}>")
+            print(
+                f"Failed to retrieve GitHub profile for user '{username}' <{email}>. "
+                f"Using '{username}' directly in the changelog."
+            )
+            return username
         return None
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
@@ -267,6 +271,10 @@ def _update_changelog(prs: set[PullRequest], tag: str, new_tag: str) -> bool:
 
             # Skip if the PR is already in changelog
             if f"#{pr_info.number}]" in content:
+                continue
+            
+            # Skip Flower Intelligence PRs
+            if parsed_title["project"] == "intelligence":
                 continue
 
             # Find section to insert

@@ -25,9 +25,9 @@ from uuid import UUID, uuid4
 
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
+    HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
-    PING_PATIENCE,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
@@ -61,7 +61,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def __init__(self) -> None:
 
-        # Map node_id to (online_until, ping_interval)
+        # Map node_id to (online_until, heartbeat_interval)
         self.node_ids: dict[int, tuple[float, float]] = {}
         self.public_key_to_node_id: dict[bytes, int] = {}
         self.node_id_to_public_key: dict[int, bytes] = {}
@@ -322,7 +322,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.message_res_store)
 
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(self, heartbeat_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(
@@ -334,8 +334,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
-            # Mark the node online util time.time() + ping_interval
-            self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+            # Mark the node online util time.time() + heartbeat_interval
+            self.node_ids[node_id] = (
+                time.time() + heartbeat_interval,
+                heartbeat_interval,
+            )
             return node_id
 
     def delete_node(self, node_id: int) -> None:
@@ -536,17 +539,19 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return None
             return self.federation_options[run_id]
 
-    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat.
+    def acknowledge_heartbeat(self, node_id: int, heartbeat_interval: float) -> bool:
+        """Acknowledge a heartbeat received from a node, serving as a heartbeat.
 
-        It allows for one missed ping (in a PING_PATIENCE * ping_interval) before
-        marking the node as offline, where PING_PATIENCE = 2 in default.
+        A node is considered online as long as it sends heartbeats within
+        the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        By default, HEARTBEAT_PATIENCE = 2, allowing for one missed heartbeat
+        before the node is marked as offline.
         """
         with self.lock:
             if node_id in self.node_ids:
                 self.node_ids[node_id] = (
-                    time.time() + PING_PATIENCE * ping_interval,
-                    ping_interval,
+                    time.time() + HEARTBEAT_PATIENCE * heartbeat_interval,
+                    heartbeat_interval,
                 )
                 return True
         return False

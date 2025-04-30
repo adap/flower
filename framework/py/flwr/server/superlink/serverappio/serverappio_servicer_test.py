@@ -211,7 +211,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_push_messages_if_running(self) -> None:
         """Test `PushMessages` success."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
+        node_id = self.state.create_node(heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         message_ins = create_ins_message(
             src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
@@ -253,7 +253,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PushInsMessages` not successful if RunStatus is not running."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
+        node_id = self.state.create_node(heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         message_ins = create_ins_message(
             src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
@@ -293,7 +293,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PullMessages` deletes messages from LinkState."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
+        node_id = self.state.create_node(heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord())
 
         # Transition status to running.

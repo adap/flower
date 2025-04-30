@@ -317,15 +317,40 @@ def test_validate_federation_in_project_config_fail() -> None:
     run_and_assert_exit(federation, config)
 
 
-def test_validate_certificate_in_federation_config(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "config,expected",
+    [
+        # Test insecure is True and root_certificates is None
+        ({"address": "127.0.0.1:9091", "insecure": True}, (True, None)),
+        # Test insecure is not declared and root_certificates is present
+        (
+            {"address": "127.0.0.1:9091", "root-certificates": "dummy_cert.pem"},
+            (False, b"dummy_cert"),
+        ),
+        # Test insecure is False and root_certificates is present
+        (
+            {
+                "address": "127.0.0.1:9091",
+                "insecure": False,
+                "root-certificates": "dummy_cert.pem",
+            },
+            (False, b"dummy_cert"),
+        ),
+        # Test insecure is not declared and root_certificates is None
+        ({"address": "127.0.0.1:9091"}, (False, None)),
+        # Test insecure is False and root_certificates is None
+        ({"address": "127.0.0.1:9091", "insecure": False}, (False, None)),
+    ],
+)
+def test_validate_certificate_in_federation_config(
+    tmp_path: Path, config: dict[str, Any], expected: tuple[bool, Optional[bytes]]
+) -> None:
     """Test that validate_certificate_in_federation_config succeeds correctly."""
     # Prepare
-    config: dict[str, Any] = {
-        "address": "127.0.0.1:9091",
-        "root-certificates": "dummy_cert.pem",
-    }
-    dummy_cert = tmp_path / "dummy_cert.pem"
-    dummy_cert.write_text("dummy_cert")
+    # If a certificate is referenced, create a dummy certificate file.
+    if "root-certificates" in config:
+        dummy_cert = tmp_path / config["root-certificates"]
+        dummy_cert.write_text("dummy_cert")
 
     # Current directory
     origin = Path.cwd()
@@ -334,41 +359,35 @@ def test_validate_certificate_in_federation_config(tmp_path: Path) -> None:
         # Change into the temporary directory
         os.chdir(tmp_path)
 
-        # Test insecure is not declared and root_certificates is present
-        # Execute
-        insecure, root_cert = validate_certificate_in_federation_config(
-            tmp_path, config
-        )
+        # Execute: Validate the configuration.
+        result = validate_certificate_in_federation_config(tmp_path, config)
         # Assert
-        assert not insecure
-        assert root_cert == b"dummy_cert"
-
-        # Test insecure is False and root_certificates is present
-        config["insecure"] = False
-        # Execute
-        insecure, root_cert = validate_certificate_in_federation_config(
-            tmp_path, config
-        )
-        # Assert
-        assert not insecure
-        assert root_cert == b"dummy_cert"
-
-        # Test insecure is True and root_certificates is None
-        config["insecure"] = True
-        config.pop("root-certificates")
-
-        # Execute
-        insecure, root_cert = validate_certificate_in_federation_config(
-            tmp_path, config
-        )
-        # Assert
-        assert insecure
-        assert root_cert is None
+        assert result == expected
     finally:
         os.chdir(origin)
 
 
-def test_validate_certificate_in_federation_config_fail(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "config",
+    [
+        # Test insecure is set to an invalid value
+        {"address": "127.0.0.1:9091", "insecure": "invalid_value"},
+        # Test insecure is True and root_certificates is set
+        {
+            "address": "127.0.0.1:9091",
+            "insecure": True,
+            "root-certificates": "dummy_cert.pem",
+        },
+        # Test insecure is False and root_certificates cannot be read
+        {
+            "address": "127.0.0.1:9091",
+            "root-certificates": "non_existent_cert.pem",
+        },
+    ],
+)
+def test_validate_certificate_in_federation_config_fail(
+    tmp_path: Path, config: dict[str, Any]
+) -> None:
     """Test that validate_certificate_in_federation_config fails correctly."""
 
     def run_and_assert_exit(app: Path, config: dict[str, Any]) -> None:
@@ -378,31 +397,13 @@ def test_validate_certificate_in_federation_config_fail(tmp_path: Path) -> None:
         assert excinfo.value.exit_code == 1
 
     # Prepare
-    config: dict[str, Any] = {"address": "localhost:8080"}
-    dummy_cert = tmp_path / "dummy_cert.pem"
-    dummy_cert.write_text("dummy_cert")
-
-    # Current directory
     origin = Path.cwd()
 
     try:
         # Change into the temporary directory
         os.chdir(tmp_path)
 
-        # Test insecure is None and root_certificates is None
-        config["insecure"] = None
-        # Execute and assert
-        run_and_assert_exit(tmp_path, config)
-
-        # Test insecure is False, but root_certificates is None
-        config["insecure"] = False
-        # Execute and assert
-        run_and_assert_exit(tmp_path, config)
-
-        # Test insecure is True, but root_certificates is not None
-        config["root-certificates"] = "dummy_cert.pem"
-        config["insecure"] = True
-        # Execute and assert
+        # Execute and assert for each failing configuration
         run_and_assert_exit(tmp_path, config)
     finally:
         os.chdir(origin)

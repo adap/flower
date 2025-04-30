@@ -41,8 +41,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
+    HeartbeatRequest,
+    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -61,7 +61,7 @@ PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
 PATH_PULL_MESSAGES: str = "/api/v0/fleet/pull-messages"
 PATH_PUSH_MESSAGES: str = "/api/v0/fleet/push-messages"
-PATH_PING: str = "api/v0/fleet/ping"
+PATH_HEARTBEAT: str = "api/v0/fleet/heartbeat"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
 PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
 
@@ -155,7 +155,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     node: Optional[Node] = None
 
     ###########################################################################
-    # ping/create_node/delete_node/receive/send/get_run functions
+    # heartbeat/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
     def _request(
@@ -211,11 +211,11 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Node instance missing")
             return False
 
-        # Construct the ping request
-        req = PingRequest(node=node, ping_interval=PING_DEFAULT_INTERVAL)
+        # Construct the heartbeat request
+        req = HeartbeatRequest(node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL)
 
         # Send the request
-        res = _request(req, PingResponse, PATH_PING, retry=False)
+        res = _request(req, HeartbeatResponse, PATH_HEARTBEAT, retry=False)
         if res is None:
             return False
 
@@ -231,7 +231,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     def create_node() -> Optional[int]:
         """Set create_node."""
-        req = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
+        req = CreateNodeRequest(heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL)
 
         # Send the request
         res = _request(req, CreateNodeResponse, PATH_CREATE_NODE)

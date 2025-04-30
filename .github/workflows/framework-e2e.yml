@@ -37,27 +37,22 @@ jobs:
 
   wheel:
     runs-on: ubuntu-22.04
-    needs: changes
     name: Build, test and upload wheel
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
-        if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
-        if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
           cd framework
           python -m poetry install --all-extras
           python -m pip install -U setuptools==70.3.0
       - name: Build wheel
-        if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./framework/dev/build.sh
       - name: Test wheel
-        if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./framework/dev/test-wheel.sh
       - name: Upload wheel
-        if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         id: upload
         env:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
@@ -84,7 +79,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
         directory: [e2e-bare-auth]
         connection: [secure, insecure]
         engine: [deployment-engine, simulation-engine]
@@ -356,7 +351,7 @@ jobs:
     strategy:
       matrix:
         framework: ["numpy"]
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     name: |
       Build & Install /
