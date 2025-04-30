@@ -26,11 +26,11 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
-interface RemoteEngineProtocol : Engine {
+internal interface RemoteEngineProtocol : Engine {
   var apiKey: String
 }
 
-class RemoteEngine(
+internal class RemoteEngine(
   private val baseURL: String = Constants.BASE_URL,
   override var apiKey: String = "",
 ) : RemoteEngineProtocol {
@@ -102,7 +102,7 @@ class RemoteEngine(
   }
 }
 
-object NetworkService {
+internal object NetworkService {
   suspend inline fun <reified Element : Any> getElement(
     client: HttpClient,
     url: String,
