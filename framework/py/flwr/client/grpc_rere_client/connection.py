@@ -215,7 +215,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Node instance missing")
             return
 
-        # Stop heartbeat sender
+        # Stop the heartbeat sender
         heartbeat_sender.stop()
 
         # Call FleetAPI
