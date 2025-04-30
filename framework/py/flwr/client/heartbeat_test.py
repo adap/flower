@@ -22,42 +22,42 @@ from unittest.mock import MagicMock
 
 import grpc
 
-from .heartbeat import start_ping_loop
+from .heartbeat import start_heartbeat_loop
 
 
 class TestStartPingLoopWithFailures(unittest.TestCase):
     """Test heartbeat utility functions."""
 
-    def test_ping_loop_terminates(self) -> None:
-        """Test if the ping loop thread terminates when flagged."""
+    def test_heartbeat_loop_terminates(self) -> None:
+        """Test if the heartbeat loop thread terminates when flagged."""
         # Prepare
-        ping_fn = MagicMock()
+        heartbeat_fn = MagicMock()
         stop_event = threading.Event()
 
         # Execute
-        thread = start_ping_loop(ping_fn, stop_event)
+        thread = start_heartbeat_loop(heartbeat_fn, stop_event)
         time.sleep(1)
         stop_event.set()
         thread.join(timeout=1)
 
         # Assert
-        self.assertTrue(ping_fn.called)
+        self.assertTrue(heartbeat_fn.called)
         self.assertFalse(thread.is_alive())
 
-    def test_ping_loop_with_failures_terminates(self) -> None:
-        """Test if the ping loop thread with failures terminates when flagged."""
+    def test_heartbeat_loop_with_failures_terminates(self) -> None:
+        """Test if the heartbeat loop thread with failures terminates when flagged."""
         # Prepare
         exc = grpc.RpcError()
         exc.code = MagicMock(return_value=grpc.StatusCode.UNAVAILABLE)
-        ping_fn = MagicMock(side_effect=exc)
+        heartbeat_fn = MagicMock(side_effect=exc)
         stop_event = threading.Event()
 
         # Execute
-        thread = start_ping_loop(ping_fn, stop_event)
+        thread = start_heartbeat_loop(heartbeat_fn, stop_event)
         time.sleep(1)
         stop_event.set()
         thread.join(timeout=1)
 
         # Assert
-        self.assertTrue(ping_fn.called)
+        self.assertTrue(heartbeat_fn.called)
         self.assertFalse(thread.is_alive())
