@@ -46,12 +46,13 @@ from .utils import (
     verify_message_ids,
 )
 
-# TODO: Add active_until and heartbeat_interval to RunRecord
 @dataclass
 class RunRecord:  # pylint: disable=R0902
     """The record of a specific run, including its status and timestamps."""
 
     run: Run
+    active_until: float = 0.0
+    heartbeat_interval: float = 0.0
     logs: list[tuple[float, str]] = field(default_factory=list)
     log_lock: threading.Lock = field(default_factory=threading.Lock)
 
@@ -551,7 +552,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return True
         return False
 
-    def acknowledge_run_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
+    def acknowledge_app_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
         """Acknowledge a heartbeat received from a ServerApp for a given run.
 
         A run with status `"running"` is considered alive as long as it sends heartbeats
@@ -560,6 +561,28 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         before the run is marked as `"completed:failed"`.
         """
         # TODO: Implement this method
+        with self.lock:
+            # Check if the run_id exists
+            if run_id not in self.run_ids:
+                log(ERROR, "`run_id` is invalid")
+                return False
+            run_record = self.run_ids[run_id]
+            
+            # Check if the run is of status "running"/"starting"
+            if run_record.run.status.status not in {Status.RUNNING, Status.STARTING}:
+                log(
+                    ERROR,
+                    'Cannot acknowledge heartbeat for run with status "%s"',
+                    run_record.run.status.status,
+                )
+                return False
+            
+            # Update the active_until timestamp
+            current = now().timestamp()
+            run_record.active_until = current + PING_PATIENCE * heartbeat_interval
+            run_record.heartbeat_interval = heartbeat_interval
+            return True
+        
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""
