@@ -27,7 +27,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import PING_DEFAULT_INTERVAL
+from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.logger import log
@@ -61,7 +61,7 @@ PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
 PATH_PULL_MESSAGES: str = "/api/v0/fleet/pull-messages"
 PATH_PUSH_MESSAGES: str = "/api/v0/fleet/push-messages"
-PATH_HEARTBEAT: str = "api/v0/fleet/heartbeat"
+PATH_PING: str = "api/v0/fleet/heartbeat"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
 PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
 
@@ -205,7 +205,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         grpc_res.ParseFromString(res.content)
         return grpc_res
 
-    def ping() -> bool:
+    def heartbeat() -> bool:
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
@@ -215,19 +215,19 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         req = HeartbeatRequest(node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL)
 
         # Send the request
-        res = _request(req, HeartbeatResponse, PATH_HEARTBEAT, retry=False)
+        res = _request(req, HeartbeatResponse, PATH_PING, retry=False)
         if res is None:
             return False
 
         # Check if success
         if not res.success:
             raise RuntimeError(
-                "Ping failed unexpectedly. The SuperLink does not "
+                "Heartbeat failed unexpectedly. The SuperLink does not "
                 "recognize this SuperNode."
             )
         return True
 
-    heartbeat_sender = HeartbeatSender(ping)
+    heartbeat_sender = HeartbeatSender(heartbeat)
 
     def create_node() -> Optional[int]:
         """Set create_node."""

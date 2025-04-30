@@ -27,7 +27,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import PING_CALL_TIMEOUT, PING_DEFAULT_INTERVAL
+from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.logger import log
@@ -144,8 +144,6 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     stub = adapter_cls(channel)
     metadata: Optional[Metadata] = None
     node: Optional[Node] = None
-    ping_thread: Optional[threading.Thread] = None
-    ping_stop_event = threading.Event()
 
     def _should_giveup_fn(e: Exception) -> bool:
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
@@ -162,7 +160,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     # heartbeat/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
-    def ping() -> None:
+    def heartbeat() -> bool:
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
@@ -173,7 +171,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         # Call FleetAPI
         try:
-            res: PingResponse = stub.Ping(req, timeout=PING_CALL_TIMEOUT)
+            res: HeartbeatResponse = stub.Heartbeat(req, timeout=HEARTBEAT_CALL_TIMEOUT)
         except grpc.RpcError as e:
             status_code = e.code()
             if status_code == grpc.StatusCode.UNAVAILABLE:
@@ -184,14 +182,13 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         # Check if success
         if not res.success:
-            raise RuntimeError("Ping failed unexpectedly.")
+            raise RuntimeError(
+                "Heartbeat failed unexpectedly. The SuperLink does not "
+                "recognize this SuperNode."
+            )
+        return True
 
-        # Wait
-        rd = random.uniform(*PING_RANDOM_RANGE)
-        next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
-        next_interval *= PING_BASE_MULTIPLIER + rd
-        if not ping_stop_event.is_set():
-            ping_stop_event.wait(next_interval)
+    heartbeat_sender = HeartbeatSender(heartbeat)
 
     def create_node() -> Optional[int]:
         """Set create_node."""
@@ -204,10 +201,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             request=create_node_request,
         )
 
-        # Remember the node and the ping-loop thread
-        nonlocal node, ping_thread
+        # Remember the node and start the heartbeat sender
+        nonlocal node
         node = cast(Node, create_node_response.node)
-        ping_thread = start_ping_loop(ping, ping_stop_event)
+        heartbeat_sender.start()
         return node.node_id
 
     def delete_node() -> None:
@@ -218,8 +215,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Node instance missing")
             return
 
-        # Stop the ping-loop thread
-        ping_stop_event.set()
+        # Stop heartbeat sender
+        heartbeat_sender.stop()
 
         # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)
