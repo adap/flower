@@ -209,7 +209,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         # Remember the node and start the heartbeat sender
         nonlocal node
+        # Remember the node and start the heartbeat sender
+        nonlocal node
         node = cast(Node, create_node_response.node)
+        heartbeat_sender.start()
         heartbeat_sender.start()
         return node.node_id
 
@@ -221,7 +224,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Node instance missing")
             return
 
-        # Stop heartbeat sender
+        # Stop the heartbeat sender
         heartbeat_sender.stop()
 
         # Call FleetAPI

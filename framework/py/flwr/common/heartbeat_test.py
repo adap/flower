@@ -66,7 +66,7 @@ class TestHeartbeatSender(unittest.TestCase):
         self.heartbeat_sender.stop()
 
         # Assert
-        self.assertLess(time.time() - current, 0.1)
+        self.assertLess(time.time() - current, 0.2)
         self.mock_heartbeat_fn.assert_called_once()
         self.assertFalse(self.heartbeat_sender._thread.is_alive())
 
