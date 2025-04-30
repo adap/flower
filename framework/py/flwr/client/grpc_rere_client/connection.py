@@ -27,14 +27,14 @@ from typing import Callable, Optional, Union, cast
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from flwr.client.heartbeat import start_ping_loop
+from flwr.client.heartbeat import start_heartbeat_loop
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import (
-    PING_BASE_MULTIPLIER,
-    PING_CALL_TIMEOUT,
-    PING_DEFAULT_INTERVAL,
-    PING_RANDOM_RANGE,
+    HEARTBEAT_BASE_MULTIPLIER,
+    HEARTBEAT_CALL_TIMEOUT,
+    HEARTBEAT_DEFAULT_INTERVAL,
+    HEARTBEAT_RANDOM_RANGE,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
@@ -49,8 +49,8 @@ from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
-    PingRequest,
-    PingResponse,
+    HeartbeatRequest,
+    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -151,8 +151,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     stub = adapter_cls(channel)
     metadata: Optional[Metadata] = None
     node: Optional[Node] = None
-    ping_thread: Optional[threading.Thread] = None
-    ping_stop_event = threading.Event()
+    heartbeat_thread: Optional[threading.Thread] = None
+    heartbeat_stop_event = threading.Event()
 
     def _should_giveup_fn(e: Exception) -> bool:
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
@@ -166,45 +166,47 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     retry_invoker.should_giveup = _should_giveup_fn
 
     ###########################################################################
-    # ping/create_node/delete_node/receive/send/get_run functions
+    # heartbeat/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
-    def ping() -> None:
+    def heartbeat() -> None:
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
             return
 
-        # Construct the ping request
-        req = PingRequest(node=node, ping_interval=PING_DEFAULT_INTERVAL)
+        # Construct the heartbeat request
+        req = HeartbeatRequest(node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL)
 
         # Call FleetAPI
-        res: PingResponse = stub.Ping(req, timeout=PING_CALL_TIMEOUT)
+        res: HeartbeatResponse = stub.Heartbeat(req, timeout=HEARTBEAT_CALL_TIMEOUT)
 
         # Check if success
         if not res.success:
-            raise RuntimeError("Ping failed unexpectedly.")
+            raise RuntimeError("Heartbeat failed unexpectedly.")
 
         # Wait
-        rd = random.uniform(*PING_RANDOM_RANGE)
-        next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
-        next_interval *= PING_BASE_MULTIPLIER + rd
-        if not ping_stop_event.is_set():
-            ping_stop_event.wait(next_interval)
+        rd = random.uniform(*HEARTBEAT_RANDOM_RANGE)
+        next_interval: float = HEARTBEAT_DEFAULT_INTERVAL - HEARTBEAT_CALL_TIMEOUT
+        next_interval *= HEARTBEAT_BASE_MULTIPLIER + rd
+        if not heartbeat_stop_event.is_set():
+            heartbeat_stop_event.wait(next_interval)
 
     def create_node() -> Optional[int]:
         """Set create_node."""
         # Call FleetAPI
-        create_node_request = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
+        create_node_request = CreateNodeRequest(
+            heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
+        )
         create_node_response = retry_invoker.invoke(
             stub.CreateNode,
             request=create_node_request,
         )
 
-        # Remember the node and the ping-loop thread
-        nonlocal node, ping_thread
+        # Remember the node and the heartbeat-loop thread
+        nonlocal node, heartbeat_thread
         node = cast(Node, create_node_response.node)
-        ping_thread = start_ping_loop(ping, ping_stop_event)
+        heartbeat_thread = start_heartbeat_loop(heartbeat, heartbeat_stop_event)
         return node.node_id
 
     def delete_node() -> None:
@@ -215,8 +217,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Node instance missing")
             return
 
-        # Stop the ping-loop thread
-        ping_stop_event.set()
+        # Stop the heartbeat-loop thread
+        heartbeat_stop_event.set()
 
         # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)

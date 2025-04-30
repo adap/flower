@@ -20,11 +20,13 @@ from typing import Callable
 
 import grpc
 
-from flwr.common.constant import PING_CALL_TIMEOUT
+from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 
 
-def _ping_loop(ping_fn: Callable[[], None], stop_event: threading.Event) -> None:
+def _heartbeat_loop(
+    heartbeat_fn: Callable[[], None], stop_event: threading.Event
+) -> None:
     def wait_fn(wait_time: float) -> None:
         if not stop_event.is_set():
             stop_event.wait(wait_time)
@@ -34,16 +36,16 @@ def _ping_loop(ping_fn: Callable[[], None], stop_event: threading.Event) -> None
         if not isinstance(err, grpc.RpcError):
             return
         status_code = err.code()
-        # If ping call timeout is triggered
+        # If heartbeat call timeout is triggered
         if status_code == grpc.StatusCode.DEADLINE_EXCEEDED:
             # Avoid long wait time.
             if state.actual_wait is None:
                 return
-            state.actual_wait = max(state.actual_wait - PING_CALL_TIMEOUT, 0.0)
+            state.actual_wait = max(state.actual_wait - HEARTBEAT_CALL_TIMEOUT, 0.0)
 
     def wrapped_ping() -> None:
         if not stop_event.is_set():
-            ping_fn()
+            heartbeat_fn()
 
     retrier = RetryInvoker(
         exponential,
@@ -57,17 +59,17 @@ def _ping_loop(ping_fn: Callable[[], None], stop_event: threading.Event) -> None
         retrier.invoke(wrapped_ping)
 
 
-def start_ping_loop(
-    ping_fn: Callable[[], None], stop_event: threading.Event
+def start_heartbeat_loop(
+    heartbeat_fn: Callable[[], None], stop_event: threading.Event
 ) -> threading.Thread:
-    """Start a ping loop in a separate thread.
+    """Start a heartbeat loop in a separate thread.
 
-    This function initializes a new thread that runs a ping loop, allowing for
-    asynchronous ping operations. The loop can be terminated through the provided stop
-    event.
+    This function initializes a new thread that runs a heartbeat loop, allowing for
+    asynchronous heartbeat operations. The loop can be terminated through the provided
+    stop event.
     """
     thread = threading.Thread(
-        target=_ping_loop, args=(ping_fn, stop_event), daemon=True
+        target=_heartbeat_loop, args=(heartbeat_fn, stop_event), daemon=True
     )
     thread.start()
 

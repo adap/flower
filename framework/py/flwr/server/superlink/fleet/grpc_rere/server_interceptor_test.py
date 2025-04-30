@@ -43,8 +43,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
+    HeartbeatRequest,
+    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -108,10 +108,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=GetRunRequest.SerializeToString,
             response_deserializer=GetRunResponse.FromString,
         )
-        self._ping = self._channel.unary_unary(
-            "/flwr.proto.Fleet/Ping",
-            request_serializer=PingRequest.SerializeToString,
-            response_deserializer=PingResponse.FromString,
+        self._heartbeat = self._channel.unary_unary(
+            "/flwr.proto.Fleet/Heartbeat",
+            request_serializer=HeartbeatRequest.SerializeToString,
+            response_deserializer=HeartbeatResponse.FromString,
         )
         self._get_fab = self._channel.unary_unary(
             "/flwr.proto.Fleet/GetFab",
@@ -207,11 +207,11 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         req = GetRunRequest(node=Node(node_id=node_id), run_id=run_id)
         return self._get_run.with_call(request=req, metadata=metadata)
 
-    def _test_ping(self, metadata: list[Any]) -> Any:
-        """Test Ping."""
+    def _test_heartbeat(self, metadata: list[Any]) -> Any:
+        """Test Heartbeat."""
         node_id = self._create_node_and_set_public_key()
-        req = PingRequest(node=Node(node_id=node_id))
-        return self._ping.with_call(request=req, metadata=metadata)
+        req = HeartbeatRequest(node=Node(node_id=node_id))
+        return self._heartbeat.with_call(request=req, metadata=metadata)
 
     def _test_get_fab(self, metadata: list[Any]) -> Any:
         """Test GetFab."""
@@ -229,7 +229,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         return self._get_fab.with_call(request=req, metadata=metadata)
 
     def _create_node_and_set_public_key(self) -> int:
-        node_id = self.state.create_node(ping_interval=30)
+        node_id = self.state.create_node(heartbeat_interval=30)
         pk_bytes = public_key_to_bytes(self.node_pk)
         self.state.set_node_public_key(node_id, pk_bytes)
         return node_id
@@ -241,7 +241,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_pull_messages,),
             (_test_push_messages,),
             (_test_get_run,),
-            (_test_ping,),
+            (_test_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore
@@ -262,7 +262,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_pull_messages,),
             (_test_push_messages,),
             (_test_get_run,),
-            (_test_ping,),
+            (_test_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore
@@ -282,7 +282,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_pull_messages,),
             (_test_push_messages,),
             (_test_get_run,),
-            (_test_ping,),
+            (_test_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore
@@ -302,7 +302,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_pull_messages,),
             (_test_push_messages,),
             (_test_get_run,),
-            (_test_ping,),
+            (_test_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore

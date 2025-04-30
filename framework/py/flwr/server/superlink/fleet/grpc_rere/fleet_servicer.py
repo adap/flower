@@ -29,8 +29,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
+    HeartbeatRequest,
+    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -56,7 +56,11 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: CreateNodeRequest, context: grpc.ServicerContext
     ) -> CreateNodeResponse:
         """."""
-        log(INFO, "[Fleet.CreateNode] Request ping_interval=%s", request.ping_interval)
+        log(
+            INFO,
+            "[Fleet.CreateNode] Request heartbeat_interval=%s",
+            request.heartbeat_interval,
+        )
         log(DEBUG, "[Fleet.CreateNode] Request: %s", MessageToDict(request))
         response = message_handler.create_node(
             request=request,
@@ -77,10 +81,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state=self.state_factory.state(),
         )
 
-    def Ping(self, request: PingRequest, context: grpc.ServicerContext) -> PingResponse:
+    def Heartbeat(
+        self, request: HeartbeatRequest, context: grpc.ServicerContext
+    ) -> HeartbeatResponse:
         """."""
-        log(DEBUG, "[Fleet.Ping] Request: %s", MessageToDict(request))
-        return message_handler.ping(
+        log(DEBUG, "[Fleet.Heartbeat] Request: %s", MessageToDict(request))
+        return message_handler.heartbeat(
             request=request,
             state=self.state_factory.state(),
         )

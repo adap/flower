@@ -33,8 +33,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
+    HeartbeatRequest,
+    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -58,7 +58,7 @@ def create_node(
 ) -> CreateNodeResponse:
     """."""
     # Create node
-    node_id = state.create_node(ping_interval=request.ping_interval)
+    node_id = state.create_node(heartbeat_interval=request.heartbeat_interval)
     return CreateNodeResponse(node=Node(node_id=node_id))
 
 
@@ -73,13 +73,13 @@ def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeRespo
     return DeleteNodeResponse()
 
 
-def ping(
-    request: PingRequest,  # pylint: disable=unused-argument
+def heartbeat(
+    request: HeartbeatRequest,  # pylint: disable=unused-argument
     state: LinkState,  # pylint: disable=unused-argument
-) -> PingResponse:
+) -> HeartbeatResponse:
     """."""
-    res = state.acknowledge_ping(request.node.node_id, request.ping_interval)
-    return PingResponse(success=res)
+    res = state.acknowledge_heartbeat(request.node.node_id, request.heartbeat_interval)
+    return HeartbeatResponse(success=res)
 
 
 def pull_messages(
