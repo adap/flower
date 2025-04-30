@@ -27,13 +27,11 @@ class Serializable(ABC):
     @abstractmethod
     def serialize(self) -> bytes:
         """Serialize the object to bytes."""
-        pass
 
     @classmethod
     @abstractmethod
     def deserialize(cls: type[T], serialized: bytes) -> T:
         """Deserialize from bytes and return an instance of the class."""
-        pass
 
     @staticmethod
     def concatenate(bytes_list: list[bytes]) -> bytes:
