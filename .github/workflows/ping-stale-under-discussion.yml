@@ -2,20 +2,25 @@ name: Ping Stale Under Discussion Issues
 
 on:
   schedule:
-    - cron: '0 8 * * *'  # Daily at 08:00 UTC
+    - cron: '0 8 * * *'
   workflow_dispatch:
 
 jobs:
   ping-stale-issues:
     runs-on: ubuntu-22.04
     permissions:
-      issues: write
+      issues: read
+    env:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
     steps:
-      - name: Ping stale Under Discussion issues
+      - name: Ping stale Under Discussion issues via Slack
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const fetch = require("node-fetch");
+
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const org = owner;
@@ -23,45 +28,38 @@ jobs:
             const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
             const query = `repo:${owner}/${repo} is:issue is:open label:"Under Discussion" comments:>=1 no:milestone`;
-            const { data } = await github.rest.search.issuesAndPullRequests({
-              q: query,
-              per_page: 100
-            });
+            const { data } = await github.rest.search.issuesAndPullRequests({ q: query, per_page: 100 });
 
             for (const issue of data.items) {
               const updatedAt = new Date(issue.updated_at);
-              if (updatedAt >= sevenDaysAgo) continue; // Skip if recently updated
+              if (updatedAt >= sevenDaysAgo) continue;
 
-              // Fetch latest comments (only 1 for efficiency)
+              // Fetch last comment
               const comments = await github.rest.issues.listComments({
-                owner,
-                repo,
+                owner, repo,
                 issue_number: issue.number,
                 per_page: 1,
                 sort: "updated",
-                direction: "desc",
+                direction: "desc"
               });
 
               if (comments.data.length > 0) {
                 const lastComment = comments.data[0];
-                const lastCommentBody = lastComment.body || "";
-
-                if (lastCommentBody.includes("<!-- bot:stale-ping -->")) {
-                  const lastPingDate = new Date(lastComment.updated_at);
-                  if (lastPingDate >= sevenDaysAgo) {
-                    console.log(`Skipping issue #${issue.number}: recent bot ping.`);
-                    continue; // Last bot ping was within 7 days → skip
+                if ((lastComment.body || "").includes("<!-- bot:stale-ping -->")) {
+                  const lastPing = new Date(lastComment.updated_at);
+                  if (lastPing >= sevenDaysAgo) {
+                    console.log(`Skipping issue #${issue.number}: recently pinged.`);
+                    continue;
                   }
                 }
               }
 
+              // Filter org assignees
               let orgAssignees = [];
               for (const assignee of issue.assignees) {
                 const login = assignee.login;
-
                 const { status } = await github.rest.orgs.checkMembershipForUser({
-                  org,
-                  username: login
+                  org, username: login
                 }).catch(() => ({ status: 404 }));
 
                 if (status === 204) {
@@ -73,12 +71,17 @@ jobs:
                 ? orgAssignees.join(", ")
                 : "@WilliamLindskog";
 
-              const body = `<!-- bot:stale-ping -->\nGentle ping ${pingTarget} — this issue has been in \`Under Discussion\` without activity for over 7 days. Please review or update its status.`;
+              const slackText = `*Stale Under Discussion Issue*\n${pingTarget} — <${issue.html_url}|#${issue.number} - ${issue.title}> has had no activity for 7+ days.\nPlease review or update its status.\n\n<!-- bot:stale-ping -->`;
 
-              await github.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number: issue.number,
-                body
+              await fetch("https://slack.com/api/chat.postMessage", {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  channel: process.env.SLACK_CHANNEL_ID,
+                  text: slackText
+                })
               });
             }
