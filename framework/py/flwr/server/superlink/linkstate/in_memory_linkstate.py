@@ -334,7 +334,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
-            # Mark the node online util time.time() + heartbeat_interval
+            # Mark the node online until time.time() + heartbeat_interval
             self.node_ids[node_id] = (
                 time.time() + heartbeat_interval,
                 heartbeat_interval,
@@ -544,8 +544,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         A node is considered online as long as it sends heartbeats within
         the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
-        By default, HEARTBEAT_PATIENCE = 2, allowing for one missed heartbeat
-        before the node is marked as offline.
+        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before
+        the node is marked as offline.
         """
         with self.lock:
             if node_id in self.node_ids:
