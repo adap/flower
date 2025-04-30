@@ -213,7 +213,6 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         nonlocal node
         node = cast(Node, create_node_response.node)
         heartbeat_sender.start()
-        heartbeat_sender.start()
         return node.node_id
 
     def delete_node() -> None:
