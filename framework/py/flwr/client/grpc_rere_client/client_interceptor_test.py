@@ -127,7 +127,7 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             request_deserializer=GetRunRequest.FromString,
             response_serializer=GetRunResponse.SerializeToString,
         ),
-        "Heartbeat": grpc.unary_unary_rpc_method_handler(
+        "SendNodeHeartbeat": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
             request_deserializer=SendNodeHeartbeatRequest.FromString,
             response_serializer=SendNodeHeartbeatResponse.SerializeToString,
