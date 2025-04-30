@@ -8,50 +8,60 @@ jobs:
   notify-assignee-or-william:
     runs-on: ubuntu-22.04
     permissions:
-      issues: write
+      issues: read
+    env:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
     steps:
-      - name: Notify assigned Flower maintainer or William if external user closed the issue
+      - name: Notify Slack if external user closed the issue
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const fetch = require("node-fetch");
             const issue = context.payload.issue;
             const closer = context.actor;
-
-            // Ignore bot closures
-            if (closer.endsWith("[bot]")) return;
-
             const org = context.repo.owner;
 
-            // Check if the closer is a member of the organization
+            // Skip if the closer is a bot
+            if (closer.endsWith("[bot]")) return;
+
             const { status: closerStatus } = await github.rest.orgs.checkMembershipForUser({
               org,
               username: closer
             }).catch(() => ({ status: 404 }));
 
             if (closerStatus !== 204) {
-              // Closer is external (not an org member)
-
+              // Closer is external
               const assignees = issue.assignees || [];
-              let notifyUser = "WilliamLindskog"; // Default fallback to William
+              let notifyUser = "@WilliamLindskog";  // fallback
+              let matched = false;
 
               for (const assignee of assignees) {
+                const login = assignee.login;
                 const { status: assigneeStatus } = await github.rest.orgs.checkMembershipForUser({
                   org,
-                  username: assignee.login
+                  username: login
                 }).catch(() => ({ status: 404 }));
 
                 if (assigneeStatus === 204) {
-                  // Found a maintainer (org member) assigned
-                  notifyUser = assignee.login;
+                  notifyUser = `@${login}`;
+                  matched = true;
                   break;
                 }
               }
 
-              // Create the comment to notify
-              await github.rest.issues.createComment({
-                ...context.repo,
-                issue_number: issue.number,
-                body: `@${notifyUser}, please confirm. This issue was closed by a community member.`
+              const slackText = `*External issue closure detected*\n${notifyUser}, <${issue.html_url}|#${issue.number} - ${issue.title}> was closed by @${closer} (external).\nPlease review whether it should remain closed.`;
+
+              await fetch("https://slack.com/api/chat.postMessage", {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  channel: process.env.SLACK_CHANNEL_ID,
+                  text: slackText
+                })
               });
             }
