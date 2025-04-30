@@ -22,8 +22,9 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, cast, overload
 
-import msgpack
 import numpy as np
+
+from flwr.proto.recorddict_pb2 import Array as ArrayProto  # pylint: disable=E0611
 
 from ..constant import SType
 from ..serializable import Serializable
@@ -252,37 +253,22 @@ class Array(Serializable):
         return cast(NDArray, ndarray_deserialized)
 
     def serialize(self) -> bytes:
-        """Serialize an Array.
+        """Serialize the Array object as a single bytes buffer."""
+        array_proto = ArrayProto(**vars(self))
 
-        Each element in the header is divided by 1 Byte of zeros     16B    <1B>   16B
-        <1B>  16B  <1B>  32B  = 83 Bytes OBJECT-TYPE <  >  DTYPE <  > SHAPE <  > STYPE =
-        <HEADER>
-
-        The final representation is the concatenation of <HEADER> and the content of
-        .data (which is already in Bytes) separated by a Byte of zeros return
-        <HEADER><1B><CONTENT>
-        """
-        class_name = self.__class__.__name__.lower()
-        header: bytes = self.concatenate(
-            [
-                msgpack.dumps(class_name).ljust(16, b"*"),
-                msgpack.dumps(self.dtype).ljust(16, b"*"),
-                msgpack.dumps(self.shape).ljust(16, b"*"),
-                msgpack.dumps(self.stype).ljust(32, b"*"),
-            ]
+        return (
+            self.header
+            + self.divider
+            + array_proto.SerializeToString(deterministic=True)
         )
-
-        return self.concatenate([header, self.data])
 
     @classmethod
     def deserialize(cls, serialized: bytes) -> Array:
         """Deserialize array bytes and instantiate an Array."""
-        head = 16 + 1
-        dtype = msgpack.loads(serialized[head : head + 16].rstrip(b"*"))
-        head += 16 + 1
-        shape = msgpack.loads(serialized[head : head + 16].rstrip(b"*"))
-        head += 16 + 1
-        stype = msgpack.loads(serialized[head : head + 32].rstrip(b"*"))
-        head += 32 + 1
-        data = serialized[head:]
-        return cls(dtype, shape, stype, data)
+        proto_array = ArrayProto.FromString(serialized[cls.head_len + 1 :])
+        return cls(
+            dtype=proto_array.dtype,
+            shape=list(proto_array.shape),
+            stype=proto_array.stype,
+            data=proto_array.data,
+        )

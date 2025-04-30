@@ -14,6 +14,7 @@
 # ==============================================================================
 """Serializable ABC."""
 
+
 import hashlib
 from abc import ABC, abstractmethod
 from typing import TypeVar
@@ -24,20 +25,26 @@ T = TypeVar("T", bound="Serializable")
 class Serializable(ABC):
     """ABC class for serializable objects."""
 
+    divider = b"\x00"
+    head_len = 16
+
     @abstractmethod
     def serialize(self) -> bytes:
         """Serialize the object to bytes."""
+
+    @property
+    def header(self) -> bytes:
+        """Create 16Bytes header using the class name.
+
+        The header is left padded with b'*'.
+        """
+        class_name = self.__class__.__name__.lower()
+        return class_name.encode().ljust(self.head_len, b"*")
 
     @classmethod
     @abstractmethod
     def deserialize(cls: type[T], serialized: bytes) -> T:
         """Deserialize from bytes and return an instance of the class."""
-
-    @staticmethod
-    def concatenate(bytes_list: list[bytes]) -> bytes:
-        """Add Bytes divider between each Bytes segement and concatenate them."""
-        divider = b"\x00"
-        return divider.join(bytes_list)
 
     @property
     def object_id(self) -> str:
