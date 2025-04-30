@@ -66,6 +66,11 @@ class ServerAppIoStub:
         flwr.proto.log_pb2.PushLogsResponse]
     """Push ServerApp logs"""
 
+    RunHeartbeat: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.serverappio_pb2.RunHeartbeatRequest,
+        flwr.proto.serverappio_pb2.RunHeartbeatResponse]
+    """Heartbeat"""
+
 
 class ServerAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -154,6 +159,14 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.log_pb2.PushLogsResponse:
         """Push ServerApp logs"""
+        pass
+
+    @abc.abstractmethod
+    def RunHeartbeat(self,
+        request: flwr.proto.serverappio_pb2.RunHeartbeatRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.serverappio_pb2.RunHeartbeatResponse:
+        """Heartbeat"""
         pass
 
 

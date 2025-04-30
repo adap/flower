@@ -66,6 +66,8 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushInsMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
+    RunHeartbeatRequest,
+    RunHeartbeatResponse,
 )
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
@@ -361,6 +363,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             for run_id, run_status in run_statuses.items()
         }
         return GetRunStatusResponse(run_status_dict=run_status_dict)
+
+    def RunHeartbeat(
+        self, request: RunHeartbeatRequest, context: grpc.ServicerContext
+    ) -> RunHeartbeatResponse:
+        """Handle a heartbeat from the ServerApp."""
+        raise NotImplementedError
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
