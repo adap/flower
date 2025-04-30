@@ -29,6 +29,6 @@ cd .. && \
   echo ''
   echo '*/*'
   echo '```'
-} | tee -a source/ts-api-ref/index.md source/swift-api-ref/index.md source/kt-api-ref/index.md
+} | tee -a source/ts-api-ref/index.md source/swift-api-ref/index.md
 
 make html
