@@ -38,7 +38,7 @@ Install
           #
           # To add dependency to your Swift package, you can run the following command:
           swift package add-dependency "https://github.com/adap/flower.git"
-    
+
     .. tab-item:: Kotlin
         :sync: kotlin
 
@@ -113,7 +113,7 @@ setup helps you integrate powerful AI capabilities with minimal overhead.
             case .failure(let error):
               print(error.localizedDescription)
             }
-    
+
     .. tab-item:: Kotlin
         :sync: kotlin
 
@@ -203,7 +203,7 @@ the :doc:`available models list <ref-models>`.
             case .failure(let error):
                 print(error.localizedDescription)
             }
-    
+
     .. tab-item:: Kotlin
         :sync: kotlin
 
@@ -302,7 +302,7 @@ application stability.
             case .failure(let error):
                 print(error.localizedDescription)
             }
-    
+
     .. tab-item:: Kotlin
         :sync: kotlin
 
@@ -412,7 +412,7 @@ available. The callback function must accept an argument of type :doc:`StreamEve
             if case .failure(let error) = result {
                 print(error.localizedDescription)
             }
-    
+
     .. tab-item:: Kotlin
         :sync: kotlin
 
@@ -534,7 +534,7 @@ ensuring that the assistant responds in a way that’s tailored to the scenario.
             case .failure(let error):
               print(error.localizedDescription)
             }
-    
+
     .. tab-item:: Kotlin
         :sync: kotlin
 
@@ -1004,7 +1004,7 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
             if case .failure(let error) = result {
               print(error.localizedDescription)
             }
-    
+
     .. tab-item:: Kotlin
         :sync: kotlin
 
