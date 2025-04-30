@@ -64,10 +64,16 @@ class HeartbeatSender:
 
     def start(self) -> None:
         """Start the heartbeat sender."""
+        if self._thread.is_alive():
+            raise RuntimeError("Heartbeat sender is already running.")
+        if self._stop_event.is_set():
+            raise RuntimeError("Cannot start a stopped heartbeat sender.")
         self._thread.start()
 
     def stop(self) -> None:
         """Stop the heartbeat sender."""
+        if not self._thread.is_alive():
+            raise RuntimeError("Heartbeat sender is not running.")
         self._stop_event.set()
         self._thread.join()
 
