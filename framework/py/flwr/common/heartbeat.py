@@ -20,10 +20,10 @@ import threading
 from typing import Callable
 
 from .constant import (
-    PING_BASE_MULTIPLIER,
-    PING_CALL_TIMEOUT,
-    PING_DEFAULT_INTERVAL,
-    PING_RANDOM_RANGE,
+    HEARTBEAT_BASE_MULTIPLIER,
+    HEARTBEAT_CALL_TIMEOUT,
+    HEARTBEAT_DEFAULT_INTERVAL,
+    HEARTBEAT_RANDOM_RANGE,
 )
 from .retry_invoker import RetryInvoker, exponential
 
@@ -79,9 +79,9 @@ class HeartbeatSender:
 
             # Calculate the interval for the next heartbeat
             # Formula: next_interval = (interval - timeout) * random.uniform(0.7, 0.9)
-            rd = random.uniform(*PING_RANDOM_RANGE)
-            next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
-            next_interval *= PING_BASE_MULTIPLIER + rd
+            rd = random.uniform(*HEARTBEAT_RANDOM_RANGE)
+            next_interval: float = HEARTBEAT_DEFAULT_INTERVAL - HEARTBEAT_CALL_TIMEOUT
+            next_interval *= HEARTBEAT_BASE_MULTIPLIER + rd
 
             # Wait for the calculated interval or exit early if stopped
             self._stop_event.wait(next_interval)
