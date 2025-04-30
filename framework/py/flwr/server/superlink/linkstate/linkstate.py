@@ -272,8 +272,8 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         A node is considered online as long as it sends heartbeats within
         the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
-        By default, HEARTBEAT_PATIENCE = 2, allowing for one missed heartbeat
-        before the node is marked as offline.
+        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before
+        the node is marked as offline.
 
         Parameters
         ----------
