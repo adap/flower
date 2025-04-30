@@ -28,9 +28,9 @@ from uuid import UUID, uuid4
 
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
+    HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
-    PING_PATIENCE,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
@@ -74,7 +74,7 @@ SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id         INTEGER UNIQUE,
     online_until    REAL,
-    ping_interval   REAL,
+    heartbeat_interval   REAL,
     public_key      BLOB
 );
 """
@@ -595,7 +595,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return {UUID(row["message_id"]) for row in rows}
 
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(self, heartbeat_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
         uint64_node_id = generate_rand_int_from_bytes(
@@ -607,18 +607,18 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         query = (
             "INSERT INTO node "
-            "(node_id, online_until, ping_interval, public_key) "
+            "(node_id, online_until, heartbeat_interval, public_key) "
             "VALUES (?, ?, ?, ?)"
         )
 
-        # Mark the node online util time.time() + ping_interval
+        # Mark the node online util time.time() + heartbeat_interval
         try:
             self.query(
                 query,
                 (
                     sint64_node_id,
-                    time.time() + ping_interval,
-                    ping_interval,
+                    time.time() + heartbeat_interval,
+                    heartbeat_interval,
                     b"",  # Initialize with an empty public key
                 ),
             )
@@ -926,11 +926,13 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         row = rows[0]
         return configrecord_from_bytes(row["federation_options"])
 
-    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat.
+    def acknowledge_heartbeat(self, node_id: int, heartbeat_interval: float) -> bool:
+        """Acknowledge a heartbeat received from a node, serving as a heartbeat.
 
-        It allows for one missed ping (in a PING_PATIENCE * ping_interval) before
-        marking the node as offline, where PING_PATIENCE = 2 in default.
+        A node is considered online as long as it sends heartbeats within
+        the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before
+        the node is marked as offline.
         """
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
@@ -939,13 +941,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if not self.query(query, (sint64_node_id,)):
             return False
 
-        # Update `online_until` and `ping_interval` for the given `node_id`
-        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?"
+        # Update `online_until` and `heartbeat_interval` for the given `node_id`
+        query = (
+            "UPDATE node SET online_until = ?, heartbeat_interval = ? WHERE node_id = ?"
+        )
         self.query(
             query,
             (
-                time.time() + PING_PATIENCE * ping_interval,
-                ping_interval,
+                time.time() + HEARTBEAT_PATIENCE * heartbeat_interval,
+                heartbeat_interval,
                 sint64_node_id,
             ),
         )

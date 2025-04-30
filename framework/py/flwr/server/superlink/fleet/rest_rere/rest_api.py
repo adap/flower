@@ -29,8 +29,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
+    HeartbeatRequest,
+    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -126,14 +126,14 @@ async def push_message(request: PushMessagesRequest) -> PushMessagesResponse:
     return message_handler.push_messages(request=request, state=state)
 
 
-@rest_request_response(PingRequest)
-async def ping(request: PingRequest) -> PingResponse:
-    """Ping."""
+@rest_request_response(HeartbeatRequest)
+async def heartbeat(request: HeartbeatRequest) -> HeartbeatResponse:
+    """Heartbeat."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
 
     # Handle message
-    return message_handler.ping(request=request, state=state)
+    return message_handler.heartbeat(request=request, state=state)
 
 
 @rest_request_response(GetRunRequest)
@@ -164,7 +164,7 @@ routes = [
     Route("/api/v0/fleet/delete-node", delete_node, methods=["POST"]),
     Route("/api/v0/fleet/pull-messages", pull_message, methods=["POST"]),
     Route("/api/v0/fleet/push-messages", push_message, methods=["POST"]),
-    Route("/api/v0/fleet/ping", ping, methods=["POST"]),
+    Route("/api/v0/fleet/heartbeat", heartbeat, methods=["POST"]),
     Route("/api/v0/fleet/get-run", get_run, methods=["POST"]),
     Route("/api/v0/fleet/get-fab", get_fab, methods=["POST"]),
 ]
