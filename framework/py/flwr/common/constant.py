@@ -61,8 +61,6 @@ HEARTBEAT_CALL_TIMEOUT = 5
 HEARTBEAT_BASE_MULTIPLIER = 0.8
 HEARTBEAT_RANDOM_RANGE = (-0.1, 0.1)
 HEARTBEAT_MAX_INTERVAL = 1e300
-# This constant is referenced in the docstring of the `LinkState` and its subclasses.
-# If this value changes, make sure to update the corresponding docstring accordingly.
 HEARTBEAT_PATIENCE = 2
 
 # IDs
