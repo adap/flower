@@ -48,9 +48,7 @@ data class Message(
   val toolCalls: List<ToolCall>? = null,
 )
 
-/**
- * Represents a call to a specific tool with its name and arguments.
- */
+/** Represents a call to a specific tool with its name and arguments. */
 typealias ToolCall = Map<String, ToolCallDetails>
 
 /**
@@ -59,11 +57,7 @@ typealias ToolCall = Map<String, ToolCallDetails>
  * @property name The name of the tool being called.
  * @property arguments The arguments passed to the tool as key-value pairs.
  */
-@Serializable
-data class ToolCallDetails(
-  val name: String,
-  val arguments: Map<String, String>,
-)
+@Serializable data class ToolCallDetails(val name: String, val arguments: Map<String, String>)
 
 /**
  * Represents a property of a tool's function parameter.
@@ -113,21 +107,14 @@ data class ToolFunction(
  * @property type The type of the tool (e.g., "function" or "plugin").
  * @property function Details about the function provided by the tool.
  */
-@Serializable
-data class Tool(
-  val type: String,
-  val function: ToolFunction,
-)
+@Serializable data class Tool(val type: String, val function: ToolFunction)
 
 /**
  * Represents a single event in a streaming response.
  *
  * @property chunk The chunk of text data received in the stream event.
  */
-@Serializable
-data class StreamEvent(
-  val chunk: String,
-)
+@Serializable data class StreamEvent(val chunk: String)
 
 /**
  * Represents the options available for a chat interaction.
@@ -161,23 +148,11 @@ internal data class ChoiceMessage(
   @SerialName("tool_calls") val toolCalls: List<ToolCall>? = null,
 )
 
-@Serializable
-internal data class Choice(
-  val index: Int,
-  val message: ChoiceMessage,
-)
+@Serializable internal data class Choice(val index: Int, val message: ChoiceMessage)
 
-@Serializable
-internal data class StreamChoice(
-  val index: Int,
-  val delta: DeltaMessage,
-)
+@Serializable internal data class StreamChoice(val index: Int, val delta: DeltaMessage)
 
-@Serializable
-internal data class DeltaMessage(
-  val content: String,
-  val role: String,
-)
+@Serializable internal data class DeltaMessage(val content: String, val role: String)
 
 @Serializable
 internal data class Usage(
@@ -206,11 +181,7 @@ internal data class ChatCompletionsResponse(
   val usage: Usage,
 )
 
-@Serializable
-internal data class ModelListResponse(
-  val `object`: String,
-  val data: List<ModelData>,
-)
+internal data class ModelListResponse(val `object`: String, val data: List<ModelData>)
 
 @Serializable
 internal data class ModelData(

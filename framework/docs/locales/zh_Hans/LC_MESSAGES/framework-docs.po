@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-24 00:08+0000\n"
+"POT-Creation-Date: 2025-04-29 00:08+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -10467,8 +10467,7 @@ msgstr "返回客户端（本身）。"
 #: flwr.common.context.Context flwr.common.message.Error
 #: flwr.common.message.Message flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Metadata
-#: flwr.common.record.arrayrecord.Array
-#: flwr.common.record.arrayrecord.ArrayRecord
+#: flwr.common.record.array.Array flwr.common.record.arrayrecord.ArrayRecord
 #: flwr.common.record.configrecord.ConfigRecord
 #: flwr.common.record.metricrecord.MetricRecord
 #: flwr.common.record.recorddict.RecordDict flwr.server.app.start_server
@@ -10622,7 +10621,7 @@ msgstr "当前客户端属性。"
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
 #: flwr.common.context.Context:1 flwr.common.message.Error:1
 #: flwr.common.message.Message:1 flwr.common.message.Metadata:1
-#: flwr.common.record.arrayrecord.Array:1 flwr.common.typing.ClientMessage:1
+#: flwr.common.record.array.Array:1 flwr.common.typing.ClientMessage:1
 #: flwr.common.typing.DisconnectRes:1 flwr.common.typing.EvaluateIns:1
 #: flwr.common.typing.EvaluateRes:1 flwr.common.typing.FitIns:1
 #: flwr.common.typing.FitRes:1 flwr.common.typing.GetParametersIns:1
@@ -10646,8 +10645,7 @@ msgstr "Bases: :py:class:`object`"
 #: flwr.client.client_app.ClientApp.lifespan:7
 #: flwr.client.client_app.ClientApp.query:12
 #: flwr.client.client_app.ClientApp.train:12
-#: flwr.client.mod.localdp_mod.LocalDpMod:22
-#: flwr.common.record.arrayrecord.Array:35
+#: flwr.client.mod.localdp_mod.LocalDpMod:22 flwr.common.record.array.Array:35
 #: flwr.common.record.arrayrecord.ArrayRecord:36
 #: flwr.common.record.arrayrecord.ParametersRecord:12
 #: flwr.common.record.configrecord.ConfigRecord:20
@@ -11364,7 +11362,7 @@ msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\
 
 #: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
-#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1
+#: flwr.common.record.array.Array.from_numpy_ndarray:1
 #: flwr.common.record.conversion_utils.array_from_numpy:1 of
 #, fuzzy
 msgid "Create Array from NumPy ndarray."
@@ -11480,7 +11478,7 @@ msgid ":py:obj:`Array <flwr.common.Array>`\\ \\(\\)"
 msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
-#: flwr.common.record.arrayrecord.Array:1 of
+#: flwr.common.record.array.Array:1 of
 #, fuzzy
 msgid "Array type."
 msgstr "返回类型"
@@ -11921,7 +11919,7 @@ msgstr "客户端状态。"
 msgid "Array"
 msgstr "数组"
 
-#: flwr.common.record.arrayrecord.Array:3 of
+#: flwr.common.record.array.Array:3 of
 #, fuzzy
 msgid ""
 "A dataclass containing serialized data from an array-like or tensor-like "
@@ -11929,26 +11927,26 @@ msgid ""
 "of three ways:"
 msgstr "数据类，包含数组类或张量类对象的序列化数据以及相关元数据。"
 
-#: flwr.common.record.arrayrecord.Array:6 of
+#: flwr.common.record.array.Array:6 of
 msgid "By specifying explicit values for `dtype`, `shape`, `stype`, and `data`."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:7 of
+#: flwr.common.record.array.Array:7 of
 msgid "By providing a NumPy ndarray (via the `ndarray` argument)."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:8 of
+#: flwr.common.record.array.Array:8 of
 msgid "By providing a PyTorch tensor (via the `torch_tensor` argument)."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:10 of
+#: flwr.common.record.array.Array:10 of
 msgid ""
 "In scenarios (2)-(3), the `dtype`, `shape`, `stype`, and `data` are "
 "automatically derived from the input. In scenario (1), these fields must "
 "be specified manually."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:13 of
+#: flwr.common.record.array.Array:13 of
 #, fuzzy
 msgid ""
 "A string representing the data type of the serialized object (e.g. "
@@ -11956,14 +11954,14 @@ msgid ""
 "tensor."
 msgstr "表示序列化对象数据类型的字符串（例如 `np.float32`)"
 
-#: flwr.common.record.arrayrecord.Array:16 of
+#: flwr.common.record.array.Array:16 of
 #, fuzzy
 msgid ""
 "A list representing the shape of the unserialized array-like object. Only"
 " required if you are not passing in a ndarray or a tensor."
 msgstr "代表未序列化数组对象形状的列表。它可用于反序列化数据（取决于序列化方法），或仅作为元数据字段使用。"
 
-#: flwr.common.record.arrayrecord.Array:19 of
+#: flwr.common.record.array.Array:19 of
 #, fuzzy
 msgid ""
 "A string indicating the serialization mechanism used to generate the "
@@ -11971,36 +11969,36 @@ msgid ""
 "if you are not passing in a ndarray or a tensor."
 msgstr "表示序列化机制类型的字符串，用于从类似数组或类似张量的对象中生成 `data` 中的字节。"
 
-#: flwr.common.record.arrayrecord.Array:23 of
+#: flwr.common.record.array.Array:23 of
 #, fuzzy
 msgid ""
 "A buffer of bytes containing the data. Only required if you are not "
 "passing in a ndarray or a tensor."
 msgstr "代表未序列化数组对象形状的列表。它可用于反序列化数据（取决于序列化方法），或仅作为元数据字段使用。"
 
-#: flwr.common.record.arrayrecord.Array:26 of
+#: flwr.common.record.array.Array:26 of
 msgid ""
 "A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data` "
 "fields are derived automatically from it."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:29 of
+#: flwr.common.record.array.Array:29 of
 msgid ""
 "A PyTorch tensor. If provided, it will be **detached and moved to CPU** "
 "before conversion, and the `dtype`, `shape`, `stype`, and `data` fields "
 "will be derived automatically from it."
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:36 of
+#: flwr.common.record.array.Array:36 of
 msgid "Initializing by specifying all fields directly::"
 msgstr ""
 
-#: flwr.common.record.arrayrecord.Array:45 of
+#: flwr.common.record.array.Array:45 of
 #, fuzzy
 msgid "Initializing with a NumPy ndarray::"
 msgstr "存放 ParametersRecord 实例的字典。"
 
-#: flwr.common.record.arrayrecord.Array:50 of
+#: flwr.common.record.array.Array:50 of
 msgid "Initializing with a PyTorch tensor::"
 msgstr ""
 
@@ -12019,7 +12017,7 @@ msgid ""
 msgstr ":py:obj:`ndarray_to_bytes <flwr.common.ndarray_to_bytes>`\\ \\(ndarray\\)"
 
 #: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
-#: flwr.common.record.arrayrecord.Array.from_torch_tensor:1 of
+#: flwr.common.record.array.Array.from_torch_tensor:1 of
 #, fuzzy
 msgid "Create Array from PyTorch tensor."
 msgstr "将参数对象转换为 NumPy ndarrays。"
@@ -12030,7 +12028,7 @@ msgid ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 msgstr "server.strategy.Strategy"
 
 #: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
-#: flwr.common.record.arrayrecord.Array.numpy:1 of
+#: flwr.common.record.array.Array.numpy:1 of
 #, fuzzy
 msgid "Return the array as a NumPy array."
 msgstr "以 NumPy ndarrays 列表形式返回模型参数"
@@ -12069,22 +12067,22 @@ msgstr "以 NumPy ndarrays 列表形式返回模型参数"
 msgid "Attributes"
 msgstr "属性"
 
-#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 msgstr ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 
-#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
 msgstr "server.strategy.Strategy"
 
-#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`stype <flwr.common.Array.stype>`\\"
 msgstr "server.strategy.Strategy"
 
-#: flwr.common.record.arrayrecord.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`data <flwr.common.Array.data>`\\"
 msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
@@ -12098,7 +12096,7 @@ msgstr "参数"
 #, fuzzy
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
-"[:py:class:`str`, :py:class:`~flwr.common.record.arrayrecord.Array`]"
+"[:py:class:`str`, :py:class:`~flwr.common.record.array.Array`]"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
@@ -34451,7 +34449,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|df330ba2ecc7486095020e6377558bba|"
+msgid "|b489956f3f574a109fad2836faf622e4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -34466,7 +34464,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|43ccc14243b84cd79df2d253d80de4fb|"
+msgid "|e8061fdb5ec94141bc7526ea8060a9ab|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -34490,7 +34488,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|8da4a971b2b44e108f7a3c0391faca33|"
+msgid "|741286a5ab8b4703919f32525e6b7ffa|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -34508,7 +34506,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|56a4b95333534d8092396b254c10bffa|"
+msgid "|0ae5263f7b4d45cca55b69d341f8c83d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -34525,7 +34523,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|d8a1fe22416c4fed8692a8273b281133|"
+msgid "|74ef57e47ce544c8b5700f7c6b213f76|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -34540,7 +34538,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|854f959d4f744c058a3dc32af5ae3d25|"
+msgid "|f49a5dad3448407ea4480d186235b295|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -34561,7 +34559,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|3dc0f4bc03e84fa5ae805329c71c0552|"
+msgid "|142636086022481fba92d32b78caa0f7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -34576,7 +34574,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|27275a6071dc4614aa0734708a543110|"
+msgid "|49cc792ae168402d9917cab825e7def4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -34736,7 +34734,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|726048ff954444ffb3a7c94a9613260a|"
+msgid "|82d2085f891e4906a7f3b2fbd94640b4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -34761,7 +34759,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|c233bf3f187d40e7a2a23b60db60d970|"
+msgid "|0de634679a2b4b958aa20f8d427e4311|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -34787,7 +34785,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|7c46e573e01b4c71bb5ef1cd79042379|"
+msgid "|564c1ebbb05945939f4fcf814facdad4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -34810,7 +34808,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|f374276c878a40208ae57cb64611d663|"
+msgid "|fe2ef144276f40e79a7cf4ecebe97b2e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -34857,7 +34855,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|4d1d8e9719ab4ce7aa48eaf3ba4d3f45|"
+msgid "|0cac13f2a4834bc5917cff64f23c0105|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -34965,7 +34963,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|65f6155df55d44bda98d7cf140a0a4ca|"
+msgid "|d66f63e57bab4d7a9eafcae9a70d238d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -45438,5 +45436,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|a644fa5b1d314256a1ab5ffc3ccd71fe|"
+#~ msgstr ""
+
+#~ msgid "|df330ba2ecc7486095020e6377558bba|"
+#~ msgstr ""
+
+#~ msgid "|43ccc14243b84cd79df2d253d80de4fb|"
+#~ msgstr ""
+
+#~ msgid "|8da4a971b2b44e108f7a3c0391faca33|"
+#~ msgstr ""
+
+#~ msgid "|56a4b95333534d8092396b254c10bffa|"
+#~ msgstr ""
+
+#~ msgid "|d8a1fe22416c4fed8692a8273b281133|"
+#~ msgstr ""
+
+#~ msgid "|854f959d4f744c058a3dc32af5ae3d25|"
+#~ msgstr ""
+
+#~ msgid "|3dc0f4bc03e84fa5ae805329c71c0552|"
+#~ msgstr ""
+
+#~ msgid "|27275a6071dc4614aa0734708a543110|"
+#~ msgstr ""
+
+#~ msgid "|726048ff954444ffb3a7c94a9613260a|"
+#~ msgstr ""
+
+#~ msgid "|c233bf3f187d40e7a2a23b60db60d970|"
+#~ msgstr ""
+
+#~ msgid "|7c46e573e01b4c71bb5ef1cd79042379|"
+#~ msgstr ""
+
+#~ msgid "|f374276c878a40208ae57cb64611d663|"
+#~ msgstr ""
+
+#~ msgid "|4d1d8e9719ab4ce7aa48eaf3ba4d3f45|"
+#~ msgstr ""
+
+#~ msgid "|65f6155df55d44bda98d7cf140a0a4ca|"
 #~ msgstr ""
 

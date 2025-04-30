@@ -15,9 +15,7 @@
 
 package ai.flower.intelligence
 
-/**
- * Enum representing failure codes for different error scenarios.
- */
+/** Enum representing failure codes for different error scenarios. */
 enum class FailureCode(val code: Int) {
   /** Indicates a local error (e.g., client-side issues). */
   LocalError(100),

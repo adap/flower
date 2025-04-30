@@ -21,8 +21,8 @@ import kotlinx.coroutines.withContext
 /**
  * FlowerIntelligence is the core intelligence service for Flower Labs.
  *
- * It facilitates chat, generation, and summarization tasks, with the option of using
- * a local or remote engine based on configuration and availability.
+ * It facilitates chat, generation, and summarization tasks, with the option of using a local or
+ * remote engine based on configuration and availability.
  */
 object FlowerIntelligence {
   private var remoteEngine = RemoteEngine()
@@ -45,8 +45,8 @@ object FlowerIntelligence {
   /**
    * Conducts a chat interaction using a single string input.
    *
-   * This method automatically wraps the input string as a message from the user.
-   * Additional parameters like temperature or model can be configured via [maybeOptions].
+   * This method automatically wraps the input string as a message from the user. Additional
+   * parameters like temperature or model can be configured via [maybeOptions].
    *
    * Example:
    * ```
@@ -95,8 +95,8 @@ object FlowerIntelligence {
   /**
    * Conducts a chat interaction using an array of messages and options.
    *
-   * This method allows for multi-message conversations by accepting a list of [Message] objects
-   * and a [ChatOptions] configuration.
+   * This method allows for multi-message conversations by accepting a list of [Message] objects and
+   * a [ChatOptions] configuration.
    *
    * Example:
    * ```
