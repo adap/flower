@@ -38,8 +38,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
+    HeartbeatRequest,
+    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -120,11 +120,11 @@ class GrpcAdapter:
         """."""
         return self._send_and_receive(request, DeleteNodeResponse, **kwargs)
 
-    def Ping(  # pylint: disable=C0103
-        self, request: PingRequest, **kwargs: Any
-    ) -> PingResponse:
+    def Heartbeat(  # pylint: disable=C0103
+        self, request: HeartbeatRequest, **kwargs: Any
+    ) -> HeartbeatResponse:
         """."""
-        return self._send_and_receive(request, PingResponse, **kwargs)
+        return self._send_and_receive(request, HeartbeatResponse, **kwargs)
 
     def PullMessages(  # pylint: disable=C0103
         self, request: PullMessagesRequest, **kwargs: Any

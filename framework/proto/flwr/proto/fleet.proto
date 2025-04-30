@@ -25,7 +25,7 @@ import "flwr/proto/message.proto";
 service Fleet {
   rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
   rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse) {}
-  rpc Ping(PingRequest) returns (PingResponse) {}
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse) {}
 
   // Retrieve one or more messages, if possible
   //
@@ -44,19 +44,19 @@ service Fleet {
 }
 
 // CreateNode messages
-message CreateNodeRequest { double ping_interval = 1; }
+message CreateNodeRequest { double heartbeat_interval = 1; }
 message CreateNodeResponse { Node node = 1; }
 
 // DeleteNode messages
 message DeleteNodeRequest { Node node = 1; }
 message DeleteNodeResponse {}
 
-// Ping messages
-message PingRequest {
+// Heartbeat messages
+message HeartbeatRequest {
   Node node = 1;
-  double ping_interval = 2;
+  double heartbeat_interval = 2;
 }
-message PingResponse { bool success = 1; }
+message HeartbeatResponse { bool success = 1; }
 
 // PullMessages messages
 message PullMessagesRequest {
