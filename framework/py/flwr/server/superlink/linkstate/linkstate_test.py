@@ -763,17 +763,17 @@ class StateTest(unittest.TestCase):
     def test_acknowledge_heartbeat(self) -> None:
         """Test if acknowledge_ping works and get_nodes return online nodes.
 
-        We permit one missed heartbeat (HEARTBEAT_PATIENCE × heartbeat_interval) before
-        marking the node offline, where HEARTBEAT_PATIENCE = 2.
+        We permit N-1 missed heartbeat (HEARTBEAT_PATIENCE × heartbeat_interval) before
+        marking the node offline, where HEARTBEAT_PATIENCE = N.
         """
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         node_ids = [state.create_node(heartbeat_interval=10) for _ in range(100)]
         for node_id in node_ids[:70]:
-            state.acknowledge_heartbeat(node_id, heartbeat_interval=30)
+            state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
         for node_id in node_ids[70:]:
-            state.acknowledge_heartbeat(node_id, heartbeat_interval=90)
+            state.acknowledge_node_heartbeat(node_id, heartbeat_interval=90)
 
         # Execute
         current_time = time.time()
@@ -793,7 +793,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
 
         # Execute
-        is_successful = state.acknowledge_heartbeat(0, heartbeat_interval=30)
+        is_successful = state.acknowledge_node_heartbeat(0, heartbeat_interval=30)
 
         # Assert
         assert not is_successful
@@ -807,8 +807,8 @@ class StateTest(unittest.TestCase):
         node_id_1 = state.create_node(heartbeat_interval=10)
 
         # Run acknowledge heartbeat
-        state.acknowledge_heartbeat(node_id_0, heartbeat_interval=90)
-        state.acknowledge_heartbeat(node_id_1, heartbeat_interval=30)
+        state.acknowledge_node_heartbeat(node_id_0, heartbeat_interval=90)
+        state.acknowledge_node_heartbeat(node_id_1, heartbeat_interval=30)
 
         # Create and store Messages
         in_message_0 = message_from_proto(
@@ -840,8 +840,8 @@ class StateTest(unittest.TestCase):
         # Execute
         current_time = time.time()
         # Test with current_time + 100s
-        # node_id_0 remain online until current_time + HEARTBEAT_PATIENCE * 90s = 180s,
-        # node_id_1 remain online until current_time + HEARTBEAT_PATIENCE * 30s = 60s.
+        # node_id_0 remain online until current_time + 180s (HEARTBEAT_PATIENCE * 90s)
+        # node_id_1 remain online until current_time + 60s (HEARTBEAT_PATIENCE * 30s)
         # As a result, a reply message with NODE_UNAVAILABLE
         # error will generate for node_id_1.
         with patch("time.time", side_effect=lambda: current_time + 100):

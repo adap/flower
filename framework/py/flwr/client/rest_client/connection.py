@@ -41,12 +41,14 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    HeartbeatRequest,
-    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+)
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
@@ -205,17 +207,19 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         grpc_res.ParseFromString(res.content)
         return grpc_res
 
-    def heartbeat() -> bool:
+    def send_node_heartbeat() -> bool:
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
             return False
 
         # Construct the heartbeat request
-        req = HeartbeatRequest(node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL)
+        req = SendNodeHeartbeatRequest(
+            node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
+        )
 
         # Send the request
-        res = _request(req, HeartbeatResponse, PATH_PING, retry=False)
+        res = _request(req, SendNodeHeartbeatResponse, PATH_PING, retry=False)
         if res is None:
             return False
 
@@ -227,7 +231,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             )
         return True
 
-    heartbeat_sender = HeartbeatSender(heartbeat)
+    heartbeat_sender = HeartbeatSender(send_node_heartbeat)
 
     def create_node() -> Optional[int]:
         """Set create_node."""
