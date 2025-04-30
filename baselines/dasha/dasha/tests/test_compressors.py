@@ -4,7 +4,11 @@ import unittest
 
 import numpy as np
 
-from dasha.compressors import IdentityUnbiasedCompressor, RandKCompressor, decompress
+from dasha.compressors import (
+    IdentityUnbiasedCompressor,
+    RandKCompressor,
+    decompress,
+)
 
 
 class TestIdentityUnbiasedCompressor(unittest.TestCase):
@@ -17,7 +21,8 @@ class TestIdentityUnbiasedCompressor(unittest.TestCase):
         np.testing.assert_almost_equal(
             vec,
             decompress(
-                compressed_vec, assert_compressor=IdentityUnbiasedCompressor.name()
+                compressed_vec,
+                assert_compressor=IdentityUnbiasedCompressor.name(),
             ),
         )
 
@@ -42,7 +47,9 @@ class TestUnbiasedBaseCompressor(unittest.TestCase):
                 == compressor.num_nonzero_components()
             )
             expected_vector += decompressed_vector / number_of_samples
-        np.testing.assert_array_almost_equal(expected_vector, vector, decimal=1)
+        np.testing.assert_array_almost_equal(
+            expected_vector, vector, decimal=1
+        )
 
 
 if __name__ == "__main__":

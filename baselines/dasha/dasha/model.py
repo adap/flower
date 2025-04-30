@@ -1,11 +1,11 @@
-"""Defines pytorch models."""
+"""dasha: A Flower Baseline."""
 
 from abc import abstractmethod
 from typing import List
 
 import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
 
 from dasha.resnet import resnet18
 
@@ -19,7 +19,9 @@ class ClassificationModel(nn.Module):
         super().__init__()
 
     @abstractmethod
-    def forward(self, input_tensor: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, input_tensor: torch.Tensor, target: torch.Tensor
+    ) -> torch.Tensor:
         """Forward pass of a model."""
         return
 
@@ -41,20 +43,23 @@ class LinearNet(nn.Module):
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """Forward pass of a model."""
-        output_tensor = self._linear(input_tensor.view(input_tensor.shape[0], -1))
+        output_tensor = self._linear(
+            input_tensor.view(input_tensor.shape[0], -1)
+        )
         return output_tensor
 
 
 class NonConvexLoss(nn.Module):
     """A nonconvex loss from Tyurin A. et al., 2023 paper.
 
-    [DASHA: Distributed Nonconvex Optimization with Communication Compression and
-    Optimal Oracle Complexity] (
+    [DASHA: Distributed Nonconvex Optimization with Communication Compression
+    and Optimal Oracle Complexity] (
     https://openreview.net/forum?id=VA1YpcNr7ul)
     """
 
-    def forward(self, input_tensor: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        # pylint: disable=no-self-use
+    def forward(
+        self, input_tensor: torch.Tensor, target: torch.Tensor
+    ) -> torch.Tensor:
         """Forward pass of a model."""
         assert len(input_tensor.shape) == 1
         target = 2 * target - 1
@@ -68,22 +73,30 @@ class NonConvexLoss(nn.Module):
 class LinearNetWithNonConvexLoss(ClassificationModel):
     """Classification model with a nonconvex loss."""
 
-    def __init__(self, input_shape: List[int], init_with_zeros: bool = False) -> None:
+    def __init__(
+        self, input_shape: List[int], init_with_zeros: bool = False
+    ) -> None:
         super().__init__(input_shape)
         assert len(input_shape) == 1
         num_input_features = input_shape[0]
         self._net = LinearNet(
-            num_input_features, num_output_features=1, init_with_zeros=init_with_zeros
+            num_input_features,
+            num_output_features=1,
+            init_with_zeros=init_with_zeros,
         )
         self._loss = NonConvexLoss()
 
-    def forward(self, input_tensor: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, input_tensor: torch.Tensor, target: torch.Tensor
+    ) -> torch.Tensor:
         """Forward pass of a model."""
         logits = self._net(input_tensor).flatten()
         return self._loss(logits, target)
 
     @torch.no_grad()
-    def accuracy(self, input_tensor: torch.Tensor, target: torch.Tensor) -> float:
+    def accuracy(
+        self, input_tensor: torch.Tensor, target: torch.Tensor
+    ) -> float:
         """Calculate accuracy."""
         logits = self._net(input_tensor).numpy().flatten()
         target = target.numpy()
@@ -99,15 +112,30 @@ class ResNet18WithLogisticLoss(ClassificationModel):
         self._net = resnet18(num_classes=num_classes)
         self._loss = torch.nn.CrossEntropyLoss()
 
-    def forward(self, input_tensor: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, input_tensor: torch.Tensor, target: torch.Tensor
+    ) -> torch.Tensor:
         """Forward pass of a model."""
         logits = self._net(input_tensor)
         return self._loss(logits, target.long())
 
     @torch.no_grad()
-    def accuracy(self, input_tensor: torch.Tensor, target: torch.Tensor) -> float:
+    def accuracy(
+        self, input_tensor: torch.Tensor, target: torch.Tensor
+    ) -> float:
         """Calculate accuracy."""
         logits = self._net(input_tensor).cpu().numpy()
         target = target.cpu().numpy()
         predictions = np.argmax(logits, axis=-1)
         return np.sum(predictions == target) / len(target)
+
+
+def define_model(model_cfg: dict, input_shape):
+    """Define the model for training."""
+    model_name = model_cfg["name"]
+    if "linear" in model_name:
+        return LinearNetWithNonConvexLoss(
+            input_shape=input_shape,
+            init_with_zeros=model_cfg["init-with-zeros"],
+        )
+    return ResNet18WithLogisticLoss(input_shape=input_shape)

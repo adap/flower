@@ -4,10 +4,10 @@ url: https://openreview.net/forum?id=VA1YpcNr7ul
 labels: [compression, heterogeneous setting, variance reduction, image classification]
 dataset: [cifar10, mushrooms, libsvm]
 ---
-
 # DASHA: Distributed Nonconvex Optimization with Communication Compression and Optimal Oracle Complexity
 
-> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
+> [!NOTE] 
+> If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
 **Paper:** [openreview.net/forum?id=VA1YpcNr7ul](https://openreview.net/forum?id=VA1YpcNr7ul)
 
@@ -24,7 +24,7 @@ dataset: [cifar10, mushrooms, libsvm]
 
 **Hardware Setup:** These experiments were run on a desktop machine with 64 CPU cores. Any machine with 1 CPU would be able to run this code with the mushrooms dataset. The experiments with CIFAR10 would require slightly more CPU resources (e.g., 4 cores would be sufficient) and 1 GPU with CUDA.
 
-**Contributors:** Alexander Tyurin ([https://github.com/k3nfalt](https://github.com/k3nfalt))
+**Contributors:** Alexander Tyurin ([https://github.com/k3nfalt](https://github.com/k3nfalt)) and Andrej Jovanović
 
 
 ## Experimental Setup
@@ -36,7 +36,7 @@ dataset: [cifar10, mushrooms, libsvm]
 * A logistic regression model with a nonconvex loss from the DASHA paper (Section A.1).
 * A neural network with the cross entropy loss (Section A.4).
 
-**Dataset:** This baseline only includes the MNIST dataset. By default, the datasets are partitioned randomly between $n$ clients:
+**Dataset:** This baseline only includes the mushrooms and CIFAR10 datasets. By default, the datasets are partitioned randomly between $n$ clients:
 
 | Dataset | #classes | partitioning method |
 | :------ | :---: | :---: |
@@ -50,40 +50,37 @@ dataset: [cifar10, mushrooms, libsvm]
 
 To construct the Python environment follow these steps:
 
+
 ```bash
-# Set Python 3.10
-pyenv local 3.10.6
-# Tell poetry to use python 3.10
-poetry env use 3.10.6
-# Install the base Poetry environment
-# By default, Poetry installs the PyTorch package with Python 3.10 and CUDA 11.8.
-# If you have a different setup, then change the "torch" and "torchvision" lines in [tool.poetry.dependencies].
-poetry install
+# Create the virtual environment
+pyenv virtualenv 3.10.14 dasha
 
-# Activate the environment
-poetry shell
+# Activate it
+pyenv activate dasha
+
+# Install the baseline
+pip install -e .
 ```
-
 
 ## Running the Experiments
 
-To run this FedProx with MNIST baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
+To run this FedProx with mushrooms baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
-python -m dasha.main # this will run using the default settings in `dasha/conf`
+flwr run . # this will run using the default settings in `dasha/conf`
 
 # you can override settings directly from the command line
 # The following commands runs an experiment with the step size 0.5.
 # Instead of the full, non-compressed vectors, each node sends a compressed vector with only 10 coordinates.
-python -m dasha.main method.strategy.step_size=0.5 compressor.number_of_coordinates=10
+flwr run . --run-config "method.step-size=0.5 compressor.number-o-coordinates=10"
 
 # if you run this baseline with a larger model, you might want to use the GPU (not used by default).
-python -m dasha.main method.client.device=cuda
+flwr run . --run-config "method.device=cuda:
 ```
 
 To run using MARINA by Gorbunov et al. (2020):
 ```bash
-python -m dasha.main method=marina
+flwr run . --run-config "method.name=marina"
 ```
 
 
@@ -94,16 +91,10 @@ With the following command we run both DASHA and MARINA methods while iterating 
 
 ```bash
 # Run experiments
-python -m dasha.main --multirun method=dasha,marina compressor.number_of_coordinates=10 method.strategy.step_size=0.25,0.5,1.0 method.client.send_gradient=true
-# The previous script output paths to the results (ex: multirun/2023-09-16/10-39-30/1 multirun/2023-09-16/10-39-30/2 ...).
-# Plot results
-python -m dasha.plot --input_paths multirun/2023-09-16/10-39-30/1 multirun/2023-09-16/10-39-30/2 --output_path plot.png --metric squared_gradient_norm
-# or it is sufficient to give the common folder as input
-python -m dasha.plot --input_paths multirun/2023-09-16/10-39-30 --output_path plot.png --metric squared_gradient_norm
+bash run_small_experiments.sh
 ```
 
-
-The above commands would generate results that you can plot and would look like:
+The above commands would generate results that you can plot using the notebook in the `docs` directory. The expected results would look like:
 
 | *Small-Scale Experiments: Comparison of DASHA and MARINA* |
 |:--:| 
@@ -115,13 +106,10 @@ In the following experiments, we compare the performance of DASHA and MARINA on 
 
 ```bash
 # Run experiments
-python -m dasha.main method.strategy.step_size=0.01 method=stochastic_dasha num_rounds=10000 compressor.number_of_coordinates=2000000 model=resnet_18_with_logistic_loss method.client.strict_load=false dataset=cifar10 method.client.device=cuda method.client.evaluate_accuracy=true local_address=localhost:8001 method.client.mega_batch_size=16
-
-python -m dasha.main method=stochastic_marina method.strategy.step_size=0.01 num_rounds=10000 compressor.number_of_coordinates=2000000 model=resnet_18_with_logistic_loss method.client.strict_load=false dataset=cifar10 method.client.device=cuda method.client.evaluate_accuracy=true local_address=localhost:8002
-# The previous scripts output paths to the results. We define them as PATH_DASHA and PATH_MARINA
-# Plot results
-python -m dasha.plot --input_paths PATH_DASHA PATH_MARINA --output_path plot_nn.png --smooth-plot 100
+bash run_large_experiments.sh
 ```
+
+Similarly, the above commands would generate results that you can plot using the notebook in the `docs` directory. The expected results would look like:
 
 | *Large-Scale Experiments: Comparison of DASHA and MARINA* |
 |:--:| 

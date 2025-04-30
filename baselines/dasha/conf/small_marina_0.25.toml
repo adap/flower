@@ -1,0 +1,7 @@
+[compressor]
+number-of-coordinates = 10
+
+[method]
+name = "marina"
+step-size = 0.25
+send-gradient = true

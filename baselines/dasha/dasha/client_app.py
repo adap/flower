@@ -1,19 +1,24 @@
-"""Defines Flower Clients."""
+"""dasha: A Flower Baseline."""
 
 from typing import Dict, Optional, Tuple
 
-import flwr as fl
 import numpy as np
 import torch
-from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import Dataset
 
+import flwr as fl
 from dasha.compressors import (
     IdentityUnbiasedCompressor,
+    RandKCompressor,
     UnbiasedBaseCompressor,
     decompress,
 )
-from dasha.models import ClassificationModel
+from dasha.dataset import load_dataset, random_split
+from dasha.model import ClassificationModel, define_model
+from dasha.utils import _get_dataset_input_shape, reformat_config, set_seed
+from flwr.client.client_app import ClientApp
+from flwr.common import ArrayRecord, Context
+from flwr.common.typing import NDArrays, Scalar
 
 
 class CompressionClient(
@@ -34,27 +39,21 @@ class CompressionClient(
         compressor: Optional[UnbiasedBaseCompressor] = None,
         evaluate_accuracy=False,
         strict_load=True,
+        client_state=None,
     ):  # pylint: disable=too-many-arguments
         self._function = function.to(device)
         self._function.train()
         self._compressor = (
-            compressor if compressor is not None else IdentityUnbiasedCompressor()
+            compressor
+            if compressor is not None
+            else IdentityUnbiasedCompressor()
         )
-        self._local_gradient_estimator = None
-        self._gradient_estimator = None
+        self.client_state = client_state
         self._momentum = None
         self._evaluate_accuracy = evaluate_accuracy
         self._dataset = dataset
         self._device = device
         self._strict_load = strict_load
-
-    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        """Return the parameters of the current model."""
-        parameters = [
-            val.detach().cpu().numpy().flatten()
-            for _, val in self._function.named_parameters()
-        ]
-        return [np.concatenate(parameters)]
 
     def _set_parameters(self, parameters_input: NDArrays) -> None:
         """Set the parameters."""
@@ -65,7 +64,8 @@ class CompressionClient(
         shift = 0
         for k, parameter_layer in self._function.named_parameters():
             numel = parameter_layer.numel()
-            parameter = parameters[shift : shift + numel].reshape(parameter_layer.shape)
+            end = shift + numel
+            parameter = parameters[shift:end].reshape(parameter_layer.shape)
             state_dict[k] = torch.Tensor(parameter)
             shift += numel
         missing_keys, unexpected_keys = self._function.load_state_dict(
@@ -78,7 +78,10 @@ class CompressionClient(
     def _get_current_gradients(self):
         """Get current gradients stored in the PyTorch model."""
         return np.concatenate(
-            [val.grad.cpu().numpy().flatten() for val in self._function.parameters()]
+            [
+                val.grad.cpu().numpy().flatten()
+                for val in self._function.parameters()
+            ]
         )
 
 
@@ -101,14 +104,16 @@ class _GradientCompressionClient(CompressionClient):
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
-        """Send either compressed or noncompressed vector based on the config info."""
+        """Send either compressed or noncompressed vector based on the config.
+
+        info.
+        """
         if config[self.SEND_FULL_GRADIENT]:
             compressed_gradient = self._gradient_step(parameters)
         else:
             compressed_gradient = self._compression_step(parameters)
-        info = {
-            self.SIZE_OF_COMPRESSED_VECTORS: self._compressor.num_nonzero_components()
-        }
+        payload = self._compressor.num_nonzero_components()
+        info = {self.SIZE_OF_COMPRESSED_VECTORS: payload}
         return (
             compressed_gradient,
             len(self._targets),
@@ -160,28 +165,44 @@ class DashaClient(_GradientCompressionClient, _BaseDashaClient):
     """Standard Flower client."""
 
     def _gradient_step(self, parameters: NDArrays):
-        """Initialize g_i with the grad (Line 2 from Alg 1 in the DASHA paper)."""
+        """Initialize g_i with the grad (Line 2 from Alg 1 in the DASHA.
+
+        paper).
+        """
         gradients = self._calculate_gradient(parameters)
-        self._gradient_estimator = gradients
-        self._local_gradient_estimator = gradients
-        compressed_gradient = IdentityUnbiasedCompressor().compress(
-            self._gradient_estimator
+        self.client_state.array_records["gradient_estimator"] = ArrayRecord(
+            [gradients]
         )
+        self.client_state.array_records["local_gradient_estimator"] = (
+            ArrayRecord([gradients])
+        )
+        compressed_gradient = IdentityUnbiasedCompressor().compress(gradients)
         return compressed_gradient
 
     def _compression_step(self, parameters: NDArrays):
         """Implement Lines 8 and 9 from Algorithm 1 in the DASHA paper."""
         gradients = self._calculate_gradient(parameters)
         momentum = self._get_momentum()
-        assert self._local_gradient_estimator is not None
-        assert self._gradient_estimator is not None
+        local_gradient_estimator = self.client_state.array_records[
+            "local_gradient_estimator"
+        ].to_numpy_ndarrays()[0]
+        gradient_estimator = self.client_state.array_records[
+            "gradient_estimator"
+        ].to_numpy_ndarrays()[0]
+        assert local_gradient_estimator is not None
+        assert gradient_estimator is not None
         compressed_gradient = self._compressor.compress(
             gradients
-            - self._local_gradient_estimator
-            - momentum * (self._gradient_estimator - self._local_gradient_estimator)
+            - local_gradient_estimator
+            - momentum * (gradient_estimator - local_gradient_estimator)
         )
-        self._local_gradient_estimator = gradients
-        self._gradient_estimator += decompress(compressed_gradient)
+        self.client_state.array_records["local_gradient_estimator"] = (
+            ArrayRecord([gradients])
+        )
+        gradient_estimator += decompress(compressed_gradient)
+        self.client_state.array_records["gradient_estimator"] = ArrayRecord(
+            [gradient_estimator]
+        )
         return compressed_gradient
 
 
@@ -191,19 +212,30 @@ class MarinaClient(_GradientCompressionClient):
     def _gradient_step(self, parameters: NDArrays):
         """Implement Line 8 from Algorithm 1 in the MARINA paper if c_k = 1."""
         gradients = self._calculate_gradient(parameters)
-        assert self._gradient_estimator is None
-        self._local_gradient_estimator = gradients
+        assert (
+            "gradient_estimator" not in self.client_state.array_records.keys()
+        )
+        self.client_state.array_records["local_gradient_estimator"] = (
+            ArrayRecord([gradients])
+        )
         compressed_gradient = IdentityUnbiasedCompressor().compress(gradients)
         return compressed_gradient
 
     def _compression_step(self, parameters: NDArrays):
         """Implement Line 8 from Algorithm 1 in the MARINA paper if c_k = 0."""
         gradients = self._calculate_gradient(parameters)
-        assert self._gradient_estimator is None
-        compressed_gradient = self._compressor.compress(
-            gradients - self._local_gradient_estimator
+        assert (
+            "gradient_estimator" not in self.client_state.array_records.keys()
         )
-        self._local_gradient_estimator = gradients
+        compressed_gradient = self._compressor.compress(
+            gradients
+            - self.client_state.array_records[
+                "local_gradient_estimator"
+            ].to_numpy_ndarrays()[0]
+        )
+        self.client_state.array_records["local_gradient_estimator"] = (
+            ArrayRecord([gradients])
+        )
         return compressed_gradient
 
 
@@ -223,7 +255,6 @@ class _StochasticGradientCompressionClient(CompressionClient):
         self._batch_size = batch_size
         assert mega_batch_size is not None
         self._mega_batch_size = mega_batch_size
-        self._previous_parameters = None
         self._evaluate_full_dataset = evaluate_full_dataset
         self._batch_sampler = iter(
             torch.utils.data.DataLoader(
@@ -231,7 +262,9 @@ class _StochasticGradientCompressionClient(CompressionClient):
                 batch_size=self._batch_size,
                 num_workers=num_workers,
                 sampler=torch.utils.data.RandomSampler(
-                    self._dataset, replacement=True, num_samples=self._LARGE_NUMBER
+                    self._dataset,
+                    replacement=True,
+                    num_samples=self._LARGE_NUMBER,
                 ),
             )
         )
@@ -244,14 +277,16 @@ class _StochasticGradientCompressionClient(CompressionClient):
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
-        """Send either compressed or uncompressed vector based on the config info."""
+        """Send either compressed or uncompressed vector based on the config.
+
+        info.
+        """
         if config[self.SEND_FULL_GRADIENT]:
             compressed_gradient = self._stochastic_gradient_step(parameters)
         else:
             compressed_gradient = self._stochastic_compression_step(parameters)
-        info = {
-            self.SIZE_OF_COMPRESSED_VECTORS: self._compressor.num_nonzero_components()
-        }
+        payload = self._compressor.num_nonzero_components()
+        info = {self.SIZE_OF_COMPRESSED_VECTORS: payload}
         return (
             compressed_gradient,
             self._batch_size,
@@ -285,18 +320,22 @@ class _StochasticGradientCompressionClient(CompressionClient):
         gradients = self._get_current_gradients()
         return gradients
 
-    def _calculate_stochastic_gradient_in_current_and_previous_parameters(
-        self, parameters: NDArrays
-    ):
+    def _calc_stoch_grad_in_curr_and_prev_params(self, parameters: NDArrays):
         """Calculate the stoch gradient of the PyTorch model at two points."""
         features, targets = next(self._batch_sampler)
         features = features.to(self._device)
         targets = targets.to(self._device)
         previous_gradients = self._calculate_gradients(
-            self._previous_parameters, features, targets
+            self.client_state.array_records[
+                "previous_parameters"
+            ].to_numpy_ndarrays(),
+            features,
+            targets,
         )
         gradients = self._calculate_gradients(parameters, features, targets)
-        self._previous_parameters = parameters
+        self.client_state.array_records["previous_parameters"] = ArrayRecord(
+            parameters
+        )
         return previous_gradients, gradients
 
     def _calculate_mega_stochastic_gradient(self, parameters: NDArrays):
@@ -310,7 +349,9 @@ class _StochasticGradientCompressionClient(CompressionClient):
                 parameters, features, targets
             )
         aggregated_gradients /= self._mega_batch_size
-        self._previous_parameters = parameters
+        self.client_state.array_records["previous_parameters"] = ArrayRecord(
+            parameters
+        )
         return aggregated_gradients
 
     def _stochastic_gradient_step(self, parameters: NDArrays):
@@ -320,7 +361,9 @@ class _StochasticGradientCompressionClient(CompressionClient):
         raise NotImplementedError()
 
 
-class StochasticDashaClient(_StochasticGradientCompressionClient, _BaseDashaClient):
+class StochasticDashaClient(
+    _StochasticGradientCompressionClient, _BaseDashaClient
+):
     """Standard Flower client."""
 
     def __init__(self, stochastic_momentum, *args, **kwargs):
@@ -328,12 +371,21 @@ class StochasticDashaClient(_StochasticGradientCompressionClient, _BaseDashaClie
         self._stochastic_momentum = stochastic_momentum
 
     def _stochastic_gradient_step(self, parameters: NDArrays):
-        """Init g_i with the stoch gradients (Line 2 from Alg 1 in the DASHA paper)."""
+        """Init g_i with the stoch gradients (Line 2 from Alg 1 in the DASHA.
+
+        paper).
+        """
         gradients = self._calculate_mega_stochastic_gradient(parameters)
-        self._gradient_estimator = gradients
-        self._local_gradient_estimator = gradients
+        self.client_state.array_records["gradient_estimator"] = ArrayRecord(
+            [gradients]
+        )
+        self.client_state.array_records["local_gradient_estimator"] = (
+            ArrayRecord([gradients])
+        )
         compressed_gradient = IdentityUnbiasedCompressor().compress(
-            self._gradient_estimator
+            self.client_state.array_records[
+                "gradient_estimator"
+            ].to_numpy_ndarrays()[0]
         )
         return compressed_gradient
 
@@ -342,22 +394,31 @@ class StochasticDashaClient(_StochasticGradientCompressionClient, _BaseDashaClie
         (
             previous_gradients,
             gradients,
-        ) = self._calculate_stochastic_gradient_in_current_and_previous_parameters(
-            parameters
-        )
-        next_local_gradient_estimator = gradients + (1 - self._stochastic_momentum) * (
-            self._local_gradient_estimator - previous_gradients
-        )
+        ) = self._calc_stoch_grad_in_curr_and_prev_params(parameters)
+        local_gradient_estimator = self.client_state.array_records[
+            "local_gradient_estimator"
+        ].to_numpy_ndarrays()[0]
+        gradient_estimator = self.client_state.array_records[
+            "gradient_estimator"
+        ].to_numpy_ndarrays()[0]
+        next_local_gradient_estimator = gradients + (
+            1 - self._stochastic_momentum
+        ) * (local_gradient_estimator - previous_gradients)
         momentum = self._get_momentum()
-        assert self._local_gradient_estimator is not None
-        assert self._gradient_estimator is not None
+        assert local_gradient_estimator is not None
+        assert gradient_estimator is not None
         compressed_gradient = self._compressor.compress(
             next_local_gradient_estimator
-            - self._local_gradient_estimator
-            - momentum * (self._gradient_estimator - self._local_gradient_estimator)
+            - local_gradient_estimator
+            - momentum * (gradient_estimator - local_gradient_estimator)
         )
-        self._local_gradient_estimator = next_local_gradient_estimator
-        self._gradient_estimator += decompress(compressed_gradient)
+        self.client_state.array_records["local_gradient_estimator"] = (
+            ArrayRecord([next_local_gradient_estimator])
+        )
+        gradient_estimator += decompress(compressed_gradient)
+        self.client_state.array_records["gradient_estimator"] = ArrayRecord(
+            [gradient_estimator]
+        )
         return compressed_gradient
 
 
@@ -367,7 +428,9 @@ class StochasticMarinaClient(_StochasticGradientCompressionClient):
     def _stochastic_gradient_step(self, parameters: NDArrays):
         """Implement Line 8 in Algorithm 3 from the MARINA paper if c_k = 1."""
         gradients = self._calculate_mega_stochastic_gradient(parameters)
-        assert self._gradient_estimator is None
+        assert (
+            "gradient_estimator" not in self.client_state.array_records.keys()
+        )
         compressed_gradient = IdentityUnbiasedCompressor().compress(gradients)
         return compressed_gradient
 
@@ -376,8 +439,85 @@ class StochasticMarinaClient(_StochasticGradientCompressionClient):
         (
             previous_gradients,
             gradients,
-        ) = self._calculate_stochastic_gradient_in_current_and_previous_parameters(
-            parameters
+        ) = self._calc_stoch_grad_in_curr_and_prev_params(parameters)
+        compressed_gradient = self._compressor.compress(
+            gradients - previous_gradients
         )
-        compressed_gradient = self._compressor.compress(gradients - previous_gradients)
         return compressed_gradient
+
+
+def define_client_obj(
+    method_cfg: dict, function, dataset, compressor, client_state
+):
+    """Generate the client object for each method."""
+    method_name = method_cfg["name"]
+    if method_name in ("dasha", "marina"):
+        client_obj = DashaClient if method_name == "dasha" else MarinaClient
+        return client_obj(
+            function=function,
+            dataset=dataset,
+            compressor=compressor,
+            client_state=client_state,
+            device=method_cfg["device"],
+            evaluate_accuracy=method_cfg["evaluate-accuracy"],
+            send_gradient=method_cfg["send-gradient"],
+            strict_load=method_cfg["strict-load"],
+        )
+    if method_name == "stochastic_dasha":
+        return StochasticDashaClient(
+            function=function,
+            dataset=dataset,
+            compressor=compressor,
+            client_state=client_state,
+            device=method_cfg["device"],
+            evaluate_accuracy=method_cfg["evaluate-accuracy"],
+            strict_load=method_cfg["strict-load"],
+            stochastic_momentum=method_cfg["stochastic-momentum"],
+            batch_size=method_cfg["batch-size"],
+            mega_batch_size=method_cfg["mega-batch-size"],
+        )
+    return StochasticMarinaClient(
+        function=function,
+        dataset=dataset,
+        compressor=compressor,
+        client_state=client_state,
+        device=method_cfg["device"],
+        evaluate_accuracy=method_cfg["evaluate-accuracy"],
+        strict_load=method_cfg["strict-load"],
+        batch_size=method_cfg["batch-size"],
+        mega_batch_size=method_cfg["mega-batch-size"],
+    )
+
+
+def client_fn(context: Context):
+    """Construct a Client that will be run in a ClientApp."""
+    # Load model and data
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+    cfg = reformat_config(context.run_config)
+    seed = set_seed(seed=42)
+    dataset = load_dataset(cfg)
+    datasets = random_split(dataset, num_partitions)
+    local_dataset = datasets[partition_id]
+    model = define_model(
+        cfg["model"], input_shape=_get_dataset_input_shape(dataset)
+    )
+    compressor = RandKCompressor(
+        number_of_coordinates=cfg["compressor"]["number-of-coordinates"],
+        seed=seed,
+    )
+    # Return Client instance
+    client_state = context.state
+    client_instance = define_client_obj(
+        cfg["method"],
+        function=model,
+        dataset=local_dataset,
+        compressor=compressor,
+        client_state=client_state,
+    )
+    # Return Client instance
+    return client_instance.to_client()
+
+
+# Flower ClientApp
+app = ClientApp(client_fn)
