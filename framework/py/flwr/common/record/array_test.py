@@ -26,6 +26,8 @@ import numpy as np
 from parameterized import parameterized
 
 from ..constant import SType
+from ..serde import array_to_proto
+from ..serializable import get_object_content_len, get_object_type
 from ..typing import NDArray
 from .array import Array
 
@@ -172,19 +174,12 @@ class TestArray(unittest.TestCase):
         arr = Array(np.random.randn(5, 5))
         arr_b = arr.serialize()
 
-        # Extract object head
-        obj_head = arr_b[: Array.obj_name_len + Array.obj_content_len]
-        obj_type = obj_head[: Array.obj_name_len].rstrip(Array.pad_symbol).decode()
-        obj_content_len = int.from_bytes(
-            obj_head[Array.obj_name_len :], byteorder="little"
-        )
-
         # assert
         # Class name matches
-        assert obj_type == arr.__class__.__name__.lower()
+        assert get_object_type(arr_b) == arr.__class__.__name__.lower()
         # Content length matches
-        assert obj_content_len == len(arr_b) - (
-            Array.obj_name_len + Array.obj_content_len
+        assert get_object_content_len(arr_b) == len(
+            array_to_proto(arr).SerializeToString()
         )
 
         # Deserialize
