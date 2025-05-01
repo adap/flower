@@ -11,7 +11,7 @@ evaluate-accuracy = true
 mega-batch-size = 16
 stochastic-momentum = 0.1
 batch-size = 25
-device = "cpu"
+device = "cuda"
 
 [compressor]
 number-of-coordinates = 2000000
