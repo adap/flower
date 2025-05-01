@@ -25,12 +25,15 @@ from uuid import UUID, uuid4
 
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
+    HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
+    RUN_FAILURE_DETAILS_NO_HEARTBEAT,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
+    SubStatus,
 )
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
@@ -45,6 +48,7 @@ from .utils import (
     verify_found_message_replies,
     verify_message_ids,
 )
+
 
 @dataclass
 class RunRecord:  # pylint: disable=R0902
@@ -473,6 +477,20 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
         with self.lock:
+            # Check heartbeats
+            # Mark runs with starting or running status as as failed
+            # if they have not sent a heartbeat before the deadline
+            current = now()
+            for record in self.run_ids.values():
+                if record.run.status.status in (Status.STARTING, Status.RUNNING):
+                    if record.active_until < current.timestamp():
+                        record.run.status = RunStatus(
+                            status=Status.FINISHED,
+                            sub_status=SubStatus.FAILED,
+                            details=RUN_FAILURE_DETAILS_NO_HEARTBEAT,
+                        )
+                        record.run.finished_at = now().isoformat()
+
             return {
                 run_id: self.run_ids[run_id].run.status
                 for run_id in set(run_ids)
@@ -508,14 +526,23 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 )
                 return False
 
-            # Update the status
+            # Initialize heartbeat_interval and active_until
+            # when switching to starting or running
+            current = now()
             run_record = self.run_ids[run_id]
+            if new_status.status in (Status.STARTING, Status.RUNNING):
+                run_record.heartbeat_interval = HEARTBEAT_DEFAULT_INTERVAL
+                run_record.active_until = (
+                    current.timestamp() + run_record.heartbeat_interval
+                )
+
+            # Update the run status
             if new_status.status == Status.STARTING:
-                run_record.run.starting_at = now().isoformat()
+                run_record.run.starting_at = current.isoformat()
             elif new_status.status == Status.RUNNING:
-                run_record.run.running_at = now().isoformat()
+                run_record.run.running_at = current.isoformat()
             elif new_status.status == Status.FINISHED:
-                run_record.run.finished_at = now().isoformat()
+                run_record.run.finished_at = current.isoformat()
             run_record.run.status = new_status
             return True
 
@@ -565,29 +592,30 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         By default, HEARTBEAT_PATIENCE = 2, allowing for one missed heartbeat
         before the run is marked as `"completed:failed"`.
         """
-        # TODO: Implement this method
         with self.lock:
+            # Search for the run
+            current_status = self.get_run_status({run_id}).get(run_id)
+
             # Check if the run_id exists
-            if run_id not in self.run_ids:
+            if current_status is None:
                 log(ERROR, "`run_id` is invalid")
                 return False
-            run_record = self.run_ids[run_id]
-            
+
             # Check if the run is of status "running"/"starting"
-            if run_record.run.status.status not in {Status.RUNNING, Status.STARTING}:
+            if current_status.status not in {Status.RUNNING, Status.STARTING}:
                 log(
                     ERROR,
                     'Cannot acknowledge heartbeat for run with status "%s"',
-                    run_record.run.status.status,
+                    current_status.status,
                 )
                 return False
-            
+
             # Update the active_until timestamp
+            run_record = self.run_ids[run_id]
             current = now().timestamp()
-            run_record.active_until = current + PING_PATIENCE * heartbeat_interval
+            run_record.active_until = current + HEARTBEAT_PATIENCE * heartbeat_interval
             run_record.heartbeat_interval = heartbeat_interval
             return True
-        
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""
