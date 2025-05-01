@@ -25,21 +25,13 @@ T = TypeVar("T", bound="Serializable")
 class Serializable(ABC):
     """ABC class for serializable objects."""
 
-    divider = b"\x00"
-    head_len = 16
+    pad_symbol = b"*"
+    obj_name_len = 16
+    obj_content_len = 8
 
     @abstractmethod
     def serialize(self) -> bytes:
         """Serialize the object to bytes."""
-
-    @property
-    def header(self) -> bytes:
-        """Create 16Bytes header using the class name.
-
-        The header is left padded with b'*'.
-        """
-        class_name = self.__class__.__name__.lower()
-        return class_name.encode().ljust(self.head_len, b"*")
 
     @classmethod
     @abstractmethod
@@ -51,3 +43,18 @@ class Serializable(ABC):
         """Return a SHA-256 hash of the serialized representation."""
         serialized: bytes = self.serialize()
         return hashlib.sha256(serialized).hexdigest()
+
+    @property
+    def object_name(self) -> bytes:
+        """Return object name based on the class it is based on.
+
+        Applies an `obj_name_len` left padding with symbol '*'.
+        """
+        class_name = self.__class__.__name__.lower()
+        return class_name.encode().ljust(self.obj_name_len, self.pad_symbol)
+
+    def get_object_content_size(self, object_content: bytes) -> bytes:
+        """Return size in Bytes of the bytes buffer passed."""
+        return len(object_content).to_bytes(
+            self.obj_content_len, byteorder="little", signed=False
+        )

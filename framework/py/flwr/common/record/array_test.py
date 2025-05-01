@@ -166,3 +166,30 @@ class TestArray(unittest.TestCase):
         """Ensure invalid combinations raise TypeError."""
         with self.assertRaises(TypeError):
             Array(*args)
+
+    def test_serialization_and_deserialization(self) -> None:
+        """Ensure an Array can be (de)serialized correctly."""
+        arr = Array(np.random.randn(5, 5))
+        arr_b = arr.serialize()
+
+        # Extract object head
+        obj_head = arr_b[: Array.obj_name_len + Array.obj_content_len]
+        obj_type = obj_head[: Array.obj_name_len].rstrip(Array.pad_symbol).decode()
+        obj_content_len = int.from_bytes(
+            obj_head[Array.obj_name_len :], byteorder="little"
+        )
+
+        # assert
+        # Class name matches
+        assert obj_type == arr.__class__.__name__.lower()
+        # Content length matches
+        assert obj_content_len == len(arr_b) - (
+            Array.obj_name_len + Array.obj_content_len
+        )
+
+        # Deserialize
+        arr_ = Array.deserialize(arr_b)
+
+        # assert
+        # both objects are identical
+        assert arr.object_id == arr_.object_id

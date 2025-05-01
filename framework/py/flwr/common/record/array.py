@@ -256,16 +256,16 @@ class Array(Serializable):
         """Serialize the Array object as a single bytes buffer."""
         array_proto = ArrayProto(**vars(self))
 
-        return (
-            self.header
-            + self.divider
-            + array_proto.SerializeToString(deterministic=True)
-        )
+        object_body = array_proto.SerializeToString(deterministic=True)
+        object_content_size = self.get_object_content_size(object_body)
+        return self.object_name + object_content_size + object_body
 
     @classmethod
     def deserialize(cls, serialized: bytes) -> Array:
         """Deserialize array bytes and instantiate an Array."""
-        proto_array = ArrayProto.FromString(serialized[cls.head_len + 1 :])
+        proto_array = ArrayProto.FromString(
+            serialized[cls.obj_name_len + cls.obj_content_len :]
+        )
         return cls(
             dtype=proto_array.dtype,
             shape=list(proto_array.shape),
