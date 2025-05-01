@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 
-from ..serializable import Serializable, get_object_content_len, get_object_type
+from .serializable import Serializable, get_object_content_len, get_object_type
 
 
 @dataclass
