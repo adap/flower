@@ -1,6 +1,5 @@
 # Flower Intelligence
 
-
 Check out the full documentation [here](https://flower.ai/docs/intelligence), and the project website [here](https://flower.ai/intelligence).
 
 ## Install
