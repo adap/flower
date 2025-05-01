@@ -19,7 +19,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fetch = require("node-fetch");
 
             const owner = context.repo.owner;
             const repo = context.repo.repo;

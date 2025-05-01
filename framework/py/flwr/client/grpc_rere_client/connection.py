@@ -15,8 +15,6 @@
 """Contextmanager for a gRPC request-response channel to the Flower server."""
 
 
-import random
-import threading
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from copy import copy
@@ -27,16 +25,11 @@ from typing import Callable, Optional, Union, cast
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from flwr.client.heartbeat import start_heartbeat_loop
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import (
-    HEARTBEAT_BASE_MULTIPLIER,
-    HEARTBEAT_CALL_TIMEOUT,
-    HEARTBEAT_DEFAULT_INTERVAL,
-    HEARTBEAT_RANDOM_RANGE,
-)
+from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
+from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
@@ -151,8 +144,6 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     stub = adapter_cls(channel)
     metadata: Optional[Metadata] = None
     node: Optional[Node] = None
-    heartbeat_thread: Optional[threading.Thread] = None
-    heartbeat_stop_event = threading.Event()
 
     def _should_giveup_fn(e: Exception) -> bool:
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
@@ -169,28 +160,35 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     # heartbeat/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
-    def heartbeat() -> None:
+    def heartbeat() -> bool:
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
-            return
+            return False
 
         # Construct the heartbeat request
         req = HeartbeatRequest(node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL)
 
         # Call FleetAPI
-        res: HeartbeatResponse = stub.Heartbeat(req, timeout=HEARTBEAT_CALL_TIMEOUT)
+        try:
+            res: HeartbeatResponse = stub.Heartbeat(req, timeout=HEARTBEAT_CALL_TIMEOUT)
+        except grpc.RpcError as e:
+            status_code = e.code()
+            if status_code == grpc.StatusCode.UNAVAILABLE:
+                return False
+            if status_code == grpc.StatusCode.DEADLINE_EXCEEDED:
+                return False
+            raise
 
         # Check if success
         if not res.success:
-            raise RuntimeError("Heartbeat failed unexpectedly.")
+            raise RuntimeError(
+                "Heartbeat failed unexpectedly. The SuperLink does not "
+                "recognize this SuperNode."
+            )
+        return True
 
-        # Wait
-        rd = random.uniform(*HEARTBEAT_RANDOM_RANGE)
-        next_interval: float = HEARTBEAT_DEFAULT_INTERVAL - HEARTBEAT_CALL_TIMEOUT
-        next_interval *= HEARTBEAT_BASE_MULTIPLIER + rd
-        if not heartbeat_stop_event.is_set():
-            heartbeat_stop_event.wait(next_interval)
+    heartbeat_sender = HeartbeatSender(heartbeat)
 
     def create_node() -> Optional[int]:
         """Set create_node."""
@@ -203,10 +201,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             request=create_node_request,
         )
 
-        # Remember the node and the heartbeat-loop thread
-        nonlocal node, heartbeat_thread
+        # Remember the node and start the heartbeat sender
+        nonlocal node
         node = cast(Node, create_node_response.node)
-        heartbeat_thread = start_heartbeat_loop(heartbeat, heartbeat_stop_event)
+        heartbeat_sender.start()
         return node.node_id
 
     def delete_node() -> None:
@@ -217,8 +215,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Node instance missing")
             return
 
-        # Stop the heartbeat-loop thread
-        heartbeat_stop_event.set()
+        # Stop the heartbeat sender
+        heartbeat_sender.stop()
 
         # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)
