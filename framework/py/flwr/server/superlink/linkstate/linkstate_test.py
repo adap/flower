@@ -838,6 +838,37 @@ class StateTest(unittest.TestCase):
         # Assert
         self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
 
+    def test_acknowledge_app_heartbeat(self) -> None:
+        """Test if acknowledge_app_heartbeat works."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id1 = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
+        run_id2 = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
+        # Switch to "running" status
+        transition_run_status(state, run_id1, 2)
+        transition_run_status(state, run_id2, 2)
+        # Heartbeat from run_id1
+        interval = HEARTBEAT_DEFAULT_INTERVAL * 2
+        state.acknowledge_app_heartbeat(run_id1, interval)
+
+        # Execute
+        # The run_id1 should be considered inactive after HEARTBEAT_DEFAULT_INTERVAL,
+        # and the run_id2 should remain active for HEARTBEAT_PATIENCE * interval.
+        ddl_run_id1 = now().timestamp() + HEARTBEAT_DEFAULT_INTERVAL
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = datetime.fromtimestamp(
+                ddl_run_id1 + 1, tz=timezone.utc
+            )
+            run_status_dict = state.get_run_status({run_id1, run_id2})
+            status1 = run_status_dict[run_id1]
+            status2 = run_status_dict[run_id2]
+
+        # Assert
+        assert status1.status == Status.RUNNING
+        assert status2.status == Status.FINISHED
+        assert status2.sub_status == SubStatus.FAILED
+        assert status2.details == RUN_FAILURE_DETAILS_NO_HEARTBEAT
+
     def test_acknowledge_heartbeat_failed(self) -> None:
         """Test that acknowledge_heartbeat returns False when the heartbeat fails."""
         # Prepare
@@ -845,6 +876,18 @@ class StateTest(unittest.TestCase):
 
         # Execute
         is_successful = state.acknowledge_heartbeat(0, heartbeat_interval=30)
+
+        # Assert
+        assert not is_successful
+
+    def test_acknowledge_app_heartbeat_failed(self) -> None:
+        """Test that acknowledge_app_heartbeat returns False when the heartbeat
+        fails."""
+        # Prepare
+        state: LinkState = self.state_factory()
+
+        # Execute
+        is_successful = state.acknowledge_app_heartbeat(61016, heartbeat_interval=30)
 
         # Assert
         assert not is_successful
