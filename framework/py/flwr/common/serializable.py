@@ -42,9 +42,10 @@ class Serializable:
         return hashlib.sha256(serialized).hexdigest()
 
 
-def get_object_content(serialized: bytes, class_name: str) -> bytes:
+def get_object_content(serialized: bytes, cls: type[T]) -> bytes:
     """Return object content but raise an error if object type in bytes does not match
     name of class."""
+    class_name = cls.__qualname__
     object_type = object_type_from_bytes(serialized)
     if not object_type == class_name:
         raise ValueError(
@@ -56,12 +57,12 @@ def get_object_content(serialized: bytes, class_name: str) -> bytes:
     return serialized[OBJECT_NAME_LEN + OBJECT_CONTENT_LEN :]
 
 
-def add_header_to_object_content(object_content: bytes, class_name: str) -> bytes:
+def add_header_to_object_content(object_content: bytes, cls: T) -> bytes:
     """Add header to object content."""
     # Construct header
-    header = object_type_to_bytes(class_name) + object_content_len_to_bytes(
-        object_content
-    )
+    header = object_type_to_bytes(
+        cls.__class__.__qualname__
+    ) + object_content_len_to_bytes(object_content)
     # Concatenate header and object content
     return header + object_content
 

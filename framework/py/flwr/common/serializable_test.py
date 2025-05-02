@@ -34,13 +34,11 @@ class CustomDataClass(Serializable):
 
     def serialize(self) -> bytes:  # noqa: D102
         obj_content = self.data
-        return add_header_to_object_content(
-            object_content=obj_content, class_name=self.__class__.__qualname__
-        )
+        return add_header_to_object_content(object_content=obj_content, cls=self)
 
     @classmethod
     def deserialize(cls, serialized: bytes) -> "CustomDataClass":  # noqa: D102
-        data = get_object_content(serialized, class_name=cls.__qualname__)
+        data = get_object_content(serialized, cls)
         return CustomDataClass(data)
 
 
