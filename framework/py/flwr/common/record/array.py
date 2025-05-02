@@ -24,7 +24,14 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
+from flwr.proto.recorddict_pb2 import Array as ArrayProto  # pylint: disable=E0611
+
 from ..constant import SType
+from ..serializable import (
+    Serializable,
+    add_header_to_object_content,
+    get_object_content,
+)
 from ..typing import NDArray
 
 if TYPE_CHECKING:
@@ -40,7 +47,7 @@ def _raise_array_init_error() -> None:
 
 
 @dataclass
-class Array:
+class Array(Serializable):
     """Array type.
 
     A dataclass containing serialized data from an array-like or tensor-like object
@@ -248,3 +255,21 @@ class Array:
         # Source: https://numpy.org/doc/stable/reference/generated/numpy.load.html
         ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
         return cast(NDArray, ndarray_deserialized)
+
+    def serialize(self) -> bytes:  # noqa: D102
+        array_proto = ArrayProto(**vars(self))
+
+        obj_content = array_proto.SerializeToString(deterministic=True)
+        return add_header_to_object_content(object_content=obj_content, cls=self)
+
+    @classmethod
+    def deserialize(cls, serialized: bytes) -> Array:  # noqa: D102
+
+        obj_content = get_object_content(serialized, cls)
+        proto_array = ArrayProto.FromString(obj_content)
+        return cls(
+            dtype=proto_array.dtype,
+            shape=list(proto_array.shape),
+            stype=proto_array.stype,
+            data=proto_array.data,
+        )
