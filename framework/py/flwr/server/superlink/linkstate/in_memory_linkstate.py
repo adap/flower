@@ -601,8 +601,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         A run with status `"running"` is considered alive as long as it sends heartbeats
         within the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
-        By default, HEARTBEAT_PATIENCE = 2, allowing for one missed heartbeat
-        before the run is marked as `"completed:failed"`.
+        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before the run is
+        marked as `"completed:failed"`.
         """
         with self.lock:
             # Check if runs are still active
