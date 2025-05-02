@@ -12,31 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Serializable ABC."""
+"""Serializable base class."""
 
 
 import hashlib
-from abc import ABC, abstractmethod
 from typing import TypeVar
+
+from .constant import OBJECT_CONTENT_LEN, OBJECT_NAME_LEN, PAD_SYMBOL
 
 T = TypeVar("T", bound="Serializable")
 
 
-class Serializable(ABC):
-    """ABC class for serializable objects."""
+class Serializable:
+    """Base class for serializable objects."""
 
-    pad_symbol = b"*"
-    obj_name_len = 16
-    obj_content_len = 8
-
-    @abstractmethod
     def serialize(self) -> bytes:
         """Serialize the object to bytes."""
+        raise NotImplementedError()
 
     @classmethod
-    @abstractmethod
     def deserialize(cls: type[T], serialized: bytes) -> T:
         """Deserialize from bytes and return an instance of the class."""
+        raise NotImplementedError()
 
     @property
     def object_id(self) -> str:
@@ -48,36 +45,36 @@ class Serializable(ABC):
     def object_name(self) -> bytes:
         """Return object name based on the class it is based on.
 
-        Applies an `obj_name_len` left padding with `pad_symbol`.
+        Applies an `OBJECT_NAME_LEN` left padding with `PAD_SYMBOL`.
         """
-        class_name = self.__class__.__name__.lower()
-        return class_name.encode(encoding="utf-8").ljust(
-            self.obj_name_len, self.pad_symbol
-        )
+        class_name = self.__class__.__qualname__.lower()
+        if len(class_name) > OBJECT_NAME_LEN:
+            raise ValueError(
+                f"The name of class `{class_name}` exceeds the maximum "
+                f"length ({OBJECT_NAME_LEN} char)"
+            )
+        return class_name.encode(encoding="utf-8").ljust(OBJECT_NAME_LEN, PAD_SYMBOL)
 
-    def get_object_content_size(self, object_content: bytes) -> bytes:
-        """Return size in Bytes of the bytes buffer passed."""
-        return len(object_content).to_bytes(
-            self.obj_content_len, byteorder="little", signed=False
-        )
+
+def get_object_content_size(object_content: bytes) -> bytes:
+    """Return size in Bytes of the bytes buffer passed."""
+    return len(object_content).to_bytes(
+        OBJECT_CONTENT_LEN, byteorder="little", signed=False
+    )
 
 
 def _get_object_head(serialized: bytes) -> bytes:
     """Return object head from bytes."""
-    return serialized[: Serializable.obj_name_len + Serializable.obj_content_len]
+    return serialized[: OBJECT_NAME_LEN + OBJECT_CONTENT_LEN]
 
 
 def get_object_type(serialized: bytes) -> str:
     """Return object type from bytes."""
     obj_head = _get_object_head(serialized)
-    return (
-        obj_head[: Serializable.obj_name_len]
-        .rstrip(Serializable.pad_symbol)
-        .decode(encoding="utf-8")
-    )
+    return obj_head[:OBJECT_NAME_LEN].rstrip(PAD_SYMBOL).decode(encoding="utf-8")
 
 
 def get_object_content_len(serialized: bytes) -> int:
     """Return length of serialized object in bytes."""
     obj_head = _get_object_head(serialized)
-    return int.from_bytes(obj_head[Serializable.obj_name_len :], byteorder="little")
+    return int.from_bytes(obj_head[OBJECT_NAME_LEN:], byteorder="little")

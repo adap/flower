@@ -127,6 +127,15 @@ GRPC_RETRY_MAX_DELAY = 20  # Maximum delay duration between two consecutive retr
 # Constants for ArrayRecord
 GC_THRESHOLD = 200_000_000  # 200 MB
 
+# Constants for Serilaizable
+PAD_SYMBOL = b"*"  # Symbol used to pad the object name if shorter than OBJECT_NAME_LEN
+OBJECT_NAME_LEN = (
+    16  # Bytes in the header of the serialized boejct to store name of class
+)
+OBJECT_CONTENT_LEN = (
+    8  # Bytes used to represent the length in bytes of the serialized object content
+)
+
 
 class MessageType:
     """Message type."""
