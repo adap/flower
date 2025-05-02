@@ -40,6 +40,7 @@ class CustomDataClass(Serializable):
     @classmethod
     def deserialize(cls, serialized: bytes) -> "CustomDataClass":
         """Deserialize bytes into a CustomDataClass instance."""
+        cls.object_type_check(serialized)
         data = serialized[OBJECT_NAME_LEN + OBJECT_CONTENT_LEN :]
         return CustomDataClass(data)
 
@@ -52,7 +53,7 @@ def test_serialization_and_deserialization() -> None:
 
     # assert
     # Class name matches
-    assert get_object_type(obj_b) == obj.__class__.__qualname__.lower()
+    assert get_object_type(obj_b) == obj.__class__.__qualname__
     # Content length matches
     assert get_object_content_len(obj_b) == len(data)
 

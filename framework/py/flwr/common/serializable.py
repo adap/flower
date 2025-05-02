@@ -35,6 +35,17 @@ class Serializable:
         """Deserialize from bytes and return an instance of the class."""
         raise NotImplementedError()
 
+    @classmethod
+    def object_type_check(cls: type[T], serialized: bytes) -> None:
+        """Raise an error if object type in bytes do not match name of class."""
+        object_type = get_object_type(serialized)
+        class_name = cls.__qualname__
+        if not object_type == class_name:
+            raise ValueError(
+                f"Class name ({class_name}) and type of serialized object "
+                f"({object_type}) do not match."
+            )
+
     @property
     def object_id(self) -> str:
         """Return a SHA-256 hash of the serialized representation."""
@@ -47,7 +58,7 @@ class Serializable:
 
         Applies an `OBJECT_NAME_LEN` left padding with `PAD_SYMBOL`.
         """
-        class_name = self.__class__.__qualname__.lower()
+        class_name = self.__class__.__qualname__
         if len(class_name) > OBJECT_NAME_LEN:
             raise ValueError(
                 f"The name of class `{class_name}` exceeds the maximum "
