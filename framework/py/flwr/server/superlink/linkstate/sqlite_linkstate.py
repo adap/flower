@@ -803,10 +803,11 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         return {convert_sint64_to_uint64(row["run_id"]) for row in rows}
 
     def _check_run_activeness(self) -> None:
-        """Check if runs are still active."""
-        # Check heartbeats
-        # Mark runs with starting or running status as as failed
-        # if they have not sent a heartbeat before the deadline
+        """Check if any runs are no longer active.
+
+        Marks runs with status 'starting' or 'running' as failed
+        if they have not sent a heartbeat before `active_until`.
+        """
         query = "UPDATE run SET finished_at = ?, sub_status = ?, details = ? "
         query += "WHERE starting_at != '' AND finished_at = '' AND active_until < ?;"
         current = now()

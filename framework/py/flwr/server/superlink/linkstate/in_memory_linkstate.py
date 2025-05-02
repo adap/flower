@@ -467,10 +467,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return set(self.run_ids.keys())
 
     def _check_run_activeness(self) -> None:
-        """Check if runs are still active."""
-        # Check heartbeats
-        # Mark runs with starting or running status as as failed
-        # if they have not sent a heartbeat before the deadline
+        """Check if any runs are no longer active.
+
+        Marks runs with status 'starting' or 'running' as failed
+        if they have not sent a heartbeat before `active_until`.
+        """
         with self.lock:
             current = now()
             for record in self.run_ids.values():
