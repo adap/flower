@@ -17,12 +17,12 @@
 
 from dataclasses import dataclass
 
-from .constant import OBJECT_CONTENT_LEN, OBJECT_NAME_LEN
 from .serializable import (
     Serializable,
-    get_object_content_len,
-    get_object_content_size,
-    get_object_type,
+    add_header_to_object_content,
+    get_object_content,
+    object_content_len_from_bytes,
+    object_type_from_bytes,
 )
 
 
@@ -32,16 +32,15 @@ class CustomDataClass(Serializable):
 
     data: bytes
 
-    def serialize(self) -> bytes:
-        """Serialize object."""
+    def serialize(self) -> bytes:  # noqa: D102
         obj_content = self.data
-        return self.object_name + get_object_content_size(obj_content) + obj_content
+        return add_header_to_object_content(
+            object_content=obj_content, class_name=self.__class__.__qualname__
+        )
 
     @classmethod
-    def deserialize(cls, serialized: bytes) -> "CustomDataClass":
-        """Deserialize bytes into a CustomDataClass instance."""
-        cls.object_type_check(serialized)
-        data = serialized[OBJECT_NAME_LEN + OBJECT_CONTENT_LEN :]
+    def deserialize(cls, serialized: bytes) -> "CustomDataClass":  # noqa: D102
+        data = get_object_content(serialized, class_name=cls.__qualname__)
         return CustomDataClass(data)
 
 
@@ -51,11 +50,13 @@ def test_serialization_and_deserialization() -> None:
     obj = CustomDataClass(data)
     obj_b = obj.serialize()
 
+    obj.serialize()
+
     # assert
     # Class name matches
-    assert get_object_type(obj_b) == obj.__class__.__qualname__
+    assert object_type_from_bytes(obj_b) == obj.__class__.__qualname__
     # Content length matches
-    assert get_object_content_len(obj_b) == len(data)
+    assert object_content_len_from_bytes(obj_b) == len(data)
 
     # Deserialize
     obj_ = CustomDataClass.deserialize(obj_b)
