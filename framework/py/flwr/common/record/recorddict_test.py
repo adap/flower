@@ -274,7 +274,7 @@ def test_set_metrics_to_metricrecord_with_and_without_keeping_input(
     my_metrics_copy = my_metrics.copy()
 
     # Add metric
-    m_record = MetricRecord(my_metrics, keep_input=keep_input)
+    m_record = MetricRecord(my_metrics, keep_input=keep_input)  # type: ignore
 
     # Check metrics are actually added
     # Check that input dict has been emptied when enabled such behaviour

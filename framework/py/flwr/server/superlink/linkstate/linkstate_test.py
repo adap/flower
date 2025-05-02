@@ -20,6 +20,7 @@ import time
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timezone
+from itertools import product
 from typing import Optional
 from unittest.mock import patch
 from uuid import UUID
@@ -167,8 +168,12 @@ class StateTest(unittest.TestCase):
         assert status1.status == Status.PENDING
         assert status2.status == Status.RUNNING
 
-    @parameterized.expand([(1,), (2,)])  # type: ignore
-    def test_get_run_with_no_heartbeat(self, num_transitions: int) -> None:
+    @parameterized.expand(
+        product([1, 2], ["get_run", "get_run_status", "update_run_status"])
+    )  # type: ignore
+    def test_run_failed_due_to_heartbeat(
+        self, num_transitions: int, test_method: str
+    ) -> None:
         """Test get_run works correctly when the run has no heartbeat."""
         # Prepare
         state = self.state_factory()
@@ -181,17 +186,29 @@ class StateTest(unittest.TestCase):
         # Execute
         ddl = now().timestamp() + HEARTBEAT_PATIENCE * HEARTBEAT_DEFAULT_INTERVAL
         patched_dt = datetime.fromtimestamp(ddl + 5, tz=timezone.utc)
+
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = patched_dt
-            run = state.get_run(run_id)
+
+            if test_method == "get_run":
+                run = state.get_run(run_id)
+                assert run is not None
+                status = run.status
+            elif test_method == "get_run_status":
+                status = state.get_run_status({run_id})[run_id]
+            elif test_method == "update_run_status":
+                # The updation should fail because the run is already finished
+                assert not state.update_run_status(
+                    run_id, RunStatus(Status.FINISHED, SubStatus.FAILED, "")
+                )
+                status = state.get_run_status({run_id})[run_id]
+            else:
+                raise AssertionError
 
         # Assert
-        finished_at_ts = datetime.fromisoformat(run.finished_at).timestamp()
-        assert run is not None
-        assert run.status.status == Status.RUNNING
-        assert run.status.sub_status == SubStatus.FAILED
-        assert run.status.details == RUN_FAILURE_DETAILS_NO_HEARTBEAT
-        assert abs(finished_at_ts - patched_dt.timestamp()) < 0.1
+        assert status.status == Status.FINISHED
+        assert status.sub_status == SubStatus.FAILED
+        assert status.details == RUN_FAILURE_DETAILS_NO_HEARTBEAT
 
     @parameterized.expand([(0,), (1,), (2,)])  # type: ignore
     def test_status_transition_valid(

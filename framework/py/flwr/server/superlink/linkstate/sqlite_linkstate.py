@@ -747,10 +747,10 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
             query = (
                 "INSERT INTO run "
-                "(run_id, active_until, heartbeat_interval, "
-                "fab_id, fab_version, fab_hash, override_config, "
-                "federation_options, pending_at, starting_at, running_at, finished_at, "
-                "sub_status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                "(run_id, active_until, heartbeat_interval, fab_id, fab_version, "
+                "fab_hash, override_config, federation_options, pending_at, "
+                "starting_at, running_at, finished_at, sub_status, details) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             override_config_json = json.dumps(override_config)
             data = [
@@ -940,9 +940,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             current.isoformat(),
             new_status.sub_status,
             new_status.details,
-            convert_uint64_to_sint64(run_id),
             active_until,
             heartbeat_interval,
+            convert_uint64_to_sint64(run_id),
         )
         self.query(query % timestamp_fld, data)
         return True
@@ -1011,7 +1011,35 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         By default, HEARTBEAT_PATIENCE = 2, allowing for one missed heartbeat
         before the run is marked as `"completed:failed"`.
         """
-        # TODO: Implement this method
+        # Check if runs are still active
+        self._check_run_activeness()
+
+        # Search for the run
+        sint_run_id = convert_uint64_to_sint64(run_id)
+        query = "SELECT * FROM run WHERE run_id = ?;"
+        rows = self.query(query, (sint_run_id,))
+
+        if not rows:
+            log(ERROR, "`run_id` is invalid")
+            return False
+
+        # Check if the run is of status "running"/"starting"
+        row = rows[0]
+        status = determine_run_status(row)
+        if status not in (Status.RUNNING, Status.STARTING):
+            log(
+                ERROR,
+                'Cannot acknowledge heartbeat for run with status "%s"',
+                status,
+            )
+            return False
+
+        # Update the `active_until` and `heartbeat_interval` for the given run
+        active_until = now().timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval
+        query = "UPDATE run SET active_until = ?, heartbeat_interval = ? "
+        query += "WHERE run_id = ?"
+        self.query(query, (active_until, heartbeat_interval, sint_run_id))
+        return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""

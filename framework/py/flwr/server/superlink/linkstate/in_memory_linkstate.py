@@ -605,16 +605,20 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         before the run is marked as `"completed:failed"`.
         """
         with self.lock:
+            # Check if runs are still active
+            self._check_run_activeness()
+
             # Search for the run
-            current_status = self.get_run_status({run_id}).get(run_id)
+            record = self.run_ids.get(run_id)
 
             # Check if the run_id exists
-            if current_status is None:
+            if record is None:
                 log(ERROR, "`run_id` is invalid")
                 return False
 
             # Check if the run is of status "running"/"starting"
-            if current_status.status not in {Status.RUNNING, Status.STARTING}:
+            current_status = record.run.status
+            if current_status.status not in (Status.RUNNING, Status.STARTING):
                 log(
                     ERROR,
                     'Cannot acknowledge heartbeat for run with status "%s"',
@@ -622,11 +626,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 )
                 return False
 
-            # Update the active_until timestamp
-            run_record = self.run_ids[run_id]
+            # Update the `active_until` and `heartbeat_interval` for the given run
             current = now().timestamp()
-            run_record.active_until = current + HEARTBEAT_PATIENCE * heartbeat_interval
-            run_record.heartbeat_interval = heartbeat_interval
+            record.active_until = current + HEARTBEAT_PATIENCE * heartbeat_interval
+            record.heartbeat_interval = heartbeat_interval
             return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
