@@ -760,11 +760,12 @@ class StateTest(unittest.TestCase):
         # Assert
         assert node_public_keys == public_keys
 
-    def test_acknowledge_heartbeat(self) -> None:
+    def test_acknowledge_node_heartbeat(self) -> None:
         """Test if acknowledge_ping works and get_nodes return online nodes.
 
-        We permit N-1 missed heartbeat (HEARTBEAT_PATIENCE × heartbeat_interval) before
-        marking the node offline, where HEARTBEAT_PATIENCE = N.
+        We permit HEARTBEAT_PATIENCE - 1 missed heartbeats before marking
+        the node offline. In time units, nodes are considered online within
+        `last heartbeat time + HEARTBEAT_PATIIENCE x heartbeat_interval (in seconds)`.
         """
         # Prepare
         state: LinkState = self.state_factory()
@@ -787,7 +788,7 @@ class StateTest(unittest.TestCase):
         # Assert
         self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
 
-    def test_acknowledge_heartbeat_failed(self) -> None:
+    def test_acknowledge_node_heartbeat_failed(self) -> None:
         """Test that acknowledge_heartbeat returns False when the heartbeat fails."""
         # Prepare
         state: LinkState = self.state_factory()
