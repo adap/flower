@@ -25,7 +25,8 @@ import "flwr/proto/message.proto";
 service Fleet {
   rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
   rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse) {}
-  rpc SendNodeHeartbeat(SendNodeHeartbeatRequest) returns (SendNodeHeartbeatResponse) {}
+  rpc SendNodeHeartbeat(SendNodeHeartbeatRequest)
+      returns (SendNodeHeartbeatResponse) {}
 
   // Retrieve one or more messages, if possible
   //

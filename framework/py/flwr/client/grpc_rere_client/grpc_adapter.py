@@ -42,13 +42,11 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
-)
-from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
-from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
-from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
+from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
+from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
 T = TypeVar("T", bound=GrpcMessage)
