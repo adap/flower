@@ -35,7 +35,15 @@ from flwr.common import (
     RecordDict,
     now,
 )
-from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
+from flwr.common.constant import (
+    HEARTBEAT_DEFAULT_INTERVAL,
+    HEARTBEAT_PATIENCE,
+    RUN_FAILURE_DETAILS_NO_HEARTBEAT,
+    SUPERLINK_NODE_ID,
+    ErrorCode,
+    Status,
+    SubStatus,
+)
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     public_key_to_bytes,
@@ -158,6 +166,32 @@ class StateTest(unittest.TestCase):
         # Assert
         assert status1.status == Status.PENDING
         assert status2.status == Status.RUNNING
+
+    @parameterized.expand([(1,), (2,)])  # type: ignore
+    def test_get_run_with_no_heartbeat(self, num_transitions: int) -> None:
+        """Test get_run works correctly when the run has no heartbeat."""
+        # Prepare
+        state = self.state_factory()
+        run_id = state.create_run(
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord()
+        )
+        # Transition run status to STARTING or RUNNING
+        transition_run_status(state, run_id, num_transitions)
+
+        # Execute
+        ddl = now().timestamp() + HEARTBEAT_PATIENCE * HEARTBEAT_DEFAULT_INTERVAL
+        patched_dt = datetime.fromtimestamp(ddl + 5, tz=timezone.utc)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = patched_dt
+            run = state.get_run(run_id)
+
+        # Assert
+        finished_at_ts = datetime.fromisoformat(run.finished_at).timestamp()
+        assert run is not None
+        assert run.status.status == Status.RUNNING
+        assert run.status.sub_status == SubStatus.FAILED
+        assert run.status.details == RUN_FAILURE_DETAILS_NO_HEARTBEAT
+        assert abs(finished_at_ts - patched_dt.timestamp()) < 0.1
 
     @parameterized.expand([(0,), (1,), (2,)])  # type: ignore
     def test_status_transition_valid(
@@ -1277,6 +1311,18 @@ def create_res_message(
         out_msg = Message(RecordDict(), reply_to=in_msg)
 
     return message_to_proto(out_msg)
+
+
+def transition_run_status(state: LinkState, run_id: int, num_transitions: int) -> None:
+    """Transition run status from PENDING."""
+    if num_transitions > 0:
+        state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+    if num_transitions > 1:
+        state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+    if num_transitions > 2:
+        state.update_run_status(
+            run_id, RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+        )
 
 
 class InMemoryStateTest(StateTest):

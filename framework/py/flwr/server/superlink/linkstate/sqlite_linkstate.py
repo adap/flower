@@ -750,7 +750,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 "(run_id, active_until, heartbeat_interval, "
                 "fab_id, fab_version, fab_hash, override_config, "
                 "federation_options, pending_at, starting_at, running_at, finished_at, "
-                "sub_status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                "sub_status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             override_config_json = json.dumps(override_config)
             data = [
@@ -872,6 +872,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
+        # Check if runs are still active
         self._check_run_activeness()
 
         # Convert the uint64 value to sint64 for SQLite
