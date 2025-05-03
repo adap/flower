@@ -257,7 +257,12 @@ class Array(Serializable):
         return cast(NDArray, ndarray_deserialized)
 
     def serialize(self) -> bytes:  # noqa: D102
-        array_proto = ArrayProto(**vars(self))
+        array_proto = ArrayProto(
+            dtype=self.dtype,
+            shape=self.shape,
+            stype=self.stype,
+            data=self.data,
+        )
 
         obj_content = array_proto.SerializeToString(deterministic=True)
         return add_header_to_object_content(object_content=obj_content, cls=self)
