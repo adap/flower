@@ -765,7 +765,7 @@ class StateTest(unittest.TestCase):
 
         We permit HEARTBEAT_PATIENCE - 1 missed heartbeats before marking
         the node offline. In time units, nodes are considered online within
-        `last heartbeat time + HEARTBEAT_PATIENCE x heartbeat_interval (in seconds)`.
+        `last heartbeat time + HEARTBEAT_PATIIENCE x heartbeat_interval (in seconds)`.
         """
         # Prepare
         state: LinkState = self.state_factory()
