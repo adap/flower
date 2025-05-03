@@ -28,7 +28,7 @@ from uuid import UUID, uuid4
 
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
-    HEARTBEAT_DEFAULT_INTERVAL,
+    HEARTBEAT_MAX_INTERVAL,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -922,7 +922,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # when switching to starting or running
         current = now()
         if new_status.status in (Status.STARTING, Status.RUNNING):
-            heartbeat_interval = HEARTBEAT_DEFAULT_INTERVAL
+            heartbeat_interval = HEARTBEAT_MAX_INTERVAL
             active_until = current.timestamp() + heartbeat_interval
         else:
             heartbeat_interval = 0
