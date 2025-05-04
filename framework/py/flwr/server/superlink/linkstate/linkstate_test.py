@@ -19,7 +19,7 @@ import tempfile
 import time
 import unittest
 from abc import abstractmethod
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from itertools import product
 from typing import Optional
 from unittest.mock import patch
@@ -37,7 +37,6 @@ from flwr.common import (
     now,
 )
 from flwr.common.constant import (
-    HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
     RUN_FAILURE_DETAILS_NO_HEARTBEAT,
     SUPERLINK_NODE_ID,
@@ -174,7 +173,7 @@ class StateTest(unittest.TestCase):
     def test_run_failed_due_to_heartbeat(
         self, num_transitions: int, test_method: str
     ) -> None:
-        """Test get_run works correctly when the run has no heartbeat."""
+        """Test methods work correctly when the run has no heartbeat."""
         # Prepare
         state = self.state_factory()
         run_id = state.create_run(
@@ -182,10 +181,11 @@ class StateTest(unittest.TestCase):
         )
         # Transition run status to STARTING or RUNNING
         transition_run_status(state, run_id, num_transitions)
+        state.acknowledge_app_heartbeat(run_id, 2)
 
         # Execute
-        ddl = now().timestamp() + HEARTBEAT_PATIENCE * HEARTBEAT_DEFAULT_INTERVAL
-        patched_dt = datetime.fromtimestamp(ddl + 5, tz=timezone.utc)
+        # The run should be marked as failed after HEARTBEAT_PATIENCE * 2s
+        patched_dt = now() + timedelta(seconds=HEARTBEAT_PATIENCE * 2 + 1)
 
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = patched_dt
@@ -848,17 +848,15 @@ class StateTest(unittest.TestCase):
         transition_run_status(state, run_id1, 2)
         transition_run_status(state, run_id2, 2)
         # Heartbeat from run_id1
-        interval = HEARTBEAT_DEFAULT_INTERVAL * 2
-        state.acknowledge_app_heartbeat(run_id1, interval)
+        state.acknowledge_app_heartbeat(run_id1, 30)
+        state.acknowledge_app_heartbeat(run_id2, 2)
 
         # Execute
-        # The run_id1 should be considered inactive after HEARTBEAT_DEFAULT_INTERVAL,
-        # and the run_id2 should remain active for HEARTBEAT_PATIENCE * interval.
-        ddl_run_id1 = now().timestamp() + HEARTBEAT_DEFAULT_INTERVAL
+        # The run_id1 should be marked as inactive after HEARTBEAT_PATIENCE * 30s,
+        # and the run_id2 after HEARTBEAT_PATIENCE * 2s.
+        future_dt = now() + timedelta(seconds=20)
         with patch("datetime.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime.fromtimestamp(
-                ddl_run_id1 + 1, tz=timezone.utc
-            )
+            mock_dt.now.return_value = future_dt
             run_status_dict = state.get_run_status({run_id1, run_id2})
             status1 = run_status_dict[run_id1]
             status2 = run_status_dict[run_id2]
