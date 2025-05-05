@@ -5,6 +5,7 @@ isort:skip_file
 import abc
 import flwr.proto.fab_pb2
 import flwr.proto.fleet_pb2
+import flwr.proto.heartbeat_pb2
 import flwr.proto.run_pb2
 import grpc
 
@@ -19,8 +20,8 @@ class FleetStub:
         flwr.proto.fleet_pb2.DeleteNodeResponse]
 
     SendNodeHeartbeat: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fleet_pb2.SendNodeHeartbeatRequest,
-        flwr.proto.fleet_pb2.SendNodeHeartbeatResponse]
+        flwr.proto.heartbeat_pb2.SendNodeHeartbeatRequest,
+        flwr.proto.heartbeat_pb2.SendNodeHeartbeatResponse]
 
     PullMessages: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.PullMessagesRequest,
@@ -63,9 +64,9 @@ class FleetServicer(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def SendNodeHeartbeat(self,
-        request: flwr.proto.fleet_pb2.SendNodeHeartbeatRequest,
+        request: flwr.proto.heartbeat_pb2.SendNodeHeartbeatRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.fleet_pb2.SendNodeHeartbeatResponse: ...
+    ) -> flwr.proto.heartbeat_pb2.SendNodeHeartbeatResponse: ...
 
     @abc.abstractmethod
     def PullMessages(self,
