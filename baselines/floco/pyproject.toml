@@ -8,10 +8,10 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.15.2",
+    "flwr[simulation]>=1.18.0",
     "flwr-datasets[vision]>=0.5.0",
-    "torch==2.5.1",
-    "torchvision==0.20.1",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
     "numpy==1.26.4",
     "scikit-learn==1.6.1",
     "torchmetrics==1.6.1",
@@ -149,5 +149,5 @@ default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 100
-options.backend.client-resources.num-cpus = 0.3
+options.backend.client-resources.num-cpus = 1
 options.backend.client-resources.num-gpus = 0.0

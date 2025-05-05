@@ -7,7 +7,7 @@ import torch
 from floco.dataset import get_federated_dataloaders
 from floco.model import Net, SimplexModel, get_weights, set_weights, test, train
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context, ParametersRecord, array_from_numpy, bytes_to_ndarray
+from flwr.common import ArrayRecord, Context, bytes_to_ndarray
 
 
 class FlowerClient(NumPyClient):
@@ -37,10 +37,8 @@ class FlowerClient(NumPyClient):
         self.pers_lamda = pers_lamda
         if self.pers_lamda != 0:
             self.client_state = context.state
-            if "pers_parameters" not in self.client_state.parameters_records:
-                self.client_state.parameters_records["pers_parameters"] = (
-                    ParametersRecord()
-                )
+            if "pers_parameters" not in self.client_state:
+                self.client_state["pers_parameters"] = ArrayRecord()
 
     def fit(self, parameters, config):
         """Train model using this client's data."""
@@ -49,12 +47,14 @@ class FlowerClient(NumPyClient):
         train_loss = self._train(self.global_model, config)
 
         if self.pers_lamda != 0:
-            param_record = self.client_state.parameters_records["pers_parameters"]
-            if len(param_record) > 0:
-                self._set_local_weights()
+            array_record = self.client_state["pers_parameters"]
+            if len(array_record) > 0:
+                self.pers_model.load_state_dict(
+                    self.client_state["pers_parameters"].to_torch_state_dict()
+                )
             self._train(self.pers_model, config, reg_parameters, self.pers_lamda)
-            self.client_state.parameters_records["pers_parameters"] = (
-                self._get_local_weights(self.pers_model)
+            self.client_state["pers_parameters"] = ArrayRecord(
+                self.pers_model.state_dict()
             )
 
         return (
@@ -68,10 +68,12 @@ class FlowerClient(NumPyClient):
         set_weights(self.global_model, parameters)
         model = self.global_model
         if self.pers_lamda != 0:
-            param_record = self.client_state.parameters_records["pers_parameters"]
-            if len(param_record) > 0:
+            array_record = self.client_state["pers_parameters"]
+            if len(array_record) > 0:
                 model = self.pers_model
-                self._set_local_weights()
+                self.pers_model.load_state_dict(
+                    self.client_state["pers_parameters"].to_torch_state_dict()
+                )
             else:
                 model = self.global_model
         self._set_simplex_params(model, config, training=False)
@@ -103,24 +105,6 @@ class FlowerClient(NumPyClient):
                 bytes_to_ndarray(config["center"]),
                 config["radius"],
             )
-
-    def _set_local_weights(self):
-        """Set local client model weights."""
-        pers_state_dict = {
-            k: torch.from_numpy(v.numpy())
-            for k, v in self.client_state.parameters_records["pers_parameters"].items()
-        }
-        self.pers_model.load_state_dict(pers_state_dict)
-
-    def _get_local_weights(self, model):
-        """Get local client model weights."""
-        p_record = ParametersRecord(
-            {
-                k: array_from_numpy(v.detach().cpu().numpy())
-                for k, v in model.state_dict().items()
-            }
-        )
-        return p_record
 
 
 def client_fn(context: Context):
