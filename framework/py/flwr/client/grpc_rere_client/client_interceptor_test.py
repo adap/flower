@@ -47,8 +47,6 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
-    SendNodeHeartbeatRequest,
-    SendNodeHeartbeatResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
