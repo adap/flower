@@ -1,168 +1,218 @@
+"""Federated Learning Provenance Core Components.
+
+This module contains the core components for tracking and analyzing provenance in
+federated learning systems. It includes classes and functions for computing client
+contributions, analyzing model updates, and tracking the evolution of model parameters
+across training rounds.
+"""
+
 import json
 import logging
 import time
-from typing import Dict, List
+from typing import Any, Dict, List, Optional, Set
 
 import torch
 
 from tracefl.models import initialize_model, test_neural_network
 from tracefl.neuron_provenance import NeuronProvenance, getAllLayers
-from tracefl.utils import get_prov_eval_metrics
+from tracefl.utils import get_prov_eval_metrics, safe_len
 
 
 class FederatedProvTrue:
+    """A class for tracking and analyzing federated learning provenance.
+
+    This class implements the core functionality for tracking and analyzing the
+    provenance of model updates during federated learning rounds.
+    """
+
     def __init__(
         self,
-        train_cfg,
-        prov_cfg,
+        train_cfg: Any,
+        prov_cfg: Any,
         round_key: str,
-        server_test_data,
-        client2model,
-        client2num_examples,
-        prov_global_model,
-        ALLROUNDSCLIENTS2CLASS,
-        t=None,
+        server_test_data: Any,
+        client2model: Dict[str, Any],
+        client2num_examples: Dict[str, int],
+        prov_global_model: Any,
+        all_rounds_clients2class: Dict[str, Dict[int, int]],
+        t: Optional[Any] = None,
     ) -> None:
-        self.t = t
-        self.prov_cfg = prov_cfg
+        """Initialize the FederatedProvTrue instance."""
         self.train_cfg = train_cfg
-        self.round_key = round_key
-        self.round_id = self.round_key.split(":")[-1]
+        self.prov_cfg = prov_cfg
+        self.round_id = round_key
+        self.server_test_data = server_test_data
         self.client2model = client2model
         self.client2num_examples = client2num_examples
-        self.central_test_data = server_test_data
         self.prov_global_model = prov_global_model
-        self.ALLROUNDSCLIENTS2CLASS = ALLROUNDSCLIENTS2CLASS
-        self._setParticipatingClientsLabels()
-        self._selectProvenanceData(server_test_data)
+        self.all_rounds_clients2class = all_rounds_clients2class
+        self.t = t
+        self.neuron_provenance: Optional[NeuronProvenance] = None
+        self.subset_test_data: Optional[Any] = None
+        self.loss: float = 0.0
+        self.acc: float = 0.0
+        self.participating_clients_labels: List[str] = []
 
-    def _modelInitializeWrapper(self):
+        self._set_participating_clients_labels()
+        self._select_provenance_data(server_test_data)
+
+    def _model_initialize_wrapper(self):
+        """Model initialize wrapper."""
         m = initialize_model(self.train_cfg.model.name, self.train_cfg.dataset)
         return m["model"]
 
-    def _setParticipatingClientsLabels(self) -> None:
-        labels = set()
+    def _set_participating_clients_labels(self) -> None:
+        """Set the labels for participating clients."""
+        labels: Set[str] = set()
         for c in self.client2model.keys():
-            client_label_data = self.ALLROUNDSCLIENTS2CLASS[c]
-            # If the data is a string, parse it to a dictionary
+            client_label_data = self.all_rounds_clients2class[c]
             if isinstance(client_label_data, str):
                 client_label_data = json.loads(client_label_data)
-            # Use the keys as the labels
-            labels = labels.union(set(client_label_data.keys()))
+            labels = labels.union({str(k) for k in client_label_data.keys()})
         self.participating_clients_labels = list(labels)
         logging.debug(
-            f"participating_clients_labels: {self.participating_clients_labels}"
+            "participating_clients_labels: %s", self.participating_clients_labels
         )
 
-    def _evalAndExtractCorrectPredsTransformer(self, test_data):
+    def _eval_and_extract_correct_preds_transformer(self, test_data):
+        """Evaluate and extract correct preds."""
         d = test_neural_network(
             self.train_cfg.model.arch, {"model": self.prov_global_model}, test_data
         )
         self.loss = d["loss"]
         self.acc = d["accuracy"]
-        logging.debug(f"Accuracy on test data: {self.acc}")
+        logging.debug("Accuracy on test data: %s", self.acc)
         return d["eval_correct_indices"], d["eval_actual_labels"]
 
-    def _balanceDatasetByLabel(
+    def _balance_dataset_by_label(
         self,
         correct_indices: torch.Tensor,
         dataset_labels: torch.Tensor,
         min_per_label: int,
     ) -> List:
+        """Balance Dataset by Label."""
         balanced_indices = []
         logging.debug(
-            f"participating_clients_labels: {self.participating_clients_labels}"
+            "participating_clients_labels: %s", self.participating_clients_labels
         )
-        # Convert dataset labels (at the given indices) to a list of strings
         selected_labels = dataset_labels[correct_indices].tolist()
-        for l in self.participating_clients_labels:
-            temp_bools = [str(label) == l for label in selected_labels]
-            # Collect indices where the flag is True
+
+        for label_str in self.participating_clients_labels:
+            temp_bools = [str(label) == label_str for label in selected_labels]
             temp_correct_indxs = [
                 correct_indices[i] for i, flag in enumerate(temp_bools) if flag
             ]
             if len(temp_correct_indxs) >= min_per_label:
                 balanced_indices.extend(temp_correct_indxs[:min_per_label])
-        logging.debug(f"Balanced indices (list): {balanced_indices}")
+
+        logging.debug("Balanced indices (list): %s", balanced_indices)
         return balanced_indices
 
-    def _selectProvenanceData(self, central_test_data, min_per_label: int = 2) -> None:
-        all_correct_i, dataset_labels = self._evalAndExtractCorrectPredsTransformer(
-            central_test_data
+    def _select_provenance_data(
+        self, central_test_data: Any, min_per_label: int = 2
+    ) -> None:
+        """Select data for provenance analysis."""
+        all_correct_i, dataset_labels = (
+            self._eval_and_extract_correct_preds_transformer(central_test_data)
         )
-        balanced_indices = self._balanceDatasetByLabel(
+        balanced_indices = self._balance_dataset_by_label(
             all_correct_i, dataset_labels, min_per_label
         )
         self.subset_test_data = central_test_data.select(balanced_indices)
-        if len(self.subset_test_data) == 0:
+        if self.subset_test_data is not None and safe_len(self.subset_test_data) == 0:
             logging.info("No correct predictions found")
 
-    def _sanityCheck(self):
-        if len(self.subset_test_data) == 0:
+    def _sanity_check(self) -> float:
+        """Perform sanity check on the selected data."""
+        if self.subset_test_data is None or safe_len(self.subset_test_data) == 0:
             raise ValueError("No correct predictions found")
+
         acc = test_neural_network(
             self.train_cfg.model.arch,
             {"model": self.prov_global_model},
             self.subset_test_data,
         )["accuracy"]
-        logging.info(f"Sanity check: {acc}")
+        logging.info("Sanity check: %s", acc)
         assert int(acc) == 1, "Sanity check failed"
         return acc
 
+    from typing import Dict, List
+
     def _computeEvalMetrics(self, input2prov: List[Dict]) -> Dict[str, float]:
+        """Return Trace FL provenance metrics for the current round."""
+        # ------- collect ground‑truth labels for provenance subset -------------
+        data_loader = torch.utils.data.DataLoader(
+            self.subset_test_data,
+            batch_size=1,
+        )
+        target_labels = [row["label"].item() for row in data_loader]
 
-        data_loader = torch.utils.data.DataLoader(self.subset_test_data, batch_size=1)
-        target_labels = [data["label"].item() for data in data_loader]
+        # ------- normalise ALL_ROUNDS_CLIENTS2CLASS to {str: int} -------------
+        client2class: Dict[str, Dict[str, int]] = {}
+        for cid in self.client2model:
+            raw = self.all_rounds_clients2class[cid]
+            if isinstance(raw, str):
+                raw = json.loads(raw)
+            client2class[cid] = {str(k): v for k, v in raw.items()}
 
-        client2class = {
-            c: json.loads(self.ALLROUNDSCLIENTS2CLASS[c]) for c in self.client2model
-        }
+        true_labels: List[int] = []
+        predicted_labels: List[int] = []
 
-        logging.debug(f"client2class: {client2class}")
-    
-
-        correct_tracing = 0
-        true_labels = []
-        predicted_labels = []
-
-        for idx, prov_r in enumerate(input2prov):
-            traced_client = prov_r["traced_client"]
-            client2prov = prov_r["client2prov"]
+        # ----------- evaluate each provenance record ---------------------------
+        for idx, prov_rec in enumerate(input2prov):
+            traced_client = prov_rec["traced_client"]
+            client2prov = prov_rec["client2prov"]
             target_l = target_labels[idx]
-            target_l_str = str(
-                target_l
-            ) 
+            target_l_str = str(target_l)
+
             responsible_clients = [
                 cid
                 for cid, c_labels in client2class.items()
                 if target_l_str in c_labels
             ]
-
-            res_c_string = ",".join(map(str, [f"c{c}" for c in responsible_clients]))
             logging.info(
-                f"*********** Input Label: {target_l}, Responsible Client(s): {res_c_string} *************"
+                "*********** Input Label: %s, Responsible Client(s): %s *************",
+                target_l,
+                ",".join(f"c{cid}" for cid in responsible_clients),
             )
 
-            # Check if traced client is among responsible ones
+            # ---------- correctness check & logging ----------------------------
             if target_l_str in client2class[traced_client]:
-                logging.info(f"Traced Client: c{traced_client} || Tracing = Correct")
-                correct_tracing += 1
+                logging.info(
+                    "     Traced Client: c%s || Tracing = Correct",
+                    traced_client,
+                )
                 predicted_labels.append(1)
-                true_labels.append(1)
             else:
-                logging.info(f"Traced Client: c{traced_client} || Tracing = Wrong")
+                logging.info(
+                    "     Traced Client: c%s || Tracing = Wrong",
+                    traced_client,
+                )
                 predicted_labels.append(0)
-                true_labels.append(1)
+            true_labels.append(1)
 
-            client2prov_score = {f"c{c}": round(p, 2) for c, p in client2prov.items()}
-            logging.info(f"TraceFL Clients Contributions Rank: {client2prov_score}\n")
+            # ---------- pretty print contribution scores (optional) ------------
+            contrib_pretty = {f"c{cid}": round(p, 2) for cid, p in client2prov.items()}
+            logging.info("TraceFL Clients Contributions Rank: %s\n", contrib_pretty)
 
-        eval_metrics = get_prov_eval_metrics(true_labels, predicted_labels)
-        return eval_metrics
+        return get_prov_eval_metrics(true_labels, predicted_labels)
 
-    def run(self) -> Dict[str, any]:
-        # Run sanity check first
-        self._sanityCheck()
+    def run(self) -> Dict[str, Any]:
+        """Execute the provenance analysis process and return the results."""
+        r = self._sanity_check()
+        if r is None:
+            return {
+                "clients": list(self.client2model.keys()),
+                "data_points": safe_len(self.subset_test_data),
+                "eval_metrics": {},
+                "test_data_acc": self.acc,
+                "test_data_loss": self.loss,
+                "prov_time": -1,
+                "round_id": self.round_id,
+                "prov_layers": {
+                    type(layer) for layer in getAllLayers(self.prov_global_model)
+                },
+            }
 
         start_time = time.time()
         nprov = NeuronProvenance(
@@ -175,24 +225,33 @@ class FederatedProvTrue:
             c2nk=self.client2num_examples,
         )
 
+        logging.info("client ids: %s", list(self.client2model.keys()))
+
         input2prov = nprov.computeInputProvenance()
         eval_metrics = self._computeEvalMetrics(input2prov)
         end_time = time.time()
 
         logging.info(
-            f"[Round {self.round_id}] TraceFL Localization Accuracy = {eval_metrics['Accuracy']*100} || "
-            f"Total Inputs Used In Prov: {len(self.subset_test_data)} || GM_(loss, acc) ({self.loss},{self.acc})"
+            "[Round %s] TraceFL Accuracy = %.2f%%",
+            self.round_id,
+            eval_metrics["Accuracy"] * 100,
+        )
+        logging.info(
+            "Total Inputs: %d | GM_loss: %.4f | GM_acc: %.4f",
+            safe_len(self.subset_test_data),
+            self.loss,
+            self.acc,
         )
 
-        prov_result = {
+        return {
             "clients": list(self.client2model.keys()),
-            "data_points": len(self.subset_test_data),
+            "data_points": safe_len(self.subset_test_data),
             "eval_metrics": eval_metrics,
             "test_data_acc": self.acc,
             "test_data_loss": self.loss,
             "prov_time": end_time - start_time,
             "round_id": self.round_id,
-            "prov_layers": set([type(l) for l in getAllLayers(self.prov_global_model)]),
+            "prov_layers": {
+                type(layer) for layer in getAllLayers(self.prov_global_model)
+            },
         }
-
-        return prov_result

@@ -1,14 +1,14 @@
 """Define our models, and training and eval functions.
 
-If your model is 100% off-the-shelf (e.g. directly from torchvision
-without requiring modifications) you might be better off instantiating
-your  model directly from the Hydra config. In this way, swapping your
-model for  another one can be done without changing the python code at
-all
+If your model is 100% off-the-shelf (e.g. directly from torchvision without requiring
+modifications) you might be better off instantiating your  model directly from the Hydra
+config. In this way, swapping your model for  another one can be done without changing
+the python code at all
 """
 
 import gc
 import logging
+from typing import Any, Dict
 
 import evaluate
 import numpy as np
@@ -26,6 +26,45 @@ from transformers import (
 
 
 class CNNTrainer(Trainer):
+    """CNN Model Trainer Class.
+
+    This class handles the training and evaluation of CNN models in the federated
+    learning system. It provides methods for training models on client data and
+    evaluating their performance.
+    """
+
+    def __init__(
+        self,
+        model,
+        args,
+        train_data=None,
+        test_data=None,
+        device=None,
+        cfg=None,
+        compute_metrics=None,
+        data_collator=None,
+    ):
+        """Initialize the CNN trainer.
+
+        Args:
+            model: The neural network model to train
+            args: Training arguments
+            train_data: Training dataset
+            test_data: Test dataset
+            device: Device to run training on (CPU/GPU)
+            cfg: Configuration object containing training parameters
+            compute_metrics: Function to compute metrics
+            data_collator: Function to collate data into batches
+        """
+        super().__init__(
+            model=model,
+            args=args,
+            train_dataset=train_data,
+            eval_dataset=test_data,
+            compute_metrics=compute_metrics,
+            data_collator=data_collator,
+        )
+
     def compute_loss(self, model, inputs, return_outputs=False):
         """Compute the loss for the given model and inputs.
 
@@ -34,14 +73,17 @@ class CNNTrainer(Trainer):
         model : torch.nn.Module
             The model to compute loss for.
         inputs : dict
-            A dictionary containing the input tensors. Expected keys are "pixel_values" and "labels".
+            A dictionary containing the input tensors. Expected keys are
+            "pixel_values" and "labels".
         return_outputs : bool, optional
-            Whether to return the model outputs along with the loss (default is False).
+            Whether to return the model outputs along with the loss
+            (default is False).
 
         Returns
         -------
         torch.Tensor or tuple
-            The computed loss if return_outputs is False; otherwise, a tuple (loss, outputs).
+            The computed loss if return_outputs is False; otherwise, a tuple
+            (loss, outputs).
         """
         labels = inputs.get("labels")
         batch_inputs = inputs.get("pixel_values")
@@ -68,7 +110,8 @@ class CNNTrainer(Trainer):
         Returns
         -------
         tuple
-            A tuple containing (loss, logits, labels). If prediction_loss_only is True, returns (loss, None, None).
+            A tuple containing (loss, logits, labels). If prediction_loss_only is
+            True, returns (loss, None, None).
         """
         loss = None
         labels = None
@@ -95,7 +138,8 @@ def _compute_metrics(eval_pred):
     Returns
     -------
     dict
-        A dictionary containing accuracy, correct_indices, actual_labels, incorrect_indices, and predicted_labels.
+        A dictionary containing accuracy, correct_indices, actual_labels,
+        incorrect_indices, and predicted_labels.
     """
     metric = evaluate.load("accuracy")
     logits, labels = eval_pred
@@ -125,7 +169,8 @@ def _get_inputs_labels_from_batch(batch):
     Parameters
     ----------
     batch : dict or tuple
-        A batch containing the data. If a dict, expected keys are "pixel_values" and "label". Otherwise, a tuple (inputs, labels).
+        A batch containing the data. If a dict, expected keys are "pixel_values"
+        and "label". Otherwise, a tuple (inputs, labels).
 
     Returns
     -------
@@ -140,15 +185,15 @@ def _get_inputs_labels_from_batch(batch):
 
 
 def initialize_model(name, cfg_dataset):
-    """Initialize and configure the model based on its name and dataset
-    configuration.
+    """Initialize and configure the model based on its name and dataset configuration.
 
     Parameters
     ----------
     name : str
         The name or identifier of the model.
     cfg_dataset : object
-        Configuration object for the dataset. Must contain attribute num_classes and channels.
+        Configuration object for the dataset. Must contain attribute num_classes and
+        channels.
 
     Returns
     -------
@@ -178,7 +223,6 @@ def initialize_model(name, cfg_dataset):
 
         tokenizer = AutoTokenizer.from_pretrained(name, trust_remote_code=True)
 
-        # Set pad_token to eos_token or add a new pad_token if eos_token is not available
         if tokenizer.pad_token is None:
             if tokenizer.eos_token is not None:
                 tokenizer.pad_token = tokenizer.eos_token
@@ -202,21 +246,23 @@ def initialize_model(name, cfg_dataset):
         elif "resnet152" == name:
             model = torchvision.models.resnet152(weights=None)
 
-        if cfg_dataset.channels == 1:
-            model.conv1 = torch.nn.Conv2d(
-                1, 64, kernel_size=7, stride=2, padding=3, bias=False
-            )
+        if model is not None:  # Add null check
+            if cfg_dataset.channels == 1:
+                model.conv1 = torch.nn.Conv2d(
+                    1, 64, kernel_size=7, stride=2, padding=3, bias=False
+                )
 
-        # set_parameter_requires_grad(model, feature_extract)
-        num_ftrs = model.fc.in_features
-        model.fc = torch.nn.Linear(num_ftrs, cfg_dataset.num_classes)
-        model_dict["model"] = model.cpu()
+            num_ftrs = model.fc.in_features
+            model.fc = torch.nn.Linear(num_ftrs, cfg_dataset.num_classes)
+            model_dict["model"] = model.cpu()
+        else:
+            raise ValueError(f"Failed to initialize model {name}")
 
     elif name == "densenet121":
         model = torchvision.models.densenet121(weights="IMAGENET1K_V1")
         if cfg_dataset.channels == 1:
             logging.info(
-                "Changing the first layer of densenet model the model to accept 1 channel"
+                "Changing the first layer of densenet model to accept 1 channel"
             )
             model.features[0] = torch.nn.Conv2d(
                 1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False
@@ -251,7 +297,8 @@ def _train_cnn(tconfig):
     Returns
     -------
     dict
-        A dictionary containing training loss ("train_loss") and training accuracy ("train_accuracy").
+        A dictionary containing training loss ("train_loss") and training
+        accuracy ("train_accuracy").
     """
     trainloader = DataLoader(tconfig["train_data"], batch_size=tconfig["batch_size"])
     net = tconfig["model_dict"]["model"]
@@ -301,7 +348,8 @@ def _test_cnn(net, test_data, device):
     Returns
     -------
     dict
-        A dictionary containing evaluation loss ("eval_loss") and evaluation accuracy ("eval_accuracy").
+        A dictionary containing evaluation loss ("eval_loss") and evaluation
+        accuracy ("eval_accuracy").
     """
     testloader = torch.utils.data.DataLoader(
         test_data, batch_size=512, shuffle=False, num_workers=4
@@ -322,7 +370,9 @@ def _test_cnn(net, test_data, device):
             correct += (predicted == labels).sum().item()
             images = images.cpu()
             labels = labels.cpu()
-    loss /= len(testloader.dataset)
+
+    # Use len(testloader) instead of len(testloader.dataset)
+    loss /= len(testloader)
     accuracy = correct / total
     net = net.cpu()
     return {"eval_loss": loss, "eval_accuracy": accuracy}
@@ -350,24 +400,25 @@ def _test_cnn_hf_trainer(gm_dict, central_server_test_data, batch_size):
     testing_args = TrainingArguments(
         logging_strategy="steps",
         output_dir=".",
-        do_train=False,  # Disable training
-        do_eval=True,  # Enable evaluation
+        do_train=False,
+        do_eval=True,
         per_device_eval_batch_size=batch_size,
-        disable_tqdm=True,  # Enable tqdm progress bar
+        disable_tqdm=True,
         remove_unused_columns=False,
         report_to="none",
     )
 
+    # Create a dictionary of metrics
+    metrics_dict = {"compute_metrics": _compute_metrics}
+
     tester = CNNTrainer(
         model=net,
         args=testing_args,
-        # Ensure it uses the correct metrics for evaluation
-        compute_metrics=_compute_metrics,
+        **metrics_dict,  # Pass metrics as kwargs
         data_collator=DefaultDataCollator(),
     )
 
-    logging.debug(f"lenght of eval dataset: {len(central_server_test_data)}")
-    # Evaluate the model on the test dataset
+    logging.debug(f"length of eval dataset: {len(central_server_test_data)}")
     r = tester.evaluate(eval_dataset=central_server_test_data)
     net = net.cpu()
     return r
@@ -376,37 +427,47 @@ def _test_cnn_hf_trainer(gm_dict, central_server_test_data, batch_size):
 # ---------------------- Transformer Training  ------------------------
 
 
-def _train_transformer(tconfig):
-    """Train a transformer model on the training dataset.
+def _train_transformer(
+    model: torch.nn.Module,
+    train_data: torch.utils.data.Dataset,
+    test_data: torch.utils.data.Dataset,
+    device: torch.device,
+    cfg: Any,
+) -> Dict[str, Any]:
+    """Train a transformer model.
 
     Parameters
     ----------
-    tconfig : dict
-        A dictionary containing training configuration, including:
-            - "model_dict": Dictionary with the model under the key "model".
-            - "device": Device to run training on.
-            - "epochs": Number of training epochs.
-            - "batch_size": Batch size for training.
-            - "train_data": Training dataset.
+    model : torch.nn.Module
+        The transformer model to train.
+    train_data : torch.utils.data.Dataset
+        The training dataset.
+    test_data : torch.utils.data.Dataset
+        The test dataset.
+    device : torch.device
+        The device to train on.
+    cfg : Any
+        Configuration object containing training parameters.
 
     Returns
     -------
-    dict
-        A dictionary containing training loss ("train_loss") and training accuracy ("train_accuracy").
+    Dict[str, Any]
+        A dictionary containing:
+            - model: The trained model
+            - train_metrics: Training metrics
+            - test_metrics: Test metrics
     """
-    model_dict = tconfig["model_dict"]
-
-    net = model_dict["model"]
-    net = net.to(tconfig["device"])
+    model_dict = {"model": model, "num_classes": cfg.num_classes}
+    net = model
+    net = net.to(device)
 
     training_args = TrainingArguments(
         output_dir="training_output",
-        lr_scheduler_type="constant",  # Set learning rate scheduler to constant
-        num_train_epochs=tconfig["epochs"],
+        lr_scheduler_type="constant",
+        num_train_epochs=cfg.epochs,
         eval_strategy="no",
-        per_device_train_batch_size=tconfig["batch_size"],
-        per_device_eval_batch_size=tconfig["batch_size"],
-        # fp16=True,
+        per_device_train_batch_size=cfg.batch_size,
+        per_device_eval_batch_size=cfg.batch_size,
         disable_tqdm=True,
         report_to="none",
     )
@@ -414,41 +475,40 @@ def _train_transformer(tconfig):
     trainer = Trainer(
         model=net,
         args=training_args,
-        train_dataset=tconfig["train_data"],
-        eval_dataset=tconfig["train_data"],
+        train_dataset=train_data,
+        eval_dataset=train_data,
         compute_metrics=_compute_metrics,
-    )  # type: ignore
+    )
 
     if "audio_feature_extractor" in model_dict:
         trainer.tokenizer = model_dict["audio_feature_extractor"]
 
     trainer.train()
-
-    r = trainer.evaluate(eval_dataset=tconfig["train_data"])
-
+    r = trainer.evaluate(eval_dataset=train_data)
     net = net.cpu()
+
+    # Handle metrics safely
+    eval_accuracy = r.get("eval_accuracy", {})
+    if isinstance(eval_accuracy, dict):
+        accuracy = eval_accuracy.get("accuracy", 0.0)
+    else:
+        accuracy = eval_accuracy
+
     return {
-        "train_loss": r["eval_loss"],
-        "train_accuracy": r["eval_accuracy"]["accuracy"],
+        "model": net,
+        "train_metrics": {
+            "train_loss": r.get("eval_loss", 0.0),
+            "train_accuracy": accuracy,
+        },
+        "test_metrics": {
+            "eval_loss": r.get("eval_loss", 0.0),
+            "eval_accuracy": accuracy,
+        },
     }
 
 
 def _test_transformer_model(args):
-    """Evaluate a transformer model on the test dataset.
-
-    Parameters
-    ----------
-    args : dict
-        A dictionary containing:
-            - "model_dict": Dictionary with the model under the key "model".
-            - "test_data": The test dataset.
-            - "batch_size": Batch size for evaluation.
-
-    Returns
-    -------
-    dict
-        A dictionary containing evaluation metrics as returned by the trainer.
-    """
+    """Evaluate a transformer model on the test dataset."""
     logging.debug("Evaluating transformer model")
     model_dict, central_server_test_data, batch_size = (
         args["model_dict"],
@@ -465,6 +525,8 @@ def _test_transformer_model(args):
         disable_tqdm=True,
         report_to="none",
     )
+
+    # Create trainer without tokenizer
     tester = Trainer(
         model=net,
         args=testing_args,
@@ -472,17 +534,11 @@ def _test_transformer_model(args):
         eval_dataset=central_server_test_data,
     )
 
+    # Set tokenizer as attribute if available
     if "audio_feature_extractor" in model_dict:
-        tester = Trainer(
-            model=net,
-            args=testing_args,
-            compute_metrics=_compute_metrics,
-            eval_dataset=central_server_test_data,
-            tokenizer=model_dict["audio_feature_extractor"],
-        )
+        tester.tokenizer = model_dict["audio_feature_extractor"]
 
-    logging.debug(f"lenght of eval dataset: {len(central_server_test_data)}")
-
+    logging.debug(f"length of eval dataset: {len(central_server_test_data)}")
     r = tester.evaluate()
     net = net.cpu()
     return r
@@ -526,8 +582,7 @@ def global_model_eval(arch, global_net_dict, server_testdata, batch_size=32):
 
 
 def test_neural_network(arch, global_net_dict, server_testdata, batch_size=32):
-    """Evaluate the global model on the server test data using the appropriate
-    method.
+    """Evaluate the global model on the server test data using the appropriate method.
 
     Parameters
     ----------
@@ -567,8 +622,16 @@ def test_neural_network(arch, global_net_dict, server_testdata, batch_size=32):
         )
     else:
         raise ValueError(f"Architecture {arch} not supported")
-    d["loss"] = d["eval_loss"]
-    d["accuracy"] = d["eval_accuracy"]["accuracy"]
+
+    # Handle metrics safely
+    eval_accuracy = d.get("eval_accuracy", {})
+    if isinstance(eval_accuracy, dict):
+        accuracy = eval_accuracy.get("accuracy", 0.0)
+    else:
+        accuracy = eval_accuracy
+
+    d["loss"] = d.get("eval_loss", 0.0)
+    d["accuracy"] = accuracy
 
     return d
 
@@ -579,7 +642,8 @@ def train_neural_network(tconfig):
     Parameters
     ----------
     tconfig : dict
-        A dictionary containing training configuration, including the key "arch" to determine the model type.
+        A dictionary containing training configuration, including the key "arch"
+        to determine the model type.
 
     Returns
     -------
@@ -595,15 +659,20 @@ def train_neural_network(tconfig):
     if tconfig["arch"] == "cnn":
         train_dict = _train_cnn(tconfig)
     elif tconfig["arch"] == "transformer":
-        train_dict = _train_transformer(tconfig)
+        train_dict = _train_transformer(
+            tconfig["model"],
+            tconfig["train_data"],
+            tconfig["test_data"],
+            tconfig["device"],
+            tconfig,
+        )
     else:
         raise ValueError(f"Architecture {tconfig['arch']} not supported")
     return train_dict
 
 
 def get_parameters(model):
-    """Extract and return the parameters of a PyTorch model as a list of NumPy
-    arrays.
+    """Extract and return the parameters of a PyTorch model as a list of NumPy arrays.
 
     Parameters
     ----------
@@ -639,10 +708,25 @@ def set_parameters(net, parameters):
     net.load_state_dict(new_state_dict, strict=False)
 
 
-def create_model(model_name: str):
+def create_model(model_name, num_classes, cfg):
+    """Create a neural network model based on the specified architecture.
+
+    Args:
+        model_name: Name of the model architecture to create
+        num_classes: Number of output classes
+        cfg: Configuration object containing model parameters
+
+    Returns
+    -------
+        The created neural network model
+
+    Raises
+    ------
+        ValueError: If the specified model architecture is not supported
+    """
     if model_name == "resnet18":
-        return models.resnet18(num_classes=10)
+        return models.resnet18(num_classes=num_classes)
     elif model_name == "densenet121":
-        return models.densenet121(num_classes=10)
+        return models.densenet121(num_classes=num_classes)
     else:
         raise ValueError(f"Unknown model name: {model_name}")

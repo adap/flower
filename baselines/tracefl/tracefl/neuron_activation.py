@@ -1,10 +1,17 @@
+"""Neuron Activation Analysis Module.
+
+This module provides functionality for tracking and analyzing neuron activations in
+neural network models during federated learning. It includes tools for capturing layer
+outputs, analyzing activation patterns, and understanding neuron behavior across
+different clients.
+"""
+
 import torch
 import torch.nn.functional as F
 
 
 def _get_all_layers_in_neural_network(net):
-    """Retrieve all layers of the neural network that are either Conv2d or
-    Linear.
+    """Retrieve all layers of the neural network that are either Conv2d or Linear.
 
     Parameters
     ----------
@@ -30,18 +37,17 @@ def _get_all_layers_in_neural_network(net):
 
 
 def _get_input_and_output_of_layer(storage):
-    """Create a forward hook function that stores the output tensor in the
-    given storage.
+    """Get input and output of a neural network layer.
 
-    Parameters
-    ----------
-    storage : list
-        A list to store layer outputs.
+    This function creates a hook that captures both the input and output
+    of a neural network layer during forward propagation.
+
+    Args:
+        storage: List to store the layer's input and output
 
     Returns
     -------
-    function
-        The hook function.
+        Function that captures layer inputs and outputs
     """
 
     def hook(module, input_t, output_t):
@@ -136,8 +142,7 @@ def _my_eval_neurons_activations(model, x):
 
 
 def get_neurons_activations(model, img):
-    """Get the activations of all neurons in the model for the given input
-    image.
+    """Get the activations of all neurons in the model for the given input image.
 
     Parameters
     ----------

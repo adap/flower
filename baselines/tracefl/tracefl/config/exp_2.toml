@@ -1,8 +1,7 @@
-
 [tool.tracefl]
-exp_key = "Transformer-"
-num_clients = 2
-clients_per_round = 2
+exp_key = "artifact_exp"
+num_clients = 10
+clients_per_round = 4
 num_rounds = 2
 dirichlet_alpha = 0.3
 batch_size = 32
@@ -19,36 +18,36 @@ gpus = 0
 [tool.tracefl.client]
 batch_size = 32
 lr = 0.001
-epochs = 1
+epochs = 2
 
 [tool.tracefl.model]
-name = "openai-community/openai-gpt"
-arch = "transformer"
+name = "resnet18"
+arch = "cnn"
 
 [tool.tracefl.dataset]
-name = "openai-community/openai-gpt"
-num_classes = 14
-num_clients = 2
-channels = "None"
+name = "mnist"
+num_classes = 10
+num_clients = 10
+channels = 3
 
 [tool.tracefl.strategy]
 name = "fedavg"
 num_rounds = 2
-clients_per_round = 2
+clients_per_round = 4
 noise_multiplier = -1  
 clipping_norm = -1       
 noise_rate = "None"
 
 [tool.tracefl.data_dist]
 dist_type = "non_iid_dirichlet"
-num_clients = 2
+num_clients = 10
 batch_size = 32
 dirichlet_alpha = 0.3
-dname = "dbpedia_14"
-mname = "openai-community/openai-gpt"
+dname = "mnist"
+mname = "resnet18"
 max_per_client_data_size = 2048
 max_server_data_size = 2048
-architecture = "transformer"
+architecture = "cnn"
 
 [tool.tracefl.logging]
 version = 1

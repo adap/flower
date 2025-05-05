@@ -166,15 +166,20 @@ clientapp = "tracefl.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 2
-fraction-fit = 1
-local-epochs = 1
+fraction-fit = 0.4              
+local-epochs = 2
 min-evaluate = 1
+
+resnet = "tracefl/config/resnet.toml"
+exp_1 = "tracefl/config/exp_1.toml"
+exp_2 = "tracefl/config/exp_2.toml"
+
 
 [tool.flwr.federations]
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 2
+options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0
-options.parallelism = 2
+options.parallelism = 10

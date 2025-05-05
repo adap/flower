@@ -1,3 +1,10 @@
+"""TraceFL Client Application Module.
+
+This module implements the client-side functionality for the TraceFL federated learning
+system. It provides the client implementation that handles local model training and
+evaluation.
+"""
+
 import copy
 import json
 
@@ -20,6 +27,13 @@ from tracefl.models import (
 
 
 class FlowerClient(NumPyClient):
+    """A Flower client implementation for TraceFL.
+
+    This client handles local model training and evaluation using the provided neural
+    network model and data loaders. It supports standard federated learning operations
+    like getting/setting weights and performing local training rounds.
+    """
+
     def __init__(
         self,
         net,
@@ -32,6 +46,19 @@ class FlowerClient(NumPyClient):
         model_dict,
         client2data,
     ):
+        """Initialize the TraceFL client.
+
+        Args:
+            net: The neural network model to train
+            trainloader: DataLoader for training data
+            local_epochs: Number of local training epochs
+            partition_id: Client's partition ID
+            cfg: Configuration object
+            ds_dict: Dictionary containing dataset information
+            arch: Model architecture
+            model_dict: Dictionary containing model information
+            client2data: Mapping of client IDs to their data
+        """
         self.net = net
         self.trainloader = trainloader
         self.local_epochs = local_epochs
@@ -46,7 +73,16 @@ class FlowerClient(NumPyClient):
         self.client2data = client2data
 
     def fit(self, parameters, config):
+        """Train the model using the client's local data.
 
+        Args:
+            parameters: Current model parameters
+            config: Configuration dictionary containing training parameters
+
+        Returns
+        -------
+            tuple: Updated model parameters, number of training examples, and metrics
+        """
         set_parameters(self.net, parameters)
 
         tconfig = {
@@ -78,13 +114,35 @@ class FlowerClient(NumPyClient):
         )
 
     def evaluate(self, parameters, config):
+        """Evaluate the model on the client's local test data.
+
+        Args:
+            parameters: Current model parameters
+            config: Configuration dictionary containing evaluation parameters
+
+        Returns
+        -------
+            tuple: Loss value, number of test examples, and evaluation metrics
+        """
         pass
 
 
 def client_fn(context: Context):
+    """Create and configure a TraceFL client instance.
 
-    config = toml.load("./tracefl/resnet.toml")
+    Args:
+        context: Flower context containing configuration and state
+
+    Returns
+    -------
+        Client: Configured TraceFL client instance
+    """
+    possible_configs = ["exp_1", "exp_2"]
+    config_key = next((k for k in possible_configs if k in context.run_config), "exp_1")
+    config_path = str(context.run_config[config_key])
+    config = toml.load(config_path)
     cfg = OmegaConf.create(config)
+
     partition_id = int(context.node_config["partition-id"])
     ds_dict = get_clients_server_data(cfg)
 
@@ -94,7 +152,7 @@ def client_fn(context: Context):
     sim.set_clients_data(ds_dict["client2data"])
     sim.set_strategy()
     model_dict = initialize_model(cfg.tool.tracefl.model.name, cfg.tool.tracefl.dataset)
-    local_epochs = context.run_config["local-epochs"]
+    local_epochs = int(context.run_config["local-epochs"])
     return FlowerClient(
         model_dict["model"],
         client_train_data,

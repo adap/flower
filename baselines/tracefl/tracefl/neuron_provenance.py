@@ -1,3 +1,9 @@
+"""Neuron-level provenance tracking in neural networks during federated learning.
+
+This module provides functionality for tracking and analyzing the provenance of neuron
+activations and gradients across different layers of neural networks.
+"""
+
 import logging
 
 import torch
@@ -10,6 +16,8 @@ from tracefl.utils import compute_importance
 
 
 class NeuronProvenance:
+    """Class for tracking neuron-level provenance in neural networks."""
+
     def __init__(self, cfg, arch, test_data, gmodel, c2model, num_classes, c2nk):
         """Initialize a NeuronProvenance instance.
 
@@ -37,15 +45,15 @@ class NeuronProvenance:
         self.c2model = c2model
         self.num_classes = num_classes
         self.device = cfg.tool.tracefl.device.device
-        self.c2nk = c2nk  # client2num_examples
+        self.c2nk = c2nk
         self.client_ids = list(self.c2model.keys())
         self.layer_importance = compute_importance(len(getAllLayers(gmodel)))
-        
+
         logging.info(f"client ids: {self.client_ids}")
         self.pk = {
             cid: self.c2nk[cid] / sum(self.c2nk.values()) for cid in self.c2nk.keys()
         }
-      
+
     def _checkAnomlies(self, t):
         """Check the tensor for inf or NaN values.
 
@@ -97,14 +105,14 @@ class NeuronProvenance:
         self._checkAnomlies(global_layer_grads)
         global_layer_grads = global_layer_grads.flatten()
 
-        for cli in self.client_ids:
-            cli_acts = client2outputs[cli].to(self.device).flatten()
+        for cid in self.client_ids:
+            cli_acts = client2outputs[cid].to(self.device).flatten()
             self._checkAnomlies(cli_acts)
             cli_part = torch.dot(cli_acts, global_layer_grads)
-            client2avg[cli] = cli_part.item() * self.layer_importance[layer_id]
+            client2avg[cid] = cli_part.item() * self.layer_importance[layer_id]
             cli_acts = cli_acts.cpu()
 
-        max_contributor = max(client2avg, key=client2avg.get)
+        max_contributor = max(client2avg, key=lambda cid: client2avg[cid])
         logging.debug(f"Max contributor: {max_contributor}")
         return client2avg
 
@@ -136,13 +144,14 @@ class NeuronProvenance:
 
         c2l = {cid: client2layers[cid][layer_id] for cid in self.client_ids}
         client2outputs = {
-            c: self._evaluateLayer(l, global_neurons_inputs) for c, l in c2l.items()
+            c: self._evaluateLayer(layer, global_neurons_inputs)
+            for c, layer in c2l.items()
         }
 
         input2client2contribution = {}
         for input_id in range(len(self.test_data)):
             logging.debug(
-                f"Mapping client contributions for input {input_id} for layer {layer_id}"
+                f"Mapping client contributions for {input_id} for layer {layer_id}"
             )
             c2out_per_input = {
                 cid: client2outputs[cid][input_id] for cid in self.client_ids
@@ -161,9 +170,7 @@ class NeuronProvenance:
         return input2client2contribution
 
     def _inplaceScaleClientWs(self):
-        """Scale client model weights based on the number of data points per
-        client.
-        """
+        """Scale client model weights based on the number of data points per client."""
         logging.debug("Scaling client weights based on data points per client.")
         logging.debug(f"Total clients in c2nk: {len(self.c2nk)}")
         logging.debug(f"Total clients in c2model: {len(self.c2model)}")
@@ -184,7 +191,7 @@ class NeuronProvenance:
         logging.debug(f"Total layers in global model: {len(glayers)}")
         hooks_forward = [hook_manager.insertForwardHook(layer) for layer in glayers]
         self.gmodel.eval().to(self.device)
-        
+
         test_neural_network(
             self.arch,
             {"model": self.gmodel},
@@ -196,8 +203,9 @@ class NeuronProvenance:
         hook_manager.clearStorages()
 
     def _captureLayerGradients(self):
-        """Capture the gradients for each layer of the global model for the
-        test data.
+        """Capture gradients.
+
+        Capture the gradients for each layer of the global model for the test data.
         """
         self.inputs2layer_grads = []
         data_loader = torch.utils.data.DataLoader(self.test_data, batch_size=1)
@@ -223,8 +231,9 @@ class NeuronProvenance:
         return outputs
 
     def _aggregateClientContributions(self, input_id: int, layers2prov):
-        """Aggregate the contributions of all clients for a given input across
-        layers.
+        """Aggregate the contributions.
+
+        Aggregate the contribution of all clients for a given input across layers.
         """
         client2totalcont = dict.fromkeys(self.client_ids, 0.0)
         for lprov in layers2prov:
@@ -252,8 +261,9 @@ class NeuronProvenance:
         return input2prov
 
     def computeInputProvenance(self):
-        """Compute the provenance of each input by aggregating client
-        contributions across layers.
+        """Compute the provenance of each input.
+
+        Aggregates client contributions across all layers to determine provenance.
         """
         self._captureLayerIO()
         self._captureLayerGradients()
@@ -268,6 +278,8 @@ class NeuronProvenance:
 
 
 class HookManager:
+    """HookManager Class."""
+
     def __init__(self):
         """Initialize a HookManager instance."""
         self.forward_hooks_storage = []
@@ -359,9 +371,7 @@ def getAllLayers(net):
 
 
 def getAllLayersBert(net):
-    """Retrieve all layers from the model that are instances of specific layer
-    types.
-    """
+    """Retrieve all layers from the model that are instances of specific layer types."""
     layers = []
     for layer in net.children():
         if isinstance(

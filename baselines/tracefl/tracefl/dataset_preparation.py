@@ -1,16 +1,16 @@
 """Handle the dataset partitioning and (optionally) complex downloads.
 
-Please add here all the necessary logic to either download, uncompress,
-pre/post-process your dataset (or all of the above). If the desired way
-of running your baseline is to first download the dataset and partition
-it and then run the experiments, please uncomment the lines below and
-tell us in the README.md (see the "Running the Experiment" block) that
-this file should be executed first.
+Please add here all the necessary logic to either download, uncompress, pre/post-
+processyour dataset (or all of the above). If the desired way of running your baseline
+is to first download the dataset and partition it and then run the experiments, please
+uncomment the lines below and tell us in the README.md (see the "Running the
+Experiment"block) that this file should be executed first.
 """
 
 import logging
 from collections import Counter
 from functools import partial
+from typing import Any
 
 import medmnist
 import torch
@@ -46,8 +46,8 @@ def _get_medmnist(data_flag="pathmnist", download=True):
     Returns
     -------
     DatasetDict
-        A dictionary with keys "train" and "test", each containing a Hugging Face Dataset
-        of images and corresponding labels.
+        A dictionary with keys "train" and "test", each containing a Hugging Face
+        Dataset        object.
     """
     info = INFO[data_flag]
     n_channels = info["n_channels"]
@@ -78,12 +78,11 @@ def _get_medmnist(data_flag="pathmnist", download=True):
 
 
 def tokenize_function_factory(cfg):
-    """Create and return a tokenizer function based on the provided
-    configuration.
+    """Create and return a tokenizer function based on the provided configuration.
 
-    The returned function will tokenize examples from the dataset according to the dataset
-    type. For "dbpedia_14", it tokenizes the "content" field; for others (like Yahoo Answers),
-    it may combine different fields.
+    The returned function will tokenize examples from the dataset according to the
+    dataset type. For "dbpedia_14", it tokenizes the "content" field; for others (like
+    Yahoo Answers), it tokenizes the "text" field.
 
     Parameters
     ----------
@@ -130,11 +129,11 @@ def tokenize_function_factory(cfg):
 
 
 def train_test_transforms_factory(cfg):
-    """Create and return train and test transformation functions for image
-    datasets.
+    """Create and return train and test transformation functions for image datasets.
 
-    Depending on the dataset name specified in the configuration (cfg.dname), this function
-    returns a dictionary with keys 'train' and 'test' that map to transformation functions.
+    Depending on the dataset name specified in the configuration (cfg.dname), this
+    function returns a dictionary with keys 'train' and 'test' that map to
+    transformation functions.
 
     Parameters
     ----------
@@ -243,8 +242,7 @@ def train_test_transforms_factory(cfg):
 
 
 def _initialize_image_dataset(cfg, dat_partitioner_func, fetch_only_test_data):
-    """Initialize and process an image dataset by applying train/test
-    transformations.
+    """Initialize and process an image dataset by applying train/test transformations.
 
     This function partitions the dataset using the provided partitioner function,
     then applies the image transformation functions to both client and server datasets.
@@ -284,8 +282,7 @@ def _initialize_image_dataset(cfg, dat_partitioner_func, fetch_only_test_data):
 
 
 def _initialize_transformer_dataset(cfg, dat_partitioner_func, fetch_only_test_data):
-    """Initialize and process a transformer-based dataset by tokenizing text
-    data.
+    """Initialize and process a transformer-based dataset by tokenizing text data.
 
     The function partitions the dataset using the provided partitioner function and
     applies the appropriate tokenization function to both client and server datasets.
@@ -302,7 +299,8 @@ def _initialize_transformer_dataset(cfg, dat_partitioner_func, fetch_only_test_d
     Returns
     -------
     dict
-        A dictionary with keys 'client2data' and 'server_data' containing tokenized data.
+        A dictionary with keys 'client2data' and 'server_data' containing tokenized
+        data.
     """
     target_label_col = "label"
     if cfg.dname == "yahoo_answers_topics":
@@ -317,58 +315,60 @@ def _initialize_transformer_dataset(cfg, dat_partitioner_func, fetch_only_test_d
 
 
 def _load_dist_based_clients_server_datasets(
-    cfg, dat_partitioner_func, fetch_only_test_data=False
+    cfg, dat_partitioner_func, fetch_only_test_data: bool = False
 ):
-    """Load and partition the dataset into client and server splits based on a
-    distribution strategy.
+    """Load and partition datasets.
 
-    Depending on the dataset type and architecture specified in the configuration,
-    this function initializes either an image or transformer dataset.
+    Load the requested dataset, split it into client and server parts according to the
+    chosen distribution strategy, and return the resulting objects. Both image and
+    text (transformer) datasets are supported.
 
     Parameters
     ----------
     cfg : object
-        A configuration object containing dataset information (e.g. dname, architecture).
-    dat_partitioner_func : function
-        The partitioner function to use for splitting the data.
+        Configuration object with dataset information (e.g., ``dname``,
+        ``architecture``).
+    dat_partitioner_func : Callable
+        Partitioner used to split the training data across clients.
     fetch_only_test_data : bool, optional
-        If True, only the test data is loaded (default is False).
+        If ``True``, only the test data is fetched (default is ``False``).
 
     Returns
     -------
     dict
-        A dictionary containing:
-            - 'client2data': Client-specific training data.
-            - 'server_data': Server test data.
-            - 'client2class': Class counts per client.
-            - 'fds': FederatedDataset object used for partitioning.
+        Dictionary with the following keys:
+
+        * ``client2data`` – Mapping client‑ID → training split
+        * ``server_data`` – Test split for the server
+        * ``client2class`` – Per‑client label counts
+        * ``fds`` – The ``FederatedDataset`` object used for partitioning
 
     Raises
     ------
     ValueError
-        If the dataset name or architecture is unknown.
+        If the dataset name (``cfg.dname``) or architecture is unknown.
     """
     if cfg.dname in ["cifar10", "mnist", "pathmnist", "organamnist"]:
         return _initialize_image_dataset(
             cfg, dat_partitioner_func, fetch_only_test_data
         )
 
-    elif cfg.dname in ["dbpedia_14", "yahoo_answers_topics"]:
+    if cfg.dname in ["dbpedia_14", "yahoo_answers_topics"]:
         return _initialize_transformer_dataset(
             cfg, dat_partitioner_func, fetch_only_test_data
         )
 
-    elif cfg.architecture == "cnn":
+    if cfg.architecture == "cnn":
         return _initialize_image_dataset(
             cfg, dat_partitioner_func, fetch_only_test_data
         )
 
-    elif cfg.architecture == "transformer":
+    if cfg.architecture == "transformer":
         return _initialize_transformer_dataset(
             cfg, dat_partitioner_func, fetch_only_test_data
         )
-    else:
-        raise ValueError(f"Unknown dataset: {cfg.dname}")
+
+    raise ValueError(f"Unknown dataset: {cfg.dname}")
 
 
 def getLabelsCount(partition, target_label_col):
@@ -393,12 +393,11 @@ def getLabelsCount(partition, target_label_col):
 
 
 def _fix_partition(cfg, c_partition, target_label_col):
-    """Clean and truncate a client data partition based on minimum sample
-    requirements.
+    """Clean and truncate a client data partition based on minimum sample requirements.
 
     This function filters out labels with fewer than 10 occurrences, then limits the
-    partition size to a maximum specified by the configuration. It also ensures that the
-    final partition size is compatible with the batch size.
+    partition size to a maximum specified by the configuration. It also ensures that
+    the final partition size is compatible with the batch size.
 
     Parameters
     ----------
@@ -516,7 +515,6 @@ def _partition_helper(
             server_data = fds.load_split("test")
         else:
             server_data = fds.load_split("test").select(range(cfg.max_server_data_size))
-
     logging.info(f"Partition helper: Keys in the dataset are: {server_data[0].keys()}")
 
     for cid in range(cfg.num_clients):
@@ -590,10 +588,10 @@ def _dirichlet_data_distribution(
 def _sharded_data_distribution(
     num_classes_per_partition, cfg, target_label_col, fetch_only_test_data, subtask=None
 ):
-    """Partition the dataset among clients using a sharded non-IID
-    distribution.
+    """Partition the dataset among clients using a sharded non-IID distribution.
 
-    This function uses a shard partitioner that assigns a fixed number of classes per client.
+    This function uses a shard partitioner that assigns a fixed number of classes
+    per client.
 
     Parameters
     ----------
@@ -627,75 +625,52 @@ def _sharded_data_distribution(
 
 
 def _pathological_partitioner(
-    num_classes_per_partition, cfg, target_label_col, fetch_only_test_data, subtask=None
-):
-    """Partition the dataset among clients using a pathological (highly non-
-    IID) strategy.
+    dataset: Dataset, num_clients: int, alpha: float = 0.5, cfg: Any = None
+) -> DatasetDict:
+    """Partition the dataset among clients using a pathological strategy.
 
-    This function uses a deterministic assignment where each client receives data from a
-    fixed number of classes.
+    This function creates a non-IID partition of the dataset by sorting examples by
+    label and then distributing them in a way that creates highly skewed
+    distributions per client.
 
     Parameters
     ----------
-    num_classes_per_partition : int
-        Number of classes assigned per client.
-    cfg : object
-        Configuration object containing:
-            - num_clients: Number of clients.
-    target_label_col : str
-        The key used for partitioning by label.
-    fetch_only_test_data : bool
-        If True, only test data is processed.
-    subtask : optional
-        A subset indicator for partitioning if needed.
+    dataset : Dataset
+        The dataset to partition.
+    num_clients : int
+        Number of clients to partition the data among.
+    alpha : float, optional
+        Concentration parameter for the Dirichlet distribution (default is 0.5).
+    cfg : Any, optional
+        Configuration object containing dataset parameters.
 
     Returns
     -------
-    dict
-        A dictionary with keys 'client2data', 'server_data', 'client2class', and 'fds'.
+    DatasetDict
+        A dictionary mapping client IDs to their respective datasets.
     """
     partitioner = PathologicalPartitioner(
-        num_partitions=cfg.num_clients,
-        partition_by=target_label_col,
-        num_classes_per_partition=num_classes_per_partition,
+        num_partitions=num_clients,
+        partition_by="label",
+        num_classes_per_partition=1,
         shuffle=True,
         class_assignment_mode="deterministic",
     )
-    return _partition_helper(
-        partitioner, cfg, target_label_col, fetch_only_test_data, subtask
-    )
+    return _partition_helper(partitioner, cfg, "label", False, None)
 
 
 class ClientsAndServerDatasets:
-    """Prepare and manage the datasets for clients and the server in a
-    federated setting.
+    """Class for managing client and server datasets.
 
-    This class initializes the dataset partitioning according to the configuration,
-    sets up the client and server datasets, and provides access to the processed data.
-
-    Attributes
-    ----------
-    cfg : object
-        Configuration object with parameters for data distribution and model settings.
-    data_dist_partitioner_func : function
-        The partitioner function selected based on the distribution type.
-    client2data : dict
-        Mapping of client IDs to their training datasets.
-    server_testdata : Dataset
-        The server's test dataset.
-    client2class : dict
-        Mapping of client IDs to label counts.
-    fds : FederatedDataset
-        The FederatedDataset object used for partitioning.
+    This class handles the organization and management of datasets for both clients and
+    the server in the federated learning system.
     """
 
     def __init__(self, cfg):
-        """Initialize the ClientsAndServerDatasets instance.
+        """Initialize the dataset manager.
 
-        Parameters
-        ----------
-        cfg : object
-            Configuration object with necessary parameters for dataset partitioning.
+        Args:
+            cfg: Configuration object containing dataset parameters
         """
         self.cfg = cfg
         self.data_dist_partitioner_func = None
@@ -703,12 +678,10 @@ class ClientsAndServerDatasets:
         self._setup()
 
     def _set_distriubtion_partitioner(self):
-        """Set the data distribution partitioner function based on the
-        configuration.
+        """Set the data distribution partitioner function based on the configuration.
 
-        The method selects the partitioner function to use (e.g.
-        Dirichlet, sharded, or pathological) based on
-        cfg.data_dist.dist_type.
+        The method selects the partitioner function to use (e.g. Dirichlet, sharded, or
+        pathological) based on cfg.data_dist.dist_type.
         """
         if self.cfg.tool.tracefl.data_dist.dist_type == "non_iid_dirichlet":
             self.data_dist_partitioner_func = _dirichlet_data_distribution
@@ -732,12 +705,17 @@ class ClientsAndServerDatasets:
             )
 
     def _setup_hugging_dataset(self):
-        """Set up the Hugging Face dataset by partitioning it among clients and
-        the server.
+        """Set up Hugging Face dataset for federated learning.
 
-        This method loads the dataset, applies tokenization or
-        transformation (depending on the type), and stores the client
-        and server data along with class distributions.
+        This function configures and prepares a Hugging Face dataset for use
+        in the federated learning system.
+
+        Args:
+            cfg: Configuration object containing dataset parameters
+
+        Returns
+        -------
+            Configured Hugging Face dataset
         """
         d = _load_dist_based_clients_server_datasets(
             self.cfg.tool.tracefl.data_dist, self.data_dist_partitioner_func
@@ -757,12 +735,14 @@ class ClientsAndServerDatasets:
         logging.info(f"Min data on a client: {min_data}")
 
     def _setup(self):
-        """Setup method to initialize the Hugging Face dataset."""
+        """Initialize the Hugging Face dataset.
+
+        This method sets up the Hugging Face dataset for federated learning.
+        """
         self._setup_hugging_dataset()
 
     def get_data(self):
-        """Retrieve the prepared client and server datasets for federated
-        simulation.
+        """Retrieve the prepared client and server datasets for federated simulation.
 
         Returns
         -------
@@ -779,3 +759,33 @@ class ClientsAndServerDatasets:
             "client2data": self.client2data,
             "fds": self.fds,
         }
+
+
+def _initialize_dataset(cfg_dataset):
+    """Initialize the dataset based on configuration.
+
+    Parameters
+    ----------
+    cfg_dataset : object
+        Configuration object with dataset information
+        and parameters for initialization.
+
+    Returns
+    -------
+    Dataset
+        The initialized dataset.
+    """
+    import torchvision  # Import here to avoid circular imports
+
+    if cfg_dataset.name == "cifar10":
+        return _initialize_image_dataset(
+            cfg_dataset,
+            torchvision.datasets.CIFAR10,
+            "CIFAR10",
+        )
+    elif cfg_dataset.name == "cifar100":
+        return _initialize_image_dataset(
+            cfg_dataset,
+            torchvision.datasets.CIFAR100,
+            "CIFAR100",
+        )
