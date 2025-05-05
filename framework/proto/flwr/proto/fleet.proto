@@ -17,6 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/heartbeat.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
@@ -51,13 +52,6 @@ message CreateNodeResponse { Node node = 1; }
 // DeleteNode messages
 message DeleteNodeRequest { Node node = 1; }
 message DeleteNodeResponse {}
-
-// Heartbeat messages
-message SendNodeHeartbeatRequest {
-  Node node = 1;
-  double heartbeat_interval = 2;
-}
-message SendNodeHeartbeatResponse { bool success = 1; }
 
 // PullMessages messages
 message PullMessagesRequest {
