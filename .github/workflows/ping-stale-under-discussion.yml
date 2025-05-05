@@ -23,7 +23,6 @@ jobs:
             const repo = context.repo.repo;
             const org = owner;
             const now = new Date();
-            const todayStr = now.toISOString().slice(0, 10);
             const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
             const query = `repo:${owner}/${repo} is:issue is:open comments:>=1 no:milestone`;
@@ -32,39 +31,34 @@ jobs:
               per_page: 100,
             });
 
+            const staleIssues = [];
+
             for (const issue of data.items) {
+              if (issue.pull_request) continue;
+
               const updatedAt = new Date(issue.updated_at);
               if (updatedAt >= sevenDaysAgo) {
                 console.log(`Skipping #${issue.number}: updated recently`);
                 continue;
               }
 
-              // Fetch last comment
-              const comments = await github.rest.issues.listComments({
-                owner,
-                repo,
-                issue_number: issue.number,
-                per_page: 1,
-                sort: "updated",
-                direction: "desc",
-              });
+              staleIssues.push(issue);
+            }
 
-              const lastComment = comments.data[0];
-              if (lastComment) {
-                const body = lastComment.body || "";
-                const isFromBot = lastComment.user?.login === "github-actions[bot]";
-                const markerMatch = body.match(/<!-- bot:stale-ping:(\d{4}-\d{2}-\d{2}) -->/);
+            if (staleIssues.length === 0) {
+              console.log("No stale issues to report.");
+              return;
+            }
 
-                if (isFromBot && markerMatch) {
-                  const lastPingDate = new Date(markerMatch[1]);
-                  if (lastPingDate >= sevenDaysAgo) {
-                    console.log(`Skipping #${issue.number}: already pinged on ${markerMatch[1]}`);
-                    continue;
-                  }
-                }
-              }
+            let table = [
+              "| Issue | Title | Assignees |",
+              "|-------|-------|-----------|"
+            ];
 
-              // Resolve assignees
+            for (const issue of staleIssues) {
+              const number = `#${issue.number}`;
+              const title = issue.title.length > 40 ? issue.title.slice(0, 37) + "..." : issue.title;
+
               let orgAssignees = [];
               for (const assignee of issue.assignees) {
                 const login = assignee.login;
@@ -78,22 +72,25 @@ jobs:
                 }
               }
 
-              const pingTarget =
-                orgAssignees.length > 0 ? orgAssignees.join(", ") : "@WilliamLindskog";
+              const assignees = orgAssignees.length > 0
+                ? orgAssignees.join(", ")
+                : "@WilliamLindskog";
 
-              const slackText = `*Stale Under Discussion Issue*\n${pingTarget} — <${issue.html_url}|#${issue.number} - ${issue.title}> has had no activity for 7+ days.\nPlease review or update its status.\n\n<!-- bot:stale-ping:${todayStr} -->`;
-
-              console.log(`Pinging #${issue.number} to Slack...`);
-
-              await fetch("https://slack.com/api/chat.postMessage", {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  channel: process.env.SLACK_CHANNEL_ID,
-                  text: slackText,
-                }),
-              });
+              table.push(`| ${number} | ${title} | ${assignees} |`);
             }
+
+            const slackText = `*Stale Under Discussion Issues (no activity in 7+ days)*\n\n\`\`\`\n${table.join("\n")}\n\`\`\`\n\nPlease review or update their status.`;
+
+            console.log("Sending Slack message...");
+
+            await fetch("https://slack.com/api/chat.postMessage", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                channel: process.env.SLACK_CHANNEL_ID,
+                text: slackText,
+              }),
+            });
