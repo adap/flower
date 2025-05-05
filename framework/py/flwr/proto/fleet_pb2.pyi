@@ -58,7 +58,7 @@ class DeleteNodeResponse(google.protobuf.message.Message):
         ) -> None: ...
 global___DeleteNodeResponse = DeleteNodeResponse
 
-class HeartbeatRequest(google.protobuf.message.Message):
+class SendNodeHeartbeatRequest(google.protobuf.message.Message):
     """Heartbeat messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_FIELD_NUMBER: builtins.int
@@ -73,9 +73,9 @@ class HeartbeatRequest(google.protobuf.message.Message):
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["heartbeat_interval",b"heartbeat_interval","node",b"node"]) -> None: ...
-global___HeartbeatRequest = HeartbeatRequest
+global___SendNodeHeartbeatRequest = SendNodeHeartbeatRequest
 
-class HeartbeatResponse(google.protobuf.message.Message):
+class SendNodeHeartbeatResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     SUCCESS_FIELD_NUMBER: builtins.int
     success: builtins.bool
@@ -84,7 +84,7 @@ class HeartbeatResponse(google.protobuf.message.Message):
         success: builtins.bool = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["success",b"success"]) -> None: ...
-global___HeartbeatResponse = HeartbeatResponse
+global___SendNodeHeartbeatResponse = SendNodeHeartbeatResponse
 
 class PullMessagesRequest(google.protobuf.message.Message):
     """PullMessages messages"""

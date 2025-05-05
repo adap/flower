@@ -18,9 +18,9 @@ class FleetStub:
         flwr.proto.fleet_pb2.DeleteNodeRequest,
         flwr.proto.fleet_pb2.DeleteNodeResponse]
 
-    Heartbeat: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fleet_pb2.HeartbeatRequest,
-        flwr.proto.fleet_pb2.HeartbeatResponse]
+    SendNodeHeartbeat: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.SendNodeHeartbeatRequest,
+        flwr.proto.fleet_pb2.SendNodeHeartbeatResponse]
 
     PullMessages: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.PullMessagesRequest,
@@ -62,10 +62,10 @@ class FleetServicer(metaclass=abc.ABCMeta):
     ) -> flwr.proto.fleet_pb2.DeleteNodeResponse: ...
 
     @abc.abstractmethod
-    def Heartbeat(self,
-        request: flwr.proto.fleet_pb2.HeartbeatRequest,
+    def SendNodeHeartbeat(self,
+        request: flwr.proto.fleet_pb2.SendNodeHeartbeatRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.fleet_pb2.HeartbeatResponse: ...
+    ) -> flwr.proto.fleet_pb2.SendNodeHeartbeatResponse: ...
 
     @abc.abstractmethod
     def PullMessages(self,
