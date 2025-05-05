@@ -1,12 +1,12 @@
 Flower Intelligence
 ===================
 
-Flower Intelligence is a cross-platform inference library that let's user
-seamlessly interact with Large-Language Models both locally and remotely in a
-secure and private way. The library was created by the ``Flower Labs`` team that also created `Flower: A Friendly Federated AI Framework <https://flower.ai>`_.
+Flower Intelligence is a cross-platform inference library that let's user seamlessly
+interact with Large-Language Models both locally and remotely in a secure and private
+way. The library was created by the ``Flower Labs`` team that also created `Flower: A
+Friendly Federated AI Framework <https://flower.ai>`_.
 
-We currently only provide a SDK for TypeScript/JavaScript.
-
+We currently provide SDKs for TypeScript/JavaScript, Kotlin, and Swift.
 
 Install
 -------
@@ -28,11 +28,31 @@ Install
 
           npm i "@flwr/flwr"
 
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: bash
+
+          # You can add package dependency to your Xcode project via its UI.
+          # Please refer to https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app.
+          #
+          # To add dependency to your Swift package, you can run the following command:
+          swift package add-dependency "https://github.com/adap/flower.git"
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: bash
+
+          # Add Flower Intelligence dependency to your build.gradle.kts
+          implementation("ai.flower:intelligence:0.1.8")
 
 Hello, Flower Intelligence!
 ---------------------------
 
-Flower Intelligence is built around the Singleton design pattern, meaning you only need to configure a single instance that can be reused throughout your project. This simple setup helps you integrate powerful AI capabilities with minimal overhead.
+Flower Intelligence is built around the Singleton design pattern, meaning you only need
+to configure a single instance that can be reused throughout your project. This simple
+setup helps you integrate powerful AI capabilities with minimal overhead.
 
 .. tab-set::
     :sync-group: category
@@ -77,11 +97,46 @@ Flower Intelligence is built around the Singleton design pattern, meaning you on
 
             await main().then().catch();
 
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            let result = await fi.chat("Why is the sky blue?")
+            switch result {
+            case .success(let message):
+              print(message.content)
+            case .failure(let error):
+              print(error.localizedDescription)
+            }
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.Failure
+
+            suspend fun main() {
+                val result = FlowerIntelligence.chat("Why is the sky blue?")
+                result.onSuccess { message ->
+                    println(message.content)
+                }.onFailure { error ->
+                    println((error as Failure).message)
+                }
+            }
 
 Specify the model
 -----------------
 
-By specifying a model in the chat options, you can easily switch between different AI models available in the ecosystem. For a full list of supported models, please refer to the :doc:`available models list <ref-models>`.
+By specifying a model in the chat options, you can easily switch between different AI
+models available in the ecosystem. For a full list of supported models, please refer to
+the :doc:`available models list <ref-models>`.
 
 .. tab-set::
     :sync-group: category
@@ -130,10 +185,51 @@ By specifying a model in the chat options, you can easily switch between differe
 
             await main().then().catch();
 
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            let options = ChatOptions(model: "meta/llama3.2-1b/instruct-fp16")
+            let result = await fi.chat("Why is the sky blue?", maybeOptions: options)
+
+            switch result {
+            case .success(let message):
+                print(message.content)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.ChatOptions
+
+            suspend fun main() {
+                val options = ChatOptions(model = "meta/llama3.2-1b/instruct-fp16")
+                val result = FlowerIntelligence.chat("Why is the sky blue?", maybeOptions = options)
+
+                result.onSuccess { message ->
+                    println(message.content)
+                }.onFailure { error ->
+                    println((error as Failure).message)
+                }
+            }
+
 Check for errors
 ----------------
 
-Instead of throwing exceptions that might crash your application, Flower Intelligence returns a response object that includes a dedicated :doc:`Failure <ts-api-ref/interfaces/Failure>` property, enabling graceful error handling and improved application stability.
+Instead of throwing exceptions that might crash your application, Flower Intelligence
+returns a response object that includes a dedicated :doc:`Failure
+<ts-api-ref/interfaces/Failure>` property, enabling graceful error handling and improved
+application stability.
 
 .. tab-set::
     :sync-group: category
@@ -188,11 +284,54 @@ Instead of throwing exceptions that might crash your application, Flower Intelli
 
             await main().then().catch();
 
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            let options = ChatOptions(model: "meta/llama3.2-1b/instruct-fp16")
+            let result = await fi.chat("Why is the sky blue?", maybeOptions: options)
+
+            switch result {
+            case .success(let message):
+                print(message.content)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.ChatOptions
+            import ai.flower.intelligence.Failure
+
+            suspend fun main() {
+                val options = ChatOptions(model = "meta/llama3.2-1b/instruct-fp16")
+                val result = FlowerIntelligence.chat("Why is the sky blue?", maybeOptions = options)
+
+                result.onSuccess { message ->
+                    println(message.content)
+                }.onFailure { error ->
+                    val failure = error as Failure
+                    println("${failure.code}: ${failure.message}")
+                }
+            }
+
 Stream Responses
 ----------------
 
-By enabling the stream option and providing a callback function, you can watch the AI’s response as it is being generated. This approach is ideal for interactive applications, as it lets you process partial responses immediately before the full answer is available.
-The callback function must accept an argument of type :doc:`StreamEvent <ts-api-ref/interfaces/StreamEvent>`.
+By enabling the stream option and providing a callback function, you can watch the AI’s
+response as it is being generated. This approach is ideal for interactive applications,
+as it lets you process partial responses immediately before the full answer is
+available. The callback function must accept an argument of type :doc:`StreamEvent
+<ts-api-ref/interfaces/StreamEvent>`.
 
 .. tab-set::
     :sync-group: category
@@ -251,10 +390,62 @@ The callback function must accept an argument of type :doc:`StreamEvent <ts-api-
 
             await main().then().catch();
 
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            let options = ChatOptions(
+              model: "meta/llama3.2-1b/instruct-fp16",
+              stream: true,
+              onStreamEvent: { event in
+                  print(event.chunk)
+              }
+            )
+
+            let result = await fi.chat("Why is the sky blue?", maybeOptions: options)
+
+            if case .failure(let error) = result {
+                print(error.localizedDescription)
+            }
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.ChatOptions
+            import ai.flower.intelligence.StreamEvent
+            import ai.flower.intelligence.Failure
+
+            suspend fun main() {
+                val options = ChatOptions(
+                    model = "meta/llama3.2-1b/instruct-fp16",
+                    stream = true,
+                    onStreamEvent = { event: StreamEvent ->
+                        println(event.chunk)
+                    }
+                )
+
+                val result = FlowerIntelligence.chat("Why is the sky blue?", maybeOptions = options)
+
+                result.onFailure { error ->
+                    println((error as Failure).message)
+                }
+            }
+
 Use Roles
 ---------
 
-Instead of simply sending a single string, you can provide an array of :doc:`messages <ts-api-ref/interfaces/Message>` with designated roles such as ``system`` and ``user``. This allows you to define the behavior and context of the conversation more clearly, ensuring that the assistant responds in a way that’s tailored to the scenario.
+Instead of simply sending a single string, you can provide an array of :doc:`messages
+<ts-api-ref/interfaces/Message>` with designated roles such as ``system`` and ``user``.
+This allows you to define the behavior and context of the conversation more clearly,
+ensuring that the assistant responds in a way that’s tailored to the scenario.
 
 .. tab-set::
     :sync-group: category
@@ -321,10 +512,69 @@ Instead of simply sending a single string, you can provide an array of :doc:`mes
 
             await main().then().catch();
 
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            let messages = [
+              Message(role: "system", content: "You are a helpful assistant."),
+              Message(role: "user", content: "Why is the sky blue?")
+            ]
+
+            let options = ChatOptions(model: "meta/llama3.2-1b/instruct-fp16")
+            let result = await fi.chat(options: (messages, options))
+            switch result {
+            case .success(let message):
+              print(message.content)
+            case .failure(let error):
+              print(error.localizedDescription)
+            }
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.Message
+            import ai.flower.intelligence.ChatOptions
+            import ai.flower.intelligence.Failure
+
+            suspend fun main() {
+                val fi = FlowerIntelligence
+                val messages = listOf(
+                    Message(role = "system", content = "You are a friendly assistant that loves using emojis."),
+                    Message(role = "user", content = "Why is the sky blue?")
+                )
+
+                val options = ChatOptions(
+                    model = "meta/llama3.2-1b/instruct-fp16",
+                    stream = true,
+                    onStreamEvent = { event -> println(event.chunk) }
+                )
+
+                val result = fi.chat(messages to options)
+
+                result.onSuccess { message ->
+                    println(message.content)
+                }.onFailure { error ->
+                    println((error as Failure).message)
+                }
+            }
+
 Handle history
 --------------
 
-In this example, the conversation history is maintained in an array that includes both system and user messages. Each time a new message is sent, it is appended to the history, ensuring that the assistant has access to the full dialogue context. This method allows Flower Intelligence to generate responses that are informed by previous interactions, resulting in a more coherent and dynamic conversation.
+In this example, the conversation history is maintained in an array that includes both
+system and user messages. Each time a new message is sent, it is appended to the
+history, ensuring that the assistant has access to the full dialogue context. This
+method allows Flower Intelligence to generate responses that are informed by previous
+interactions, resulting in a more coherent and dynamic conversation.
 
 .. tab-set::
     :sync-group: category
@@ -415,13 +665,99 @@ In this example, the conversation history is maintained in an array that include
 
             await main().then().catch();
 
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+
+            // Initialize history with a system message
+            var history: [Message] = [
+                Message(role: "system", content: "You are a friendly assistant that loves using emojis.")
+            ]
+
+            // Function to chat while preserving conversation history
+            func chatWithHistory(userInput: String) async {
+                // Append user input to the history
+                history.append(Message(role: "user", content: userInput))
+
+                // Define chat options with streaming
+                let options = ChatOptions(
+                    model: "meta/llama3.2-1b/instruct-fp16",
+                    stream: true,
+                    onStreamEvent: { event in
+                        print(event.chunk)
+                    }
+                )
+
+                // Perform chat with full history
+                let result = await fi.chat(options: (history, options))
+
+                switch result {
+                case .success(let response):
+                    // Append assistant's response to history
+                    history.append(response)
+                    print("Assistant's full response:", response.content)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+
+            // Start the conversation
+            await chatWithHistory("Why is the sky blue?")
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.Message
+            import ai.flower.intelligence.ChatOptions
+            import ai.flower.intelligence.Failure
+            import ai.flower.intelligence.StreamEvent
+
+            private val history = mutableListOf(
+                Message(role = "system", content = "You are a friendly assistant that loves using emojis.")
+            )
+
+            suspend fun chatWithHistory(userInput: String) {
+                history.add(Message(role = "user", content = userInput))
+
+                val options = ChatOptions(
+                    model = "meta/llama3.2-1b/instruct-fp16",
+                    stream = true,
+                    onStreamEvent = { event: StreamEvent -> println(event.chunk) }
+                )
+
+                val result = FlowerIntelligence.chat(history to options)
+
+                result.onSuccess { response ->
+                    history.add(response)
+                    println("Assistant: ${response.content}")
+                }.onFailure { error ->
+                    println((error as Failure).message)
+                }
+            }
+
+            suspend fun main() {
+                chatWithHistory("Why is the sky blue?")
+            }
+
 Pre-loading the model
 ---------------------
 
-You might have noticed that the first time you run inference on a given model, you'll have to wait longer for it to complete compared to the second time you call the model.
-This is because the model first needs to be downloaded. This might be undesirable if you have an app where users can click a button and expect a quick response from the model.
-In this case, you might want to first let the user download the model (or download it on the first start-up), so once they click on the inference button, the results are consistently fast.
-This can be done using the :doc:`fetchModel <ts-api-ref/classes/FlowerIntelligence>` method.
+You might have noticed that the first time you run inference on a given model, you'll
+have to wait longer for it to complete compared to the second time you call the model.
+This is because the model first needs to be downloaded. This might be undesirable if you
+have an app where users can click a button and expect a quick response from the model.
+In this case, you might want to first let the user download the model (or download it on
+the first start-up), so once they click on the inference button, the results are
+consistently fast. This can be done using the :doc:`fetchModel
+<ts-api-ref/classes/FlowerIntelligence>` method.
 
 .. tab-set::
     :sync-group: category
@@ -515,7 +851,8 @@ This can be done using the :doc:`fetchModel <ts-api-ref/classes/FlowerIntelligen
 
             await main().then().catch();
 
-If you want to follow the progress of the download, you can pass a callback function that takes a :doc:`Progress <ts-api-ref/interfaces/Progress>` object as input:
+If you want to follow the progress of the download, you can pass a callback function
+that takes a :doc:`Progress <ts-api-ref/interfaces/Progress>` object as input:
 
 .. tab-set::
     :sync-group: category
@@ -543,17 +880,24 @@ If you want to follow the progress of the download, you can pass a callback func
             );
 
 .. note::
-   Checkout out full examples over on `GitHub <https://github.com/adap/flower/tree/main/intelligence/ts/examples>`_ for more information!
+
+    Checkout out full examples over on `GitHub
+    <https://github.com/adap/flower/tree/main/intelligence/ts/examples>`_ for more
+    information!
 
 Flower Confidential Remote Compute
 ----------------------------------
 
 .. warning::
-   Flower Confidential Remote Compute is available in private beta. If you are interested in using Confidential Remote Compute, please apply for Early Access via the `Flower Intelligence Pilot Program <https://forms.gle/J8pFpMrsmek2VFKq8>`_.
+
+    Flower Confidential Remote Compute is available in private beta. If you are
+    interested in using Confidential Remote Compute, please apply for Early Access via
+    the `Flower Intelligence Pilot Program <https://forms.gle/J8pFpMrsmek2VFKq8>`_.
 
 Flower Intelligence prioritizes local inference, but also allows to privately handoff
-the compute to the Flower Confidential Remote Compute service when local resources are scarce. You can find more
-information on `flower.ai/intelligence <https://flower.ai/intelligence>`_.
+the compute to the Flower Confidential Remote Compute service when local resources are
+scarce. You can find more information on `flower.ai/intelligence
+<https://flower.ai/intelligence>`_.
 
 This feature is turned off by default, and can be enabled by using the ``remoteHandoff``
 attribute of the ``FlowerIntelligence`` object.
@@ -631,27 +975,107 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
 
             await main().then().catch();
 
+    .. tab-item:: Swift
+        :sync: swift
+
+        .. code-block:: swift
+
+            import FlowerIntelligence
+
+            let fi = FlowerIntelligence.instance
+            fi.remoteHandoff = true
+            fi.apiKey = "YOUR_API_KEY"
+
+            let messages = [
+              Message(role: "system", content: "You are a helpful assistant."),
+              Message(role: "user", content: "Why is the sky blue?")
+            ]
+
+            let options = ChatOptions(
+              model: "meta/llama3.2-1b/instruct-fp16",
+              stream: true,
+              onStreamEvent: { event in
+                  print(event.chunk)
+              }
+            )
+
+            let result = await fi.chat(options: (messages, options))
+
+            if case .failure(let error) = result {
+              print(error.localizedDescription)
+            }
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.Message
+            import ai.flower.intelligence.ChatOptions
+            import ai.flower.intelligence.Failure
+            import ai.flower.intelligence.StreamEvent
+
+            suspend fun main() {
+                val fi = FlowerIntelligence
+                fi.apiKey = "YOUR_API_KEY"
+                // Flower Confidential Remote Compute enabled by default in backend setup
+
+                val messages = listOf(
+                    Message(role = "system", content = "You are a helpful assistant."),
+                    Message(role = "user", content = "Why is the sky blue?")
+                )
+
+                val options = ChatOptions(
+                    model = "meta/llama3.2-1b/instruct-fp16",
+                    stream = true,
+                    onStreamEvent = { event -> println(event.chunk) }
+                )
+
+                val result = fi.chat(messages to options)
+
+                result.onSuccess { message ->
+                    println(message.content)
+                }.onFailure { error ->
+                    println((error as Failure).message)
+                }
+            }
+
 References
 ----------
 
 Information-oriented API reference and other reference material.
 
 .. toctree::
-   :maxdepth: 1
-   :glob:
-   :caption: Reference docs
+    :maxdepth: 1
+    :glob:
+    :caption: Reference docs
 
-   ref-models
-   ts-api-ref/index
+    ref-models
+    examples
+    ts-api-ref/index
+    swift-api-ref/index
+
+Contributor guides
+------------------
+
+If you are interested in contributing or playing around with the source code.
+
+.. toctree::
+    :maxdepth: 1
+    :glob:
+    :caption: Contributor docs
+
+    contributor-how-to-build-from-source.rst
 
 Join the Flower Community
 -------------------------
 
-The Flower Community is growing quickly - we're a friendly group of researchers, engineers, students, professionals, academics, and other enthusiasts.
+The Flower Community is growing quickly - we're a friendly group of researchers,
+engineers, students, professionals, academics, and other enthusiasts.
 
 .. button-link:: https://flower.ai/join-slack
     :color: primary
     :shadow:
 
     Join us on Slack
-

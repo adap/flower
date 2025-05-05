@@ -29,6 +29,8 @@ pnpm version "$version_type"
 new_version=$(node -p "require('./package.json').version")
 echo "New version: $new_version"
 
+sed -i.bak "s/release = \".*\"/release = \"$new_version\"/g" ../docs/source/conf.py
+
 # Update the version in src/constants.ts
 sed -i.bak "s/export const VERSION = '.*';/export const VERSION = '$new_version';/g" src/constants.ts
 
@@ -36,12 +38,12 @@ sed -i.bak "s/export const VERSION = '.*';/export const VERSION = '$new_version'
 sed -i.bak "s/VERSION: '.*',/VERSION: '$new_version',/g" src/flowerintelligence.test.ts
 
 # Remove the temporary backup files created by sed
-rm src/constants.ts.bak src/flowerintelligence.test.ts.bak
+rm src/constants.ts.bak src/flowerintelligence.test.ts.bak ../docs/source/conf.py.bak
 
 # Update all examples/*/package.json files to set "@flwr/flwr" to the old version.
 for pkg in examples/*/package.json; do
   echo "Updating $pkg with version ^$old_version"
-  sed -i.bak "s/\"@flwr\/flwr\": \"\^[0-9]*\.[0-9]*\.[0-9]*\",/\"@flwr\/flwr\": \"^$old_version\",/g" "$pkg"
+  sed -i.bak "s/\"@flwr\/flwr\": \"\^[0-9]*\.[0-9]*\.[0-9]*\"/\"@flwr\/flwr\": \"^$old_version\"/g" "$pkg"
   rm "$pkg.bak"
 done
 

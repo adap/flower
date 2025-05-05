@@ -25,8 +25,9 @@ import {
 import type { ProgressInfo, TextGenerationConfig } from '@huggingface/transformers';
 import { FailureCode, Message, Result, Progress, ChatResponseResult } from '../typing';
 
+import { getAvailableRAM } from '../env';
 import { BaseEngine } from './engine';
-import { getEngineModelName } from './common';
+import { getEngineModelConfig } from './common/model';
 
 const stoppingCriteria = new InterruptableStoppingCriteria();
 const choice = 0;
@@ -42,8 +43,8 @@ export class TransformersEngine extends BaseEngine {
     stream?: boolean,
     onStreamEvent?: (event: { chunk: string }) => void
   ): Promise<ChatResponseResult> {
-    const modelNameRes = await getEngineModelName(model, 'onnx');
-    if (!modelNameRes.ok) {
+    const modelConfigRes = await getEngineModelConfig(model, 'onnx');
+    if (!modelConfigRes.ok) {
       return {
         ok: false,
         failure: {
@@ -54,15 +55,12 @@ export class TransformersEngine extends BaseEngine {
     }
     try {
       if (!(model in this.generationPipelines)) {
-        let options = {};
-        const modelElems = modelNameRes.value.split('|');
+        const modelElems = modelConfigRes.value.name.split('|');
         const modelId = modelElems[0];
-        if (modelElems.length > 1) {
-          options = {
-            dtype: modelElems[1],
-          };
-        }
-        this.generationPipelines.model = await pipeline('text-generation', modelId, options);
+
+        this.generationPipelines.model = await pipeline('text-generation', modelId, {
+          ...(modelElems.length > 1 && { dtype: modelElems[1] as DTYPE }),
+        });
       }
       const tokenizer = this.generationPipelines.model.tokenizer;
       const modelInstance = this.generationPipelines.model.model;
@@ -143,8 +141,8 @@ export class TransformersEngine extends BaseEngine {
   }
 
   async fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>> {
-    const modelNameRes = await getEngineModelName(model, 'onnx');
-    if (!modelNameRes.ok) {
+    const modelConfigRes = await getEngineModelConfig(model, 'onnx');
+    if (!modelConfigRes.ok) {
       return {
         ok: false,
         failure: {
@@ -155,8 +153,10 @@ export class TransformersEngine extends BaseEngine {
     }
     try {
       if (!(model in this.generationPipelines)) {
-        this.generationPipelines.model = await pipeline('text-generation', modelNameRes.value, {
-          dtype: 'q4',
+        const modelElems = modelConfigRes.value.name.split('|');
+        const modelId = modelElems[0];
+
+        this.generationPipelines.model = await pipeline('text-generation', modelId, {
           progress_callback: (progressInfo: ProgressInfo) => {
             let percentage = 0;
             let total = 0;
@@ -178,6 +178,7 @@ export class TransformersEngine extends BaseEngine {
               description,
             });
           },
+          ...(modelElems.length > 1 && { dtype: modelElems[1] as DTYPE }),
         });
       }
       return { ok: true, value: undefined };
@@ -189,8 +190,51 @@ export class TransformersEngine extends BaseEngine {
     }
   }
 
-  async isSupported(model: string): Promise<boolean> {
-    const modelNameRes = await getEngineModelName(model, 'onnx');
-    return modelNameRes.ok;
+  async isSupported(model: string): Promise<Result<void>> {
+    const modelConfigRes = await getEngineModelConfig(model, 'onnx');
+    if (modelConfigRes.ok) {
+      if (modelConfigRes.value.vram) {
+        const availableRamRes = await getAvailableRAM();
+        if (availableRamRes.ok) {
+          if (modelConfigRes.value.vram < availableRamRes.value) {
+            return {
+              ok: true,
+              value: undefined,
+            };
+          } else {
+            return {
+              ok: false,
+              failure: {
+                code: FailureCode.InsufficientRAMError,
+                description: `Model ${model} requires at least ${String(modelConfigRes.value.vram)} MB to be loaded, but on ${String(availableRamRes.value)} MB are currently available.`,
+              },
+            };
+          }
+        }
+      }
+      return {
+        ok: true,
+        value: undefined,
+      };
+    }
+    return {
+      ok: false,
+      failure: {
+        code: FailureCode.UnsupportedModelError,
+        description: `Model ${model} is unavailable for local inference.`,
+      },
+    };
   }
 }
+
+type DTYPE =
+  | 'auto'
+  | 'fp32'
+  | 'fp16'
+  | 'q8'
+  | 'int8'
+  | 'uint8'
+  | 'q4'
+  | 'bnb4'
+  | 'q4f16'
+  | Record<string, 'auto' | 'fp32' | 'fp16' | 'q8' | 'int8' | 'uint8' | 'q4' | 'bnb4' | 'q4f16'>;

@@ -145,6 +145,7 @@ class NaturalIdPartitioner(Partitioner):
 
     @partition_id_to_natural_id.setter
     def partition_id_to_natural_id(self, value: dict[int, str]) -> None:
+        """Set the partition_id_to_natural_id property."""
         raise AttributeError(
             "Setting the partition_id_to_natural_id dictionary is not allowed."
         )
