@@ -4,6 +4,7 @@ isort:skip_file
 """
 import builtins
 import flwr.proto.fab_pb2
+import flwr.proto.message_pb2
 import flwr.proto.recorddict_pb2
 import flwr.proto.run_pb2
 import flwr.proto.transport_pb2
@@ -210,3 +211,34 @@ class StopRunResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["success",b"success"]) -> None: ...
 global___StopRunResponse = StopRunResponse
+
+class GetArtifactRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+global___GetArtifactRequest = GetArtifactRequest
+
+class GetArtifactResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    CONTEXT_FIELD_NUMBER: builtins.int
+    FAB_FIELD_NUMBER: builtins.int
+    LOG_FIELD_NUMBER: builtins.int
+    @property
+    def context(self) -> flwr.proto.message_pb2.Context: ...
+    @property
+    def fab(self) -> flwr.proto.fab_pb2.Fab: ...
+    log: typing.Text
+    def __init__(self,
+        *,
+        context: typing.Optional[flwr.proto.message_pb2.Context] = ...,
+        fab: typing.Optional[flwr.proto.fab_pb2.Fab] = ...,
+        log: typing.Text = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["context",b"context","fab",b"fab"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["context",b"context","fab",b"fab","log",b"log"]) -> None: ...
+global___GetArtifactResponse = GetArtifactResponse

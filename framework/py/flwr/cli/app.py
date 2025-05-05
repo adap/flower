@@ -19,6 +19,7 @@ from typer.main import get_command
 
 from flwr.common.version import package_version
 
+from .artifacts import artifacts
 from .build import build
 from .install import install
 from .log import log
@@ -46,6 +47,7 @@ app.command()(log)
 app.command()(ls)
 app.command()(stop)
 app.command()(login)
+app.command()(artifacts)
 
 typer_click_object = get_command(app)
 

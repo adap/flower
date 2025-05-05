@@ -44,6 +44,11 @@ class ExecStub(object):
                 request_serializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokensRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokensResponse.FromString,
                 )
+        self.GetArtifacts = channel.unary_unary(
+                '/flwr.proto.Exec/GetArtifacts',
+                request_serializer=flwr_dot_proto_dot_exec__pb2.GetArtifactRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_exec__pb2.GetArtifactResponse.FromString,
+                )
 
 
 class ExecServicer(object):
@@ -91,6 +96,13 @@ class ExecServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetArtifacts(self, request, context):
+        """Get artifacts from a run
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ExecServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -123,6 +135,11 @@ def add_ExecServicer_to_server(servicer, server):
                     servicer.GetAuthTokens,
                     request_deserializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokensRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokensResponse.SerializeToString,
+            ),
+            'GetArtifacts': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetArtifacts,
+                    request_deserializer=flwr_dot_proto_dot_exec__pb2.GetArtifactRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_exec__pb2.GetArtifactResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -233,5 +250,22 @@ class Exec(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/GetAuthTokens',
             flwr_dot_proto_dot_exec__pb2.GetAuthTokensRequest.SerializeToString,
             flwr_dot_proto_dot_exec__pb2.GetAuthTokensResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetArtifacts(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/GetArtifacts',
+            flwr_dot_proto_dot_exec__pb2.GetArtifactRequest.SerializeToString,
+            flwr_dot_proto_dot_exec__pb2.GetArtifactResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

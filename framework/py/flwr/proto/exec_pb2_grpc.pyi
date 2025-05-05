@@ -39,6 +39,11 @@ class ExecStub:
         flwr.proto.exec_pb2.GetAuthTokensResponse]
     """Get auth tokens upon request"""
 
+    GetArtifacts: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.exec_pb2.GetArtifactRequest,
+        flwr.proto.exec_pb2.GetArtifactResponse]
+    """Get artifacts from a run"""
+
 
 class ExecServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -87,6 +92,14 @@ class ExecServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.exec_pb2.GetAuthTokensResponse:
         """Get auth tokens upon request"""
+        pass
+
+    @abc.abstractmethod
+    def GetArtifacts(self,
+        request: flwr.proto.exec_pb2.GetArtifactRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.exec_pb2.GetArtifactResponse:
+        """Get artifacts from a run"""
         pass
 
 

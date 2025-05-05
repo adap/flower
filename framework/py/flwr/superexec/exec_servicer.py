@@ -29,12 +29,16 @@ from flwr.common.constant import LOG_STREAM_INTERVAL, Status, SubStatus
 from flwr.common.logger import log
 from flwr.common.serde import (
     config_record_from_proto,
+    context_to_proto,
+    fab_to_proto,
     run_to_proto,
     user_config_from_proto,
 )
-from flwr.common.typing import RunStatus
+from flwr.common.typing import Fab, RunStatus
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    GetArtifactRequest,
+    GetArtifactResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
@@ -219,6 +223,33 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         return GetAuthTokensResponse(
             access_token=credentials.access_token,
             refresh_token=credentials.refresh_token,
+        )
+
+    def GetArtifacts(
+        self, request: GetArtifactRequest, context: grpc.ServicerContext
+    ) -> GetArtifactResponse:
+        """Get artifacts generated during a run."""
+        log(INFO, "ExecServicer.GetArtifacts")
+        state = self.linkstate_factory.state()
+        ffs = self.ffs_factory.ffs()
+
+        # Exit if `run_id` not found
+        run = state.get_run(request.run_id)
+        if run is None:
+            context.abort(
+                grpc.StatusCode.NOT_FOUND, f"Run ID {request.run_id} not found"
+            )
+            raise grpc.RpcError()  # This line is unreachable
+
+        # Fetch ServerApp context
+        ctx = state.get_serverapp_context(request.run_id)
+        # Fetch FAB
+        fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0])
+        # Fetch logs
+        log_msg, _ = state.get_serverapp_log(request.run_id, 0)
+
+        return GetArtifactResponse(
+            context=context_to_proto(ctx), fab=fab_to_proto(fab), log=log_msg
         )
 
 

@@ -21,6 +21,7 @@ import "flwr/proto/fab.proto";
 import "flwr/proto/transport.proto";
 import "flwr/proto/recorddict.proto";
 import "flwr/proto/run.proto";
+import "flwr/proto/message.proto";
 
 service Exec {
   // Start run upon request
@@ -41,6 +42,9 @@ service Exec {
 
   // Get auth tokens upon request
   rpc GetAuthTokens(GetAuthTokensRequest) returns (GetAuthTokensResponse) {}
+
+  // Get artifacts from a run
+  rpc GetArtifacts(GetArtifactRequest) returns (GetArtifactResponse) {}
 }
 
 message StartRunRequest {
@@ -80,3 +84,10 @@ message GetAuthTokensResponse {
 
 message StopRunRequest { uint64 run_id = 1; }
 message StopRunResponse { bool success = 1; }
+
+message GetArtifactRequest { uint64 run_id = 1; }
+message GetArtifactResponse {
+  Context context = 1;
+  Fab fab = 2;
+  string log = 3;
+}
