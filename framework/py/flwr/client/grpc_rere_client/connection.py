@@ -42,11 +42,11 @@ from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
-    HeartbeatRequest,
-    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -157,21 +157,25 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     retry_invoker.should_giveup = _should_giveup_fn
 
     ###########################################################################
-    # heartbeat/create_node/delete_node/receive/send/get_run functions
+    # send_node_heartbeat/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
-    def heartbeat() -> bool:
+    def send_node_heartbeat() -> bool:
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
             return False
 
         # Construct the heartbeat request
-        req = HeartbeatRequest(node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL)
+        req = SendNodeHeartbeatRequest(
+            node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
+        )
 
         # Call FleetAPI
         try:
-            res: HeartbeatResponse = stub.Heartbeat(req, timeout=HEARTBEAT_CALL_TIMEOUT)
+            res: SendNodeHeartbeatResponse = stub.SendNodeHeartbeat(
+                req, timeout=HEARTBEAT_CALL_TIMEOUT
+            )
         except grpc.RpcError as e:
             status_code = e.code()
             if status_code == grpc.StatusCode.UNAVAILABLE:
@@ -188,7 +192,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             )
         return True
 
-    heartbeat_sender = HeartbeatSender(heartbeat)
+    heartbeat_sender = HeartbeatSender(send_node_heartbeat)
 
     def create_node() -> Optional[int]:
         """Set create_node."""

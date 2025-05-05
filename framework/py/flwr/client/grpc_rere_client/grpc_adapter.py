@@ -38,12 +38,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    HeartbeatRequest,
-    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
 )
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
@@ -120,11 +120,11 @@ class GrpcAdapter:
         """."""
         return self._send_and_receive(request, DeleteNodeResponse, **kwargs)
 
-    def Heartbeat(  # pylint: disable=C0103
-        self, request: HeartbeatRequest, **kwargs: Any
-    ) -> HeartbeatResponse:
+    def SendNodeHeartbeat(  # pylint: disable=C0103
+        self, request: SendNodeHeartbeatRequest, **kwargs: Any
+    ) -> SendNodeHeartbeatResponse:
         """."""
-        return self._send_and_receive(request, HeartbeatResponse, **kwargs)
+        return self._send_and_receive(request, SendNodeHeartbeatResponse, **kwargs)
 
     def PullMessages(  # pylint: disable=C0103
         self, request: PullMessagesRequest, **kwargs: Any
