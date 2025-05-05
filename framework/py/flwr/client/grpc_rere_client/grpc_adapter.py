@@ -42,6 +42,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
 )
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub

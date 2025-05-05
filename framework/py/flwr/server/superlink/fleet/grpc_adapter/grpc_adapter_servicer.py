@@ -37,6 +37,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeRequest,
     PullMessagesRequest,
     PushMessagesRequest,
+    SendNodeHeartbeatRequest,
 )
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import SendNodeHeartbeatRequest  # pylint: disable=E0611
