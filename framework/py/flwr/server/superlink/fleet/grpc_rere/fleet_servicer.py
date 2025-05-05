@@ -29,12 +29,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    HeartbeatRequest,
-    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
@@ -81,12 +81,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state=self.state_factory.state(),
         )
 
-    def Heartbeat(
-        self, request: HeartbeatRequest, context: grpc.ServicerContext
-    ) -> HeartbeatResponse:
+    def SendNodeHeartbeat(
+        self, request: SendNodeHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendNodeHeartbeatResponse:
         """."""
-        log(DEBUG, "[Fleet.Heartbeat] Request: %s", MessageToDict(request))
-        return message_handler.heartbeat(
+        log(DEBUG, "[Fleet.SendNodeHeartbeat] Request: %s", MessageToDict(request))
+        return message_handler.send_node_heartbeat(
             request=request,
             state=self.state_factory.state(),
         )

@@ -41,12 +41,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    HeartbeatRequest,
-    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
@@ -61,7 +61,7 @@ PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
 PATH_PULL_MESSAGES: str = "/api/v0/fleet/pull-messages"
 PATH_PUSH_MESSAGES: str = "/api/v0/fleet/push-messages"
-PATH_PING: str = "api/v0/fleet/heartbeat"
+PATH_SEND_NODE_HEARTBEAT: str = "api/v0/fleet/send-node-heartbeat"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
 PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
 
@@ -205,17 +205,21 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         grpc_res.ParseFromString(res.content)
         return grpc_res
 
-    def heartbeat() -> bool:
+    def send_node_heartbeat() -> bool:
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
             return False
 
         # Construct the heartbeat request
-        req = HeartbeatRequest(node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL)
+        req = SendNodeHeartbeatRequest(
+            node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
+        )
 
         # Send the request
-        res = _request(req, HeartbeatResponse, PATH_PING, retry=False)
+        res = _request(
+            req, SendNodeHeartbeatResponse, PATH_SEND_NODE_HEARTBEAT, retry=False
+        )
         if res is None:
             return False
 
@@ -227,7 +231,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             )
         return True
 
-    heartbeat_sender = HeartbeatSender(heartbeat)
+    heartbeat_sender = HeartbeatSender(send_node_heartbeat)
 
     def create_node() -> Optional[int]:
         """Set create_node."""
