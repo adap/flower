@@ -64,8 +64,9 @@ pip install -e .
 
 ## Dataset Preparation
 
-You can download the TON_IoT dataset by accessing the following [link](https://research.unsw.edu.au/projects/toniot-datasets). Please navigate to `TON_IoT datasets/Train_Test_datasets/Train_Test_Linux_dataset` and download the file `Train_test_linux_memory.csv`. Then, rename the downloaded file to `dataset.csv` and place it in the `dataset/` directory. If you want to run the experiments with your own data, ensure your dataset is also named `dataset.csv` and located in the same directory. The dataset is preprocessed using `dataset_preparation.py`, which you can modify if you wish to add custom preprocessing steps.
-
+You can download the TON_IoT dataset by accessing the following [link](https://research.unsw.edu.au/projects/toniot-datasets). Please navigate to `TON_IoT datasets/Train_Test_datasets/Train_Test_Linux_dataset` and download the file `Train_test_linux_memory.csv`. Then, rename the downloaded file to `dataset.csv` and place it in a new `dataset/` directory located in the directory where this `README.md` is.
+ 
+If you want to run the experiments with your own data, ensure your dataset is also named `dataset.csv` and located in the same directory. The dataset is preprocessed using `dataset_preparation.py`, which you can modify if you wish to add custom preprocessing steps.
 ## Running the Experiments
 To run StatAvg with TON IoT baseline, ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
