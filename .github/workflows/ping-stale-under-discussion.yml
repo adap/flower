@@ -1,4 +1,4 @@
-name: Ping Stale Under Discussion Issues
+name: Ping Stale Under Discussion GitHub Issues
 
 on:
   schedule:
