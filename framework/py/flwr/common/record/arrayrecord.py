@@ -28,7 +28,7 @@ import numpy as np
 
 from ..constant import GC_THRESHOLD
 from ..logger import log
-from ..serializable import Serializable, add_header_to_object_content
+from ..serializable import Serializable, add_header_to_object_content, get_object_id
 from ..typing import NDArray
 from .array import Array
 from .typeddict import TypedDict
@@ -370,7 +370,8 @@ class ArrayRecord(TypedDict[str, Array], Serializable):
     def serialize(self, refs_dict: dict[str, str]) -> bytes:
         """Serialize references of child objects."""
         obj_content = json.dumps(refs_dict).encode("utf-8")
-        return add_header_to_object_content(object_content=obj_content, cls=self)
+        full_serialized = add_header_to_object_content(object_content=obj_content, cls=self)
+        return full_serialized, get_object_id(full_serialized)
 
 
 class ParametersRecord(ArrayRecord):

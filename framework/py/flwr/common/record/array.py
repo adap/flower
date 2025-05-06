@@ -31,6 +31,7 @@ from ..serializable import (
     Serializable,
     add_header_to_object_content,
     get_object_content,
+    get_object_id,
 )
 from ..typing import NDArray
 
@@ -265,7 +266,8 @@ class Array(Serializable):
         )
 
         obj_content = array_proto.SerializeToString(deterministic=True)
-        return add_header_to_object_content(object_content=obj_content, cls=self)
+        full_serialized = add_header_to_object_content(object_content=obj_content, cls=self)
+        return full_serialized, get_object_id(full_serialized)
 
     @classmethod
     def deserialize(cls, serialized: bytes) -> Array:  # noqa: D102

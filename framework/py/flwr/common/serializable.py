@@ -17,7 +17,7 @@
 
 import hashlib
 from functools import singledispatchmethod
-from typing import TypeVar
+from typing import TypeVar, Union
 
 from .constant import OBJECT_CONTENT_LEN, OBJECT_NAME_LEN, PAD_SYMBOL
 
@@ -28,12 +28,12 @@ class Serializable:
     """Base class for serializable objects."""
 
     @singledispatchmethod
-    def serialize(self) -> bytes:
+    def serialize(self) -> Union[bytes, str]:
         """Serialize the object to bytes."""
         raise NotImplementedError()
 
     @serialize.register
-    def _(self, refs_dict: dict) -> bytes:
+    def _(self, refs_dict: dict) -> Union[bytes, str]:
         """Serialize references of child objects."""
         raise NotImplementedError()
 
