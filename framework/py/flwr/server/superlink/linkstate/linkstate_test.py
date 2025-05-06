@@ -869,12 +869,13 @@ class StateTest(unittest.TestCase):
         assert status2.details == RUN_FAILURE_DETAILS_NO_HEARTBEAT
 
     def test_acknowledge_node_heartbeat_failed(self) -> None:
-        """Test that acknowledge_heartbeat returns False when the heartbeat fails."""
+        """Test that acknowledge_node_heartbeat returns False when the heartbeat
+        fails."""
         # Prepare
         state: LinkState = self.state_factory()
 
         # Execute
-        is_successful = state.acknowledge_heartbeat(0, heartbeat_interval=30)
+        is_successful = state.acknowledge_node_heartbeat(0, heartbeat_interval=30)
 
         # Assert
         assert not is_successful
