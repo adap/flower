@@ -466,7 +466,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             return set(self.run_ids.keys())
 
-    def _check_run_activeness(self) -> None:
+    def _check_and_tag_inactive_run(self) -> None:
         """Check if any runs are no longer active.
 
         Marks runs with status 'starting' or 'running' as failed
@@ -487,7 +487,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
         # Check if runs are still active
-        self._check_run_activeness()
+        self._check_and_tag_inactive_run()
 
         with self.lock:
             if run_id not in self.run_ids:
@@ -498,7 +498,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
         # Check if runs are still active
-        self._check_run_activeness()
+        self._check_and_tag_inactive_run()
 
         with self.lock:
             return {
@@ -510,7 +510,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
         # Check if runs are still active
-        self._check_run_activeness()
+        self._check_and_tag_inactive_run()
 
         with self.lock:
             # Check if the run_id exists
@@ -609,7 +609,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         with self.lock:
             # Check if runs are still active
-            self._check_run_activeness()
+            self._check_and_tag_inactive_run()
 
             # Search for the run
             record = self.run_ids.get(run_id)

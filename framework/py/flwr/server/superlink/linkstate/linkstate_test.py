@@ -844,7 +844,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         run_id1 = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
-        run_id2 = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
+        run_id2 = state.create_run(None, None, "9abcdef", {}, ConfigRecord())
         # Switch to "running" status
         transition_run_status(state, run_id1, 2)
         transition_run_status(state, run_id2, 2)
