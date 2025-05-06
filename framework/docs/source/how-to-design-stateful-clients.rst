@@ -9,11 +9,11 @@ Design stateful ClientApps
 
 .. _clientapp: ref-api/flwr.client.ClientApp.html
 
-.. _configsrecord: ref-api/flwr.common.ConfigsRecord.html
+.. _configrecord: ref-api/flwr.common.ConfigRecord.html
 
 .. _context: ref-api/flwr.common.Context.html
 
-.. _metricsrecord: ref-api/flwr.common.MetricsRecord.html
+.. _metricrecord: ref-api/flwr.common.MetricRecord.html
 
 .. _numpyclient: ref-api/flwr.client.NumPyClient.html
 
@@ -57,7 +57,7 @@ Let's begin with a simple setting in which ``ClientApp`` is defined as follows. 
 .. code-block:: python
 
     import random
-    from flwr.common import Context, ConfigsRecord
+    from flwr.common import Context, ConfigRecord
     from flwr.client import ClientApp, NumPyClient
 
 
@@ -86,7 +86,7 @@ Let's say we want to save that randomly generated integer and append it to a lis
 persists in the context. To do that, you'll need to do two key things:
 
 1. Make the ``context.state`` reachable withing your client class
-2. Initialise the appropiate record type (in this example we use ConfigsRecord_) and
+2. Initialise the appropiate record type (in this example we use ConfigRecord_) and
    save/read your entry when required.
 
 .. code-block:: python
@@ -97,18 +97,18 @@ persists in the context. To do that, you'll need to do two key things:
             self.client_state = (
                 context.state
             )  # add a reference to the state of your ClientApp
-            if "eval_metrics" not in self.client_state.configs_records:
-                self.client_state.configs_records["eval_metrics"] = ConfigsRecord()
+            if "eval_metrics" not in self.client_state.config_records:
+                self.client_state.config_records["eval_metrics"] = ConfigRecord()
 
             # Print content of the state
             # You'll see it persists previous entries of `n_val`
-            print(self.client_state.configs_records)
+            print(self.client_state.config_records)
 
         def evaluate(self, parameters, config):
             n = random.randint(0, 10)  # Generate a random integer between 0 and 10
-            # Add results into a `ConfigsRecord` object under the "n_val" key
-            # Note a `ConfigsRecord` is a special type of python Dictionary
-            eval_metrics = self.client_state.configs_records["eval_metrics"]
+            # Add results into a `ConfigRecord` object under the "n_val" key
+            # Note a `ConfigRecord` is a special type of python Dictionary
+            eval_metrics = self.client_state.config_records["eval_metrics"]
             if "n_val" not in eval_metrics:
                 eval_metrics["n_val"] = [n]
             else:
@@ -131,26 +131,26 @@ in which the `ClientApp` logs these messages might differ slightly between round
 .. code-block:: shell
 
     # round 1 (.evaluate() hasn't been executed yet, so that's why it's empty)
-    configs_records={'eval_metrics': {}}
-    configs_records={'eval_metrics': {}}
+    config_records={'eval_metrics': {}}
+    config_records={'eval_metrics': {}}
 
     # round 2 (note `eval_metrics` has results added in round 1)
-    configs_records={'eval_metrics': {'n_val': [2]}}
-    configs_records={'eval_metrics': {'n_val': [8]}}
+    config_records={'eval_metrics': {'n_val': [2]}}
+    config_records={'eval_metrics': {'n_val': [8]}}
 
     # round 3 (note `eval_metrics` has results added in round 1&2)
-    configs_records={'eval_metrics': {'n_val': [8, 2]}}
-    configs_records={'eval_metrics': {'n_val': [2, 9]}}
+    config_records={'eval_metrics': {'n_val': [8, 2]}}
+    config_records={'eval_metrics': {'n_val': [2, 9]}}
 
     # round 4 (note `eval_metrics` has results added in round 1&2&3)
-    configs_records={'eval_metrics': {'n_val': [2, 9, 4]}}
-    configs_records={'eval_metrics': {'n_val': [8, 2, 5]}}
+    config_records={'eval_metrics': {'n_val': [2, 9, 4]}}
+    config_records={'eval_metrics': {'n_val': [8, 2, 5]}}
 
 Saving model parameters to the context
 --------------------------------------
 
-Using ConfigsRecord_ or MetricsRecord_ to save "simple" components is fine (e.g., float,
-integer, boolean, string, bytes, and lists of these types. Note that MetricsRecord_ only
+Using ConfigRecord_ or MetricRecord_ to save "simple" components is fine (e.g., float,
+integer, boolean, string, bytes, and lists of these types. Note that MetricRecord_ only
 supports float, integer, and lists of these types) Flower has a specific type of record,
 a ParametersRecord_, for storing model parameters or more generally data arrays.
 

@@ -2,6 +2,149 @@
 
 ## Unreleased
 
+## v1.18.0 (2025-04-23)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Alan Silva`, `Andrej Jovanović`, `Charles Beauville`, `Chong Shen Ng`, `Chunhui XU`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Guanheng Liu`, `Gustavo Bertoli`, `Heng Pan`, `Javier`, `Khoa Nguyen`, `Mohammad Naseri`, `Pinji Chen`, `Robert Steiner`, `Stephane Moroso`, `Taner Topal`, `William Lindskog`, `Yan Gao` <!---TOKEN_v1.18.0-->
+
+### What's new?
+
+- **Add support for Python 3.12** ([#5238](https://github.com/adap/flower/pull/5238))
+
+  Python 3.12 is officially supported (Python 3.12 was in preview support since Flower 1.6). Python 3.13 support continues to be in preview until all dependencies officially support Python 3.13.
+
+- **Enable TLS connection for `flwr` CLI using CA certificates** ([#5227](https://github.com/adap/flower/pull/5227), [#5237](https://github.com/adap/flower/pull/5237), [#5253](https://github.com/adap/flower/pull/5253), [#5254](https://github.com/adap/flower/pull/5254))
+
+  `flwr` CLI now supports secure TLS connections to SuperLink instances with valid CA certificates. If no root certificates are provided, the CLI automatically uses the default CA certificates bundled with gRPC.
+
+- **Add `--version` and `-V` flags to display `flwr` version** ([#5236](https://github.com/adap/flower/pull/5236))
+
+  Users can run `flwr --version` or `flwr -V` to print the current Flower version. The update also adds `-h` as a shorthand for CLI help.
+
+- **Use Hugging Face `flwrlabs` datasets in FlowerTune templates** ([#5205](https://github.com/adap/flower/pull/5205))
+
+  FlowerTune templates switch to use datasets hosted under the `flwrlabs` organization on Hugging Face.
+
+- **Upgrade FedBN baseline to support `flwr` CLI** ([#5115](https://github.com/adap/flower/pull/5115))
+
+  Refactors the FedBN baseline to use the new Flower CLI, removes Hydra, migrates configs, enables result saving, adds run instructions, and ensures stateful clients.
+
+- **Fix bug in Shamir's secret sharing utilities affecting Secure Aggregation** ([#5252](https://github.com/adap/flower/pull/5252))
+
+  Refactors Shamir's secret sharing utilities to fix a bug impacting Secure Aggregation. Thanks to [Pinji Chen](mailto:cpj24@mails.tsinghua.edu.cn) and [Guanheng Liu](mailto:coolwind326@gmail.com) for their contributions.
+
+- **Ensure backward compatibility for `RecordDict`** ([#5239](https://github.com/adap/flower/pull/5239), [#5270](https://github.com/adap/flower/pull/5270))
+
+  The `RecordDict` (formerly `RecordSet`) now maintains full backward compatibility. Legacy usages of `RecordSet` and its properties are supported, with deprecation warnings logged when outdated references are used. Users are encouraged to transition to the updated `RecordDict` interface promptly to avoid future issues.
+
+- **Refactor and optimize CI/CD for repository restructuring** ([#5202](https://github.com/adap/flower/pull/5202), [#5176](https://github.com/adap/flower/pull/5176), [#5200](https://github.com/adap/flower/pull/5200), [#5203](https://github.com/adap/flower/pull/5203), [#5210](https://github.com/adap/flower/pull/5210), [#5166](https://github.com/adap/flower/pull/5166), [#5214](https://github.com/adap/flower/pull/5214), [#5212](https://github.com/adap/flower/pull/5212), [#5209](https://github.com/adap/flower/pull/5209), [#5199](https://github.com/adap/flower/pull/5199), [#5204](https://github.com/adap/flower/pull/5204), [#5201](https://github.com/adap/flower/pull/5201), [#5191](https://github.com/adap/flower/pull/5191), [#5167](https://github.com/adap/flower/pull/5167), [#5248](https://github.com/adap/flower/pull/5248), [#5268](https://github.com/adap/flower/pull/5268), [#5251](https://github.com/adap/flower/pull/5251))
+
+  Improves CI/CD workflows to align with repository changes. Updates issue templates, fixes Docker and docs jobs, enhances script compatibility, adds checks, and bumps tool versions to streamline development and deployment.
+
+- **Improve and clean up documentation** ([#5233](https://github.com/adap/flower/pull/5233), [#5179](https://github.com/adap/flower/pull/5179), [#5216](https://github.com/adap/flower/pull/5216), [#5211](https://github.com/adap/flower/pull/5211), [#5217](https://github.com/adap/flower/pull/5217), [#5198](https://github.com/adap/flower/pull/5198), [#5168](https://github.com/adap/flower/pull/5168), [#5215](https://github.com/adap/flower/pull/5215), [#5169](https://github.com/adap/flower/pull/5169), [#5171](https://github.com/adap/flower/pull/5171), [#5240](https://github.com/adap/flower/pull/5240), [#5259](https://github.com/adap/flower/pull/5259))
+
+  Removes outdated content, redundant CLI flags, and unnecessary sections; updates Docker READMEs and virtual environment setup guide; and syncs translation source texts.
+
+- **General Improvements** ([#5241](https://github.com/adap/flower/pull/5241), [#5180](https://github.com/adap/flower/pull/5180), [#5226](https://github.com/adap/flower/pull/5226), [#5173](https://github.com/adap/flower/pull/5173), [#5219](https://github.com/adap/flower/pull/5219), [#5208](https://github.com/adap/flower/pull/5208), [#5158](https://github.com/adap/flower/pull/5158), [#5255](https://github.com/adap/flower/pull/5255), [#5264](https://github.com/adap/flower/pull/5264), [#5272](https://github.com/adap/flower/pull/5272))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
+### Incompatible changes
+
+- **Restructure repository (breaking change for contributors only)** ([#5206](https://github.com/adap/flower/pull/5206), [#5194](https://github.com/adap/flower/pull/5194), [#5192](https://github.com/adap/flower/pull/5192), [#5185](https://github.com/adap/flower/pull/5185), [#5184](https://github.com/adap/flower/pull/5184), [#5177](https://github.com/adap/flower/pull/5177), [#5183](https://github.com/adap/flower/pull/5183), [#5207](https://github.com/adap/flower/pull/5207), [#5267](https://github.com/adap/flower/pull/5267), [#5274](https://github.com/adap/flower/pull/5274))
+
+  Restructures the Flower repository by moving all framework-related code, configs, and dev tools into the `framework/` subdirectory. This includes relocating all files under `src/`, dev scripts, `pyproject.toml` and other configs. Contributor documentation has been updated to reflect these changes.
+
+  Switching to the new structure is straightforward and should require only minimal adjustments for most contributors, though this is a breaking change—refer to the [contributor guide](https://flower.ai/docs/framework/v1.18.0/en/contribute.html) for updated instructions.
+
+## v1.17.0 (2025-03-24)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Aline Almeida`, `Charles Beauville`, `Chong Shen Ng`, `Daniel Hinjos García`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Robert Steiner`, `Yan Gao` <!---TOKEN_v1.17.0-->
+
+### What's new?
+
+- **Allow registration of functions for custom message types** ([#5093](https://github.com/adap/flower/pull/5093))
+
+  Enables support for custom message types in `ServerApp` by allowing the `message_type` field to be set as `"<action_type>.<action_name>"`, where `<action_type>` is one of `train`, `evaluate`, or `query`, and `<action_name>` is a valid Python identifier.  Developers can now register handler functions for these custom message types using the decorator `@app.<action_type>("<action_name>")`. For example, the `my_echo_fn` function is called when the `ServerApp` sends a message with `message_type` set to `"query.echo"`, and the `get_mean_value` function is called when it's `"query.mean"`:
+
+  ```python
+  app = ClientApp()
+
+  @app.query("echo")
+  def my_echo_fn(message: Message, context: Context):
+      # Echo the incoming message
+      return Message(message.content, reply_to=message)
+
+  @app.query("mean")
+  def get_mean_value(message: Message, context: Context):
+      # Calculate the mean value
+      mean = ...  # Replace with actual computation
+
+      # Wrap the result in a MetricRecord, then in a RecordDict
+      metrics = MetricRecord({"mean": mean})
+      content = RecordDict({"metrics": metrics})
+
+      return Message(content, reply_to=message)
+  ```
+
+- **Rename core Message API components for clarity and consistency** ([#5140](https://github.com/adap/flower/pull/5140), [#5133](https://github.com/adap/flower/pull/5133), [#5139](https://github.com/adap/flower/pull/5139), [#5129](https://github.com/adap/flower/pull/5129), [#5150](https://github.com/adap/flower/pull/5150), [#5151](https://github.com/adap/flower/pull/5151), [#5146](https://github.com/adap/flower/pull/5146), [#5152](https://github.com/adap/flower/pull/5152))
+
+  To improve clarity and ensure consistency across the Message API, the following renamings have been made:
+
+  - `Driver` → `Grid`
+  - `RecordSet` → `RecordDict`
+  - `ParametersRecord` → `ArrayRecord`
+  - `MetricsRecord` → `MetricRecord`
+  - `ConfigsRecord` → `ConfigRecord`
+
+  Backward compatibility is maintained for all the above changes, and deprecation notices have been introduced to support a smooth transition.
+
+- **Enable seamless conversions between `ArrayRecord`/`Array` and NumPy/PyTorch types** ([#4922](https://github.com/adap/flower/pull/4922), [#4920](https://github.com/adap/flower/pull/4920))
+
+  One-liner conversions are now supported between `Array` and `numpy.ndarray` or `torch.Tensor`, and between `ArrayRecord` (formerly `ParametersRecord`) and PyTorch `state_dict` or a list of `numpy.ndarray`. This simplifies workflows involving model parameters and tensor data structures. Example usage includes `ArrayRecord(model.state_dict())` and `array_record.to_torch_state_dict()`. Refer to the [ArrayRecord](https://flower.ai/docs/framework/ref-api/flwr.common.ArrayRecord.html) and [Array](https://flower.ai/docs/framework/ref-api/flwr.common.Array.html) documentation for details.
+
+- **Revamp message creation using `Message` constructor** ([#5137](https://github.com/adap/flower/pull/5137), [#5153](https://github.com/adap/flower/pull/5153))
+
+  Revamps the `Message` creation workflow by enabling direct instantiation via the `Message(...)` constructor. This deprecates the previous APIs and simplifies message creation:
+
+  - `Driver.create_message(...)` → `Message(...)`
+  - `<some_message>.create_reply(...)` → `Message(..., reply_to=<some_message>)`
+
+- **Stabilize low-level Message API** ([#5120](https://github.com/adap/flower/pull/5120))
+
+  With all the changes above, the stability of the low-level Message API has been significantly improved. All preview feature warnings have been removed, marking the completion of its transition out of experimental status.
+
+- **Add node availability check to reduce wait time** ([#4968](https://github.com/adap/flower/pull/4968))
+
+  Adds a node availability check to SuperLink. If the target SuperNode is offline, SuperLink automatically generates an error reply message when the ServerApp attempts to pull the reply. This mechanism helps avoid unnecessary delays in each round caused by waiting for responses from unavailable nodes.
+
+- **Enable extensible event logging for FleetServicer and ExecServicer** ([#4998](https://github.com/adap/flower/pull/4998), [#4997](https://github.com/adap/flower/pull/4997), [#4951](https://github.com/adap/flower/pull/4951), [#4950](https://github.com/adap/flower/pull/4950), [#5108](https://github.com/adap/flower/pull/5108))
+
+  Introduces the necessary hooks and infrastructure to support RPC event logging for `FleetServicer` and `ExecServicer`. This enables advanced auditing and observability of RPC calls made by `flwr CLI` users and SuperNodes, when appropriate event log plugins are available.
+
+- **Add CareQA benchmark for medical LLM evaluation** ([#4966](https://github.com/adap/flower/pull/4966))
+
+  Adds the CareQA dataset as a new benchmark for evaluating medical knowledge in LLMs. CareQA consists of 5,621 QA pairs from official Spanish healthcare exams (2020–2024), translated to English and covering multiple disciplines. This enhances the diversity of datasets used in the Flower Medical LLM Leaderboard.
+
+- **Fix docstrings and improve handling of Ray nodes without CPU resources** ([#5155](https://github.com/adap/flower/pull/5155), [#5076](https://github.com/adap/flower/pull/5076), [#5132](https://github.com/adap/flower/pull/5132))
+
+  Fixes inaccurate or outdated docstrings in `RecordDict` and the `FlowerClient` used in FlowerTune templates, improving documentation clarity. Also adds handling for Ray nodes that report zero CPU resources, preventing potential runtime issues.
+
+- **Improve documentation and examples** ([#5162](https://github.com/adap/flower/pull/5162), [#5079](https://github.com/adap/flower/pull/5079), [#5123](https://github.com/adap/flower/pull/5123), [#5066](https://github.com/adap/flower/pull/5066), [#5143](https://github.com/adap/flower/pull/5143), [#5118](https://github.com/adap/flower/pull/5118), [#5148](https://github.com/adap/flower/pull/5148), [#5134](https://github.com/adap/flower/pull/5134), [#5080](https://github.com/adap/flower/pull/5080), [#5160](https://github.com/adap/flower/pull/5160), [#5069](https://github.com/adap/flower/pull/5069), [#5032](https://github.com/adap/flower/pull/5032))
+
+- **Update CI/CD** ([#5125](https://github.com/adap/flower/pull/5125), [#5062](https://github.com/adap/flower/pull/5062), [#5056](https://github.com/adap/flower/pull/5056), [#5048](https://github.com/adap/flower/pull/5048), [#5065](https://github.com/adap/flower/pull/5065), [#5061](https://github.com/adap/flower/pull/5061), [#5057](https://github.com/adap/flower/pull/5057), [#5064](https://github.com/adap/flower/pull/5064), [#5144](https://github.com/adap/flower/pull/5144))
+
+- **General Improvements** ([#5074](https://github.com/adap/flower/pull/5074), [#5126](https://github.com/adap/flower/pull/5126), [#5122](https://github.com/adap/flower/pull/5122), [#5149](https://github.com/adap/flower/pull/5149), [#5157](https://github.com/adap/flower/pull/5157))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
 ## v1.16.0 (2025-03-11)
 
 ### Thanks to our contributors

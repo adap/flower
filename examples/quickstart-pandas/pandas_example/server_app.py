@@ -45,7 +45,7 @@ def main(grid: Grid, context: Context) -> None:
         recorddict = RecordDict()
         messages = []
         for node_id in node_ids:  # one message for each node
-            message = grid.create_message(
+            message = Message(
                 content=recorddict,
                 message_type=MessageType.QUERY,  # target `query` method in ClientApp
                 dst_node_id=node_id,

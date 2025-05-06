@@ -12,5 +12,5 @@ authors = ["The Flower Authors <hello@flower.ai>"]
 python = ">=3.9.2,<3.11"
 flwr = ">=1.0,<2.0"
 flwr-datasets = { extras = ["vision"], version = ">=0.0.2,<1.0.0" }
-torch = "2.2.0"
-torchvision = "0.17.0"
+torch = "2.4.0"
+torchvision = "0.19.0"
