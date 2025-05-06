@@ -16,6 +16,7 @@
 
 
 import hashlib
+from functools import singledispatchmethod
 from typing import TypeVar
 
 from .constant import OBJECT_CONTENT_LEN, OBJECT_NAME_LEN, PAD_SYMBOL
@@ -26,8 +27,14 @@ T = TypeVar("T", bound="Serializable")
 class Serializable:
     """Base class for serializable objects."""
 
+    @singledispatchmethod
     def serialize(self) -> bytes:
         """Serialize the object to bytes."""
+        raise NotImplementedError()
+
+    @serialize.register
+    def _(self, refs_dict: dict) -> bytes:
+        """Serialize references of child objects."""
         raise NotImplementedError()
 
     @classmethod

@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import gc
+import json
 import sys
 from collections import OrderedDict
 from logging import WARN
@@ -27,6 +28,7 @@ import numpy as np
 
 from ..constant import GC_THRESHOLD
 from ..logger import log
+from ..serializable import Serializable, add_header_to_object_content
 from ..typing import NDArray
 from .array import Array
 from .typeddict import TypedDict
@@ -56,7 +58,7 @@ def _check_value(value: Array) -> None:
         )
 
 
-class ArrayRecord(TypedDict[str, Array]):
+class ArrayRecord(TypedDict[str, Array], Serializable):
     """Array record.
 
     A typed dictionary (``str`` to :class:`Array`) that can store named arrays,
@@ -364,6 +366,11 @@ class ArrayRecord(TypedDict[str, Array]):
             num_bytes += len(k)
 
         return num_bytes
+
+    def serialize(self, refs_dict: dict[str, str]) -> bytes:
+        """Serialize references of child objects."""
+        obj_content = json.dumps(refs_dict).encode("utf-8")
+        return add_header_to_object_content(object_content=obj_content, cls=self)
 
 
 class ParametersRecord(ArrayRecord):
