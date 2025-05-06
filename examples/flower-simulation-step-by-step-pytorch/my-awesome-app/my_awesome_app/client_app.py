@@ -3,7 +3,7 @@
 import torch
 from random import random
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context, ConfigsRecord
+from flwr.common import Context, ConfigRecord
 from my_awesome_app.task import Net, get_weights, load_data, set_weights, test, train
 
 import json
@@ -19,8 +19,8 @@ class FlowerClient(NumPyClient):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.net.to(self.device)
 
-        if "fit_metrics" not in self.client_state.configs_records:
-            self.client_state.configs_records["fit_metrics"] = ConfigsRecord()
+        if "fit_metrics" not in self.client_state.config_records:
+            self.client_state.config_records["fit_metrics"] = ConfigRecord()
 
     def fit(self, parameters, config):
         """Train a model using as starting point the parameters sent by the ServerApp.
@@ -39,7 +39,7 @@ class FlowerClient(NumPyClient):
         )
 
         # Append to persistent state the `train_loss` just obtained
-        fit_metrics = self.client_state.configs_records["fit_metrics"]
+        fit_metrics = self.client_state.config_records["fit_metrics"]
         if "train_loss_hist" not in fit_metrics:
             # If first entry, create the list
             fit_metrics["train_loss_hist"] = [train_loss]

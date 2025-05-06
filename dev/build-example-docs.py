@@ -70,7 +70,6 @@ urls = {
     "Java": "https://www.java.com/",
     "Keras": "https://keras.io/",
     "Kotlin": "https://kotlinlang.org/",
-    "mlcube": "https://docs.mlcommons.org/mlcube/",
     "MLX": "https://ml-explore.github.io/mlx/build/html/index.html",
     "MONAI": "https://monai.io/",
     "PEFT": "https://huggingface.co/docs/peft/index",

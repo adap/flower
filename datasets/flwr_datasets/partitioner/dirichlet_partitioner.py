@@ -85,7 +85,7 @@ class DirichletPartitioner(Partitioner):
     [2134, 2615, 3646, 6011, 6170, 6386, 6715, 7653, 8435, 10235]
     """
 
-    def __init__(  # pylint: disable=R0913
+    def __init__(  # pylint: disable=R0913, R0917
         self,
         num_partitions: int,
         partition_by: str,

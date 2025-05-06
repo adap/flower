@@ -42,15 +42,19 @@ commands to install the Flower directly from GitHub.
 
 Install ``flwr`` from the default GitHub branch (``main``):
 
-- ``pip install flwr@git+https://github.com/adap/flower.git`` (without extras)
-- ``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git'`` (with
-  extras)
+- ``pip install flwr@git+https://github.com/adap/flower.git#subdirectory=framework``
+  (without extras)
+- ``pip install
+  'flwr[simulation]@git+https://github.com/adap/flower.git#subdirectory=framework'``
+  (with extras)
 
 Install ``flwr`` from a specific GitHub branch (``branch-name``):
 
-- ``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` (without
-  extras)
-- ``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git@branch-name'``
+- ``pip install
+  flwr@git+https://github.com/adap/flower.git@branch-name#subdirectory=framework``
+  (without extras)
+- ``pip install
+  'flwr[simulation]@git+https://github.com/adap/flower.git@branch-name#subdirectory=framework'``
   (with extras)
 
 Open Jupyter Notebooks on Google Colab
