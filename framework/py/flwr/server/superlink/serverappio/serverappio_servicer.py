@@ -40,6 +40,10 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendAppHeartbeatRequest,
+    SendAppHeartbeatResponse,
+)
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
     PushLogsResponse,
@@ -66,8 +70,6 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushInsMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
-    RunHeartbeatRequest,
-    RunHeartbeatResponse,
 )
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
@@ -364,10 +366,20 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         }
         return GetRunStatusResponse(run_status_dict=run_status_dict)
 
-    def RunHeartbeat(
-        self, request: RunHeartbeatRequest, context: grpc.ServicerContext
-    ) -> RunHeartbeatResponse:
+    def SendAppHeartbeat(
+        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendAppHeartbeatResponse:
         """Handle a heartbeat from the ServerApp."""
+        log(DEBUG, "ServerAppIoServicer.SendAppHeartbeat")
+
+        # Init state
+        state = self.state_factory.state()
+
+        # Abort if the run is pending or finished
+        # Heartbeat can only be sent when the run is starting or running
+        abort_if(request.run_id, [Status.PENDING, Status.FINISHED], state, context)
+
+        # TODO: Acknowledge the heartbeat
         raise NotImplementedError
 
 

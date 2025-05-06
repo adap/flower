@@ -3,6 +3,7 @@
 import grpc
 
 from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
+from flwr.proto import heartbeat_pb2 as flwr_dot_proto_dot_heartbeat__pb2
 from flwr.proto import log_pb2 as flwr_dot_proto_dot_log__pb2
 from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 from flwr.proto import serverappio_pb2 as flwr_dot_proto_dot_serverappio__pb2
@@ -72,10 +73,10 @@ class ServerAppIoStub(object):
                 request_serializer=flwr_dot_proto_dot_log__pb2.PushLogsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_log__pb2.PushLogsResponse.FromString,
                 )
-        self.RunHeartbeat = channel.unary_unary(
-                '/flwr.proto.ServerAppIo/RunHeartbeat',
-                request_serializer=flwr_dot_proto_dot_serverappio__pb2.RunHeartbeatRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_serverappio__pb2.RunHeartbeatResponse.FromString,
+        self.SendAppHeartbeat = channel.unary_unary(
+                '/flwr.proto.ServerAppIo/SendAppHeartbeat',
+                request_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatResponse.FromString,
                 )
 
 
@@ -159,7 +160,7 @@ class ServerAppIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def RunHeartbeat(self, request, context):
+    def SendAppHeartbeat(self, request, context):
         """Heartbeat
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -224,10 +225,10 @@ def add_ServerAppIoServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_log__pb2.PushLogsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_log__pb2.PushLogsResponse.SerializeToString,
             ),
-            'RunHeartbeat': grpc.unary_unary_rpc_method_handler(
-                    servicer.RunHeartbeat,
-                    request_deserializer=flwr_dot_proto_dot_serverappio__pb2.RunHeartbeatRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_serverappio__pb2.RunHeartbeatResponse.SerializeToString,
+            'SendAppHeartbeat': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendAppHeartbeat,
+                    request_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -427,7 +428,7 @@ class ServerAppIo(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def RunHeartbeat(request,
+    def SendAppHeartbeat(request,
             target,
             options=(),
             channel_credentials=None,
@@ -437,8 +438,8 @@ class ServerAppIo(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/RunHeartbeat',
-            flwr_dot_proto_dot_serverappio__pb2.RunHeartbeatRequest.SerializeToString,
-            flwr_dot_proto_dot_serverappio__pb2.RunHeartbeatResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/SendAppHeartbeat',
+            flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatRequest.SerializeToString,
+            flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

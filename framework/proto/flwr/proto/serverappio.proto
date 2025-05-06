@@ -17,6 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/heartbeat.proto";
 import "flwr/proto/log.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/message.proto";
@@ -61,7 +62,8 @@ service ServerAppIo {
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
 
   // Heartbeat
-  rpc RunHeartbeat(RunHeartbeatRequest) returns (RunHeartbeatResponse) {}
+  rpc SendAppHeartbeat(SendAppHeartbeatRequest)
+      returns (SendAppHeartbeatResponse) {}
 }
 
 // GetNodes messages
@@ -95,10 +97,3 @@ message PushServerAppOutputsRequest {
   Context context = 2;
 }
 message PushServerAppOutputsResponse {}
-
-// Heartbeat messages
-message RunHeartbeatRequest {
-  uint64 run_id = 1;
-  double heartbeat_interval = 2;
-}
-message RunHeartbeatResponse { bool success = 1; }
