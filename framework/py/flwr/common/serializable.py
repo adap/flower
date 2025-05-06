@@ -35,11 +35,10 @@ class Serializable:
         """Deserialize from bytes and return an instance of the class."""
         raise NotImplementedError()
 
-    @property
-    def object_id(self) -> str:
-        """Return a SHA-256 hash of the serialized representation."""
-        serialized: bytes = self.serialize()
-        return hashlib.sha256(serialized).hexdigest()
+
+def get_object_id(serialized: bytes) -> str:
+    """Return a SHA-256 hash of the serialized object."""
+    return hashlib.sha256(serialized).hexdigest()
 
 
 def get_object_content(serialized: bytes, cls: type[T]) -> bytes:

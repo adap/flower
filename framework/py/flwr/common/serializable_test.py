@@ -21,6 +21,7 @@ from .serializable import (
     Serializable,
     add_header_to_object_content,
     get_object_content,
+    get_object_id,
     object_content_len_from_bytes,
     object_type_from_bytes,
 )
@@ -61,4 +62,4 @@ def test_serialization_and_deserialization() -> None:
 
     # assert
     # both objects are identical
-    assert obj.object_id == obj_.object_id
+    assert get_object_id(obj_b) == get_object_id(obj_.serialize())
