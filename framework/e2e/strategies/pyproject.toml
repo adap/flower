@@ -7,6 +7,7 @@ name = "quickstart_tensorflow"
 version = "0.1.0"
 description = "Keras Federated Learning Quickstart with Flower"
 authors = ["The Flower Authors <hello@flower.ai>"]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.9.2,<3.11"
