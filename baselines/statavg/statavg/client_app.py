@@ -1,10 +1,9 @@
 """statavg: A Flower Baseline."""
 
 import json
-import os
+import pickle
 from typing import Dict, Tuple
 
-import joblib
 import numpy as np
 import tensorflow as tf
 from imblearn.over_sampling import SMOTE
@@ -14,7 +13,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.common import ConfigRecord, Context
 from flwr.common.typing import NDArrays, Scalar
 from statavg.dataset import prepare_dataset
 from statavg.model import get_model
@@ -22,20 +21,20 @@ from statavg.model import get_model
 
 # Define Flower client
 # pylint: disable=too-many-instance-attributes
-class FlowerClient(NumPyClient):
-    """Client class that will implement StatAvg."""
+class FedAvgClient(NumPyClient):
+    """Client class that will implement FedAvg."""
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         trainset: DataFrame,
-        save_path: str,
         val_ratio: float,
         client_id: int,
         learning_rate: float,
         strategy_name: str,
         local_epochs: int,
         batch_size: int,
+        client_state,
     ) -> None:
 
         # load trainset
@@ -48,10 +47,7 @@ class FlowerClient(NumPyClient):
         self._strategy_name = strategy_name
         self.local_epochs = local_epochs
         self.batch_size = batch_size
-
-        # path to save scalers
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        self.dir_path = os.path.join(script_dir, save_path, f"client_{self.client_id}")
+        self.client_state = client_state
 
         # preprocess and split the dataset
         self.x_train, self.y_train, self.x_val, self.y_val = preprocess_and_split(
@@ -73,31 +69,27 @@ class FlowerClient(NumPyClient):
 
         # scale and resample
         self.scaler_first_r = None  # will be used only at the 1st round
-        self.normalize_data()
+        scaler, use_transform_only = self.determine_scaler()
+        self.normalize_data(scaler, use_transform_only)
         self.resample()
+
+    def determine_scaler(self):
+        """Determine data scaler."""
+        return StandardScaler(), False
 
     def resample(self) -> None:
         """Perform resampling using SMOTE."""
         smo = SMOTE(random_state=42)
         self.x_train, self.y_train = smo.fit_resample(self.x_train, self.y_train)
 
-    def normalize_data(self) -> None:
-        """Scales/normalize data (z-score)."""
-        # Check if the directory of the scaler exists
-        if not os.path.exists(self.dir_path) or self._strategy_name == "fedavg":
-            # this will be executed only on the first round iff 'statavg'
-            # since the scaler directory does not exist yet
-            scaler = StandardScaler()
-            self.x_train = scaler.fit_transform(self.x_train)
-            self.x_val = scaler.transform(self.x_val)
-            self.scaler_first_r = scaler
-        else:
-            scaler = joblib.load(f"{self.dir_path}/scaler.joblib")
+    def normalize_data(self, scaler, use_transform_only) -> None:
+        """Normalise data."""
+        if use_transform_only:
             self.x_train = scaler.transform(self.x_train)
-            self.x_val = scaler.transform(self.x_val)
-            # in case the directory already exists from previous experiments,
-            # the following line is used to prevent error at the 1st round
-            self.scaler_first_r = scaler
+        else:
+            self.x_train = scaler.fit_transform(self.x_train)
+        self.x_val = scaler.transform(self.x_val)
+        self.scaler_first_r = scaler
 
     def encode_labels(self) -> None:
         """Encode the labels."""
@@ -112,6 +104,46 @@ class FlowerClient(NumPyClient):
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
+        """Create a Dict with local statistics and sends it to the server."""
+        # set weights and fit
+        self.model.set_weights(parameters)
+        self.model.fit(
+            self.x_train,
+            self.y_train,
+            epochs=self.local_epochs,
+            batch_size=self.batch_size,
+            verbose=0,
+        )
+
+        weights = self.model.get_weights()  # type: ignore
+        return weights, len(self.x_train), {}  # type: ignore
+
+    def evaluate(
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[float, int, Dict]:
+        """Evaluate using the validation set: x_val."""
+        self.model.set_weights(parameters)
+        loss, accuracy = self.model.evaluate(self.x_val, self.y_val, verbose=0)
+
+        return loss, len(self.x_val), {"accuracy": accuracy}
+
+
+class StatAvgClient(FedAvgClient):
+    """Client class that will implement StatAvg."""
+
+    def determine_scaler(self):
+        """Determine scaler with client context."""
+        if "scaler" not in self.client_state.config_records.keys():
+            scaler = StandardScaler()
+            use_transform_only = False
+        else:
+            scaler = pickle.loads(
+                self.client_state.config_records["scaler"]["serialized_obj"]
+            )
+            use_transform_only = True
+        return scaler, use_transform_only
+
+    def fit(self, parameters, config):
         """Create a Dict with local statistics and sends it to the server.
 
         At the 1st round: Receives aggregated statistics from the server.
@@ -119,11 +151,11 @@ class FlowerClient(NumPyClient):
         """
         # the client statistics are saved as a Dict[str, int] only at 1st round
         metrics = {}
-        if config["current_round"] == 1 and self._strategy_name == "statavg":
+        if config["current_round"] == 1:
             metrics = configure_metrics(self.scaler_first_r)
 
         # read the global statistics only at 2nd round
-        if config["current_round"] == 2 and self._strategy_name == "statavg":
+        if config["current_round"] == 2:
             for key, val in config.items():
                 if val == 0:
                     stats_global = json.loads(key)
@@ -138,45 +170,23 @@ class FlowerClient(NumPyClient):
             scaler.mean_ = mean_global
             scaler.var_ = var_global
             scaler.scale_ = std_global
-
-            # check if the directory exists, if not, create it
-            if not os.path.exists(self.dir_path):
-                os.makedirs(self.dir_path)
-
             #             Save the scaler/statistics
             # -------------------------------------------------
-            # since Flower does not persist state within different rounds
-            # the global statistics recieved by each client
-            # are saved in a dedicated directory.
             # In subsequent rounds (>2), clients load the saved scalers and retrieve
             # the global statistics.
             # Note that scaling/normalization happens in __init()__
             # by invoking the method normalize_data().
-            joblib.dump(scaler, f"{self.dir_path}/scaler.joblib")
+            serialized_scaler = pickle.dumps(scaler)
+            self.client_state.config_records["scaler"] = ConfigRecord(
+                {"serialized_obj": serialized_scaler}
+            )
+            # Sent to the server so that the
+            # server can access the local scalers for eval.
+            metrics = {"scaler": serialized_scaler}
             # ---------------------------------------------------
 
-        # set weights and fit
-        self.model.set_weights(parameters)
-        self.model.fit(
-            self.x_train,
-            self.y_train,
-            epochs=self.local_epochs,
-            batch_size=self.batch_size,
-            verbose=0,
-        )
-
-        weights = self.model.get_weights()  # type: ignore
-
-        return weights, len(self.x_train), metrics  # type: ignore
-
-    def evaluate(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[float, int, Dict]:
-        """Evaluate using the validation set: x_val."""
-        self.model.set_weights(parameters)
-        loss, accuracy = self.model.evaluate(self.x_val, self.y_val, verbose=0)
-
-        return loss, len(self.x_val), {"accuracy": accuracy}
+        weights, train_len, _ = super().fit(parameters, config)
+        return weights, train_len, metrics
 
 
 def preprocess_and_split(
@@ -221,17 +231,18 @@ def client_fn(context: Context):
     trainset, _ = prepare_dataset(
         cfg.num_clients, cfg.path_to_dataset, cfg.include_test, cfg.testset_ratio
     )
-
+    client_state = context.state
+    client_type = FedAvgClient if cfg.strategy_name == "fedavg" else StatAvgClient
     # Return Client instance
-    return FlowerClient(
+    return client_type(
         trainset=trainset[partition_id],
-        save_path=cfg.scaler_save_path,
         val_ratio=cfg.val_ratio,
         client_id=partition_id,
         learning_rate=cfg.learning_rate,
         strategy_name=cfg.strategy_name,
         local_epochs=cfg.local_epochs,
         batch_size=cfg.batch_size,
+        client_state=client_state,
     ).to_client()
 
 

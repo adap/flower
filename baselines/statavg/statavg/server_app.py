@@ -1,8 +1,5 @@
 """statavg: A Flower Baseline."""
 
-import os
-
-import joblib
 from omegaconf import DictConfig, OmegaConf
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
@@ -25,10 +22,9 @@ def get_evaluate_fn(cfg: DictConfig):
         cfg.num_clients, cfg.path_to_dataset, cfg.include_test, cfg.testset_ratio
     )
 
-    def evalaute_fn(server_round, parameters, config):
+    def evalaute_fn(server_round, parameters, scaler):
         """Evaluate the test set (if provided)."""
-        _, _ = server_round, config
-
+        _ = server_round
         if testset.empty:
             # this implies that testset is not used
             # and thus, included_testset from config file is False
@@ -42,12 +38,12 @@ def get_evaluate_fn(cfg: DictConfig):
         # normalization
         # Check if the directory of the scaler exists and pick a scaler
         # of an arbitrary user. It's the same for all users.
-        if not os.path.exists(cfg.scaler_save_path):
+        if scaler:
+            scaler = scaler[1]
+            x_test = scaler.transform(x_test)
+        else:
             scaler = StandardScaler()
             x_test = scaler.fit_transform(x_test)
-        else:
-            scaler = joblib.load(f"{cfg.scaler_save_path}/client_1/scaler.joblib")
-            x_test = scaler.transform(x_test)
 
         model = get_model(cfg.input_shape, cfg.num_classes)
         model.set_weights(parameters)

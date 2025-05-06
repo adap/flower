@@ -2,7 +2,6 @@
 
 import os
 import pickle
-import shutil
 from logging import INFO
 from pathlib import Path
 
@@ -43,10 +42,3 @@ def save_results_and_clean_dir(history, run_config):
     results_path.mkdir(exist_ok=True, parents=True)
     with open(results_path / "results.pickle", "wb") as file:
         pickle.dump(results, file)
-
-    # (Optional): Delete scalers directory for future experiments
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    scaler_save_path = os.path.join(script_dir, run_config.scaler_save_path)
-    if run_config.delete_scaler_dir:
-        if os.path.exists(scaler_save_path):
-            shutil.rmtree(scaler_save_path)
