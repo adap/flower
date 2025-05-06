@@ -91,7 +91,7 @@ To reproduce the results of the paper (Fig. 3., StatAvg), simply run:
 bash run_experiments.sh
 ```
 
-The expected results should look similar to the following figure (which you can visualize using the notebook contained in the `docs` directory.):
+The expected results should look similar to the following figure (which you can visualize using the notebook contained in the `docs` directory):
 <p align="center">
   <b>Testing Accuracy vs Rounds for StatAvg</b><br>
   <img src="_static/results.png" alt="StatAvg Figure"/>
