@@ -97,7 +97,7 @@ The expected results should look similar to the following figure (which you can 
   <img src="_static/results.png" alt="StatAvg Figure"/>
 </p>
 
-It is noted that the results are saved into a pickle file in the directory `outputs/`, which will be automatically created when the experiments are run.
+It is noted that the results are saved into a pickle file in the directory `results/`, which will be automatically created when the experiments are run.
 In the paper, server-side evaluation is not implemented, as it is considered that the server does not own any data. However, it can be enabled by executing:
 
 ```bash
