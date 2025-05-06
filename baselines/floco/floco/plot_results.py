@@ -38,7 +38,7 @@ def read_from_results(path: str) -> Tuple[str, List[float], List[float], str, st
         )
 
 
-def make_plot(dir_path: str, dataset: str, split: str, plt_title: str) -> None:
+def make_plot(dir_path: str, dataset: str, split_name: str, plt_title: str) -> None:
     """Given a directory with json files, generate a plot using the provided title."""
     _, ax = plt.subplots(1, 2, figsize=(8, 3))
 
@@ -55,7 +55,7 @@ def make_plot(dir_path: str, dataset: str, split: str, plt_title: str) -> None:
                 read_split,
                 pers_lamda,
             ) = read_from_results(file_name)
-            if read_dataset != dataset or read_split != split:
+            if read_dataset != dataset or read_split != split_name:
                 continue
             if algorithm == "Floco" and pers_lamda > 0:
                 algorithm = r"Floco$^{+}$"

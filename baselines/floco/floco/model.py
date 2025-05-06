@@ -127,7 +127,9 @@ class Net(nn.Module):
         return self.classifier(x)
 
 
-def train(net, trainloader, epochs, device, reg_params=None, lamda=0.0):
+def train(
+    net, trainloader, epochs, device, reg_params=None, lamda=0.0
+):  # pylint: disable=R0917
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss()

@@ -7,9 +7,6 @@ from typing import Dict, Optional, Tuple, Union
 
 import torch
 
-from floco.dataset import get_testloader
-from floco.model import Net, SimplexModel, get_weights, set_weights, test
-from floco.strategy import CustomFedAvg, Floco
 from flwr.common import (
     Context,
     NDArrays,
@@ -18,6 +15,10 @@ from flwr.common import (
     ndarrays_to_parameters,
 )
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+
+from .dataset import get_testloader
+from .model import Net, SimplexModel, get_weights, set_weights, test
+from .strategy import CustomFedAvg, Floco
 
 DEVICE = torch.device(
     "cuda:0"
@@ -78,6 +79,7 @@ def server_evaluate(
     context: Context,
 ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
     """Evaluate the current global model on the test set."""
+    _ = server_round
     if context.run_config["algorithm"] == "Floco":
         server_model = SimplexModel(endpoints=context.run_config["endpoints"], seed=0)
         set_weights(server_model, parameters)
@@ -124,7 +126,7 @@ def get_strategy(context: Context) -> Union[CustomFedAvg, Floco]:
             evaluate_fn=server_evaluate,
             context=context,
         )
-    elif context.run_config["algorithm"] == "Floco":
+    if context.run_config["algorithm"] == "Floco":
         tau = int(context.run_config["tau"])
         rho = float(context.run_config["rho"])
         endpoints = int(context.run_config["endpoints"])
@@ -142,8 +144,7 @@ def get_strategy(context: Context) -> Union[CustomFedAvg, Floco]:
             rho=rho,
             endpoints=endpoints,
         )
-    else:
-        raise ValueError("Algorithm not implemented")
+    raise ValueError("Algorithm not implemented")
 
 
 def server_fn(context: Context):

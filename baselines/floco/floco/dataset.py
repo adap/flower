@@ -8,8 +8,11 @@ from flwr_datasets.partitioner import InnerDirichletPartitioner
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-from floco.partitioners import FoldPartitioner
 from flwr.common import Context
+
+from .partitioners import FoldPartitioner
+
+# pylint: disable=C0103, W0603
 
 # Cache datasets and dataloaders
 global_test_set = None

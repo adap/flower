@@ -29,6 +29,7 @@ from flwr.server.strategy import FedAvg
 from flwr.server.strategy.aggregate import aggregate, aggregate_inplace
 
 
+# pylint: disable=too-many-arguments
 class CustomFedAvg(FedAvg):
     """Custom Federated Averaging strategy that stores and sends context object."""
 

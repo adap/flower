@@ -4,10 +4,11 @@ import copy
 
 import torch
 
-from floco.dataset import get_federated_dataloaders
-from floco.model import Net, SimplexModel, get_weights, set_weights, test, train
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import ArrayRecord, Context, bytes_to_ndarray
+
+from .dataset import get_federated_dataloaders
+from .model import Net, SimplexModel, get_weights, set_weights, test, train
 
 
 class FlowerClient(NumPyClient):

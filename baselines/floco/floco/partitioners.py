@@ -42,7 +42,7 @@ class FoldPartitioner(Partitioner):
         Seed used for dataset shuffling. It has no effect if `shuffle` is False.
     """
 
-    def __init__(  # pylint: disable=R0913
+    def __init__(  # pylint: disable=R0913,R0917
         self,
         num_partitions: int,
         partition_by: str,
