@@ -285,3 +285,15 @@ class Array(Serializable):
             stype=proto_array.stype,
             data=proto_array.data,
         )
+
+    @property
+    def object_id(self):
+        # Recompute if not found (which might be because Array was modified)
+        if "_object_id" not in self.__dict__:
+            self.__dict__["_object_id"] = self.serialize()[1]
+        return self.__dict__["_object_id"]
+
+    def __setattr__(self, name, value):
+        """Discard object id if changes are done to Array."""
+        object.__getattribute__(self, "__dict__").pop("_object_id", None)
+        return super().__setattr__(name, value)

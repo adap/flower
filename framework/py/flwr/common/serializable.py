@@ -26,8 +26,6 @@ T = TypeVar("T", bound="Serializable")
 class Serializable:
     """Base class for serializable objects."""
 
-    _object_id: Optional[str] = None
-
     @overload
     def serialize(self) -> Union[bytes, str]: ...
 
@@ -78,10 +76,8 @@ class Serializable:
         raise NotImplementedError()
 
     @property
-    def object_id(self) -> str:
-        if self._object_id is None:
-            _, self._object_id = self.serialize()
-        return self._object_id
+    def object_id(self):
+        raise NotImplementedError()
 
     @object_id.setter
     def object_id(self, value: str) -> None:

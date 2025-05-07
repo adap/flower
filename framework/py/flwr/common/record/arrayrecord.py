@@ -394,6 +394,12 @@ class ArrayRecord(TypedDict[str, Array], Serializable):
         obj_content = get_object_content(serialized_refs_dict, cls)
         return json.loads(obj_content.decode(encoding="utf-8"))
 
+    @property
+    def object_id(self):
+        # Always compute object_id (tiny overhead)
+        _, object_id = self.serialize()
+        return object_id
+
 
 class ParametersRecord(ArrayRecord):
     """Deprecated class ``ParametersRecord``, use ``ArrayRecord`` instead.
