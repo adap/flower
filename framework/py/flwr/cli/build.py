@@ -126,8 +126,8 @@ def build(
 def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     """Build a FAB in memory and return the bytes, hash, and config.
 
-    This function assumes that the app is a valid Flower app and it will
-    bundle it into a FAB without additional checks.
+    This function assumes that the provided path points to a valid Flower app and 
+    bundles it into a FAB without performing additional validation.
 
     Parameters
     ----------
@@ -138,8 +138,8 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     -------
     tuple[bytes, str, dict[str, Any]]
         A tuple containing:
-        - the FAB bytes
-        - the FAB hash
+        - the FAB as bytes
+        - the SHA256 hash of the FAB
         - the project configuration (with the 'federations' field removed)
     """
     app = app.resolve()
