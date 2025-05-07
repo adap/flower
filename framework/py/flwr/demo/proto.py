@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pickle
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from flwr.demo.utils import get_object_head
 
@@ -30,18 +30,18 @@ class PushObjectResponse:
 
 
 @dataclass
-class ObjectRef:
+class SerdeHelper:
 
-    names: list[str]
-    ids: list[str]
+    extra: bytes = b""
+    children_ids: list[str] = field(default_factory=list)
 
     @staticmethod
-    def FromString(data: bytes) -> ObjectRef:
-        names, ids = pickle.loads(data)
-        return ObjectRef(names=names, ids=ids)
+    def FromString(data: bytes) -> SerdeHelper:
+        extra, ids = pickle.loads(data)
+        return SerdeHelper(extra=extra, children_ids=ids)
 
     def SerializeToString(self) -> bytes:
-        return pickle.dumps((self.names, self.ids))
+        return pickle.dumps((self.extra, self.children_ids))
 
 
 class ServerAppIoStub:

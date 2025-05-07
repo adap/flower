@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from flwr.demo.proto import (
-    ObjectRef,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
+    SerdeHelper,
     ServerAppIoStub,
 )
 from flwr.demo.serializable import Array, ArrayRecord, Serializable, get_object_class
@@ -36,8 +36,8 @@ def pull_and_deserialize_object(object_id: str, stub: ServerAppIoStub) -> Serial
         return obj_cls.deserialize(proto.object_content)
 
     children: list[Serializable] = []
-    refs = ObjectRef.FromString(get_object_body(proto.object_content))
-    for child_object_id in refs.ids:
+    refs = SerdeHelper.FromString(get_object_body(proto.object_content))
+    for child_object_id in refs.children_ids:
         children.append(pull_and_deserialize_object(child_object_id, stub))
 
     return obj_cls.deserialize(proto.object_content, children)
@@ -49,13 +49,15 @@ arr = Array(
     dtype="float32",
     shape=[2, 3],
     stype="ndarray",
+    # Data length: 11 bytes
     data=b"Mock data 1",
 )
 arr2 = Array(
     dtype="float32",
     shape=[2, 3],
     stype="ndarray",
-    data=b"Mock data 2",
+    # Data length: 76 bytes
+    data=b"Hello world! This is a long string that will be chunked into smaller pieces.",
 )
 arr_record = ArrayRecord(data={"arr": arr, "other": arr2})
 print(f"Initial object:\n{arr_record}\n")
