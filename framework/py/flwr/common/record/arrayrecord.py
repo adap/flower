@@ -22,13 +22,18 @@ import json
 import sys
 from collections import OrderedDict
 from logging import WARN
-from typing import TYPE_CHECKING, Any, cast, overload
+from typing import TYPE_CHECKING, Any, Union, cast, overload
 
 import numpy as np
 
 from ..constant import GC_THRESHOLD
 from ..logger import log
-from ..serializable import Serializable, add_header_to_object_content, get_object_id
+from ..serializable import (
+    Serializable,
+    add_header_to_object_content,
+    get_object_content,
+    get_object_id,
+)
 from ..typing import NDArray
 from .array import Array
 from .typeddict import TypedDict
@@ -367,11 +372,17 @@ class ArrayRecord(TypedDict[str, Array], Serializable):
 
         return num_bytes
 
-    def serialize(self, refs_dict: dict[str, str]) -> bytes:
-        """Serialize references of child objects."""
+    def serialize(self, refs_dict: dict[str, str]) -> Union[str, bytes]:
         obj_content = json.dumps(refs_dict).encode("utf-8")
-        full_serialized = add_header_to_object_content(object_content=obj_content, cls=self)
+        full_serialized = add_header_to_object_content(
+            object_content=obj_content, cls=self
+        )
         return full_serialized, get_object_id(full_serialized)
+
+    @classmethod
+    def deserialize_refs(cls, serialized_refs_dict: bytes) -> dict[str, str]:
+        obj_content = get_object_content(serialized_refs_dict, cls)
+        return json.loads(obj_content.decode(encoding="utf-8"))
 
 
 class ParametersRecord(ArrayRecord):

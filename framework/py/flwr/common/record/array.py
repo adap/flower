@@ -266,7 +266,9 @@ class Array(Serializable):
         )
 
         obj_content = array_proto.SerializeToString(deterministic=True)
-        full_serialized = add_header_to_object_content(object_content=obj_content, cls=self)
+        full_serialized = add_header_to_object_content(
+            object_content=obj_content, cls=self
+        )
         return full_serialized, get_object_id(full_serialized)
 
     @classmethod
