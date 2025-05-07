@@ -1,4 +1,4 @@
-name: Publish `@flwr/flwr` release on NPM
+name: Publish `@flwr/flwr` (NPM) and `ai.flower:flwr` (Maven)
 
 on:
   push:
@@ -10,9 +10,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  publish:
+  publish-npm:
     if: ${{ github.repository == 'adap/flower' }}
-    name: Publish release
+    name: Publish TypeScript to npm
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
@@ -41,3 +41,32 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish . --access public --no-git-checks
+
+  publish-kotlin:
+    if: ${{ github.repository == 'adap/flower' }}
+    name: Publish Kotlin to Maven Central
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    env:
+      MVN_CENTRAL_USER: ${{ secrets.MVN_CENTRAL_USER }}
+      MVN_CENTRAL_PASSWORD: ${{ secrets.MVN_CENTRAL_PASSWORD }}
+      ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GRADLE_SIGNING_KEY }}
+      ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GRADLE_SIGNING_PASSWORD }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Make publish script executable
+        run: chmod +x intelligence/kt/dev/publish.sh
+
+      - name: Publish Kotlin package
+        working-directory: intelligence/kt
+        run: ./dev/publish.sh
