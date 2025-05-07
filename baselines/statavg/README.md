@@ -94,7 +94,7 @@ bash run_experiments.sh
 The expected results should look similar to the following figure (which you can visualize using the notebook contained in the `docs` directory):
 <p align="center">
   <b>Testing Accuracy vs Rounds for StatAvg</b><br>
-  <img src="_static/results.png" alt="StatAvg Figure"/>
+  <img src="_static/results.png" alt="StatAvg Figure" width=600/>
 </p>
 
 It is noted that the results are saved into a pickle file in the directory `results/`, which will be automatically created when the experiments are run.
