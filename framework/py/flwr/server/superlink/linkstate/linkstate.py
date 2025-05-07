@@ -267,7 +267,9 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Retrieve all currently stored `node_public_keys` as a set."""
 
     @abc.abstractmethod
-    def acknowledge_heartbeat(self, node_id: int, heartbeat_interval: float) -> bool:
+    def acknowledge_node_heartbeat(
+        self, node_id: int, heartbeat_interval: float
+    ) -> bool:
         """Acknowledge a heartbeat received from a node.
 
         A node is considered online as long as it sends heartbeats within

@@ -926,7 +926,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         row = rows[0]
         return configrecord_from_bytes(row["federation_options"])
 
-    def acknowledge_heartbeat(self, node_id: int, heartbeat_interval: float) -> bool:
+    def acknowledge_node_heartbeat(
+        self, node_id: int, heartbeat_interval: float
+    ) -> bool:
         """Acknowledge a heartbeat received from a node, serving as a heartbeat.
 
         A node is considered online as long as it sends heartbeats within
