@@ -16,7 +16,7 @@
 
 
 import hashlib
-from typing import TypeVar, Union
+from typing import Optional, TypeVar, Union
 
 from .constant import OBJECT_CONTENT_LEN, OBJECT_NAME_LEN, PAD_SYMBOL
 
@@ -25,6 +25,8 @@ T = TypeVar("T", bound="Serializable")
 
 class Serializable:
     """Base class for serializable objects."""
+
+    _object_id: Optional[str] = None
 
     def serialize(self) -> Union[bytes, str]:
         """Serialize the object to bytes."""
@@ -43,6 +45,16 @@ class Serializable:
     def deserialize_refs(cls: type[T], serialized_refs_dict: bytes) -> dict[str, str]:
         """Deserialize references of child objects."""
         raise NotImplementedError()
+
+    @property
+    def object_id(self) -> str:
+        if self._object_id is None:
+            _, self._object_id = self.serialize()
+        return self._object_id
+
+    @object_id.setter
+    def object_id(self, value: str) -> None:
+        self._object_id = value
 
 
 def get_object_id(serialized: bytes) -> str:

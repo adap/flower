@@ -372,7 +372,16 @@ class ArrayRecord(TypedDict[str, Array], Serializable):
 
         return num_bytes
 
-    def serialize(self, refs_dict: dict[str, str]) -> Union[str, bytes]:
+    def serialize(self):
+        """Serialize in-place this ArrayRecord."""
+        # Serialize Arrays and construct refs dictionary
+        array_refs: dict[str, str] = {}
+        for array_name, array in self.items():
+            array_refs[array_name] = array.object_id
+        # Construct serialized ArrayDict
+        return self.serialize_refs(array_refs)
+
+    def serialize_refs(self, refs_dict: dict[str, str]) -> Union[str, bytes]:
         obj_content = json.dumps(refs_dict).encode("utf-8")
         full_serialized = add_header_to_object_content(
             object_content=obj_content, cls=self
