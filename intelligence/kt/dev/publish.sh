@@ -16,7 +16,7 @@ ARTIFACT_ID=$(getProp "ARTIFACT_ID")
 VERSION=$(getProp "VERSION_NAME")
 
 CENTRAL_API_URL="https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED"
-ZIP_FILE="${ARTIFACT_ID}-${VERSION}-bundle.zip"
+ZIP_FILE="${ARTIFACT_ID}-${VERSION}.zip"
 REPO_DIR="$HOME/.m2/repository/$(echo $GROUP_ID | tr '.' '/')/$ARTIFACT_ID/$VERSION"
 
 # === AUTH ===
@@ -57,10 +57,15 @@ for f in *.{aar,pom,jar,module}; do
     fi
   fi
 done
+popd > /dev/null
 
 # === CREATE ZIP ===
 echo "Packaging ZIP..."
-zip -r "$OLDPWD/$ZIP_FILE" *
+REPO_ROOT="$HOME/.m2/repository"
+RELATIVE_PATH="$(echo "$GROUP_ID" | tr '.' '/')/$ARTIFACT_ID/$VERSION"
+pushd "$REPO_ROOT" > /dev/null
+zip -r "$OLDPWD/$ZIP_FILE" "$RELATIVE_PATH"
+
 popd > /dev/null
 
 # === PUBLISH ===
