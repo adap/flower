@@ -71,7 +71,7 @@ popd > /dev/null
 # === PUBLISH ===
 echo "Uploading to Maven Central (USER_MANAGED)..."
 RESPONSE=$(curl -s -X POST "$CENTRAL_API_URL" \
-  -H "Authorization: Basic $AUTH_TOKEN" \
+  -H "Authorization: Bearer $AUTH_TOKEN" \
   -F "bundle=@$ZIP_FILE;type=application/octet-stream")
 
 echo "RAW RESPONSE:"
