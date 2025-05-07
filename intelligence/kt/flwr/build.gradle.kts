@@ -3,6 +3,8 @@ plugins {
   alias(libs.plugins.kotlin.android)
   alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.ktfmt)
+  alias(libs.plugins.maven.publish)
+  alias(libs.plugins.signing)
 }
 
 android {
@@ -36,6 +38,13 @@ android {
       excludes += "/META-INF/LICENSE-notice.md"
     }
   }
+
+  publishing {
+    singleVariant("release") {
+      withSourcesJar()
+      withJavadocJar()
+    }
+  }
 }
 
 dependencies {
@@ -64,3 +73,45 @@ dependencies {
 ktfmt { googleStyle() }
 
 tasks.withType<Test>().configureEach { useJUnitPlatform() }
+
+afterEvaluate {
+  publishing {
+    publications {
+      create<MavenPublication>("release") {
+        from(components["release"])
+
+        groupId = project.property("GROUP_ID") as String
+        artifactId = project.property("ARTIFACT_ID") as String
+        version = project.property("VERSION_NAME") as String
+
+        pom {
+          name.set("Flower Intelligence")
+          description.set("Open-Source On-Device AI with optional Confidential Remote Compute")
+          url.set("https://github.com/adap/flower/")
+
+          licenses {
+            license {
+              name.set("The Apache License, Version 2.0")
+              url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+          }
+          developers {
+            developer {
+              id.set("flower.ai")
+              name.set("The Flower Authors")
+            }
+          }
+          scm {
+            connection.set("scm:git:git://github.com/adap/flower.git")
+            developerConnection.set("scm:git:ssh://git@github.com/adap/flower.git")
+            url.set("https://github.com/adap/flower/")
+          }
+        }
+      }
+    }
+  }
+
+  signing {
+    sign(publishing.publications["release"])
+  }
+}
