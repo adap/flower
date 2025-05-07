@@ -16,7 +16,7 @@
 
 
 import hashlib
-from typing import Optional, TypeVar, Union
+from typing import Optional, TypeVar, Union, overload
 
 from .constant import OBJECT_CONTENT_LEN, OBJECT_NAME_LEN, PAD_SYMBOL
 
@@ -28,22 +28,53 @@ class Serializable:
 
     _object_id: Optional[str] = None
 
-    def serialize(self) -> Union[bytes, str]:
-        """Serialize the object to bytes."""
+    @overload
+    def serialize(self) -> Union[bytes, str]: ...
+
+    @overload
+    def serialize(self, refs_dict: dict[str, str]) -> Union[bytes, str]: ...
+
+    def serialize(
+        self, refs_dict: Optional[dict[str, str]] = None
+    ) -> Union[bytes, str]:
+        if refs_dict is not None:
+            return self._serialize_refs(refs_dict)
+        return self._serialize()
+
+    def _serialize(self) -> Union[bytes, str]:
+        """Actual logic for serializing the object."""
         raise NotImplementedError()
 
-    def serialize_refs(self, refs_dict: dict[str, str]) -> Union[bytes, str]:
-        """Serialize references of child objects."""
+    def _serialize_refs(self, refs_dict: dict[str, str]) -> Union[bytes, str]:
+        """Actual logic for serializing references."""
+        raise NotImplementedError()
+
+    @overload
+    @classmethod
+    def deserialize(cls: type[T], serialized: bytes) -> T: ...
+
+    @overload
+    @classmethod
+    def deserialize(cls: type[T], serialized: dict[str, str]) -> dict[str, str]: ...
+
+    @classmethod
+    def deserialize(
+        cls: type[T], serialized: Union[bytes, dict[str, str]]
+    ) -> Union[T, dict[str, str]]:
+        if isinstance(serialized, dict):
+            return cls._deserialize_refs(serialized)
+        return cls._deserialize(serialized)
+
+    @classmethod
+    def _deserialize(cls: type[T], serialized: bytes) -> T:
+        """Actual logic for deserializing the object."""
         raise NotImplementedError()
 
     @classmethod
-    def deserialize(cls: type[T], serialized: bytes) -> T:
-        """Deserialize from bytes and return an instance of the class."""
-        raise NotImplementedError()
-
-    @classmethod
-    def deserialize_refs(cls: type[T], serialized_refs_dict: bytes) -> dict[str, str]:
-        """Deserialize references of child objects."""
+    def _deserialize_refs(
+        cls: type[T], serialized_refs_dict: dict[str, str]
+    ) -> dict[str, str]:
+        """Actual logic for deserializing references."""
         raise NotImplementedError()
 
     @property

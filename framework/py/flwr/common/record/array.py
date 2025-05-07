@@ -20,7 +20,7 @@ from __future__ import annotations
 import sys
 from dataclasses import dataclass
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, cast, overload
+from typing import TYPE_CHECKING, Any, Optional, Union, cast, overload
 
 import numpy as np
 
@@ -257,7 +257,11 @@ class Array(Serializable):
         ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
         return cast(NDArray, ndarray_deserialized)
 
-    def serialize(self) -> bytes:  # noqa: D102
+    def serialize(
+        self, refs_dict: Optional[dict[str, str]] = None
+    ) -> Union[bytes, str]:  # noqa: D102
+        if refs_dict:
+            raise NotImplementedError()
         array_proto = ArrayProto(
             dtype=self.dtype,
             shape=self.shape,
@@ -273,7 +277,6 @@ class Array(Serializable):
 
     @classmethod
     def deserialize(cls, serialized: bytes) -> Array:  # noqa: D102
-
         obj_content = get_object_content(serialized, cls)
         proto_array = ArrayProto.FromString(obj_content)
         return cls(
