@@ -72,7 +72,7 @@ Create Flower Dev Environment
 
        ::
 
-           (your-env-name) $ pip install poetry==1.7.1
+           (your-env-name) $ pip install poetry==2.1.3
 
 4. Navigate to the ``framework`` directory and install the Flower project in development
    mode, including all optional dependencies:
