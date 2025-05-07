@@ -79,7 +79,7 @@ jobs:
               table.push(`| ${number} | ${title} | ${assignees} |`);
             }
 
-            const slackText = `*Stale Under Discussion GitHub Issues (no activity in 7+ days)*\n\n\`\`\`\n${table.join("\n")}\n\`\`\`\n\nPlease review or update GitHub Issue status.`;
+            const slackText = `*Stale Under Discussion GitHub Issues (no activity in 7+ days)*\n\n\`\`\`\n${table.join("\n")}\n\`\`\`\n\nPlease review or update issue status.`;
 
             console.log("Sending Slack message...");
 
