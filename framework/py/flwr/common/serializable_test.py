@@ -19,10 +19,9 @@ from dataclasses import dataclass
 
 from .serializable import (
     Serializable,
-    add_header_to_object_content,
-    get_object_content,
+    add_header_to_object_body,
+    get_object_body,
     get_object_id,
-    object_content_len_from_bytes,
     object_type_from_bytes,
 )
 
@@ -34,12 +33,12 @@ class CustomDataClass(Serializable):
     data: bytes
 
     def serialize(self) -> bytes:  # noqa: D102
-        obj_content = self.data
-        return add_header_to_object_content(object_content=obj_content, cls=self)
+        obj_body = self.data
+        return add_header_to_object_body(object_body=obj_body, cls=self)
 
     @classmethod
     def deserialize(cls, serialized: bytes) -> "CustomDataClass":  # noqa: D102
-        data = get_object_content(serialized, cls)
+        data = get_object_body(serialized, cls)
         return CustomDataClass(data)
 
 
@@ -55,7 +54,7 @@ def test_serialization_and_deserialization() -> None:
     # Class name matches
     assert object_type_from_bytes(obj_b) == obj.__class__.__qualname__
     # Content length matches
-    assert object_content_len_from_bytes(obj_b) == len(data)
+    assert len(get_object_body(obj_b, CustomDataClass)) == len(data)
 
     # Deserialize
     obj_ = CustomDataClass.deserialize(obj_b)

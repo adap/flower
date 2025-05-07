@@ -20,7 +20,7 @@ from __future__ import annotations
 import sys
 from dataclasses import dataclass
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Optional, Union, cast, overload
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
@@ -29,8 +29,8 @@ from flwr.proto.recorddict_pb2 import Array as ArrayProto  # pylint: disable=E06
 from ..constant import SType
 from ..serializable import (
     Serializable,
-    add_header_to_object_content,
-    get_object_content,
+    add_header_to_object_body,
+    get_object_body,
     get_object_id,
 )
 from ..typing import NDArray
@@ -257,11 +257,7 @@ class Array(Serializable):
         ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
         return cast(NDArray, ndarray_deserialized)
 
-    def serialize(
-        self, refs_dict: Optional[dict[str, str]] = None
-    ) -> Union[bytes, str]:  # noqa: D102
-        if refs_dict:
-            raise NotImplementedError()
+    def serialize(self) -> tuple[bytes, str]:  # noqa: D102
         array_proto = ArrayProto(
             dtype=self.dtype,
             shape=self.shape,
@@ -269,16 +265,14 @@ class Array(Serializable):
             data=self.data,
         )
 
-        obj_content = array_proto.SerializeToString(deterministic=True)
-        full_serialized = add_header_to_object_content(
-            object_content=obj_content, cls=self
-        )
+        obj_body = array_proto.SerializeToString(deterministic=True)
+        full_serialized = add_header_to_object_body(object_body=obj_body, cls=self)
         return full_serialized, get_object_id(full_serialized)
 
     @classmethod
     def deserialize(cls, serialized: bytes) -> Array:  # noqa: D102
-        obj_content = get_object_content(serialized, cls)
-        proto_array = ArrayProto.FromString(obj_content)
+        obj_body = get_object_body(serialized, cls)
+        proto_array = ArrayProto.FromString(obj_body)
         return cls(
             dtype=proto_array.dtype,
             shape=list(proto_array.shape),

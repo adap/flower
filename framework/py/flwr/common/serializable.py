@@ -16,9 +16,9 @@
 
 
 import hashlib
-from typing import Optional, TypeVar, Union, overload
+from typing import TypeVar, Union, overload
 
-from .constant import OBJECT_CONTENT_LEN, OBJECT_NAME_LEN, PAD_SYMBOL
+from .constant import HEAD_BODY_DIVIDER
 
 T = TypeVar("T", bound="Serializable")
 
@@ -26,25 +26,8 @@ T = TypeVar("T", bound="Serializable")
 class Serializable:
     """Base class for serializable objects."""
 
-    @overload
-    def serialize(self) -> Union[bytes, str]: ...
-
-    @overload
-    def serialize(self, refs_dict: dict[str, str]) -> Union[bytes, str]: ...
-
-    def serialize(
-        self, refs_dict: Optional[dict[str, str]] = None
-    ) -> Union[bytes, str]:
-        if refs_dict is not None:
-            return self._serialize_refs(refs_dict)
-        return self._serialize()
-
-    def _serialize(self) -> Union[bytes, str]:
-        """Actual logic for serializing the object."""
-        raise NotImplementedError()
-
-    def _serialize_refs(self, refs_dict: dict[str, str]) -> Union[bytes, str]:
-        """Actual logic for serializing references."""
+    def serialize(self) -> tuple[bytes, str]:
+        """Serialize object."""
         raise NotImplementedError()
 
     @overload
@@ -89,9 +72,9 @@ def get_object_id(serialized: bytes) -> str:
     return hashlib.sha256(serialized).hexdigest()
 
 
-def get_object_content(serialized: bytes, cls: type[T]) -> bytes:
-    """Return object content but raise an error if object type in bytes does not match
-    name of class."""
+def get_object_body(serialized: bytes, cls: type[T]) -> bytes:
+    """Return object body but raise an error if object type in bytes does not match name
+    of class."""
     class_name = cls.__qualname__
     object_type = object_type_from_bytes(serialized)
     if not object_type == class_name:
@@ -100,52 +83,30 @@ def get_object_content(serialized: bytes, cls: type[T]) -> bytes:
             f"({object_type}) do not match."
         )
 
-    # Return object content by excluding the header
-    return serialized[OBJECT_NAME_LEN + OBJECT_CONTENT_LEN :]
+    # Return object body
+    return _get_object_body(serialized)
 
 
-def add_header_to_object_content(object_content: bytes, cls: T) -> bytes:
+def add_header_to_object_body(object_body: bytes, cls: T) -> bytes:
     """Add header to object content."""
     # Construct header
-    header = object_type_to_bytes(
-        cls.__class__.__qualname__
-    ) + object_content_len_to_bytes(object_content)
-    # Concatenate header and object content
-    return header + object_content
+    header = f"{cls.__class__.__qualname__} {len(object_body)}"
+    enc_header = header.encode(encoding="utf-8")
+    # Concatenate header and object body
+    return enc_header + HEAD_BODY_DIVIDER + object_body
 
 
 def _get_object_head(serialized: bytes) -> bytes:
-    """Return object head from bytes."""
-    return serialized[: OBJECT_NAME_LEN + OBJECT_CONTENT_LEN]
+    """Return object head from object content."""
+    return serialized[: serialized.find(HEAD_BODY_DIVIDER)]
 
 
-def object_type_to_bytes(class_name: str) -> bytes:
-    """Return object name based on the class it is based on.
-
-    Applies an `OBJECT_NAME_LEN` left padding with `PAD_SYMBOL`.
-    """
-    if len(class_name) > OBJECT_NAME_LEN:
-        raise ValueError(
-            f"The name of class `{class_name}` exceeds the maximum "
-            f"length ({OBJECT_NAME_LEN} char)"
-        )
-    return class_name.encode(encoding="utf-8").ljust(OBJECT_NAME_LEN, PAD_SYMBOL)
+def _get_object_body(serialized: bytes) -> bytes:
+    """Return object body from object content."""
+    return serialized[serialized.find(HEAD_BODY_DIVIDER) + 1 :]
 
 
 def object_type_from_bytes(serialized: bytes) -> str:
     """Return object type from bytes."""
-    obj_head = _get_object_head(serialized)
-    return obj_head[:OBJECT_NAME_LEN].rstrip(PAD_SYMBOL).decode(encoding="utf-8")
-
-
-def object_content_len_to_bytes(object_content: bytes) -> bytes:
-    """Return size in Bytes of the bytes buffer passed."""
-    return len(object_content).to_bytes(
-        OBJECT_CONTENT_LEN, byteorder="little", signed=False
-    )
-
-
-def object_content_len_from_bytes(serialized: bytes) -> int:
-    """Return length of serialized object in bytes."""
-    obj_head = _get_object_head(serialized)
-    return int.from_bytes(obj_head[OBJECT_NAME_LEN:], byteorder="little")
+    obj_head: str = _get_object_head(serialized).decode(encoding="utf-8")
+    return obj_head.split(" ", 1)[0]

@@ -22,7 +22,7 @@ import json
 import sys
 from collections import OrderedDict
 from logging import WARN
-from typing import TYPE_CHECKING, Any, Optional, Union, cast, overload
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
@@ -30,8 +30,8 @@ from ..constant import GC_THRESHOLD
 from ..logger import log
 from ..serializable import (
     Serializable,
-    add_header_to_object_content,
-    get_object_content,
+    add_header_to_object_body,
+    get_object_body,
     get_object_id,
 )
 from ..typing import NDArray
@@ -372,26 +372,21 @@ class ArrayRecord(TypedDict[str, Array], Serializable):
 
         return num_bytes
 
-    def serialize(
-        self, refs_dict: Optional[dict[str, str]] = None
-    ) -> Union[bytes, str]:  # noqa: D102
-        if refs_dict is None:
-            array_refs: dict[str, str] = {}
-            for array_name, array in self.items():
-                array_refs[array_name] = array.object_id
-            # Construct serialized ArrayDict
-            return self.serialize(array_refs)
+    def serialize(self) -> tuple[bytes, str]:  # noqa: D102
+
+        array_refs: dict[str, str] = {}
+        # reserialize (but likely using cached object_id)
+        for array_name, array in self.items():
+            array_refs[array_name] = array.object_id
 
         # Serialize references dict
-        obj_content = json.dumps(refs_dict).encode("utf-8")
-        full_serialized = add_header_to_object_content(
-            object_content=obj_content, cls=self
-        )
-        return full_serialized, get_object_id(full_serialized)
+        object_body = json.dumps(array_refs).encode("utf-8")
+        object_content = add_header_to_object_body(object_body=object_body, cls=self)
+        return object_content, get_object_id(object_content)
 
     @classmethod
     def deserialize(cls, serialized_refs_dict: bytes) -> dict[str, str]:  # noqa: D102
-        obj_content = get_object_content(serialized_refs_dict, cls)
+        obj_content = get_object_body(serialized_refs_dict, cls)
         return json.loads(obj_content.decode(encoding="utf-8"))
 
     @property
