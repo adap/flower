@@ -97,8 +97,8 @@ afterEvaluate {
           }
           developers {
             developer {
-              id.set("flower.ai")
               name.set("The Flower Authors")
+              url.set("flower.ai")
             }
           }
           scm {
