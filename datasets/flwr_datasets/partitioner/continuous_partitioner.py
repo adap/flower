@@ -27,10 +27,21 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 class ContinuousPartitioner(
     Partitioner
 ):  # pylint: disable=too-many-instance-attributes
-    """Partitioner based on a continuous dataset property with adjustable strictness.
+    """Partitioner based on a real-valued (continuous) dataset property with adjustable strictness.
 
-    This partitioner enables non-IID partitioning by sorting the dataset based on a
-    continuous property and introducing Gaussian noise controlled by a strictness parameter.
+    This partitioner enables non-IID partitioning by sorting the dataset according to a
+    continuous (i.e., real-valued, not categorical) property and introducing controlled noise
+    to adjust the level of heterogeneity.
+
+    To interpolate between IID and non-IID partitioning, a `strictness` parameter
+    (𝜎 ∈ [0, 1]) blends a standardized property vector (z ∈ ℝⁿ) with Gaussian noise
+    (ε ~ 𝒩(0, I)), producing blended scores:
+
+    b = 𝜎 · z + (1 - 𝜎) · ε
+
+    Samples are then sorted by `b` to assign them to partitions. When `strictness` is 0,
+    partitioning is purely random (IID), while a value of 1 strictly follows the property ranking
+    (strongly non-IID).
 
     Parameters
     ----------
@@ -47,18 +58,33 @@ class ContinuousPartitioner(
 
     Examples
     --------
-    >>> from flwr_datasets import FederatedDataset
+    >>> from datasets import Dataset
+    >>> import numpy as np
+    >>> import pandas as pd
     >>> from flwr_datasets.partitioner import ContinuousPartitioner
     >>>
+    >>> # Create synthetic data
+    >>> np.random.seed(42)
+    >>> df = pd.DataFrame({
+    >>>     "continuous": np.linspace(0, 10, 100),
+    >>>     "category": np.random.choice([0, 1, 2, 3], size=100)
+    >>> })
+    >>>
+    >>> # Convert to Hugging Face Dataset
+    >>> hf_dataset = Dataset.from_pandas(df)
+    >>>
+    >>> # Create and configure the partitioner
     >>> partitioner = ContinuousPartitioner(
     >>>     num_partitions=5,
-    >>>     partition_by="logS",
+    >>>     partition_by="continuous",
     >>>     strictness=0.7,
     >>>     shuffle=True
     >>> )
-    >>> fds = FederatedDataset(dataset="chembl_aqsol", partitioners={"train": partitioner})
-    >>> partition = fds.load_partition(0)
-    >>> print(partition[0])
+    >>> partitioner.dataset = hf_dataset  # Assign dataset manually
+    >>>
+    >>> # Load and inspect one partition
+    >>> partition = partitioner.load_partition(0)
+    >>> print(partition.to_pandas())
     """
 
     def __init__(
@@ -131,17 +157,17 @@ class ContinuousPartitioner(
         if np.any(property_values is None) or np.isnan(property_values).any():
             raise ValueError(
                 f"The column '{self._partition_by}' contains None or NaN values, "
-                "which are not supported by ContinuousPartitioner. "
+                f"which are not supported by {self.__class__.__qualname__}. "
                 "Please clean or filter your dataset before partitioning."
             )
 
         # Standardize
         std = np.std(property_values)
-        if std < 1e-6:
+        if std < 1e-6 and self._strictness > 0:
             raise ValueError(
-                f"Cannot standardize column '{self._partition_by}' because it has near-zero s.d. "
-                f"(std={std}). All values are nearly identical, which prevents meaningful"
-                " partitioning. Please choose a different column or adjust the dataset."
+                f"Cannot standardize column '{self._partition_by}' because it has near-zero std "
+                f"(std={std}). All values are nearly identical, which prevents meaningful non-IID partitioning. "
+                "Either choose a different partition property or set strictness to 0 for IID partitioning."
             )
 
         standardized_values = (property_values - np.mean(property_values)) / std
