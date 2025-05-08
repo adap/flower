@@ -18,16 +18,16 @@
 from dataclasses import dataclass
 
 from .inflatable import (
-    Inflatable,
+    InflatableObject,
     add_header_to_object_body,
     get_object_body,
     get_object_id,
-    object_type_from_bytes,
+    object_type_from_object_content,
 )
 
 
 @dataclass
-class CustomDataClass(Inflatable):
+class CustomDataClass(InflatableObject):
     """A dummy dataclass to test Inflatable features."""
 
     data: bytes
@@ -46,7 +46,7 @@ def test_deflate() -> None:
 
     # assert
     # Class name matches
-    assert object_type_from_bytes(obj_b) == obj.__class__.__qualname__
+    assert object_type_from_object_content(obj_b) == obj.__class__.__qualname__
     # Content length matches
     assert len(get_object_body(obj_b, CustomDataClass)) == len(data)
 
