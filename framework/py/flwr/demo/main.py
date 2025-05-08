@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from flwr.demo.proto import (
+    HasObjectRequest,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -13,6 +14,11 @@ from flwr.demo.utils import get_object_body
 
 def serialize_and_push_object(obj: Serializable, stub: ServerAppIoStub) -> None:
     """Serialize an object and push it to the server."""
+    object_id = obj.object_id
+    res = stub.HasObject(HasObjectRequest(object_id=object_id))
+    if res.has_object:
+        return
+
     if obj.children:
         for child in obj.children:
             serialize_and_push_object(child, stub)
@@ -59,7 +65,7 @@ arr2 = Array(
     # Data length: 76 bytes
     data=b"Hello world! This is a long string that will be chunked into smaller pieces.",
 )
-arr_record = ArrayRecord(data={"arr": arr, "other": arr2})
+arr_record = ArrayRecord(data={"arr": arr, "other": arr2, "repeat": arr})
 print(f"Initial object:\n{arr_record}\n")
 
 print("Serializing and pushing object to server...")

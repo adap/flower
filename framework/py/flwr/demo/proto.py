@@ -30,6 +30,16 @@ class PushObjectResponse:
 
 
 @dataclass
+class HasObjectRequest:
+    object_id: str
+
+
+@dataclass
+class HasObjectResponse:
+    has_object: bool
+
+
+@dataclass
 class SerdeHelper:
 
     extra: bytes = b""
@@ -64,3 +74,9 @@ class ServerAppIoStub:
         _type, _len = get_object_head(request.object_content)
         print(f"Pushed '{_type}' object ({_len} bytes) with ID '{request.object_id}'")
         return PushObjectResponse()
+
+    def HasObject(self, request: HasObjectRequest) -> HasObjectResponse:
+        # Simulate a gRPC call
+        has_object = request.object_id in self.store
+        print(f"Checked existence of object with ID '{request.object_id}': {has_object}")
+        return HasObjectResponse(has_object=has_object)

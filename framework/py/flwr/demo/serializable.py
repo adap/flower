@@ -20,15 +20,13 @@ class Serializable(ABC):
         """Return a list of child objects."""
 
     @abstractmethod
-    def serialize(self) -> tuple[bytes, str]:
+    def serialize(self) -> bytes:
         """Serialize the object to bytes.
 
         Returns
         -------
-        tuple[bytes, str]
-            A tuple containing:
-            - The object content as bytes
-            - The object ID as a string
+        bytes
+            The serialized object content.
         """
 
     @classmethod
@@ -55,11 +53,6 @@ class Serializable(ABC):
     def object_id(self) -> str:
         """Return the object ID."""
         return hashlib.sha256(self.serialize()).hexdigest()
-
-    @object_id.setter
-    def object_id(self, value: str):
-        """Set the object ID."""
-        pass  # No action by default
 
 
 @dataclass
