@@ -27,7 +27,7 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 class ContinuousPartitioner(
     Partitioner
 ):  # pylint: disable=too-many-instance-attributes
-    """Partitioner based on a real-valued (continuous) dataset property with adjustable strictness.
+    """Partitioner based on a real-valued dataset property with adjustable strictness.
 
     This partitioner enables non-IID partitioning by sorting the dataset according to a
     continuous (i.e., real-valued, not categorical) property and introducing controlled noise
@@ -165,9 +165,11 @@ class ContinuousPartitioner(
         std = np.std(property_values)
         if std < 1e-6 and self._strictness > 0:
             raise ValueError(
-                f"Cannot standardize column '{self._partition_by}' because it has near-zero std "
-                f"(std={std}). All values are nearly identical, which prevents meaningful non-IID partitioning. "
-                "Either choose a different partition property or set strictness to 0 for IID partitioning."
+                f"Cannot standardize column '{self._partition_by}' "
+                f"because it has near-zero std (std={std}). "
+                "All values are nearly identical, which prevents meaningful non-IID partitioning. "
+                "To resolve this, choose a different partition property "
+                "or set strictness to 0 to enable IID partitioning."
             )
 
         standardized_values = (property_values - np.mean(property_values)) / std
