@@ -42,11 +42,11 @@ def get_object_id(object_content: bytes) -> str:
     return hashlib.sha256(object_content).hexdigest()
 
 
-def get_object_body(content: bytes, cls: type[T]) -> bytes:
+def get_object_body(object_content: bytes, cls: type[T]) -> bytes:
     """Return object body but raise an error if object type in bytes does not match name
     of class."""
     class_name = cls.__qualname__
-    object_type = object_type_from_object_content(content)
+    object_type = object_type_from_object_content(object_content)
     if not object_type == class_name:
         raise ValueError(
             f"Class name ({class_name}) and object type "
@@ -54,7 +54,7 @@ def get_object_body(content: bytes, cls: type[T]) -> bytes:
         )
 
     # Return object body
-    return _get_object_body(content)
+    return _get_object_body(object_content)
 
 
 def add_header_to_object_body(object_body: bytes, cls: T) -> bytes:
@@ -66,17 +66,17 @@ def add_header_to_object_body(object_body: bytes, cls: T) -> bytes:
     return enc_header + HEAD_BODY_DIVIDER + object_body
 
 
-def _get_object_head(content: bytes) -> bytes:
+def _get_object_head(object_content: bytes) -> bytes:
     """Return object head from object content."""
-    return content[: content.find(HEAD_BODY_DIVIDER)]
+    return object_content[: object_content.find(HEAD_BODY_DIVIDER)]
 
 
-def _get_object_body(content: bytes) -> bytes:
+def _get_object_body(object_content: bytes) -> bytes:
     """Return object body from object content."""
-    return content[content.find(HEAD_BODY_DIVIDER) + 1 :]
+    return object_content[object_content.find(HEAD_BODY_DIVIDER) + 1 :]
 
 
-def object_type_from_object_content(content: bytes) -> str:
+def object_type_from_object_content(object_content: bytes) -> str:
     """Return object type from bytes."""
-    obj_head: str = _get_object_head(content).decode(encoding="utf-8")
+    obj_head: str = _get_object_head(object_content).decode(encoding="utf-8")
     return obj_head.split(" ", 1)[0]
