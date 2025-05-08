@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  publish-npm:
+  publish-typescript:
     if: ${{ github.repository == 'adap/flower' }}
     name: Publish Flower Intelligence TypeScript SDK to NPM
     runs-on: ubuntu-22.04
