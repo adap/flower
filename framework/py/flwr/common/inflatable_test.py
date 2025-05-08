@@ -32,17 +32,16 @@ class CustomDataClass(InflatableObject):
 
     data: bytes
 
-    def deflate(self) -> tuple[bytes, str]:  # noqa: D102
+    def deflate(self) -> bytes:  # noqa: D102
         obj_body = self.data
-        obj_content = add_header_to_object_body(object_body=obj_body, cls=self)
-        return obj_content, get_object_id(obj_content)
+        return add_header_to_object_body(object_body=obj_body, cls=self)
 
 
 def test_deflate() -> None:
     """Deflate a custom object and verify its object_id it."""
     data = b"this is a test"
     obj = CustomDataClass(data)
-    obj_b, _ = obj.deflate()
+    obj_b = obj.deflate()
 
     # assert
     # Class name matches

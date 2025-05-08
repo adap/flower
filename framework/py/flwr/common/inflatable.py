@@ -26,15 +26,14 @@ T = TypeVar("T", bound="InflatableObject")
 class InflatableObject:
     """Base class for inflatable objects."""
 
-    def deflate(self) -> tuple[bytes, str]:
+    def deflate(self) -> bytes:
         """Deflate object."""
         raise NotImplementedError()
 
     @property
     def object_id(self) -> str:
         """Get object_id."""
-        _, object_id = self.deflate()
-        return object_id
+        return get_object_id(self.deflate())
 
 
 def get_object_id(object_content: bytes) -> str:
