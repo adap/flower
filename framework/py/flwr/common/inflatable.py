@@ -66,12 +66,12 @@ def add_header_to_object_body(object_body: bytes, cls: T) -> bytes:
 
 def _get_object_head(object_content: bytes) -> bytes:
     """Return object head from object content."""
-    return object_content[: object_content.find(HEAD_BODY_DIVIDER)]
+    return object_content.split(HEAD_BODY_DIVIDER, 1)[0]
 
 
 def _get_object_body(object_content: bytes) -> bytes:
     """Return object body from object content."""
-    return object_content[object_content.find(HEAD_BODY_DIVIDER) + 1 :]
+    return object_content.split(HEAD_BODY_DIVIDER, 1)[1]
 
 
 def object_type_from_object_content(object_content: bytes) -> str:
