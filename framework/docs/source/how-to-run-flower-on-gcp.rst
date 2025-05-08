@@ -11,7 +11,7 @@ Kubernetes Engine (GKE) <https://cloud.google.com/kubernetes-engine>`_. The figu
 presents an overview of the architecture of the Flower components we will deploy on GCP
 using GKE through the current guide.
 
-.. figure:: ./_static/flwr-gke-architecture.png
+.. figure:: ./_static/flower-gke-architecture.png
     :align: center
     :width: 100%
     :alt: Running Flower on GCP using GKE Architecture
