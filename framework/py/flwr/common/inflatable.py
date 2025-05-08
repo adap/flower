@@ -80,7 +80,7 @@ def _get_object_body(serialized: bytes) -> bytes:
     return serialized[serialized.find(HEAD_BODY_DIVIDER) + 1 :]
 
 
-def object_type_from_bytes(serialized: bytes) -> str:
+def object_type_from_object_content(serialized: bytes) -> str:
     """Return object type from bytes."""
     obj_head: str = _get_object_head(serialized).decode(encoding="utf-8")
     return obj_head.split(" ", 1)[0]
