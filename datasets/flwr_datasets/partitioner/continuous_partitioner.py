@@ -27,7 +27,7 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 class ContinuousPartitioner(
     Partitioner
 ):  # pylint: disable=too-many-instance-attributes
-    """Partitioner based on a real-valued dataset property with adjustable strictness.
+    r"""Partitioner based on a real-valued dataset property with adjustable strictness.
 
     This partitioner enables non-IID partitioning by sorting the dataset according to a
     continuous (i.e., real-valued, not categorical) property and introducing controlled noise

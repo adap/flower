@@ -97,13 +97,26 @@ class TestContinuousPartitionerSuccess(unittest.TestCase):
         for indices in partitioner.partition_id_to_indices.values():
             self.assertTrue(indices == sorted(indices))
 
-    def test_strictness_zero_is_pure_noise(self) -> None:
-        """With strictness=0, output should be similar to shuffling."""
-        _, part1 = _dummy_setup(3, strictness=0.0, num_rows=30, seed=42)
-        _, part2 = _dummy_setup(3, strictness=0.0, num_rows=30, seed=43)
-        self.assertNotEqual(
-            part1.partition_id_to_indices, part2.partition_id_to_indices
+    def test_strictness_zero_partitions_have_uniform_distribution(self) -> None:
+        """With strictness=0, partitions should sample like global distribution."""
+        num_rows = 300
+        num_partitions = 3
+        _, partitioner = _dummy_setup(
+            num_partitions, strictness=0.0, num_rows=num_rows, seed=42
         )
+
+        global_values = np.linspace(0, 10, num_rows)
+
+        # Create global histogram
+        global_hist, bin_edges = np.histogram(
+            global_values, bins=10, range=(0, 10), density=True
+        )
+
+        for pid in range(num_partitions):
+            partition = partitioner.load_partition(pid)
+            part_values = partition["score"]
+            part_hist, _ = np.histogram(part_values, bins=bin_edges, density=True)
+            np.testing.assert_allclose(part_hist, global_hist, rtol=0.2, atol=0.05)
 
     def test_partitions_are_disjoint(self) -> None:
         """Ensure no sample index is shared across partitions."""
@@ -125,6 +138,23 @@ class TestContinuousPartitionerSuccess(unittest.TestCase):
             indices = partitioner.partition_id_to_indices[pid]
             values.extend(partitioner.dataset["score"][i] for i in indices)
         self.assertEqual(values, sorted(values))
+
+    def test_zero_stddev_allowed_when_strictness_zero(self) -> None:
+        """Allow partitioning with zero stddev when strictness=0 (IID case)."""
+        data = {
+            "score": [3.14] * 20,  # Constant value
+            "features": list(range(20)),
+        }
+        dataset = Dataset.from_dict(data)
+        partitioner = ContinuousPartitioner(
+            num_partitions=4, partition_by="score", strictness=0.0, seed=42
+        )
+        partitioner.dataset = dataset
+
+        partitions = [partitioner.load_partition(i) for i in range(4)]
+
+        total_rows = sum(len(part) for part in partitions)
+        self.assertEqual(total_rows, 20)
 
 
 class TestContinuousPartitionerFailure(unittest.TestCase):
