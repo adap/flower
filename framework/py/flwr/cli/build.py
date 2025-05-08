@@ -42,11 +42,11 @@ def write_to_zip(
     return zipfile_obj
 
 
-def get_fab_filename(conf: dict[str, Any], fab_hash: str) -> str:
+def get_fab_filename(config: dict[str, Any], fab_hash: str) -> str:
     """Get the FAB filename based on the given config and FAB hash."""
-    publisher = conf["tool"]["flwr"]["app"]["publisher"]
-    name = conf["project"]["name"]
-    version = conf["project"]["version"].replace(".", "-")
+    publisher = config["tool"]["flwr"]["app"]["publisher"]
+    name = config["project"]["name"]
+    version = config["project"]["version"].replace(".", "-")
     fab_hash_truncated = fab_hash[:FAB_HASH_TRUNCATION]
     return f"{publisher}.{name}.{version}.{fab_hash_truncated}.fab"
 
@@ -88,8 +88,8 @@ def build(
         )
         raise typer.Exit(code=1)
 
-    conf, errors, warnings = load_and_validate(app / "pyproject.toml")
-    if conf is None:
+    config, errors, warnings = load_and_validate(app / "pyproject.toml")
+    if config is None:
         typer.secho(
             "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
             + "\n".join([f"- {line}" for line in errors]),
@@ -110,7 +110,7 @@ def build(
     fab_bytes, fab_hash, _ = build_fab(app)
 
     # Get the name of the zip file
-    fab_filename = get_fab_filename(conf, fab_hash)
+    fab_filename = get_fab_filename(config, fab_hash)
 
     # Write the FAB
     Path(fab_filename).write_bytes(fab_bytes)
@@ -144,17 +144,17 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     app = app.resolve()
 
     # Load the pyproject.toml file
-    conf = load_toml(app / "pyproject.toml")
-    if conf is None:
+    config = load_toml(app / "pyproject.toml")
+    if config is None:
         raise ValueError("Project configuration could not be loaded.")
 
     # Remove the 'federations' field if it exists
     if (
-        "tool" in conf
-        and "flwr" in conf["tool"]
-        and "federations" in conf["tool"]["flwr"]
+        "tool" in config
+        and "flwr" in config["tool"]
+        and "federations" in config["tool"]["flwr"]
     ):
-        del conf["tool"]["flwr"]["federations"]
+        del config["tool"]["flwr"]["federations"]
 
     # Load .gitignore rules if present
     ignore_spec = _load_gitignore(app)
@@ -175,7 +175,7 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     fab_buffer = BytesIO()
     with zipfile.ZipFile(fab_buffer, "w", zipfile.ZIP_DEFLATED) as fab_file:
         # Add pyproject.toml
-        write_to_zip(fab_file, "pyproject.toml", tomli_w.dumps(conf))
+        write_to_zip(fab_file, "pyproject.toml", tomli_w.dumps(config))
 
         for file_path in all_files:
             # Read the file content manually
@@ -195,7 +195,7 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     fab_bytes = fab_buffer.getvalue()
     fab_hash = hashlib.sha256(fab_bytes).hexdigest()
 
-    return fab_bytes, fab_hash, conf
+    return fab_bytes, fab_hash, config
 
 
 def _load_gitignore(app: Path) -> pathspec.PathSpec:

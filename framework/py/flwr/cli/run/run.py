@@ -164,8 +164,8 @@ def _run_with_exec_api(
     fab = Fab(fab_hash, fab_bytes)
 
     # Construct a `ConfigRecord` out of a flattened `UserConfig`
-    fed_conf = flatten_dict(federation_config.get("options", {}))
-    c_record = user_config_to_configrecord(fed_conf)
+    fed_config = flatten_dict(federation_config.get("options", {}))
+    c_record = user_config_to_configrecord(fed_config)
 
     req = StartRunRequest(
         fab=fab_to_proto(fab),
