@@ -5,11 +5,11 @@
 Run Flower on GCP
 =================
 
-A step-by-step guide to learn how to create, deploy and run a Flower app on the
-`Google Cloud Platform (GCP) <https://console.cloud.google.com>`_ using the `Google
-Kubernetes Engine (GKE) <https://cloud.google.com/kubernetes-engine>`_. The figure below
-presents an overview of the architecture of the Flower components we will deploy on GCP
-using GKE.
+A step-by-step guide to learn how to create, deploy and run a Flower app on the `Google
+Cloud Platform (GCP) <https://console.cloud.google.com>`_ using the `Google Kubernetes
+Engine (GKE) <https://cloud.google.com/kubernetes-engine>`_. The figure below presents
+an overview of the architecture of the Flower components we will deploy on GCP using
+GKE.
 
 .. figure:: ./_static/flower-gke-architecture.png
     :align: center
@@ -130,14 +130,14 @@ Create a Google Artifact Registry
 
 The Google Cloud Artifact Registry is a fully managed, scalable, and private service for
 storing and managing software build artifacts and dependencies. Consequently, to run our
-Flower app on the GKE cluster, we need to store the app's specific
-Flower Docker images within the registry, i.e., ``ClientApp`` and ``ServerApp``, which
-we discuss in the next section. For typical use-cases, the Flower SuperLink and
-SuperNode Docker images do not need to be built and can be pulled directly from the
-official `Flower DockerHub repository <https://hub.docker.com/u/flwr>`_. This step is
-crucial as it enables the cluster, and subsequently the ``Pods``, to download the built
-Docker images and deploy the necessary Flower components. Please see below the
-instructions on how to create the repository using the ``gcloud`` CLI:
+Flower app on the GKE cluster, we need to store the app's specific Flower Docker images
+within the registry, i.e., ``ClientApp`` and ``ServerApp``, which we discuss in the next
+section. For typical use-cases, the Flower SuperLink and SuperNode Docker images do not
+need to be built and can be pulled directly from the official `Flower DockerHub
+repository <https://hub.docker.com/u/flwr>`_. This step is crucial as it enables the
+cluster, and subsequently the ``Pods``, to download the built Docker images and deploy
+the necessary Flower components. Please see below the instructions on how to create the
+repository using the ``gcloud`` CLI:
 
 .. code-block:: bash
 
@@ -157,11 +157,11 @@ instructions on how to create the repository using the ``gcloud`` CLI:
 Configure Flower App Docker Images
 ----------------------------------
 
-In order to proceed with this next step, first, we create a local Flower app,
-and then create a dedicated Dockerfile for the ServerApp and the ClientApp Docker
-images. Once we build the images, we tag them and push them to the newly created Google
-registry. Most of the steps on how to build Docker images discussed below are based on
-the `Flower Quickstart with Docker Tutorial
+In order to proceed with this next step, first, we create a local Flower app, and then
+create a dedicated Dockerfile for the ServerApp and the ClientApp Docker images. Once we
+build the images, we tag them and push them to the newly created Google registry. Most
+of the steps on how to build Docker images discussed below are based on the `Flower
+Quickstart with Docker Tutorial
 <https://flower.ai/docs/framework/docker/tutorial-quickstart-docker.html>`_.
 
 We create the Flower NumPy app as follows:
@@ -174,22 +174,20 @@ We create the Flower NumPy app as follows:
 Create Docker Images
 ~~~~~~~~~~~~~~~~~~~~
 
-Once the app is created, we navigate inside the app directory (i.e.,
-where the ``pyproject.toml`` file is) and create two ``Dockerfile``\s one for the
-``ClientApp`` component, named ``clientapp.Dockerfile`` and one for the ``ServerApp``
-component, named ``serverapp.Dockerfile``. We will use both files to build locally the
-necessary Docker images. We will be using the default images for ``SuperLink`` and
-``SuperLink`` available in the `Flower DockerHub repository
-<https://hub.docker.com/u/flwr>`_.
+Once the app is created, we navigate inside the app directory (i.e., where the
+``pyproject.toml`` file is) and create two ``Dockerfile``\s one for the ``ClientApp``
+component, named ``clientapp.Dockerfile`` and one for the ``ServerApp`` component, named
+``serverapp.Dockerfile``. We will use both files to build locally the necessary Docker
+images. We will be using the default images for ``SuperLink`` and ``SuperLink``
+available in the `Flower DockerHub repository <https://hub.docker.com/u/flwr>`_.
 
 .. note::
 
-    Even though the app you created has only ``NumPy`` as dependency, you can
-    use the provided ``clientapp.Dockerfile`` and ``serverapp.Dockerfile`` to create the
-    corresponding images for any Flower app when going from simulation to
-    deployment. The ``RUN`` command installs all the necessary dependencies for your app
-    to run and removes the ``flwr[simulation]`` dependency while building the Docker
-    images.
+    Even though the app you created has only ``NumPy`` as dependency, you can use the
+    provided ``clientapp.Dockerfile`` and ``serverapp.Dockerfile`` to create the
+    corresponding images for any Flower app when going from simulation to deployment.
+    The ``RUN`` command installs all the necessary dependencies for your app to run and
+    removes the ``flwr[simulation]`` dependency while building the Docker images.
 
 .. dropdown:: clientapp.Dockerfile
 
@@ -560,8 +558,8 @@ Run Flower App
 --------------
 
 Once all ``Pods`` are up and running, we need to get the ``EXTERNAL_IP`` of the
-``superlink-service`` and point our Flower app to use the Kubernetes cluster to
-submit and execute the job.
+``superlink-service`` and point our Flower app to use the Kubernetes cluster to submit
+and execute the job.
 
 To get the ``EXTERNAL-IP`` of the ``superlink-service`` we run the following command,
 which will show the ``NAME``, ``TYPE``, ``CLUSTER-IP``, ``EXTERNAL-IP`` and ``PORTS`` of
