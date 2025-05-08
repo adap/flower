@@ -10,9 +10,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  publish-npm:
+  publish-typescript:
     if: ${{ github.repository == 'adap/flower' }}
-    name: Publish TypeScript to npm
+    name: Publish Flower Intelligence TypeScript SDK to NPM
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
@@ -44,7 +44,7 @@ jobs:
 
   publish-kotlin:
     if: ${{ github.repository == 'adap/flower' }}
-    name: Publish Kotlin to Maven Central
+    name: Publish Flower Intelligence Kotlin SDK to Maven Central
     runs-on: ubuntu-22.04
     timeout-minutes: 10
 
