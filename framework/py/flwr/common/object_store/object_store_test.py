@@ -32,84 +32,84 @@ class ObjectStoreTest(unittest.TestCase):
         """Provide ObjectStore implementation to test."""
         raise NotImplementedError()
 
-    def test_get_non_existent_key(self) -> None:
-        """Test get method with a non-existent key."""
+    def test_get_non_existent_object_id(self) -> None:
+        """Test get method with a non-existent object_id."""
         object_store = self.object_store_factory()
-        key = "non_existent_key"
+        object_id = "non_existent_object_id"
 
-        retrieved_value = object_store.get(key)
+        retrieved_value = object_store.get(object_id)
 
         self.assertIsNone(retrieved_value)
 
     def test_put_and_get(self) -> None:
         """Test put and get methods."""
         object_store = self.object_store_factory()
-        key = "test_key"
+        object_id = "test_object_id"
         object_content = b"test_value"
 
-        object_store.put(key, object_content)
-        retrieved_value = object_store.get(key)
+        object_store.put(object_id, object_content)
+        retrieved_value = object_store.get(object_id)
 
         self.assertEqual(object_content, retrieved_value)
 
     def test_put_overwrite(self) -> None:
-        """Test put method with an existing key."""
+        """Test put method with an existing object_id."""
         object_store = self.object_store_factory()
-        key = "test_key"
+        object_id = "test_object_id"
         object_content1 = b"test_value1"
         object_content2 = b"test_value2"
 
-        object_store.put(key, object_content1)
-        object_store.put(key, object_content2)
-        retrieved_value = object_store.get(key)
+        object_store.put(object_id, object_content1)
+        object_store.put(object_id, object_content2)
+        retrieved_value = object_store.get(object_id)
 
         self.assertEqual(object_content2, retrieved_value)
 
-    def test_put_empty_key(self) -> None:
-        """Test put method with an empty key."""
+    def test_put_empty_object_id(self) -> None:
+        """Test put method with an empty object_id."""
         object_store = self.object_store_factory()
-        key = ""
+        object_id = ""
         object_content = b"test_value"
 
-        object_store.put(key, object_content)
-        retrieved_value = object_store.get(key)
+        object_store.put(object_id, object_content)
+        retrieved_value = object_store.get(object_id)
 
         self.assertEqual(object_content, retrieved_value)
 
     def test_delete(self) -> None:
         """Test delete method."""
         object_store = self.object_store_factory()
-        key = "test_key"
+        object_id = "test_object_id"
         object_content = b"test_value"
 
-        object_store.put(key, object_content)
-        object_store.delete(key)
-        retrieved_value = object_store.get(key)
+        object_store.put(object_id, object_content)
+        object_store.delete(object_id)
+        retrieved_value = object_store.get(object_id)
 
         self.assertIsNone(retrieved_value)
 
-    def test_delete_non_existent_key(self) -> None:
-        """Test delete method with a non-existent key."""
+    def test_delete_non_existent_object_id(self) -> None:
+        """Test delete method with a non-existent object_id."""
         object_store = self.object_store_factory()
-        key = "non_existent_key"
+        object_id = "non_existent_object_id"
 
-        object_store.delete(key)
+        object_store.delete(object_id)
         # No exception should be raised
 
     def test_clear(self) -> None:
         """Test clear method."""
         object_store = self.object_store_factory()
-        key1 = "test_key1"
+        object_id1 = "test_object_id1"
         object_content1 = b"test_value1"
-        key2 = "test_key2"
+        object_id2 = "test_object_id2"
         object_content2 = b"test_value2"
 
-        object_store.put(key1, object_content1)
-        object_store.put(key2, object_content2)
+        object_store.put(object_id1, object_content1)
+        object_store.put(object_id2, object_content2)
         object_store.clear()
 
-        retrieved_value1 = object_store.get(key1)
-        retrieved_value2 = object_store.get(key2)
+        retrieved_value1 = object_store.get(object_id1)
+        retrieved_value2 = object_store.get(object_id2)
 
         self.assertIsNone(retrieved_value1)
         self.assertIsNone(retrieved_value2)
@@ -124,10 +124,10 @@ class ObjectStoreTest(unittest.TestCase):
     def test_contains(self) -> None:
         """Test __contains__ method."""
         object_store = self.object_store_factory()
-        key = "test_key"
+        object_id = "test_object_id"
         object_content = b"test_value"
 
-        object_store.put(key, object_content)
+        object_store.put(object_id, object_content)
 
-        self.assertTrue(key in object_store)
-        self.assertFalse("non_existent_key" in object_store)
+        self.assertTrue(object_id in object_store)
+        self.assertFalse("non_existent_object_id" in object_store)

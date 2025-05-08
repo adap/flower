@@ -25,23 +25,23 @@ class InMemoryObjectStore(ObjectStore):
     def __init__(self) -> None:
         self.store: dict[str, bytes] = {}
 
-    def put(self, key: str, object_content: bytes) -> None:
+    def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store."""
-        self.store[key] = object_content
+        self.store[object_id] = object_content
 
-    def get(self, key: str) -> Optional[bytes]:
+    def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store."""
-        return self.store.get(key)
+        return self.store.get(object_id)
 
-    def delete(self, key: str) -> None:
+    def delete(self, object_id: str) -> None:
         """Delete an object from the store."""
-        if key in self.store:
-            del self.store[key]
+        if object_id in self.store:
+            del self.store[object_id]
 
     def clear(self) -> None:
         """Clear the store."""
         self.store.clear()
 
-    def __contains__(self, key: str) -> bool:
-        """Check if a key is in the store."""
-        return key in self.store
+    def __contains__(self, object_id: str) -> bool:
+        """Check if an object_id is in the store."""
+        return object_id in self.store

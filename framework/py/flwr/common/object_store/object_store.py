@@ -25,40 +25,40 @@ class ObjectStore(ABC):
     delete objects identified by keys.
     """
 
-    def put(self, key: str, object_content: bytes) -> None:
+    def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store.
 
         Parameters
         ----------
-        key : str
-            The key under which to store the object.
+        object_id : str
+            The object_id under which to store the object.
         object_content : bytes
             The serialized object to store.
         """
         raise NotImplementedError
 
-    def get(self, key: str) -> Optional[bytes]:
+    def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store.
 
         Parameters
         ----------
-        key : str
-            The key under which the object is stored.
+        object_id : str
+            The object_id under which the object is stored.
 
         Returns
         -------
         bytes
-            The object stored under the given key.
+            The object stored under the given object_id.
         """
         raise NotImplementedError
 
-    def delete(self, key: str) -> None:
+    def delete(self, object_id: str) -> None:
         """Delete an object from the store.
 
         Parameters
         ----------
-        key : str
-            The key under which the object is stored.
+        object_id : str
+            The object_id under which the object is stored.
         """
         raise NotImplementedError
 
@@ -69,17 +69,17 @@ class ObjectStore(ABC):
         """
         raise NotImplementedError
 
-    def __contains__(self, key: str) -> bool:
-        """Check if a key is in the store.
+    def __contains__(self, object_id: str) -> bool:
+        """Check if an object_id is in the store.
 
         Parameters
         ----------
-        key : str
-            The key to check.
+        object_id : str
+            The object_id to check.
 
         Returns
         -------
         bool
-            True if the key is in the store, False otherwise.
+            True if the object_id is in the store, False otherwise.
         """
         raise NotImplementedError

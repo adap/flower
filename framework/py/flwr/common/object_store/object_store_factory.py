@@ -31,7 +31,13 @@ class ObjectStoreFactory:
         self.store_instance: Optional[ObjectStore] = None
 
     def store(self) -> ObjectStore:
-        """Return an ObjectStore instance and create it, if necessary."""
+        """Return an ObjectStore instance and create it, if necessary.
+
+        Returns
+        -------
+        ObjectStore
+            An ObjectStore instance for storing objects by object_id.
+        """
         if self.store_instance is None:
             self.store_instance = InMemoryObjectStore()
         log(DEBUG, "Using InMemoryObjectStore")
