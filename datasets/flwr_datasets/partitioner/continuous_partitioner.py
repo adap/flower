@@ -37,7 +37,10 @@ class ContinuousPartitioner(
     (𝜎 ∈ [0, 1]) blends a standardized property vector (z ∈ ℝⁿ) with Gaussian noise
     (ε ~ 𝒩(0, I)), producing blended scores:
 
-    b = 𝜎 · z + (1 - 𝜎) · ε
+        .. math::
+
+        b = \sigma \cdot z + (1 - \sigma) \cdot ε
+
 
     Samples are then sorted by `b` to assign them to partitions. When `strictness` is 0,
     partitioning is purely random (IID), while a value of 1 strictly follows the property ranking
