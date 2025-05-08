@@ -48,6 +48,10 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushMessagesRequest,
     PushMessagesResponse,
 )
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
@@ -79,6 +83,8 @@ class _MockServicer:
                 return PushMessagesResponse()
             if isinstance(request, GetRunRequest):
                 return GetRunResponse()
+            if isinstance(request, SendNodeHeartbeatRequest):
+                return SendNodeHeartbeatResponse(success=True)
             return PullMessagesResponse(messages_list=[])
 
     def received_client_metadata(
@@ -120,6 +126,11 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             servicer.unary_unary,
             request_deserializer=GetRunRequest.FromString,
             response_serializer=GetRunResponse.SerializeToString,
+        ),
+        "SendNodeHeartbeat": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=SendNodeHeartbeatRequest.FromString,
+            response_serializer=SendNodeHeartbeatResponse.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(

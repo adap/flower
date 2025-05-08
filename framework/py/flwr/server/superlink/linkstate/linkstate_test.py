@@ -529,7 +529,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         for _ in range(10):
-            node_ids.append(state.create_node(ping_interval=10))
+            node_ids.append(state.create_node(heartbeat_interval=10))
         retrieved_node_ids = state.get_nodes(run_id)
 
         # Assert
@@ -544,7 +544,7 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
 
         # Execute
-        node_id = state.create_node(ping_interval=10)
+        node_id = state.create_node(heartbeat_interval=10)
         state.set_node_public_key(node_id, public_key)
         retrieved_node_ids = state.get_nodes(run_id)
         retrieved_node_id = state.get_node_id(public_key)
@@ -559,11 +559,11 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         public_key = b"mock"
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
-        node_id = state.create_node(ping_interval=10)
+        node_id = state.create_node(heartbeat_interval=10)
         state.set_node_public_key(node_id, public_key)
 
         # Execute
-        new_node_id = state.create_node(ping_interval=10)
+        new_node_id = state.create_node(heartbeat_interval=10)
         try:
             state.set_node_public_key(new_node_id, public_key)
         except ValueError:
@@ -587,7 +587,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
-        node_id = state.create_node(ping_interval=10)
+        node_id = state.create_node(heartbeat_interval=10)
 
         # Execute
         state.delete_node(node_id)
@@ -602,7 +602,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         public_key = b"mock"
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
-        node_id = state.create_node(ping_interval=10)
+        node_id = state.create_node(heartbeat_interval=10)
         state.set_node_public_key(node_id, public_key)
 
         # Execute
@@ -623,7 +623,7 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
 
         # Execute
-        node_id = state.create_node(ping_interval=10)
+        node_id = state.create_node(heartbeat_interval=10)
         state.set_node_public_key(node_id, public_key)
         retrieved_node_ids = state.get_nodes(run_id)
         retrieved_node_id = state.get_node_id(wrong_public_key)
@@ -638,7 +638,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         invalid_run_id = 61016
-        state.create_node(ping_interval=10)
+        state.create_node(heartbeat_interval=10)
 
         # Execute
         retrieved_node_ids = state.get_nodes(invalid_run_id)
@@ -760,26 +760,27 @@ class StateTest(unittest.TestCase):
         # Assert
         assert node_public_keys == public_keys
 
-    def test_acknowledge_ping(self) -> None:
+    def test_acknowledge_node_heartbeat(self) -> None:
         """Test if acknowledge_ping works and get_nodes return online nodes.
 
-        We permit one missed ping (PING_PATIENCE × ping_interval) before marking the
-        node offline, where PING_PATIENCE = 2.
+        We permit HEARTBEAT_PATIENCE - 1 missed heartbeats before marking
+        the node offline. In time units, nodes are considered online within
+        `last heartbeat time + HEARTBEAT_PATIENCE x heartbeat_interval (in seconds)`.
         """
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
-        node_ids = [state.create_node(ping_interval=10) for _ in range(100)]
+        node_ids = [state.create_node(heartbeat_interval=10) for _ in range(100)]
         for node_id in node_ids[:70]:
-            state.acknowledge_ping(node_id, ping_interval=30)
+            state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
         for node_id in node_ids[70:]:
-            state.acknowledge_ping(node_id, ping_interval=90)
+            state.acknowledge_node_heartbeat(node_id, heartbeat_interval=90)
 
         # Execute
         current_time = time.time()
         # Test with current_time + 70s
-        # node_ids[:70] remain online until current_time + PING_PATIENCE * 30s = 60s,
-        # node_ids[70:] remain online until current_time + PING_PATIENCE * 90s = 180s.
+        # node_ids[:70] are online until current_time + 60s (HEARTBEAT_PATIENCE * 30s)
+        # node_ids[70:] are online until current_time + 180s (HEARTBEAT_PATIENCE * 90s)
         # As a result, only node_ids[70:] will be returned by get_nodes().
         with patch("time.time", side_effect=lambda: current_time + 70):
             actual_node_ids = state.get_nodes(run_id)
@@ -787,13 +788,13 @@ class StateTest(unittest.TestCase):
         # Assert
         self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
 
-    def test_acknowledge_ping_failed(self) -> None:
-        """Test that acknowledge_ping returns False when the ping fails."""
+    def test_acknowledge_node_heartbeat_failed(self) -> None:
+        """Test that acknowledge_heartbeat returns False when the heartbeat fails."""
         # Prepare
         state: LinkState = self.state_factory()
 
         # Execute
-        is_successful = state.acknowledge_ping(0, ping_interval=30)
+        is_successful = state.acknowledge_node_heartbeat(0, heartbeat_interval=30)
 
         # Assert
         assert not is_successful
@@ -803,12 +804,12 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
-        node_id_0 = state.create_node(ping_interval=10)
-        node_id_1 = state.create_node(ping_interval=10)
+        node_id_0 = state.create_node(heartbeat_interval=10)
+        node_id_1 = state.create_node(heartbeat_interval=10)
 
-        # Run acknowledge ping
-        state.acknowledge_ping(node_id_0, ping_interval=90)
-        state.acknowledge_ping(node_id_1, ping_interval=30)
+        # Run acknowledge heartbeat
+        state.acknowledge_node_heartbeat(node_id_0, heartbeat_interval=90)
+        state.acknowledge_node_heartbeat(node_id_1, heartbeat_interval=30)
 
         # Create and store Messages
         in_message_0 = message_from_proto(
@@ -840,8 +841,8 @@ class StateTest(unittest.TestCase):
         # Execute
         current_time = time.time()
         # Test with current_time + 100s
-        # node_id_0 remain online until current_time + PING_PATIENCE * 90s = 180s,
-        # node_id_1 remain online until current_time + PING_PATIENCE * 30s = 60s.
+        # node_id_0 remain online until current_time + 180s (HEARTBEAT_PATIENCE * 90s)
+        # node_id_1 remain online until current_time + 60s (HEARTBEAT_PATIENCE * 30s)
         # As a result, a reply message with NODE_UNAVAILABLE
         # error will generate for node_id_1.
         with patch("time.time", side_effect=lambda: current_time + 100):

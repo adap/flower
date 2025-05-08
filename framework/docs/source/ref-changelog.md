@@ -1,6 +1,8 @@
 # Changelog
 
-## v1.18.0 (2025-04-22)
+## Unreleased
+
+## v1.18.0 (2025-04-23)
 
 ### Thanks to our contributors
 
@@ -56,7 +58,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Restructures the Flower repository by moving all framework-related code, configs, and dev tools into the `framework/` subdirectory. This includes relocating all files under `src/`, dev scripts, `pyproject.toml` and other configs. Contributor documentation has been updated to reflect these changes.
 
-  Switching to the new structure is straightforward and should require only minimal adjustments for most contributors, though this is a breaking change—refer to the [contributor guide](https://flower.ai/docs/framework/v1.17.0/en/contribute.html) for updated instructions.
+  Switching to the new structure is straightforward and should require only minimal adjustments for most contributors, though this is a breaking change—refer to the [contributor guide](https://flower.ai/docs/framework/v1.18.0/en/contribute.html) for updated instructions.
 
 ## v1.17.0 (2025-03-24)
 
