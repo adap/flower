@@ -127,6 +127,10 @@ GRPC_RETRY_MAX_DELAY = 20  # Maximum delay duration between two consecutive retr
 # Constants for ArrayRecord
 GC_THRESHOLD = 200_000_000  # 200 MB
 
+# Constants for Inflatable
+HEAD_BODY_DIVIDER = b"\x00"
+TYPE_BODY_LEN_DIVIDER = " "
+
 
 class MessageType:
     """Message type."""
