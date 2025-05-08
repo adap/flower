@@ -12,7 +12,7 @@ concurrency:
 jobs:
   publish-npm:
     if: ${{ github.repository == 'adap/flower' }}
-    name: Publish TypeScript to npm
+    name: Publish Flower Intelligence TypeScript SDK to NPM
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
