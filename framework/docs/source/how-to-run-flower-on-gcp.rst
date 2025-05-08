@@ -6,13 +6,14 @@ Run Flower on GCP
 =================
 
 A step-by-step guide to learn how to create, deploy and run a Flower application on the
-Google Cloud Platform (GCP) using the Google Kubernetes Engine (GKE). The figure below
+`Google Cloud Platform (GCP) <https://console.cloud.google.com>`_ using the `Google
+Kubernetes Engine (GKE) <https://cloud.google.com/kubernetes-engine>`_. The figure below
 presents an overview of the architecture of the Flower components we will deploy on GCP
 using GKE through the current guide.
 
-.. figure:: ./_static/flower-gke-architecture.png
+.. figure:: ./_static/flwr-gke-architecture.png
     :align: center
-    :width: 600
+    :width: 100%
     :alt: Running Flower on GCP using GKE Architecture
     :class: no-scaled-link
 
@@ -22,44 +23,38 @@ Part of this guide has also been presented during the `Flower AI Summit 2025
 <https://flower.ai/events/flower-ai-summit-2025/>`_, by Prashant Kulkarni, GenAI
 Security Engineer at Google Cloud.
 
-.. raw:: html
-
-    <a href="https://www.youtube.com/watch?v=DoklGCdtrrc" target="_blank" style="display: block; text-align: center;">
-        <img src="https://img.youtube.com/vi/DoklGCdtrrc/0.jpg" alt="Introduction" width="300"/>
-    </a>
+.. youtube:: DoklGCdtrrc
+    :align: center
+    :width: 70%
 
 Create a Kubernetes Cluster
 ---------------------------
 
-Here, we will discuss the necessary steps to create an account and a Kubernetes cluster
-in `GCP <https://console.cloud.google.com>`_ through the GCP interface. Before
-proceeding, please make sure you have created an account on `GCP
-<https://console.cloud.google.com>`_.
+Here, we outline the steps to create a Kubernetes cluster in GCP through the GCP user
+interface. Before proceeding, please make sure you have an account on GCP.
 
 1. **Create GCP Project**: Once you have created the account, please create a new
-   project, by pressing on the top button with the project name. This will open a new
-   window from where you can press the ``NEW PROJECT`` button and create the new project
-   and assign a name, e.g., ``flower-gcp``.
-
-2. **Enable Kubernetes API**: After the project creation in the search bar at the top of
-the GCP page type ``Kubernetes Engine API``. This will redirect you to the ``Kubernetes
-Engine API`` Product page. From there you need to select ``Enable``. After the you
-enable it you should see a green mark in the ``Kubernetes Engine API`` saying ``API
-Enabled``.
-
+   project, by selecting the project picker button, i.e., the button with the project
+   name appearing at the top of the page. This will open a new window from where you can
+   press the ``NEW PROJECT`` button and create the new project and assign a name, e.g.,
+   ``flower-gcp``.
+2. **Enable Kubernetes API**: After project creating a GCP project, in the search bar at
+   the top of the GCP page type ``Kubernetes Engine API`` and click on it (it has an
+   ``API`` icon). This will redirect you to the ``Kubernetes Engine API`` Product page.
+   From there you need to select ``Enable``; if you see a ``Billing required`` pop-up,
+   please check with your administrator to continue, if necessary. After you enable it
+   you should see a green mark in the ``Kubernetes Engine API`` saying ``API Enabled``.
 3. **Create Kubernetes Cluster**: in the home page of the GCP project, under the
-``Products`` section, look for the a tab that is called ``Create a Kubernetes Cluster``.
-This will redirect you to a page where you will see an overview of the existing
-Kubernetes clusters. At the top of the page you should see a button called ``Create``.
-By default, the Kubernetes clusters are deployed using the ``Autopilot`` mode. For the
-current guide, we use the ``Autopilot`` mode; in an advanced version of this guide, we
-shall deploy a cluster using the ``Standard`` mode.
-
+   ``Products`` section, look for the tab called ``Create a Kubernetes Cluster``. This
+   will redirect you to a page where you will see an overview of the existing Kubernetes
+   clusters. At the top of the page you should see a button called ``Create``. By
+   default, the Kubernetes clusters are deployed using the ``Autopilot`` mode. For the
+   current guide, we use the ``Autopilot`` mode.
 4. **Configure Kubernetes Cluster**: in the page that is shown, we assign a name to the
-new cluster, e.g., ``flower-numpy-example`` and we select the region, e.g.,
-``us-central1``. For the rest of the configuration settings, such as ``Cluster Tier``,
-``Fleet Registration``, ``Networking``, and other settings we use the default values.
-Now, press the ``Create`` button.
+   new cluster, e.g., ``flower-numpy-example`` and we select the region, e.g.,
+   ``us-central1``. For the rest of the configuration settings, such as ``Cluster
+   Tier``, ``Fleet Registration``, ``Networking``, and other settings we use the default
+   values. Now, press the ``Create`` button.
 
 .. note::
 
@@ -68,9 +63,9 @@ Now, press the ``Create`` button.
 Configure Google Cloud SDK
 --------------------------
 
-To start interacting with the our newly deployed Kubernetes cluster we need to configure
-locally the Google Cloud SDK. The SDK will allow us to interact with the Google Cloud
-Platform and in turn with out recently deployed Kubernetes cluster.
+To interact with our newly deployed Kubernetes cluster, we will use the Google Cloud SDK
+and configure it locally. This SDK allows us to directly interact with GCP and in turn
+with our recently deployed Kubernetes cluster.
 
 To install the Google Cloud SDK, we first need to install and configure the ``gcloud``
 CLI:
@@ -99,7 +94,8 @@ CLI:
     different operating systems, please take look at the official ``gcloud`` CLI
     installation page https://cloud.google.com/sdk/docs/install
 
-Once ``gcloud`` is installed we need to install ``kubectl``:
+Once ``gcloud`` is installed we need to install ``kubectl``, which is a command-line
+tool to interact with Kubernetes clusters:
 
 .. code-block:: bash
 
@@ -121,45 +117,27 @@ following command:
 
 .. code-block:: bash
 
-    kubectl config current-context  # this should return the Kubernetes cluster you connected
+    kubectl config current-context  # this should return the Kubernetes cluster you are connected to
 
 .. note::
 
     For more information on how ``kubectl`` works, please have a look at the following
-    official quick-reference guide:
-    https://kubernetes.io/docs/reference/kubectl/quick-reference/
+    `official quick-reference guide
+    <https://kubernetes.io/docs/reference/kubectl/quick-reference/>`_.
 
-Create a Google Artifact Repository
------------------------------------
+Create a Google Artifact Registry
+---------------------------------
 
 The Google Cloud Artifact Registry is a fully managed, scalable, and private service for
 storing and managing software build artifacts and dependencies. Consequently, to run our
 Flower application on the GKE cluster, we need to store the application's specific
 Flower Docker images within the registry, i.e., ``ClientApp`` and ``ServerApp``, which
-we discuss in the next section. This step is crucial as it enables the cluster, and
-subsequently the pods, to download the built Docker images and deploy the necessary
-Flower components.
-
-There are two ways to create the required registry, one through the UI and another
-through the CLI., below we discuss both approaches.
-
-**Create through UI**:
-
-- we need to go to the ``APIs & Services`` and then look for ``Library``.
-- we search for ``Artifact Registry API`` and we enable the API (if it's not already
-  enabled).
-- once the ``Artifact Registry API`` is enabled, we navigate to the `Artifact Registry
-  page <https://console.cloud.google.com/artifacts>`_ and we select ``Create
-  Repository``.
-- we enter the name of the new repository, e.g., ``flower-gcp-example-artifacts``, we
-  then choose ``Docker`` as format, ``Standard`` as mode and we pick a location type and
-  region, e.g., ``Region: us-central``.
-
-For all the rest of the fields, such as ``Encryption``, ``Immutable image tags``,
-``Cleanup Policies``, and ``Artifact Analysis`` we leave the default values. Finally, we
-press ``Create``.
-
-**Create through CLI**:
+we discuss in the next section. For typical use-cases, the Flower SuperLink and
+SuperNode Docker images do not need to be built and can be pulled directly from the
+official `Flower DockerHub repository <https://hub.docker.com/u/flwr>`_. This step is
+crucial as it enables the cluster, and subsequently the ``Pods``, to download the built
+Docker images and deploy the necessary Flower components. Please see below the
+instructions on how to create the repository using the ``gcloud`` CLI:
 
 .. code-block:: bash
 
@@ -169,11 +147,11 @@ press ``Create``.
     # Create the repository
     # gcloud artifacts repositories create YOUR_REPOSITORY_NAME
     gcloud artifacts repositories create flower-gcp-example-artifacts \
-    --repository-format=docker \
-    --location=us-central1
+        --repository-format=docker \
+        --location=us-central1
 
-    # Configure Docker to Authenticate with Artifact Registry:
-    # gcloud auth configure-docker YOUR_REGION-docker.pkg.dev
+    # Configure Docker to Authenticate with Artifact Registry, e.g.:
+    #   gcloud auth configure-docker YOUR_REGION-docker.pkg.dev
     gcloud auth configure-docker us-central1-docker.pkg.dev  # we use us-central1 as our region
 
 Configure Flower Application Docker Images
@@ -188,9 +166,9 @@ the `Flower Quickstart with Docker Tutorial
 
 .. note::
 
-    We do not create a Dockerfile for the SuperLink or the SuperNode components, since
-    we only need to use the default provided by the official `Flower DockerHub
-    repository <https://hub.docker.com/u/flwr>`_.
+    For this application, we do not need to create a Docker image for the SuperLink and
+    the SuperNode components, since we only need to use the default images provided in
+    the official Flower DockerHub repository.
 
 We create the Flower NumPy application as follows:
 
@@ -203,17 +181,26 @@ Create Docker Images
 ~~~~~~~~~~~~~~~~~~~~
 
 Once the application is created, we navigate inside the parent directory and create two
-``Dockerfiles`` one for the ``ClientApp`` component, named ``clientapp.Dockerfile`` and
-one for the ``ServerApp`` component, named as ``serverapp.Dockerfile``. We will use both
+``Dockerfile``\s one for the ``ClientApp`` component, named ``clientapp.Dockerfile`` and
+one for the ``ServerApp`` component, named ``serverapp.Dockerfile``. We will use both
 files to build locally the necessary Docker images.
+
+.. note::
+
+    Even though the application you created has only ``NumPy`` as dependency, you can
+    use the provided ``clientapp.Dockerfile`` and ``serverapp.Dockerfile`` to create the
+    corresponding images for any Flower application when going from simulation to
+    deployment. The ``RUN`` command installs all the necessary dependencies for your app
+    to run and removes the ``flwr[simulation]`` dependency while building the Docker
+    images.
 
 .. dropdown:: clientapp.Dockerfile
 
     .. code-block:: bash
+        :substitutions:
 
         # clientapp.Dockerfile
-        ARG FLWR_VERSION
-        FROM flwr/clientapp:${FLWR_VERSION}  # set the Flower version, e.g., 1.18.0
+        FROM flwr/clientapp:|stable_flwr_version|
 
         WORKDIR /app
 
@@ -226,10 +213,10 @@ files to build locally the necessary Docker images.
 .. dropdown:: serverapp.Dockerfile
 
     .. code-block:: bash
+        :substitutions:
 
         # serverapp.Dockerfile
-        ARG FLWR_VERSION
-        FROM flwr/serverapp:${FLWR_VERSION}  # set the Flower version, e.g., 1.18.0
+        FROM flwr/serverapp:|stable_flwr_version|
 
         WORKDIR /app
 
@@ -243,28 +230,17 @@ Once we have created the required Dockerfiles, we build the Docker Images as fol
 
 .. important::
 
-    - Depending on which Flower version you used to create the Flower application, make
-      sure you use the same version while building the ``ClientApp`` and ``ServerApp``
-      components, and either update the value of the ``FLWR_VERSION`` variable directly
-      in the two Dockerfiles, or pass ``--build-arg FLWR_VERSION=<FLWR_VERSION>``
-      argument as shown below.
-    - Before running the commands below, make sure ``Docker`` is installed and it is up
-      running. The ``--platform`` type is set to ``linux/amd64``, because when using the
-      ``Autopilot`` mode, all ``Pods`` in the Kubernetes cluster (by default) are
-      deployed with an ``amd64``-based architecture.
+    Before running the commands below, make sure ``Docker`` is installed and it is up
+    running. The ``--platform`` type is set to ``linux/amd64``, because when using the
+    ``Autopilot`` mode, all ``Pods`` in the Kubernetes cluster (by default) are deployed
+    with an ``amd64``-based architecture.
 
 .. code-block:: bash
 
     # ServerApp
-    # with build-arg
-    docker build --build-arg FLWR_VERSION=1.18.0 --platform linux/amd64 -f serverapp.Dockerfile -t flower_numpy_example_serverapp:0.0.1 .
-    # without build-arg
     docker build --platform linux/amd64 -f serverapp.Dockerfile -t flower_numpy_example_serverapp:0.0.1 .
 
     # ClientApp
-    # with build-arg
-    docker build --build-arg FLWR_VERSION=1.18.0 --platform linux/amd64 -f clientapp.Dockerfile -t flower_numpy_example_clientapp:0.0.1 .
-    # without build-arg
     docker build --platform linux/amd64 -f clientapp.Dockerfile -t flower_numpy_example_clientapp:0.0.1 .
 
 Tag Docker Images
@@ -315,14 +291,12 @@ In this step, we shall deploy six ``Pods``: 1x ``SuperLink``, 2x ``SuperNode``, 
 ``ClientApp``, and 1x ``ServerApp``. To achieve this, below we provide the definition of
 the six ``yaml`` files that are necessary to deploy the ``Pods`` on the cluster and
 which are passed to ``kubectl``, and a helper ``k8s-deploy.sh`` script, which will
-deploy the ``Pods``. To define the Flower version for ``SuperLink`` and ``SuperNodes``,
-you can either change directly the the value of the ``${FLWR_VERSION}`` within each
-respective ``.yaml`` file or modify the value of the ``FLWR_VERSION=<FLWR_VERSION>``
-directly in the helper ``k8s-deploy.sh`` script.
+deploy the ``Pods``.
 
 .. dropdown:: superlink-deployment.yaml
 
     .. code-block:: bash
+        :substitutions:
 
         apiVersion: apps/v1
         kind: Deployment
@@ -340,7 +314,7 @@ directly in the helper ``k8s-deploy.sh`` script.
             spec:
               containers:
               - name: superlink
-                image: flwr/superlink:${FLWR_VERSION}  # set the Flower version, e.g., 1.18.0
+                image: flwr/superlink:|stable_flwr_version|
                 args:
                   - "--insecure"
                   - "--isolation"
@@ -375,6 +349,7 @@ directly in the helper ``k8s-deploy.sh`` script.
 .. dropdown:: supernode-1-deployment.yaml
 
     .. code-block:: bash
+        :substitutions:
 
         apiVersion: apps/v1
         kind: Deployment
@@ -392,7 +367,7 @@ directly in the helper ``k8s-deploy.sh`` script.
             spec:
               containers:
               - name: supernode
-                image: flwr/supernode:${FLWR_VERSION}  # set the Flower version, e.g., 1.18.0
+                image: flwr/supernode:|stable_flwr_version|
                 args:
                   - "--insecure"
                   - "--superlink"
@@ -401,8 +376,6 @@ directly in the helper ``k8s-deploy.sh`` script.
                   - "0.0.0.0:9094"
                   - "--isolation"
                   - "process"
-                  - "--node-config"
-                  - "partition-id=0 num-partitions=2"
                 ports:
                 - containerPort: 9094
         ---
@@ -421,6 +394,7 @@ directly in the helper ``k8s-deploy.sh`` script.
 .. dropdown:: supernode-2-deployment.yaml
 
     .. code-block:: bash
+        :substitutions:
 
         apiVersion: apps/v1
         kind: Deployment
@@ -438,7 +412,7 @@ directly in the helper ``k8s-deploy.sh`` script.
             spec:
               containers:
               - name: supernode
-                image: flwr/supernode:${FLWR_VERSION}  # set the Flower version, e.g., 1.18.0
+                image: flwr/supernode:|stable_flwr_version|
                 args:
                   - "--insecure"
                   - "--superlink"
@@ -447,8 +421,6 @@ directly in the helper ``k8s-deploy.sh`` script.
                   - "0.0.0.0:9094"
                   - "--isolation"
                   - "process"
-                  - "--node-config"
-                  - "partition-id=1 num-partitions=2"
                 ports:
                 - containerPort: 9094
         ---
@@ -547,8 +519,8 @@ helper script to deploy all the ``Pods``.
 
 .. important::
 
-    Please note that you need to define the Flower version. The version needs to match
-    the Flower version you used when you created the Flower Application.
+    Make sure the Flower version you use to deploy the ``Pods`` matches the version of
+    your Flower Application.
 
 .. dropdown:: k8s-deploy.sh
 
@@ -556,21 +528,16 @@ helper script to deploy all the ``Pods``.
 
         #! /bin/bash -l
 
-        export FLWR_VERSION=<FLWR_VERSION>  # set the Flower version, e.g., 1.18.0
-
         # Change directory to the yaml files directory
         cd "$(dirname "${BASH_SOURCE[0]}")"
 
-        envsubst < superlink-deployment.yaml > ./_rendered.yaml && \
-        kubectl apply -f ./_rendered.yaml
+        kubectl apply -f superlink-deployment.yaml
         sleep 0.1
 
-        envsubst < supernode-1-deployment.yaml > ./_rendered.yaml && \
-        kubectl apply -f ./_rendered.yaml
+        kubectl apply -f supernode-1-deployment.yaml
         sleep 0.1
 
-        envsubst < supernode-2-deployment.yaml > ./_rendered.yaml && \
-        kubectl apply -f ./_rendered.yaml
+        kubectl apply -f supernode-2-deployment.yaml
         sleep 0.1
 
         kubectl apply -f ./serverapp-deployment.yaml
@@ -584,7 +551,7 @@ helper script to deploy all the ``Pods``.
 
 To see that your ``Pods`` are deployed, please go to the ``Navigation Menu`` on the
 Google Console, select ``Kubernetes Engine`` and then the ``Workloads`` page. The new
-window that appears will show the status of the pods under deployment.
+window that appears will show the status of the ``Pods`` under deployment.
 
 .. caution::
 
@@ -622,9 +589,63 @@ Then we can execute the example on the GCP cluster by running:
 
     flwr run . gcp-deployment --stream
 
+.. note::
+
+    Please note that in the current deployment, communication is not encrypted. To
+    enable TLS for secure connections, check the following `guide
+    <https://flower.ai/docs/framework/how-to-enable-tls-connections.html>`_. We will
+    also be updating the current guide soon with more details on how to configure TLS.
+
 If the job is successfully submitted, and executed, then in your console you should see
 the ``fit`` and ``evaluate`` configuration and execution execution per round, and in the
-end a ``Summary`` of the performance per round.
+end a ``Summary`` of the performance per round. The output should look like the one
+shared below.
+
+.. dropdown:: Expected Output
+
+    .. code-block:: shell
+
+        Loading project configuration...
+        Success
+        🎊 Successfully built flower.flower-numpy-example.1-0-0.ba270a25.fab
+        🎊 Successfully started run 2796207907461390277
+        INFO :      Starting logstream for run_id `2796207907461390277`
+        INFO :      Start `flwr-serverapp` process
+        🎊 Successfully installed flower-numpy-example to /app/.flwr/apps/flower.flower-numpy-example.1.0.0.ba270a25.
+        INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
+        INFO :
+        INFO :      [INIT]
+        INFO :      Using initial global parameters provided by strategy
+        INFO :      Starting evaluation of initial global parameters
+        INFO :      Evaluation returned no results (`None`)
+        INFO :
+        INFO :      [ROUND 1]
+        INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+        INFO :      aggregate_fit: received 2 results and 0 failures
+        WARNING :   No fit_metrics_aggregation_fn provided
+        INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+        INFO :      aggregate_evaluate: received 2 results and 0 failures
+        WARNING :   No evaluate_metrics_aggregation_fn provided
+        INFO :
+        INFO :      [ROUND 2]
+        INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+        INFO :      aggregate_fit: received 2 results and 0 failures
+        INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+        INFO :      aggregate_evaluate: received 2 results and 0 failures
+        INFO :
+        INFO :      [ROUND 3]
+        INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+        INFO :      aggregate_fit: received 2 results and 0 failures
+        INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+        INFO :      aggregate_evaluate: received 2 results and 0 failures
+        INFO :
+        INFO :      [SUMMARY]
+        INFO :      Run finished 3 round(s) in 30.11s
+        INFO :          History (loss, distributed):
+        INFO :                  round 1: 0.0
+        INFO :                  round 2: 0.0
+        INFO :                  round 3: 0.0
+        INFO :
 
 .. note::
 
