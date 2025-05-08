@@ -21,7 +21,7 @@ from typing import Optional
 import numpy as np
 
 from datasets import Dataset
-from flwr_datasets.partitioner import Partitioner
+from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class ContinuousPartitioner(
