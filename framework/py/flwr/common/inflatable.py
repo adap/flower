@@ -43,7 +43,7 @@ def get_object_id(object_content: bytes) -> str:
 
 
 def get_object_body(object_content: bytes, cls: type[T]) -> bytes:
-    """Return object body but raise an error if object type does not match class name class."""
+    """Return object body but raise an error if object type doesn't match class name."""
     class_name = cls.__qualname__
     object_type = object_type_from_object_content(object_content)
     if not object_type == class_name:
