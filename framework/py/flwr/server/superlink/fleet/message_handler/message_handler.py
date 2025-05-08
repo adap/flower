@@ -33,13 +33,15 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
     Reconnect,
+)
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
@@ -58,7 +60,7 @@ def create_node(
 ) -> CreateNodeResponse:
     """."""
     # Create node
-    node_id = state.create_node(ping_interval=request.ping_interval)
+    node_id = state.create_node(heartbeat_interval=request.heartbeat_interval)
     return CreateNodeResponse(node=Node(node_id=node_id))
 
 
@@ -73,13 +75,15 @@ def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeRespo
     return DeleteNodeResponse()
 
 
-def ping(
-    request: PingRequest,  # pylint: disable=unused-argument
+def send_node_heartbeat(
+    request: SendNodeHeartbeatRequest,  # pylint: disable=unused-argument
     state: LinkState,  # pylint: disable=unused-argument
-) -> PingResponse:
+) -> SendNodeHeartbeatResponse:
     """."""
-    res = state.acknowledge_ping(request.node.node_id, request.ping_interval)
-    return PingResponse(success=res)
+    res = state.acknowledge_node_heartbeat(
+        request.node.node_id, request.heartbeat_interval
+    )
+    return SendNodeHeartbeatResponse(success=res)
 
 
 def pull_messages(

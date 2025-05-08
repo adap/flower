@@ -35,11 +35,11 @@ from flwr.proto.fab_pb2 import GetFabRequest  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
-    PingRequest,
     PullMessagesRequest,
     PushMessagesRequest,
 )
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
+from flwr.proto.heartbeat_pb2 import SendNodeHeartbeatRequest  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
 
 from ..grpc_rere.fleet_servicer import FleetServicer
@@ -81,8 +81,10 @@ class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer, FleetService
             return _handle(request, context, CreateNodeRequest, self.CreateNode)
         if request.grpc_message_name == DeleteNodeRequest.__qualname__:
             return _handle(request, context, DeleteNodeRequest, self.DeleteNode)
-        if request.grpc_message_name == PingRequest.__qualname__:
-            return _handle(request, context, PingRequest, self.Ping)
+        if request.grpc_message_name == SendNodeHeartbeatRequest.__qualname__:
+            return _handle(
+                request, context, SendNodeHeartbeatRequest, self.SendNodeHeartbeat
+            )
         if request.grpc_message_name == GetRunRequest.__qualname__:
             return _handle(request, context, GetRunRequest, self.GetRun)
         if request.grpc_message_name == GetFabRequest.__qualname__:

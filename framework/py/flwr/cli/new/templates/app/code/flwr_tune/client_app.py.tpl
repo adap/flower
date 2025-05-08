@@ -49,7 +49,7 @@ class FlowerClient(NumPyClient):
     ):  # pylint: disable=too-many-arguments
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.train_cfg = train_cfg
-        self.training_argumnets = TrainingArguments(**train_cfg.training_arguments)
+        self.training_arguments = TrainingArguments(**train_cfg.training_arguments)
         self.tokenizer = tokenizer
         self.formatting_prompts_func = formatting_prompts_func
         self.data_collator = data_collator
@@ -72,14 +72,14 @@ class FlowerClient(NumPyClient):
             self.train_cfg.learning_rate_min,
         )
 
-        self.training_argumnets.learning_rate = new_lr
-        self.training_argumnets.output_dir = config["save_path"]
+        self.training_arguments.learning_rate = new_lr
+        self.training_arguments.output_dir = config["save_path"]
 
         # Construct trainer
         trainer = SFTTrainer(
             model=self.model,
             tokenizer=self.tokenizer,
-            args=self.training_argumnets,
+            args=self.training_arguments,
             max_seq_length=self.train_cfg.seq_length,
             train_dataset=self.trainset,
             formatting_func=self.formatting_prompts_func,
