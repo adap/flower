@@ -31,7 +31,7 @@ class InflatableObject:
         raise NotImplementedError()
 
     @property
-    def object_id(self):
+    def object_id(self) -> str:
         """Get object_id."""
         _, object_id = self.deflate()
         return object_id
