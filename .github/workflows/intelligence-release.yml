@@ -44,7 +44,7 @@ jobs:
 
   publish-kotlin:
     if: ${{ github.repository == 'adap/flower' }}
-    name: Publish Kotlin to Maven Central
+    name: Publish Flower Intelligence Kotlin SDK to Maven Central
     runs-on: ubuntu-22.04
     timeout-minutes: 10
 
