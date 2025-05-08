@@ -57,7 +57,7 @@ def test_deflate() -> None:
     assert get_object_id(obj_b) == obj.object_id
 
 
-def test_get_object_id():
+def test_get_object_id() -> None:
     """Test helper function to get object id from bytes."""
     some_bytes = b"hello world"
     expected = hashlib.sha256(some_bytes).hexdigest()
