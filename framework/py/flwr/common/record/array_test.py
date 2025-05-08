@@ -25,7 +25,10 @@ from unittest.mock import Mock
 import numpy as np
 from parameterized import parameterized
 
+from flwr.common.serde import array_to_proto
+
 from ..constant import SType
+from ..serializable import object_content_len_from_bytes, object_type_from_bytes
 from ..typing import NDArray
 from .array import Array
 
@@ -166,3 +169,23 @@ class TestArray(unittest.TestCase):
         """Ensure invalid combinations raise TypeError."""
         with self.assertRaises(TypeError):
             Array(*args)
+
+    def test_serialization_and_deserialization(self) -> None:
+        """Ensure an Array can be (de)serialized correctly."""
+        arr = Array(np.random.randn(5, 5))
+        arr_b = arr.serialize()
+
+        # assert
+        # Class name matches
+        assert object_type_from_bytes(arr_b) == arr.__class__.__qualname__
+        # Content length matches
+        assert object_content_len_from_bytes(arr_b) == len(
+            array_to_proto(arr).SerializeToString()
+        )
+
+        # Deserialize
+        arr_ = Array.deserialize(arr_b)
+
+        # assert
+        # both objects are identical
+        assert arr.object_id == arr_.object_id

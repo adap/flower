@@ -24,7 +24,15 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
+from flwr.proto.recorddict_pb2 import Array as ArrayProto  # pylint: disable=E0611
+
 from ..constant import SType
+from ..serializable import (
+    Serializable,
+    add_header_to_object_body,
+    get_object_body,
+    get_object_id,
+)
 from ..typing import NDArray
 
 if TYPE_CHECKING:
@@ -40,7 +48,7 @@ def _raise_array_init_error() -> None:
 
 
 @dataclass
-class Array:
+class Array(Serializable):
     """Array type.
 
     A dataclass containing serialized data from an array-like or tensor-like object
@@ -248,3 +256,38 @@ class Array:
         # Source: https://numpy.org/doc/stable/reference/generated/numpy.load.html
         ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
         return cast(NDArray, ndarray_deserialized)
+
+    def serialize(self) -> tuple[bytes, str]:  # noqa: D102
+        array_proto = ArrayProto(
+            dtype=self.dtype,
+            shape=self.shape,
+            stype=self.stype,
+            data=self.data,
+        )
+
+        obj_body = array_proto.SerializeToString(deterministic=True)
+        full_serialized = add_header_to_object_body(object_body=obj_body, cls=self)
+        return full_serialized, get_object_id(full_serialized)
+
+    @classmethod
+    def deserialize(cls, serialized: bytes) -> Array:  # noqa: D102
+        obj_body = get_object_body(serialized, cls)
+        proto_array = ArrayProto.FromString(obj_body)
+        return cls(
+            dtype=proto_array.dtype,
+            shape=list(proto_array.shape),
+            stype=proto_array.stype,
+            data=proto_array.data,
+        )
+
+    @property
+    def object_id(self):
+        # Recompute if not found (which might be because Array was modified)
+        if "_object_id" not in self.__dict__:
+            self.__dict__["_object_id"] = self.serialize()[1]
+        return self.__dict__["_object_id"]
+
+    def __setattr__(self, name, value):
+        """Discard object id if changes are done to Array."""
+        object.__getattribute__(self, "__dict__").pop("_object_id", None)
+        return super().__setattr__(name, value)

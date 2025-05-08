@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import gc
+import json
 import sys
 from collections import OrderedDict
 from logging import WARN
@@ -27,6 +28,12 @@ import numpy as np
 
 from ..constant import GC_THRESHOLD
 from ..logger import log
+from ..serializable import (
+    Serializable,
+    add_header_to_object_body,
+    get_object_body,
+    get_object_id,
+)
 from ..typing import NDArray
 from .array import Array
 from .typeddict import TypedDict
@@ -56,7 +63,7 @@ def _check_value(value: Array) -> None:
         )
 
 
-class ArrayRecord(TypedDict[str, Array]):
+class ArrayRecord(TypedDict[str, Array], Serializable):
     """Array record.
 
     A typed dictionary (``str`` to :class:`Array`) that can store named arrays,
@@ -364,6 +371,29 @@ class ArrayRecord(TypedDict[str, Array]):
             num_bytes += len(k)
 
         return num_bytes
+
+    def serialize(self) -> tuple[bytes, str]:  # noqa: D102
+
+        array_refs: dict[str, str] = {}
+        # reserialize (but likely using cached object_id)
+        for array_name, array in self.items():
+            array_refs[array_name] = array.object_id
+
+        # Serialize references dict
+        object_body = json.dumps(array_refs).encode("utf-8")
+        object_content = add_header_to_object_body(object_body=object_body, cls=self)
+        return object_content, get_object_id(object_content)
+
+    @classmethod
+    def deserialize(cls, serialized_refs_dict: bytes) -> dict[str, str]:  # noqa: D102
+        obj_content = get_object_body(serialized_refs_dict, cls)
+        return json.loads(obj_content.decode(encoding="utf-8"))
+
+    @property
+    def object_id(self):
+        # Always compute object_id (tiny overhead)
+        _, object_id = self.serialize()
+        return object_id
 
 
 class ParametersRecord(ArrayRecord):
