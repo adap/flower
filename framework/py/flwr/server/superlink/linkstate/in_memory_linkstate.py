@@ -539,7 +539,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return None
             return self.federation_options[run_id]
 
-    def acknowledge_heartbeat(self, node_id: int, heartbeat_interval: float) -> bool:
+    def acknowledge_node_heartbeat(
+        self, node_id: int, heartbeat_interval: float
+    ) -> bool:
         """Acknowledge a heartbeat received from a node, serving as a heartbeat.
 
         A node is considered online as long as it sends heartbeats within

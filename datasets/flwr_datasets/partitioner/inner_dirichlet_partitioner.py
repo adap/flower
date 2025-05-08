@@ -14,7 +14,7 @@
 # ==============================================================================
 """InnerDirichlet partitioner."""
 import warnings
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
 import numpy as np
 
@@ -253,9 +253,10 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
                 ]
                 break
 
-        partition_id_to_indices = {
-            cid: client_indices[cid].tolist() for cid in range(self._num_partitions)
-        }
+        partition_id_to_indices = cast(
+            dict[int, list[int]],
+            {cid: client_indices[cid].tolist() for cid in range(self._num_partitions)},
+        )
         # Shuffle the indices if the shuffle is True.
         # Note that the samples from this partitioning do not necessarily require
         # shuffling, the order should exhibit consecutive samples.
@@ -304,7 +305,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
 
 def _instantiate_partition_sizes(
-    partition_sizes: Union[list[int], NDArrayInt]
+    partition_sizes: Union[list[int], NDArrayInt],
 ) -> NDArrayInt:
     """Transform list to the ndarray of ints if needed."""
     if isinstance(partition_sizes, list):
