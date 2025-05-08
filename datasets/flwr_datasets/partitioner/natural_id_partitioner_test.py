@@ -17,6 +17,7 @@
 
 import itertools
 import math
+import random
 import unittest
 
 from parameterized import parameterized
@@ -40,9 +41,11 @@ def _dummy_setup(
 
 def _create_dataset(num_rows: int, n_unique_natural_ids: int) -> Dataset:
     """Create dataset based on the number of rows and unique natural ids."""
+    natural_id = [f"{i % n_unique_natural_ids}" for i in range(num_rows)]
+    random.shuffle(natural_id)
     data = {
         "features": list(range(num_rows)),
-        "natural_id": [f"{i % n_unique_natural_ids}" for i in range(num_rows)],
+        "natural_id": natural_id,
         "labels": [i % 2 for i in range(num_rows)],
     }
     dataset = Dataset.from_dict(data)
@@ -116,6 +119,19 @@ class TestNaturalIdPartitioner(unittest.TestCase):
         _, partitioner = _dummy_setup(num_rows=10, n_unique_natural_ids=2)
         with self.assertRaises(AttributeError):
             partitioner.partition_id_to_natural_id = {0: "0"}
+
+    def test_consistent_partition_ids(self) -> None:
+        """Test that the partition IDs assigned to the natural IDs are consistent."""
+        _, partitioner1 = _dummy_setup(num_rows=10, n_unique_natural_ids=10)
+        _, partitioner2 = _dummy_setup(num_rows=10, n_unique_natural_ids=10)
+
+        _ = partitioner1.load_partition(0)
+        _ = partitioner2.load_partition(0)
+
+        self.assertEqual(
+            partitioner1.partition_id_to_natural_id,
+            partitioner2.partition_id_to_natural_id,
+        )
 
 
 if __name__ == "__main__":
