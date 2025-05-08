@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-29 00:08+0000\n"
+"POT-Creation-Date: 2025-05-08 00:07+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -10698,8 +10698,9 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
-"alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
-":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
+"alias of :py:class:`~numpy.ndarray`\\ [:py:class:`tuple`\\ "
+"[:py:class:`int`, ...], :py:class:`~numpy.dtype`\\ "
+"[:py:obj:`~typing.Any`]]"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -10709,7 +10710,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 "alias of :py:class:`list`\\ [:py:class:`~numpy.ndarray`\\ "
-"[:py:obj:`~typing.Any`, :py:class:`~numpy.dtype`\\ "
+"[:py:class:`tuple`\\ [:py:class:`int`, ...], :py:class:`~numpy.dtype`\\ "
 "[:py:obj:`~typing.Any`]]]"
 msgstr ""
 
@@ -28758,7 +28759,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|b489956f3f574a109fad2836faf622e4|"
+msgid "|450f5fd286984c7b9cf26b1cfc7c6c5a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -28773,7 +28774,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|e8061fdb5ec94141bc7526ea8060a9ab|"
+msgid "|eb64ca89d00a46818780245bef0d9950|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -28795,7 +28796,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|741286a5ab8b4703919f32525e6b7ffa|"
+msgid "|a711c3264bdb46bdbb9535f668951a9b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -28811,7 +28812,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|0ae5263f7b4d45cca55b69d341f8c83d|"
+msgid "|cb0d905bafcf47b3beb2148744af5b90|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -28827,7 +28828,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|74ef57e47ce544c8b5700f7c6b213f76|"
+msgid "|41cb4736601f4b4e8da3108fd3fc9dd1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -28842,7 +28843,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|f49a5dad3448407ea4480d186235b295|"
+msgid "|efc7105fab324accadb050560bbb9956|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -28862,7 +28863,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|142636086022481fba92d32b78caa0f7|"
+msgid "|85b42a41b88a48a08d174ce7fbd133dc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -28877,7 +28878,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|49cc792ae168402d9917cab825e7def4|"
+msgid "|d05f53bd0b46413aa91b1e7b20eff8af|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -29017,7 +29018,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|82d2085f891e4906a7f3b2fbd94640b4|"
+msgid "|d96743a5729441ca8baeb9d07ea28337|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -29041,7 +29042,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|0de634679a2b4b958aa20f8d427e4311|"
+msgid "|64c013ad98634d8cab49cace2215b65f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -29065,7 +29066,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|564c1ebbb05945939f4fcf814facdad4|"
+msgid "|fc74b460576e444c85baf34a38f97b20|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -29088,7 +29089,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|fe2ef144276f40e79a7cf4ecebe97b2e|"
+msgid "|cfeae6f48fff4571af741752ccb21448|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -29126,7 +29127,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|0cac13f2a4834bc5917cff64f23c0105|"
+msgid "|2224c9f05174456ea442fda695413392|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -29220,7 +29221,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|d66f63e57bab4d7a9eafcae9a70d238d|"
+msgid "|6bcc2eed06b24833a7877563ec9f40c7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -45374,5 +45375,59 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|65f6155df55d44bda98d7cf140a0a4ca|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "alias of :py:class:`~numpy.ndarray`\\ "
+#~ "[:py:obj:`~typing.Any`, :py:class:`~numpy.dtype`\\ "
+#~ "[:py:obj:`~typing.Any`]]"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "alias of :py:class:`list`\\ "
+#~ "[:py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
+#~ ":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]]"
+#~ msgstr ""
+
+#~ msgid "|b489956f3f574a109fad2836faf622e4|"
+#~ msgstr ""
+
+#~ msgid "|e8061fdb5ec94141bc7526ea8060a9ab|"
+#~ msgstr ""
+
+#~ msgid "|741286a5ab8b4703919f32525e6b7ffa|"
+#~ msgstr ""
+
+#~ msgid "|0ae5263f7b4d45cca55b69d341f8c83d|"
+#~ msgstr ""
+
+#~ msgid "|74ef57e47ce544c8b5700f7c6b213f76|"
+#~ msgstr ""
+
+#~ msgid "|f49a5dad3448407ea4480d186235b295|"
+#~ msgstr ""
+
+#~ msgid "|142636086022481fba92d32b78caa0f7|"
+#~ msgstr ""
+
+#~ msgid "|49cc792ae168402d9917cab825e7def4|"
+#~ msgstr ""
+
+#~ msgid "|82d2085f891e4906a7f3b2fbd94640b4|"
+#~ msgstr ""
+
+#~ msgid "|0de634679a2b4b958aa20f8d427e4311|"
+#~ msgstr ""
+
+#~ msgid "|564c1ebbb05945939f4fcf814facdad4|"
+#~ msgstr ""
+
+#~ msgid "|fe2ef144276f40e79a7cf4ecebe97b2e|"
+#~ msgstr ""
+
+#~ msgid "|0cac13f2a4834bc5917cff64f23c0105|"
+#~ msgstr ""
+
+#~ msgid "|d66f63e57bab4d7a9eafcae9a70d238d|"
 #~ msgstr ""
 
