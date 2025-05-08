@@ -21,6 +21,7 @@ from uuid import UUID, uuid4
 
 from flwr.common import ConfigRecord, Context, Error, Message, Metadata, now, serde
 from flwr.common.constant import (
+    HEARTBEAT_PATIENCE,
     SUPERLINK_NODE_ID,
     ErrorCode,
     MessageType,
@@ -56,8 +57,8 @@ REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON = (
     "Error: Reply Message Unavailable - The reply message has expired."
 )
 NODE_UNAVAILABLE_ERROR_REASON = (
-    "Error: Node Unavailable - The destination node is currently unavailable. "
-    "It exceeds twice the time limit specified in its last ping."
+    "Error: Node Unavailable — The destination node failed to report a heartbeat "
+    f"within {HEARTBEAT_PATIENCE} × its expected interval."
 )
 
 
