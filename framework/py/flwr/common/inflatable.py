@@ -18,7 +18,7 @@
 import hashlib
 from typing import TypeVar
 
-from .constant import HEAD_BODY_DIVIDER
+from .constant import HEAD_BODY_DIVIDER, TYPE_BODY_LEN_DIVIDER
 
 T = TypeVar("T", bound="InflatableObject")
 
@@ -44,7 +44,7 @@ def get_object_id(object_content: bytes) -> str:
 def get_object_body(object_content: bytes, cls: type[T]) -> bytes:
     """Return object body but raise an error if object type doesn't match class name."""
     class_name = cls.__qualname__
-    object_type = object_type_from_object_content(object_content)
+    object_type = get_object_type_from_object_content(object_content)
     if not object_type == class_name:
         raise ValueError(
             f"Class name ({class_name}) and object type "
@@ -58,7 +58,7 @@ def get_object_body(object_content: bytes, cls: type[T]) -> bytes:
 def add_header_to_object_body(object_body: bytes, cls: T) -> bytes:
     """Add header to object content."""
     # Construct header
-    header = f"{cls.__class__.__qualname__} {len(object_body)}"
+    header = f"{cls.__class__.__qualname__}{TYPE_BODY_LEN_DIVIDER}{len(object_body)}"
     enc_header = header.encode(encoding="utf-8")
     # Concatenate header and object body
     return enc_header + HEAD_BODY_DIVIDER + object_body
@@ -74,7 +74,7 @@ def _get_object_body(object_content: bytes) -> bytes:
     return object_content.split(HEAD_BODY_DIVIDER, 1)[1]
 
 
-def object_type_from_object_content(object_content: bytes) -> str:
+def get_object_type_from_object_content(object_content: bytes) -> str:
     """Return object type from bytes."""
     obj_head: str = _get_object_head(object_content).decode(encoding="utf-8")
-    return obj_head.split(" ", 1)[0]
+    return obj_head.split(TYPE_BODY_LEN_DIVIDER, 1)[0]

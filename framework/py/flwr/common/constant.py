@@ -129,6 +129,7 @@ GC_THRESHOLD = 200_000_000  # 200 MB
 
 # Constants for Inflatable
 HEAD_BODY_DIVIDER = b"\x00"
+TYPE_BODY_LEN_DIVIDER = " "
 
 
 class MessageType:
