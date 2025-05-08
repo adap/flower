@@ -16,7 +16,6 @@
 
 
 import hashlib
-import os
 import zipfile
 from io import BytesIO
 from pathlib import Path
@@ -180,15 +179,14 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
 
         for file_path in all_files:
             # Read the file content manually
-            with open(file_path, "rb") as f:
-                file_contents = f.read()
+            file_contents = file_path.read_bytes()
 
             archive_path = str(file_path.relative_to(app))
             write_to_zip(fab_file, archive_path, file_contents)
 
             # Calculate file info
             sha256_hash = hashlib.sha256(file_contents).hexdigest()
-            file_size_bits = os.path.getsize(file_path) * 8  # size in bits
+            file_size_bits = len(file_contents) * 8  # size in bits
             list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
 
         # Add CONTENT and CONTENT.jwt to the zip file
