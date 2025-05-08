@@ -25,14 +25,14 @@ class ObjectStore(ABC):
     delete objects identified by keys.
     """
 
-    def put(self, key: str, value: bytes) -> None:
+    def put(self, key: str, object_content: bytes) -> None:
         """Put an object into the store.
 
         Parameters
         ----------
         key : str
             The key under which to store the object.
-        value : bytes
+        object_content : bytes
             The serialized object to store.
         """
         raise NotImplementedError

@@ -45,44 +45,44 @@ class ObjectStoreTest(unittest.TestCase):
         """Test put and get methods."""
         object_store = self.object_store_factory()
         key = "test_key"
-        value = b"test_value"
+        object_content = b"test_value"
 
-        object_store.put(key, value)
+        object_store.put(key, object_content)
         retrieved_value = object_store.get(key)
 
-        self.assertEqual(value, retrieved_value)
+        self.assertEqual(object_content, retrieved_value)
 
     def test_put_overwrite(self) -> None:
         """Test put method with an existing key."""
         object_store = self.object_store_factory()
         key = "test_key"
-        value1 = b"test_value1"
-        value2 = b"test_value2"
+        object_content1 = b"test_value1"
+        object_content2 = b"test_value2"
 
-        object_store.put(key, value1)
-        object_store.put(key, value2)
+        object_store.put(key, object_content1)
+        object_store.put(key, object_content2)
         retrieved_value = object_store.get(key)
 
-        self.assertEqual(value2, retrieved_value)
+        self.assertEqual(object_content2, retrieved_value)
 
     def test_put_empty_key(self) -> None:
         """Test put method with an empty key."""
         object_store = self.object_store_factory()
         key = ""
-        value = b"test_value"
+        object_content = b"test_value"
 
-        object_store.put(key, value)
+        object_store.put(key, object_content)
         retrieved_value = object_store.get(key)
 
-        self.assertEqual(value, retrieved_value)
+        self.assertEqual(object_content, retrieved_value)
 
     def test_delete(self) -> None:
         """Test delete method."""
         object_store = self.object_store_factory()
         key = "test_key"
-        value = b"test_value"
+        object_content = b"test_value"
 
-        object_store.put(key, value)
+        object_store.put(key, object_content)
         object_store.delete(key)
         retrieved_value = object_store.get(key)
 
@@ -100,12 +100,12 @@ class ObjectStoreTest(unittest.TestCase):
         """Test clear method."""
         object_store = self.object_store_factory()
         key1 = "test_key1"
-        value1 = b"test_value1"
+        object_content1 = b"test_value1"
         key2 = "test_key2"
-        value2 = b"test_value2"
+        object_content2 = b"test_value2"
 
-        object_store.put(key1, value1)
-        object_store.put(key2, value2)
+        object_store.put(key1, object_content1)
+        object_store.put(key2, object_content2)
         object_store.clear()
 
         retrieved_value1 = object_store.get(key1)
@@ -125,9 +125,9 @@ class ObjectStoreTest(unittest.TestCase):
         """Test __contains__ method."""
         object_store = self.object_store_factory()
         key = "test_key"
-        value = b"test_value"
+        object_content = b"test_value"
 
-        object_store.put(key, value)
+        object_store.put(key, object_content)
 
         self.assertTrue(key in object_store)
         self.assertFalse("non_existent_key" in object_store)

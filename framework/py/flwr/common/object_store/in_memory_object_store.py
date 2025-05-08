@@ -25,9 +25,9 @@ class InMemoryObjectStore(ObjectStore):
     def __init__(self) -> None:
         self.store: dict[str, bytes] = {}
 
-    def put(self, key: str, value: bytes) -> None:
+    def put(self, key: str, object_content: bytes) -> None:
         """Put an object into the store."""
-        self.store[key] = value
+        self.store[key] = object_content
 
     def get(self, key: str) -> Optional[bytes]:
         """Get an object from the store."""
