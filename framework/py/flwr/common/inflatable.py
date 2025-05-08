@@ -41,9 +41,9 @@ class Inflatable:
         self._object_id = value
 
 
-def get_object_id(serialized: bytes) -> str:
-    """Return a SHA-256 hash of the serialized object."""
-    return hashlib.sha256(serialized).hexdigest()
+def get_object_id(object_content: bytes) -> str:
+    """Return a SHA-256 hash of the (deflated) object content."""
+    return hashlib.sha256(object_content).hexdigest()
 
 
 def get_object_body(serialized: bytes, cls: type[T]) -> bytes:
