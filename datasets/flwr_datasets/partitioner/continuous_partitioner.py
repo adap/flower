@@ -62,29 +62,39 @@ class ContinuousPartitioner(
     >>> import numpy as np
     >>> import pandas as pd
     >>> from flwr_datasets.partitioner import ContinuousPartitioner
+    >>> import matplotlib.pyplot as plt
     >>>
     >>> # Create synthetic data
-    >>> np.random.seed(42)
     >>> df = pd.DataFrame({
-    >>>     "continuous": np.linspace(0, 10, 100),
-    >>>     "category": np.random.choice([0, 1, 2, 3], size=100)
+    >>>     "continuous": np.linspace(0, 10, 10_000),
+    >>>     "category": np.random.choice([0, 1, 2, 3], size=10_000)
     >>> })
-    >>>
-    >>> # Convert to Hugging Face Dataset
     >>> hf_dataset = Dataset.from_pandas(df)
     >>>
-    >>> # Create and configure the partitioner
+    >>> # Partition dataset
     >>> partitioner = ContinuousPartitioner(
     >>>     num_partitions=5,
     >>>     partition_by="continuous",
     >>>     strictness=0.7,
     >>>     shuffle=True
     >>> )
-    >>> partitioner.dataset = hf_dataset  # Assign dataset manually
+    >>> partitioner.dataset = hf_dataset
     >>>
-    >>> # Load and inspect one partition
-    >>> partition = partitioner.load_partition(0)
-    >>> print(partition.to_pandas())
+    >>> # Plot partitions
+    >>> plt.figure(figsize=(10, 6))
+    >>> for i in range(5):
+    >>>     plt.hist(
+    >>>         partitioner.load_partition(i)["continuous"],
+    >>>         bins=64,
+    >>>         alpha=0.5,
+    >>>         label=f"Partition {i}"
+    >>>     )
+    >>> plt.legend()
+    >>> plt.xlabel("Continuous Value")
+    >>> plt.ylabel("Frequency")
+    >>> plt.title("Partition distributions")
+    >>> plt.grid(True)
+    >>> plt.show()
     """
 
     def __init__(
