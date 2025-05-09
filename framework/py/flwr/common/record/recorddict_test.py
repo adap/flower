@@ -37,7 +37,15 @@ from flwr.common.typing import (
     Parameters,
 )
 
-from ..inflatable import get_object_body, get_object_type_from_object_content
+# pylint: disable=E0611
+from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
+from flwr.proto.recorddict_pb2 import MetricRecord as ProtoMetricRecord
+
+from ..inflatable import (
+    InflatableObject,
+    get_object_body,
+    get_object_type_from_object_content,
+)
 from ..serde import config_record_to_proto, metric_record_to_proto
 from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 
@@ -541,10 +549,32 @@ def test_configs_records_delegation_and_return() -> None:
         assert result is mock_property.return_value
 
 
-def test_metric_record_deflate_and_inflate() -> None:
+@pytest.mark.parametrize(
+    "record_type, record_data, proto_conversion_fn",
+    [
+        (
+            MetricRecord,
+            {"a": 123, "b": [0.123, 0.456]},
+            lambda x: metric_record_to_proto(x).SerializeToString(deterministic=True),
+        ),
+        (
+            ConfigRecord,
+            {
+                "a": 123,
+                "b": [0.123, 0.456],
+                "data": b"hello world",
+            },
+            lambda x: config_record_to_proto(x).SerializeToString(deterministic=True),
+        ),
+    ],
+)
+def test_metric_record_deflate_and_inflate(
+    record_type: type[InflatableObject],
+    record_data: Union[dict[str, ConfigRecordValues], dict[str, MetricRecordValues]],
+    proto_conversion_fn: Callable[[Union[ProtoConfigRecord, ProtoMetricRecord]], bytes],
+) -> None:
     """Ensure an MetricRecord can be (de)inflated correctly."""
-    metrics = {"a": 123, "b": [0.123, 0.456]}
-    record = MetricRecord(metrics)
+    record = record_type(record_data)
     record_b = record.deflate()
 
     # assert
@@ -553,40 +583,10 @@ def test_metric_record_deflate_and_inflate() -> None:
         get_object_type_from_object_content(record_b) == record.__class__.__qualname__
     )
     # Body of deflfated Array matches its direct protobuf serialization
-    assert get_object_body(record_b, MetricRecord) == metric_record_to_proto(
-        record
-    ).SerializeToString(deterministic=True)
+    assert get_object_body(record_b, record_type) == proto_conversion_fn(record)
 
     # Inflate
-    record_ = MetricRecord.inflate(record_b)
-
-    # assert
-    # both objects are identical
-    assert record.object_id == record_.object_id
-
-
-def test_config_record_deflate_and_inflate() -> None:
-    """Ensure an ConfigRecord can be (de)inflated correctly."""
-    metrics = {
-        "a": 123,
-        "b": [0.123, 0.456],
-        "data": b"hello world",
-    }
-    record = ConfigRecord(metrics)
-    record_b = record.deflate()
-
-    # assert
-    # Class name matches
-    assert (
-        get_object_type_from_object_content(record_b) == record.__class__.__qualname__
-    )
-    # Body of deflfated Array matches its direct protobuf serialization
-    assert get_object_body(record_b, ConfigRecord) == config_record_to_proto(
-        record
-    ).SerializeToString(deterministic=True)
-
-    # Inflate
-    record_ = ConfigRecord.inflate(record_b)
+    record_ = record_type.inflate(record_b)
 
     # assert
     # both objects are identical
