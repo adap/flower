@@ -175,7 +175,7 @@ class TestArray(unittest.TestCase):
         arr = Array(np.random.randn(5, 5))
         arr_b = arr.deflate()
 
-        # assert
+        # Assert
         # Class name matches
         assert get_object_type_from_object_content(arr_b) == arr.__class__.__qualname__
         # Body of deflfated Array matches its direct protobuf serialization
@@ -184,6 +184,6 @@ class TestArray(unittest.TestCase):
         # Inflate
         arr_ = Array.inflate(arr_b)
 
-        # assert
-        # both objects are identical
+        # Assert
+        # Both objects are identical
         assert arr.object_id == arr_.object_id

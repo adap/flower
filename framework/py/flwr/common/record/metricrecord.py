@@ -15,6 +15,8 @@
 """MetricRecord."""
 
 
+from __future__ import annotations
+
 from logging import WARN
 from typing import Optional, cast, get_args
 
@@ -157,18 +159,16 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
         return add_header_to_object_body(object_body=obj_body, cls=self)
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> "MetricRecord":
-        """Inflate the object from bytes.
-
+    def inflate(cls, object_content: bytes) -> MetricRecord:
+        """Inflate a MetricRecord from bytes.
         Parameters
         ----------
         object_content : bytes
-            The deflated object content.
-
+            The deflated object content of the MetricRecord.
         Returns
         -------
-        InflatableObject
-            The inflated object.
+        MetricRecord
+            The inflated MetricRecord.
         """
         obj_body = get_object_body(object_content, cls)
         metric_record_proto = ProtoMetricRecord.FromString(obj_body)

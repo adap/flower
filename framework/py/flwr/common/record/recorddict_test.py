@@ -571,7 +571,7 @@ def test_metric_and_config_record_deflate_and_inflate(
     record = record_type(record_data)  # type: ignore[arg-type]
     record_b = record.deflate()
 
-    # assert
+    # Assert
     # Class name matches
     assert (
         get_object_type_from_object_content(record_b) == record.__class__.__qualname__
@@ -582,6 +582,6 @@ def test_metric_and_config_record_deflate_and_inflate(
     # Inflate
     record_ = record_type.inflate(record_b)
 
-    # assert
-    # both objects are identical
+    # Assert
+    # Both objects are identical
     assert record.object_id == record_.object_id

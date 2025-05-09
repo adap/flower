@@ -15,6 +15,8 @@
 """ConfigRecord."""
 
 
+from __future__ import annotations
+
 from logging import WARN
 from typing import Optional, cast, get_args
 
@@ -182,18 +184,17 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
         return add_header_to_object_body(object_body=obj_body, cls=self)
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> "ConfigRecord":
-        """Inflate the object from bytes.
-
+    def inflate(cls, object_content: bytes) -> ConfigRecord:
+        """Inflate a ConfigRecord from bytes.
         Parameters
         ----------
         object_content : bytes
-            The deflated object content.
-
+            The deflated object content of the ConfigRecord.
         Returns
         -------
-        InflatableObject
-            The inflated object.
+        ConfigRecord
+            The inflated ConfigRecord.
+        """
         """
         obj_body = get_object_body(object_content, cls)
         config_record_proto = ProtoConfigRecord.FromString(obj_body)

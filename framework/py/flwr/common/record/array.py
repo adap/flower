@@ -253,7 +253,7 @@ class Array(InflatableObject):
         return cast(NDArray, ndarray_deserialized)
 
     def deflate(self) -> bytes:
-        """Deflate object."""
+        """Deflate the Array."""
         array_proto = ArrayProto(
             dtype=self.dtype,
             shape=self.shape,
@@ -266,17 +266,18 @@ class Array(InflatableObject):
 
     @classmethod
     def inflate(cls, object_content: bytes) -> Array:
-        """Inflate the object from bytes.
+        """Inflate an Array from bytes.
 
         Parameters
         ----------
         object_content : bytes
-            The deflated object content.
+            The deflated object content of the Array.
 
         Returns
         -------
-        InflatableObject
-            The inflated object.
+        Array
+            The inflated Array.
+        """
         """
         obj_body = get_object_body(object_content, cls)
         proto_array = ArrayProto.FromString(obj_body)
