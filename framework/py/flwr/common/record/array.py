@@ -24,7 +24,10 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
+from flwr.proto.recorddict_pb2 import Array as ArrayProto  # pylint: disable=E0611
+
 from ..constant import SType
+from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..typing import NDArray
 
 if TYPE_CHECKING:
@@ -40,7 +43,7 @@ def _raise_array_init_error() -> None:
 
 
 @dataclass
-class Array:
+class Array(InflatableObject):
     """Array type.
 
     A dataclass containing serialized data from an array-like or tensor-like object
@@ -248,3 +251,27 @@ class Array:
         # Source: https://numpy.org/doc/stable/reference/generated/numpy.load.html
         ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
         return cast(NDArray, ndarray_deserialized)
+
+    def deflate(self) -> bytes:  # noqa: D102
+
+        array_proto = ArrayProto(
+            dtype=self.dtype,
+            shape=self.shape,
+            stype=self.stype,
+            data=self.data,
+        )
+
+        obj_body = array_proto.SerializeToString(deterministic=True)
+        return add_header_to_object_body(object_body=obj_body, cls=self)
+
+    @classmethod
+    def inflate(cls, object_content: bytes) -> Array:  # noqa: D102
+
+        obj_body = get_object_body(object_content, cls)
+        proto_array = ArrayProto.FromString(obj_body)
+        return cls(
+            dtype=proto_array.dtype,
+            shape=list(proto_array.shape),
+            stype=proto_array.stype,
+            data=proto_array.data,
+        )

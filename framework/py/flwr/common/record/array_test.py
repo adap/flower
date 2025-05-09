@@ -25,7 +25,10 @@ from unittest.mock import Mock
 import numpy as np
 from parameterized import parameterized
 
+from flwr.common.serde import array_to_proto
+
 from ..constant import SType
+from ..inflatable import get_object_body, get_object_type_from_object_content
 from ..typing import NDArray
 from .array import Array
 
@@ -166,3 +169,21 @@ class TestArray(unittest.TestCase):
         """Ensure invalid combinations raise TypeError."""
         with self.assertRaises(TypeError):
             Array(*args)
+
+    def test_deflate_and_inflate(self) -> None:
+        """Ensure an Array can be (de)inflated correctly."""
+        arr = Array(np.random.randn(5, 5))
+        arr_b = arr.deflate()
+
+        # assert
+        # Class name matches
+        assert get_object_type_from_object_content(arr_b) == arr.__class__.__qualname__
+        # Body of deflfated Array matches its direct protobuf serialization
+        assert get_object_body(arr_b, Array) == array_to_proto(arr).SerializeToString()
+
+        # Inflate
+        arr_ = Array.inflate(arr_b)
+
+        # assert
+        # both objects are identical
+        assert arr.object_id == arr_.object_id
