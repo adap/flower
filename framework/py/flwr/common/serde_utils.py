@@ -19,6 +19,7 @@ from typing import Any, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
+# pylint: disable=E0611
 from flwr.proto.recorddict_pb2 import (
     BoolList,
     BytesList,
