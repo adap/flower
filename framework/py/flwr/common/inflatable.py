@@ -32,7 +32,7 @@ class InflatableObject:
 
     @classmethod
     def inflate(cls, object_content: bytes) -> "InflatableObject":
-        """Deserialize the object from bytes.
+        """Inflate the object from bytes.
 
         Parameters
         ----------
