@@ -37,7 +37,8 @@ class ContinuousPartitioner(
     (𝜎 ∈ [0, 1]) blends a standardized property vector (z ∈ ℝⁿ) with Gaussian noise
     (ε ~ 𝒩(0, I)), producing blended scores:
 
-        .. math::
+
+    .. math::
 
         b = \sigma \cdot z + (1 - \sigma) \cdot ε
 
