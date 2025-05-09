@@ -16,6 +16,7 @@
 
 
 # pylint: disable=W0212
+import random
 import unittest
 from typing import Union
 
@@ -35,10 +36,10 @@ def _dummy_setup(
     self_balancing: bool = True,
 ) -> tuple[Dataset, DirichletPartitioner]:
     """Create a dummy dataset and partitioner for testing."""
-    data = {
-        partition_by: [i % 3 for i in range(num_rows)],
-        "features": list(range(num_rows)),
-    }
+    examples = list(zip(range(num_rows), [i % 3 for i in range(num_rows)]))
+    random.shuffle(examples)
+    features, labels = zip(*examples)
+    data = {partition_by: labels, "features": features}
     dataset = Dataset.from_dict(data)
     partitioner = DirichletPartitioner(
         num_partitions=num_partitions,
@@ -98,6 +99,36 @@ class TestDirichletPartitionerSuccess(unittest.TestCase):
             partitioner._partition_id_to_indices_determined
             and len(partitioner._partition_id_to_indices) == num_partitions
         )
+
+    def test__determine_partition_id_to_indices_if_needed_consistency(
+        self,
+    ) -> None:
+        """Test that indices are consistently assigned to partition IDs.
+
+        Partition distributions should be consistent regardless of the
+        ordering of examples in the dataset. This is important to ensure
+        that partitions from train and test partitioners have the same
+        distributions.
+        """
+        num_partitions = 3
+        _, partitioner1 = _dummy_setup(num_partitions, 0.5, 50, "labels")
+        _, partitioner2 = _dummy_setup(num_partitions, 0.5, 50, "labels")
+
+        _ = partitioner1.load_partition(0)
+        _ = partitioner2.load_partition(0)
+
+        classes = partitioner1.dataset.unique(partitioner1._partition_by)
+        for i in range(num_partitions):
+            partition1 = partitioner1.load_partition(i)
+            partition2 = partitioner2.load_partition(i)
+
+            targets1 = np.array(partition1[partitioner1._partition_by])
+            targets2 = np.array(partition2[partitioner2._partition_by])
+
+            for k in classes:
+                self.assertCountEqual(
+                    np.nonzero(targets1 == k)[0], np.nonzero(targets2 == k)[0]
+                )
 
 
 class TestDirichletPartitionerFailure(unittest.TestCase):
