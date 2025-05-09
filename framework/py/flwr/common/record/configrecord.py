@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 from logging import WARN
-from typing import Optional, cast, get_args
+from typing import cast, get_args
 
 from flwr.common.typing import ConfigRecordValues, ConfigScalar
 
@@ -120,7 +120,7 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
 
     def __init__(
         self,
-        config_dict: Optional[dict[str, ConfigRecordValues]] = None,
+        config_dict: dict[str, ConfigRecordValues] | None = None,
         keep_input: bool = True,
     ) -> None:
 
@@ -187,15 +187,16 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
     @classmethod
     def inflate(cls, object_content: bytes) -> ConfigRecord:
         """Inflate a ConfigRecord from bytes.
+
         Parameters
         ----------
         object_content : bytes
             The deflated object content of the ConfigRecord.
+
         Returns
         -------
         ConfigRecord
             The inflated ConfigRecord.
-        """
         """
         obj_body = get_object_body(object_content, cls)
         config_record_proto = ProtoConfigRecord.FromString(obj_body)
@@ -239,7 +240,7 @@ class ConfigsRecord(ConfigRecord):
 
     def __init__(
         self,
-        config_dict: Optional[dict[str, ConfigRecordValues]] = None,
+        config_dict: dict[str, ConfigRecordValues] | None = None,
         keep_input: bool = True,
     ):
         if not ConfigsRecord._warning_logged:

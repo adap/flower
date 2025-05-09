@@ -278,7 +278,6 @@ class Array(InflatableObject):
         Array
             The inflated Array.
         """
-        """
         obj_body = get_object_body(object_content, cls)
         proto_array = ArrayProto.FromString(obj_body)
         return cls(

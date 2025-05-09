@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 from logging import WARN
-from typing import Optional, cast, get_args
+from typing import cast, get_args
 
 from flwr.common.typing import MetricRecordValues, MetricScalar
 
@@ -126,7 +126,7 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
 
     def __init__(
         self,
-        metric_dict: Optional[dict[str, MetricRecordValues]] = None,
+        metric_dict: dict[str, MetricRecordValues] | None = None,
         keep_input: bool = True,
     ) -> None:
         super().__init__(_check_key, _check_value)
@@ -162,10 +162,12 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
     @classmethod
     def inflate(cls, object_content: bytes) -> MetricRecord:
         """Inflate a MetricRecord from bytes.
+
         Parameters
         ----------
         object_content : bytes
             The deflated object content of the MetricRecord.
+
         Returns
         -------
         MetricRecord
@@ -213,7 +215,7 @@ class MetricsRecord(MetricRecord):
 
     def __init__(
         self,
-        metric_dict: Optional[dict[str, MetricRecordValues]] = None,
+        metric_dict: dict[str, MetricRecordValues] | None = None,
         keep_input: bool = True,
     ):
         if not MetricsRecord._warning_logged:
