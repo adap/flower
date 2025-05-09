@@ -39,9 +39,17 @@ class CustomDataClass(InflatableObject):
         obj_body = self.data
         return add_header_to_object_body(object_body=obj_body, cls=self)
 
+    @classmethod
+    def inflate(cls, object_content: bytes) -> "CustomDataClass":  # noqa: D102
+        object_body = get_object_body(object_content, cls)
+        return cls(data=object_body)
 
-def test_deflate() -> None:
-    """Deflate a custom object and verify its object_id it."""
+
+def test_deflate_and_inflate() -> None:
+    """Deflate a custom object and verify its object_id it.
+
+    Then inflate it and verify the content is identical to the original object.
+    """
     data = b"this is a test"
     obj = CustomDataClass(data)
     obj_b = obj.deflate()
@@ -55,6 +63,10 @@ def test_deflate() -> None:
     # assert
     # both objects are identical
     assert get_object_id(obj_b) == obj.object_id
+
+    # Inflate and check object payload is the same
+    obj_ = CustomDataClass.inflate(obj_b)
+    assert obj_.data == obj.data
 
 
 def test_get_object_id() -> None:

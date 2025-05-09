@@ -30,6 +30,22 @@ class InflatableObject:
         """Deflate object."""
         raise NotImplementedError()
 
+    @classmethod
+    def inflate(cls, object_content: bytes) -> "InflatableObject":
+        """Deserialize the object from bytes.
+
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content.
+
+        Returns
+        -------
+        InflatableObject
+            The inflated object.
+        """
+        raise NotImplementedError()
+
     @property
     def object_id(self) -> str:
         """Get object_id."""
