@@ -15,11 +15,13 @@
 """MetricRecord."""
 
 
+import json
 from logging import WARN
 from typing import Optional, get_args
 
 from flwr.common.typing import MetricRecordValues, MetricScalar
 
+from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..logger import log
 from .typeddict import TypedDict
 
@@ -59,7 +61,7 @@ def _check_value(value: MetricRecordValues) -> None:
         is_valid(value)
 
 
-class MetricRecord(TypedDict[str, MetricRecordValues]):
+class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
     """Metric record.
 
     A :code:`MetricRecord` is a Python dictionary designed to ensure that
@@ -142,6 +144,16 @@ class MetricRecord(TypedDict[str, MetricRecordValues]):
             # We also count the bytes footprint of the keys
             num_bytes += len(k)
         return num_bytes
+
+    def deflate(self) -> bytes:  # noqa: D102
+        obj_body = json.dumps(dict(self)).encode(encoding="utf-8")
+        return add_header_to_object_body(object_body=obj_body, cls=self)
+
+    @classmethod
+    def inflate(cls, object_content: bytes) -> "MetricRecord":  # noqa: D102
+
+        obj_body = get_object_body(object_content, cls)
+        return cls(json.loads(obj_body.decode(encoding="utf-8")))
 
 
 class MetricsRecord(MetricRecord):

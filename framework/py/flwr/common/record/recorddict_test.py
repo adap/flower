@@ -15,6 +15,7 @@
 """RecordDict tests."""
 
 
+import json
 import pickle
 from collections import OrderedDict
 from copy import deepcopy
@@ -37,6 +38,7 @@ from flwr.common.typing import (
     Parameters,
 )
 
+from ..inflatable import get_object_body, get_object_type_from_object_content
 from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 
 
@@ -537,3 +539,28 @@ def test_configs_records_delegation_and_return() -> None:
 
         mock_property.assert_called_once()
         assert result is mock_property.return_value
+
+
+def test_metric_record_deflate_and_inflate() -> None:
+    """Ensure an MetricRecord can be (de)inflated correctly."""
+    metrics = {"a": 123, "b": 0.456}
+    record = MetricRecord(metrics)
+    record_b = record.deflate()
+
+    # assert
+    # Class name matches
+    assert (
+        get_object_type_from_object_content(record_b) == record.__class__.__qualname__
+    )
+    # Body of deflfated Array matches its direct protobuf serialization
+    print(get_object_body(record_b, MetricRecord))
+    assert get_object_body(record_b, MetricRecord) == json.dumps(metrics).encode(
+        encoding="utf-8"
+    )
+
+    # Inflate
+    record_ = MetricRecord.inflate(record_b)
+
+    # assert
+    # both objects are identical
+    assert record.object_id == record_.object_id
