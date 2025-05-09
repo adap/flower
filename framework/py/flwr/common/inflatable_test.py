@@ -46,7 +46,7 @@ class CustomDataClass(InflatableObject):
 
 
 def test_deflate_and_inflate() -> None:
-    """Deflate a custom object and verify its object_id it.
+    """Deflate a custom object and verify its ``object_id``.
 
     Then inflate it and verify the content is identical to the original object.
     """
