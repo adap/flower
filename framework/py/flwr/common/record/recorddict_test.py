@@ -567,7 +567,7 @@ def test_metric_and_config_record_deflate_and_inflate(
     record_data: dict[str, Union[ConfigRecordValues, MetricRecordValues]],
     proto_conversion_fn: Callable[[Union[ConfigRecord, MetricRecord]], bytes],
 ) -> None:
-    """Ensure an MetricRecord can be (de)inflated correctly."""
+    """Ensure an MetricRecord and ConfigRecord can be (de)inflated correctly."""
     record = record_type(record_data)  # type: ignore[arg-type]
     record_b = record.deflate()
 
