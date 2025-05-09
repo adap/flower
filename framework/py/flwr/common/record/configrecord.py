@@ -170,8 +170,8 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
 
         return num_bytes
 
-    def deflate(self) -> bytes:  # noqa: D102
-
+    def deflate(self) -> bytes:
+        """Deflate object."""
         obj_body = ProtoConfigRecord(
             data=record_value_dict_to_proto(
                 self,
@@ -182,8 +182,19 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
         return add_header_to_object_body(object_body=obj_body, cls=self)
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> "ConfigRecord":  # noqa: D102
+    def inflate(cls, object_content: bytes) -> "ConfigRecord":
+        """Inflate the object from bytes.
 
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content.
+
+        Returns
+        -------
+        InflatableObject
+            The inflated object.
+        """
         obj_body = get_object_body(object_content, cls)
         config_record_proto = ProtoConfigRecord.FromString(obj_body)
 

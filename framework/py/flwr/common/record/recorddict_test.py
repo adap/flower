@@ -37,17 +37,11 @@ from flwr.common.typing import (
     Parameters,
 )
 
-# pylint: disable=E0611
-from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
-from flwr.proto.recorddict_pb2 import MetricRecord as ProtoMetricRecord
-
-from ..inflatable import (
-    InflatableObject,
-    get_object_body,
-    get_object_type_from_object_content,
-)
+from ..inflatable import get_object_body, get_object_type_from_object_content
 from ..serde import config_record_to_proto, metric_record_to_proto
 from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
+
+# pylint: disable=E0611
 
 
 def get_ndarrays() -> NDArrays:
@@ -568,13 +562,13 @@ def test_configs_records_delegation_and_return() -> None:
         ),
     ],
 )
-def test_metric_record_deflate_and_inflate(
-    record_type: type[InflatableObject],
-    record_data: Union[dict[str, ConfigRecordValues], dict[str, MetricRecordValues]],
-    proto_conversion_fn: Callable[[Union[ProtoConfigRecord, ProtoMetricRecord]], bytes],
+def test_metric_and_config_record_deflate_and_inflate(
+    record_type: type[Union[ConfigRecord, MetricRecord]],
+    record_data: dict[str, Union[ConfigRecordValues, MetricRecordValues]],
+    proto_conversion_fn: Callable[[Union[ConfigRecord, MetricRecord]], bytes],
 ) -> None:
     """Ensure an MetricRecord can be (de)inflated correctly."""
-    record = record_type(record_data)
+    record = record_type(record_data)  # type: ignore[arg-type]
     record_b = record.deflate()
 
     # assert

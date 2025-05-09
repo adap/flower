@@ -149,15 +149,27 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
             num_bytes += len(k)
         return num_bytes
 
-    def deflate(self) -> bytes:  # noqa: D102
+    def deflate(self) -> bytes:
+        """Deflate object."""
         obj_body = ProtoMetricRecord(
             data=record_value_dict_to_proto(self, [float, int], ProtoMetricRecordValue)
         ).SerializeToString(deterministic=True)
         return add_header_to_object_body(object_body=obj_body, cls=self)
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> "MetricRecord":  # noqa: D102
+    def inflate(cls, object_content: bytes) -> "MetricRecord":
+        """Inflate the object from bytes.
 
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content.
+
+        Returns
+        -------
+        InflatableObject
+            The inflated object.
+        """
         obj_body = get_object_body(object_content, cls)
         metric_record_proto = ProtoMetricRecord.FromString(obj_body)
 

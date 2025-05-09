@@ -252,8 +252,8 @@ class Array(InflatableObject):
         ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
         return cast(NDArray, ndarray_deserialized)
 
-    def deflate(self) -> bytes:  # noqa: D102
-
+    def deflate(self) -> bytes:
+        """Deflate object."""
         array_proto = ArrayProto(
             dtype=self.dtype,
             shape=self.shape,
@@ -265,8 +265,19 @@ class Array(InflatableObject):
         return add_header_to_object_body(object_body=obj_body, cls=self)
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> Array:  # noqa: D102
+    def inflate(cls, object_content: bytes) -> Array:
+        """Inflate the object from bytes.
 
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content.
+
+        Returns
+        -------
+        InflatableObject
+            The inflated object.
+        """
         obj_body = get_object_body(object_content, cls)
         proto_array = ArrayProto.FromString(obj_body)
         return cls(
