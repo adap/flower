@@ -15,14 +15,18 @@
 """MetricRecord."""
 
 
-import json
 from logging import WARN
-from typing import Optional, get_args
+from typing import Optional, cast, get_args
 
 from flwr.common.typing import MetricRecordValues, MetricScalar
 
+# pylint: disable=E0611
+from flwr.proto.recorddict_pb2 import MetricRecord as ProtoMetricRecord
+from flwr.proto.recorddict_pb2 import MetricRecordValue as ProtoMetricRecordValue
+
 from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..logger import log
+from ..serde_utils import record_value_dict_from_proto, record_value_dict_to_proto
 from .typeddict import TypedDict
 
 
@@ -146,14 +150,24 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
         return num_bytes
 
     def deflate(self) -> bytes:  # noqa: D102
-        obj_body = json.dumps(dict(self)).encode(encoding="utf-8")
+        obj_body = ProtoMetricRecord(
+            data=record_value_dict_to_proto(self, [float, int], ProtoMetricRecordValue)
+        ).SerializeToString(deterministic=True)
         return add_header_to_object_body(object_body=obj_body, cls=self)
 
     @classmethod
     def inflate(cls, object_content: bytes) -> "MetricRecord":  # noqa: D102
 
         obj_body = get_object_body(object_content, cls)
-        return cls(json.loads(obj_body.decode(encoding="utf-8")))
+        metric_record_proto = ProtoMetricRecord.FromString(obj_body)
+
+        return cls(
+            metric_dict=cast(
+                dict[str, MetricRecordValues],
+                record_value_dict_from_proto(metric_record_proto.data),
+            ),
+            keep_input=False,
+        )
 
 
 class MetricsRecord(MetricRecord):

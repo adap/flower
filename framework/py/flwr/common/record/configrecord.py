@@ -16,11 +16,17 @@
 
 
 from logging import WARN
-from typing import Optional, get_args
+from typing import Optional, cast, get_args
 
 from flwr.common.typing import ConfigRecordValues, ConfigScalar
 
+# pylint: disable=E0611
+from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
+from flwr.proto.recorddict_pb2 import ConfigRecordValue as ProtoConfigRecordValue
+
+from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..logger import log
+from ..serde_utils import record_value_dict_from_proto, record_value_dict_to_proto
 from .typeddict import TypedDict
 
 
@@ -59,7 +65,7 @@ def _check_value(value: ConfigRecordValues) -> None:
         is_valid(value)
 
 
-class ConfigRecord(TypedDict[str, ConfigRecordValues]):
+class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
     """Config record.
 
     A :code:`ConfigRecord` is a Python dictionary designed to ensure that
@@ -163,6 +169,31 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues]):
             num_bytes += len(k)
 
         return num_bytes
+
+    def deflate(self) -> bytes:  # noqa: D102
+
+        obj_body = ProtoConfigRecord(
+            data=record_value_dict_to_proto(
+                self,
+                [bool, int, float, str, bytes],
+                ProtoConfigRecordValue,
+            )
+        ).SerializeToString(deterministic=True)
+        return add_header_to_object_body(object_body=obj_body, cls=self)
+
+    @classmethod
+    def inflate(cls, object_content: bytes) -> "ConfigRecord":  # noqa: D102
+
+        obj_body = get_object_body(object_content, cls)
+        config_record_proto = ProtoConfigRecord.FromString(obj_body)
+
+        return ConfigRecord(
+            config_dict=cast(
+                dict[str, ConfigRecordValues],
+                record_value_dict_from_proto(config_record_proto.data),
+            ),
+            keep_input=False,
+        )
 
 
 class ConfigsRecord(ConfigRecord):
