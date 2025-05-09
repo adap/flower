@@ -1,8 +1,11 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+
 plugins {
   alias(libs.plugins.android.library)
   alias(libs.plugins.kotlin.android)
   alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.ktfmt)
+  alias(libs.plugins.dokka)
 }
 
 android {
@@ -64,3 +67,28 @@ dependencies {
 ktfmt { googleStyle() }
 
 tasks.withType<Test>().configureEach { useJUnitPlatform() }
+
+tasks.withType<DokkaTask>().configureEach {
+  moduleName.set(project.name)
+  moduleVersion.set(project.version.toString())
+  outputDirectory.set(layout.buildDirectory.dir("dokka/$name"))
+  failOnWarning.set(false)
+  suppressObviousFunctions.set(true)
+  suppressInheritedMembers.set(false)
+  offlineMode.set(false)
+
+  dokkaSourceSets {
+    configureEach {
+      if (name == "test" || name == "androidTest") {
+        suppress.set(true)
+      }
+      perPackageOption {
+        matchingRegex.set(".*FlowerIntelligence(Android)?Test.*")
+        suppress.set(true)
+      }
+      noStdlibLink.set(true)
+      noJdkLink.set(true)
+      noAndroidSdkLink.set(true)
+    }
+  }
+}

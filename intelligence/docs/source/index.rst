@@ -1055,6 +1055,7 @@ Information-oriented API reference and other reference material.
     examples
     ts-api-ref/index
     swift-api-ref/index
+    kt-api-ref/index
 
 Contributor guides
 ------------------
