@@ -35,7 +35,7 @@ profile = "black"
 
 [tool.black]
 line-length = 88
-target-version = ["py310", "py311", "py12"]
+target-version = ["py310", "py311", "py312"]
 
 [tool.pytest.ini_options]
 minversion = "6.2"
@@ -108,7 +108,7 @@ select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
 ignore = ["B024", "B027", "D205", "D209"]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
 [tool.hatch.build.targets.wheel]
