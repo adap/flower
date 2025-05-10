@@ -3,8 +3,6 @@ name: PR Check
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
-    branches:
-      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
