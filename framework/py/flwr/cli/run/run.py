@@ -24,9 +24,8 @@ from typing import Annotated, Any, Optional
 import typer
 from rich.console import Console
 
-from flwr.cli.build import build
+from flwr.cli.build import build_fab, get_fab_filename
 from flwr.cli.config_utils import (
-    get_fab_metadata,
     load_and_validate,
     process_loaded_project_config,
     validate_federation_in_project_config,
@@ -34,6 +33,7 @@ from flwr.cli.config_utils import (
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.config import (
     flatten_dict,
+    get_metadata_from_config,
     parse_config_args,
     user_config_to_configrecord,
 )
@@ -158,18 +158,14 @@ def _run_with_exec_api(
     channel = init_channel(app, federation_config, auth_plugin)
     stub = ExecStub(channel)
 
-    fab_path, fab_hash = build(app)
-    content = Path(fab_path).read_bytes()
-    fab_id, fab_version = get_fab_metadata(Path(fab_path))
+    fab_bytes, fab_hash, config = build_fab(app)
+    fab_id, fab_version = get_metadata_from_config(config)
 
-    # Delete FAB file once the bytes is computed
-    Path(fab_path).unlink()
-
-    fab = Fab(fab_hash, content)
+    fab = Fab(fab_hash, fab_bytes)
 
     # Construct a `ConfigRecord` out of a flattened `UserConfig`
-    fed_conf = flatten_dict(federation_config.get("options", {}))
-    c_record = user_config_to_configrecord(fed_conf)
+    fed_config = flatten_dict(federation_config.get("options", {}))
+    c_record = user_config_to_configrecord(fed_config)
 
     req = StartRunRequest(
         fab=fab_to_proto(fab),
@@ -194,7 +190,7 @@ def _run_with_exec_api(
                 "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
                 "fab-version": fab_version,
                 "fab-hash": fab_hash[:8],
-                "fab-filename": fab_path,
+                "fab-filename": get_fab_filename(config, fab_hash),
             }
         )
         restore_output()

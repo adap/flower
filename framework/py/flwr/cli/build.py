@@ -16,10 +16,8 @@
 
 
 import hashlib
-import os
-import shutil
-import tempfile
 import zipfile
+from io import BytesIO
 from pathlib import Path
 from typing import Annotated, Any, Optional, Union
 
@@ -29,6 +27,7 @@ import typer
 
 from flwr.common.constant import FAB_ALLOWED_EXTENSIONS, FAB_DATE, FAB_HASH_TRUNCATION
 
+from .config_utils import load as load_toml
 from .config_utils import load_and_validate
 from .utils import is_valid_project_name
 
@@ -43,11 +42,11 @@ def write_to_zip(
     return zipfile_obj
 
 
-def get_fab_filename(conf: dict[str, Any], fab_hash: str) -> str:
+def get_fab_filename(config: dict[str, Any], fab_hash: str) -> str:
     """Get the FAB filename based on the given config and FAB hash."""
-    publisher = conf["tool"]["flwr"]["app"]["publisher"]
-    name = conf["project"]["name"]
-    version = conf["project"]["version"].replace(".", "-")
+    publisher = config["tool"]["flwr"]["app"]["publisher"]
+    name = config["project"]["name"]
+    version = config["project"]["version"].replace(".", "-")
     fab_hash_truncated = fab_hash[:FAB_HASH_TRUNCATION]
     return f"{publisher}.{name}.{version}.{fab_hash_truncated}.fab"
 
@@ -89,8 +88,8 @@ def build(
         )
         raise typer.Exit(code=1)
 
-    conf, errors, warnings = load_and_validate(app / "pyproject.toml")
-    if conf is None:
+    config, errors, warnings = load_and_validate(app / "pyproject.toml")
+    if config is None:
         typer.secho(
             "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
             + "\n".join([f"- {line}" for line in errors]),
@@ -107,70 +106,96 @@ def build(
             bold=True,
         )
 
-    # Load .gitignore rules if present
-    ignore_spec = _load_gitignore(app)
+    # Build FAB
+    fab_bytes, fab_hash, _ = build_fab(app)
 
-    list_file_content = ""
+    # Get the name of the zip file
+    fab_filename = get_fab_filename(config, fab_hash)
 
-    # Remove the 'federations' field from 'tool.flwr' if it exists
-    if (
-        "tool" in conf
-        and "flwr" in conf["tool"]
-        and "federations" in conf["tool"]["flwr"]
-    ):
-        del conf["tool"]["flwr"]["federations"]
-
-    toml_contents = tomli_w.dumps(conf)
-
-    with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as temp_file:
-        temp_filename = temp_file.name
-
-        with zipfile.ZipFile(temp_filename, "w", zipfile.ZIP_DEFLATED) as fab_file:
-            write_to_zip(fab_file, "pyproject.toml", toml_contents)
-
-            # Continue with adding other files
-            all_files = [
-                f
-                for f in app.rglob("*")
-                if not ignore_spec.match_file(f)
-                and f.name != temp_filename
-                and f.suffix in FAB_ALLOWED_EXTENSIONS
-                and f.name != "pyproject.toml"  # Exclude the original pyproject.toml
-            ]
-
-            all_files.sort()
-
-            for file_path in all_files:
-                # Read the file content manually
-                with open(file_path, "rb") as f:
-                    file_contents = f.read()
-
-                archive_path = file_path.relative_to(app)
-                write_to_zip(fab_file, str(archive_path), file_contents)
-
-                # Calculate file info
-                sha256_hash = hashlib.sha256(file_contents).hexdigest()
-                file_size_bits = os.path.getsize(file_path) * 8  # size in bits
-                list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
-
-            # Add CONTENT and CONTENT.jwt to the zip file
-            write_to_zip(fab_file, ".info/CONTENT", list_file_content)
-
-    # Get hash of FAB file
-    content = Path(temp_filename).read_bytes()
-    fab_hash = hashlib.sha256(content).hexdigest()
-
-    # Set the name of the zip file
-    fab_filename = get_fab_filename(conf, fab_hash)
-
-    # Once the temporary zip file is created, rename it to the final filename
-    shutil.move(temp_filename, fab_filename)
+    # Write the FAB
+    Path(fab_filename).write_bytes(fab_bytes)
 
     typer.secho(
         f"🎊 Successfully built {fab_filename}", fg=typer.colors.GREEN, bold=True
     )
 
     return fab_filename, fab_hash
+
+
+def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
+    """Build a FAB in memory and return the bytes, hash, and config.
+
+    This function assumes that the provided path points to a valid Flower app and
+    bundles it into a FAB without performing additional validation.
+
+    Parameters
+    ----------
+    app : Path
+        Path to the Flower app to bundle into a FAB.
+
+    Returns
+    -------
+    tuple[bytes, str, dict[str, Any]]
+        A tuple containing:
+        - the FAB as bytes
+        - the SHA256 hash of the FAB
+        - the project configuration (with the 'federations' field removed)
+    """
+    app = app.resolve()
+
+    # Load the pyproject.toml file
+    config = load_toml(app / "pyproject.toml")
+    if config is None:
+        raise ValueError("Project configuration could not be loaded.")
+
+    # Remove the 'federations' field if it exists
+    if (
+        "tool" in config
+        and "flwr" in config["tool"]
+        and "federations" in config["tool"]["flwr"]
+    ):
+        del config["tool"]["flwr"]["federations"]
+
+    # Load .gitignore rules if present
+    ignore_spec = _load_gitignore(app)
+
+    # Search for all files in the app directory
+    all_files = [
+        f
+        for f in app.rglob("*")
+        if not ignore_spec.match_file(f)
+        and f.suffix in FAB_ALLOWED_EXTENSIONS
+        and f.name != "pyproject.toml"  # Exclude the original pyproject.toml
+    ]
+    all_files.sort()
+
+    # Create a zip file in memory
+    list_file_content = ""
+
+    fab_buffer = BytesIO()
+    with zipfile.ZipFile(fab_buffer, "w", zipfile.ZIP_DEFLATED) as fab_file:
+        # Add pyproject.toml
+        write_to_zip(fab_file, "pyproject.toml", tomli_w.dumps(config))
+
+        for file_path in all_files:
+            # Read the file content manually
+            file_contents = file_path.read_bytes()
+
+            archive_path = str(file_path.relative_to(app))
+            write_to_zip(fab_file, archive_path, file_contents)
+
+            # Calculate file info
+            sha256_hash = hashlib.sha256(file_contents).hexdigest()
+            file_size_bits = len(file_contents) * 8  # size in bits
+            list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
+
+        # Add CONTENT and CONTENT.jwt to the zip file
+        write_to_zip(fab_file, ".info/CONTENT", list_file_content)
+
+    fab_bytes = fab_buffer.getvalue()
+    fab_hash = hashlib.sha256(fab_bytes).hexdigest()
+
+    return fab_bytes, fab_hash, config
 
 
 def _load_gitignore(app: Path) -> pathspec.PathSpec:
