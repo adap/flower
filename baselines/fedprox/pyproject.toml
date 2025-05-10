@@ -141,6 +141,7 @@ mu = 1.0
 num-clients = 1000 # This parameter is used by the Server only, and does not change the size of the federation.
 
 [tool.flwr.app.config.dataset]
+path = "ylecun/mnist"
 power-law = true
 num-unique-labels-per-partition = 2
 num-unique-labels = 10

@@ -110,7 +110,8 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
         The model that has been trained for one epoch.
     """
     for batch in trainloader:
-        images, labels = batch["image"].to(device), batch["label"].to(device)
+        label_key = "character" if "character" in batch else "label" # FEMNIST's label is called "character"
+        images, labels = batch["image"].to(device), batch[label_key].to(device)
         optimizer.zero_grad()
         proximal_term = 0.0
         for local_weights, global_weights in zip(net.parameters(), global_params):
@@ -145,7 +146,8 @@ def test(
     net.eval()
     with torch.no_grad():
         for batch in testloader:
-            images, labels = batch["image"].to(device), batch["label"].to(device)
+            label_key = "character" if "character" in batch else "label" # FEMNIST's label is called "character"
+            images, labels = batch["image"].to(device), batch[label_key].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
