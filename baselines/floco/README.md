@@ -1,7 +1,7 @@
 ---
 title: Federated Learning over Connected Modes
 url: https://openreview.net/pdf?id=JL2eMCfDW8
-labels: [personalization] 
+labels: [personalization, cross-silo, linear mode connectivity] 
 dataset: [CIFAR10]
 ---
 
