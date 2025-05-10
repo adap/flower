@@ -76,7 +76,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: baselines/${{ matrix.baseline }}
-        run: pip install .
+        run: pip install ."[dev]"
 
       - name: Testing ${{ matrix.baseline }}
         working-directory: baselines
