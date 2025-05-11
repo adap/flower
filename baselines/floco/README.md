@@ -28,7 +28,7 @@ dataset: [CIFAR10]
 
 **Task:** Image Classification
 
-**Model:** This repository implements a two-layer CNN as in \cite{FedAvg}. Additional models can be implemented by changing the `base_model` attribute in the `SimplexModel` class in `floco/model.py`.
+**Model:** This repository implements a two-layer CNN as in [McMahan et al. 2017](https://arxiv.org/abs/1602.05629). Additional models can be implemented by changing the `base_model` attribute in the `SimplexModel` class in `floco/model.py`.
 
 **Dataset:**
 
