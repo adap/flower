@@ -381,7 +381,7 @@ jobs:
           flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
           cd tmp-${{ matrix.framework }}
           flwr build
-          flwr install *.fab
+          flwr install $HOME/.flwr/*.fab
 
   numpy:
     runs-on: ubuntu-22.04
