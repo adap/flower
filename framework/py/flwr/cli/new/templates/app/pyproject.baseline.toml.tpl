@@ -10,8 +10,8 @@ license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.19.0",
     "flwr-datasets[vision]>=0.5.0",
-    "torch==2.5.1",
-    "torchvision==0.20.1",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
 ]
 
 [tool.hatch.metadata]
@@ -23,28 +23,23 @@ dev = [
     "black==24.2.0",
     "docformatter==1.7.5",
     "mypy==1.8.0",
-    "pylint==3.2.6",
-    "flake8==5.0.4",
-    "pytest==6.2.4",
+    "pylint==3.3.1",
+    "pytest==7.4.4",
     "pytest-watch==4.2.0",
-    "ruff==0.1.9",
+    "ruff==0.4.5",
     "types-requests==2.31.0.20240125",
 ]
 
 [tool.isort]
 profile = "black"
-known_first_party = ["flwr"]
 
 [tool.black]
 line-length = 88
-target-version = ["py38", "py39", "py310", "py311"]
+target-version = ["py310", "py311", "py312"]
 
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = [
-    "flwr_baselines",
-]
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -82,11 +77,8 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py310"
 line-length = 88
-select = ["D", "E", "F", "W", "B", "ISC", "C4"]
-fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
-ignore = ["B024", "B027"]
 exclude = [
     ".bzr",
     ".direnv",
@@ -111,7 +103,12 @@ exclude = [
     "proto",
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint]
+select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
+fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
+ignore = ["B024", "B027", "D205", "D209"]
+
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
 [tool.hatch.build.targets.wheel]
