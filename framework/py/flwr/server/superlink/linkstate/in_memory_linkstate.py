@@ -59,6 +59,7 @@ class RunRecord:  # pylint: disable=R0902
     heartbeat_interval: float = 0.0
     logs: list[tuple[float, str]] = field(default_factory=list)
     log_lock: threading.Lock = field(default_factory=threading.Lock)
+    lock: threading.RLock = field(default_factory=threading.RLock)
 
 
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
@@ -466,15 +467,15 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             return set(self.run_ids.keys())
 
-    def _check_and_tag_inactive_run(self) -> None:
+    def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
         """Check if any runs are no longer active.
 
         Marks runs with status 'starting' or 'running' as failed
         if they have not sent a heartbeat before `active_until`.
         """
-        with self.lock:
-            current = now()
-            for record in self.run_ids.values():
+        current = now()
+        for record in [self.run_ids[run_id] for run_id in run_ids]:
+            with record.lock:
                 if record.run.status.status in (Status.STARTING, Status.RUNNING):
                     if record.active_until < current.timestamp():
                         record.run.status = RunStatus(
@@ -487,7 +488,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
         # Check if runs are still active
-        self._check_and_tag_inactive_run()
+        self._check_and_tag_inactive_run(run_ids={run_id})
 
         with self.lock:
             if run_id not in self.run_ids:
@@ -498,7 +499,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
         # Check if runs are still active
-        self._check_and_tag_inactive_run()
+        self._check_and_tag_inactive_run(run_ids=run_ids)
 
         with self.lock:
             return {
@@ -510,7 +511,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
         # Check if runs are still active
-        self._check_and_tag_inactive_run()
+        self._check_and_tag_inactive_run(run_ids={run_id})
 
         with self.lock:
             # Check if the run_id exists
@@ -518,6 +519,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "`run_id` is invalid")
                 return False
 
+        with self.run_ids[run_id].lock:
             # Check if the status transition is valid
             current_status = self.run_ids[run_id].run.status
             if not is_valid_transition(current_status, new_status):
@@ -608,9 +610,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         marked as `"completed:failed"`.
         """
         with self.lock:
-            # Check if runs are still active
-            self._check_and_tag_inactive_run()
-
             # Search for the run
             record = self.run_ids.get(run_id)
 
@@ -618,6 +617,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             if record is None:
                 log(ERROR, "`run_id` is invalid")
                 return False
+
+        with self.lock:
+            # Check if runs are still active
+            self._check_and_tag_inactive_run(run_ids={run_id})
 
             # Check if the run is of status "running"/"starting"
             current_status = record.run.status

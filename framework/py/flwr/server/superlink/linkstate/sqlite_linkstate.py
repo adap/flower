@@ -802,14 +802,16 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         rows = self.query(query)
         return {convert_sint64_to_uint64(row["run_id"]) for row in rows}
 
-    def _check_and_tag_inactive_run(self) -> None:
+    def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
         """Check if any runs are no longer active.
 
         Marks runs with status 'starting' or 'running' as failed
         if they have not sent a heartbeat before `active_until`.
         """
+        sint_run_ids = [convert_uint64_to_sint64(run_id) for run_id in run_ids]
         query = "UPDATE run SET finished_at = ?, sub_status = ?, details = ? "
-        query += "WHERE starting_at != '' AND finished_at = '' AND active_until < ?;"
+        query += "WHERE starting_at != '' AND finished_at = '' AND active_until < ?"
+        query += f" AND run_id IN ({','.join(['?'] * len(run_ids))});"
         current = now()
         self.query(
             query,
@@ -818,13 +820,14 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 SubStatus.FAILED,
                 RUN_FAILURE_DETAILS_NO_HEARTBEAT,
                 current.timestamp(),
+                *sint_run_ids,
             ),
         )
 
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
         # Check if runs are still active
-        self._check_and_tag_inactive_run()
+        self._check_and_tag_inactive_run(run_ids={run_id})
 
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
@@ -854,7 +857,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
         # Check if runs are still active
-        self._check_and_tag_inactive_run()
+        self._check_and_tag_inactive_run(run_ids=run_ids)
 
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_ids = (convert_uint64_to_sint64(run_id) for run_id in set(run_ids))
@@ -874,7 +877,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
         # Check if runs are still active
-        self._check_and_tag_inactive_run()
+        self._check_and_tag_inactive_run(run_ids={run_id})
 
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
@@ -1015,7 +1018,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         marked as `"completed:failed"`.
         """
         # Check if runs are still active
-        self._check_and_tag_inactive_run()
+        self._check_and_tag_inactive_run(run_ids={run_id})
 
         # Search for the run
         sint_run_id = convert_uint64_to_sint64(run_id)
