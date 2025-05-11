@@ -2,7 +2,7 @@
 title: Federated Learning over Connected Modes
 url: https://openreview.net/pdf?id=JL2eMCfDW8
 labels: [personalization, cross-silo, linear mode connectivity] 
-dataset: [CIFAR10]
+dataset: [CIFAR-10]
 ---
 
 # Floco: Federated Learning over Connected Modes
