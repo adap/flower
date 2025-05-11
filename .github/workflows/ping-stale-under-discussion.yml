@@ -1,4 +1,4 @@
-name: Ping Stale Under Discussion Issues
+name: Ping Stale Under Discussion GitHub Issues
 
 on:
   schedule:
@@ -19,7 +19,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const org = owner;
@@ -27,38 +26,45 @@ jobs:
             const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
             const query = `repo:${owner}/${repo} is:issue is:open comments:>=1 no:milestone`;
-            const { data } = await github.rest.search.issuesAndPullRequests({ q: query, per_page: 100 });
+            const { data } = await github.rest.search.issuesAndPullRequests({
+              q: query,
+              per_page: 100,
+            });
+
+            const staleIssues = [];
 
             for (const issue of data.items) {
+              if (issue.pull_request) continue;
+
               const updatedAt = new Date(issue.updated_at);
-              if (updatedAt >= sevenDaysAgo) continue;
-
-              // Fetch last comment
-              const comments = await github.rest.issues.listComments({
-                owner, repo,
-                issue_number: issue.number,
-                per_page: 1,
-                sort: "updated",
-                direction: "desc"
-              });
-
-              if (comments.data.length > 0) {
-                const lastComment = comments.data[0];
-                if ((lastComment.body || "").includes("<!-- bot:stale-ping -->")) {
-                  const lastPing = new Date(lastComment.updated_at);
-                  if (lastPing >= sevenDaysAgo) {
-                    console.log(`Skipping issue #${issue.number}: recently pinged.`);
-                    continue;
-                  }
-                }
+              if (updatedAt >= sevenDaysAgo) {
+                console.log(`Skipping #${issue.number}: updated recently`);
+                continue;
               }
 
-              // Filter org assignees
+              staleIssues.push(issue);
+            }
+
+            if (staleIssues.length === 0) {
+              console.log("No stale issues to report.");
+              return;
+            }
+
+            let table = [
+              "| Issue | Title | Assignees |",
+              "|-------|-------|-----------|"
+            ];
+
+            for (const issue of staleIssues) {
+              const number = `#${issue.number}`;
+              const title = issue.title.length > 40 ? issue.title.slice(0, 37) + "..." : issue.title;
+
               let orgAssignees = [];
               for (const assignee of issue.assignees) {
                 const login = assignee.login;
                 const { status } = await github.rest.orgs.checkMembershipForUser({
-                  org, username: login
+                  org,
+                  username: login,
                 }).catch(() => ({ status: 404 }));
 
                 if (status === 204) {
@@ -66,21 +72,25 @@ jobs:
                 }
               }
 
-              const pingTarget = orgAssignees.length > 0
+              const assignees = orgAssignees.length > 0
                 ? orgAssignees.join(", ")
                 : "@WilliamLindskog";
 
-              const slackText = `*Stale Under Discussion Issue*\n${pingTarget} — <${issue.html_url}|#${issue.number} - ${issue.title}> has had no activity for 7+ days.\nPlease review or update its status.\n\n<!-- bot:stale-ping -->`;
-
-              await fetch("https://slack.com/api/chat.postMessage", {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                  channel: process.env.SLACK_CHANNEL_ID,
-                  text: slackText
-                })
-              });
+              table.push(`| ${number} | ${title} | ${assignees} |`);
             }
+
+            const slackText = `*Stale Under Discussion GitHub Issues (no activity in 7+ days)*\n\n\`\`\`\n${table.join("\n")}\n\`\`\`\n\nPlease review or update issue status.`;
+
+            console.log("Sending Slack message...");
+
+            await fetch("https://slack.com/api/chat.postMessage", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                channel: process.env.SLACK_CHANNEL_ID,
+                text: slackText,
+              }),
+            });
