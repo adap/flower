@@ -22,7 +22,7 @@ dataset: [CIFAR10]
 
 **Hardware Setup:** We trained the models used for the plots below on an Apple M1 Pro chip.
 
-**Contributors:** <add here your names (or github tags, emails are fine too if you'd like)> 
+**Contributors:** Dennis Grinwald (dennis.grinwald@tu-berlin.de), Philipp Wiesner (wiesner@tu-berlin.de)
 
 ## Experimental Setup
 
