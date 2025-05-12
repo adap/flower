@@ -22,7 +22,7 @@ num_classes=[]
 num_features=1
 
 def get_client_logger():
-    logger = logging.getLogger(f"logs/Clients_data_info.log)
+    logger = logging.getLogger(f"logs/Clients_data_info.log")
     if not logger.hasHandlers():
         os.makedirs("logs", exist_ok=True)
         handler = logging.FileHandler(f"logs/Clients_data_info.log", mode='w')
