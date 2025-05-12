@@ -265,7 +265,9 @@ class Array(InflatableObject):
         return add_header_to_object_body(object_body=obj_body, cls=self)
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> Array:
+    def inflate(
+        cls, object_content: bytes, children: list[InflatableObject] | None = None
+    ) -> Array:
         """Inflate an Array from bytes.
 
         Parameters
@@ -273,11 +275,18 @@ class Array(InflatableObject):
         object_content : bytes
             The deflated object content of the Array.
 
+        children : list[InflatableObject] | None
+            Unusued. List of children InflatableObjects that enable the full inflation
+            of the Array.
+
         Returns
         -------
         Array
             The inflated Array.
         """
+        if children:
+            raise ValueError("`Array` objects do not have children.")
+
         obj_body = get_object_body(object_content, cls)
         proto_array = ArrayProto.FromString(obj_body)
         return cls(

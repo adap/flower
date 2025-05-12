@@ -31,13 +31,19 @@ class InflatableObject:
         raise NotImplementedError()
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> "InflatableObject":
+    def inflate(
+        cls, object_content: bytes, children: list["InflatableObject"] | None = None
+    ) -> "InflatableObject":
         """Inflate the object from bytes.
 
         Parameters
         ----------
         object_content : bytes
             The deflated object content.
+
+        children : list[InflatableObject] | None
+            List of children InflatableObjects that enable the full inflation
+            of the parent InflatableObject.
 
         Returns
         -------
@@ -50,6 +56,11 @@ class InflatableObject:
     def object_id(self) -> str:
         """Get object_id."""
         return get_object_id(self.deflate())
+
+    @property
+    def children(self) -> list["InflatableObject"]:
+        """Return a list of child objects."""
+        return []
 
 
 def get_object_id(object_content: bytes) -> str:

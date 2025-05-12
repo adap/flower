@@ -160,7 +160,9 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
         return add_header_to_object_body(object_body=obj_body, cls=self)
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> MetricRecord:
+    def inflate(
+        cls, object_content: bytes, children: list[InflatableObject] | None = None
+    ) -> MetricRecord:
         """Inflate a MetricRecord from bytes.
 
         Parameters
@@ -168,11 +170,18 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
         object_content : bytes
             The deflated object content of the MetricRecord.
 
+        children : list[InflatableObject] | None
+            Unusued. List of children InflatableObjects that enable the full inflation
+            of the MetricRecord.
+
         Returns
         -------
         MetricRecord
             The inflated MetricRecord.
         """
+        if children:
+            raise ValueError("`MetricRecord` objects do not have children.")
+
         obj_body = get_object_body(object_content, cls)
         metric_record_proto = ProtoMetricRecord.FromString(obj_body)
 

@@ -185,7 +185,9 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
         return add_header_to_object_body(object_body=obj_body, cls=self)
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> ConfigRecord:
+    def inflate(
+        cls, object_content: bytes, children: list[InflatableObject] | None = None
+    ) -> ConfigRecord:
         """Inflate a ConfigRecord from bytes.
 
         Parameters
@@ -193,11 +195,18 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
         object_content : bytes
             The deflated object content of the ConfigRecord.
 
+        children : list[InflatableObject] | None
+            Unusued. List of children InflatableObjects that enable the full inflation
+            of the ConfigRecord.
+
         Returns
         -------
         ConfigRecord
             The inflated ConfigRecord.
         """
+        if children:
+            raise ValueError("`ConfigRecord` objects do not have children.")
+
         obj_body = get_object_body(object_content, cls)
         config_record_proto = ProtoConfigRecord.FromString(obj_body)
 
