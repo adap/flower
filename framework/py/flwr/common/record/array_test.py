@@ -195,11 +195,4 @@ class TestArray(unittest.TestCase):
 
         # Assert
         # Inflate passing children raises ValueError
-        self.assertRaises(
-            ValueError,
-            Array.inflate,
-            arr_b,
-            children=[
-                arr,
-            ],
-        )
+        self.assertRaises(ValueError, Array.inflate, arr_b, children={"123": arr})
