@@ -14,6 +14,7 @@
 # ==============================================================================
 """InflatableObject base class."""
 
+from __future__ import annotations
 
 import hashlib
 from typing import TypeVar
@@ -32,8 +33,8 @@ class InflatableObject:
 
     @classmethod
     def inflate(
-        cls, object_content: bytes, children: list["InflatableObject"] | None = None
-    ) -> "InflatableObject":
+        cls, object_content: bytes, children: list[InflatableObject] | None = None
+    ) -> InflatableObject:
         """Inflate the object from bytes.
 
         Parameters
@@ -58,7 +59,7 @@ class InflatableObject:
         return get_object_id(self.deflate())
 
     @property
-    def children(self) -> list["InflatableObject"]:
+    def children(self) -> list[InflatableObject]:
         """Return a list of child objects."""
         return []
 
