@@ -25,7 +25,7 @@ import kotlinx.coroutines.withContext
  * remote engine based on configuration and availability.
  */
 object FlowerIntelligence {
-  private var remoteEngine = RemoteEngine()
+  internal var remoteEngine = RemoteEngine()
   private var remoteHandoff: Boolean = true
 
   /**
