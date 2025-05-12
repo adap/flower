@@ -54,7 +54,7 @@ class FlowerIntelligenceTest {
     assertTrue(result.isFailure)
     val exception = result.exceptionOrNull() as Failure
     assertEquals(FailureCode.ConfigError, exception.code)
-    assertTrue(exception.message!!.contains("Cannot set both forceRemote and forceLocal to true"))
+    assertTrue(exception.message.contains("Cannot set both forceRemote and forceLocal to true"))
   }
 
   @Test
@@ -113,7 +113,9 @@ class FlowerIntelligenceTest {
 
     val options =
       ChatOptions(model = "model", temperature = 0.7f, maxCompletionTokens = 150, stream = true)
-    val result = FlowerIntelligence.chat(userMessages to options)
+
+    // Updated to match new chat signature: messages + optional options
+    val result = FlowerIntelligence.chat(userMessages, options)
 
     assertTrue(result.isSuccess)
     assertEquals("I'm good!", result.getOrNull()?.content)
