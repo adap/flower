@@ -491,8 +491,8 @@ jobs:
       - name: Overwrite ping interval and patience
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          sed -i 's/\(PING_DEFAULT_INTERVAL *= *\).*/\16/' framework/py/flwr/common/constant.py
-          sed -i 's/\(PING_PATIENCE *= *\).*/\11/' framework/py/flwr/common/constant.py
+          sed -i 's/\(HEARTBEAT_DEFAULT_INTERVAL *= *\).*/\16/' framework/py/flwr/common/constant.py
+          sed -i 's/\(HEARTBEAT_PATIENCE *= *\).*/\11/' framework/py/flwr/common/constant.py
       - name: Install dependencies
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
