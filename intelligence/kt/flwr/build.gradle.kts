@@ -6,6 +6,8 @@ plugins {
   alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.ktfmt)
   alias(libs.plugins.dokka)
+  alias(libs.plugins.maven.publish)
+  alias(libs.plugins.signing)
 }
 
 android {
@@ -37,6 +39,13 @@ android {
     resources {
       excludes += "/META-INF/LICENSE.md"
       excludes += "/META-INF/LICENSE-notice.md"
+    }
+  }
+
+  publishing {
+    singleVariant("release") {
+      withSourcesJar()
+      withJavadocJar()
     }
   }
 }
@@ -90,5 +99,49 @@ tasks.withType<DokkaTask>().configureEach {
       noJdkLink.set(true)
       noAndroidSdkLink.set(true)
     }
+  }
+
+afterEvaluate {
+  publishing {
+    publications {
+      create<MavenPublication>("release") {
+        from(components["release"])
+
+        groupId = project.property("GROUP_ID") as String
+        artifactId = project.property("ARTIFACT_ID") as String
+        version = project.property("VERSION_NAME") as String
+
+        pom {
+          name.set("Flower Intelligence")
+          description.set("Open-Source On-Device AI with optional Confidential Remote Compute")
+          url.set("https://github.com/adap/flower/")
+
+          licenses {
+            license {
+              name.set("The Apache License, Version 2.0")
+              url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+          }
+          developers {
+            developer {
+              name.set("The Flower Authors")
+              url.set("flower.ai")
+            }
+          }
+          scm {
+            connection.set("scm:git:git://github.com/adap/flower.git")
+            developerConnection.set("scm:git:ssh://git@github.com/adap/flower.git")
+            url.set("https://github.com/adap/flower/")
+          }
+        }
+      }
+    }
+  }
+
+  signing {
+    val signingKey: String? by project
+    val signingPassword: String? by project
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign(publishing.publications["release"])
   }
 }
