@@ -99,6 +99,32 @@ jobs:
           name: swift-docs
           path: intelligence/docs/source/swift-api-ref/
 
+  build_kt_docs:
+    runs-on: ubuntu-22.04
+    name: Build Kotlin Docs
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build Kotlin docs
+        run: |
+          chmod +x ./intelligence/dev/build-kt-docs.sh
+          ./intelligence/dev/build-kt-docs.sh
+
+      - name: Upload Kotlin docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kt-docs
+          path: intelligence/docs/source/kt-api-ref/
+
   build_and_deploy:
     runs-on: ubuntu-22.04
     needs: [build_ts_docs, build_swift_docs]
