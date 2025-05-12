@@ -26,6 +26,7 @@ from .inflatable import (
     get_object_body,
     get_object_id,
     get_object_type_from_object_content,
+    is_valid_sha256_hash,
 )
 
 
@@ -110,3 +111,21 @@ def test_get_object_type_from_object_content() -> None:
     obj_b = obj.deflate()
 
     assert get_object_type_from_object_content(obj_b) == obj.__class__.__qualname__
+
+
+def test_is_valid_sha256_hash_valid() -> None:
+    """Test helper function that checks if a string is a valid SHA256 hash."""
+    # Prepare
+    valid_hash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+    # Execute & assert
+    assert is_valid_sha256_hash(valid_hash)
+
+
+def test_is_valid_sha256_hash_invalid() -> None:
+    """Test helper function that checks if a string is a valid SHA256 hash."""
+    # Prepare
+    invalid_hash = "invalid_hash"
+
+    # Execute & assert
+    assert not is_valid_sha256_hash(invalid_hash)

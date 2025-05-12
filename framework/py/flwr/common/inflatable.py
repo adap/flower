@@ -94,3 +94,26 @@ def get_object_type_from_object_content(object_content: bytes) -> str:
     """Return object type from bytes."""
     obj_head: str = _get_object_head(object_content).decode(encoding="utf-8")
     return obj_head.split(TYPE_BODY_LEN_DIVIDER, 1)[0]
+
+
+def is_valid_sha256_hash(object_id: str) -> bool:
+    """Check if the given string is a valid SHA-256 hash.
+
+    Parameters
+    ----------
+    object_id : str
+        The string to check.
+
+    Returns
+    -------
+    bool
+        ``True`` if the string is a valid SHA-256 hash, ``False`` otherwise.
+    """
+    if len(object_id) != 64:
+        return False
+    try:
+        # If base 16 int conversion succeeds, it's a valid hexadecimal str
+        int(object_id, 16)
+        return True
+    except ValueError:
+        return False

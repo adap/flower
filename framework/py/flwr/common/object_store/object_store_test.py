@@ -18,6 +18,7 @@
 import unittest
 from abc import abstractmethod
 
+from ..inflatable import get_object_id
 from .object_store import ObjectStore
 
 
@@ -34,80 +35,133 @@ class ObjectStoreTest(unittest.TestCase):
 
     def test_get_non_existent_object_id(self) -> None:
         """Test get method with a non-existent object_id."""
+        # Prepare
         object_store = self.object_store_factory()
         object_id = "non_existent_object_id"
 
+        # Execute
         retrieved_value = object_store.get(object_id)
 
+        # Assert
         self.assertIsNone(retrieved_value)
 
     def test_put_and_get(self) -> None:
         """Test put and get methods."""
+        # Prepare
         object_store = self.object_store_factory()
-        object_id = "test_object_id"
         object_content = b"test_value"
+        object_id = get_object_id(object_content)
 
+        # Execute
         object_store.put(object_id, object_content)
         retrieved_value = object_store.get(object_id)
 
+        # Assert
         self.assertEqual(object_content, retrieved_value)
 
     def test_put_overwrite(self) -> None:
         """Test put method with an existing object_id."""
+        # Prepare
         object_store = self.object_store_factory()
-        object_id = "test_object_id"
-        object_content1 = b"test_value1"
-        object_content2 = b"test_value2"
+        object_content = b"test_value"
+        object_id = get_object_id(object_content)
 
-        object_store.put(object_id, object_content1)
-        object_store.put(object_id, object_content2)
+        # Execute
+        object_store.put(object_id, object_content)
+        object_store.put(object_id, object_content)
         retrieved_value = object_store.get(object_id)
 
-        self.assertEqual(object_content2, retrieved_value)
+        # Assert
+        self.assertEqual(object_content, retrieved_value)
 
     def test_put_empty_object_id(self) -> None:
         """Test put method with an empty object_id."""
+        # Prepare
         object_store = self.object_store_factory()
-        object_id = ""
         object_content = b"test_value"
+        object_id = ""  # Invalid
 
-        object_store.put(object_id, object_content)
-        retrieved_value = object_store.get(object_id)
+        # Execute
+        try:
+            object_store.put(object_id, object_content)
+            # Assert
+            raise AssertionError("Expected ValueError not raised")
+        except ValueError:
+            # Assert
+            assert True
 
-        self.assertEqual(object_content, retrieved_value)
+    def test_put_invalid_object_id(self) -> None:
+        """Test put method with an invalid object_id."""
+        # Prepare
+        object_store = self.object_store_factory()
+        object_content = b"test_value"
+        object_id = "invalid"
+
+        # Execute
+        try:
+            object_store.put(object_id, object_content)
+            # Assert
+            raise AssertionError("Expected ValueError not raised")
+        except ValueError:
+            # Assert
+            assert True
+
+    def test_put_object_id_and_content_pair(self) -> None:
+        """Test put method with an empty object_id."""
+        # Prepare
+        object_store = self.object_store_factory()
+        object_content = b"test_value"
+        object_id = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+        # Execute
+        try:
+            object_store.put(object_id, object_content)
+            # Assert
+            raise AssertionError("Expected ValueError not raised")
+        except ValueError:
+            # Assert
+            assert True
 
     def test_delete(self) -> None:
         """Test delete method."""
+        # Prepare
         object_store = self.object_store_factory()
-        object_id = "test_object_id"
         object_content = b"test_value"
-
+        object_id = get_object_id(object_content)
         object_store.put(object_id, object_content)
+
+        # Execute
         object_store.delete(object_id)
         retrieved_value = object_store.get(object_id)
 
+        # Assert
         self.assertIsNone(retrieved_value)
 
     def test_delete_non_existent_object_id(self) -> None:
         """Test delete method with a non-existent object_id."""
+        # Prepare
         object_store = self.object_store_factory()
-        object_id = "non_existent_object_id"
+        object_id = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
         object_store.delete(object_id)
         # No exception should be raised
 
     def test_clear(self) -> None:
         """Test clear method."""
+        # Prepare
         object_store = self.object_store_factory()
-        object_id1 = "test_object_id1"
         object_content1 = b"test_value1"
-        object_id2 = "test_object_id2"
+        object_id1 = get_object_id(object_content1)
         object_content2 = b"test_value2"
+        object_id2 = get_object_id(object_content2)
 
         object_store.put(object_id1, object_content1)
         object_store.put(object_id2, object_content2)
+
+        # Execute
         object_store.clear()
 
+        # Assert
         retrieved_value1 = object_store.get(object_id1)
         retrieved_value2 = object_store.get(object_id2)
 
@@ -116,18 +170,26 @@ class ObjectStoreTest(unittest.TestCase):
 
     def test_clear_empty_store(self) -> None:
         """Test clear method on an empty store."""
+        # Prepare
         object_store = self.object_store_factory()
 
+        # Execute
         object_store.clear()
         # No exception should be raised
 
     def test_contains(self) -> None:
         """Test __contains__ method."""
+        # Prepare
         object_store = self.object_store_factory()
-        object_id = "test_object_id"
         object_content = b"test_value"
-
+        object_id = get_object_id(object_content)
         object_store.put(object_id, object_content)
+        unavailable = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
-        self.assertTrue(object_id in object_store)
-        self.assertFalse("non_existent_object_id" in object_store)
+        # Execute
+        contained = object_id in object_store
+        not_contained = unavailable in object_store
+
+        # Assert
+        self.assertTrue(contained)
+        self.assertFalse(not_contained)

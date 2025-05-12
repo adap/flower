@@ -16,17 +16,33 @@
 
 from typing import Optional
 
+from ..inflatable import get_object_id, is_valid_sha256_hash
 from .object_store import ObjectStore
 
 
 class InMemoryObjectStore(ObjectStore):
     """In-memory implementation of the ObjectStore interface."""
 
-    def __init__(self) -> None:
+    def __init__(self, verify: bool = True) -> None:
+        self.verify = verify
         self.store: dict[str, bytes] = {}
 
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store."""
+        # Verify object ID format (must be a valid sha256 hash)
+        if not is_valid_sha256_hash(object_id):
+            raise ValueError(f"Invalid object ID format: {object_id}")
+
+        # Verify object_id and object_content match
+        if self.verify:
+            object_id_from_content = get_object_id(object_content)
+            if object_id != object_id_from_content:
+                raise ValueError(f"Object ID {object_id} does not match content hash")
+
+        # Return if object is already present in the store
+        if object_id in self.store:
+            return
+
         self.store[object_id] = object_content
 
     def get(self, object_id: str) -> Optional[bytes]:
