@@ -6,7 +6,7 @@ framework: [torch]
 
 # Federated AI with Embedded Devices using Flower
 
-This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use Raspberry Pi as Flower clients, or better said, `SuperNodes`.  The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) example, but you could adjust it to follow [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) if you prefere using TensorFlow. The main difference compare to those examples is that here you'll learn how to use Flower's Deployment Engine to run FL across multiple embedded devices.
+This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use **NVIDIA Jetson devices and** Raspberry Pi as Flower clients, or better said, `SuperNodes`.  The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) example, but you could adjust it to follow [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) if you prefere using TensorFlow. The main difference compare to those examples is that here you'll learn how to use Flower's Deployment Engine to run FL across multiple embedded devices.
 
 ![Different was of running Flower FL on embedded devices](_static/diagram.png)
 
@@ -18,8 +18,8 @@ This example will show you how Flower makes it very easy to run Federated Learni
 This tutorial allows for a variety of settings (some shown in the diagrams above). As long as you have access to one embedded device, you can follow along. This is a list of components that you'll need:
 
 - For Flower server: A machine running Linux/macOS (e.g. your laptop). You can run the server on an embedded device too!
-- For Flower clients (one or more): Raspberry Pi 5 or 4 (or Zero 2), or anything similar to these.
-- A uSD card with 32GB or more.
+- For Flower clients (one or more): Raspberry Pi 5 or 4 (or Zero 2), **or an NVIDIA Jetson Orin NX,** or anything similar to these.
+- A uSD card with 32GB or more. **While 32GB is enough for the RPi, a larger 64GB uSD card works best for the NVIDIA Jetson.**
 - Software to flash the images to a uSD card:
   - For Raspberry Pi we recommend the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
   - For other devices [balenaEtcher](https://www.balena.io/etcher/) it's a great option.
@@ -78,6 +78,99 @@ pip install -e .
    - Follow the steps outlined in [Embedded Devices Setup](device_setup.md) to set it up for develpment. The objetive of this step is to have your Pi ready to join later as a Flower `SuperNode` to an existing federation.
 
 3. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
+
+## Setting up a Jetson Orin NX
+
+> These steps have been validated for a Jetson Orin NX Dev Kit.
+
+1. **Install JetPack 6.0 on your Jetson device**
+
+   - Download the JetPack 6.0 image from [NVIDIA-embedded](https://developer.nvidia.com/embedded/jetpack-sdk-60), note that you might need an NVIDIA developer account. For our testing, we used the reComputer J4012 model and installed JetPack 6.0 by following the instructions provided by [Seeed Studio](https://wiki.seeedstudio.com/reComputer_J4012_Flash_Jetpack/). (Optional) If you are using an older Jetson model, you may still download and install JetPack 5.1.2 from NVIDIA’s website, although the current setup has been validated with JetPack 6.0.
+   
+   - Installation procedures may vary slightly depending on the Jetson model you own. Please refer to the appropriate instructions on the NVIDIA Embedded site or the Seeed Studio site for your specific board.
+
+2. **Set up the device.** The first time you boot your Orin NX you should plug it into a display to complete the installation process. After that, a display is no longer needed for this example but you could still use it instead of connecting to your device over ssh.
+
+3. **Set up Docker**: Docker comes pre-installed with the Ubuntu image provided by NVIDIA. But for convenience, we will create a new user group and add our user to it (with the idea of not having to use `sudo` for every command involving docker (e.g. `docker run`, `docker ps`, etc)). More details about what this entails can be found in the [Docker documentation](https://docs.docker.com/engine/install/linux-postinstall/). You can achieve this by doing:
+
+   ```bash
+   sudo usermod -aG docker $USER
+   # apply changes to current shell (or logout/reboot)
+   newgrp docker
+   ```
+
+4. **Update OS and install utilities.** Then, install some useful utilities:
+
+   ```bash
+   sudo apt update && sudo apt upgrade -y
+   # now reboot
+   sudo reboot
+   ```
+
+   Login again and (optional) install the following packages:
+
+   <img align="right" style="padding-top: 40px; padding-left: 15px" width="575" height="380" src="_static/tmux_jtop_view.gif">
+
+   - [jtop](https://github.com/rbonghi/jetson_stats),  to monitor CPU/GPU utilization, power consumption and, many more. You can read more about it in [this blog post](https://jetsonhacks.com/2023/02/07/jtop-the-ultimate-tool-for-monitoring-nvidia-jetson-devices/).
+
+     ```bash
+     # First we need to install pip3
+     sudo apt install python3-pip -y
+     # finally, install jtop
+     sudo pip3 install -U jetson-stats
+     # now reboot (or run `sudo systemctl restart jtop.service` and login again)
+     sudo reboot
+     ```
+
+     Now you have installed `jtop`, just launch it by running the `jtop` command on your terminal. An interactive panel similar to the one shown on the right will show up. `jtop` allows you to monitor and control many features of your Jetson device. Read more in the [jtop documentation](https://rnext.it/jetson_stats/jtop/jtop.html)
+
+   - [TMUX](https://github.com/tmux/tmux/wiki), a terminal multiplexer. As its name suggests, it allows you to divide a single terminal window into multiple panels. In this way, you could (for example) use one panel to show your terminal and another to show `jtop`. That's precisely what the visualization on the right shows.
+
+     ```bash
+     # install tmux
+     sudo apt install tmux -y
+     # add mouse support
+     echo set -g mouse on > ~/.tmux.conf
+     ```
+
+5. **Power modes**. The Jetson devices can operate at different power modes, each making use of more or less CPU cores clocked at different frequencies. The right power mode might very much depend on the application and scenario. When power consumption is not a limiting factor, we could use the highest 30W mode using all 8 or 6 CPU cores. On the other hand, if the devices are battery-powered we might want to make use of a low-power mode using 10W and 2 CPU cores. All the details regarding the different power modes of a Jetson Orin can be found [here](https://docs.nvidia.com/jetson/archives/r36.2/DeveloperGuide/SO/JetsonOrinSeries.html#power-modes-profiles). For this demo, we'll be setting the device to high-performance mode:
+
+   ```bash
+   sudo /usr/sbin/nvpmodel -m 2 # 15W with 4cpus @ 2.0GHz
+   ```
+
+   Jetson Stats (that you launch via `jtop`) also allows you to see and set the power mode on your device. Navigate to the `CTRL` panel and click on one of the `NVM modes` available.
+
+6. **Build base client image**. Before running a Flower client, we need to install `Flower` and other ML dependencies (i.e. PyTorch or Tensorflow). Instead of installing this manually via `pip3 install ...`, you can use the pre-built Docker images provided by NVIDIA. In this way, we can be confident that the ML infrastructure is optimized for these devices. Build your Flower client image with:
+
+   ```bash
+   # On your Jetson's terminal run
+   ./build_jetson_flower_client.sh --pytorch # or --tensorflow
+   # Bear in mind this might take a few minutes since the base images need to be downloaded (~7GB) and decompressed.
+   # To the above script pass the additional flag `--no-cache` to re-build the image.
+   # We use the DustyNV’s base image that supports JetPack 6.0 to ensure compatibility with PyTorch v2.0.0 and above.
+   ```
+
+   Once your script is finished, verify your `flower_client` Docker image is present. If you type `docker images` you'll see something like the following:
+
+   ```bash
+   REPOSITORY      TAG       IMAGE ID       CREATED          SIZE
+   flower_client   latest    87e935a8ee37   18 seconds ago   12.6GB
+   ```
+
+7. **Access your client image**. Before launching the Flower client, we need to run the image we just created. To keep things simpler, let's run the image in interactive mode (`-it`), mount the entire repository you cloned inside the `/client` directory of your container (`` -v `pwd`:/client ``), and use the NVIDIA runtime so we can access the GPU `--runtime nvidia`:
+
+   ```bash
+   # first ensure you are in the `embedded-devices` directory. If you are not, use the `cd` command to navigate to it
+
+   # run the client container (This command does not launch the Flower client. It simply opens an interactive shell inside the Docker container. The client can be run following the steps in the next section of the readme)
+   docker run -it --rm --runtime nvidia -v `pwd`:/client flower_client
+   # this will take you to a shell that looks something like this:
+   root@6e6ce826b8bb:/client# <here you can run python commands or any command as usual>
+   ```
+
+8. **Run your FL experiments with Flower**. Follow the steps in the section below.
+
 
 ## Embedded Federated AI
 
