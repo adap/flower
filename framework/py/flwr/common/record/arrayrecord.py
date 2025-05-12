@@ -387,7 +387,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
     @classmethod
     def inflate(
         cls, object_content: bytes, children: list[InflatableObject] | None = None
-    ) -> Array:
+    ) -> ArrayRecord:
         """Inflate an ArrayRecord from bytes.
 
         Parameters
@@ -408,18 +408,20 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         obj_body = get_object_body(object_content, cls)
         array_refs: dict[str, str] = json.loads(obj_body.decode(encoding="utf-8"))
 
-        if len(array_refs) != len(children):
+        if children and len(array_refs) != len(children):
             raise ValueError(
                 "Unexpected number of `children`. "
                 f"Expected {len(array_refs)} but got {len(children)}."
             )
 
         # Construct helper dict to facilitate insertion of arrays under the rigth key
-        array_dict = {arr.object_id: arr for arr in children}
+        array_dict = {arr.object_id: arr for arr in children} if children else {}
 
         # Instantiate new ArrayRecord
         return ArrayRecord(
-            {name: array_dict[object_id] for name, object_id in array_refs.items()}
+            OrderedDict(
+                {name: array_dict[object_id] for name, object_id in array_refs.items()}
+            )
         )
 
 

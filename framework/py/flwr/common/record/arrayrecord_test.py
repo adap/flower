@@ -15,6 +15,7 @@
 """Unit tests for ArrayRecord."""
 
 
+import json
 import sys
 import unittest
 from collections import OrderedDict
@@ -30,7 +31,7 @@ from parameterized import parameterized
 from flwr.common import ndarray_to_bytes
 
 from ..constant import SType
-from ..inflatable import get_object_type_from_object_content
+from ..inflatable import get_object_body, get_object_type_from_object_content
 from ..typing import NDArray
 from .array import Array
 from .arrayrecord import ArrayRecord
@@ -353,7 +354,9 @@ class TestArrayRecord(unittest.TestCase):
             == arr_rec.__class__.__qualname__
         )
         # Body of deflfated ArrayRecord matches its direct protobuf serialization
-        #! assert get_object_body(arr_rec_b, ArrayRecord) == array_to_proto(arr_rec).SerializeToString()
+        array_refs = {name: arr.object_id for name, arr in arr_rec.items()}
+        array_refs_enc = json.dumps(array_refs).encode("utf-8")
+        assert get_object_body(arr_rec_b, ArrayRecord) == array_refs_enc
 
         # Inflate
         # Assert if children needed but not passed:
