@@ -100,6 +100,7 @@ tasks.withType<DokkaTask>().configureEach {
       noAndroidSdkLink.set(true)
     }
   }
+}
 
 afterEvaluate {
   publishing {
