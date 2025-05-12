@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import gc
+import json
 import sys
 from collections import OrderedDict
 from logging import WARN
@@ -26,6 +27,7 @@ from typing import TYPE_CHECKING, Any, cast, overload
 import numpy as np
 
 from ..constant import GC_THRESHOLD
+from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..logger import log
 from ..typing import NDArray
 from .array import Array
@@ -56,7 +58,7 @@ def _check_value(value: Array) -> None:
         )
 
 
-class ArrayRecord(TypedDict[str, Array]):
+class ArrayRecord(TypedDict[str, Array], InflatableObject):
     """Array record.
 
     A typed dictionary (``str`` to :class:`Array`) that can store named arrays,
@@ -364,6 +366,61 @@ class ArrayRecord(TypedDict[str, Array]):
             num_bytes += len(k)
 
         return num_bytes
+
+    @property
+    def children(self) -> list[InflatableObject]:
+        """Return a list of Arrays."""
+        return list(self.values())
+
+    def deflate(self) -> bytes:
+        """Deflate the ArrayRecord."""
+        # array_name: array_object_id mapping
+        array_refs: dict[str, str] = {}
+
+        for array_name, array in self.items():
+            array_refs[array_name] = array.object_id
+
+        # Serialize references dict
+        object_body = json.dumps(array_refs).encode("utf-8")
+        return add_header_to_object_body(object_body=object_body, cls=self)
+
+    @classmethod
+    def inflate(
+        cls, object_content: bytes, children: list[InflatableObject] | None = None
+    ) -> Array:
+        """Inflate an ArrayRecord from bytes.
+
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content of the Array.
+
+        children : list[InflatableObject] | None
+            List of children InflatableObjects (Arrays) that enable the full inflation
+            of the ArrayRecord.
+
+        Returns
+        -------
+        Array
+            The inflated ArrayRecord.
+        """
+        # Inflate mapping of array_names (keys in the ArrayRecord) to Arrays' object IDs
+        obj_body = get_object_body(object_content, cls)
+        array_refs: dict[str, str] = json.loads(obj_body.decode(encoding="utf-8"))
+
+        if len(array_refs) != len(children):
+            raise ValueError(
+                "Unexpected number of `children`. "
+                f"Expected {len(array_refs)} but got {len(children)}."
+            )
+
+        # Construct helper dict to facilitate insertion of arrays under the rigth key
+        array_dict = {arr.object_id: arr for arr in children}
+
+        # Instantiate new ArrayRecord
+        return ArrayRecord(
+            {name: array_dict[object_id] for name, object_id in array_refs.items()}
+        )
 
 
 class ParametersRecord(ArrayRecord):

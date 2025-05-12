@@ -30,6 +30,7 @@ from parameterized import parameterized
 from flwr.common import ndarray_to_bytes
 
 from ..constant import SType
+from ..inflatable import get_object_type_from_object_content
 from ..typing import NDArray
 from .array import Array
 from .arrayrecord import ArrayRecord
@@ -327,6 +328,47 @@ class TestArrayRecord(unittest.TestCase):
         """Test initializing with unrecognized arguments."""
         with self.assertRaisesRegex(TypeError, "Invalid arguments for ArrayRecord.*"):
             ArrayRecord(*args, **kwargs)
+
+    @parameterized.expand(  # type: ignore
+        [
+            ([np.array([1, 2]), np.array([3, 4])],),  # Two arrays
+            ([np.array(5)],),  # Single array
+            ([],),  # Empty list
+        ]
+    )
+    def test_inflation_deflation(self, array_content) -> None:
+        """Test inflation and deflation of ArrayRecord."""
+        arr_rec = ArrayRecord(array_content)
+
+        # Assert
+        # Expected children
+        assert len(arr_rec.children) == len(array_content)
+
+        arr_rec_b = arr_rec.deflate()
+
+        # Assert
+        # Class name matches
+        assert (
+            get_object_type_from_object_content(arr_rec_b)
+            == arr_rec.__class__.__qualname__
+        )
+        # Body of deflfated ArrayRecord matches its direct protobuf serialization
+        #! assert get_object_body(arr_rec_b, ArrayRecord) == array_to_proto(arr_rec).SerializeToString()
+
+        # Inflate
+        # Assert if children needed but not passed:
+        if len(array_content) > 0:
+            with pytest.raises(ValueError):
+                ArrayRecord.inflate(
+                    arr_rec_b,
+                    children=[],
+                )
+        # Inflate passing children (if any)
+        arr_rec_ = ArrayRecord.inflate(arr_rec_b, children=list(arr_rec.values()))
+
+        # Assert
+        # Both objects are identical
+        assert arr_rec.object_id == arr_rec_.object_id
 
 
 @pytest.mark.parametrize(
