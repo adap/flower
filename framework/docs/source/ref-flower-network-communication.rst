@@ -62,7 +62,7 @@ Optional Network Connections
 Depending on the SuperLink and SuperNode configuration, Flower systems can have/use a
 number of additional network connections.
 
-Isolation mode
+Isolation Mode
 ~~~~~~~~~~~~~~
 
 Both Flower SuperLink and Flower SuperNode can use different isolation modes. Isolation
@@ -98,7 +98,7 @@ SuperLink or SuperNode:
     SuperLink/SuperNode should never communicate over untrusted networks (e.g., public
     internet).
 
-User authentication
+User Authentication
 ~~~~~~~~~~~~~~~~~~~
 
 When user authentication is enabled, Flower uses an OIDC-compatible server to
@@ -108,7 +108,7 @@ authenticate requests:
   authenticated users to interact with it. In this setting, the Flower SuperLink acts as
   a REST client to the OIDC-compatible server.
 
-Application-specific connections
+Application-specific Connections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Users who write Flower Apps (``ServerApp`` and ``ClientApp``) can also make additional
@@ -134,3 +134,50 @@ Typical examples include:
   MLFlow and Weights & Biases are often used to track the progress of training runs. In
   this setting, the ``ServerApp`` typically acts as a client to the metric logging
   service.
+
+Networking Interfaces
+~~~~~~~~~~~~~~~~~~~~~
+
+Each component — ``SuperLink``, ``ServerApp``, ``SuperNode``, and ``ClientApp`` —
+exposes ports for interacting with other Flower components. The ``SuperLink`` component
+includes three such APIs: the ``ServerAppIo API``, ``Fleet API``, and the ``Exec API``.
+Similarly, the ``SuperNode`` component includes the ``ClientAppIo API``. Each of these
+APIs serves a distinct purpose during the runtime of a Flower app, as summarized in the
+table below.
+
+.. list-table:: Flower Components Default Ports and Purpose Overview
+    :widths: 25 25 50 50
+    :header-rows: 1
+
+    - - Component
+      - Port
+      - API
+      - Purpose
+    - - ``SuperLink``
+      - 9091 (default)
+      - ``ServerAppIo API``
+      - Communication between the ``SuperLink`` and the ``ServerApp``
+    - -
+      - 9092 (default)
+      - ``Fleet API``
+      - Coordinates execution across ``SuperNodes``
+    - -
+      - 9093 (default)
+      - ``Exec API``
+      - Receives execution tasks submitted by users
+    - - ``SuperNode``
+      - 9094 (default)
+      - ``ClientAppIo API``
+      - Communication between the ``SuperNode`` and the ``ClientApp``
+
+Communication Model
+~~~~~~~~~~~~~~~~~~~
+
+During real-world deployment, the push/pull communication model adopted by each
+component can influence decisions related to resource provisioning, scaling, monitoring,
+and reliability. To support such decisions, the list below outlines the communication
+model used between the Flower components:
+
+- **SuperLink ↔ ServerApp**: ServerApp pulls tasks from the SuperLink
+- **SuperLink ↔ SuperNode**: SuperNode pulls tasks from the SuperLink
+- **SuperNode ↔ ClientApp**: ClientApp pulls tasks from the SuperNode
