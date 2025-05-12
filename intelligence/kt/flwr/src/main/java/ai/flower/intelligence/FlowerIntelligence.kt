@@ -112,10 +112,7 @@ object FlowerIntelligence {
    * @param chatOptions Optional [ChatOptions] to customize behavior.
    * @return A [Result] containing the reply [Message] on success, or [Failure] on error.
    */
-  suspend fun chat(
-    messages: List<Message>,
-    chatOptions: ChatOptions? = null
-  ): Result<Message> =
+  suspend fun chat(messages: List<Message>, chatOptions: ChatOptions? = null): Result<Message> =
     withContext(Dispatchers.Default) {
       val selectedEngine = remoteEngine
 
