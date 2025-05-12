@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 
 from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import Context
+from flwr.common import Context, NDArrays, Scalar
 
 model_params = np.array([1])
 objective = 5
@@ -11,15 +11,20 @@ objective = 5
 
 # Define Flower client
 class FlowerClient(NumPyClient):
-    def get_parameters(self, config):
+    def get_parameters(self, config: dict[str, Scalar]) -> NDArrays:
         return model_params
 
-    def fit(self, parameters, config):
+    def fit(
+        self, parameters: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[NDArrays, int, dict[str, Scalar]]:
         model_params = parameters
         model_params = [param * (objective / np.mean(param)) for param in model_params]
         return model_params, 1, {}
 
-    def evaluate(self, parameters, config):
+    
+    def evaluate(
+        self, parameters: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[float, int, dict[str, Scalar]]:
         model_params = parameters
         loss = min(np.abs(1 - np.mean(model_params) / objective), 1)
         accuracy = 1 - loss
