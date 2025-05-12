@@ -98,9 +98,11 @@ def main() -> None:
     add_e2e_federation()
 
     # Start the SuperLink
+    print("Starting SuperLink...")
     superlink_proc = run_superlink()
 
     # Submit the first run and run the first ServerApp process
+    print("Starting the first run and ServerApp process...")
     run_id1 = flwr_run()
     serverapp_proc = run_server_app_process()
 
@@ -108,6 +110,7 @@ def main() -> None:
     time.sleep(1)
 
     # Submit the second run and run the second ServerApp process
+    print("Starting the second run and ServerApp process...")
     run_id2 = flwr_run()
     _ = run_server_app_process()
 
@@ -124,17 +127,23 @@ def main() -> None:
             break
         time.sleep(1)
     assert is_running, "Run IDs did not start within 6 seconds"
+    print("Both runs are running.")
 
     # Kill SuperLink process first to simulate restart scenario
     # This prevents ServerApp from notifying SuperLink, isolating the heartbeat test
+    print("Terminating SuperLink process...")
     superlink_proc.terminate()
+    superlink_proc.wait()
 
     # Kill the first ServerApp process
     # The ServerApp process cannot be terminated gracefully yet,
     # so we need to kill it via SIGKILL.
+    print("Terminating the first ServerApp process...")
     serverapp_proc.kill()
+    serverapp_proc.wait()
 
     # Restart the SuperLink
+    print("Restarting SuperLink...")
     superlink_proc = run_superlink()
 
     # Allow time for SuperLink to detect heartbeat failures and update statuses
