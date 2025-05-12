@@ -127,7 +127,7 @@ jobs:
 
   build_and_deploy:
     runs-on: ubuntu-22.04
-    needs: [build_ts_docs, build_swift_docs]
+    needs: [build_ts_docs, build_swift_docs, build_kt_docs]
     name: Deploy Docs
     steps:
       - uses: actions/checkout@v4
@@ -155,6 +155,12 @@ jobs:
         with:
           name: swift-docs
           path: intelligence/docs/source/swift-api-ref/
+      - name: Download Kotlin docs
+        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
+        uses: actions/download-artifact@v4
+        with:
+          name: kt-docs
+          path: intelligence/docs/source/kt-api-ref/
       - name: Build final docs
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         run: |
