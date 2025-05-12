@@ -116,7 +116,6 @@ jobs:
 
       - name: Build Kotlin docs
         run: |
-          chmod +x ./intelligence/dev/build-kt-docs.sh
           ./intelligence/dev/build-kt-docs.sh
 
       - name: Upload Kotlin docs artifact
