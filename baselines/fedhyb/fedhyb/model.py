@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import classification_report
 from tqdm import tqdm
 import numpy as np
-
+import logging
 accuracy_stats = {
     'train': [],
     "val": []
@@ -67,9 +67,9 @@ def multi_acc(y_pred, y_true):
 # ---------------------------------------
 # Training Function
 # ---------------------------------------
-def train(model, train_loader, val_loader, EPOCHS, lr):
+def train(model, train_loader, val_loader, EPOCHS):
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr)
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
 
 
     print("Begin training...")
@@ -123,7 +123,7 @@ def train(model, train_loader, val_loader, EPOCHS, lr):
 # ---------------------------------------
 # Validation Function (Inference + Report)
 # ---------------------------------------
-def validation(model, val_loader, current_round, server_round):
+def validation(model, val_loader, current_round, server_round, logger):
     criterion = nn.CrossEntropyLoss()
     y_pred_list = []
     val_round_loss = 0
@@ -153,7 +153,18 @@ def validation(model, val_loader, current_round, server_round):
 
 
    # print(f'| Val Loss: {avg_loss:.5f} | Val Acc: {avg_acc:.3f}')
-    if current_round==server_round:
-     print(classification_report(true_labels, y_pred_list))
+    if current_round==server_round:     
+      logger.info(classification_report(true_labels, y_pred_list))
 
     return avg_loss, avg_acc
+    
+def get_weights(net):
+    """Extract model parameters as numpy arrays from state_dict."""
+    return [val.cpu().numpy() for _, val in net.state_dict().items()]
+
+
+def set_weights(net, parameters):
+    """Apply parameters to an existing model."""
+    params_dict = zip(net.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    net.load_state_dict(state_dict, strict=True)

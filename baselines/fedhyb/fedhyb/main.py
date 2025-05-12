@@ -16,9 +16,9 @@ import numpy as np
 
 from omegaconf import DictConfig, OmegaConf
 
-from .client import generate_client_fn
+from .client_app import generate_client_fn
 from .dataset_preparation import prepare_dataset
-from .server import weighted_average, fit_config
+from .server_app import weighted_average, fit_config
 from .strategy import WeightedStrategy
 from hydra.core.hydra_config import HydraConfig
 import sys
