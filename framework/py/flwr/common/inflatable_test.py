@@ -17,6 +17,8 @@
 import hashlib
 from dataclasses import dataclass
 
+import pytest
+
 from .constant import HEAD_BODY_DIVIDER, TYPE_BODY_LEN_DIVIDER
 from .inflatable import (
     InflatableObject,
@@ -40,7 +42,12 @@ class CustomDataClass(InflatableObject):
         return add_header_to_object_body(object_body=obj_body, cls=self)
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> "CustomDataClass":  # noqa: D102
+    def inflate(  # noqa: D102
+        cls, object_content: bytes, children: list["InflatableObject"] | None = None
+    ) -> "CustomDataClass":
+
+        if children:
+            raise ValueError("`CustomDataClass` does not have children.")
         object_body = get_object_body(object_content, cls)
         return cls(data=object_body)
 
@@ -67,6 +74,16 @@ def test_deflate_and_inflate() -> None:
     # Inflate and check object payload is the same
     obj_ = CustomDataClass.inflate(obj_b)
     assert obj_.data == obj.data
+
+    # Assert
+    # Inflate passing children raises ValueError
+    with pytest.raises(ValueError):
+        CustomDataClass.inflate(
+            obj_b,
+            children=[
+                obj,
+            ],
+        )
 
 
 def test_get_object_id() -> None:
