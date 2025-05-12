@@ -379,8 +379,13 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Heartbeat can only be sent when the run is starting or running
         abort_if(request.run_id, [Status.PENDING, Status.FINISHED], state, context)
 
-        # TODO: Acknowledge the heartbeat
-        raise NotImplementedError
+        # Acknowledge the heartbeat
+        success = state.acknowledge_app_heartbeat(
+            run_id=request.run_id,
+            heartbeat_interval=request.heartbeat_interval,
+        )
+
+        return SendAppHeartbeatResponse(success=success)
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
