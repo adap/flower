@@ -266,7 +266,7 @@ class Array(InflatableObject):
 
     @classmethod
     def inflate(
-        cls, object_content: bytes, children: list[InflatableObject] | None = None
+        cls, object_content: bytes, children: dict[str, InflatableObject]
     ) -> Array:
         """Inflate an Array from bytes.
 
@@ -275,9 +275,9 @@ class Array(InflatableObject):
         object_content : bytes
             The deflated object content of the Array.
 
-        children : list[InflatableObject] | None
-            Unusued. List of children InflatableObjects that enable the full inflation
-            of the Array.
+        children : dict[str, InflatableObject]
+            Unused. Dict of children InflatableObjects mapped to thier Object ID.
+            These children enable the full inflation of the Array.
 
         Returns
         -------

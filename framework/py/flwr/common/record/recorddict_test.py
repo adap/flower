@@ -585,7 +585,7 @@ def test_metric_and_config_record_deflate_and_inflate(
     assert get_object_body(record_b, record_type) == proto_conversion_fn(record)
 
     # Inflate
-    record_ = record_type.inflate(record_b)
+    record_ = record_type.inflate(record_b, {})
 
     # Assert
     # Both objects are identical
@@ -594,9 +594,4 @@ def test_metric_and_config_record_deflate_and_inflate(
     # Assert
     # Inflate passing children raises ValueError
     with pytest.raises(ValueError):
-        record_type.inflate(
-            record_b,
-            children=[
-                record,
-            ],
-        )
+        record_type.inflate(record_b, children={"1234": record})

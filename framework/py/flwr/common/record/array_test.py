@@ -187,7 +187,7 @@ class TestArray(unittest.TestCase):
         assert get_object_body(arr_b, Array) == array_to_proto(arr).SerializeToString()
 
         # Inflate
-        arr_ = Array.inflate(arr_b)
+        arr_ = Array.inflate(arr_b, {})
 
         # Assert
         # Both objects are identical

@@ -161,7 +161,7 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
 
     @classmethod
     def inflate(
-        cls, object_content: bytes, children: list[InflatableObject] | None = None
+        cls, object_content: bytes, children: dict[str, InflatableObject]
     ) -> MetricRecord:
         """Inflate a MetricRecord from bytes.
 
@@ -170,9 +170,9 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
         object_content : bytes
             The deflated object content of the MetricRecord.
 
-        children : list[InflatableObject] | None
-            Unusued. List of children InflatableObjects that enable the full inflation
-            of the MetricRecord.
+        children : dict[str, InflatableObject]
+            Unused. Dict of children InflatableObjects mapped to thier Object ID.
+            These children enable the full inflation of the MetricRecord.
 
         Returns
         -------

@@ -14,8 +14,6 @@
 # ==============================================================================
 """Inflatable test."""
 
-from __future__ import annotations
-
 import hashlib
 from dataclasses import dataclass
 
@@ -45,8 +43,8 @@ class CustomDataClass(InflatableObject):
 
     @classmethod
     def inflate(  # noqa: D102
-        cls, object_content: bytes, children: list[InflatableObject] | None = None
-    ) -> CustomDataClass:
+        cls, object_content: bytes, children: dict[str, InflatableObject]
+    ) -> "CustomDataClass":
 
         if children:
             raise ValueError("`CustomDataClass` does not have children.")
@@ -74,18 +72,13 @@ def test_deflate_and_inflate() -> None:
     assert get_object_id(obj_b) == obj.object_id
 
     # Inflate and check object payload is the same
-    obj_ = CustomDataClass.inflate(obj_b)
+    obj_ = CustomDataClass.inflate(obj_b, {})
     assert obj_.data == obj.data
 
     # Assert
     # Inflate passing children raises ValueError
     with pytest.raises(ValueError):
-        CustomDataClass.inflate(
-            obj_b,
-            children=[
-                obj,
-            ],
-        )
+        CustomDataClass.inflate(obj_b, children={"1234": obj})
 
 
 def test_get_object_id() -> None:
