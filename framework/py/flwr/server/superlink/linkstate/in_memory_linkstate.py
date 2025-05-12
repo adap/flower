@@ -618,7 +618,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "`run_id` is invalid")
                 return False
 
-        with self.lock:
+        with record.lock:
             # Check if runs are still active
             self._check_and_tag_inactive_run(run_ids={run_id})
 
