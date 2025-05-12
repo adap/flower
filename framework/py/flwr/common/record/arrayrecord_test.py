@@ -362,12 +362,16 @@ class TestArrayRecord(unittest.TestCase):
         # Assert if children needed but not passed:
         if len(array_content) > 0:
             with pytest.raises(ValueError):
-                ArrayRecord.inflate(
-                    arr_rec_b,
-                    children=[],
-                )
+                ArrayRecord.inflate(arr_rec_b, children={})
+
+        # Check children
+        # Assert if children not computed correctly
+        assert set(arr_rec.children.keys()) == {
+            arr.object_id for arr in arr_rec.values()
+        }
+
         # Inflate passing children (if any)
-        arr_rec_ = ArrayRecord.inflate(arr_rec_b, children=list(arr_rec.values()))
+        arr_rec_ = ArrayRecord.inflate(arr_rec_b, children=arr_rec.children)
 
         # Assert
         # Both objects are identical

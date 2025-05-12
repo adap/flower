@@ -368,9 +368,9 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         return num_bytes
 
     @property
-    def children(self) -> list[InflatableObject]:
-        """Return a list of Arrays."""
-        return list(self.values())
+    def children(self) -> dict[str, InflatableObject]:
+        """Return a dict of Arrays with their Object IDs as keys."""
+        return {arr.object_id: arr for arr in self.values()}
 
     def deflate(self) -> bytes:
         """Deflate the ArrayRecord."""
@@ -386,7 +386,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
 
     @classmethod
     def inflate(
-        cls, object_content: bytes, children: list[InflatableObject] | None = None
+        cls, object_content: bytes, children: dict[str, InflatableObject]
     ) -> ArrayRecord:
         """Inflate an ArrayRecord from bytes.
 
@@ -395,9 +395,9 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         object_content : bytes
             The deflated object content of the Array.
 
-        children : list[InflatableObject] | None
-            List of children InflatableObjects (Arrays) that enable the full inflation
-            of the ArrayRecord.
+        children : dict[str, InflatableObject]
+            Dict of children InflatableObjects mapped to thier Object ID.
+            These children enable the full inflation of the ArrayRecord.
 
         Returns
         -------
@@ -408,19 +408,16 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         obj_body = get_object_body(object_content, cls)
         array_refs: dict[str, str] = json.loads(obj_body.decode(encoding="utf-8"))
 
-        if children and len(array_refs) != len(children):
+        if len(array_refs) != len(children):
             raise ValueError(
                 "Unexpected number of `children`. "
                 f"Expected {len(array_refs)} but got {len(children)}."
             )
 
-        # Construct helper dict to facilitate insertion of arrays under the rigth key
-        array_dict = {arr.object_id: arr for arr in children} if children else {}
-
         # Instantiate new ArrayRecord
         return ArrayRecord(
             OrderedDict(
-                {name: array_dict[object_id] for name, object_id in array_refs.items()}
+                {name: children[object_id] for name, object_id in array_refs.items()}
             )
         )
 
