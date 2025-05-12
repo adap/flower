@@ -33,8 +33,14 @@ def add_e2e_federation() -> None:
 def run_superlink() -> subprocess.Popen:
     """Run the SuperLink."""
     return subprocess.Popen(
-        "flower-superlink --insecure --database tmp.db",
-        shell=True,
+        [
+            "flower-superlink",
+            "--insecure",
+            "--database",
+            "tmp.db",
+            "--isolation",
+            "process",
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -43,10 +49,7 @@ def run_superlink() -> subprocess.Popen:
 def run_server_app_process() -> subprocess.Popen:
     """Run the server app process."""
     return subprocess.Popen(
-        "flwr-serverapp --insecure",
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        ["flwr-serverapp", "--insecure"],
     )
 
 
@@ -98,9 +101,11 @@ def main() -> None:
     add_e2e_federation()
 
     # Start the SuperLink
+    print("Starting SuperLink...")
     superlink_proc = run_superlink()
 
     # Submit the first run and run the first ServerApp process
+    print("Starting the first run and ServerApp process...")
     run_id1 = flwr_run()
     serverapp_proc = run_server_app_process()
 
@@ -108,8 +113,9 @@ def main() -> None:
     time.sleep(1)
 
     # Submit the second run and run the second ServerApp process
+    print("Starting the second run and ServerApp process...")
     run_id2 = flwr_run()
-    _ = run_server_app_process()
+    serverapp_proc2 = run_server_app_process()
 
     # Wait up to 6 seconds for both runs to reach RUNNING status
     tic = time.time()
@@ -124,23 +130,29 @@ def main() -> None:
             break
         time.sleep(1)
     assert is_running, "Run IDs did not start within 6 seconds"
+    print("Both runs are running.")
 
     # Kill SuperLink process first to simulate restart scenario
     # This prevents ServerApp from notifying SuperLink, isolating the heartbeat test
+    print("Terminating SuperLink process...")
     superlink_proc.terminate()
+    superlink_proc.wait()
 
     # Kill the first ServerApp process
     # The ServerApp process cannot be terminated gracefully yet,
     # so we need to kill it via SIGKILL.
+    print("Terminating the first ServerApp process...")
     serverapp_proc.kill()
+    serverapp_proc.wait()
 
     # Restart the SuperLink
+    print("Restarting SuperLink...")
     superlink_proc = run_superlink()
 
     # Allow time for SuperLink to detect heartbeat failures and update statuses
     tic = time.time()
     is_valid = False
-    while (time.time() - tic) < 30:
+    while (time.time() - tic) < 20:
         run_status = flwr_ls()
         if (
             run_status[run_id1] == f"{Status.FINISHED}:{SubStatus.FAILED}"
@@ -150,6 +162,13 @@ def main() -> None:
             break
         time.sleep(1)
     assert is_valid, "Run statuses are not updated correctly"
+    print("Run statuses are updated correctly.")
+
+    # Clean up
+    serverapp_proc2.kill()
+    serverapp_proc2.wait()
+    superlink_proc.terminate()
+    superlink_proc.wait()
 
 
 if __name__ == "__main__":
