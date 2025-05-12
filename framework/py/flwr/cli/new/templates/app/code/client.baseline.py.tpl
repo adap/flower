@@ -1,9 +1,9 @@
 """$project_name: A Flower Baseline."""
 
 import torch
-
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
+
 from $import_name.dataset import load_data
 from $import_name.model import Net, get_weights, set_weights, test, train
 

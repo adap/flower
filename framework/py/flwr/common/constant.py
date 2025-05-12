@@ -62,6 +62,7 @@ HEARTBEAT_BASE_MULTIPLIER = 0.8
 HEARTBEAT_RANDOM_RANGE = (-0.1, 0.1)
 HEARTBEAT_MAX_INTERVAL = 1e300
 HEARTBEAT_PATIENCE = 2
+RUN_FAILURE_DETAILS_NO_HEARTBEAT = "No heartbeat received from the run."
 
 # IDs
 RUN_ID_NUM_BYTES = 8
@@ -126,6 +127,13 @@ GRPC_RETRY_MAX_DELAY = 20  # Maximum delay duration between two consecutive retr
 
 # Constants for ArrayRecord
 GC_THRESHOLD = 200_000_000  # 200 MB
+
+# Constants for Inflatable
+HEAD_BODY_DIVIDER = b"\x00"
+TYPE_BODY_LEN_DIVIDER = " "
+
+# Constants for serialization
+INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
 
 
 class MessageType:
