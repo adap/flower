@@ -186,7 +186,7 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
 
     @classmethod
     def inflate(
-        cls, object_content: bytes, children: list[InflatableObject] | None = None
+        cls, object_content: bytes, children: dict[str, InflatableObject]
     ) -> ConfigRecord:
         """Inflate a ConfigRecord from bytes.
 
@@ -195,9 +195,9 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
         object_content : bytes
             The deflated object content of the ConfigRecord.
 
-        children : list[InflatableObject] | None
-            Unusued. List of children InflatableObjects that enable the full inflation
-            of the ConfigRecord.
+        children : dict[str, InflatableObject]
+            Unused. Dict of children InflatableObjects mapped to thier Object ID.
+            These children enable the full inflation of the ConfigRecord
 
         Returns
         -------
