@@ -186,7 +186,7 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
 
     @classmethod
     def inflate(
-        cls, object_content: bytes, children: dict[str, InflatableObject]
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
     ) -> ConfigRecord:
         """Inflate a ConfigRecord from bytes.
 
@@ -195,8 +195,8 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
         object_content : bytes
             The deflated object content of the ConfigRecord.
 
-        children : dict[str, InflatableObject]
-            Must be an empty dictionary. ConfigRecords do not support child objects.
+        children : Optional[dict[str, InflatableObject]]
+            Must be None. ConfigRecords do not support child objects.
             Providing any children will raise a ValueError.
 
         Returns
@@ -204,7 +204,7 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
         ConfigRecord
             The inflated ConfigRecord.
         """
-        if children:
+        if children is not None:
             raise ValueError("`ConfigRecord` objects do not have children.")
 
         obj_body = get_object_body(object_content, cls)

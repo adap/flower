@@ -572,7 +572,7 @@ def test_metric_and_config_record_deflate_and_inflate(
 
     # Assert
     # Record has no children
-    assert len(record.children) == 0
+    assert record.children is None
 
     record_b = record.deflate()
 
@@ -585,7 +585,7 @@ def test_metric_and_config_record_deflate_and_inflate(
     assert get_object_body(record_b, record_type) == proto_conversion_fn(record)
 
     # Inflate
-    record_ = record_type.inflate(record_b, {})
+    record_ = record_type.inflate(record_b)
 
     # Assert
     # Both objects are identical

@@ -161,7 +161,7 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
 
     @classmethod
     def inflate(
-        cls, object_content: bytes, children: dict[str, InflatableObject]
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
     ) -> MetricRecord:
         """Inflate a MetricRecord from bytes.
 
@@ -170,8 +170,8 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
         object_content : bytes
             The deflated object content of the MetricRecord.
 
-        children : dict[str, InflatableObject]
-            Must be an empty dictionary. MetricRecords do not support child objects.
+        children : Optional[dict[str, InflatableObject]]
+            Must be None. MetricRecords do not support child objects.
             Providing any children will raise a ValueError.
 
         Returns
@@ -179,7 +179,7 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
         MetricRecord
             The inflated MetricRecord.
         """
-        if children:
+        if children is not None:
             raise ValueError("`MetricRecord` objects do not have children.")
 
         obj_body = get_object_body(object_content, cls)
