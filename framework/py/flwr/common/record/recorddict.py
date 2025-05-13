@@ -315,7 +315,6 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
         ----------
         object_content : bytes
             The deflated object content of the RecordDict.
-
         children : Optional[dict[str, InflatableObject]]  (default: None)
             Dictionary of children InflatableObjects mapped to their Object IDs.
             These children enable the full inflation of the RecordDict. Default is None.
