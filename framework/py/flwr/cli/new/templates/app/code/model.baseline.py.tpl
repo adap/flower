@@ -76,5 +76,5 @@ def get_weights(net):
 def set_weights(net, parameters):
     """Apply parameters to an existing model."""
     params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)

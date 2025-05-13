@@ -9,9 +9,11 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
 kotlinxCoroutinesTest = "1.7.3"
+kotlinxDatetime = "0.6.2"
 kotlinxSerializationJson = "1.8.0"
 ktorClientCore = "3.1.2"
 mockkAndroid = "1.13.7"
+dokka = "1.9.10"
 
 [libraries]
 androidx-core = { module = "androidx.test:core", version.ref = "core" }
@@ -23,6 +25,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiterApi" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiterApi" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCore" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientCore" }
@@ -36,3 +39,6 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version = "0.22.0" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+maven-publish = { id = "maven-publish" }
+signing = { id = "signing" }
