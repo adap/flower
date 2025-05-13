@@ -290,12 +290,12 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
 
     @property
     def children(self) -> dict[str, InflatableObject]:
-        """Return a dict of records with their Object IDs as keys."""
+        """Return a dictionary of records with their Object IDs as keys."""
         return {record.object_id: record for record in self.values()}
 
     def deflate(self) -> bytes:
         """Deflate the RecordDict."""
-        # array_name: record_object_id mapping
+        # record_name: record_object_id mapping
         record_refs: dict[str, str] = {}
 
         for record_name, record in self.items():
@@ -309,7 +309,7 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
     def inflate(
         cls, object_content: bytes, children: dict[str, InflatableObject]
     ) -> RecordDict:
-        """Inflate an ArrayRecord from bytes.
+        """Inflate an RecordDict from bytes.
 
         Parameters
         ----------
@@ -317,7 +317,7 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
             The deflated object content of the RecordDict.
 
         children : dict[str, InflatableObject]
-            Dict of children InflatableObjects mapped to thier Object ID.
+            Dictionary of children InflatableObjects mapped to thier Object IDs.
             These children enable the full inflation of the RecordDict.
 
         Returns
@@ -325,7 +325,7 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
         RecordDict
             The inflated RecordDict.
         """
-        # Inflate mapping of array_names (keys in the RecordDict) to Record' object IDs
+        # Inflate mapping of record_names (keys in the RecordDict) to Record' object IDs
         obj_body = get_object_body(object_content, cls)
         record_refs: dict[str, str] = json.loads(obj_body.decode(encoding="utf-8"))
 
@@ -337,7 +337,8 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
 
         # Ensure children are one of the *Record objects exepecte in a RecordDict
         if not all(
-            isinstance(ch, (ArrayRecord, ConfigRecord, MetricRecord)) for ch in children
+            isinstance(ch, (ArrayRecord, ConfigRecord, MetricRecord))
+            for ch in children.values()
         ):
             raise ValueError(
                 "`Children` are expected to be of type `ArrayRecord`, "
