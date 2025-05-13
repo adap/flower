@@ -48,7 +48,6 @@ class CustomDataClass(InflatableObject):
     def inflate(  # noqa: D102
         cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
     ) -> CustomDataClass:
-
         if children is not None:
             raise ValueError("`CustomDataClass` does not have children.")
         object_body = get_object_body(object_content, cls)
