@@ -266,7 +266,7 @@ class Array(InflatableObject):
 
     @classmethod
     def inflate(
-        cls, object_content: bytes, children: dict[str, InflatableObject]
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
     ) -> Array:
         """Inflate an Array from bytes.
 
@@ -275,8 +275,8 @@ class Array(InflatableObject):
         object_content : bytes
             The deflated object content of the Array.
 
-        children : dict[str, InflatableObject]
-            Must be an empty dictionary. Arrays do not support child objects.
+        children : Optional[dict[str, InflatableObject]]
+            Must be None. Arrays do not support child objects.
             Providing any children will raise a ValueError.
 
         Returns
@@ -284,7 +284,7 @@ class Array(InflatableObject):
         Array
             The inflated Array.
         """
-        if children:
+        if children is not None:
             raise ValueError("`Array` objects do not have children.")
 
         obj_body = get_object_body(object_content, cls)

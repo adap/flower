@@ -45,10 +45,10 @@ class CustomDataClass(InflatableObject):
 
     @classmethod
     def inflate(  # noqa: D102
-        cls, object_content: bytes, children: dict[str, InflatableObject]
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
     ) -> CustomDataClass:
 
-        if children:
+        if children is not None:
             raise ValueError("`CustomDataClass` does not have children.")
         object_body = get_object_body(object_content, cls)
         return cls(data=object_body)
@@ -74,7 +74,7 @@ def test_deflate_and_inflate() -> None:
     assert get_object_id(obj_b) == obj.object_id
 
     # Inflate and check object payload is the same
-    obj_ = CustomDataClass.inflate(obj_b, {})
+    obj_ = CustomDataClass.inflate(obj_b)
     assert obj_.data == obj.data
 
     # Assert
