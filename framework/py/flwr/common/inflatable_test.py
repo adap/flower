@@ -14,6 +14,8 @@
 # ==============================================================================
 """Inflatable test."""
 
+from __future__ import annotations
+
 import hashlib
 from dataclasses import dataclass
 
@@ -44,7 +46,7 @@ class CustomDataClass(InflatableObject):
     @classmethod
     def inflate(  # noqa: D102
         cls, object_content: bytes, children: dict[str, InflatableObject]
-    ) -> "CustomDataClass":
+    ) -> CustomDataClass:
 
         if children:
             raise ValueError("`CustomDataClass` does not have children.")

@@ -276,8 +276,8 @@ class Array(InflatableObject):
             The deflated object content of the Array.
 
         children : dict[str, InflatableObject]
-            Unused. Dict of children InflatableObjects mapped to thier Object ID.
-            These children enable the full inflation of the Array.
+            Must be an empty dictionary. Arrays do not support child objects.
+            Providing any children will raise a ValueError.
 
         Returns
         -------
