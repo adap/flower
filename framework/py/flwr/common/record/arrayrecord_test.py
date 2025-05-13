@@ -387,7 +387,7 @@ class TestArrayRecord(unittest.TestCase):
         # Assert
         # Inflate but passing wrong Children type
         with pytest.raises(ValueError):
-            ArrayRecord.inflate(arr_rec_b, children={"123": np.array(5)})
+            ArrayRecord.inflate(arr_rec_b, children={"123": np.array(5)})  # type: ignore
 
 
 @pytest.mark.parametrize(
