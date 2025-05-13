@@ -394,7 +394,6 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         ----------
         object_content : bytes
             The deflated object content of the ArrayRecord.
-
         children : Optional[dict[str, InflatableObject]] (default: None)
             Dictionary of children InflatableObjects mapped to their Object IDs.
             These children enable the full inflation of the ArrayRecord.
