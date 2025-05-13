@@ -19,6 +19,13 @@ import random
 import threading
 from typing import Callable
 
+import grpc
+
+# pylint: disable=E0611
+from flwr.proto.heartbeat_pb2 import SendAppHeartbeatRequest
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+
+# pylint: enable=E0611
 from .constant import (
     HEARTBEAT_BASE_MULTIPLIER,
     HEARTBEAT_CALL_TIMEOUT,
@@ -106,3 +113,52 @@ class HeartbeatSender:
         if not self._stop_event.is_set():
             if not self.heartbeat_fn():
                 raise HeartbeatFailure
+
+
+def get_grpc_app_heartbeat_fn(
+    stub: ServerAppIoStub,
+    run_id: int,
+    *,
+    failure_message: str,
+) -> Callable[[], bool]:
+    """Get the function to sends a heartbeat to gRPC endpoint.
+
+    This function is for app heartbeats only. It is not used for node heartbeats.
+
+    Parameters
+    ----------
+    stub : ServerAppIoStub
+        gRPC stub to send the heartbeat.
+    run_id : int
+        The run ID to use in the heartbeat request.
+    failure_message : str
+        Error message to raise if the heartbeat fails.
+
+    Returns
+    -------
+    Callable[[], bool]
+        Function that sends a heartbeat to the gRPC endpoint.
+    """
+    # Construct the heartbeat request
+    req = SendAppHeartbeatRequest(
+        run_id=run_id, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
+    )
+
+    def fn() -> bool:
+        # Call ServerAppIo API
+        try:
+            res = stub.SendAppHeartbeat(req)
+        except grpc.RpcError as e:
+            status_code = e.code()
+            if status_code == grpc.StatusCode.UNAVAILABLE:
+                return False
+            if status_code == grpc.StatusCode.DEADLINE_EXCEEDED:
+                return False
+            raise
+
+        # Check if success
+        if not res.success:
+            raise RuntimeError(failure_message)
+        return True
+
+    return fn

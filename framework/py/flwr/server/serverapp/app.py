@@ -20,9 +20,7 @@ from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
 from time import sleep
-from typing import Callable, Optional
-
-import grpc
+from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
@@ -35,13 +33,12 @@ from flwr.common.config import (
     get_project_dir,
 )
 from flwr.common.constant import (
-    HEARTBEAT_DEFAULT_INTERVAL,
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     Status,
     SubStatus,
 )
 from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.heartbeat import HeartbeatSender
+from flwr.common.heartbeat import HeartbeatSender, get_grpc_app_heartbeat_fn
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -58,14 +55,12 @@ from flwr.common.serde import (
 )
 from flwr.common.telemetry import EventType, event
 from flwr.common.typing import RunNotRunningException, RunStatus
-from flwr.proto.heartbeat_pb2 import SendAppHeartbeatRequest  # pylint: disable=E0611
 from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
     PushServerAppOutputsRequest,
 )
-from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 from flwr.server.grid.grpc_grid import GrpcGrid
 from flwr.server.run_serverapp import run as run_
 
@@ -190,9 +185,10 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             )
 
             # Set up heartbeat sender
-            heartbeat_sender = HeartbeatSender(
-                heartbeat_fn=_get_send_app_heartbeat_fn(grid._stub, run.run_id),
+            heartbeat_fn = get_grpc_app_heartbeat_fn(
+                grid._stub, run.run_id, failure_message="Heartbeat failed unexpectedly."
             )
+            heartbeat_sender = HeartbeatSender(heartbeat_fn)
             heartbeat_sender.start()
 
             # Load and run the ServerApp with the Grid
@@ -253,38 +249,6 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
         # Stop the loop if `flwr-serverapp` is expected to process a single run
         if run_once:
             break
-
-
-def _get_send_app_heartbeat_fn(
-    stub: ServerAppIoStub, run_id: int
-) -> Callable[[], bool]:
-    """Get the function to send heartbeat to ServerAppIo API."""
-    # Construct the heartbeat request
-    req = SendAppHeartbeatRequest(
-        run_id=run_id, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
-    )
-
-    def fn() -> bool:
-        # Call ServerAppIo API
-        try:
-            res = stub.SendAppHeartbeat(req)
-        except grpc.RpcError as e:
-            status_code = e.code()
-            if status_code == grpc.StatusCode.UNAVAILABLE:
-                return False
-            if status_code == grpc.StatusCode.DEADLINE_EXCEEDED:
-                return False
-            raise
-
-        # Check if success
-        if not res.success:
-            raise RuntimeError(
-                "Heartbeat failed unexpectedly. The SuperLink does not "
-                "recognize this SuperNode."
-            )
-        return True
-
-    return fn
 
 
 def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
