@@ -344,7 +344,10 @@ class TestArrayRecord(unittest.TestCase):
 
         # Assert
         # Expected children
-        assert len(arr_rec.children) == len(array_content)
+        # print(len(set(arr.tobytes() for arr in array_content)))
+        assert len(arr_rec.children) == len(
+            {arr.object_id: arr for arr in arr_rec.values()}
+        )
 
         arr_rec_b = arr_rec.deflate()
 
@@ -363,7 +366,7 @@ class TestArrayRecord(unittest.TestCase):
         # Assert if children needed but not passed:
         if len(array_content) > 0:
             with pytest.raises(ValueError):
-                ArrayRecord.inflate(arr_rec_b, children={})
+                ArrayRecord.inflate(arr_rec_b)
 
         # Check children
         # Assert if children not computed correctly
