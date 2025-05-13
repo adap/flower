@@ -569,6 +569,11 @@ def test_metric_and_config_record_deflate_and_inflate(
 ) -> None:
     """Ensure an MetricRecord and ConfigRecord can be (de)inflated correctly."""
     record = record_type(record_data)  # type: ignore[arg-type]
+
+    # Assert
+    # Record has no children
+    assert record.children is None
+
     record_b = record.deflate()
 
     # Assert
@@ -585,3 +590,8 @@ def test_metric_and_config_record_deflate_and_inflate(
     # Assert
     # Both objects are identical
     assert record.object_id == record_.object_id
+
+    # Assert
+    # Inflate passing children raises ValueError
+    with pytest.raises(ValueError):
+        record_type.inflate(record_b, children={"1234": record})
