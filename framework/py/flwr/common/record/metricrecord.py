@@ -170,7 +170,7 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
         object_content : bytes
             The deflated object content of the MetricRecord.
 
-        children : Optional[dict[str, InflatableObject]]
+        children : Optional[dict[str, InflatableObject]] (default: None)
             Must be None. MetricRecords do not support child objects.
             Providing any children will raise a ValueError.
 
