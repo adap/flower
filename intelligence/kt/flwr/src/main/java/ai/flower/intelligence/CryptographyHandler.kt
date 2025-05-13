@@ -31,7 +31,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 class CryptographyHandler(
-  private val serverUrl: String,
+  private val baseURL: String = Constants.BASE_URL,
   private val apiKey: String,
   private val client: HttpClient,
 ) {
@@ -68,14 +68,14 @@ class CryptographyHandler(
       client = client,
       element = payload,
       authorization = "Bearer $apiKey",
-      url = "$serverUrl/encryption/public-key",
+      url = "${Constants.BASE_URL}${Constants.ENCRYPTION_PUBLIC_KEY_PATH}",
     )
   }
 
   private suspend fun getServerPublicKey(): GetServerPublicKeyResponse {
     return NetworkService.getElement(
       client = client,
-      url = "$serverUrl/encryption/server-public-key",
+      url = "${Constants.BASE_URL}${Constants.ENCRYPTION_SERVER_PUBLIC_KEY_PATH}",
       authorization = "Bearer $apiKey",
     )
   }
@@ -89,13 +89,7 @@ class CryptographyHandler(
     keyAgreement.init(privateKey)
     keyAgreement.doPhase(publicKey, true)
     val secret = keyAgreement.generateSecret()
-    val derivedKey =
-      Hkdf.deriveKey(
-        ikm = secret,
-        salt = ByteArray(32), // You can customize this if needed
-        info = "flower-crypto".toByteArray(), // Optional context info
-        outputLength = 32, // 256-bit AES key
-      )
+    val derivedKey = Hkdf.deriveKey(ikm = secret, salt = ByteArray(32), outputLength = 32)
     return SecretKeySpec(derivedKey, "AES")
   }
 
@@ -145,11 +139,11 @@ class CryptographyHandler(
 
 object Hkdf {
   private const val HMAC_ALGORITHM = "HmacSHA256"
-  private const val HASH_LEN = 32 // SHA-256 output size in bytes
+  private const val HASH_LEN = 32
 
   fun deriveKey(
     ikm: ByteArray,
-    salt: ByteArray = ByteArray(HASH_LEN), // default: zeroes
+    salt: ByteArray = ByteArray(HASH_LEN),
     info: ByteArray = ByteArray(0),
     outputLength: Int = 32,
   ): ByteArray {
