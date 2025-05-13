@@ -377,6 +377,18 @@ class TestArrayRecord(unittest.TestCase):
         # Both objects are identical
         assert arr_rec.object_id == arr_rec_.object_id
 
+    def test_inflation_with_unsupported_children(self) -> None:
+        """Test inflation of an ArrayRecord when children are not Arrays."""
+        arr_rec = ArrayRecord([np.array(5)])
+
+        # Deflate
+        arr_rec_b = arr_rec.deflate()
+
+        # Assert
+        # Inflate but passing wrong Children type
+        with pytest.raises(ValueError):
+            ArrayRecord.inflate(arr_rec_b, children={"123": np.array(5)})
+
 
 @pytest.mark.parametrize(
     "shape, dtype",
