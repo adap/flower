@@ -68,14 +68,14 @@ class CryptographyHandler(
       client = client,
       element = payload,
       authorization = "Bearer $apiKey",
-      url = "${Constants.BASE_URL}${Constants.ENCRYPTION_PUBLIC_KEY_PATH}",
+      url = "$baseURL${Constants.ENCRYPTION_PUBLIC_KEY_PATH}",
     )
   }
 
   private suspend fun getServerPublicKey(): GetServerPublicKeyResponse {
     return NetworkService.getElement(
       client = client,
-      url = "${Constants.BASE_URL}${Constants.ENCRYPTION_SERVER_PUBLIC_KEY_PATH}",
+      url = "$baseURL${Constants.ENCRYPTION_SERVER_PUBLIC_KEY_PATH}",
       authorization = "Bearer $apiKey",
     )
   }
