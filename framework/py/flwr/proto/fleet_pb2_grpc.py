@@ -4,6 +4,7 @@ import grpc
 
 from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
 from flwr.proto import fleet_pb2 as flwr_dot_proto_dot_fleet__pb2
+from flwr.proto import heartbeat_pb2 as flwr_dot_proto_dot_heartbeat__pb2
 from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 
 
@@ -26,10 +27,10 @@ class FleetStub(object):
                 request_serializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeResponse.FromString,
                 )
-        self.Heartbeat = channel.unary_unary(
-                '/flwr.proto.Fleet/Heartbeat',
-                request_serializer=flwr_dot_proto_dot_fleet__pb2.HeartbeatRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_fleet__pb2.HeartbeatResponse.FromString,
+        self.SendNodeHeartbeat = channel.unary_unary(
+                '/flwr.proto.Fleet/SendNodeHeartbeat',
+                request_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendNodeHeartbeatRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendNodeHeartbeatResponse.FromString,
                 )
         self.PullMessages = channel.unary_unary(
                 '/flwr.proto.Fleet/PullMessages',
@@ -68,7 +69,7 @@ class FleetServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Heartbeat(self, request, context):
+    def SendNodeHeartbeat(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -118,10 +119,10 @@ def add_FleetServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeResponse.SerializeToString,
             ),
-            'Heartbeat': grpc.unary_unary_rpc_method_handler(
-                    servicer.Heartbeat,
-                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.HeartbeatRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_fleet__pb2.HeartbeatResponse.SerializeToString,
+            'SendNodeHeartbeat': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendNodeHeartbeat,
+                    request_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendNodeHeartbeatRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendNodeHeartbeatResponse.SerializeToString,
             ),
             'PullMessages': grpc.unary_unary_rpc_method_handler(
                     servicer.PullMessages,
@@ -188,7 +189,7 @@ class Fleet(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def Heartbeat(request,
+    def SendNodeHeartbeat(request,
             target,
             options=(),
             channel_credentials=None,
@@ -198,9 +199,9 @@ class Fleet(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/Heartbeat',
-            flwr_dot_proto_dot_fleet__pb2.HeartbeatRequest.SerializeToString,
-            flwr_dot_proto_dot_fleet__pb2.HeartbeatResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/SendNodeHeartbeat',
+            flwr_dot_proto_dot_heartbeat__pb2.SendNodeHeartbeatRequest.SerializeToString,
+            flwr_dot_proto_dot_heartbeat__pb2.SendNodeHeartbeatResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

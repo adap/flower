@@ -29,12 +29,14 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    HeartbeatRequest,
-    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+)
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
@@ -126,14 +128,16 @@ async def push_message(request: PushMessagesRequest) -> PushMessagesResponse:
     return message_handler.push_messages(request=request, state=state)
 
 
-@rest_request_response(HeartbeatRequest)
-async def heartbeat(request: HeartbeatRequest) -> HeartbeatResponse:
-    """Heartbeat."""
+@rest_request_response(SendNodeHeartbeatRequest)
+async def send_node_heartbeat(
+    request: SendNodeHeartbeatRequest,
+) -> SendNodeHeartbeatResponse:
+    """Send node heartbeat."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
 
     # Handle message
-    return message_handler.heartbeat(request=request, state=state)
+    return message_handler.send_node_heartbeat(request=request, state=state)
 
 
 @rest_request_response(GetRunRequest)
@@ -164,7 +168,7 @@ routes = [
     Route("/api/v0/fleet/delete-node", delete_node, methods=["POST"]),
     Route("/api/v0/fleet/pull-messages", pull_message, methods=["POST"]),
     Route("/api/v0/fleet/push-messages", push_message, methods=["POST"]),
-    Route("/api/v0/fleet/heartbeat", heartbeat, methods=["POST"]),
+    Route("/api/v0/fleet/send-node-heartbeat", send_node_heartbeat, methods=["POST"]),
     Route("/api/v0/fleet/get-run", get_run, methods=["POST"]),
     Route("/api/v0/fleet/get-fab", get_fab, methods=["POST"]),
 ]

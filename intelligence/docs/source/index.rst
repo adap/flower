@@ -546,7 +546,6 @@ ensuring that the assistant responds in a way that’s tailored to the scenario.
             import ai.flower.intelligence.Failure
 
             suspend fun main() {
-                val fi = FlowerIntelligence
                 val messages = listOf(
                     Message(role = "system", content = "You are a friendly assistant that loves using emojis."),
                     Message(role = "user", content = "Why is the sky blue?")
@@ -558,7 +557,7 @@ ensuring that the assistant responds in a way that’s tailored to the scenario.
                     onStreamEvent = { event -> println(event.chunk) }
                 )
 
-                val result = fi.chat(messages to options)
+                val result = FlowerIntelligence.chat(messages, options)
 
                 result.onSuccess { message ->
                     println(message.content)
@@ -733,7 +732,7 @@ interactions, resulting in a more coherent and dynamic conversation.
                     onStreamEvent = { event: StreamEvent -> println(event.chunk) }
                 )
 
-                val result = FlowerIntelligence.chat(history to options)
+                val result = FlowerIntelligence.chat(history, options)
 
                 result.onSuccess { response ->
                     history.add(response)
@@ -1032,7 +1031,7 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
                     onStreamEvent = { event -> println(event.chunk) }
                 )
 
-                val result = fi.chat(messages to options)
+                val result = fi.chat(messages, options)
 
                 result.onSuccess { message ->
                     println(message.content)
@@ -1055,6 +1054,7 @@ Information-oriented API reference and other reference material.
     examples
     ts-api-ref/index
     swift-api-ref/index
+    kt-api-ref/index
 
 Contributor guides
 ------------------
