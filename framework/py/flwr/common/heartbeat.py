@@ -156,7 +156,7 @@ def get_grpc_app_heartbeat_fn(
                 return False
             raise
 
-        # Check if success
+        # Check if not successful
         if not res.success:
             raise RuntimeError(failure_message)
         return True
