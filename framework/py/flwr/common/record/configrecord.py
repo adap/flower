@@ -195,7 +195,7 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
         object_content : bytes
             The deflated object content of the ConfigRecord.
 
-        children : Optional[dict[str, InflatableObject]]
+        children : Optional[dict[str, InflatableObject]] (default: None)
             Must be None. ConfigRecords do not support child objects.
             Providing any children will raise a ValueError.
 
