@@ -414,6 +414,10 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
                 f"Expected {len(array_refs)} but got {len(children)}."
             )
 
+        # Ensure children are of type Array
+        if not all(isinstance(arr, Array) for arr in children.values()):
+            raise ValueError("`Children` are expected to be of type `Array`.")
+
         # Instantiate new ArrayRecord
         return ArrayRecord(
             OrderedDict(
