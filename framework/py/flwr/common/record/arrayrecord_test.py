@@ -385,6 +385,9 @@ class TestArrayRecord(unittest.TestCase):
         arr_rec_b = arr_rec.deflate()
 
         # Assert
+        # Inflate but passing no children
+        with pytest.raises(ValueError):
+            ArrayRecord.inflate(arr_rec_b)
         # Inflate but passing wrong Children type
         with pytest.raises(ValueError):
             ArrayRecord.inflate(arr_rec_b, children={"123": np.array(5)})  # type: ignore
