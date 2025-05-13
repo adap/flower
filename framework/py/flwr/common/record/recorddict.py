@@ -17,10 +17,12 @@
 
 from __future__ import annotations
 
+import json
 from logging import WARN
 from textwrap import indent
 from typing import TypeVar, Union, cast
 
+from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..logger import log
 from .arrayrecord import ArrayRecord
 from .configrecord import ConfigRecord
@@ -97,7 +99,7 @@ class _SyncedDict(TypedDict[str, T]):
             )
 
 
-class RecordDict(TypedDict[str, RecordType]):
+class RecordDict(TypedDict[str, RecordType], InflatableObject):
     """RecordDict stores groups of arrays, metrics and configs.
 
     A :class:`RecordDict` is the unified mechanism by which arrays,
@@ -285,6 +287,67 @@ class RecordDict(TypedDict[str, RecordType]):
                 "future release. Please use the `config_records` property instead.",
             )
         return self.config_records
+
+    @property
+    def children(self) -> dict[str, InflatableObject]:
+        """Return a dict of records with their Object IDs as keys."""
+        return {record.object_id: record for record in self.values()}
+
+    def deflate(self) -> bytes:
+        """Deflate the RecordDict."""
+        # array_name: record_object_id mapping
+        record_refs: dict[str, str] = {}
+
+        for record_name, record in self.items():
+            record_refs[record_name] = record.object_id
+
+        # Serialize references dict
+        object_body = json.dumps(record_refs).encode("utf-8")
+        return add_header_to_object_body(object_body=object_body, cls=self)
+
+    @classmethod
+    def inflate(
+        cls, object_content: bytes, children: dict[str, InflatableObject]
+    ) -> RecordDict:
+        """Inflate an ArrayRecord from bytes.
+
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content of the RecordDict.
+
+        children : dict[str, InflatableObject]
+            Dict of children InflatableObjects mapped to thier Object ID.
+            These children enable the full inflation of the RecordDict.
+
+        Returns
+        -------
+        RecordDict
+            The inflated RecordDict.
+        """
+        # Inflate mapping of array_names (keys in the RecordDict) to Record' object IDs
+        obj_body = get_object_body(object_content, cls)
+        record_refs: dict[str, str] = json.loads(obj_body.decode(encoding="utf-8"))
+
+        if len(record_refs) != len(children):
+            raise ValueError(
+                "Unexpected number of `children`. "
+                f"Expected {len(record_refs)} but got {len(children)}."
+            )
+
+        # Ensure children are one of the *Record objects exepecte in a RecordDict
+        if not all(
+            isinstance(ch, (ArrayRecord, ConfigRecord, MetricRecord)) for ch in children
+        ):
+            raise ValueError(
+                "`Children` are expected to be of type `ArrayRecord`, "
+                "`ConfigRecord` or `MetricRecord`."
+            )
+
+        # Instantiate new RecordDict
+        return RecordDict(
+            {name: children[object_id] for name, object_id in record_refs.items()}  # type: ignore
+        )
 
 
 class RecordSet(RecordDict):
