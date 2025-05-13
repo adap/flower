@@ -317,7 +317,7 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
             The deflated object content of the RecordDict.
 
         children : dict[str, InflatableObject]
-            Dictionary of children InflatableObjects mapped to thier Object IDs.
+            Dictionary of children InflatableObjects mapped to their Object IDs.
             These children enable the full inflation of the RecordDict.
 
         Returns
