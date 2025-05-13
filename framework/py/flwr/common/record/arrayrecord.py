@@ -393,7 +393,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         Parameters
         ----------
         object_content : bytes
-            The deflated object content of the Array.
+            The deflated object content of the ArrayRecord.
 
         children : dict[str, InflatableObject]
             Dict of children InflatableObjects mapped to thier Object ID.
@@ -401,7 +401,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
 
         Returns
         -------
-        Array
+        ArrayRecord
             The inflated ArrayRecord.
         """
         # Inflate mapping of array_names (keys in the ArrayRecord) to Arrays' object IDs
