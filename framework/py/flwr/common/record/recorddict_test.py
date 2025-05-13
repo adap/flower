@@ -18,7 +18,8 @@
 import pickle
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Callable, Union
+from typing import Callable, Union, cast
+from unittest.mock import Mock, PropertyMock, patch
 
 import numpy as np
 import pytest
@@ -36,7 +37,11 @@ from flwr.common.typing import (
     Parameters,
 )
 
+from ..inflatable import get_object_body, get_object_type_from_object_content
+from ..serde import config_record_to_proto, metric_record_to_proto
 from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
+
+# pylint: disable=E0611
 
 
 def get_ndarrays() -> NDArrays:
@@ -266,10 +271,10 @@ def test_set_metrics_to_metricrecord_with_and_without_keeping_input(
     # constructing a valid input
     labels = [1, 2.0]
     arrays = get_ndarrays()
-    my_metrics = OrderedDict(
-        {str(label): arr.flatten().tolist() for label, arr in zip(labels, arrays)}
+    my_metrics = cast(
+        dict[str, MetricRecordValues],
+        {str(label): arr.flatten().tolist() for label, arr in zip(labels, arrays)},
     )
-
     my_metrics_copy = my_metrics.copy()
 
     # Add metric
@@ -463,3 +468,120 @@ def test_recorddict_set_get_del_item() -> None:
     assert "arrays" not in rs
     assert "metrics" not in rs
     assert "configs" not in rs
+
+
+def test_constructor_with_deprecated_arguments() -> None:
+    """Test constructor with deprecated arguments."""
+    # Prepare
+    array_rec = ArrayRecord(
+        OrderedDict({"weights": Array("mock", [2, 3], "mock", b"123")})
+    )
+    metric_rec = MetricRecord({"accuracy": 0.95})
+    config_rec = ConfigRecord({"lr": 0.01})
+
+    # Execute
+    rd = RecordDict(
+        parameters_records={"param": array_rec},
+        metrics_records={"metric": metric_rec},
+        configs_records={"config": config_rec},
+    )
+
+    # Assert
+    assert rd["param"] == array_rec
+    assert rd["metric"] == metric_rec
+    assert rd["config"] == config_rec
+
+
+def test_parameters_records_delegation_and_return() -> None:
+    """Test parameters_records property delegates to array_records."""
+    # Prepare
+    rd = RecordDict()
+
+    # Execute and assert
+    with patch.object(
+        RecordDict, "array_records", new_callable=PropertyMock
+    ) as mock_property:
+        mock_property.return_value = Mock(name="array_records_return")
+
+        result = rd.parameters_records
+
+        mock_property.assert_called_once()
+        assert result is mock_property.return_value
+
+
+def test_metrics_records_delegation_and_return() -> None:
+    """Test metrics_records property delegates to metric_records."""
+    # Prepare
+    rd = RecordDict()
+
+    # Execute and assert
+    with patch.object(
+        RecordDict, "metric_records", new_callable=PropertyMock
+    ) as mock_property:
+        mock_property.return_value = Mock(name="metric_records_return")
+
+        result = rd.metrics_records
+
+        mock_property.assert_called_once()
+        assert result is mock_property.return_value
+
+
+def test_configs_records_delegation_and_return() -> None:
+    """Test configs_records property delegates to config_records."""
+    # Prepare
+    rd = RecordDict()
+
+    # Execute and assert
+    with patch.object(
+        RecordDict, "config_records", new_callable=PropertyMock
+    ) as mock_property:
+        mock_property.return_value = Mock(name="config_records_return")
+
+        result = rd.configs_records
+
+        mock_property.assert_called_once()
+        assert result is mock_property.return_value
+
+
+@pytest.mark.parametrize(
+    "record_type, record_data, proto_conversion_fn",
+    [
+        (
+            MetricRecord,
+            {"a": 123, "b": [0.123, 0.456]},
+            lambda x: metric_record_to_proto(x).SerializeToString(deterministic=True),
+        ),
+        (
+            ConfigRecord,
+            {
+                "a": 123,
+                "b": [0.123, 0.456],
+                "data": b"hello world",
+            },
+            lambda x: config_record_to_proto(x).SerializeToString(deterministic=True),
+        ),
+    ],
+)
+def test_metric_and_config_record_deflate_and_inflate(
+    record_type: type[Union[ConfigRecord, MetricRecord]],
+    record_data: dict[str, Union[ConfigRecordValues, MetricRecordValues]],
+    proto_conversion_fn: Callable[[Union[ConfigRecord, MetricRecord]], bytes],
+) -> None:
+    """Ensure an MetricRecord and ConfigRecord can be (de)inflated correctly."""
+    record = record_type(record_data)  # type: ignore[arg-type]
+    record_b = record.deflate()
+
+    # Assert
+    # Class name matches
+    assert (
+        get_object_type_from_object_content(record_b) == record.__class__.__qualname__
+    )
+    # Body of deflfated Array matches its direct protobuf serialization
+    assert get_object_body(record_b, record_type) == proto_conversion_fn(record)
+
+    # Inflate
+    record_ = record_type.inflate(record_b)
+
+    # Assert
+    # Both objects are identical
+    assert record.object_id == record_.object_id

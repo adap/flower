@@ -25,12 +25,15 @@ from uuid import UUID, uuid4
 
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
+    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
-    PING_PATIENCE,
+    RUN_FAILURE_DETAILS_NO_HEARTBEAT,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
+    SubStatus,
 )
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
@@ -52,8 +55,11 @@ class RunRecord:  # pylint: disable=R0902
     """The record of a specific run, including its status and timestamps."""
 
     run: Run
+    active_until: float = 0.0
+    heartbeat_interval: float = 0.0
     logs: list[tuple[float, str]] = field(default_factory=list)
     log_lock: threading.Lock = field(default_factory=threading.Lock)
+    lock: threading.RLock = field(default_factory=threading.RLock)
 
 
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
@@ -61,7 +67,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def __init__(self) -> None:
 
-        # Map node_id to (online_until, ping_interval)
+        # Map node_id to (online_until, heartbeat_interval)
         self.node_ids: dict[int, tuple[float, float]] = {}
         self.public_key_to_node_id: dict[bytes, int] = {}
         self.node_id_to_public_key: dict[int, bytes] = {}
@@ -322,7 +328,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.message_res_store)
 
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(self, heartbeat_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(
@@ -334,8 +340,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
-            # Mark the node online util time.time() + ping_interval
-            self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+            # Mark the node online until time.time() + heartbeat_interval
+            self.node_ids[node_id] = (
+                time.time() + heartbeat_interval,
+                heartbeat_interval,
+            )
             return node_id
 
     def delete_node(self, node_id: int) -> None:
@@ -458,8 +467,29 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             return set(self.run_ids.keys())
 
+    def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
+        """Check if any runs are no longer active.
+
+        Marks runs with status 'starting' or 'running' as failed
+        if they have not sent a heartbeat before `active_until`.
+        """
+        current = now()
+        for record in [self.run_ids[run_id] for run_id in run_ids]:
+            with record.lock:
+                if record.run.status.status in (Status.STARTING, Status.RUNNING):
+                    if record.active_until < current.timestamp():
+                        record.run.status = RunStatus(
+                            status=Status.FINISHED,
+                            sub_status=SubStatus.FAILED,
+                            details=RUN_FAILURE_DETAILS_NO_HEARTBEAT,
+                        )
+                        record.run.finished_at = now().isoformat()
+
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
+        # Check if runs are still active
+        self._check_and_tag_inactive_run(run_ids={run_id})
+
         with self.lock:
             if run_id not in self.run_ids:
                 log(ERROR, "`run_id` is invalid")
@@ -468,6 +498,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
+        # Check if runs are still active
+        self._check_and_tag_inactive_run(run_ids=run_ids)
+
         with self.lock:
             return {
                 run_id: self.run_ids[run_id].run.status
@@ -477,12 +510,16 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
+        # Check if runs are still active
+        self._check_and_tag_inactive_run(run_ids={run_id})
+
         with self.lock:
             # Check if the run_id exists
             if run_id not in self.run_ids:
                 log(ERROR, "`run_id` is invalid")
                 return False
 
+        with self.run_ids[run_id].lock:
             # Check if the status transition is valid
             current_status = self.run_ids[run_id].run.status
             if not is_valid_transition(current_status, new_status):
@@ -504,14 +541,23 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 )
                 return False
 
-            # Update the status
+            # Initialize heartbeat_interval and active_until
+            # when switching to starting or running
+            current = now()
             run_record = self.run_ids[run_id]
+            if new_status.status in (Status.STARTING, Status.RUNNING):
+                run_record.heartbeat_interval = HEARTBEAT_MAX_INTERVAL
+                run_record.active_until = (
+                    current.timestamp() + run_record.heartbeat_interval
+                )
+
+            # Update the run status
             if new_status.status == Status.STARTING:
-                run_record.run.starting_at = now().isoformat()
+                run_record.run.starting_at = current.isoformat()
             elif new_status.status == Status.RUNNING:
-                run_record.run.running_at = now().isoformat()
+                run_record.run.running_at = current.isoformat()
             elif new_status.status == Status.FINISHED:
-                run_record.run.finished_at = now().isoformat()
+                run_record.run.finished_at = current.isoformat()
             run_record.run.status = new_status
             return True
 
@@ -536,20 +582,61 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return None
             return self.federation_options[run_id]
 
-    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat.
+    def acknowledge_node_heartbeat(
+        self, node_id: int, heartbeat_interval: float
+    ) -> bool:
+        """Acknowledge a heartbeat received from a node, serving as a heartbeat.
 
-        It allows for one missed ping (in a PING_PATIENCE * ping_interval) before
-        marking the node as offline, where PING_PATIENCE = 2 in default.
+        A node is considered online as long as it sends heartbeats within
+        the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before
+        the node is marked as offline.
         """
         with self.lock:
             if node_id in self.node_ids:
                 self.node_ids[node_id] = (
-                    time.time() + PING_PATIENCE * ping_interval,
-                    ping_interval,
+                    time.time() + HEARTBEAT_PATIENCE * heartbeat_interval,
+                    heartbeat_interval,
                 )
                 return True
         return False
+
+    def acknowledge_app_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
+        """Acknowledge a heartbeat received from a ServerApp for a given run.
+
+        A run with status `"running"` is considered alive as long as it sends heartbeats
+        within the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before the run is
+        marked as `"completed:failed"`.
+        """
+        with self.lock:
+            # Search for the run
+            record = self.run_ids.get(run_id)
+
+            # Check if the run_id exists
+            if record is None:
+                log(ERROR, "`run_id` is invalid")
+                return False
+
+        with record.lock:
+            # Check if runs are still active
+            self._check_and_tag_inactive_run(run_ids={run_id})
+
+            # Check if the run is of status "running"/"starting"
+            current_status = record.run.status
+            if current_status.status not in (Status.RUNNING, Status.STARTING):
+                log(
+                    ERROR,
+                    'Cannot acknowledge heartbeat for run with status "%s"',
+                    current_status.status,
+                )
+                return False
+
+            # Update the `active_until` and `heartbeat_interval` for the given run
+            current = now().timestamp()
+            record.active_until = current + HEARTBEAT_PATIENCE * heartbeat_interval
+            record.heartbeat_interval = heartbeat_interval
+            return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""
