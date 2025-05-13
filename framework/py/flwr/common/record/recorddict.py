@@ -307,7 +307,7 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
 
     @classmethod
     def inflate(
-        cls, object_content: bytes, children: dict[str, InflatableObject]
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
     ) -> RecordDict:
         """Inflate an RecordDict from bytes.
 
@@ -316,15 +316,21 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
         object_content : bytes
             The deflated object content of the RecordDict.
 
-        children : dict[str, InflatableObject]
+        children : Optional[dict[str, InflatableObject]]
             Dictionary of children InflatableObjects mapped to their Object IDs.
-            These children enable the full inflation of the RecordDict.
+            These children enable the full inflation of the RecordDict. Default is None.
 
         Returns
         -------
         RecordDict
             The inflated RecordDict.
         """
+        if children is None:
+            raise ValueError(
+                "`RecordDict` children cannot be None. It must be a dictionary of "
+                "with values of type `ArrayRecord`, `ConfigRecord` or `MetricRecord`."
+            )
+
         # Inflate mapping of record_names (keys in the RecordDict) to Record' object IDs
         obj_body = get_object_body(object_content, cls)
         record_refs: dict[str, str] = json.loads(obj_body.decode(encoding="utf-8"))

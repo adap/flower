@@ -656,7 +656,9 @@ def test_recorddict_raises_value_error_with_unsupported_children() -> None:
         ArrayRecord.inflate(
             record_b, children={"123": ConfigRecord(), "456": MetricRecord()}
         )
-
+    # Inflate but passing no children
+    with pytest.raises(ValueError):
+        ArrayRecord.inflate(record_b)
     # Inflate but passing unsupported children type
     with pytest.raises(ValueError):
         ArrayRecord.inflate(record_b, children={"123": RecordDict()})
