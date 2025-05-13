@@ -187,7 +187,7 @@ def prepare_dataset(partition_id: int, num_partitions: int,  max_drop:int, total
             )
             if trainset_ is clientsets[-1]:
          # Special behavior for the server
-              client_train, dropped, num_classes_cl = filter_training_labels(9,client_train, random_drop=False, max_drop=max_drop, logger=logger )
+              client_train, dropped, num_classes_cl = filter_training_labels(idx,client_train, random_drop=False, max_drop=max_drop, logger=logger )
             else:     
               client_train, dropped, num_classes_cl = filter_training_labels(idx,client_train, random_drop=True, max_drop=max_drop, logger=logger )
        
