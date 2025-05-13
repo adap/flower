@@ -413,8 +413,8 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         unique_arrays = set(array_refs.values())
         if unique_arrays != set(children.keys()):
             raise ValueError(
-                "Unexpected number of `children`. "
-                f"Expected {len(unique_arrays)} but got {len(children)}."
+                "Unexpected set of `children`. "
+                f"Expected {unique_arrays} but got {children}."
             )
 
         # Ensure children are of type Array
