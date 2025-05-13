@@ -34,7 +34,7 @@ class InflatableObject:
 
     @classmethod
     def inflate(
-        cls, object_content: bytes, children: dict[str, InflatableObject]
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
     ) -> InflatableObject:
         """Inflate the object from bytes.
 
@@ -43,9 +43,10 @@ class InflatableObject:
         object_content : bytes
             The deflated object content.
 
-        children : dict[str, InflatableObject]
-            Dictionary of children InflatableObjects mapped to thier Object IDs. These
-            children enable the full inflation of the parent InflatableObject.
+        children : Optional[dict[str, InflatableObject]]
+            Dictionary of children InflatableObjects mapped to their Object IDs. These
+            childrens enable the full inflation of the parent InflatableObject.
+            Default None.
 
         Returns
         -------
@@ -60,9 +61,9 @@ class InflatableObject:
         return get_object_id(self.deflate())
 
     @property
-    def children(self) -> dict[str, InflatableObject]:
-        """Get all child objects as a dictionary."""
-        return {}
+    def children(self) -> dict[str, InflatableObject] | None:
+        """Get all child objects as a dictionary or None if ther are none."""
+        return None
 
 
 def get_object_id(object_content: bytes) -> str:
