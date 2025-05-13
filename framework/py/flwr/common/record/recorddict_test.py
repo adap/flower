@@ -15,6 +15,7 @@
 """RecordDict tests."""
 
 
+import json
 import pickle
 from collections import OrderedDict
 from copy import deepcopy
@@ -611,9 +612,15 @@ def test_metric_and_config_record_deflate_and_inflate(
                     }
                 ),
                 "a": ArrayRecord([np.array([1, 2]), np.array([3, 4])]),
-            }
+            }  # All types of supported records
         ),
-        ({}),
+        ({}),  # No records
+        (
+            {
+                "a": MetricRecord({"a": 123, "b": [0.123, 0.456]}),
+                "b": MetricRecord({"a": 123, "b": [0.123, 0.456]}),
+            }
+        ),  # Identical records under different key
     ],
 )
 def test_recorddict_deflate_and_inflate(
@@ -623,8 +630,8 @@ def test_recorddict_deflate_and_inflate(
     record = RecordDict(records)
 
     # Assert
-    # RecordDict has many children as record passed
-    assert len(record.children) == len(records)
+    # Expected children
+    assert record.children == {rec.object_id: rec for rec in records.values()}
 
     record_b = record.deflate()
 
@@ -633,8 +640,10 @@ def test_recorddict_deflate_and_inflate(
     assert (
         get_object_type_from_object_content(record_b) == record.__class__.__qualname__
     )
-    # Body of deflfated Array matches its direct protobuf serialization
-    # assert get_object_body(record_b, RecordDict) == proto_conversion_fn(record)
+    # Body of deflfated RecordDict matches its direct protobuf serialization
+    record_refs = {name: rec.object_id for name, rec in record.items()}
+    record_refs_enc = json.dumps(record_refs).encode("utf-8")
+    assert get_object_body(record_b, RecordDict) == record_refs_enc
 
     # Inflate
     record_ = RecordDict.inflate(record_b, record.children)
@@ -647,18 +656,21 @@ def test_recorddict_deflate_and_inflate(
 def test_recorddict_raises_value_error_with_unsupported_children() -> None:
     """Test that inflating a RecordDict raises a ValueError with unsupported
     Children."""
-    record = RecordDict({"a": ConfigRecord()})
-    record_b = record.deflate()
+    record_dict = RecordDict({"a": ConfigRecord()})
+    record_dict_b = record_dict.deflate()
 
     # Assert
     # Inflate but passing unexpected number of children (but of correct type)
     with pytest.raises(ValueError):
         ArrayRecord.inflate(
-            record_b, children={"123": ConfigRecord(), "456": MetricRecord()}
+            record_dict_b, children={"123": ConfigRecord(), "456": MetricRecord()}
         )
     # Inflate but passing no children
     with pytest.raises(ValueError):
-        ArrayRecord.inflate(record_b)
+        ArrayRecord.inflate(record_dict_b)
     # Inflate but passing unsupported children type
     with pytest.raises(ValueError):
-        ArrayRecord.inflate(record_b, children={"123": RecordDict()})
+        ArrayRecord.inflate(record_dict_b, children={"123": RecordDict()})
+    # Inflate but passing expected children value but under the wrong key
+    with pytest.raises(ValueError):
+        ArrayRecord.inflate(record_dict_b, children={"123": ConfigRecord()})

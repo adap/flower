@@ -332,10 +332,12 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
         obj_body = get_object_body(object_content, cls)
         record_refs: dict[str, str] = json.loads(obj_body.decode(encoding="utf-8"))
 
-        if len(record_refs) != len(children):
+        unique_records = set(record_refs.values())
+        children_obj_ids = set(children.keys())
+        if unique_records != children_obj_ids:
             raise ValueError(
-                "Unexpected number of `children`. "
-                f"Expected {len(record_refs)} but got {len(children)}."
+                "Unexpected set of `children`. "
+                f"Expected {unique_records} but got {children_obj_ids}."
             )
 
         # Ensure children are one of the *Record objects exepecte in a RecordDict
