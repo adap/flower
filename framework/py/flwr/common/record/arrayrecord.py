@@ -411,10 +411,11 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         array_refs: dict[str, str] = json.loads(obj_body.decode(encoding="utf-8"))
 
         unique_arrays = set(array_refs.values())
-        if unique_arrays != set(children.keys()):
+        children_obj_ids = set(children.keys())
+        if unique_arrays != children_obj_ids:
             raise ValueError(
                 "Unexpected set of `children`. "
-                f"Expected {unique_arrays} but got {children}."
+                f"Expected {unique_arrays} but got {children_obj_ids}."
             )
 
         # Ensure children are of type Array
