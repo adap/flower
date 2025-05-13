@@ -15,6 +15,7 @@
 
 package ai.flower.intelligence
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -187,3 +188,9 @@ internal data class ModelData(
   val created: Int,
   @SerialName("owned_by") val ownedBy: String,
 )
+
+@Serializable
+data class SubmitClientPublicKeyResponse(val expiresAt: Instant, val encryptionId: String)
+
+@Serializable
+data class GetServerPublicKeyResponse(val publicKeyEncoded: String, val expiresAt: Instant)
