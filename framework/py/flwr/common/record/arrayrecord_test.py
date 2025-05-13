@@ -380,7 +380,8 @@ class TestArrayRecord(unittest.TestCase):
 
     def test_inflation_with_unsupported_children(self) -> None:
         """Test inflation of an ArrayRecord when children are not Arrays."""
-        arr_rec = ArrayRecord([np.array(5)])
+        arr = np.array(5)
+        arr_rec = ArrayRecord([arr])
 
         # Deflate
         arr_rec_b = arr_rec.deflate()
@@ -392,6 +393,9 @@ class TestArrayRecord(unittest.TestCase):
         # Inflate but passing wrong Children type
         with pytest.raises(ValueError):
             ArrayRecord.inflate(arr_rec_b, children={"123": np.array(5)})  # type: ignore
+        # Inflate but passing children with wrong Object ID
+        with pytest.raises(ValueError):
+            ArrayRecord.inflate(arr_rec_b, children={"123": Array(arr)})
 
 
 @pytest.mark.parametrize(
