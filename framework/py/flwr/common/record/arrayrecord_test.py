@@ -335,6 +335,7 @@ class TestArrayRecord(unittest.TestCase):
             ([np.array([1, 2]), np.array([3, 4])],),  # Two arrays
             ([np.array(5)],),  # Single array
             ([],),  # Empty list
+            ([np.array(5), np.array(5)],),  # Same array twice
         ]
     )
     def test_inflation_deflation(self, array_content) -> None:
