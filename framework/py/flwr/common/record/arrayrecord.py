@@ -369,7 +369,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
 
     @property
     def children(self) -> dict[str, InflatableObject]:
-        """Return a dict of Arrays with their Object IDs as keys."""
+        """Return a dictionary of Arrays with their Object IDs as keys."""
         return {arr.object_id: arr for arr in self.values()}
 
     def deflate(self) -> bytes:
@@ -396,7 +396,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
             The deflated object content of the ArrayRecord.
 
         children : dict[str, InflatableObject]
-            Dict of children InflatableObjects mapped to thier Object ID.
+            Dictionary of children InflatableObjects mapped to thier Object IDs.
             These children enable the full inflation of the ArrayRecord.
 
         Returns
