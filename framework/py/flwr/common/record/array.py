@@ -276,8 +276,8 @@ class Array(InflatableObject):
             The deflated object content of the Array.
 
         children : Optional[dict[str, InflatableObject]] (default: None)
-            Must be None. Arrays do not support child objects.
-            Providing any children will raise a ValueError.
+            Must be ``None``. ``Array`` does not support child objects.
+            Providing any children will raise a ``ValueError``.
 
         Returns
         -------
