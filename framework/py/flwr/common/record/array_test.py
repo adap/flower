@@ -173,6 +173,11 @@ class TestArray(unittest.TestCase):
     def test_deflate_and_inflate(self) -> None:
         """Ensure an Array can be (de)inflated correctly."""
         arr = Array(np.random.randn(5, 5))
+
+        # Assert
+        # Array has no children
+        assert arr.children is None
+
         arr_b = arr.deflate()
 
         # Assert
@@ -187,3 +192,7 @@ class TestArray(unittest.TestCase):
         # Assert
         # Both objects are identical
         assert arr.object_id == arr_.object_id
+
+        # Assert
+        # Inflate passing children raises ValueError
+        self.assertRaises(ValueError, Array.inflate, arr_b, children={"123": arr})
