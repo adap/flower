@@ -316,7 +316,7 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
         object_content : bytes
             The deflated object content of the RecordDict.
 
-        children : Optional[dict[str, InflatableObject]]
+        children : Optional[dict[str, InflatableObject]]  (default: None)
             Dictionary of children InflatableObjects mapped to their Object IDs.
             These children enable the full inflation of the RecordDict. Default is None.
 
@@ -326,10 +326,7 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
             The inflated RecordDict.
         """
         if children is None:
-            raise ValueError(
-                "`RecordDict` children cannot be None. It must be a dictionary of "
-                "with values of type `ArrayRecord`, `ConfigRecord` or `MetricRecord`."
-            )
+            children = {}
 
         # Inflate mapping of record_names (keys in the RecordDict) to Record' object IDs
         obj_body = get_object_body(object_content, cls)
