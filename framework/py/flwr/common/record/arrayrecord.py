@@ -397,7 +397,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
 
         children : Optional[dict[str, InflatableObject]] (default: None)
             Dictionary of children InflatableObjects mapped to their Object IDs.
-            These children enable the full inflation of the ArrayRecord. Default None.
+            These children enable the full inflation of the ArrayRecord.
 
         Returns
         -------
@@ -405,10 +405,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
             The inflated ArrayRecord.
         """
         if children is None:
-            raise ValueError(
-                "`ArrayRecord` children cannot be None. It must be a dictionary of "
-                "`Array` objects."
-            )
+            children = {}
 
         # Inflate mapping of array_names (keys in the ArrayRecord) to Arrays' object IDs
         obj_body = get_object_body(object_content, cls)
