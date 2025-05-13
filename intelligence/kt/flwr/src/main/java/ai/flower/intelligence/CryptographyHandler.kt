@@ -15,25 +15,25 @@
 
 package ai.flower.intelligence
 
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
+import io.ktor.client.HttpClient
 import java.security.*
-import java.security.spec.*
-import java.time.Instant
+import java.security.spec.ECGenParameterSpec
+import java.security.spec.X509EncodedKeySpec
 import java.util.*
-import javax.crypto.*
-import javax.crypto.interfaces.DHPublicKey
+import javax.crypto.Cipher
+import javax.crypto.KeyAgreement
+import javax.crypto.Mac
+import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
+import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 class CryptographyHandler(
   private val serverUrl: String,
-  private val apiKey: String
+  private val apiKey: String,
+  private val client: HttpClient,
 ) {
   private val keyPair: KeyPair
   private var sharedSecret: SecretKey
@@ -43,16 +43,16 @@ class CryptographyHandler(
 
   init {
     keyPair = generateECKeyPair()
-    val submitResponse = runBlocking {
-      submitClientPublicKey(keyPair.public)
-    }
+    val submitResponse = runBlocking { submitClientPublicKey(keyPair.public) }
     encryptionId = submitResponse.encryptionId
     encryptionIdExpiresAt = submitResponse.expiresAt
-    val serverResponse = runBlocking {
-      getServerPublicKey()
-    }
+    val serverResponse = runBlocking { getServerPublicKey() }
     serverPublicKeyExpiresAt = serverResponse.expiresAt
-    sharedSecret = deriveSharedSecret(keyPair.private, serverResponse.publicKeyEncoded)
+    sharedSecret =
+      deriveSharedSecret(
+        keyPair.private,
+        Base64.getDecoder().decode(serverResponse.publicKeyEncoded),
+      )
   }
 
   private fun generateECKeyPair(): KeyPair {
@@ -61,44 +61,24 @@ class CryptographyHandler(
     return keyGen.generateKeyPair()
   }
 
-  private suspend fun submitClientPublicKey(publicKey: PublicKey): SubmitClientPublicKeyResponse =
-    withContext(Dispatchers.IO) {
-      val publicKeyEncoded = Base64.getEncoder().encodeToString(publicKey.encoded)
-      val payload = JSONObject().put("public_key_base64", publicKeyEncoded)
-      val request = HttpRequest.newBuilder()
-        .uri(URI.create("$serverUrl/encryption/public-key"))
-        .header("Authorization", "Bearer $apiKey")
-        .header("Content-Type", "application/json")
-        .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
-        .build()
-      val response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString())
-      if (response.statusCode() != 200) {
-        throw Exception("Failed to submit client public key")
-      }
-      val json = JSONObject(response.body())
-      SubmitClientPublicKeyResponse(
-        Instant.parse(json.getString("expires_at")),
-        json.getString("encryption_id")
-      )
-    }
+  private suspend fun submitClientPublicKey(publicKey: PublicKey): SubmitClientPublicKeyResponse {
+    val publicKeyEncoded = Base64.getEncoder().encodeToString(publicKey.encoded)
+    val payload = mapOf("public_key_base64" to publicKeyEncoded)
+    return NetworkService.postElement(
+      client = client,
+      element = payload,
+      authorization = "Bearer $apiKey",
+      url = "$serverUrl/encryption/public-key",
+    )
+  }
 
-  private suspend fun getServerPublicKey(): GetServerPublicKeyResponse =
-    withContext(Dispatchers.IO) {
-      val request = HttpRequest.newBuilder()
-        .uri(URI.create("$serverUrl/encryption/server-public-key"))
-        .header("Authorization", "Bearer $apiKey")
-        .header("Content-Type", "application/json")
-        .GET()
-        .build()
-      val response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString())
-      if (response.statusCode() != 200) {
-        throw Exception("Failed to get server public key")
-      }
-      val json = JSONObject(response.body())
-      val pubKeyBase64 = json.getString("public_key_base64")
-      val pubKeyBytes = Base64.getDecoder().decode(pubKeyBase64)
-      GetServerPublicKeyResponse(pubKeyBytes, Instant.parse(json.getString("expires_at")))
-    }
+  private suspend fun getServerPublicKey(): GetServerPublicKeyResponse {
+    return NetworkService.getElement(
+      client = client,
+      url = "$serverUrl/encryption/server-public-key",
+      authorization = "Bearer $apiKey",
+    )
+  }
 
   private fun deriveSharedSecret(privateKey: PrivateKey, publicKeyBytes: ByteArray): SecretKey {
     val keyFactory = KeyFactory.getInstance("EC")
@@ -109,9 +89,14 @@ class CryptographyHandler(
     keyAgreement.init(privateKey)
     keyAgreement.doPhase(publicKey, true)
     val secret = keyAgreement.generateSecret()
-
-    // Derive a 256-bit AES key from the shared secret
-    return SecretKeySpec(secret.copyOf(32), "AES")
+    val derivedKey =
+      Hkdf.deriveKey(
+        ikm = secret,
+        salt = ByteArray(32), // You can customize this if needed
+        info = "flower-crypto".toByteArray(), // Optional context info
+        outputLength = 32, // 256-bit AES key
+      )
+    return SecretKeySpec(derivedKey, "AES")
   }
 
   suspend fun encryptMessage(message: String): String {
@@ -138,18 +123,59 @@ class CryptographyHandler(
   }
 
   private suspend fun refreshSharedSecretIfNeeded() {
-    if (serverPublicKeyExpiresAt.isBefore(Instant.now())) {
+    if (serverPublicKeyExpiresAt < Clock.System.now()) {
       val serverResponse = getServerPublicKey()
       serverPublicKeyExpiresAt = serverResponse.expiresAt
-      sharedSecret = deriveSharedSecret(keyPair.private, serverResponse.publicKeyEncoded)
+      sharedSecret =
+        deriveSharedSecret(
+          keyPair.private,
+          Base64.getDecoder().decode(serverResponse.publicKeyEncoded),
+        )
     }
   }
 
   suspend fun refreshEncryptionIdIfNeeded() {
-    if (encryptionIdExpiresAt.isBefore(Instant.now())) {
+    if (encryptionIdExpiresAt < Clock.System.now()) {
       val submitResponse = submitClientPublicKey(keyPair.public)
       encryptionId = submitResponse.encryptionId
       encryptionIdExpiresAt = submitResponse.expiresAt
     }
+  }
+}
+
+object Hkdf {
+  private const val HMAC_ALGORITHM = "HmacSHA256"
+  private const val HASH_LEN = 32 // SHA-256 output size in bytes
+
+  fun deriveKey(
+    ikm: ByteArray,
+    salt: ByteArray = ByteArray(HASH_LEN), // default: zeroes
+    info: ByteArray = ByteArray(0),
+    outputLength: Int = 32,
+  ): ByteArray {
+    // Extract
+    val prk = hmacSha256(salt, ikm)
+
+    // Expand
+    val n = (outputLength + HASH_LEN - 1) / HASH_LEN
+    val result = ByteArray(outputLength)
+    var t = ByteArray(0)
+    var offset = 0
+
+    for (i in 1..n) {
+      val macInput = t + info + byteArrayOf(i.toByte())
+      t = hmacSha256(prk, macInput)
+      val toCopy = minOf(HASH_LEN, outputLength - offset)
+      System.arraycopy(t, 0, result, offset, toCopy)
+      offset += toCopy
+    }
+
+    return result
+  }
+
+  private fun hmacSha256(key: ByteArray, data: ByteArray): ByteArray {
+    val mac = Mac.getInstance(HMAC_ALGORITHM)
+    mac.init(SecretKeySpec(key, HMAC_ALGORITHM))
+    return mac.doFinal(data)
   }
 }
