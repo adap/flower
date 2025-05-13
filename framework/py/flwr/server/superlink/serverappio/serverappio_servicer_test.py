@@ -514,8 +514,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         request = SendAppHeartbeatRequest(run_id=run_id, heartbeat_interval=30)
 
         # Execute
-        with self.assertRaises(grpc.RpcError) as e:
-            self._send_app_heartbeat.with_call(request=request)
+        response, _ = self._send_app_heartbeat.with_call(request=request)
 
         # Assert
-        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert not response.success
