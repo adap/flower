@@ -43,7 +43,7 @@ class InflatableObject:
         object_content : bytes
             The deflated object content.
 
-        children : Optional[dict[str, InflatableObject]]
+        children : Optional[dict[str, InflatableObject]] (default: None)
             Dictionary of children InflatableObjects mapped to their Object IDs. These
             childrens enable the full inflation of the parent InflatableObject.
             Default None.
@@ -62,7 +62,7 @@ class InflatableObject:
 
     @property
     def children(self) -> dict[str, InflatableObject] | None:
-        """Get all child objects as a dictionary or None if ther are none."""
+        """Get all child objects as a dictionary or None if there are no children."""
         return None
 
 
