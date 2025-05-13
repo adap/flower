@@ -394,7 +394,6 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         ----------
         object_content : bytes
             The deflated object content of the ArrayRecord.
-
         children : Optional[dict[str, InflatableObject]] (default: None)
             Dictionary of children InflatableObjects mapped to their Object IDs.
             These children enable the full inflation of the ArrayRecord.
@@ -411,10 +410,11 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         obj_body = get_object_body(object_content, cls)
         array_refs: dict[str, str] = json.loads(obj_body.decode(encoding="utf-8"))
 
-        if len(array_refs) != len(children):
+        unique_arrays = set(array_refs.values())
+        if unique_arrays != set(children.keys()):
             raise ValueError(
-                "Unexpected number of `children`. "
-                f"Expected {len(array_refs)} but got {len(children)}."
+                "Unexpected set of `children`. "
+                f"Expected {unique_arrays} but got {children}."
             )
 
         # Ensure children are of type Array

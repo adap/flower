@@ -335,6 +335,7 @@ class TestArrayRecord(unittest.TestCase):
             ([np.array([1, 2]), np.array([3, 4])],),  # Two arrays
             ([np.array(5)],),  # Single array
             ([],),  # Empty list
+            ([np.array(5), np.array(5)],),  # Same array twice
         ]
     )
     def test_inflation_deflation(self, array_content) -> None:
@@ -343,7 +344,7 @@ class TestArrayRecord(unittest.TestCase):
 
         # Assert
         # Expected children
-        assert len(arr_rec.children) == len(array_content)
+        assert arr_rec.children == {arr.object_id: arr for arr in arr_rec.values()}
 
         arr_rec_b = arr_rec.deflate()
 
@@ -362,7 +363,7 @@ class TestArrayRecord(unittest.TestCase):
         # Assert if children needed but not passed:
         if len(array_content) > 0:
             with pytest.raises(ValueError):
-                ArrayRecord.inflate(arr_rec_b, children={})
+                ArrayRecord.inflate(arr_rec_b)
 
         # Check children
         # Assert if children not computed correctly
@@ -379,7 +380,8 @@ class TestArrayRecord(unittest.TestCase):
 
     def test_inflation_with_unsupported_children(self) -> None:
         """Test inflation of an ArrayRecord when children are not Arrays."""
-        arr_rec = ArrayRecord([np.array(5)])
+        arr = np.array(5)
+        arr_rec = ArrayRecord([arr])
 
         # Deflate
         arr_rec_b = arr_rec.deflate()
@@ -391,6 +393,9 @@ class TestArrayRecord(unittest.TestCase):
         # Inflate but passing wrong Children type
         with pytest.raises(ValueError):
             ArrayRecord.inflate(arr_rec_b, children={"123": np.array(5)})  # type: ignore
+        # Inflate but passing children with wrong Object ID
+        with pytest.raises(ValueError):
+            ArrayRecord.inflate(arr_rec_b, children={"123": Array(arr)})
 
 
 @pytest.mark.parametrize(
