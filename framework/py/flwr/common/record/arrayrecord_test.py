@@ -344,10 +344,7 @@ class TestArrayRecord(unittest.TestCase):
 
         # Assert
         # Expected children
-        # print(len(set(arr.tobytes() for arr in array_content)))
-        assert len(arr_rec.children) == len(
-            {arr.object_id: arr for arr in arr_rec.values()}
-        )
+        assert arr_rec.children == {arr.object_id: arr for arr in arr_rec.values()}
 
         arr_rec_b = arr_rec.deflate()
 
