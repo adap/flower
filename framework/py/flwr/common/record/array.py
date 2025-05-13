@@ -278,6 +278,7 @@ class Array(InflatableObject):
         children : dict[str, InflatableObject]
             Must be an empty dictionary. Arrays do not support child objects.
             Providing any children will raise a ValueError.
+
         Returns
         -------
         Array

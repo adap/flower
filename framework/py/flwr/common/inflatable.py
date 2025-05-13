@@ -61,13 +61,7 @@ class InflatableObject:
 
     @property
     def children(self) -> dict[str, InflatableObject]:
-        """Get all child objects as a dictionary.
-
-        Returns
-        -------
-        dict[str, InflatableObject]
-            A dictionary mapping object IDs to their corresponding child objects.
-        """
+        """Get all child objects as a dictionary."""
         return {}
 
 
