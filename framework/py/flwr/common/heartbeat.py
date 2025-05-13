@@ -77,6 +77,11 @@ class HeartbeatSender:
         self._stop_event.set()
         self._thread.join()
 
+    @property
+    def is_running(self) -> bool:
+        """Return True if the heartbeat sender is running, False otherwise."""
+        return self._thread.is_alive() and not self._stop_event.is_set()
+
     def _run(self) -> None:
         """Periodically send heartbeats until stopped."""
         while not self._stop_event.is_set():
