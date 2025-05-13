@@ -14,6 +14,9 @@
 # ==============================================================================
 """InflatableObject base class."""
 
+
+from __future__ import annotations
+
 import hashlib
 from typing import TypeVar
 
@@ -31,8 +34,8 @@ class InflatableObject:
 
     @classmethod
     def inflate(
-        cls, object_content: bytes, children: dict[str, "InflatableObject"]
-    ) -> "InflatableObject":
+        cls, object_content: bytes, children: dict[str, InflatableObject]
+    ) -> InflatableObject:
         """Inflate the object from bytes.
 
         Parameters
@@ -41,7 +44,7 @@ class InflatableObject:
             The deflated object content.
 
         children : dict[str, InflatableObject]
-            Dict of children InflatableObjects mapped to thier Object ID. These
+            Dictionary of children InflatableObjects mapped to thier Object IDs. These
             children enable the full inflation of the parent InflatableObject.
 
         Returns
@@ -57,8 +60,14 @@ class InflatableObject:
         return get_object_id(self.deflate())
 
     @property
-    def children(self) -> dict[str, "InflatableObject"]:
-        """Return a list of child objects."""
+    def children(self) -> dict[str, InflatableObject]:
+        """Get all child objects as a dictionary.
+
+        Returns
+        -------
+        dict[str, InflatableObject]
+            A dictionary mapping object IDs to their corresponding child objects.
+        """
         return {}
 
 

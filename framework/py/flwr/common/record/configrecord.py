@@ -196,8 +196,8 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
             The deflated object content of the ConfigRecord.
 
         children : dict[str, InflatableObject]
-            Unused. Dict of children InflatableObjects mapped to thier Object ID.
-            These children enable the full inflation of the ConfigRecord
+            Must be an empty dictionary. ConfigRecords do not support child objects.
+            Providing any children will raise a ValueError.
 
         Returns
         -------
