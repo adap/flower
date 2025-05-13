@@ -44,9 +44,8 @@ class InflatableObject:
             The deflated object content.
 
         children : Optional[dict[str, InflatableObject]] (default: None)
-            Dictionary of children InflatableObjects mapped to their Object IDs. These
+            Dictionary of children InflatableObjects mapped to their object IDs. These
             childrens enable the full inflation of the parent InflatableObject.
-            Default None.
 
         Returns
         -------
