@@ -99,6 +99,47 @@ class TestDirichletPartitionerSuccess(unittest.TestCase):
             and len(partitioner._partition_id_to_indices) == num_partitions
         )
 
+    def test__determine_partition_id_to_indices_if_needed_consistency(
+        self,
+    ) -> None:
+        """Test that indices are consistently assigned to partition IDs.
+
+        Partition distributions should be consistent regardless of the ordering of
+        examples in the dataset. This is important to ensure that partitions from train
+        and test partitioners have the same distributions.
+        """
+        num_partitions = 3
+        data = {
+            "features": list(range(100)),
+            "labels": [i % 3 for i in range(100)],
+        }
+
+        dataset1 = Dataset.from_dict(data)
+        partitioner1 = DirichletPartitioner(num_partitions, "labels", 0.5, 10)
+        partitioner1.dataset = dataset1
+        partitioner1.load_partition(0)
+
+        data_reversed = data.copy()
+        data_reversed["features"].reverse()
+        data_reversed["labels"].reverse()
+        dataset2 = Dataset.from_dict(data_reversed)
+        partitioner2 = DirichletPartitioner(num_partitions, "labels", 0.5, 10)
+        partitioner2.dataset = dataset2
+        partitioner2.load_partition(0)
+
+        classes = partitioner1.dataset.unique("labels")
+        for i in range(num_partitions):
+            partition1 = partitioner1.load_partition(i)
+            partition2 = partitioner2.load_partition(i)
+
+            targets1 = np.array(partition1["labels"])
+            targets2 = np.array(partition2["labels"])
+
+            for k in classes:
+                self.assertCountEqual(
+                    np.nonzero(targets1 == k)[0], np.nonzero(targets2 == k)[0]
+                )
+
 
 class TestDirichletPartitionerFailure(unittest.TestCase):
     """Test DirichletPartitioner failures (exceptions) by incorrect usage."""
