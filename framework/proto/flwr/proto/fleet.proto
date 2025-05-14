@@ -43,6 +43,12 @@ service Fleet {
 
   // Get FAB
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
+
+  // Push Object
+  rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
+
+  // Pull Object
+  rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
 }
 
 // CreateNode messages
