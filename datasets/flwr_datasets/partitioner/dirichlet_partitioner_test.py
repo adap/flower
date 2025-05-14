@@ -16,7 +16,6 @@
 
 
 # pylint: disable=W0212
-import random
 import unittest
 from typing import Union
 
@@ -36,10 +35,10 @@ def _dummy_setup(
     self_balancing: bool = True,
 ) -> tuple[Dataset, DirichletPartitioner]:
     """Create a dummy dataset and partitioner for testing."""
-    examples = list(zip(range(num_rows), [i % 3 for i in range(num_rows)]))
-    random.shuffle(examples)
-    features, labels = zip(*examples)
-    data = {partition_by: labels, "features": features}
+    data = {
+        partition_by: [i % 3 for i in range(num_rows)],
+        "features": list(range(num_rows)),
+    }
     dataset = Dataset.from_dict(data)
     partitioner = DirichletPartitioner(
         num_partitions=num_partitions,
@@ -111,11 +110,23 @@ class TestDirichletPartitionerSuccess(unittest.TestCase):
         distributions.
         """
         num_partitions = 3
-        _, partitioner1 = _dummy_setup(num_partitions, 0.5, 50, "labels")
-        _, partitioner2 = _dummy_setup(num_partitions, 0.5, 50, "labels")
+        data = {
+            "features": list(range(100)),
+            "labels": [i % 3 for i in range(100)],
+        }
 
-        _ = partitioner1.load_partition(0)
-        _ = partitioner2.load_partition(0)
+        dataset1 = Dataset.from_dict(data)
+        partitioner1 = DirichletPartitioner(num_partitions, "labels", 0.5, 10)
+        partitioner1.dataset = dataset1
+        partitioner1.load_partition(0)
+
+        data_reversed = data.copy()
+        data_reversed["features"].reverse()
+        data_reversed["labels"].reverse()
+        dataset2 = Dataset.from_dict(data_reversed)
+        partitioner2 = DirichletPartitioner(num_partitions, "labels", 0.5, 10)
+        partitioner2.dataset = dataset2
+        partitioner2.load_partition(0)
 
         classes = partitioner1.dataset.unique(partitioner1._partition_by)
         for i in range(num_partitions):
