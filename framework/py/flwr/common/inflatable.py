@@ -15,6 +15,8 @@
 """InflatableObject base class."""
 
 
+from __future__ import annotations
+
 import hashlib
 from typing import TypeVar
 
@@ -31,13 +33,19 @@ class InflatableObject:
         raise NotImplementedError()
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> "InflatableObject":
+    def inflate(
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
+    ) -> InflatableObject:
         """Inflate the object from bytes.
 
         Parameters
         ----------
         object_content : bytes
             The deflated object content.
+
+        children : Optional[dict[str, InflatableObject]] (default: None)
+            Dictionary of children InflatableObjects mapped to their object IDs. These
+            childrens enable the full inflation of the parent InflatableObject.
 
         Returns
         -------
@@ -50,6 +58,11 @@ class InflatableObject:
     def object_id(self) -> str:
         """Get object_id."""
         return get_object_id(self.deflate())
+
+    @property
+    def children(self) -> dict[str, InflatableObject] | None:
+        """Get all child objects as a dictionary or None if there are no children."""
+        return None
 
 
 def get_object_id(object_content: bytes) -> str:
