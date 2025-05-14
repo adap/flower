@@ -64,6 +64,12 @@ service ServerAppIo {
   // Heartbeat
   rpc SendAppHeartbeat(SendAppHeartbeatRequest)
       returns (SendAppHeartbeatResponse) {}
+
+  // Push Object
+  rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
+
+  // Pull Object
+  rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
 }
 
 // GetNodes messages
