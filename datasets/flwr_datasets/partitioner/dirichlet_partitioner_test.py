@@ -104,10 +104,9 @@ class TestDirichletPartitionerSuccess(unittest.TestCase):
     ) -> None:
         """Test that indices are consistently assigned to partition IDs.
 
-        Partition distributions should be consistent regardless of the
-        ordering of examples in the dataset. This is important to ensure
-        that partitions from train and test partitioners have the same
-        distributions.
+        Partition distributions should be consistent regardless of the ordering of
+        examples in the dataset. This is important to ensure that partitions from train
+        and test partitioners have the same distributions.
         """
         num_partitions = 3
         data = {

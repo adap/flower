@@ -18,9 +18,9 @@
 import warnings
 from typing import Optional, Union
 
-import datasets
 import numpy as np
 
+import datasets
 from flwr_datasets.common.typing import NDArrayFloat
 from flwr_datasets.partitioner.partitioner import Partitioner
 
