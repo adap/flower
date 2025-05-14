@@ -128,13 +128,13 @@ class TestDirichletPartitionerSuccess(unittest.TestCase):
         partitioner2.dataset = dataset2
         partitioner2.load_partition(0)
 
-        classes = partitioner1.dataset.unique(partitioner1._partition_by)
+        classes = partitioner1.dataset.unique("labels")
         for i in range(num_partitions):
             partition1 = partitioner1.load_partition(i)
             partition2 = partitioner2.load_partition(i)
 
-            targets1 = np.array(partition1[partitioner1._partition_by])
-            targets2 = np.array(partition2[partitioner2._partition_by])
+            targets1 = np.array(partition1["labels"])
+            targets2 = np.array(partition2["labels"])
 
             for k in classes:
                 self.assertCountEqual(
