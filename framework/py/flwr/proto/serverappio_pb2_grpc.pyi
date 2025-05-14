@@ -6,6 +6,7 @@ import abc
 import flwr.proto.fab_pb2
 import flwr.proto.heartbeat_pb2
 import flwr.proto.log_pb2
+import flwr.proto.message_pb2
 import flwr.proto.run_pb2
 import flwr.proto.serverappio_pb2
 import grpc
@@ -71,6 +72,16 @@ class ServerAppIoStub:
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse]
     """Heartbeat"""
+
+    PushObject: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.message_pb2.PushObjectRequest,
+        flwr.proto.message_pb2.PushObjectResponse]
+    """Push Object"""
+
+    PullObject: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.message_pb2.PullObjectRequest,
+        flwr.proto.message_pb2.PullObjectResponse]
+    """Pull Object"""
 
 
 class ServerAppIoServicer(metaclass=abc.ABCMeta):
@@ -168,6 +179,22 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse:
         """Heartbeat"""
+        pass
+
+    @abc.abstractmethod
+    def PushObject(self,
+        request: flwr.proto.message_pb2.PushObjectRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.message_pb2.PushObjectResponse:
+        """Push Object"""
+        pass
+
+    @abc.abstractmethod
+    def PullObject(self,
+        request: flwr.proto.message_pb2.PullObjectRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.message_pb2.PullObjectResponse:
+        """Pull Object"""
         pass
 
 

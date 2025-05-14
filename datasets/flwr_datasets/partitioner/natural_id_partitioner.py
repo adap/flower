@@ -70,7 +70,7 @@ class NaturalIdPartitioner(Partitioner):
 
         Natural ids come from the column specified in `partition_by`.
         """
-        unique_natural_ids = self.dataset.unique(self._partition_by)
+        unique_natural_ids = sorted(self.dataset.unique(self._partition_by))
         self._partition_id_to_natural_id = dict(
             zip(range(len(unique_natural_ids)), unique_natural_ids)
         )

@@ -105,5 +105,24 @@ def _get_object_body(object_content: bytes) -> bytes:
 
 def get_object_type_from_object_content(object_content: bytes) -> str:
     """Return object type from bytes."""
-    obj_head: str = _get_object_head(object_content).decode(encoding="utf-8")
-    return obj_head.split(TYPE_BODY_LEN_DIVIDER, 1)[0]
+    return get_object_head_values_from_object_content(object_content)[0]
+
+
+def get_object_body_len_from_object_content(object_content: bytes) -> int:
+    """Return length of the object body."""
+    return get_object_head_values_from_object_content(object_content)[1]
+
+
+def check_body_len_consistency(object_content: bytes) -> bool:
+    """Check that the object body is of length as specified in the head."""
+    body_len = get_object_body_len_from_object_content(object_content)
+    return body_len == len(_get_object_body(object_content))
+
+
+def get_object_head_values_from_object_content(
+    object_content: bytes,
+) -> tuple[str, int]:
+    """Return object type and body length from object content."""
+    head = _get_object_head(object_content).decode(encoding="utf-8")
+    obj_type, body_len = head.split(TYPE_BODY_LEN_DIVIDER, 1)
+    return obj_type, int(body_len)
