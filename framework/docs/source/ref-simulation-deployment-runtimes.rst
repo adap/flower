@@ -1,24 +1,36 @@
+:og:description: Flower simulation versus deployment runtime
+.. meta::
+    :description: Flower simulation versus deployment runtime
+
 Simulation vs. Deployment Runtime
 =================================
 
 From both a developer and user experience perspective, the only change required when
-moving from a simulated to a real-world Flower federation is updating the federation
-address. Applications developed using the Flower simulation engine can be seamlessly
-deployed in a real-world federation by simply pointing to the appropriate ``SuperLink``
-endpoint. Additionally, the Flower CLI remains the same across both environments,
-ensuring a smooth transition without the need for additional configuration or tooling
-changes. The following table outlines the key characteristics that differentiate
-simulated Flower federations from deployed ones.
+moving from a simulated to a real-world Flower federation is to set the correct
+federation address pointing to a SuperLink deployed either in a `simulation
+<how-to-run-simulations.html>`_ or `deployment
+<how-to-run-flower-with-deployment-engine.html>`_ runtime. In this way, the same
+application developed using the Flower simulation runtime can be directly deployed to a
+real-world federation. Additionally, the Flower CLI remains the same across both
+environments, ensuring a smooth transition without the need for additional configuration
+or tooling changes. The following table outlines the key characteristics that
+differentiate simulated Flower federations from deployed ones.
 
-.. list-table:: Comparing Simulation to Deployment Runtime
-    :widths: 25 25 50
+.. note::
+
+    Please see the following resources for more information regarding the overall
+    `Flower Architecture <explanation-flower-architecture.html>`_ and `Network
+    Communication <ref-flower-network-communication.html>`_.
+
+.. list-table::
+    :widths: 15 25 25
     :header-rows: 1
 
     - - Dimension
       - Simulation Runtime
       - Deployment Runtime
     - - **Lifecycle Stage**
-      - Ideal for quick prototype testing, algorithm validation, research, debugging,
+      - Ideal for rapid prototyping, algorithm validation, research, debugging, and
         experimentation
       - Deploy validated use cases in production, real-world privacy-preserving
         applications
@@ -26,28 +38,31 @@ simulated Flower federations from deployed ones.
       - Local, standalone, controlled
       - Distributed, remote
     - - **Data**
-      - Simulated, e.g., academic sources or artificially generated
-      - Real client-side data, residing on physical devices
-    - - **Backed**
-      - Multiple ``Python`` processes/workers coordinated using ``Ray``
-      - Multiple independent processes or subprocesses deployed through the
-        ``SuperLink`` and ``SuperNode`` services
+      - Simulated, e.g., academic sources or artificially generated - a natural fit for
+        `Flower Datasets <https://flower.ai/docs/datasets/>`_
+      - Real client-side data, residing on local databases or filesystems
+    - - **Backend**
+      - Multiple ``Python`` processes/workers coordinated using `Ray
+        <https://docs.ray.io/>`_
+      - Multiple independent processes or subprocesses deployed through the SuperLink
+        and SuperNode services
     - - **Execution Mode**
       - Parallelized or concurrent worker execution mode depending on the available
         resources of the simulated environment
-      - Parallel execution mode across a network of physical machines/devices
+      - Parallel execution mode across a network of physical machines/devices or
+        computing environment
     - - **Communication**
-      - Managed via ``Python`` APIs
-      - Managed through Flower Deployment Runtime, ``Docker``, ``Kubernetes``, ``Helm``
-        charts
-    - - **Server**
+      - Managed via in-memory communication
+      - Managed through Flower Deployment Runtime, ``Docker``, ``Kubernetes``, ``Helm``,
+        charts, ``TLS-enabled gRPC``
+    - - **Server-side**
       - A ``ServerApp`` process initialized inside a controlled environment,
         coordinating multiple simulated clients
-      - Runs independently on a machine through the ``SuperLink`` service, which
-        coordinates physically distributed ``SuperNode``\s over a network. The
-        communication takes place over ``gRPC`` via the ``ServerAppIO``, ``Exec``,
-        ``Fleet``, and ``ClientAppIO API``\s.
-    - - **Client(s)**
+      - Runs independently on a machine through the SuperLink service, the communication
+        takes place over ``gRPC`` via the ``ServerAppIO``, ``Exec``, ``Fleet``, and
+        ``ClientAppIO API``\s
+    - - **Client-side**
       - Simulated ``ClientApp`` processes initialized inside a controlled environment
-      - Initialized as ``ClientApp`` process or subprocess connected to independent
-        ``SuperNode`` instances via the ``ClientAppIo API``
+      - Initialized as ``ClientApp`` `process or subprocess
+        <ref-flower-network-communication.html>`_ connected to independent SuperNode
+        instances via the ``ClientAppIo API``
