@@ -188,8 +188,8 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             heartbeat_fn = get_grpc_app_heartbeat_fn(
                 grid._stub,
                 run.run_id,
-                failure_message="Heartbeat failed unexpectedly. The SuperLink could not "
-                "find the provided run ID, or the run status is invalid.",
+                failure_message="Heartbeat failed unexpectedly. The SuperLink could "
+                "not find the provided run ID, or the run status is invalid.",
             )
             heartbeat_sender = HeartbeatSender(heartbeat_fn)
             heartbeat_sender.start()
