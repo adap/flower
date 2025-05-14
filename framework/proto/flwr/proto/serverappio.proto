@@ -59,6 +59,12 @@ service ServerAppIo {
 
   // Push ServerApp logs
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
+
+  // Push Object
+  rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
+
+  // Pull Object
+  rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
 }
 
 // GetNodes messages
