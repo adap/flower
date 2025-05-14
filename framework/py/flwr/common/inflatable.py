@@ -107,3 +107,10 @@ def get_object_type_from_object_content(object_content: bytes) -> str:
     """Return object type from bytes."""
     obj_head: str = _get_object_head(object_content).decode(encoding="utf-8")
     return obj_head.split(TYPE_BODY_LEN_DIVIDER, 1)[0]
+
+
+def check_body_len_consistency(object_content: bytes) -> bool:
+    """Check that the object body is of length as specified in the head."""
+    head = _get_object_head(object_content)
+    body_len = head.decode(encoding="utf-8").split(TYPE_BODY_LEN_DIVIDER, 1)[1]
+    return int(body_len) == len(_get_object_body(object_content))

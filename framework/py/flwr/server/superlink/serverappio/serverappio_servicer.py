@@ -24,6 +24,7 @@ import grpc
 
 from flwr.common import ConfigRecord, Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
+from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -373,6 +374,10 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushObjectResponse:
         """Push an object to the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PushObject")
+
+        if not check_body_len_consistency(request.object_content):
+            # Cancel insertion in ObjectStore
+            context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
 
         return PushObjectResponse()
 

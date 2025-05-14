@@ -32,6 +32,10 @@ from flwr.common.serde import context_to_proto, message_from_proto, run_status_t
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PushObjectRequest,
+    PushObjectResponse,
+)
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
@@ -148,6 +152,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.ServerAppIo/UpdateRunStatus",
             request_serializer=UpdateRunStatusRequest.SerializeToString,
             response_deserializer=UpdateRunStatusResponse.FromString,
+        )
+        self._push_object = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PushObject",
+            request_serializer=PushObjectRequest.SerializeToString,
+            response_deserializer=PushObjectResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -477,3 +486,24 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             self._update_run_status.with_call(request=request)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
         assert e.exception.details() == self.status_to_msg[run_status.status]
+
+    def test_push_object(self) -> None:
+        """Test `PushObject`."""
+        # Prepare
+        obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
+        obj_b = obj.deflate()
+
+        # Execute
+        req = PushObjectRequest(object_id=obj.object_id, object_content=obj_b)
+        res: PushObjectResponse = self._push_object(request=req)
+
+        # Empty response
+        assert res == PushObjectResponse()
+
+        # Create invalid object_content
+        obj_b_ = obj_b + b"extra content"
+        # Execute
+        req = PushObjectRequest(object_id=obj.object_id, object_content=obj_b_)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
