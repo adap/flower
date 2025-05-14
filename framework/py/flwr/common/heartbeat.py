@@ -122,7 +122,7 @@ def get_grpc_app_heartbeat_fn(
     *,
     failure_message: str,
 ) -> Callable[[], bool]:
-    """Get the function to sends a heartbeat to gRPC endpoint.
+    """Get the function to send a heartbeat to gRPC endpoint.
 
     This function is for app heartbeats only. It is not used for node heartbeats.
 
