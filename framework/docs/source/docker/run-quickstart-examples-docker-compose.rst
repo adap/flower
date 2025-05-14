@@ -37,13 +37,13 @@ Run the Quickstart Example
             && rm -rf flower && cd quickstart-pytorch
 
 2. Download the `compose.yml
-   <https://github.com/adap/flower/blob/main/src/docker/complete/compose.yml>`_ file
-   into the example directory:
+   <https://github.com/adap/flower/blob/main/framework/docker/complete/compose.yml>`_
+   file into the example directory:
 
    .. code-block:: bash
        :substitutions:
 
-       $ curl https://raw.githubusercontent.com/adap/flower/refs/tags/v|stable_flwr_version|/src/docker/complete/compose.yml \
+       $ curl https://raw.githubusercontent.com/adap/flower/refs/tags/v|stable_flwr_version|/framework/docker/complete/compose.yml \
            -o compose.yml
 
 3. Export the version of Flower that your environment uses. Then, build and start the
