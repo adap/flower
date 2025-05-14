@@ -30,6 +30,7 @@ from .inflatable import (
     add_header_to_object_body,
     check_body_len_consistency,
     get_object_body,
+    get_object_body_len_from_object_content,
     get_object_id,
     get_object_type_from_object_content,
 )
@@ -133,6 +134,9 @@ def test_check_body_length() -> None:
     data = b"this is a test"
     obj = CustomDataClass(data)
     obj_b = obj.deflate()
+
+    # Body length is measured correctly
+    assert get_object_body_len_from_object_content(obj_b) == len(data)
 
     # Consistent: passes
     assert check_body_len_consistency(obj_b)
