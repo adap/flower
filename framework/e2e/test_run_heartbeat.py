@@ -2,6 +2,7 @@
 
 import json
 import subprocess
+import sys
 import time
 
 import tomli
@@ -23,6 +24,7 @@ def add_e2e_federation() -> None:
     pyproject["tool"]["flwr"]["federations"]["e2e"] = {
         "address": "127.0.0.1:9093",
         "insecure": True,
+        "options": {"num-supernodes": 0},
     }
 
     # Write the updated pyproject.toml file
@@ -30,26 +32,30 @@ def add_e2e_federation() -> None:
         tomli_w.dump(pyproject, f)
 
 
-def run_superlink() -> subprocess.Popen:
+def run_superlink(is_simulation: bool) -> subprocess.Popen:
     """Run the SuperLink."""
+    executor_arg = "flwr.superexec.deployment:executor"
+    if is_simulation:
+        executor_arg = "flwr.superexec.simulation:executor"
     return subprocess.Popen(
         [
             "flower-superlink",
             "--insecure",
             "--database",
             "tmp.db",
+            "--executor",
+            executor_arg,
             "--isolation",
             "process",
         ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
     )
 
 
-def run_server_app_process() -> subprocess.Popen:
-    """Run the server app process."""
+def run_worker_process(is_simulation: bool) -> subprocess.Popen:
+    """Run the flwr-serverapp or flwr-simulation process."""
+    cmd = "flwr-simulation" if is_simulation else "flwr-serverapp"
     return subprocess.Popen(
-        ["flwr-serverapp", "--insecure"],
+        [cmd, "--insecure"],
     )
 
 
@@ -65,7 +71,7 @@ def flwr_run() -> int:
 
     # Parse JSON output and ensure the command succeeded
     data = json.loads(result.stdout)
-    assert data["success"], "flwr run failed"
+    assert data["success"], "flwr run failed\n" + str(data)
 
     # Return the run ID
     return data["run-id"]
@@ -97,20 +103,24 @@ def flwr_ls() -> dict[int, str]:
 
 def main() -> None:
     """."""
+    # Determine if the test is running in simulation mode
+    is_simulation = sys.argv[1] == "simulation" if len(sys.argv) > 1 else False
+    print(f"Running in {'simulation' if is_simulation else 'deployment'} mode.")
+
     # Add e2e federation to pyproject.toml
     add_e2e_federation()
 
     # Start the SuperLink
     print("Starting SuperLink...")
-    superlink_proc = run_superlink()
+    superlink_proc = run_superlink(is_simulation)
 
     # Allow time for SuperLink to start
-    time.sleep(2)
+    time.sleep(4)
 
     # Submit the first run and run the first ServerApp process
     print("Starting the first run and ServerApp process...")
     run_id1 = flwr_run()
-    serverapp_proc = run_server_app_process()
+    serverapp_proc = run_worker_process(is_simulation)
 
     # Brief pause to allow the ServerApp process to initialize
     time.sleep(1)
@@ -118,7 +128,7 @@ def main() -> None:
     # Submit the second run and run the second ServerApp process
     print("Starting the second run and ServerApp process...")
     run_id2 = flwr_run()
-    serverapp_proc2 = run_server_app_process()
+    serverapp_proc2 = run_worker_process(is_simulation)
 
     # Wait up to 6 seconds for both runs to reach RUNNING status
     tic = time.time()
@@ -150,7 +160,7 @@ def main() -> None:
 
     # Restart the SuperLink
     print("Restarting SuperLink...")
-    superlink_proc = run_superlink()
+    superlink_proc = run_superlink(is_simulation)
 
     # Allow time for SuperLink to detect heartbeat failures and update statuses
     tic = time.time()
