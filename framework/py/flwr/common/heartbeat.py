@@ -17,13 +17,14 @@
 
 import random
 import threading
-from typing import Callable
+from typing import Callable, Union
 
 import grpc
 
 # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import SendAppHeartbeatRequest
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 
 # pylint: enable=E0611
 from .constant import (
@@ -116,7 +117,7 @@ class HeartbeatSender:
 
 
 def get_grpc_app_heartbeat_fn(
-    stub: ServerAppIoStub,
+    stub: Union[ServerAppIoStub, SimulationIoStub],
     run_id: int,
     *,
     failure_message: str,
@@ -127,7 +128,7 @@ def get_grpc_app_heartbeat_fn(
 
     Parameters
     ----------
-    stub : ServerAppIoStub
+    stub : Union[ServerAppIoStub, SimulationIoStub]
         gRPC stub to send the heartbeat.
     run_id : int
         The run ID to use in the heartbeat request.

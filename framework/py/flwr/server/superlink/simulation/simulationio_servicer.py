@@ -34,6 +34,10 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import simulationio_pb2_grpc
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendAppHeartbeatRequest,
+    SendAppHeartbeatResponse,
+)
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
     PushLogsResponse,
@@ -184,3 +188,22 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         return GetFederationOptionsResponse(
             federation_options=config_record_to_proto(federation_options)
         )
+
+    def SendAppHeartbeat(
+        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendAppHeartbeatResponse:
+        """Handle a heartbeat from the ServerApp in simulation."""
+        log(DEBUG, "SimultionIoServicer.SendAppHeartbeat")
+
+        # Init state
+        state = self.state_factory.state()
+
+        # Acknowledge the heartbeat
+        # The app heartbeat can only be acknowledged if the run is in
+        # starting or running status.
+        success = state.acknowledge_app_heartbeat(
+            run_id=request.run_id,
+            heartbeat_interval=request.heartbeat_interval,
+        )
+
+        return SendAppHeartbeatResponse(success=success)
