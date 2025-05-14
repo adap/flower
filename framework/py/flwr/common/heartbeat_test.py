@@ -35,16 +35,19 @@ class TestHeartbeatSender(unittest.TestCase):
         """Test that the thread is started and is alive after calling start()."""
         self.heartbeat_sender.start()
         self.assertTrue(self.heartbeat_sender._thread.is_alive())
+        self.assertTrue(self.heartbeat_sender.is_running)
         self.heartbeat_sender.stop()  # Clean up
 
     def test_stop_the_thread(self) -> None:
         """Test that the thread is stopped and not alive after calling stop()."""
         self.heartbeat_sender.start()
         self.assertTrue(self.heartbeat_sender._thread.is_alive())
+        self.assertTrue(self.heartbeat_sender.is_running)
 
         self.heartbeat_sender.stop()
         self.assertFalse(self.heartbeat_sender._thread.is_alive())
         self.assertTrue(self.heartbeat_sender._stop_event.is_set())
+        self.assertFalse(self.heartbeat_sender.is_running)
 
     def test_heartbeat_function_called(self) -> None:
         """Test that the heartbeat function is called."""

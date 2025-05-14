@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-08 00:07+0000\n"
+"POT-Creation-Date: 2025-05-10 00:07+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -10486,9 +10486,12 @@ msgstr "클라이언트(자체)를 반환합니다."
 #: flwr.common.context.Context flwr.common.message.Error
 #: flwr.common.message.Message flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Metadata
-#: flwr.common.record.array.Array flwr.common.record.arrayrecord.ArrayRecord
+#: flwr.common.record.array.Array flwr.common.record.array.Array.inflate
+#: flwr.common.record.arrayrecord.ArrayRecord
 #: flwr.common.record.configrecord.ConfigRecord
+#: flwr.common.record.configrecord.ConfigRecord.inflate
 #: flwr.common.record.metricrecord.MetricRecord
+#: flwr.common.record.metricrecord.MetricRecord.inflate
 #: flwr.common.record.recorddict.RecordDict flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.register
 #: flwr.server.client_manager.ClientManager.unregister
@@ -10546,7 +10549,11 @@ msgstr "서버에서 받은 (전역) 모델 파라미터와 로컬 평가 프로
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
 #: flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply flwr.server.app.start_server
+#: flwr.common.message.Message.create_reply
+#: flwr.common.record.array.Array.inflate
+#: flwr.common.record.configrecord.ConfigRecord.inflate
+#: flwr.common.record.metricrecord.MetricRecord.inflate
+#: flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.num_available
 #: flwr.server.client_manager.ClientManager.register
 #: flwr.server.client_manager.SimpleClientManager.num_available
@@ -10582,7 +10589,11 @@ msgstr "로컬 데이터 세트의 손실 및 평가에 사용된 로컬 데이�
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
 #: flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply flwr.server.app.start_server
+#: flwr.common.message.Message.create_reply
+#: flwr.common.record.array.Array.inflate
+#: flwr.common.record.configrecord.ConfigRecord.inflate
+#: flwr.common.record.metricrecord.MetricRecord.inflate
+#: flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.num_available
 #: flwr.server.client_manager.ClientManager.register
 #: flwr.server.client_manager.SimpleClientManager.num_available
@@ -10640,16 +10651,15 @@ msgstr "현재 클라이언트 속성입니다."
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
 #: flwr.common.context.Context:1 flwr.common.message.Error:1
 #: flwr.common.message.Message:1 flwr.common.message.Metadata:1
-#: flwr.common.record.array.Array:1 flwr.common.typing.ClientMessage:1
-#: flwr.common.typing.DisconnectRes:1 flwr.common.typing.EvaluateIns:1
-#: flwr.common.typing.EvaluateRes:1 flwr.common.typing.FitIns:1
-#: flwr.common.typing.FitRes:1 flwr.common.typing.GetParametersIns:1
-#: flwr.common.typing.GetParametersRes:1 flwr.common.typing.GetPropertiesIns:1
-#: flwr.common.typing.GetPropertiesRes:1 flwr.common.typing.Parameters:1
-#: flwr.common.typing.ReconnectIns:1 flwr.common.typing.ServerMessage:1
-#: flwr.common.typing.Status:1 flwr.server.history.History:1
-#: flwr.server.server.Server:1 flwr.server.server_app.ServerApp:1
-#: flwr.server.server_config.ServerConfig:1
+#: flwr.common.typing.ClientMessage:1 flwr.common.typing.DisconnectRes:1
+#: flwr.common.typing.EvaluateIns:1 flwr.common.typing.EvaluateRes:1
+#: flwr.common.typing.FitIns:1 flwr.common.typing.FitRes:1
+#: flwr.common.typing.GetParametersIns:1 flwr.common.typing.GetParametersRes:1
+#: flwr.common.typing.GetPropertiesIns:1 flwr.common.typing.GetPropertiesRes:1
+#: flwr.common.typing.Parameters:1 flwr.common.typing.ReconnectIns:1
+#: flwr.common.typing.ServerMessage:1 flwr.common.typing.Status:1
+#: flwr.server.history.History:1 flwr.server.server.Server:1
+#: flwr.server.server_app.ServerApp:1 flwr.server.server_config.ServerConfig:1
 #: flwr.server.serverapp_components.ServerAppComponents:1
 #: flwr.server.workflow.default_workflows.DefaultWorkflow:1
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:1
@@ -11377,7 +11387,7 @@ msgstr "공통"
 msgid ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.record.array.Array.from_numpy_ndarray:1
 #: flwr.common.record.conversion_utils.array_from_numpy:1 of
@@ -11900,6 +11910,11 @@ msgstr "클라이언트 상태."
 msgid "Array"
 msgstr "배열"
 
+#: flwr.common.record.array.Array:1 of
+#, fuzzy
+msgid "Bases: :py:class:`~flwr.common.inflatable.InflatableObject`"
+msgstr "Bases: :py:class:`~abc.ABC`"
+
 #: flwr.common.record.array.Array:3 of
 #, fuzzy
 msgid ""
@@ -11987,38 +12002,61 @@ msgstr "Dictionary holding ParametersRecord instances."
 msgid "Initializing with a PyTorch tensor::"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`deflate <flwr.common.Array.deflate>`\\ \\(\\)"
+msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
+
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: flwr.common.record.array.Array.deflate:1 of
+msgid "Deflate the Array."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_numpy_ndarray <flwr.common.Array.from_numpy_ndarray>`\\ "
 "\\(ndarray\\)"
 msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_torch_tensor <flwr.common.Array.from_torch_tensor>`\\ "
 "\\(tensor\\)"
 msgstr ":py:obj:`ndarray_to_bytes <flwr.common.ndarray_to_bytes>`\\ \\(ndarray\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 #: flwr.common.record.array.Array.from_torch_tensor:1 of
 #, fuzzy
 msgid "Create Array from PyTorch tensor."
 msgstr "NumPy에서 배열을 만듭니다."
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`inflate <flwr.common.Array.inflate>`\\ \\(object\\_content\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: flwr.common.record.array.Array.inflate:1 of
+#, fuzzy
+msgid "Inflate an Array from bytes."
+msgstr "바이트에서 NumPy를 역직렬화합니다."
+
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 msgid ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 msgstr ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 #: flwr.common.record.array.Array.numpy:1 of
 msgid "Return the array as a NumPy array."
 msgstr "배열을 NumPy 배열로 반환합니다."
 
-#: ../../source/ref-api/flwr.common.Array.rst:34
+#: ../../source/ref-api/flwr.common.Array.rst:40
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:25
 #: ../../source/ref-api/flwr.common.Code.rst:19
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:61
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:61
 #: ../../source/ref-api/flwr.common.Context.rst:25
 #: ../../source/ref-api/flwr.common.DisconnectRes.rst:25
 #: ../../source/ref-api/flwr.common.Error.rst:25
@@ -12035,6 +12073,8 @@ msgstr "배열을 NumPy 배열로 반환합니다."
 #: ../../source/ref-api/flwr.common.MessageType.rst:25
 #: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:25
 #: ../../source/ref-api/flwr.common.Metadata.rst:25
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:61
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:61
 #: ../../source/ref-api/flwr.common.Parameters.rst:25
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
 #: ../../source/ref-api/flwr.common.RecordDict.rst:52
@@ -12049,21 +12089,42 @@ msgstr "배열을 NumPy 배열로 반환합니다."
 msgid "Attributes"
 msgstr "속성"
 
-#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`object_id <flwr.common.Array.object_id>`\\"
+msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: flwr.common.Array.object_id:1 flwr.common.ConfigRecord.object_id:1
+#: flwr.common.ConfigsRecord.object_id:1 flwr.common.MetricRecord.object_id:1
+#: flwr.common.MetricsRecord.object_id:1
+#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
+msgid "Get object_id."
+msgstr ""
+
+#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
 msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 msgstr ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 
-#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
 msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
 msgstr ":py:obj:`shape <flwr.common.Array.shape>`\\"
 
-#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
 msgid ":py:obj:`stype <flwr.common.Array.stype>`\\"
 msgstr ":py:obj:`stype <flwr.common.Array.stype>`\\"
 
-#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
 msgid ":py:obj:`data <flwr.common.Array.data>`\\"
 msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
+
+#: flwr.common.record.array.Array.inflate:3 of
+msgid "The deflated object content of the Array."
+msgstr ""
+
+#: flwr.common.record.array.Array.inflate:6 of
+msgid "The inflated Array."
+msgstr ""
 
 #: ../../source/ref-api/flwr.common.ArrayRecord.rst:2
 #, fuzzy
@@ -12182,6 +12243,10 @@ msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
 msgid ":py:obj:`count_bytes <flwr.common.ArrayRecord.count_bytes>`\\ \\(\\)"
 msgstr ":py:obj:`count_bytes <flwr.common.ParametersRecord.count_bytes>`\\ \\(\\)"
 
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.count_bytes:1
 #: flwr.common.record.configrecord.ConfigRecord.count_bytes:1
@@ -12252,6 +12317,10 @@ msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
 msgid ":py:obj:`pop <flwr.common.ArrayRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
@@ -12264,6 +12333,10 @@ msgstr "키를 찾을 수 없으면 주어진 경우 d가 반환되고, 그렇�
 msgid ":py:obj:`popitem <flwr.common.ArrayRecord.popitem>`\\ \\(\\)"
 msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
 
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
@@ -12316,6 +12389,10 @@ msgstr ""
 ":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
 #: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1
@@ -12426,7 +12503,8 @@ msgid ""
 " :py:class:`bytes` | :py:class:`bool` | :py:class:`list`\\ "
 "[:py:class:`int`] | :py:class:`list`\\ [:py:class:`float`] | "
 ":py:class:`list`\\ [:py:class:`str`] | :py:class:`list`\\ "
-"[:py:class:`bytes`] | :py:class:`list`\\ [:py:class:`bool`]]"
+"[:py:class:`bytes`] | :py:class:`list`\\ [:py:class:`bool`]], "
+":py:class:`~flwr.common.inflatable.InflatableObject`"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`int` | :py:class:`float` | :py:class:`str` |"
@@ -12485,49 +12563,76 @@ msgid ""
 "(bytes are allowed in a :code:`ConfigRecord`)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`clear <flwr.common.ConfigRecord.clear>`\\ \\(\\)"
 msgstr ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`count_bytes <flwr.common.ConfigRecord.count_bytes>`\\ \\(\\)"
 msgstr ":py:obj:`count_bytes <flwr.common.ConfigsRecord.count_bytes>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`deflate <flwr.common.ConfigRecord.deflate>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: flwr.common.record.configrecord.ConfigRecord.deflate:1
+#: flwr.common.record.metricrecord.MetricRecord.deflate:1 of
+msgid "Deflate object."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.ConfigRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`inflate <flwr.common.ConfigRecord.inflate>`\\ "
+"\\(object\\_content\\)"
+msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: flwr.common.record.configrecord.ConfigRecord.inflate:1 of
+msgid "Inflate a ConfigRecord from bytes."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`items <flwr.common.ConfigRecord.items>`\\ \\(\\)"
 msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`keys <flwr.common.ConfigRecord.keys>`\\ \\(\\)"
 msgstr ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`pop <flwr.common.ConfigRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.ConfigRecord.popitem>`\\ \\(\\)"
 msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.ConfigRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`update <flwr.common.ConfigRecord.update>`\\ \\(\\[E\\, "
@@ -12536,14 +12641,28 @@ msgstr ""
 ":py:obj:`update <flwr.common.ConfigsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`values <flwr.common.ConfigRecord.values>`\\ \\(\\)"
 msgstr ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
 
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`object_id <flwr.common.ConfigRecord.object_id>`\\"
+msgstr ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
+
 #: flwr.common.record.configrecord.ConfigRecord.count_bytes:3 of
 msgid "This function counts booleans as occupying 1 Byte."
 msgstr "이 함수는 booleans을 1바이트를 차지하는 것으로 계산합니다."
+
+#: flwr.common.record.configrecord.ConfigRecord.inflate:3 of
+msgid "The deflated object content of the ConfigRecord."
+msgstr ""
+
+#: flwr.common.record.configrecord.ConfigRecord.inflate:6 of
+#, fuzzy
+msgid "The inflated ConfigRecord."
+msgstr "레코드를 설정합니다."
 
 #: ../../source/ref-api/flwr.common.ConfigsRecord.rst:2
 msgid "ConfigsRecord"
@@ -12582,44 +12701,56 @@ msgstr ""
 msgid "Updated usage::"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
 msgstr ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.ConfigsRecord.count_bytes>`\\ \\(\\)"
 msgstr ":py:obj:`count_bytes <flwr.common.ConfigsRecord.count_bytes>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`deflate <flwr.common.ConfigsRecord.deflate>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`inflate <flwr.common.ConfigsRecord.inflate>`\\ "
+"\\(object\\_content\\)"
+msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
 msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
 msgstr ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.ConfigsRecord.popitem>`\\ \\(\\)"
 msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.ConfigsRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.ConfigsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
@@ -12627,9 +12758,14 @@ msgstr ""
 ":py:obj:`update <flwr.common.ConfigsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
 msgstr ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`object_id <flwr.common.ConfigsRecord.object_id>`\\"
+msgstr ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.Context.rst:2
 msgid "Context"
@@ -14133,7 +14269,8 @@ msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`int` | :py:class:`float` | "
 ":py:class:`list`\\ [:py:class:`int`] | :py:class:`list`\\ "
-"[:py:class:`float`]]"
+"[:py:class:`float`]], "
+":py:class:`~flwr.common.inflatable.InflatableObject`"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`int` | :py:class:`float` | "
@@ -14196,49 +14333,67 @@ msgid ""
 ":code:`ArrayRecord`."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`clear <flwr.common.MetricRecord.clear>`\\ \\(\\)"
 msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`count_bytes <flwr.common.MetricRecord.count_bytes>`\\ \\(\\)"
 msgstr ":py:obj:`count_bytes <flwr.common.MetricsRecord.count_bytes>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`deflate <flwr.common.MetricRecord.deflate>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.MetricRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`inflate <flwr.common.MetricRecord.inflate>`\\ "
+"\\(object\\_content\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: flwr.common.record.metricrecord.MetricRecord.inflate:1 of
+msgid "Inflate a MetricRecord from bytes."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`items <flwr.common.MetricRecord.items>`\\ \\(\\)"
 msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`keys <flwr.common.MetricRecord.keys>`\\ \\(\\)"
 msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`pop <flwr.common.MetricRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.MetricRecord.popitem>`\\ \\(\\)"
 msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.MetricRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`update <flwr.common.MetricRecord.update>`\\ \\(\\[E\\, "
@@ -14247,12 +14402,26 @@ msgstr ""
 ":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`values <flwr.common.MetricRecord.values>`\\ \\(\\)"
 msgstr ""
 ":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`object_id <flwr.common.MetricRecord.object_id>`\\"
+msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
+
+#: flwr.common.record.metricrecord.MetricRecord.inflate:3 of
+msgid "The deflated object content of the MetricRecord."
+msgstr ""
+
+#: flwr.common.record.metricrecord.MetricRecord.inflate:6 of
+#, fuzzy
+msgid "The inflated MetricRecord."
+msgstr "메트릭 기록."
 
 #: ../../source/ref-api/flwr.common.Metrics.rst:2
 #, fuzzy
@@ -14280,44 +14449,56 @@ msgid ""
 "Use ``MetricRecord`` instead."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
 msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.MetricsRecord.count_bytes>`\\ \\(\\)"
 msgstr ":py:obj:`count_bytes <flwr.common.MetricsRecord.count_bytes>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`deflate <flwr.common.MetricsRecord.deflate>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`inflate <flwr.common.MetricsRecord.inflate>`\\ "
+"\\(object\\_content\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
 msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
 msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.MetricsRecord.popitem>`\\ \\(\\)"
 msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.MetricsRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
@@ -14325,11 +14506,16 @@ msgstr ""
 ":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.MetricsRecord.values>`\\ \\(\\)"
 msgstr ""
 ":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
+
+#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`object_id <flwr.common.MetricsRecord.object_id>`\\"
+msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.NDArray.rst:2
 msgid "NDArray"
@@ -30281,7 +30467,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|450f5fd286984c7b9cf26b1cfc7c6c5a|"
+msgid "|40ef7f2f1aaf4bd3a23870efddba5ef3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30298,7 +30484,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|eb64ca89d00a46818780245bef0d9950|"
+msgid "|168960a2078a43858e627edcdecdf75f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30324,7 +30510,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|a711c3264bdb46bdbb9535f668951a9b|"
+msgid "|650e6e01cb3244369e1139f79e60e172|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30342,7 +30528,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|cb0d905bafcf47b3beb2148744af5b90|"
+msgid "|2a0485dfa4d2416f89d8d38a59b3e1db|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -30361,7 +30547,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|41cb4736601f4b4e8da3108fd3fc9dd1|"
+msgid "|6055bb68397e416199c7bc6fda1b11d6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -30378,7 +30564,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|efc7105fab324accadb050560bbb9956|"
+msgid "|9c449256925849b0a2d98406818bb9b6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -30401,7 +30587,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|85b42a41b88a48a08d174ce7fbd133dc|"
+msgid "|709d97d6f114426fb55ff5a136cb8d74|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -30418,7 +30604,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|d05f53bd0b46413aa91b1e7b20eff8af|"
+msgid "|47e82670bcac47099edc2c22937972b4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -30597,7 +30783,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|d96743a5729441ca8baeb9d07ea28337|"
+msgid "|abbc7a56a4024df8a38621445bd95bb5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -30625,7 +30811,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|64c013ad98634d8cab49cace2215b65f|"
+msgid "|5fc71ddcdc79460a9977dfe403be4cc4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -30652,7 +30838,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|fc74b460576e444c85baf34a38f97b20|"
+msgid "|bd8c9bf3c7304cb78b00db6c3f765890|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -30678,7 +30864,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|cfeae6f48fff4571af741752ccb21448|"
+msgid "|313fe723caf843429564a13c3e776013|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -30728,7 +30914,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|2224c9f05174456ea442fda695413392|"
+msgid "|34c0cbcbee5e4926828eed40c64eb293|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -30848,7 +31034,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|6bcc2eed06b24833a7877563ec9f40c7|"
+msgid "|7c405b30c75543d1915c05bebff6313c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -41188,5 +41374,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|d66f63e57bab4d7a9eafcae9a70d238d|"
+#~ msgstr ""
+
+#~ msgid "|450f5fd286984c7b9cf26b1cfc7c6c5a|"
+#~ msgstr ""
+
+#~ msgid "|eb64ca89d00a46818780245bef0d9950|"
+#~ msgstr ""
+
+#~ msgid "|a711c3264bdb46bdbb9535f668951a9b|"
+#~ msgstr ""
+
+#~ msgid "|cb0d905bafcf47b3beb2148744af5b90|"
+#~ msgstr ""
+
+#~ msgid "|41cb4736601f4b4e8da3108fd3fc9dd1|"
+#~ msgstr ""
+
+#~ msgid "|efc7105fab324accadb050560bbb9956|"
+#~ msgstr ""
+
+#~ msgid "|85b42a41b88a48a08d174ce7fbd133dc|"
+#~ msgstr ""
+
+#~ msgid "|d05f53bd0b46413aa91b1e7b20eff8af|"
+#~ msgstr ""
+
+#~ msgid "|d96743a5729441ca8baeb9d07ea28337|"
+#~ msgstr ""
+
+#~ msgid "|64c013ad98634d8cab49cace2215b65f|"
+#~ msgstr ""
+
+#~ msgid "|fc74b460576e444c85baf34a38f97b20|"
+#~ msgstr ""
+
+#~ msgid "|cfeae6f48fff4571af741752ccb21448|"
+#~ msgstr ""
+
+#~ msgid "|2224c9f05174456ea442fda695413392|"
+#~ msgstr ""
+
+#~ msgid "|6bcc2eed06b24833a7877563ec9f40c7|"
 #~ msgstr ""
 

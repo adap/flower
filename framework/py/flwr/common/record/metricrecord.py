@@ -15,12 +15,21 @@
 """MetricRecord."""
 
 
+from __future__ import annotations
+
 from logging import WARN
-from typing import Optional, get_args
+from typing import cast, get_args
 
 from flwr.common.typing import MetricRecordValues, MetricScalar
 
+# pylint: disable=E0611
+from flwr.proto.recorddict_pb2 import MetricRecord as ProtoMetricRecord
+from flwr.proto.recorddict_pb2 import MetricRecordValue as ProtoMetricRecordValue
+
+# pylint: enable=E0611
+from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..logger import log
+from ..serde_utils import record_value_dict_from_proto, record_value_dict_to_proto
 from .typeddict import TypedDict
 
 
@@ -59,7 +68,7 @@ def _check_value(value: MetricRecordValues) -> None:
         is_valid(value)
 
 
-class MetricRecord(TypedDict[str, MetricRecordValues]):
+class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
     """Metric record.
 
     A :code:`MetricRecord` is a Python dictionary designed to ensure that
@@ -117,7 +126,7 @@ class MetricRecord(TypedDict[str, MetricRecordValues]):
 
     def __init__(
         self,
-        metric_dict: Optional[dict[str, MetricRecordValues]] = None,
+        metric_dict: dict[str, MetricRecordValues] | None = None,
         keep_input: bool = True,
     ) -> None:
         super().__init__(_check_key, _check_value)
@@ -142,6 +151,47 @@ class MetricRecord(TypedDict[str, MetricRecordValues]):
             # We also count the bytes footprint of the keys
             num_bytes += len(k)
         return num_bytes
+
+    def deflate(self) -> bytes:
+        """Deflate object."""
+        obj_body = ProtoMetricRecord(
+            data=record_value_dict_to_proto(self, [float, int], ProtoMetricRecordValue)
+        ).SerializeToString(deterministic=True)
+        return add_header_to_object_body(object_body=obj_body, cls=self)
+
+    @classmethod
+    def inflate(
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
+    ) -> MetricRecord:
+        """Inflate a MetricRecord from bytes.
+
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content of the MetricRecord.
+
+        children : Optional[dict[str, InflatableObject]] (default: None)
+            Must be ``None``. ``MetricRecord`` does not support child objects.
+            Providing any children will raise a ``ValueError``.
+
+        Returns
+        -------
+        MetricRecord
+            The inflated MetricRecord.
+        """
+        if children is not None:
+            raise ValueError("`MetricRecord` objects do not have children.")
+
+        obj_body = get_object_body(object_content, cls)
+        metric_record_proto = ProtoMetricRecord.FromString(obj_body)
+
+        return cls(
+            metric_dict=cast(
+                dict[str, MetricRecordValues],
+                record_value_dict_from_proto(metric_record_proto.data),
+            ),
+            keep_input=False,
+        )
 
 
 class MetricsRecord(MetricRecord):
@@ -174,7 +224,7 @@ class MetricsRecord(MetricRecord):
 
     def __init__(
         self,
-        metric_dict: Optional[dict[str, MetricRecordValues]] = None,
+        metric_dict: dict[str, MetricRecordValues] | None = None,
         keep_input: bool = True,
     ):
         if not MetricsRecord._warning_logged:
