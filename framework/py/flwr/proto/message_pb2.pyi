@@ -162,14 +162,11 @@ global___PullObjectRequest = PullObjectRequest
 
 class PullObjectResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    OBJECT_ID_FIELD_NUMBER: builtins.int
     OBJECT_CONTENT_FIELD_NUMBER: builtins.int
-    object_id: typing.Text
     object_content: builtins.bytes
     def __init__(self,
         *,
-        object_id: typing.Text = ...,
         object_content: builtins.bytes = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["object_content",b"object_content","object_id",b"object_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["object_content",b"object_content"]) -> None: ...
 global___PullObjectResponse = PullObjectResponse
