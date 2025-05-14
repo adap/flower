@@ -31,6 +31,10 @@ from flwr.common.constant import (
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendAppHeartbeatRequest,
+    SendAppHeartbeatResponse,
+)
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
@@ -148,6 +152,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.ServerAppIo/UpdateRunStatus",
             request_serializer=UpdateRunStatusRequest.SerializeToString,
             response_deserializer=UpdateRunStatusResponse.FromString,
+        )
+        self._send_app_heartbeat = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/SendAppHeartbeat",
+            request_serializer=SendAppHeartbeatRequest.SerializeToString,
+            response_deserializer=SendAppHeartbeatResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -477,3 +486,35 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             self._update_run_status.with_call(request=request)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
         assert e.exception.details() == self.status_to_msg[run_status.status]
+
+    @parameterized.expand([(1,), (2,)])  # type: ignore
+    def test_successful_send_app_heartbeat(self, num_transitions: int) -> None:
+        """Test `SendAppHeartbeat` success."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Transition status to starting or running.
+        self._transition_run_status(run_id, num_transitions)
+        request = SendAppHeartbeatRequest(run_id=run_id, heartbeat_interval=30)
+
+        # Execute
+        response, call = self._send_app_heartbeat.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, SendAppHeartbeatResponse)
+        assert grpc.StatusCode.OK == call.code()
+        assert response.success
+
+    @parameterized.expand([(0,), (3,)])  # type: ignore
+    def test_send_app_heartbeat_not_successful(self, num_transitions: int) -> None:
+        """Test `SendAppHeartbeat` not successful when status is pending or finished."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Stay in pending or transition to finished
+        self._transition_run_status(run_id, num_transitions)
+        request = SendAppHeartbeatRequest(run_id=run_id, heartbeat_interval=30)
+
+        # Execute
+        response, _ = self._send_app_heartbeat.with_call(request=request)
+
+        # Assert
+        assert not response.success
