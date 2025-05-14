@@ -37,7 +37,7 @@ Run the Quickstart Example
             && rm -rf flower && cd quickstart-pytorch
 
 2. Download the `compose.yml
-   <https://github.com/adap/flower/tree/main/framework/docker/complete/compose.yml>`_
+   <https://github.com/adap/flower/blob/main/framework/docker/complete/compose.yml>`_
    file into the example directory:
 
    .. code-block:: bash
