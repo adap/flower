@@ -139,5 +139,5 @@ def test_check_body_length() -> None:
 
     # Extend content artificially
     obj_b_ = obj_b + b"more content"
-    # Inconsistent: failss
+    # Inconsistent: fails
     assert not check_body_len_consistency(obj_b_)
