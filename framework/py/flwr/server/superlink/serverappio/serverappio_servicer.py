@@ -40,6 +40,10 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendAppHeartbeatRequest,
+    SendAppHeartbeatResponse,
+)
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
     PushLogsResponse,
@@ -361,6 +365,25 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             for run_id, run_status in run_statuses.items()
         }
         return GetRunStatusResponse(run_status_dict=run_status_dict)
+
+    def SendAppHeartbeat(
+        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendAppHeartbeatResponse:
+        """Handle a heartbeat from the ServerApp."""
+        log(DEBUG, "ServerAppIoServicer.SendAppHeartbeat")
+
+        # Init state
+        state = self.state_factory.state()
+
+        # Acknowledge the heartbeat
+        # The app heartbeat can only be acknowledged if the run is in
+        # starting or running status.
+        success = state.acknowledge_app_heartbeat(
+            run_id=request.run_id,
+            heartbeat_interval=request.heartbeat_interval,
+        )
+
+        return SendAppHeartbeatResponse(success=success)
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
