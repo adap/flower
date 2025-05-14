@@ -24,6 +24,7 @@ import grpc
 
 from flwr.common import ConfigRecord, Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
+from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -47,6 +48,12 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
     PushLogsResponse,
+)
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
@@ -384,6 +391,26 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         return SendAppHeartbeatResponse(success=success)
+
+    def PushObject(
+        self, request: PushObjectRequest, context: grpc.ServicerContext
+    ) -> PushObjectResponse:
+        """Push an object to the ObjectStore."""
+        log(DEBUG, "ServerAppIoServicer.PushObject")
+
+        if not check_body_len_consistency(request.object_content):
+            # Cancel insertion in ObjectStore
+            context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
+
+        return PushObjectResponse()
+
+    def PullObject(
+        self, request: PullObjectRequest, context: grpc.ServicerContext
+    ) -> PullObjectResponse:
+        """Pull an object from the ObjectStore."""
+        log(DEBUG, "ServerAppIoServicer.PullObject")
+
+        return PullObjectResponse()
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
