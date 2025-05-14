@@ -104,6 +104,9 @@ def main() -> None:
     print("Starting SuperLink...")
     superlink_proc = run_superlink()
 
+    # Allow time for SuperLink to start
+    time.sleep(2)
+
     # Submit the first run and run the first ServerApp process
     print("Starting the first run and ServerApp process...")
     run_id1 = flwr_run()
