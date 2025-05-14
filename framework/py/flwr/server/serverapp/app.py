@@ -38,6 +38,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.exit import ExitCode, flwr_exit
+from flwr.common.heartbeat import HeartbeatSender, get_grpc_app_heartbeat_fn
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -117,6 +118,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     success = True
     hash_run_id = None
     run_status = None
+    heartbeat_sender = None
     while True:
 
         try:
@@ -182,6 +184,16 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                 event_details={"run-id-hash": hash_run_id},
             )
 
+            # Set up heartbeat sender
+            heartbeat_fn = get_grpc_app_heartbeat_fn(
+                grid._stub,
+                run.run_id,
+                failure_message="Heartbeat failed unexpectedly. The SuperLink could "
+                "not find the provided run ID, or the run status is invalid.",
+            )
+            heartbeat_sender = HeartbeatSender(heartbeat_fn)
+            heartbeat_sender.start()
+
             # Load and run the ServerApp with the Grid
             updated_context = run_(
                 grid=grid,
@@ -213,6 +225,11 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             success = False
 
         finally:
+            # Stop heartbeat sender
+            if heartbeat_sender:
+                heartbeat_sender.stop()
+                heartbeat_sender = None
+
             # Stop log uploader for this run and upload final logs
             if log_uploader:
                 stop_log_uploader(log_queue, log_uploader)
@@ -226,6 +243,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                         run_id=run.run_id, run_status=run_status_proto
                     )
                 )
+
             event(
                 EventType.FLWR_SERVERAPP_RUN_LEAVE,
                 event_details={"run-id-hash": hash_run_id, "success": success},

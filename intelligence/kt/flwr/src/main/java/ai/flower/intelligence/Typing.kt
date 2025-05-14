@@ -15,9 +15,18 @@
 
 package ai.flower.intelligence
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents the progress of an operation.
+ *
+ * @property totalBytes The total number of bytes expected.
+ * @property loadedBytes The number of bytes loaded so far.
+ * @property percentage The completion percentage of the operation.
+ * @property description A textual description of the progress state.
+ */
 @Serializable
 data class Progress(
   val totalBytes: Int? = null,
@@ -26,13 +35,34 @@ data class Progress(
   val description: String? = null,
 )
 
+/**
+ * Represents a message in a chat session.
+ *
+ * @property role The role of the sender (e.g., "user", "system", "assistant").
+ * @property content The content of the message.
+ * @property toolCalls An optional list of tool calls associated with the message.
+ */
 @Serializable
 data class Message(val role: String, val content: String, val toolCalls: List<ToolCall>? = null)
 
+/** Represents a call to a specific tool with its name and arguments. */
 typealias ToolCall = Map<String, ToolCallDetails>
 
+/**
+ * Represents the details of a tool call.
+ *
+ * @property name The name of the tool being called.
+ * @property arguments The arguments passed to the tool as key-value pairs.
+ */
 @Serializable data class ToolCallDetails(val name: String, val arguments: Map<String, String>)
 
+/**
+ * Represents a property of a tool's function parameter.
+ *
+ * @property type The data type of the property (e.g., "string", "number").
+ * @property description A description of the property.
+ * @property enum An optional list of allowed values for the property.
+ */
 @Serializable
 data class ToolParameterProperty(
   val type: String,
@@ -40,6 +70,13 @@ data class ToolParameterProperty(
   val `enum`: List<String>? = null,
 )
 
+/**
+ * Represents the parameters required for a tool's function.
+ *
+ * @property type The data type of the parameters (e.g., "object").
+ * @property properties A dictionary defining the properties of each parameter.
+ * @property required A list of parameter names that are required.
+ */
 @Serializable
 data class ToolFunctionParameters(
   val type: String,
@@ -47,6 +84,13 @@ data class ToolFunctionParameters(
   val required: List<String>,
 )
 
+/**
+ * Represents the function provided by a tool.
+ *
+ * @property name The name of the function provided by the tool.
+ * @property description A brief description of what the function does.
+ * @property parameters The parameters required for invoking the function.
+ */
 @Serializable
 data class ToolFunction(
   val name: String,
@@ -54,10 +98,34 @@ data class ToolFunction(
   val parameters: ToolFunctionParameters,
 )
 
+/**
+ * Represents a tool with details about its type, function, and parameters.
+ *
+ * @property type The type of the tool (e.g., "function" or "plugin").
+ * @property function Details about the function provided by the tool.
+ */
 @Serializable data class Tool(val type: String, val function: ToolFunction)
 
+/**
+ * Represents a single event in a streaming response.
+ *
+ * @property chunk The chunk of text data received in the stream event.
+ */
 @Serializable data class StreamEvent(val chunk: String)
 
+/**
+ * Represents the options available for a chat interaction.
+ *
+ * @property model Optional model identifier.
+ * @property temperature Optional sampling temperature for creativity.
+ * @property maxCompletionTokens Optional maximum number of tokens to generate.
+ * @property stream Whether to stream responses back.
+ * @property onStreamEvent Callback for handling streaming events.
+ * @property tools Optional list of tools available to the model.
+ * @property forceRemote Force using a remote engine for the chat.
+ * @property forceLocal Force using a local engine for the chat.
+ * @property encrypt Whether to use encryption for remote inference.
+ */
 data class ChatOptions(
   var model: String? = null,
   var temperature: Float? = null,
@@ -71,27 +139,27 @@ data class ChatOptions(
 )
 
 @Serializable
-data class ChoiceMessage(
+internal data class ChoiceMessage(
   val role: String,
   val content: String? = null,
   @SerialName("tool_calls") val toolCalls: List<ToolCall>? = null,
 )
 
-@Serializable data class Choice(val index: Int, val message: ChoiceMessage)
+@Serializable internal data class Choice(val index: Int, val message: ChoiceMessage)
 
-@Serializable data class StreamChoice(val index: Int, val delta: DeltaMessage)
+@Serializable internal data class StreamChoice(val index: Int, val delta: DeltaMessage)
 
-@Serializable data class DeltaMessage(val content: String, val role: String)
+@Serializable internal data class DeltaMessage(val content: String, val role: String)
 
 @Serializable
-data class Usage(
+internal data class Usage(
   @SerialName("completion_tokens") val completionTokens: Int,
   @SerialName("prompt_tokens") val promptTokens: Int,
   @SerialName("total_tokens") val totalTokens: Int,
 )
 
 @Serializable
-data class ChatCompletionsRequest(
+internal data class ChatCompletionsRequest(
   val model: String,
   val messages: List<Message>,
   val temperature: Float? = null,
@@ -102,7 +170,7 @@ data class ChatCompletionsRequest(
 )
 
 @Serializable
-data class ChatCompletionsResponse(
+internal data class ChatCompletionsResponse(
   val `object`: String,
   val created: Int,
   val model: String,
@@ -110,12 +178,19 @@ data class ChatCompletionsResponse(
   val usage: Usage,
 )
 
-@Serializable data class ModelListResponse(val `object`: String, val data: List<ModelData>)
+@Serializable
+internal data class ModelListResponse(val `object`: String, val data: List<ModelData>)
 
 @Serializable
-data class ModelData(
+internal data class ModelData(
   val id: String,
   val `object`: String,
   val created: Int,
   @SerialName("owned_by") val ownedBy: String,
 )
+
+@Serializable
+data class SubmitClientPublicKeyResponse(val expiresAt: Instant, val encryptionId: String)
+
+@Serializable
+data class GetServerPublicKeyResponse(val publicKeyEncoded: String, val expiresAt: Instant)
