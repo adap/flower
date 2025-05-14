@@ -46,3 +46,14 @@ message Metadata {
   string message_type = 8;
   double created_at = 9;
 }
+
+// PushObject messages
+message PushObjectRequest {
+  string object_id = 1;
+  bytes object_content = 2;
+}
+message PushObjectResponse {}
+
+// PullObject messages
+message PullObjectRequest { string object_id = 1; }
+message PullObjectResponse { bytes object_content = 1; }
