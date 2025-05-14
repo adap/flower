@@ -1,3 +1,4 @@
+import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
@@ -8,6 +9,7 @@ plugins {
   alias(libs.plugins.dokka)
   alias(libs.plugins.maven.publish)
   alias(libs.plugins.signing)
+  alias(libs.plugins.detekt)
 }
 
 android {
@@ -145,4 +147,19 @@ afterEvaluate {
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications["release"])
   }
+}
+
+detekt {
+  buildUponDefaultConfig = true
+  parallel = true
+}
+
+tasks.withType<Detekt>().configureEach {
+  reports {
+    html.required.set(true) // observe findings in your browser with structure and code snippets
+    xml.required.set(true) // checkstyle like format mainly for integrations like Jenkins
+    sarif.required.set(true) // standardized SARIF format (https://sarifweb.azurewebsites.net/) to support integrations with GitHub Code Scanning
+    md.required.set(true) // simple Markdown format
+  }
+  jvmTarget = "1.8"
 }
