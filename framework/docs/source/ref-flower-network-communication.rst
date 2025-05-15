@@ -67,9 +67,9 @@ Networking Interfaces
 
 Each component — SuperLink, ``ServerApp``, SuperNode, and ``ClientApp`` — exposes ports
 for interacting with other Flower components. The SuperLink component includes three
-such APIs: the ServerAppIo API, Fleet API, and the Exec API. Similarly, the
-SuperNode component includes the ClientAppIo API. Each of these APIs serves a
-distinct purpose during the runtime of a Flower app, as summarized in the table below.
+such APIs: the ServerAppIo API, Fleet API, and the Exec API. Similarly, the SuperNode
+component includes the ClientAppIo API. Each of these APIs serves a distinct purpose
+during the runtime of a Flower app, as summarized in the table below.
 
 .. list-table::
     :widths: 25 25 50 50
@@ -90,12 +90,12 @@ distinct purpose during the runtime of a Flower app, as summarized in the table 
     - -
       - 9093
       - Exec API
-      - Users interface with the SuperLink via this API using the `FlowerCLI <ref-api-cli.html>`_.
+      - Users interface with the SuperLink via this API using the `FlowerCLI
+        <ref-api-cli.html>`_.
     - - SuperNode
       - 9094
       - ClientAppIo API
       - Communication between the SuperNode and the ``ClientApp`` process
-
 
 Isolation Mode
 ~~~~~~~~~~~~~~
@@ -178,9 +178,14 @@ component can influence decisions related to resource provisioning, scaling, mon
 and reliability. To support such decisions, the list below outlines the communication
 model used between the Flower components:
 
-- **SuperLink ↔ SuperNode**: the SuperNode pulls information and submits requests to the
-  SuperLink via the Fleet API
-- **SuperLink ↔ ServerApp**: the necessary inputs to execute the ``ServerApp`` are
-  pulled from the SuperLink via the ``flwr-serverapp`` process
-- **SuperNode ↔ ClientApp**: the necessary inputs to execute the ``ClientApp`` are
-  pulled from the SuperNode via the ``flwr-clientapp`` process
+- **SuperLink ↔ SuperNode (Fleet API)**: The SuperNode pulls/pushes Messages from/to the
+  SuperLink via the Fleet API. The SuperNode also pulls the FAB if a new run is being
+  executed.
+- **SuperLink ↔ ServerApp (ServerAppIo API)**: The ``ServerApp`` process pulls/pushes
+  Messages from/to the SuperLink via the ServerAppIo API. The ``ServerApp`` also pulls
+  the FAB as part of the first interaction with the SuperLink, and at the end of the
+  execution it pushes the Context back to the SuperLink.
+- **SuperNode ↔ ClientApp (ClientAppIo API)**: The ``ClientApp`` process pulls/pushes
+  Messages from/to the SuperNode via the ClientAppIo API. The ``ClientApp`` also pulls
+  the FAB as part of the first interaction with the SuperNode, and at the end of the
+  execution it pushes the Context back to the SuperNode.
