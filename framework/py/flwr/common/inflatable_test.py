@@ -31,6 +31,7 @@ from .inflatable import (
     check_body_len_consistency,
     get_object_body,
     get_object_body_len_from_object_content,
+    get_object_head_values_from_object_content,
     get_object_id,
     get_object_type_from_object_content,
 )
@@ -113,44 +114,58 @@ def test_get_object_body() -> None:
     assert get_object_body(obj_b, CustomDataClass) == data
 
 
-def test_add_header_to_object_body_no_children() -> None:
-    """Test helper function that adds the header to the object body and returns the
-    object content."""
+@pytest.mark.parametrize(
+    "children",
+    [
+        [],
+        [CustomDataClass(b"child1 data")],
+        [CustomDataClass(b"child1 data"), CustomDataClass(b"child2 data")],
+    ],
+)
+def test_add_header_to_object_body(children: list[InflatableObject]) -> None:
+    """Test helper function that adds the header to the object body."""
     data = b"this is a test"
     obj = CustomDataClass(data)
-    obj_b = obj.deflate()
-
-    # Expected object head
-    exp_obj_head = f"CustomDataClass{HEAD_VALUE_DIVIDER*2}{len(data)}".encode()
-    assert _get_object_head(obj_b) == exp_obj_head
-
-    # Expected object content
-    exp_obj_conten = exp_obj_head + HEAD_BODY_DIVIDER + data
-    assert add_header_to_object_body(data, obj) == exp_obj_conten
-
-
-def test_add_header_to_object_body_with_children() -> None:
-    """Test helper function that adds the header to the object body and returns the
-    object content."""
-    data = b"this is a test"
-    obj = CustomDataClass(data)
-    child_obj1 = CustomDataClass(b"child1 data")
-    child_obj2 = CustomDataClass(b"child2 data")
-    obj.children = {child_obj1.object_id: child_obj1, child_obj2.object_id: child_obj2}
+    obj.children = {child.object_id: child for child in children}
     obj_b = obj.deflate()
 
     # Expected object head
     head_str = f"%s{HEAD_VALUE_DIVIDER}%s{HEAD_VALUE_DIVIDER}%d" % (
         "CustomDataClass",
-        child_obj1.object_id + "," + child_obj2.object_id,
+        ",".join(child.object_id for child in children),
         len(data),
     )
     exp_obj_head = head_str.encode()
     assert _get_object_head(obj_b) == exp_obj_head
 
     # Expected object content
-    exp_obj_conten = exp_obj_head + HEAD_BODY_DIVIDER + data
-    assert add_header_to_object_body(data, obj) == exp_obj_conten
+    exp_obj_content = exp_obj_head + HEAD_BODY_DIVIDER + data
+    assert add_header_to_object_body(data, obj) == exp_obj_content
+
+
+@pytest.mark.parametrize(
+    "children",
+    [
+        [],
+        [CustomDataClass(b"child1 data")],
+        [CustomDataClass(b"child1 data"), CustomDataClass(b"child2 data")],
+    ],
+)
+def test_get_head_values_from_object_content(children: list[InflatableObject]) -> None:
+    """Test helper function that extracts the values of the object head."""
+    # Prepare
+    data = b"this is a test"
+    obj = CustomDataClass(data)
+    obj.children = {child.object_id: child for child in children}
+    obj_b = obj.deflate()
+
+    # Execute
+    obj_type, children_ids, body_len = get_object_head_values_from_object_content(obj_b)
+
+    # Assert
+    assert obj_type == "CustomDataClass"
+    assert children_ids == [child.object_id for child in children]
+    assert body_len == len(data)
 
 
 def test_get_object_type_from_object_content() -> None:
