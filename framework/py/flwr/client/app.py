@@ -70,6 +70,8 @@ from .message_handler.message_handler import handle_control_message
 from .numpy_client import NumPyClient
 from .run_info_store import DeprecatedRunInfoStore
 
+DATABASE = ":flwr-in-memory-state:"
+
 
 def _check_actionable_client(
     client: Optional[Client], client_fn: Optional[ClientFnExt]
@@ -238,6 +240,7 @@ def start_client_internal(
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
     clientappio_api_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
+    database: str = DATABASE,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -301,6 +304,8 @@ def start_client_internal(
     clientappio_api_address : Optional[str]
         (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
         The SuperNode gRPC server address.
+    database : str (default: ":flwr-in-memory-state:")
+        The database to use for the node state.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -386,7 +391,7 @@ def start_client_internal(
 
     # DeprecatedRunInfoStore gets initialized when the first connection is established
     run_info_store: Optional[DeprecatedRunInfoStore] = None
-    state_factory = NodeStateFactory()
+    state_factory = NodeStateFactory(database=database)
     state = state_factory.state()
     mp_spawn_context = multiprocessing.get_context("spawn")
 
@@ -419,15 +424,21 @@ def start_client_internal(
                         node_config={},
                     )
                 else:
-                    # Call create_node fn to register node
-                    # and store node_id in state
-                    if (node_id := create_node()) is None:
-                        raise ValueError(
-                            "Failed to register SuperNode with the SuperLink"
-                        )
-                    state.set_node_id(node_id)
+                    try:
+                        # Try to get node_id from state
+                        # TODO: what about the auto-generated node public key?
+                        node_id = state.get_node_id()
+                    except ValueError:
+                        # If node_id is not set,
+                        # call create_node fn to register node
+                        # and store node_id in state
+                        if (node_id := create_node()) is None:
+                            raise ValueError(
+                                "Failed to register SuperNode with the SuperLink"
+                            ) from None
+                        state.set_node_id(node_id)
                     run_info_store = DeprecatedRunInfoStore(
-                        node_id=state.get_node_id(),
+                        node_id=node_id,
                         node_config=node_config,
                     )
 
@@ -623,6 +634,7 @@ def start_client_internal(
             # Unregister node
             if delete_node is not None:
                 delete_node()  # pylint: disable=not-callable
+                state.set_node_id(None)
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
