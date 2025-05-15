@@ -497,7 +497,7 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
           cd framework
-          python -m pip install --upgrade .
+          python -m pip install --upgrade .[simulation]
       - name: Run test with deployment engine
         if: ${{ needs.changes.outputs.framework == 'true' }}
         working-directory: ./framework/e2e/e2e-run-heartbeat
