@@ -41,6 +41,7 @@ class CustomDataClass(InflatableObject):
     """A dummy dataclass to test Inflatable features."""
 
     data: bytes
+    _children = None
 
     def deflate(self) -> bytes:  # noqa: D102
         obj_body = self.data
@@ -54,6 +55,16 @@ class CustomDataClass(InflatableObject):
             raise ValueError("`CustomDataClass` does not have children.")
         object_body = get_object_body(object_content, cls)
         return cls(data=object_body)
+
+    @property
+    def children(self) -> dict[str, InflatableObject] | None:
+        """Get children."""
+        return self._children
+
+    @children.setter
+    def children(self, children: dict[str, InflatableObject]) -> None:
+        """Set children only for testing purposes."""
+        self._children = children
 
 
 def test_deflate_and_inflate() -> None:
@@ -102,7 +113,7 @@ def test_get_object_body() -> None:
     assert get_object_body(obj_b, CustomDataClass) == data
 
 
-def test_add_header_to_object_body() -> None:
+def test_add_header_to_object_body_no_children() -> None:
     """Test helper function that adds the header to the object body and returns the
     object content."""
     data = b"this is a test"
@@ -110,7 +121,7 @@ def test_add_header_to_object_body() -> None:
     obj_b = obj.deflate()
 
     # Expected object head
-    exp_obj_head = f"CustomDataClass{HEAD_VALUE_DIVIDER}{len(data)}".encode()
+    exp_obj_head = f"CustomDataClass{HEAD_VALUE_DIVIDER*2}{len(data)}".encode()
     assert _get_object_head(obj_b) == exp_obj_head
 
     # Expected object content
@@ -123,12 +134,18 @@ def test_add_header_to_object_body_with_children() -> None:
     object content."""
     data = b"this is a test"
     obj = CustomDataClass(data)
-    child_obj = CustomDataClass(b"child1 data")
-    obj.children = {child_obj.object_id: child_obj}
+    child_obj1 = CustomDataClass(b"child1 data")
+    child_obj2 = CustomDataClass(b"child2 data")
+    obj.children = {child_obj1.object_id: child_obj1, child_obj2.object_id: child_obj2}
     obj_b = obj.deflate()
 
     # Expected object head
-    exp_obj_head = f"CustomDataClass{HEAD_VALUE_DIVIDER}{len(data)}".encode()
+    head_str = f"%s{HEAD_VALUE_DIVIDER}%s{HEAD_VALUE_DIVIDER}%d" % (
+        "CustomDataClass",
+        child_obj1.object_id + "," + child_obj2.object_id,
+        len(data),
+    )
+    exp_obj_head = head_str.encode()
     assert _get_object_head(obj_b) == exp_obj_head
 
     # Expected object content

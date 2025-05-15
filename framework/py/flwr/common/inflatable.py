@@ -137,12 +137,12 @@ def get_object_head_values_from_object_content(
     object_content: bytes,
 ) -> tuple[str, list[str], int]:
     """Return object type and body length from object content.
-    
+
     Parameters
     ----------
     object_content : bytes
         The deflated object content.
-    
+
     Returns
     -------
     tuple[str, list[str], int]
