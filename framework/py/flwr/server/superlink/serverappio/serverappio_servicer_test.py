@@ -598,10 +598,12 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Construct a stub and use mocked push_object
         stub = ServerAppIoStub(self._channel)
         stub.PushObject = self._push_object
+
         # Execute
         pushed_object_ids = push_object_to_object_store(obj, stub)
 
-        # Empty response
+        # Assert
+        # Expected number of objects were pushed
         assert (
             len(pushed_object_ids) == expected_obj_count + 1
         )  # +1 due to the RecordDict itself
