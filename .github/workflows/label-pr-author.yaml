@@ -1,0 +1,46 @@
+name: Label PR Author as Internal or External
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize, labeled, unlabeled]
+
+permissions:  
+  pull-requests: write
+  issues: write       
+  members: read
+
+jobs:
+  label-author-type:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Auto-label PR author
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = pr.labels.map(label => label.name.toLowerCase());
+
+            const hasLabel = labels.includes("internal") || labels.includes("external");
+            if (hasLabel || pr.state !== "open") {
+              console.log("PR already labeled or not open — skipping.");
+              return;
+            }
+
+            const org = "adap";
+            const author = pr.user.login;
+            const { status } = await github.rest.orgs.checkMembershipForUser({
+              org,
+              username: author
+            }).catch(e => ({ status: e.status }));
+
+            const label = status === 204 ? "Internal" : "External";
+
+            console.log(`Adding label: ${label}`);
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: [label]
+            });
