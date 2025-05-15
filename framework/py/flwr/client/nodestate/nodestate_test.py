@@ -15,10 +15,11 @@
 """Tests all NodeState implementations have to conform to."""
 
 
+import tempfile
 import unittest
 from abc import abstractmethod
 
-from flwr.client.nodestate import InMemoryNodeState, NodeState
+from flwr.client.nodestate import InMemoryNodeState, NodeState, SqliteNodeState
 
 
 class StateTest(unittest.TestCase):
@@ -66,5 +67,49 @@ class InMemoryStateTest(StateTest):
         return InMemoryNodeState()
 
 
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+class SqliteInMemoryStateTest(StateTest):
+    """Test SqliteState implementation with in-memory database."""
+
+    __test__ = True
+
+    def state_factory(self) -> SqliteNodeState:
+        """Return SqliteState."""
+        state = SqliteNodeState(":memory:")
+        state.initialize()
+        return state
+
+    def test_initialize(self) -> None:
+        """Test initialization."""
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        result = state.query("SELECT name FROM sqlite_schema;")
+
+        # Assert
+        assert len(result) == 2
+
+
+class SqliteFileBasedStateTest(StateTest):
+    """Test SqliteState implementation with file-based database."""
+
+    __test__ = True
+
+    def state_factory(self) -> SqliteNodeState:
+        """Return SqliteState."""
+        # pylint: disable-next=consider-using-with,attribute-defined-outside-init
+        self.tmp_file = tempfile.NamedTemporaryFile()
+        state = SqliteNodeState(self.tmp_file.name)
+        state.initialize()
+        return state
+
+    def test_initialize(self) -> None:
+        """Test initialization."""
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        result = state.query("SELECT name FROM sqlite_schema;")
+
+        # Assert
+        assert len(result) == 2
