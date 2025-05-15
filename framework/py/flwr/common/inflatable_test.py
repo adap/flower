@@ -22,7 +22,7 @@ from dataclasses import dataclass
 
 import pytest
 
-from .constant import HEAD_BODY_DIVIDER, TYPE_BODY_LEN_DIVIDER
+from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 from .inflatable import (
     InflatableObject,
     _get_object_body,
@@ -44,7 +44,7 @@ class CustomDataClass(InflatableObject):
 
     def deflate(self) -> bytes:  # noqa: D102
         obj_body = self.data
-        return add_header_to_object_body(object_body=obj_body, cls=self)
+        return add_header_to_object_body(object_body=obj_body, obj=self)
 
     @classmethod
     def inflate(  # noqa: D102
@@ -110,7 +110,25 @@ def test_add_header_to_object_body() -> None:
     obj_b = obj.deflate()
 
     # Expected object head
-    exp_obj_head = f"CustomDataClass{TYPE_BODY_LEN_DIVIDER}{len(data)}".encode()
+    exp_obj_head = f"CustomDataClass{HEAD_VALUE_DIVIDER}{len(data)}".encode()
+    assert _get_object_head(obj_b) == exp_obj_head
+
+    # Expected object content
+    exp_obj_conten = exp_obj_head + HEAD_BODY_DIVIDER + data
+    assert add_header_to_object_body(data, obj) == exp_obj_conten
+
+
+def test_add_header_to_object_body_with_children() -> None:
+    """Test helper function that adds the header to the object body and returns the
+    object content."""
+    data = b"this is a test"
+    obj = CustomDataClass(data)
+    child_obj = CustomDataClass(b"child1 data")
+    obj.children = {child_obj.object_id: child_obj}
+    obj_b = obj.deflate()
+
+    # Expected object head
+    exp_obj_head = f"CustomDataClass{HEAD_VALUE_DIVIDER}{len(data)}".encode()
     assert _get_object_head(obj_b) == exp_obj_head
 
     # Expected object content

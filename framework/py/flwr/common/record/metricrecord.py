@@ -157,7 +157,7 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
         obj_body = ProtoMetricRecord(
             data=record_value_dict_to_proto(self, [float, int], ProtoMetricRecordValue)
         ).SerializeToString(deterministic=True)
-        return add_header_to_object_body(object_body=obj_body, cls=self)
+        return add_header_to_object_body(object_body=obj_body, obj=self)
 
     @classmethod
     def inflate(
