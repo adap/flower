@@ -17,6 +17,7 @@
 
 import re
 import sqlite3
+from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from logging import DEBUG, ERROR
 from typing import Any, Optional, Union
@@ -26,7 +27,7 @@ from flwr.common import log
 DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
 
 
-class SqliteStateMixin:  # pylint: disable=R0904
+class SqliteStateMixin(ABC):  # pylint: disable=R0904
     """SQLite-based state management mixin."""
 
     def __init__(
@@ -45,9 +46,9 @@ class SqliteStateMixin:  # pylint: disable=R0904
         self.conn: Optional[sqlite3.Connection] = None
 
     @property
+    @abstractmethod
     def schema_setup_commands(self) -> list[str]:
         """Return the schema setup commands."""
-        raise NotImplementedError
 
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Create tables if they don't exist yet.
