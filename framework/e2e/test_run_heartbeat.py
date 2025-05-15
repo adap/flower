@@ -115,7 +115,7 @@ def main() -> None:
     superlink_proc = run_superlink(is_simulation)
 
     # Allow time for SuperLink to start
-    time.sleep(4)
+    time.sleep(1)
 
     # Submit the first run and run the first ServerApp process
     print("Starting the first run and ServerApp process...")
@@ -161,6 +161,9 @@ def main() -> None:
     # Restart the SuperLink
     print("Restarting SuperLink...")
     superlink_proc = run_superlink(is_simulation)
+
+    # Allow time for SuperLink to start
+    time.sleep(1)
 
     # Allow time for SuperLink to detect heartbeat failures and update statuses
     tic = time.time()
