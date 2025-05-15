@@ -62,6 +62,41 @@ Optional Network Connections
 Depending on the SuperLink and SuperNode configuration, Flower systems can have/use a
 number of additional network connections.
 
+Networking Interfaces
+~~~~~~~~~~~~~~~~~~~~~
+
+Each component — SuperLink, ``ServerApp``, SuperNode, and ``ClientApp`` — exposes ports
+for interacting with other Flower components. The SuperLink component includes three
+such APIs: the ``ServerAppIo API``, ``Fleet API``, and the ``Exec API``. Similarly, the
+SuperNode component includes the ``ClientAppIo API``. Each of these APIs serves a
+distinct purpose during the runtime of a Flower app, as summarized in the table below.
+
+.. list-table::
+    :widths: 25 25 50 50
+    :header-rows: 1
+
+    - - Component
+      - Default Port
+      - API
+      - Purpose
+    - - SuperLink
+      - 9091
+      - ``ServerAppIo API``
+      - Communication between the SuperLink and the ``ServerApp`` process
+    - -
+      - 9092
+      - ``Fleet API``
+      - Used by the SuperNodes to communicate with the SuperLink
+    - -
+      - 9093
+      - ``Exec API``
+      - Users interface with the SuperLink via the `FlowerCLI <ref-api-cli.html>`_ via
+        this API.
+    - - SuperNode
+      - 9094
+      - ``ClientAppIo API``
+      - Communication between the SuperNode and the ``ClientApp`` process
+
 Isolation Mode
 ~~~~~~~~~~~~~~
 
@@ -135,41 +170,6 @@ Typical examples include:
   this setting, the ``ServerApp`` typically acts as a client to the metric logging
   service.
 
-Networking Interfaces
-~~~~~~~~~~~~~~~~~~~~~
-
-Each component — ``SuperLink``, ``ServerApp``, ``SuperNode``, and ``ClientApp`` —
-exposes ports for interacting with other Flower components. The ``SuperLink`` component
-includes three such APIs: the ``ServerAppIo API``, ``Fleet API``, and the ``Exec API``.
-Similarly, the ``SuperNode`` component includes the ``ClientAppIo API``. Each of these
-APIs serves a distinct purpose during the runtime of a Flower app, as summarized in the
-table below.
-
-.. list-table:: Flower Components Default Ports and Purpose Overview
-    :widths: 25 25 50 50
-    :header-rows: 1
-
-    - - Component
-      - Port
-      - API
-      - Purpose
-    - - ``SuperLink``
-      - 9091 (default)
-      - ``ServerAppIo API``
-      - Communication between the ``SuperLink`` and the ``ServerApp``
-    - -
-      - 9092 (default)
-      - ``Fleet API``
-      - Coordinates execution across ``SuperNodes``
-    - -
-      - 9093 (default)
-      - ``Exec API``
-      - Receives execution tasks submitted by users
-    - - ``SuperNode``
-      - 9094 (default)
-      - ``ClientAppIo API``
-      - Communication between the ``SuperNode`` and the ``ClientApp``
-
 Communication Model
 ~~~~~~~~~~~~~~~~~~~
 
@@ -178,6 +178,9 @@ component can influence decisions related to resource provisioning, scaling, mon
 and reliability. To support such decisions, the list below outlines the communication
 model used between the Flower components:
 
-- **SuperLink ↔ ServerApp**: ServerApp pulls tasks from the SuperLink
-- **SuperLink ↔ SuperNode**: SuperNode pulls tasks from the SuperLink
-- **SuperNode ↔ ClientApp**: ClientApp pulls tasks from the SuperNode
+- **SuperLink ↔ SuperNode**: the SuperNode pulls the necessary information from the
+  SuperLink to execute the Flower App
+- **SuperLink ↔ ServerApp**: the necessary inputs to execute the ``ServerApp`` are
+  pulled from the SuperLink via the ``flwr-serverapp`` process
+- **SuperNode ↔ ClientApp**: the necessary inputs to execute the ``ClientApp`` are
+  pulled from the SuperNode via the ``flwr-clientapp`` process
