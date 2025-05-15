@@ -577,7 +577,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             (
                 {"a": ConfigRecord({"a": 123, "b": 123}), "b": ConfigRecord()},
                 2,
-            ),  # Differnt objects w/o children
+            ),  # Different objects w/o children
             (
                 {
                     "a": ConfigRecord({"a": 123, "b": 123}),

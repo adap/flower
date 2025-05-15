@@ -76,7 +76,7 @@ def pull_object_from_object_store(
 
     # Extract object class and object_ids of children
     # TODO: Update this function
-    obj_type, _, children_obj_ids = get_object_head_values_from_object_content(
+    obj_type, children_obj_ids, _ = get_object_head_values_from_object_content(
         object_content=object_content
     )
     # Resolve object class
