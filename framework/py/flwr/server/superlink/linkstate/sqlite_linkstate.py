@@ -18,11 +18,9 @@
 # pylint: disable=too-many-lines
 
 import json
-import re
 import sqlite3
 import time
-from collections.abc import Sequence
-from logging import DEBUG, ERROR, WARNING
+from logging import ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
@@ -46,6 +44,14 @@ from flwr.common.serde import (
     recorddict_from_proto,
     recorddict_to_proto,
 )
+from flwr.common.sqlite_state_mixin import SqliteStateMixin
+from flwr.common.state_utils import (
+    convert_sint64_to_uint64,
+    convert_sint64_values_in_dict_to_uint64,
+    convert_uint64_to_sint64,
+    convert_uint64_values_in_dict_to_sint64,
+    generate_rand_int_from_bytes,
+)
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
@@ -62,11 +68,6 @@ from .utils import (
     configrecord_to_bytes,
     context_from_bytes,
     context_to_bytes,
-    convert_sint64_to_uint64,
-    convert_sint64_values_in_dict_to_uint64,
-    convert_uint64_to_sint64,
-    convert_uint64_values_in_dict_to_sint64,
-    generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
     verify_found_message_replies,
@@ -170,90 +171,22 @@ CREATE TABLE IF NOT EXISTS message_res(
 DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
 
 
-class SqliteLinkState(LinkState):  # pylint: disable=R0904
+class SqliteLinkState(LinkState, SqliteStateMixin):  # pylint: disable=R0904
     """SQLite-based LinkState implementation."""
 
-    def __init__(
-        self,
-        database_path: str,
-    ) -> None:
-        """Initialize an SqliteLinkState.
-
-        Parameters
-        ----------
-        database : (path-like object)
-            The path to the database file to be opened. Pass ":memory:" to open
-            a connection to a database that is in RAM, instead of on disk.
-        """
-        self.database_path = database_path
-        self.conn: Optional[sqlite3.Connection] = None
-
-    def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
-        """Create tables if they don't exist yet.
-
-        Parameters
-        ----------
-        log_queries : bool
-            Log each query which is executed.
-
-        Returns
-        -------
-        list[tuple[str]]
-            The list of all tables in the DB.
-        """
-        self.conn = sqlite3.connect(self.database_path)
-        self.conn.execute("PRAGMA foreign_keys = ON;")
-        self.conn.row_factory = dict_factory
-        if log_queries:
-            self.conn.set_trace_callback(lambda query: log(DEBUG, query))
-        cur = self.conn.cursor()
-
-        # Create each table if not exists queries
-        cur.execute(SQL_CREATE_TABLE_RUN)
-        cur.execute(SQL_CREATE_TABLE_LOGS)
-        cur.execute(SQL_CREATE_TABLE_CONTEXT)
-        cur.execute(SQL_CREATE_TABLE_MESSAGE_INS)
-        cur.execute(SQL_CREATE_TABLE_MESSAGE_RES)
-        cur.execute(SQL_CREATE_TABLE_NODE)
-        cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
-        cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
-        res = cur.execute("SELECT name FROM sqlite_schema;")
-        return res.fetchall()
-
-    def query(
-        self,
-        query: str,
-        data: Optional[Union[Sequence[DictOrTuple], DictOrTuple]] = None,
-    ) -> list[dict[str, Any]]:
-        """Execute a SQL query."""
-        if self.conn is None:
-            raise AttributeError("LinkState is not initialized.")
-
-        if data is None:
-            data = []
-
-        # Clean up whitespace to make the logs nicer
-        query = re.sub(r"\s+", " ", query)
-
-        try:
-            with self.conn:
-                if (
-                    len(data) > 0
-                    and isinstance(data, (tuple, list))
-                    and isinstance(data[0], (tuple, dict))
-                ):
-                    rows = self.conn.executemany(query, data)
-                else:
-                    rows = self.conn.execute(query, data)
-
-                # Extract results before committing to support
-                #   INSERT/UPDATE ... RETURNING
-                # style queries
-                result = rows.fetchall()
-        except KeyError as exc:
-            log(ERROR, {"query": query, "data": data, "exception": exc})
-
-        return result
+    @property
+    def schema_setup_commands(self) -> list[str]:
+        """Return the schema setup commands."""
+        return [
+            SQL_CREATE_TABLE_RUN,
+            SQL_CREATE_TABLE_LOGS,
+            SQL_CREATE_TABLE_CONTEXT,
+            SQL_CREATE_TABLE_MESSAGE_INS,
+            SQL_CREATE_TABLE_MESSAGE_RES,
+            SQL_CREATE_TABLE_NODE,
+            SQL_CREATE_TABLE_PUBLIC_KEY,
+            SQL_CREATE_INDEX_ONLINE_UNTIL,
+        ]
 
     def store_message_ins(self, message: Message) -> Optional[UUID]:
         """Store one Message."""
