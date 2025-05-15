@@ -40,12 +40,16 @@ inflatable_class_registry: dict[str, type[InflatableObject]] = {
 
 def push_object_to_object_store(
     object: InflatableObject, stub: Union[FleetStub, ServerAppIoStub]
-) -> None:
-    """Recursively deflate an object and push it to the `ObjectStore`."""
-    # Push first children if it has any
+) -> list[str]:
+    """Recursively deflate an object and push it to the `ObjectStore`.
+
+    It returns the list of pushed object IDs.
+    """
+    pushed_object_ids = []
+    # Push children if it has any
     if object.children:
         for child in object.children.values():
-            push_object_to_object_store(child, stub)
+            pushed_object_ids.extend(push_object_to_object_store(child, stub))
 
     # Deflate object and push
     object_content = object.deflate()
@@ -55,6 +59,9 @@ def push_object_to_object_store(
             object_content=object_content,
         )
     )
+    pushed_object_ids.append(object.object_id)
+
+    return pushed_object_ids
 
 
 def pull_object_from_object_store(
@@ -68,6 +75,7 @@ def pull_object_from_object_store(
     object_content = object_proto.object_content
 
     # Extract object class and object_ids of children
+    # TODO: Update this function
     obj_type, _, children_obj_ids = get_object_head_values_from_object_content(
         object_content=object_content
     )

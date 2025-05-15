@@ -17,17 +17,27 @@
 
 import tempfile
 import unittest
-from typing import Optional
+from typing import Optional, Union
 
 import grpc
+import numpy as np
 from parameterized import parameterized
 
-from flwr.common import ConfigRecord, Context, Error, Message, RecordDict
+from flwr.common import (
+    ArrayRecord,
+    ConfigRecord,
+    Context,
+    Error,
+    Message,
+    MetricRecord,
+    RecordDict,
+)
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.inflatable_utils import push_object_to_object_store
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
@@ -54,6 +64,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
 )
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
@@ -121,6 +132,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         self.state = state_factory.state()
         ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()
+        self.call_push_object_count = 0
 
         self.status_to_msg = _STATUS_TO_MSG
 
@@ -548,3 +560,48 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         with self.assertRaises(grpc.RpcError) as e:
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+
+    @parameterized.expand(
+        [
+            (
+                {"a": ConfigRecord({"a": 123, "b": 123})},
+                1,
+            ),  # Single w/o children
+            (
+                {
+                    "a": ConfigRecord({"a": 123, "b": 123}),
+                    "b": ConfigRecord({"a": 123, "b": 123}),
+                },
+                1,
+            ),  # Two objects but identical content
+            (
+                {"a": ConfigRecord({"a": 123, "b": 123}), "b": ConfigRecord()},
+                2,
+            ),  # Differnt objects w/o children
+            (
+                {
+                    "a": ConfigRecord({"a": 123, "b": 123}),
+                    "b": ArrayRecord([np.array([1, 2]), np.array([3, 4])]),
+                },
+                4,
+            ),  # Multiple objects and some with children
+        ]
+    )  # type: ignore
+    def test_push_object_with_helper_function(
+        self,
+        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+        expected_obj_count: int,
+    ) -> None:
+        """Use helper function to push an object recursively."""
+        # Prepare
+        obj = RecordDict(records)
+        # Construct a stub and use mocked push_object
+        stub = ServerAppIoStub(self._channel)
+        stub.PushObject = self._push_object
+        # Execute
+        pushed_object_ids = push_object_to_object_store(obj, stub)
+
+        # Empty response
+        assert (
+            len(pushed_object_ids) == expected_obj_count + 1
+        )  # +1 due to the RecordDict itself
