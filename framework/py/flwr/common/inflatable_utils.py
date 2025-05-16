@@ -47,19 +47,20 @@ def push_object_to_servicer(
     """
     pushed_object_ids = []
     # Push children if it has any
-    if obj.children:
-        for child in obj.children.values():
+    if (children := obj.children):
+        for child in children.values():
             pushed_object_ids.extend(push_object_to_servicer(child, stub))
 
     # Deflate object and push
     object_content = obj.deflate()
+    object_id = get_object_id(object_content)
     _: PushObjectResponse = stub.PushObject(
         PushObjectRequest(
-            object_id=obj.object_id,
+            object_id=object_id,
             object_content=object_content,
         )
     )
-    pushed_object_ids.append(obj.object_id)
+    pushed_object_ids.append(object_id)
 
     return pushed_object_ids
 
