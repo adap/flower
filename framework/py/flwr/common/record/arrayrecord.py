@@ -382,7 +382,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
 
         # Serialize references dict
         object_body = json.dumps(array_refs).encode("utf-8")
-        return add_header_to_object_body(object_body=object_body, cls=self)
+        return add_header_to_object_body(object_body=object_body, obj=self)
 
     @classmethod
     def inflate(
