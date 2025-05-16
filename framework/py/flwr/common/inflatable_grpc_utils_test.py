@@ -14,31 +14,23 @@
 # ==============================================================================
 """Tests for InflatableObject helpers to communicate with gRPC servicers."""
 
-import tempfile
+
 import unittest
 from typing import Union
+from unittest.mock import Mock
 
-import grpc
 import numpy as np
 from parameterized import parameterized
 
 from flwr.common import ArrayRecord, ConfigRecord, MetricRecord, RecordDict
-from flwr.common.constant import (
-    FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
-    SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
-)
-from flwr.proto.fleet_pb2_grpc import FleetStub
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PullObjectRequest,
+    PullObjectResponse,
     PushObjectRequest,
     PushObjectResponse,
 )
-from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
-from flwr.server.app import _run_fleet_api_grpc_rere
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
-from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
-from flwr.server.superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 
-from .inflatable_grpc_utils import push_object_to_servicer
+from .inflatable_grpc_utils import pull_object_from_servicer, push_object_to_servicer
 
 base_cases = [
     ({"a": ConfigRecord({"a": 123, "b": 123})}, 1),  # Single w/o children
@@ -68,90 +60,56 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
-        self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
-        self.addCleanup(self.temp_dir.cleanup)  # Ensures cleanup after test
+        self.mock_store: dict[str, bytes] = {}
+        self.mock_stub = Mock()
 
-        state_factory = LinkStateFactory(":flwr-in-memory-state:")
-        self.state = state_factory.state()
-        ffs_factory = FfsFactory(self.temp_dir.name)
-        self.ffs = ffs_factory.ffs()
+        def push_object(request: PushObjectRequest) -> PushObjectResponse:
+            self.mock_store[request.object_id] = request.object_content
+            return PushObjectResponse()
 
-        # ServerAppIo endpoints
-        self._server_serverappio: grpc.Server = run_serverappio_api_grpc(
-            SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
-            state_factory,
-            ffs_factory,
-            None,
-        )
-        self._channel_serverappio = grpc.insecure_channel("localhost:9091")
-        self._push_object_serverappio = self._channel_serverappio.unary_unary(
-            "/flwr.proto.ServerAppIo/PushObject",
-            request_serializer=PushObjectRequest.SerializeToString,
-            response_deserializer=PushObjectResponse.FromString,
-        )
+        def pull_object(request: PullObjectRequest) -> PullObjectResponse:
+            return PullObjectResponse(object_content=self.mock_store[request.object_id])
 
-        # Fleet endpoints
-        self._server_fleet: grpc.Server = _run_fleet_api_grpc_rere(
-            FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
-            state_factory,
-            ffs_factory,
-            None,
-            None,
-        )
-        self._channel_fleet = grpc.insecure_channel("localhost:9092")
-        self._push_object_fleet = self._channel_fleet.unary_unary(
-            "/flwr.proto.Fleet/PushObject",
-            request_serializer=PushObjectRequest.SerializeToString,
-            response_deserializer=PushObjectResponse.FromString,
-        )
+        self.mock_stub.PushObject.side_effect = push_object
+        self.mock_stub.PullObject.side_effect = pull_object
 
-    def tearDown(self) -> None:
-        """Clean up grpc server."""
-        self._server_serverappio.stop(None)
-        self._server_fleet.stop(None)
-
-    def get_serverappio_stub(self) -> ServerAppIoStub:
-        """Get ServerAppIo stub."""
-        stub = ServerAppIoStub(self._channel_serverappio)
-        stub.PushObject = self._push_object_serverappio
-        return stub
-
-    def get_fleet_stub(self) -> FleetStub:
-        """Get ServerAppIo stub."""
-        stub = FleetStub(self._channel_fleet)
-        stub.PushObject = self._push_object_fleet
-        return stub
-
-    @parameterized.expand(
-        [
-            (records, expected, stub_type)
-            for records, expected in base_cases
-            for stub_type in [ServerAppIoStub, FleetStub]
-        ]
-    )  # type: ignore
+    @parameterized.expand(base_cases)  # type: ignore
     def test_push_object_with_helper_function(
         self,
         records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
         expected_obj_count: int,
-        stub_type: type[Union[ServerAppIoStub, FleetStub]],
     ) -> None:
         """Use helper function to push an object recursively."""
         # Prepare
         obj = RecordDict(records)
-        # Construct a stub and use mocked push_object
-        stub: Union[ServerAppIoStub, FleetStub]
-        if stub_type == ServerAppIoStub:
-            stub = self.get_serverappio_stub()
-        elif stub_type == FleetStub:
-            stub = self.get_fleet_stub()
-        else:
-            raise NotImplementedError()
+        # +1 due to the RecordDict itself
+        expected_obj_count += 1
 
         # Execute
-        pushed_object_ids = push_object_to_servicer(obj, stub)
+        push_object_to_servicer(obj, self.mock_stub)
 
         # Assert
         # Expected number of objects were pushed
-        assert (
-            len(pushed_object_ids) == expected_obj_count + 1
-        )  # +1 due to the RecordDict itself
+        assert self.mock_stub.PushObject.call_count == expected_obj_count
+        assert len(self.mock_store) == expected_obj_count
+
+    @parameterized.expand(base_cases)  # type: ignore
+    def test_pull_object_with_helper_function(
+        self,
+        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+        expected_obj_count: int,
+    ) -> None:
+        """Use helper function to pull an object recursively."""
+        # Prepare
+        obj = RecordDict(records)
+        # +1 due to the RecordDict itself
+        expected_obj_count += 1
+
+        # Execute
+        push_object_to_servicer(obj, self.mock_stub)
+        pulled_obj = pull_object_from_servicer(obj.object_id, self.mock_stub)
+
+        # Assert
+        # Expected number of objects were pulled
+        assert self.mock_stub.PullObject.call_count == expected_obj_count
+        assert pulled_obj == obj
