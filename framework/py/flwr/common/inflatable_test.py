@@ -22,7 +22,7 @@ from dataclasses import dataclass
 
 import pytest
 
-from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
+from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER, NONE_CHILDREN_MARKER
 from .inflatable import (
     InflatableObject,
     _get_object_body,
@@ -118,21 +118,25 @@ def test_get_object_body() -> None:
     "children",
     [
         [],
+        None,
         [CustomDataClass(b"child1 data")],
         [CustomDataClass(b"child1 data"), CustomDataClass(b"child2 data")],
     ],
 )
-def test_add_header_to_object_body(children: list[InflatableObject]) -> None:
+def test_add_header_to_object_body(children: list[InflatableObject] | None) -> None:
     """Test helper function that adds the header to the object body."""
     data = b"this is a test"
     obj = CustomDataClass(data)
-    obj.children = {child.object_id: child for child in children}
+    children_str = NONE_CHILDREN_MARKER
+    if children is not None:
+        obj.children = {child.object_id: child for child in children}
+        children_str = ",".join(child.object_id for child in children)
     obj_b = obj.deflate()
 
     # Expected object head
     head_str = f"%s{HEAD_VALUE_DIVIDER}%s{HEAD_VALUE_DIVIDER}%d" % (
         "CustomDataClass",
-        ",".join(child.object_id for child in children),
+        children_str,
         len(data),
     )
     exp_obj_head = head_str.encode()
@@ -147,16 +151,22 @@ def test_add_header_to_object_body(children: list[InflatableObject]) -> None:
     "children",
     [
         [],
+        None,
         [CustomDataClass(b"child1 data")],
         [CustomDataClass(b"child1 data"), CustomDataClass(b"child2 data")],
     ],
 )
-def test_get_head_values_from_object_content(children: list[InflatableObject]) -> None:
+def test_get_head_values_from_object_content(
+    children: list[InflatableObject] | None,
+) -> None:
     """Test helper function that extracts the values of the object head."""
     # Prepare
     data = b"this is a test"
     obj = CustomDataClass(data)
-    obj.children = {child.object_id: child for child in children}
+    expected_children_ids = None
+    if children is not None:
+        obj.children = {child.object_id: child for child in children}
+        expected_children_ids = [child.object_id for child in children]
     obj_b = obj.deflate()
 
     # Execute
@@ -164,7 +174,7 @@ def test_get_head_values_from_object_content(children: list[InflatableObject]) -
 
     # Assert
     assert obj_type == "CustomDataClass"
-    assert children_ids == [child.object_id for child in children]
+    assert children_ids == expected_children_ids
     assert body_len == len(data)
 
 
