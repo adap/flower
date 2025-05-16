@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Utils tests."""
+"""Tests for utility functions for states."""
 
 
 import unittest
 
 from parameterized import parameterized
 
-from .utils import (
+from .state_utils import (
     convert_sint64_to_uint64,
     convert_sint64_values_in_dict_to_uint64,
     convert_uint64_to_sint64,
