@@ -1,9 +1,10 @@
 [algorithm]
 name = "FedAvg"
-stragglers-fraction = 0.0
+stragglers-fraction = 0.9
 mu = 0.0 # Always 0 when using FedAvg
 
 [dataset]
+path = "ylecun/mnist"
 mu = 0.0 # Always 0 when using FedAvg
 
 [fit]
