@@ -22,7 +22,7 @@ jobs:
             const pr = context.payload.pull_request;
             const labels = pr.labels.map(label => label.name.toLowerCase());
 
-            const hasLabel = labels.includes("internal") || labels.includes("external");
+            const hasLabel = labels.includes("maintainer") || labels.includes("contributor");
             if (hasLabel || pr.state !== "open") {
               console.log("PR already labeled or not open — skipping.");
               return;
@@ -35,7 +35,7 @@ jobs:
               username: author
             }).catch(e => ({ status: e.status }));
 
-            const label = status === 204 ? "Internal" : "External";
+            const label = status === 204 ? "Maintainer" : "Contributor";
 
             console.log(`Adding label: ${label}`);
             await github.rest.issues.addLabels({
