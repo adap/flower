@@ -1,15 +1,10 @@
 [algorithm]
 name = "FedProx"
-num-server-rounds = 100
-min-available-clients= 1000
-min-fit-clients= 1000
-num-clients = 1000
 stragglers-fraction = 0.9
 mu = 2.0 # Always 0 when using FedAvg
 
 [dataset]
 path = "ylecun/mnist"
-num-unique-labels-per-partition = 2
 mu = 2.0 # Always 0 when using FedAvg
 
 [fit]

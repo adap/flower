@@ -171,3 +171,8 @@ options.backend.client-resources.num-gpus = 0.0
 options.num-supernodes = 1000
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0.25
+
+[tool.flwr.federations.femnist-federation]
+options.num-supernodes = 200
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.0
