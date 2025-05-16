@@ -20,7 +20,7 @@ from __future__ import annotations
 import hashlib
 from typing import TypeVar
 
-from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
+from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER, NONE_CHILDREN_MARKER
 
 
 class InflatableObject:
@@ -88,9 +88,13 @@ def get_object_body(object_content: bytes, cls: type[T]) -> bytes:
 def add_header_to_object_body(object_body: bytes, obj: InflatableObject) -> bytes:
     """Add header to object content."""
     # Construct header
+    if (children := obj.children) is None:
+        children_str = NONE_CHILDREN_MARKER
+    else:
+        children_str = ",".join(children.keys())
     header = f"%s{HEAD_VALUE_DIVIDER}%s{HEAD_VALUE_DIVIDER}%d" % (
         obj.__class__.__qualname__,  # Type of object
-        ",".join((obj.children or {}).keys()),  # IDs of child objects
+        children_str,  # IDs of child objects
         len(object_body),  # Length of object body
     )
 
@@ -135,7 +139,7 @@ def check_body_len_consistency(object_content: bytes) -> bool:
 
 def get_object_head_values_from_object_content(
     object_content: bytes,
-) -> tuple[str, list[str], int]:
+) -> tuple[str, list[str] | None, int]:
     """Return object type and body length from object content.
 
     Parameters
@@ -145,7 +149,7 @@ def get_object_head_values_from_object_content(
 
     Returns
     -------
-    tuple[str, list[str], int]
+    tuple[str, Optional[list[str]], int]
         A tuple containing:
         - The object type as a string.
         - A list of child object IDs as strings.
@@ -153,5 +157,8 @@ def get_object_head_values_from_object_content(
     """
     head = _get_object_head(object_content).decode(encoding="utf-8")
     obj_type, children_str, body_len = head.split(HEAD_VALUE_DIVIDER)
-    children_ids = children_str.split(",") if children_str else []
+    if children_str == NONE_CHILDREN_MARKER:
+        children_ids = None
+    else:
+        children_ids = children_str.split(",") if children_str else []
     return obj_type, children_ids, int(body_len)
