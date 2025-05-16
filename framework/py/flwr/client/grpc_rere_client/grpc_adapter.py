@@ -38,8 +38,6 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -47,6 +45,16 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
+)
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
+)
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
 T = TypeVar("T", bound=GrpcMessage)
@@ -120,11 +128,11 @@ class GrpcAdapter:
         """."""
         return self._send_and_receive(request, DeleteNodeResponse, **kwargs)
 
-    def Ping(  # pylint: disable=C0103
-        self, request: PingRequest, **kwargs: Any
-    ) -> PingResponse:
+    def SendNodeHeartbeat(  # pylint: disable=C0103
+        self, request: SendNodeHeartbeatRequest, **kwargs: Any
+    ) -> SendNodeHeartbeatResponse:
         """."""
-        return self._send_and_receive(request, PingResponse, **kwargs)
+        return self._send_and_receive(request, SendNodeHeartbeatResponse, **kwargs)
 
     def PullMessages(  # pylint: disable=C0103
         self, request: PullMessagesRequest, **kwargs: Any
@@ -149,3 +157,15 @@ class GrpcAdapter:
     ) -> GetFabResponse:
         """."""
         return self._send_and_receive(request, GetFabResponse, **kwargs)
+
+    def PushObject(  # pylint: disable=C0103
+        self, request: PushObjectRequest, **kwargs: Any
+    ) -> PushObjectResponse:
+        """."""
+        return self._send_and_receive(request, PushObjectResponse, **kwargs)
+
+    def PullObject(  # pylint: disable=C0103
+        self, request: PullObjectRequest, **kwargs: Any
+    ) -> PullObjectResponse:
+        """."""
+        return self._send_and_receive(request, PullObjectResponse, **kwargs)

@@ -5,6 +5,8 @@ isort:skip_file
 import abc
 import flwr.proto.fab_pb2
 import flwr.proto.fleet_pb2
+import flwr.proto.heartbeat_pb2
+import flwr.proto.message_pb2
 import flwr.proto.run_pb2
 import grpc
 
@@ -18,9 +20,9 @@ class FleetStub:
         flwr.proto.fleet_pb2.DeleteNodeRequest,
         flwr.proto.fleet_pb2.DeleteNodeResponse]
 
-    Ping: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fleet_pb2.PingRequest,
-        flwr.proto.fleet_pb2.PingResponse]
+    SendNodeHeartbeat: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.SendNodeHeartbeatRequest,
+        flwr.proto.heartbeat_pb2.SendNodeHeartbeatResponse]
 
     PullMessages: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.PullMessagesRequest,
@@ -47,6 +49,16 @@ class FleetStub:
         flwr.proto.fab_pb2.GetFabResponse]
     """Get FAB"""
 
+    PushObject: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.message_pb2.PushObjectRequest,
+        flwr.proto.message_pb2.PushObjectResponse]
+    """Push Object"""
+
+    PullObject: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.message_pb2.PullObjectRequest,
+        flwr.proto.message_pb2.PullObjectResponse]
+    """Pull Object"""
+
 
 class FleetServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -62,10 +74,10 @@ class FleetServicer(metaclass=abc.ABCMeta):
     ) -> flwr.proto.fleet_pb2.DeleteNodeResponse: ...
 
     @abc.abstractmethod
-    def Ping(self,
-        request: flwr.proto.fleet_pb2.PingRequest,
+    def SendNodeHeartbeat(self,
+        request: flwr.proto.heartbeat_pb2.SendNodeHeartbeatRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.fleet_pb2.PingResponse: ...
+    ) -> flwr.proto.heartbeat_pb2.SendNodeHeartbeatResponse: ...
 
     @abc.abstractmethod
     def PullMessages(self,
@@ -101,6 +113,22 @@ class FleetServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.fab_pb2.GetFabResponse:
         """Get FAB"""
+        pass
+
+    @abc.abstractmethod
+    def PushObject(self,
+        request: flwr.proto.message_pb2.PushObjectRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.message_pb2.PushObjectResponse:
+        """Push Object"""
+        pass
+
+    @abc.abstractmethod
+    def PullObject(self,
+        request: flwr.proto.message_pb2.PullObjectRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.message_pb2.PullObjectResponse:
+        """Pull Object"""
         pass
 
 

@@ -117,6 +117,34 @@ class TestNaturalIdPartitioner(unittest.TestCase):
         with self.assertRaises(AttributeError):
             partitioner.partition_id_to_natural_id = {0: "0"}
 
+    def test_consistent_partition_ids(self) -> None:
+        """Test that the partition IDs assigned to the natural IDs are consistent."""
+        train_data = {
+            "features": [1, 2, 3],
+            "labels": [0, 0, 1],
+            "clients": ["a", "b", "a"],
+        }
+        test_data = {
+            "features": [4, 5, 6],
+            "labels": [1, 0, 0],
+            "clients": ["b", "a", "a"],
+        }
+        train_dataset = Dataset.from_dict(train_data)
+        test_dataset = Dataset.from_dict(test_data)
+
+        # Create partitioners
+        train_partitioner = NaturalIdPartitioner(partition_by="clients")
+        test_partitioner = NaturalIdPartitioner(partition_by="clients")
+        train_partitioner.dataset = train_dataset
+        test_partitioner.dataset = test_dataset
+        train_partitioner.load_partition(0)
+        test_partitioner.load_partition(0)
+
+        self.assertEqual(
+            train_partitioner.partition_id_to_natural_id,
+            test_partitioner.partition_id_to_natural_id,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -20,6 +20,7 @@ from logging import DEBUG, INFO
 import grpc
 from google.protobuf.json_format import MessageToDict
 
+from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
@@ -29,12 +30,20 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+)
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
+)
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
@@ -56,7 +65,11 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: CreateNodeRequest, context: grpc.ServicerContext
     ) -> CreateNodeResponse:
         """."""
-        log(INFO, "[Fleet.CreateNode] Request ping_interval=%s", request.ping_interval)
+        log(
+            INFO,
+            "[Fleet.CreateNode] Request heartbeat_interval=%s",
+            request.heartbeat_interval,
+        )
         log(DEBUG, "[Fleet.CreateNode] Request: %s", MessageToDict(request))
         response = message_handler.create_node(
             request=request,
@@ -77,10 +90,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state=self.state_factory.state(),
         )
 
-    def Ping(self, request: PingRequest, context: grpc.ServicerContext) -> PingResponse:
+    def SendNodeHeartbeat(
+        self, request: SendNodeHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendNodeHeartbeatResponse:
         """."""
-        log(DEBUG, "[Fleet.Ping] Request: %s", MessageToDict(request))
-        return message_handler.ping(
+        log(DEBUG, "[Fleet.SendNodeHeartbeat] Request: %s", MessageToDict(request))
+        return message_handler.send_node_heartbeat(
             request=request,
             state=self.state_factory.state(),
         )
@@ -150,3 +165,31 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             abort_grpc_context(e.message, context)
 
         return res
+
+    def PushObject(
+        self, request: PushObjectRequest, context: grpc.ServicerContext
+    ) -> PushObjectResponse:
+        """Push an object to the ObjectStore."""
+        log(
+            DEBUG,
+            "[ServerAppIoServicer.PushObject] Push Object with object_id=%s",
+            request.object_id,
+        )
+
+        if not check_body_len_consistency(request.object_content):
+            # Cancel insertion in ObjectStore
+            context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
+
+        return PushObjectResponse()
+
+    def PullObject(
+        self, request: PullObjectRequest, context: grpc.ServicerContext
+    ) -> PullObjectResponse:
+        """Pull an object from the ObjectStore."""
+        log(
+            DEBUG,
+            "[ServerAppIoServicer.PullObject] Pull Object with object_id=%s",
+            request.object_id,
+        )
+
+        return PullObjectResponse()
