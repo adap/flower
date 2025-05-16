@@ -37,7 +37,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable_utils import push_object_to_object_store
+from flwr.common.inflatable_utils import push_object_to_servicer
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
@@ -600,7 +600,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         stub.PushObject = self._push_object
 
         # Execute
-        pushed_object_ids = push_object_to_object_store(obj, stub)
+        pushed_object_ids = push_object_to_servicer(obj, stub)
 
         # Assert
         # Expected number of objects were pushed

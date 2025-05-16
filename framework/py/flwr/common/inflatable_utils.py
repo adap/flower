@@ -38,36 +38,36 @@ inflatable_class_registry: dict[str, type[InflatableObject]] = {
 }
 
 
-def push_object_to_object_store(
-    object: InflatableObject, stub: Union[FleetStub, ServerAppIoStub]
+def push_object_to_servicer(
+    obj: InflatableObject, stub: Union[FleetStub, ServerAppIoStub]
 ) -> list[str]:
-    """Recursively deflate an object and push it to the `ObjectStore`.
+    """Recursively deflate an object and push it to the servicer.
 
     It returns the list of pushed object IDs.
     """
     pushed_object_ids = []
     # Push children if it has any
-    if object.children:
-        for child in object.children.values():
-            pushed_object_ids.extend(push_object_to_object_store(child, stub))
+    if obj.children:
+        for child in obj.children.values():
+            pushed_object_ids.extend(push_object_to_servicer(child, stub))
 
     # Deflate object and push
-    object_content = object.deflate()
+    object_content = obj.deflate()
     _: PushObjectResponse = stub.PushObject(
         PushObjectRequest(
-            object_id=object.object_id,
+            object_id=obj.object_id,
             object_content=object_content,
         )
     )
-    pushed_object_ids.append(object.object_id)
+    pushed_object_ids.append(obj.object_id)
 
     return pushed_object_ids
 
 
-def pull_object_from_object_store(
+def pull_object_from_servicer(
     object_id: str, stub: Union[FleetStub, ServerAppIoStub]
 ) -> InflatableObject:
-    """Recursively inflate an object by pulling it from the `ObjectStore`."""
+    """Recursively inflate an object by pulling it from the servicer."""
     # Pull object
     object_proto: PullObjectResponse = stub.PullObject(
         PullObjectRequest(object_id=object_id)
@@ -75,7 +75,6 @@ def pull_object_from_object_store(
     object_content = object_proto.object_content
 
     # Extract object class and object_ids of children
-    # TODO: Update this function
     obj_type, children_obj_ids, _ = get_object_head_values_from_object_content(
         object_content=object_content
     )
@@ -89,7 +88,7 @@ def pull_object_from_object_store(
     # Pull all children objects
     children: dict[str, InflatableObject] = {}
     for child_object_id in children_obj_ids:
-        children[child_object_id] = pull_object_from_object_store(child_object_id, stub)
+        children[child_object_id] = pull_object_from_servicer(child_object_id, stub)
 
     # Inflate object passing its children
     return cls_type.inflate(object_content, children=children)
