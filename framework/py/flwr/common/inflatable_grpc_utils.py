@@ -31,7 +31,7 @@ from .inflatable import (
     get_object_head_values_from_object_content,
     get_object_id,
 )
-from .record import Array, ArrayRecord, ConfigRecord, MetricRecord
+from .record import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 
 # Helper registry that maps names of classes to their type
 inflatable_class_registry: dict[str, type[InflatableObject]] = {
@@ -39,6 +39,7 @@ inflatable_class_registry: dict[str, type[InflatableObject]] = {
     ArrayRecord.__qualname__: ArrayRecord,
     ConfigRecord.__qualname__: ConfigRecord,
     MetricRecord.__qualname__: MetricRecord,
+    RecordDict.__qualname__: RecordDict,
 }
 
 
