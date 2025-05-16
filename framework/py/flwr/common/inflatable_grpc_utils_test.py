@@ -38,7 +38,7 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 
-from .inflatable_utils import push_object_to_servicer
+from .inflatable_grpc_utils import push_object_to_servicer
 
 base_cases = [
     ({"a": ConfigRecord({"a": 123, "b": 123})}, 1),  # Single w/o children

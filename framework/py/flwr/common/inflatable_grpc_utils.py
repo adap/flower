@@ -26,7 +26,11 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
-from .inflatable import InflatableObject, get_object_head_values_from_object_content
+from .inflatable import (
+    InflatableObject,
+    get_object_head_values_from_object_content,
+    get_object_id,
+)
 from .record import Array, ArrayRecord, ConfigRecord, MetricRecord
 
 # Helper registry that maps names of classes to their type
@@ -47,7 +51,7 @@ def push_object_to_servicer(
     """
     pushed_object_ids = []
     # Push children if it has any
-    if (children := obj.children):
+    if children := obj.children:
         for child in children.values():
             pushed_object_ids.extend(push_object_to_servicer(child, stub))
 
@@ -81,10 +85,6 @@ def pull_object_from_servicer(
     )
     # Resolve object class
     cls_type = inflatable_class_registry[obj_type]
-
-    # Inflate if no children
-    if not children_obj_ids:
-        return cls_type.inflate(object_content)
 
     # Pull all children objects
     children: dict[str, InflatableObject] = {}
