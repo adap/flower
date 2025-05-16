@@ -36,12 +36,12 @@ from flwr.common.logger import (
     warn_deprecated_feature,
     warn_unsupported_feature,
 )
+from flwr.common.state_utils import generate_rand_int_from_bytes
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
-from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.ray_actor import (
     ClientAppActor,
     VirtualClientEngineActor,
