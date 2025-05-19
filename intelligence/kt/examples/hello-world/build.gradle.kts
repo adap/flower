@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "ai.flower.intelligence.example.helloworld"
+    namespace = "ai.flower.intelligence.examples.helloworld"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "ai.flower.intelligence.example.helloworld"
+        applicationId = "ai.flower.intelligence.examples.helloworld"
         minSdk = 28
         targetSdk = 35
         versionCode = 1
@@ -61,4 +61,7 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
+  implementation(libs.activity.compose)
+  implementation(libs.navigation.compose)
+  implementation(libs.lifecycle.runtime.ktx)
 }

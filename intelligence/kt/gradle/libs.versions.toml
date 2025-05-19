@@ -15,6 +15,9 @@ ktorClientCore = "3.1.2"
 mockkAndroid = "1.13.7"
 dokka = "1.9.10"
 composeBom = "2025.04.00"
+activity-compose = "1.7.2"
+navigation = "2.7.1"
+lifecycle = "2.6.2"
 
 [libraries]
 androidx-core = { module = "androidx.test:core", version.ref = "core" }
@@ -39,6 +42,9 @@ compose-ui = { module = "androidx.compose.ui:ui" }
 compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
+activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }
