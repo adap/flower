@@ -14,17 +14,18 @@
 # ==============================================================================
 """Flower abstract ObjectStore definition."""
 
-from abc import ABC
+import abc
 from typing import Optional
 
 
-class ObjectStore(ABC):
+class ObjectStore(abc.ABC):
     """Abstract base class for `ObjectStore` implementations.
 
     This class defines the interface for an object store that can store, retrieve, and
     delete objects identified by object IDs.
     """
 
+    @abc.abstractmethod
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store.
 
@@ -35,8 +36,8 @@ class ObjectStore(ABC):
         object_content : bytes
             The deflated object to store.
         """
-        raise NotImplementedError
 
+    @abc.abstractmethod
     def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store.
 
@@ -50,8 +51,8 @@ class ObjectStore(ABC):
         bytes
             The object stored under the given object_id.
         """
-        raise NotImplementedError
 
+    @abc.abstractmethod
     def delete(self, object_id: str) -> None:
         """Delete an object from the store.
 
@@ -60,15 +61,15 @@ class ObjectStore(ABC):
         object_id : str
             The object_id under which the object is stored.
         """
-        raise NotImplementedError
 
+    @abc.abstractmethod
     def clear(self) -> None:
         """Clear the store.
 
         This method should remove all objects from the store.
         """
-        raise NotImplementedError
 
+    @abc.abstractmethod
     def __contains__(self, object_id: str) -> bool:
         """Check if an object_id is in the store.
 
@@ -82,4 +83,3 @@ class ObjectStore(ABC):
         bool
             True if the object_id is in the store, False otherwise.
         """
-        raise NotImplementedError
