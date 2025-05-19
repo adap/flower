@@ -22,7 +22,7 @@ class ObjectStore(ABC):
     """Abstract base class for `ObjectStore` implementations.
 
     This class defines the interface for an object store that can store, retrieve, and
-    delete objects identified by keys.
+    delete objects identified by object IDs.
     """
 
     def put(self, object_id: str, object_content: bytes) -> None:
@@ -33,7 +33,7 @@ class ObjectStore(ABC):
         object_id : str
             The object_id under which to store the object.
         object_content : bytes
-            The serialized object to store.
+            The deflated object to store.
         """
         raise NotImplementedError
 
