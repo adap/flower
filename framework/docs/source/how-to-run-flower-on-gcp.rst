@@ -47,9 +47,9 @@ interface. Before proceeding, please make sure you have an account on GCP.
 3. **Create Kubernetes Cluster**: in the home page of the GCP project, under the
    ``Products`` section, look for the tab called ``Create a Kubernetes Cluster``. This
    will redirect you to a page where you will see an overview of the existing Kubernetes
-   clusters. At the top of the page you should see a button called ``Create``. By
-   default, the Kubernetes clusters are deployed using the ``Autopilot`` mode. For the
-   current guide, we use the ``Autopilot`` mode.
+   clusters. At the top of the page you should see a button called ``Create cluster``.
+   By default, the Kubernetes clusters are deployed using the ``Autopilot`` mode. For
+   the current guide, we use the ``Autopilot`` mode.
 4. **Configure Kubernetes Cluster**: in the page that is shown, we assign a name to the
    new cluster, e.g., ``flower-numpy-example`` and we select the region, e.g.,
    ``us-central1``. For the rest of the configuration settings, such as ``Cluster
@@ -83,9 +83,8 @@ CLI:
     # https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe
     # Run the .exe installer and follow the on-screen instructions
 
-    # Once the package is installed, we initialize gcloud as follows:
+    # Once the package is installed (e.g., using brew), we initialize gcloud as follows:
     gcloud init  # initialize with gcloud init.
-    source ~/.bashrc  # update PATH
     gcloud version  # verify installation
 
 .. note::
