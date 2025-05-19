@@ -14,6 +14,7 @@
 # ==============================================================================
 """Tests for factory class that creates ObjectStore instances."""
 
+
 import unittest
 
 from .in_memory_object_store import InMemoryObjectStore

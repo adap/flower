@@ -19,6 +19,7 @@ import unittest
 from abc import abstractmethod
 
 from ..inflatable import get_object_id
+from .in_memory_object_store import InMemoryObjectStore
 from .object_store import ObjectStore
 
 
@@ -193,3 +194,13 @@ class ObjectStoreTest(unittest.TestCase):
         # Assert
         self.assertTrue(contained)
         self.assertFalse(not_contained)
+
+
+class InMemoryStateTest(ObjectStoreTest):
+    """Test InMemoryObjectStore implementation."""
+
+    __test__ = True
+
+    def object_store_factory(self) -> ObjectStore:
+        """Return InMemoryObjectStore."""
+        return InMemoryObjectStore()
