@@ -15,11 +15,10 @@
 
 package ai.flower.intelligence
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.datetime.serializers.InstantIso8601Serializer
-import java.time.Instant
-import java.util.Base64
+
 /**
  * Represents the progress of an operation.
  *
@@ -191,18 +190,7 @@ internal data class ModelData(
 )
 
 @Serializable
-data class SubmitClientPublicKeyResponse(
-  @SerialName("expires_at")
-  @Serializable(with = InstantIso8601Serializer::class)
-  val expiresAt: Instant,
-  @SerialName("encryption_id") val encryptionId: String
-)
+data class SubmitClientPublicKeyResponse(val expiresAt: Instant, val encryptionId: String)
 
 @Serializable
-data class GetServerPublicKeyResponse(
-  @SerialName("public_key_base64") val publicKeyBase64: String,
-  @SerialName("expires_at") val expiresAt: Instant
-) {
-  val publicKeyEncoded: ByteArray
-    get() = Base64.getDecoder().decode(publicKeyBase64)
-}
+data class GetServerPublicKeyResponse(val publicKeyEncoded: String, val expiresAt: Instant)

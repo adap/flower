@@ -40,6 +40,10 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import SendNodeHeartbeatRequest  # pylint: disable=E0611
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PullObjectRequest,
+    PushObjectRequest,
+)
 from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
 
 from ..grpc_rere.fleet_servicer import FleetServicer
@@ -93,4 +97,8 @@ class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer, FleetService
             return _handle(request, context, PullMessagesRequest, self.PullMessages)
         if request.grpc_message_name == PushMessagesRequest.__qualname__:
             return _handle(request, context, PushMessagesRequest, self.PushMessages)
+        if request.grpc_message_name == PushObjectRequest.__qualname__:
+            return _handle(request, context, PushObjectRequest, self.PushObject)
+        if request.grpc_message_name == PullObjectRequest.__qualname__:
+            return _handle(request, context, PullObjectRequest, self.PullObject)
         raise ValueError(f"Invalid grpc_message_name: {request.grpc_message_name}")
