@@ -130,7 +130,7 @@ GC_THRESHOLD = 200_000_000  # 200 MB
 
 # Constants for Inflatable
 HEAD_BODY_DIVIDER = b"\x00"
-TYPE_BODY_LEN_DIVIDER = " "
+HEAD_VALUE_DIVIDER = " "
 
 # Constants for serialization
 INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
