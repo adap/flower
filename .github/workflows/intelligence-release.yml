@@ -82,9 +82,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Make publish script executable
-        run: chmod +x intelligence/kt/dev/publish.sh
-
       - name: Publish Kotlin package
         working-directory: intelligence/kt
         run: ./dev/publish.sh
