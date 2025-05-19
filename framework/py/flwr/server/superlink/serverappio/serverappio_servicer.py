@@ -26,6 +26,7 @@ from flwr.common import ConfigRecord, Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
+from flwr.common.object_store import ObjectStoreFactory
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
@@ -89,10 +90,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     """ServerAppIo API servicer."""
 
     def __init__(
-        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+        self,
+        state_factory: LinkStateFactory,
+        ffs_factory: FfsFactory,
+        objectstore_factory: ObjectStoreFactory,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
+        self.objectstore_factory = objectstore_factory
         self.lock = threading.RLock()
 
     def GetNodes(

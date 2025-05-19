@@ -28,6 +28,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.object_store import ObjectStoreFactory
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
@@ -121,6 +122,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         self.state = state_factory.state()
         ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()
+        objectstore_factory = ObjectStoreFactory()
 
         self.status_to_msg = _STATUS_TO_MSG
 
@@ -128,6 +130,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
             state_factory,
             ffs_factory,
+            objectstore_factory,
             None,
         )
 

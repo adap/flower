@@ -61,6 +61,7 @@ from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.object_store import ObjectStoreFactory
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     public_key_to_bytes,
 )
@@ -307,6 +308,9 @@ def run_superlink() -> None:
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
 
+    # Initialize ObjectStoreFactory
+    objectstore_factory = ObjectStoreFactory()
+
     # Start Exec API
     executor = load_executor(args)
     exec_server: grpc.Server = run_exec_api_grpc(
@@ -343,6 +347,7 @@ def run_superlink() -> None:
             address=serverappio_address,
             state_factory=state_factory,
             ffs_factory=ffs_factory,
+            objectstore_factory=objectstore_factory,
             certificates=None,  # ServerAppIo API doesn't support SSL yet
         )
         grpc_servers.append(serverappio_server)
