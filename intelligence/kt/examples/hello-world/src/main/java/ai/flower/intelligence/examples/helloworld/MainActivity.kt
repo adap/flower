@@ -1,23 +1,23 @@
 package ai.flower.intelligence.examples.helloworld
 
+import ai.flower.intelligence.FlowerIntelligence
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import android.util.Log
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.*
 import kotlinx.coroutines.launch
-import androidx.compose.material3.MaterialTheme
-import ai.flower.intelligence.FlowerIntelligence
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,11 +25,7 @@ class MainActivity : ComponentActivity() {
     Log.d("API_KEY", "Using key: ${BuildConfig.API_KEY}")
     FlowerIntelligence.apiKey = BuildConfig.API_KEY
 
-    setContent {
-      MaterialTheme {
-        AppNavigator()
-      }
-    }
+    setContent { MaterialTheme { AppNavigator() } }
   }
 }
 
@@ -37,12 +33,8 @@ class MainActivity : ComponentActivity() {
 fun AppNavigator() {
   val navController = rememberNavController()
   NavHost(navController = navController, startDestination = "flower") {
-    composable("home") {
-      HomeScreen(navController)
-    }
-    composable("flower") {
-      FlowerApp()
-    }
+    composable("home") { HomeScreen(navController) }
+    composable("flower") { FlowerApp() }
   }
 }
 
@@ -50,17 +42,13 @@ fun AppNavigator() {
 fun HomeScreen(navController: NavHostController) {
   Surface(modifier = Modifier.fillMaxSize()) {
     Column(
-      modifier = Modifier
-        .padding(24.dp)
-        .fillMaxSize(),
+      modifier = Modifier.padding(24.dp).fillMaxSize(),
       verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally
+      horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       Text("Welcome to Flower Intelligence!")
       Spacer(modifier = Modifier.height(16.dp))
-      Button(onClick = { navController.navigate("flower") }) {
-        Text("Ask a Question")
-      }
+      Button(onClick = { navController.navigate("flower") }) { Text("Ask a Question") }
     }
   }
 }
@@ -74,21 +62,16 @@ fun FlowerApp() {
 
   Surface(modifier = Modifier.fillMaxSize()) {
     Column(
-      modifier = Modifier
-        .padding(16.dp)
-        .fillMaxWidth(),
+      modifier = Modifier.padding(16.dp).fillMaxWidth(),
       verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally
+      horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       if (loading) {
         CircularProgressIndicator()
       } else if (response.isNotBlank()) {
         Column(
-          modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f)
-            .verticalScroll(rememberScrollState())
-            .padding(8.dp)
+          modifier =
+            Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(8.dp)
         ) {
           Text(response)
         }
@@ -100,7 +83,7 @@ fun FlowerApp() {
         value = input,
         onValueChange = { input = it },
         label = { Text("Type a message...") },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
       )
 
       Spacer(modifier = Modifier.height(16.dp))
@@ -116,7 +99,7 @@ fun FlowerApp() {
             loading = false
           }
         },
-        enabled = input.isNotBlank() && !loading
+        enabled = input.isNotBlank() && !loading,
       ) {
         Text("Send")
       }
