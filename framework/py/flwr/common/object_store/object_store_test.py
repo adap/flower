@@ -107,8 +107,8 @@ class ObjectStoreTest(unittest.TestCase):
             # Assert
             assert True
 
-    def test_put_object_id_and_content_pair(self) -> None:
-        """Test put method with an empty object_id."""
+    def test_put_object_id_and_content_pair_not_matching(self) -> None:
+        """Test put method with an object_id that does not match that of content."""
         # Prepare
         object_store = self.object_store_factory()
         object_content = b"test_value"
