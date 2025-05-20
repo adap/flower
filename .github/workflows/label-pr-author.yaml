@@ -20,9 +20,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const pr = context.payload.pull_request;
-            const labels = pr.labels.map(label => label.name.toLowerCase());
+            const labels = pr.labels.map(label => label.name);
 
-            const hasLabel = labels.includes("maintainer") || labels.includes("contributor");
+            const hasLabel = labels.includes("Maintainer") || labels.includes("Contributor");
             if (hasLabel || pr.state !== "open") {
               console.log("PR already labeled or not open — skipping.");
               return;
