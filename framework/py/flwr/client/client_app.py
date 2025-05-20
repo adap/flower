@@ -28,7 +28,7 @@ from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFnExt, Mod
 from flwr.common import Context, Message, MessageType
 from flwr.common.logger import warn_deprecated_feature
-from flwr.common.message import validate_message_type
+from flwr.common.metadata import validate_message_type
 
 from .typing import ClientAppCallable
 
