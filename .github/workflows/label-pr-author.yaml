@@ -7,7 +7,6 @@ on:
 permissions:  
   pull-requests: write
   issues: write       
-  members: read
 
 jobs:
   label-author-type:
