@@ -24,11 +24,11 @@ from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 
+from ..app.error import Error
+from ..app.metadata import Metadata
 from .constant import MESSAGE_TTL_TOLERANCE
-from .error import Error
 from .inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from .logger import log
-from .metadata import Metadata
 from .record import RecordDict
 from .serde_utils import (
     error_from_proto,

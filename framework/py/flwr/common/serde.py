@@ -42,6 +42,9 @@ from flwr.proto.transport_pb2 import (
     Status,
 )
 
+from ..app.error import Error
+from ..app.metadata import Metadata
+
 # pylint: enable=E0611
 from . import (
     Array,
