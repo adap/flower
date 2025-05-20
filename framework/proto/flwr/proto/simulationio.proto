@@ -17,6 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/heartbeat.proto";
 import "flwr/proto/log.proto";
 import "flwr/proto/message.proto";
 import "flwr/proto/run.proto";
@@ -44,6 +45,10 @@ service SimulationIo {
 
   // Get Run Status
   rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
+
+  // Heartbeat
+  rpc SendAppHeartbeat(SendAppHeartbeatRequest)
+      returns (SendAppHeartbeatResponse) {}
 }
 
 // PullSimulationInputs messages

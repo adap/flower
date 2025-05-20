@@ -202,7 +202,7 @@ class DirichletPartitioner(Partitioner):
             return
 
         # Generate information needed for Dirichlet partitioning
-        self._unique_classes = self.dataset.unique(self._partition_by)
+        self._unique_classes = sorted(self.dataset.unique(self._partition_by))
         assert self._unique_classes is not None
         # This is needed only if self._self_balancing is True (the default option)
         self._avg_num_of_samples_per_partition = (
