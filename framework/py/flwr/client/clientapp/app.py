@@ -29,10 +29,10 @@ from flwr.common import Context, Message
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS, ErrorCode
+from flwr.common.error import Error
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
-from flwr.common.message import Error
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import (
     context_from_proto,

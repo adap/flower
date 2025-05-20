@@ -18,12 +18,13 @@
 from __future__ import annotations
 
 from logging import WARNING
-from typing import Any, Optional, cast, overload
+from typing import Any, cast, overload
 
 from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
 
 from .constant import MESSAGE_TTL_TOLERANCE
+from .error import Error
 from .logger import log
 from .metadata import Metadata
 from .record import RecordDict
@@ -55,46 +56,6 @@ class MessageInitializationError(TypeError):
 
     def __init__(self, message: str | None = None) -> None:
         super().__init__(message or MESSAGE_INIT_ERROR_MESSAGE)
-
-
-class Error:
-    """The class storing information about an error that occurred.
-
-    Parameters
-    ----------
-    code : int
-        An identifier for the error.
-    reason : Optional[str]
-        A reason for why the error arose (e.g. an exception stack-trace)
-    """
-
-    def __init__(self, code: int, reason: str | None = None) -> None:
-        var_dict = {
-            "_code": code,
-            "_reason": reason,
-        }
-        self.__dict__.update(var_dict)
-
-    @property
-    def code(self) -> int:
-        """Error code."""
-        return cast(int, self.__dict__["_code"])
-
-    @property
-    def reason(self) -> str | None:
-        """Reason reported about the error."""
-        return cast(Optional[str], self.__dict__["_reason"])
-
-    def __repr__(self) -> str:
-        """Return a string representation of this instance."""
-        view = ", ".join([f"{k.lstrip('_')}={v!r}" for k, v in self.__dict__.items()])
-        return f"{self.__class__.__qualname__}({view})"
-
-    def __eq__(self, other: object) -> bool:
-        """Compare two instances of the class."""
-        if not isinstance(other, self.__class__):
-            raise NotImplementedError
-        return self.__dict__ == other.__dict__
 
 
 class Message:

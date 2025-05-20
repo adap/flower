@@ -49,7 +49,7 @@ from . import (
     RecordDict,
     typing,
 )
-from .message import Error
+from .error import Error
 from .metadata import Metadata
 from .serde import (
     array_from_proto,
