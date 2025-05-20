@@ -45,16 +45,17 @@ inflatable_class_registry: dict[str, type[InflatableObject]] = {
 
 def push_object_to_servicer(
     obj: InflatableObject, stub: Union[FleetStub, ServerAppIoStub]
-) -> list[str]:
+) -> set[str]:
     """Recursively deflate an object and push it to the servicer.
 
-    It returns the list of pushed object IDs.
+    Objects with the same ID are not pushed twice. It returns the set of pushed object
+    IDs.
     """
-    pushed_object_ids = []
+    pushed_object_ids: set[str] = set()
     # Push children if it has any
     if children := obj.children:
         for child in children.values():
-            pushed_object_ids.extend(push_object_to_servicer(child, stub))
+            pushed_object_ids |= push_object_to_servicer(child, stub)
 
     # Deflate object and push
     object_content = obj.deflate()
@@ -65,7 +66,7 @@ def push_object_to_servicer(
             object_content=object_content,
         )
     )
-    pushed_object_ids.append(object_id)
+    pushed_object_ids.add(object_id)
 
     return pushed_object_ids
 

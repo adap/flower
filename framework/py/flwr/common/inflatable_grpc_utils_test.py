@@ -86,12 +86,13 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         expected_obj_count += 1
 
         # Execute
-        push_object_to_servicer(obj, self.mock_stub)
+        pushed_object_ids = push_object_to_servicer(obj, self.mock_stub)
 
         # Assert
         # Expected number of objects were pushed
         assert self.mock_stub.PushObject.call_count == expected_obj_count
         assert len(self.mock_store) == expected_obj_count
+        assert len(pushed_object_ids) == expected_obj_count
 
     @parameterized.expand(base_cases)  # type: ignore
     def test_pull_object_with_helper_function(
