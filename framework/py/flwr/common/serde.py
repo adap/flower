@@ -55,7 +55,8 @@ from . import (
     typing,
 )
 from .constant import INT64_MAX_VALUE
-from .message import Error, Message, Metadata, make_message
+from .message import Error, Message, make_message
+from .metadata import Metadata
 from .serde_utils import record_value_dict_from_proto, record_value_dict_to_proto
 
 #  === Parameters message ===

@@ -25,7 +25,7 @@ from .logger import log as log
 from .message import DEFAULT_TTL
 from .message import Error as Error
 from .message import Message as Message
-from .message import Metadata as Metadata
+from .metadata import Metadata as Metadata
 from .parameter import bytes_to_ndarray as bytes_to_ndarray
 from .parameter import ndarray_to_bytes as ndarray_to_bytes
 from .parameter import ndarrays_to_parameters as ndarrays_to_parameters

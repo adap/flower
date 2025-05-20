@@ -31,9 +31,9 @@ from .message import (
     Error,
     Message,
     MessageInitializationError,
-    Metadata,
     make_message,
 )
+from .metadata import Metadata
 from .serde_test import RecordMaker
 
 
