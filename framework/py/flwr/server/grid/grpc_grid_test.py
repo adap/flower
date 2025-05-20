@@ -21,8 +21,8 @@ from unittest.mock import Mock, patch
 
 import grpc
 
+from flwr.app.error import Error
 from flwr.common import RecordDict
-from flwr.common.error import Error
 from flwr.common.message import Message
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
