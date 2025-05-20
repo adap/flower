@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "e2e-run-heartbeat"
+name = "e2e-serverapp-heartbeat"
 version = "1.0.0"
 description = "Test heartbeat for runs."
 license = "Apache-2.0"
@@ -19,8 +19,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "e2e_run_heartbeat.server_app:app"
-clientapp = "e2e_run_heartbeat.client_app:app"
+serverapp = "e2e_serverapp_heartbeat.server_app:app"
+clientapp = "e2e_serverapp_heartbeat.client_app:app"
 
 [tool.flwr.app.config]
 

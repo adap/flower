@@ -471,7 +471,7 @@ jobs:
         run: ./test_windows.sh
         shell: bash
 
-  run-heartbeat-test:
+  serverapp-heartbeat-test:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     needs: [changes, wheel]
@@ -483,7 +483,7 @@ jobs:
     if: ${{ needs.changes.outputs.framework == 'true' }}
 
     name: |
-      Run heartbeat test with ${{ matrix.engine }} runtime /
+      ServerApp/run heartbeat test with ${{ matrix.engine }} runtime /
       Python ${{ matrix.python-version }}
 
     steps:
@@ -503,6 +503,6 @@ jobs:
           cd framework
           python -m pip install --upgrade .[simulation]
       - name: Run test
-        working-directory: ./framework/e2e/e2e-run-heartbeat
-        run: python ../test_run_heartbeat.py ${{ matrix.engine }}
+        working-directory: ./framework/e2e/e2e-serverapp-heartbeat
+        run: python ../test_serverapp_heartbeat.py ${{ matrix.engine }}
         shell: bash
