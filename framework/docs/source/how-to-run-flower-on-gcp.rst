@@ -37,13 +37,14 @@ interface. Before proceeding, please make sure you have an account on GCP.
    project, by selecting the project picker button, i.e., the button with the project
    name appearing at the top of the page. This will open a new window from where you can
    press the ``NEW PROJECT`` button and create the new project and assign a name, e.g.,
-   ``flower-gcp``.
-2. **Enable Kubernetes API**: After project creating a GCP project, in the search bar at
-   the top of the GCP page type ``Kubernetes Engine API`` and click on it (it has an
-   ``API`` icon). This will redirect you to the ``Kubernetes Engine API`` Product page.
-   From there you need to select ``Enable``; if you see a ``Billing required`` pop-up,
-   please check with your administrator to continue, if necessary. After you enable it
-   you should see a green mark in the ``Kubernetes Engine API`` saying ``API Enabled``.
+   ``flower-gcp``. Before proceeding to the next step, please ensure that the
+   ``flower-gcp`` project is selected in the top left corner.
+2. **Enable Kubernetes API**: After the GCP project is created, in the search bar at the
+   top of the GCP page type ``Kubernetes Engine API`` and click on it (it has an ``API``
+   icon). This will redirect you to the ``Kubernetes Engine API`` Product page. From
+   there you need to select ``Enable``; if you see a ``Billing required`` pop-up, please
+   check with your administrator to continue, if necessary. After you enable it you
+   should see a green mark in the ``Kubernetes Engine API`` saying ``API Enabled``.
 3. **Create Kubernetes Cluster**: in the home page of the GCP project, under the
    ``Products`` section, look for the tab called ``Create a Kubernetes Cluster``. This
    will redirect you to a page where you will see an overview of the existing Kubernetes
@@ -101,7 +102,32 @@ tool to interact with Kubernetes clusters:
     gcloud components install kubectl
     kubectl version --client  # this will show the installed versions of the Client and Kustomize
 
-Now you need to configure ``kubectl`` to point to the GKE cluster you created in the
+Before proceeding with the next steps, please make sure that you have an active account
+selected, otherwise you will receive a ``ERROR:
+(gcloud.container.clusters.get-credentials)`` when running the commands below. To obtain
+new credentials or select an already authenticated account please run the following
+commands
+
+.. code-block:: bash
+
+    gcloud auth login  # to obtain new credentials
+    gcloud config set account <ACCOUNT>  # to select an already authenticated <ACCOUNT> that you want to use
+
+Now you need to set the ``project`` property in your current workspace using the unique
+project identifier, which can be found under the ID column when clicking on the project
+picker.
+
+.. code-block:: bash
+
+    # glocud config set project
+    gcloud config set project <YOUR_PROJECT_ID>  # <YOUR_PROJECT_ID> is not the project name but the project identifier, e.g., flower-gcp-XXXXXX
+
+.. note::
+
+    The <YOUR_PROJECT_ID> value will be different for each user, e.g., ``flower-gcp``,
+    ``flower-gcp-XXXXXX``. Its value will be used in subsequent steps, e.g.,
+
+The next step is to configure ``kubectl`` to point to the GKE cluster you created in the
 previous steps by using the name of the cluster, e.g., ``flower-numpy-example``, and the
 name of the region where the cluster was created:
 
@@ -144,14 +170,36 @@ repository using the ``gcloud`` CLI:
     gcloud services enable artifactregistry.googleapis.com
 
     # Create the repository
-    # gcloud artifacts repositories create YOUR_REPOSITORY_NAME
+    # gcloud artifacts repositories create <YOUR_REPOSITORY_NAME>
     gcloud artifacts repositories create flower-gcp-example-artifacts \
         --repository-format=docker \
         --location=us-central1
 
     # Configure Docker to Authenticate with Artifact Registry, e.g.:
-    #   gcloud auth configure-docker YOUR_REGION-docker.pkg.dev
+    #   gcloud auth configure-docker <YOUR_REGION>-docker.pkg.dev
     gcloud auth configure-docker us-central1-docker.pkg.dev  # we use us-central1 as our region
+
+Registry Validation & Permissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The steps below validate that the Google Artifact Registry has been properly configured,
+you have correct access and you have writing permissions to push the docker images
+discussed in the next section.
+
+.. code-block:: bash
+
+    gcloud artifacts repositories list --location=us-central1  # this will list the items under the project with ID <YOUR_PROJECT_ID>
+
+The above command shows that the ``flower-gcp-example-artifacts`` repository has been
+successfully created under the specified project with ID ``<YOUR_PROJECT_ID>``. Finally,
+you need to update your role and assign writing permissions to the artifact registry. To
+accomplish this, please run the following command:
+
+.. code-block:: bash
+
+    gcloud projects add-iam-policy-binding <YOUR_PROJECT_ID> \  # <YOUR_PROJECT_ID> is the ID of the project
+        --member="user:<YOUR_EMAIL@DOMAIN.COM>" \
+        --role="roles/artifactregistry.writer"
 
 Configure Flower App Docker Images
 ----------------------------------
@@ -167,7 +215,7 @@ We create the Flower NumPy app as follows:
 
 .. code-block:: bash
 
-    # flwr new YOUR_APP_NAME --framework YOUR_ML_FRAMEWORK --username YOUR_USERNAME
+    # flwr new <YOUR_APP_NAME> --framework <YOUR_ML_FRAMEWORK> --username <YOUR_USERNAME>
     flwr new flower-numpy-example --framework NumPy --username flower
 
 Create Docker Images
@@ -242,22 +290,25 @@ Tag Docker Images
 
 Before we are able to push our two newly locally created Docker images, we need to tag
 them with the Google Artifact Registry repository name and image name we created during
-the previous steps. If you have followed the earlier naming suggestions, then the
-project ID is ``flower-gcp``, the repository name is ``flower-gcp-example-artifacts``,
-the local Docker images names are ``flower_numpy_example_serverapp:0.0.1`` and
-``flower_numpy_example_numpy:0.0.1``, and the region is ``us-central1``. Putting all
-this together, the final commands you need to run to tag the ``ServerApp`` and
-``ClientApp`` Docker images are:
+the previous steps. If you have followed the earlier naming suggestions, the the
+repository name is ``flower-gcp-example-artifacts``, the local Docker images names are
+``flower_numpy_example_serverapp:0.0.1`` and ``flower_numpy_example_numpy:0.0.1``, and
+the region is ``us-central1``. Please note that the ``<YOUR_PROJECT_ID>`` is different
+from user to user so in the commands below we use the ``<YOUR_PROJECT_ID>`` placeholder.
+Putting all this together, the final commands you need to run to tag the ``ServerApp``
+and ``ClientApp`` Docker images are:
 
 .. code-block:: bash
 
     # docker tag YOUR_IMAGE_NAME YOUR_REGION-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY_NAME/YOUR_IMAGE_NAME:YOUR_TAG
 
     # ServerApp
-    docker tag flower_numpy_example_serverapp:0.0.1 us-central1-docker.pkg.dev/flower-gcp/flower-gcp-example-artifacts/flower_numpy_example_serverapp:0.0.1
+    # please change <YOUR_PROJECT_ID> to point to your project identifier
+    docker tag flower_numpy_example_serverapp:0.0.1 us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_serverapp:0.0.1
 
     # ClientApp
-    docker tag flower_numpy_example_clientapp:0.0.1 us-central1-docker.pkg.dev/flower-gcp/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
+    # please change <YOUR_PROJECT_ID> to point to your project identifier
+    docker tag flower_numpy_example_clientapp:0.0.1 us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
 
 Push Docker Images
 ~~~~~~~~~~~~~~~~~~
@@ -267,13 +318,15 @@ repository using the ``docker push`` command with the tagged name:
 
 .. code-block:: bash
 
-    # docker push YOUR_REGION-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY_NAME/YOUR_IMAGE_NAME:YOUR_TAG
+    # docker push YOUR_REGION-docker.pkg.dev/<YOUR_PROJECT_ID>/YOUR_REPOSITORY_NAME/YOUR_IMAGE_NAME:YOUR_TAG
 
     # ServerApp
-    docker push us-central1-docker.pkg.dev/flower-gcp/flower-gcp-example-artifacts/flower_numpy_example_serverapp:0.0.1
+    # please change <YOUR_PROJECT_ID> to point to your project identifier
+    docker push us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_serverapp:0.0.1
 
     # ClientApp
-    docker push us-central1-docker.pkg.dev/flower-gcp/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
+    # please change <YOUR_PROJECT_ID> to point to your project identifier
+    docker push us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
 
 Deploy Flower Infrastructure
 ----------------------------
@@ -430,7 +483,7 @@ deploy the ``Pods``.
             port: 9094
             targetPort: 9094
 
-.. dropdown:: serverapp-1-deployment.yaml
+.. dropdown:: serverapp-deployment.yaml
 
     .. code-block:: bash
 
@@ -450,7 +503,8 @@ deploy the ``Pods``.
             spec:
               containers:
               - name: serverapp
-                image: us-central1-docker.pkg.dev/flower-gcp/flower-gcp-example-artifacts/flower_numpy_example_serverapp:0.0.1
+                # please change <YOUR_PROJECT_ID> to point to your project identifier
+                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_serverapp:0.0.1
                 args:
                   - "--insecure"
                   - "--serverappio-api-address"
@@ -476,7 +530,8 @@ deploy the ``Pods``.
             spec:
               containers:
               - name: clientapp
-                image: us-central1-docker.pkg.dev/flower-gcp/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
+                # please change <YOUR_PROJECT_ID> to point to your project identifier
+                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
                 args:
                   - "--insecure"
                   - "--clientappio-api-address"
@@ -502,7 +557,8 @@ deploy the ``Pods``.
             spec:
               containers:
               - name: clientapp
-                image: us-central1-docker.pkg.dev/flower-gcp/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
+                # please change <YOUR_PROJECT_ID> to point to your project identifier
+                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
                 args:
                   - "--insecure"
                   - "--clientappio-api-address"
@@ -644,3 +700,37 @@ the logs from the run. The output should look like the one shared below.
     Please note that if you terminate or shut down the cluster, and create a new one,
     the value of the ``EXTERNAL_IP`` changes. In that case, you will have to update the
     ``pyproject.toml``.
+
+Shutdown Flower Infrastructure
+------------------------------
+
+If you would like to shutdown all the running pods deployed during this guide, you can
+use the ``kubectl delete`` command and pass the the ``.yaml`` file of each pod, as also
+shown in the helper script below.
+
+.. dropdown:: k8s-shutdown.sh
+
+    .. code-block:: bash
+
+        #! /bin/bash -l
+
+        # Change directory to the yaml files directory
+        cd "$(dirname "${BASH_SOURCE[0]}")"
+
+        kubectl delete -f superlink-deployment.yaml
+        sleep 0.1
+
+        kubectl delete -f supernode-1-deployment.yaml
+        sleep 0.1
+
+        kubectl delete -f supernode-2-deployment.yaml
+        sleep 0.1
+
+        kubectl delete -f ./serverapp-deployment.yaml
+        sleep 0.1
+
+        kubectl delete -f ./clientapp-1-deployment.yaml
+        sleep 0.1
+
+        kubectl delete -f ./clientapp-2-deployment.yaml
+        sleep 0.1
