@@ -23,17 +23,12 @@ from typing import Any, Callable, Optional, Union
 
 import pytest
 
+from ..app.error import Error
+from ..app.metadata import Metadata
 from . import RecordDict
 from .constant import MESSAGE_TTL_TOLERANCE
 from .date import now
-from .message import (
-    DEFAULT_TTL,
-    Error,
-    Message,
-    MessageInitializationError,
-    Metadata,
-    make_message,
-)
+from .message import DEFAULT_TTL, Message, MessageInitializationError, make_message
 from .serde_test import RecordMaker
 
 

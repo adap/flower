@@ -204,7 +204,7 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
         ConfigRecord
             The inflated ConfigRecord.
         """
-        if children is not None:
+        if children:
             raise ValueError("`ConfigRecord` objects do not have children.")
 
         obj_body = get_object_body(object_content, cls)
