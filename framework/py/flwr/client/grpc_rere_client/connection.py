@@ -31,7 +31,8 @@ from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTER
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
+from flwr.common.metadata import Metadata
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,

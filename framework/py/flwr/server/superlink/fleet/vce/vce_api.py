@@ -36,8 +36,8 @@ from flwr.common.constant import (
     PARTITION_ID_KEY,
     ErrorCode,
 )
+from flwr.common.error import Error
 from flwr.common.logger import log
-from flwr.common.message import Error
 from flwr.common.typing import Run
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
