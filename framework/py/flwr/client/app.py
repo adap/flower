@@ -54,10 +54,10 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
     ErrorCode,
 )
+from flwr.common.error import Error
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
-from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server

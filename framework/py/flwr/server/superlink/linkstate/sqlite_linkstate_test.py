@@ -21,7 +21,7 @@ from copy import deepcopy
 from parameterized import parameterized
 
 from flwr.common.constant import SUPERLINK_NODE_ID
-from flwr.common.message import Error
+from flwr.common.error import Error
 from flwr.common.serde import message_from_proto
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.linkstate.sqlite_linkstate import (

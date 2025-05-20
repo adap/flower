@@ -31,7 +31,8 @@ from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
+from flwr.common.metadata import Metadata
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run
