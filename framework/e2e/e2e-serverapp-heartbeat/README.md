@@ -1,3 +1,3 @@
 # Test ServerApp Heartbeat
 
-This app is designed solely to test heartbeats coming from `ServerApp` in `flwr-serverapp`/`flwr-simulation`.
+This app is designed solely to test app heartbeats coming from `flwr-serverapp` or `flwr-simulation`.
