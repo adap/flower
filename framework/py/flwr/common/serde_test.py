@@ -49,7 +49,8 @@ from . import (
     RecordDict,
     typing,
 )
-from .message import Error, Metadata
+from .error import Error
+from .metadata import Metadata
 from .serde import (
     array_from_proto,
     array_record_from_proto,
