@@ -23,3 +23,4 @@ dependencyResolutionManagement {
 rootProject.name = "Flower Intelligence"
 
 include(":flwr")
+include(":examples:hello-world")
