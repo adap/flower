@@ -39,6 +39,9 @@ from flwr.proto.recorddict_pb2 import MetricRecord as ProtoMetricRecord
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.proto.run_pb2 import Run as ProtoRun
 
+from ..app.error import Error
+from ..app.metadata import Metadata
+
 # pylint: enable=E0611
 from . import (
     Array,
@@ -49,8 +52,6 @@ from . import (
     RecordDict,
     typing,
 )
-from .error import Error
-from .metadata import Metadata
 from .serde import (
     array_from_proto,
     array_record_from_proto,

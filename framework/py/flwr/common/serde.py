@@ -44,6 +44,9 @@ from flwr.proto.transport_pb2 import (
     Status,
 )
 
+from ..app.error import Error
+from ..app.metadata import Metadata
+
 # pylint: enable=E0611
 from . import (
     Array,
@@ -55,9 +58,7 @@ from . import (
     typing,
 )
 from .constant import INT64_MAX_VALUE
-from .error import Error
 from .message import Message, make_message
-from .metadata import Metadata
 from .serde_utils import record_value_dict_from_proto, record_value_dict_to_proto
 
 #  === Parameters message ===
