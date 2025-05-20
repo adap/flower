@@ -27,7 +27,12 @@ from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0
 from ..app.error import Error
 from ..app.metadata import Metadata
 from .constant import MESSAGE_TTL_TOLERANCE
-from .inflatable import InflatableObject, add_header_to_object_body, get_object_body
+from .inflatable import (
+    InflatableObject,
+    add_header_to_object_body,
+    get_object_body,
+    get_object_children_ids_from_object_content,
+)
 from .logger import log
 from .record import RecordDict
 from .serde_utils import (
@@ -374,26 +379,39 @@ class Message(InflatableObject):
         Message
             The inflated Message.
         """
-        # Check children
-        if children and len(children) > 1:
-            # Message has a single children: the content (which is of type RecordDict)
-            raise ValueError("`Message` objects can have at most one children.")
-
         if children is None:
             children = {}
+
+        # Get the children id form the deflated message
+        children_ids = get_object_children_ids_from_object_content(object_content)
+
+        # If the message had content, only one children is possible
+        # If the nmessage carried an error, the returned listed should be empty
+        if children_ids != list(children.keys()):
+            raise ValueError(
+                "Unexpected set of `children`. "
+                f"Expected {children_ids} but got {children.keys()}."
+            )
 
         # Inflate content
         obj_body = get_object_body(object_content, cls)
         proto_message = ProtoMessage.FromString(obj_body)
 
-        # TODO: Must check if object_id of single children does match
-        # the object id stored as part of the body of this message
-
-        # Return inflated message
+        # Prepare content if error wasn't set in protobuf message
+        content = (
+            cast(RecordDict, children[children_ids[0]])
+            if not proto_message.HasField("error")
+            else None
+        )
+        # Return message
         return make_message(
             metadata=metadata_from_proto(proto_message.metadata),
-            content=list(children.values())[0],  # type: ignore
-            error=error_from_proto(proto_message.error),
+            content=content,
+            error=(
+                error_from_proto(proto_message.error)
+                if proto_message.HasField("error")
+                else None
+            ),
         )
 
 

@@ -31,9 +31,9 @@ from flwr.proto.recorddict_pb2 import (
     UintList,
 )
 
+from ..app.error import Error
+from ..app.metadata import Metadata
 from .constant import INT64_MAX_VALUE
-from .error import Error
-from .metadata import Metadata
 from .record.typeddict import TypedDict
 
 # pylint: enable=E0611
