@@ -18,9 +18,11 @@
 from .in_memory_nodestate import InMemoryNodeState as InMemoryNodeState
 from .nodestate import NodeState as NodeState
 from .nodestate_factory import NodeStateFactory as NodeStateFactory
+from .sqlite_nodestate import SqliteNodeState as SqliteNodeState
 
 __all__ = [
     "InMemoryNodeState",
     "NodeState",
     "NodeStateFactory",
+    "SqliteNodeState",
 ]

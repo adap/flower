@@ -36,13 +36,13 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.record import ConfigRecord
+from flwr.common.state_utils import generate_rand_int_from_bytes
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
 
 from .utils import (
     check_node_availability_for_in_message,
-    generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
     verify_found_message_replies,

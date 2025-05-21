@@ -43,7 +43,7 @@ from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 
-from ..app import start_client_internal
+from ..app import DATABASE, start_client_internal
 from ..clientapp.utils import get_load_client_app_fn
 
 
@@ -95,6 +95,7 @@ def run_supernode() -> None:
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
         clientappio_api_address=args.clientappio_api_address,
+        database=args.database,
     )
 
 
@@ -133,6 +134,15 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         default=CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
         help="ClientAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
         f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
+    )
+    parser.add_argument(
+        "--database",
+        help="A string representing the path to the database "
+        "file that will be opened. Note that passing ':memory:' "
+        "will open a connection to a database that is in RAM, "
+        "instead of on disk. If nothing is provided, "
+        "Flower will just create a state in memory.",
+        default=DATABASE,
     )
 
     return parser

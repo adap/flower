@@ -29,6 +29,7 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.serde import message_from_proto
+from flwr.common.state_utils import generate_rand_int_from_bytes
 from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.linkstate import (
     InMemoryLinkState,
@@ -36,7 +37,6 @@ from flwr.server.superlink.linkstate import (
     SqliteLinkState,
 )
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
-from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .inmemory_grid import InMemoryGrid
 
