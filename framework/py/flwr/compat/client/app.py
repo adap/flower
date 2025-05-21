@@ -44,7 +44,6 @@ from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_client.connection import grpc_connection
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.client.message_handler.message_handler import handle_control_message
-from flwr.client.nodestate.nodestate_factory import NodeStateFactory
 from flwr.client.numpy_client import NumPyClient
 from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.client.typing import ClientFnExt
@@ -71,6 +70,7 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
+from flwr.supernode.nodestate import NodeStateFactory
 
 
 def _check_actionable_client(
