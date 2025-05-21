@@ -44,11 +44,11 @@ simulated Flower federations from deployed ones.
       - Parallel execution mode across a network of physical machines/devices or
         computing environment.
     - - **Communication**
-      - Managed via in-memory communication.
-      - Managed via Flower Deployment Runtime through TLS-enabled gRPC.
+      - In-memory communication.
+      - TLS-enabled gRPC.
     - - **Server-side Infrastructure**
-      - Simulation runtime coordinates the spawning of workers (python process) which
-        play the role of `simulated` SuperNodes. There is no SuperLink.
+      - Simulation runtime coordinates the spawning of multiple workers (Python process) which
+        act as `simulated` SuperNodes. There is no SuperLink.
       - The SuperLink awaits for SuperNodes to connect. User interface with the
         SuperLink using the `Flower CLI <ref-api-cli.html>`_.
     - - **Server-side App execution**
@@ -58,7 +58,7 @@ simulated Flower federations from deployed ones.
         runs independently from the SuperLink and communicates with it over gRPC via the
         ServerAppIO API.
     - - **Client-side Infrastructure**
-      - None. The Simulation runtime is standalone.
+      - None. The simulation runtime is self-contained.
       - SuperNodes connect to the SuperLink via TLS-enabled gRPC using the Fleet API.
         Node authentication can be enabled.
     - - **Client-side App execution**
