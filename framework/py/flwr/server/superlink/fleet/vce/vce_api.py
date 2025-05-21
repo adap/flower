@@ -26,6 +26,7 @@ from queue import Empty, Queue
 from time import sleep
 from typing import Callable, Optional
 
+from flwr.app.error import Error
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.clientapp.utils import get_load_client_app_fn
 from flwr.client.run_info_store import DeprecatedRunInfoStore
@@ -37,7 +38,6 @@ from flwr.common.constant import (
     ErrorCode,
 )
 from flwr.common.logger import log
-from flwr.common.message import Error
 from flwr.common.typing import Run
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
