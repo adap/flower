@@ -23,6 +23,7 @@ from typing import Optional
 
 import grpc
 
+from flwr.app.error import Error
 from flwr.cli.install import install_from_fab
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import Context, Message
@@ -32,7 +33,6 @@ from flwr.common.constant import CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS, ErrorCo
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
-from flwr.common.message import Error
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import (
     context_from_proto,
