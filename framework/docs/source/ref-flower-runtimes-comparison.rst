@@ -1,9 +1,9 @@
-:og:description: Flower simulation versus deployment runtime
+:og:description: Flower runtimes comparison
 .. meta::
-    :description: Flower simulation versus deployment runtime
+    :description: Flower runtimes comparison
 
-Simulation vs. Deployment Runtime
-=================================
+Flower Runtimes Comparison
+==========================
 
 Flower Apps can be executed with both with `simulation <how-to-run-simulations.html>`_
 or `deployment <how-to-run-flower-with-deployment-engine.html>`_ runtimes. Switching

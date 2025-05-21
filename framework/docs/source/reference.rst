@@ -26,7 +26,7 @@ Information-oriented API reference and other reference material.
     ref-example-projects
     ref-telemetry
     ref-changelog
-    ref-simulation-deployment-runtimes
+    ref-flower-runtimes-comparison
     ref-flower-network-communication
     ref-exit-codes-dir
     ref-faq
