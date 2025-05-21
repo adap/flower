@@ -382,7 +382,7 @@ class Message(InflatableObject):
         if children is None:
             children = {}
 
-        # Get the children id form the deflated message
+        # Get the children id from the deflated message
         children_ids = get_object_children_ids_from_object_content(object_content)
 
         # If the message had content, only one children is possible
