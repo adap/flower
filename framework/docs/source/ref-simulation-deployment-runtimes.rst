@@ -12,8 +12,9 @@ executing the `flwr run` command via the `Flower CLI <ref-api-cli.html>`_.
 
 While Flower Apps can run in both simulation and deployment without making changes to
 their code, there are some differences on how they get executed depending on the
-runtime. The following table outlines the key characteristics that differentiate
-simulated Flower federations from deployed ones.
+runtime. The following table outlines the key characteristics that differ when executing
+a Flower App in a Flower federation with the simulation runtime from another using the
+deployment runtime.
 
 .. list-table::
     :widths: 15 25 25
@@ -47,8 +48,8 @@ simulated Flower federations from deployed ones.
       - In-memory communication.
       - TLS-enabled gRPC.
     - - **Server-side Infrastructure**
-      - Simulation runtime coordinates the spawning of multiple workers (Python process) which
-        act as `simulated` SuperNodes. There is no SuperLink.
+      - Simulation runtime coordinates the spawning of multiple workers (Python process)
+        which act as `simulated` SuperNodes. There is no SuperLink.
       - The SuperLink awaits for SuperNodes to connect. User interface with the
         SuperLink using the `Flower CLI <ref-api-cli.html>`_.
     - - **Server-side App execution**
