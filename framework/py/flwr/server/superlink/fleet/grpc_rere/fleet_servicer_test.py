@@ -27,6 +27,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.object_store import ObjectStoreFactory
 from flwr.common.typing import RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -55,6 +56,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         self.state = state_factory.state()
         ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()
+        objectstore_factory = ObjectStoreFactory()
 
         self.status_to_msg = _STATUS_TO_MSG
 
@@ -62,6 +64,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
             ffs_factory,
+            objectstore_factory,
             None,
             None,
         )

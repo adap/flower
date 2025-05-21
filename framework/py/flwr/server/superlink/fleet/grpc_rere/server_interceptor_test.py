@@ -31,6 +31,7 @@ from flwr.common.constant import (
     TIMESTAMP_HEADER,
     Status,
 )
+from flwr.common.object_store import ObjectStoreFactory
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     public_key_to_bytes,
@@ -73,6 +74,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state = state_factory.state()
         ffs_factory = FfsFactory(".")
         self.ffs = ffs_factory.ffs()
+        objectstore_factory = ObjectStoreFactory()
         self.state.store_node_public_keys({public_key_to_bytes(self.node_pk)})
 
         self._server_interceptor = AuthenticateServerInterceptor(state_factory)
@@ -80,6 +82,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
             ffs_factory,
+            objectstore_factory,
             None,
             [self._server_interceptor],
         )

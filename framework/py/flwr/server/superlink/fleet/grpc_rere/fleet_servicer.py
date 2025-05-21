@@ -22,6 +22,7 @@ from google.protobuf.json_format import MessageToDict
 
 from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
+from flwr.common.object_store import ObjectStoreFactory
 from flwr.common.typing import InvalidRunStatusException
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -56,10 +57,14 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
     def __init__(
-        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+        self,
+        state_factory: LinkStateFactory,
+        ffs_factory: FfsFactory,
+        objectstore_factory: ObjectStoreFactory,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
+        self.objectstore_factory = objectstore_factory
 
     def CreateNode(
         self, request: CreateNodeRequest, context: grpc.ServicerContext
