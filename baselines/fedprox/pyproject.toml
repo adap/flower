@@ -125,7 +125,7 @@ clientapp = "fedprox.client_app:app"
 [tool.flwr.app.config]
 [tool.flwr.app.config.algorithm]
 name = "FedProx"
-num-server-rounds = 5
+num-server-rounds = 100
 fraction-fit = 0.01
 fraction-evaluate= 0.0
 min-evaluate-clients= 0
