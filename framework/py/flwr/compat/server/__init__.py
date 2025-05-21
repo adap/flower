@@ -12,24 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client."""
-
-
-from ..compat.client.app import start_client as start_client  # Deprecated
-from ..compat.client.app import start_numpy_client as start_numpy_client  # Deprecated
-from .client import Client as Client
-from .client_app import ClientApp as ClientApp
-from .numpy_client import NumPyClient as NumPyClient
-from .typing import ClientFn as ClientFn
-from .typing import ClientFnExt as ClientFnExt
-
-__all__ = [
-    "Client",
-    "ClientApp",
-    "ClientFn",
-    "ClientFnExt",
-    "NumPyClient",
-    "mod",
-    "start_client",
-    "start_numpy_client",
-]
+"""Legacy components previously located in ``flwr.server``."""

@@ -18,17 +18,24 @@
 import time
 from collections import namedtuple
 from contextlib import ExitStack
+from copy import copy
 from itertools import product
 from typing import Any, Callable, Optional, Union
 
 import pytest
 
+from ..app.error import Error
+from ..app.metadata import Metadata
 from . import RecordDict
 from .constant import MESSAGE_TTL_TOLERANCE
 from .date import now
-from .error import Error
+from .inflatable import (
+    get_object_body,
+    get_object_children_ids_from_object_content,
+    get_object_type_from_object_content,
+)
 from .message import DEFAULT_TTL, Message, MessageInitializationError, make_message
-from .metadata import Metadata
+from .serde import message_to_proto
 from .serde_test import RecordMaker
 
 
@@ -373,3 +380,74 @@ def test_create_reply_message_failure(args: Any, kwargs: dict[str, Any]) -> None
     # Execute
     with pytest.raises(MessageInitializationError):
         Message(*args, reply_to=msg, **kwargs)
+
+
+def test_inflate_deflate_message_with_content() -> None:
+    """Test inflation and deflation of a Message carrying a RecordDict."""
+    # Prepare
+    msg = make_message(content=RecordDict(), metadata=RecordMaker(1).metadata())
+
+    # Assert
+    # Expected children
+    assert msg.children == {msg.content.object_id: msg.content}
+
+    msg_b = msg.deflate()
+
+    # Assert
+    # Class name matches
+    assert get_object_type_from_object_content(msg_b) == msg.__class__.__qualname__
+    # Header contains the Object ID of the message content
+    assert get_object_children_ids_from_object_content(msg_b) == [msg.content.object_id]
+    # Body of deflated Message matches its direct protobuf serialization
+    # when the content is removed
+    msg_copy = copy(msg)
+    msg_copy.content = None  # type: ignore
+    assert message_to_proto(msg_copy).SerializeToString(
+        deterministic=True
+    ) == get_object_body(msg_b, Message)
+
+    msg_ = Message.inflate(msg_b, children=msg.children)
+    # Assert
+    # Both objects are identical
+    assert msg.object_id == msg_.object_id
+
+    # Assert
+    # Inflate but passing no children
+    with pytest.raises(ValueError):
+        Message.inflate(msg_b)
+    # Inflate but passing children with wrong Object ID
+    with pytest.raises(ValueError):
+        Message.inflate(msg_b, children={"123": RecordDict()})
+
+
+def test_inflate_deflate_message_with_error() -> None:
+    """Test inflation and deflation of a Message carrying an Error."""
+    # Prepare
+    msg = make_message(error=Error(code=1), metadata=RecordMaker(1).metadata())
+
+    # Assert
+    # Expected children
+    assert msg.children is None
+
+    msg_b = msg.deflate()
+
+    # Assert
+    # Class name matches
+    assert get_object_type_from_object_content(msg_b) == msg.__class__.__qualname__
+    # Header contains the Object ID of the message content
+    assert get_object_children_ids_from_object_content(msg_b) == []
+    # Body of deflated Message matches its direct protobuf serialization
+    assert message_to_proto(msg).SerializeToString(
+        deterministic=True
+    ) == get_object_body(msg_b, Message)
+
+    # Inflate without passing any children
+    msg_ = Message.inflate(msg_b)
+    # Assert
+    # Both objects are identical
+    assert msg.object_id == msg_.object_id
+
+    # Assert
+    # Inflate but passing children
+    with pytest.raises(ValueError):
+        Message.inflate(msg_b, children={"123": RecordDict()})
