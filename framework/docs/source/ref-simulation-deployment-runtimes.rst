@@ -28,7 +28,7 @@ simulated Flower federations from deployed ones.
       - Deploy validated use cases in production, real-world privacy-preserving
         applications.
     - - **Environment**
-      - Local or remote, standalone, controlled.
+      - Local or remote, single-node or multi-node, controlled.
       - Distributed, remote.
     - - **Data**
       - Simulated data partitions, public or private datasets or artificially generated
