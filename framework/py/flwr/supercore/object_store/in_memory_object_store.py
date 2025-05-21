@@ -17,7 +17,8 @@
 
 from typing import Optional
 
-from ..inflatable import get_object_id, is_valid_sha256_hash
+from flwr.common.inflatable import get_object_id, is_valid_sha256_hash
+
 from .object_store import ObjectStore
 
 
