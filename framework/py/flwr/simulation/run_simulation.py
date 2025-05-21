@@ -38,6 +38,7 @@ from flwr.common.logger import (
     update_console_handler,
     warn_deprecated_feature_with_example,
 )
+from flwr.common.state_utils import generate_rand_int_from_bytes
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.server.grid import Grid, InMemoryGrid
 from flwr.server.run_serverapp import run as _run
@@ -46,7 +47,6 @@ from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
-from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
