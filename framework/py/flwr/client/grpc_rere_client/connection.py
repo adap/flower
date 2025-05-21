@@ -25,13 +25,14 @@ from typing import Callable, Optional, Union, cast
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from flwr.app.metadata import Metadata
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
