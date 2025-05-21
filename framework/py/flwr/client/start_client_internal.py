@@ -41,7 +41,6 @@ from flwr.client.clientapp.clientappio_servicer import (
     ClientAppIoServicer,
 )
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
-from flwr.client.grpc_client.connection import grpc_connection
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.client.message_handler.message_handler import handle_control_message
 from flwr.client.run_info_store import DeprecatedRunInfoStore
@@ -57,7 +56,6 @@ from flwr.common.constant import (
     RUN_ID_NUM_BYTES,
     SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
-    TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
@@ -101,7 +99,7 @@ def start_client_internal(
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
-    transport: Optional[str] = None,
+    transport: str,
     authentication_keys: Optional[
         tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
@@ -142,10 +140,10 @@ def start_client_internal(
     insecure : Optional[bool] (default: None)
         Starts an insecure gRPC connection when True. Enables HTTPS connection
         when False, using system certificates if `root_certificates` is None.
-    transport : Optional[str] (default: None)
+    transport : str
         Configure the transport layer. Allowed values:
-        - 'grpc-bidi': gRPC, bidirectional streaming
-        - 'grpc-rere': gRPC, request-response (experimental)
+        - 'grpc-rere': gRPC, request-response
+        - 'grpc-adapter': gRPC via 3rd party adapter (experimental)
         - 'rest': HTTP (experimental)
     authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
         Tuple containing the elliptic curve private key and public key for
@@ -276,32 +274,36 @@ def start_client_internal(
         ) as conn:
             receive, send, create_node, delete_node, get_run, get_fab = conn
 
+            # Cast the following functions to the correct types
+            # They are all guaranteed to be present in the supported transport types
+            create_node = cast(
+                Callable[[], Optional[int]],
+                create_node,
+            )
+            delete_node = cast(
+                Callable[[], None],
+                delete_node,
+            )
+            get_run = cast(
+                Callable[[int], Run],
+                get_run,
+            )
+            get_fab = cast(
+                Callable[[str, int], Fab],
+                get_fab,
+            )
+
             # Register node when connecting the first time
             if run_info_store is None:
-                if create_node is None:
-                    if transport not in ["grpc-bidi", None]:
-                        raise NotImplementedError(
-                            "All transports except `grpc-bidi` require "
-                            "an implementation for `create_node()`.'"
-                        )
-                    # gRPC-bidi doesn't have the concept of node_id,
-                    # so we set it to -1
-                    run_info_store = DeprecatedRunInfoStore(
-                        node_id=-1,
-                        node_config={},
-                    )
-                else:
-                    # Call create_node fn to register node
-                    # and store node_id in state
-                    if (node_id := create_node()) is None:
-                        raise ValueError(
-                            "Failed to register SuperNode with the SuperLink"
-                        )
-                    state.set_node_id(node_id)
-                    run_info_store = DeprecatedRunInfoStore(
-                        node_id=state.get_node_id(),
-                        node_config=node_config,
-                    )
+                # Call create_node fn to register node
+                # and store node_id in state
+                if (node_id := create_node()) is None:
+                    raise ValueError("Failed to register SuperNode with the SuperLink")
+                state.set_node_id(node_id)
+                run_info_store = DeprecatedRunInfoStore(
+                    node_id=state.get_node_id(),
+                    node_config=node_config,
+                )
 
             # pylint: disable=too-many-nested-blocks
             while True:
@@ -336,11 +338,7 @@ def start_client_internal(
                     # Get run info
                     run_id = message.metadata.run_id
                     if run_id not in runs:
-                        if get_run is not None:
-                            runs[run_id] = get_run(run_id)
-                        # If get_run is None, i.e., in grpc-bidi mode
-                        else:
-                            runs[run_id] = Run.create_empty(run_id=run_id)
+                        runs[run_id] = get_run(run_id)
 
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
@@ -443,12 +441,6 @@ def start_client_internal(
                             reply_message = client_app(message=message, context=context)
                     except Exception as ex:  # pylint: disable=broad-exception-caught
 
-                        # Legacy grpc-bidi
-                        if transport in ["grpc-bidi", None]:
-                            log(ERROR, "Client raised an exception.", exc_info=ex)
-                            # Raise exception, crash process
-                            raise ex
-
                         # Don't update/change DeprecatedRunInfoStore
 
                         e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
@@ -509,7 +501,7 @@ def start_client_internal(
         time.sleep(sleep_duration)
 
 
-def _init_connection(transport: Optional[str], server_address: str) -> tuple[
+def _init_connection(transport: str, server_address: str) -> tuple[
     Callable[
         [
             str,
@@ -543,10 +535,6 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-    # Set the default transport layer
-    if transport is None:
-        transport = TRANSPORT_TYPE_GRPC_BIDI
-
     # Use either gRPC bidirectional streaming or REST request/response
     if transport == TRANSPORT_TYPE_REST:
         try:
@@ -562,8 +550,6 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
         connection, error_type = grpc_request_response, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
         connection, error_type = grpc_adapter, RpcError
-    elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection, error_type = grpc_connection, RpcError
     else:
         raise ValueError(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
