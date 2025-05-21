@@ -411,6 +411,14 @@ def test_inflate_deflate_message_with_content() -> None:
     # Both objects are identical
     assert msg.object_id == msg_.object_id
 
+    # Assert
+    # Inflate but passing no children
+    with pytest.raises(ValueError):
+        Message.inflate(msg_b)
+    # Inflate but passing children with wrong Object ID
+    with pytest.raises(ValueError):
+        Message.inflate(msg_b, children={"123": RecordDict()})
+
 
 def test_inflate_deflate_message_with_error() -> None:
     """Test inflation and deflation of a Message carrying an Error."""
@@ -438,3 +446,8 @@ def test_inflate_deflate_message_with_error() -> None:
     # Assert
     # Both objects are identical
     assert msg.object_id == msg_.object_id
+
+    # Assert
+    # Inflate but passing children
+    with pytest.raises(ValueError):
+        Message.inflate(msg_b, children={"123": RecordDict()})
