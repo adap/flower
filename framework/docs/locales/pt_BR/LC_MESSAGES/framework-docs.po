@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-10 00:07+0000\n"
+"POT-Creation-Date: 2025-05-21 00:07+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -3193,7 +3193,7 @@ msgstr ""
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:39
 msgid ""
 "Download the `compose.yml "
-"<https://github.com/adap/flower/blob/main/src/docker/complete/compose.yml>`_"
+"<https://github.com/adap/flower/blob/main/framework/docker/complete/compose.yml>`_"
 " file into the example directory:"
 msgstr ""
 
@@ -9532,10 +9532,10 @@ msgstr ""
 msgid "Return client (itself)."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Parameters.rst:2
-#: flwr.client.app.start_client flwr.client.app.start_numpy_client
-#: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
-#: flwr.client.client.Client.get_parameters
+#: ../../source/ref-api/flwr.common.Parameters.rst:2 flwr.app.error.Error
+#: flwr.app.metadata.Metadata flwr.client.app.start_client
+#: flwr.client.app.start_numpy_client flwr.client.client.Client.evaluate
+#: flwr.client.client.Client.fit flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
 #: flwr.client.client_app.ClientApp.evaluate
 #: flwr.client.client_app.ClientApp.query
@@ -9545,16 +9545,19 @@ msgstr ""
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
-#: flwr.common.context.Context flwr.common.message.Error
-#: flwr.common.message.Message flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply flwr.common.message.Metadata
-#: flwr.common.record.array.Array flwr.common.record.array.Array.inflate
+#: flwr.common.context.Context flwr.common.message.Message
+#: flwr.common.message.Message.create_error_reply
+#: flwr.common.message.Message.create_reply flwr.common.record.array.Array
+#: flwr.common.record.array.Array.inflate
 #: flwr.common.record.arrayrecord.ArrayRecord
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate
 #: flwr.common.record.configrecord.ConfigRecord
 #: flwr.common.record.configrecord.ConfigRecord.inflate
 #: flwr.common.record.metricrecord.MetricRecord
 #: flwr.common.record.metricrecord.MetricRecord.inflate
-#: flwr.common.record.recorddict.RecordDict flwr.server.app.start_server
+#: flwr.common.record.recorddict.RecordDict
+#: flwr.common.record.recorddict.RecordDict.inflate
+#: flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.register
 #: flwr.server.client_manager.ClientManager.unregister
 #: flwr.server.client_manager.SimpleClientManager.register
@@ -9613,8 +9616,10 @@ msgstr ""
 #: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply
 #: flwr.common.record.array.Array.inflate
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate
 #: flwr.common.record.configrecord.ConfigRecord.inflate
 #: flwr.common.record.metricrecord.MetricRecord.inflate
+#: flwr.common.record.recorddict.RecordDict.inflate
 #: flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.num_available
 #: flwr.server.client_manager.ClientManager.register
@@ -9653,8 +9658,10 @@ msgstr ""
 #: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply
 #: flwr.common.record.array.Array.inflate
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate
 #: flwr.common.record.configrecord.ConfigRecord.inflate
 #: flwr.common.record.metricrecord.MetricRecord.inflate
+#: flwr.common.record.recorddict.RecordDict.inflate
 #: flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.num_available
 #: flwr.server.client_manager.ClientManager.register
@@ -9709,10 +9716,10 @@ msgstr ""
 msgid "The current client properties."
 msgstr ""
 
+#: flwr.app.error.Error:1 flwr.app.metadata.Metadata:1
 #: flwr.client.client_app.ClientApp:1 flwr.client.mod.localdp_mod.LocalDpMod:1
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
-#: flwr.common.context.Context:1 flwr.common.message.Error:1
-#: flwr.common.message.Message:1 flwr.common.message.Metadata:1
+#: flwr.common.context.Context:1 flwr.common.message.Message:1
 #: flwr.common.typing.ClientMessage:1 flwr.common.typing.DisconnectRes:1
 #: flwr.common.typing.EvaluateIns:1 flwr.common.typing.EvaluateRes:1
 #: flwr.common.typing.FitIns:1 flwr.common.typing.FitRes:1
@@ -10543,7 +10550,7 @@ msgid ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
-#: flwr.common.message.Error:1 of
+#: flwr.app.error.Error:1 of
 msgid "The class storing information about an error that occurred."
 msgstr ""
 
@@ -10672,7 +10679,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
-#: flwr.common.message.Metadata:1 of
+#: flwr.app.metadata.Metadata:1 of
 msgid "The class representing metadata associated with the current message."
 msgstr ""
 
@@ -10913,7 +10920,9 @@ msgid "Create Array from PyTorch tensor."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
-msgid ":py:obj:`inflate <flwr.common.Array.inflate>`\\ \\(object\\_content\\)"
+msgid ""
+":py:obj:`inflate <flwr.common.Array.inflate>`\\ \\(object\\_content\\[\\,"
+" children\\]\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
@@ -10931,6 +10940,7 @@ msgid "Return the array as a NumPy array."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Array.rst:40
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:76
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:25
 #: ../../source/ref-api/flwr.common.Code.rst:19
 #: ../../source/ref-api/flwr.common.ConfigRecord.rst:61
@@ -10954,9 +10964,10 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.MetricRecord.rst:61
 #: ../../source/ref-api/flwr.common.MetricsRecord.rst:61
 #: ../../source/ref-api/flwr.common.Parameters.rst:25
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:76
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
-#: ../../source/ref-api/flwr.common.RecordDict.rst:52
-#: ../../source/ref-api/flwr.common.RecordSet.rst:52
+#: ../../source/ref-api/flwr.common.RecordDict.rst:58
+#: ../../source/ref-api/flwr.common.RecordSet.rst:58
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:25
 #: ../../source/ref-api/flwr.common.Status.rst:25
 #: ../../source/ref-api/flwr.server.Driver.rst:43
@@ -10967,31 +10978,59 @@ msgstr ""
 msgid "Attributes"
 msgstr ""
 
-#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
+#: flwr.common.Array.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.Array.children>`\\"
+msgstr ""
+
+#: flwr.common.Array.children:1 flwr.common.Array.children:1:<autosummary>:1
+#: flwr.common.ConfigRecord.children:1
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigsRecord.children:1
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1
+#: flwr.common.MetricRecord.children:1
+#: flwr.common.MetricRecord.children:1:<autosummary>:1
+#: flwr.common.MetricsRecord.children:1
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
+msgid "Get all child objects as a dictionary or None if there are no children."
+msgstr ""
+
+#: flwr.common.Array.children:1:<autosummary>:1 of
 msgid ":py:obj:`object_id <flwr.common.Array.object_id>`\\"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
-#: flwr.common.Array.object_id:1 flwr.common.ConfigRecord.object_id:1
-#: flwr.common.ConfigsRecord.object_id:1 flwr.common.MetricRecord.object_id:1
+#: flwr.common.Array.children:1:<autosummary>:1 flwr.common.Array.object_id:1
+#: flwr.common.ArrayRecord.children:1:<autosummary>:1
+#: flwr.common.ArrayRecord.object_id:1
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigRecord.object_id:1
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigsRecord.object_id:1
+#: flwr.common.MetricRecord.children:1:<autosummary>:1
+#: flwr.common.MetricRecord.object_id:1
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1
 #: flwr.common.MetricsRecord.object_id:1
-#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
+#: flwr.common.ParametersRecord.children:1:<autosummary>:1
+#: flwr.common.ParametersRecord.object_id:1
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1
+#: flwr.common.RecordDict.object_id:1
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1
+#: flwr.common.RecordSet.object_id:1 of
 msgid "Get object_id."
 msgstr ""
 
-#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
+#: flwr.common.Array.children:1:<autosummary>:1 of
 msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 msgstr ""
 
-#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
+#: flwr.common.Array.children:1:<autosummary>:1 of
 msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
 msgstr ""
 
-#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
+#: flwr.common.Array.children:1:<autosummary>:1 of
 msgid ":py:obj:`stype <flwr.common.Array.stype>`\\"
 msgstr ""
 
-#: flwr.common.record.array.Array.deflate:1:<autosummary>:1 of
+#: flwr.common.Array.children:1:<autosummary>:1 of
 msgid ":py:obj:`data <flwr.common.Array.data>`\\"
 msgstr ""
 
@@ -10999,7 +11038,13 @@ msgstr ""
 msgid "The deflated object content of the Array."
 msgstr ""
 
-#: flwr.common.record.array.Array.inflate:6 of
+#: flwr.common.record.array.Array.inflate:5 of
+msgid ""
+"Must be ``None``. ``Array`` does not support child objects. Providing any"
+" children will raise a ``ValueError``."
+msgstr ""
+
+#: flwr.common.record.array.Array.inflate:9 of
 msgid "The inflated Array."
 msgstr ""
 
@@ -11010,7 +11055,8 @@ msgstr ""
 #: flwr.common.record.arrayrecord.ArrayRecord:1 of
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
-"[:py:class:`str`, :py:class:`~flwr.common.record.array.Array`]"
+"[:py:class:`str`, :py:class:`~flwr.common.record.array.Array`], "
+":py:class:`~flwr.common.inflatable.InflatableObject`"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:3 of
@@ -11103,144 +11149,175 @@ msgstr ""
 msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays)::"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.ArrayRecord.clear>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.ArrayRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 #: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.count_bytes:1
 #: flwr.common.record.configrecord.ConfigRecord.count_bytes:1
 #: flwr.common.record.metricrecord.MetricRecord.count_bytes:1 of
 msgid "Return number of Bytes stored in this object."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.ArrayRecord.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: flwr.common.record.arrayrecord.ArrayRecord.deflate:1 of
+msgid "Deflate the ArrayRecord."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_array_dict <flwr.common.ArrayRecord.from_array_dict>`\\ "
 "\\(array\\_dict\\, \\*\\[\\, keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.from_array_dict:1 of
 msgid "Create ArrayRecord from a dictionary of :class:`Array`."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_numpy_ndarrays "
 "<flwr.common.ArrayRecord.from_numpy_ndarrays>`\\ \\(ndarrays\\, \\*\\[\\,"
 " keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.from_numpy_ndarrays:1 of
 msgid "Create ArrayRecord from a list of NumPy ``ndarray``."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_torch_state_dict "
 "<flwr.common.ArrayRecord.from_torch_state_dict>`\\ \\(state\\_dict\\, "
 "\\*\\[\\, ...\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.from_torch_state_dict:1 of
 msgid "Create ArrayRecord from PyTorch ``state_dict``."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.ArrayRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.ArrayRecord.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate:1 of
+msgid "Inflate an ArrayRecord from bytes."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.ArrayRecord.items>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.ArrayRecord.keys>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.ArrayRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 #: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 #: collections.abc.MutableMapping.pop:1 of
 msgid "If key is not found, d is returned if given, otherwise KeyError is raised."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.ArrayRecord.popitem>`\\ \\(\\)"
 msgstr ""
 
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 #: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 #: collections.abc.MutableMapping.popitem:1 of
 msgid "as a 2-tuple; but raise KeyError if D is empty."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.ArrayRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`to_numpy_ndarrays <flwr.common.ArrayRecord.to_numpy_ndarrays>`\\"
 " \\(\\*\\[\\, keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.to_numpy_ndarrays:1 of
 msgid "Return the ArrayRecord as a list of NumPy ``ndarray``."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`to_torch_state_dict "
 "<flwr.common.ArrayRecord.to_torch_state_dict>`\\ \\(\\*\\[\\, "
 "keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.to_torch_state_dict:1 of
 msgid "Return the ArrayRecord as a PyTorch ``state_dict``."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.ArrayRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 #: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 #: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 #: collections.abc.MutableMapping.update:1 of
 msgid ""
 "If E present and has a .keys() method, does:     for k in E: D[k] = E[k] "
@@ -11248,8 +11325,23 @@ msgid ""
 "v In either case, this is followed by: for k, v in F.items(): D[k] = v"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.ArrayRecord.values>`\\ \\(\\)"
+msgstr ""
+
+#: flwr.common.ArrayRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.ArrayRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.ArrayRecord.children:1
+#: flwr.common.ArrayRecord.children:1:<autosummary>:1
+#: flwr.common.ParametersRecord.children:1
+#: flwr.common.ParametersRecord.children:1:<autosummary>:1 of
+msgid "Return a dictionary of Arrays with their Object IDs as keys."
+msgstr ""
+
+#: flwr.common.ArrayRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.ArrayRecord.object_id>`\\"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord.count_bytes:3 of
@@ -11257,6 +11349,20 @@ msgid ""
 "Note that a small amount of Bytes might also be included in this counting"
 " that correspond to metadata of the serialized object (e.g. of NumPy "
 "array) needed for deseralization."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate:3 of
+msgid "The deflated object content of the ArrayRecord."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate:5 of
+msgid ""
+"Dictionary of children InflatableObjects mapped to their Object IDs. "
+"These children enable the full inflation of the ArrayRecord."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate:9 of
+msgid "The inflated ArrayRecord."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:2
@@ -11414,7 +11520,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`inflate <flwr.common.ConfigRecord.inflate>`\\ "
-"\\(object\\_content\\)"
+"\\(object\\_content\\[\\, children\\]\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
@@ -11455,7 +11561,11 @@ msgstr ""
 msgid ":py:obj:`values <flwr.common.ConfigRecord.values>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.ConfigRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1 of
 msgid ":py:obj:`object_id <flwr.common.ConfigRecord.object_id>`\\"
 msgstr ""
 
@@ -11467,7 +11577,13 @@ msgstr ""
 msgid "The deflated object content of the ConfigRecord."
 msgstr ""
 
-#: flwr.common.record.configrecord.ConfigRecord.inflate:6 of
+#: flwr.common.record.configrecord.ConfigRecord.inflate:5 of
+msgid ""
+"Must be ``None``. ``ConfigRecord`` does not support child objects. "
+"Providing any children will raise a ``ValueError``."
+msgstr ""
+
+#: flwr.common.record.configrecord.ConfigRecord.inflate:9 of
 msgid "The inflated ConfigRecord."
 msgstr ""
 
@@ -11527,7 +11643,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`inflate <flwr.common.ConfigsRecord.inflate>`\\ "
-"\\(object\\_content\\)"
+"\\(object\\_content\\[\\, children\\]\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
@@ -11562,7 +11678,11 @@ msgstr ""
 msgid ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.ConfigsRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1 of
 msgid ":py:obj:`object_id <flwr.common.ConfigsRecord.object_id>`\\"
 msgstr ""
 
@@ -11634,11 +11754,11 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
-#: flwr.common.message.Error:3 of
+#: flwr.app.error.Error:3 of
 msgid "An identifier for the error."
 msgstr ""
 
-#: flwr.common.message.Error:5 of
+#: flwr.app.error.Error:5 of
 msgid "A reason for why the error arose (e.g. an exception stack-trace)"
 msgstr ""
 
@@ -12659,15 +12779,15 @@ msgid ""
 " processing another message."
 msgstr ""
 
+#: flwr.app.metadata.Metadata:9
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Message:12
-#: flwr.common.message.Metadata:9 of
+#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Message:12 of
 msgid "An identifier for the node receiving this message."
 msgstr ""
 
+#: flwr.app.metadata.Metadata:20
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.message_type:1 flwr.common.message.Message:14
-#: flwr.common.message.Metadata:20 of
+#: flwr.common.Metadata.message_type:1 flwr.common.message.Message:14 of
 msgid "A string that encodes the action to be executed on the receiving end."
 msgstr ""
 
@@ -12677,7 +12797,7 @@ msgid ""
 "TTL is set to 43,200 seconds (12 hours)."
 msgstr ""
 
-#: flwr.common.message.Message:20 flwr.common.message.Metadata:13 of
+#: flwr.app.metadata.Metadata:13 flwr.common.message.Message:20 of
 msgid ""
 "An identifier for grouping messages. In some settings, this is used as "
 "the FL round."
@@ -12837,34 +12957,36 @@ msgstr ""
 msgid "Metadata"
 msgstr ""
 
+#: flwr.app.metadata.Metadata:3
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.run_id:1 flwr.common.message.Metadata:3 of
+#: flwr.common.Metadata.run_id:1 of
 msgid "An identifier for the current run."
 msgstr ""
 
+#: flwr.app.metadata.Metadata:5
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.message_id:1 flwr.common.message.Metadata:5 of
+#: flwr.common.Metadata.message_id:1 of
 msgid "An identifier for the current message."
 msgstr ""
 
+#: flwr.app.metadata.Metadata:7
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.src_node_id:1 flwr.common.message.Metadata:7 of
+#: flwr.common.Metadata.src_node_id:1 of
 msgid "An identifier for the node sending this message."
 msgstr ""
 
+#: flwr.app.metadata.Metadata:11
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.reply_to_message_id:1 flwr.common.message.Metadata:11
-#: of
+#: flwr.common.Metadata.reply_to_message_id:1 of
 msgid "An identifier for the message to which this message is a reply."
 msgstr ""
 
-#: flwr.common.Metadata.created_at:1
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.message.Metadata:16 of
+#: flwr.app.metadata.Metadata:16 flwr.common.Metadata.created_at:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid "Unix timestamp when the message was created."
 msgstr ""
 
-#: flwr.common.message.Metadata:18 of
+#: flwr.app.metadata.Metadata:18 of
 msgid "Time-to-live for this message in seconds."
 msgstr ""
 
@@ -13011,7 +13133,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`inflate <flwr.common.MetricRecord.inflate>`\\ "
-"\\(object\\_content\\)"
+"\\(object\\_content\\[\\, children\\]\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
@@ -13052,7 +13174,11 @@ msgstr ""
 msgid ":py:obj:`values <flwr.common.MetricRecord.values>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: flwr.common.MetricRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.MetricRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.MetricRecord.children:1:<autosummary>:1 of
 msgid ":py:obj:`object_id <flwr.common.MetricRecord.object_id>`\\"
 msgstr ""
 
@@ -13060,7 +13186,13 @@ msgstr ""
 msgid "The deflated object content of the MetricRecord."
 msgstr ""
 
-#: flwr.common.record.metricrecord.MetricRecord.inflate:6 of
+#: flwr.common.record.metricrecord.MetricRecord.inflate:5 of
+msgid ""
+"Must be ``None``. ``MetricRecord`` does not support child objects. "
+"Providing any children will raise a ``ValueError``."
+msgstr ""
+
+#: flwr.common.record.metricrecord.MetricRecord.inflate:9 of
 msgid "The inflated MetricRecord."
 msgstr ""
 
@@ -13108,7 +13240,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`inflate <flwr.common.MetricsRecord.inflate>`\\ "
-"\\(object\\_content\\)"
+"\\(object\\_content\\[\\, children\\]\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
@@ -13143,7 +13275,11 @@ msgstr ""
 msgid ":py:obj:`values <flwr.common.MetricsRecord.values>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.MetricsRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
 msgid ":py:obj:`object_id <flwr.common.MetricsRecord.object_id>`\\"
 msgstr ""
 
@@ -13184,83 +13320,101 @@ msgid ""
 "release. Use ``ArrayRecord`` instead."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.ParametersRecord.clear>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.ParametersRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.ParametersRecord.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_array_dict "
 "<flwr.common.ParametersRecord.from_array_dict>`\\ \\(array\\_dict\\, "
 "\\*\\[\\, keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_numpy_ndarrays "
 "<flwr.common.ParametersRecord.from_numpy_ndarrays>`\\ \\(ndarrays\\, "
 "\\*\\[\\, keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_torch_state_dict "
 "<flwr.common.ParametersRecord.from_torch_state_dict>`\\ "
 "\\(state\\_dict\\, \\*\\[\\, ...\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.ParametersRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.ParametersRecord.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.ParametersRecord.items>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.ParametersRecord.keys>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.ParametersRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.ParametersRecord.popitem>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.ParametersRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`to_numpy_ndarrays "
 "<flwr.common.ParametersRecord.to_numpy_ndarrays>`\\ \\(\\*\\[\\, "
 "keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`to_torch_state_dict "
 "<flwr.common.ParametersRecord.to_torch_state_dict>`\\ \\(\\*\\[\\, "
 "keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.ParametersRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.ParametersRecord.values>`\\ \\(\\)"
+msgstr ""
+
+#: flwr.common.ParametersRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.ParametersRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.ParametersRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.ParametersRecord.object_id>`\\"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Properties.rst:2
@@ -13284,7 +13438,8 @@ msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.arrayrecord.ArrayRecord`"
 " | :py:class:`~flwr.common.record.metricrecord.MetricRecord` | "
-":py:class:`~flwr.common.record.configrecord.ConfigRecord`]"
+":py:class:`~flwr.common.record.configrecord.ConfigRecord`], "
+":py:class:`~flwr.common.inflatable.InflatableObject`"
 msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:3 of
@@ -13327,43 +13482,65 @@ msgid ""
 ":code:`MetricRecord` and :code:`ArrayRecord`."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.RecordDict.clear>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.RecordDict.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: flwr.common.record.recorddict.RecordDict.deflate:1 of
+msgid "Deflate the RecordDict."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.RecordDict.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.RecordDict.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: flwr.common.record.recorddict.RecordDict.inflate:1 of
+msgid "Inflate an RecordDict from bytes."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.RecordDict.items>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.RecordDict.keys>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.RecordDict.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.RecordDict.popitem>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.RecordDict.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.RecordDict.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.RecordDict.values>`\\ \\(\\)"
 msgstr ""
 
@@ -13376,6 +13553,17 @@ msgstr ""
 #: flwr.common.RecordSet.array_records:1
 #: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
 msgid "Dictionary holding only ArrayRecord instances."
+msgstr ""
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.RecordDict.children>`\\"
+msgstr ""
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1
+#: flwr.common.RecordDict.children:1
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1
+#: flwr.common.RecordSet.children:1 of
+msgid "Return a dictionary of records with their Object IDs as keys."
 msgstr ""
 
 #: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
@@ -13420,12 +13608,31 @@ msgid ":py:obj:`metrics_records <flwr.common.RecordDict.metrics_records>`\\"
 msgstr ""
 
 #: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.RecordDict.object_id>`\\"
+msgstr ""
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
 msgid ":py:obj:`parameters_records <flwr.common.RecordDict.parameters_records>`\\"
 msgstr ""
 
 #: flwr.common.RecordDict.configs_records:3
 #: flwr.common.RecordSet.configs_records:3 of
 msgid "Use ``config_records`` instead."
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordDict.inflate:3 of
+msgid "The deflated object content of the RecordDict."
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordDict.inflate:5 of
+msgid ""
+"Dictionary of children InflatableObjects mapped to their Object IDs. "
+"These children enable the full inflation of the RecordDict. Default is "
+"None."
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordDict.inflate:9 of
+msgid "The inflated RecordDict."
 msgstr ""
 
 #: flwr.common.RecordDict.metrics_records:3
@@ -13459,46 +13666,60 @@ msgid ""
 "``RecordDict`` instead."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.RecordSet.clear>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.RecordSet.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.RecordSet.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.RecordSet.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.RecordSet.items>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.RecordSet.keys>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.RecordSet.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.RecordSet.popitem>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.RecordSet.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`update <flwr.common.RecordSet.update>`\\ \\(\\[E\\, \\]\\*\\*F\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.RecordSet.values>`\\ \\(\\)"
 msgstr ""
 
 #: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
 msgid ":py:obj:`array_records <flwr.common.RecordSet.array_records>`\\"
+msgstr ""
+
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.RecordSet.children>`\\"
 msgstr ""
 
 #: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
@@ -13515,6 +13736,10 @@ msgstr ""
 
 #: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
 msgid ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
+msgstr ""
+
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.RecordSet.object_id>`\\"
 msgstr ""
 
 #: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
@@ -28926,7 +29151,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|40ef7f2f1aaf4bd3a23870efddba5ef3|"
+msgid "|78fff3204c3742c68d48864f44287827|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -28941,7 +29166,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|168960a2078a43858e627edcdecdf75f|"
+msgid "|bc08a4804db84be9977290dc7464fe7c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -28963,7 +29188,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|650e6e01cb3244369e1139f79e60e172|"
+msgid "|ebd5a7b8a51943389b874677725311ab|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -28979,7 +29204,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|2a0485dfa4d2416f89d8d38a59b3e1db|"
+msgid "|6568438e6cbc4794a6cd508d5a00ef61|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -28995,7 +29220,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|6055bb68397e416199c7bc6fda1b11d6|"
+msgid "|0405ab79153047d4aaabc017e9599390|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -29010,7 +29235,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|9c449256925849b0a2d98406818bb9b6|"
+msgid "|8e85ef8d54994b38bb953294af54024d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -29030,7 +29255,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|709d97d6f114426fb55ff5a136cb8d74|"
+msgid "|f0af739067674c95973768e57e5ab559|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -29045,7 +29270,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|47e82670bcac47099edc2c22937972b4|"
+msgid "|9958f885ad484663922ee5f3138bfc2d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -29185,7 +29410,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|abbc7a56a4024df8a38621445bd95bb5|"
+msgid "|7ea0ff7c3d494ae79e94e983df38625b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -29209,7 +29434,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|5fc71ddcdc79460a9977dfe403be4cc4|"
+msgid "|7951e9e7f8f240b7a7e77ecaa090e3bc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -29233,7 +29458,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|bd8c9bf3c7304cb78b00db6c3f765890|"
+msgid "|ce06be29ec894267aba51fe4351ad0e9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -29256,7 +29481,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|313fe723caf843429564a13c3e776013|"
+msgid "|f988f40567d8459e9d776b39c5c113ab|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -29294,7 +29519,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|34c0cbcbee5e4926828eed40c64eb293|"
+msgid "|4041d7e27af142a7b046fedf1107e6fb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -29388,7 +29613,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|7c405b30c75543d1915c05bebff6313c|"
+msgid "|6784a3e35b52433c997e1c23365ef089|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -45658,5 +45883,173 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|6bcc2eed06b24833a7877563ec9f40c7|"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`inflate <flwr.common.Array.inflate>`\\ \\(object\\_content\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
+#~ "[:py:class:`str`, :py:class:`~flwr.common.record.array.Array`]"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`inflate <flwr.common.ConfigRecord.inflate>`\\ "
+#~ "\\(object\\_content\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`inflate <flwr.common.ConfigsRecord.inflate>`\\ "
+#~ "\\(object\\_content\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`inflate <flwr.common.MetricRecord.inflate>`\\ "
+#~ "\\(object\\_content\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`inflate <flwr.common.MetricsRecord.inflate>`\\ "
+#~ "\\(object\\_content\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
+#~ "[:py:class:`str`, "
+#~ ":py:class:`~flwr.common.record.arrayrecord.ArrayRecord` | "
+#~ ":py:class:`~flwr.common.record.metricrecord.MetricRecord` | "
+#~ ":py:class:`~flwr.common.record.configrecord.ConfigRecord`]"
+#~ msgstr ""
+
+#~ msgid "|40ef7f2f1aaf4bd3a23870efddba5ef3|"
+#~ msgstr ""
+
+#~ msgid "|168960a2078a43858e627edcdecdf75f|"
+#~ msgstr ""
+
+#~ msgid "|650e6e01cb3244369e1139f79e60e172|"
+#~ msgstr ""
+
+#~ msgid "|2a0485dfa4d2416f89d8d38a59b3e1db|"
+#~ msgstr ""
+
+#~ msgid "|6055bb68397e416199c7bc6fda1b11d6|"
+#~ msgstr ""
+
+#~ msgid "|9c449256925849b0a2d98406818bb9b6|"
+#~ msgstr ""
+
+#~ msgid "|709d97d6f114426fb55ff5a136cb8d74|"
+#~ msgstr ""
+
+#~ msgid "|47e82670bcac47099edc2c22937972b4|"
+#~ msgstr ""
+
+#~ msgid "|abbc7a56a4024df8a38621445bd95bb5|"
+#~ msgstr ""
+
+#~ msgid "|5fc71ddcdc79460a9977dfe403be4cc4|"
+#~ msgstr ""
+
+#~ msgid "|bd8c9bf3c7304cb78b00db6c3f765890|"
+#~ msgstr ""
+
+#~ msgid "|313fe723caf843429564a13c3e776013|"
+#~ msgstr ""
+
+#~ msgid "|34c0cbcbee5e4926828eed40c64eb293|"
+#~ msgstr ""
+
+#~ msgid "|7c405b30c75543d1915c05bebff6313c|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Download the `compose.yml "
+#~ "<https://github.com/adap/flower/blob/main/src/docker/complete/compose.yml>`_"
+#~ " file into the example directory:"
+#~ msgstr ""
+
+#~ msgid "|4ee450862b1f41b8b36328d36134e8c8|"
+#~ msgstr ""
+
+#~ msgid "|a76df2fc6efc4340b0b0a8caa03dffe9|"
+#~ msgstr ""
+
+#~ msgid "|50b54340e4b9421c92e5016dd66c8355|"
+#~ msgstr ""
+
+#~ msgid "|f68042152bf34c54994fcebdc5d52d6f|"
+#~ msgstr ""
+
+#~ msgid "|1ea250d7f01b4efd988a7c5c8f6734a7|"
+#~ msgstr ""
+
+#~ msgid "|56352bd604f5486eaa9a95c6c6ee7b8f|"
+#~ msgstr ""
+
+#~ msgid "|06d0bceaa2e743be93b39c28b5190476|"
+#~ msgstr ""
+
+#~ msgid "|7216dd59d94846ed99c03684a2ad0a6c|"
+#~ msgstr ""
+
+#~ msgid "|0bcfd02f88784ad38f75a4caa92f05c2|"
+#~ msgstr ""
+
+#~ msgid "|d223a37d39f7468abb777b7cd5ee2fea|"
+#~ msgstr ""
+
+#~ msgid "|8b88feed06ae468aa85b4eda6656f7f4|"
+#~ msgstr ""
+
+#~ msgid "|12d7bf22d5a44820848e8d4078ccf868|"
+#~ msgstr ""
+
+#~ msgid "|2aa1be5fff654e3ca96a98b74bb2ae95|"
+#~ msgstr ""
+
+#~ msgid "|31cf3d419a3f432b8871ed48bb092db1|"
+#~ msgstr ""
+
+#~ msgid "|1e9960abe23a4045afa5298674ad3085|"
+#~ msgstr ""
+
+#~ msgid "|935c2faa5b6246e78309ee66d4f8e67a|"
+#~ msgstr ""
+
+#~ msgid "|2732344c7a464489972dd411fa151ede|"
+#~ msgstr ""
+
+#~ msgid "|a08cd4adac0d4bd0a89fa52e2b8d4043|"
+#~ msgstr ""
+
+#~ msgid "|d39ebdbbf7e6437aaf695ce7717c453e|"
+#~ msgstr ""
+
+#~ msgid "|d17184158b1143ff998a1090e045b4e8|"
+#~ msgstr ""
+
+#~ msgid "|8a4ad5bcbfe246c8a15084182f862583|"
+#~ msgstr ""
+
+#~ msgid "|978cc849947d41de87abeec99e401f93|"
+#~ msgstr ""
+
+#~ msgid "|281f579687904d10af5dc0afee5379fc|"
+#~ msgstr ""
+
+#~ msgid "|49a3268eba18415396cf6a9da7cbc6ff|"
+#~ msgstr ""
+
+#~ msgid "|03282d5b3691414a8084ff2ab69bc173|"
+#~ msgstr ""
+
+#~ msgid "|a30fedc5e9e54ff796cdc99d7004a9a7|"
+#~ msgstr ""
+
+#~ msgid "|794c04c2efa9435aad3ccc4b15d6433e|"
+#~ msgstr ""
+
+#~ msgid "|77a2ae94f6e24c1692f6e7b8997d4db1|"
 #~ msgstr ""
 

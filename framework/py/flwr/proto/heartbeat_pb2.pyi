@@ -38,3 +38,29 @@ class SendNodeHeartbeatResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["success",b"success"]) -> None: ...
 global___SendNodeHeartbeatResponse = SendNodeHeartbeatResponse
+
+class SendAppHeartbeatRequest(google.protobuf.message.Message):
+    """App Heartbeat messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    heartbeat_interval: builtins.float
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        heartbeat_interval: builtins.float = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["heartbeat_interval",b"heartbeat_interval","run_id",b"run_id"]) -> None: ...
+global___SendAppHeartbeatRequest = SendAppHeartbeatRequest
+
+class SendAppHeartbeatResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    SUCCESS_FIELD_NUMBER: builtins.int
+    success: builtins.bool
+    def __init__(self,
+        *,
+        success: builtins.bool = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["success",b"success"]) -> None: ...
+global___SendAppHeartbeatResponse = SendAppHeartbeatResponse
