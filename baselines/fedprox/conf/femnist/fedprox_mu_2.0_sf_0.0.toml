@@ -2,7 +2,6 @@
 name = "FedProx"
 num-server-rounds = 200
 min-available-clients= 200
-min-fit-clients= 200
 num-clients = 200
 fraction-fit = 0.05
 stragglers-fraction = 0.0

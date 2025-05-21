@@ -4,7 +4,6 @@ stragglers-fraction = 0.0
 mu = 2.0 # Always 0 when using FedAvg
 
 [dataset]
-path = "ylecun/mnist"
 mu = 2.0 # Always 0 when using FedAvg
 
 [fit]
