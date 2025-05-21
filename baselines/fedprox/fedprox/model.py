@@ -116,7 +116,7 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments, too-many-positional
         optimizer.zero_grad()
         proximal_term = 0.0
         for local_weights, global_weights in zip(
-            net.parameters(), global_params, strict=False
+            net.parameters(), global_params, strict=True
         ):
             proximal_term += torch.square((local_weights - global_weights).norm(2))
         loss = criterion(net(images), labels) + (proximal_mu / 2) * proximal_term
@@ -172,7 +172,7 @@ def get_weights(net):
 
 def set_weights(net, parameters):
     """Apply parameters to an existing model."""
-    params_dict = zip(net.state_dict().keys(), parameters, strict=False)
+    params_dict = zip(net.state_dict().keys(), parameters, strict=True)
     state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
 
