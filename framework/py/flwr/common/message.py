@@ -386,7 +386,7 @@ class Message(InflatableObject):
         children_ids = get_object_children_ids_from_object_content(object_content)
 
         # If the message had content, only one children is possible
-        # If the nmessage carried an error, the returned listed should be empty
+        # If the message carried an error, the returned listed should be empty
         if children_ids != list(children.keys()):
             raise ValueError(
                 f"Mismatch in children object IDs: expected {children_ids}, but "
