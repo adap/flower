@@ -389,8 +389,9 @@ class Message(InflatableObject):
         # If the nmessage carried an error, the returned listed should be empty
         if children_ids != list(children.keys()):
             raise ValueError(
-                f"Mismatch in children object IDs: expected {children_ids}, but received {list(children.keys())}. "
-                "The provided children must exactly match the IDs specified in the object head."
+                f"Mismatch in children object IDs: expected {children_ids}, but "
+                f"received {list(children.keys())}. The provided children must exactly "
+                "match the IDs specified in the object head."
             )
 
         # Inflate content
@@ -402,7 +403,7 @@ class Message(InflatableObject):
             content = None
             error = error_from_proto(proto_message.error)
         else:
-            content = cast(RecordDict, children[children_ids[0]]
+            content = cast(RecordDict, children[children_ids[0]])
             error = None
         # Return message
         return make_message(
