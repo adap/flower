@@ -6,10 +6,8 @@ import pickle
 from logging import INFO
 from pathlib import Path
 from secrets import token_hex
-from typing import Dict, Optional, Union
 
 from easydict import EasyDict
-
 from flwr.common import log
 from flwr.server import Server
 from flwr.server.history import History
@@ -60,14 +58,18 @@ def history_saver(history: History, run_config: EasyDict):
     )
     path_file_suffix = f"{run_config.algorithm.name}" / Path(file_suffix)
     dataset_path = Path(run_config.dataset.path)
-    save_results_as_pickle(history, file_path=SAVE_PATH / dataset_path.name / path_file_suffix)
-    save_config_file(run_config, save_path=SAVE_PATH / dataset_path.name /  path_file_suffix)
+    save_results_as_pickle(
+        history, file_path=SAVE_PATH / dataset_path.name / path_file_suffix
+    )
+    save_config_file(
+        run_config, save_path=SAVE_PATH / dataset_path.name / path_file_suffix
+    )
 
 
 def save_results_as_pickle(
     history: History,
-    file_path: Union[str, Path],
-    extra_results: Optional[Dict] = None,
+    file_path: str | Path,
+    extra_results: dict | None = None,
     default_filename: str = "results.pkl",
 ) -> None:
     """Save results from simulation to pickle.

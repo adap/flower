@@ -1,7 +1,7 @@
 """fedprox: A Flower Baseline."""
 
 import numpy as np
-from datasets import load_dataset, DatasetDict
+from datasets import DatasetDict, load_dataset
 from easydict import EasyDict
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import DistributionPartitioner
@@ -13,22 +13,33 @@ FDS = None  # Cache FederatedDataset
 
 MNIST_TRANSFORMS = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
 
+
 class FEMNISTFilter(Preprocessor):
-    ''' A Preprocessor class that filter the FEMNIST data to the data with label 0 to 9 (lower case letters 'a'-'j') '''
+    """A Preprocessor class that filter the FEMNIST data.
+
+    It filters data with label 0 to 9 (lower case letters 'a'-'j')
+    """
+
     def __call__(self, dataset: DatasetDict) -> DatasetDict:
+        """."""
         allowed_labels = list(range(10))  # mapping to 'a'-'j'
-        filtered_dataset = dataset.filter(lambda example: example["character"] in allowed_labels)
+        filtered_dataset = dataset.filter(
+            lambda example: example["character"] in allowed_labels
+        )
         return filtered_dataset
+
 
 def apply_transforms(batch):
     """Apply transforms to the partition from FederatedDataset."""
-    batch["image"] = [MNIST_TRANSFORMS(img) for img in batch["image"]]    
-    
+    batch["image"] = [MNIST_TRANSFORMS(img) for img in batch["image"]]
+
     return batch
 
+
 def process_femnist(dataset):
-    ''' A function to preprocess FEMNIST when setting up centralised test data. '''
+    """Process FEMNIST when setting up centralised test data."""
     return dataset.filter(lambda example: example["character"] in list(range(10)))
+
 
 def load_data(
     dataset_config: EasyDict,
@@ -63,7 +74,7 @@ def load_data(
             FDS = FederatedDataset(
                 dataset=dataset_config.path,
                 partitioners={"train": partitioner},
-                preprocessor=FEMNISTFilter(), # Add the Preprocessor class for FEMNIST
+                preprocessor=FEMNISTFilter(),  # Add the Preprocessor class for FEMNIST
             )
         else:
             FDS = FederatedDataset(
@@ -99,7 +110,8 @@ def prepare_test_loader(dataset_config: EasyDict):
     Args:
         dataset_config (dict): The dataset configuration.
 
-    Note: FEMNIST does not have a test data, so we need to manually process the training data to create test data.
+    Note: FEMNIST does not have a test data, so we need to manually process the
+    training data to create test data.
 
     Returns
     -------
@@ -107,9 +119,13 @@ def prepare_test_loader(dataset_config: EasyDict):
     """
     if "femnist" in dataset_config.path:
         dataset = load_dataset(path=dataset_config.path)["train"]
-        split_dataset = dataset.train_test_split(test_size=dataset_config.val_ratio, seed=dataset_config.seed)
+        split_dataset = dataset.train_test_split(
+            test_size=dataset_config.val_ratio, seed=dataset_config.seed
+        )
         test_dataset = process_femnist(split_dataset["test"])
         test_dataset = test_dataset.with_transform(apply_transforms)
     else:
-        test_dataset = load_dataset(path=dataset_config.path)["test"].with_transform(apply_transforms)
+        test_dataset = load_dataset(path=dataset_config.path)["test"].with_transform(
+            apply_transforms
+        )
     return DataLoader(test_dataset, batch_size=dataset_config.batch_size)

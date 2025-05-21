@@ -1,7 +1,6 @@
 """fedprox: A Flower Baseline."""
 
 from collections import OrderedDict
-from typing import List, Tuple
 
 import torch
 from easydict import EasyDict
@@ -41,7 +40,7 @@ class LogisticRegression(nn.Module):
         return output_tensor
 
 
-def train(  # pylint: disable=too-many-arguments
+def train(  # pylint: disable=too-many-arguments, too-many-positional-arguments
     net: nn.Module,
     trainloader: DataLoader,
     device: torch.device,
@@ -76,9 +75,9 @@ def train(  # pylint: disable=too-many-arguments
         )
 
 
-def _train_one_epoch(  # pylint: disable=too-many-arguments
+def _train_one_epoch(  # pylint: disable=too-many-arguments, too-many-positional-arguments
     net: nn.Module,
-    global_params: List[Parameter],
+    global_params: list[Parameter],
     trainloader: DataLoader,
     device: torch.device,
     criterion: torch.nn.CrossEntropyLoss,
@@ -110,11 +109,15 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
         The model that has been trained for one epoch.
     """
     for batch in trainloader:
-        label_key = "character" if "character" in batch else "label" # FEMNIST's label is called "character"
+        label_key = (
+            "character" if "character" in batch else "label"
+        )  # FEMNIST's label is called "character"
         images, labels = batch["image"].to(device), batch[label_key].to(device)
         optimizer.zero_grad()
         proximal_term = 0.0
-        for local_weights, global_weights in zip(net.parameters(), global_params):
+        for local_weights, global_weights in zip(
+            net.parameters(), global_params, strict=False
+        ):
             proximal_term += torch.square((local_weights - global_weights).norm(2))
         loss = criterion(net(images), labels) + (proximal_mu / 2) * proximal_term
         loss.backward()
@@ -124,7 +127,7 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
 
 def test(
     net: nn.Module, testloader: DataLoader, device: torch.device
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """Evaluate the network on the entire test set.
 
     Parameters
@@ -146,7 +149,9 @@ def test(
     net.eval()
     with torch.no_grad():
         for batch in testloader:
-            label_key = "character" if "character" in batch else "label" # FEMNIST's label is called "character"
+            label_key = (
+                "character" if "character" in batch else "label"
+            )  # FEMNIST's label is called "character"
             images, labels = batch["image"].to(device), batch[label_key].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
@@ -167,7 +172,7 @@ def get_weights(net):
 
 def set_weights(net, parameters):
     """Apply parameters to an existing model."""
-    params_dict = zip(net.state_dict().keys(), parameters)
+    params_dict = zip(net.state_dict().keys(), parameters, strict=False)
     state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
 
