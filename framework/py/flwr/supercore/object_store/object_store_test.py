@@ -18,7 +18,8 @@
 import unittest
 from abc import abstractmethod
 
-from ..inflatable import get_object_id
+from flwr.common.inflatable import get_object_id
+
 from .in_memory_object_store import InMemoryObjectStore
 from .object_store import ObjectStore
 
