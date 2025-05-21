@@ -18,7 +18,7 @@
 import unittest
 from abc import abstractmethod
 
-from flwr.client.nodestate import InMemoryNodeState, NodeState
+from . import InMemoryNodeState, NodeState
 
 
 class StateTest(unittest.TestCase):
