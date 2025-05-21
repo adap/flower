@@ -40,7 +40,7 @@ simulated Flower federations from deployed ones.
       - Multiple independent processes or subprocesses running in coordination with the
         SuperLink and SuperNodes.
     - - **Execution Mode**
-      - Multiprocessing execution where each process simulates being a distinct client.
+      - Multiprocessing execution where each process simulates a distinct client.
       - Parallel execution mode across a network of physical machines/devices or
         computing environment.
     - - **Communication**
