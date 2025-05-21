@@ -436,7 +436,7 @@ def test_inflate_deflate_message_with_error() -> None:
     assert get_object_type_from_object_content(msg_b) == msg.__class__.__qualname__
     # Header contains the Object ID of the message content
     assert get_object_children_ids_from_object_content(msg_b) == []
-    # Body of deflfated Message matches its direct protobuf serialization
+    # Body of deflated Message matches its direct protobuf serialization
     assert message_to_proto(msg).SerializeToString(
         deterministic=True
     ) == get_object_body(msg_b, Message)
