@@ -398,20 +398,17 @@ class Message(InflatableObject):
         proto_message = ProtoMessage.FromString(obj_body)
 
         # Prepare content if error wasn't set in protobuf message
-        content = (
-            cast(RecordDict, children[children_ids[0]])
-            if not proto_message.HasField("error")
-            else None
-        )
+        if proto_message.HasField("error"):
+            content = None
+            error = error_from_proto(proto_message.error)
+        else:
+            content = cast(RecordDict, children[children_ids[0]]
+            error = None
         # Return message
         return make_message(
             metadata=metadata_from_proto(proto_message.metadata),
             content=content,
-            error=(
-                error_from_proto(proto_message.error)
-                if proto_message.HasField("error")
-                else None
-            ),
+            error=error,
         )
 
 
