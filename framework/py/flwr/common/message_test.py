@@ -398,7 +398,7 @@ def test_inflate_deflate_message_with_content() -> None:
     assert get_object_type_from_object_content(msg_b) == msg.__class__.__qualname__
     # Header contains the Object ID of the message content
     assert get_object_children_ids_from_object_content(msg_b) == [msg.content.object_id]
-    # Body of deflfated Message matches its direct protobuf serialization
+    # Body of deflated Message matches its direct protobuf serialization
     # when the content is removed
     msg_copy = copy(msg)
     msg_copy.content = None  # type: ignore
