@@ -58,6 +58,7 @@ from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_res_message
+from flwr.supercore.object_store import ObjectStoreFactory
 
 from .server_interceptor import AuthenticateServerInterceptor
 
@@ -73,6 +74,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state = state_factory.state()
         ffs_factory = FfsFactory(".")
         self.ffs = ffs_factory.ffs()
+        objectstore_factory = ObjectStoreFactory()
         self.state.store_node_public_keys({public_key_to_bytes(self.node_pk)})
 
         self._server_interceptor = AuthenticateServerInterceptor(state_factory)
@@ -80,6 +82,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
             ffs_factory,
+            objectstore_factory,
             None,
             [self._server_interceptor],
         )
