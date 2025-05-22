@@ -47,21 +47,18 @@ class StateTest(unittest.TestCase):
         node_id = 123
 
         # Execute
-        state.set_node_id(node_id)
+        self.state.set_node_id(node_id)
 
-        retrieved_node_id = state.get_node_id()
+        retrieved_node_id = self.state.get_node_id()
 
         # Assert
         assert node_id == retrieved_node_id
 
     def test_get_node_id_fails(self) -> None:
         """Test get_node_id fails correctly if node_id is not set."""
-        # Prepare
-        state: NodeState = self.state_factory()
-
         # Execute and assert
         with self.assertRaises(ValueError):
-            state.get_node_id()
+            self.state.get_node_id()
 
     def test_store_and_get_run(self) -> None:
         """Test storing and retrieving a run."""
@@ -137,7 +134,8 @@ class StateTest(unittest.TestCase):
     )
     def test_get_message_with_filters(
         self, filters: dict[str, Any], expected: set[str]
-    ):
+    ) -> None:
+        """Test retrieving messages with various filters."""
         # Prepare
         # Run 1: 1 instruction, 1 reply
         self.state.store_message(make_dummy_message(run_id=1, is_reply=True), "msg1")
