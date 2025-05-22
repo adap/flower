@@ -794,7 +794,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
         connection, error_type = grpc_adapter, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection, error_type = grpc_connection, RpcError
+        connection, error_type = grpc_connection, RpcError  # type: ignore[assignment]
     else:
         raise ValueError(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"

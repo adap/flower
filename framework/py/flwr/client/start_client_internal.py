@@ -274,25 +274,6 @@ def start_client_internal(
         ) as conn:
             receive, send, create_node, delete_node, get_run, get_fab = conn
 
-            # Cast the following functions to the correct types
-            # They are all guaranteed to be present in the supported transport types
-            create_node = cast(
-                Callable[[], Optional[int]],
-                create_node,
-            )
-            delete_node = cast(
-                Callable[[], None],
-                delete_node,
-            )
-            get_run = cast(
-                Callable[[int], Run],
-                get_run,
-            )
-            get_fab = cast(
-                Callable[[str, int], Fab],
-                get_fab,
-            )
-
             # Register node when connecting the first time
             if run_info_store is None:
                 # Call create_node fn to register node
@@ -515,10 +496,10 @@ def _init_connection(transport: str, server_address: str) -> tuple[
             tuple[
                 Callable[[], Optional[Message]],
                 Callable[[Message], None],
-                Optional[Callable[[], Optional[int]]],
-                Optional[Callable[[], None]],
-                Optional[Callable[[int], Run]],
-                Optional[Callable[[str, int], Fab]],
+                Callable[[], Optional[int]],
+                Callable[[], None],
+                Callable[[int], Run],
+                Callable[[str, int], Fab],
             ]
         ],
     ],
