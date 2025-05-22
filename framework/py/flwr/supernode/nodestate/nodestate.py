@@ -77,6 +77,11 @@ class NodeState(ABC):
             The message to store.
         object_id : str
             The object ID of the message.
+
+        Returns
+        -------
+        UUID
+            The message ID of the stored message.
         """
 
     @abstractmethod
