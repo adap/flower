@@ -23,12 +23,12 @@ import grpc
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
-from flwr.common.object_store import ObjectStoreFactory
 from flwr.proto.serverappio_pb2_grpc import (  # pylint: disable=E0611
     add_ServerAppIoServicer_to_server,
 )
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.supercore.object_store import ObjectStoreFactory
 
 from .serverappio_servicer import ServerAppIoServicer
 

@@ -26,7 +26,6 @@ from flwr.common import ConfigRecord, Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
-from flwr.common.object_store import ObjectStoreFactory
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
@@ -84,6 +83,7 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
+from flwr.supercore.object_store import ObjectStoreFactory
 
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):

@@ -22,7 +22,6 @@ from google.protobuf.json_format import MessageToDict
 
 from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
-from flwr.common.object_store import ObjectStoreFactory
 from flwr.common.typing import InvalidRunStatusException
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -51,6 +50,7 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_grpc_context
+from flwr.supercore.object_store import ObjectStoreFactory
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):

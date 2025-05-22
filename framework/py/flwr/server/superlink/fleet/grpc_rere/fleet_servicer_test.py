@@ -27,7 +27,6 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.object_store import ObjectStoreFactory
 from flwr.common.typing import RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -41,6 +40,7 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_res_message
 from flwr.server.superlink.utils import _STATUS_TO_MSG
+from flwr.supercore.object_store import ObjectStoreFactory
 
 
 class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
