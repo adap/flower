@@ -1,10 +1,11 @@
 """fedprox: A Flower Baseline."""
 
 import numpy as np
-from datasets import load_dataset
+from datasets import DatasetDict, load_dataset
 from easydict import EasyDict
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import DistributionPartitioner
+from flwr_datasets.preprocessor import Preprocessor
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
@@ -13,10 +14,31 @@ FDS = None  # Cache FederatedDataset
 MNIST_TRANSFORMS = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
 
 
+class FEMNISTFilter(Preprocessor):
+    """A Preprocessor class that filter the FEMNIST data.
+
+    It filters data with label 0 to 9 (lower case letters 'a'-'j')
+    """
+
+    def __call__(self, dataset: DatasetDict) -> DatasetDict:
+        """."""
+        allowed_labels = list(range(10))  # mapping to 'a'-'j'
+        filtered_dataset = dataset.filter(
+            lambda example: example["character"] in allowed_labels
+        )
+        return filtered_dataset
+
+
 def apply_transforms(batch):
     """Apply transforms to the partition from FederatedDataset."""
     batch["image"] = [MNIST_TRANSFORMS(img) for img in batch["image"]]
+
     return batch
+
+
+def process_femnist(dataset):
+    """Process FEMNIST when setting up centralised test data."""
+    return dataset.filter(lambda example: example["character"] in list(range(10)))
 
 
 def load_data(
@@ -24,7 +46,7 @@ def load_data(
     partition_id: int,
     num_partitions: int,
 ):
-    """Load and partition MNIST data."""
+    """Load and partition data."""
     # Only initialize `FederatedDataset` once
     global FDS  # pylint: disable=global-statement
     if FDS is None:
@@ -40,19 +62,28 @@ def load_data(
         )
         labels_per_partition = dataset_config.num_unique_labels_per_partition
         samples_per_label = dataset_config.preassigned_num_samples_per_label
+        label_key = "character" if "femnist" in dataset_config.path else "label"
         partitioner = DistributionPartitioner(
             distribution_array=distribution_array,
             num_partitions=num_partitions,
             num_unique_labels_per_partition=labels_per_partition,
-            partition_by="label",  # MNIST dataset has a target column `label`
+            partition_by=label_key,  # target column `label` ("character" for FEMNIST)
             preassigned_num_samples_per_label=samples_per_label,
         )
-        FDS = FederatedDataset(
-            dataset="ylecun/mnist",
-            partitioners={"train": partitioner},
-        )
+        if "femnist" in dataset_config.path:
+            FDS = FederatedDataset(
+                dataset=dataset_config.path,
+                partitioners={"train": partitioner},
+                preprocessor=FEMNISTFilter(),  # Add the Preprocessor class for FEMNIST
+            )
+        else:
+            FDS = FederatedDataset(
+                dataset=dataset_config.path,
+                partitioners={"train": partitioner},
+            )
 
     partition = FDS.load_partition(partition_id)
+
     # Divide data on each node: 90% train, 10% test
     partition_train_test = partition.train_test_split(
         test_size=dataset_config.val_ratio, seed=dataset_config.seed
@@ -74,16 +105,27 @@ def load_data(
 
 
 def prepare_test_loader(dataset_config: EasyDict):
-    """Generate the dataloader for the MNIST test set.
+    """Generate the dataloader for the test set.
 
     Args:
         dataset_config (dict): The dataset configuration.
+
+    Note: FEMNIST does not have a test data, so we need to manually process the
+    training data to create test data.
 
     Returns
     -------
         DataLoader: The MNIST test set dataloader.
     """
-    test_dataset = load_dataset(path="ylecun/mnist")["test"].with_transform(
-        apply_transforms
-    )
+    if "femnist" in dataset_config.path:
+        dataset = load_dataset(path=dataset_config.path)["train"]
+        split_dataset = dataset.train_test_split(
+            test_size=dataset_config.val_ratio, seed=dataset_config.seed
+        )
+        test_dataset = process_femnist(split_dataset["test"])
+        test_dataset = test_dataset.with_transform(apply_transforms)
+    else:
+        test_dataset = load_dataset(path=dataset_config.path)["test"].with_transform(
+            apply_transforms
+        )
     return DataLoader(test_dataset, batch_size=dataset_config.batch_size)
