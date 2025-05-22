@@ -277,15 +277,3 @@ Congratulations! You've successfully built and run your first federated learning
 .. |quickstart_tf_link| replace:: ``examples/quickstart-tensorflow``
 
 .. _quickstart_tf_link: https://github.com/adap/flower/blob/main/examples/quickstart-tensorflow
-
-Video tutorial
---------------
-
-.. note::
-
-    The video shown below shows how to setup a TensorFlow + Flower project using our
-    previously recommended APIs. A new video tutorial will be released that shows the
-    new APIs (as the content above does)
-
-.. youtube:: FGTc2TQq7VM
-    :width: 100%
