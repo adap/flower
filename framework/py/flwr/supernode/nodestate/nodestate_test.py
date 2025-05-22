@@ -20,8 +20,8 @@ from typing import Any
 
 from parameterized import parameterized
 
-from flwr.common import ConfigRecord, Context, Message, RecordDict
-from flwr.common.message import Metadata, make_message
+from flwr.common import ConfigRecord, Context, Message, Metadata, RecordDict
+from flwr.common.message import make_message
 from flwr.common.typing import Run
 
 from . import InMemoryNodeState, NodeState
@@ -122,7 +122,7 @@ class StateTest(unittest.TestCase):
         result_after = self.state.get_message()
         self.assertNotIn(obj_id, result_after)
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             ({"run_id": 1}, {"msg1", "msg2"}),
             ({"run_id": 1, "is_reply": False}, {"msg2"}),
@@ -166,7 +166,7 @@ def make_dummy_message(run_id: int = 110, is_reply: bool = False) -> Message:
         dst_node_id=120,
         reply_to_message_id="mock id" if is_reply else "",
         group_id="Mock mock",
-        created_at="2025-05-22T12:00:00Z",
+        created_at=123456789,
         ttl=999,
         message_type="query",
     )
