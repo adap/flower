@@ -71,6 +71,7 @@ from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.server.serverapp.app import flwr_serverapp
 from flwr.simulation.app import flwr_simulation
+from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
 
@@ -307,6 +308,9 @@ def run_superlink() -> None:
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
 
+    # Initialize ObjectStoreFactory
+    objectstore_factory = ObjectStoreFactory()
+
     # Start Exec API
     executor = load_executor(args)
     exec_server: grpc.Server = run_exec_api_grpc(
@@ -343,6 +347,7 @@ def run_superlink() -> None:
             address=serverappio_address,
             state_factory=state_factory,
             ffs_factory=ffs_factory,
+            objectstore_factory=objectstore_factory,
             certificates=None,  # ServerAppIo API doesn't support SSL yet
         )
         grpc_servers.append(serverappio_server)
@@ -421,6 +426,7 @@ def run_superlink() -> None:
                 address=fleet_address,
                 state_factory=state_factory,
                 ffs_factory=ffs_factory,
+                objectstore_factory=objectstore_factory,
                 certificates=certificates,
                 interceptors=interceptors,
             )
@@ -430,6 +436,7 @@ def run_superlink() -> None:
                 address=fleet_address,
                 state_factory=state_factory,
                 ffs_factory=ffs_factory,
+                objectstore_factory=objectstore_factory,
                 certificates=certificates,
             )
             grpc_servers.append(fleet_server)
@@ -668,10 +675,11 @@ def _try_obtain_fleet_event_log_writer_plugin() -> Optional[EventLogWriterPlugin
         sys.exit("No Fleet API event log writer plugins are currently supported.")
 
 
-def _run_fleet_api_grpc_rere(
+def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
     address: str,
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
+    objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
@@ -680,6 +688,7 @@ def _run_fleet_api_grpc_rere(
     fleet_servicer = FleetServicer(
         state_factory=state_factory,
         ffs_factory=ffs_factory,
+        objectstore_factory=objectstore_factory,
     )
     fleet_add_servicer_to_server_fn = add_FleetServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
@@ -700,6 +709,7 @@ def _run_fleet_api_grpc_adapter(
     address: str,
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
+    objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (GrpcAdapter)."""
@@ -707,6 +717,7 @@ def _run_fleet_api_grpc_adapter(
     fleet_servicer = GrpcAdapterServicer(
         state_factory=state_factory,
         ffs_factory=ffs_factory,
+        objectstore_factory=objectstore_factory,
     )
     fleet_add_servicer_to_server_fn = add_GrpcAdapterServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
