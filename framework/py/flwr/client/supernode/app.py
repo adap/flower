@@ -43,8 +43,8 @@ from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 
-from ..app import start_client_internal
 from ..clientapp.utils import get_load_client_app_fn
+from ..start_client_internal import start_client_internal
 
 
 def run_supernode() -> None:
