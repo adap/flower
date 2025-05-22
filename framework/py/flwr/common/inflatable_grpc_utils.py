@@ -25,6 +25,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectRequest,
     PushObjectResponse,
 )
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
 from .inflatable import (
@@ -47,6 +48,7 @@ inflatable_class_registry: dict[str, type[InflatableObject]] = {
 
 def push_object_to_servicer(
     obj: InflatableObject,
+    node: Node,
     stub: Optional[Union[FleetStub, ServerAppIoStub]] = None,
     obj_ids_to_push: Optional[set[str]] = None,
 ) -> set[str]:
@@ -60,7 +62,9 @@ def push_object_to_servicer(
     # Push children if it has any
     if children := obj.children:
         for child in children.values():
-            pushed_object_ids |= push_object_to_servicer(child, stub, obj_ids_to_push)
+            pushed_object_ids |= push_object_to_servicer(
+                child, node, stub, obj_ids_to_push
+            )
 
     # Deflate object and push
     object_content = obj.deflate()
@@ -72,6 +76,7 @@ def push_object_to_servicer(
         if obj_ids_to_push is None or object_id in obj_ids_to_push:
             _: PushObjectResponse = stub.PushObject(
                 PushObjectRequest(
+                    node=node,
                     object_id=object_id,
                     object_content=object_content,
                 )
@@ -86,12 +91,12 @@ def push_object_to_servicer(
 
 
 def pull_object_from_servicer(
-    object_id: str, stub: Union[FleetStub, ServerAppIoStub]
+    object_id: str, stub: Union[FleetStub, ServerAppIoStub], node: Node
 ) -> InflatableObject:
     """Recursively inflate an object by pulling it from the servicer."""
     # Pull object
     object_proto: PullObjectResponse = stub.PullObject(
-        PullObjectRequest(object_id=object_id)
+        PullObjectRequest(object_id=object_id, node=node)
     )
     object_content = object_proto.object_content
 
@@ -105,7 +110,9 @@ def pull_object_from_servicer(
     # Pull all children objects
     children: dict[str, InflatableObject] = {}
     for child_object_id in children_obj_ids:
-        children[child_object_id] = pull_object_from_servicer(child_object_id, stub)
+        children[child_object_id] = pull_object_from_servicer(
+            child_object_id, stub, node=node
+        )
 
     # Inflate object passing its children
     return cls_type.inflate(object_content, children=children)

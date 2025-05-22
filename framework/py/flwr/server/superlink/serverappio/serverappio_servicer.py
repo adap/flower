@@ -197,9 +197,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             message_id = state.store_message_ins(message=message, message_id=message_id)
             message_ids.append(message_id)
 
-            # Pre-register objects in ObjectStore
             obj_ids_list = request.object_ids.pop(0).split(",")
-            obj_to_push = []
+            # Register message:children mapping
+            store.register_message_children_mapping(message_id, obj_ids_list)
+            # Pre-register objects in ObjectStore
+            obj_to_push = []  # List of object_ids not present in the store
             for obj_id in obj_ids_list:
                 if obj_id not in store:
                     obj_to_push.append(obj_id)
@@ -243,7 +245,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         }
 
         state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
-
         # Convert Messages to proto
         messages_list = []
         while messages_res:
@@ -258,8 +259,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 )
             messages_list.append(message_to_proto(msg))
 
-        print("addddd")
-        print(messages_list)
         return PullResMessagesResponse(messages_list=messages_list)
 
     def GetRun(
@@ -442,7 +441,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
 
-        return PullObjectResponse()
+        store = self.objectstore_factory.store()
+
+        # TODO: improve but enough for PoC
+        obj_content = store.get(request.object_id)
+
+        return PullObjectResponse(object_content=obj_content)
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:

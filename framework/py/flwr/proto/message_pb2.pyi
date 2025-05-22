@@ -4,6 +4,7 @@ isort:skip_file
 """
 import builtins
 import flwr.proto.error_pb2
+import flwr.proto.node_pb2
 import flwr.proto.recorddict_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
@@ -17,18 +18,22 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 class Message(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     METADATA_FIELD_NUMBER: builtins.int
+    CONTENT_FIELD_NUMBER: builtins.int
     ERROR_FIELD_NUMBER: builtins.int
     @property
     def metadata(self) -> global___Metadata: ...
+    @property
+    def content(self) -> flwr.proto.recorddict_pb2.RecordDict: ...
     @property
     def error(self) -> flwr.proto.error_pb2.Error: ...
     def __init__(self,
         *,
         metadata: typing.Optional[global___Metadata] = ...,
+        content: typing.Optional[flwr.proto.recorddict_pb2.RecordDict] = ...,
         error: typing.Optional[flwr.proto.error_pb2.Error] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["error",b"error","metadata",b"metadata"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["error",b"error","metadata",b"metadata"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["content",b"content","error",b"error","metadata",b"metadata"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["content",b"content","error",b"error","metadata",b"metadata"]) -> None: ...
 global___Message = Message
 
 class Context(google.protobuf.message.Message):
@@ -126,16 +131,21 @@ global___Metadata = Metadata
 class PushObjectRequest(google.protobuf.message.Message):
     """PushObject messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_FIELD_NUMBER: builtins.int
     OBJECT_ID_FIELD_NUMBER: builtins.int
     OBJECT_CONTENT_FIELD_NUMBER: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
     object_id: typing.Text
     object_content: builtins.bytes
     def __init__(self,
         *,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         object_id: typing.Text = ...,
         object_content: builtins.bytes = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["object_content",b"object_content","object_id",b"object_id"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node","object_content",b"object_content","object_id",b"object_id"]) -> None: ...
 global___PushObjectRequest = PushObjectRequest
 
 class PushObjectResponse(google.protobuf.message.Message):
@@ -147,13 +157,18 @@ global___PushObjectResponse = PushObjectResponse
 class PullObjectRequest(google.protobuf.message.Message):
     """PullObject messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_FIELD_NUMBER: builtins.int
     OBJECT_ID_FIELD_NUMBER: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
     object_id: typing.Text
     def __init__(self,
         *,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         object_id: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["object_id",b"object_id"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node","object_id",b"object_id"]) -> None: ...
 global___PullObjectRequest = PullObjectRequest
 
 class PullObjectResponse(google.protobuf.message.Message):

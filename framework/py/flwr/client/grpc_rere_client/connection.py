@@ -20,6 +20,7 @@ from contextlib import contextmanager
 from copy import copy
 from logging import ERROR
 from pathlib import Path
+from time import sleep
 from typing import Callable, Optional, Union, cast
 
 import grpc
@@ -31,9 +32,13 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.heartbeat import HeartbeatSender
+from flwr.common.inflatable_grpc_utils import (
+    pull_object_from_servicer,
+    push_object_to_servicer,
+)
 from flwr.common.logger import log
 from flwr.common.message import Message
-from flwr.common.retry_invoker import RetryInvoker
+from flwr.common.retry_invoker import RetryInvoker, _wrap_stub
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
 )
@@ -46,6 +51,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
@@ -241,25 +247,47 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         # Request instructions (message) from server
         request = PullMessagesRequest(node=node)
-        response: PullMessagesResponse = retry_invoker.invoke(
-            stub.PullMessages, request=request
-        )
+        _wrap_stub(stub, retry_invoker)
+        response: PullMessagesResponse = stub.PullMessages(request=request)
 
         # Get the current Messages
         message_proto = (
             None if len(response.messages_list) == 0 else response.messages_list[0]
         )
 
-        # Discard the current message if not valid
-        if message_proto is not None and not (
-            message_proto.metadata.dst_node_id == node.node_id
-        ):
-            message_proto = None
+        in_message = None
+        if message_proto:
 
-        # Construct the Message
-        in_message = message_from_proto(message_proto) if message_proto else None
+            c_ids = response.children_object_ids
+            print(f"received children IDs list: {c_ids}")
 
-        # Remember `metadata` of the in message
+            #! Here we can try many variants of pulling objects. Not all objects will be
+            #! avail in the store yet. We can also pull in parallel.
+
+            # Keeping it simple: sleep (to ensure all objs are in the store), then pull
+            sleep(3)
+            msg_id = message_proto.metadata.message_id
+            in_message: Message = pull_object_from_servicer(msg_id, stub, node)
+
+            # TODO: remove, here for consistency checks in this PoC since the MEssage
+            # is sent in the regular way and also using the ObjectStore
+            # THis ensures both the received Message via PUllMessage and the inflated one are identical
+            assert in_message.object_id == message_from_proto(message_proto).object_id
+
+            #! The deflateed message doesn't contain the message_id (since it's its own object_id)
+            #! Inject
+            in_message.metadata.__dict__["_message_id"] = msg_id
+
+        # # Discard the current message if not valid
+        # if message_proto is not None and not (
+        #     message_proto.metadata.dst_node_id == node.node_id
+        # ):
+        #     message_proto = None
+
+        # # Construct the Message
+        # in_message = message_from_proto(message_proto) if message_proto else None
+
+        # # Remember `metadata` of the in message
         nonlocal metadata
         metadata = copy(in_message.metadata) if in_message else None
 
@@ -284,10 +312,29 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Invalid out message")
             return
 
-        # Serialize Message
+        _wrap_stub(stub, retry_invoker)
+
+        # Get list of all objects
+        obj_ids = push_object_to_servicer(message, node=node)
+
+        # Inject message_id
+        message.metadata.__dict__["_message_id"] = message.object_id
+
+        # Serialize Message and send as usual
+        #! We would exclude the content after the PoC (it is sent now to allow integrity checks on the receiving end)
         message_proto = message_to_proto(message=message)
-        request = PushMessagesRequest(node=node, messages_list=[message_proto])
-        _ = retry_invoker.invoke(stub.PushMessages, request)
+        request = PushMessagesRequest(
+            node=node,
+            messages_list=[message_proto],
+            object_ids_from_messages=[message.object_id],
+            object_ids=[",".join(obj_ids)],
+        )
+        response: PushMessagesResponse = stub.PushMessages(request)
+
+        objs_to_push = response.object_ids_to_push
+        print(f"objects to push: {objs_to_push = }")
+        # Push all objects to the servicer
+        push_object_to_servicer(message, node, stub, obj_ids_to_push=objs_to_push)
 
         # Cleanup
         metadata = None

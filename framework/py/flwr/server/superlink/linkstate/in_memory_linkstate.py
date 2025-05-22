@@ -118,9 +118,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if message_id is None:
             message_id = uuid4()
 
-        # Store Message
-        # pylint: disable-next=W0212
-        message.metadata._message_id = str(message_id)  # type: ignore
+            # Store Message
+            # pylint: disable-next=W0212
+            message.metadata._message_id = str(message_id)  # type: ignore
+        print(f"INsert meessage with id: {message.metadata._message_id = }")
         with self.lock:
             self.message_ins_store[message_id] = message
 
@@ -229,9 +230,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if message_id is None:
             message_id = uuid4()
 
-        # Store Message
-        # pylint: disable-next=W0212
-        message.metadata._message_id = str(message_id)  # type: ignore
+            # Store Message
+            # pylint: disable-next=W0212
+            message.metadata._message_id = str(message_id)  # type: ignore
         with self.lock:
             self.message_res_store[message_id] = message
             self.message_ins_id_to_message_res_id[str(msg_ins_id)] = message_id

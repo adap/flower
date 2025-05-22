@@ -30,10 +30,23 @@ class InMemoryObjectStore(ObjectStore):
     def __init__(self, verify: bool = True) -> None:
         self.verify = verify
         self.store: dict[str, bytes] = {}
+        self.msg_ojb_id_to_children_ids: dict[str, set[str]] = {}
 
     def preregister(self, object_id: str):
         """Pre-register an object entry."""
         self.store[object_id] = b""
+
+    def register_message_children_mapping(
+        self, msg_object_id: str, children_ids: list[str]
+    ) -> None:
+        """."""
+        self.msg_ojb_id_to_children_ids[msg_object_id] = children_ids
+
+    def get_children_ids(self, msg_object_id: str) -> list[str]:
+        """."""
+
+        # TODO: ensure passed object id belongs to a message -> check head
+        return self.msg_ojb_id_to_children_ids[msg_object_id]
 
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store."""

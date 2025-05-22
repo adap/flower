@@ -49,6 +49,19 @@ class ObjectStore(abc.ABC):
         """
 
     @abc.abstractmethod
+    def register_message_children_mapping(
+        self, object_id: str, children_ids: list[str]
+    ) -> None:
+        """Register mapping between message object id and its children.
+
+        This is helpful when pulling messages.
+        """
+
+    @abc.abstractmethod
+    def get_children_ids(self, object_id: str) -> list[str]:
+        """Get Object ids of all childrens that belong to the passed object_id."""
+
+    @abc.abstractmethod
     def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store.
 

@@ -52,6 +52,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
+from flwr.supercore.object_store import ObjectStore
 
 
 def create_node(
@@ -87,7 +88,7 @@ def send_node_heartbeat(
 
 
 def pull_messages(
-    request: PullMessagesRequest, state: LinkState
+    request: PullMessagesRequest, state: LinkState, store: ObjectStore
 ) -> PullMessagesResponse:
     """Pull Messages handler."""
     # Get node_id if client node is not anonymous
@@ -99,14 +100,22 @@ def pull_messages(
 
     # Convert to Messages
     msg_proto = []
+    obj_ids_list = []
     for msg in message_list:
         msg_proto.append(message_to_proto(msg))
+        # Get list of object ids associated with this message
+        children_ids = store.get_children_ids(msg.metadata.message_id)
+        # TODO: we could include here the object id of the message also
+        # ! to simplify a bit the logic in the supernode.
+        obj_ids_list.append(",".join(children_ids))
 
-    return PullMessagesResponse(messages_list=msg_proto)
+    return PullMessagesResponse(
+        messages_list=msg_proto, children_object_ids=obj_ids_list
+    )
 
 
 def push_messages(
-    request: PushMessagesRequest, state: LinkState
+    request: PushMessagesRequest, state: LinkState, store: ObjectStore
 ) -> PushMessagesResponse:
     """Push Messages handler."""
     # Convert Message from proto
@@ -122,12 +131,29 @@ def push_messages(
         raise InvalidRunStatusException(abort_msg)
 
     # Store Message in State
-    message_id: Optional[UUID] = state.store_message_res(message=msg)
+    # ! Pass message id
+    message_id: Optional[str] = state.store_message_res(
+        message=msg, message_id=request.object_ids[0]
+    )
+
+    obj_ids_list = request.object_ids.pop(0).split(",")
+    # Register message:children mapping
+    store.register_message_children_mapping(message_id, obj_ids_list)
+    # Pre-register objects in ObjectStore
+    obj_to_push = []  # List of object_ids not present in the store
+    for obj_id in obj_ids_list:
+        if obj_id not in store:
+            obj_to_push.append(obj_id)
+            # now pre-register
+            print(f"pre-register: {obj_id}")
+            store.preregister(object_id=obj_id)
+    objects_ids_not_in_store = [",".join(obj_to_push)]
 
     # Build response
     response = PushMessagesResponse(
         reconnect=Reconnect(reconnect=5),
         results={str(message_id): 0},
+        object_ids_to_push=objects_ids_not_in_store,
     )
     return response
 
