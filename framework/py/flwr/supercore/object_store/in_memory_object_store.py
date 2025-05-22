@@ -15,9 +15,11 @@
 """Flower in-memory ObjectStore implementation."""
 
 
+from logging import INFO
 from typing import Optional
 
 from flwr.common.inflatable import get_object_id, is_valid_sha256_hash
+from flwr.common.logger import log
 
 from .object_store import ObjectStore
 
@@ -28,6 +30,10 @@ class InMemoryObjectStore(ObjectStore):
     def __init__(self, verify: bool = True) -> None:
         self.verify = verify
         self.store: dict[str, bytes] = {}
+
+    def preregister(self, object_id: str):
+        """Pre-register an object entry."""
+        self.store[object_id] = b""
 
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store."""
@@ -41,11 +47,14 @@ class InMemoryObjectStore(ObjectStore):
             if object_id != object_id_from_content:
                 raise ValueError(f"Object ID {object_id} does not match content hash")
 
-        # Return if object is already present in the store
-        if object_id in self.store:
-            return
+        # Only allow adding the object if it has been pre-registered
+        if self.store[object_id] != b"":
+            raise ValueError(
+                f"Object with id {object_id} wasn't pre-registered. Aborting insertion :("
+            )
 
         self.store[object_id] = object_content
+        log(INFO, f"Inserted object: {object_id}")
 
     def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store."""

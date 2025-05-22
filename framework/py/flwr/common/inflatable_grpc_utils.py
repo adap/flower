@@ -15,8 +15,9 @@
 """InflatableObject utils."""
 
 
-from typing import Union
+from typing import Optional, Union
 
+from flwr.common import Message
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PullObjectRequest,
@@ -39,15 +40,19 @@ inflatable_class_registry: dict[str, type[InflatableObject]] = {
     ArrayRecord.__qualname__: ArrayRecord,
     ConfigRecord.__qualname__: ConfigRecord,
     MetricRecord.__qualname__: MetricRecord,
+    Message.__qualname__: Message,
     RecordDict.__qualname__: RecordDict,
 }
 
 
 def push_object_to_servicer(
-    obj: InflatableObject, stub: Union[FleetStub, ServerAppIoStub]
+    obj: InflatableObject,
+    stub: Optional[Union[FleetStub, ServerAppIoStub]] = None,
+    obj_ids_to_push: Optional[set[str]] = None,
 ) -> set[str]:
-    """Recursively deflate an object and push it to the servicer.
+    """Recursively deflate an object and push it to the servicer if a stub is passed.
 
+    If obj_ids_to_push is set, only objects whose ids are in the set are allowed.
     Objects with the same ID are not pushed twice. It returns the set of pushed object
     IDs.
     """
@@ -55,18 +60,27 @@ def push_object_to_servicer(
     # Push children if it has any
     if children := obj.children:
         for child in children.values():
-            pushed_object_ids |= push_object_to_servicer(child, stub)
+            pushed_object_ids |= push_object_to_servicer(child, stub, obj_ids_to_push)
 
     # Deflate object and push
     object_content = obj.deflate()
     object_id = get_object_id(object_content)
-    _: PushObjectResponse = stub.PushObject(
-        PushObjectRequest(
-            object_id=object_id,
-            object_content=object_content,
-        )
-    )
-    pushed_object_ids.add(object_id)
+
+    # Push if stub passed
+    if stub:
+        # Push always if no object set is specified, or if the object is in the set
+        if obj_ids_to_push is None or object_id in obj_ids_to_push:
+            _: PushObjectResponse = stub.PushObject(
+                PushObjectRequest(
+                    object_id=object_id,
+                    object_content=object_content,
+                )
+            )
+            pushed_object_ids.add(object_id)
+
+    # Always track if stub is disabled
+    if stub is None:
+        pushed_object_ids.add(object_id)
 
     return pushed_object_ids
 

@@ -354,7 +354,6 @@ class Message(InflatableObject):
         # Store message metadata and error in object body
         obj_body = ProtoMessage(
             metadata=metadata_to_proto(self.metadata),
-            content=None,
             error=error_to_proto(self.error) if self.has_error() else None,
         ).SerializeToString(deterministic=True)
 
@@ -463,8 +462,8 @@ def _extract_positional_args(
         raise MessageInitializationError()
 
     # One and only one of `content_or_error`, `content` and `error` must be set
-    if sum(x is not None for x in [content_or_error, content, error]) != 1:
-        raise MessageInitializationError()
+    # if sum(x is not None for x in [content_or_error, content, error]) != 1:
+    #     raise MessageInitializationError()
 
     # Set `content` or `error` based on `content_or_error`
     if content_or_error is not None:  # This means `content` and `error` are None

@@ -17,7 +17,7 @@ from flwr.proto import recorddict_pb2 as flwr_dot_proto_dot_recorddict__pb2
 from flwr.proto import transport_pb2 as flwr_dot_proto_dot_transport__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18\x66lwr/proto/message.proto\x12\nflwr.proto\x1a\x16\x66lwr/proto/error.proto\x1a\x1b\x66lwr/proto/recorddict.proto\x1a\x1a\x66lwr/proto/transport.proto\"|\n\x07Message\x12&\n\x08metadata\x18\x01 \x01(\x0b\x32\x14.flwr.proto.Metadata\x12\'\n\x07\x63ontent\x18\x02 \x01(\x0b\x32\x16.flwr.proto.RecordDict\x12 \n\x05\x65rror\x18\x03 \x01(\x0b\x32\x11.flwr.proto.Error\"\xd0\x02\n\x07\x43ontext\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12\x0f\n\x07node_id\x18\x02 \x01(\x04\x12\x38\n\x0bnode_config\x18\x03 \x03(\x0b\x32#.flwr.proto.Context.NodeConfigEntry\x12%\n\x05state\x18\x04 \x01(\x0b\x32\x16.flwr.proto.RecordDict\x12\x36\n\nrun_config\x18\x05 \x03(\x0b\x32\".flwr.proto.Context.RunConfigEntry\x1a\x45\n\x0fNodeConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\x1a\x44\n\x0eRunConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\"\xbe\x01\n\x08Metadata\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12\x12\n\nmessage_id\x18\x02 \x01(\t\x12\x13\n\x0bsrc_node_id\x18\x03 \x01(\x04\x12\x13\n\x0b\x64st_node_id\x18\x04 \x01(\x04\x12\x1b\n\x13reply_to_message_id\x18\x05 \x01(\t\x12\x10\n\x08group_id\x18\x06 \x01(\t\x12\x0b\n\x03ttl\x18\x07 \x01(\x01\x12\x14\n\x0cmessage_type\x18\x08 \x01(\t\x12\x12\n\ncreated_at\x18\t \x01(\x01\">\n\x11PushObjectRequest\x12\x11\n\tobject_id\x18\x01 \x01(\t\x12\x16\n\x0eobject_content\x18\x02 \x01(\x0c\"\x14\n\x12PushObjectResponse\"&\n\x11PullObjectRequest\x12\x11\n\tobject_id\x18\x01 \x01(\t\",\n\x12PullObjectResponse\x12\x16\n\x0eobject_content\x18\x01 \x01(\x0c\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18\x66lwr/proto/message.proto\x12\nflwr.proto\x1a\x16\x66lwr/proto/error.proto\x1a\x1b\x66lwr/proto/recorddict.proto\x1a\x1a\x66lwr/proto/transport.proto\"S\n\x07Message\x12&\n\x08metadata\x18\x01 \x01(\x0b\x32\x14.flwr.proto.Metadata\x12 \n\x05\x65rror\x18\x03 \x01(\x0b\x32\x11.flwr.proto.Error\"\xd0\x02\n\x07\x43ontext\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12\x0f\n\x07node_id\x18\x02 \x01(\x04\x12\x38\n\x0bnode_config\x18\x03 \x03(\x0b\x32#.flwr.proto.Context.NodeConfigEntry\x12%\n\x05state\x18\x04 \x01(\x0b\x32\x16.flwr.proto.RecordDict\x12\x36\n\nrun_config\x18\x05 \x03(\x0b\x32\".flwr.proto.Context.RunConfigEntry\x1a\x45\n\x0fNodeConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\x1a\x44\n\x0eRunConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\"\xbe\x01\n\x08Metadata\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12\x12\n\nmessage_id\x18\x02 \x01(\t\x12\x13\n\x0bsrc_node_id\x18\x03 \x01(\x04\x12\x13\n\x0b\x64st_node_id\x18\x04 \x01(\x04\x12\x1b\n\x13reply_to_message_id\x18\x05 \x01(\t\x12\x10\n\x08group_id\x18\x06 \x01(\t\x12\x0b\n\x03ttl\x18\x07 \x01(\x01\x12\x14\n\x0cmessage_type\x18\x08 \x01(\t\x12\x12\n\ncreated_at\x18\t \x01(\x01\">\n\x11PushObjectRequest\x12\x11\n\tobject_id\x18\x01 \x01(\t\x12\x16\n\x0eobject_content\x18\x02 \x01(\x0c\"\x14\n\x12PushObjectResponse\"&\n\x11PullObjectRequest\x12\x11\n\tobject_id\x18\x01 \x01(\t\",\n\x12PullObjectResponse\x12\x16\n\x0eobject_content\x18\x01 \x01(\x0c\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -29,21 +29,21 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_CONTEXT_RUNCONFIGENTRY']._options = None
   _globals['_CONTEXT_RUNCONFIGENTRY']._serialized_options = b'8\001'
   _globals['_MESSAGE']._serialized_start=121
-  _globals['_MESSAGE']._serialized_end=245
-  _globals['_CONTEXT']._serialized_start=248
-  _globals['_CONTEXT']._serialized_end=584
-  _globals['_CONTEXT_NODECONFIGENTRY']._serialized_start=445
-  _globals['_CONTEXT_NODECONFIGENTRY']._serialized_end=514
-  _globals['_CONTEXT_RUNCONFIGENTRY']._serialized_start=516
-  _globals['_CONTEXT_RUNCONFIGENTRY']._serialized_end=584
-  _globals['_METADATA']._serialized_start=587
-  _globals['_METADATA']._serialized_end=777
-  _globals['_PUSHOBJECTREQUEST']._serialized_start=779
-  _globals['_PUSHOBJECTREQUEST']._serialized_end=841
-  _globals['_PUSHOBJECTRESPONSE']._serialized_start=843
-  _globals['_PUSHOBJECTRESPONSE']._serialized_end=863
-  _globals['_PULLOBJECTREQUEST']._serialized_start=865
-  _globals['_PULLOBJECTREQUEST']._serialized_end=903
-  _globals['_PULLOBJECTRESPONSE']._serialized_start=905
-  _globals['_PULLOBJECTRESPONSE']._serialized_end=949
+  _globals['_MESSAGE']._serialized_end=204
+  _globals['_CONTEXT']._serialized_start=207
+  _globals['_CONTEXT']._serialized_end=543
+  _globals['_CONTEXT_NODECONFIGENTRY']._serialized_start=404
+  _globals['_CONTEXT_NODECONFIGENTRY']._serialized_end=473
+  _globals['_CONTEXT_RUNCONFIGENTRY']._serialized_start=475
+  _globals['_CONTEXT_RUNCONFIGENTRY']._serialized_end=543
+  _globals['_METADATA']._serialized_start=546
+  _globals['_METADATA']._serialized_end=736
+  _globals['_PUSHOBJECTREQUEST']._serialized_start=738
+  _globals['_PUSHOBJECTREQUEST']._serialized_end=800
+  _globals['_PUSHOBJECTRESPONSE']._serialized_start=802
+  _globals['_PUSHOBJECTRESPONSE']._serialized_end=822
+  _globals['_PULLOBJECTREQUEST']._serialized_start=824
+  _globals['_PULLOBJECTREQUEST']._serialized_end=862
+  _globals['_PULLOBJECTRESPONSE']._serialized_start=864
+  _globals['_PULLOBJECTRESPONSE']._serialized_end=908
 # @@protoc_insertion_point(module_scope)

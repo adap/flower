@@ -546,9 +546,6 @@ def message_to_proto(message: Message) -> ProtoMessage:
     """Serialize `Message` to ProtoBuf."""
     proto = ProtoMessage(
         metadata=metadata_to_proto(message.metadata),
-        content=(
-            recorddict_to_proto(message.content) if message.has_content() else None
-        ),
         error=error_to_proto(message.error) if message.has_error() else None,
     )
     return proto
@@ -558,11 +555,6 @@ def message_from_proto(message_proto: ProtoMessage) -> Message:
     """Deserialize `Message` from ProtoBuf."""
     return make_message(
         metadata=metadata_from_proto(message_proto.metadata),
-        content=(
-            recorddict_from_proto(message_proto.content)
-            if message_proto.HasField("content")
-            else None
-        ),
         error=(
             error_from_proto(message_proto.error)
             if message_proto.HasField("error")

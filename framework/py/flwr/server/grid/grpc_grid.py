@@ -14,8 +14,9 @@
 # ==============================================================================
 """Flower gRPC Grid."""
 
-
+import sys
 import time
+import traceback
 from collections.abc import Iterable
 from logging import DEBUG, ERROR, WARNING
 from typing import Optional, cast
@@ -28,6 +29,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
+from flwr.common.inflatable_grpc_utils import push_object_to_servicer
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
@@ -207,6 +209,8 @@ class GrpcGrid(Grid):
         # Construct Messages
         run_id = cast(Run, self._run).run_id
         message_proto_list: list[ProtoMessage] = []
+        objects_ids_for_messages: list[str] = []
+        obj_count = 0
         for msg in messages:
             # Populate metadata
             msg.metadata.__dict__["_run_id"] = run_id
@@ -214,14 +218,31 @@ class GrpcGrid(Grid):
             # Check message
             self._check_message(msg)
             # Convert to proto
-            msg_proto = message_to_proto(msg)
+            msg_proto = message_to_proto(msg)  #! .content is excluded in message.proto
+            # Compute all the object ids in the message
+            obj_ids = push_object_to_servicer(msg)
+            obj_ids_str = ",".join(
+                obj_ids
+            )  # convert to comma separated string to ease protobuf
+            obj_count += len(obj_ids)
             # Add to list
             message_proto_list.append(msg_proto)
+            objects_ids_for_messages.append(obj_ids_str)
+
+        print(
+            f"Obj IDs carried in messages: ({obj_count}) -> {objects_ids_for_messages}"
+        )
 
         try:
             # Call GrpcServerAppIoStub method
+            # Pushe N messages and N comma-separated strings containing the object ids
+            # associated to each message
             res: PushInsMessagesResponse = self._stub.PushMessages(
-                PushInsMessagesRequest(messages_list=message_proto_list, run_id=run_id)
+                PushInsMessagesRequest(
+                    messages_list=message_proto_list,
+                    run_id=run_id,
+                    object_ids=objects_ids_for_messages,
+                )
             )
             if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
                 message_proto_list
@@ -233,12 +254,32 @@ class GrpcGrid(Grid):
                     "passed to `push_messages`). This could be due to a malformed "
                     "message.",
                 )
+
+            # For each message, we received a comma-separated list of object ids to push
+            #! We assume the list returned is in the same order as messages were pushed
+            #! It should hold based on the logic in the PushMessages method in the servicer
+            #! But we can probably make this more robust -- or relax the pushing of objects
+            #! so it's not done in a per-message basis
+            for msg, obj_ids_list in zip(messages, res.object_ids_to_push):
+                obj_ids = obj_ids_list.split(",")
+                print(f"Object IDs that need pushing: {len(obj_ids)} -> {obj_ids}")
+                # Push the objects for this message
+                push_object_to_servicer(msg, self._stub, obj_ids_to_push=set(obj_ids))
+
             return list(res.message_ids)
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
                 log(ERROR, ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED)
                 return []
             raise
+        except Exception:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            tb = traceback.extract_tb(exc_traceback)
+            for frame in tb:
+                print(
+                    f"Exception in {frame.filename}, line {frame.lineno}, in {frame.name}"
+                )
+                print(f"  Code: {frame.line}")
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.

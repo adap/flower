@@ -39,6 +39,16 @@ class ObjectStore(abc.ABC):
         """
 
     @abc.abstractmethod
+    def preregister(self, object_id: str) -> None:
+        """Preregister an object entry.
+
+        Parameters
+        ----------
+        object_id : str
+            The object_id under which to store the object.
+        """
+
+    @abc.abstractmethod
     def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store.
 

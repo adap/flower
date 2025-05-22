@@ -61,10 +61,10 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
         validation_errors.append("`metadata.message_type` MUST be set")
 
     # Content
-    if not message.has_content() != message.has_error():
-        validation_errors.append(
-            "Either message `content` or `error` MUST be set (but not both)"
-        )
+    # if not message.has_content() != message.has_error():
+    #     validation_errors.append(
+    #         "Either message `content` or `error` MUST be set (but not both)"
+    #     )
 
     # Link respose to original message
     if not is_reply_message:

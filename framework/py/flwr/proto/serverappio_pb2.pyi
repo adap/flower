@@ -44,27 +44,35 @@ class PushInsMessagesRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MESSAGES_LIST_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
+    OBJECT_IDS_FIELD_NUMBER: builtins.int
     @property
     def messages_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.message_pb2.Message]: ...
     run_id: builtins.int
+    @property
+    def object_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     def __init__(self,
         *,
         messages_list: typing.Optional[typing.Iterable[flwr.proto.message_pb2.Message]] = ...,
         run_id: builtins.int = ...,
+        object_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list","run_id",b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list","object_ids",b"object_ids","run_id",b"run_id"]) -> None: ...
 global___PushInsMessagesRequest = PushInsMessagesRequest
 
 class PushInsMessagesResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MESSAGE_IDS_FIELD_NUMBER: builtins.int
+    OBJECT_IDS_TO_PUSH_FIELD_NUMBER: builtins.int
     @property
     def message_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    @property
+    def object_ids_to_push(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     def __init__(self,
         *,
         message_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        object_ids_to_push: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["message_ids",b"message_ids"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["message_ids",b"message_ids","object_ids_to_push",b"object_ids_to_push"]) -> None: ...
 global___PushInsMessagesResponse = PushInsMessagesResponse
 
 class PullResMessagesRequest(google.protobuf.message.Message):

@@ -23,7 +23,6 @@ import "flwr/proto/transport.proto";
 
 message Message {
   Metadata metadata = 1;
-  RecordDict content = 2;
   Error error = 3;
 }
 

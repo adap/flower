@@ -155,6 +155,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Init state
         state: LinkState = self.state_factory.state()
+        # Init store
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
@@ -171,6 +173,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             detail="`messages_list` must not be empty",
         )
         message_ids: list[Optional[UUID]] = []
+        objects_ids_not_in_store: list[str] = (
+            []
+        )  # to return in response (grid will then push)
         while request.messages_list:
             message_proto = request.messages_list.pop(0)
             message = message_from_proto(message_proto=message_proto)
@@ -189,10 +194,22 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             message_id: Optional[UUID] = state.store_message_ins(message=message)
             message_ids.append(message_id)
 
+            # Pre-register objects in ObjectStore
+            obj_ids_list = request.object_ids.pop(0).split(",")
+            obj_to_push = []
+            for obj_id in obj_ids_list:
+                if obj_id not in store:
+                    obj_to_push.append(obj_id)
+                    # now pre-register
+                    print(f"pre-register: {obj_id}")
+                    store.preregister(object_id=obj_id)
+            objects_ids_not_in_store.append(",".join(obj_to_push))
+
         return PushInsMessagesResponse(
             message_ids=[
                 str(message_id) if message_id else "" for message_id in message_ids
-            ]
+            ],
+            object_ids_to_push=objects_ids_not_in_store,
         )
 
     def PullMessages(
@@ -406,6 +423,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         if not check_body_len_consistency(request.object_content):
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
+
+        store = self.objectstore_factory.store()
+
+        # Insert in store
+        try:
+            store.put(request.object_id, request.object_content)
+        except ValueError as e:
+            context.abort(grpc.StatusCode.PERMISSION_DENIED, f"{e}")
 
         return PushObjectResponse()
 
