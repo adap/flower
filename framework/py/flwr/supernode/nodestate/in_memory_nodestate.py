@@ -66,7 +66,9 @@ class InMemoryNodeState(NodeState):
 
         with self.lock_msg_store:
             # Iterate through all messages in the store
-            for object_id, message in self.msg_store.items():
+            for object_id in list(self.msg_store.keys()):
+                message = self.msg_store[object_id]
+
                 # Skip messages whose run_id doesn't match the filter
                 if run_id is not None:
                     if message.metadata.run_id not in run_id:
@@ -81,6 +83,9 @@ class InMemoryNodeState(NodeState):
 
                 # Add the message to the result set
                 selected_messages[object_id] = message
+
+                # Remove the message from the store
+                del self.msg_store[object_id]
 
                 # Stop if the number of collected messages reaches the limit
                 if limit is not None and len(selected_messages) >= limit:
@@ -108,10 +113,10 @@ class InMemoryNodeState(NodeState):
         with self.lock_run_store:
             return list(self.run_store.keys())
 
-    def store_context(self, context: Context, run_id: int) -> None:
+    def store_context(self, context: Context) -> None:
         """Store a context."""
         with self.lock_ctx_store:
-            self.ctx_store[run_id] = context
+            self.ctx_store[context.run_id] = context
 
     def get_context(self, run_id: int) -> Optional[Context]:
         """Retrieve a context by its run ID."""
