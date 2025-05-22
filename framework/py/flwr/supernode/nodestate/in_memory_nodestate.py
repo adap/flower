@@ -17,7 +17,7 @@
 
 from typing import Optional
 
-from flwr.client.nodestate.nodestate import NodeState
+from .nodestate import NodeState
 
 
 class InMemoryNodeState(NodeState):
