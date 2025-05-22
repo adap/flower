@@ -24,7 +24,7 @@ from contextlib import AbstractContextManager
 from logging import ERROR, INFO, WARN
 from os import urandom
 from pathlib import Path
-from typing import Callable, Optional, Union, cast
+from typing import Callable, Optional, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -32,9 +32,6 @@ from grpc import RpcError
 
 from flwr.app.error import Error
 from flwr.cli.config_utils import get_fab_metadata
-from flwr.cli.install import install_from_fab
-from flwr.client.client import Client
-from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.clientapp.app import flwr_clientapp
 from flwr.client.clientapp.clientappio_servicer import (
     ClientAppInputs,
@@ -44,13 +41,11 @@ from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.client.message_handler.message_handler import handle_control_message
 from flwr.client.run_info_store import DeprecatedRunInfoStore
-from flwr.client.typing import ClientFnExt
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Message
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Message
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     CLIENT_OCTET,
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
-    ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MAX_RETRY_DELAY,
     RUN_ID_NUM_BYTES,
@@ -90,7 +85,7 @@ def start_client_internal(
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
     isolation: str,
-    clientappio_api_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
+    clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -150,17 +145,10 @@ def start_client_internal(
     if insecure is None:
         insecure = root_certificates is None
 
-    if isolation:
-        if clientappio_api_address is None:
-            raise ValueError(
-                f"`clientappio_api_address` required when `isolation` is "
-                f"{ISOLATION_MODE_SUBPROCESS} or {ISOLATION_MODE_PROCESS}",
-            )
-        _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
-            address=clientappio_api_address,
-            certificates=None,
-        )
-    clientappio_api_address = cast(str, clientappio_api_address)
+    _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
+        address=clientappio_api_address,
+        certificates=None,
+    )
 
     # Initialize connection context manager
     connection, address, connection_error_type = _init_connection(
@@ -224,25 +212,6 @@ def start_client_internal(
             authentication_keys,
         ) as conn:
             receive, send, create_node, delete_node, get_run, get_fab = conn
-
-            # Cast the following functions to the correct types
-            # They are all guaranteed to be present in the supported transport types
-            create_node = cast(
-                Callable[[], Optional[int]],
-                create_node,
-            )
-            delete_node = cast(
-                Callable[[], None],
-                delete_node,
-            )
-            get_run = cast(
-                Callable[[int], Run],
-                get_run,
-            )
-            get_fab = cast(
-                Callable[[str, int], Fab],
-                get_fab,
-            )
 
             # Register node when connecting the first time
             if run_info_store is None:
