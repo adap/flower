@@ -84,7 +84,7 @@ def start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
-    isolation: str,
+    isolation: str = ISOLATION_MODE_SUBPROCESS,
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
@@ -131,14 +131,14 @@ def start_client_internal(
         If set to None, there is no limit to the total time.
     flwr_path: Optional[Path] (default: None)
         The fully resolved path containing installed Flower Apps.
-    isolation : str
+    isolation : str (default: ISOLATION_MODE_SUBPROCESS)
         Isolation mode for `ClientApp`. Possible values are `subprocess` and
         `process`. If `subprocess`, the `ClientApp` runs in a subprocess started
         by the SueprNode and communicates using gRPC at the address
         `clientappio_api_address`. If `process`, the `ClientApp` runs in a separate
         isolated process and communicates using gRPC at the address
         `clientappio_api_address`.
-    clientappio_api_address : Optional[str]
+    clientappio_api_address : str
         (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
         The SuperNode gRPC server address.
     """
