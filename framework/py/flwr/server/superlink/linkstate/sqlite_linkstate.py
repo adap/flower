@@ -40,12 +40,8 @@ from flwr.common.constant import (
 )
 from flwr.common.message import make_message
 from flwr.common.record import ConfigRecord
-from flwr.common.serde import (
-    error_from_proto,
-    error_to_proto,
-    recorddict_from_proto,
-    recorddict_to_proto,
-)
+from flwr.common.serde import recorddict_from_proto, recorddict_to_proto
+from flwr.common.serde_utils import error_from_proto, error_to_proto
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
