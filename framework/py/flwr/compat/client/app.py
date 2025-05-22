@@ -41,7 +41,6 @@ from flwr.client.clientapp.clientappio_servicer import (
     ClientAppIoServicer,
 )
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
-from flwr.client.grpc_client.connection import grpc_connection
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.client.message_handler.message_handler import handle_control_message
 from flwr.client.numpy_client import NumPyClient
@@ -69,6 +68,7 @@ from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
+from flwr.compat.client.grpc_client.connection import grpc_connection
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.supernode.nodestate import NodeStateFactory
 
@@ -794,7 +794,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
         connection, error_type = grpc_adapter, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection, error_type = grpc_connection, RpcError
+        connection, error_type = grpc_connection, RpcError  # type: ignore[assignment]
     else:
         raise ValueError(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
