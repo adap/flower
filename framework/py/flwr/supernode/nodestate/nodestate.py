@@ -17,7 +17,6 @@
 
 from abc import ABC, abstractmethod
 from typing import Optional
-from uuid import UUID
 
 from flwr.common import Context, Message
 from flwr.common.typing import Run
@@ -45,12 +44,13 @@ class NodeState(ABC):
         """Retrieve messages based on the specified filters.
 
         If a filter is set to None, it is ignored.
-        If a list is provided for a filter, it is treated as an OR condition.
+        If multiple filters are provided, they are combined using AND logic.
 
         Parameters
         ----------
         run_id : Optional[int | list[int]] (default: None)
-            Run ID or list of run IDs to filter by.
+            Run ID or list of run IDs to filter by. If a list is provided,
+            it is treated as an OR condition.
         is_reply : Optional[bool] (default: None)
             If True, filter for reply messages; if False, filter for non-reply
             (instruction) messages.
