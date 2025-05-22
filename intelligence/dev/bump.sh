@@ -49,4 +49,8 @@ done
 
 cd ..
 
+# Update version in Kotlin SDK
+sed -i.bak "s/^VERSION_NAME=.*/VERSION_NAME=$new_version/" kt/gradle.properties
+rm kt/gradle.properties.bak
+
 echo "Version updated successfully!"

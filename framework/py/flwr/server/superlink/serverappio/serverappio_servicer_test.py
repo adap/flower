@@ -60,6 +60,7 @@ from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from flwr.server.superlink.serverappio.serverappio_servicer import _raise_if
 from flwr.server.superlink.utils import _STATUS_TO_MSG
+from flwr.supercore.object_store import ObjectStoreFactory
 
 # pylint: disable=broad-except
 
@@ -121,6 +122,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         self.state = state_factory.state()
         ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()
+        objectstore_factory = ObjectStoreFactory()
 
         self.status_to_msg = _STATUS_TO_MSG
 
@@ -128,6 +130,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
             state_factory,
             ffs_factory,
+            objectstore_factory,
             None,
         )
 
