@@ -68,7 +68,7 @@ class NodeState(ABC):
         """
 
     @abstractmethod
-    def store_message(self, message: Message, object_id: str) -> UUID:
+    def store_message(self, message: Message, object_id: str) -> None:
         """Store a message.
 
         Parameters
@@ -77,11 +77,6 @@ class NodeState(ABC):
             The message to store.
         object_id : str
             The object ID of the message.
-
-        Returns
-        -------
-        UUID
-            The message ID of the stored message.
         """
 
     @abstractmethod
