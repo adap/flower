@@ -178,6 +178,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )  # to return in response (grid will then push)
         while request.messages_list:
             message_proto = request.messages_list.pop(0)
+            message_id = request.object_ids_from_messages.pop(
+                0
+            )  # the object_id, will be used as message_id
             message = message_from_proto(message_proto=message_proto)
             validation_errors = validate_message(message, is_reply_message=False)
             _raise_if(
@@ -191,7 +194,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 detail="`Message.metadata` has mismatched `run_id`",
             )
             # Store
-            message_id: Optional[UUID] = state.store_message_ins(message=message)
+            message_id = state.store_message_ins(message=message, message_id=message_id)
             message_ids.append(message_id)
 
             # Pre-register objects in ObjectStore
@@ -230,16 +233,13 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         # Convert each message_id str to UUID
-        message_ids: set[UUID] = {
-            UUID(message_id) for message_id in request.message_ids
-        }
+        message_ids: set[str] = set(request.message_ids)
 
         # Read from state
         messages_res: list[Message] = state.get_message_res(message_ids=message_ids)
-
         # Delete the instruction Messages and their replies if found
         message_ins_ids_to_delete = {
-            UUID(msg_res.metadata.reply_to_message_id) for msg_res in messages_res
+            str(msg_res.metadata.reply_to_message_id) for msg_res in messages_res
         }
 
         state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
@@ -258,6 +258,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 )
             messages_list.append(message_to_proto(msg))
 
+        print("addddd")
+        print(messages_list)
         return PullResMessagesResponse(messages_list=messages_list)
 
     def GetRun(

@@ -28,7 +28,9 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
     """Abstract LinkState."""
 
     @abc.abstractmethod
-    def store_message_ins(self, message: Message) -> Optional[UUID]:
+    def store_message_ins(
+        self, message: Message, message_id: Optional[str] = None
+    ) -> Optional[UUID]:
         """Store one Message.
 
         Usually, the ServerAppIo API calls this to schedule instructions.
@@ -61,7 +63,9 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def store_message_res(self, message: Message) -> Optional[UUID]:
+    def store_message_res(
+        self, message: Message, message_id: Optional[str] = None
+    ) -> Optional[UUID]:
         """Store one Message.
 
         Usually, the Fleet API calls this for Nodes returning results.

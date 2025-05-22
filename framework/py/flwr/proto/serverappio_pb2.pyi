@@ -45,18 +45,22 @@ class PushInsMessagesRequest(google.protobuf.message.Message):
     MESSAGES_LIST_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
     OBJECT_IDS_FIELD_NUMBER: builtins.int
+    OBJECT_IDS_FROM_MESSAGES_FIELD_NUMBER: builtins.int
     @property
     def messages_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.message_pb2.Message]: ...
     run_id: builtins.int
     @property
     def object_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    @property
+    def object_ids_from_messages(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     def __init__(self,
         *,
         messages_list: typing.Optional[typing.Iterable[flwr.proto.message_pb2.Message]] = ...,
         run_id: builtins.int = ...,
         object_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        object_ids_from_messages: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list","object_ids",b"object_ids","run_id",b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list","object_ids",b"object_ids","object_ids_from_messages",b"object_ids_from_messages","run_id",b"run_id"]) -> None: ...
 global___PushInsMessagesRequest = PushInsMessagesRequest
 
 class PushInsMessagesResponse(google.protobuf.message.Message):

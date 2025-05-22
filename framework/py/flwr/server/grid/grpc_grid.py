@@ -14,9 +14,7 @@
 # ==============================================================================
 """Flower gRPC Grid."""
 
-import sys
 import time
-import traceback
 from collections.abc import Iterable
 from logging import DEBUG, ERROR, WARNING
 from typing import Optional, cast
@@ -237,11 +235,14 @@ class GrpcGrid(Grid):
             # Call GrpcServerAppIoStub method
             # Pushe N messages and N comma-separated strings containing the object ids
             # associated to each message
+            #! Since this carry the object-id of the messages we could also use them
+            #! to replace the message-id creation in the LinkState
             res: PushInsMessagesResponse = self._stub.PushMessages(
                 PushInsMessagesRequest(
                     messages_list=message_proto_list,
                     run_id=run_id,
                     object_ids=objects_ids_for_messages,
+                    object_ids_from_messages=[msg.object_id for msg in messages],
                 )
             )
             if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
@@ -272,14 +273,6 @@ class GrpcGrid(Grid):
                 log(ERROR, ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED)
                 return []
             raise
-        except Exception:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            tb = traceback.extract_tb(exc_traceback)
-            for frame in tb:
-                print(
-                    f"Exception in {frame.filename}, line {frame.lineno}, in {frame.name}"
-                )
-                print(f"  Code: {frame.line}")
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.

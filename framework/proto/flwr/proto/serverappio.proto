@@ -81,6 +81,7 @@ message PushInsMessagesRequest {
   repeated Message messages_list = 1;
   uint64 run_id = 2;
   repeated string object_ids = 3;
+  repeated string object_ids_from_messages = 4;
 }
 message PushInsMessagesResponse {
   repeated string message_ids = 1;
