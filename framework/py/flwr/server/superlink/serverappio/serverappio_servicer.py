@@ -22,21 +22,19 @@ from uuid import UUID
 
 import grpc
 
-from flwr.common import ConfigRecord, Message
+from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
-    fab_from_proto,
     fab_to_proto,
     message_from_proto,
     message_to_proto,
     run_status_from_proto,
     run_status_to_proto,
     run_to_proto,
-    user_config_from_proto,
 )
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
@@ -57,8 +55,6 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
-    CreateRunRequest,
-    CreateRunResponse,
     GetRunRequest,
     GetRunResponse,
     GetRunStatusRequest,
@@ -120,32 +116,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         all_ids: set[int] = state.get_nodes(request.run_id)
         nodes: list[Node] = [Node(node_id=node_id) for node_id in all_ids]
         return GetNodesResponse(nodes=nodes)
-
-    def CreateRun(
-        self, request: CreateRunRequest, context: grpc.ServicerContext
-    ) -> CreateRunResponse:
-        """Create run ID."""
-        log(DEBUG, "ServerAppIoServicer.CreateRun")
-        state: LinkState = self.state_factory.state()
-        if request.HasField("fab"):
-            fab = fab_from_proto(request.fab)
-            ffs: Ffs = self.ffs_factory.ffs()
-            fab_hash = ffs.put(fab.content, {})
-            _raise_if(
-                validation_error=fab_hash != fab.hash_str,
-                request_name="CreateRun",
-                detail=f"FAB ({fab.hash_str}) hash from request doesn't match contents",
-            )
-        else:
-            fab_hash = ""
-        run_id = state.create_run(
-            request.fab_id,
-            request.fab_version,
-            fab_hash,
-            user_config_from_proto(request.override_config),
-            ConfigRecord(),
-        )
-        return CreateRunResponse(run_id=run_id)
 
     def PushMessages(
         self, request: PushInsMessagesRequest, context: grpc.ServicerContext
