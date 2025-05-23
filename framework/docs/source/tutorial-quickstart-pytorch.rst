@@ -353,15 +353,3 @@ Congratulations! You've successfully built and run your first federated learning
     <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch>`_ of the
     extended version of this tutorial in ``examples/quickstart-pytorch`` in the Flower
     GitHub repository.
-
-Video tutorial
---------------
-
-.. note::
-
-    The video shown below shows how to setup a PyTorch + Flower project using our
-    previously recommended APIs. A new video tutorial will be released that shows the
-    new APIs (as the content above does)
-
-.. youtube:: jOmmuzMIQ4c
-    :width: 100%

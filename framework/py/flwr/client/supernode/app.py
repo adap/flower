@@ -43,7 +43,6 @@ from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 
-from ..clientapp.utils import get_load_client_app_fn
 from ..start_client_internal import start_client_internal
 
 
@@ -64,12 +63,6 @@ def run_supernode() -> None:
         )
 
     root_certificates = try_obtain_root_certificates(args, args.superlink)
-    load_fn = get_load_client_app_fn(
-        default_app_ref="",
-        app_path=None,
-        flwr_dir=args.flwr_dir,
-        multi_app=True,
-    )
     authentication_keys = _try_setup_client_authentication(args)
 
     log(DEBUG, "Isolation mode: %s", args.isolation)
@@ -82,7 +75,6 @@ def run_supernode() -> None:
 
     start_client_internal(
         server_address=args.superlink,
-        load_client_app_fn=load_fn,
         transport=args.transport,
         root_certificates=root_certificates,
         insecure=args.insecure,
