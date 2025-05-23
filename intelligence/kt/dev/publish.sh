@@ -15,7 +15,7 @@ GROUP_ID=$(getProp "GROUP_ID")
 ARTIFACT_ID=$(getProp "ARTIFACT_ID")
 VERSION=$(getProp "VERSION_NAME")
 
-CENTRAL_API_URL="https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED"
+CENTRAL_API_URL="https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC"
 ZIP_FILE="${ARTIFACT_ID}-${VERSION}.zip"
 REPO_DIR="$HOME/.m2/repository/$(echo $GROUP_ID | tr '.' '/')/$ARTIFACT_ID/$VERSION"
 
@@ -69,7 +69,7 @@ zip -r "$OLDPWD/$ZIP_FILE" "$RELATIVE_PATH"
 popd > /dev/null
 
 # === PUBLISH ===
-echo "Uploading to Maven Central (USER_MANAGED)..."
+echo "Uploading to Maven Central (AUTOMATIC)..."
 RESPONSE=$(curl -s -X POST "$CENTRAL_API_URL" \
   -H "Authorization: Bearer $AUTH_TOKEN" \
   -F "bundle=@$ZIP_FILE;type=application/octet-stream")
