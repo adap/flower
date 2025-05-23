@@ -46,7 +46,7 @@ from flwr.common.logger import log
 from ..start_client_internal import start_client_internal
 
 
-def run_supernode() -> None:
+def flower_supernode() -> None:
     """Run Flower SuperNode."""
     args = _parse_args_run_supernode().parse_args()
 

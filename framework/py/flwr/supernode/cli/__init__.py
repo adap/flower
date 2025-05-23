@@ -13,3 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Flower command line interface for SuperNode."""
+
+
+from .flower_supernode import flower_supernode
+
+__all__ = ["flower_supernode"]
