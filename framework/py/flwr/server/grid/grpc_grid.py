@@ -14,7 +14,6 @@
 # ==============================================================================
 """Flower gRPC Grid."""
 
-
 import time
 from collections.abc import Iterable
 from logging import DEBUG, ERROR, WARNING
@@ -28,6 +27,10 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
+from flwr.common.inflatable_grpc_utils import (
+    pull_object_from_servicer,
+    push_object_to_servicer,
+)
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
@@ -163,8 +166,8 @@ class GrpcGrid(Grid):
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            message.metadata.message_id == ""
-            and message.metadata.reply_to_message_id == ""
+            # message.metadata.message_id == "" #! we set it before pushing based on object_Id
+            message.metadata.reply_to_message_id == ""
             and message.metadata.ttl > 0
         ):
             raise ValueError(f"Invalid message: {message}")
@@ -207,21 +210,48 @@ class GrpcGrid(Grid):
         # Construct Messages
         run_id = cast(Run, self._run).run_id
         message_proto_list: list[ProtoMessage] = []
+        objects_ids_for_messages: list[str] = []
+        obj_count = 0
         for msg in messages:
             # Populate metadata
             msg.metadata.__dict__["_run_id"] = run_id
             msg.metadata.__dict__["_src_node_id"] = self.node.node_id
+            msg.metadata.__dict__["_message_id"] = (
+                msg.object_id
+            )  # Yes, we can do this now, more context later
             # Check message
             self._check_message(msg)
             # Convert to proto
-            msg_proto = message_to_proto(msg)
+            msg_proto = message_to_proto(msg)  #! .content is excluded in message.proto
+            # Compute all the object ids in the message
+            obj_ids = push_object_to_servicer(msg, self.node)
+            obj_ids_str = ",".join(
+                obj_ids
+            )  # convert to comma separated string to ease protobuf
+            obj_count += len(obj_ids)
             # Add to list
             message_proto_list.append(msg_proto)
+            objects_ids_for_messages.append(obj_ids_str)
+
+        print(
+            f"Obj IDs carried in messages: ({obj_count}) -> {objects_ids_for_messages}"
+        )
 
         try:
             # Call GrpcServerAppIoStub method
+            # Pushe N messages and N comma-separated strings containing the object ids
+            # associated to each message
+            #! Since this carry the object-id of the messages we could also use them
+            #! to replace the message-id creation in the LinkState
             res: PushInsMessagesResponse = self._stub.PushMessages(
-                PushInsMessagesRequest(messages_list=message_proto_list, run_id=run_id)
+                PushInsMessagesRequest(
+                    messages_list=message_proto_list,
+                    run_id=run_id,
+                    object_ids=objects_ids_for_messages,
+                    object_ids_from_messages=[
+                        msg.object_id for msg in messages
+                    ],  # could be done more efficiently
+                )
             )
             if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
                 message_proto_list
@@ -233,6 +263,20 @@ class GrpcGrid(Grid):
                     "passed to `push_messages`). This could be due to a malformed "
                     "message.",
                 )
+
+            # For each message, we received a comma-separated list of object ids to push
+            #! We assume the list returned is in the same order as messages were pushed
+            #! It should hold based on the logic in the PushMessages method in the servicer
+            #! But we can probably make this more robust -- or relax the pushing of objects
+            #! so it's not done in a per-message basis
+            for msg, obj_ids_list in zip(messages, res.object_ids_to_push):
+                obj_ids = obj_ids_list.split(",")
+                print(f"Object IDs that need pushing: {len(obj_ids)} -> {obj_ids}")
+                # Push the objects for this message
+                push_object_to_servicer(
+                    msg, self.node, self._stub, obj_ids_to_push=set(obj_ids)
+                )
+
             return list(res.message_ids)
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
@@ -255,8 +299,20 @@ class GrpcGrid(Grid):
                 )
             )
             # Convert Message from Protobuf representation
+            # ! Regular way of doing things, will be used to compare with the new way next
             msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
-            return msgs
+
+            inflated_msgs: list[Message] = []
+            for msg_proto in res.messages_list:
+                inflated_msgs.append(
+                    pull_object_from_servicer(
+                        msg_proto.metadata.message_id, self._stub, node=self.node
+                    )
+                )
+
+            for normal, inflated in zip(msgs, inflated_msgs):
+                assert normal.object_id == inflated.object_id
+            return inflated_msgs
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
                 log(ERROR, ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED)

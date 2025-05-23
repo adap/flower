@@ -27,8 +27,9 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     validation_errors = []
     metadata = message.metadata
 
-    if metadata.message_id != "":
-        validation_errors.append("non-empty `metadata.message_id`")
+    #! We set it when pushing (it's the object_id of the message)
+    # if metadata.message_id != "":
+    # validation_errors.append("non-empty `metadata.message_id`")
 
     # Created/delivered/TTL/Pushed
     if (
@@ -68,8 +69,9 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
 
     # Link respose to original message
     if not is_reply_message:
-        if metadata.reply_to_message_id != "":
-            validation_errors.append("`metadata.reply_to_message_id` MUST not be set.")
+        #! We set it when pushing (it's the object_id of the message)
+        # if metadata.reply_to_message_id != "":
+        #     validation_errors.append("`metadata.reply_to_message_id` MUST not be set.")
         if metadata.src_node_id != SUPERLINK_NODE_ID:
             validation_errors.append(
                 f"`metadata.src_node_id` is not {SUPERLINK_NODE_ID} (SuperLink node ID)"

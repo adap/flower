@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+from copy import copy
 from logging import WARNING
 from typing import Any, cast, overload
 
@@ -352,9 +353,12 @@ class Message(InflatableObject):
     def deflate(self) -> bytes:
         """Deflate message."""
         # Store message metadata and error in object body
+        # ! IF we want .message_id to be the object_id of the message
+        # ! it is critical that we exclude it from its computation (else the object changes after setting it)
+        _metadata = copy(self.metadata)
+        _metadata.__dict__["_message_id"] = ""
         obj_body = ProtoMessage(
-            metadata=metadata_to_proto(self.metadata),
-            content=None,
+            metadata=metadata_to_proto(_metadata),
             error=error_to_proto(self.error) if self.has_error() else None,
         ).SerializeToString(deterministic=True)
 

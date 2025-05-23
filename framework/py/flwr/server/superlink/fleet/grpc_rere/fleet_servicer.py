@@ -114,6 +114,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         return message_handler.pull_messages(
             request=request,
             state=self.state_factory.state(),
+            store=self.objectstore_factory.store(),
         )
 
     def PushMessages(
@@ -133,6 +134,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             res = message_handler.push_messages(
                 request=request,
                 state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
             )
         except InvalidRunStatusException as e:
             abort_grpc_context(e.message, context)
@@ -185,6 +187,13 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
 
+        store = self.objectstore_factory.store()
+
+        # Insert in store
+        try:
+            store.put(request.object_id, request.object_content)
+        except ValueError as e:
+            context.abort(grpc.StatusCode.PERMISSION_DENIED, f"{e}")
         return PushObjectResponse()
 
     def PullObject(
@@ -196,5 +205,9 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             "[ServerAppIoServicer.PullObject] Pull Object with object_id=%s",
             request.object_id,
         )
+        store = self.objectstore_factory.store()
 
-        return PullObjectResponse()
+        # TODO: improve but enough for PoC
+        obj_content = store.get(request.object_id)
+
+        return PullObjectResponse(object_content=obj_content)

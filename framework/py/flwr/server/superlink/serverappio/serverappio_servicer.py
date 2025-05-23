@@ -155,6 +155,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Init state
         state: LinkState = self.state_factory.state()
+        # Init store
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
@@ -171,8 +173,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             detail="`messages_list` must not be empty",
         )
         message_ids: list[Optional[UUID]] = []
+        objects_ids_not_in_store: list[str] = (
+            []
+        )  # to return in response (grid will then push)
         while request.messages_list:
             message_proto = request.messages_list.pop(0)
+            message_id = request.object_ids_from_messages.pop(
+                0
+            )  # the object_id, will be used as message_id
             message = message_from_proto(message_proto=message_proto)
             validation_errors = validate_message(message, is_reply_message=False)
             _raise_if(
@@ -186,13 +194,27 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 detail="`Message.metadata` has mismatched `run_id`",
             )
             # Store
-            message_id: Optional[UUID] = state.store_message_ins(message=message)
+            message_id = state.store_message_ins(message=message, message_id=message_id)
             message_ids.append(message_id)
+
+            obj_ids_list = request.object_ids.pop(0).split(",")
+            # Register message:children mapping
+            store.register_message_children_mapping(message_id, obj_ids_list)
+            # Pre-register objects in ObjectStore
+            obj_to_push = []  # List of object_ids not present in the store
+            for obj_id in obj_ids_list:
+                if obj_id not in store:
+                    obj_to_push.append(obj_id)
+                    # now pre-register
+                    print(f"pre-register: {obj_id}")
+                    store.preregister(object_id=obj_id)
+            objects_ids_not_in_store.append(",".join(obj_to_push))
 
         return PushInsMessagesResponse(
             message_ids=[
                 str(message_id) if message_id else "" for message_id in message_ids
-            ]
+            ],
+            object_ids_to_push=objects_ids_not_in_store,
         )
 
     def PullMessages(
@@ -213,20 +235,16 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         # Convert each message_id str to UUID
-        message_ids: set[UUID] = {
-            UUID(message_id) for message_id in request.message_ids
-        }
+        message_ids: set[str] = set(request.message_ids)
 
         # Read from state
         messages_res: list[Message] = state.get_message_res(message_ids=message_ids)
-
         # Delete the instruction Messages and their replies if found
         message_ins_ids_to_delete = {
-            UUID(msg_res.metadata.reply_to_message_id) for msg_res in messages_res
+            str(msg_res.metadata.reply_to_message_id) for msg_res in messages_res
         }
 
         state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
-
         # Convert Messages to proto
         messages_list = []
         while messages_res:
@@ -407,6 +425,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
 
+        store = self.objectstore_factory.store()
+
+        # Insert in store
+        try:
+            store.put(request.object_id, request.object_content)
+        except ValueError as e:
+            context.abort(grpc.StatusCode.PERMISSION_DENIED, f"{e}")
+
         return PushObjectResponse()
 
     def PullObject(
@@ -415,7 +441,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
 
-        return PullObjectResponse()
+        store = self.objectstore_factory.store()
+
+        # TODO: improve but enough for PoC
+        obj_content = store.get(request.object_id)
+
+        return PullObjectResponse(object_content=obj_content)
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:

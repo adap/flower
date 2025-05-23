@@ -67,16 +67,20 @@ message PullMessagesRequest {
 message PullMessagesResponse {
   Reconnect reconnect = 1;
   repeated Message messages_list = 2;
+  repeated string children_object_ids = 3;
 }
 
 // PushMessages messages
 message PushMessagesRequest {
   Node node = 1;
   repeated Message messages_list = 2;
+  repeated string object_ids = 3;
+  repeated string object_ids_from_messages = 4;
 }
 message PushMessagesResponse {
   Reconnect reconnect = 1;
   map<string, uint32> results = 2;
+  repeated string object_ids_to_push = 3;
 }
 
 message Reconnect { uint64 reconnect = 1; }
