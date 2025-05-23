@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower SuperNode."""
+"""Flower command line interface for SuperNode."""
 
 
-from .app import run_supernode as run_supernode
+from .flower_supernode import flower_supernode
 
-__all__ = [
-    "run_supernode",
-]
+__all__ = ["flower_supernode"]
