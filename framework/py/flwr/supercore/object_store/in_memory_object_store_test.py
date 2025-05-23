@@ -12,24 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client."""
+"""Tests for InMemoryObjectStore."""
 
 
-from ..compat.client.app import start_client as start_client  # Deprecated
-from ..compat.client.app import start_numpy_client as start_numpy_client  # Deprecated
-from .client import Client as Client
-from .client_app import ClientApp as ClientApp
-from .numpy_client import NumPyClient as NumPyClient
-from .typing import ClientFn as ClientFn
-from .typing import ClientFnExt as ClientFnExt
+import unittest
 
-__all__ = [
-    "Client",
-    "ClientApp",
-    "ClientFn",
-    "ClientFnExt",
-    "NumPyClient",
-    "mod",
-    "start_client",
-    "start_numpy_client",
-]
+from .in_memory_object_store import InMemoryObjectStore
+from .object_store import ObjectStore
+from .object_store_test import ObjectStoreTest
+
+
+class InMemoryObjectStoreTest(ObjectStoreTest):
+    """Test InMemoryObjectStore implementation."""
+
+    __test__ = True
+
+    def object_store_factory(self) -> ObjectStore:
+        """Provide ObjectStore implementation to test."""
+        return InMemoryObjectStore()
+
+
+if __name__ == "__main__":
+    unittest.main()

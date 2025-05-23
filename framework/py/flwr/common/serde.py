@@ -20,11 +20,9 @@ from typing import Any, cast
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import ClientAppOutputCode, ClientAppOutputStatus
-from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
-from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recorddict_pb2 import Array as ProtoArray
 from flwr.proto.recorddict_pb2 import ArrayRecord as ProtoArrayRecord
 from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
@@ -44,9 +42,6 @@ from flwr.proto.transport_pb2 import (
     Status,
 )
 
-from ..app.error import Error
-from ..app.metadata import Metadata
-
 # pylint: enable=E0611
 from . import (
     Array,
@@ -59,7 +54,14 @@ from . import (
 )
 from .constant import INT64_MAX_VALUE
 from .message import Message, make_message
-from .serde_utils import record_value_dict_from_proto, record_value_dict_to_proto
+from .serde_utils import (
+    error_from_proto,
+    error_to_proto,
+    metadata_from_proto,
+    metadata_to_proto,
+    record_value_dict_from_proto,
+    record_value_dict_to_proto,
+)
 
 #  === Parameters message ===
 
@@ -449,21 +451,6 @@ def config_record_from_proto(record_proto: ProtoConfigRecord) -> ConfigRecord:
     )
 
 
-# === Error message ===
-
-
-def error_to_proto(error: Error) -> ProtoError:
-    """Serialize Error to ProtoBuf."""
-    reason = error.reason if error.reason else ""
-    return ProtoError(code=error.code, reason=reason)
-
-
-def error_from_proto(error_proto: ProtoError) -> Error:
-    """Deserialize Error from ProtoBuf."""
-    reason = error_proto.reason if len(error_proto.reason) > 0 else None
-    return Error(code=error_proto.code, reason=reason)
-
-
 # === RecordDict message ===
 
 
@@ -550,41 +537,6 @@ def user_config_value_from_proto(scalar_msg: Scalar) -> typing.UserConfigValue:
     scalar_field = scalar_msg.WhichOneof("scalar")
     scalar = getattr(scalar_msg, cast(str, scalar_field))
     return cast(typing.UserConfigValue, scalar)
-
-
-# === Metadata messages ===
-
-
-def metadata_to_proto(metadata: Metadata) -> ProtoMetadata:
-    """Serialize `Metadata` to ProtoBuf."""
-    proto = ProtoMetadata(  # pylint: disable=E1101
-        run_id=metadata.run_id,
-        message_id=metadata.message_id,
-        src_node_id=metadata.src_node_id,
-        dst_node_id=metadata.dst_node_id,
-        reply_to_message_id=metadata.reply_to_message_id,
-        group_id=metadata.group_id,
-        ttl=metadata.ttl,
-        message_type=metadata.message_type,
-        created_at=metadata.created_at,
-    )
-    return proto
-
-
-def metadata_from_proto(metadata_proto: ProtoMetadata) -> Metadata:
-    """Deserialize `Metadata` from ProtoBuf."""
-    metadata = Metadata(
-        run_id=metadata_proto.run_id,
-        message_id=metadata_proto.message_id,
-        src_node_id=metadata_proto.src_node_id,
-        dst_node_id=metadata_proto.dst_node_id,
-        reply_to_message_id=metadata_proto.reply_to_message_id,
-        group_id=metadata_proto.group_id,
-        created_at=metadata_proto.created_at,
-        ttl=metadata_proto.ttl,
-        message_type=metadata_proto.message_type,
-    )
-    return metadata
 
 
 # === Message messages ===

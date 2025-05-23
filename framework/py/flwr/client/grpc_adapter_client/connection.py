@@ -45,10 +45,10 @@ def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
     tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
-        Optional[Callable[[], Optional[int]]],
-        Optional[Callable[[], None]],
-        Optional[Callable[[int], Run]],
-        Optional[Callable[[str, int], Fab]],
+        Callable[[], Optional[int]],
+        Callable[[], None],
+        Callable[[int], Run],
+        Callable[[str, int], Fab],
     ]
 ]:
     """Primitives for request/response-based interaction with a server via GrpcAdapter.

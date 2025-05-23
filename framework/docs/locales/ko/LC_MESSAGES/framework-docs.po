@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-21 00:07+0000\n"
+"POT-Creation-Date: 2025-05-23 00:07+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -4039,6 +4039,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker.rst:164
+#: ../../source/how-to-run-flower-on-gcp.rst
 #, fuzzy
 msgid "serverapp.Dockerfile"
 msgstr "SuperNode Dockerfile 만들기"
@@ -4188,6 +4189,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker.rst:249
+#: ../../source/how-to-run-flower-on-gcp.rst
 #, fuzzy
 msgid "clientapp.Dockerfile"
 msgstr "클라이언트앱"
@@ -7219,6 +7221,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-azure.rst:196
+#: ../../source/how-to-run-flower-on-gcp.rst:613
 #, fuzzy
 msgid "Run Flower App"
 msgstr "Flower 서버."
@@ -7248,6 +7251,452 @@ msgid ""
 "To enable authentication and establish secure connections, please refer "
 "to the following resources: |authenticate_supernodes|_, "
 "|enable_tls_connections|_"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:-1
+msgid ""
+"A step-by-step guide to learn how to create, deploy and run a Flower app "
+"on the Google Cloud Platform (GCP) using the Google Kubernetes Engine "
+"(GKE)."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:6
+#, fuzzy
+msgid "Run Flower on GCP"
+msgstr "Flower 서버."
+
+#: ../../source/how-to-run-flower-on-gcp.rst:8
+msgid ""
+"A step-by-step guide to learn how to create, deploy and run a Flower app "
+"on the `Google Cloud Platform (GCP) <https://console.cloud.google.com>`_ "
+"using the `Google Kubernetes Engine (GKE) <https://cloud.google.com"
+"/kubernetes-engine>`_. The figure below presents an overview of the "
+"architecture of the Flower components we will deploy on GCP using GKE."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:20
+#, fuzzy
+msgid "Running Flower on GCP using GKE Architecture"
+msgstr "Flower 아키텍처"
+
+#: ../../source/how-to-run-flower-on-gcp.rst:22
+msgid ""
+"Part of this guide has also been presented during the `Flower AI Summit "
+"2025 <https://flower.ai/events/flower-ai-summit-2025/>`_, by Prashant "
+"Kulkarni, GenAI Security Engineer at Google Cloud."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:31
+msgid "Create a Kubernetes Cluster"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:33
+msgid ""
+"Here, we outline the steps to create a Kubernetes cluster in GCP through "
+"the GCP user interface. Before proceeding, please make sure you have an "
+"account on GCP."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:36
+msgid ""
+"**Create GCP Project**: Once you have created the account, please create "
+"a new project, by selecting the project picker button, i.e., the button "
+"with the project name appearing at the top of the page. This will open a "
+"new window from where you can press the ``NEW PROJECT`` button and create"
+" the new project and assign a name, e.g., ``flower-gcp``. Before "
+"proceeding to the next step, please ensure that the ``flower-gcp`` "
+"project is selected in the top left corner."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:42
+msgid ""
+"**Enable Kubernetes API**: After the GCP project is created, in the "
+"search bar at the top of the GCP page type ``Kubernetes Engine API`` and "
+"click on it (it has an ``API`` icon). This will redirect you to the "
+"``Kubernetes Engine API`` Product page. From there you need to select "
+"``Enable``; if you see a ``Billing required`` pop-up, please check with "
+"your administrator to continue, if necessary. After you enable it you "
+"should see a green mark in the ``Kubernetes Engine API`` saying ``API "
+"Enabled``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:48
+msgid ""
+"**Create Kubernetes Cluster**: in the home page of the GCP project, under"
+" the ``Products`` section, look for the tab called ``Create a Kubernetes "
+"Cluster``. This will redirect you to a page where you will see an "
+"overview of the existing Kubernetes clusters. At the top of the page you "
+"should see a button called ``Create cluster``. By default, the Kubernetes"
+" clusters are deployed using the ``Autopilot`` mode. For the current "
+"guide, we use the ``Autopilot`` mode."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:54
+msgid ""
+"**Configure Kubernetes Cluster**: in the page that is shown, we assign a "
+"name to the new cluster, e.g., ``flower-numpy-example`` and we select the"
+" region, e.g., ``us-central1``. For the rest of the configuration "
+"settings, such as ``Cluster Tier``, ``Fleet Registration``, "
+"``Networking``, and other settings we use the default values. Now, press "
+"the ``Create`` button."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:62
+msgid ""
+"Please wait for a couple of minutes until the cluster is ready and fully "
+"deployed."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:65
+#, fuzzy
+msgid "Configure Google Cloud SDK"
+msgstr "클라이언트 구성"
+
+#: ../../source/how-to-run-flower-on-gcp.rst:67
+msgid ""
+"To interact with our newly deployed Kubernetes cluster, we will use the "
+"Google Cloud SDK and configure it locally. This SDK allows us to directly"
+" interact with GCP and in turn with our recently deployed Kubernetes "
+"cluster."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:71
+msgid ""
+"To install the Google Cloud SDK, we first need to install and configure "
+"the ``gcloud`` CLI:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:93
+msgid ""
+"For more detailed installation instructions and for installing ``gcloud``"
+" for different operating systems, please take look at the official "
+"``gcloud`` CLI installation page "
+"https://cloud.google.com/sdk/docs/install"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:97
+msgid ""
+"Once ``gcloud`` is installed we need to install ``kubectl``, which is a "
+"command-line tool to interact with Kubernetes clusters:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:105
+msgid ""
+"Before proceeding with the next steps, please make sure that you have an "
+"active account selected, otherwise you will receive a ``ERROR: "
+"(gcloud.container.clusters.get-credentials)`` when running the commands "
+"below. To obtain new credentials or select an already authenticated "
+"account please run the following commands"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:116
+msgid ""
+"Now you need to set the ``project`` property in your current workspace "
+"using the unique project identifier, which can be found under the ID "
+"column when clicking on the project picker."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:127
+msgid ""
+"The <YOUR_PROJECT_ID> value will be different for each user, e.g., "
+"``flower-gcp``, ``flower-gcp-XXXXXX``. Its value will be used in "
+"subsequent steps, e.g.,"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:130
+msgid ""
+"The next step is to configure ``kubectl`` to point to the GKE cluster you"
+" created in the previous steps by using the name of the cluster, e.g., "
+"``flower-numpy-example``, and the name of the region where the cluster "
+"was created:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:138
+msgid ""
+"This will configure the required metadata and fetch the necessary "
+"credentials to allow your local ``kubectl`` to communicate with the GKE "
+"cluster. To verify that ``kubectl`` was able to connect to the cluster "
+"and get the necessary information, you can run the following command:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:149
+msgid ""
+"For more information on how ``kubectl`` works, please have a look at the "
+"following `official quick-reference guide "
+"<https://kubernetes.io/docs/reference/kubectl/quick-reference/>`_."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:154
+msgid "Create a Google Artifact Registry"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:156
+msgid ""
+"The Google Cloud Artifact Registry is a fully managed, scalable, and "
+"private service for storing and managing software build artifacts and "
+"dependencies. Consequently, to run our Flower app on the GKE cluster, we "
+"need to store the app's specific Flower Docker images within the "
+"registry, i.e., ``ClientApp`` and ``ServerApp``, which we discuss in the "
+"next section. For typical use-cases, the Flower SuperLink and SuperNode "
+"Docker images do not need to be built and can be pulled directly from the"
+" official `Flower DockerHub repository <https://hub.docker.com/u/flwr>`_."
+" This step is crucial as it enables the cluster, and subsequently the "
+"``Pods``, to download the built Docker images and deploy the necessary "
+"Flower components. Please see below the instructions on how to create the"
+" repository using the ``gcloud`` CLI:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:183
+msgid "Registry Validation & Permissions"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:185
+msgid ""
+"The steps below validate that the Google Artifact Registry has been "
+"properly configured, you have correct access and you have writing "
+"permissions to push the docker images discussed in the next section."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:193
+msgid ""
+"The above command shows that the ``flower-gcp-example-artifacts`` "
+"repository has been successfully created under the specified project with"
+" ID ``<YOUR_PROJECT_ID>``. Finally, you need to update your role and "
+"assign writing permissions to the artifact registry. To accomplish this, "
+"please run the following command:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:205
+msgid "Configure Flower App Docker Images"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:207
+msgid ""
+"In order to proceed with this next step, first, we create a local Flower "
+"app, and then create a dedicated Dockerfile for the ServerApp and the "
+"ClientApp Docker images. Once we build the images, we tag them and push "
+"them to the newly created Google registry. Most of the steps on how to "
+"build Docker images discussed below are based on the `Flower Quickstart "
+"with Docker Tutorial <https://flower.ai/docs/framework/docker/tutorial-"
+"quickstart-docker.html>`_."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:214
+msgid "We create the Flower NumPy app as follows:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:222
+msgid "Create Docker Images"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:224
+msgid ""
+"Once the app is created, we navigate inside the app directory (i.e., "
+"where the ``pyproject.toml`` file is) and create two ``Dockerfile``\\s "
+"one for the ``ClientApp`` component, named ``clientapp.Dockerfile`` and "
+"one for the ``ServerApp`` component, named ``serverapp.Dockerfile``. We "
+"will use both files to build locally the necessary Docker images. We will"
+" be using the default images for ``SuperLink`` and ``SuperLink`` "
+"available in the `Flower DockerHub repository "
+"<https://hub.docker.com/u/flwr>`_."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:233
+msgid ""
+"Even though the app you created has only ``NumPy`` as dependency, you can"
+" use the provided ``clientapp.Dockerfile`` and ``serverapp.Dockerfile`` "
+"to create the corresponding images for any Flower app when going from "
+"simulation to deployment. The ``RUN`` command installs all the necessary "
+"dependencies for your app to run and removes the ``flwr[simulation]`` "
+"dependency while building the Docker images."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:271
+msgid ""
+"Once we have created the required Dockerfiles, we build the Docker Images"
+" as follows:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:275
+msgid ""
+"Before running the commands below, make sure ``Docker`` is installed and "
+"it is up running. The ``--platform`` type is set to ``linux/amd64``, "
+"because when using the ``Autopilot`` mode, all ``Pods`` in the Kubernetes"
+" cluster (by default) are deployed with an ``amd64``-based architecture."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:289
+msgid "Tag Docker Images"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:291
+msgid ""
+"Before we are able to push our two newly locally created Docker images, "
+"we need to tag them with the Google Artifact Registry repository name and"
+" image name we created during the previous steps. If you have followed "
+"the earlier naming suggestions, the the repository name is ``flower-gcp-"
+"example-artifacts``, the local Docker images names are "
+"``flower_numpy_example_serverapp:0.0.1`` and "
+"``flower_numpy_example_numpy:0.0.1``, and the region is ``us-central1``. "
+"Please note that the ``<YOUR_PROJECT_ID>`` is different from user to user"
+" so in the commands below we use the ``<YOUR_PROJECT_ID>`` placeholder. "
+"Putting all this together, the final commands you need to run to tag the "
+"``ServerApp`` and ``ClientApp`` Docker images are:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:314
+msgid "Push Docker Images"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:316
+msgid ""
+"Once our images are tagged correctly, you can push them to your "
+"``Artifact Registry`` repository using the ``docker push`` command with "
+"the tagged name:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:332
+msgid "Deploy Flower Infrastructure"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:334
+msgid ""
+"Before running our Flower app, we first need to deploy our ``Pods`` on "
+"the Kubernetes cluster."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:337
+msgid ""
+"In this step, we shall deploy six ``Pods``: 1x ``SuperLink``, 2x "
+"``SuperNode``, 2x ``ClientApp``, and 1x ``ServerApp``. To achieve this, "
+"below we provide the definition of the six ``yaml`` files that are "
+"necessary to deploy the ``Pods`` on the cluster and which are passed to "
+"``kubectl``, and a helper ``k8s-deploy.sh`` script, which will deploy the"
+" ``Pods``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "superlink-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "supernode-1-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "supernode-2-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "serverapp-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "clientapp-1-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "clientapp-2-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:567
+msgid ""
+"Once you have created the required files, you can use the following "
+"``k8s-deploy.sh`` helper script to deploy all the ``Pods``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:572
+msgid ""
+"Make sure the Flower version you use to deploy the ``Pods`` matches the "
+"version of your Flower app."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+#, fuzzy
+msgid "k8s-deploy.sh"
+msgstr "배포"
+
+#: ../../source/how-to-run-flower-on-gcp.rst:602
+msgid ""
+"To see that your ``Pods`` are deployed, please go to the ``Navigation "
+"Menu`` on the Google Console, select ``Kubernetes Engine`` and then the "
+"``Workloads`` page. The new window that appears will show the status of "
+"the ``Pods`` under deployment."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:608
+msgid ""
+"Please wait for a couple of minutes (3' to 5' minutes should be enough) "
+"before the ``Pods`` are up and running. While ``Pods`` resources are "
+"being provisioned, some warnings are expected."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:615
+msgid ""
+"Once all ``Pods`` are up and running, we need to get the ``EXTERNAL_IP`` "
+"of the ``superlink-service`` and point our Flower app to use the "
+"Kubernetes cluster to submit and execute the job."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:619
+msgid ""
+"To get the ``EXTERNAL-IP`` of the ``superlink-service`` we run the "
+"following command, which will show the ``NAME``, ``TYPE``, ``CLUSTER-"
+"IP``, ``EXTERNAL-IP`` and ``PORTS`` of the service:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:627
+msgid ""
+"After we get the ``EXTERNAL-IP`` , we go to the directory of the Flower "
+"example, we open the ``pyproject.toml`` and then add the following "
+"section at the end of the file:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:636
+msgid "Then we can execute the example on the GCP cluster by running:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:644
+msgid ""
+"Please note that in the current deployment, communication is not "
+"encrypted. To enable TLS for secure connections, check the following "
+"`guide <https://flower.ai/docs/framework/how-to-enable-tls-"
+"connections.html>`_. We will also be updating the current guide soon with"
+" more details on how to configure TLS."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:649
+msgid ""
+"If the job is successfully submitted, and executed, then in your console "
+"you should see the logs from the run. The output should look like the one"
+" shared below."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "Expected Output"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:700
+msgid ""
+"Please note that if you terminate or shut down the cluster, and create a "
+"new one, the value of the ``EXTERNAL_IP`` changes. In that case, you will"
+" have to update the ``pyproject.toml``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:705
+#, fuzzy
+msgid "Shutdown Flower Infrastructure"
+msgstr "Flower 서버."
+
+#: ../../source/how-to-run-flower-on-gcp.rst:707
+msgid ""
+"If you would like to shutdown all the running pods deployed during this "
+"guide, you can use the ``kubectl delete`` command and pass the the "
+"``.yaml`` file of each pod, as also shown in the helper script below."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "k8s-shutdown.sh"
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:-1
@@ -10273,7 +10722,7 @@ msgstr ""
 "server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
 
 #: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
-#: flwr.client.app.start_client:1 of
+#: flwr.compat.client.app.start_client:1 of
 msgid "Start a Flower client node which connects to a Flower server."
 msgstr "Flower 서버에 연결되는 Flower 클라이언트 노드를 시작합니다."
 
@@ -10286,7 +10735,7 @@ msgstr ""
 " server\\_address\\, client\\)"
 
 #: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
-#: flwr.client.app.start_numpy_client:1 of
+#: flwr.compat.client.app.start_numpy_client:1 of
 msgid "Start a Flower NumPyClient which connects to a gRPC server."
 msgstr "gRPC 서버에 연결되는 Flower NumPyClient를 시작합니다."
 
@@ -10471,8 +10920,7 @@ msgid "Return client (itself)."
 msgstr "클라이언트(자체)를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.Parameters.rst:2 flwr.app.error.Error
-#: flwr.app.metadata.Metadata flwr.client.app.start_client
-#: flwr.client.app.start_numpy_client flwr.client.client.Client.evaluate
+#: flwr.app.metadata.Metadata flwr.client.client.Client.evaluate
 #: flwr.client.client.Client.fit flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
 #: flwr.client.client_app.ClientApp.evaluate
@@ -10485,8 +10933,8 @@ msgstr "클라이언트(자체)를 반환합니다."
 #: flwr.client.numpy_client.NumPyClient.get_properties
 #: flwr.common.context.Context flwr.common.message.Message
 #: flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply flwr.common.record.array.Array
-#: flwr.common.record.array.Array.inflate
+#: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
+#: flwr.common.record.array.Array flwr.common.record.array.Array.inflate
 #: flwr.common.record.arrayrecord.ArrayRecord
 #: flwr.common.record.arrayrecord.ArrayRecord.inflate
 #: flwr.common.record.configrecord.ConfigRecord
@@ -10495,7 +10943,8 @@ msgstr "클라이언트(자체)를 반환합니다."
 #: flwr.common.record.metricrecord.MetricRecord.inflate
 #: flwr.common.record.recorddict.RecordDict
 #: flwr.common.record.recorddict.RecordDict.inflate
-#: flwr.server.app.start_server
+#: flwr.compat.client.app.start_client
+#: flwr.compat.client.app.start_numpy_client flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.register
 #: flwr.server.client_manager.ClientManager.unregister
 #: flwr.server.client_manager.SimpleClientManager.register
@@ -10552,7 +11001,7 @@ msgstr "서버에서 받은 (전역) 모델 파라미터와 로컬 평가 프로
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
 #: flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply
+#: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
 #: flwr.common.record.array.Array.inflate
 #: flwr.common.record.arrayrecord.ArrayRecord.inflate
 #: flwr.common.record.configrecord.ConfigRecord.inflate
@@ -10594,7 +11043,7 @@ msgstr "로컬 데이터 세트의 손실 및 평가에 사용된 로컬 데이�
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
 #: flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply
+#: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
 #: flwr.common.record.array.Array.inflate
 #: flwr.common.record.arrayrecord.ArrayRecord.inflate
 #: flwr.common.record.configrecord.ConfigRecord.inflate
@@ -10657,16 +11106,16 @@ msgstr "현재 클라이언트 속성입니다."
 #: flwr.app.error.Error:1 flwr.app.metadata.Metadata:1
 #: flwr.client.client_app.ClientApp:1 flwr.client.mod.localdp_mod.LocalDpMod:1
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
-#: flwr.common.context.Context:1 flwr.common.message.Message:1
-#: flwr.common.typing.ClientMessage:1 flwr.common.typing.DisconnectRes:1
-#: flwr.common.typing.EvaluateIns:1 flwr.common.typing.EvaluateRes:1
-#: flwr.common.typing.FitIns:1 flwr.common.typing.FitRes:1
-#: flwr.common.typing.GetParametersIns:1 flwr.common.typing.GetParametersRes:1
-#: flwr.common.typing.GetPropertiesIns:1 flwr.common.typing.GetPropertiesRes:1
-#: flwr.common.typing.Parameters:1 flwr.common.typing.ReconnectIns:1
-#: flwr.common.typing.ServerMessage:1 flwr.common.typing.Status:1
-#: flwr.server.history.History:1 flwr.server.server.Server:1
-#: flwr.server.server_app.ServerApp:1 flwr.server.server_config.ServerConfig:1
+#: flwr.common.context.Context:1 flwr.common.typing.ClientMessage:1
+#: flwr.common.typing.DisconnectRes:1 flwr.common.typing.EvaluateIns:1
+#: flwr.common.typing.EvaluateRes:1 flwr.common.typing.FitIns:1
+#: flwr.common.typing.FitRes:1 flwr.common.typing.GetParametersIns:1
+#: flwr.common.typing.GetParametersRes:1 flwr.common.typing.GetPropertiesIns:1
+#: flwr.common.typing.GetPropertiesRes:1 flwr.common.typing.Parameters:1
+#: flwr.common.typing.ReconnectIns:1 flwr.common.typing.ServerMessage:1
+#: flwr.common.typing.Status:1 flwr.server.history.History:1
+#: flwr.server.server.Server:1 flwr.server.server_app.ServerApp:1
+#: flwr.server.server_config.ServerConfig:1
 #: flwr.server.serverapp_components.ServerAppComponents:1
 #: flwr.server.workflow.default_workflows.DefaultWorkflow:1
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:1
@@ -10674,7 +11123,6 @@ msgstr "현재 클라이언트 속성입니다."
 msgid "Bases: :py:class:`object`"
 msgstr "Bases: :py:class:`object`"
 
-#: flwr.client.app.start_client:51 flwr.client.app.start_numpy_client:36
 #: flwr.client.client_app.ClientApp:4
 #: flwr.client.client_app.ClientApp.evaluate:12
 #: flwr.client.client_app.ClientApp.lifespan:7
@@ -10688,7 +11136,9 @@ msgstr "Bases: :py:class:`object`"
 #: flwr.common.record.metricrecord.MetricRecord:19
 #: flwr.common.record.metricrecord.MetricsRecord:12
 #: flwr.common.record.recorddict.RecordDict:14
-#: flwr.common.record.recorddict.RecordSet:12 flwr.server.app.start_server:46
+#: flwr.common.record.recorddict.RecordSet:12
+#: flwr.compat.client.app.start_client:51
+#: flwr.compat.client.app.start_numpy_client:36 flwr.server.app.start_server:46
 #: flwr.server.grid.grid.Driver:14 flwr.server.server_app.ServerApp:4
 #: flwr.server.server_app.ServerApp.lifespan:7
 #: flwr.server.server_app.ServerApp.main:4
@@ -11262,13 +11712,14 @@ msgstr "secaggplus\\_mod"
 msgid "start\\_client"
 msgstr "start\\_client"
 
-#: flwr.client.app.start_client:5 of
+#: flwr.compat.client.app.start_client:5 of
 msgid ""
 "This function is deprecated since 1.13.0. Use :code:`flower-supernode` "
 "command instead to start a SuperNode."
 msgstr ""
 
-#: flwr.client.app.start_client:8 flwr.client.app.start_numpy_client:9 of
+#: flwr.compat.client.app.start_client:8
+#: flwr.compat.client.app.start_numpy_client:9 of
 msgid ""
 "The IPv4 or IPv6 address of the server. If the Flower server runs on the "
 "same machine on port 8080, then `server_address` would be "
@@ -11277,17 +11728,18 @@ msgstr ""
 "서버의 IPv4 또는 IPv6 주소입니다. Flower 서버가 포트 8080의 동일한 컴퓨터에서 실행되는 경우 `서버_주소`는 "
 "`\"[::]:8080\"`이 됩니다."
 
-#: flwr.client.app.start_client:12 of
+#: flwr.compat.client.app.start_client:12 of
 msgid "A callable that instantiates a Client. (default: None)"
 msgstr "클라이언트를 인스턴스화하는 호출 가능 항목입니다. (기본값: None)"
 
-#: flwr.client.app.start_client:14 of
+#: flwr.compat.client.app.start_client:14 of
 msgid ""
 "An implementation of the abstract base class `flwr.client.Client` "
 "(default: None)"
 msgstr "추상 베이스 클래스 `flwr.client.Client`의 구현(기본값: None)"
 
-#: flwr.client.app.start_client:17 flwr.client.app.start_numpy_client:15 of
+#: flwr.compat.client.app.start_client:17
+#: flwr.compat.client.app.start_numpy_client:15 of
 msgid ""
 "The maximum length of gRPC messages that can be exchanged with the Flower"
 " server. The default should be sufficient for most models. Users who "
@@ -11300,7 +11752,8 @@ msgstr ""
 "훈련하는 사용자는 이 값을 늘려야 할 수도 있습니다. Flower 서버는 동일한 값으로 시작해야 "
 "하며(`flwr.server.start_server` 참조), 그렇지 않으면 증가된 제한을 알지 못해 더 큰 메시지를 차단합니다."
 
-#: flwr.client.app.start_client:24 flwr.client.app.start_numpy_client:22 of
+#: flwr.compat.client.app.start_client:24
+#: flwr.compat.client.app.start_numpy_client:22 of
 msgid ""
 "The PEM-encoded root certificates as a byte string or a path string. If "
 "provided, a secure connection using the certificates will be established "
@@ -11309,7 +11762,8 @@ msgstr ""
 "바이트 문자열 또는 경로 문자열로 PEM 인코딩된 루트 인증서. 제공하면 인증서를 사용하여 SSL이 활성화된 Flower 서버에 "
 "보안 연결이 설정됩니다."
 
-#: flwr.client.app.start_client:28 flwr.client.app.start_numpy_client:26 of
+#: flwr.compat.client.app.start_client:28
+#: flwr.compat.client.app.start_numpy_client:26 of
 msgid ""
 "Starts an insecure gRPC connection when True. Enables HTTPS connection "
 "when False, using system certificates if `root_certificates` is None."
@@ -11317,7 +11771,8 @@ msgstr ""
 "True일 경우 안전하지 않은 gRPC 연결을 시작합니다. root_certificates`가 None인 경우 시스템 인증서를 "
 "사용하여 False일 때 HTTPS 연결을 활성화합니다."
 
-#: flwr.client.app.start_client:31 flwr.client.app.start_numpy_client:29 of
+#: flwr.compat.client.app.start_client:31
+#: flwr.compat.client.app.start_numpy_client:29 of
 msgid ""
 "Configure the transport layer. Allowed values: - 'grpc-bidi': gRPC, "
 "bidirectional streaming - 'grpc-rere': gRPC, request-response "
@@ -11326,7 +11781,7 @@ msgstr ""
 "전송 계층을 구성합니다. 허용되는 값입니다: - 'grpc-bidi': gRPC, 양방향 스트리밍 - 'grpc-rere': "
 "gRPC, 요청-응답(실험적) - 'rest': HTTP(실험적)"
 
-#: flwr.client.app.start_client:36 of
+#: flwr.compat.client.app.start_client:36 of
 msgid ""
 "Tuple containing the elliptic curve private key and public key for "
 "authentication from the cryptography library. Source: "
@@ -11334,7 +11789,7 @@ msgid ""
 "to establish an authenticated connection with the server."
 msgstr ""
 
-#: flwr.client.app.start_client:41 of
+#: flwr.compat.client.app.start_client:41 of
 msgid ""
 "The maximum number of times the client will try to connect to the server "
 "before giving up in case of a connection error. If set to None, there is "
@@ -11343,7 +11798,7 @@ msgstr ""
 "연결 오류 발생 시 클라이언트가 서버 연결을 포기하기 전에 시도하는 최대 횟수입니다. None으로 설정하면 시도 횟수에 제한이 "
 "없습니다."
 
-#: flwr.client.app.start_client:45 of
+#: flwr.compat.client.app.start_client:45 of
 msgid ""
 "The maximum duration before the client stops trying to connect to the "
 "server in case of connection error. If set to None, there is no limit to "
@@ -11352,17 +11807,20 @@ msgstr ""
 "연결 오류 발생 시 클라이언트가 서버에 대한 연결을 시도하지 않는 최대 기간입니다. None으로 설정하면 총 시간에는 제한이 "
 "없습니다."
 
-#: flwr.client.app.start_client:52 flwr.client.app.start_numpy_client:37 of
+#: flwr.compat.client.app.start_client:52
+#: flwr.compat.client.app.start_numpy_client:37 of
 #, fuzzy
 msgid "Starting a gRPC client with an insecure server connection::"
 msgstr "안전하지 않은 서버 연결로 gRPC 클라이언트 시작하기:"
 
-#: flwr.client.app.start_client:59 flwr.client.app.start_numpy_client:44 of
+#: flwr.compat.client.app.start_client:59
+#: flwr.compat.client.app.start_numpy_client:44 of
 #, fuzzy
 msgid "Starting a TLS-enabled gRPC client using system certificates::"
 msgstr "시스템 인증서를 사용하여 SSL 사용 gRPC 클라이언트를 시작합니다:"
 
-#: flwr.client.app.start_client:70 flwr.client.app.start_numpy_client:52 of
+#: flwr.compat.client.app.start_client:70
+#: flwr.compat.client.app.start_numpy_client:52 of
 #, fuzzy
 msgid "Starting a TLS-enabled gRPC client using provided certificates::"
 msgstr "제공된 인증서를 사용하여 SSL 지원 gRPC 클라이언트를 시작합니다:"
@@ -11371,7 +11829,7 @@ msgstr "제공된 인증서를 사용하여 SSL 지원 gRPC 클라이언트를 �
 msgid "start\\_numpy\\_client"
 msgstr "start\\_numpy\\_client"
 
-#: flwr.client.app.start_numpy_client:5 of
+#: flwr.compat.client.app.start_numpy_client:5 of
 msgid ""
 "This function is deprecated since 1.7.0. Use "
 ":code:`flwr.client.start_client` instead and first convert your "
@@ -11382,7 +11840,7 @@ msgstr ""
 "먼저 :code:`to_client()` 메서드를 실행하여 :code:`NumPyClient`를 "
 ":code:`flwr.client.Client` 유형으로 변환합니다."
 
-#: flwr.client.app.start_numpy_client:13 of
+#: flwr.compat.client.app.start_numpy_client:13 of
 msgid "An implementation of the abstract base class `flwr.client.NumPyClient`."
 msgstr "추상 베이스 클래스 `flwr.client.NumPyClient`의 구현입니다."
 
@@ -11917,7 +12375,7 @@ msgstr "클라이언트 상태."
 msgid "Array"
 msgstr "배열"
 
-#: flwr.common.record.array.Array:1 of
+#: flwr.common.message.Message:1 flwr.common.record.array.Array:1 of
 #, fuzzy
 msgid "Bases: :py:class:`~flwr.common.inflatable.InflatableObject`"
 msgstr "Bases: :py:class:`~abc.ABC`"
@@ -12079,7 +12537,7 @@ msgstr "배열을 NumPy 배열로 반환합니다."
 #: ../../source/ref-api/flwr.common.GetParametersRes.rst:25
 #: ../../source/ref-api/flwr.common.GetPropertiesIns.rst:25
 #: ../../source/ref-api/flwr.common.GetPropertiesRes.rst:25
-#: ../../source/ref-api/flwr.common.Message.rst:37
+#: ../../source/ref-api/flwr.common.Message.rst:43
 #: ../../source/ref-api/flwr.common.MessageType.rst:25
 #: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:25
 #: ../../source/ref-api/flwr.common.Metadata.rst:25
@@ -12129,6 +12587,8 @@ msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
 #: flwr.common.ConfigRecord.object_id:1
 #: flwr.common.ConfigsRecord.children:1:<autosummary>:1
 #: flwr.common.ConfigsRecord.object_id:1
+#: flwr.common.Message.children:1:<autosummary>:1
+#: flwr.common.Message.object_id:1
 #: flwr.common.MetricRecord.children:1:<autosummary>:1
 #: flwr.common.MetricRecord.object_id:1
 #: flwr.common.MetricsRecord.children:1:<autosummary>:1
@@ -14139,7 +14599,7 @@ msgid ""
 "from it."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 msgid ""
 ":py:obj:`create_error_reply <flwr.common.Message.create_error_reply>`\\ "
 "\\(error\\[\\, ttl\\]\\)"
@@ -14147,12 +14607,12 @@ msgstr ""
 ":py:obj:`create_error_reply <flwr.common.Message.create_error_reply>`\\ "
 "\\(error\\[\\, ttl\\]\\)"
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 #: flwr.common.message.Message.create_error_reply:1 of
 msgid "Construct a reply message indicating an error happened."
 msgstr "오류가 발생했음을 나타내는 답장 메시지를 작성합니다."
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 msgid ""
 ":py:obj:`create_reply <flwr.common.Message.create_reply>`\\ "
 "\\(content\\[\\, ttl\\]\\)"
@@ -14160,54 +14620,94 @@ msgstr ""
 ":py:obj:`create_reply <flwr.common.Message.create_reply>`\\ "
 "\\(content\\[\\, ttl\\]\\)"
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 #: flwr.common.message.Message.create_reply:1 of
 msgid "Create a reply to this message with specified content and TTL."
 msgstr "지정된 콘텐츠와 TTL을 사용하여 이 메시지에 대한 답글을 작성합니다."
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`deflate <flwr.common.Message.deflate>`\\ \\(\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
+#: flwr.common.message.Message.deflate:1 of
+#, fuzzy
+msgid "Deflate message."
+msgstr "ServerMessage"
+
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 msgid ":py:obj:`has_content <flwr.common.Message.has_content>`\\ \\(\\)"
 msgstr ":py:obj:`has_content <flwr.common.Message.has_content>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 #: flwr.common.message.Message.has_content:1 of
 msgid "Return True if message has content, else False."
 msgstr "메시지에 콘텐츠가 있으면 True을 반환하고, 그렇지 않으면 False을 반환합니다."
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 msgid ":py:obj:`has_error <flwr.common.Message.has_error>`\\ \\(\\)"
 msgstr ":py:obj:`has_error <flwr.common.Message.has_error>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 #: flwr.common.message.Message.has_error:1 of
 msgid "Return True if message has an error, else False."
 msgstr "메시지에 오류가 있으면 True을 반환하고, 그렇지 않으면 False을 반환합니다."
 
-#: flwr.common.Message.content:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`inflate <flwr.common.Message.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
+#: flwr.common.message.Message.inflate:1 of
+#, fuzzy
+msgid "Inflate an Message from bytes."
+msgstr "바이트에서 NumPy를 역직렬화합니다."
+
+#: flwr.common.Message.children:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`children <flwr.common.Message.children>`\\"
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
+
+#: flwr.common.Message.children:1
+#: flwr.common.Message.children:1:<autosummary>:1 of
+msgid "Return a dictionary of a single RecordDict with its Object IDs as key."
+msgstr ""
+
+#: flwr.common.Message.children:1:<autosummary>:1 of
 msgid ":py:obj:`content <flwr.common.Message.content>`\\"
 msgstr ":py:obj:`content <flwr.common.Message.content>`\\"
 
-#: flwr.common.Message.content:1 flwr.common.Message.content:1:<autosummary>:1
+#: flwr.common.Message.children:1:<autosummary>:1 flwr.common.Message.content:1
 #: of
 msgid "The content of this message."
 msgstr "이 메시지의 내용입니다."
 
-#: flwr.common.Message.content:1:<autosummary>:1 of
+#: flwr.common.Message.children:1:<autosummary>:1 of
 msgid ":py:obj:`error <flwr.common.Message.error>`\\"
 msgstr ":py:obj:`error <flwr.common.Message.error>`\\"
 
-#: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.error:1 of
+#: flwr.common.Message.children:1:<autosummary>:1 flwr.common.Message.error:1
+#: of
 msgid "Error captured by this message."
 msgstr "이 메시지가 캡처한 오류입니다."
 
-#: flwr.common.Message.content:1:<autosummary>:1 of
+#: flwr.common.Message.children:1:<autosummary>:1 of
 msgid ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
 msgstr ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
 
-#: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.metadata:1
-#: of
+#: flwr.common.Message.children:1:<autosummary>:1
+#: flwr.common.Message.metadata:1 of
 msgid "A dataclass including information about the message to be executed."
 msgstr "실행할 메시지에 대한 정보를 포함한 데이터 클래스입니다."
+
+#: flwr.common.Message.children:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`object_id <flwr.common.Message.object_id>`\\"
+msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
 
 #: flwr.common.message.Message.create_error_reply:3 of
 msgid "The error that was encountered."
@@ -14261,6 +14761,22 @@ msgstr "답장 메시지의 콘텐츠입니다."
 #: flwr.common.message.Message.create_reply:16 of
 msgid "A new `Message` instance representing the reply."
 msgstr "답장을 나타내는 새로운 `메시지` 인스턴스입니다."
+
+#: flwr.common.message.Message.inflate:3 of
+#, fuzzy
+msgid "The deflated object content of the Message."
+msgstr "레코드를 설정합니다."
+
+#: flwr.common.message.Message.inflate:5 of
+msgid ""
+"Dictionary of children InflatableObjects mapped to their Object IDs. "
+"These children enable the full inflation of the Message."
+msgstr ""
+
+#: flwr.common.message.Message.inflate:9 of
+#, fuzzy
+msgid "The inflated Message."
+msgstr "메트릭 기록."
 
 #: ../../source/ref-api/flwr.common.MessageType.rst:2
 msgid "MessageType"
@@ -28651,19 +29167,6 @@ msgid ""
 "``examples/quickstart-pytorch`` in the Flower GitHub repository."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:358
-#: ../../source/tutorial-quickstart-tensorflow.rst:282
-#, fuzzy
-msgid "Video tutorial"
-msgstr "튜토리얼"
-
-#: ../../source/tutorial-quickstart-pytorch.rst:362
-msgid ""
-"The video shown below shows how to setup a PyTorch + Flower project using"
-" our previously recommended APIs. A new video tutorial will be released "
-"that shows the new APIs (as the content above does)"
-msgstr ""
-
 #: ../../source/tutorial-quickstart-pytorch-lightning.rst:-1
 msgid ""
 "Learn how to train an autoencoder on MNIST using federated learning with "
@@ -28929,13 +29432,6 @@ msgstr ""
 msgid ""
 "Check the source code of the extended version of this tutorial in "
 "|quickstart_tf_link|_ in the Flower GitHub repository."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-tensorflow.rst:286
-msgid ""
-"The video shown below shows how to setup a TensorFlow + Flower project "
-"using our previously recommended APIs. A new video tutorial will be "
-"released that shows the new APIs (as the content above does)"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-xgboost.rst:-1
@@ -30721,7 +31217,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|78fff3204c3742c68d48864f44287827|"
+msgid "|691cc2446f8d4904b5eefbb2e422a00d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30738,7 +31234,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|bc08a4804db84be9977290dc7464fe7c|"
+msgid "|959ace9236d44a84b0352fa7abce0ae5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30764,7 +31260,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|ebd5a7b8a51943389b874677725311ab|"
+msgid "|d08d86434b0a40d0ab9e970c9d3f26a3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30782,7 +31278,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|6568438e6cbc4794a6cd508d5a00ef61|"
+msgid "|c903d4610434415c893c2896cc44d1be|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -30801,7 +31297,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|0405ab79153047d4aaabc017e9599390|"
+msgid "|a8a127b5e77e40058d92534a98a1ac67|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -30818,7 +31314,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|8e85ef8d54994b38bb953294af54024d|"
+msgid "|d94816ae0bb948a08d9c70fc40cdfe45|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -30841,7 +31337,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|f0af739067674c95973768e57e5ab559|"
+msgid "|0df9b0b7bd7f49428a0f16986577e640|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -30858,7 +31354,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|9958f885ad484663922ee5f3138bfc2d|"
+msgid "|3ca2aec703e04914846468bdebbaa579|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -31037,7 +31533,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|7ea0ff7c3d494ae79e94e983df38625b|"
+msgid "|62c7197c979a425eae442a833817ad90|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -31065,7 +31561,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|7951e9e7f8f240b7a7e77ecaa090e3bc|"
+msgid "|cec1ac1022eb49b6b4999a6fc0dc1692|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -31092,7 +31588,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|ce06be29ec894267aba51fe4351ad0e9|"
+msgid "|ff4ad9f1c9d0454f82cd45e2237ec41f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -31118,7 +31614,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|f988f40567d8459e9d776b39c5c113ab|"
+msgid "|263fa38c588a42b6b9b5bb6f1ab7e572|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -31168,7 +31664,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|4041d7e27af142a7b046fedf1107e6fb|"
+msgid "|832fe0df0b4c44f9b7d1e170a8071363|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -31288,7 +31784,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|6784a3e35b52433c997e1c23365ef089|"
+msgid "|db0ef1f7489c450e96abcfc32fae9b06|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -41802,5 +42298,110 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|77a2ae94f6e24c1692f6e7b8997d4db1|"
+#~ msgstr ""
+
+#~ msgid "|78fff3204c3742c68d48864f44287827|"
+#~ msgstr ""
+
+#~ msgid "|bc08a4804db84be9977290dc7464fe7c|"
+#~ msgstr ""
+
+#~ msgid "|ebd5a7b8a51943389b874677725311ab|"
+#~ msgstr ""
+
+#~ msgid "|6568438e6cbc4794a6cd508d5a00ef61|"
+#~ msgstr ""
+
+#~ msgid "|0405ab79153047d4aaabc017e9599390|"
+#~ msgstr ""
+
+#~ msgid "|8e85ef8d54994b38bb953294af54024d|"
+#~ msgstr ""
+
+#~ msgid "|f0af739067674c95973768e57e5ab559|"
+#~ msgstr ""
+
+#~ msgid "|9958f885ad484663922ee5f3138bfc2d|"
+#~ msgstr ""
+
+#~ msgid "|7ea0ff7c3d494ae79e94e983df38625b|"
+#~ msgstr ""
+
+#~ msgid "|7951e9e7f8f240b7a7e77ecaa090e3bc|"
+#~ msgstr ""
+
+#~ msgid "|ce06be29ec894267aba51fe4351ad0e9|"
+#~ msgstr ""
+
+#~ msgid "|f988f40567d8459e9d776b39c5c113ab|"
+#~ msgstr ""
+
+#~ msgid "|4041d7e27af142a7b046fedf1107e6fb|"
+#~ msgstr ""
+
+#~ msgid "|6784a3e35b52433c997e1c23365ef089|"
+#~ msgstr ""
+
+#~ msgid "Video tutorial"
+#~ msgstr "튜토리얼"
+
+#~ msgid ""
+#~ "The video shown below shows how to"
+#~ " setup a PyTorch + Flower project "
+#~ "using our previously recommended APIs. A"
+#~ " new video tutorial will be released"
+#~ " that shows the new APIs (as "
+#~ "the content above does)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The video shown below shows how to"
+#~ " setup a TensorFlow + Flower project"
+#~ " using our previously recommended APIs. "
+#~ "A new video tutorial will be "
+#~ "released that shows the new APIs "
+#~ "(as the content above does)"
+#~ msgstr ""
+
+#~ msgid "|fdddf98a0e4242a2a1ae5e5514f47dff|"
+#~ msgstr ""
+
+#~ msgid "|be53537e5d0541b88f511c0d85c62ab8|"
+#~ msgstr ""
+
+#~ msgid "|eae203170ed2414195dc0d760749d2e1|"
+#~ msgstr ""
+
+#~ msgid "|1fed92efb1c24be0a6b12b7d7cb69a87|"
+#~ msgstr ""
+
+#~ msgid "|82c4f5d4978648de91fa4f307defcc16|"
+#~ msgstr ""
+
+#~ msgid "|57086c10071943e99968d55d6972a799|"
+#~ msgstr ""
+
+#~ msgid "|801435c7b9314afabc35aaa9cf512f8e|"
+#~ msgstr ""
+
+#~ msgid "|f73c9b4adcf9414a9605996eb2b597af|"
+#~ msgstr ""
+
+#~ msgid "|d183568ca3344f72b0f198acfc6a4b8e|"
+#~ msgstr ""
+
+#~ msgid "|33858954857a4f41ab39463102a19013|"
+#~ msgstr ""
+
+#~ msgid "|8d14735cba704b908b908a595955611f|"
+#~ msgstr ""
+
+#~ msgid "|ab6d1c42314648d3a8aa6434b7895f45|"
+#~ msgstr ""
+
+#~ msgid "|bc903db0ab9f43f1a0c26a04ba5f3e51|"
+#~ msgstr ""
+
+#~ msgid "|09519054c2274a1194bc2c6154294192|"
 #~ msgstr ""
 

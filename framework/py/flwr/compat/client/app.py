@@ -36,7 +36,15 @@ from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.clientapp.app import flwr_clientapp
-from flwr.client.nodestate.nodestate_factory import NodeStateFactory
+from flwr.client.clientapp.clientappio_servicer import (
+    ClientAppInputs,
+    ClientAppIoServicer,
+)
+from flwr.client.grpc_adapter_client.connection import grpc_adapter
+from flwr.client.grpc_rere_client.connection import grpc_request_response
+from flwr.client.message_handler.message_handler import handle_control_message
+from flwr.client.numpy_client import NumPyClient
+from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
@@ -60,15 +68,9 @@ from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
+from flwr.compat.client.grpc_client.connection import grpc_connection
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
-
-from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
-from .grpc_adapter_client.connection import grpc_adapter
-from .grpc_client.connection import grpc_connection
-from .grpc_rere_client.connection import grpc_request_response
-from .message_handler.message_handler import handle_control_message
-from .numpy_client import NumPyClient
-from .run_info_store import DeprecatedRunInfoStore
+from flwr.supernode.nodestate import NodeStateFactory
 
 
 def _check_actionable_client(
@@ -781,7 +783,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
         try:
             from requests.exceptions import ConnectionError as RequestsConnectionError
 
-            from .rest_client.connection import http_request_response
+            from flwr.client.rest_client.connection import http_request_response
         except ModuleNotFoundError:
             flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
         if server_address[:4] != "http":
@@ -792,7 +794,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
         connection, error_type = grpc_adapter, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection, error_type = grpc_connection, RpcError
+        connection, error_type = grpc_connection, RpcError  # type: ignore[assignment]
     else:
         raise ValueError(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"

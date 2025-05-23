@@ -22,7 +22,7 @@ from unittest.mock import Mock
 import numpy as np
 from parameterized import parameterized
 
-from flwr.common import ArrayRecord, ConfigRecord, MetricRecord, RecordDict
+from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, RecordDict
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PullObjectRequest,
     PullObjectResponse,
@@ -81,9 +81,9 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Use helper function to push an object recursively."""
         # Prepare
-        obj = RecordDict(records)
-        # +1 due to the RecordDict itself
-        expected_obj_count += 1
+        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
+        # +2 due to the RecordDict and Message
+        expected_obj_count += 2
 
         # Execute
         pushed_object_ids = push_object_to_servicer(obj, self.mock_stub)
@@ -102,9 +102,9 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Use helper function to pull an object recursively."""
         # Prepare
-        obj = RecordDict(records)
-        # +1 due to the RecordDict itself
-        expected_obj_count += 1
+        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
+        # +2 due to the RecordDict and Message
+        expected_obj_count += 2
 
         # Execute
         push_object_to_servicer(obj, self.mock_stub)
@@ -113,4 +113,5 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         # Expected number of objects were pulled
         assert self.mock_stub.PullObject.call_count == expected_obj_count
-        assert pulled_obj == obj
+        assert pulled_obj.object_id == obj.object_id
+        self.assertNotEqual(pulled_obj, obj)
