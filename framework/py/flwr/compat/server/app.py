@@ -24,13 +24,12 @@ from flwr.common.address import parse_address
 from flwr.common.constant import FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
-
-from .client_manager import ClientManager
-from .history import History
-from .server import Server, init_defaults, run_fl
-from .server_config import ServerConfig
-from .strategy import Strategy
-from .superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
+from flwr.server.client_manager import ClientManager
+from flwr.server.history import History
+from flwr.server.server import Server, init_defaults, run_fl
+from flwr.server.server_config import ServerConfig
+from flwr.server.strategy import Strategy
+from flwr.server.superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
