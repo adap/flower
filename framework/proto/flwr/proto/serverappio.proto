@@ -25,9 +25,6 @@ import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
 
 service ServerAppIo {
-  // Request run_id
-  rpc CreateRun(CreateRunRequest) returns (CreateRunResponse) {}
-
   // Return a set of nodes
   rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
 
