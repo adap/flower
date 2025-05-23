@@ -39,6 +39,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.exit import ExitCode, flwr_exit
+from flwr.common.heartbeat import HeartbeatSender, get_grpc_app_heartbeat_fn
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -120,6 +121,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
     # Resolve directory where FABs are installed
     flwr_dir = get_flwr_dir(flwr_dir_)
     log_uploader = None
+    heartbeat_sender = None
 
     while True:
 
@@ -210,6 +212,16 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 },
             )
 
+            # Set up heartbeat sender
+            heartbeat_fn = get_grpc_app_heartbeat_fn(
+                conn._stub,
+                run.run_id,
+                failure_message="Heartbeat failed unexpectedly. The SuperLink could "
+                "not find the provided run ID, or the run status is invalid.",
+            )
+            heartbeat_sender = HeartbeatSender(heartbeat_fn)
+            heartbeat_sender.start()
+
             # Launch the simulation
             updated_context = _run_simulation(
                 server_app_attr=server_app_attr,
@@ -240,6 +252,11 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
 
         finally:
+            # Stop heartbeat sender
+            if heartbeat_sender:
+                heartbeat_sender.stop()
+                heartbeat_sender = None
+
             # Stop log uploader for this run and upload final logs
             if log_uploader:
                 stop_log_uploader(log_queue, log_uploader)

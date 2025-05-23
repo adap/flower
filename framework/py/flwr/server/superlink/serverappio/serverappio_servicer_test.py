@@ -31,7 +31,15 @@ from flwr.common.constant import (
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendAppHeartbeatRequest,
+    SendAppHeartbeatResponse,
+)
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PushObjectRequest,
+    PushObjectResponse,
+)
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
@@ -52,6 +60,7 @@ from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from flwr.server.superlink.serverappio.serverappio_servicer import _raise_if
 from flwr.server.superlink.utils import _STATUS_TO_MSG
+from flwr.supercore.object_store import ObjectStoreFactory
 
 # pylint: disable=broad-except
 
@@ -113,6 +122,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         self.state = state_factory.state()
         ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()
+        objectstore_factory = ObjectStoreFactory()
 
         self.status_to_msg = _STATUS_TO_MSG
 
@@ -120,6 +130,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
             state_factory,
             ffs_factory,
+            objectstore_factory,
             None,
         )
 
@@ -148,6 +159,16 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.ServerAppIo/UpdateRunStatus",
             request_serializer=UpdateRunStatusRequest.SerializeToString,
             response_deserializer=UpdateRunStatusResponse.FromString,
+        )
+        self._send_app_heartbeat = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/SendAppHeartbeat",
+            request_serializer=SendAppHeartbeatRequest.SerializeToString,
+            response_deserializer=SendAppHeartbeatResponse.FromString,
+        )
+        self._push_object = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PushObject",
+            request_serializer=PushObjectRequest.SerializeToString,
+            response_deserializer=PushObjectResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -477,3 +498,56 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             self._update_run_status.with_call(request=request)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
         assert e.exception.details() == self.status_to_msg[run_status.status]
+
+    @parameterized.expand([(1,), (2,)])  # type: ignore
+    def test_successful_send_app_heartbeat(self, num_transitions: int) -> None:
+        """Test `SendAppHeartbeat` success."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Transition status to starting or running.
+        self._transition_run_status(run_id, num_transitions)
+        request = SendAppHeartbeatRequest(run_id=run_id, heartbeat_interval=30)
+
+        # Execute
+        response, call = self._send_app_heartbeat.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, SendAppHeartbeatResponse)
+        assert grpc.StatusCode.OK == call.code()
+        assert response.success
+
+    @parameterized.expand([(0,), (3,)])  # type: ignore
+    def test_send_app_heartbeat_not_successful(self, num_transitions: int) -> None:
+        """Test `SendAppHeartbeat` not successful when status is pending or finished."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Stay in pending or transition to finished
+        self._transition_run_status(run_id, num_transitions)
+        request = SendAppHeartbeatRequest(run_id=run_id, heartbeat_interval=30)
+
+        # Execute
+        response, _ = self._send_app_heartbeat.with_call(request=request)
+
+        # Assert
+        assert not response.success
+
+    def test_push_object(self) -> None:
+        """Test `PushObject`."""
+        # Prepare
+        obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
+        obj_b = obj.deflate()
+
+        # Execute
+        req = PushObjectRequest(object_id=obj.object_id, object_content=obj_b)
+        res: PushObjectResponse = self._push_object(request=req)
+
+        # Empty response
+        assert res == PushObjectResponse()
+
+        # Create invalid object_content
+        obj_b_ = obj_b + b"extra content"
+        # Execute
+        req = PushObjectRequest(object_id=obj.object_id, object_content=obj_b_)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED

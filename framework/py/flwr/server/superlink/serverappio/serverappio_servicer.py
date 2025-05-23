@@ -24,6 +24,7 @@ import grpc
 
 from flwr.common import ConfigRecord, Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
+from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -40,9 +41,19 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendAppHeartbeatRequest,
+    SendAppHeartbeatResponse,
+)
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
     PushLogsResponse,
+)
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
@@ -72,16 +83,21 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
+from flwr.supercore.object_store import ObjectStoreFactory
 
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     """ServerAppIo API servicer."""
 
     def __init__(
-        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+        self,
+        state_factory: LinkStateFactory,
+        ffs_factory: FfsFactory,
+        objectstore_factory: ObjectStoreFactory,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
+        self.objectstore_factory = objectstore_factory
         self.lock = threading.RLock()
 
     def GetNodes(
@@ -361,6 +377,45 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             for run_id, run_status in run_statuses.items()
         }
         return GetRunStatusResponse(run_status_dict=run_status_dict)
+
+    def SendAppHeartbeat(
+        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendAppHeartbeatResponse:
+        """Handle a heartbeat from the ServerApp."""
+        log(DEBUG, "ServerAppIoServicer.SendAppHeartbeat")
+
+        # Init state
+        state = self.state_factory.state()
+
+        # Acknowledge the heartbeat
+        # The app heartbeat can only be acknowledged if the run is in
+        # starting or running status.
+        success = state.acknowledge_app_heartbeat(
+            run_id=request.run_id,
+            heartbeat_interval=request.heartbeat_interval,
+        )
+
+        return SendAppHeartbeatResponse(success=success)
+
+    def PushObject(
+        self, request: PushObjectRequest, context: grpc.ServicerContext
+    ) -> PushObjectResponse:
+        """Push an object to the ObjectStore."""
+        log(DEBUG, "ServerAppIoServicer.PushObject")
+
+        if not check_body_len_consistency(request.object_content):
+            # Cancel insertion in ObjectStore
+            context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
+
+        return PushObjectResponse()
+
+    def PullObject(
+        self, request: PullObjectRequest, context: grpc.ServicerContext
+    ) -> PullObjectResponse:
+        """Pull an object from the ObjectStore."""
+        log(DEBUG, "ServerAppIoServicer.PullObject")
+
+        return PullObjectResponse()
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:

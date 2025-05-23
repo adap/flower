@@ -14,18 +14,27 @@
 # ==============================================================================
 """Inflatable test."""
 
+
+from __future__ import annotations
+
 import hashlib
 from dataclasses import dataclass
 
-from .constant import HEAD_BODY_DIVIDER, TYPE_BODY_LEN_DIVIDER
+import pytest
+
+from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 from .inflatable import (
     InflatableObject,
     _get_object_body,
     _get_object_head,
     add_header_to_object_body,
+    check_body_len_consistency,
     get_object_body,
+    get_object_body_len_from_object_content,
+    get_object_head_values_from_object_content,
     get_object_id,
     get_object_type_from_object_content,
+    is_valid_sha256_hash,
 )
 
 
@@ -34,15 +43,30 @@ class CustomDataClass(InflatableObject):
     """A dummy dataclass to test Inflatable features."""
 
     data: bytes
+    _children = None
 
     def deflate(self) -> bytes:  # noqa: D102
         obj_body = self.data
-        return add_header_to_object_body(object_body=obj_body, cls=self)
+        return add_header_to_object_body(object_body=obj_body, obj=self)
 
     @classmethod
-    def inflate(cls, object_content: bytes) -> "CustomDataClass":  # noqa: D102
+    def inflate(  # noqa: D102
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
+    ) -> CustomDataClass:
+        if children is not None:
+            raise ValueError("`CustomDataClass` does not have children.")
         object_body = get_object_body(object_content, cls)
         return cls(data=object_body)
+
+    @property
+    def children(self) -> dict[str, InflatableObject] | None:
+        """Get children."""
+        return self._children
+
+    @children.setter
+    def children(self, children: dict[str, InflatableObject]) -> None:
+        """Set children only for testing purposes."""
+        self._children = children
 
 
 def test_deflate_and_inflate() -> None:
@@ -68,6 +92,11 @@ def test_deflate_and_inflate() -> None:
     obj_ = CustomDataClass.inflate(obj_b)
     assert obj_.data == obj.data
 
+    # Assert
+    # Inflate passing children raises ValueError
+    with pytest.raises(ValueError):
+        CustomDataClass.inflate(obj_b, children={"1234": obj})
+
 
 def test_get_object_id() -> None:
     """Test helper function to get object id from bytes."""
@@ -86,20 +115,58 @@ def test_get_object_body() -> None:
     assert get_object_body(obj_b, CustomDataClass) == data
 
 
-def test_add_header_to_object_body() -> None:
-    """Test helper function that adds the header to the object body and returns the
-    object content."""
+@pytest.mark.parametrize(
+    "children",
+    [
+        [],
+        [CustomDataClass(b"child1 data")],
+        [CustomDataClass(b"child1 data"), CustomDataClass(b"child2 data")],
+    ],
+)
+def test_add_header_to_object_body(children: list[InflatableObject]) -> None:
+    """Test helper function that adds the header to the object body."""
     data = b"this is a test"
     obj = CustomDataClass(data)
+    obj.children = {child.object_id: child for child in children}
     obj_b = obj.deflate()
 
     # Expected object head
-    exp_obj_head = f"CustomDataClass{TYPE_BODY_LEN_DIVIDER}{len(data)}".encode()
+    head_str = f"%s{HEAD_VALUE_DIVIDER}%s{HEAD_VALUE_DIVIDER}%d" % (
+        "CustomDataClass",
+        ",".join(child.object_id for child in children),
+        len(data),
+    )
+    exp_obj_head = head_str.encode()
     assert _get_object_head(obj_b) == exp_obj_head
 
     # Expected object content
-    exp_obj_conten = exp_obj_head + HEAD_BODY_DIVIDER + data
-    assert add_header_to_object_body(data, obj) == exp_obj_conten
+    exp_obj_content = exp_obj_head + HEAD_BODY_DIVIDER + data
+    assert add_header_to_object_body(data, obj) == exp_obj_content
+
+
+@pytest.mark.parametrize(
+    "children",
+    [
+        [],
+        [CustomDataClass(b"child1 data")],
+        [CustomDataClass(b"child1 data"), CustomDataClass(b"child2 data")],
+    ],
+)
+def test_get_head_values_from_object_content(children: list[InflatableObject]) -> None:
+    """Test helper function that extracts the values of the object head."""
+    # Prepare
+    data = b"this is a test"
+    obj = CustomDataClass(data)
+    obj.children = {child.object_id: child for child in children}
+    obj_b = obj.deflate()
+
+    # Execute
+    obj_type, children_ids, body_len = get_object_head_values_from_object_content(obj_b)
+
+    # Assert
+    assert obj_type == "CustomDataClass"
+    assert children_ids == [child.object_id for child in children]
+    assert body_len == len(data)
 
 
 def test_get_object_type_from_object_content() -> None:
@@ -110,3 +177,40 @@ def test_get_object_type_from_object_content() -> None:
     obj_b = obj.deflate()
 
     assert get_object_type_from_object_content(obj_b) == obj.__class__.__qualname__
+
+
+def test_is_valid_sha256_hash_valid() -> None:
+    """Test helper function that checks if a string is a valid SHA256 hash."""
+    # Prepare
+    valid_hash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+    # Execute & assert
+    assert is_valid_sha256_hash(valid_hash)
+
+
+def test_is_valid_sha256_hash_invalid() -> None:
+    """Test helper function that checks if a string is a valid SHA256 hash."""
+    # Prepare
+    invalid_hash = "invalid_hash"
+
+    # Execute & assert
+    assert not is_valid_sha256_hash(invalid_hash)
+
+
+def test_check_body_length() -> None:
+    """Test helper function that checks if the specified body length in the object head
+    matches the actual length of the object body."""
+    data = b"this is a test"
+    obj = CustomDataClass(data)
+    obj_b = obj.deflate()
+
+    # Body length is measured correctly
+    assert get_object_body_len_from_object_content(obj_b) == len(data)
+
+    # Consistent: passes
+    assert check_body_len_consistency(obj_b)
+
+    # Extend content artificially
+    obj_b_ = obj_b + b"more content"
+    # Inconsistent: fails
+    assert not check_body_len_consistency(obj_b_)

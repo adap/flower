@@ -20,6 +20,7 @@ from logging import DEBUG, INFO
 import grpc
 from google.protobuf.json_format import MessageToDict
 
+from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
@@ -38,21 +39,32 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
+)
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_grpc_context
+from flwr.supercore.object_store import ObjectStoreFactory
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
     def __init__(
-        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+        self,
+        state_factory: LinkStateFactory,
+        ffs_factory: FfsFactory,
+        objectstore_factory: ObjectStoreFactory,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
+        self.objectstore_factory = objectstore_factory
 
     def CreateNode(
         self, request: CreateNodeRequest, context: grpc.ServicerContext
@@ -158,3 +170,31 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             abort_grpc_context(e.message, context)
 
         return res
+
+    def PushObject(
+        self, request: PushObjectRequest, context: grpc.ServicerContext
+    ) -> PushObjectResponse:
+        """Push an object to the ObjectStore."""
+        log(
+            DEBUG,
+            "[ServerAppIoServicer.PushObject] Push Object with object_id=%s",
+            request.object_id,
+        )
+
+        if not check_body_len_consistency(request.object_content):
+            # Cancel insertion in ObjectStore
+            context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
+
+        return PushObjectResponse()
+
+    def PullObject(
+        self, request: PullObjectRequest, context: grpc.ServicerContext
+    ) -> PullObjectResponse:
+        """Pull an object from the ObjectStore."""
+        log(
+            DEBUG,
+            "[ServerAppIoServicer.PullObject] Pull Object with object_id=%s",
+            request.object_id,
+        )
+
+        return PullObjectResponse()
