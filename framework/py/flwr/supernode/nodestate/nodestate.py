@@ -16,7 +16,7 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Union
 
 from flwr.common import Context, Message
 from flwr.common.typing import Run
@@ -37,7 +37,7 @@ class NodeState(ABC):
     def get_message(
         self,
         *,
-        run_id: Optional[int | list[int]] = None,
+        run_id: Optional[Union[int, list[int]]] = None,
         is_reply: Optional[bool] = None,
         limit: Optional[int] = None,
     ) -> dict[str, Message]:
@@ -48,7 +48,7 @@ class NodeState(ABC):
 
         Parameters
         ----------
-        run_id : Optional[int | list[int]] (default: None)
+        run_id : Optional[Union[int, list[int]]] (default: None)
             Run ID or list of run IDs to filter by. If a list is provided,
             it is treated as an OR condition.
         is_reply : Optional[bool] (default: None)
