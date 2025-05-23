@@ -182,7 +182,7 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
                 ProtoConfigRecordValue,
             )
         ).SerializeToString(deterministic=True)
-        return add_header_to_object_body(object_body=obj_body, cls=self)
+        return add_header_to_object_body(object_body=obj_body, obj=self)
 
     @classmethod
     def inflate(
@@ -204,7 +204,7 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
         ConfigRecord
             The inflated ConfigRecord.
         """
-        if children is not None:
+        if children:
             raise ValueError("`ConfigRecord` objects do not have children.")
 
         obj_body = get_object_body(object_content, cls)

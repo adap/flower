@@ -262,7 +262,7 @@ class Array(InflatableObject):
         )
 
         obj_body = array_proto.SerializeToString(deterministic=True)
-        return add_header_to_object_body(object_body=obj_body, cls=self)
+        return add_header_to_object_body(object_body=obj_body, obj=self)
 
     @classmethod
     def inflate(
@@ -284,7 +284,7 @@ class Array(InflatableObject):
         Array
             The inflated Array.
         """
-        if children is not None:
+        if children:
             raise ValueError("`Array` objects do not have children.")
 
         obj_body = get_object_body(object_content, cls)
