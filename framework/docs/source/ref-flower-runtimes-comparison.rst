@@ -5,7 +5,7 @@
 Flower Runtimes Comparison
 ==========================
 
-Flower Apps can be executed with both with `simulation <how-to-run-simulations.html>`_
+Flower Apps can be executed with both `simulation <how-to-run-simulations.html>`_
 or `deployment <how-to-run-flower-with-deployment-engine.html>`_ runtimes. Switching
 between runtimes simply requires specifying a different type of `federation` when
 executing the `flwr run` command via the `Flower CLI <ref-api-cli.html>`_.
