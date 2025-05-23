@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower SuperNode."""
+"""`flower-supernode` command."""
 
 
 import argparse
@@ -43,10 +43,10 @@ from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 
-from .start_client_internal import start_client_internal
+from ..start_client_internal import start_client_internal
 
 
-def run_supernode() -> None:
+def flower_supernode() -> None:
     """Run Flower SuperNode."""
     args = _parse_args_run_supernode().parse_args()
 
