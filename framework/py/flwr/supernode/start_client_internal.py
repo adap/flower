@@ -22,7 +22,7 @@ import threading
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
-from logging import ERROR, INFO, WARN
+from logging import INFO, WARN
 from os import urandom
 from pathlib import Path
 from typing import Callable, Optional, Union
@@ -238,88 +238,68 @@ def start_client_internal(
                         reply_to=message,
                     )
 
-                    # Handle app loading and task message
-                    try:
-                        # Two isolation modes:
-                        # 1. `subprocess`: SuperNode is starting the ClientApp
-                        #    process as a subprocess.
-                        # 2. `process`: ClientApp process gets started separately
-                        #    (via `flwr-clientapp`), for example, in a separate
-                        #    Docker container.
+                    # Two isolation modes:
+                    # 1. `subprocess`: SuperNode is starting the ClientApp
+                    #    process as a subprocess.
+                    # 2. `process`: ClientApp process gets started separately
+                    #    (via `flwr-clientapp`), for example, in a separate
+                    #    Docker container.
 
-                        # Generate SuperNode token
-                        token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
+                    # Generate SuperNode token
+                    token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
 
-                        # Mode 1: SuperNode starts ClientApp as subprocess
-                        start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
+                    # Mode 1: SuperNode starts ClientApp as subprocess
+                    start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
 
-                        # Share Message and Context with servicer
-                        clientappio_servicer.set_inputs(
-                            clientapp_input=ClientAppInputs(
-                                message=message,
-                                context=context,
-                                run=run,
-                                fab=fab,
-                                token=token,
-                            ),
-                            token_returned=start_subprocess,
-                        )
-
-                        if start_subprocess:
-                            _octet, _colon, _port = clientappio_api_address.rpartition(
-                                ":"
-                            )
-                            io_address = (
-                                f"{CLIENT_OCTET}:{_port}"
-                                if _octet == SERVER_OCTET
-                                else clientappio_api_address
-                            )
-                            # Start ClientApp subprocess
-                            command = [
-                                "flwr-clientapp",
-                                "--clientappio-api-address",
-                                io_address,
-                                "--token",
-                                str(token),
-                            ]
-                            command.append("--insecure")
-
-                            proc = mp_spawn_context.Process(
-                                target=_run_flwr_clientapp,
-                                args=(command, os.getpid()),
-                                daemon=True,
-                            )
-                            proc.start()
-                            proc.join()
-                        else:
-                            # Wait for output to become available
-                            while not clientappio_servicer.has_outputs():
-                                time.sleep(0.1)
-
-                        outputs = clientappio_servicer.get_outputs()
-                        reply_message, context = outputs.message, outputs.context
-                    except Exception as ex:  # pylint: disable=broad-exception-caught
-
-                        # Don't update/change DeprecatedRunInfoStore
-
-                        e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                        # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
-                        reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                        exc_entity = "ClientApp"
-
-                        log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
-
-                        # Create error message
-                        reply_message = Message(
-                            Error(code=e_code, reason=reason),
-                            reply_to=message,
-                        )
-                    else:
-                        # No exception, update node state
-                        run_info_store.update_context(
-                            run_id=run_id,
+                    # Share Message and Context with servicer
+                    clientappio_servicer.set_inputs(
+                        clientapp_input=ClientAppInputs(
+                            message=message,
                             context=context,
+                            run=run,
+                            fab=fab,
+                            token=token,
+                        ),
+                        token_returned=start_subprocess,
+                    )
+
+                    if start_subprocess:
+                        _octet, _colon, _port = clientappio_api_address.rpartition(":")
+                        io_address = (
+                            f"{CLIENT_OCTET}:{_port}"
+                            if _octet == SERVER_OCTET
+                            else clientappio_api_address
                         )
+                        # Start ClientApp subprocess
+                        command = [
+                            "flwr-clientapp",
+                            "--clientappio-api-address",
+                            io_address,
+                            "--token",
+                            str(token),
+                        ]
+                        command.append("--insecure")
+
+                        proc = mp_spawn_context.Process(
+                            target=_run_flwr_clientapp,
+                            args=(command, os.getpid()),
+                            daemon=True,
+                        )
+                        proc.start()
+                        proc.join()
+                    else:
+                        # Wait for output to become available
+                        while not clientappio_servicer.has_outputs():
+                            time.sleep(0.1)
+
+                    outputs = clientappio_servicer.get_outputs()
+                    reply_message, context = outputs.message, outputs.context
+
+                    # Update node state
+                    run_info_store.update_context(
+                        run_id=run_id,
+                        context=context,
+                    )
 
                     # Send
                     send(reply_message)
