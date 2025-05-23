@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-22 00:07+0000\n"
+"POT-Creation-Date: 2025-05-23 00:07+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -29167,19 +29167,6 @@ msgid ""
 "``examples/quickstart-pytorch`` in the Flower GitHub repository."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:358
-#: ../../source/tutorial-quickstart-tensorflow.rst:282
-#, fuzzy
-msgid "Video tutorial"
-msgstr "튜토리얼"
-
-#: ../../source/tutorial-quickstart-pytorch.rst:362
-msgid ""
-"The video shown below shows how to setup a PyTorch + Flower project using"
-" our previously recommended APIs. A new video tutorial will be released "
-"that shows the new APIs (as the content above does)"
-msgstr ""
-
 #: ../../source/tutorial-quickstart-pytorch-lightning.rst:-1
 msgid ""
 "Learn how to train an autoencoder on MNIST using federated learning with "
@@ -29445,13 +29432,6 @@ msgstr ""
 msgid ""
 "Check the source code of the extended version of this tutorial in "
 "|quickstart_tf_link|_ in the Flower GitHub repository."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-tensorflow.rst:286
-msgid ""
-"The video shown below shows how to setup a TensorFlow + Flower project "
-"using our previously recommended APIs. A new video tutorial will be "
-"released that shows the new APIs (as the content above does)"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-xgboost.rst:-1
@@ -31237,7 +31217,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|fdddf98a0e4242a2a1ae5e5514f47dff|"
+msgid "|691cc2446f8d4904b5eefbb2e422a00d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -31254,7 +31234,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|be53537e5d0541b88f511c0d85c62ab8|"
+msgid "|959ace9236d44a84b0352fa7abce0ae5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -31280,7 +31260,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|eae203170ed2414195dc0d760749d2e1|"
+msgid "|d08d86434b0a40d0ab9e970c9d3f26a3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -31298,7 +31278,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|1fed92efb1c24be0a6b12b7d7cb69a87|"
+msgid "|c903d4610434415c893c2896cc44d1be|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -31317,7 +31297,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|82c4f5d4978648de91fa4f307defcc16|"
+msgid "|a8a127b5e77e40058d92534a98a1ac67|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -31334,7 +31314,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|57086c10071943e99968d55d6972a799|"
+msgid "|d94816ae0bb948a08d9c70fc40cdfe45|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -31357,7 +31337,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|801435c7b9314afabc35aaa9cf512f8e|"
+msgid "|0df9b0b7bd7f49428a0f16986577e640|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -31374,7 +31354,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|f73c9b4adcf9414a9605996eb2b597af|"
+msgid "|3ca2aec703e04914846468bdebbaa579|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -31553,7 +31533,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|d183568ca3344f72b0f198acfc6a4b8e|"
+msgid "|62c7197c979a425eae442a833817ad90|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -31581,7 +31561,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|33858954857a4f41ab39463102a19013|"
+msgid "|cec1ac1022eb49b6b4999a6fc0dc1692|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -31608,7 +31588,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|8d14735cba704b908b908a595955611f|"
+msgid "|ff4ad9f1c9d0454f82cd45e2237ec41f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -31634,7 +31614,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|ab6d1c42314648d3a8aa6434b7895f45|"
+msgid "|263fa38c588a42b6b9b5bb6f1ab7e572|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -31684,7 +31664,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|bc903db0ab9f43f1a0c26a04ba5f3e51|"
+msgid "|832fe0df0b4c44f9b7d1e170a8071363|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -31804,7 +31784,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|09519054c2274a1194bc2c6154294192|"
+msgid "|db0ef1f7489c450e96abcfc32fae9b06|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -42360,5 +42340,68 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|6784a3e35b52433c997e1c23365ef089|"
+#~ msgstr ""
+
+#~ msgid "Video tutorial"
+#~ msgstr "튜토리얼"
+
+#~ msgid ""
+#~ "The video shown below shows how to"
+#~ " setup a PyTorch + Flower project "
+#~ "using our previously recommended APIs. A"
+#~ " new video tutorial will be released"
+#~ " that shows the new APIs (as "
+#~ "the content above does)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The video shown below shows how to"
+#~ " setup a TensorFlow + Flower project"
+#~ " using our previously recommended APIs. "
+#~ "A new video tutorial will be "
+#~ "released that shows the new APIs "
+#~ "(as the content above does)"
+#~ msgstr ""
+
+#~ msgid "|fdddf98a0e4242a2a1ae5e5514f47dff|"
+#~ msgstr ""
+
+#~ msgid "|be53537e5d0541b88f511c0d85c62ab8|"
+#~ msgstr ""
+
+#~ msgid "|eae203170ed2414195dc0d760749d2e1|"
+#~ msgstr ""
+
+#~ msgid "|1fed92efb1c24be0a6b12b7d7cb69a87|"
+#~ msgstr ""
+
+#~ msgid "|82c4f5d4978648de91fa4f307defcc16|"
+#~ msgstr ""
+
+#~ msgid "|57086c10071943e99968d55d6972a799|"
+#~ msgstr ""
+
+#~ msgid "|801435c7b9314afabc35aaa9cf512f8e|"
+#~ msgstr ""
+
+#~ msgid "|f73c9b4adcf9414a9605996eb2b597af|"
+#~ msgstr ""
+
+#~ msgid "|d183568ca3344f72b0f198acfc6a4b8e|"
+#~ msgstr ""
+
+#~ msgid "|33858954857a4f41ab39463102a19013|"
+#~ msgstr ""
+
+#~ msgid "|8d14735cba704b908b908a595955611f|"
+#~ msgstr ""
+
+#~ msgid "|ab6d1c42314648d3a8aa6434b7895f45|"
+#~ msgstr ""
+
+#~ msgid "|bc903db0ab9f43f1a0c26a04ba5f3e51|"
+#~ msgstr ""
+
+#~ msgid "|09519054c2274a1194bc2c6154294192|"
 #~ msgstr ""
 
