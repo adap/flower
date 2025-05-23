@@ -4,21 +4,20 @@ import os
 import unittest
 
 import numpy as np
-from omegaconf import OmegaConf
 
 from dasha.dataset import LIBSVMDatasetName, load_dataset, random_split
 from dasha.dataset_preparation import DatasetType
 
-TESTDATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "datasets")
-cfg = OmegaConf.create(
-    {
-        "dataset": {
-            "type": DatasetType.LIBSVM.value,
-            "path_to_dataset": TESTDATA_PATH,
-            "dataset_name": LIBSVMDatasetName.MUSHROOMS.value,
-        }
-    }
+TESTDATA_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "datasets"
 )
+cfg = {
+    "dataset": {
+        "type": DatasetType.LIBSVM.value,
+        "train-url": TESTDATA_PATH,
+        "name": LIBSVMDatasetName.MUSHROOMS.value,
+    }
+}
 
 
 class TestMushroomsDataset(unittest.TestCase):
