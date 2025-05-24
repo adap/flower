@@ -43,7 +43,6 @@ from flwr.common.constant import (
     AUTH_TYPE_YAML_KEY,
     CLIENT_OCTET,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
-    FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     FLEET_API_REST_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
@@ -60,7 +59,7 @@ from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     public_key_to_bytes,
 )
@@ -75,14 +74,8 @@ from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
 
-from .client_manager import ClientManager
-from .history import History
-from .server import Server, init_defaults, run_fl
-from .server_config import ServerConfig
-from .strategy import Strategy
 from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
-from .superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.linkstate import LinkStateFactory
@@ -122,148 +115,6 @@ except ImportError:
         raise NotImplementedError(
             "No event log writer plugins are currently supported."
         )
-
-
-def start_server(  # pylint: disable=too-many-arguments,too-many-locals
-    *,
-    server_address: str = FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
-    server: Optional[Server] = None,
-    config: Optional[ServerConfig] = None,
-    strategy: Optional[Strategy] = None,
-    client_manager: Optional[ClientManager] = None,
-    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
-) -> History:
-    """Start a Flower server using the gRPC transport layer.
-
-    Warning
-    -------
-    This function is deprecated since 1.13.0. Use the :code:`flower-superlink` command
-    instead to start a SuperLink.
-
-    Parameters
-    ----------
-    server_address : Optional[str]
-        The IPv4 or IPv6 address of the server. Defaults to `"[::]:8080"`.
-    server : Optional[flwr.server.Server] (default: None)
-        A server implementation, either `flwr.server.Server` or a subclass
-        thereof. If no instance is provided, then `start_server` will create
-        one.
-    config : Optional[ServerConfig] (default: None)
-        Currently supported values are `num_rounds` (int, default: 1) and
-        `round_timeout` in seconds (float, default: None).
-    strategy : Optional[flwr.server.Strategy] (default: None).
-        An implementation of the abstract base class
-        `flwr.server.strategy.Strategy`. If no strategy is provided, then
-        `start_server` will use `flwr.server.strategy.FedAvg`.
-    client_manager : Optional[flwr.server.ClientManager] (default: None)
-        An implementation of the abstract base class
-        `flwr.server.ClientManager`. If no implementation is provided, then
-        `start_server` will use
-        `flwr.server.client_manager.SimpleClientManager`.
-    grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
-        The maximum length of gRPC messages that can be exchanged with the
-        Flower clients. The default should be sufficient for most models.
-        Users who train very large models might need to increase this
-        value. Note that the Flower clients need to be started with the
-        same value (see `flwr.client.start_client`), otherwise clients will
-        not know about the increased limit and block larger messages.
-    certificates : Tuple[bytes, bytes, bytes] (default: None)
-        Tuple containing root certificate, server certificate, and private key
-        to start a secure SSL-enabled server. The tuple is expected to have
-        three bytes elements in the following order:
-
-            * CA certificate.
-            * server certificate.
-            * server private key.
-
-    Returns
-    -------
-    hist : flwr.server.history.History
-        Object containing training and evaluation metrics.
-
-    Examples
-    --------
-    Starting an insecure server::
-
-        start_server()
-
-    Starting a TLS-enabled server::
-
-        start_server(
-            certificates=(
-                Path("/crts/root.pem").read_bytes(),
-                Path("/crts/localhost.crt").read_bytes(),
-                Path("/crts/localhost.key").read_bytes()
-            )
-        )
-    """
-    msg = (
-        "flwr.server.start_server() is deprecated."
-        "\n\tInstead, use the `flower-superlink` CLI command to start a SuperLink "
-        "as shown below:"
-        "\n\n\t\t$ flower-superlink --insecure"
-        "\n\n\tTo view usage and all available options, run:"
-        "\n\n\t\t$ flower-superlink --help"
-        "\n\n\tUsing `start_server()` is deprecated."
-    )
-    warn_deprecated_feature(name=msg)
-
-    event(EventType.START_SERVER_ENTER)
-
-    # Parse IP address
-    parsed_address = parse_address(server_address)
-    if not parsed_address:
-        sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-
-    # Initialize server and server config
-    initialized_server, initialized_config = init_defaults(
-        server=server,
-        config=config,
-        strategy=strategy,
-        client_manager=client_manager,
-    )
-    log(
-        INFO,
-        "Starting Flower server, config: %s",
-        initialized_config,
-    )
-
-    # Start gRPC server
-    grpc_server = start_grpc_server(
-        client_manager=initialized_server.client_manager(),
-        server_address=address,
-        max_message_length=grpc_max_message_length,
-        certificates=certificates,
-    )
-    log(
-        INFO,
-        "Flower ECE: gRPC server running (%s rounds), SSL is %s",
-        initialized_config.num_rounds,
-        "enabled" if certificates is not None else "disabled",
-    )
-
-    # Graceful shutdown
-    register_exit_handlers(
-        event_type=EventType.START_SERVER_LEAVE,
-        exit_message="Flower server terminated gracefully.",
-        grpc_servers=[grpc_server],
-    )
-
-    # Start training
-    hist = run_fl(
-        server=initialized_server,
-        config=initialized_config,
-    )
-
-    # Stop the gRPC server
-    grpc_server.stop(grace=1)
-
-    event(EventType.START_SERVER_LEAVE)
-
-    return hist
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
