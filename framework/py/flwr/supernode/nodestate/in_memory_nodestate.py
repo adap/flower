@@ -15,6 +15,7 @@
 """In-memory NodeState implementation."""
 
 
+import os
 from threading import Lock
 from typing import Optional
 
@@ -39,6 +40,9 @@ class InMemoryNodeState(NodeState):
         # Store run ID to Context mapping
         self.ctx_store: dict[int, Context] = {}
         self.lock_ctx_store = Lock()
+        # Store run ID to token mapping
+        self.token_store: dict[int, bytes] = {}
+        self.lock_token_store = Lock()
 
     def set_node_id(self, node_id: Optional[int]) -> None:
         """Set the node ID."""
@@ -108,10 +112,15 @@ class InMemoryNodeState(NodeState):
         with self.lock_run_store:
             return self.run_store.get(run_id)
 
-    def get_run_ids(self) -> list[int]:
-        """Get all stored run IDs."""
-        with self.lock_run_store:
-            return list(self.run_store.keys())
+    def get_run_ids_with_pending_messages(self) -> set[int]:
+        """Get all stored run IDs with pending messages."""
+        # Collect run IDs from messages
+        with self.lock_msg_store:
+            ret = {message.metadata.run_id for message in self.msg_store.values()}
+        # Remove run IDs that have tokens stored (indicating they are in progress)
+        with self.lock_token_store:
+            ret -= set(self.token_store.keys())
+            return ret
 
     def store_context(self, context: Context) -> None:
         """Store a context."""
@@ -122,3 +131,22 @@ class InMemoryNodeState(NodeState):
         """Retrieve a context by its run ID."""
         with self.lock_ctx_store:
             return self.ctx_store.get(run_id)
+
+    def create_token(self, run_id: int) -> bytes:
+        """Create a token for the given run ID."""
+        token = os.urandom(256)  # Generate a random token
+        with self.lock_token_store:
+            if run_id in self.token_store:
+                raise ValueError("Unexpected: Token already created for this run ID")
+            self.token_store[run_id] = token
+        return token
+
+    def verify_token(self, run_id: int, token: bytes) -> bool:
+        """Verify a token for a given run ID."""
+        with self.lock_token_store:
+            return self.token_store.get(run_id) == token
+
+    def delete_token(self, run_id: int) -> None:
+        """Delete the token for a given run ID."""
+        with self.lock_token_store:
+            self.token_store.pop(run_id, None)

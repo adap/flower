@@ -81,7 +81,7 @@ class StateTest(unittest.TestCase):
         self.state.store_run(run2)
 
         # Execute
-        ids = self.state.get_run_ids()
+        ids = self.state.get_run_ids_with_pending_messages()
 
         # Assert
         self.assertCountEqual(set(ids), {61017, 61018})

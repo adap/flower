@@ -105,13 +105,13 @@ class NodeState(ABC):
         """
 
     @abstractmethod
-    def get_run_ids(self) -> list[int]:
-        """Retrieve all stored run IDs.
+    def get_run_ids_with_pending_messages(self) -> set[int]:
+        """Retrieve run IDs that have at least one pending message.
 
         Returns
         -------
         list[int]
-            List of all stored run IDs.
+            List of run IDs with pending messages.
         """
 
     @abstractmethod
@@ -137,4 +137,46 @@ class NodeState(ABC):
         -------
         Optional[Context]
             The `Context` instance if found, otherwise None.
+        """
+
+    @abstractmethod
+    def create_token(self, run_id: int) -> bytes:
+        """Create a token for a given run ID.
+
+        Parameters
+        ----------
+        run_id : int
+            The ID of the run for which to create a token.
+
+        Returns
+        -------
+        bytes
+            A unique token associated with the run ID.
+        """
+
+    @abstractmethod
+    def verify_token(self, run_id: int, token: bytes) -> bool:
+        """Verify a token for a given run ID.
+
+        Parameters
+        ----------
+        run_id : int
+            The ID of the run for which to verify the token.
+        token : bytes
+            The token to verify.
+
+        Returns
+        -------
+        bool
+            True if the token is valid for the run ID, False otherwise.
+        """
+
+    @abstractmethod
+    def delete_token(self, run_id: int) -> None:
+        """Delete the token for a given run ID.
+
+        Parameters
+        ----------
+        run_id : int
+            The ID of the run for which to delete the token.
         """

@@ -71,9 +71,9 @@ from flwr.supernode.nodestate import NodeStateFactory
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-arguments
-def start_client_internal(
+def main_loop(
     *,
-    server_address: str,
+    superlink_fleet_api_address: str,
     node_config: UserConfig,
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
@@ -138,7 +138,7 @@ def start_client_internal(
     if insecure is None:
         insecure = root_certificates is None
 
-    _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
+    _, clientappio_servicer = run_clientappio_api_grpc(
         address=clientappio_api_address,
         certificates=None,
     )
@@ -155,7 +155,7 @@ def start_client_internal(
         sleep_duration: int = 0
         with _init_connection(
             transport=transport,
-            server_address=server_address,
+            server_address=superlink_fleet_api_address,
             insecure=insecure,
             root_certificates=root_certificates,
             authentication_keys=authentication_keys,
