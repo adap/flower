@@ -102,7 +102,7 @@ if $RUN_FULL_TEST; then
 fi
 
 echo "- licensecheck: start"
-python -m licensecheck -u poetry --fail-licenses gpl --zero
+python -m licensecheck --fail-licenses gpl --zero
 echo "- licensecheck: done"
 
 echo "- All license checks passed"
