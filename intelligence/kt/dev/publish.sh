@@ -11,6 +11,7 @@ getProp() {
   grep "^$1=" "$PROPERTIES_FILE" | cut -d'=' -f2 | tr -d '\r'
 }
 
+
 GROUP_ID=$(getProp "GROUP_ID")
 ARTIFACT_ID=$(getProp "ARTIFACT_ID")
 VERSION=$(getProp "VERSION_NAME")
