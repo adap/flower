@@ -67,12 +67,6 @@ def flower_supernode() -> None:
 
     log(DEBUG, "Isolation mode: %s", args.isolation)
 
-    # Register handlers for graceful shutdown
-    register_exit_handlers(
-        event_type=EventType.RUN_SUPERNODE_LEAVE,
-        exit_message="SuperNode terminated gracefully.",
-    )
-
     main_loop(
         superlink_fleet_api_address=args.superlink,
         transport=args.transport,

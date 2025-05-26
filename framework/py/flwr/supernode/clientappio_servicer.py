@@ -123,6 +123,8 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             run_id=request.run_id, is_reply=False, limit=1
         )
         if not found_messages:
+            print("Cannot find messages for run ID:", request.run_id)
+            print("what the heck is going on?")
             return PullClientAppInputsResponse()
         message = next(iter(found_messages.values()))
         run_ctx = state.get_context(run_id=request.run_id)
@@ -148,35 +150,33 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Initialize state connection
         state = self.state_factory.state()
 
+        # Get Message and Context from request
+        message = message_from_proto(request.message)
+        run_ctx = context_from_proto(request.context)
+        run_id = run_ctx.run_id
+
+        # Verify run ID
+        if run_id != message.metadata.run_id:
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "Run ID in context does not match run ID in message metadata.",
+            )
+
         # TODO: Validate request in a interceptor
-        if not state.verify_token(request.run_id, request.token):
+        if not state.verify_token(run_id, request.token):
             context.abort(
                 grpc.StatusCode.PERMISSION_DENIED,
                 "Invalid or missing token for the requested run ID.",
             )
 
-        # Get Message and Context from request
-        message = message_from_proto(request.message)
-        run_ctx = context_from_proto(request.context)
-
-        # Verify run ID
-        if (
-            run_ctx.run_id != request.run_id
-            or message.metadata.run_id != request.run_id
-        ):
-            context.abort(
-                grpc.StatusCode.INVALID_ARGUMENT,
-                "Run ID in the context or message does not match the requested run ID.",
-            )
-
         # Store Message and Context in state
         # TODO: use real object ID instead of a random one
-        object_id = secrets.token_hex(64)
+        object_id = secrets.token_hex(8)
         state.store_message(message, object_id)
         state.store_context(run_ctx)
 
         # Delete the token for the run ID
-        state.delete_token(request.run_id)
+        state.delete_token(run_id)
 
         # Return empty response
         return PushClientAppOutputsResponse()
@@ -196,7 +196,8 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         except ValueError:
             # If a token already exists for this run ID (the run is in progress),
             # return an empty token
-            return RequestTokenResponse(token=b"")
+            return RequestTokenResponse(token="")
 
         # Return the token
+        print(f"Token created for run ID {request.run_id}: {token}")
         return RequestTokenResponse(token=token)

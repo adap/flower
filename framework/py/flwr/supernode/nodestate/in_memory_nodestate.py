@@ -18,7 +18,7 @@
 import os
 from threading import Lock
 from typing import Optional
-
+import secrets
 from flwr.common import Context, Message
 from flwr.common.typing import Run
 
@@ -63,6 +63,9 @@ class InMemoryNodeState(NodeState):
     ) -> dict[str, Message]:
         """Retrieve messages based on the specified filters."""
         selected_messages: dict[str, Message] = {}
+        print("DEBUG:\n")
+        print(f"DEBUG: run_id={run_id}, is_reply={is_reply}, limit={limit}")
+        print(f"DEBUG: Current message store: {self.msg_store}")
 
         # Normalize run_id to a list for consistent processing
         if isinstance(run_id, int):
@@ -116,7 +119,7 @@ class InMemoryNodeState(NodeState):
         """Get all stored run IDs with pending messages."""
         # Collect run IDs from messages
         with self.lock_msg_store:
-            ret = {message.metadata.run_id for message in self.msg_store.values()}
+            ret = {message.metadata.run_id for message in self.msg_store.values() if message.metadata.reply_to_message_id == ""}
         # Remove run IDs that have tokens stored (indicating they are in progress)
         with self.lock_token_store:
             ret -= set(self.token_store.keys())
@@ -132,16 +135,16 @@ class InMemoryNodeState(NodeState):
         with self.lock_ctx_store:
             return self.ctx_store.get(run_id)
 
-    def create_token(self, run_id: int) -> bytes:
+    def create_token(self, run_id: int) -> str:
         """Create a token for the given run ID."""
-        token = os.urandom(256)  # Generate a random token
+        token = secrets.token_hex(8)  # Generate a random token
         with self.lock_token_store:
             if run_id in self.token_store:
-                raise ValueError("Unexpected: Token already created for this run ID")
+                raise ValueError("Token already created for this run ID")
             self.token_store[run_id] = token
         return token
 
-    def verify_token(self, run_id: int, token: bytes) -> bool:
+    def verify_token(self, run_id: int, token: str) -> bool:
         """Verify a token for a given run ID."""
         with self.lock_token_store:
             return self.token_store.get(run_id) == token
@@ -150,3 +153,11 @@ class InMemoryNodeState(NodeState):
         """Delete the token for a given run ID."""
         with self.lock_token_store:
             self.token_store.pop(run_id, None)
+
+    def get_run_id_from_token(self, token: str) -> Optional[int]:
+        """Get the run ID associated with a given token."""
+        with self.lock_token_store:
+            for run_id, stored_token in self.token_store.items():
+                if stored_token == token:
+                    return run_id
+        return None

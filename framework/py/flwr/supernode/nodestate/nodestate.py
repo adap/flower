@@ -140,7 +140,7 @@ class NodeState(ABC):
         """
 
     @abstractmethod
-    def create_token(self, run_id: int) -> bytes:
+    def create_token(self, run_id: int) -> str:
         """Create a token for a given run ID.
 
         Parameters
@@ -150,19 +150,19 @@ class NodeState(ABC):
 
         Returns
         -------
-        bytes
+        str
             A unique token associated with the run ID.
         """
 
     @abstractmethod
-    def verify_token(self, run_id: int, token: bytes) -> bool:
+    def verify_token(self, run_id: int, token: str) -> bool:
         """Verify a token for a given run ID.
 
         Parameters
         ----------
         run_id : int
             The ID of the run for which to verify the token.
-        token : bytes
+        token : str
             The token to verify.
 
         Returns

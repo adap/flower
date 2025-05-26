@@ -259,10 +259,6 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Construct the Message
         in_message = message_from_proto(message_proto) if message_proto else None
 
-        # Remember `metadata` of the in message
-        nonlocal metadata
-        metadata = copy(in_message.metadata) if in_message else None
-
         # Return the message if available
         return in_message
 
@@ -273,24 +269,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Node instance missing")
             return
 
-        # Get the metadata of the incoming message
-        nonlocal metadata
-        if metadata is None:
-            log(ERROR, "No current message")
-            return
-
-        # Validate out message
-        if not validate_out_message(message, metadata):
-            log(ERROR, "Invalid out message")
-            return
-
         # Serialize Message
         message_proto = message_to_proto(message=message)
         request = PushMessagesRequest(node=node, messages_list=[message_proto])
         _ = retry_invoker.invoke(stub.PushMessages, request)
-
-        # Cleanup
-        metadata = None
 
     def get_run(run_id: int) -> Run:
         # Call FleetAPI
@@ -318,6 +300,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         yield (receive, send, create_node, delete_node, get_run, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
+        import traceback
+        traceback.print_exc()
     # Cleanup
     finally:
         try:

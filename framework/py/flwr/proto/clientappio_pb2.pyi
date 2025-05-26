@@ -38,11 +38,11 @@ class PullClientAppInputsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TOKEN_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
-    token: builtins.bytes
+    token: typing.Text
     run_id: builtins.int
     def __init__(self,
         *,
-        token: builtins.bytes = ...,
+        token: typing.Text = ...,
         run_id: builtins.int = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id","token",b"token"]) -> None: ...
@@ -79,7 +79,7 @@ class PushClientAppOutputsRequest(google.protobuf.message.Message):
     RUN_ID_FIELD_NUMBER: builtins.int
     MESSAGE_FIELD_NUMBER: builtins.int
     CONTEXT_FIELD_NUMBER: builtins.int
-    token: builtins.bytes
+    token: typing.Text
     run_id: builtins.int
     @property
     def message(self) -> flwr.proto.message_pb2.Message: ...
@@ -87,7 +87,7 @@ class PushClientAppOutputsRequest(google.protobuf.message.Message):
     def context(self) -> flwr.proto.message_pb2.Context: ...
     def __init__(self,
         *,
-        token: builtins.bytes = ...,
+        token: typing.Text = ...,
         run_id: builtins.int = ...,
         message: typing.Optional[flwr.proto.message_pb2.Message] = ...,
         context: typing.Optional[flwr.proto.message_pb2.Context] = ...,
@@ -116,10 +116,10 @@ global___RequestTokenRequest = RequestTokenRequest
 class RequestTokenResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TOKEN_FIELD_NUMBER: builtins.int
-    token: builtins.bytes
+    token: typing.Text
     def __init__(self,
         *,
-        token: builtins.bytes = ...,
+        token: typing.Text = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
 global___RequestTokenResponse = RequestTokenResponse
