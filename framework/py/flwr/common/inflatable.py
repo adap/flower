@@ -112,6 +112,29 @@ def _get_object_body(object_content: bytes) -> bytes:
     return object_content.split(HEAD_BODY_DIVIDER, 1)[1]
 
 
+def is_valid_sha256_hash(object_id: str) -> bool:
+    """Check if the given string is a valid SHA-256 hash.
+
+    Parameters
+    ----------
+    object_id : str
+        The string to check.
+
+    Returns
+    -------
+    bool
+        ``True`` if the string is a valid SHA-256 hash, ``False`` otherwise.
+    """
+    if len(object_id) != 64:
+        return False
+    try:
+        # If base 16 int conversion succeeds, it's a valid hexadecimal str
+        int(object_id, 16)
+        return True
+    except ValueError:
+        return False
+
+
 def get_object_type_from_object_content(object_content: bytes) -> str:
     """Return object type from bytes."""
     return get_object_head_values_from_object_content(object_content)[0]

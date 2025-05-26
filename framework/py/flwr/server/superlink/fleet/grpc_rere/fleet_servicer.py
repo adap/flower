@@ -50,16 +50,21 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_grpc_context
+from flwr.supercore.object_store import ObjectStoreFactory
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
     def __init__(
-        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+        self,
+        state_factory: LinkStateFactory,
+        ffs_factory: FfsFactory,
+        objectstore_factory: ObjectStoreFactory,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
+        self.objectstore_factory = objectstore_factory
 
     def CreateNode(
         self, request: CreateNodeRequest, context: grpc.ServicerContext
