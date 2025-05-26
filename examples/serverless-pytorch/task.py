@@ -2,6 +2,8 @@
 
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
+from flwr.common import ndarrays_to_parameters
+from net import ResNet18
 
 
 
@@ -34,4 +36,10 @@ def load_data(partition_id, num_partitions, batch_size):
     valloader = DataLoader(val_dataset, batch_size=batch_size)
     
     return trainloader, valloader
+
+def get_initial_parameters():
+    """Get initial model parameters."""
+    model = ResNet18(small_resolution=True)
+    weights = [p.detach().cpu().numpy() for p in model.parameters()]
+    return ndarrays_to_parameters(weights)
 

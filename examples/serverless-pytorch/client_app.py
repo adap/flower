@@ -2,17 +2,16 @@
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, random_split
+import torch.optim as optim
 from torchvision import datasets, transforms
+from torch.utils.data import DataLoader, random_split
 from collections import OrderedDict
 
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context, ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.server.strategy import FedAvg
 
-from flwr.serverless.federated_node.async_federated_node import AsyncFederatedNode
-from flwr.serverless.shared_folder.local_folder import LocalFolder
+from flwr.serverless import AsyncFederatedNode, SyncFederatedNode, InMemoryFolder
 
 from net import ResNet18
 
@@ -29,29 +28,20 @@ def set_weights(net, parameters):
     net.load_state_dict(state_dict, strict=True)
 
 
-def load_data(partition_id, num_partitions, batch_size):
-    """Load partition of CIFAR10 data."""
-    # Define data transforms
-    transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-    )
+def load_data(batch_size=32):
+    """Load CIFAR-10 data."""
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
     
-    # Load the full dataset
+    # Load dataset
     dataset = datasets.CIFAR10(root="./data", train=True, download=True, transform=transform)
     
-    # Calculate partition size
-    partition_size = len(dataset) // num_partitions
-    
-    # Create partitions
-    partitions = random_split(dataset, [partition_size] * num_partitions)
-    
-    # Get the partition for this client
-    partition = partitions[partition_id]
-    
     # Split into train and validation
-    train_size = int(0.8 * len(partition))
-    val_size = len(partition) - train_size
-    train_dataset, val_dataset = random_split(partition, [train_size, val_size])
+    train_size = int(0.8 * len(dataset))
+    val_size = len(dataset) - train_size
+    train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
     
     # Create data loaders
     trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -60,76 +50,78 @@ def load_data(partition_id, num_partitions, batch_size):
     return trainloader, valloader
 
 
-def train(net, trainloader, valloader, epochs, learning_rate, device, node=None, node_id=None):
-    """Train the model on the training set."""
-    print(f"Training on node {node_id}. Device: {device}")
-    net.to(device)  # move model to GPU if available
-    criterion = nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
+def train(model, trainloader, valloader, node, epochs=5):
+    """Train the model using federated learning."""
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
     
-    net.train()
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+    
     for epoch in range(epochs):
+        model.train()
         running_loss = 0.0
         correct = 0
         total = 0
         
-        for batch_idx, (images, labels) in enumerate(trainloader):
-            images, labels = images.to(device), labels.to(device)
+        for batch_idx, (data, target) in enumerate(trainloader):
+            data, target = data.to(device), target.to(device)
             optimizer.zero_grad()
-            outputs = net(images)
-            loss = criterion(outputs, labels)
+            output = model(data)
+            loss = criterion(output, target)
             loss.backward()
             optimizer.step()
             
             running_loss += loss.item()
-            _, predicted = outputs.max(1)
-            total += labels.size(0)
-            correct += predicted.eq(labels).sum().item()
+            pred = output.argmax(dim=1, keepdim=True)
+            correct += pred.eq(target.view_as(pred)).sum().item()
+            total += target.size(0)
             
             if batch_idx % 100 == 99:
-                accuracy = correct / total
-                print(f'[Node {node_id}] Epoch [{epoch + 1}/{epochs}], '
+                print(f'Node {node.node_id} - Epoch {epoch + 1}, '
                       f'Step [{batch_idx + 1}/{len(trainloader)}], '
                       f'Loss: {running_loss / 100:.3f}, '
-                      f'Acc: {100. * accuracy:.3f}%')
+                      f'Acc: {100. * correct / total:.3f}%')
                 running_loss = 0.0
         
-        print(f"Finished local training for epoch {epoch + 1} of {epochs} on node {node_id}")
+        # Federate the model
+        weights = [p.detach().cpu().numpy() for p in model.parameters()]
+        flwr_parameters = ndarrays_to_parameters(weights)
         
-        # If we have a node, perform federation after each epoch
-        if node is not None:
-            print(f"Federating on node {node_id}")
-            # Convert torch model weights to flwr parameters
-            flwr_parameters = ndarrays_to_parameters(get_weights(net))
-            
-            # Perform federation using the node
-            accuracy = correct / total
-            updated_parameters, metrics = node.update_parameters(
-                local_parameters=flwr_parameters,
-                num_examples=len(trainloader.dataset),
-                metrics={
-                    "loss": loss.item(),
-                    "accuracy": accuracy,
-                },
-                epoch=epoch,
-            )
-            
-            # Convert flwr parameters back to torch model weights
-            np_parameters = parameters_to_ndarrays(updated_parameters)
-            set_weights(net, np_parameters)
-            print(f"Updated model weights on node {node_id}")
-    
-    # Evaluate on validation set
-    print(f"Evaluating on node {node_id}")
-    val_loss, val_acc = test(net, valloader, device)
-    print(f"Finished evaluation on node {node_id}")
-    
-    results = {
-        "val_loss": val_loss,
-        "val_accuracy": val_acc,
-    }
-    print(f"Results on node {node_id}: {results}")
-    return results
+        # Update parameters through federation
+        updated_parameters, metrics = node.update_parameters(
+            local_parameters=flwr_parameters,
+            num_examples=total,
+            metrics={'loss': running_loss / len(trainloader), 'accuracy': correct / total},
+            epoch=epoch
+        )
+        
+        # Update model with federated weights
+        if updated_parameters:
+            new_weights = parameters_to_ndarrays(updated_parameters)
+            for param, new_weight in zip(model.parameters(), new_weights):
+                param.data = torch.tensor(new_weight).to(device)
+        
+        # Evaluate on validation set
+        model.eval()
+        val_loss = 0
+        val_correct = 0
+        val_total = 0
+        
+        with torch.no_grad():
+            for data, target in valloader:
+                data, target = data.to(device), target.to(device)
+                output = model(data)
+                val_loss += criterion(output, target).item()
+                pred = output.argmax(dim=1, keepdim=True)
+                val_correct += pred.eq(target.view_as(pred)).sum().item()
+                val_total += target.size(0)
+        
+        val_loss /= len(valloader)
+        val_accuracy = val_correct / val_total
+        
+        print(f'Node {node.node_id} - Epoch {epoch + 1} - '
+              f'Val Loss: {val_loss:.3f}, Val Acc: {100. * val_accuracy:.3f}%')
 
 
 def test(net, testloader, device):
@@ -161,11 +153,12 @@ class FlowerClient(NumPyClient):
         self.node_id = node_id
         
         # Create AsyncFederatedNode for this client
-        self.storage_backend = LocalFolder("./shared_folder")
+        self.storage_backend = InMemoryFolder()
         self.strategy = FedAvg()
         self.node = AsyncFederatedNode(
             shared_folder=self.storage_backend,
-            strategy=self.strategy
+            strategy=self.strategy,
+            node_id=self.node_id
         )
 
     def fit(self, parameters, config):
@@ -174,11 +167,8 @@ class FlowerClient(NumPyClient):
             self.net,
             self.trainloader,
             self.valloader,
-            self.local_epochs,
-            self.lr,
-            self.device,
             self.node,
-            self.node_id
+            self.local_epochs
         )
         return get_weights(self.net), len(self.trainloader.dataset), results
 
@@ -197,7 +187,7 @@ def client_fn(context: Context):
 
     # Read run_config to fetch hyperparameters relevant to this run
     batch_size = context.run_config["batch-size"]
-    trainloader, valloader = load_data(partition_id, num_partitions, batch_size)
+    trainloader, valloader = load_data(batch_size)
     local_epochs = context.run_config["local-epochs"]
     learning_rate = context.run_config["learning-rate"]
 
@@ -213,3 +203,28 @@ def client_fn(context: Context):
 
 # Flower ClientApp
 app = ClientApp(client_fn) 
+
+def main():
+    # Create model
+    model = ResNet18(small_resolution=True)
+    
+    # Load data
+    trainloader, valloader = load_data()
+    
+    # Create shared folder for model storage
+    shared_folder = InMemoryFolder()
+    
+    # Create federated node (async or sync)
+    node_id = "client_1"  # In a real scenario, this would be unique per client
+    strategy = FedAvg()
+    node = AsyncFederatedNode(
+        shared_folder=shared_folder,
+        strategy=strategy,
+        node_id=node_id
+    )
+    
+    # Train the model
+    train(model, trainloader, valloader, node)
+
+if __name__ == "__main__":
+    main() 

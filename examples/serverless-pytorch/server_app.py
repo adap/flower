@@ -1,8 +1,7 @@
 """Server app for serverless federated learning with PyTorch."""
 
 from flwr.common import Context
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
+from flwr.server import ServerApp, ServerAppComponents
 
 
 # Define metric aggregation function
@@ -19,4 +18,11 @@ def server_fn(context: Context):
     return ServerAppComponents()
     
 # Create ServerApp
-app = ServerApp(server_fn=server_fn) 
+app = ServerApp(server_fn=server_fn)
+
+def main():
+    app.run()
+    print("Server initialized and waiting for clients...")
+
+if __name__ == "__main__":
+    main() 

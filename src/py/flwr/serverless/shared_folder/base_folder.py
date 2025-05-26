@@ -8,6 +8,9 @@ class SharedFolder:
     def __setitem__(self, key, value):
         ...
 
+    def __delitem__(self, key):
+        ...
+
     def __len__(self):
         ...
 

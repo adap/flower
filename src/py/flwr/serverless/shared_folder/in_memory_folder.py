@@ -1,25 +1,27 @@
-class InMemoryFolder:
+from .base_folder import SharedFolder
+
+class InMemoryFolder(SharedFolder):
     def __init__(self):
-        self.model_store = {}
+        self.store = {}
 
     def get(self, key, default=None):
-        return self.model_store[key] if key in self.model_store else default
+        return self.store.get(key, default)
 
     def __getitem__(self, key):
-        return self.model_store[key]
+        return self.store[key]
 
     def __setitem__(self, key, value):
-        self.model_store[key] = value
+        self.store[key] = value
 
     def __delitem__(self, key):
-        if key in self.model_store:
-            del self.model_store[key]
+        if key in self.store:
+            del self.store[key]
 
     def __len__(self):
-        return len(self.model_store)
+        return len(self.store)
 
     def items(self):
-        return self.model_store.items()
+        return self.store.items()
 
     def get_raw_folder(self):
         return self
