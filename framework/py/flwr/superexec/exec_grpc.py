@@ -59,12 +59,7 @@ def run_exec_api_grpc(
     )
     interceptors: list[grpc.ServerInterceptor] = []
     if auth_plugin is not None:
-        if authz_plugin is not None:
-            # both plugins present
-            interceptors.append(ExecUserAuthInterceptor(auth_plugin, authz_plugin))
-        else:
-            # only auth_plugin present
-            interceptors.append(ExecUserAuthInterceptor(auth_plugin))
+        interceptors.append(ExecUserAuthInterceptor(auth_plugin, authz_plugin))
     # Event log interceptor must be added after user auth interceptor
     if event_log_plugin is not None:
         interceptors.append(ExecEventLogInterceptor(event_log_plugin))
