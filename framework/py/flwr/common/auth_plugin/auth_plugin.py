@@ -64,6 +64,24 @@ class ExecAuthPlugin(ABC):
         """Refresh authentication tokens in the provided metadata."""
 
 
+class ExecAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
+    """Abstract Flower Authorization Plugin class for ExecServicer.
+
+    Parameters
+    ----------
+    user_authz_config_path : Path
+        Path to the YAML file containing the authorization configuration.
+    """
+
+    @abstractmethod
+    def __init__(self, user_authz_config_path: Path):
+        """Abstract constructor."""
+
+    @abstractmethod
+    def verify_user_authorization(self, user_info: UserInfo) -> bool:
+        """Verify user authorization request."""
+
+
 class CliAuthPlugin(ABC):
     """Abstract Flower Auth Plugin class for CLI.
 
