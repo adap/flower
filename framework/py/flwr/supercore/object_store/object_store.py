@@ -27,13 +27,31 @@ class ObjectStore(abc.ABC):
     """
 
     @abc.abstractmethod
+    def preregister(self, object_ids: list[str]) -> list[str]:
+        """Preregister objects in the `ObjectStore`.
+
+        Parameters
+        ----------
+        object_ids : list[str]
+            The list of object_ids to be pre-registered in the store if they do not
+            exist.
+
+        Returns
+        -------
+        list[str]
+            List of object_ids that were preregistered. This list represents the
+            object_ids that were not present in the `ObjectStore` at the time this
+            method was executed.
+        """
+
+    @abc.abstractmethod
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store.
 
         Parameters
         ----------
         object_id : str
-            The object_id under which to store the object.
+            The object_id under which to store the object. Must be preregistered.
         object_content : bytes
             The deflated object to store.
         """
@@ -68,6 +86,36 @@ class ObjectStore(abc.ABC):
         """Clear the store.
 
         This method should remove all objects from the store.
+        """
+
+    @abc.abstractmethod
+    def set_children_object_ids(
+        self, msg_object_id: str, children_ids: list[str]
+    ) -> None:
+        """Store mapping of an object_id of type ``Message`` to those of its children.
+
+        Parameters
+        ----------
+        msg_object_id : str
+            The object_id of a ``Message``.
+
+        children_ids : list[str]
+            A list of object_ids belonging to the children of the ``Message``.
+        """
+
+    @abc.abstractmethod
+    def get_children_object_ids(self, msg_object_id: str) -> list[str]:
+        """Get object_ids of childrens.
+
+        Parameters
+        ----------
+        msg_object_id : str
+            The object_id of a ``Message`` object.
+
+        Returns
+        -------
+        list[str]
+            The list of object_ids of children objects.
         """
 
     @abc.abstractmethod

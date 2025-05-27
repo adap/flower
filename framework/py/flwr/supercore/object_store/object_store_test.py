@@ -53,6 +53,7 @@ class ObjectStoreTest(unittest.TestCase):
         object_store = self.object_store_factory()
         object_content = b"test_value"
         object_id = get_object_id(object_content)
+        object_store.preregister(object_ids=[object_id])
 
         # Execute
         object_store.put(object_id, object_content)
@@ -67,6 +68,7 @@ class ObjectStoreTest(unittest.TestCase):
         object_store = self.object_store_factory()
         object_content = b"test_value"
         object_id = get_object_id(object_content)
+        object_store.preregister(object_ids=[object_id])
 
         # Execute
         object_store.put(object_id, object_content)
@@ -81,6 +83,7 @@ class ObjectStoreTest(unittest.TestCase):
         # Prepare
         object_store = self.object_store_factory()
         object_content = b"test_value"
+        object_store.preregister(object_ids=[get_object_id(object_content)])
         object_id = ""  # Invalid
 
         # Execute
@@ -97,6 +100,7 @@ class ObjectStoreTest(unittest.TestCase):
         # Prepare
         object_store = self.object_store_factory()
         object_content = b"test_value"
+        object_store.preregister(object_ids=[get_object_id(object_content)])
         object_id = "invalid"
 
         # Execute
@@ -113,6 +117,7 @@ class ObjectStoreTest(unittest.TestCase):
         # Prepare
         object_store = self.object_store_factory()
         object_content = b"test_value"
+        object_store.preregister(object_ids=[get_object_id(object_content)])
         object_id = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
         # Execute
@@ -130,6 +135,7 @@ class ObjectStoreTest(unittest.TestCase):
         object_store = self.object_store_factory()
         object_content = b"test_value"
         object_id = get_object_id(object_content)
+        object_store.preregister(object_ids=[object_id])
         object_store.put(object_id, object_content)
 
         # Execute
@@ -154,8 +160,10 @@ class ObjectStoreTest(unittest.TestCase):
         object_store = self.object_store_factory()
         object_content1 = b"test_value1"
         object_id1 = get_object_id(object_content1)
+        object_store.preregister(object_ids=[object_id1])
         object_content2 = b"test_value2"
         object_id2 = get_object_id(object_content2)
+        object_store.preregister(object_ids=[object_id2])
 
         object_store.put(object_id1, object_content1)
         object_store.put(object_id2, object_content2)
@@ -185,6 +193,7 @@ class ObjectStoreTest(unittest.TestCase):
         object_store = self.object_store_factory()
         object_content = b"test_value"
         object_id = get_object_id(object_content)
+        object_store.preregister(object_ids=[object_id])
         object_store.put(object_id, object_content)
         unavailable = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
@@ -195,6 +204,50 @@ class ObjectStoreTest(unittest.TestCase):
         # Assert
         self.assertTrue(contained)
         self.assertFalse(not_contained)
+
+    def test_put_without_preregistering(self) -> None:
+        """Test put without preregistering first."""
+        # Prepare
+        object_store = self.object_store_factory()
+        object_content = b"test_value"
+        object_id = get_object_id(object_content)
+
+        # Execute
+        with self.assertRaises(KeyError):
+            object_store.put(object_id, object_content)
+
+    def test_preregister(self) -> None:
+        """Test preregister functionality."""
+        # Prepare
+        object_store = self.object_store_factory()
+        object_content1 = b"test_value1"
+        object_id1 = get_object_id(object_content1)
+        object_content2 = b"test_value2"
+        object_id2 = get_object_id(object_content2)
+
+        # Execute (preregister all)
+        not_present = object_store.preregister(object_ids=[object_id1, object_id2])
+
+        # Assert (none was present)
+        self.assertEqual([object_id1, object_id2], not_present)
+
+        object_content3 = b"test_value3"
+        object_id3 = get_object_id(object_content3)
+        # Execute (preregister new object)
+        not_present = object_store.preregister(object_ids=[object_id3])
+        # Assert (only new message is not present)
+        self.assertEqual([object_id3], not_present)
+
+    def test_preregister_with_invalid_object_id(self) -> None:
+        """Test preregistering with object_id that is not a valid SHA256."""
+        # Prepare
+        object_store = self.object_store_factory()
+        object_content = b"test_value"
+        object_id = "invalid"
+
+        # Execute
+        with self.assertRaises(ValueError):
+            object_store.put(object_id, object_content)
 
 
 class InMemoryStateTest(ObjectStoreTest):

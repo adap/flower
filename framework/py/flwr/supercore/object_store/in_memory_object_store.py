@@ -28,24 +28,50 @@ class InMemoryObjectStore(ObjectStore):
     def __init__(self, verify: bool = True) -> None:
         self.verify = verify
         self.store: dict[str, bytes] = {}
+        # Mapping the Object ID of a message to the list of children object IDs
+        self.msg_children_objects_mapping: dict[str, list[str]] = {}
+
+    def preregister(self, object_ids: list[str]) -> list[str]:
+        """Preregister object entries."""
+        new_objects = []
+        for obj_id in object_ids:
+            # Verify object ID format (must be a valid sha256 hash)
+            if not is_valid_sha256_hash(obj_id):
+                raise ValueError(f"Invalid object ID format: {obj_id}")
+            if obj_id not in self.store:
+                self.store[obj_id] = b""
+                new_objects.append(obj_id)
+
+        return new_objects
 
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store."""
-        # Verify object ID format (must be a valid sha256 hash)
-        if not is_valid_sha256_hash(object_id):
-            raise ValueError(f"Invalid object ID format: {object_id}")
-
         # Verify object_id and object_content match
         if self.verify:
             object_id_from_content = get_object_id(object_content)
             if object_id != object_id_from_content:
                 raise ValueError(f"Object ID {object_id} does not match content hash")
 
+        # Only allow adding the object if it has been preregistered
+        if object_id not in self.store:
+            raise KeyError(f"Object with id {object_id} was not preregistered.")
+
         # Return if object is already present in the store
-        if object_id in self.store:
+        if self.store[object_id] != b"":
             return
 
         self.store[object_id] = object_content
+
+    def set_children_object_ids(
+        self, msg_object_id: str, children_ids: list[str]
+    ) -> None:
+        """Store mapping of an object_id of type ``Message`` to those of its
+        children."""
+        self.msg_children_objects_mapping[msg_object_id] = children_ids
+
+    def get_children_object_ids(self, msg_object_id: str) -> list[str]:
+        """Get object_ids of childrens associated with `msg_object_id`."""
+        return self.msg_children_objects_mapping[msg_object_id]
 
     def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store."""
