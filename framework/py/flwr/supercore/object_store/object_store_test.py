@@ -78,47 +78,13 @@ class ObjectStoreTest(unittest.TestCase):
         # Assert
         self.assertEqual(object_content, retrieved_value)
 
-    def test_put_empty_object_id(self) -> None:
-        """Test put method with an empty object_id."""
-        # Prepare
-        object_store = self.object_store_factory()
-        object_content = b"test_value"
-        object_store.preregister(object_ids=[get_object_id(object_content)])
-        object_id = ""  # Invalid
-
-        # Execute
-        try:
-            object_store.put(object_id, object_content)
-            # Assert
-            raise AssertionError("Expected ValueError not raised")
-        except ValueError:
-            # Assert
-            assert True
-
-    def test_put_invalid_object_id(self) -> None:
-        """Test put method with an invalid object_id."""
-        # Prepare
-        object_store = self.object_store_factory()
-        object_content = b"test_value"
-        object_store.preregister(object_ids=[get_object_id(object_content)])
-        object_id = "invalid"
-
-        # Execute
-        try:
-            object_store.put(object_id, object_content)
-            # Assert
-            raise AssertionError("Expected ValueError not raised")
-        except ValueError:
-            # Assert
-            assert True
-
     def test_put_object_id_and_content_pair_not_matching(self) -> None:
         """Test put method with an object_id that does not match that of content."""
         # Prepare
         object_store = self.object_store_factory()
         object_content = b"test_value"
-        object_store.preregister(object_ids=[get_object_id(object_content)])
         object_id = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        object_store.preregister(object_ids=[object_id])
 
         # Execute
         try:
@@ -242,12 +208,11 @@ class ObjectStoreTest(unittest.TestCase):
         """Test preregistering with object_id that is not a valid SHA256."""
         # Prepare
         object_store = self.object_store_factory()
-        object_content = b"test_value"
         object_id = "invalid"
 
         # Execute
         with self.assertRaises(ValueError):
-            object_store.put(object_id, object_content)
+            object_store.preregister(object_ids=[object_id])
 
 
 class InMemoryStateTest(ObjectStoreTest):

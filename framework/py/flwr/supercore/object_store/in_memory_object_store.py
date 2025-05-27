@@ -46,15 +46,15 @@ class InMemoryObjectStore(ObjectStore):
 
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store."""
+        # Only allow adding the object if it has been preregistered
+        if object_id not in self.store:
+            raise KeyError(f"Object with id {object_id} was not preregistered.")
+
         # Verify object_id and object_content match
         if self.verify:
             object_id_from_content = get_object_id(object_content)
             if object_id != object_id_from_content:
                 raise ValueError(f"Object ID {object_id} does not match content hash")
-
-        # Only allow adding the object if it has been preregistered
-        if object_id not in self.store:
-            raise KeyError(f"Object with id {object_id} was not preregistered.")
 
         # Return if object is already present in the store
         if self.store[object_id] != b"":
