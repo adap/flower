@@ -100,9 +100,10 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 # Store user info in contextvars for authenticated users
                 shared_user_info.set(cast(UserInfo, user_info))
                 if self.authz_plugin and user_info is not None:
+                    # Check if the user is authorized
                     if not self.authz_plugin.verify_user_authorization(user_info):
                         context.abort(
-                            grpc.StatusCode.PERMISSION_DENIED, "Access denied"
+                            grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
                         )
                         raise grpc.RpcError()
                 return call(request, context)  # type: ignore

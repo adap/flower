@@ -151,7 +151,7 @@ def run_superlink() -> None:
     verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", None)
 
     auth_plugin: Optional[ExecAuthPlugin] = None
-    authz_plugin: Optional[ExecAuthzPlugin] = None  # pylint: disable=unused-variable
+    authz_plugin: Optional[ExecAuthzPlugin] = None
     event_log_plugin: Optional[EventLogWriterPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
@@ -184,6 +184,7 @@ def run_superlink() -> None:
             [args.executor_config] if args.executor_config else args.executor_config
         ),
         auth_plugin=auth_plugin,
+        authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
     )
     grpc_servers = [exec_server]
