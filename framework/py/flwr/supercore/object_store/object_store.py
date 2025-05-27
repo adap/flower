@@ -91,9 +91,9 @@ class ObjectStore(abc.ABC):
     def set_message_descendant_ids(
         self, msg_object_id: str, descendant_ids: list[str]
     ) -> None:
-        """
-        Store the mapping from a ``Message`` object ID to the object IDs of its descendants.
-    
+        """Store the mapping from a ``Message`` object ID to the object IDs of its
+        descendants.
+
         Parameters
         ----------
         msg_object_id : str
@@ -104,14 +104,13 @@ class ObjectStore(abc.ABC):
 
     @abc.abstractmethod
     def get_message_descendant_ids(self, msg_object_id: str) -> list[str]:
-        """
-        Retrieve the object IDs of all descendants of a given Message.
-    
+        """Retrieve the object IDs of all descendants of a given ``Message``.
+
         Parameters
         ----------
         msg_object_id : str
             The object ID of the ``Message``.
-    
+
         Returns
         -------
         list[str]

@@ -62,15 +62,15 @@ class InMemoryObjectStore(ObjectStore):
 
         self.store[object_id] = object_content
 
-    def set_children_object_ids(
-        self, msg_object_id: str, children_ids: list[str]
+    def set_message_descendant_ids(
+        self, msg_object_id: str, descendant_ids: list[str]
     ) -> None:
-        """Store mapping of an object_id of type ``Message`` to those of its
-        children."""
-        self.msg_children_objects_mapping[msg_object_id] = children_ids
+        """Store the mapping from a ``Message`` object ID to the object IDs of its
+        descendants."""
+        self.msg_children_objects_mapping[msg_object_id] = descendant_ids
 
-    def get_children_object_ids(self, msg_object_id: str) -> list[str]:
-        """Get object_ids of childrens associated with `msg_object_id`."""
+    def get_message_descendant_ids(self, msg_object_id: str) -> list[str]:
+        """Retrieve the object IDs of all descendants of a given Message."""
         return self.msg_children_objects_mapping[msg_object_id]
 
     def get(self, object_id: str) -> Optional[bytes]:
