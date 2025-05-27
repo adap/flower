@@ -81,7 +81,7 @@ message PushInsMessagesRequest {
 }
 message PushInsMessagesResponse {
   repeated string message_ids = 1;
-  ObjectIDs objects_to_push = 2;
+  map<string, ObjectIDs> objects_to_push = 2;
 }
 
 // PullMessages messages
@@ -91,7 +91,7 @@ message PullResMessagesRequest {
 }
 message PullResMessagesResponse {
   repeated Message messages_list = 1;
-  ObjectIDs objects_to_pull = 2;
+  map<string, ObjectIDs> objects_to_pull = 2;
 }
 // PullServerAppInputs messages
 message PullServerAppInputsRequest {}
