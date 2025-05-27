@@ -18,6 +18,8 @@
 import unittest
 from abc import abstractmethod
 
+from parameterized import parameterized
+
 from flwr.common.inflatable import get_object_id
 
 from .in_memory_object_store import InMemoryObjectStore
@@ -204,15 +206,15 @@ class ObjectStoreTest(unittest.TestCase):
         # Assert (only new message is not present)
         self.assertEqual([object_id3], not_present)
 
-    def test_preregister_with_invalid_object_id(self) -> None:
+    @parameterized.expand([(""), ("invalid")])  # type: ignore
+    def test_preregister_with_invalid_object_id(self, invalid_object_id) -> None:
         """Test preregistering with object_id that is not a valid SHA256."""
         # Prepare
         object_store = self.object_store_factory()
-        object_id = "invalid"
 
         # Execute
         with self.assertRaises(ValueError):
-            object_store.preregister(object_ids=[object_id])
+            object_store.preregister(object_ids=[invalid_object_id])
 
 
 class InMemoryStateTest(ObjectStoreTest):
