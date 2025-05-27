@@ -46,15 +46,13 @@ from flwr.common.typing import Fab, Run
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
-    GetTokenRequest,
-    GetTokenResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
     PushClientAppOutputsRequest,
-    PushClientAppOutputsResponse,
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 
+# pylint: enable=E0611
 from .utils import get_load_client_app_fn
 
 
@@ -77,7 +75,7 @@ def flwr_clientapp() -> None:
     )
     run_clientapp(
         clientappio_api_address=args.clientappio_api_address,
-        run_once=(args.token is not None),
+        run_id=args.run_id,
         token=args.token,
         flwr_dir=args.flwr_dir,
         certificates=None,
@@ -86,129 +84,95 @@ def flwr_clientapp() -> None:
 
 def run_clientapp(  # pylint: disable=R0914
     clientappio_api_address: str,
-    run_once: bool,
-    token: Optional[int] = None,
+    run_id: int,
+    token: str,
     flwr_dir: Optional[str] = None,
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ClientApp process."""
+    print("ClientApp for run ID: %d with token: %s" % (run_id, token))
+    # Resolve directory where FABs are installed
+    flwr_dir_ = get_flwr_dir(flwr_dir)
+    
+    # Initialize gRPC stub with retry invoker
     channel = create_channel(
         server_address=clientappio_api_address,
         insecure=(certificates is None),
         root_certificates=certificates,
     )
     channel.subscribe(on_channel_state_change)
+    stub = ClientAppIoStub(channel)
+    _wrap_stub(stub, _make_simple_grpc_retry_invoker())
 
-    # Resolve directory where FABs are installed
-    flwr_dir_ = get_flwr_dir(flwr_dir)
     try:
-        stub = ClientAppIoStub(channel)
-        _wrap_stub(stub, _make_simple_grpc_retry_invoker())
+        # Pull Message, Context, Run and FAB from SuperNode
+        message, context, run, fab = pull_clientappinputs(stub=stub, token=token, run_id=run_id)
 
-        while True:
-            # If token is not set, loop until token is received from SuperNode
-            while token is None:
-                token = get_token(stub)
-                time.sleep(1)
+        # Install FAB, if provided
+        if fab:
+            log(DEBUG, "[flwr-clientapp] Start FAB installation.")
+            install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
-            # Pull Message, Context, Run and (optional) FAB from SuperNode
-            message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
+        load_client_app_fn = get_load_client_app_fn(
+            default_app_ref="",
+            app_path=None,
+            multi_app=True,
+            flwr_dir=str(flwr_dir_),
+        )
 
-            # Install FAB, if provided
-            if fab:
-                log(DEBUG, "[flwr-clientapp] Start FAB installation.")
-                install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
-
-            load_client_app_fn = get_load_client_app_fn(
-                default_app_ref="",
-                app_path=None,
-                multi_app=True,
-                flwr_dir=str(flwr_dir_),
+        try:
+            # Load ClientApp
+            log(DEBUG, "[flwr-clientapp] Start `ClientApp` Loading.")
+            client_app: ClientApp = load_client_app_fn(
+                run.fab_id, run.fab_version, fab.hash_str if fab else ""
             )
 
-            try:
-                # Load ClientApp
-                log(DEBUG, "[flwr-clientapp] Start `ClientApp` Loading.")
-                client_app: ClientApp = load_client_app_fn(
-                    run.fab_id, run.fab_version, fab.hash_str if fab else ""
+            # Execute ClientApp
+            reply_message = client_app(message=message, context=context)
+
+        except Exception as ex:  # pylint: disable=broad-exception-caught
+            # Don't update/change NodeState
+
+            e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+            # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
+            reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+            exc_entity = "ClientApp"
+            if isinstance(ex, LoadClientAppError):
+                reason = (
+                    "An exception was raised when attempting to load `ClientApp`"
                 )
+                e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
 
-                # Execute ClientApp
-                reply_message = client_app(message=message, context=context)
+            log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
 
-            except Exception as ex:  # pylint: disable=broad-exception-caught
-                # Don't update/change NodeState
-
-                e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
-                reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                exc_entity = "ClientApp"
-                if isinstance(ex, LoadClientAppError):
-                    reason = (
-                        "An exception was raised when attempting to load `ClientApp`"
-                    )
-                    e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
-
-                log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
-
-                # Create error message
-                reply_message = Message(
-                    Error(code=e_code, reason=reason), reply_to=message
-                )
-
-            # Push Message and Context to SuperNode
-            _ = push_clientappoutputs(
-                stub=stub, token=token, message=reply_message, context=context
+            # Create error message
+            reply_message = Message(
+                Error(code=e_code, reason=reason), reply_to=message
             )
 
-            del client_app, message, context, run, fab, reply_message
-            gc.collect()
+        # Push Message and Context to SuperNode
+        push_clientappoutputs(
+            stub=stub, token=token, message=reply_message, context=context
+        )
 
-            # Reset token to `None` to prevent flwr-clientapp from trying to pull the
-            # same inputs again
-            token = None
-
-            # Stop the loop if `flwr-clientapp` is expected to process only a single
-            # message
-            if run_once:
-                break
-
-    except KeyboardInterrupt:
-        log(INFO, "Closing connection")
     except grpc.RpcError as e:
         log(ERROR, "GRPC error occurred: %s", str(e))
     finally:
         channel.close()
 
 
-def get_token(stub: grpc.Channel) -> Optional[int]:
-    """Get a token from SuperNode."""
-    log(DEBUG, "[flwr-clientapp] Request token")
-    try:
-        res: GetTokenResponse = stub.GetToken(GetTokenRequest())
-        log(DEBUG, "[GetToken] Received token: %s", res.token)
-        return res.token
-    except grpc.RpcError as e:
-        if e.code() == grpc.StatusCode.FAILED_PRECONDITION:  # pylint: disable=no-member
-            log(DEBUG, "[GetToken] No token available yet")
-        else:
-            log(ERROR, "[GetToken] gRPC error occurred: %s", str(e))
-        return None
-
-
 def pull_clientappinputs(
-    stub: grpc.Channel, token: int
-) -> tuple[Message, Context, Run, Optional[Fab]]:
+    stub: ClientAppIoStub, token: str, run_id: int
+) -> tuple[Message, Context, Run, Fab]:
     """Pull ClientAppInputs from SuperNode."""
-    log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", token)
+    log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for run %d", run_id)
     try:
-        res: PullClientAppInputsResponse = stub.PullClientAppInputs(
-            PullClientAppInputsRequest(token=token)
-        )
+        req = PullClientAppInputsRequest(token=token, run_id=run_id)
+        res: PullClientAppInputsResponse = stub.PullClientAppInputs(req)
         message = message_from_proto(res.message)
         context = context_from_proto(res.context)
         run = run_from_proto(res.run)
-        fab = fab_from_proto(res.fab) if res.fab else None
+        fab = fab_from_proto(res.fab)
         return message, context, run, fab
     except grpc.RpcError as e:
         log(ERROR, "[PullClientAppInputs] gRPC error occurred: %s", str(e))
@@ -216,23 +180,21 @@ def pull_clientappinputs(
 
 
 def push_clientappoutputs(
-    stub: grpc.Channel, token: int, message: Message, context: Context
-) -> PushClientAppOutputsResponse:
+    stub: ClientAppIoStub, token: str, message: Message, context: Context
+) -> None:
     """Push ClientAppOutputs to SuperNode."""
     log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", token)
     proto_message = message_to_proto(message)
     proto_context = context_to_proto(context)
+    req = PushClientAppOutputsRequest(
+        token=token, message=proto_message, context=proto_context
+    )
 
     try:
-        res: PushClientAppOutputsResponse = stub.PushClientAppOutputs(
-            PushClientAppOutputsRequest(
-                token=token, message=proto_message, context=proto_context
-            )
-        )
-        return res
+        stub.PushClientAppOutputs(req)
     except grpc.RpcError as e:
         log(ERROR, "[PushClientAppOutputs] gRPC error occurred: %s", str(e))
-        raise e
+        raise
 
 
 def _parse_args_run_flwr_clientapp() -> argparse.ArgumentParser:
@@ -248,9 +210,15 @@ def _parse_args_run_flwr_clientapp() -> argparse.ArgumentParser:
         f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS}.",
     )
     parser.add_argument(
-        "--token",
+        "--run-id",
         type=int,
-        required=False,
+        required=True,
+        help="Run ID to be used by this ClientApp.",
+    )
+    parser.add_argument(
+        "--token",
+        type=str,
+        required=True,
         help="Unique token generated by SuperNode for each ClientApp execution",
     )
     add_args_flwr_app_common(parser=parser)
