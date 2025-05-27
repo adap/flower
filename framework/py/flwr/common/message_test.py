@@ -465,4 +465,5 @@ def test_object_id_excludes_message_id_in_metadata() -> None:
     # Modify message_id
     msg.metadata.__dict__["_message_id"] = "1234"
 
+    # Assert
     assert object_id == msg.object_id
