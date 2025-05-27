@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import hashlib
+from functools import cached_property
 from typing import TypeVar
 
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
@@ -52,9 +53,10 @@ class InflatableObject:
         """
         raise NotImplementedError()
 
-    @property
+    @cached_property
     def object_id(self) -> str:
         """Get object_id."""
+        print("computed")
         return get_object_id(self.deflate())
 
     @property
