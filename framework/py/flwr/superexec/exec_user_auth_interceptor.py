@@ -16,11 +16,11 @@
 
 
 import contextvars
-from typing import Any, Callable, Union, cast
+from typing import Any, Callable, Optional, Union, cast
 
 import grpc
 
-from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.auth_plugin import ExecAuthPlugin, ExecAuthzPlugin
 from flwr.common.typing import UserInfo
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -56,8 +56,10 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
     def __init__(
         self,
         auth_plugin: ExecAuthPlugin,
+        authz_plugin: Optional[ExecAuthzPlugin] = None,
     ):
         self.auth_plugin = auth_plugin
+        self.authz_plugin = authz_plugin if authz_plugin else None
 
     def intercept_service(
         self,
@@ -97,6 +99,12 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
             if valid_tokens:
                 # Store user info in contextvars for authenticated users
                 shared_user_info.set(cast(UserInfo, user_info))
+                if self.authz_plugin and user_info is not None:
+                    if not self.authz_plugin.verify_user_authorization(user_info):
+                        context.abort(
+                            grpc.StatusCode.PERMISSION_DENIED, "Access denied"
+                        )
+                        raise grpc.RpcError()
                 return call(request, context)  # type: ignore
 
             # If the user is not authenticated, refresh tokens

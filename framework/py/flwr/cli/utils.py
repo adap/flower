@@ -312,4 +312,12 @@ def unauthenticated_exc_handler() -> Iterator[None]:
                 bold=True,
             )
             raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.PERMISSION_DENIED:
+            typer.secho(
+                "❌ Authorization failed. Please contact your administrator"
+                " to check your permissions.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
         raise
