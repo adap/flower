@@ -33,15 +33,14 @@ class ObjectStore(abc.ABC):
         Parameters
         ----------
         object_ids : list[str]
-            The list of object_ids to be pre-registered in the store if they do not
-            exist.
+            A list of object IDs to check against the store. Any object ID not already
+            present will be preregistered.
 
         Returns
         -------
         list[str]
-            List of object_ids that were preregistered. This list represents the
-            object_ids that were not present in the `ObjectStore` at the time this
-            method was executed.
+            A list of object IDs that were not present in the `ObjectStore` and have now
+            been preregistered.
         """
 
     @abc.abstractmethod
@@ -89,33 +88,34 @@ class ObjectStore(abc.ABC):
         """
 
     @abc.abstractmethod
-    def set_children_object_ids(
-        self, msg_object_id: str, children_ids: list[str]
+    def set_message_descendant_ids(
+        self, msg_object_id: str, descendant_ids: list[str]
     ) -> None:
-        """Store mapping of an object_id of type ``Message`` to those of its children.
-
+        """
+        Store the mapping from a ``Message`` object ID to the object IDs of its descendants.
+    
         Parameters
         ----------
         msg_object_id : str
-            The object_id of a ``Message``.
-
-        children_ids : list[str]
-            A list of object_ids belonging to the children of the ``Message``.
+            The object ID of the ``Message``.
+        descendant_ids : list[str]
+            A list of object IDs representing all descendant objects of the ``Message``.
         """
 
     @abc.abstractmethod
-    def get_children_object_ids(self, msg_object_id: str) -> list[str]:
-        """Get object_ids of childrens.
-
+    def get_message_descendant_ids(self, msg_object_id: str) -> list[str]:
+        """
+        Retrieve the object IDs of all descendants of a given Message.
+    
         Parameters
         ----------
         msg_object_id : str
-            The object_id of a ``Message`` object.
-
+            The object ID of the ``Message``.
+    
         Returns
         -------
         list[str]
-            The list of object_ids of children objects.
+            A list of object IDs of all descendant objects of the ``Message``.
         """
 
     @abc.abstractmethod
