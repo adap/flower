@@ -23,6 +23,7 @@ from typing import Any, cast, overload
 from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
+from flwr.proto.message_pb2 import Metadata as ProtoMetadata  # pylint: disable=E0611
 
 from ..app.error import Error
 from ..app.metadata import Metadata
@@ -351,9 +352,12 @@ class Message(InflatableObject):
 
     def deflate(self) -> bytes:
         """Deflate message."""
+        # Exclude message_id from serialization
+        proto_metadata: ProtoMetadata = metadata_to_proto(self.metadata)
+        proto_metadata.message_id = ""
         # Store message metadata and error in object body
         obj_body = ProtoMessage(
-            metadata=metadata_to_proto(self.metadata),
+            metadata=proto_metadata,
             content=None,
             error=error_to_proto(self.error) if self.has_error() else None,
         ).SerializeToString(deterministic=True)
