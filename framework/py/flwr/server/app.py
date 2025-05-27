@@ -37,10 +37,11 @@ from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
-from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.auth_plugin import ExecAuthPlugin, ExecAuthzPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
     AUTH_TYPE_YAML_KEY,
+    AUTHZ_TYPE_YAML_KEY,
     CLIENT_OCTET,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
@@ -91,6 +92,7 @@ try:
         add_ee_args_superlink,
         get_dashboard_server,
         get_exec_auth_plugins,
+        get_exec_authz_plugins,
         get_exec_event_log_writer_plugins,
         get_fleet_event_log_writer_plugins,
     )
@@ -103,6 +105,10 @@ except ImportError:
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
         """Return all Exec API authentication plugins."""
         raise NotImplementedError("No authentication plugins are currently supported.")
+
+    def get_exec_authz_plugins() -> dict[str, type[ExecAuthzPlugin]]:
+        """Return all Exec API authorization plugins."""
+        raise NotImplementedError("No authorization plugins are currently supported.")
 
     def get_exec_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
         """Return all Exec API event log writer plugins."""
@@ -145,6 +151,7 @@ def run_superlink() -> None:
     verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", None)
 
     auth_plugin: Optional[ExecAuthPlugin] = None
+    authz_plugin: Optional[ExecAuthzPlugin] = None  # pylint: disable=unused-variable
     event_log_plugin: Optional[EventLogWriterPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
@@ -152,6 +159,9 @@ def run_superlink() -> None:
         # Enable event logging if the args.enable_event_log is True
         if args.enable_event_log:
             event_log_plugin = _try_obtain_exec_event_log_writer_plugin()
+        # Enable authorization if the args.enable_authorization is True
+        if args.enable_authorization:
+            authz_plugin = _try_obtain_exec_authz_plugin(Path(cfg_path))
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -496,6 +506,31 @@ def _try_obtain_exec_auth_plugin(
         sys.exit("No authentication type is provided in the configuration.")
     except NotImplementedError:
         sys.exit("No authentication plugins are currently supported.")
+
+
+def _try_obtain_exec_authz_plugin(config_path: Path) -> Optional[ExecAuthzPlugin]:
+    # Load YAML file
+    with config_path.open("r", encoding="utf-8") as file:
+        config: dict[str, Any] = yaml.safe_load(file)
+
+    # Load authentication configuration
+    authz_config: dict[str, Any] = config.get("authorization", {})
+    authz_type: str = authz_config.get(AUTHZ_TYPE_YAML_KEY, "")
+
+    # Load authorization plugin
+    try:
+        all_plugins: dict[str, type[ExecAuthzPlugin]] = get_exec_authz_plugins()
+        authz_plugin_class = all_plugins[authz_type]
+        return authz_plugin_class(user_authz_config_path=config_path)
+    except KeyError:
+        if authz_type != "":
+            sys.exit(
+                f'Authentication type "{authz_type}" is not supported. '
+                "Please provide a valid authorization type in the configuration."
+            )
+        sys.exit("No authorization type is provided in the configuration.")
+    except NotImplementedError:
+        sys.exit("No authorization plugins are currently supported.")
 
 
 def _try_obtain_exec_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]:
