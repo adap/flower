@@ -16,6 +16,7 @@
 
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from typing import Optional, Union
 
 from flwr.common import Context, Message
@@ -34,10 +35,22 @@ class NodeState(ABC):
         """Get the node ID."""
 
     @abstractmethod
+    def store_message(self, message: Message, object_id: str) -> None:
+        """Store a message.
+
+        Parameters
+        ----------
+        message : Message
+            The message to store.
+        object_id : str
+            The object ID of the message.
+        """
+
+    @abstractmethod
     def get_message(
         self,
         *,
-        run_id: Optional[Union[int, list[int]]] = None,
+        run_ids: Optional[Union[int, Sequence[int]]] = None,
         is_reply: Optional[bool] = None,
         limit: Optional[int] = None,
     ) -> dict[str, Message]:
@@ -48,8 +61,8 @@ class NodeState(ABC):
 
         Parameters
         ----------
-        run_id : Optional[Union[int, list[int]]] (default: None)
-            Run ID or list of run IDs to filter by. If a list is provided,
+        run_ids : Optional[Union[int, Sequence[int]]] (default: None)
+            Run ID or sequence of run IDs to filter by. If a sequence is provided,
             it is treated as an OR condition.
         is_reply : Optional[bool] (default: None)
             If True, filter for reply messages; if False, filter for non-reply
@@ -64,19 +77,30 @@ class NodeState(ABC):
 
         Notes
         -----
-        **IMPORTANT:** Retrieved messages will be **deleted** after retrieval!
+        **IMPORTANT:** Retrieved messages will **NOT** be returned again by subsequent
+        calls to this method, even if the filters match them.
         """
 
     @abstractmethod
-    def store_message(self, message: Message, object_id: str) -> None:
-        """Store a message.
+    def delete_message(
+        self,
+        *,
+        message_ids: Optional[Union[str, Sequence[str]]] = None,
+        object_ids: Optional[Union[str, Sequence[str]]] = None,
+    ) -> None:
+        """Delete messages based on the specified filters.
+
+        If a filter is set to None, it is ignored.
+        If multiple filters are provided, they are combined using AND logic.
 
         Parameters
         ----------
-        message : Message
-            The message to store.
-        object_id : str
-            The object ID of the message.
+        message_ids : Optional[Union[str, Sequence[str]]] (default: None)
+            Message ID or sequence of message IDs to filter by.
+            If a sequence is provided, it is treated as an OR condition.
+        object_ids : Optional[Union[str, Sequence[str]]] (default: None)
+            Message object ID or sequence of message object IDs to filter by.
+            If a sequence is provided, it is treated as an OR condition.
         """
 
     @abstractmethod
@@ -102,16 +126,6 @@ class NodeState(ABC):
         -------
         Optional[Run]
             The `Run` instance if found, otherwise None.
-        """
-
-    @abstractmethod
-    def get_run_ids(self) -> list[int]:
-        """Retrieve all stored run IDs.
-
-        Returns
-        -------
-        list[int]
-            List of all stored run IDs.
         """
 
     @abstractmethod
