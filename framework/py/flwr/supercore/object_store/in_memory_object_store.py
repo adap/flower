@@ -32,7 +32,7 @@ class InMemoryObjectStore(ObjectStore):
         self.msg_children_objects_mapping: dict[str, list[str]] = {}
 
     def preregister(self, object_ids: list[str]) -> list[str]:
-        """Preregister object entries."""
+        """Identify and preregister missing objects."""
         new_objects = []
         for obj_id in object_ids:
             # Verify object ID format (must be a valid sha256 hash)
