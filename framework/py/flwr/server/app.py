@@ -161,7 +161,11 @@ def run_superlink() -> None:
             event_log_plugin = _try_obtain_exec_event_log_writer_plugin()
         # Enable authorization if the args.enable_authorization is True
         if args.enable_authorization:
-            authz_plugin = _try_obtain_exec_authz_plugin(Path(cfg_path))
+            # pylint: disable=unused-variable
+            authz_plugin = _try_obtain_exec_authz_plugin(
+                Path(cfg_path), verify_tls_cert
+            )  # noqa: F841
+            # pylint: enable=unused-variable
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -509,7 +513,9 @@ def _try_obtain_exec_auth_plugin(
         sys.exit("No authentication plugins are currently supported.")
 
 
-def _try_obtain_exec_authz_plugin(config_path: Path) -> Optional[ExecAuthzPlugin]:
+def _try_obtain_exec_authz_plugin(
+    config_path: Path, verify_tls_cert: bool
+) -> Optional[ExecAuthzPlugin]:
     # Load YAML file
     with config_path.open("r", encoding="utf-8") as file:
         config: dict[str, Any] = yaml.safe_load(file)
@@ -522,7 +528,9 @@ def _try_obtain_exec_authz_plugin(config_path: Path) -> Optional[ExecAuthzPlugin
     try:
         all_plugins: dict[str, type[ExecAuthzPlugin]] = get_exec_authz_plugins()
         authz_plugin_class = all_plugins[authz_type]
-        return authz_plugin_class(user_authz_config_path=config_path)
+        return authz_plugin_class(
+            user_authz_config_path=config_path, verify_tls_cert=verify_tls_cert
+        )
     except KeyError:
         if authz_type != "":
             sys.exit(

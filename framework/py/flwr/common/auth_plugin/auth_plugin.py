@@ -74,7 +74,7 @@ class ExecAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
     """
 
     @abstractmethod
-    def __init__(self, user_authz_config_path: Path):
+    def __init__(self, user_authz_config_path: Path, verify_tls_cert: bool):
         """Abstract constructor."""
 
     @abstractmethod
