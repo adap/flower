@@ -28,7 +28,7 @@ class ObjectStore(abc.ABC):
 
     @abc.abstractmethod
     def preregister(self, object_ids: list[str]) -> list[str]:
-        """Preregister objects in the `ObjectStore`.
+        """Identify and preregister missing objects in the `ObjectStore`.
 
         Parameters
         ----------
