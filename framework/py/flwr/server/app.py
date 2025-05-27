@@ -162,9 +162,9 @@ def run_superlink() -> None:
         # Enable authorization if the args.enable_authorization is True
         if args.enable_authorization:
             # pylint: disable=unused-variable
-            authz_plugin = _try_obtain_exec_authz_plugin(
+            authz_plugin = _try_obtain_exec_authz_plugin(  # noqa: F841
                 Path(cfg_path), verify_tls_cert
-            )  # noqa: F841
+            )
             # pylint: enable=unused-variable
 
     # Initialize StateFactory
