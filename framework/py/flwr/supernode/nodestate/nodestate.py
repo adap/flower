@@ -100,6 +100,10 @@ class NodeState(ABC):
         message_ids : Optional[Union[str, Sequence[str]]] (default: None)
             Message (object) ID or sequence of message (object) IDs to filter by.
             If a sequence is provided, it is treated as an OR condition.
+
+        Notes
+        -----
+        **IMPORTANT:** **All messages** will be deleted if no filters are provided.
         """
 
     @abstractmethod
