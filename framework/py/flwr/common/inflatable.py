@@ -192,7 +192,7 @@ def _get_descendants_recursively(obj: InflatableObject) -> list[str]:
     return descendants
 
 
-def get_desdendants(obj: InflatableObject) -> list[str]:
+def get_desdendant_object_ids(obj: InflatableObject) -> list[str]:
     """Get list of object IDs of all descendants."""
     descendants = _get_descendants_recursively(obj)
     # Exclude last object ID inserted (represents the object_id of `obj`)
