@@ -19,7 +19,7 @@ import time
 import unittest
 from collections.abc import Iterable
 from unittest.mock import MagicMock, patch
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from flwr.common import ConfigRecord, Message, RecordDict, now
 from flwr.common.constant import (
@@ -57,6 +57,8 @@ def get_replies(grid: InMemoryGrid, msg_ids: Iterable[str], node_id: int) -> lis
     messages = grid.state.get_message_ins(node_id, limit=len(list(msg_ids)))
     for msg in messages:
         reply_msg = Message(RecordDict(), reply_to=msg)
+        # pylint: disable-next=W0212
+        reply_msg.metadata._message_id = str(uuid4())  # type: ignore
         grid.state.store_message_res(message=reply_msg)
 
     # Execute: Pull messages
@@ -129,17 +131,6 @@ class TestInMemoryGrid(unittest.TestCase):
         self.assertEqual(len(msg_res_ids), 2)
         self.assertEqual(msg_res_ids, [str(ids) for ids in msg_ids])
 
-    def test_push_messages_invalid(self) -> None:
-        """Test pushing invalid messages."""
-        # Prepare
-        msgs = [Message(RecordDict(), 1, "query") for _ in range(2)]
-        # Use invalid run_id
-        msgs[1].metadata.__dict__["_message_id"] = "invalid message id"
-
-        # Execute and assert
-        with self.assertRaises(ValueError):
-            self.grid.push_messages(msgs)
-
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""
         # Prepare
@@ -155,9 +146,7 @@ class TestInMemoryGrid(unittest.TestCase):
         self.assertEqual(len(pulled_msgs), 2)
         self.assertEqual(reply_tos, msg_ids)
         # Ensure messages are deleted
-        self.state.delete_messages.assert_called_once_with(
-            message_ins_ids={UUID(m_id) for m_id in msg_ids}
-        )
+        self.state.delete_messages.assert_called_once_with(message_ins_ids=set(msg_ids))
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
