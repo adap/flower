@@ -107,9 +107,20 @@ class Array(InflatableObject):
     """
 
     dtype: str
-    shape: list[int]
     stype: str
     data: bytes
+
+    @property
+    def shape(self) -> list[int]:
+        """Get the shape of the array."""
+        self.is_dirty = True  # Mark as dirty when shape is accessed
+        return cast(list[int], self.__dict__["_shape"])
+
+    @shape.setter
+    def shape(self, value: list[int]) -> None:
+        """Set the shape of the array."""
+        self.is_dirty = True  # Mark as dirty when shape is set
+        self.__dict__["_shape"] = value
 
     @overload
     def __init__(  # noqa: E704
@@ -315,16 +326,9 @@ class Array(InflatableObject):
         """Set the dirty flag."""
         self.__dict__["_is_dirty"] = value
 
-    def __getattribute__(self, name: str) -> Any:
-        """Get attribute with special handling for dirty state."""
-        if name == "shape":
-            # Mark as dirty if shape is accessed since it's mutable
-            self.is_dirty = True
-        return super().__getattribute__(name)
-
     def __setattr__(self, name: str, value: Any) -> None:
         """Set attribute with special handling for dirty state."""
-        if name in ("dtype", "shape", "stype", "data"):
+        if name in ("dtype", "stype", "data"):
             # Mark as dirty if any of the main attributes are set
             self.is_dirty = True
         super().__setattr__(name, value)
