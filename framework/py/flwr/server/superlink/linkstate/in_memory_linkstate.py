@@ -281,7 +281,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if not message_ins_ids:
             return
 
-        print(self.message_ins_store.keys())
         with self.lock:
             for message_id in message_ins_ids:
                 # Delete Messages
@@ -300,7 +299,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             for message_id, message in self.message_ins_store.items():
                 if message.metadata.run_id == run_id:
-                    message_id_list.add(str(message_id))
+                    message_id_list.add(message_id)
 
         return message_id_list
 
