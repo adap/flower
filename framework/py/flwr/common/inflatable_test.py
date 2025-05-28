@@ -29,6 +29,7 @@ from .inflatable import (
     _get_object_head,
     add_header_to_object_body,
     check_body_len_consistency,
+    get_desdendants,
     get_object_body,
     get_object_body_len_from_object_content,
     get_object_head_values_from_object_content,
@@ -214,3 +215,22 @@ def test_check_body_length() -> None:
     obj_b_ = obj_b + b"more content"
     # Inconsistent: fails
     assert not check_body_len_consistency(obj_b_)
+
+
+@pytest.mark.parametrize(
+    "children",
+    [
+        [],
+        [CustomDataClass(b"child1 data")],
+        [CustomDataClass(b"child1 data"), CustomDataClass(b"child2 data")],
+    ],
+)
+def test_get_desdendants(children: list[InflatableObject]) -> None:
+    """Test computing list of object IDs for all descendants."""
+    data = b"this is a test"
+    obj = CustomDataClass(data)
+
+    obj.children = {child.object_id: child for child in children}
+
+    # Assert
+    assert get_desdendants(obj) == [child.object_id for child in children]
