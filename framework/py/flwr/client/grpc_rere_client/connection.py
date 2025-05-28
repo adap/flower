@@ -279,6 +279,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "No current message")
             return
 
+        # Set message_id
+        message.metadata.__dict__["_message_id"] = message.object_id
         # Validate out message
         if not validate_out_message(message, metadata):
             log(ERROR, "Invalid out message")
