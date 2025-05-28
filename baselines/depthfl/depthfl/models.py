@@ -1,4 +1,4 @@
-"""ResNet18 model architecutre, training, and testing functions for CIFAR100."""
+"""ResNet18 model architecture, training, and testing functions for CIFAR100."""
 
 from typing import List, Tuple
 
