@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 import hashlib
-from typing import TypeVar
+from typing import TypeVar, cast
 
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 
@@ -55,12 +55,23 @@ class InflatableObject:
     @property
     def object_id(self) -> str:
         """Get object_id."""
-        return get_object_id(self.deflate())
+        if self.is_dirty or "_object_id" not in self.__dict__:
+            self.__dict__["_object_id"] = get_object_id(self.deflate())
+        return cast(str, self.__dict__["_object_id"])
 
     @property
     def children(self) -> dict[str, InflatableObject] | None:
         """Get all child objects as a dictionary or None if there are no children."""
         return None
+
+    @property
+    def is_dirty(self) -> bool:
+        """Check if the object is dirty after the last deflation.
+
+        An object is considered dirty if its content has changed since the last
+        deflation to determine whether its object ID has changed.
+        """
+        return True
 
 
 T = TypeVar("T", bound=InflatableObject)

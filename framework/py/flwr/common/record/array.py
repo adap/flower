@@ -295,3 +295,36 @@ class Array(InflatableObject):
             stype=proto_array.stype,
             data=proto_array.data,
         )
+
+    @property
+    def object_id(self) -> str:
+        """Get object ID."""
+        ret = super().object_id
+        self.is_dirty = False  # Reset dirty flag
+        return ret
+
+    @property
+    def is_dirty(self) -> bool:
+        """Check if the object is dirty after the last deflation."""
+        if "_is_dirty" not in self.__dict__:
+            self.__dict__["_is_dirty"] = True
+        return cast(bool, self.__dict__["_is_dirty"])
+
+    @is_dirty.setter
+    def is_dirty(self, value: bool) -> None:
+        """Set the dirty flag."""
+        self.__dict__["_is_dirty"] = value
+
+    def __getattribute__(self, name: str) -> Any:
+        """Get attribute with special handling for dirty state."""
+        if name == "shape":
+            # Mark as dirty if shape is accessed since it's mutable
+            self.is_dirty = True
+        return super().__getattribute__(name)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        """Set attribute with special handling for dirty state."""
+        if name in ("dtype", "shape", "stype", "data"):
+            # Mark as dirty if any of the main attributes are set
+            self.is_dirty = True
+        super().__setattr__(name, value)
