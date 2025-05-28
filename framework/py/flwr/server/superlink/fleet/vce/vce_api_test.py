@@ -23,7 +23,6 @@ from pathlib import Path
 from time import sleep
 from typing import Optional
 from unittest import TestCase
-from uuid import UUID
 
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.client.client_app import LoadClientAppError
@@ -87,7 +86,7 @@ def terminate_simulation(f_stop: threading.Event, sleep_duration: int) -> None:
 def init_state_factory_nodes_mapping(
     num_nodes: int,
     num_messages: int,
-) -> tuple[LinkStateFactory, NodeToPartitionMapping, dict[UUID, float]]:
+) -> tuple[LinkStateFactory, NodeToPartitionMapping, dict[str, float]]:
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
     run_id = 1234
@@ -111,7 +110,7 @@ def register_messages_into_state(
     nodes_mapping: NodeToPartitionMapping,
     run_id: int,
     num_messages: int,
-) -> dict[UUID, float]:
+) -> dict[str, float]:
     """Register `num_messages` into the state factory."""
     state: InMemoryLinkState = state_factory.state()  # type: ignore
     state.run_ids[run_id] = RunRecord(
@@ -135,7 +134,7 @@ def register_messages_into_state(
     # Artificially add Messages to state so they can be processed
     # by the Simulation Engine logic
     nodes_cycle = cycle(nodes_mapping.keys())  # we have more messages than supernodes
-    message_ids: set[UUID] = set()  # so we can retrieve them later
+    message_ids: set[str] = set()  # so we can retrieve them later
     expected_results = {}
     for i in range(num_messages):
         dst_node_id = next(nodes_cycle)
@@ -161,7 +160,7 @@ def register_messages_into_state(
         # Insert in state
         message_id = state.store_message_res(message)
         if message_id:
-            # Add to UUID set
+            # Add message_id to set
             message_ids.add(message_id)
             # Store expected output for check later on
             expected_results[message_id] = mult_factor * pi
@@ -323,5 +322,5 @@ class TestFleetSimulationEngineRayBackend(TestCase):
             content = message_res.content
             assert (
                 content.config_records["getpropertiesres.properties"]["result"]
-                == expected_results[UUID(message_res.metadata.reply_to_message_id)]
+                == expected_results[message_res.metadata.reply_to_message_id]
             )

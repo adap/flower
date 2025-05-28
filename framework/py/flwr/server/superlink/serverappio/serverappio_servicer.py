@@ -18,7 +18,6 @@
 import threading
 from logging import DEBUG, INFO
 from typing import Optional
-from uuid import UUID
 
 import grpc
 
@@ -140,7 +139,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             request_name="PushMessages",
             detail="`messages_list` must not be empty",
         )
-        message_ids: list[Optional[UUID]] = []
+        message_ids: list[Optional[str]] = []
         while request.messages_list:
             message_proto = request.messages_list.pop(0)
             message = message_from_proto(message_proto=message_proto)
@@ -156,7 +155,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 detail="`Message.metadata` has mismatched `run_id`",
             )
             # Store
-            message_id: Optional[UUID] = state.store_message_ins(message=message)
+            message_id: Optional[str] = state.store_message_ins(message=message)
             message_ids.append(message_id)
 
         return PushInsMessagesResponse(
@@ -182,17 +181,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             context,
         )
 
-        # Convert each message_id str to UUID
-        message_ids: set[UUID] = {
-            UUID(message_id) for message_id in request.message_ids
-        }
-
         # Read from state
-        messages_res: list[Message] = state.get_message_res(message_ids=message_ids)
+        messages_res: list[Message] = state.get_message_res(
+            message_ids=set(request.message_ids)
+        )
 
         # Delete the instruction Messages and their replies if found
         message_ins_ids_to_delete = {
-            UUID(msg_res.metadata.reply_to_message_id) for msg_res in messages_res
+            msg_res.metadata.reply_to_message_id for msg_res in messages_res
         }
 
         state.delete_messages(message_ins_ids=message_ins_ids_to_delete)

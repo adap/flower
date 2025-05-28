@@ -378,7 +378,12 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
 
 def array_to_proto(array: Array) -> ProtoArray:
     """Serialize Array to ProtoBuf."""
-    return ProtoArray(**vars(array))
+    return ProtoArray(
+        dtype=array.dtype,
+        shape=array.shape,
+        stype=array.stype,
+        data=array.data,
+    )
 
 
 def array_from_proto(array_proto: ProtoArray) -> Array:

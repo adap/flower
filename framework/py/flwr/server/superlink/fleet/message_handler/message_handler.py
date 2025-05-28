@@ -16,7 +16,6 @@
 
 
 from typing import Optional
-from uuid import UUID
 
 from flwr.common import Message
 from flwr.common.constant import Status
@@ -122,7 +121,7 @@ def push_messages(
         raise InvalidRunStatusException(abort_msg)
 
     # Store Message in State
-    message_id: Optional[UUID] = state.store_message_res(message=msg)
+    message_id: Optional[str] = state.store_message_res(message=msg)
 
     # Build response
     response = PushMessagesResponse(

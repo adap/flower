@@ -18,6 +18,7 @@
 import tempfile
 import unittest
 from typing import Optional
+from uuid import uuid4
 
 import grpc
 from parameterized import parameterized
@@ -334,6 +335,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         else:
             assert error is not None
             reply_msg = Message(error, reply_to=msg_)
+
+        # pylint: disable-next=W0212
+        reply_msg.metadata._message_id = str(uuid4())  # type: ignore
 
         self.state.store_message_res(message=reply_msg)
 

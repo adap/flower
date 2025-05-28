@@ -25,6 +25,7 @@ from pathlib import Path
 from queue import Empty, Queue
 from time import sleep
 from typing import Callable, Optional
+from uuid import uuid4
 
 from flwr.app.error import Error
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
@@ -134,6 +135,8 @@ def worker(
 
         finally:
             if out_mssg:
+                # Assign a message_id
+                out_mssg.metadata.__dict__["_message_id"] = str(uuid4())
                 # Store reply Messages in state
                 messageres_queue.put(out_mssg)
 
