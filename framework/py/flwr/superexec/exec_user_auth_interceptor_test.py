@@ -279,7 +279,8 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
     def test_authorization_successful(self, request: GrpcMessage) -> None:
         """Test RPC calls successful when authorization is approved.
 
-        When AuthZ plugin approves, the RPC calls should succeed."""
+        When AuthZ plugin approves, the RPC calls should succeed.
+        """
         dummy_context = MagicMock()
         handler_call_details = MagicMock()
 
@@ -323,7 +324,8 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
     def test_authorization_failure(self, request: GrpcMessage) -> None:
         """Test RPC calls not successful when authorization fails.
 
-        When AuthZ plugin denies, the calls should be aborted with PERMISSION_DENIED."""
+        When AuthZ plugin denies, the calls should be aborted with PERMISSION_DENIED.
+        """
         dummy_context = MagicMock()
         handler_call_details = MagicMock()
 
