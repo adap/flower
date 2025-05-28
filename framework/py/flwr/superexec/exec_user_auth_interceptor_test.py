@@ -248,6 +248,7 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
     """Test the ExecUserAuthInterceptor authorization logic."""
 
     def setUp(self) -> None:
+        """Set up test fixtures."""
         # Reset the shared UserInfo before each test
         self.default_token = shared_user_info.set(
             UserInfo(user_id=None, user_name=None)
@@ -265,7 +266,7 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         )
 
     def tearDown(self) -> None:
-        # Restore prior state
+        """Reset shared_user_info."""
         shared_user_info.reset(self.default_token)
 
     @parameterized.expand(
