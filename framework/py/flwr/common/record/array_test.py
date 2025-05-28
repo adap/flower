@@ -76,7 +76,7 @@ class TestArray(unittest.TestCase):
         # Execute
         array_instance = Array(
             dtype=str(original_array.dtype),
-            shape=list(original_array.shape),
+            shape=tuple(original_array.shape),
             stype=SType.NUMPY,
             data=buffer,
         )
@@ -90,7 +90,7 @@ class TestArray(unittest.TestCase):
         # Prepare
         array_instance = Array(
             dtype="float32",
-            shape=[3],
+            shape=(3,),
             stype="invalid_stype",  # Non-numpy stype
             data=b"",
         )
