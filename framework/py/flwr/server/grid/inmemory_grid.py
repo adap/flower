@@ -18,7 +18,7 @@
 import time
 from collections.abc import Iterable
 from typing import Optional, cast
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from flwr.common import Message, RecordDict
 from flwr.common.constant import SUPERLINK_NODE_ID
@@ -57,7 +57,6 @@ class InMemoryGrid(Grid):
         # Check if the message is valid
         if not (
             message.metadata.message_id != ""
-            and message.metadata.message_id == str(UUID(message.metadata.message_id))
             and message.metadata.reply_to_message_id == ""
             and message.metadata.ttl > 0
             and message.metadata.delivered_at == ""
