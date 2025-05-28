@@ -29,7 +29,7 @@ from .inflatable import (
     _get_object_head,
     add_header_to_object_body,
     check_body_len_consistency,
-    get_desdendants,
+    get_desdendant_object_ids,
     get_object_body,
     get_object_body_len_from_object_content,
     get_object_head_values_from_object_content,
@@ -233,4 +233,4 @@ def test_get_desdendants(children: list[InflatableObject]) -> None:
     obj.children = {child.object_id: child for child in children}
 
     # Assert
-    assert get_desdendants(obj) == [child.object_id for child in children]
+    assert get_desdendant_object_ids(obj) == {child.object_id for child in children}

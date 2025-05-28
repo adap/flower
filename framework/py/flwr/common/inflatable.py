@@ -180,20 +180,21 @@ def get_object_head_values_from_object_content(
     return obj_type, children_ids, int(body_len)
 
 
-def _get_descendants_recursively(obj: InflatableObject) -> list[str]:
+def _get_descendants_object_ids_recursively(obj: InflatableObject) -> set[str]:
 
-    descendants: list[str] = []
+    descendants: set[str] = set()
     if children := obj.children:
         for child in children.values():
-            descendants.extend(_get_descendants_recursively(child))
+            descendants |= _get_descendants_object_ids_recursively(child)
 
-    descendants.append(obj.object_id)
+    descendants.add(obj.object_id)
 
     return descendants
 
 
-def get_desdendant_object_ids(obj: InflatableObject) -> list[str]:
-    """Get list of object IDs of all descendants."""
-    descendants = _get_descendants_recursively(obj)
-    # Exclude last object ID inserted (represents the object_id of `obj`)
-    return descendants[:-1]
+def get_desdendant_object_ids(obj: InflatableObject) -> set[str]:
+    """Get a set of object IDs of all descendants."""
+    descendants = _get_descendants_object_ids_recursively(obj)
+    # Exclude Object ID of parent object
+    descendants.discard(obj.object_id)
+    return descendants
