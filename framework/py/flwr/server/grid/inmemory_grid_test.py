@@ -228,8 +228,6 @@ class TestInMemoryGrid(unittest.TestCase):
         reply_tos = get_replies(self.grid, msg_ids, node_id)
 
         # Assert
-        print(reply_tos)
-        print(msg_ids)
         self.assertEqual(set(reply_tos), set(msg_ids))
         self.assertEqual(len(state.message_res_store), 0)
         self.assertEqual(len(state.message_ins_store), 0)
