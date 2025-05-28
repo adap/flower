@@ -35,15 +35,18 @@ class NodeState(ABC):
         """Get the node ID."""
 
     @abstractmethod
-    def store_message(self, message: Message, object_id: str) -> None:
+    def store_message(self, message: Message) -> Optional[str]:
         """Store a message.
 
         Parameters
         ----------
         message : Message
             The message to store.
-        object_id : str
-            The object ID of the message.
+
+        Returns
+        -------
+        Optional[str]
+            The object ID of the stored message, or None if storage failed.
         """
 
     @abstractmethod
@@ -53,7 +56,7 @@ class NodeState(ABC):
         run_ids: Optional[Union[int, Sequence[int]]] = None,
         is_reply: Optional[bool] = None,
         limit: Optional[int] = None,
-    ) -> dict[str, Message]:
+    ) -> Sequence[Message]:
         """Retrieve messages based on the specified filters.
 
         If a filter is set to None, it is ignored.
@@ -72,8 +75,8 @@ class NodeState(ABC):
 
         Returns
         -------
-        dict[str, Message]
-            Dictionary of messages matching the filters, keyed by their object ID.
+        Sequence[Message]
+            A sequence of messages matching the specified filters.
 
         Notes
         -----
@@ -86,7 +89,6 @@ class NodeState(ABC):
         self,
         *,
         message_ids: Optional[Union[str, Sequence[str]]] = None,
-        object_ids: Optional[Union[str, Sequence[str]]] = None,
     ) -> None:
         """Delete messages based on the specified filters.
 
@@ -96,10 +98,7 @@ class NodeState(ABC):
         Parameters
         ----------
         message_ids : Optional[Union[str, Sequence[str]]] (default: None)
-            Message ID or sequence of message IDs to filter by.
-            If a sequence is provided, it is treated as an OR condition.
-        object_ids : Optional[Union[str, Sequence[str]]] (default: None)
-            Message object ID or sequence of message object IDs to filter by.
+            Message (object) ID or sequence of message (object) IDs to filter by.
             If a sequence is provided, it is treated as an OR condition.
         """
 
