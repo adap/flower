@@ -68,8 +68,8 @@ class InflatableObject:
     def is_dirty(self) -> bool:
         """Check if the object is dirty after the last deflation.
 
-        An object is considered dirty if its content has changed since the last
-        its object ID was computed.
+        An object is considered dirty if its content has changed since the last its
+        object ID was computed.
         """
         return True
 
