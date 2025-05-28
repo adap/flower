@@ -69,7 +69,7 @@ class InflatableObject:
         """Check if the object is dirty after the last deflation.
 
         An object is considered dirty if its content has changed since the last
-        deflation to determine whether its object ID has changed.
+        its object ID was computed.
         """
         return True
 
