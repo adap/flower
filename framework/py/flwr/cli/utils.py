@@ -288,11 +288,12 @@ def init_channel(
 
 
 @contextmanager
-def unauthenticated_exc_handler() -> Iterator[None]:
-    """Context manager to handle gRPC UNAUTHENTICATED errors.
+def flwr_cli_grpc_exc_handler() -> Iterator[None]:
+    """Context manager to handle specific gRPC errors.
 
-    It catches grpc.RpcError exceptions with UNAUTHENTICATED status, informs the user,
-    and exits the application. All other exceptions will be allowed to escape.
+    It catches grpc.RpcError exceptions with UNAUTHENTICATED and UNIMPLEMENTED statuses,
+    informs the user, and exits the application. All other exceptions will be allowed to
+    escape.
     """
     try:
         yield
