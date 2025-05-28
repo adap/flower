@@ -72,20 +72,6 @@ class StateTest(unittest.TestCase):
         # Assert
         self.assertEqual(retrieved, run)
 
-    def test_get_run_ids(self) -> None:
-        """Test retrieving run IDs."""
-        # Prepare
-        run1 = Run.create_empty(61017)
-        run2 = Run.create_empty(61018)
-        self.state.store_run(run1)
-        self.state.store_run(run2)
-
-        # Execute
-        ids = self.state.get_run_ids()
-
-        # Assert
-        self.assertCountEqual(set(ids), {61017, 61018})
-
     def test_store_and_get_context(self) -> None:
         """Test storing and retrieving a context."""
         # Prepare
@@ -107,27 +93,27 @@ class StateTest(unittest.TestCase):
     def test_store_and_get_message_basic(self) -> None:
         """Test storing and retrieving a message."""
         # Prepare
-        msg = make_dummy_message()
-        obj_id = "abc"
+        msg = make_dummy_message(msg_id="test_msg")
 
         # Execute
-        self.state.store_message(msg, obj_id)
+        self.state.store_message(msg)
 
         # Basic retrieval with no filters
-        result = self.state.get_message()
-        self.assertIn(obj_id, result)
-        self.assertEqual(result[obj_id], msg)
+        retrieved_msg = self.state.get_message()[0]
 
-        # Ensure message was deleted after retrieval
-        result_after = self.state.get_message()
-        self.assertNotIn(obj_id, result_after)
+        self.assertIn("test_msg", retrieved_msg.metadata.message_id)
+        self.assertEqual(retrieved_msg, msg)
+
+        # Ensure message won't be retrieved again
+        result = self.state.get_message()
+        self.assertEqual(len(result), 0)
 
     @parameterized.expand(  # type: ignore
         [
-            ({"run_id": 1}, {"msg1", "msg2"}),
-            ({"run_id": 1, "is_reply": False}, {"msg2"}),
-            ({"run_id": 1, "limit": 1}, {"msg1", "msg2"}),
-            ({"run_id": [2, 3]}, {"msg3", "msg4"}),
+            ({"run_ids": 1}, {"msg1", "msg2"}),
+            ({"run_ids": 1, "is_reply": False}, {"msg2"}),
+            ({"run_ids": 1, "limit": 1}, {"msg1", "msg2"}),
+            ({"run_ids": [2, 3]}, {"msg3", "msg4"}),
             ({"is_reply": True}, {"msg1", "msg4"}),
             ({"is_reply": True, "limit": 1}, {"msg1", "msg4"}),
         ]
@@ -138,16 +124,16 @@ class StateTest(unittest.TestCase):
         """Test retrieving messages with various filters."""
         # Prepare
         # Run 1: 1 instruction, 1 reply
-        self.state.store_message(make_dummy_message(run_id=1, is_reply=True), "msg1")
-        self.state.store_message(make_dummy_message(run_id=1, is_reply=False), "msg2")
+        self.state.store_message(make_dummy_message(1, True, "msg1"))
+        self.state.store_message(make_dummy_message(1, False, "msg2"))
         # Run 2: 1 instruction
-        self.state.store_message(make_dummy_message(run_id=2, is_reply=False), "msg3")
+        self.state.store_message(make_dummy_message(2, False, "msg3"))
         # Run 3: 1 reply
-        self.state.store_message(make_dummy_message(run_id=3, is_reply=True), "msg4")
+        self.state.store_message(make_dummy_message(3, True, "msg4"))
 
         # Execute
         result = self.state.get_message(**filters)
-        result_ids = set(result.keys())
+        result_ids = {msg.metadata.message_id for msg in result}
 
         # Assert
         if (limit := filters.get("limit")) is not None:
@@ -156,12 +142,32 @@ class StateTest(unittest.TestCase):
         else:
             self.assertEqual(result_ids, expected)
 
+    def test_delete_message(self) -> None:
+        """Test deleting messages."""
+        # Prepare
+        msg1 = make_dummy_message(msg_id="msg1")
+        msg2 = make_dummy_message(msg_id="msg2")
+        self.state.store_message(msg1)
+        self.state.store_message(msg2)
 
-def make_dummy_message(run_id: int = 110, is_reply: bool = False) -> Message:
+        # Execute: delete one message
+        self.state.delete_message(message_ids="msg1")
+
+        # Assert: msg1 should be deleted, msg2 should remain
+        msgs = self.state.get_message()
+        msg_ids = {msg.metadata.message_id for msg in msgs}
+        self.assertNotIn("msg1", msg_ids)
+        self.assertIn("msg2", msg_ids)
+
+
+def make_dummy_message(
+    run_id: int = 110, is_reply: bool = False, msg_id: str = ""
+) -> Message:
     """Create a dummy message for testing."""
     metadata = Metadata(
         run_id=run_id,
-        message_id="",
+        # This is for testing purposes, in a real scenario this would be `.object_id`
+        message_id=msg_id,
         src_node_id=0,
         dst_node_id=120,
         reply_to_message_id="mock id" if is_reply else "",
