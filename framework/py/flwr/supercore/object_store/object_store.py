@@ -16,7 +16,11 @@
 
 
 import abc
-from typing import Optional
+from typing import Optional, Union
+
+from flwr.proto.fleet_pb2 import PushMessagesRequest  # pylint: disable=E0611
+from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
+from flwr.proto.serverappio_pb2 import PushInsMessagesRequest  # pylint: disable=E0611
 
 
 class ObjectStore(abc.ABC):
@@ -131,3 +135,27 @@ class ObjectStore(abc.ABC):
         bool
             True if the object_id is in the store, False otherwise.
         """
+
+
+def store_mapping_and_register_objects(
+    store: ObjectStore, request: Union[PushInsMessagesRequest, PushMessagesRequest]
+) -> dict[str, ObjectIDs]:
+    """Store Message object to descendants mapping and preregister objects."""
+    objects_to_push: dict[str, ObjectIDs] = {}
+    for (
+        message_obj_id,
+        descendant_obj_ids,
+    ) in request.msg_to_children_mapping.items():
+        descendants = list(descendant_obj_ids.object_id)
+        # Store mapping
+        store.set_message_descendant_ids(
+            msg_object_id=message_obj_id, descendant_ids=descendants
+        )
+
+        # Preregister
+        object_ids_just_registered = store.preregister(descendants + [message_obj_id])
+        objects_to_push[message_obj_id] = ObjectIDs(
+            object_id=object_ids_just_registered
+        )
+
+    return objects_to_push
