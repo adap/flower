@@ -242,3 +242,116 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         dummy_context.send_initial_metadata.assert_called_once_with(
             expected_refresh_tokens_value
         )
+
+
+class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
+    """Test the ExecUserAuthInterceptor authorization logic."""
+
+    def setUp(self) -> None:
+        # Reset the shared UserInfo before each test
+        self.default_token = shared_user_info.set(
+            UserInfo(user_id=None, user_name=None)
+        )
+        self.expected_user_info = UserInfo(user_id="user_id", user_name="user_name")
+
+        # A dummy authorization plugin
+        self.authz_plugin = MagicMock()
+
+        # A dummy authentication plugin that always validates tokens
+        self.auth_plugin = MagicMock()
+        self.auth_plugin.validate_tokens_in_metadata.return_value = (
+            True,
+            self.expected_user_info,
+        )
+
+    def tearDown(self) -> None:
+        # Restore prior state
+        shared_user_info.reset(self.default_token)
+
+    @parameterized.expand(
+        [
+            (ListRunsRequest()),
+            (StartRunRequest()),
+            (StopRunRequest()),
+            (StreamLogsRequest()),
+        ]
+    )  # type: ignore
+    def test_authorization_successful(self, request: GrpcMessage) -> None:
+        """Test RPC calls successful when authorization is approved.
+
+        When AuthZ plugin approves, the RPC calls should succeed."""
+        dummy_context = MagicMock()
+        handler_call_details = MagicMock()
+
+        # Authorization approves
+        self.authz_plugin.verify_user_authorization.return_value = True
+
+        interceptor = ExecUserAuthInterceptor(
+            auth_plugin=self.auth_plugin, authz_plugin=self.authz_plugin
+        )
+
+        # Pick correct continuation for unary vs stream
+        continuation: Union[
+            Callable[[Any], NoOpUnaryUnaryHandler],
+            Callable[[Any], NoOpUnaryStreamHandler],
+        ] = get_noop_unary_unary_handler
+        if isinstance(request, StreamLogsRequest):
+            continuation = get_noop_unary_stream_handler
+
+        intercepted = interceptor.intercept_service(continuation, handler_call_details)
+
+        # Execute & Assert
+        if isinstance(request, StreamLogsRequest):
+            result = list(intercepted.unary_stream(request, dummy_context))
+            self.assertEqual(result, ["stream response 1", "stream response 2"])
+        else:
+            result = intercepted.unary_unary(request, dummy_context)
+            self.assertEqual(result, "dummy_response")
+        # Authz plugin should have been called once
+        self.authz_plugin.verify_user_authorization.assert_called_once_with(
+            self.expected_user_info
+        )
+
+    @parameterized.expand(
+        [
+            (ListRunsRequest()),
+            (StartRunRequest()),
+            (StopRunRequest()),
+            (StreamLogsRequest()),
+        ]
+    )  # type: ignore
+    def test_authorization_failure(self, request: GrpcMessage) -> None:
+        """Test RPC calls not successful when authorization fails.
+
+        When AuthZ plugin denies, the calls should be aborted with PERMISSION_DENIED."""
+        dummy_context = MagicMock()
+        handler_call_details = MagicMock()
+
+        # Authorization denies
+        self.authz_plugin.verify_user_authorization.return_value = False
+
+        interceptor = ExecUserAuthInterceptor(
+            auth_plugin=self.auth_plugin, authz_plugin=self.authz_plugin
+        )
+
+        continuation: Union[
+            Callable[[Any], NoOpUnaryUnaryHandler],
+            Callable[[Any], NoOpUnaryStreamHandler],
+        ] = get_noop_unary_unary_handler
+        if isinstance(request, StreamLogsRequest):
+            continuation = get_noop_unary_stream_handler
+
+        intercepted = interceptor.intercept_service(continuation, handler_call_details)
+
+        # Execute & Assert
+        if isinstance(request, StreamLogsRequest):
+            with self.assertRaises(grpc.RpcError):
+                _ = intercepted.unary_stream(request, dummy_context)
+        else:
+            with self.assertRaises(grpc.RpcError):
+                _ = intercepted.unary_unary(request, dummy_context)
+
+        # Ensure abort was called with PERMISSION_DENIED
+        dummy_context.abort.assert_called_once_with(
+            grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
+        )
