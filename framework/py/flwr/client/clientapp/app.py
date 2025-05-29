@@ -85,7 +85,7 @@ def flwr_clientapp() -> None:
     )
 
 
-def run_clientapp(  # pylint: disable=R0914
+def run_clientapp(  # pylint: disable=R0912,R0913,R0914,R0915,R0917
     clientappio_api_address: str,
     run_once: bool,
     token: Optional[int] = None,
@@ -107,7 +107,10 @@ def run_clientapp(  # pylint: disable=R0914
         stub = ClientAppIoStub(channel)
         _wrap_stub(stub, _make_simple_grpc_retry_invoker())
 
+        # dummy definitions
         current_run_id: Optional[int] = None
+        _context: Optional[Context] = None
+        client_app: ClientApp = ClientApp()
         while True:
             # If token is not set, loop until token is received from SuperNode
             while token is None:
@@ -115,16 +118,17 @@ def run_clientapp(  # pylint: disable=R0914
                 time.sleep(1)
 
             # Pull Message, Context, Run and (optional) FAB from SuperNode
-            message, context_, run, fab = pull_clientappinputs(stub=stub, token=token)
+            message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
 
-            if not persist_client_app or current_run_id is None:
-                context = context_
-            elif current_run_id and current_run_id != run.run_id:
-                # It's a new run, let's use the fresh context we received
-                context = context_
-            else:
+            # Dummy init
+            if _context is None:
+                _context = context
+
+            # If persistent model is enabled, and we are in the same run, keep using
+            # local context
+            if persist_client_app and current_run_id == run.run_id:
                 # keep using the local context
-                pass
+                context = _context
 
             # Install FAB, if provided
             if fab:
@@ -142,7 +146,7 @@ def run_clientapp(  # pylint: disable=R0914
                 # Load ClientApp
                 if not persist_client_app or current_run_id != run.run_id:
                     log(DEBUG, "[flwr-clientapp] Start `ClientApp` Loading.")
-                    client_app: ClientApp = load_client_app_fn(
+                    client_app = load_client_app_fn(
                         run.fab_id, run.fab_version, fab.hash_str if fab else ""
                     )
                     current_run_id = run.run_id
@@ -182,6 +186,7 @@ def run_clientapp(  # pylint: disable=R0914
                     state=RecordDict(),
                     run_config=context.run_config,
                 )
+                _context = context
             else:
                 context_to_send = context
             _ = push_clientappoutputs(
