@@ -78,10 +78,9 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
-from flwr.supercore.object_store import (
-    ObjectStoreFactory,
-    store_mapping_and_register_objects,
-)
+from flwr.supercore.object_store import ObjectStoreFactory
+
+from ..utils import store_mapping_and_register_objects
 
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):

@@ -14,11 +14,10 @@
 # ==============================================================================
 """Flower ObjectStore."""
 
-from .object_store import ObjectStore, store_mapping_and_register_objects
+from .object_store import ObjectStore
 from .object_store_factory import ObjectStoreFactory
 
 __all__ = [
     "ObjectStore",
     "ObjectStoreFactory",
-    "store_mapping_and_register_objects",
 ]
