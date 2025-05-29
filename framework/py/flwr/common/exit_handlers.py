@@ -62,6 +62,7 @@ def register_exit_handlers(
         terminated before exiting.
     exit_handlers: Optional[List[Callable[[], None]]] (default: None)
         An optional list of exit handlers to be called before exiting.
+        Additional exit handlers can be added using `add_exit_handler`.
     """
     default_handlers: dict[int, Callable[[int, FrameType], None]] = {}
     registered_exit_handlers.extend(exit_handlers or [])
