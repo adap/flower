@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-26 00:08+0000\n"
+"POT-Creation-Date: 2025-05-29 00:07+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -12599,41 +12599,59 @@ msgstr ""
 
 #: flwr.common.Array.children:1:<autosummary>:1 of
 #, fuzzy
+msgid ":py:obj:`is_dirty <flwr.common.Array.is_dirty>`\\"
+msgstr "server.strategy.Strategy"
+
+#: flwr.common.Array.children:1:<autosummary>:1 flwr.common.Array.is_dirty:1
+#: flwr.common.ArrayRecord.children:1:<autosummary>:1
+#: flwr.common.ArrayRecord.is_dirty:1
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigRecord.is_dirty:1
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigsRecord.is_dirty:1
+#: flwr.common.Message.children:1:<autosummary>:1
+#: flwr.common.Message.is_dirty:1
+#: flwr.common.MetricRecord.children:1:<autosummary>:1
+#: flwr.common.MetricRecord.is_dirty:1
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1
+#: flwr.common.MetricsRecord.is_dirty:1
+#: flwr.common.ParametersRecord.children:1:<autosummary>:1
+#: flwr.common.ParametersRecord.is_dirty:1
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1
+#: flwr.common.RecordDict.is_dirty:1
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1
+#: flwr.common.RecordSet.is_dirty:1 of
+msgid "Check if the object is dirty after the last deflation."
+msgstr ""
+
+#: flwr.common.Array.children:1:<autosummary>:1 of
+#, fuzzy
 msgid ":py:obj:`object_id <flwr.common.Array.object_id>`\\"
 msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
 
 #: flwr.common.Array.children:1:<autosummary>:1 flwr.common.Array.object_id:1
 #: flwr.common.ArrayRecord.children:1:<autosummary>:1
 #: flwr.common.ArrayRecord.object_id:1
-#: flwr.common.ConfigRecord.children:1:<autosummary>:1
-#: flwr.common.ConfigRecord.object_id:1
-#: flwr.common.ConfigsRecord.children:1:<autosummary>:1
-#: flwr.common.ConfigsRecord.object_id:1
-#: flwr.common.Message.children:1:<autosummary>:1
-#: flwr.common.Message.object_id:1
-#: flwr.common.MetricRecord.children:1:<autosummary>:1
-#: flwr.common.MetricRecord.object_id:1
-#: flwr.common.MetricsRecord.children:1:<autosummary>:1
-#: flwr.common.MetricsRecord.object_id:1
 #: flwr.common.ParametersRecord.children:1:<autosummary>:1
-#: flwr.common.ParametersRecord.object_id:1
-#: flwr.common.RecordDict.array_records:1:<autosummary>:1
-#: flwr.common.RecordDict.object_id:1
-#: flwr.common.RecordSet.array_records:1:<autosummary>:1
-#: flwr.common.RecordSet.object_id:1 of
+#: flwr.common.ParametersRecord.object_id:1 of
 #, fuzzy
-msgid "Get object_id."
+msgid "Get object ID."
 msgstr "获取节点 ID。"
-
-#: flwr.common.Array.children:1:<autosummary>:1 of
-#, fuzzy
-msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
-msgstr ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 
 #: flwr.common.Array.children:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
 msgstr "server.strategy.Strategy"
+
+#: flwr.common.Array.children:1:<autosummary>:1 flwr.common.Array.shape:1 of
+#, fuzzy
+msgid "Get the shape of the array."
+msgstr "基础镜像的存储库名称。"
+
+#: flwr.common.Array.children:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
+msgstr ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 
 #: flwr.common.Array.children:1:<autosummary>:1 of
 #, fuzzy
@@ -12993,6 +13011,11 @@ msgstr ""
 
 #: flwr.common.ArrayRecord.children:1:<autosummary>:1 of
 #, fuzzy
+msgid ":py:obj:`is_dirty <flwr.common.ArrayRecord.is_dirty>`\\"
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
+
+#: flwr.common.ArrayRecord.children:1:<autosummary>:1 of
+#, fuzzy
 msgid ":py:obj:`object_id <flwr.common.ArrayRecord.object_id>`\\"
 msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
 
@@ -13269,8 +13292,31 @@ msgstr ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
 
 #: flwr.common.ConfigRecord.children:1:<autosummary>:1 of
 #, fuzzy
+msgid ":py:obj:`is_dirty <flwr.common.ConfigRecord.is_dirty>`\\"
+msgstr ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
+
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1 of
+#, fuzzy
 msgid ":py:obj:`object_id <flwr.common.ConfigRecord.object_id>`\\"
 msgstr ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
+
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigRecord.object_id:1
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigsRecord.object_id:1
+#: flwr.common.Message.children:1:<autosummary>:1
+#: flwr.common.Message.object_id:1
+#: flwr.common.MetricRecord.children:1:<autosummary>:1
+#: flwr.common.MetricRecord.object_id:1
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1
+#: flwr.common.MetricsRecord.object_id:1
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1
+#: flwr.common.RecordDict.object_id:1
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1
+#: flwr.common.RecordSet.object_id:1 of
+#, fuzzy
+msgid "Get object_id."
+msgstr "获取节点 ID。"
 
 #: flwr.common.record.configrecord.ConfigRecord.count_bytes:3 of
 #, fuzzy
@@ -13291,6 +13337,15 @@ msgstr ""
 #, fuzzy
 msgid "The inflated ConfigRecord."
 msgstr "配置日志记录"
+
+#: flwr.common.ConfigRecord.is_dirty:3 flwr.common.ConfigsRecord.is_dirty:3
+#: flwr.common.Message.is_dirty:3 flwr.common.MetricRecord.is_dirty:3
+#: flwr.common.MetricsRecord.is_dirty:3 flwr.common.RecordDict.is_dirty:3
+#: flwr.common.RecordSet.is_dirty:3 of
+msgid ""
+"An object is considered dirty if its content has changed since the last "
+"its object ID was computed."
+msgstr ""
 
 #: ../../source/ref-api/flwr.common.ConfigsRecord.rst:2
 #, fuzzy
@@ -13403,6 +13458,11 @@ msgstr ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
 #: flwr.common.ConfigsRecord.children:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`children <flwr.common.ConfigsRecord.children>`\\"
+msgstr ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
+
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`is_dirty <flwr.common.ConfigsRecord.is_dirty>`\\"
 msgstr ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
 
 #: flwr.common.ConfigsRecord.children:1:<autosummary>:1 of
@@ -14898,6 +14958,11 @@ msgstr "该信息捕捉到的错误。"
 
 #: flwr.common.Message.children:1:<autosummary>:1 of
 #, fuzzy
+msgid ":py:obj:`is_dirty <flwr.common.Message.is_dirty>`\\"
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
+
+#: flwr.common.Message.children:1:<autosummary>:1 of
+#, fuzzy
 msgid ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
 msgstr ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
 
@@ -15293,6 +15358,11 @@ msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
 
 #: flwr.common.MetricRecord.children:1:<autosummary>:1 of
 #, fuzzy
+msgid ":py:obj:`is_dirty <flwr.common.MetricRecord.is_dirty>`\\"
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
+
+#: flwr.common.MetricRecord.children:1:<autosummary>:1 of
+#, fuzzy
 msgid ":py:obj:`object_id <flwr.common.MetricRecord.object_id>`\\"
 msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
 
@@ -15411,6 +15481,11 @@ msgstr ":py:obj:`values <flwr.common.MetricsRecord.values>`\\ \\(\\)"
 #: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`children <flwr.common.MetricsRecord.children>`\\"
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
+
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`is_dirty <flwr.common.MetricsRecord.is_dirty>`\\"
 msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
 
 #: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
@@ -15577,6 +15652,11 @@ msgstr ":py:obj:`values <flwr.common.ParametersRecord.values>`\\ \\(\\)"
 #: flwr.common.ParametersRecord.children:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`children <flwr.common.ParametersRecord.children>`\\"
+msgstr ":py:obj:`clear <flwr.common.ParametersRecord.clear>`\\ \\(\\)"
+
+#: flwr.common.ParametersRecord.children:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`is_dirty <flwr.common.ParametersRecord.is_dirty>`\\"
 msgstr ":py:obj:`clear <flwr.common.ParametersRecord.clear>`\\ \\(\\)"
 
 #: flwr.common.ParametersRecord.children:1:<autosummary>:1 of
@@ -15790,6 +15870,11 @@ msgstr ""
 
 #: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
 #, fuzzy
+msgid ":py:obj:`is_dirty <flwr.common.RecordDict.is_dirty>`\\"
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
+#, fuzzy
 msgid ":py:obj:`metric_records <flwr.common.RecordDict.metric_records>`\\"
 msgstr ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
 
@@ -15952,6 +16037,11 @@ msgstr ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
 #, fuzzy
 msgid ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
 msgstr ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
+
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`is_dirty <flwr.common.RecordSet.is_dirty>`\\"
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
 
 #: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
 #, fuzzy
@@ -35390,7 +35480,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|305404ff382b42e3afc1b27b11c732c1|"
+msgid "|0ea48143db30437b919c47ae5b8ff9bf|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -35405,7 +35495,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|64ab5026bd994c15a6c473a5652dcf1b|"
+msgid "|ff8aa37ba237463a9475ce7312d8921f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -35429,7 +35519,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|823bbd248f154e1bb640a5d0d93af4de|"
+msgid "|ebd7d0a0c4964788a4bbe2dc145e30a3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -35447,7 +35537,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|4709c7a2e15146fdbac896e9bc7e2354|"
+msgid "|4781d482ca224829a7c8e4843dae96dd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -35464,7 +35554,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|3627003a08694bd3b6a4e11e48e9ae0c|"
+msgid "|8528765b7fdd4cc59e72ddfe2fa5827d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -35479,7 +35569,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|8d9fe79d8c804dfd80a215699a1538dc|"
+msgid "|fa5a4492a49a4f0097081b2610649f4d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -35500,7 +35590,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|efd371c313c940f2b0bd75808a437742|"
+msgid "|9333bfd7117449bfb1b7a02e7282b3a2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -35515,7 +35605,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|e9f908c8fd754b22afdecd79d16a2288|"
+msgid "|018e85c87a56450d920091df27460f21|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -35675,7 +35765,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|0b00dbec410444c29339b6f4832261a7|"
+msgid "|b875e957083647488294b44f6e60508e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -35700,7 +35790,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|afe9444cfc0b4872908db840c186dadc|"
+msgid "|f6ece9f07d354a01b09129256fd36d16|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -35726,7 +35816,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|306e3dd0b4434c1e9aa6dc3a096db3b2|"
+msgid "|e8c23423c2dd49e9a5912b0d5c703a56|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -35749,7 +35839,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|ccf3d95299284d9e8c2825c233e88705|"
+msgid "|927a52ff98574b059fa2facb2af6c230|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -35796,7 +35886,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|fec8c44eaca7456c9896fcec43d132df|"
+msgid "|790b693a579946fe966dfc84cc8472fe|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -35904,7 +35994,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|bcde8581fb664c5faa45209fb9f30e19|"
+msgid "|497ea844d8d947bcbb290cee1a70008c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -46782,5 +46872,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|db0ef1f7489c450e96abcfc32fae9b06|"
+#~ msgstr ""
+
+#~ msgid "|305404ff382b42e3afc1b27b11c732c1|"
+#~ msgstr ""
+
+#~ msgid "|64ab5026bd994c15a6c473a5652dcf1b|"
+#~ msgstr ""
+
+#~ msgid "|823bbd248f154e1bb640a5d0d93af4de|"
+#~ msgstr ""
+
+#~ msgid "|4709c7a2e15146fdbac896e9bc7e2354|"
+#~ msgstr ""
+
+#~ msgid "|3627003a08694bd3b6a4e11e48e9ae0c|"
+#~ msgstr ""
+
+#~ msgid "|8d9fe79d8c804dfd80a215699a1538dc|"
+#~ msgstr ""
+
+#~ msgid "|efd371c313c940f2b0bd75808a437742|"
+#~ msgstr ""
+
+#~ msgid "|e9f908c8fd754b22afdecd79d16a2288|"
+#~ msgstr ""
+
+#~ msgid "|0b00dbec410444c29339b6f4832261a7|"
+#~ msgstr ""
+
+#~ msgid "|afe9444cfc0b4872908db840c186dadc|"
+#~ msgstr ""
+
+#~ msgid "|306e3dd0b4434c1e9aa6dc3a096db3b2|"
+#~ msgstr ""
+
+#~ msgid "|ccf3d95299284d9e8c2825c233e88705|"
+#~ msgstr ""
+
+#~ msgid "|fec8c44eaca7456c9896fcec43d132df|"
+#~ msgstr ""
+
+#~ msgid "|bcde8581fb664c5faa45209fb9f30e19|"
 #~ msgstr ""
 
