@@ -22,7 +22,7 @@ show that the hybrid learning classifier succeeds in identifying unseen attacks.
 
 ## About this baseline
 
-**What’s implemented:**  The code  in this directory  replicates the experiments from the above paper for SCADA intrusion detection, using imbalanced client datasets. It simulates a real-world scenario where certain attack classes are intentionally missing from the training sets but appear in the validation sets to evaluate the model’s ability to detect unseen attacks. 
+**What’s implemented:**  The code in this directory presents an improved implementation of the experiments from the referenced paper for SCADA intrusion detection using imbalanced client datasets in a federated learning setting. It simulates a realistic scenario where certain attack classes are intentionally excluded from specific clients’ training sets but appear during validation to assess the model’s ability to generalize and detect unseen threats. To enhance performance under such imbalance, the aggregation strategy incorporates both rarity and entropy-based scoring. Rarity quantifies the uniqueness of each client’s available classes relative to the overall class distribution, while entropy measures the diversity of classes within a client's dataset. These scores are combined to weigh client updates, rewarding clients with diverse or rare class distributions, thereby improving detection of underrepresented attack types.
 
 **Datasets:** CSE-CIC-IDS2018     Online [here](https://www.unb.ca/cic/datasets/ids-2018.html).
 
@@ -50,7 +50,7 @@ show that the hybrid learning classifier succeeds in identifying unseen attacks.
 | total clients | 10 |
 | clients per round | 10 |
 | number of rounds | 30 |
-| local epochs | 10 |
+| local epochs | 1 |
 | client resources | {'num_cpus': 2.0, 'num_gpus': 0.0 }|
 | data partition | stratified based on labels (different classes per client) |
 | optimizer | Adam |
@@ -83,21 +83,11 @@ python -m fedhyb.main # this will run using the default settings in the `conf/ba
 ```
 
 ## Expected Results
+  The default algorithm used  is `fedhyb`. To use `fedavg` please change the `algorithm` property in the pyproject.toml file.   
+  All plots shown below are generated under default settings using the follwing command 'flwr run .'
 
+  When the execution completes, a new directory `logs` will be created with a txt files that contains the classification report and  performance metrics foe each client.  
 
-Due to the randomized selection of available classes for each client in each run, results will vary. Below is an example result from one simulation execution.
-In this example, all clients have the following classes dropped from their training data. The test dataset, however, retains all classes to evaluate each client’s ability to detect previously unseen attacks. The table below presents the availability of each class for every client, where a check mark (✔️) indicates that the class is present in the client’s training data, and a cross mark (❌) denotes that it has been excluded.
-
-| Client | Bot | Benign | Infilteration | DoS attacks-GoldenEye | DoS attacks-Hulk | DoS attacks-SlowHTTPTest | DDOS attack-HOIC | DoS attacks-Slowloris | SSH-Bruteforce | DDOS attack-LOIC-UDP | Brute Force -Web | FTP-BruteForce | Brute Force -XSS | SQL Injection | DDoS attacks-LOIC-HTTP | Accuracy               |
-|:-------|:----|:--------|:----------------|:-----------------------|:----------------|:--------------------------|:----------------|:------------------------|:----------------|:-----------------------|:----------------|:----------------|:----------------|:----------------|:------------------------|:------------------------|
-| 0      | ✔️   | ❌      | ❌              | ✔️                     | ✔️                | ❌                        | ✔️                | ✔️                      | ✔️              | ❌                     | ❌                | ✔️              | ✔️                | ✔️              | ✔️                      | 58.00                  |
-| 1      | ✔️   | ✔️      | ✔️              | ✔️                     | ✔️                | ✔️                        | ❌                | ❌                      | ✔️              | ✔️                     | ✔️                | ✔️              | ✔️                | ✔️              | ✔️                      | 78.65                  |
-| 2      | ❌   | ✔️      | ✔️              | ❌                     | ✔️                | ✔️                        | ✔️                | ❌                      | ✔️              | ✔️                     | ✔️                | ✔️              | ✔️                | ✔️              | ❌                      | 87.94                  |
-| 3      | ✔️   | ✔️      | ✔️              | ✔️                     | ✔️                | ❌                        | ✔️                | ✔️                      | ✔️              | ❌                     | ✔️                | ✔️              | ✔️                | ✔️              | ❌                      | 83.06                  |
-| 4      | ✔️   | ❌      | ✔️              | ✔️                     | ❌                | ✔️                        | ✔️                | ❌                      | ❌              | ✔️                     | ❌                | ✔️              | ✔️                | ✔️              | ✔️                      | 81.90                  |
-| 5      | ✔️   | ✔️      | ✔️              | ✔️                     | ✔️                | ❌                        | ✔️                | ✔️                      | ✔️              | ❌                     | ✔️                | ✔️              | ✔️                | ✔️              | ✔️                      | 83.53                  |
-| 6      | ✔️   | ✔️      | ✔️              | ✔️                     | ✔️                | ✔️                        | ✔️                | ✔️                      | ✔️              | ✔️                     | ✔️                | ✔️              | ✔️                | ✔️              | ❌                      | 87.70                  |
-| 7      | ❌   | ❌      | ✔️              | ✔️                     | ❌                | ✔️                        | ✔️                | ✔️                      | ❌              | ✔️                     | ✔️                | ✔️              | ✔️                | ❌              | ✔️                      | 73.55                  |
-| 8      | ❌   | ✔️      | ❌              | ✔️                     | ✔️                | ✔️                        | ✔️                | ❌                      | ✔️              | ✔️                     | ✔️                | ✔️              | ✔️                | ✔️              | ✔️                      | 86.77                  |
-| 9      | ✔️   | ✔️      | ✔️              | ✔️                     | ✔️                | ✔️                        | ✔️                | ✔️                      | ✔️              | ✔️                     | ✔️                | ✔️              | ✔️                | ✔️              | ✔️                      | 86.08                  |
-
+  ![](_static/Acc.png)
+  ![](_static/loss.png)
+  ![](_static/precision_client1.png)
