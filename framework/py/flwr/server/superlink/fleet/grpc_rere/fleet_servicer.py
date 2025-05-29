@@ -111,10 +111,16 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """Pull Messages."""
         log(INFO, "[Fleet.PullMessages] node_id=%s", request.node.node_id)
         log(DEBUG, "[Fleet.PullMessages] Request: %s", MessageToDict(request))
-        return message_handler.pull_messages(
-            request=request,
-            state=self.state_factory.state(),
-        )
+        try:
+            res = message_handler.pull_messages(
+                request=request,
+                state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
+            )
+        except KeyError as ke:
+            abort_grpc_context(ke.args[0], context)
+
+        return res
 
     def PushMessages(
         self, request: PushMessagesRequest, context: grpc.ServicerContext

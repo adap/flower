@@ -47,6 +47,7 @@ from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ObjectIDs,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -76,7 +77,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from flwr.server.superlink.utils import abort_if
+from flwr.server.superlink.utils import abort_grpc_context, abort_if
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.object_store import ObjectStoreFactory
 
@@ -202,8 +203,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
 
+        # Init store
+        store = self.objectstore_factory.store()
+
         # Convert Messages to proto
         messages_list = []
+        objects_to_pull: dict[str, ObjectIDs] = {}
         while messages_res:
             msg = messages_res.pop(0)
 
@@ -216,7 +221,16 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 )
             messages_list.append(message_to_proto(msg))
 
-        return PullResMessagesResponse(messages_list=messages_list)
+            try:
+                msg_object_id = msg.metadata.message_id
+                descendants = store.get_message_descendant_ids(msg_object_id)
+                objects_to_pull[msg_object_id] = ObjectIDs(object_ids=descendants)
+            except KeyError as ke:
+                abort_grpc_context(ke.args[0], context)
+
+        return PullResMessagesResponse(
+            messages_list=messages_list, objects_to_pull=objects_to_pull
+        )
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext

@@ -71,6 +71,11 @@ class InMemoryObjectStore(ObjectStore):
 
     def get_message_descendant_ids(self, msg_object_id: str) -> list[str]:
         """Retrieve the object IDs of all descendants of a given Message."""
+        if msg_object_id not in self.msg_children_objects_mapping:
+            raise KeyError(
+                f"No message registed in Object Store with ID {msg_object_id}"
+            )
+
         return self.msg_children_objects_mapping[msg_object_id]
 
     def get(self, object_id: str) -> Optional[bytes]:

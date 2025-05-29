@@ -42,6 +42,7 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
+from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -89,7 +90,9 @@ def send_node_heartbeat(
 
 
 def pull_messages(
-    request: PullMessagesRequest, state: LinkState
+    request: PullMessagesRequest,
+    state: LinkState,
+    store: ObjectStore,
 ) -> PullMessagesResponse:
     """Pull Messages handler."""
     # Get node_id if client node is not anonymous
@@ -101,10 +104,17 @@ def pull_messages(
 
     # Convert to Messages
     msg_proto = []
+    objects_to_pull: dict[str, ObjectIDs] = {}
     for msg in message_list:
         msg_proto.append(message_to_proto(msg))
 
-    return PullMessagesResponse(messages_list=msg_proto)
+        msg_object_id = msg.metadata.message_id
+        descendants = store.get_message_descendant_ids(msg_object_id)
+        objects_to_pull[msg_object_id] = ObjectIDs(object_ids=descendants)
+
+    return PullMessagesResponse(
+        messages_list=msg_proto, objects_to_pull=objects_to_pull
+    )
 
 
 def push_messages(
