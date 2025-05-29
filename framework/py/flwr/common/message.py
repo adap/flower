@@ -23,6 +23,8 @@ from typing import Any, cast, overload
 from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
+from flwr.proto.message_pb2 import Metadata as ProtoMetadata  # pylint: disable=E0611
+from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 
 from ..app.error import Error
 from ..app.metadata import Metadata
@@ -30,6 +32,7 @@ from .constant import MESSAGE_TTL_TOLERANCE
 from .inflatable import (
     InflatableObject,
     add_header_to_object_body,
+    get_desdendant_object_ids,
     get_object_body,
     get_object_children_ids_from_object_content,
 )
@@ -351,9 +354,12 @@ class Message(InflatableObject):
 
     def deflate(self) -> bytes:
         """Deflate message."""
+        # Exclude message_id from serialization
+        proto_metadata: ProtoMetadata = metadata_to_proto(self.metadata)
+        proto_metadata.message_id = ""
         # Store message metadata and error in object body
         obj_body = ProtoMessage(
-            metadata=metadata_to_proto(self.metadata),
+            metadata=proto_metadata,
             content=None,
             error=error_to_proto(self.error) if self.has_error() else None,
         ).SerializeToString(deterministic=True)
@@ -501,3 +507,12 @@ def _check_arg_types(  # pylint: disable=too-many-arguments, R0917
     ):
         return
     raise MessageInitializationError()
+
+
+def get_message_to_descendant_id_mapping(message: Message) -> dict[str, ObjectIDs]:
+    """Construct a mapping between message object_id and that of its descendants."""
+    return {
+        message.object_id: ObjectIDs(
+            object_ids=list(get_desdendant_object_ids(message))
+        )
+    }

@@ -28,12 +28,27 @@ class InMemoryObjectStore(ObjectStore):
     def __init__(self, verify: bool = True) -> None:
         self.verify = verify
         self.store: dict[str, bytes] = {}
+        # Mapping the Object ID of a message to the list of children object IDs
+        self.msg_children_objects_mapping: dict[str, list[str]] = {}
+
+    def preregister(self, object_ids: list[str]) -> list[str]:
+        """Identify and preregister missing objects."""
+        new_objects = []
+        for obj_id in object_ids:
+            # Verify object ID format (must be a valid sha256 hash)
+            if not is_valid_sha256_hash(obj_id):
+                raise ValueError(f"Invalid object ID format: {obj_id}")
+            if obj_id not in self.store:
+                self.store[obj_id] = b""
+                new_objects.append(obj_id)
+
+        return new_objects
 
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store."""
-        # Verify object ID format (must be a valid sha256 hash)
-        if not is_valid_sha256_hash(object_id):
-            raise ValueError(f"Invalid object ID format: {object_id}")
+        # Only allow adding the object if it has been preregistered
+        if object_id not in self.store:
+            raise KeyError(f"Object with id {object_id} was not preregistered.")
 
         # Verify object_id and object_content match
         if self.verify:
@@ -42,10 +57,21 @@ class InMemoryObjectStore(ObjectStore):
                 raise ValueError(f"Object ID {object_id} does not match content hash")
 
         # Return if object is already present in the store
-        if object_id in self.store:
+        if self.store[object_id] != b"":
             return
 
         self.store[object_id] = object_content
+
+    def set_message_descendant_ids(
+        self, msg_object_id: str, descendant_ids: list[str]
+    ) -> None:
+        """Store the mapping from a ``Message`` object ID to the object IDs of its
+        descendants."""
+        self.msg_children_objects_mapping[msg_object_id] = descendant_ids
+
+    def get_message_descendant_ids(self, msg_object_id: str) -> list[str]:
+        """Retrieve the object IDs of all descendants of a given Message."""
+        return self.msg_children_objects_mapping[msg_object_id]
 
     def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store."""

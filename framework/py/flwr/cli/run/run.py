@@ -45,11 +45,7 @@ from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 from ..log import start_stream
-from ..utils import (
-    init_channel,
-    try_obtain_cli_auth_plugin,
-    unauthenticated_exc_handler,
-)
+from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -172,7 +168,7 @@ def _run_with_exec_api(
         override_config=user_config_to_proto(parse_config_args(config_overrides)),
         federation_options=config_record_to_proto(c_record),
     )
-    with unauthenticated_exc_handler():
+    with flwr_cli_grpc_exc_handler():
         res = stub.StartRun(req)
 
     if res.HasField("run_id"):

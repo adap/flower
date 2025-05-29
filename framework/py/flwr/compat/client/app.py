@@ -15,18 +15,12 @@
 """Flower client app."""
 
 
-import multiprocessing
-import os
-import sys
-import threading
 import time
 from contextlib import AbstractContextManager
 from logging import ERROR, INFO, WARN
-from os import urandom
 from pathlib import Path
-from typing import Callable, Optional, Union, cast
+from typing import Callable, Optional, Union
 
-import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
@@ -35,11 +29,6 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.client.clientapp.app import flwr_clientapp
-from flwr.client.clientapp.clientappio_servicer import (
-    ClientAppInputs,
-    ClientAppIoServicer,
-)
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.client.message_handler.message_handler import handle_control_message
@@ -49,13 +38,7 @@ from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
-    CLIENT_OCTET,
-    CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
-    ISOLATION_MODE_PROCESS,
-    ISOLATION_MODE_SUBPROCESS,
     MAX_RETRY_DELAY,
-    RUN_ID_NUM_BYTES,
-    SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -64,12 +47,10 @@ from flwr.common.constant import (
     ErrorCode,
 )
 from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.compat.client.grpc_client.connection import grpc_connection
-from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.supernode.nodestate import NodeStateFactory
 
 
@@ -238,8 +219,6 @@ def start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
-    isolation: Optional[str] = None,
-    clientappio_api_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -292,17 +271,6 @@ def start_client_internal(
         If set to None, there is no limit to the total time.
     flwr_path: Optional[Path] (default: None)
         The fully resolved path containing installed Flower Apps.
-    isolation : Optional[str] (default: None)
-        Isolation mode for `ClientApp`. Possible values are `subprocess` and
-        `process`. Defaults to `None`, which runs the `ClientApp` in the same process
-        as the SuperNode. If `subprocess`, the `ClientApp` runs in a subprocess started
-        by the SueprNode and communicates using gRPC at the address
-        `clientappio_api_address`. If `process`, the `ClientApp` runs in a separate
-        isolated process and communicates using gRPC at the address
-        `clientappio_api_address`.
-    clientappio_api_address : Optional[str]
-        (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
-        The SuperNode gRPC server address.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -327,18 +295,6 @@ def start_client_internal(
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
-
-    if isolation:
-        if clientappio_api_address is None:
-            raise ValueError(
-                f"`clientappio_api_address` required when `isolation` is "
-                f"{ISOLATION_MODE_SUBPROCESS} or {ISOLATION_MODE_PROCESS}",
-            )
-        _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
-            address=clientappio_api_address,
-            certificates=None,
-        )
-    clientappio_api_address = cast(str, clientappio_api_address)
 
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
@@ -390,7 +346,6 @@ def start_client_internal(
     run_info_store: Optional[DeprecatedRunInfoStore] = None
     state_factory = NodeStateFactory()
     state = state_factory.state()
-    mp_spawn_context = multiprocessing.get_context("spawn")
 
     runs: dict[int, Run] = {}
 
@@ -475,9 +430,8 @@ def start_client_internal(
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
                         fab = get_fab(run.fab_hash, run_id)
-                        if not isolation:
-                            # If `ClientApp` runs in the same process, install the FAB
-                            install_from_fab(fab.content, flwr_path, True)
+                        # If `ClientApp` runs in the same process, install the FAB
+                        install_from_fab(fab.content, flwr_path, True)
                         fab_id, fab_version = get_fab_metadata(fab.content)
                     else:
                         fab = None
@@ -504,73 +458,13 @@ def start_client_internal(
 
                     # Handle app loading and task message
                     try:
-                        if isolation:
-                            # Two isolation modes:
-                            # 1. `subprocess`: SuperNode is starting the ClientApp
-                            #    process as a subprocess.
-                            # 2. `process`: ClientApp process gets started separately
-                            #    (via `flwr-clientapp`), for example, in a separate
-                            #    Docker container.
+                        # Load ClientApp instance
+                        client_app: ClientApp = load_client_app_fn(
+                            fab_id, fab_version, run.fab_hash
+                        )
 
-                            # Generate SuperNode token
-                            token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
-
-                            # Mode 1: SuperNode starts ClientApp as subprocess
-                            start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
-
-                            # Share Message and Context with servicer
-                            clientappio_servicer.set_inputs(
-                                clientapp_input=ClientAppInputs(
-                                    message=message,
-                                    context=context,
-                                    run=run,
-                                    fab=fab,
-                                    token=token,
-                                ),
-                                token_returned=start_subprocess,
-                            )
-
-                            if start_subprocess:
-                                _octet, _colon, _port = (
-                                    clientappio_api_address.rpartition(":")
-                                )
-                                io_address = (
-                                    f"{CLIENT_OCTET}:{_port}"
-                                    if _octet == SERVER_OCTET
-                                    else clientappio_api_address
-                                )
-                                # Start ClientApp subprocess
-                                command = [
-                                    "flwr-clientapp",
-                                    "--clientappio-api-address",
-                                    io_address,
-                                    "--token",
-                                    str(token),
-                                ]
-                                command.append("--insecure")
-
-                                proc = mp_spawn_context.Process(
-                                    target=_run_flwr_clientapp,
-                                    args=(command, os.getpid()),
-                                    daemon=True,
-                                )
-                                proc.start()
-                                proc.join()
-                            else:
-                                # Wait for output to become available
-                                while not clientappio_servicer.has_outputs():
-                                    time.sleep(0.1)
-
-                            outputs = clientappio_servicer.get_outputs()
-                            reply_message, context = outputs.message, outputs.context
-                        else:
-                            # Load ClientApp instance
-                            client_app: ClientApp = load_client_app_fn(
-                                fab_id, fab_version, run.fab_hash
-                            )
-
-                            # Execute ClientApp
-                            reply_message = client_app(message=message, context=context)
+                        # Execute ClientApp
+                        reply_message = client_app(message=message, context=context)
                     except Exception as ex:  # pylint: disable=broad-exception-caught
 
                         # Legacy grpc-bidi
@@ -801,39 +695,3 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
         )
 
     return connection, address, error_type
-
-
-def _run_flwr_clientapp(args: list[str], main_pid: int) -> None:
-    # Monitor the main process in case of SIGKILL
-    def main_process_monitor() -> None:
-        while True:
-            time.sleep(1)
-            if os.getppid() != main_pid:
-                os.kill(os.getpid(), 9)
-
-    threading.Thread(target=main_process_monitor, daemon=True).start()
-
-    # Run the command
-    sys.argv = args
-    flwr_clientapp()
-
-
-def run_clientappio_api_grpc(
-    address: str,
-    certificates: Optional[tuple[bytes, bytes, bytes]],
-) -> tuple[grpc.Server, ClientAppIoServicer]:
-    """Run ClientAppIo API gRPC server."""
-    clientappio_servicer: grpc.Server = ClientAppIoServicer()
-    clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
-    clientappio_grpc_server = generic_create_grpc_server(
-        servicer_and_add_fn=(
-            clientappio_servicer,
-            clientappio_add_servicer_to_server_fn,
-        ),
-        server_address=address,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=certificates,
-    )
-    log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
-    clientappio_grpc_server.start()
-    return clientappio_grpc_server, clientappio_servicer

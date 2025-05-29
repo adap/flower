@@ -16,6 +16,7 @@
 
 
 import unittest
+from uuid import uuid4
 
 from parameterized import parameterized
 
@@ -27,7 +28,7 @@ from .validator import validate_message
 
 
 def create_message(  # pylint: disable=R0913, R0917
-    message_id: str = "",
+    message_id: str = str(uuid4()),
     src_node_id: int = SUPERLINK_NODE_ID,
     dst_node_id: int = 456,
     ttl: int = DEFAULT_TTL,
@@ -68,8 +69,8 @@ class ValidatorTest(unittest.TestCase):
             # Valid messages
             (create_message(), False, False),
             (create_message(has_content=False, has_error=True), False, False),
-            # `message_id` is set
-            (create_message(message_id="123"), False, True),
+            # `message_id` is not set
+            (create_message(message_id=""), False, True),
             # `ttl` is zero
             (create_message(ttl=0), False, True),
             # `src_node_id` is not set

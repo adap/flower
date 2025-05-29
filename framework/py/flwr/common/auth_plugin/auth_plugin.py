@@ -33,6 +33,9 @@ class ExecAuthPlugin(ABC):
     ----------
     user_auth_config_path : Path
         Path to the YAML file containing the authentication configuration.
+    verify_tls_cert : bool
+        Boolean indicating whether to verify the TLS certificate
+        when making requests to the server.
     """
 
     @abstractmethod
@@ -62,6 +65,27 @@ class ExecAuthPlugin(ABC):
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> Optional[Sequence[tuple[str, Union[str, bytes]]]]:
         """Refresh authentication tokens in the provided metadata."""
+
+
+class ExecAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
+    """Abstract Flower Authorization Plugin class for ExecServicer.
+
+    Parameters
+    ----------
+    user_auth_config_path : Path
+        Path to the YAML file containing the authorization configuration.
+    verify_tls_cert : bool
+        Boolean indicating whether to verify the TLS certificate
+        when making requests to the server.
+    """
+
+    @abstractmethod
+    def __init__(self, user_auth_config_path: Path, verify_tls_cert: bool):
+        """Abstract constructor."""
+
+    @abstractmethod
+    def verify_user_authorization(self, user_info: UserInfo) -> bool:
+        """Verify user authorization request."""
 
 
 class CliAuthPlugin(ABC):

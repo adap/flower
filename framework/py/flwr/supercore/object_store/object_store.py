@@ -27,13 +27,30 @@ class ObjectStore(abc.ABC):
     """
 
     @abc.abstractmethod
+    def preregister(self, object_ids: list[str]) -> list[str]:
+        """Identify and preregister missing objects in the `ObjectStore`.
+
+        Parameters
+        ----------
+        object_ids : list[str]
+            A list of object IDs to check against the store. Any object ID not already
+            present will be preregistered.
+
+        Returns
+        -------
+        list[str]
+            A list of object IDs that were not present in the `ObjectStore` and have now
+            been preregistered.
+        """
+
+    @abc.abstractmethod
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store.
 
         Parameters
         ----------
         object_id : str
-            The object_id under which to store the object.
+            The object_id under which to store the object. Must be preregistered.
         object_content : bytes
             The deflated object to store.
         """
@@ -68,6 +85,36 @@ class ObjectStore(abc.ABC):
         """Clear the store.
 
         This method should remove all objects from the store.
+        """
+
+    @abc.abstractmethod
+    def set_message_descendant_ids(
+        self, msg_object_id: str, descendant_ids: list[str]
+    ) -> None:
+        """Store the mapping from a ``Message`` object ID to the object IDs of its
+        descendants.
+
+        Parameters
+        ----------
+        msg_object_id : str
+            The object ID of the ``Message``.
+        descendant_ids : list[str]
+            A list of object IDs representing all descendant objects of the ``Message``.
+        """
+
+    @abc.abstractmethod
+    def get_message_descendant_ids(self, msg_object_id: str) -> list[str]:
+        """Retrieve the object IDs of all descendants of a given ``Message``.
+
+        Parameters
+        ----------
+        msg_object_id : str
+            The object ID of the ``Message``.
+
+        Returns
+        -------
+        list[str]
+            A list of object IDs of all descendant objects of the ``Message``.
         """
 
     @abc.abstractmethod

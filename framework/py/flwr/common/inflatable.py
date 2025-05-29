@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 import hashlib
-from typing import TypeVar
+from typing import TypeVar, cast
 
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 
@@ -55,12 +55,23 @@ class InflatableObject:
     @property
     def object_id(self) -> str:
         """Get object_id."""
-        return get_object_id(self.deflate())
+        if self.is_dirty or "_object_id" not in self.__dict__:
+            self.__dict__["_object_id"] = get_object_id(self.deflate())
+        return cast(str, self.__dict__["_object_id"])
 
     @property
     def children(self) -> dict[str, InflatableObject] | None:
         """Get all child objects as a dictionary or None if there are no children."""
         return None
+
+    @property
+    def is_dirty(self) -> bool:
+        """Check if the object is dirty after the last deflation.
+
+        An object is considered dirty if its content has changed since the last its
+        object ID was computed.
+        """
+        return True
 
 
 T = TypeVar("T", bound=InflatableObject)
@@ -178,3 +189,23 @@ def get_object_head_values_from_object_content(
     obj_type, children_str, body_len = head.split(HEAD_VALUE_DIVIDER)
     children_ids = children_str.split(",") if children_str else []
     return obj_type, children_ids, int(body_len)
+
+
+def _get_descendants_object_ids_recursively(obj: InflatableObject) -> set[str]:
+
+    descendants: set[str] = set()
+    if children := obj.children:
+        for child in children.values():
+            descendants |= _get_descendants_object_ids_recursively(child)
+
+    descendants.add(obj.object_id)
+
+    return descendants
+
+
+def get_desdendant_object_ids(obj: InflatableObject) -> set[str]:
+    """Get a set of object IDs of all descendants."""
+    descendants = _get_descendants_object_ids_recursively(obj)
+    # Exclude Object ID of parent object
+    descendants.discard(obj.object_id)
+    return descendants

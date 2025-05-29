@@ -27,6 +27,8 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.message import get_message_to_descendant_id_mapping
+from flwr.common.serde import message_from_proto
 from flwr.common.typing import RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -110,8 +112,15 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         msg_proto = create_res_message(
             src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
         )
+
+        # Construct message to descendant mapping
+        message = message_from_proto(msg_proto)
+        descendant_mapping = get_message_to_descendant_id_mapping(message)
+
         request = PushMessagesRequest(
-            node=Node(node_id=node_id), messages_list=[msg_proto]
+            node=Node(node_id=node_id),
+            messages_list=[msg_proto],
+            msg_to_descendant_mapping=descendant_mapping,
         )
 
         # Execute
@@ -120,6 +129,22 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, PushMessagesResponse)
         assert grpc.StatusCode.OK == call.code()
+
+        # Assert: check that response indicates all objects need pushing
+        expected_object_ids = {message.object_id}  # message
+        expected_object_ids |= {
+            obj_id
+            for obj_ids in descendant_mapping.values()
+            for obj_id in obj_ids.object_ids
+        }  # descendants
+        # Construct a single set with all object ids
+        requested_object_ids = {
+            obj_id
+            for obj_ids in response.objects_to_push.values()
+            for obj_id in obj_ids.object_ids
+        }
+        assert expected_object_ids == requested_object_ids
+        assert response.objects_to_push.keys() == descendant_mapping.keys()
 
     def _assert_push_messages_not_allowed(self, node_id: int, run_id: int) -> None:
         """Assert `PushMessages` not allowed."""
