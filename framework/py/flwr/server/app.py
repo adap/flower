@@ -255,6 +255,7 @@ def run_superlink() -> None:
                     args.ssl_certfile,
                     state_factory,
                     ffs_factory,
+                    objectstore_factory,
                     num_workers,
                 ),
                 daemon=True,
@@ -629,6 +630,7 @@ def _run_fleet_api_rest(
     ssl_certfile: Optional[str],
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
+    objectstore_factory: ObjectStoreFactory,
     num_workers: int,
 ) -> None:
     """Run ServerAppIo API (REST-based)."""
@@ -644,6 +646,7 @@ def _run_fleet_api_rest(
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
     fast_api_app.state.STATE_FACTORY = state_factory
     fast_api_app.state.FFS_FACTORY = ffs_factory
+    fast_api_app.state.OBJECTSTORE_FACTORY = objectstore_factory
 
     uvicorn.run(
         app="flwr.server.superlink.fleet.rest_rere.rest_api:app",

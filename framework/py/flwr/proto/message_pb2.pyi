@@ -130,14 +130,14 @@ global___Metadata = Metadata
 
 class ObjectIDs(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    OBJECT_ID_FIELD_NUMBER: builtins.int
+    OBJECT_IDS_FIELD_NUMBER: builtins.int
     @property
-    def object_id(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    def object_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     def __init__(self,
         *,
-        object_id: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        object_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["object_id",b"object_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["object_ids",b"object_ids"]) -> None: ...
 global___ObjectIDs = ObjectIDs
 
 class PushObjectRequest(google.protobuf.message.Message):

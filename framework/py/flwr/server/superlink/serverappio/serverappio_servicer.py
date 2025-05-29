@@ -80,6 +80,8 @@ from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.object_store import ObjectStoreFactory
 
+from ..utils import store_mapping_and_register_objects
+
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     """ServerAppIo API servicer."""
@@ -158,10 +160,17 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             message_id: Optional[str] = state.store_message_ins(message=message)
             message_ids.append(message_id)
 
+        # Init store
+        store = self.objectstore_factory.store()
+
+        # Store Message object to descendants mapping and preregister objects
+        objects_to_push = store_mapping_and_register_objects(store, request=request)
+
         return PushInsMessagesResponse(
             message_ids=[
                 str(message_id) if message_id else "" for message_id in message_ids
-            ]
+            ],
+            objects_to_push=objects_to_push,
         )
 
     def PullMessages(

@@ -48,7 +48,7 @@ message Metadata {
   double created_at = 9;
 }
 
-message ObjectIDs { repeated string object_id = 1; }
+message ObjectIDs { repeated string object_ids = 1; }
 
 // PushObject messages
 message PushObjectRequest {
