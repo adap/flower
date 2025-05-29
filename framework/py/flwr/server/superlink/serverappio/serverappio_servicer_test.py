@@ -18,6 +18,7 @@
 import tempfile
 import unittest
 from typing import Optional
+from unittest.mock import patch
 
 import grpc
 from parameterized import parameterized
@@ -426,6 +427,49 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Execute & Assert
         self._assert_pull_messages_not_allowed(run_id)
+
+    def test_pull_message_from_expired_message_error(self) -> None:
+        """Test that the servicer correctly handles the registration in the ObjecStore
+        of an Error message created by the LinkState due to an expired TTL."""
+        # Prepare
+        node_id = self.state.create_node(heartbeat_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+
+        # Transition status to running.
+        self._transition_run_status(run_id, 2)
+
+        # Push Messages and reply
+        message_ins = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        msg_id = self.state.store_message_ins(message=message_ins)
+
+        with patch(
+            "time.time",
+            side_effect=lambda: message_ins.metadata.created_at
+            + message_ins.metadata.ttl
+            + 0.1,
+        ):  # over TTL limit
+
+            request = PullResMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
+
+            # Execute
+            response, call = self._pull_messages.with_call(request=request)
+
+            # Assert
+            assert isinstance(response, PullResMessagesResponse)
+            assert grpc.StatusCode.OK == call.code()
+
+            # Assert that objects to pull points to a message carrying an error
+            msg_res = message_from_proto(response.messages_list[0])
+            assert msg_res.has_error()
+            # objects_to_pull is expected to be {msg_obj_id: msg_obj_id}
+            assert list(response.objects_to_pull.keys()) == [msg_res.object_id]
+            assert list(response.objects_to_pull.values())[0].object_ids == [
+                msg_res.object_id
+            ]
 
     def test_push_serverapp_outputs_successful_if_running(self) -> None:
         """Test `PushServerAppOutputs` success."""
