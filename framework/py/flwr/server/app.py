@@ -510,6 +510,7 @@ def _try_obtain_exec_auth_plugins(
         except NotImplementedError:
             sys.exit(f"No {section} plugins are currently supported.")
 
+    # Load authentication plugin
     auth_plugin = cast(
         ExecAuthPlugin,
         _load_plugin(
@@ -519,6 +520,7 @@ def _try_obtain_exec_auth_plugins(
         ),
     )
 
+    # Load authorization plugin
     authz_plugin = cast(
         ExecAuthzPlugin,
         _load_plugin(
