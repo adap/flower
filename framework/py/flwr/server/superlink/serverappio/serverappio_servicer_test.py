@@ -446,6 +446,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         )
         msg_id = self.state.store_message_ins(message=message_ins)
 
+        # Simulate situation where the message has expired in the LinkState
+        # This will trigger the creation of an Error message
         with patch(
             "time.time",
             side_effect=lambda: message_ins.metadata.created_at
