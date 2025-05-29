@@ -40,7 +40,6 @@ from flwr.client.clientapp.clientappio_servicer import (
 )
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
-from flwr.client.message_handler.message_handler import handle_control_message
 from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Message
 from flwr.common.address import parse_address
@@ -151,186 +150,161 @@ def start_client_internal(
 
     runs: dict[int, Run] = {}
 
-    while True:
-        sleep_duration: int = 0
-        with _init_connection(
-            transport=transport,
-            server_address=server_address,
-            insecure=insecure,
-            root_certificates=root_certificates,
-            authentication_keys=authentication_keys,
-            max_retries=max_retries,
-            max_wait_time=max_wait_time,
-        ) as conn:
-            receive, send, create_node, delete_node, get_run, get_fab = conn
+    with _init_connection(
+        transport=transport,
+        server_address=server_address,
+        insecure=insecure,
+        root_certificates=root_certificates,
+        authentication_keys=authentication_keys,
+        max_retries=max_retries,
+        max_wait_time=max_wait_time,
+    ) as conn:
+        receive, send, create_node, _, get_run, get_fab = conn
 
-            # Register node when connecting the first time
-            if run_info_store is None:
-                # Call create_node fn to register node
-                # and store node_id in state
-                if (node_id := create_node()) is None:
-                    raise ValueError("Failed to register SuperNode with the SuperLink")
-                state.set_node_id(node_id)
-                run_info_store = DeprecatedRunInfoStore(
-                    node_id=state.get_node_id(),
-                    node_config=node_config,
+        # Register node when connecting the first time
+        if run_info_store is None:
+            # Call create_node fn to register node
+            # and store node_id in state
+            if (node_id := create_node()) is None:
+                raise ValueError("Failed to register SuperNode with the SuperLink")
+            state.set_node_id(node_id)
+            run_info_store = DeprecatedRunInfoStore(
+                node_id=state.get_node_id(),
+                node_config=node_config,
+            )
+
+        # pylint: disable=too-many-nested-blocks
+        while True:
+            try:
+                # Receive
+                message = receive()
+                if message is None:
+                    time.sleep(3)  # Wait for 3s before asking again
+                    continue
+
+                log(INFO, "")
+                if len(message.metadata.group_id) > 0:
+                    log(
+                        INFO,
+                        "[RUN %s, ROUND %s]",
+                        message.metadata.run_id,
+                        message.metadata.group_id,
+                    )
+                log(
+                    INFO,
+                    "Received: %s message %s",
+                    message.metadata.message_type,
+                    message.metadata.message_id,
                 )
 
-            # pylint: disable=too-many-nested-blocks
-            while True:
-                try:
-                    # Receive
-                    message = receive()
-                    if message is None:
-                        time.sleep(3)  # Wait for 3s before asking again
-                        continue
+                # Get run info
+                run_id = message.metadata.run_id
+                if run_id not in runs:
+                    runs[run_id] = get_run(run_id)
 
-                    log(INFO, "")
-                    if len(message.metadata.group_id) > 0:
-                        log(
-                            INFO,
-                            "[RUN %s, ROUND %s]",
-                            message.metadata.run_id,
-                            message.metadata.group_id,
-                        )
-                    log(
-                        INFO,
-                        "Received: %s message %s",
-                        message.metadata.message_type,
-                        message.metadata.message_id,
-                    )
+                run: Run = runs[run_id]
+                if get_fab is not None and run.fab_hash:
+                    fab = get_fab(run.fab_hash, run_id)
+                    fab_id, fab_version = get_fab_metadata(fab.content)
+                else:
+                    fab = None
+                    fab_id, fab_version = run.fab_id, run.fab_version
 
-                    # Handle control message
-                    out_message, sleep_duration = handle_control_message(message)
-                    if out_message:
-                        send(out_message)
-                        break
+                run.fab_id, run.fab_version = fab_id, fab_version
 
-                    # Get run info
-                    run_id = message.metadata.run_id
-                    if run_id not in runs:
-                        runs[run_id] = get_run(run_id)
+                # Register context for this run
+                run_info_store.register_context(
+                    run_id=run_id,
+                    run=run,
+                    flwr_path=flwr_path,
+                    fab=fab,
+                )
 
-                    run: Run = runs[run_id]
-                    if get_fab is not None and run.fab_hash:
-                        fab = get_fab(run.fab_hash, run_id)
-                        fab_id, fab_version = get_fab_metadata(fab.content)
-                    else:
-                        fab = None
-                        fab_id, fab_version = run.fab_id, run.fab_version
+                # Retrieve context for this run
+                context = run_info_store.retrieve_context(run_id=run_id)
+                # Create an error reply message that will never be used to prevent
+                # the used-before-assignment linting error
+                reply_message = Message(
+                    Error(code=ErrorCode.UNKNOWN, reason="Unknown"),
+                    reply_to=message,
+                )
 
-                    run.fab_id, run.fab_version = fab_id, fab_version
+                # Two isolation modes:
+                # 1. `subprocess`: SuperNode is starting the ClientApp
+                #    process as a subprocess.
+                # 2. `process`: ClientApp process gets started separately
+                #    (via `flwr-clientapp`), for example, in a separate
+                #    Docker container.
 
-                    # Register context for this run
-                    run_info_store.register_context(
-                        run_id=run_id,
-                        run=run,
-                        flwr_path=flwr_path,
-                        fab=fab,
-                    )
+                # Generate SuperNode token
+                token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
 
-                    # Retrieve context for this run
-                    context = run_info_store.retrieve_context(run_id=run_id)
-                    # Create an error reply message that will never be used to prevent
-                    # the used-before-assignment linting error
-                    reply_message = Message(
-                        Error(code=ErrorCode.UNKNOWN, reason="Unknown"),
-                        reply_to=message,
-                    )
+                # Mode 1: SuperNode starts ClientApp as subprocess
+                start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
 
-                    # Two isolation modes:
-                    # 1. `subprocess`: SuperNode is starting the ClientApp
-                    #    process as a subprocess.
-                    # 2. `process`: ClientApp process gets started separately
-                    #    (via `flwr-clientapp`), for example, in a separate
-                    #    Docker container.
-
-                    # Generate SuperNode token
-                    token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
-
-                    # Mode 1: SuperNode starts ClientApp as subprocess
-                    start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
-
-                    # Share Message and Context with servicer
-                    clientappio_servicer.set_inputs(
-                        clientapp_input=ClientAppInputs(
-                            message=message,
-                            context=context,
-                            run=run,
-                            fab=fab,
-                            token=token,
-                        ),
-                        token_returned=start_subprocess,
-                    )
-
-                    if start_subprocess:
-                        _octet, _colon, _port = clientappio_api_address.rpartition(":")
-                        io_address = (
-                            f"{CLIENT_OCTET}:{_port}"
-                            if _octet == SERVER_OCTET
-                            else clientappio_api_address
-                        )
-                        # Start ClientApp subprocess
-                        command = [
-                            "flwr-clientapp",
-                            "--clientappio-api-address",
-                            io_address,
-                            "--token",
-                            str(token),
-                        ]
-                        command.append("--insecure")
-
-                        proc = mp_spawn_context.Process(
-                            target=_run_flwr_clientapp,
-                            args=(command, os.getpid()),
-                            daemon=True,
-                        )
-                        proc.start()
-                        proc.join()
-                    else:
-                        # Wait for output to become available
-                        while not clientappio_servicer.has_outputs():
-                            time.sleep(0.1)
-
-                    outputs = clientappio_servicer.get_outputs()
-                    reply_message, context = outputs.message, outputs.context
-
-                    # Update node state
-                    run_info_store.update_context(
-                        run_id=run_id,
+                # Share Message and Context with servicer
+                clientappio_servicer.set_inputs(
+                    clientapp_input=ClientAppInputs(
+                        message=message,
                         context=context,
+                        run=run,
+                        fab=fab,
+                        token=token,
+                    ),
+                    token_returned=start_subprocess,
+                )
+
+                if start_subprocess:
+                    _octet, _colon, _port = clientappio_api_address.rpartition(":")
+                    io_address = (
+                        f"{CLIENT_OCTET}:{_port}"
+                        if _octet == SERVER_OCTET
+                        else clientappio_api_address
                     )
+                    # Start ClientApp subprocess
+                    command = [
+                        "flwr-clientapp",
+                        "--clientappio-api-address",
+                        io_address,
+                        "--token",
+                        str(token),
+                    ]
+                    command.append("--insecure")
 
-                    # Send
-                    send(reply_message)
-                    log(INFO, "Sent reply")
-
-                except RunNotRunningException:
-                    log(INFO, "")
-                    log(
-                        INFO,
-                        "SuperNode aborted sending the reply message. "
-                        "Run ID %s is not in `RUNNING` status.",
-                        run_id,
+                    proc = mp_spawn_context.Process(
+                        target=_run_flwr_clientapp,
+                        args=(command, os.getpid()),
+                        daemon=True,
                     )
-                    log(INFO, "")
-            # pylint: enable=too-many-nested-blocks
+                    proc.start()
+                    proc.join()
+                else:
+                    # Wait for output to become available
+                    while not clientappio_servicer.has_outputs():
+                        time.sleep(0.1)
 
-            # Unregister node
-            if delete_node is not None:
-                delete_node()  # pylint: disable=not-callable
+                outputs = clientappio_servicer.get_outputs()
+                reply_message, context = outputs.message, outputs.context
 
-        if sleep_duration == 0:
-            log(INFO, "Disconnect and shut down")
-            break
+                # Update node state
+                run_info_store.update_context(
+                    run_id=run_id,
+                    context=context,
+                )
 
-        # Sleep and reconnect afterwards
-        log(
-            INFO,
-            "Disconnect, then re-establish connection after %s second(s)",
-            sleep_duration,
-        )
-        time.sleep(sleep_duration)
+                # Send
+                send(reply_message)
+                log(INFO, "Sent reply")
+
+            except RunNotRunningException:
+                log(INFO, "")
+                log(
+                    INFO,
+                    "SuperNode aborted sending the reply message. "
+                    "Run ID %s is not in `RUNNING` status.",
+                    run_id,
+                )
+                log(INFO, "")
 
 
 @contextmanager
