@@ -1,6 +1,6 @@
-:og:description: Flower runtimes comparison
+:og:description: Comparison of Flower simulation and deployment runtimes for federated apps.
 .. meta::
-    :description: Flower runtimes comparison
+    :description: Comparison of Flower simulation and deployment runtimes for federated apps.
 
 Flower Runtimes Comparison
 ==========================
@@ -49,7 +49,7 @@ deployment runtime.
       - TLS-enabled gRPC.
     - - **Server-side Infrastructure**
       - Simulation runtime coordinates the spawning of multiple workers (Python process)
-        which act as `simulated` SuperNodes. There is no SuperLink.
+        which act as `simulated` SuperNodes. The simulation runtime can be started with or without the `SuperLink <ref-api-cli.html#flower-superlink>`_.
       - The SuperLink awaits for SuperNodes to connect. User interface with the
         SuperLink using the `Flower CLI <ref-api-cli.html>`_.
     - - **Server-side App execution**
@@ -67,6 +67,6 @@ deployment runtime.
         instances of the same ``ClientApp`` to simulate large amounts of clients.
         ``ClientApps`` are stateless.
       - Initialized as a ``ClientApp`` `process or subprocess
-        <ref-flower-network-communication.html>`_ runs independently from the SuperNode
+        <ref-flower-network-communication.html>`_, it runs independently from the SuperNode
         and communicates with it over gRPC via the ClientAppIo API. ``ClientApps`` are
         stateless.
