@@ -53,22 +53,22 @@ def arrays_size_mod(
     This mod logs the number of array elements transmitted in ``ArrayRecord`` objects
     of the message as well as their sizes in bytes.
     """
-    # Log the model size statistics and the total size in the incoming message
-    model_size_stats = _get_array_record_size_stats(msg)
-    total_bytes = sum(stat["bytes"] for stat in model_size_stats.values())
-    if model_size_stats:
+    # Log the ArrayRecord size statistics and the total size in the incoming message
+    array_record_size_stats = _get_array_record_size_stats(msg)
+    total_bytes = sum(stat["bytes"] for stat in array_record_size_stats.values())
+    if array_record_size_stats:
         log(INFO, "Incoming `ArrayRecord` size statistics:")
-        log(INFO, model_size_stats)
+        log(INFO, array_record_size_stats)
     log(INFO, "Total array elements received: %i bytes", total_bytes)
 
     msg = call_next(msg, ctxt)
 
-    # Log the model size statistics and the total size in the outgoing message
-    model_size_stats = _get_array_record_size_stats(msg)
-    total_bytes = sum(stat["bytes"] for stat in model_size_stats.values())
-    if model_size_stats:
+    # Log the ArrayRecord size statistics and the total size in the outgoing message
+    array_record_size_stats = _get_array_record_size_stats(msg)
+    total_bytes = sum(stat["bytes"] for stat in array_record_size_stats.values())
+    if array_record_size_stats:
         log(INFO, "Outgoing `ArrayRecord` size statistics:")
-        log(INFO, model_size_stats)
+        log(INFO, array_record_size_stats)
     log(INFO, "Total array elements sent: %i bytes", total_bytes)
     return msg
 
