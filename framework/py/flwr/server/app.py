@@ -27,7 +27,7 @@ from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Any, Optional
+from typing import Any, Callable, Optional, Union, cast
 
 import grpc
 import yaml
@@ -155,17 +155,14 @@ def run_superlink() -> None:
     event_log_plugin: Optional[EventLogWriterPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
-        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path), verify_tls_cert)
+        # pylint: disable=unused-variable
+        auth_plugin, authz_plugin = _try_obtain_exec_auth_plugins(  # noqa: F841
+            Path(cfg_path), verify_tls_cert
+        )
+        # pylint: enable=unused-variable
         # Enable event logging if the args.enable_event_log is True
         if args.enable_event_log:
             event_log_plugin = _try_obtain_exec_event_log_writer_plugin()
-        # Enable authorization if the args.enable_authorization is True
-        if args.enable_authorization:
-            # pylint: disable=unused-variable
-            authz_plugin = _try_obtain_exec_authz_plugin(  # noqa: F841
-                Path(cfg_path), verify_tls_cert
-            )
-            # pylint: enable=unused-variable
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -484,62 +481,58 @@ def _try_load_public_keys_node_authentication(
     return node_public_keys
 
 
-def _try_obtain_exec_auth_plugin(
+def _try_obtain_exec_auth_plugins(
     config_path: Path, verify_tls_cert: bool
-) -> Optional[ExecAuthPlugin]:
+) -> tuple[ExecAuthPlugin, ExecAuthzPlugin]:
+    """Obtain Exec API authentication and authorization plugins."""
     # Load YAML file
     with config_path.open("r", encoding="utf-8") as file:
         config: dict[str, Any] = yaml.safe_load(file)
 
-    # Load authentication configuration
-    auth_config: dict[str, Any] = config.get("authentication", {})
-    auth_type: str = auth_config.get(AUTH_TYPE_YAML_KEY, "")
+    def _load_plugin(
+        section: str,
+        yaml_key: str,
+        loader: Callable[[], dict[str, type[Union[ExecAuthPlugin, ExecAuthzPlugin]]]],
+    ) -> Union[ExecAuthPlugin, ExecAuthzPlugin]:
+        section_cfg = config.get(section, {})
+        auth_plugin_name = section_cfg.get(yaml_key, "")
+        try:
+            plugins = loader()
+            plugin_cls = plugins[auth_plugin_name]
+            return plugin_cls(
+                user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
+            )
+        except KeyError:
+            if auth_plugin_name:
+                sys.exit(
+                    f"{yaml_key}: {auth_plugin_name} is not supported. "
+                    f"Please provide a valid {section} type in the configuration."
+                )
+            sys.exit(f"No {section} type is provided in the configuration.")
+        except NotImplementedError:
+            sys.exit(f"No {section} plugins are currently supported.")
 
     # Load authentication plugin
-    try:
-        all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
-        auth_plugin_class = all_plugins[auth_type]
-        return auth_plugin_class(
-            user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
-        )
-    except KeyError:
-        if auth_type != "":
-            sys.exit(
-                f'Authentication type "{auth_type}" is not supported. '
-                "Please provide a valid authentication type in the configuration."
-            )
-        sys.exit("No authentication type is provided in the configuration.")
-    except NotImplementedError:
-        sys.exit("No authentication plugins are currently supported.")
-
-
-def _try_obtain_exec_authz_plugin(
-    config_path: Path, verify_tls_cert: bool
-) -> Optional[ExecAuthzPlugin]:
-    # Load YAML file
-    with config_path.open("r", encoding="utf-8") as file:
-        config: dict[str, Any] = yaml.safe_load(file)
-
-    # Load authentication configuration
-    authz_config: dict[str, Any] = config.get("authorization", {})
-    authz_type: str = authz_config.get(AUTHZ_TYPE_YAML_KEY, "")
+    auth_plugin = cast(
+        ExecAuthPlugin,
+        _load_plugin(
+            section="authentication",
+            yaml_key=AUTH_TYPE_YAML_KEY,
+            loader=get_exec_auth_plugins,
+        ),
+    )
 
     # Load authorization plugin
-    try:
-        all_plugins: dict[str, type[ExecAuthzPlugin]] = get_exec_authz_plugins()
-        authz_plugin_class = all_plugins[authz_type]
-        return authz_plugin_class(
-            user_authz_config_path=config_path, verify_tls_cert=verify_tls_cert
-        )
-    except KeyError:
-        if authz_type != "":
-            sys.exit(
-                f'Authentication type "{authz_type}" is not supported. '
-                "Please provide a valid authorization type in the configuration."
-            )
-        sys.exit("No authorization type is provided in the configuration.")
-    except NotImplementedError:
-        sys.exit("No authorization plugins are currently supported.")
+    authz_plugin = cast(
+        ExecAuthzPlugin,
+        _load_plugin(
+            section="authorization",
+            yaml_key=AUTHZ_TYPE_YAML_KEY,
+            loader=get_exec_authz_plugins,
+        ),
+    )
+
+    return auth_plugin, authz_plugin
 
 
 def _try_obtain_exec_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]:
