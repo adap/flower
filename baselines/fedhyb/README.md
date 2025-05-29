@@ -74,11 +74,11 @@ poetry install
 To run Fedhyb with CSE-CIC-IDS2018  baseline, ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
-python -m fedhyb.main # this will run using the default settings in the `conf/base.yaml`
+flwr run . # this will run using the default settings in the `pyproject.toml`
 
 
 # By default, centralized (server) evaluation is disabled. Therefore, the federated evaluation is activated for all the clients.
-# Per_client evaluation metrics (accuracy and loss) are returned to the server at each round for weighted acuuracy athe the server's side.
+# Per_client evaluation metrics (accuracy and loss) are returned to the server at each round for weighted acuracy at he the server's side.
 # We adopt a federated evaluation approach to better mimic real-world scenarios, where clients possess heterogeneous and imbalanced data #distributions.
 ```
 
