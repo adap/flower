@@ -16,7 +16,7 @@
 
 
 import contextvars
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Union
 
 import grpc
 
@@ -56,10 +56,10 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
     def __init__(
         self,
         auth_plugin: ExecAuthPlugin,
-        authz_plugin: Optional[ExecAuthzPlugin] = None,
+        authz_plugin: ExecAuthzPlugin,
     ):
         self.auth_plugin = auth_plugin
-        self.authz_plugin = authz_plugin if authz_plugin else None
+        self.authz_plugin = authz_plugin
 
     def intercept_service(
         self,
@@ -104,13 +104,12 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                     raise grpc.RpcError()
                 # Store user info in contextvars for authenticated users
                 shared_user_info.set(user_info)
-                if self.authz_plugin:
-                    # Check if the user is authorized
-                    if not self.authz_plugin.verify_user_authorization(user_info):
-                        context.abort(
-                            grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
-                        )
-                        raise grpc.RpcError()
+                # Check if the user is authorized
+                if not self.authz_plugin.verify_user_authorization(user_info):
+                    context.abort(
+                        grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
+                    )
+                    raise grpc.RpcError()
                 return call(request, context)  # type: ignore
 
             # If the user is not authenticated, refresh tokens
