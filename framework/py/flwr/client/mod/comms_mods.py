@@ -57,6 +57,7 @@ def arrays_size_mod(
     model_size_stats = _get_model_size_stats(msg)
     total_bytes = sum(stat["bytes"] for stat in model_size_stats.values())
     if model_size_stats:
+        log(INFO, "Incoming model size statistics:")
         log(INFO, model_size_stats)
     log(INFO, "Total array elements received: %i bytes", total_bytes)
 
@@ -66,6 +67,7 @@ def arrays_size_mod(
     model_size_stats = _get_model_size_stats(msg)
     total_bytes = sum(stat["bytes"] for stat in model_size_stats.values())
     if model_size_stats:
+        log(INFO, "Outgoing model size statistics:")
         log(INFO, model_size_stats)
     log(INFO, "Total array elements sent: %i bytes", total_bytes)
     return msg
