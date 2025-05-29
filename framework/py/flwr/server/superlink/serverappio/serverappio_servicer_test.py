@@ -18,7 +18,6 @@
 import tempfile
 import unittest
 from typing import Optional
-from uuid import uuid4
 
 import grpc
 from parameterized import parameterized
@@ -29,6 +28,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.inflatable import get_desdendant_object_ids
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
@@ -125,6 +125,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()
         objectstore_factory = ObjectStoreFactory()
+        self.store = objectstore_factory.store()
 
         self.status_to_msg = _STATUS_TO_MSG
 
@@ -335,7 +336,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             (None, Error(code=0)),
         ]
     )  # type: ignore
-    def test_successful_pull_messages_deletes_messages_in_linkstate(
+    def test_successful_pull_messages_deletes_messages_in_linkstate(  # pylint: disable=R0914
         self, content: Optional[RecordDict], error: Optional[Error]
     ) -> None:
         """Test `PullMessages` deletes messages from LinkState."""
@@ -362,9 +363,20 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             reply_msg = Message(error, reply_to=msg_)
 
         # pylint: disable-next=W0212
-        reply_msg.metadata._message_id = str(uuid4())  # type: ignore
-
+        reply_msg.metadata._message_id = reply_msg.object_id  # type: ignore
         self.state.store_message_res(message=reply_msg)
+        # When pulling a Message, the response also must include the IDs of the objects
+        # to pull. To achieve this, we need to at least register the Objects in the
+        # message reply into the store. Note this would normally be done when the
+        # servicer handles a PushMessageRequest
+        descendants = list(get_desdendant_object_ids(reply_msg))
+        message_obj_id = reply_msg.metadata.message_id
+        # Store mapping
+        self.store.set_message_descendant_ids(
+            msg_object_id=message_obj_id, descendant_ids=descendants
+        )
+        # Preregister
+        obj_ids_registered = self.store.preregister(descendants + [message_obj_id])
 
         request = PullResMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
 
@@ -376,6 +388,15 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
         assert self.state.num_message_ins() == 0
         assert self.state.num_message_res() == 0
+
+        # Assert expected object_ids
+        object_ids_in_response = {
+            obj_id
+            for obj_ids in response.objects_to_pull.values()
+            for obj_id in obj_ids.object_ids
+        }
+        assert set(obj_ids_registered) == object_ids_in_response
+        assert message_obj_id == list(response.objects_to_pull.keys())[0]
 
     def _assert_pull_messages_not_allowed(self, run_id: int) -> None:
         """Assert `PullMessages` not allowed."""
