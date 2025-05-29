@@ -86,19 +86,19 @@ python -m fedhyb.main # this will run using the default settings in the `conf/ba
   The default algorithm used  is `fedhyb`. To use `fedavg` please change the `algorithm` property in the pyproject.toml file.   
   All plots shown below are generated under default settings using the follwing command 'flwr run .'
 
-  When the execution completes, a new directory `logs` will be created with a txt files that contains the classification report and  performance metrics foe each client. 
+  When the execution completes, a new directory `logs` will be created with  .txt files that contains the classification report and  performance metrics for each client. 
 
   As shown by the last plot for a random client, FedHyb shows a notable improvement in detecting previously missing or unseen attack classes ( classes 3, 7, 10, and 14) compared to FedAvg:
 
-    Class 7: Precision jumps from 0.00 in FedAvg to 0.97 in FedHyb.
+    Class 7: Precision jumps from 0.00 in FedAvg to 0.97 in Fedhyb.
 
-    Class 10: From 0.00 in FedAvg to 0.67 in FedHyb.
+    Class 10: From 0.00 in FedAvg to 0.67 in Fedhyb.
 
     Class 3: From 0.61 to 0.93, indicating better generalization despite limited local exposure.
 
-    Class 14: Precision remains high in both, but slightly improves in FedHyb.
+    Class 14: Precision remains high in both, but slightly improves in Fedhyb.
 
-Conclusion: FedHyb clearly helps mitigate the effect of class imbalance and supports the generalization of rare or missing attack classes across clients.
+Conclusion: Fedhyb clearly helps mitigate the effect of class imbalance and supports the generalization of rare or missing attack classes across clients.
 
   ![](_static/Acc.png)
   ![](_static/loss.png)
