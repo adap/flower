@@ -25,13 +25,14 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
+from flwr.app.metadata import Metadata
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run
@@ -41,12 +42,14 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    HeartbeatRequest,
-    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+)
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
@@ -61,7 +64,7 @@ PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
 PATH_PULL_MESSAGES: str = "/api/v0/fleet/pull-messages"
 PATH_PUSH_MESSAGES: str = "/api/v0/fleet/push-messages"
-PATH_PING: str = "api/v0/fleet/heartbeat"
+PATH_SEND_NODE_HEARTBEAT: str = "api/v0/fleet/send-node-heartbeat"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
 PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
 
@@ -84,10 +87,10 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
-        Optional[Callable[[], Optional[int]]],
-        Optional[Callable[[], None]],
-        Optional[Callable[[int], Run]],
-        Optional[Callable[[str, int], Fab]],
+        Callable[[], Optional[int]],
+        Callable[[], None],
+        Callable[[int], Run],
+        Callable[[str, int], Fab],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -205,17 +208,21 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         grpc_res.ParseFromString(res.content)
         return grpc_res
 
-    def heartbeat() -> bool:
+    def send_node_heartbeat() -> bool:
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
             return False
 
         # Construct the heartbeat request
-        req = HeartbeatRequest(node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL)
+        req = SendNodeHeartbeatRequest(
+            node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
+        )
 
         # Send the request
-        res = _request(req, HeartbeatResponse, PATH_PING, retry=False)
+        res = _request(
+            req, SendNodeHeartbeatResponse, PATH_SEND_NODE_HEARTBEAT, retry=False
+        )
         if res is None:
             return False
 
@@ -227,7 +234,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             )
         return True
 
-    heartbeat_sender = HeartbeatSender(heartbeat)
+    heartbeat_sender = HeartbeatSender(send_node_heartbeat)
 
     def create_node() -> Optional[int]:
         """Set create_node."""

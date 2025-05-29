@@ -25,13 +25,14 @@ from typing import Callable, Optional, Union, cast
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from flwr.app.metadata import Metadata
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -42,13 +43,15 @@ from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
-    HeartbeatRequest,
-    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
@@ -71,10 +74,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
-        Optional[Callable[[], Optional[int]]],
-        Optional[Callable[[], None]],
-        Optional[Callable[[int], Run]],
-        Optional[Callable[[str, int], Fab]],
+        Callable[[], Optional[int]],
+        Callable[[], None],
+        Callable[[int], Run],
+        Callable[[str, int], Fab],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -157,21 +160,25 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     retry_invoker.should_giveup = _should_giveup_fn
 
     ###########################################################################
-    # heartbeat/create_node/delete_node/receive/send/get_run functions
+    # send_node_heartbeat/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
-    def heartbeat() -> bool:
+    def send_node_heartbeat() -> bool:
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
             return False
 
         # Construct the heartbeat request
-        req = HeartbeatRequest(node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL)
+        req = SendNodeHeartbeatRequest(
+            node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
+        )
 
         # Call FleetAPI
         try:
-            res: HeartbeatResponse = stub.Heartbeat(req, timeout=HEARTBEAT_CALL_TIMEOUT)
+            res: SendNodeHeartbeatResponse = stub.SendNodeHeartbeat(
+                req, timeout=HEARTBEAT_CALL_TIMEOUT
+            )
         except grpc.RpcError as e:
             status_code = e.code()
             if status_code == grpc.StatusCode.UNAVAILABLE:
@@ -188,7 +195,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             )
         return True
 
-    heartbeat_sender = HeartbeatSender(heartbeat)
+    heartbeat_sender = HeartbeatSender(send_node_heartbeat)
 
     def create_node() -> Optional[int]:
         """Set create_node."""
@@ -272,6 +279,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "No current message")
             return
 
+        # Set message_id
+        message.metadata.__dict__["_message_id"] = message.object_id
         # Validate out message
         if not validate_out_message(message, metadata):
             log(ERROR, "Invalid out message")

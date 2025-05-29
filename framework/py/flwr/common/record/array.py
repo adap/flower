@@ -24,7 +24,10 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
+from flwr.proto.recorddict_pb2 import Array as ArrayProto  # pylint: disable=E0611
+
 from ..constant import SType
+from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..typing import NDArray
 
 if TYPE_CHECKING:
@@ -40,7 +43,7 @@ def _raise_array_init_error() -> None:
 
 
 @dataclass
-class Array:
+class Array(InflatableObject):
     """Array type.
 
     A dataclass containing serialized data from an array-like or tensor-like object
@@ -104,9 +107,20 @@ class Array:
     """
 
     dtype: str
-    shape: list[int]
     stype: str
     data: bytes
+
+    @property
+    def shape(self) -> list[int]:
+        """Get the shape of the array."""
+        self.is_dirty = True  # Mark as dirty when shape is accessed
+        return cast(list[int], self.__dict__["_shape"])
+
+    @shape.setter
+    def shape(self, value: list[int]) -> None:
+        """Set the shape of the array."""
+        self.is_dirty = True  # Mark as dirty when shape is set
+        self.__dict__["_shape"] = value
 
     @overload
     def __init__(  # noqa: E704
@@ -248,3 +262,73 @@ class Array:
         # Source: https://numpy.org/doc/stable/reference/generated/numpy.load.html
         ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
         return cast(NDArray, ndarray_deserialized)
+
+    def deflate(self) -> bytes:
+        """Deflate the Array."""
+        array_proto = ArrayProto(
+            dtype=self.dtype,
+            shape=self.shape,
+            stype=self.stype,
+            data=self.data,
+        )
+
+        obj_body = array_proto.SerializeToString(deterministic=True)
+        return add_header_to_object_body(object_body=obj_body, obj=self)
+
+    @classmethod
+    def inflate(
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
+    ) -> Array:
+        """Inflate an Array from bytes.
+
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content of the Array.
+
+        children : Optional[dict[str, InflatableObject]] (default: None)
+            Must be ``None``. ``Array`` does not support child objects.
+            Providing any children will raise a ``ValueError``.
+
+        Returns
+        -------
+        Array
+            The inflated Array.
+        """
+        if children:
+            raise ValueError("`Array` objects do not have children.")
+
+        obj_body = get_object_body(object_content, cls)
+        proto_array = ArrayProto.FromString(obj_body)
+        return cls(
+            dtype=proto_array.dtype,
+            shape=list(proto_array.shape),
+            stype=proto_array.stype,
+            data=proto_array.data,
+        )
+
+    @property
+    def object_id(self) -> str:
+        """Get object ID."""
+        ret = super().object_id
+        self.is_dirty = False  # Reset dirty flag
+        return ret
+
+    @property
+    def is_dirty(self) -> bool:
+        """Check if the object is dirty after the last deflation."""
+        if "_is_dirty" not in self.__dict__:
+            self.__dict__["_is_dirty"] = True
+        return cast(bool, self.__dict__["_is_dirty"])
+
+    @is_dirty.setter
+    def is_dirty(self, value: bool) -> None:
+        """Set the dirty flag."""
+        self.__dict__["_is_dirty"] = value
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        """Set attribute with special handling for dirty state."""
+        if name in ("dtype", "stype", "data"):
+            # Mark as dirty if any of the main attributes are set
+            self.is_dirty = True
+        super().__setattr__(name, value)

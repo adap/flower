@@ -16,7 +16,6 @@
 
 
 from typing import Optional
-from uuid import UUID
 
 from flwr.common import Message
 from flwr.common.constant import Status
@@ -33,13 +32,15 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    HeartbeatRequest,
-    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
     Reconnect,
+)
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
@@ -73,13 +74,15 @@ def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeRespo
     return DeleteNodeResponse()
 
 
-def heartbeat(
-    request: HeartbeatRequest,  # pylint: disable=unused-argument
+def send_node_heartbeat(
+    request: SendNodeHeartbeatRequest,  # pylint: disable=unused-argument
     state: LinkState,  # pylint: disable=unused-argument
-) -> HeartbeatResponse:
+) -> SendNodeHeartbeatResponse:
     """."""
-    res = state.acknowledge_heartbeat(request.node.node_id, request.heartbeat_interval)
-    return HeartbeatResponse(success=res)
+    res = state.acknowledge_node_heartbeat(
+        request.node.node_id, request.heartbeat_interval
+    )
+    return SendNodeHeartbeatResponse(success=res)
 
 
 def pull_messages(
@@ -118,7 +121,7 @@ def push_messages(
         raise InvalidRunStatusException(abort_msg)
 
     # Store Message in State
-    message_id: Optional[UUID] = state.store_message_res(message=msg)
+    message_id: Optional[str] = state.store_message_res(message=msg)
 
     # Build response
     response = PushMessagesResponse(

@@ -25,7 +25,7 @@ import kotlinx.coroutines.withContext
  * remote engine based on configuration and availability.
  */
 object FlowerIntelligence {
-  private var remoteEngine = RemoteEngine()
+  internal var remoteEngine = RemoteEngine()
   private var remoteHandoff: Boolean = true
 
   /**
@@ -93,35 +93,39 @@ object FlowerIntelligence {
     }
 
   /**
-   * Conducts a chat interaction using an array of messages and options.
+   * Conducts a chat interaction using a list of messages and optional options.
    *
    * This method allows for multi-message conversations by accepting a list of [Message] objects and
    * a [ChatOptions] configuration.
    *
    * Example:
    * ```
-   * val messages = listOf(Message(role = "user", content = "Why is the sky blue?"))
-   * val result = FlowerIntelligence.chat(messages to ChatOptions(model = "meta/llama3.2-1b"))
+   * val messages = listOf(
+   *   Message(role = "system", content = "You are a helpful assistant."),
+   *   Message(role = "user", content = "Why is the sky blue?")
+   * )
+   * val options = ChatOptions(model = "meta/llama3.2-1b")
+   * val result = FlowerIntelligence.chat(messages, options)
    * ```
    *
-   * @param options A [Pair] containing a list of [Message] and a [ChatOptions] object.
+   * @param messages The list of [Message] objects representing the conversation.
+   * @param chatOptions Optional [ChatOptions] to customize behavior.
    * @return A [Result] containing the reply [Message] on success, or [Failure] on error.
    */
-  suspend fun chat(options: Pair<List<Message>, ChatOptions>): Result<Message> =
+  suspend fun chat(messages: List<Message>, chatOptions: ChatOptions? = null): Result<Message> =
     withContext(Dispatchers.Default) {
-      val (messages, chatOptions) = options
       val selectedEngine = remoteEngine
 
       return@withContext try {
         val result =
           selectedEngine.chat(
             messages,
-            model = chatOptions.model,
-            temperature = chatOptions.temperature,
-            maxCompletionTokens = chatOptions.maxCompletionTokens,
-            stream = chatOptions.stream,
-            onStreamEvent = chatOptions.onStreamEvent,
-            tools = chatOptions.tools,
+            model = chatOptions?.model,
+            temperature = chatOptions?.temperature,
+            maxCompletionTokens = chatOptions?.maxCompletionTokens,
+            stream = chatOptions?.stream ?: false,
+            onStreamEvent = chatOptions?.onStreamEvent,
+            tools = chatOptions?.tools,
           )
         Result.success(result)
       } catch (e: Exception) {

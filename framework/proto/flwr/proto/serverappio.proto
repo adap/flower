@@ -17,6 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/heartbeat.proto";
 import "flwr/proto/log.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/message.proto";
@@ -24,9 +25,6 @@ import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
 
 service ServerAppIo {
-  // Request run_id
-  rpc CreateRun(CreateRunRequest) returns (CreateRunResponse) {}
-
   // Return a set of nodes
   rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
 
@@ -59,6 +57,16 @@ service ServerAppIo {
 
   // Push ServerApp logs
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
+
+  // Heartbeat
+  rpc SendAppHeartbeat(SendAppHeartbeatRequest)
+      returns (SendAppHeartbeatResponse) {}
+
+  // Push Object
+  rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
+
+  // Pull Object
+  rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
 }
 
 // GetNodes messages
@@ -69,15 +77,22 @@ message GetNodesResponse { repeated Node nodes = 1; }
 message PushInsMessagesRequest {
   repeated Message messages_list = 1;
   uint64 run_id = 2;
+  map<string, ObjectIDs> msg_to_children_mapping = 3;
 }
-message PushInsMessagesResponse { repeated string message_ids = 1; }
+message PushInsMessagesResponse {
+  repeated string message_ids = 1;
+  map<string, ObjectIDs> objects_to_push = 2;
+}
 
 // PullMessages messages
 message PullResMessagesRequest {
   repeated string message_ids = 1;
   uint64 run_id = 2;
 }
-message PullResMessagesResponse { repeated Message messages_list = 1; }
+message PullResMessagesResponse {
+  repeated Message messages_list = 1;
+  map<string, ObjectIDs> objects_to_pull = 2;
+}
 // PullServerAppInputs messages
 message PullServerAppInputsRequest {}
 message PullServerAppInputsResponse {

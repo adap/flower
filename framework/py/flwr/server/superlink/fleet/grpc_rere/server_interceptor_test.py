@@ -43,12 +43,14 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    HeartbeatRequest,
-    HeartbeatResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+)
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
@@ -56,6 +58,7 @@ from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_res_message
+from flwr.supercore.object_store import ObjectStoreFactory
 
 from .server_interceptor import AuthenticateServerInterceptor
 
@@ -71,6 +74,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state = state_factory.state()
         ffs_factory = FfsFactory(".")
         self.ffs = ffs_factory.ffs()
+        objectstore_factory = ObjectStoreFactory()
         self.state.store_node_public_keys({public_key_to_bytes(self.node_pk)})
 
         self._server_interceptor = AuthenticateServerInterceptor(state_factory)
@@ -78,6 +82,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
             ffs_factory,
+            objectstore_factory,
             None,
             [self._server_interceptor],
         )
@@ -108,10 +113,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=GetRunRequest.SerializeToString,
             response_deserializer=GetRunResponse.FromString,
         )
-        self._heartbeat = self._channel.unary_unary(
-            "/flwr.proto.Fleet/Heartbeat",
-            request_serializer=HeartbeatRequest.SerializeToString,
-            response_deserializer=HeartbeatResponse.FromString,
+        self._send_node_heartbeat = self._channel.unary_unary(
+            "/flwr.proto.Fleet/SendNodeHeartbeat",
+            request_serializer=SendNodeHeartbeatRequest.SerializeToString,
+            response_deserializer=SendNodeHeartbeatResponse.FromString,
         )
         self._get_fab = self._channel.unary_unary(
             "/flwr.proto.Fleet/GetFab",
@@ -207,11 +212,11 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         req = GetRunRequest(node=Node(node_id=node_id), run_id=run_id)
         return self._get_run.with_call(request=req, metadata=metadata)
 
-    def _test_heartbeat(self, metadata: list[Any]) -> Any:
-        """Test Heartbeat."""
+    def _test_send_node_heartbeat(self, metadata: list[Any]) -> Any:
+        """Test SendNodeHeartbeat."""
         node_id = self._create_node_and_set_public_key()
-        req = HeartbeatRequest(node=Node(node_id=node_id))
-        return self._heartbeat.with_call(request=req, metadata=metadata)
+        req = SendNodeHeartbeatRequest(node=Node(node_id=node_id))
+        return self._send_node_heartbeat.with_call(request=req, metadata=metadata)
 
     def _test_get_fab(self, metadata: list[Any]) -> Any:
         """Test GetFab."""
@@ -241,7 +246,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_pull_messages,),
             (_test_push_messages,),
             (_test_get_run,),
-            (_test_heartbeat,),
+            (_test_send_node_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore
@@ -262,7 +267,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_pull_messages,),
             (_test_push_messages,),
             (_test_get_run,),
-            (_test_heartbeat,),
+            (_test_send_node_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore
@@ -282,7 +287,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_pull_messages,),
             (_test_push_messages,),
             (_test_get_run,),
-            (_test_heartbeat,),
+            (_test_send_node_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore
@@ -302,7 +307,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_pull_messages,),
             (_test_push_messages,),
             (_test_get_run,),
-            (_test_heartbeat,),
+            (_test_send_node_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore

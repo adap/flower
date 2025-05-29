@@ -4,4 +4,6 @@ plugins {
   alias(libs.plugins.kotlin.android) apply false
   alias(libs.plugins.kotlin.serialization) apply false
   alias(libs.plugins.ktfmt) apply false
+  alias(libs.plugins.dokka) apply false
+  alias(libs.plugins.android.application) apply false
 }

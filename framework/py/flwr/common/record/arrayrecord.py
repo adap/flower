@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import gc
+import json
 import sys
 from collections import OrderedDict
 from logging import WARN
@@ -26,6 +27,7 @@ from typing import TYPE_CHECKING, Any, cast, overload
 import numpy as np
 
 from ..constant import GC_THRESHOLD
+from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..logger import log
 from ..typing import NDArray
 from .array import Array
@@ -56,7 +58,7 @@ def _check_value(value: Array) -> None:
         )
 
 
-class ArrayRecord(TypedDict[str, Array]):
+class ArrayRecord(TypedDict[str, Array], InflatableObject):
     """Array record.
 
     A typed dictionary (``str`` to :class:`Array`) that can store named arrays,
@@ -364,6 +366,102 @@ class ArrayRecord(TypedDict[str, Array]):
             num_bytes += len(k)
 
         return num_bytes
+
+    @property
+    def children(self) -> dict[str, InflatableObject]:
+        """Return a dictionary of Arrays with their Object IDs as keys."""
+        return {arr.object_id: arr for arr in self.values()}
+
+    def deflate(self) -> bytes:
+        """Deflate the ArrayRecord."""
+        # array_name: array_object_id mapping
+        array_refs: dict[str, str] = {}
+
+        for array_name, array in self.items():
+            array_refs[array_name] = array.object_id
+
+        # Serialize references dict
+        object_body = json.dumps(array_refs).encode("utf-8")
+        return add_header_to_object_body(object_body=object_body, obj=self)
+
+    @classmethod
+    def inflate(
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
+    ) -> ArrayRecord:
+        """Inflate an ArrayRecord from bytes.
+
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content of the ArrayRecord.
+        children : Optional[dict[str, InflatableObject]] (default: None)
+            Dictionary of children InflatableObjects mapped to their Object IDs.
+            These children enable the full inflation of the ArrayRecord.
+
+        Returns
+        -------
+        ArrayRecord
+            The inflated ArrayRecord.
+        """
+        if children is None:
+            children = {}
+
+        # Inflate mapping of array_names (keys in the ArrayRecord) to Arrays' object IDs
+        obj_body = get_object_body(object_content, cls)
+        array_refs: dict[str, str] = json.loads(obj_body.decode(encoding="utf-8"))
+
+        unique_arrays = set(array_refs.values())
+        children_obj_ids = set(children.keys())
+        if unique_arrays != children_obj_ids:
+            raise ValueError(
+                "Unexpected set of `children`. "
+                f"Expected {unique_arrays} but got {children_obj_ids}."
+            )
+
+        # Ensure children are of type Array
+        if not all(isinstance(arr, Array) for arr in children.values()):
+            raise ValueError("`Children` are expected to be of type `Array`.")
+
+        # Instantiate new ArrayRecord
+        return ArrayRecord(
+            OrderedDict(
+                {name: children[object_id] for name, object_id in array_refs.items()}
+            )
+        )
+
+    @property
+    def object_id(self) -> str:
+        """Get object ID."""
+        ret = super().object_id
+        self.is_dirty = False  # Reset dirty flag
+        return ret
+
+    @property
+    def is_dirty(self) -> bool:
+        """Check if the object is dirty after the last deflation."""
+        if "_is_dirty" not in self.__dict__:
+            self.__dict__["_is_dirty"] = True
+
+        if not self.__dict__["_is_dirty"]:
+            if any(v.is_dirty for v in self.values()):
+                # If any Array is dirty, mark the record as dirty
+                self.__dict__["_is_dirty"] = True
+        return cast(bool, self.__dict__["_is_dirty"])
+
+    @is_dirty.setter
+    def is_dirty(self, value: bool) -> None:
+        """Set the dirty flag."""
+        self.__dict__["_is_dirty"] = value
+
+    def __setitem__(self, key: str, value: Array) -> None:
+        """Set item and mark the record as dirty."""
+        self.is_dirty = True  # Mark as dirty when setting an item
+        super().__setitem__(key, value)
+
+    def __delitem__(self, key: str) -> None:
+        """Delete item and mark the record as dirty."""
+        self.is_dirty = True  # Mark as dirty when deleting an item
+        super().__delitem__(key)
 
 
 class ParametersRecord(ArrayRecord):

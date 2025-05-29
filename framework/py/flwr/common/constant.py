@@ -62,6 +62,7 @@ HEARTBEAT_BASE_MULTIPLIER = 0.8
 HEARTBEAT_RANDOM_RANGE = (-0.1, 0.1)
 HEARTBEAT_MAX_INTERVAL = 1e300
 HEARTBEAT_PATIENCE = 2
+RUN_FAILURE_DETAILS_NO_HEARTBEAT = "No heartbeat received from the run."
 
 # IDs
 RUN_ID_NUM_BYTES = 8
@@ -114,6 +115,9 @@ AUTH_TYPE_YAML_KEY = "auth_type"  # For key name in YAML file
 ACCESS_TOKEN_KEY = "flwr-oidc-access-token"
 REFRESH_TOKEN_KEY = "flwr-oidc-refresh-token"
 
+# Constants for user authorization
+AUTHZ_TYPE_YAML_KEY = "authz_type"  # For key name in YAML file
+
 # Constants for node authentication
 PUBLIC_KEY_HEADER = "flwr-public-key-bin"  # Must end with "-bin" for binary data
 SIGNATURE_HEADER = "flwr-signature-bin"  # Must end with "-bin" for binary data
@@ -126,6 +130,13 @@ GRPC_RETRY_MAX_DELAY = 20  # Maximum delay duration between two consecutive retr
 
 # Constants for ArrayRecord
 GC_THRESHOLD = 200_000_000  # 200 MB
+
+# Constants for Inflatable
+HEAD_BODY_DIVIDER = b"\x00"
+HEAD_VALUE_DIVIDER = " "
+
+# Constants for serialization
+INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
 
 
 class MessageType:

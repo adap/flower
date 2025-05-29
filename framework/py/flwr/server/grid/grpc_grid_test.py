@@ -21,8 +21,9 @@ from unittest.mock import Mock, patch
 
 import grpc
 
+from flwr.app.error import Error
 from flwr.common import RecordDict
-from flwr.common.message import Error, Message
+from flwr.common.message import Message
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
@@ -109,19 +110,6 @@ class TestGrpcGrid(unittest.TestCase):
         self.assertEqual(msg_ids, mock_response.message_ids)
         for message in args[0].messages_list:
             self.assertEqual(message.metadata.run_id, 61016)
-
-    def test_push_messages_invalid(self) -> None:
-        """Test pushing invalid messages."""
-        # Prepare
-        mock_response = Mock(message_ids=["id1", "id2"])
-        self.mock_stub.PushMessages.return_value = mock_response
-        msgs = [Message(RecordDict(), 0, "query") for _ in range(2)]
-        # Use invalid run_id
-        msgs[1].metadata.__dict__["_message_id"] = "invalid message id"
-
-        # Execute and assert
-        with self.assertRaises(ValueError):
-            self.grid.push_messages(msgs)
 
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""

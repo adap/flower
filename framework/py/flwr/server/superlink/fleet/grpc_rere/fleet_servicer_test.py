@@ -40,6 +40,7 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_res_message
 from flwr.server.superlink.utils import _STATUS_TO_MSG
+from flwr.supercore.object_store import ObjectStoreFactory
 
 
 class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
@@ -55,6 +56,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         self.state = state_factory.state()
         ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()
+        objectstore_factory = ObjectStoreFactory()
 
         self.status_to_msg = _STATUS_TO_MSG
 
@@ -62,6 +64,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
             ffs_factory,
+            objectstore_factory,
             None,
             None,
         )

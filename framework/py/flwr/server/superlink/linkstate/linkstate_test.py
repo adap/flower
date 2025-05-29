@@ -19,10 +19,11 @@ import tempfile
 import time
 import unittest
 from abc import abstractmethod
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from itertools import product
 from typing import Optional
 from unittest.mock import patch
-from uuid import UUID
+from uuid import uuid4
 
 from parameterized import parameterized
 
@@ -35,7 +36,14 @@ from flwr.common import (
     RecordDict,
     now,
 )
-from flwr.common.constant import SUPERLINK_NODE_ID, ErrorCode, Status, SubStatus
+from flwr.common.constant import (
+    HEARTBEAT_PATIENCE,
+    RUN_FAILURE_DETAILS_NO_HEARTBEAT,
+    SUPERLINK_NODE_ID,
+    ErrorCode,
+    Status,
+    SubStatus,
+)
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     public_key_to_bytes,
@@ -158,6 +166,49 @@ class StateTest(unittest.TestCase):
         # Assert
         assert status1.status == Status.PENDING
         assert status2.status == Status.RUNNING
+
+    @parameterized.expand(
+        product([1, 2], ["get_run", "get_run_status", "update_run_status"])
+    )  # type: ignore
+    def test_run_failed_due_to_heartbeat(
+        self, num_transitions: int, test_method: str
+    ) -> None:
+        """Test methods work correctly when the run has no heartbeat."""
+        # Prepare
+        state = self.state_factory()
+        run_id = state.create_run(
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord()
+        )
+        # Transition run status to STARTING or RUNNING
+        transition_run_status(state, run_id, num_transitions)
+        state.acknowledge_app_heartbeat(run_id, 2)
+
+        # Execute
+        # The run should be marked as failed after HEARTBEAT_PATIENCE * 2s
+        patched_dt = now() + timedelta(seconds=HEARTBEAT_PATIENCE * 2 + 1)
+
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = patched_dt
+
+            if test_method == "get_run":
+                run = state.get_run(run_id)
+                assert run is not None
+                status = run.status
+            elif test_method == "get_run_status":
+                status = state.get_run_status({run_id})[run_id]
+            elif test_method == "update_run_status":
+                # The updation should fail because the run is already finished
+                assert not state.update_run_status(
+                    run_id, RunStatus(Status.FINISHED, SubStatus.FAILED, "")
+                )
+                status = state.get_run_status({run_id})[run_id]
+            else:
+                raise AssertionError
+
+        # Assert
+        assert status.status == Status.FINISHED
+        assert status.sub_status == SubStatus.FAILED
+        assert status.details == RUN_FAILURE_DETAILS_NO_HEARTBEAT
 
     @parameterized.expand([(0,), (1,), (2,)])  # type: ignore
     def test_status_transition_valid(
@@ -343,15 +394,19 @@ class StateTest(unittest.TestCase):
 
         # Insert one reply Message and retrieve it to mark it as delivered
         msg_res_0 = Message(Error(0), reply_to=msg_ins_list[0])
+        # pylint: disable-next=W0212
+        msg_res_0.metadata._message_id = str(uuid4())  # type: ignore
 
         _ = state.store_message_res(message=msg_res_0)
         retrieved_msg_res_0 = state.get_message_res(
-            message_ids={UUID(msg_res_0.metadata.reply_to_message_id)}
+            message_ids={msg_res_0.metadata.reply_to_message_id}
         )[0]
         assert retrieved_msg_res_0.error.code == 0
 
         # Insert one reply Message, but don't retrieve it
         msg_res_1 = Message(RecordDict(), reply_to=msg_ins_list[1])
+        # pylint: disable-next=W0212
+        msg_res_1.metadata._message_id = str(uuid4())  # type: ignore
         _ = state.store_message_res(message=msg_res_1)
 
         # Situation now:
@@ -705,8 +760,14 @@ class StateTest(unittest.TestCase):
         _ = state.store_message_ins(message=msg1)
 
         # Store replies
-        state.store_message_res(Message(RecordDict(), reply_to=msg0))
-        state.store_message_res(Message(RecordDict(), reply_to=msg1))
+        msg_rp0 = Message(RecordDict(), reply_to=msg0)
+        # pylint: disable-next=W0212
+        msg_rp0.metadata._message_id = str(uuid4())  # type: ignore
+        state.store_message_res(msg_rp0)
+        msg_rp1 = Message(RecordDict(), reply_to=msg1)
+        # pylint: disable-next=W0212
+        msg_rp1.metadata._message_id = str(uuid4())  # type: ignore
+        state.store_message_res(msg_rp1)
 
         # Execute
         num = state.num_message_res()
@@ -760,20 +821,21 @@ class StateTest(unittest.TestCase):
         # Assert
         assert node_public_keys == public_keys
 
-    def test_acknowledge_heartbeat(self) -> None:
+    def test_acknowledge_node_heartbeat(self) -> None:
         """Test if acknowledge_ping works and get_nodes return online nodes.
 
-        We permit one missed heartbeat (HEARTBEAT_PATIENCE × heartbeat_interval) before
-        marking the node offline, where HEARTBEAT_PATIENCE = 2.
+        We permit HEARTBEAT_PATIENCE - 1 missed heartbeats before marking
+        the node offline. In time units, nodes are considered online within
+        `last heartbeat time + HEARTBEAT_PATIENCE x heartbeat_interval (in seconds)`.
         """
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
         node_ids = [state.create_node(heartbeat_interval=10) for _ in range(100)]
         for node_id in node_ids[:70]:
-            state.acknowledge_heartbeat(node_id, heartbeat_interval=30)
+            state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
         for node_id in node_ids[70:]:
-            state.acknowledge_heartbeat(node_id, heartbeat_interval=90)
+            state.acknowledge_node_heartbeat(node_id, heartbeat_interval=90)
 
         # Execute
         current_time = time.time()
@@ -787,13 +849,55 @@ class StateTest(unittest.TestCase):
         # Assert
         self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
 
-    def test_acknowledge_heartbeat_failed(self) -> None:
-        """Test that acknowledge_heartbeat returns False when the heartbeat fails."""
+    def test_acknowledge_app_heartbeat(self) -> None:
+        """Test if acknowledge_app_heartbeat works."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id1 = state.create_run(None, None, "9f86d08", {}, ConfigRecord())
+        run_id2 = state.create_run(None, None, "9abcdef", {}, ConfigRecord())
+        # Switch to "running" status
+        transition_run_status(state, run_id1, 2)
+        transition_run_status(state, run_id2, 2)
+        # Heartbeat from run_id1
+        state.acknowledge_app_heartbeat(run_id1, 30)
+        state.acknowledge_app_heartbeat(run_id2, 2)
+
+        # Execute
+        # The run_id1 should be marked as inactive after HEARTBEAT_PATIENCE * 30s,
+        # and the run_id2 after HEARTBEAT_PATIENCE * 2s.
+        future_dt = now() + timedelta(seconds=20)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = future_dt
+            run_status_dict = state.get_run_status({run_id1, run_id2})
+            status1 = run_status_dict[run_id1]
+            status2 = run_status_dict[run_id2]
+
+        # Assert
+        assert status1.status == Status.RUNNING
+        assert status2.status == Status.FINISHED
+        assert status2.sub_status == SubStatus.FAILED
+        assert status2.details == RUN_FAILURE_DETAILS_NO_HEARTBEAT
+
+    def test_acknowledge_node_heartbeat_failed(self) -> None:
+        """Test that acknowledge_node_heartbeat returns False when the heartbeat
+        fails."""
         # Prepare
         state: LinkState = self.state_factory()
 
         # Execute
-        is_successful = state.acknowledge_heartbeat(0, heartbeat_interval=30)
+        is_successful = state.acknowledge_node_heartbeat(0, heartbeat_interval=30)
+
+        # Assert
+        assert not is_successful
+
+    def test_acknowledge_app_heartbeat_failed(self) -> None:
+        """Test that acknowledge_app_heartbeat returns False when the heartbeat
+        fails."""
+        # Prepare
+        state: LinkState = self.state_factory()
+
+        # Execute
+        is_successful = state.acknowledge_app_heartbeat(61016, heartbeat_interval=30)
 
         # Assert
         assert not is_successful
@@ -807,8 +911,8 @@ class StateTest(unittest.TestCase):
         node_id_1 = state.create_node(heartbeat_interval=10)
 
         # Run acknowledge heartbeat
-        state.acknowledge_heartbeat(node_id_0, heartbeat_interval=90)
-        state.acknowledge_heartbeat(node_id_1, heartbeat_interval=30)
+        state.acknowledge_node_heartbeat(node_id_0, heartbeat_interval=90)
+        state.acknowledge_node_heartbeat(node_id_1, heartbeat_interval=30)
 
         # Create and store Messages
         in_message_0 = message_from_proto(
@@ -835,13 +939,15 @@ class StateTest(unittest.TestCase):
 
         # Create and store reply Messages
         res_message_0 = Message(content=RecordDict(), reply_to=in_message_0)
+        # pylint: disable-next=W0212
+        res_message_0.metadata._message_id = str(uuid4())  # type: ignore
         state.store_message_res(res_message_0)
 
         # Execute
         current_time = time.time()
         # Test with current_time + 100s
-        # node_id_0 remain online until current_time + HEARTBEAT_PATIENCE * 90s = 180s,
-        # node_id_1 remain online until current_time + HEARTBEAT_PATIENCE * 30s = 60s.
+        # node_id_0 remain online until current_time + 180s (HEARTBEAT_PATIENCE * 90s)
+        # node_id_1 remain online until current_time + 60s (HEARTBEAT_PATIENCE * 30s)
         # As a result, a reply message with NODE_UNAVAILABLE
         # error will generate for node_id_1.
         with patch("time.time", side_effect=lambda: current_time + 100):
@@ -934,6 +1040,7 @@ class StateTest(unittest.TestCase):
             state.store_message_ins(message=msg)
 
             reply_msg = Message(RecordDict(), reply_to=msg)
+            reply_msg.metadata._message_id = str(uuid4())  # type: ignore
             reply_msg.metadata.created_at = msg_res_created_at
             reply_msg.metadata.ttl = msg_res_ttl
 
@@ -1023,7 +1130,8 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         message_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
         # Execute
-        message_res_list = state.get_message_res(message_ids={UUID(message_ins_id)})
+        message_res_list = state.get_message_res(message_ids={message_ins_id})
+        print(message_res_list)
 
         # Assert
         assert len(message_res_list) == 1
@@ -1049,6 +1157,7 @@ class StateTest(unittest.TestCase):
         ins_msg = state.get_message_ins(node_id=node_id, limit=1)[0]
         # Create reply and insert
         res_msg = Message(RecordDict(), reply_to=ins_msg)
+        res_msg.metadata._message_id = str(uuid4())  # type: ignore
         state.store_message_res(res_msg)
         assert state.num_message_res() == 1
 
@@ -1247,7 +1356,7 @@ def create_ins_message(
     return ProtoMessage(
         metadata=ProtoMetadata(
             run_id=run_id,
-            message_id="",
+            message_id=str(uuid4()),
             src_node_id=src_node_id,
             dst_node_id=dst_node_id,
             group_id="",
@@ -1277,6 +1386,18 @@ def create_res_message(
         out_msg = Message(RecordDict(), reply_to=in_msg)
 
     return message_to_proto(out_msg)
+
+
+def transition_run_status(state: LinkState, run_id: int, num_transitions: int) -> None:
+    """Transition run status from PENDING."""
+    if num_transitions > 0:
+        state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+    if num_transitions > 1:
+        state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+    if num_transitions > 2:
+        state.update_run_status(
+            run_id, RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+        )
 
 
 class InMemoryStateTest(StateTest):

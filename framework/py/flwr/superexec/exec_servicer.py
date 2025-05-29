@@ -19,7 +19,6 @@ import time
 from collections.abc import Generator
 from logging import ERROR, INFO
 from typing import Any, Optional
-from uuid import UUID
 
 import grpc
 
@@ -163,7 +162,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         )
 
         if update_success:
-            message_ids: set[UUID] = state.get_message_ids_from_run_id(request.run_id)
+            message_ids: set[str] = state.get_message_ids_from_run_id(request.run_id)
 
             # Delete Messages and their replies for the `run_id`
             state.delete_messages(message_ids)

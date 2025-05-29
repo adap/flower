@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-29 00:08+0000\n"
+"POT-Creation-Date: 2025-05-26 00:08+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -3193,7 +3193,7 @@ msgstr ""
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:39
 msgid ""
 "Download the `compose.yml "
-"<https://github.com/adap/flower/blob/main/src/docker/complete/compose.yml>`_"
+"<https://github.com/adap/flower/blob/main/framework/docker/complete/compose.yml>`_"
 " file into the example directory:"
 msgstr ""
 
@@ -3777,6 +3777,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker.rst:164
+#: ../../source/how-to-run-flower-on-gcp.rst
 #, fuzzy
 msgid "serverapp.Dockerfile"
 msgstr "Construindo a imagem do servidor"
@@ -3921,6 +3922,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker.rst:249
+#: ../../source/how-to-run-flower-on-gcp.rst
 msgid "clientapp.Dockerfile"
 msgstr ""
 
@@ -6629,6 +6631,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-azure.rst:196
+#: ../../source/how-to-run-flower-on-gcp.rst:613
 #, fuzzy
 msgid "Run Flower App"
 msgstr "O nome do repositório da imagem base."
@@ -6658,6 +6661,449 @@ msgid ""
 "To enable authentication and establish secure connections, please refer "
 "to the following resources: |authenticate_supernodes|_, "
 "|enable_tls_connections|_"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:-1
+msgid ""
+"A step-by-step guide to learn how to create, deploy and run a Flower app "
+"on the Google Cloud Platform (GCP) using the Google Kubernetes Engine "
+"(GKE)."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:6
+#, fuzzy
+msgid "Run Flower on GCP"
+msgstr "O nome do repositório da imagem base."
+
+#: ../../source/how-to-run-flower-on-gcp.rst:8
+msgid ""
+"A step-by-step guide to learn how to create, deploy and run a Flower app "
+"on the `Google Cloud Platform (GCP) <https://console.cloud.google.com>`_ "
+"using the `Google Kubernetes Engine (GKE) <https://cloud.google.com"
+"/kubernetes-engine>`_. The figure below presents an overview of the "
+"architecture of the Flower components we will deploy on GCP using GKE."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:20
+#, fuzzy
+msgid "Running Flower on GCP using GKE Architecture"
+msgstr "Arquitetura do Flower"
+
+#: ../../source/how-to-run-flower-on-gcp.rst:22
+msgid ""
+"Part of this guide has also been presented during the `Flower AI Summit "
+"2025 <https://flower.ai/events/flower-ai-summit-2025/>`_, by Prashant "
+"Kulkarni, GenAI Security Engineer at Google Cloud."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:31
+msgid "Create a Kubernetes Cluster"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:33
+msgid ""
+"Here, we outline the steps to create a Kubernetes cluster in GCP through "
+"the GCP user interface. Before proceeding, please make sure you have an "
+"account on GCP."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:36
+msgid ""
+"**Create GCP Project**: Once you have created the account, please create "
+"a new project, by selecting the project picker button, i.e., the button "
+"with the project name appearing at the top of the page. This will open a "
+"new window from where you can press the ``NEW PROJECT`` button and create"
+" the new project and assign a name, e.g., ``flower-gcp``. Before "
+"proceeding to the next step, please ensure that the ``flower-gcp`` "
+"project is selected in the top left corner."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:42
+msgid ""
+"**Enable Kubernetes API**: After the GCP project is created, in the "
+"search bar at the top of the GCP page type ``Kubernetes Engine API`` and "
+"click on it (it has an ``API`` icon). This will redirect you to the "
+"``Kubernetes Engine API`` Product page. From there you need to select "
+"``Enable``; if you see a ``Billing required`` pop-up, please check with "
+"your administrator to continue, if necessary. After you enable it you "
+"should see a green mark in the ``Kubernetes Engine API`` saying ``API "
+"Enabled``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:48
+msgid ""
+"**Create Kubernetes Cluster**: in the home page of the GCP project, under"
+" the ``Products`` section, look for the tab called ``Create a Kubernetes "
+"Cluster``. This will redirect you to a page where you will see an "
+"overview of the existing Kubernetes clusters. At the top of the page you "
+"should see a button called ``Create cluster``. By default, the Kubernetes"
+" clusters are deployed using the ``Autopilot`` mode. For the current "
+"guide, we use the ``Autopilot`` mode."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:54
+msgid ""
+"**Configure Kubernetes Cluster**: in the page that is shown, we assign a "
+"name to the new cluster, e.g., ``flower-numpy-example`` and we select the"
+" region, e.g., ``us-central1``. For the rest of the configuration "
+"settings, such as ``Cluster Tier``, ``Fleet Registration``, "
+"``Networking``, and other settings we use the default values. Now, press "
+"the ``Create`` button."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:62
+msgid ""
+"Please wait for a couple of minutes until the cluster is ready and fully "
+"deployed."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:65
+msgid "Configure Google Cloud SDK"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:67
+msgid ""
+"To interact with our newly deployed Kubernetes cluster, we will use the "
+"Google Cloud SDK and configure it locally. This SDK allows us to directly"
+" interact with GCP and in turn with our recently deployed Kubernetes "
+"cluster."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:71
+msgid ""
+"To install the Google Cloud SDK, we first need to install and configure "
+"the ``gcloud`` CLI:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:93
+msgid ""
+"For more detailed installation instructions and for installing ``gcloud``"
+" for different operating systems, please take look at the official "
+"``gcloud`` CLI installation page "
+"https://cloud.google.com/sdk/docs/install"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:97
+msgid ""
+"Once ``gcloud`` is installed we need to install ``kubectl``, which is a "
+"command-line tool to interact with Kubernetes clusters:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:105
+msgid ""
+"Before proceeding with the next steps, please make sure that you have an "
+"active account selected, otherwise you will receive a ``ERROR: "
+"(gcloud.container.clusters.get-credentials)`` when running the commands "
+"below. To obtain new credentials or select an already authenticated "
+"account please run the following commands"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:116
+msgid ""
+"Now you need to set the ``project`` property in your current workspace "
+"using the unique project identifier, which can be found under the ID "
+"column when clicking on the project picker."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:127
+msgid ""
+"The <YOUR_PROJECT_ID> value will be different for each user, e.g., "
+"``flower-gcp``, ``flower-gcp-XXXXXX``. Its value will be used in "
+"subsequent steps, e.g.,"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:130
+msgid ""
+"The next step is to configure ``kubectl`` to point to the GKE cluster you"
+" created in the previous steps by using the name of the cluster, e.g., "
+"``flower-numpy-example``, and the name of the region where the cluster "
+"was created:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:138
+msgid ""
+"This will configure the required metadata and fetch the necessary "
+"credentials to allow your local ``kubectl`` to communicate with the GKE "
+"cluster. To verify that ``kubectl`` was able to connect to the cluster "
+"and get the necessary information, you can run the following command:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:149
+msgid ""
+"For more information on how ``kubectl`` works, please have a look at the "
+"following `official quick-reference guide "
+"<https://kubernetes.io/docs/reference/kubectl/quick-reference/>`_."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:154
+msgid "Create a Google Artifact Registry"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:156
+msgid ""
+"The Google Cloud Artifact Registry is a fully managed, scalable, and "
+"private service for storing and managing software build artifacts and "
+"dependencies. Consequently, to run our Flower app on the GKE cluster, we "
+"need to store the app's specific Flower Docker images within the "
+"registry, i.e., ``ClientApp`` and ``ServerApp``, which we discuss in the "
+"next section. For typical use-cases, the Flower SuperLink and SuperNode "
+"Docker images do not need to be built and can be pulled directly from the"
+" official `Flower DockerHub repository <https://hub.docker.com/u/flwr>`_."
+" This step is crucial as it enables the cluster, and subsequently the "
+"``Pods``, to download the built Docker images and deploy the necessary "
+"Flower components. Please see below the instructions on how to create the"
+" repository using the ``gcloud`` CLI:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:183
+msgid "Registry Validation & Permissions"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:185
+msgid ""
+"The steps below validate that the Google Artifact Registry has been "
+"properly configured, you have correct access and you have writing "
+"permissions to push the docker images discussed in the next section."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:193
+msgid ""
+"The above command shows that the ``flower-gcp-example-artifacts`` "
+"repository has been successfully created under the specified project with"
+" ID ``<YOUR_PROJECT_ID>``. Finally, you need to update your role and "
+"assign writing permissions to the artifact registry. To accomplish this, "
+"please run the following command:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:205
+msgid "Configure Flower App Docker Images"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:207
+msgid ""
+"In order to proceed with this next step, first, we create a local Flower "
+"app, and then create a dedicated Dockerfile for the ServerApp and the "
+"ClientApp Docker images. Once we build the images, we tag them and push "
+"them to the newly created Google registry. Most of the steps on how to "
+"build Docker images discussed below are based on the `Flower Quickstart "
+"with Docker Tutorial <https://flower.ai/docs/framework/docker/tutorial-"
+"quickstart-docker.html>`_."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:214
+msgid "We create the Flower NumPy app as follows:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:222
+msgid "Create Docker Images"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:224
+msgid ""
+"Once the app is created, we navigate inside the app directory (i.e., "
+"where the ``pyproject.toml`` file is) and create two ``Dockerfile``\\s "
+"one for the ``ClientApp`` component, named ``clientapp.Dockerfile`` and "
+"one for the ``ServerApp`` component, named ``serverapp.Dockerfile``. We "
+"will use both files to build locally the necessary Docker images. We will"
+" be using the default images for ``SuperLink`` and ``SuperLink`` "
+"available in the `Flower DockerHub repository "
+"<https://hub.docker.com/u/flwr>`_."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:233
+msgid ""
+"Even though the app you created has only ``NumPy`` as dependency, you can"
+" use the provided ``clientapp.Dockerfile`` and ``serverapp.Dockerfile`` "
+"to create the corresponding images for any Flower app when going from "
+"simulation to deployment. The ``RUN`` command installs all the necessary "
+"dependencies for your app to run and removes the ``flwr[simulation]`` "
+"dependency while building the Docker images."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:271
+msgid ""
+"Once we have created the required Dockerfiles, we build the Docker Images"
+" as follows:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:275
+msgid ""
+"Before running the commands below, make sure ``Docker`` is installed and "
+"it is up running. The ``--platform`` type is set to ``linux/amd64``, "
+"because when using the ``Autopilot`` mode, all ``Pods`` in the Kubernetes"
+" cluster (by default) are deployed with an ``amd64``-based architecture."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:289
+msgid "Tag Docker Images"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:291
+msgid ""
+"Before we are able to push our two newly locally created Docker images, "
+"we need to tag them with the Google Artifact Registry repository name and"
+" image name we created during the previous steps. If you have followed "
+"the earlier naming suggestions, the the repository name is ``flower-gcp-"
+"example-artifacts``, the local Docker images names are "
+"``flower_numpy_example_serverapp:0.0.1`` and "
+"``flower_numpy_example_numpy:0.0.1``, and the region is ``us-central1``. "
+"Please note that the ``<YOUR_PROJECT_ID>`` is different from user to user"
+" so in the commands below we use the ``<YOUR_PROJECT_ID>`` placeholder. "
+"Putting all this together, the final commands you need to run to tag the "
+"``ServerApp`` and ``ClientApp`` Docker images are:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:314
+msgid "Push Docker Images"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:316
+msgid ""
+"Once our images are tagged correctly, you can push them to your "
+"``Artifact Registry`` repository using the ``docker push`` command with "
+"the tagged name:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:332
+msgid "Deploy Flower Infrastructure"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:334
+msgid ""
+"Before running our Flower app, we first need to deploy our ``Pods`` on "
+"the Kubernetes cluster."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:337
+msgid ""
+"In this step, we shall deploy six ``Pods``: 1x ``SuperLink``, 2x "
+"``SuperNode``, 2x ``ClientApp``, and 1x ``ServerApp``. To achieve this, "
+"below we provide the definition of the six ``yaml`` files that are "
+"necessary to deploy the ``Pods`` on the cluster and which are passed to "
+"``kubectl``, and a helper ``k8s-deploy.sh`` script, which will deploy the"
+" ``Pods``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "superlink-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "supernode-1-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "supernode-2-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "serverapp-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "clientapp-1-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "clientapp-2-deployment.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:567
+msgid ""
+"Once you have created the required files, you can use the following "
+"``k8s-deploy.sh`` helper script to deploy all the ``Pods``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:572
+msgid ""
+"Make sure the Flower version you use to deploy the ``Pods`` matches the "
+"version of your Flower app."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "k8s-deploy.sh"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:602
+msgid ""
+"To see that your ``Pods`` are deployed, please go to the ``Navigation "
+"Menu`` on the Google Console, select ``Kubernetes Engine`` and then the "
+"``Workloads`` page. The new window that appears will show the status of "
+"the ``Pods`` under deployment."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:608
+msgid ""
+"Please wait for a couple of minutes (3' to 5' minutes should be enough) "
+"before the ``Pods`` are up and running. While ``Pods`` resources are "
+"being provisioned, some warnings are expected."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:615
+msgid ""
+"Once all ``Pods`` are up and running, we need to get the ``EXTERNAL_IP`` "
+"of the ``superlink-service`` and point our Flower app to use the "
+"Kubernetes cluster to submit and execute the job."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:619
+msgid ""
+"To get the ``EXTERNAL-IP`` of the ``superlink-service`` we run the "
+"following command, which will show the ``NAME``, ``TYPE``, ``CLUSTER-"
+"IP``, ``EXTERNAL-IP`` and ``PORTS`` of the service:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:627
+msgid ""
+"After we get the ``EXTERNAL-IP`` , we go to the directory of the Flower "
+"example, we open the ``pyproject.toml`` and then add the following "
+"section at the end of the file:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:636
+msgid "Then we can execute the example on the GCP cluster by running:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:644
+msgid ""
+"Please note that in the current deployment, communication is not "
+"encrypted. To enable TLS for secure connections, check the following "
+"`guide <https://flower.ai/docs/framework/how-to-enable-tls-"
+"connections.html>`_. We will also be updating the current guide soon with"
+" more details on how to configure TLS."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:649
+msgid ""
+"If the job is successfully submitted, and executed, then in your console "
+"you should see the logs from the run. The output should look like the one"
+" shared below."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "Expected Output"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:700
+msgid ""
+"Please note that if you terminate or shut down the cluster, and create a "
+"new one, the value of the ``EXTERNAL_IP`` changes. In that case, you will"
+" have to update the ``pyproject.toml``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:705
+msgid "Shutdown Flower Infrastructure"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst:707
+msgid ""
+"If you would like to shutdown all the running pods deployed during this "
+"guide, you can use the ``kubectl delete`` command and pass the the "
+"``.yaml`` file of each pod, as also shown in the helper script below."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-gcp.rst
+msgid "k8s-shutdown.sh"
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:-1
@@ -9340,7 +9786,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
-#: flwr.client.app.start_client:1 of
+#: flwr.compat.client.app.start_client:1 of
 msgid "Start a Flower client node which connects to a Flower server."
 msgstr ""
 
@@ -9351,7 +9797,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
-#: flwr.client.app.start_numpy_client:1 of
+#: flwr.compat.client.app.start_numpy_client:1 of
 msgid "Start a Flower NumPyClient which connects to a gRPC server."
 msgstr ""
 
@@ -9532,10 +9978,9 @@ msgstr ""
 msgid "Return client (itself)."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Parameters.rst:2
-#: flwr.client.app.start_client flwr.client.app.start_numpy_client
-#: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
-#: flwr.client.client.Client.get_parameters
+#: ../../source/ref-api/flwr.common.Parameters.rst:2 flwr.app.error.Error
+#: flwr.app.metadata.Metadata flwr.client.client.Client.evaluate
+#: flwr.client.client.Client.fit flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
 #: flwr.client.client_app.ClientApp.evaluate
 #: flwr.client.client_app.ClientApp.query
@@ -9545,13 +9990,21 @@ msgstr ""
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
-#: flwr.common.context.Context flwr.common.message.Error
-#: flwr.common.message.Message flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply flwr.common.message.Metadata
-#: flwr.common.record.array.Array flwr.common.record.arrayrecord.ArrayRecord
+#: flwr.common.context.Context flwr.common.message.Message
+#: flwr.common.message.Message.create_error_reply
+#: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
+#: flwr.common.record.array.Array flwr.common.record.array.Array.inflate
+#: flwr.common.record.arrayrecord.ArrayRecord
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate
 #: flwr.common.record.configrecord.ConfigRecord
+#: flwr.common.record.configrecord.ConfigRecord.inflate
 #: flwr.common.record.metricrecord.MetricRecord
-#: flwr.common.record.recorddict.RecordDict flwr.server.app.start_server
+#: flwr.common.record.metricrecord.MetricRecord.inflate
+#: flwr.common.record.recorddict.RecordDict
+#: flwr.common.record.recorddict.RecordDict.inflate
+#: flwr.compat.client.app.start_client
+#: flwr.compat.client.app.start_numpy_client
+#: flwr.compat.server.app.start_server
 #: flwr.server.client_manager.ClientManager.register
 #: flwr.server.client_manager.ClientManager.unregister
 #: flwr.server.client_manager.SimpleClientManager.register
@@ -9608,7 +10061,13 @@ msgstr ""
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
 #: flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply flwr.server.app.start_server
+#: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
+#: flwr.common.record.array.Array.inflate
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate
+#: flwr.common.record.configrecord.ConfigRecord.inflate
+#: flwr.common.record.metricrecord.MetricRecord.inflate
+#: flwr.common.record.recorddict.RecordDict.inflate
+#: flwr.compat.server.app.start_server
 #: flwr.server.client_manager.ClientManager.num_available
 #: flwr.server.client_manager.ClientManager.register
 #: flwr.server.client_manager.SimpleClientManager.num_available
@@ -9644,7 +10103,13 @@ msgstr ""
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
 #: flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply flwr.server.app.start_server
+#: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
+#: flwr.common.record.array.Array.inflate
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate
+#: flwr.common.record.configrecord.ConfigRecord.inflate
+#: flwr.common.record.metricrecord.MetricRecord.inflate
+#: flwr.common.record.recorddict.RecordDict.inflate
+#: flwr.compat.server.app.start_server
 #: flwr.server.client_manager.ClientManager.num_available
 #: flwr.server.client_manager.ClientManager.register
 #: flwr.server.client_manager.SimpleClientManager.num_available
@@ -9698,11 +10163,10 @@ msgstr ""
 msgid "The current client properties."
 msgstr ""
 
+#: flwr.app.error.Error:1 flwr.app.metadata.Metadata:1
 #: flwr.client.client_app.ClientApp:1 flwr.client.mod.localdp_mod.LocalDpMod:1
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
-#: flwr.common.context.Context:1 flwr.common.message.Error:1
-#: flwr.common.message.Message:1 flwr.common.message.Metadata:1
-#: flwr.common.record.array.Array:1 flwr.common.typing.ClientMessage:1
+#: flwr.common.context.Context:1 flwr.common.typing.ClientMessage:1
 #: flwr.common.typing.DisconnectRes:1 flwr.common.typing.EvaluateIns:1
 #: flwr.common.typing.EvaluateRes:1 flwr.common.typing.FitIns:1
 #: flwr.common.typing.FitRes:1 flwr.common.typing.GetParametersIns:1
@@ -9719,7 +10183,6 @@ msgstr ""
 msgid "Bases: :py:class:`object`"
 msgstr ""
 
-#: flwr.client.app.start_client:51 flwr.client.app.start_numpy_client:36
 #: flwr.client.client_app.ClientApp:4
 #: flwr.client.client_app.ClientApp.evaluate:12
 #: flwr.client.client_app.ClientApp.lifespan:7
@@ -9733,8 +10196,11 @@ msgstr ""
 #: flwr.common.record.metricrecord.MetricRecord:19
 #: flwr.common.record.metricrecord.MetricsRecord:12
 #: flwr.common.record.recorddict.RecordDict:14
-#: flwr.common.record.recorddict.RecordSet:12 flwr.server.app.start_server:46
-#: flwr.server.grid.grid.Driver:14 flwr.server.server_app.ServerApp:4
+#: flwr.common.record.recorddict.RecordSet:12
+#: flwr.compat.client.app.start_client:51
+#: flwr.compat.client.app.start_numpy_client:36
+#: flwr.compat.server.app.start_server:46 flwr.server.grid.grid.Driver:14
+#: flwr.server.server_app.ServerApp:4
 #: flwr.server.server_app.ServerApp.lifespan:7
 #: flwr.server.server_app.ServerApp.main:4
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:29
@@ -10234,30 +10700,32 @@ msgstr ""
 msgid "start\\_client"
 msgstr ""
 
-#: flwr.client.app.start_client:5 of
+#: flwr.compat.client.app.start_client:5 of
 msgid ""
 "This function is deprecated since 1.13.0. Use :code:`flower-supernode` "
 "command instead to start a SuperNode."
 msgstr ""
 
-#: flwr.client.app.start_client:8 flwr.client.app.start_numpy_client:9 of
+#: flwr.compat.client.app.start_client:8
+#: flwr.compat.client.app.start_numpy_client:9 of
 msgid ""
 "The IPv4 or IPv6 address of the server. If the Flower server runs on the "
 "same machine on port 8080, then `server_address` would be "
 "`\"[::]:8080\"`."
 msgstr ""
 
-#: flwr.client.app.start_client:12 of
+#: flwr.compat.client.app.start_client:12 of
 msgid "A callable that instantiates a Client. (default: None)"
 msgstr ""
 
-#: flwr.client.app.start_client:14 of
+#: flwr.compat.client.app.start_client:14 of
 msgid ""
 "An implementation of the abstract base class `flwr.client.Client` "
 "(default: None)"
 msgstr ""
 
-#: flwr.client.app.start_client:17 flwr.client.app.start_numpy_client:15 of
+#: flwr.compat.client.app.start_client:17
+#: flwr.compat.client.app.start_numpy_client:15 of
 msgid ""
 "The maximum length of gRPC messages that can be exchanged with the Flower"
 " server. The default should be sufficient for most models. Users who "
@@ -10267,27 +10735,30 @@ msgid ""
 "increased limit and block larger messages."
 msgstr ""
 
-#: flwr.client.app.start_client:24 flwr.client.app.start_numpy_client:22 of
+#: flwr.compat.client.app.start_client:24
+#: flwr.compat.client.app.start_numpy_client:22 of
 msgid ""
 "The PEM-encoded root certificates as a byte string or a path string. If "
 "provided, a secure connection using the certificates will be established "
 "to an SSL-enabled Flower server."
 msgstr ""
 
-#: flwr.client.app.start_client:28 flwr.client.app.start_numpy_client:26 of
+#: flwr.compat.client.app.start_client:28
+#: flwr.compat.client.app.start_numpy_client:26 of
 msgid ""
 "Starts an insecure gRPC connection when True. Enables HTTPS connection "
 "when False, using system certificates if `root_certificates` is None."
 msgstr ""
 
-#: flwr.client.app.start_client:31 flwr.client.app.start_numpy_client:29 of
+#: flwr.compat.client.app.start_client:31
+#: flwr.compat.client.app.start_numpy_client:29 of
 msgid ""
 "Configure the transport layer. Allowed values: - 'grpc-bidi': gRPC, "
 "bidirectional streaming - 'grpc-rere': gRPC, request-response "
 "(experimental) - 'rest': HTTP (experimental)"
 msgstr ""
 
-#: flwr.client.app.start_client:36 of
+#: flwr.compat.client.app.start_client:36 of
 msgid ""
 "Tuple containing the elliptic curve private key and public key for "
 "authentication from the cryptography library. Source: "
@@ -10295,29 +10766,32 @@ msgid ""
 "to establish an authenticated connection with the server."
 msgstr ""
 
-#: flwr.client.app.start_client:41 of
+#: flwr.compat.client.app.start_client:41 of
 msgid ""
 "The maximum number of times the client will try to connect to the server "
 "before giving up in case of a connection error. If set to None, there is "
 "no limit to the number of tries."
 msgstr ""
 
-#: flwr.client.app.start_client:45 of
+#: flwr.compat.client.app.start_client:45 of
 msgid ""
 "The maximum duration before the client stops trying to connect to the "
 "server in case of connection error. If set to None, there is no limit to "
 "the total time."
 msgstr ""
 
-#: flwr.client.app.start_client:52 flwr.client.app.start_numpy_client:37 of
+#: flwr.compat.client.app.start_client:52
+#: flwr.compat.client.app.start_numpy_client:37 of
 msgid "Starting a gRPC client with an insecure server connection::"
 msgstr ""
 
-#: flwr.client.app.start_client:59 flwr.client.app.start_numpy_client:44 of
+#: flwr.compat.client.app.start_client:59
+#: flwr.compat.client.app.start_numpy_client:44 of
 msgid "Starting a TLS-enabled gRPC client using system certificates::"
 msgstr ""
 
-#: flwr.client.app.start_client:70 flwr.client.app.start_numpy_client:52 of
+#: flwr.compat.client.app.start_client:70
+#: flwr.compat.client.app.start_numpy_client:52 of
 msgid "Starting a TLS-enabled gRPC client using provided certificates::"
 msgstr ""
 
@@ -10325,7 +10799,7 @@ msgstr ""
 msgid "start\\_numpy\\_client"
 msgstr ""
 
-#: flwr.client.app.start_numpy_client:5 of
+#: flwr.compat.client.app.start_numpy_client:5 of
 msgid ""
 "This function is deprecated since 1.7.0. Use "
 ":code:`flwr.client.start_client` instead and first convert your "
@@ -10333,7 +10807,7 @@ msgid ""
 ":code:`to_client()` method."
 msgstr ""
 
-#: flwr.client.app.start_numpy_client:13 of
+#: flwr.compat.client.app.start_numpy_client:13 of
 msgid "An implementation of the abstract base class `flwr.client.NumPyClient`."
 msgstr ""
 
@@ -10345,7 +10819,7 @@ msgstr ""
 msgid ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.record.array.Array.from_numpy_ndarray:1
 #: flwr.common.record.conversion_utils.array_from_numpy:1 of
@@ -10533,7 +11007,7 @@ msgid ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
-#: flwr.common.message.Error:1 of
+#: flwr.app.error.Error:1 of
 msgid "The class storing information about an error that occurred."
 msgstr ""
 
@@ -10662,7 +11136,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
-#: flwr.common.message.Metadata:1 of
+#: flwr.app.metadata.Metadata:1 of
 msgid "The class representing metadata associated with the current message."
 msgstr ""
 
@@ -10698,8 +11172,9 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
-"alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
-":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
+"alias of :py:class:`~numpy.ndarray`\\ [:py:class:`tuple`\\ "
+"[:py:class:`int`, ...], :py:class:`~numpy.dtype`\\ "
+"[:py:obj:`~typing.Any`]]"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
@@ -10709,7 +11184,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 msgid ""
 "alias of :py:class:`list`\\ [:py:class:`~numpy.ndarray`\\ "
-"[:py:obj:`~typing.Any`, :py:class:`~numpy.dtype`\\ "
+"[:py:class:`tuple`\\ [:py:class:`int`, ...], :py:class:`~numpy.dtype`\\ "
 "[:py:obj:`~typing.Any`]]]"
 msgstr ""
 
@@ -10794,6 +11269,10 @@ msgstr ""
 msgid "Array"
 msgstr ""
 
+#: flwr.common.message.Message:1 flwr.common.record.array.Array:1 of
+msgid "Bases: :py:class:`~flwr.common.inflatable.InflatableObject`"
+msgstr ""
+
 #: flwr.common.record.array.Array:3 of
 msgid ""
 "A dataclass containing serialized data from an array-like or tensor-like "
@@ -10871,35 +11350,58 @@ msgstr ""
 msgid "Initializing with a PyTorch tensor::"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.Array.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: flwr.common.record.array.Array.deflate:1 of
+msgid "Deflate the Array."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 msgid ""
 ":py:obj:`from_numpy_ndarray <flwr.common.Array.from_numpy_ndarray>`\\ "
 "\\(ndarray\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 msgid ""
 ":py:obj:`from_torch_tensor <flwr.common.Array.from_torch_tensor>`\\ "
 "\\(tensor\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 #: flwr.common.record.array.Array.from_torch_tensor:1 of
 msgid "Create Array from PyTorch tensor."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.Array.inflate>`\\ \\(object\\_content\\[\\,"
+" children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: flwr.common.record.array.Array.inflate:1 of
+msgid "Inflate an Array from bytes."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 msgid ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
 #: flwr.common.record.array.Array.numpy:1 of
 msgid "Return the array as a NumPy array."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:34
+#: ../../source/ref-api/flwr.common.Array.rst:40
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:76
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:25
 #: ../../source/ref-api/flwr.common.Code.rst:19
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:61
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:61
 #: ../../source/ref-api/flwr.common.Context.rst:25
 #: ../../source/ref-api/flwr.common.DisconnectRes.rst:25
 #: ../../source/ref-api/flwr.common.Error.rst:25
@@ -10912,14 +11414,17 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.GetParametersRes.rst:25
 #: ../../source/ref-api/flwr.common.GetPropertiesIns.rst:25
 #: ../../source/ref-api/flwr.common.GetPropertiesRes.rst:25
-#: ../../source/ref-api/flwr.common.Message.rst:37
+#: ../../source/ref-api/flwr.common.Message.rst:43
 #: ../../source/ref-api/flwr.common.MessageType.rst:25
 #: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:25
 #: ../../source/ref-api/flwr.common.Metadata.rst:25
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:61
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:61
 #: ../../source/ref-api/flwr.common.Parameters.rst:25
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:76
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
-#: ../../source/ref-api/flwr.common.RecordDict.rst:52
-#: ../../source/ref-api/flwr.common.RecordSet.rst:52
+#: ../../source/ref-api/flwr.common.RecordDict.rst:58
+#: ../../source/ref-api/flwr.common.RecordSet.rst:58
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:25
 #: ../../source/ref-api/flwr.common.Status.rst:25
 #: ../../source/ref-api/flwr.server.Driver.rst:43
@@ -10930,20 +11435,76 @@ msgstr ""
 msgid "Attributes"
 msgstr ""
 
-#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.Array.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.Array.children>`\\"
+msgstr ""
+
+#: flwr.common.Array.children:1 flwr.common.Array.children:1:<autosummary>:1
+#: flwr.common.ConfigRecord.children:1
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigsRecord.children:1
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1
+#: flwr.common.MetricRecord.children:1
+#: flwr.common.MetricRecord.children:1:<autosummary>:1
+#: flwr.common.MetricsRecord.children:1
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
+msgid "Get all child objects as a dictionary or None if there are no children."
+msgstr ""
+
+#: flwr.common.Array.children:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.Array.object_id>`\\"
+msgstr ""
+
+#: flwr.common.Array.children:1:<autosummary>:1 flwr.common.Array.object_id:1
+#: flwr.common.ArrayRecord.children:1:<autosummary>:1
+#: flwr.common.ArrayRecord.object_id:1
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigRecord.object_id:1
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigsRecord.object_id:1
+#: flwr.common.Message.children:1:<autosummary>:1
+#: flwr.common.Message.object_id:1
+#: flwr.common.MetricRecord.children:1:<autosummary>:1
+#: flwr.common.MetricRecord.object_id:1
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1
+#: flwr.common.MetricsRecord.object_id:1
+#: flwr.common.ParametersRecord.children:1:<autosummary>:1
+#: flwr.common.ParametersRecord.object_id:1
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1
+#: flwr.common.RecordDict.object_id:1
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1
+#: flwr.common.RecordSet.object_id:1 of
+msgid "Get object_id."
+msgstr ""
+
+#: flwr.common.Array.children:1:<autosummary>:1 of
 msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 msgstr ""
 
-#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.Array.children:1:<autosummary>:1 of
 msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
 msgstr ""
 
-#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.Array.children:1:<autosummary>:1 of
 msgid ":py:obj:`stype <flwr.common.Array.stype>`\\"
 msgstr ""
 
-#: flwr.common.record.array.Array.from_numpy_ndarray:1:<autosummary>:1 of
+#: flwr.common.Array.children:1:<autosummary>:1 of
 msgid ":py:obj:`data <flwr.common.Array.data>`\\"
+msgstr ""
+
+#: flwr.common.record.array.Array.inflate:3 of
+msgid "The deflated object content of the Array."
+msgstr ""
+
+#: flwr.common.record.array.Array.inflate:5 of
+msgid ""
+"Must be ``None``. ``Array`` does not support child objects. Providing any"
+" children will raise a ``ValueError``."
+msgstr ""
+
+#: flwr.common.record.array.Array.inflate:9 of
+msgid "The inflated Array."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.ArrayRecord.rst:2
@@ -10953,7 +11514,8 @@ msgstr ""
 #: flwr.common.record.arrayrecord.ArrayRecord:1 of
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
-"[:py:class:`str`, :py:class:`~flwr.common.record.array.Array`]"
+"[:py:class:`str`, :py:class:`~flwr.common.record.array.Array`], "
+":py:class:`~flwr.common.inflatable.InflatableObject`"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord:3 of
@@ -11046,128 +11608,175 @@ msgstr ""
 msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays)::"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.ArrayRecord.clear>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.ArrayRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.count_bytes:1
 #: flwr.common.record.configrecord.ConfigRecord.count_bytes:1
 #: flwr.common.record.metricrecord.MetricRecord.count_bytes:1 of
 msgid "Return number of Bytes stored in this object."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.ArrayRecord.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: flwr.common.record.arrayrecord.ArrayRecord.deflate:1 of
+msgid "Deflate the ArrayRecord."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_array_dict <flwr.common.ArrayRecord.from_array_dict>`\\ "
 "\\(array\\_dict\\, \\*\\[\\, keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.from_array_dict:1 of
 msgid "Create ArrayRecord from a dictionary of :class:`Array`."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_numpy_ndarrays "
 "<flwr.common.ArrayRecord.from_numpy_ndarrays>`\\ \\(ndarrays\\, \\*\\[\\,"
 " keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.from_numpy_ndarrays:1 of
 msgid "Create ArrayRecord from a list of NumPy ``ndarray``."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_torch_state_dict "
 "<flwr.common.ArrayRecord.from_torch_state_dict>`\\ \\(state\\_dict\\, "
 "\\*\\[\\, ...\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.from_torch_state_dict:1 of
 msgid "Create ArrayRecord from PyTorch ``state_dict``."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.ArrayRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.ArrayRecord.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate:1 of
+msgid "Inflate an ArrayRecord from bytes."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.ArrayRecord.items>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.ArrayRecord.keys>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.ArrayRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 #: collections.abc.MutableMapping.pop:1 of
 msgid "If key is not found, d is returned if given, otherwise KeyError is raised."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.ArrayRecord.popitem>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 #: collections.abc.MutableMapping.popitem:1 of
 msgid "as a 2-tuple; but raise KeyError if D is empty."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.ArrayRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`to_numpy_ndarrays <flwr.common.ArrayRecord.to_numpy_ndarrays>`\\"
 " \\(\\*\\[\\, keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.to_numpy_ndarrays:1 of
 msgid "Return the ArrayRecord as a list of NumPy ``ndarray``."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`to_torch_state_dict "
 "<flwr.common.ArrayRecord.to_torch_state_dict>`\\ \\(\\*\\[\\, "
 "keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.to_torch_state_dict:1 of
 msgid "Return the ArrayRecord as a PyTorch ``state_dict``."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.ArrayRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 #: collections.abc.MutableMapping.update:1 of
 msgid ""
 "If E present and has a .keys() method, does:     for k in E: D[k] = E[k] "
@@ -11175,8 +11784,23 @@ msgid ""
 "v In either case, this is followed by: for k, v in F.items(): D[k] = v"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.ArrayRecord.values>`\\ \\(\\)"
+msgstr ""
+
+#: flwr.common.ArrayRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.ArrayRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.ArrayRecord.children:1
+#: flwr.common.ArrayRecord.children:1:<autosummary>:1
+#: flwr.common.ParametersRecord.children:1
+#: flwr.common.ParametersRecord.children:1:<autosummary>:1 of
+msgid "Return a dictionary of Arrays with their Object IDs as keys."
+msgstr ""
+
+#: flwr.common.ArrayRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.ArrayRecord.object_id>`\\"
 msgstr ""
 
 #: flwr.common.record.arrayrecord.ArrayRecord.count_bytes:3 of
@@ -11184,6 +11808,20 @@ msgid ""
 "Note that a small amount of Bytes might also be included in this counting"
 " that correspond to metadata of the serialized object (e.g. of NumPy "
 "array) needed for deseralization."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate:3 of
+msgid "The deflated object content of the ArrayRecord."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate:5 of
+msgid ""
+"Dictionary of children InflatableObjects mapped to their Object IDs. "
+"These children enable the full inflation of the ArrayRecord."
+msgstr ""
+
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate:9 of
+msgid "The inflated ArrayRecord."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:2
@@ -11259,7 +11897,8 @@ msgid ""
 " :py:class:`bytes` | :py:class:`bool` | :py:class:`list`\\ "
 "[:py:class:`int`] | :py:class:`list`\\ [:py:class:`float`] | "
 ":py:class:`list`\\ [:py:class:`str`] | :py:class:`list`\\ "
-"[:py:class:`bytes`] | :py:class:`list`\\ [:py:class:`bool`]]"
+"[:py:class:`bytes`] | :py:class:`list`\\ [:py:class:`bool`]], "
+":py:class:`~flwr.common.inflatable.InflatableObject`"
 msgstr ""
 
 #: flwr.common.record.configrecord.ConfigRecord:3 of
@@ -11312,52 +11951,99 @@ msgid ""
 "(bytes are allowed in a :code:`ConfigRecord`)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.ConfigRecord.clear>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.ConfigRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.ConfigRecord.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: flwr.common.record.configrecord.ConfigRecord.deflate:1
+#: flwr.common.record.metricrecord.MetricRecord.deflate:1 of
+msgid "Deflate object."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.ConfigRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.ConfigRecord.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: flwr.common.record.configrecord.ConfigRecord.inflate:1 of
+msgid "Inflate a ConfigRecord from bytes."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.ConfigRecord.items>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.ConfigRecord.keys>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.ConfigRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.ConfigRecord.popitem>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.ConfigRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.ConfigRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.ConfigRecord.values>`\\ \\(\\)"
+msgstr ""
+
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.ConfigRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.ConfigRecord.object_id>`\\"
 msgstr ""
 
 #: flwr.common.record.configrecord.ConfigRecord.count_bytes:3 of
 msgid "This function counts booleans as occupying 1 Byte."
+msgstr ""
+
+#: flwr.common.record.configrecord.ConfigRecord.inflate:3 of
+msgid "The deflated object content of the ConfigRecord."
+msgstr ""
+
+#: flwr.common.record.configrecord.ConfigRecord.inflate:5 of
+msgid ""
+"Must be ``None``. ``ConfigRecord`` does not support child objects. "
+"Providing any children will raise a ``ValueError``."
+msgstr ""
+
+#: flwr.common.record.configrecord.ConfigRecord.inflate:9 of
+msgid "The inflated ConfigRecord."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.ConfigsRecord.rst:2
@@ -11397,48 +12083,66 @@ msgstr ""
 msgid "Updated usage::"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.ConfigsRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.ConfigsRecord.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.ConfigsRecord.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.ConfigsRecord.popitem>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.ConfigsRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.ConfigsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
+msgstr ""
+
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.ConfigsRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.ConfigsRecord.object_id>`\\"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Context.rst:2
@@ -11509,11 +12213,11 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
-#: flwr.common.message.Error:3 of
+#: flwr.app.error.Error:3 of
 msgid "An identifier for the error."
 msgstr ""
 
-#: flwr.common.message.Error:5 of
+#: flwr.app.error.Error:5 of
 msgid "A reason for why the error arose (e.g. an exception stack-trace)"
 msgstr ""
 
@@ -12534,15 +13238,15 @@ msgid ""
 " processing another message."
 msgstr ""
 
+#: flwr.app.metadata.Metadata:9
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Message:12
-#: flwr.common.message.Metadata:9 of
+#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Message:12 of
 msgid "An identifier for the node receiving this message."
 msgstr ""
 
+#: flwr.app.metadata.Metadata:20
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.message_type:1 flwr.common.message.Message:14
-#: flwr.common.message.Metadata:20 of
+#: flwr.common.Metadata.message_type:1 flwr.common.message.Message:14 of
 msgid "A string that encodes the action to be executed on the receiving end."
 msgstr ""
 
@@ -12552,7 +13256,7 @@ msgid ""
 "TTL is set to 43,200 seconds (12 hours)."
 msgstr ""
 
-#: flwr.common.message.Message:20 flwr.common.message.Metadata:13 of
+#: flwr.app.metadata.Metadata:13 flwr.common.message.Message:20 of
 msgid ""
 "An identifier for grouping messages. In some settings, this is used as "
 "the FL round."
@@ -12565,70 +13269,104 @@ msgid ""
 "from it."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 msgid ""
 ":py:obj:`create_error_reply <flwr.common.Message.create_error_reply>`\\ "
 "\\(error\\[\\, ttl\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 #: flwr.common.message.Message.create_error_reply:1 of
 msgid "Construct a reply message indicating an error happened."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 msgid ""
 ":py:obj:`create_reply <flwr.common.Message.create_reply>`\\ "
 "\\(content\\[\\, ttl\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 #: flwr.common.message.Message.create_reply:1 of
 msgid "Create a reply to this message with specified content and TTL."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.Message.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
+#: flwr.common.message.Message.deflate:1 of
+msgid "Deflate message."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 msgid ":py:obj:`has_content <flwr.common.Message.has_content>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 #: flwr.common.message.Message.has_content:1 of
 msgid "Return True if message has content, else False."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 msgid ":py:obj:`has_error <flwr.common.Message.has_error>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
 #: flwr.common.message.Message.has_error:1 of
 msgid "Return True if message has an error, else False."
 msgstr ""
 
-#: flwr.common.Message.content:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.Message.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Message.rst:41:<autosummary>:1
+#: flwr.common.message.Message.inflate:1 of
+msgid "Inflate an Message from bytes."
+msgstr ""
+
+#: flwr.common.Message.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.Message.children>`\\"
+msgstr ""
+
+#: flwr.common.Message.children:1
+#: flwr.common.Message.children:1:<autosummary>:1 of
+msgid "Return a dictionary of a single RecordDict with its Object IDs as key."
+msgstr ""
+
+#: flwr.common.Message.children:1:<autosummary>:1 of
 msgid ":py:obj:`content <flwr.common.Message.content>`\\"
 msgstr ""
 
-#: flwr.common.Message.content:1 flwr.common.Message.content:1:<autosummary>:1
+#: flwr.common.Message.children:1:<autosummary>:1 flwr.common.Message.content:1
 #: of
 msgid "The content of this message."
 msgstr ""
 
-#: flwr.common.Message.content:1:<autosummary>:1 of
+#: flwr.common.Message.children:1:<autosummary>:1 of
 msgid ":py:obj:`error <flwr.common.Message.error>`\\"
 msgstr ""
 
-#: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.error:1 of
+#: flwr.common.Message.children:1:<autosummary>:1 flwr.common.Message.error:1
+#: of
 msgid "Error captured by this message."
 msgstr ""
 
-#: flwr.common.Message.content:1:<autosummary>:1 of
+#: flwr.common.Message.children:1:<autosummary>:1 of
 msgid ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
 msgstr ""
 
-#: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.metadata:1
-#: of
+#: flwr.common.Message.children:1:<autosummary>:1
+#: flwr.common.Message.metadata:1 of
 msgid "A dataclass including information about the message to be executed."
+msgstr ""
+
+#: flwr.common.Message.children:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.Message.object_id>`\\"
 msgstr ""
 
 #: flwr.common.message.Message.create_error_reply:3 of
@@ -12676,6 +13414,20 @@ msgstr ""
 msgid "A new `Message` instance representing the reply."
 msgstr ""
 
+#: flwr.common.message.Message.inflate:3 of
+msgid "The deflated object content of the Message."
+msgstr ""
+
+#: flwr.common.message.Message.inflate:5 of
+msgid ""
+"Dictionary of children InflatableObjects mapped to their Object IDs. "
+"These children enable the full inflation of the Message."
+msgstr ""
+
+#: flwr.common.message.Message.inflate:9 of
+msgid "The inflated Message."
+msgstr ""
+
 #: ../../source/ref-api/flwr.common.MessageType.rst:2
 msgid "MessageType"
 msgstr ""
@@ -12712,34 +13464,36 @@ msgstr ""
 msgid "Metadata"
 msgstr ""
 
+#: flwr.app.metadata.Metadata:3
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.run_id:1 flwr.common.message.Metadata:3 of
+#: flwr.common.Metadata.run_id:1 of
 msgid "An identifier for the current run."
 msgstr ""
 
+#: flwr.app.metadata.Metadata:5
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.message_id:1 flwr.common.message.Metadata:5 of
+#: flwr.common.Metadata.message_id:1 of
 msgid "An identifier for the current message."
 msgstr ""
 
+#: flwr.app.metadata.Metadata:7
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.src_node_id:1 flwr.common.message.Metadata:7 of
+#: flwr.common.Metadata.src_node_id:1 of
 msgid "An identifier for the node sending this message."
 msgstr ""
 
+#: flwr.app.metadata.Metadata:11
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.reply_to_message_id:1 flwr.common.message.Metadata:11
-#: of
+#: flwr.common.Metadata.reply_to_message_id:1 of
 msgid "An identifier for the message to which this message is a reply."
 msgstr ""
 
-#: flwr.common.Metadata.created_at:1
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.message.Metadata:16 of
+#: flwr.app.metadata.Metadata:16 flwr.common.Metadata.created_at:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid "Unix timestamp when the message was created."
 msgstr ""
 
-#: flwr.common.message.Metadata:18 of
+#: flwr.app.metadata.Metadata:18 of
 msgid "Time-to-live for this message in seconds."
 msgstr ""
 
@@ -12807,7 +13561,8 @@ msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`int` | :py:class:`float` | "
 ":py:class:`list`\\ [:py:class:`int`] | :py:class:`list`\\ "
-"[:py:class:`float`]]"
+"[:py:class:`float`]], "
+":py:class:`~flwr.common.inflatable.InflatableObject`"
 msgstr ""
 
 #: flwr.common.record.metricrecord.MetricRecord:3 of
@@ -12866,48 +13621,86 @@ msgid ""
 ":code:`ArrayRecord`."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.MetricRecord.clear>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.MetricRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.MetricRecord.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.MetricRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.MetricRecord.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: flwr.common.record.metricrecord.MetricRecord.inflate:1 of
+msgid "Inflate a MetricRecord from bytes."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.MetricRecord.items>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.MetricRecord.keys>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.MetricRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.MetricRecord.popitem>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.MetricRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.MetricRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.MetricRecord.values>`\\ \\(\\)"
+msgstr ""
+
+#: flwr.common.MetricRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.MetricRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.MetricRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.MetricRecord.object_id>`\\"
+msgstr ""
+
+#: flwr.common.record.metricrecord.MetricRecord.inflate:3 of
+msgid "The deflated object content of the MetricRecord."
+msgstr ""
+
+#: flwr.common.record.metricrecord.MetricRecord.inflate:5 of
+msgid ""
+"Must be ``None``. ``MetricRecord`` does not support child objects. "
+"Providing any children will raise a ``ValueError``."
+msgstr ""
+
+#: flwr.common.record.metricrecord.MetricRecord.inflate:9 of
+msgid "The inflated MetricRecord."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Metrics.rst:2
@@ -12935,48 +13728,66 @@ msgid ""
 "Use ``MetricRecord`` instead."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.MetricsRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.MetricsRecord.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.MetricsRecord.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.MetricsRecord.popitem>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.MetricsRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.MetricsRecord.values>`\\ \\(\\)"
+msgstr ""
+
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.MetricsRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.MetricsRecord.object_id>`\\"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.NDArray.rst:2
@@ -13016,83 +13827,101 @@ msgid ""
 "release. Use ``ArrayRecord`` instead."
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.ParametersRecord.clear>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.ParametersRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.ParametersRecord.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_array_dict "
 "<flwr.common.ParametersRecord.from_array_dict>`\\ \\(array\\_dict\\, "
 "\\*\\[\\, keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_numpy_ndarrays "
 "<flwr.common.ParametersRecord.from_numpy_ndarrays>`\\ \\(ndarrays\\, "
 "\\*\\[\\, keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`from_torch_state_dict "
 "<flwr.common.ParametersRecord.from_torch_state_dict>`\\ "
 "\\(state\\_dict\\, \\*\\[\\, ...\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.ParametersRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.ParametersRecord.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.ParametersRecord.items>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.ParametersRecord.keys>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.ParametersRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.ParametersRecord.popitem>`\\ \\(\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.ParametersRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`to_numpy_ndarrays "
 "<flwr.common.ParametersRecord.to_numpy_ndarrays>`\\ \\(\\*\\[\\, "
 "keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`to_torch_state_dict "
 "<flwr.common.ParametersRecord.to_torch_state_dict>`\\ \\(\\*\\[\\, "
 "keep\\_input\\]\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.ParametersRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.ParametersRecord.values>`\\ \\(\\)"
+msgstr ""
+
+#: flwr.common.ParametersRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.ParametersRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.ParametersRecord.children:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.ParametersRecord.object_id>`\\"
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Properties.rst:2
@@ -13116,7 +13945,8 @@ msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.arrayrecord.ArrayRecord`"
 " | :py:class:`~flwr.common.record.metricrecord.MetricRecord` | "
-":py:class:`~flwr.common.record.configrecord.ConfigRecord`]"
+":py:class:`~flwr.common.record.configrecord.ConfigRecord`], "
+":py:class:`~flwr.common.inflatable.InflatableObject`"
 msgstr ""
 
 #: flwr.common.record.recorddict.RecordDict:3 of
@@ -13159,43 +13989,65 @@ msgid ""
 ":code:`MetricRecord` and :code:`ArrayRecord`."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.RecordDict.clear>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.RecordDict.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: flwr.common.record.recorddict.RecordDict.deflate:1 of
+msgid "Deflate the RecordDict."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.RecordDict.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.RecordDict.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: flwr.common.record.recorddict.RecordDict.inflate:1 of
+msgid "Inflate an RecordDict from bytes."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.RecordDict.items>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.RecordDict.keys>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.RecordDict.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.RecordDict.popitem>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.RecordDict.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.RecordDict.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.RecordDict.values>`\\ \\(\\)"
 msgstr ""
 
@@ -13208,6 +14060,17 @@ msgstr ""
 #: flwr.common.RecordSet.array_records:1
 #: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
 msgid "Dictionary holding only ArrayRecord instances."
+msgstr ""
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.RecordDict.children>`\\"
+msgstr ""
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1
+#: flwr.common.RecordDict.children:1
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1
+#: flwr.common.RecordSet.children:1 of
+msgid "Return a dictionary of records with their Object IDs as keys."
 msgstr ""
 
 #: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
@@ -13252,12 +14115,31 @@ msgid ":py:obj:`metrics_records <flwr.common.RecordDict.metrics_records>`\\"
 msgstr ""
 
 #: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.RecordDict.object_id>`\\"
+msgstr ""
+
+#: flwr.common.RecordDict.array_records:1:<autosummary>:1 of
 msgid ":py:obj:`parameters_records <flwr.common.RecordDict.parameters_records>`\\"
 msgstr ""
 
 #: flwr.common.RecordDict.configs_records:3
 #: flwr.common.RecordSet.configs_records:3 of
 msgid "Use ``config_records`` instead."
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordDict.inflate:3 of
+msgid "The deflated object content of the RecordDict."
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordDict.inflate:5 of
+msgid ""
+"Dictionary of children InflatableObjects mapped to their Object IDs. "
+"These children enable the full inflation of the RecordDict. Default is "
+"None."
+msgstr ""
+
+#: flwr.common.record.recorddict.RecordDict.inflate:9 of
+msgid "The inflated RecordDict."
 msgstr ""
 
 #: flwr.common.RecordDict.metrics_records:3
@@ -13291,46 +14173,60 @@ msgid ""
 "``RecordDict`` instead."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.RecordSet.clear>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+msgid ":py:obj:`deflate <flwr.common.RecordSet.deflate>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`get <flwr.common.RecordSet.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+msgid ""
+":py:obj:`inflate <flwr.common.RecordSet.inflate>`\\ "
+"\\(object\\_content\\[\\, children\\]\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.RecordSet.items>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.RecordSet.keys>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.RecordSet.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`popitem <flwr.common.RecordSet.popitem>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ""
 ":py:obj:`setdefault <flwr.common.RecordSet.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`update <flwr.common.RecordSet.update>`\\ \\(\\[E\\, \\]\\*\\*F\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.RecordSet.values>`\\ \\(\\)"
 msgstr ""
 
 #: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
 msgid ":py:obj:`array_records <flwr.common.RecordSet.array_records>`\\"
+msgstr ""
+
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
+msgid ":py:obj:`children <flwr.common.RecordSet.children>`\\"
 msgstr ""
 
 #: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
@@ -13347,6 +14243,10 @@ msgstr ""
 
 #: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
 msgid ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
+msgstr ""
+
+#: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
+msgid ":py:obj:`object_id <flwr.common.RecordSet.object_id>`\\"
 msgstr ""
 
 #: flwr.common.RecordSet.array_records:1:<autosummary>:1 of
@@ -13447,7 +14347,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.rst:22:<autosummary>:1
-#: flwr.server.app.start_server:1 of
+#: flwr.compat.server.app.start_server:1 of
 msgid "Start a Flower server using the gRPC transport layer."
 msgstr ""
 
@@ -14132,7 +15032,7 @@ msgid ""
 "thereof. If no instance is provided, one will be created internally."
 msgstr ""
 
-#: flwr.server.app.start_server:14
+#: flwr.compat.server.app.start_server:14
 #: flwr.server.serverapp_components.ServerAppComponents:6 of
 msgid ""
 "Currently supported values are `num_rounds` (int, default: 1) and "
@@ -14253,37 +15153,37 @@ msgstr ""
 msgid "start\\_server"
 msgstr ""
 
-#: flwr.server.app.start_server:5 of
+#: flwr.compat.server.app.start_server:5 of
 msgid ""
 "This function is deprecated since 1.13.0. Use the :code:`flower-"
 "superlink` command instead to start a SuperLink."
 msgstr ""
 
-#: flwr.server.app.start_server:8 of
+#: flwr.compat.server.app.start_server:8 of
 msgid "The IPv4 or IPv6 address of the server. Defaults to `\"[::]:8080\"`."
 msgstr ""
 
-#: flwr.server.app.start_server:10 of
+#: flwr.compat.server.app.start_server:10 of
 msgid ""
 "A server implementation, either `flwr.server.Server` or a subclass "
 "thereof. If no instance is provided, then `start_server` will create one."
 msgstr ""
 
-#: flwr.server.app.start_server:17 of
+#: flwr.compat.server.app.start_server:17 of
 msgid ""
 "An implementation of the abstract base class "
 "`flwr.server.strategy.Strategy`. If no strategy is provided, then "
 "`start_server` will use `flwr.server.strategy.FedAvg`."
 msgstr ""
 
-#: flwr.server.app.start_server:21 of
+#: flwr.compat.server.app.start_server:21 of
 msgid ""
 "An implementation of the abstract base class `flwr.server.ClientManager`."
 " If no implementation is provided, then `start_server` will use "
 "`flwr.server.client_manager.SimpleClientManager`."
 msgstr ""
 
-#: flwr.server.app.start_server:26 of
+#: flwr.compat.server.app.start_server:26 of
 msgid ""
 "The maximum length of gRPC messages that can be exchanged with the Flower"
 " clients. The default should be sufficient for most models. Users who "
@@ -14293,7 +15193,7 @@ msgid ""
 "increased limit and block larger messages."
 msgstr ""
 
-#: flwr.server.app.start_server:33 of
+#: flwr.compat.server.app.start_server:33 of
 msgid ""
 "Tuple containing root certificate, server certificate, and private key to"
 " start a secure SSL-enabled server. The tuple is expected to have three "
@@ -14301,34 +15201,34 @@ msgid ""
 "server certificate.     * server private key."
 msgstr ""
 
-#: flwr.server.app.start_server:33 of
+#: flwr.compat.server.app.start_server:33 of
 msgid ""
 "Tuple containing root certificate, server certificate, and private key to"
 " start a secure SSL-enabled server. The tuple is expected to have three "
 "bytes elements in the following order:"
 msgstr ""
 
-#: flwr.server.app.start_server:37 of
+#: flwr.compat.server.app.start_server:37 of
 msgid "CA certificate."
 msgstr ""
 
-#: flwr.server.app.start_server:38 of
+#: flwr.compat.server.app.start_server:38 of
 msgid "server certificate."
 msgstr ""
 
-#: flwr.server.app.start_server:39 of
+#: flwr.compat.server.app.start_server:39 of
 msgid "server private key."
 msgstr ""
 
-#: flwr.server.app.start_server:42 of
+#: flwr.compat.server.app.start_server:42 of
 msgid "**hist** -- Object containing training and evaluation metrics."
 msgstr ""
 
-#: flwr.server.app.start_server:47 of
+#: flwr.compat.server.app.start_server:47 of
 msgid "Starting an insecure server::"
 msgstr ""
 
-#: flwr.server.app.start_server:51 of
+#: flwr.compat.server.app.start_server:51 of
 msgid "Starting a TLS-enabled server::"
 msgstr ""
 
@@ -26719,18 +27619,6 @@ msgid ""
 "``examples/quickstart-pytorch`` in the Flower GitHub repository."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:358
-#: ../../source/tutorial-quickstart-tensorflow.rst:282
-msgid "Video tutorial"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-pytorch.rst:362
-msgid ""
-"The video shown below shows how to setup a PyTorch + Flower project using"
-" our previously recommended APIs. A new video tutorial will be released "
-"that shows the new APIs (as the content above does)"
-msgstr ""
-
 #: ../../source/tutorial-quickstart-pytorch-lightning.rst:-1
 msgid ""
 "Learn how to train an autoencoder on MNIST using federated learning with "
@@ -26996,13 +27884,6 @@ msgstr ""
 msgid ""
 "Check the source code of the extended version of this tutorial in "
 "|quickstart_tf_link|_ in the Flower GitHub repository."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-tensorflow.rst:286
-msgid ""
-"The video shown below shows how to setup a TensorFlow + Flower project "
-"using our previously recommended APIs. A new video tutorial will be "
-"released that shows the new APIs (as the content above does)"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-xgboost.rst:-1
@@ -28758,7 +29639,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|b489956f3f574a109fad2836faf622e4|"
+msgid "|305404ff382b42e3afc1b27b11c732c1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -28773,7 +29654,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|e8061fdb5ec94141bc7526ea8060a9ab|"
+msgid "|64ab5026bd994c15a6c473a5652dcf1b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -28795,7 +29676,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|741286a5ab8b4703919f32525e6b7ffa|"
+msgid "|823bbd248f154e1bb640a5d0d93af4de|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -28811,7 +29692,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|0ae5263f7b4d45cca55b69d341f8c83d|"
+msgid "|4709c7a2e15146fdbac896e9bc7e2354|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -28827,7 +29708,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|74ef57e47ce544c8b5700f7c6b213f76|"
+msgid "|3627003a08694bd3b6a4e11e48e9ae0c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -28842,7 +29723,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|f49a5dad3448407ea4480d186235b295|"
+msgid "|8d9fe79d8c804dfd80a215699a1538dc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -28862,7 +29743,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|142636086022481fba92d32b78caa0f7|"
+msgid "|efd371c313c940f2b0bd75808a437742|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -28877,7 +29758,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|49cc792ae168402d9917cab825e7def4|"
+msgid "|e9f908c8fd754b22afdecd79d16a2288|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -29017,7 +29898,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|82d2085f891e4906a7f3b2fbd94640b4|"
+msgid "|0b00dbec410444c29339b6f4832261a7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -29041,7 +29922,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|0de634679a2b4b958aa20f8d427e4311|"
+msgid "|afe9444cfc0b4872908db840c186dadc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -29065,7 +29946,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|564c1ebbb05945939f4fcf814facdad4|"
+msgid "|306e3dd0b4434c1e9aa6dc3a096db3b2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -29088,7 +29969,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|fe2ef144276f40e79a7cf4ecebe97b2e|"
+msgid "|ccf3d95299284d9e8c2825c233e88705|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -29126,7 +30007,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|0cac13f2a4834bc5917cff64f23c0105|"
+msgid "|fec8c44eaca7456c9896fcec43d132df|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -29220,7 +30101,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|d66f63e57bab4d7a9eafcae9a70d238d|"
+msgid "|bcde8581fb664c5faa45209fb9f30e19|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -45374,5 +46255,436 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|65f6155df55d44bda98d7cf140a0a4ca|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "alias of :py:class:`~numpy.ndarray`\\ "
+#~ "[:py:obj:`~typing.Any`, :py:class:`~numpy.dtype`\\ "
+#~ "[:py:obj:`~typing.Any`]]"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "alias of :py:class:`list`\\ "
+#~ "[:py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
+#~ ":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]]"
+#~ msgstr ""
+
+#~ msgid "|b489956f3f574a109fad2836faf622e4|"
+#~ msgstr ""
+
+#~ msgid "|e8061fdb5ec94141bc7526ea8060a9ab|"
+#~ msgstr ""
+
+#~ msgid "|741286a5ab8b4703919f32525e6b7ffa|"
+#~ msgstr ""
+
+#~ msgid "|0ae5263f7b4d45cca55b69d341f8c83d|"
+#~ msgstr ""
+
+#~ msgid "|74ef57e47ce544c8b5700f7c6b213f76|"
+#~ msgstr ""
+
+#~ msgid "|f49a5dad3448407ea4480d186235b295|"
+#~ msgstr ""
+
+#~ msgid "|142636086022481fba92d32b78caa0f7|"
+#~ msgstr ""
+
+#~ msgid "|49cc792ae168402d9917cab825e7def4|"
+#~ msgstr ""
+
+#~ msgid "|82d2085f891e4906a7f3b2fbd94640b4|"
+#~ msgstr ""
+
+#~ msgid "|0de634679a2b4b958aa20f8d427e4311|"
+#~ msgstr ""
+
+#~ msgid "|564c1ebbb05945939f4fcf814facdad4|"
+#~ msgstr ""
+
+#~ msgid "|fe2ef144276f40e79a7cf4ecebe97b2e|"
+#~ msgstr ""
+
+#~ msgid "|0cac13f2a4834bc5917cff64f23c0105|"
+#~ msgstr ""
+
+#~ msgid "|d66f63e57bab4d7a9eafcae9a70d238d|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
+#~ "[:py:class:`str`, :py:class:`int` | "
+#~ ":py:class:`float` | :py:class:`str` | "
+#~ ":py:class:`bytes` | :py:class:`bool` | "
+#~ ":py:class:`list`\\ [:py:class:`int`] | "
+#~ ":py:class:`list`\\ [:py:class:`float`] | "
+#~ ":py:class:`list`\\ [:py:class:`str`] | "
+#~ ":py:class:`list`\\ [:py:class:`bytes`] | "
+#~ ":py:class:`list`\\ [:py:class:`bool`]]"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
+#~ "[:py:class:`str`, :py:class:`int` | "
+#~ ":py:class:`float` | :py:class:`list`\\ "
+#~ "[:py:class:`int`] | :py:class:`list`\\ "
+#~ "[:py:class:`float`]]"
+#~ msgstr ""
+
+#~ msgid "|450f5fd286984c7b9cf26b1cfc7c6c5a|"
+#~ msgstr ""
+
+#~ msgid "|eb64ca89d00a46818780245bef0d9950|"
+#~ msgstr ""
+
+#~ msgid "|a711c3264bdb46bdbb9535f668951a9b|"
+#~ msgstr ""
+
+#~ msgid "|cb0d905bafcf47b3beb2148744af5b90|"
+#~ msgstr ""
+
+#~ msgid "|41cb4736601f4b4e8da3108fd3fc9dd1|"
+#~ msgstr ""
+
+#~ msgid "|efc7105fab324accadb050560bbb9956|"
+#~ msgstr ""
+
+#~ msgid "|85b42a41b88a48a08d174ce7fbd133dc|"
+#~ msgstr ""
+
+#~ msgid "|d05f53bd0b46413aa91b1e7b20eff8af|"
+#~ msgstr ""
+
+#~ msgid "|d96743a5729441ca8baeb9d07ea28337|"
+#~ msgstr ""
+
+#~ msgid "|64c013ad98634d8cab49cace2215b65f|"
+#~ msgstr ""
+
+#~ msgid "|fc74b460576e444c85baf34a38f97b20|"
+#~ msgstr ""
+
+#~ msgid "|cfeae6f48fff4571af741752ccb21448|"
+#~ msgstr ""
+
+#~ msgid "|2224c9f05174456ea442fda695413392|"
+#~ msgstr ""
+
+#~ msgid "|6bcc2eed06b24833a7877563ec9f40c7|"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`inflate <flwr.common.Array.inflate>`\\ \\(object\\_content\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
+#~ "[:py:class:`str`, :py:class:`~flwr.common.record.array.Array`]"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`inflate <flwr.common.ConfigRecord.inflate>`\\ "
+#~ "\\(object\\_content\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`inflate <flwr.common.ConfigsRecord.inflate>`\\ "
+#~ "\\(object\\_content\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`inflate <flwr.common.MetricRecord.inflate>`\\ "
+#~ "\\(object\\_content\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`inflate <flwr.common.MetricsRecord.inflate>`\\ "
+#~ "\\(object\\_content\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
+#~ "[:py:class:`str`, "
+#~ ":py:class:`~flwr.common.record.arrayrecord.ArrayRecord` | "
+#~ ":py:class:`~flwr.common.record.metricrecord.MetricRecord` | "
+#~ ":py:class:`~flwr.common.record.configrecord.ConfigRecord`]"
+#~ msgstr ""
+
+#~ msgid "|40ef7f2f1aaf4bd3a23870efddba5ef3|"
+#~ msgstr ""
+
+#~ msgid "|168960a2078a43858e627edcdecdf75f|"
+#~ msgstr ""
+
+#~ msgid "|650e6e01cb3244369e1139f79e60e172|"
+#~ msgstr ""
+
+#~ msgid "|2a0485dfa4d2416f89d8d38a59b3e1db|"
+#~ msgstr ""
+
+#~ msgid "|6055bb68397e416199c7bc6fda1b11d6|"
+#~ msgstr ""
+
+#~ msgid "|9c449256925849b0a2d98406818bb9b6|"
+#~ msgstr ""
+
+#~ msgid "|709d97d6f114426fb55ff5a136cb8d74|"
+#~ msgstr ""
+
+#~ msgid "|47e82670bcac47099edc2c22937972b4|"
+#~ msgstr ""
+
+#~ msgid "|abbc7a56a4024df8a38621445bd95bb5|"
+#~ msgstr ""
+
+#~ msgid "|5fc71ddcdc79460a9977dfe403be4cc4|"
+#~ msgstr ""
+
+#~ msgid "|bd8c9bf3c7304cb78b00db6c3f765890|"
+#~ msgstr ""
+
+#~ msgid "|313fe723caf843429564a13c3e776013|"
+#~ msgstr ""
+
+#~ msgid "|34c0cbcbee5e4926828eed40c64eb293|"
+#~ msgstr ""
+
+#~ msgid "|7c405b30c75543d1915c05bebff6313c|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Download the `compose.yml "
+#~ "<https://github.com/adap/flower/blob/main/src/docker/complete/compose.yml>`_"
+#~ " file into the example directory:"
+#~ msgstr ""
+
+#~ msgid "|4ee450862b1f41b8b36328d36134e8c8|"
+#~ msgstr ""
+
+#~ msgid "|a76df2fc6efc4340b0b0a8caa03dffe9|"
+#~ msgstr ""
+
+#~ msgid "|50b54340e4b9421c92e5016dd66c8355|"
+#~ msgstr ""
+
+#~ msgid "|f68042152bf34c54994fcebdc5d52d6f|"
+#~ msgstr ""
+
+#~ msgid "|1ea250d7f01b4efd988a7c5c8f6734a7|"
+#~ msgstr ""
+
+#~ msgid "|56352bd604f5486eaa9a95c6c6ee7b8f|"
+#~ msgstr ""
+
+#~ msgid "|06d0bceaa2e743be93b39c28b5190476|"
+#~ msgstr ""
+
+#~ msgid "|7216dd59d94846ed99c03684a2ad0a6c|"
+#~ msgstr ""
+
+#~ msgid "|0bcfd02f88784ad38f75a4caa92f05c2|"
+#~ msgstr ""
+
+#~ msgid "|d223a37d39f7468abb777b7cd5ee2fea|"
+#~ msgstr ""
+
+#~ msgid "|8b88feed06ae468aa85b4eda6656f7f4|"
+#~ msgstr ""
+
+#~ msgid "|12d7bf22d5a44820848e8d4078ccf868|"
+#~ msgstr ""
+
+#~ msgid "|2aa1be5fff654e3ca96a98b74bb2ae95|"
+#~ msgstr ""
+
+#~ msgid "|31cf3d419a3f432b8871ed48bb092db1|"
+#~ msgstr ""
+
+#~ msgid "|1e9960abe23a4045afa5298674ad3085|"
+#~ msgstr ""
+
+#~ msgid "|935c2faa5b6246e78309ee66d4f8e67a|"
+#~ msgstr ""
+
+#~ msgid "|2732344c7a464489972dd411fa151ede|"
+#~ msgstr ""
+
+#~ msgid "|a08cd4adac0d4bd0a89fa52e2b8d4043|"
+#~ msgstr ""
+
+#~ msgid "|d39ebdbbf7e6437aaf695ce7717c453e|"
+#~ msgstr ""
+
+#~ msgid "|d17184158b1143ff998a1090e045b4e8|"
+#~ msgstr ""
+
+#~ msgid "|8a4ad5bcbfe246c8a15084182f862583|"
+#~ msgstr ""
+
+#~ msgid "|978cc849947d41de87abeec99e401f93|"
+#~ msgstr ""
+
+#~ msgid "|281f579687904d10af5dc0afee5379fc|"
+#~ msgstr ""
+
+#~ msgid "|49a3268eba18415396cf6a9da7cbc6ff|"
+#~ msgstr ""
+
+#~ msgid "|03282d5b3691414a8084ff2ab69bc173|"
+#~ msgstr ""
+
+#~ msgid "|a30fedc5e9e54ff796cdc99d7004a9a7|"
+#~ msgstr ""
+
+#~ msgid "|794c04c2efa9435aad3ccc4b15d6433e|"
+#~ msgstr ""
+
+#~ msgid "|77a2ae94f6e24c1692f6e7b8997d4db1|"
+#~ msgstr ""
+
+#~ msgid "|78fff3204c3742c68d48864f44287827|"
+#~ msgstr ""
+
+#~ msgid "|bc08a4804db84be9977290dc7464fe7c|"
+#~ msgstr ""
+
+#~ msgid "|ebd5a7b8a51943389b874677725311ab|"
+#~ msgstr ""
+
+#~ msgid "|6568438e6cbc4794a6cd508d5a00ef61|"
+#~ msgstr ""
+
+#~ msgid "|0405ab79153047d4aaabc017e9599390|"
+#~ msgstr ""
+
+#~ msgid "|8e85ef8d54994b38bb953294af54024d|"
+#~ msgstr ""
+
+#~ msgid "|f0af739067674c95973768e57e5ab559|"
+#~ msgstr ""
+
+#~ msgid "|9958f885ad484663922ee5f3138bfc2d|"
+#~ msgstr ""
+
+#~ msgid "|7ea0ff7c3d494ae79e94e983df38625b|"
+#~ msgstr ""
+
+#~ msgid "|7951e9e7f8f240b7a7e77ecaa090e3bc|"
+#~ msgstr ""
+
+#~ msgid "|ce06be29ec894267aba51fe4351ad0e9|"
+#~ msgstr ""
+
+#~ msgid "|f988f40567d8459e9d776b39c5c113ab|"
+#~ msgstr ""
+
+#~ msgid "|4041d7e27af142a7b046fedf1107e6fb|"
+#~ msgstr ""
+
+#~ msgid "|6784a3e35b52433c997e1c23365ef089|"
+#~ msgstr ""
+
+#~ msgid "Video tutorial"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The video shown below shows how to"
+#~ " setup a PyTorch + Flower project "
+#~ "using our previously recommended APIs. A"
+#~ " new video tutorial will be released"
+#~ " that shows the new APIs (as "
+#~ "the content above does)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The video shown below shows how to"
+#~ " setup a TensorFlow + Flower project"
+#~ " using our previously recommended APIs. "
+#~ "A new video tutorial will be "
+#~ "released that shows the new APIs "
+#~ "(as the content above does)"
+#~ msgstr ""
+
+#~ msgid "|fdddf98a0e4242a2a1ae5e5514f47dff|"
+#~ msgstr ""
+
+#~ msgid "|be53537e5d0541b88f511c0d85c62ab8|"
+#~ msgstr ""
+
+#~ msgid "|eae203170ed2414195dc0d760749d2e1|"
+#~ msgstr ""
+
+#~ msgid "|1fed92efb1c24be0a6b12b7d7cb69a87|"
+#~ msgstr ""
+
+#~ msgid "|82c4f5d4978648de91fa4f307defcc16|"
+#~ msgstr ""
+
+#~ msgid "|57086c10071943e99968d55d6972a799|"
+#~ msgstr ""
+
+#~ msgid "|801435c7b9314afabc35aaa9cf512f8e|"
+#~ msgstr ""
+
+#~ msgid "|f73c9b4adcf9414a9605996eb2b597af|"
+#~ msgstr ""
+
+#~ msgid "|d183568ca3344f72b0f198acfc6a4b8e|"
+#~ msgstr ""
+
+#~ msgid "|33858954857a4f41ab39463102a19013|"
+#~ msgstr ""
+
+#~ msgid "|8d14735cba704b908b908a595955611f|"
+#~ msgstr ""
+
+#~ msgid "|ab6d1c42314648d3a8aa6434b7895f45|"
+#~ msgstr ""
+
+#~ msgid "|bc903db0ab9f43f1a0c26a04ba5f3e51|"
+#~ msgstr ""
+
+#~ msgid "|09519054c2274a1194bc2c6154294192|"
+#~ msgstr ""
+
+#~ msgid "|691cc2446f8d4904b5eefbb2e422a00d|"
+#~ msgstr ""
+
+#~ msgid "|959ace9236d44a84b0352fa7abce0ae5|"
+#~ msgstr ""
+
+#~ msgid "|d08d86434b0a40d0ab9e970c9d3f26a3|"
+#~ msgstr ""
+
+#~ msgid "|c903d4610434415c893c2896cc44d1be|"
+#~ msgstr ""
+
+#~ msgid "|a8a127b5e77e40058d92534a98a1ac67|"
+#~ msgstr ""
+
+#~ msgid "|d94816ae0bb948a08d9c70fc40cdfe45|"
+#~ msgstr ""
+
+#~ msgid "|0df9b0b7bd7f49428a0f16986577e640|"
+#~ msgstr ""
+
+#~ msgid "|3ca2aec703e04914846468bdebbaa579|"
+#~ msgstr ""
+
+#~ msgid "|62c7197c979a425eae442a833817ad90|"
+#~ msgstr ""
+
+#~ msgid "|cec1ac1022eb49b6b4999a6fc0dc1692|"
+#~ msgstr ""
+
+#~ msgid "|ff4ad9f1c9d0454f82cd45e2237ec41f|"
+#~ msgstr ""
+
+#~ msgid "|263fa38c588a42b6b9b5bb6f1ab7e572|"
+#~ msgstr ""
+
+#~ msgid "|832fe0df0b4c44f9b7d1e170a8071363|"
+#~ msgstr ""
+
+#~ msgid "|db0ef1f7489c450e96abcfc32fae9b06|"
 #~ msgstr ""
 
