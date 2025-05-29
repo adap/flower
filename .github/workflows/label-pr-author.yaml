@@ -28,10 +28,22 @@ jobs:
 
             for (const pr of prs.data) {
               const labels = pr.labels.map(l => l.name);
-              const hasLabel = labels.includes("Maintainer") || labels.includes("Contributor");
+              const hasLabel = labels.includes("Maintainer") || labels.includes("Contributor") || labels.includes("Bot");
               if (hasLabel) continue;
 
               const author = pr.user.login;
+              const isBot = pr.user.type === "Bot";
+
+              if (isBot) {
+                console.log(`Labeling PR #${pr.number} by ${author} as Bot`);
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  labels: ["Bot"],
+                });
+                continue;
+              }
 
               let isMaintainer = false;
               try {
@@ -41,11 +53,7 @@ jobs:
                 });
                 isMaintainer = result.status === 204;
               } catch (e) {
-                if (e.status === 404) {
-                  isMaintainer = false;
-                } else {
-                  throw e;
-                }
+                if (e.status !== 404) throw e;
               }
 
               const label = isMaintainer ? "Maintainer" : "Contributor";
@@ -58,3 +66,5 @@ jobs:
                 labels: [label],
               });
             }
+
+              console.log("All PRs processed");
