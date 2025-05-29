@@ -161,9 +161,11 @@ def run_superlink() -> None:
             event_log_plugin = _try_obtain_exec_event_log_writer_plugin()
         # Enable authorization if the args.enable_authorization is True
         if args.enable_authorization:
-            authz_plugin = _try_obtain_exec_authz_plugin(
+            # pylint: disable=unused-variable
+            authz_plugin = _try_obtain_exec_authz_plugin(  # noqa: F841
                 Path(cfg_path), verify_tls_cert
             )
+            # pylint: enable=unused-variable
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
