@@ -51,7 +51,7 @@ Create **custom partitioning schemes** or choose from the **implemented [partiti
 * Exponential partitioning `ExponentialPartitioner(num_partitions)`
 * more to come in the future releases (contributions are welcome).
 <p align="center">
-  <img src="./doc/source/_static/readme/comparison_of_partitioning_schemes.png" alt="Comparison of partitioning schemes."/>
+  <img src="./docs/source/_static/readme/comparison_of_partitioning_schemes.png" alt="Comparison of partitioning schemes."/>
   <br>
   <em>Comparison of Partitioning Schemes on CIFAR10</em>
 </p>

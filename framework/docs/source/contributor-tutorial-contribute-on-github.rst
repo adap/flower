@@ -144,10 +144,8 @@ And with Flower's repository:
 
        .. code-block:: shell
 
-           $ ./dev/format.sh # to format your code
-           $ ./dev/test.sh # to test that your code can be accepted
-           $ ./baselines/dev/format.sh # same as above but for code added to baselines
-           $ ./baselines/dev/test.sh # same as above but for code added to baselines
+           $ ./framework/dev/format.sh # to format your code
+           $ ./framework/dev/test.sh # to test that your code can be accepted
 4. **Stage changes**
        Before creating a commit that will update your history, you must specify to Git
        which files it needs to take into account.
@@ -304,7 +302,7 @@ Solution
 This is a tiny change, but it'll allow us to test your end-to-end setup. After cloning
 and setting up the Flower repo, here's what you should do:
 
-- Find the source file in ``doc/source``
+- Find the source file in ``framework/docs/source``
 - Make the change in the ``.rst`` file (beware, the dashes under the title should be the
   same length as the title itself)
 - Build the docs and `check the result
@@ -320,7 +318,7 @@ avoid that, breaking links can harm our search engine ranking.
 Here's how to change the file name:
 
 - Change the file name to ``save-progress.rst``
-- Add a redirect rule to ``doc/source/conf.py``
+- Add a redirect rule to ``framework/docs/source/conf.py``
 
 This will cause a redirect from ``saving-progress.html`` to ``save-progress.html``, old
 links will continue to work.

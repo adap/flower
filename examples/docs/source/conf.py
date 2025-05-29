@@ -29,7 +29,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.14.0"
+release = "1.19.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -70,6 +70,7 @@ redirects = {
     "vit-finetune": "flowertune-vit.html",
     "simulation-pytorch": "quickstart-pytorch.html",
     "simulation-tensorflow": "quickstart-tensorflow.html",
+    "quickstart-mlcube": "index.html",
 }
 
 
@@ -121,7 +122,7 @@ _open_in_colab_button = """
 .. raw:: html
 
     <br/>
-    <a href="https://colab.research.google.com/github/adap/flower/blob/main/doc/source/{{ env.doc2path(env.docname, base=None) }}">
+    <a href="https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source/{{ env.doc2path(env.docname, base=None) }}">
         <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"/>
     </a>
 """

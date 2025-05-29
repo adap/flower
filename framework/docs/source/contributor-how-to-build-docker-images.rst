@@ -19,7 +19,7 @@ environment.
 2. Verify the Docker daemon is running.
 
    The build instructions that assemble the images are located in the respective
-   Dockerfiles. You can find them in the subdirectories of ``src/docker``.
+   Dockerfiles. You can find them in the subdirectories of ``framework/docker``.
 
    Flower Docker images are configured via build arguments. Through build arguments, we
    can make the creation of images more flexible. For example, in the base image, we can
@@ -82,7 +82,7 @@ and Flower :substitution-code:`|stable_flwr_version|`:
 .. code-block:: bash
     :substitutions:
 
-    $ cd src/docker/base/<ubuntu|alpine>
+    $ cd framework/docker/base/<ubuntu|alpine>
     $ docker build \
       --build-arg PYTHON_VERSION=3.11.0 \
       --build-arg FLWR_VERSION=|stable_flwr_version| \
@@ -120,7 +120,7 @@ Ubuntu 22.04, run the following:
 .. code-block:: bash
     :substitutions:
 
-    $ cd src/docker/superlink
+    $ cd framework/docker/superlink
     $ docker build \
       --build-arg BASE_IMAGE=|stable_flwr_version|-py3.11-ubuntu22.04 \
       -t flwr_superlink:0.1.0 .
@@ -131,7 +131,7 @@ specified above).
 
 .. code-block:: bash
 
-    $ cd src/docker/superlink/
+    $ cd framework/docker/superlink/
     $ docker build \
       --build-arg BASE_REPOSITORY=flwr_base \
       --build-arg BASE_IMAGE=0.1.0
@@ -150,13 +150,13 @@ Direct Reference Examples
     :substitutions:
 
     # main branch
-    git+https://github.com/adap/flower.git@main
+    git+https://github.com/adap/flower.git@main#subdirectory=framework
 
     # commit hash
-    git+https://github.com/adap/flower.git@1187c707f1894924bfa693d99611cf6f93431835
+    git+https://github.com/adap/flower.git@4bc1bca3d0576dd2233972d9d91c2c7e8eb03edd#subdirectory=framework
 
     # tag
-    git+https://github.com/adap/flower.git@|stable_flwr_version|
+    git+https://github.com/adap/flower.git@|stable_flwr_version|#subdirectory=framework
 
     # artifact store
     https://artifact.flower.ai/py/main/latest/flwr-|stable_flwr_version|-py3-none-any.whl

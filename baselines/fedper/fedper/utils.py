@@ -9,10 +9,11 @@ from typing import Callable, Optional, Type, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+from flwr.client import Client
 from flwr.server.history import History
 from omegaconf import DictConfig
 
-from fedper.client import BaseClient, FedPerClient, get_client_fn_simulation
+from fedper.client import get_client_fn_simulation
 from fedper.implemented_models.mobile_model import MobileNet, MobileNetModelSplit
 from fedper.implemented_models.resnet_model import ResNet, ResNetModelSplit
 
@@ -71,7 +72,7 @@ def set_client_state_save_path() -> str:
 
 def get_client_fn(
     config: DictConfig, client_state_save_path: str = ""
-) -> Callable[[str], Union[FedPerClient, BaseClient]]:
+) -> Callable[[str], Client]:
     """Get client function."""
     # Get algorithm
     algorithm = config.algorithm.lower()

@@ -19,15 +19,16 @@ Run Flower on Azure
 
 .. note::
 
-    There are many ways to deploy Flower on Microst Azure. The instructions provided in
-    this guide is just a basic walkthrough, step-by-step guide on how to quickly setup
-    and run a Flower application on a Federated Learning environment on Microst Azure.
+    There are many ways to deploy Flower on Microsoft Azure. The instructions provided
+    in this guide is just a basic walkthrough, step-by-step guide on how to quickly
+    setup and run a Flower application on a Federated Learning environment on Microsoft
+    Azure.
 
-In this how-to guide, we want to create a Federated Learning environment on Microst
+In this how-to guide, we want to create a Federated Learning environment on Microsoft
 Azure using three Virtual Machines (VMs). From the three machines, one machine will be
 used as the Federation server and two as the Federation clients. Our goal is to create a
-Flower federation on Microst Azure where we can run Flower apps from our local machine,
-e.g., laptop.
+Flower federation on Microsoft Azure where we can run Flower apps from our local
+machine, e.g., laptop.
 
 On the Federation server VM we will deploy the long-running Flower server
 (``SuperLink``) and on the two Federation client VMs we will deploy the long-running
@@ -43,7 +44,7 @@ networking rules to allow cross-VM communication.
 VM Create
 ~~~~~~~~~
 
-Assuming we are already inside the Microst Azure portal, we navigate to the ``Create``
+Assuming we are already inside the Microsoft Azure portal, we navigate to the ``Create``
 page and we select ``Azure virtual machine``. In the new page, for each VM we edit the
 properties as follows:
 
@@ -184,13 +185,11 @@ and then at each client (``SuperNode``).
     # Client-1 VM (SuperNode-1)
     flower-supernode \
       --insecure \
-      --clientappio-api-address="0.0.0.0:9094" \  # SuperNode listening port
       --superlink="SUPERLINK_PUBLIC_IP:9092"  # SuperLink public ip and port
 
     # Client-2 VM (SuperNode-2)
     flower-supernode \
       --insecure \
-      --clientappio-api-address="0.0.0.0:9095" \  # SuperNode listening port
       --superlink="SUPERLINK_PUBLIC_IP:9092"  # SuperLink public ip and port
 
 Run Flower App

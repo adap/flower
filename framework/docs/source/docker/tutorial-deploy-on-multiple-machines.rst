@@ -1,3 +1,7 @@
+:og:description: Deploy a Flower project on multiple machines using Docker Compose to configure server and client components with TLS encryption and persistent SuperLink state.
+.. meta::
+    :description: Deploy a Flower project on multiple machines using Docker Compose to configure server and client components with TLS encryption and persistent SuperLink state.
+
 Deploy Flower on Multiple Machines with Docker Compose
 ======================================================
 
@@ -41,7 +45,7 @@ Step 1: Set Up
        :substitutions:
 
        $ git clone --depth=1 --branch v|stable_flwr_version| https://github.com/adap/flower.git
-       $ cd flower/src/docker/distributed
+       $ cd flower/framework/docker/distributed
 
 2. Get the IP address from the remote machine and save it for later.
 3. Use the ``certs.yml`` Compose file to generate your own self-signed certificates. If
@@ -145,7 +149,7 @@ Here, we have named our remote federation ``remote-deployment``:
 
     [tool.flwr.federations.remote-deployment]
     address = "192.168.2.33:9093"
-    root-certificates = "../../src/docker/distributed/superlink-certificates/ca.crt"
+    root-certificates = "../../framework/docker/distributed/superlink-certificates/ca.crt"
 
 .. note::
 

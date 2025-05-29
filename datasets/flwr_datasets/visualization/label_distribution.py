@@ -32,7 +32,7 @@ from flwr_datasets.visualization.utils import _validate_parameters
 # pylint: disable=too-many-arguments,too-many-locals
 
 
-def plot_label_distributions(
+def plot_label_distributions(  # pylint: disable=R0917
     partitioner: Partitioner,
     label_name: str,
     plot_type: str = "bar",
