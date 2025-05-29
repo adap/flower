@@ -36,11 +36,15 @@ if hasattr(signal, "SIGQUIT"):
     SIGNAL_TO_EXIT_CODE[signal.SIGQUIT] = ExitCode.GRACEFUL_EXIT_SIGQUIT
 
 
+registered_exit_handlers: list[Callable[[], None]] = []
+
+
 def register_exit_handlers(
     event_type: EventType,
     exit_message: Optional[str] = None,
     grpc_servers: Optional[list[Server]] = None,
     bckg_threads: Optional[list[Thread]] = None,
+    exit_handlers: Optional[list[Callable[[], None]]] = None,
 ) -> None:
     """Register exit handlers for `SIGINT`, `SIGTERM` and `SIGQUIT` signals.
 
@@ -56,8 +60,11 @@ def register_exit_handlers(
     bckg_threads: Optional[List[Thread]] (default: None)
         An optional list of threads that need to be gracefully
         terminated before exiting.
+    exit_handlers: Optional[List[Callable[[], None]]] (default: None)
+        An optional list of exit handlers to be called before exiting.
     """
     default_handlers: dict[int, Callable[[int, FrameType], None]] = {}
+    registered_exit_handlers.extend(exit_handlers or [])
 
     def graceful_exit_handler(signalnum: int, _frame: FrameType) -> None:
         """Exit handler to be registered with `signal.signal`.
@@ -76,6 +83,9 @@ def register_exit_handlers(
             for bckg_thread in bckg_threads:
                 bckg_thread.join()
 
+        for exit_handler in registered_exit_handlers:
+            exit_handler()
+
         # Setup things for graceful exit
         flwr_exit(
             code=SIGNAL_TO_EXIT_CODE[signalnum],
@@ -87,3 +97,24 @@ def register_exit_handlers(
     for sig in SIGNAL_TO_EXIT_CODE:
         default_handler = signal.signal(sig, graceful_exit_handler)  # type: ignore
         default_handlers[sig] = default_handler  # type: ignore
+
+
+def add_exit_handler(exit_handler: Callable[[], None]) -> None:
+    """Add an exit handler to be called on graceful exit.
+
+    This function allows you to register additional exit handlers
+    that will be executed when the application exits gracefully,
+    if `register_exit_handlers` was called.
+
+    Parameters
+    ----------
+    exit_handler : Callable[[], None]
+        A callable that takes no arguments and performs cleanup or
+        other actions before the application exits.
+
+    Notes
+    -----
+    This method is not thread-safe, and it allows you to add the
+    same exit handler multiple times.
+    """
+    registered_exit_handlers.append(exit_handler)
