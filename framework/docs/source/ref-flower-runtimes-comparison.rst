@@ -5,8 +5,8 @@
 Flower Runtimes Comparison
 ==========================
 
-Flower Apps can be executed with both `simulation <how-to-run-simulations.html>`_
-or `deployment <how-to-run-flower-with-deployment-engine.html>`_ runtimes. Switching
+Flower Apps can be executed with both `simulation <how-to-run-simulations.html>`_ or
+`deployment <how-to-run-flower-with-deployment-engine.html>`_ runtimes. Switching
 between runtimes simply requires specifying a different type of `federation` when
 executing the `flwr run` command via the `Flower CLI <ref-api-cli.html>`_.
 
@@ -49,7 +49,8 @@ deployment runtime.
       - TLS-enabled gRPC.
     - - **Server-side Infrastructure**
       - Simulation runtime coordinates the spawning of multiple workers (Python process)
-        which act as `simulated` SuperNodes. The simulation runtime can be started with or without the `SuperLink <ref-api-cli.html#flower-superlink>`_.
+        which act as `simulated` SuperNodes. The simulation runtime can be started with
+        or without the `SuperLink <ref-api-cli.html#flower-superlink>`_.
       - The SuperLink awaits for SuperNodes to connect. User interface with the
         SuperLink using the `Flower CLI <ref-api-cli.html>`_.
     - - **Server-side App execution**
@@ -67,6 +68,6 @@ deployment runtime.
         instances of the same ``ClientApp`` to simulate large amounts of clients.
         ``ClientApps`` are stateless.
       - Initialized as a ``ClientApp`` `process or subprocess
-        <ref-flower-network-communication.html>`_, it runs independently from the SuperNode
-        and communicates with it over gRPC via the ClientAppIo API. ``ClientApps`` are
-        stateless.
+        <ref-flower-network-communication.html>`_, it runs independently from the
+        SuperNode and communicates with it over gRPC via the ClientAppIo API.
+        ``ClientApps`` are stateless.
