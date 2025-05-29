@@ -115,7 +115,7 @@ global___PullMessagesResponse = PullMessagesResponse
 class PushMessagesRequest(google.protobuf.message.Message):
     """PushMessages messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    class MsgToChildrenMappingEntry(google.protobuf.message.Message):
+    class MsgToDescendantMappingEntry(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
         KEY_FIELD_NUMBER: builtins.int
         VALUE_FIELD_NUMBER: builtins.int
@@ -132,21 +132,21 @@ class PushMessagesRequest(google.protobuf.message.Message):
 
     NODE_FIELD_NUMBER: builtins.int
     MESSAGES_LIST_FIELD_NUMBER: builtins.int
-    MSG_TO_CHILDREN_MAPPING_FIELD_NUMBER: builtins.int
+    MSG_TO_DESCENDANT_MAPPING_FIELD_NUMBER: builtins.int
     @property
     def node(self) -> flwr.proto.node_pb2.Node: ...
     @property
     def messages_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.message_pb2.Message]: ...
     @property
-    def msg_to_children_mapping(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.message_pb2.ObjectIDs]: ...
+    def msg_to_descendant_mapping(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.message_pb2.ObjectIDs]: ...
     def __init__(self,
         *,
         node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         messages_list: typing.Optional[typing.Iterable[flwr.proto.message_pb2.Message]] = ...,
-        msg_to_children_mapping: typing.Optional[typing.Mapping[typing.Text, flwr.proto.message_pb2.ObjectIDs]] = ...,
+        msg_to_descendant_mapping: typing.Optional[typing.Mapping[typing.Text, flwr.proto.message_pb2.ObjectIDs]] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list","msg_to_children_mapping",b"msg_to_children_mapping","node",b"node"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list","msg_to_descendant_mapping",b"msg_to_descendant_mapping","node",b"node"]) -> None: ...
 global___PushMessagesRequest = PushMessagesRequest
 
 class PushMessagesResponse(google.protobuf.message.Message):
