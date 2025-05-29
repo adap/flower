@@ -18,25 +18,22 @@
 import threading
 from logging import DEBUG, INFO
 from typing import Optional
-from uuid import UUID
 
 import grpc
 
-from flwr.common import ConfigRecord, Message
+from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
-    fab_from_proto,
     fab_to_proto,
     message_from_proto,
     message_to_proto,
     run_status_from_proto,
     run_status_to_proto,
     run_to_proto,
-    user_config_from_proto,
 )
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
@@ -57,8 +54,6 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
-    CreateRunRequest,
-    CreateRunResponse,
     GetRunRequest,
     GetRunResponse,
     GetRunStatusRequest,
@@ -121,32 +116,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         nodes: list[Node] = [Node(node_id=node_id) for node_id in all_ids]
         return GetNodesResponse(nodes=nodes)
 
-    def CreateRun(
-        self, request: CreateRunRequest, context: grpc.ServicerContext
-    ) -> CreateRunResponse:
-        """Create run ID."""
-        log(DEBUG, "ServerAppIoServicer.CreateRun")
-        state: LinkState = self.state_factory.state()
-        if request.HasField("fab"):
-            fab = fab_from_proto(request.fab)
-            ffs: Ffs = self.ffs_factory.ffs()
-            fab_hash = ffs.put(fab.content, {})
-            _raise_if(
-                validation_error=fab_hash != fab.hash_str,
-                request_name="CreateRun",
-                detail=f"FAB ({fab.hash_str}) hash from request doesn't match contents",
-            )
-        else:
-            fab_hash = ""
-        run_id = state.create_run(
-            request.fab_id,
-            request.fab_version,
-            fab_hash,
-            user_config_from_proto(request.override_config),
-            ConfigRecord(),
-        )
-        return CreateRunResponse(run_id=run_id)
-
     def PushMessages(
         self, request: PushInsMessagesRequest, context: grpc.ServicerContext
     ) -> PushInsMessagesResponse:
@@ -170,7 +139,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             request_name="PushMessages",
             detail="`messages_list` must not be empty",
         )
-        message_ids: list[Optional[UUID]] = []
+        message_ids: list[Optional[str]] = []
         while request.messages_list:
             message_proto = request.messages_list.pop(0)
             message = message_from_proto(message_proto=message_proto)
@@ -186,7 +155,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 detail="`Message.metadata` has mismatched `run_id`",
             )
             # Store
-            message_id: Optional[UUID] = state.store_message_ins(message=message)
+            message_id: Optional[str] = state.store_message_ins(message=message)
             message_ids.append(message_id)
 
         return PushInsMessagesResponse(
@@ -212,17 +181,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             context,
         )
 
-        # Convert each message_id str to UUID
-        message_ids: set[UUID] = {
-            UUID(message_id) for message_id in request.message_ids
-        }
-
         # Read from state
-        messages_res: list[Message] = state.get_message_res(message_ids=message_ids)
+        messages_res: list[Message] = state.get_message_res(
+            message_ids=set(request.message_ids)
+        )
 
         # Delete the instruction Messages and their replies if found
         message_ins_ids_to_delete = {
-            UUID(msg_res.metadata.reply_to_message_id) for msg_res in messages_res
+            msg_res.metadata.reply_to_message_id for msg_res in messages_res
         }
 
         state.delete_messages(message_ins_ids=message_ins_ids_to_delete)

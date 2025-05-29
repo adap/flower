@@ -429,6 +429,40 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
             )
         )
 
+    @property
+    def object_id(self) -> str:
+        """Get object ID."""
+        ret = super().object_id
+        self.is_dirty = False  # Reset dirty flag
+        return ret
+
+    @property
+    def is_dirty(self) -> bool:
+        """Check if the object is dirty after the last deflation."""
+        if "_is_dirty" not in self.__dict__:
+            self.__dict__["_is_dirty"] = True
+
+        if not self.__dict__["_is_dirty"]:
+            if any(v.is_dirty for v in self.values()):
+                # If any Array is dirty, mark the record as dirty
+                self.__dict__["_is_dirty"] = True
+        return cast(bool, self.__dict__["_is_dirty"])
+
+    @is_dirty.setter
+    def is_dirty(self, value: bool) -> None:
+        """Set the dirty flag."""
+        self.__dict__["_is_dirty"] = value
+
+    def __setitem__(self, key: str, value: Array) -> None:
+        """Set item and mark the record as dirty."""
+        self.is_dirty = True  # Mark as dirty when setting an item
+        super().__setitem__(key, value)
+
+    def __delitem__(self, key: str) -> None:
+        """Delete item and mark the record as dirty."""
+        self.is_dirty = True  # Mark as dirty when deleting an item
+        super().__delitem__(key)
+
 
 class ParametersRecord(ArrayRecord):
     """Deprecated class ``ParametersRecord``, use ``ArrayRecord`` instead.
