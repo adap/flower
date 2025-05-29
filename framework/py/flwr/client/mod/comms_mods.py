@@ -54,7 +54,7 @@ def arrays_size_mod(
     of the message as well as their sizes in bytes.
     """
     # Log the model size statistics and the total size in the incoming message
-    model_size_stats = _get_model_size_stats(msg)
+    model_size_stats = _get_array_record_size_stats(msg)
     total_bytes = sum(stat["bytes"] for stat in model_size_stats.values())
     if model_size_stats:
         log(INFO, "Incoming `ArrayRecord` size statistics:")
@@ -64,7 +64,7 @@ def arrays_size_mod(
     msg = call_next(msg, ctxt)
 
     # Log the model size statistics and the total size in the outgoing message
-    model_size_stats = _get_model_size_stats(msg)
+    model_size_stats = _get_array_record_size_stats(msg)
     total_bytes = sum(stat["bytes"] for stat in model_size_stats.values())
     if model_size_stats:
         log(INFO, "Outgoing `ArrayRecord` size statistics:")
@@ -73,11 +73,11 @@ def arrays_size_mod(
     return msg
 
 
-def _get_model_size_stats(
+def _get_array_record_size_stats(
     msg: Message,
 ) -> dict[str, dict[str, int]]:
-    """Get model size statistics from the message."""
-    model_size_stats = {}
+    """Get `ArrayRecord` size statistics from the message."""
+    array_record_size_stats = {}
     for record_name, arr_record in msg.content.array_records.items():
         arr_record_bytes = arr_record.count_bytes()
         element_count = 0
@@ -86,8 +86,8 @@ def _get_model_size_stats(
                 int(np.prod(array.shape)) if array.shape else array.numpy().size
             )
 
-        model_size_stats[record_name] = {
+        array_record_size_stats[record_name] = {
             "elements": element_count,
             "bytes": arr_record_bytes,
         }
-    return model_size_stats
+    return array_record_size_stats
