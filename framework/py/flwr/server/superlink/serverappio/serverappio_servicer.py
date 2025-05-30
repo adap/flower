@@ -411,15 +411,35 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         if not check_body_len_consistency(request.object_content):
             # Cancel insertion in ObjectStore
-            context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION, "Unexpected object length"
+            )
 
-        return PushObjectResponse()
+        # Init store
+        store = self.objectstore_factory.store()
+
+        # Insert in store
+        stored = False
+        try:
+            store.put(request.object_id, request.object_content)
+            stored = True
+        except (NoObjectInStoreError, ValueError) as e:
+            log(ERROR, str(e))
+
+        return PushObjectResponse(stored=stored)
 
     def PullObject(
         self, request: PullObjectRequest, context: grpc.ServicerContext
     ) -> PullObjectResponse:
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
+
+        # Init store
+        store = self.objectstore_factory.store()
+
+        # Fetch from store
+        if content := store.get(request.object_id):
+            return PullObjectResponse(object_content=content)
 
         return PullObjectResponse()
 
