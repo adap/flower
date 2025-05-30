@@ -102,7 +102,7 @@ mode:
 
 .. dropdown:: Understand the command
 
-    * ``flower-superlink``: Name of the SuperLink binary.
+    * ``flower-superlink``: Name of the SuperLink installed CLI executable.
     * ``--insecure``: This flag tells the SuperLink to operate in an insecure mode, allowing
       unencrypted communication. Refer to the :doc:`how-to-enable-tls-connections` guide to learn how to run your SuperLink with TLS.
 
@@ -134,7 +134,7 @@ need two terminals for this step.
 
    .. dropdown:: Understand the command
 
-       * ``flower-supernode``: Name of the SuperNode binary.
+       * ``flower-supernode``: Name of the SuperNode installed CLI executable.
        * ``--insecure``: This flag tells the SuperNode to operate in an insecure mode, allowing
          unencrypted communication. Refer to the :doc:`how-to-enable-tls-connections` guide to learn how to run your SuperNode with TLS.
        * ``--superlink 127.0.0.1:9092``: Connect to the SuperLink's Fleet API at the address
