@@ -209,8 +209,22 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
         return obj_ids_registered
 
-    def test_successful_pull_messages_if_running(self) -> None:
-        """Test `PullMessages` success."""
+    @parameterized.expand(
+        [
+            (
+                True,
+                grpc.StatusCode.OK,
+            ),
+            (
+                False,
+                grpc.StatusCode.NOT_FOUND,
+            ),
+        ]
+    )  # type: ignore
+    def test_pull_messages_if_running(
+        self, register_in_store: bool, expected_code: grpc.StatusCode
+    ) -> None:
+        """Test `PullMessages` success if objects are registered in ObjectStore."""
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
 
@@ -225,27 +239,35 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
             )
         )
+        # pylint: disable-next=W0212
         message_ins.metadata._message_id = message_ins.object_id  # type: ignore
         self.state.store_message_ins(message=message_ins)
-        obj_ids_registered = self._register_in_object_store(message_ins)
+        obj_ids_registered: list[str] = []
+        if register_in_store:
+            obj_ids_registered = self._register_in_object_store(message_ins)
 
         request = PullMessagesRequest(node=Node(node_id=node_id))
 
         # Execute
-        response, call = self._pull_messages.with_call(request=request)
+        try:
+            response, call = self._pull_messages.with_call(request=request)
 
-        # Assert
-        assert isinstance(response, PullMessagesResponse)
-        assert grpc.StatusCode.OK == call.code()
+            # Assert
+            assert isinstance(response, PullMessagesResponse)
+            assert call.code() == expected_code
+            assert expected_code == grpc.StatusCode.OK
 
-        # Assert expected object_ids
-        object_ids_in_response = {
-            obj_id
-            for obj_ids in response.objects_to_pull.values()
-            for obj_id in obj_ids.object_ids
-        }
-        assert set(obj_ids_registered) == object_ids_in_response
-        assert message_ins.object_id == list(response.objects_to_pull.keys())[0]
+            # Assert expected object_ids
+            object_ids_in_response = {
+                obj_id
+                for obj_ids in response.objects_to_pull.values()
+                for obj_id in obj_ids.object_ids
+            }
+            assert set(obj_ids_registered) == object_ids_in_response
+            assert message_ins.object_id == list(response.objects_to_pull.keys())[0]
+        except grpc.RpcError as e:
+            assert e.code() == expected_code
+            assert expected_code == grpc.StatusCode.NOT_FOUND
 
     def test_successful_get_run_if_running(self) -> None:
         """Test `GetRun` success."""

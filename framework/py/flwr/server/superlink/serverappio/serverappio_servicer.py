@@ -77,9 +77,9 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from flwr.server.superlink.utils import abort_grpc_context, abort_if
+from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
-from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 
 from ..utils import store_mapping_and_register_objects
 
@@ -240,8 +240,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 objects_to_pull[msg_object_id] = ObjectIDs(
                     object_ids=descendants + [msg_object_id]
                 )
-            except KeyError as ke:
-                abort_grpc_context(ke.args[0], context)
+            except NoObjectInStoreError as e:
+                context.abort(grpc.StatusCode.NOT_FOUND, e.args[0])
 
         return PullResMessagesResponse(
             messages_list=messages_list, objects_to_pull=objects_to_pull
