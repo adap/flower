@@ -115,6 +115,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         return message_handler.pull_messages(
             request=request,
             state=self.state_factory.state(),
+            store=self.objectstore_factory.store(),
         )
 
     def PushMessages(
