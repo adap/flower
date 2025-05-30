@@ -19,6 +19,18 @@ import abc
 from typing import Optional
 
 
+class NoObjectInStoreError(Exception):
+    """Error when trying to access an element in the ObjectStore that does not exist."""
+
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.message = message
+
+    def __str__(self) -> str:
+        """Return formatted exception message string."""
+        return f"NoObjectInStoreError: {self.message}"
+
+
 class ObjectStore(abc.ABC):
     """Abstract base class for `ObjectStore` implementations.
 
