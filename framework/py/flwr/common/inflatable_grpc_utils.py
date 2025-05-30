@@ -50,7 +50,7 @@ def push_object_to_servicer(
     obj: InflatableObject,
     stub: Union[FleetStub, ServerAppIoStub],
     node: Node,
-    object_ids_to_push: Optional[list[str]] = None,
+    object_ids_to_push: Optional[set[str]] = None,
 ) -> set[str]:
     """Recursively deflate an object and push it to the servicer.
 
