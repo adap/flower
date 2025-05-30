@@ -382,6 +382,15 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
 
+        # Init store
+        store = self.objectstore_factory.store()
+
+        # Insert in store
+        try:
+            store.put(request.object_id, request.object_content)
+        except Exception as e:
+            context.abort(grpc.StatusCode.PERMISSION_DENIED, f"{e}")
+
         return PushObjectResponse()
 
     def PullObject(
@@ -389,6 +398,13 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PullObjectResponse:
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
+
+        # Init store
+        store = self.objectstore_factory.store()
+
+        # Fetch from store
+        if content := store.get(request.object_id):
+            return PullObjectResponse(object_content=content)
 
         return PullObjectResponse()
 
