@@ -19,7 +19,7 @@ from typing import Optional
 
 from flwr.common.inflatable import get_object_id, is_valid_sha256_hash
 
-from .object_store import ObjectStore
+from .object_store import NoObjectInStoreError, ObjectStore
 
 
 class InMemoryObjectStore(ObjectStore):
@@ -48,7 +48,9 @@ class InMemoryObjectStore(ObjectStore):
         """Put an object into the store."""
         # Only allow adding the object if it has been preregistered
         if object_id not in self.store:
-            raise KeyError(f"Object with id {object_id} was not preregistered.")
+            raise NoObjectInStoreError(
+                f"Object with ID '{object_id}' was not pre-registered."
+            )
 
         # Verify object_id and object_content match
         if self.verify:
@@ -71,6 +73,11 @@ class InMemoryObjectStore(ObjectStore):
 
     def get_message_descendant_ids(self, msg_object_id: str) -> list[str]:
         """Retrieve the object IDs of all descendants of a given Message."""
+        if msg_object_id not in self.msg_children_objects_mapping:
+            raise NoObjectInStoreError(
+                f"No message registered in Object Store with ID '{msg_object_id}'. "
+                "Mapping to descendants could not be found."
+            )
         return self.msg_children_objects_mapping[msg_object_id]
 
     def get(self, object_id: str) -> Optional[bytes]:
