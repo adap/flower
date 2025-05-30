@@ -23,7 +23,7 @@ from parameterized import parameterized
 from flwr.common.inflatable import get_object_id
 
 from .in_memory_object_store import InMemoryObjectStore
-from .object_store import ObjectStore
+from .object_store import NoObjectInStoreError, ObjectStore
 
 
 class ObjectStoreTest(unittest.TestCase):
@@ -181,7 +181,7 @@ class ObjectStoreTest(unittest.TestCase):
         object_id = get_object_id(object_content)
 
         # Execute
-        with self.assertRaises(KeyError):
+        with self.assertRaises(NoObjectInStoreError):
             object_store.put(object_id, object_content)
 
     def test_preregister(self) -> None:
@@ -215,6 +215,30 @@ class ObjectStoreTest(unittest.TestCase):
         # Execute
         with self.assertRaises(ValueError):
             object_store.preregister(object_ids=[invalid_object_id])
+
+    def test_get_message_descendants_ids(self) -> None:
+        """Test setting and getting mapping of message object id and its descendants."""
+        # Prepare
+        object_store = self.object_store_factory()
+        object_content = b"test_value"
+        object_id = get_object_id(object_content)
+
+        # Execute
+        # Insert
+        object_store.set_message_descendant_ids(
+            msg_object_id=object_id, descendant_ids=[]
+        )
+        # Extract correct
+        descendant_ids = object_store.get_message_descendant_ids(
+            msg_object_id=object_id
+        )
+
+        # Assert
+        assert descendant_ids == []
+
+        # Extract nonexistent id
+        with self.assertRaises(NoObjectInStoreError):
+            object_store.get_message_descendant_ids(msg_object_id="1234")
 
 
 class InMemoryStateTest(ObjectStoreTest):

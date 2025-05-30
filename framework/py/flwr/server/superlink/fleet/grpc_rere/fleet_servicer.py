@@ -133,6 +133,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             res = message_handler.push_messages(
                 request=request,
                 state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
             )
         except InvalidRunStatusException as e:
             abort_grpc_context(e.message, context)

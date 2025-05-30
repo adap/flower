@@ -15,7 +15,7 @@
 """InflatableObject utils."""
 
 
-from typing import Union
+from typing import Optional, Union
 
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
@@ -24,6 +24,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectRequest,
     PushObjectResponse,
 )
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
 from .inflatable import (
@@ -46,40 +47,51 @@ inflatable_class_registry: dict[str, type[InflatableObject]] = {
 
 
 def push_object_to_servicer(
-    obj: InflatableObject, stub: Union[FleetStub, ServerAppIoStub]
+    obj: InflatableObject,
+    stub: Union[FleetStub, ServerAppIoStub],
+    node: Node,
+    object_ids_to_push: Optional[set[str]] = None,
 ) -> set[str]:
     """Recursively deflate an object and push it to the servicer.
 
-    Objects with the same ID are not pushed twice. It returns the set of pushed object
+    Objects with the same ID are not pushed twice. If `object_ids_to_push` is set,
+    only objects with those IDs are pushed. It returns the set of pushed object
     IDs.
     """
     pushed_object_ids: set[str] = set()
     # Push children if it has any
     if children := obj.children:
         for child in children.values():
-            pushed_object_ids |= push_object_to_servicer(child, stub)
+            pushed_object_ids |= push_object_to_servicer(
+                child, stub, node, object_ids_to_push
+            )
 
     # Deflate object and push
     object_content = obj.deflate()
     object_id = get_object_id(object_content)
-    _: PushObjectResponse = stub.PushObject(
-        PushObjectRequest(
-            object_id=object_id,
-            object_content=object_content,
+    # Push always if no object set is specified, or if the object is in the set
+    if object_ids_to_push is None or object_id in object_ids_to_push:
+        _: PushObjectResponse = stub.PushObject(
+            PushObjectRequest(
+                node=node,
+                object_id=object_id,
+                object_content=object_content,
+            )
         )
-    )
-    pushed_object_ids.add(object_id)
+        pushed_object_ids.add(object_id)
 
     return pushed_object_ids
 
 
 def pull_object_from_servicer(
-    object_id: str, stub: Union[FleetStub, ServerAppIoStub]
+    object_id: str,
+    stub: Union[FleetStub, ServerAppIoStub],
+    node: Node,
 ) -> InflatableObject:
     """Recursively inflate an object by pulling it from the servicer."""
     # Pull object
     object_proto: PullObjectResponse = stub.PullObject(
-        PullObjectRequest(object_id=object_id)
+        PullObjectRequest(node=node, object_id=object_id)
     )
     object_content = object_proto.object_content
 
@@ -93,7 +105,9 @@ def pull_object_from_servicer(
     # Pull all children objects
     children: dict[str, InflatableObject] = {}
     for child_object_id in children_obj_ids:
-        children[child_object_id] = pull_object_from_servicer(child_object_id, stub)
+        children[child_object_id] = pull_object_from_servicer(
+            child_object_id, stub, node
+        )
 
     # Inflate object passing its children
     return cls_type.inflate(object_content, children=children)
