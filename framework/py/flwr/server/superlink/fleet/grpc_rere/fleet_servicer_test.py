@@ -21,17 +21,20 @@ import unittest
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigRecord
+from flwr.common import ConfigRecord, Message
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.inflatable import get_desdendant_object_ids
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
 from flwr.common.typing import RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    PullMessagesRequest,
+    PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
 )
@@ -40,7 +43,10 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
-from flwr.server.superlink.linkstate.linkstate_test import create_res_message
+from flwr.server.superlink.linkstate.linkstate_test import (
+    create_ins_message,
+    create_res_message,
+)
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.object_store import ObjectStoreFactory
 
@@ -59,6 +65,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()
         objectstore_factory = ObjectStoreFactory()
+        self.store = objectstore_factory.store()
 
         self.status_to_msg = _STATUS_TO_MSG
 
@@ -76,6 +83,11 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.Fleet/PushMessages",
             request_serializer=PushMessagesRequest.SerializeToString,
             response_deserializer=PushMessagesResponse.FromString,
+        )
+        self._pull_messages = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PullMessages",
+            request_serializer=PullMessagesRequest.SerializeToString,
+            response_deserializer=PullMessagesResponse.FromString,
         )
         self._get_run = self._channel.unary_unary(
             "/flwr.proto.Fleet/GetRun",
@@ -180,6 +192,60 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Execute & Assert
         self._assert_push_messages_not_allowed(node_id, run_id)
+
+    def _register_in_object_store(self, message: Message) -> list[str]:
+        # When pulling a Message, the response also must include the IDs of the objects
+        # to pull. To achieve this, we need to at least register the Objects in the
+        # message into the store. Note this would normally be done when the
+        # servicer handles a PushMessageRequest
+        descendants = list(get_desdendant_object_ids(message))
+        message_obj_id = message.metadata.message_id
+        # Store mapping
+        self.store.set_message_descendant_ids(
+            msg_object_id=message_obj_id, descendant_ids=descendants
+        )
+        # Preregister
+        obj_ids_registered = self.store.preregister(descendants + [message_obj_id])
+
+        return obj_ids_registered
+
+    def test_successful_pull_messages_if_running(self) -> None:
+        """Test `PullMessages` success."""
+        # Prepare
+        node_id = self.state.create_node(heartbeat_interval=30)
+
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Transition status to running. PullMessagesRequest is only
+        # allowed in running status.
+        self._transition_run_status(run_id, 2)
+
+        # Let's insert a Message in the LinkState and register it in the ObjectStore
+        message_ins = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        message_ins.metadata._message_id = message_ins.object_id  # type: ignore
+        self.state.store_message_ins(message=message_ins)
+        obj_ids_registered = self._register_in_object_store(message_ins)
+
+        request = PullMessagesRequest(node=Node(node_id=node_id))
+
+        # Execute
+        response, call = self._pull_messages.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, PullMessagesResponse)
+        assert grpc.StatusCode.OK == call.code()
+
+        # Assert expected object_ids
+        object_ids_in_response = {
+            obj_id
+            for obj_ids in response.objects_to_pull.values()
+            for obj_id in obj_ids.object_ids
+        }
+        assert set(obj_ids_registered) == object_ids_in_response
+        assert message_ins.object_id == list(response.objects_to_pull.keys())[0]
 
     def test_successful_get_run_if_running(self) -> None:
         """Test `GetRun` success."""

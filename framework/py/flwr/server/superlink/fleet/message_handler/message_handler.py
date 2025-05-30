@@ -110,7 +110,10 @@ def pull_messages(
 
         msg_object_id = msg.metadata.message_id
         descendants = store.get_message_descendant_ids(msg_object_id)
-        objects_to_pull[msg_object_id] = ObjectIDs(object_ids=descendants)
+        # Include the object_id of the message itself
+        objects_to_pull[msg_object_id] = ObjectIDs(
+            object_ids=descendants + [msg_object_id]
+        )
 
     return PullMessagesResponse(
         messages_list=msg_proto, objects_to_pull=objects_to_pull

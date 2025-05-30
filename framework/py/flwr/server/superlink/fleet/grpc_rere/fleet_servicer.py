@@ -50,7 +50,7 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_grpc_context
-from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
@@ -117,8 +117,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
                 store=self.objectstore_factory.store(),
             )
-        except KeyError as ke:
-            abort_grpc_context(ke.args[0], context)
+        except NoObjectInStoreError as e:
+            context.abort(grpc.StatusCode.NOT_FOUND, e.args[0])
 
         return res
 
