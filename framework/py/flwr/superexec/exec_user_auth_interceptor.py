@@ -106,9 +106,7 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 return call(request, context)  # type: ignore
 
             # If the user is not authenticated, refresh tokens
-            tokens, user_info = self.auth_plugin.refresh_tokens(
-                context.invocation_metadata()
-            )
+            tokens, user_info = self.auth_plugin.refresh_tokens(metadata)
             if tokens is not None:
                 if user_info is None:
                     context.abort(
