@@ -474,7 +474,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         self._assert_pull_messages_not_allowed(run_id)
 
     def test_pull_message_from_expired_message_error(self) -> None:
-        """Test that the servicer correctly handles the registration in the ObjecStore
+        """Test that the servicer correctly handles the registration in the ObjectStore
         of an Error message created by the LinkState due to an expired TTL."""
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
