@@ -252,7 +252,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         record = ArrayRecord()
         for k, v in array_dict.items():
             record[k] = Array(
-                dtype=v.dtype, shape=list(v.shape), stype=v.stype, data=v.data
+                dtype=v.dtype, shape=tuple(v.shape), stype=v.stype, data=v.data
             )
         if not keep_input:
             array_dict.clear()
