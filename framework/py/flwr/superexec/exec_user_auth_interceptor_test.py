@@ -45,11 +45,7 @@ from flwr.superexec.exec_user_auth_interceptor import (
 
 
 class TestExecUserAuthInterceptor(unittest.TestCase):
-    """Test the ExecUserAuthInterceptor authentication logic.
-
-    The authorization logic is tested in a separate class. So, the return values
-    of the mocked authorization plugin is set to True in this class.
-    """
+    """Test the ExecUserAuthInterceptor authentication logic."""
 
     def setUp(self) -> None:
         """Set up test fixtures."""
