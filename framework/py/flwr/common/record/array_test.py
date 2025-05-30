@@ -76,7 +76,7 @@ class TestArray(unittest.TestCase):
         # Execute
         array_instance = Array(
             dtype=str(original_array.dtype),
-            shape=list(original_array.shape),
+            shape=tuple(original_array.shape),
             stype=SType.NUMPY,
             data=buffer,
         )
@@ -90,7 +90,7 @@ class TestArray(unittest.TestCase):
         # Prepare
         array_instance = Array(
             dtype="float32",
-            shape=[3],
+            shape=(3,),
             stype="invalid_stype",  # Non-numpy stype
             data=b"",
         )
@@ -111,7 +111,7 @@ class TestArray(unittest.TestCase):
 
         # Assert
         self.assertEqual(array_instance.dtype, str(original_array.dtype))
-        self.assertEqual(array_instance.shape, list(original_array.shape))
+        self.assertEqual(array_instance.shape, tuple(original_array.shape))
         self.assertEqual(array_instance.stype, SType.NUMPY)
         np.testing.assert_array_equal(deserialized_array, original_array)
 
@@ -130,14 +130,14 @@ class TestArray(unittest.TestCase):
 
         # Assert
         self.assertEqual(arr.dtype, "float32")
-        self.assertEqual(arr.shape, [2, 2])
+        self.assertEqual(arr.shape, (2, 2))
         self.assertEqual(arr.stype, SType.NUMPY)
 
     @parameterized.expand(  # type: ignore
         [
             ({"torch_tensor": MOCK_TORCH_TENSOR},),
             ({"ndarray": np.array([1, 2, 3])},),
-            ({"dtype": "float32", "shape": [2, 2], "stype": "dense", "data": b"data"},),
+            ({"dtype": "float32", "shape": (2, 2), "stype": "dense", "data": b"data"},),
         ]
     )
     def test_valid_init_overloads_kwargs(self, kwargs: dict[str, Any]) -> None:
@@ -149,7 +149,7 @@ class TestArray(unittest.TestCase):
         [
             (MOCK_TORCH_TENSOR,),
             (np.array([1, 2, 3]),),
-            ("float32", [2, 2], "dense", b"data"),
+            ("float32", (2, 2), "dense", b"data"),
         ]
     )
     def test_valid_init_overloads_args(self, *args: Any) -> None:
@@ -160,8 +160,8 @@ class TestArray(unittest.TestCase):
     @parameterized.expand(  # type: ignore
         [
             (MOCK_TORCH_TENSOR, np.array([1])),
-            ("float32", [2, 2], "dense", 213),
-            ([2, 2], "dense", b"data"),
+            ("float32", (2, 2), "dense", 213),
+            ((2, 2), "dense", b"data"),
             (123, "invalid"),
         ]
     )
