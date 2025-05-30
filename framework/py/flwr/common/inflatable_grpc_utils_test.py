@@ -123,6 +123,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         assert self.mock_stub.PushObject.call_count == expected_obj_count
         assert len(self.mock_store) == expected_obj_count
         assert len(pushed_object_ids) == expected_obj_count
+        assert set(obj_to_push) == pushed_object_ids
 
     @parameterized.expand(base_cases)  # type: ignore
     def test_pull_object_with_helper_function(
