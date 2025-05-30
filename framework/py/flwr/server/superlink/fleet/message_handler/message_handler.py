@@ -16,7 +16,6 @@
 
 
 from typing import Optional
-from uuid import UUID
 
 from flwr.common import Message
 from flwr.common.constant import Status
@@ -52,6 +51,9 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
+from flwr.supercore.object_store import ObjectStore
+
+from ...utils import store_mapping_and_register_objects
 
 
 def create_node(
@@ -106,7 +108,9 @@ def pull_messages(
 
 
 def push_messages(
-    request: PushMessagesRequest, state: LinkState
+    request: PushMessagesRequest,
+    state: LinkState,
+    store: ObjectStore,
 ) -> PushMessagesResponse:
     """Push Messages handler."""
     # Convert Message from proto
@@ -122,12 +126,16 @@ def push_messages(
         raise InvalidRunStatusException(abort_msg)
 
     # Store Message in State
-    message_id: Optional[UUID] = state.store_message_res(message=msg)
+    message_id: Optional[str] = state.store_message_res(message=msg)
+
+    # Store Message object to descendants mapping and preregister objects
+    objects_to_push = store_mapping_and_register_objects(store, request=request)
 
     # Build response
     response = PushMessagesResponse(
         reconnect=Reconnect(reconnect=5),
         results={str(message_id): 0},
+        objects_to_push=objects_to_push,
     )
     return response
 

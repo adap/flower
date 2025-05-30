@@ -56,7 +56,7 @@ flwr-simulation = "flwr.simulation.app:flwr_simulation"
 flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 # Deployment Engine
 flower-superlink = "flwr.server.app:run_superlink"
-flower-supernode = "flwr.client.supernode.app:run_supernode"
+flower-supernode = "flwr.supernode.cli:flower_supernode"
 flwr-serverapp = "flwr.server.serverapp:flwr_serverapp"
 flwr-clientapp = "flwr.client.clientapp:flwr_clientapp"
 

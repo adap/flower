@@ -18,6 +18,7 @@
 import tempfile
 import unittest
 from typing import Optional
+from uuid import uuid4
 
 import grpc
 from parameterized import parameterized
@@ -28,6 +29,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
@@ -238,10 +240,18 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
 
+        # Construct message to descendant mapping
+        message = message_from_proto(message_ins)
+        descendant_mapping = get_message_to_descendant_id_mapping(message)
+
         # Transition status to running. PushInsMessagesRequest is only
         # allowed in running status.
         self._transition_run_status(run_id, 2)
-        request = PushInsMessagesRequest(messages_list=[message_ins], run_id=run_id)
+        request = PushInsMessagesRequest(
+            messages_list=[message_ins],
+            run_id=run_id,
+            msg_to_descendant_mapping=descendant_mapping,
+        )
 
         # Execute
         response, call = self._push_messages.with_call(request=request)
@@ -249,6 +259,22 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, PushInsMessagesResponse)
         assert grpc.StatusCode.OK == call.code()
+
+        # Assert: check that response indicates all objects need pushing
+        expected_object_ids = {message.object_id}  # message
+        expected_object_ids |= {
+            obj_id
+            for obj_ids in descendant_mapping.values()
+            for obj_id in obj_ids.object_ids
+        }  # descendants
+        # Construct a single set with all object ids
+        requested_object_ids = {
+            obj_id
+            for obj_ids in response.objects_to_push.values()
+            for obj_id in obj_ids.object_ids
+        }
+        assert expected_object_ids == requested_object_ids
+        assert response.objects_to_push.keys() == descendant_mapping.keys()
 
     def _assert_push_ins_messages_not_allowed(
         self, message: ProtoMessage, run_id: int
@@ -334,6 +360,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         else:
             assert error is not None
             reply_msg = Message(error, reply_to=msg_)
+
+        # pylint: disable-next=W0212
+        reply_msg.metadata._message_id = str(uuid4())  # type: ignore
 
         self.state.store_message_res(message=reply_msg)
 

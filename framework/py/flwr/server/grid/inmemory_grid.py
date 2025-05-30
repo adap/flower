@@ -18,7 +18,7 @@
 import time
 from collections.abc import Iterable
 from typing import Optional, cast
-from uuid import UUID
+from uuid import uuid4
 
 from flwr.common import Message, RecordDict
 from flwr.common.constant import SUPERLINK_NODE_ID
@@ -56,7 +56,7 @@ class InMemoryGrid(Grid):
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            message.metadata.message_id == ""
+            message.metadata.message_id != ""
             and message.metadata.reply_to_message_id == ""
             and message.metadata.ttl > 0
             and message.metadata.delivered_at == ""
@@ -111,6 +111,7 @@ class InMemoryGrid(Grid):
             # Populate metadata
             msg.metadata.__dict__["_run_id"] = cast(Run, self._run).run_id
             msg.metadata.__dict__["_src_node_id"] = self.node.node_id
+            msg.metadata.__dict__["_message_id"] = str(uuid4())
             # Check message
             self._check_message(msg)
             # Store in state
@@ -126,12 +127,12 @@ class InMemoryGrid(Grid):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        msg_ids = {UUID(msg_id) for msg_id in message_ids}
+        msg_ids = set(message_ids)
         # Pull Messages
         message_res_list = self.state.get_message_res(message_ids=msg_ids)
         # Get IDs of Messages these replies are for
         message_ins_ids_to_delete = {
-            UUID(msg_res.metadata.reply_to_message_id) for msg_res in message_res_list
+            msg_res.metadata.reply_to_message_id for msg_res in message_res_list
         }
         # Delete
         self.state.delete_messages(message_ins_ids=message_ins_ids_to_delete)

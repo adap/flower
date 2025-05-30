@@ -402,6 +402,7 @@ def test_inflate_deflate_message_with_content() -> None:
     # when the content is removed
     msg_copy = copy(msg)
     msg_copy.content = None  # type: ignore
+    msg_copy.metadata.__dict__["_message_id"] = ""
     assert message_to_proto(msg_copy).SerializeToString(
         deterministic=True
     ) == get_object_body(msg_b, Message)
@@ -437,7 +438,9 @@ def test_inflate_deflate_message_with_error() -> None:
     # Header contains the Object ID of the message content
     assert get_object_children_ids_from_object_content(msg_b) == []
     # Body of deflated Message matches its direct protobuf serialization
-    assert message_to_proto(msg).SerializeToString(
+    msg_copy = copy(msg)
+    msg_copy.metadata.__dict__["_message_id"] = ""
+    assert message_to_proto(msg_copy).SerializeToString(
         deterministic=True
     ) == get_object_body(msg_b, Message)
 
@@ -451,3 +454,16 @@ def test_inflate_deflate_message_with_error() -> None:
     # Inflate but passing children
     with pytest.raises(ValueError):
         Message.inflate(msg_b, children={"123": RecordDict()})
+
+
+def test_object_id_excludes_message_id_in_metadata() -> None:
+    """Test inflation and deflation of a Message carrying an Error."""
+    # Prepare
+    msg = make_message(error=Error(code=1), metadata=RecordMaker(1).metadata())
+    object_id = msg.object_id
+
+    # Modify message_id
+    msg.metadata.__dict__["_message_id"] = "1234"
+
+    # Assert
+    assert object_id == msg.object_id

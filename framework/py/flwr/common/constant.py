@@ -115,6 +115,9 @@ AUTH_TYPE_YAML_KEY = "auth_type"  # For key name in YAML file
 ACCESS_TOKEN_KEY = "flwr-oidc-access-token"
 REFRESH_TOKEN_KEY = "flwr-oidc-refresh-token"
 
+# Constants for user authorization
+AUTHZ_TYPE_YAML_KEY = "authz_type"  # For key name in YAML file
+
 # Constants for node authentication
 PUBLIC_KEY_HEADER = "flwr-public-key-bin"  # Must end with "-bin" for binary data
 SIGNATURE_HEADER = "flwr-signature-bin"  # Must end with "-bin" for binary data

@@ -163,7 +163,7 @@ class GrpcGrid(Grid):
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            message.metadata.message_id == ""
+            message.metadata.message_id != ""
             and message.metadata.reply_to_message_id == ""
             and message.metadata.ttl > 0
         ):
@@ -211,6 +211,7 @@ class GrpcGrid(Grid):
             # Populate metadata
             msg.metadata.__dict__["_run_id"] = run_id
             msg.metadata.__dict__["_src_node_id"] = self.node.node_id
+            msg.metadata.__dict__["_message_id"] = msg.object_id
             # Check message
             self._check_message(msg)
             # Convert to proto
