@@ -26,11 +26,12 @@ import grpc
 from flwr.app.error import Error
 from flwr.cli.install import install_from_fab
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.common import Context, Message
+from flwr.common import Context, EventType, Message, event
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS, ErrorCode
 from flwr.common.exit import ExitCode, flwr_exit
+from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
@@ -68,6 +69,7 @@ def flwr_clientapp() -> None:
         )
 
     log(INFO, "Start `flwr-clientapp` process")
+    event(EventType.FLWR_CLIENTAPP_ENTER)
     log(
         DEBUG,
         "`flwr-clientapp` will attempt to connect to SuperNode's "
@@ -82,6 +84,8 @@ def flwr_clientapp() -> None:
         flwr_dir=args.flwr_dir,
         certificates=None,
     )
+    # Graceful shutdown
+    register_exit_handlers(event_type=EventType.FLWR_CLIENTAPP_LEAVE)
 
 
 def run_clientapp(  # pylint: disable=R0914
