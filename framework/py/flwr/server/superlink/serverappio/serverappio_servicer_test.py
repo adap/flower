@@ -331,9 +331,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
     @parameterized.expand(
         [
-            # The normal case: the message is recognized by both `LinkState` and `ObjectStore`
+            # The normal case:
+            # The message is recognized by both `LinkState` and `ObjectStore`
             (True,),
-            # The failure case: the message is found in `LinkState` but not in `ObjectStore`
+            # The failure case:
+            # The message is found in `LinkState` but not in `ObjectStore`
             (False,),
         ]
     )  # type: ignore
