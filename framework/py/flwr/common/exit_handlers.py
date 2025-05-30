@@ -19,7 +19,6 @@ import signal
 from threading import Thread
 from types import FrameType
 from typing import Callable, Optional
-from uuid import uuid4
 
 from grpc import Server
 
