@@ -17,8 +17,10 @@
 
 from .disk_ffs import DiskFfs as DiskFfs
 from .ffs import Ffs as Ffs
+from .ffs_factory import FfsFactory as FfsFactory
 
 __all__ = [
     "DiskFfs",
     "Ffs",
+    "FfsFactory",
 ]
