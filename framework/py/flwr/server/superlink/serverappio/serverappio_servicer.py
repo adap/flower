@@ -16,7 +16,7 @@
 
 
 import threading
-from logging import DEBUG, INFO
+from logging import DEBUG, ERROR, INFO
 from typing import Optional
 
 import grpc
@@ -241,7 +241,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                     object_ids=descendants + [msg_object_id]
                 )
             except NoObjectInStoreError as e:
-                context.abort(grpc.StatusCode.NOT_FOUND, e.args[0])
+                log(ERROR, e.message)
+                # Delete message ins from state
+                state.delete_messages(message_ins_ids={msg_object_id})
 
         return PullResMessagesResponse(
             messages_list=messages_list, objects_to_pull=objects_to_pull

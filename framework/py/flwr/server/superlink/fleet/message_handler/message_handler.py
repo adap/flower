@@ -14,10 +14,10 @@
 # ==============================================================================
 """Fleet API message handlers."""
 
-
+from logging import ERROR
 from typing import Optional
 
-from flwr.common import Message
+from flwr.common import Message, log
 from flwr.common.constant import Status
 from flwr.common.serde import (
     fab_to_proto,
@@ -52,7 +52,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
-from flwr.supercore.object_store import ObjectStore
+from flwr.supercore.object_store import NoObjectInStoreError, ObjectStore
 
 from ...utils import store_mapping_and_register_objects
 
@@ -106,14 +106,19 @@ def pull_messages(
     msg_proto = []
     objects_to_pull: dict[str, ObjectIDs] = {}
     for msg in message_list:
-        msg_proto.append(message_to_proto(msg))
+        try:
+            msg_proto.append(message_to_proto(msg))
 
-        msg_object_id = msg.metadata.message_id
-        descendants = store.get_message_descendant_ids(msg_object_id)
-        # Include the object_id of the message itself
-        objects_to_pull[msg_object_id] = ObjectIDs(
-            object_ids=descendants + [msg_object_id]
-        )
+            msg_object_id = msg.metadata.message_id
+            descendants = store.get_message_descendant_ids(msg_object_id)
+            # Include the object_id of the message itself
+            objects_to_pull[msg_object_id] = ObjectIDs(
+                object_ids=descendants + [msg_object_id]
+            )
+        except NoObjectInStoreError as e:
+            log(ERROR, e.message)
+            # Delete message ins from state
+            state.delete_messages(message_ins_ids={msg_object_id})
 
     return PullMessagesResponse(
         messages_list=msg_proto, objects_to_pull=objects_to_pull

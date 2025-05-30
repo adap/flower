@@ -331,19 +331,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
     @parameterized.expand(
         [
-            (
-                True,
-                grpc.StatusCode.OK,
-            ),
-            (
-                False,
-                grpc.StatusCode.NOT_FOUND,
-            ),
+            (True,),
+            (False,),
         ]
     )  # type: ignore
-    def test_pull_messages_if_running(
-        self, register_in_store: bool, expected_code: grpc.StatusCode
-    ) -> None:
+    def test_pull_messages_if_running(self, register_in_store: bool) -> None:
         """Test `PullMessages` success if objects are registered in ObjectStore."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord())
@@ -376,25 +368,25 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         request = PullResMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
 
         # Execute
-        try:
-            response, call = self._pull_messages.with_call(request=request)
+        response, call = self._pull_messages.with_call(request=request)
 
-            # Assert
-            assert isinstance(response, PullResMessagesResponse)
-            assert call.code() == expected_code
-            assert expected_code == grpc.StatusCode.OK
+        # Assert
+        assert isinstance(response, PullResMessagesResponse)
+        assert call.code() == grpc.StatusCode.OK
 
+        object_ids_in_response = {
+            obj_id
+            for obj_ids in response.objects_to_pull.values()
+            for obj_id in obj_ids.object_ids
+        }
+        if register_in_store:
             # Assert expected object_ids
-            object_ids_in_response = {
-                obj_id
-                for obj_ids in response.objects_to_pull.values()
-                for obj_id in obj_ids.object_ids
-            }
             assert set(obj_ids_registered) == object_ids_in_response
             assert reply_msg.object_id == list(response.objects_to_pull.keys())[0]
-        except grpc.RpcError as e:
-            assert e.code() == expected_code
-            assert expected_code == grpc.StatusCode.NOT_FOUND
+        else:
+            assert set() == object_ids_in_response
+            # Ins message was deleted
+            assert self.state.num_message_ins() == 0
 
     @parameterized.expand(
         [

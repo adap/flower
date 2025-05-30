@@ -50,7 +50,7 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_grpc_context
-from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
+from flwr.supercore.object_store import ObjectStoreFactory
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
@@ -111,14 +111,11 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """Pull Messages."""
         log(INFO, "[Fleet.PullMessages] node_id=%s", request.node.node_id)
         log(DEBUG, "[Fleet.PullMessages] Request: %s", MessageToDict(request))
-        try:
-            res = message_handler.pull_messages(
-                request=request,
-                state=self.state_factory.state(),
-                store=self.objectstore_factory.store(),
-            )
-        except NoObjectInStoreError as e:
-            context.abort(grpc.StatusCode.NOT_FOUND, e.args[0])
+        res = message_handler.pull_messages(
+            request=request,
+            state=self.state_factory.state(),
+            store=self.objectstore_factory.store(),
+        )
 
         return res
 
