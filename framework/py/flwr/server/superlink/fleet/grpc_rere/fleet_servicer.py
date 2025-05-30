@@ -187,6 +187,15 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
 
+        # Init store
+        store = self.objectstore_factory.store()
+
+        # Insert in store
+        try:
+            store.put(request.object_id, request.object_content)
+        except Exception as e:
+            context.abort(grpc.StatusCode.PERMISSION_DENIED, f"{e}")
+
         return PushObjectResponse()
 
     def PullObject(
@@ -198,5 +207,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             "[ServerAppIoServicer.PullObject] Pull Object with object_id=%s",
             request.object_id,
         )
+
+        # Init store
+        store = self.objectstore_factory.store()
+
+        # Fetch from store
+        if content := store.get(request.object_id):
+            return PullObjectResponse(object_content=content)
 
         return PullObjectResponse()

@@ -15,6 +15,7 @@
 """InflatableObject utils."""
 
 
+from time import sleep
 from typing import Optional, Union
 
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
@@ -90,10 +91,13 @@ def pull_object_from_servicer(
 ) -> InflatableObject:
     """Recursively inflate an object by pulling it from the servicer."""
     # Pull object
-    object_proto: PullObjectResponse = stub.PullObject(
-        PullObjectRequest(node=node, object_id=object_id)
-    )
-    object_content = object_proto.object_content
+    object_content = b""
+    while object_content == b"":
+        object_proto: PullObjectResponse = stub.PullObject(
+            PullObjectRequest(node=node, object_id=object_id)
+        )
+        object_content = object_proto.object_content
+        sleep(0.25)
 
     # Extract object class and object_ids of children
     obj_type, children_obj_ids, _ = get_object_head_values_from_object_content(
