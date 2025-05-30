@@ -390,7 +390,7 @@ def array_from_proto(array_proto: ProtoArray) -> Array:
     """Deserialize Array from ProtoBuf."""
     return Array(
         dtype=array_proto.dtype,
-        shape=list(array_proto.shape),
+        shape=tuple(array_proto.shape),
         stype=array_proto.stype,
         data=array_proto.data,
     )
