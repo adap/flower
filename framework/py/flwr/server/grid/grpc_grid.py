@@ -28,11 +28,17 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
+from flwr.common.inflatable_grpc_utils import (
+    pull_object_from_servicer,
+    push_object_to_servicer,
+)
 from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
-from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
+from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
+from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
@@ -207,6 +213,7 @@ class GrpcGrid(Grid):
         # Construct Messages
         run_id = cast(Run, self._run).run_id
         message_proto_list: list[ProtoMessage] = []
+        descendants_mapping: dict[str, ObjectIDs] = {}
         for msg in messages:
             # Populate metadata
             msg.metadata.__dict__["_run_id"] = run_id
@@ -218,11 +225,17 @@ class GrpcGrid(Grid):
             msg_proto = message_to_proto(msg)
             # Add to list
             message_proto_list.append(msg_proto)
+            # Get descendants mapping for this message
+            descendants_mapping.update(get_message_to_descendant_id_mapping(msg))
 
         try:
             # Call GrpcServerAppIoStub method
             res: PushInsMessagesResponse = self._stub.PushMessages(
-                PushInsMessagesRequest(messages_list=message_proto_list, run_id=run_id)
+                PushInsMessagesRequest(
+                    messages_list=message_proto_list,
+                    run_id=run_id,
+                    msg_to_descendant_mapping=descendants_mapping,
+                )
             )
             if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
                 message_proto_list
@@ -234,6 +247,19 @@ class GrpcGrid(Grid):
                     "passed to `push_messages`). This could be due to a malformed "
                     "message.",
                 )
+            # Push objects
+            for msg, msg_ids in zip(messages, res.message_ids):
+                # If Message was added to the LinkState correctly
+                if msg_ids is not None:
+                    obj_ids_to_push = set(res.objects_to_push[msg_ids].object_ids)
+                    # Push only object that are not in the store
+                    push_object_to_servicer(
+                        msg,
+                        self._stub,
+                        node=self.node,
+                        object_ids_to_push=obj_ids_to_push,
+                    )
+
             return list(res.message_ids)
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
@@ -255,9 +281,17 @@ class GrpcGrid(Grid):
                     run_id=cast(Run, self._run).run_id,
                 )
             )
-            # Convert Message from Protobuf representation
-            msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
-            return msgs
+            # Pull Messages from store
+            inflated_msgs: list[Message] = []
+            for msg_proto in res.messages_list:
+                inflated_msgs.append(
+                    pull_object_from_servicer(
+                        msg_proto.metadata.message_id, self._stub, node=self.node
+                    )
+                )
+
+            return inflated_msgs
+
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
                 log(ERROR, ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED)

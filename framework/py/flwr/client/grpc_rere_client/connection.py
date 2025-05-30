@@ -31,13 +31,17 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.heartbeat import HeartbeatSender
+from flwr.common.inflatable_grpc_utils import (
+    pull_object_from_servicer,
+    push_object_to_servicer,
+)
 from flwr.common.logger import log
 from flwr.common.message import Message
-from flwr.common.retry_invoker import RetryInvoker
+from flwr.common.retry_invoker import RetryInvoker, _wrap_stub
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
 )
-from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
+from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -46,6 +50,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
@@ -159,6 +164,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     # If the status code is PERMISSION_DENIED, additionally raise RunNotRunningException
     retry_invoker.should_giveup = _should_giveup_fn
 
+    # Wrap stub
+    _wrap_stub(stub, retry_invoker)
     ###########################################################################
     # send_node_heartbeat/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
@@ -241,9 +248,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         # Request instructions (message) from server
         request = PullMessagesRequest(node=node)
-        response: PullMessagesResponse = retry_invoker.invoke(
-            stub.PullMessages, request=request
-        )
+        response: PullMessagesResponse = stub.PullMessages(request=request)
 
         # Get the current Messages
         message_proto = (
@@ -257,7 +262,13 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             message_proto = None
 
         # Construct the Message
-        in_message = message_from_proto(message_proto) if message_proto else None
+        in_message = (
+            pull_object_from_servicer(
+                object_id=message_proto.metadata.message_id, stub=stub, node=node
+            )
+            if message_proto
+            else None
+        )
 
         # Remember `metadata` of the in message
         nonlocal metadata
@@ -289,7 +300,11 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Serialize Message
         message_proto = message_to_proto(message=message)
         request = PushMessagesRequest(node=node, messages_list=[message_proto])
-        _ = retry_invoker.invoke(stub.PushMessages, request)
+        response: PushMessagesResponse = stub.PullMessages(request=request)
+
+        if response.objects_to_push:
+            objs_to_push = set(response.objects_to_push[message.object_id].object_ids)
+            push_object_to_servicer(message, node, stub, obj_ids_to_push=objs_to_push)
 
         # Cleanup
         metadata = None
