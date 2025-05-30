@@ -49,7 +49,7 @@ class InMemoryObjectStore(ObjectStore):
         # Only allow adding the object if it has been preregistered
         if object_id not in self.store:
             raise NoObjectInStoreError(
-                f"Object with id {object_id} was not preregistered."
+                f"Object with ID '{object_id}' was not pre-registered."
             )
 
         # Verify object_id and object_content match
@@ -75,8 +75,8 @@ class InMemoryObjectStore(ObjectStore):
         """Retrieve the object IDs of all descendants of a given Message."""
         if msg_object_id not in self.msg_children_objects_mapping:
             raise NoObjectInStoreError(
-                f"No message registed in Object Store with ID {msg_object_id}. "
-                "Mapping to descendants cannot be found."
+                f"No message registered in Object Store with ID '{msg_object_id}'. "
+                "Mapping to descendants could not be found."
             )
         return self.msg_children_objects_mapping[msg_object_id]
 
