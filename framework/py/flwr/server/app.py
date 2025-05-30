@@ -27,7 +27,7 @@ from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Any, Callable, Optional, Union, cast
+from typing import Any, Callable, Optional, Type, TypeVar
 
 import grpc
 import yaml
@@ -85,6 +85,7 @@ from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
+P = TypeVar("P", ExecAuthPlugin, ExecAuthzPlugin)
 
 
 try:
@@ -490,15 +491,13 @@ def _try_obtain_exec_auth_plugins(
         config: dict[str, Any] = yaml.safe_load(file)
 
     def _load_plugin(
-        section: str,
-        yaml_key: str,
-        loader: Callable[[], dict[str, type[Union[ExecAuthPlugin, ExecAuthzPlugin]]]],
-    ) -> Union[ExecAuthPlugin, ExecAuthzPlugin]:
+        section: str, yaml_key: str, loader: Callable[[], dict[str, Type[P]]]
+    ) -> P:
         section_cfg = config.get(section, {})
         auth_plugin_name = section_cfg.get(yaml_key, "")
         try:
-            plugins = loader()
-            plugin_cls = plugins[auth_plugin_name]
+            plugins: dict[str, Type[P]] = loader()
+            plugin_cls: Type[P] = plugins[auth_plugin_name]
             return plugin_cls(
                 user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
             )
@@ -513,23 +512,17 @@ def _try_obtain_exec_auth_plugins(
             sys.exit(f"No {section} plugins are currently supported.")
 
     # Load authentication plugin
-    auth_plugin = cast(
-        ExecAuthPlugin,
-        _load_plugin(
-            section="authentication",
-            yaml_key=AUTH_TYPE_YAML_KEY,
-            loader=get_exec_auth_plugins,
-        ),
+    auth_plugin = _load_plugin(
+        section="authentication",
+        yaml_key=AUTH_TYPE_YAML_KEY,
+        loader=get_exec_auth_plugins,
     )
 
     # Load authorization plugin
-    authz_plugin = cast(
-        ExecAuthzPlugin,
-        _load_plugin(
-            section="authorization",
-            yaml_key=AUTHZ_TYPE_YAML_KEY,
-            loader=get_exec_authz_plugins,
-        ),
+    authz_plugin = _load_plugin(
+        section="authorization",
+        yaml_key=AUTHZ_TYPE_YAML_KEY,
+        loader=get_exec_authz_plugins,
     )
 
     return auth_plugin, authz_plugin
