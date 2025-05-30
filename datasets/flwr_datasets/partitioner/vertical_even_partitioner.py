@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """VerticalEvenPartitioner class."""
-# flake8: noqa: E501
+# noqa: E501
 # pylint: disable=C0301, R0902, R0913
 from typing import Literal, Optional, Union
 
@@ -81,7 +81,7 @@ class VerticalEvenPartitioner(Partitioner):
     >>> print([partition.column_names for partition in partitions])
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=R0917
         self,
         num_partitions: int,
         active_party_columns: Optional[Union[str, list[str]]] = None,

@@ -2,7 +2,14 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-ROOT=`pwd`
+# Determine platform
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  SED_INPLACE="sed -i ''"
+else
+  SED_INPLACE="sed -i"
+fi
+
+ROOT=$(pwd)
 INDEX=$ROOT/baselines/docs/source/index.rst
 
 initial_text=$(cat <<-END
@@ -52,7 +59,7 @@ function add_table_entry ()
 
 
 # Create Sphinx table block and header
-! sed -i '' -e "s/.. BASELINES_TABLE_ANCHOR/$table_body/" $INDEX
+! $SED_INPLACE -e "s/.. BASELINES_TABLE_ANCHOR/$table_body/" $INDEX
 
 ! grep -q ":caption: References" $INDEX && echo "$initial_text" >> $INDEX && echo "" >> $INDEX
 
@@ -103,7 +110,7 @@ for d in $(printf '%s\n' */ | sort -V); do
 
       # Add entry to the table
       add_table_entry $baseline
-      ! sed -i '' -e "s/.. BASELINES_TABLE_ENTRY/$table_entry/" $INDEX
+      ! $SED_INPLACE -e "s/.. BASELINES_TABLE_ENTRY/$table_entry/" $INDEX
 
     fi
   fi
