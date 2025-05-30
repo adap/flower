@@ -212,10 +212,10 @@ class RecordMaker:
         min_max_bytes_size = (10, 1000)
 
         dtype = self.rng.choice(dtypes)
-        shape = [
+        shape = tuple(
             self.rng.randint(1, max_shape_size)
             for _ in range(self.rng.randint(1, max_shape_dim))
-        ]
+        )
         stype = self.rng.choice(stypes)
         data = self.randbytes(self.rng.randint(*min_max_bytes_size))
         return Array(dtype=dtype, shape=shape, stype=stype, data=data)

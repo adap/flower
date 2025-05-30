@@ -113,7 +113,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
 
         # Set up validate_tokens_in_metadata to return a tuple indicating invalid tokens
         dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
-        dummy_auth_plugin.refresh_tokens.return_value = None
+        dummy_auth_plugin.refresh_tokens.return_value = (None, None)
         interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
         continuation: Union[
             Callable[[Any], NoOpUnaryUnaryHandler],
@@ -212,7 +212,10 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
         # Set up refresh tokens
         expected_refresh_tokens_value = [("new-token", "value")]
-        dummy_auth_plugin.refresh_tokens.return_value = expected_refresh_tokens_value
+        dummy_auth_plugin.refresh_tokens.return_value = (
+            expected_refresh_tokens_value,
+            self.default_user_info,
+        )
 
         interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
         continuation: Union[

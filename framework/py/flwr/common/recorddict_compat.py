@@ -111,12 +111,12 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
         else:
             tensor = parameters.tensors.pop(0)
         ordered_dict[str(idx)] = Array(
-            data=tensor, dtype="", stype=tensor_type, shape=[]
+            data=tensor, dtype="", stype=tensor_type, shape=()
         )
 
     if num_arrays == 0:
         ordered_dict[EMPTY_TENSOR_KEY] = Array(
-            data=b"", dtype="", stype=tensor_type, shape=[]
+            data=b"", dtype="", stype=tensor_type, shape=()
         )
     return ArrayRecord(ordered_dict, keep_input=keep_input)
 

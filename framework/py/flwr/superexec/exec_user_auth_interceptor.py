@@ -99,7 +99,8 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
             if valid_tokens:
                 if user_info is None:
                     context.abort(
-                        grpc.StatusCode.UNAUTHENTICATED, "User info not found"
+                        grpc.StatusCode.UNAUTHENTICATED,
+                        "Tokens validated, but user info not found",
                     )
                     raise grpc.RpcError()
                 # Store user info in contextvars for authenticated users
@@ -113,8 +114,16 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 return call(request, context)  # type: ignore
 
             # If the user is not authenticated, refresh tokens
-            tokens = self.auth_plugin.refresh_tokens(context.invocation_metadata())
+            tokens, user_info = self.auth_plugin.refresh_tokens(metadata)
             if tokens is not None:
+                if user_info is None:
+                    context.abort(
+                        grpc.StatusCode.UNAUTHENTICATED,
+                        "Tokens refreshed, but user info not found",
+                    )
+                    raise grpc.RpcError()
+                # Store user info in contextvars for authenticated users
+                shared_user_info.set(user_info)
                 context.send_initial_metadata(tokens)
                 return call(request, context)  # type: ignore
 

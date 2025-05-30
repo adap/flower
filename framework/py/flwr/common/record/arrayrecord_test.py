@@ -220,7 +220,7 @@ class TestArrayRecord(unittest.TestCase):
     def test_init_array_dict_keep_input_false(self, use_keyword: bool) -> None:
         """Test initializing with an array_dict and keep_input=False."""
         # Prepare
-        arr = Array(dtype="float32", shape=[2, 2], stype=SType.NUMPY, data=b"data")
+        arr = Array(dtype="float32", shape=(2, 2), stype=SType.NUMPY, data=b"data")
         arr_dict: OrderedDict[str, Array] = OrderedDict({"x": arr})
 
         # Execute
@@ -235,8 +235,8 @@ class TestArrayRecord(unittest.TestCase):
 
     @parameterized.expand(  # type: ignore
         [
-            ("array_dict", OrderedDict({"x": Array("mock", [1], "np", b"data")})),
-            (None, OrderedDict({"x": Array("mock", [1], "np", b"data")})),
+            ("array_dict", OrderedDict({"x": Array("mock", (1,), "np", b"data")})),
+            (None, OrderedDict({"x": Array("mock", (1,), "np", b"data")})),
             ("torch_state_dict", OrderedDict({"x": MOCK_TORCH_TENSOR})),
             (None, OrderedDict({"x": MOCK_TORCH_TENSOR})),
             ("numpy_ndarrays", [np.array([1, 2, 3])]),
@@ -272,7 +272,7 @@ class TestArrayRecord(unittest.TestCase):
     def test_init_array_dict_keep_input_true(self, use_keyword: bool) -> None:
         """Test initializing with an array_dict and keep_input=True."""
         # Prepare
-        arr = Array(dtype="float32", shape=[2, 2], stype=SType.NUMPY, data=b"data")
+        arr = Array(dtype="float32", shape=(2, 2), stype=SType.NUMPY, data=b"data")
         arr_dict: OrderedDict[str, Array] = OrderedDict({"x": arr})
 
         # Execute
@@ -401,12 +401,12 @@ class TestArrayRecord(unittest.TestCase):
 @pytest.mark.parametrize(
     "shape, dtype",
     [
-        ([100], "float32"),
-        ([31, 31], "int8"),
-        ([31, 153], "bool_"),  # bool_ is represented as a whole Byte in NumPy
+        ((100,), "float32"),
+        ((31, 31), "int8"),
+        ((31, 153), "bool_"),  # bool_ is represented as a whole Byte in NumPy
     ],
 )
-def test_count_bytes(shape: list[int], dtype: str) -> None:
+def test_count_bytes(shape: tuple[int, ...], dtype: str) -> None:
     """Test bytes in a ArrayRecord are computed correctly."""
     original_array = np.random.randn(*shape).astype(np.dtype(dtype))
 
@@ -416,7 +416,7 @@ def test_count_bytes(shape: list[int], dtype: str) -> None:
 
     array_instance = Array(
         dtype=str(original_array.dtype),
-        shape=list(original_array.shape),
+        shape=tuple(original_array.shape),
         stype=SType.NUMPY,
         data=buffer,
     )
