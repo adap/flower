@@ -73,7 +73,7 @@ def _add_active_party_columns(  # pylint: disable=R0912
     Returns
     -------
     partition_columns: list[list[str]]
-        List of partition columns after the modyfication.
+        List of partition columns after the modification.
     """
     if isinstance(active_party_columns, str):
         active_party_columns = [active_party_columns]
