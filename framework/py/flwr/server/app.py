@@ -27,7 +27,7 @@ from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Any, Callable, Optional, Type, TypeVar
+from typing import Any, Callable, Optional, TypeVar
 
 import grpc
 import yaml
@@ -491,13 +491,13 @@ def _try_obtain_exec_auth_plugins(
         config: dict[str, Any] = yaml.safe_load(file)
 
     def _load_plugin(
-        section: str, yaml_key: str, loader: Callable[[], dict[str, Type[P]]]
+        section: str, yaml_key: str, loader: Callable[[], dict[str, type[P]]]
     ) -> P:
         section_cfg = config.get(section, {})
         auth_plugin_name = section_cfg.get(yaml_key, "")
         try:
-            plugins: dict[str, Type[P]] = loader()
-            plugin_cls: Type[P] = plugins[auth_plugin_name]
+            plugins: dict[str, type[P]] = loader()
+            plugin_cls: type[P] = plugins[auth_plugin_name]
             return plugin_cls(
                 user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
             )
