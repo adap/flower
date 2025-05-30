@@ -162,8 +162,13 @@ global___PushObjectRequest = PushObjectRequest
 
 class PushObjectResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    STORED_FIELD_NUMBER: builtins.int
+    stored: builtins.bool
     def __init__(self,
+        *,
+        stored: builtins.bool = ...,
         ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["stored",b"stored"]) -> None: ...
 global___PushObjectResponse = PushObjectResponse
 
 class PullObjectRequest(google.protobuf.message.Message):

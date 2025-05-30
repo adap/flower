@@ -16,7 +16,7 @@
 
 
 import threading
-from logging import DEBUG, INFO
+from logging import DEBUG, ERROR, INFO
 from typing import Optional
 
 import grpc
@@ -79,6 +79,7 @@ from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.object_store.object_store import NoObjectInStoreError
 
 from ..utils import store_mapping_and_register_objects
 
@@ -380,18 +381,22 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         if not check_body_len_consistency(request.object_content):
             # Cancel insertion in ObjectStore
-            context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION, "Unexpected object length"
+            )
 
         # Init store
         store = self.objectstore_factory.store()
 
         # Insert in store
+        stored = False
         try:
             store.put(request.object_id, request.object_content)
-        except Exception as e:
-            context.abort(grpc.StatusCode.PERMISSION_DENIED, f"{e}")
+            stored = True
+        except (NoObjectInStoreError, ValueError) as e:
+            log(ERROR, str(e))
 
-        return PushObjectResponse()
+        return PushObjectResponse(stored=stored)
 
     def PullObject(
         self, request: PullObjectRequest, context: grpc.ServicerContext
