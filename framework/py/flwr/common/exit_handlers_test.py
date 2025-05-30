@@ -21,10 +21,9 @@ import unittest
 from unittest.mock import Mock, patch
 
 from .exit_handlers import (
-    _handlers,
     add_exit_handler,
     register_exit_handlers,
-    remove_exit_handler,
+    registered_exit_handlers,
 )
 from .telemetry import EventType
 
@@ -34,14 +33,15 @@ class TestExitHandlers(unittest.TestCase):
 
     def setUp(self) -> None:
         """Clear all exit handlers before each test."""
-        _handlers.clear()
+        registered_exit_handlers.clear()
 
     @patch("sys.exit")
     def test_register_exit_handlers(self, mock_sys_exit: Mock) -> None:
         """Test register_exit_handlers."""
         # Prepare
-        handlers = [Mock(), Mock()]
-        register_exit_handlers(EventType.PING, handlers=handlers)  # type: ignore
+        handlers = [Mock(), Mock(), Mock()]
+        register_exit_handlers(EventType.PING, exit_handlers=handlers[:-1])  # type: ignore
+        add_exit_handler(handlers[-1])
 
         # Execute
         os.kill(os.getpid(), signal.SIGTERM)
@@ -50,7 +50,7 @@ class TestExitHandlers(unittest.TestCase):
         for handler in handlers:
             handler.assert_called()
         mock_sys_exit.assert_called()
-        self.assertEqual(list(_handlers.values()), handlers)
+        self.assertEqual(registered_exit_handlers, handlers)
 
     def test_add_exit_handler(self) -> None:
         """Test add_exit_handler."""
@@ -58,34 +58,7 @@ class TestExitHandlers(unittest.TestCase):
         handler = Mock()
 
         # Execute
-        add_exit_handler(handler, "mock_handler")
+        add_exit_handler(handler)
 
         # Assert
-        self.assertIn("mock_handler", _handlers)
-        self.assertEqual(_handlers["mock_handler"], handler)
-
-    def test_remove_exit_handler(self) -> None:
-        """Test remove_exit_handler."""
-        # Prepare
-        handler = Mock()
-        add_exit_handler(handler, "mock_handler")
-
-        # Execute
-        remove_exit_handler("mock_handler")
-
-        # Assert
-        self.assertNotIn("mock_handler", _handlers)
-
-    def test_remove_exit_handler_not_found(self) -> None:
-        """Test remove_exit_handler with invalid name."""
-        # Prepare
-        handler = Mock()
-        add_exit_handler(handler, "mock_handler")
-
-        # Execute
-        with self.assertRaises(KeyError):
-            remove_exit_handler("non_existent_handler")
-
-        # Assert
-        self.assertIn("mock_handler", _handlers)
-        self.assertEqual(_handlers["mock_handler"], handler)
+        self.assertIn(handler, registered_exit_handlers)
