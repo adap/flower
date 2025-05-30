@@ -21,7 +21,11 @@ import grpc
 
 from flwr.common.constant import Status, SubStatus
 from flwr.common.typing import RunStatus
+from flwr.proto.fleet_pb2 import PushMessagesRequest  # pylint: disable=E0611
+from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
+from flwr.proto.serverappio_pb2 import PushInsMessagesRequest  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState
+from flwr.supercore.object_store import ObjectStore
 
 _STATUS_TO_MSG = {
     Status.PENDING: "Run is pending.",
@@ -63,3 +67,28 @@ def abort_if(
     """Abort context if status of the provided `run_id` is in `abort_status_list`."""
     msg = check_abort(run_id, abort_status_list, state)
     abort_grpc_context(msg, context)
+
+
+def store_mapping_and_register_objects(
+    store: ObjectStore, request: Union[PushInsMessagesRequest, PushMessagesRequest]
+) -> dict[str, ObjectIDs]:
+    """Store Message object to descendants mapping and preregister objects."""
+    objects_to_push: dict[str, ObjectIDs] = {}
+    for (
+        message_obj_id,
+        descendant_obj_ids,
+    ) in request.msg_to_descendant_mapping.items():
+        descendants = list(descendant_obj_ids.object_ids)
+        # Store mapping
+        store.set_message_descendant_ids(
+            msg_object_id=message_obj_id, descendant_ids=descendants
+        )
+
+        # Preregister
+        object_ids_just_registered = store.preregister(descendants + [message_obj_id])
+        # Keep track of objects that need to be pushed
+        objects_to_push[message_obj_id] = ObjectIDs(
+            object_ids=object_ids_just_registered
+        )
+
+    return objects_to_push
