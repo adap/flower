@@ -110,7 +110,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         # Compute descendants
         descendants = list(get_desdendant_object_ids(obj))
         # Take first two
-        obj_to_push = [obj.object_id] + descendants[:2]
+        obj_to_push = set([obj.object_id] + descendants[:2])
         expected_obj_count = 3
 
         # Execute
@@ -123,7 +123,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         assert self.mock_stub.PushObject.call_count == expected_obj_count
         assert len(self.mock_store) == expected_obj_count
         assert len(pushed_object_ids) == expected_obj_count
-        assert set(obj_to_push) == pushed_object_ids
+        assert obj_to_push == pushed_object_ids
 
     @parameterized.expand(base_cases)  # type: ignore
     def test_pull_object_with_helper_function(
