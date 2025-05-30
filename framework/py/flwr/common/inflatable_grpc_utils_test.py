@@ -29,7 +29,9 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectRequest,
     PushObjectResponse,
 )
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
+from .inflatable import get_desdendant_object_ids
 from .inflatable_grpc_utils import pull_object_from_servicer, push_object_to_servicer
 
 base_cases = [
@@ -82,11 +84,39 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         """Use helper function to push an object recursively."""
         # Prepare
         obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
+        node = Node(node_id=456)
         # +2 due to the RecordDict and Message
         expected_obj_count += 2
 
         # Execute
-        pushed_object_ids = push_object_to_servicer(obj, self.mock_stub)
+        pushed_object_ids = push_object_to_servicer(obj, self.mock_stub, node)
+
+        # Assert
+        # Expected number of objects were pushed
+        assert self.mock_stub.PushObject.call_count == expected_obj_count
+        assert len(self.mock_store) == expected_obj_count
+        assert len(pushed_object_ids) == expected_obj_count
+
+    def test_push_objects_filtering_by_obj_ids_list(self) -> None:
+        """Test pushing objects based on list of object_ids to push."""
+        # Prepare
+        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]] = {
+            "a": ConfigRecord({"a": 123, "b": 123}),
+            "b": ArrayRecord([np.array([1, 2]), np.array([3, 4])]),
+        }
+        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
+        node = Node(node_id=456)
+
+        # Compute descendants
+        descendants = list(get_desdendant_object_ids(obj))
+        # Take first two
+        obj_to_push = [obj.object_id] + descendants[:2]
+        expected_obj_count = 3
+
+        # Execute
+        pushed_object_ids = push_object_to_servicer(
+            obj, self.mock_stub, node, obj_to_push
+        )
 
         # Assert
         # Expected number of objects were pushed
@@ -103,12 +133,13 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         """Use helper function to pull an object recursively."""
         # Prepare
         obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
+        node = Node(node_id=456)
         # +2 due to the RecordDict and Message
         expected_obj_count += 2
 
         # Execute
-        push_object_to_servicer(obj, self.mock_stub)
-        pulled_obj = pull_object_from_servicer(obj.object_id, self.mock_stub)
+        push_object_to_servicer(obj, self.mock_stub, node)
+        pulled_obj = pull_object_from_servicer(obj.object_id, self.mock_stub, node)
 
         # Assert
         # Expected number of objects were pulled
