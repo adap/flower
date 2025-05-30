@@ -36,7 +36,7 @@ from flwr.common.inflatable_grpc_utils import (
     push_object_to_servicer,
 )
 from flwr.common.logger import log
-from flwr.common.message import Message
+from flwr.common.message import Message, get_message_to_descendant_id_mapping
 from flwr.common.retry_invoker import RetryInvoker, _wrap_stub
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -262,13 +262,18 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             message_proto = None
 
         # Construct the Message
-        in_message = (
+        in_message: Optional[Message] = (
             pull_object_from_servicer(
                 object_id=message_proto.metadata.message_id, stub=stub, node=node
             )
             if message_proto
             else None
         )
+
+        if in_message:
+            # The deflateed message doesn't contain the message_id (since it's its own object_id)
+            # Inject
+            in_message.metadata._message_id = message_proto.metadata.message_id  # type: ignore
 
         # Remember `metadata` of the in message
         nonlocal metadata
@@ -299,13 +304,19 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         # Serialize Message
         message_proto = message_to_proto(message=message)
-        request = PushMessagesRequest(node=node, messages_list=[message_proto])
-        response: PushMessagesResponse = stub.PullMessages(request=request)
+        descendants_mapping = get_message_to_descendant_id_mapping(message)
+        request = PushMessagesRequest(
+            node=node,
+            messages_list=[message_proto],
+            msg_to_descendant_mapping=descendants_mapping,
+        )
+        response: PushMessagesResponse = stub.PushMessages(request=request)
 
         if response.objects_to_push:
             objs_to_push = set(response.objects_to_push[message.object_id].object_ids)
-            push_object_to_servicer(message, node, stub, obj_ids_to_push=objs_to_push)
-
+            push_object_to_servicer(
+                message, node, stub, object_ids_to_push=objs_to_push
+            )
         # Cleanup
         metadata = None
 
