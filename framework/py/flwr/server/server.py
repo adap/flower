@@ -485,6 +485,7 @@ def init_defaults(
     server: Optional[Server],
     config: Optional[ServerConfig],
     strategy: Optional[Strategy],
+    client_results_strategy: Optional[ClientResultsStrategy],
     client_manager: Optional[ClientManager],
 ) -> tuple[Server, ServerConfig]:
     """Create server instance if none was given."""
@@ -493,7 +494,10 @@ def init_defaults(
             client_manager = SimpleClientManager()
         if strategy is None:
             strategy = FedAvg()
-        server = Server(client_manager=client_manager, strategy=strategy)
+        if client_results_strategy is None:
+            client_results_strategy = AlwaysTrustClientResultsStrategy()
+        server = Server(client_manager=client_manager, strategy=strategy,
+                        client_results_strategy=client_results_strategy)
     elif strategy is not None:
         log(WARN, "Both server and strategy were provided, ignoring strategy")
 
