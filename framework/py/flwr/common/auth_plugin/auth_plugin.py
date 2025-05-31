@@ -63,7 +63,7 @@ class ExecAuthPlugin(ABC):
     @abstractmethod
     def refresh_tokens(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Optional[Sequence[tuple[str, Union[str, bytes]]]]:
+    ) -> tuple[Optional[Sequence[tuple[str, Union[str, bytes]]]], Optional[UserInfo]]:
         """Refresh authentication tokens in the provided metadata."""
 
 
