@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-05-29 00:07+0000\n"
+"POT-Creation-Date: 2025-05-31 00:07+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -12433,8 +12433,8 @@ msgstr ""
 
 #: flwr.common.record.array.Array:16 of
 msgid ""
-"A list representing the shape of the unserialized array-like object. Only"
-" required if you are not passing in a ndarray or a tensor."
+"A tuple representing the shape of the unserialized array-like object. "
+"Only required if you are not passing in a ndarray or a tensor."
 msgstr ""
 
 #: flwr.common.record.array.Array:19 of
@@ -12627,18 +12627,13 @@ msgid "Get object ID."
 msgstr ""
 
 #: flwr.common.Array.children:1:<autosummary>:1 of
+msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
+msgstr ""
+
+#: flwr.common.Array.children:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
 msgstr "serveur.stratégie.Stratégie"
-
-#: flwr.common.Array.children:1:<autosummary>:1 flwr.common.Array.shape:1 of
-#, fuzzy
-msgid "Get the shape of the array."
-msgstr "Chargement des données"
-
-#: flwr.common.Array.children:1:<autosummary>:1 of
-msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
-msgstr ""
 
 #: flwr.common.Array.children:1:<autosummary>:1 of
 #, fuzzy
@@ -34641,7 +34636,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|0ea48143db30437b919c47ae5b8ff9bf|"
+msgid "|a541e80739ae473889664326a72b6b86|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -34660,7 +34655,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|ff8aa37ba237463a9475ce7312d8921f|"
+msgid "|8298aea8f2a24c4b9d41a595e2611b0e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -34692,7 +34687,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|ebd7d0a0c4964788a4bbe2dc145e30a3|"
+msgid "|3f88e9d67f1b464abb970cc735f44b62|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -34713,7 +34708,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|4781d482ca224829a7c8e4843dae96dd|"
+msgid "|069f904b498045c2be925486facd7c62|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -34735,7 +34730,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|8528765b7fdd4cc59e72ddfe2fa5827d|"
+msgid "|6e135e1ee6ce4ae0a3ec830b030460fe|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -34756,7 +34751,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|fa5a4492a49a4f0097081b2610649f4d|"
+msgid "|c107bf28396542039ec6c4b9bf9fe56f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -34782,7 +34777,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|9333bfd7117449bfb1b7a02e7282b3a2|"
+msgid "|9e2ba35a58314fc49416f66e645a412d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -34801,7 +34796,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|018e85c87a56450d920091df27460f21|"
+msgid "|b4de289f4c8f4cb38d5c93fcf985bc29|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -35032,7 +35027,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|b875e957083647488294b44f6e60508e|"
+msgid "|394770fe41704bda8c0f258f4317a06d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -35067,7 +35062,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|f6ece9f07d354a01b09129256fd36d16|"
+msgid "|bb06c2522b0946529e85e1023d06de73|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -35100,7 +35095,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|e8c23423c2dd49e9a5912b0d5c703a56|"
+msgid "|64464d4610134384922f81ade51cb44a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -35131,7 +35126,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|927a52ff98574b059fa2facb2af6c230|"
+msgid "|360ee8f726fc43da8e991c292dbf1676|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -35191,7 +35186,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|790b693a579946fe966dfc84cc8472fe|"
+msgid "|58f68bfc00a54146b2634f1ffc6d60cd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -35335,7 +35330,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|497ea844d8d947bcbb290cee1a70008c|"
+msgid "|706f677094cf44d2b2021043a0d0ebf8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -52604,5 +52599,57 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|bcde8581fb664c5faa45209fb9f30e19|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A list representing the shape of "
+#~ "the unserialized array-like object. Only"
+#~ " required if you are not passing "
+#~ "in a ndarray or a tensor."
+#~ msgstr ""
+
+#~ msgid "Get the shape of the array."
+#~ msgstr "Chargement des données"
+
+#~ msgid "|0ea48143db30437b919c47ae5b8ff9bf|"
+#~ msgstr ""
+
+#~ msgid "|ff8aa37ba237463a9475ce7312d8921f|"
+#~ msgstr ""
+
+#~ msgid "|ebd7d0a0c4964788a4bbe2dc145e30a3|"
+#~ msgstr ""
+
+#~ msgid "|4781d482ca224829a7c8e4843dae96dd|"
+#~ msgstr ""
+
+#~ msgid "|8528765b7fdd4cc59e72ddfe2fa5827d|"
+#~ msgstr ""
+
+#~ msgid "|fa5a4492a49a4f0097081b2610649f4d|"
+#~ msgstr ""
+
+#~ msgid "|9333bfd7117449bfb1b7a02e7282b3a2|"
+#~ msgstr ""
+
+#~ msgid "|018e85c87a56450d920091df27460f21|"
+#~ msgstr ""
+
+#~ msgid "|b875e957083647488294b44f6e60508e|"
+#~ msgstr ""
+
+#~ msgid "|f6ece9f07d354a01b09129256fd36d16|"
+#~ msgstr ""
+
+#~ msgid "|e8c23423c2dd49e9a5912b0d5c703a56|"
+#~ msgstr ""
+
+#~ msgid "|927a52ff98574b059fa2facb2af6c230|"
+#~ msgstr ""
+
+#~ msgid "|790b693a579946fe966dfc84cc8472fe|"
+#~ msgstr ""
+
+#~ msgid "|497ea844d8d947bcbb290cee1a70008c|"
 #~ msgstr ""
 
