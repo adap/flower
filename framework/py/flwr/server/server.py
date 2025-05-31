@@ -36,6 +36,10 @@ from flwr.common.logger import log
 from flwr.common.typing import GetParametersIns
 from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
+from flwr.server.client_results_strategy import (
+    AlwaysTrustClientResultsStrategy,
+    ClientResultsStrategy,
+)
 from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
 
@@ -63,12 +67,18 @@ class Server:
         *,
         client_manager: ClientManager,
         strategy: Optional[Strategy] = None,
+        client_results_strategy: Optional[ClientResultsStrategy] = None,
     ) -> None:
         self._client_manager: ClientManager = client_manager
         self.parameters: Parameters = Parameters(
             tensors=[], tensor_type="numpy.ndarray"
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
+        self.client_results_strategy: ClientResultsStrategy = (
+            client_results_strategy
+            if client_results_strategy is not None
+            else AlwaysTrustClientResultsStrategy()
+        )
         self.max_workers: Optional[int] = None
 
     def set_max_workers(self, max_workers: Optional[int]) -> None:
@@ -244,11 +254,21 @@ class Server:
             len(failures),
         )
 
+        validated_client_results: tuple[
+            list[tuple[ClientProxy, FitRes]],
+            list[Union[tuple[ClientProxy, FitRes], BaseException]],
+        ] = self.client_results_strategy.validate_client_results(
+            server_round, results, failures
+        )
+        trusted_results, trusted_failures = validated_client_results
+
         # Aggregate training results
         aggregated_result: tuple[
             Optional[Parameters],
             dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(server_round, results, failures)
+        ] = self.strategy.aggregate_fit(
+            server_round, trusted_results, trusted_failures
+        )
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
