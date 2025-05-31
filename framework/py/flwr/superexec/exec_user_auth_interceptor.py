@@ -16,11 +16,11 @@
 
 
 import contextvars
-from typing import Any, Callable, Union, cast
+from typing import Any, Callable, Union
 
 import grpc
 
-from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.auth_plugin import ExecAuthPlugin, ExecAuthzPlugin
 from flwr.common.typing import UserInfo
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -56,8 +56,10 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
     def __init__(
         self,
         auth_plugin: ExecAuthPlugin,
+        authz_plugin: ExecAuthzPlugin,
     ):
         self.auth_plugin = auth_plugin
+        self.authz_plugin = authz_plugin
 
     def intercept_service(
         self,
@@ -95,13 +97,40 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 metadata
             )
             if valid_tokens:
+                if user_info is None:
+                    context.abort(
+                        grpc.StatusCode.UNAUTHENTICATED,
+                        "Tokens validated, but user info not found",
+                    )
+                    raise grpc.RpcError()
                 # Store user info in contextvars for authenticated users
-                shared_user_info.set(cast(UserInfo, user_info))
+                shared_user_info.set(user_info)
+                # Check if the user is authorized
+                if not self.authz_plugin.verify_user_authorization(user_info):
+                    context.abort(
+                        grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
+                    )
+                    raise grpc.RpcError()
                 return call(request, context)  # type: ignore
 
             # If the user is not authenticated, refresh tokens
-            tokens = self.auth_plugin.refresh_tokens(context.invocation_metadata())
+            tokens, user_info = self.auth_plugin.refresh_tokens(metadata)
             if tokens is not None:
+                if user_info is None:
+                    context.abort(
+                        grpc.StatusCode.UNAUTHENTICATED,
+                        "Tokens refreshed, but user info not found",
+                    )
+                    raise grpc.RpcError()
+                # Store user info in contextvars for authenticated users
+                shared_user_info.set(user_info)
+                # Check if the user is authorized
+                if not self.authz_plugin.verify_user_authorization(user_info):
+                    context.abort(
+                        grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
+                    )
+                    raise grpc.RpcError()
+
                 context.send_initial_metadata(tokens)
                 return call(request, context)  # type: ignore
 

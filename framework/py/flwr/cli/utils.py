@@ -291,9 +291,9 @@ def init_channel(
 def flwr_cli_grpc_exc_handler() -> Iterator[None]:
     """Context manager to handle specific gRPC errors.
 
-    It catches grpc.RpcError exceptions with UNAUTHENTICATED and UNIMPLEMENTED statuses,
-    informs the user, and exits the application. All other exceptions will be allowed to
-    escape.
+    It catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED, and
+    PERMISSION_DENIED statuses, informs the user, and exits the application. All other
+    exceptions will be allowed to escape.
     """
     try:
         yield
@@ -309,6 +309,14 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
         if e.code() == grpc.StatusCode.UNIMPLEMENTED:
             typer.secho(
                 "❌ User authentication is not enabled on this SuperLink.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.PERMISSION_DENIED:
+            typer.secho(
+                "❌ Authorization failed. Please contact your administrator"
+                " to check your permissions.",
                 fg=typer.colors.RED,
                 bold=True,
             )
