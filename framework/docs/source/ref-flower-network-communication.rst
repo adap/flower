@@ -62,14 +62,15 @@ Optional Network Connections
 Depending on the SuperLink and SuperNode configuration, Flower systems can have/use a
 number of additional network connections.
 
-Networking Interfaces
-~~~~~~~~~~~~~~~~~~~~~
+Flower Components APIs
+~~~~~~~~~~~~~~~~~~~~~~
 
-Each component — SuperLink, ``ServerApp``, SuperNode, and ``ClientApp`` — exposes ports
-for interacting with other Flower components. The SuperLink component includes three
-such APIs: the ServerAppIo API, Fleet API, and the Exec API. Similarly, the SuperNode
-component includes the ClientAppIo API. Each of these APIs serves a distinct purpose
-during the runtime of a Flower app, as summarized in the table below.
+All Flower components — SuperLink, ServerApp process (``flwr-serverapp``), SuperNode,
+and ClientApp process (``flwr-clientapp``) — expose APIs to interact with other Flower
+components. The SuperLink component includes three such APIs: the ServerAppIo API, Fleet
+API, and the Exec API. Similarly, the SuperNode component includes the ClientAppIo API.
+Each of these APIs serves a distinct purpose when running a Flower app using the
+deployment runtime, as summarized in the table below.
 
 .. list-table::
     :widths: 25 25 50 50
