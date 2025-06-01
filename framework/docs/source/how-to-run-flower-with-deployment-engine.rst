@@ -12,8 +12,8 @@ to the :doc:`docker/index` guides.
 In this how-to guide, you will:
 
 - Create a Flower App using the PyTorch template.
-- Start a Flower federation consisting of one ``SuperLink`` ("the server") and two
-  ``SuperNodes`` ("the clients").
+- Start a Flower federation consisting of one SuperLink ("the server") and two
+  SuperNodes ("the clients").
 - Run the Flower App on this federation.
 
 The how-to guide should take less than 10 minutes to complete.
@@ -28,20 +28,20 @@ Before you start, make sure that:
 - This guide assumes all commands to be executed in the same machine in different
   terminals, each making use of the same Python environment.
 - This guide also assumes that you are familiar with the basic components in a Flower
-  deployment (i.e. ``SuperLink`` and ``SuperNode``), what their roles are and how they
-  interact with each other. Please refer to the :doc:`explanation-flower-architecture`
-  guide and the :doc:`ref-flower-network-communication` for an overview of what each
-  component does and how they interact with each other.
+  deployment (i.e. SuperLink and SuperNode), what their roles are and how they interact
+  with each other. Please refer to the :doc:`explanation-flower-architecture` guide and
+  the :doc:`ref-flower-network-communication` for an overview of what each component
+  does and how they interact with each other.
 
 .. note::
 
-    In a real deployment you would typically run the ``SuperLink`` the ``SuperNodes`` in
+    In a real deployment you would typically run the SuperLink the SuperNodes in
     different machines/servers from the one you develop your Flower app (i.e. from where
     you do ``flwr new`` and ``flwr run``). The guide presented below is still valid for
     such scenarios but you will need to have setup a Python environment with the right
-    set of dependencies for ``SuperLink`` and ``SuperNodes``. An often easier way to
-    achieve such deployments is by means of Docker. Check the :doc:`docker/index` to
-    gain a better understanding on how to do so.
+    set of dependencies for SuperLink and SuperNodes. An often easier way to achieve
+    such deployments is by means of Docker. Check the :doc:`docker/index` to gain a
+    better understanding on how to do so.
 
 Step 1: Create a Flower App
 ---------------------------
@@ -87,14 +87,14 @@ Create a new Flower app (PyTorch), and follow the instructions show upon executi
 Step 2: Launch Flower Federation
 --------------------------------
 
-In this section you will learn how to launch a ``SuperLink`` and connect two
-``SuperNodes`` to it.
+In this section you will learn how to launch a SuperLink and connect two SuperNodes to
+it.
 
 Start a Flower SuperLink
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-In a new terminal, activate your environment and start the ``SuperLink`` process in
-insecure mode:
+In a new terminal, activate your environment and start the SuperLink process in insecure
+mode:
 
 .. code-block:: bash
 
@@ -102,15 +102,15 @@ insecure mode:
 
 .. dropdown:: Understand the command
 
-    * ``flower-superlink``: Name of the ``SuperLink`` binary.
-    * | ``--insecure``: This flag tells the SuperLink to operate in an insecure mode, allowing
-      | unencrypted communication. Refer to the :doc:`how-to-enable-tls-connections` guide to learn how to run your ``SuperLink`` with TLS.
+    * ``flower-superlink``: Name of the SuperLink installed CLI executable.
+    * ``--insecure``: This flag tells the SuperLink to operate in an insecure mode, allowing
+      unencrypted communication. Refer to the :doc:`how-to-enable-tls-connections` guide to learn how to run your SuperLink with TLS.
 
 Start two Flower SuperNodes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this step, you will launch two ``SuperNodes`` and connect them to the ``SuperLink``.
-You will need two terminals for this step.
+In this step, you will launch two SuperNodes and connect them to the SuperLink. You will
+need two terminals for this step.
 
 .. note::
 
@@ -122,7 +122,7 @@ You will need two terminals for this step.
     directly available. In such cases you would write your ``ClientApp`` and make it
     receive, for example, the path to a directory of images.
 
-1. **Terminal 1** Start the first ``SuperNode`` after activating your environment:
+1. **Terminal 1** Start the first SuperNode after activating your environment:
 
    .. code-block:: bash
 
@@ -134,16 +134,16 @@ You will need two terminals for this step.
 
    .. dropdown:: Understand the command
 
-       * ``flower-supernode``: Name of the ``SuperNode`` binary.
-       * | ``--insecure``: This flag tells the ``SuperNode`` to operate in an insecure mode, allowing
-         | unencrypted communication. Refer to the :doc:`how-to-enable-tls-connections` guide to learn how to run your ``SuperNode`` with TLS.
-       * | ``--superlink 127.0.0.1:9092``: Connect to the SuperLink's Fleet API at the address
-         | ``127.0.0.1:9092``. If you had launched the ``SuperLink`` in a different machine, you'd replace ``127.0.0.1`` with the public IP of that machine.
-       * | ``--clientappio-api-address 127.0.0.1:9094``: Set the address and port number where the
-         | SuperNode is listening to communicate with the ``ClientApp``.
-       * | ``--node-config "partition-id=0 num-partitions=2"``: The ``ClientApp`` code generated via the ``flwr new`` template expects those two key-value pairs to be defined at run time. Set the partition ID to ``0`` and the number of partitions to ``2`` for the ``SuperNode`` configuration.
+       * ``flower-supernode``: Name of the SuperNode installed CLI executable.
+       * ``--insecure``: This flag tells the SuperNode to operate in an insecure mode, allowing
+         unencrypted communication. Refer to the :doc:`how-to-enable-tls-connections` guide to learn how to run your SuperNode with TLS.
+       * ``--superlink 127.0.0.1:9092``: Connect to the SuperLink's Fleet API at the address
+         ``127.0.0.1:9092``. If you had launched the SuperLink in a different machine, you'd replace ``127.0.0.1`` with the public IP of that machine.
+       * ``--clientappio-api-address 127.0.0.1:9094``: Set the address and port number where the
+         SuperNode is listening to communicate with the ``ClientApp``.
+       * ``--node-config "partition-id=0 num-partitions=2"``: The ``ClientApp`` code generated via the ``flwr new`` template expects those two key-value pairs to be defined at run time. Set the partition ID to ``0`` and the number of partitions to ``2`` for the SuperNode configuration.
 
-2. **Terminal 2** Start the second ``SuperNode`` after activating your environment:
+2. **Terminal 2** Start the second SuperNode after activating your environment:
 
    .. code-block:: shell
 
@@ -155,20 +155,19 @@ You will need two terminals for this step.
 
    .. dropdown:: Understand the command
 
-       * ``--clientappio-api-address 127.0.0.1:9095``: Note that a different port is being used. This is only needed because you are running two ``SuperNodes`` on the same machine. Typically you would run one node per machine and therefore, the ``--clientappio-api-address`` could be omitted all together and left with its default value.
-       * ``--node-config "partition-id=1 num-partitions=2"```: Note here we indicate a different `partition-id`. In this way, a ``ClientApp`` will use a different data partition depending on which ``SuperNode`` runs in.
+       * ``--clientappio-api-address 127.0.0.1:9095``: Note that a different port is being used. This is only needed because you are running two SuperNodes on the same machine. Typically you would run one node per machine and therefore, the ``--clientappio-api-address`` could be omitted all together and left with its default value.
+       * ``--node-config "partition-id=1 num-partitions=2"``: Note here we indicate a different `partition-id`. In this way, a ``ClientApp`` will use a different data partition depending on which SuperNode runs in.
 
 Step 3: Run a Flower App on the Federation
 ------------------------------------------
 
-At this point, you have launched two ``SuperNodes`` that are connected to the same
-``SuperLink``. The system is idling waiting for a ``Run`` to be submitted. Before you
-can run your Flower App through the federation we need a way to tell ``flwr run`` that
-the App is to be executed via the SuperLink we just started, instead of using the local
+At this point, you have launched two SuperNodes that are connected to the same
+SuperLink. The system is idling waiting for a ``Run`` to be submitted. Before you can
+run your Flower App through the federation we need a way to tell ``flwr run`` that the
+App is to be executed via the SuperLink we just started, instead of using the local
 Simulation Engine (the default). Doing this is easy: define a new federation section in
-the ``pyproject.toml``, indicate the address of the ``SuperLink`` and pass a certificate
-(if any) or set the insecure flag (only when testing locally, real deployments require
-TLS).
+the ``pyproject.toml``, indicate the address of the SuperLink and pass a certificate (if
+any) or set the insecure flag (only when testing locally, real deployments require TLS).
 
 1. Open the ``pyproject.toml`` file and at the end add a new federation configuration:
 
