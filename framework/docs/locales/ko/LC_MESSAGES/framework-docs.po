@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-29 00:07+0000\n"
+"POT-Creation-Date: 2025-06-01 00:09+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -2976,7 +2976,7 @@ msgstr "``pyproject.toml``에 다음 버전 제약 조건을 설정했는지 확
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:60
 #: ../../source/docker/tutorial-quickstart-docker.rst:334
 #: ../../source/how-to-enable-tls-connections.rst:122
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:175
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:174
 #, fuzzy
 msgid "pyproject.toml"
 msgstr "또는 ``pyproject.toml``:"
@@ -2990,7 +2990,7 @@ msgstr ""
 
 #: ../../source/docker/enable-tls.rst:258
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:69
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:184
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:183
 msgid ""
 "You can customize the string that follows ``tool.flwr.federations.`` to "
 "fit your needs. However, please note that the string cannot contain a dot"
@@ -3445,7 +3445,7 @@ msgid ""
 msgstr "다음 명령을 실행하여 가상 환경을 활성화합니다:"
 
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:72
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:187
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:186
 msgid ""
 "In this example, ``local-deployment`` has been used. Just remember to "
 "replace ``local-deployment`` with your chosen name in both the "
@@ -7728,8 +7728,8 @@ msgstr "gRPC transport layer를 사용하여 Flower 서버를 실행하세요."
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:15
 msgid ""
-"Start a Flower federation consisting of one ``SuperLink`` (\"the "
-"server\") and two ``SuperNodes`` (\"the clients\")."
+"Start a Flower federation consisting of one SuperLink (\"the server\") "
+"and two SuperNodes (\"the clients\")."
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:17
@@ -7755,23 +7755,23 @@ msgstr ""
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:30
 msgid ""
 "This guide also assumes that you are familiar with the basic components "
-"in a Flower deployment (i.e. ``SuperLink`` and ``SuperNode``), what their"
-" roles are and how they interact with each other. Please refer to the "
-":doc:`explanation-flower-architecture` guide and the :doc:`ref-flower-"
+"in a Flower deployment (i.e. SuperLink and SuperNode), what their roles "
+"are and how they interact with each other. Please refer to the :doc"
+":`explanation-flower-architecture` guide and the :doc:`ref-flower-"
 "network-communication` for an overview of what each component does and "
 "how they interact with each other."
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:38
 msgid ""
-"In a real deployment you would typically run the ``SuperLink`` the "
-"``SuperNodes`` in different machines/servers from the one you develop "
-"your Flower app (i.e. from where you do ``flwr new`` and ``flwr run``). "
-"The guide presented below is still valid for such scenarios but you will "
-"need to have setup a Python environment with the right set of "
-"dependencies for ``SuperLink`` and ``SuperNodes``. An often easier way to"
-" achieve such deployments is by means of Docker. Check the "
-":doc:`docker/index` to gain a better understanding on how to do so."
+"In a real deployment you would typically run the SuperLink the SuperNodes"
+" in different machines/servers from the one you develop your Flower app "
+"(i.e. from where you do ``flwr new`` and ``flwr run``). The guide "
+"presented below is still valid for such scenarios but you will need to "
+"have setup a Python environment with the right set of dependencies for "
+"SuperLink and SuperNodes. An often easier way to achieve such deployments"
+" is by means of Docker. Check the :doc:`docker/index` to gain a better "
+"understanding on how to do so."
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:47
@@ -7817,8 +7817,8 @@ msgstr "Flower SuperNode를 실행합니다."
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:90
 msgid ""
-"In this section you will learn how to launch a ``SuperLink`` and connect "
-"two ``SuperNodes`` to it."
+"In this section you will learn how to launch a SuperLink and connect two "
+"SuperNodes to it."
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:94
@@ -7828,24 +7828,20 @@ msgstr "flower 초연결"
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:96
 msgid ""
-"In a new terminal, activate your environment and start the ``SuperLink`` "
+"In a new terminal, activate your environment and start the SuperLink "
 "process in insecure mode:"
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:105
-msgid "``flower-superlink``: Name of the ``SuperLink`` binary."
+msgid "``flower-superlink``: Name of the SuperLink installed CLI executable."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:106
 msgid ""
 "``--insecure``: This flag tells the SuperLink to operate in an insecure "
-"mode, allowing"
-msgstr ""
-
-#: ../../source/how-to-run-flower-with-deployment-engine.rst
-msgid ""
-"unencrypted communication. Refer to the :doc:`how-to-enable-tls-"
-"connections` guide to learn how to run your ``SuperLink`` with TLS."
+"mode, allowing unencrypted communication. Refer to the :doc:`how-to-"
+"enable-tls-connections` guide to learn how to run your SuperLink with "
+"TLS."
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:110
@@ -7855,8 +7851,8 @@ msgstr "서버(SuperLink)"
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:112
 msgid ""
-"In this step, you will launch two ``SuperNodes`` and connect them to the "
-"``SuperLink``. You will need two terminals for this step."
+"In this step, you will launch two SuperNodes and connect them to the "
+"SuperLink. You will need two terminals for this step."
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:117
@@ -7873,76 +7869,65 @@ msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:125
 msgid ""
-"**Terminal 1** Start the first ``SuperNode`` after activating your "
+"**Terminal 1** Start the first SuperNode after activating your "
 "environment:"
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:137
-msgid "``flower-supernode``: Name of the ``SuperNode`` binary."
+msgid "``flower-supernode``: Name of the SuperNode installed CLI executable."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:138
 msgid ""
-"``--insecure``: This flag tells the ``SuperNode`` to operate in an "
-"insecure mode, allowing"
+"``--insecure``: This flag tells the SuperNode to operate in an insecure "
+"mode, allowing unencrypted communication. Refer to the :doc:`how-to-"
+"enable-tls-connections` guide to learn how to run your SuperNode with "
+"TLS."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst
-msgid ""
-"unencrypted communication. Refer to the :doc:`how-to-enable-tls-"
-"connections` guide to learn how to run your ``SuperNode`` with TLS."
-msgstr ""
-
-#: ../../source/how-to-run-flower-with-deployment-engine.rst
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:140
 msgid ""
 "``--superlink 127.0.0.1:9092``: Connect to the SuperLink's Fleet API at "
-"the address"
+"the address ``127.0.0.1:9092``. If you had launched the SuperLink in a "
+"different machine, you'd replace ``127.0.0.1`` with the public IP of that"
+" machine."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst
-msgid ""
-"``127.0.0.1:9092``. If you had launched the ``SuperLink`` in a different "
-"machine, you'd replace ``127.0.0.1`` with the public IP of that machine."
-msgstr ""
-
-#: ../../source/how-to-run-flower-with-deployment-engine.rst
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:142
 msgid ""
 "``--clientappio-api-address 127.0.0.1:9094``: Set the address and port "
-"number where the"
+"number where the SuperNode is listening to communicate with the "
+"``ClientApp``."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst
-msgid "SuperNode is listening to communicate with the ``ClientApp``."
-msgstr ""
-
-#: ../../source/how-to-run-flower-with-deployment-engine.rst
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:144
 msgid ""
 "``--node-config \"partition-id=0 num-partitions=2\"``: The ``ClientApp`` "
 "code generated via the ``flwr new`` template expects those two key-value "
 "pairs to be defined at run time. Set the partition ID to ``0`` and the "
-"number of partitions to ``2`` for the ``SuperNode`` configuration."
+"number of partitions to ``2`` for the SuperNode configuration."
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:146
 msgid ""
-"**Terminal 2** Start the second ``SuperNode`` after activating your "
+"**Terminal 2** Start the second SuperNode after activating your "
 "environment:"
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:158
 msgid ""
 "``--clientappio-api-address 127.0.0.1:9095``: Note that a different port "
-"is being used. This is only needed because you are running two "
-"``SuperNodes`` on the same machine. Typically you would run one node per "
-"machine and therefore, the ``--clientappio-api-address`` could be omitted"
-" all together and left with its default value."
+"is being used. This is only needed because you are running two SuperNodes"
+" on the same machine. Typically you would run one node per machine and "
+"therefore, the ``--clientappio-api-address`` could be omitted all "
+"together and left with its default value."
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:159
 msgid ""
-"``--node-config \"partition-id=1 num-partitions=2\"```: Note here we "
+"``--node-config \"partition-id=1 num-partitions=2\"``: Note here we "
 "indicate a different `partition-id`. In this way, a ``ClientApp`` will "
-"use a different data partition depending on which ``SuperNode`` runs in."
+"use a different data partition depending on which SuperNode runs in."
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:162
@@ -7952,41 +7937,41 @@ msgstr "Flower SuperNode를 실행합니다."
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:164
 msgid ""
-"At this point, you have launched two ``SuperNodes`` that are connected to"
-" the same ``SuperLink``. The system is idling waiting for a ``Run`` to be"
-" submitted. Before you can run your Flower App through the federation we "
+"At this point, you have launched two SuperNodes that are connected to the"
+" same SuperLink. The system is idling waiting for a ``Run`` to be "
+"submitted. Before you can run your Flower App through the federation we "
 "need a way to tell ``flwr run`` that the App is to be executed via the "
 "SuperLink we just started, instead of using the local Simulation Engine "
 "(the default). Doing this is easy: define a new federation section in the"
-" ``pyproject.toml``, indicate the address of the ``SuperLink`` and pass a"
-" certificate (if any) or set the insecure flag (only when testing "
-"locally, real deployments require TLS)."
+" ``pyproject.toml``, indicate the address of the SuperLink and pass a "
+"certificate (if any) or set the insecure flag (only when testing locally,"
+" real deployments require TLS)."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:173
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:172
 msgid ""
 "Open the ``pyproject.toml`` file and at the end add a new federation "
 "configuration:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:191
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:190
 msgid ""
 "In another terminal and with your Python environment activated, run the "
 "Flower App and follow the ``ServerApp`` logs to track the execution of "
 "the run:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:198
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:197
 msgid ""
 "If you want to rerun the project or test an updated version by making "
 "changes to the code, simply re-run the command above."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:202
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:201
 msgid "Step 4: Clean Up"
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:204
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:203
 msgid ""
 "Use the ``Ctrl+C`` command in each terminal to stop the respective "
 "processes."
@@ -12420,8 +12405,8 @@ msgstr "직렬화된 객체의 데이터 유형을 나타내는 문자열(예: `
 #: flwr.common.record.array.Array:16 of
 #, fuzzy
 msgid ""
-"A list representing the shape of the unserialized array-like object. Only"
-" required if you are not passing in a ndarray or a tensor."
+"A tuple representing the shape of the unserialized array-like object. "
+"Only required if you are not passing in a ndarray or a tensor."
 msgstr ""
 "직렬화되지 않은 배열과 같은 객체의 모양을 나타내는 목록입니다. 직렬화 방법에 따라 데이터를 역직렬화하는 데 사용되거나 단순히 "
 "메타데이터 필드로 사용됩니다."
@@ -12618,17 +12603,12 @@ msgid "Get object ID."
 msgstr ""
 
 #: flwr.common.Array.children:1:<autosummary>:1 of
-msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
-msgstr ":py:obj:`shape <flwr.common.Array.shape>`\\"
-
-#: flwr.common.Array.children:1:<autosummary>:1 flwr.common.Array.shape:1 of
-#, fuzzy
-msgid "Get the shape of the array."
-msgstr "Flower 기본 이미지의 태그."
-
-#: flwr.common.Array.children:1:<autosummary>:1 of
 msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 msgstr ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
+
+#: flwr.common.Array.children:1:<autosummary>:1 of
+msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
+msgstr ":py:obj:`shape <flwr.common.Array.shape>`\\"
 
 #: flwr.common.Array.children:1:<autosummary>:1 of
 msgid ":py:obj:`stype <flwr.common.Array.stype>`\\"
@@ -28085,6 +28065,213 @@ msgid ""
 "acts as a client to the metric logging service."
 msgstr ""
 
+#: ../../source/ref-flower-runtime-comparison.rst:-1
+msgid ""
+"Comparison of Flower Runtimes for simulation and deployment of federated "
+"AI apps."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:6
+#, fuzzy
+msgid "Flower Runtime Comparison"
+msgstr "Flower 시뮬레이션."
+
+#: ../../source/ref-flower-runtime-comparison.rst:8
+msgid ""
+"Flower Apps can be executed with both `simulation <how-to-run-"
+"simulations.html>`_ or `deployment <how-to-run-flower-with-deployment-"
+"engine.html>`_ runtimes. Switching between runtimes simply requires "
+"specifying a different type of `federation` when executing the `flwr run`"
+" command via the `Flower CLI <ref-api-cli.html>`_."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:13
+msgid ""
+"While Flower Apps can run in both simulation and deployment without "
+"making changes to their code, there are some differences on how they get "
+"executed depending on the runtime. The following table outlines the key "
+"characteristics that differ when executing a Flower App in a Flower "
+"federation with the simulation runtime from another using the deployment "
+"runtime."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:23
+#, fuzzy
+msgid "Dimension"
+msgstr "설명"
+
+#: ../../source/ref-flower-runtime-comparison.rst:24
+#, fuzzy
+msgid "Simulation Runtime"
+msgstr "Notebook에서 시뮬레이션"
+
+#: ../../source/ref-flower-runtime-comparison.rst:25
+#, fuzzy
+msgid "Deployment Runtime"
+msgstr "배포"
+
+#: ../../source/ref-flower-runtime-comparison.rst:26
+msgid "**Lifecycle Stage**"
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:27
+msgid ""
+"Ideal for rapid prototyping, algorithm validation, research, debugging, "
+"and experimentation."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:29
+msgid ""
+"Deploy validated use cases in production, real-world privacy-preserving "
+"applications."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:31
+#, fuzzy
+msgid "**Environment**"
+msgstr "Flower 개발 환경 만들기"
+
+#: ../../source/ref-flower-runtime-comparison.rst:32
+msgid "Local or remote, single-node or multi-node, controlled."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:33
+msgid "Distributed, remote."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:34
+#, fuzzy
+msgid "**Data**"
+msgstr "설명"
+
+#: ../../source/ref-flower-runtime-comparison.rst:35
+msgid ""
+"Simulated data partitions, public or private datasets or artificially "
+"generated - a natural fit for `Flower Datasets "
+"<https://flower.ai/docs/datasets/>`_."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:37
+msgid "Real client-side data, residing on local databases or filesystems."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:38
+#, fuzzy
+msgid "**Backend**"
+msgstr "**변경하기**"
+
+#: ../../source/ref-flower-runtime-comparison.rst:39
+msgid ""
+"Multiple Python processes/workers coordinated using `Ray "
+"<https://docs.ray.io/>`_."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:41
+msgid ""
+"Multiple independent processes or subprocesses running in coordination "
+"with the SuperLink and SuperNodes."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:43
+msgid "**Execution Mode**"
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:44
+msgid "Multiprocessing execution where each process simulates a distinct client."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:45
+msgid ""
+"Parallel execution mode across a network of physical machines/devices or "
+"computing environment."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:47
+#, fuzzy
+msgid "**Communication**"
+msgstr "**변경사항 커밋**"
+
+#: ../../source/ref-flower-runtime-comparison.rst:48
+#, fuzzy
+msgid "In-memory communication."
+msgstr "플라워 프레임워크 문서"
+
+#: ../../source/ref-flower-runtime-comparison.rst:49
+msgid "TLS-enabled gRPC."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:50
+#, fuzzy
+msgid "**Server-side Infrastructure**"
+msgstr "Flower 서버."
+
+#: ../../source/ref-flower-runtime-comparison.rst:51
+msgid ""
+"Simulation runtime coordinates the spawning of multiple workers (Python "
+"process) which act as `simulated` SuperNodes. The simulation runtime can "
+"be started with or without the `SuperLink <ref-api-cli.html#flower-"
+"superlink>`_."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:54
+msgid ""
+"The SuperLink awaits for SuperNodes to connect. User interface with the "
+"SuperLink using the `Flower CLI <ref-api-cli.html>`_."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:56
+#, fuzzy
+msgid "**Server-side App execution**"
+msgstr "서버 측 클리핑"
+
+#: ../../source/ref-flower-runtime-comparison.rst:57
+msgid ""
+"A ``ServerApp`` process is initialized inside a controlled environment "
+"and communicates in-memory with workers."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:59
+msgid ""
+"``ServerApp`` `process or subprocess <ref-flower-network-"
+"communication.html>`_ runs independently from the SuperLink and "
+"communicates with it over gRPC via the ServerAppIO API."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:62
+#, fuzzy
+msgid "**Client-side Infrastructure**"
+msgstr "Flower 서버."
+
+#: ../../source/ref-flower-runtime-comparison.rst:63
+msgid "None. The simulation runtime is self-contained."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:64
+msgid ""
+"SuperNodes connect to the SuperLink via TLS-enabled gRPC using the Fleet "
+"API. Node authentication can be enabled."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:66
+#, fuzzy
+msgid "**Client-side App execution**"
+msgstr "클라이언트 측 클리핑"
+
+#: ../../source/ref-flower-runtime-comparison.rst:67
+msgid ""
+"Each process executes a ``ClientApp`` on demand. They might execute "
+"multiple instances of the same ``ClientApp`` to simulate large amounts of"
+" clients. ``ClientApps`` are stateless."
+msgstr ""
+
+#: ../../source/ref-flower-runtime-comparison.rst:70
+msgid ""
+"Initialized as a ``ClientApp`` `process or subprocess <ref-flower-"
+"network-communication.html>`_, it runs independently from the SuperNode "
+"and communicates with it over gRPC via the ClientAppIo API. "
+"``ClientApps`` are stateless."
+msgstr ""
+
 #: ../../source/ref-telemetry.md:1
 msgid "Telemetry"
 msgstr ""
@@ -31308,7 +31495,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|0ea48143db30437b919c47ae5b8ff9bf|"
+msgid "|c90efe526c8b43b6a8719655ac882bc1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -31325,7 +31512,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|ff8aa37ba237463a9475ce7312d8921f|"
+msgid "|14e660e737d64433b21c943f37e95f35|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -31351,7 +31538,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|ebd7d0a0c4964788a4bbe2dc145e30a3|"
+msgid "|f8d9449a9c0446e291b169a27ee5f607|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -31369,7 +31556,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|4781d482ca224829a7c8e4843dae96dd|"
+msgid "|55f389a1315745a1991eb81133d78707|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -31388,7 +31575,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|8528765b7fdd4cc59e72ddfe2fa5827d|"
+msgid "|dd2f73f17b5842d4920e76053e0574de|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -31405,7 +31592,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|fa5a4492a49a4f0097081b2610649f4d|"
+msgid "|812687c6acf84b68bfbe64407e4454de|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -31428,7 +31615,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|9333bfd7117449bfb1b7a02e7282b3a2|"
+msgid "|27d1fdb5cb5043ecbbe8ebd10f259792|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -31445,7 +31632,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|018e85c87a56450d920091df27460f21|"
+msgid "|96d399b76b9542d499f8a02a8720f5d7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -31624,7 +31811,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|b875e957083647488294b44f6e60508e|"
+msgid "|77852905944447a181494bde921015ee|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -31652,7 +31839,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|f6ece9f07d354a01b09129256fd36d16|"
+msgid "|50be3dc66fe84eae88f2b0b17aa452c6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -31679,7 +31866,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|e8c23423c2dd49e9a5912b0d5c703a56|"
+msgid "|a87eaa5ac95e46d98f94741e0b048709|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -31705,7 +31892,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|927a52ff98574b059fa2facb2af6c230|"
+msgid "|763016ca004041dc9afa69ed083f6ada|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -31755,7 +31942,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|790b693a579946fe966dfc84cc8472fe|"
+msgid "|7e852469d39442ccb870816a9d2d6615|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -31875,7 +32062,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|497ea844d8d947bcbb290cee1a70008c|"
+msgid "|1a1aa4b296844f5795b3d24ef8bac64b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -42578,5 +42765,227 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|bcde8581fb664c5faa45209fb9f30e19|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Start a Flower federation consisting of"
+#~ " one ``SuperLink`` (\"the server\") and "
+#~ "two ``SuperNodes`` (\"the clients\")."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This guide also assumes that you "
+#~ "are familiar with the basic components"
+#~ " in a Flower deployment (i.e. "
+#~ "``SuperLink`` and ``SuperNode``), what their"
+#~ " roles are and how they interact "
+#~ "with each other. Please refer to "
+#~ "the :doc:`explanation-flower-architecture` "
+#~ "guide and the :doc:`ref-flower-"
+#~ "network-communication` for an overview of"
+#~ " what each component does and how "
+#~ "they interact with each other."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In a real deployment you would "
+#~ "typically run the ``SuperLink`` the "
+#~ "``SuperNodes`` in different machines/servers "
+#~ "from the one you develop your "
+#~ "Flower app (i.e. from where you do"
+#~ " ``flwr new`` and ``flwr run``). The"
+#~ " guide presented below is still valid"
+#~ " for such scenarios but you will "
+#~ "need to have setup a Python "
+#~ "environment with the right set of "
+#~ "dependencies for ``SuperLink`` and "
+#~ "``SuperNodes``. An often easier way to"
+#~ " achieve such deployments is by means"
+#~ " of Docker. Check the :doc:`docker/index`"
+#~ " to gain a better understanding on"
+#~ " how to do so."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this section you will learn how"
+#~ " to launch a ``SuperLink`` and "
+#~ "connect two ``SuperNodes`` to it."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In a new terminal, activate your "
+#~ "environment and start the ``SuperLink`` "
+#~ "process in insecure mode:"
+#~ msgstr ""
+
+#~ msgid "``flower-superlink``: Name of the ``SuperLink`` binary."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--insecure``: This flag tells the "
+#~ "SuperLink to operate in an insecure "
+#~ "mode, allowing"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "unencrypted communication. Refer to the "
+#~ ":doc:`how-to-enable-tls-connections` "
+#~ "guide to learn how to run your "
+#~ "``SuperLink`` with TLS."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this step, you will launch two"
+#~ " ``SuperNodes`` and connect them to "
+#~ "the ``SuperLink``. You will need two "
+#~ "terminals for this step."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Terminal 1** Start the first "
+#~ "``SuperNode`` after activating your "
+#~ "environment:"
+#~ msgstr ""
+
+#~ msgid "``flower-supernode``: Name of the ``SuperNode`` binary."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--insecure``: This flag tells the "
+#~ "``SuperNode`` to operate in an insecure"
+#~ " mode, allowing"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "unencrypted communication. Refer to the "
+#~ ":doc:`how-to-enable-tls-connections` "
+#~ "guide to learn how to run your "
+#~ "``SuperNode`` with TLS."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--superlink 127.0.0.1:9092``: Connect to the"
+#~ " SuperLink's Fleet API at the address"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``127.0.0.1:9092``. If you had launched "
+#~ "the ``SuperLink`` in a different "
+#~ "machine, you'd replace ``127.0.0.1`` with "
+#~ "the public IP of that machine."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--clientappio-api-address 127.0.0.1:9094``: "
+#~ "Set the address and port number "
+#~ "where the"
+#~ msgstr ""
+
+#~ msgid "SuperNode is listening to communicate with the ``ClientApp``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--node-config \"partition-id=0 num-"
+#~ "partitions=2\"``: The ``ClientApp`` code "
+#~ "generated via the ``flwr new`` template"
+#~ " expects those two key-value pairs"
+#~ " to be defined at run time. Set"
+#~ " the partition ID to ``0`` and "
+#~ "the number of partitions to ``2`` "
+#~ "for the ``SuperNode`` configuration."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Terminal 2** Start the second "
+#~ "``SuperNode`` after activating your "
+#~ "environment:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--clientappio-api-address 127.0.0.1:9095``: "
+#~ "Note that a different port is "
+#~ "being used. This is only needed "
+#~ "because you are running two "
+#~ "``SuperNodes`` on the same machine. "
+#~ "Typically you would run one node "
+#~ "per machine and therefore, the "
+#~ "``--clientappio-api-address`` could be "
+#~ "omitted all together and left with "
+#~ "its default value."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--node-config \"partition-id=1 num-"
+#~ "partitions=2\"```: Note here we indicate "
+#~ "a different `partition-id`. In this "
+#~ "way, a ``ClientApp`` will use a "
+#~ "different data partition depending on "
+#~ "which ``SuperNode`` runs in."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "At this point, you have launched "
+#~ "two ``SuperNodes`` that are connected to"
+#~ " the same ``SuperLink``. The system "
+#~ "is idling waiting for a ``Run`` to"
+#~ " be submitted. Before you can run "
+#~ "your Flower App through the federation"
+#~ " we need a way to tell ``flwr"
+#~ " run`` that the App is to be"
+#~ " executed via the SuperLink we just"
+#~ " started, instead of using the local"
+#~ " Simulation Engine (the default). Doing "
+#~ "this is easy: define a new "
+#~ "federation section in the ``pyproject.toml``,"
+#~ " indicate the address of the "
+#~ "``SuperLink`` and pass a certificate (if"
+#~ " any) or set the insecure flag "
+#~ "(only when testing locally, real "
+#~ "deployments require TLS)."
+#~ msgstr ""
+
+#~ msgid "Get the shape of the array."
+#~ msgstr "Flower 기본 이미지의 태그."
+
+#~ msgid "|0ea48143db30437b919c47ae5b8ff9bf|"
+#~ msgstr ""
+
+#~ msgid "|ff8aa37ba237463a9475ce7312d8921f|"
+#~ msgstr ""
+
+#~ msgid "|ebd7d0a0c4964788a4bbe2dc145e30a3|"
+#~ msgstr ""
+
+#~ msgid "|4781d482ca224829a7c8e4843dae96dd|"
+#~ msgstr ""
+
+#~ msgid "|8528765b7fdd4cc59e72ddfe2fa5827d|"
+#~ msgstr ""
+
+#~ msgid "|fa5a4492a49a4f0097081b2610649f4d|"
+#~ msgstr ""
+
+#~ msgid "|9333bfd7117449bfb1b7a02e7282b3a2|"
+#~ msgstr ""
+
+#~ msgid "|018e85c87a56450d920091df27460f21|"
+#~ msgstr ""
+
+#~ msgid "|b875e957083647488294b44f6e60508e|"
+#~ msgstr ""
+
+#~ msgid "|f6ece9f07d354a01b09129256fd36d16|"
+#~ msgstr ""
+
+#~ msgid "|e8c23423c2dd49e9a5912b0d5c703a56|"
+#~ msgstr ""
+
+#~ msgid "|927a52ff98574b059fa2facb2af6c230|"
+#~ msgstr ""
+
+#~ msgid "|790b693a579946fe966dfc84cc8472fe|"
+#~ msgstr ""
+
+#~ msgid "|497ea844d8d947bcbb290cee1a70008c|"
 #~ msgstr ""
 
