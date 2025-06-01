@@ -109,6 +109,8 @@ def record_value_dict_to_proto(
 ) -> dict[str, T]:
     """Serialize the record value dict to ProtoBuf.
 
+    This function will preserve the order of the keys in the input dictionary.
+
     Note: `bool` MUST be put in the front of allowd_types if it exists.
     """
     # Move bool to the front
