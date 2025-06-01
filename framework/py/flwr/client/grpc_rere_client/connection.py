@@ -14,11 +14,10 @@
 # ==============================================================================
 """Contextmanager for a gRPC request-response channel to the Flower server."""
 
-
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from copy import copy
-from logging import ERROR
+from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -271,7 +270,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         )
 
         if in_message:
-            # The deflateed message doesn't contain the message_id (since it's its own object_id)
+            # The deflateed message doesn't contain the message_id (its own object_id)
             # Inject
             in_message.metadata._message_id = message_proto.metadata.message_id  # type: ignore
 
@@ -315,8 +314,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         if response.objects_to_push:
             objs_to_push = set(response.objects_to_push[message.object_id].object_ids)
             push_object_to_servicer(
-                message, node, stub, object_ids_to_push=objs_to_push
+                message, stub, node, object_ids_to_push=objs_to_push
             )
+            log(DEBUG, f"Pushed {len(objs_to_push)} objects to servicer.")
+
         # Cleanup
         metadata = None
 

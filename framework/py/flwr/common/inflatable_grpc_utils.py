@@ -97,7 +97,7 @@ def pull_object_from_servicer(
             PullObjectRequest(node=node, object_id=object_id)
         )
         object_content = object_proto.object_content
-        sleep(0.25)
+        sleep(0.1)
 
     # Extract object class and object_ids of children
     obj_type, children_obj_ids, _ = get_object_head_values_from_object_content(

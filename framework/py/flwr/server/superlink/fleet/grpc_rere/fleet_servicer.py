@@ -183,7 +183,6 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             "[ServerAppIoServicer.PushObject] Push Object with object_id=%s",
             request.object_id,
         )
-
         if not check_body_len_consistency(request.object_content):
             # Cancel insertion in ObjectStore
             context.abort(
