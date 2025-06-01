@@ -56,7 +56,7 @@ message PushObjectRequest {
   string object_id = 2;
   bytes object_content = 3;
 }
-message PushObjectResponse {}
+message PushObjectResponse { bool stored = 1; }
 
 // PullObject messages
 message PullObjectRequest {

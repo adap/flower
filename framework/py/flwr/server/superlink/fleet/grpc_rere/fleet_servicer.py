@@ -15,7 +15,7 @@
 """Fleet API gRPC request-response servicer."""
 
 
-from logging import DEBUG, INFO
+from logging import DEBUG, ERROR, INFO
 
 import grpc
 from google.protobuf.json_format import MessageToDict
@@ -51,6 +51,7 @@ from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_grpc_context
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.object_store.object_store import NoObjectInStoreError
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
@@ -185,18 +186,22 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
         if not check_body_len_consistency(request.object_content):
             # Cancel insertion in ObjectStore
-            context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION, "Unexpected object length"
+            )
 
         # Init store
         store = self.objectstore_factory.store()
 
         # Insert in store
+        stored = False
         try:
             store.put(request.object_id, request.object_content)
-        except Exception as e:
-            context.abort(grpc.StatusCode.PERMISSION_DENIED, f"{e}")
+            stored = True
+        except (NoObjectInStoreError, ValueError) as e:
+            log(ERROR, str(e))
 
-        return PushObjectResponse()
+        return PushObjectResponse(stored=stored)
 
     def PullObject(
         self, request: PullObjectRequest, context: grpc.ServicerContext
