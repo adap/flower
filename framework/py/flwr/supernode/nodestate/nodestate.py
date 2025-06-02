@@ -17,7 +17,7 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import Optional, Union
+from typing import Optional
 
 from flwr.common import Context, Message
 from flwr.common.typing import Run
@@ -50,10 +50,10 @@ class NodeState(ABC):
         """
 
     @abstractmethod
-    def get_message(
+    def get_messages(
         self,
         *,
-        run_ids: Optional[Union[int, Sequence[int]]] = None,
+        run_ids: Optional[Sequence[int]] = None,
         is_reply: Optional[bool] = None,
         limit: Optional[int] = None,
     ) -> Sequence[Message]:
@@ -64,8 +64,8 @@ class NodeState(ABC):
 
         Parameters
         ----------
-        run_ids : Optional[Union[int, Sequence[int]]] (default: None)
-            Run ID or sequence of run IDs to filter by. If a sequence is provided,
+        run_ids : Optional[Sequence[int]] (default: None)
+            Sequence of run IDs to filter by. If a sequence is provided,
             it is treated as an OR condition.
         is_reply : Optional[bool] (default: None)
             If True, filter for reply messages; if False, filter for non-reply
@@ -85,10 +85,10 @@ class NodeState(ABC):
         """
 
     @abstractmethod
-    def delete_message(
+    def delete_messages(
         self,
         *,
-        message_ids: Optional[Union[str, Sequence[str]]] = None,
+        message_ids: Optional[Sequence[str]] = None,
     ) -> None:
         """Delete messages based on the specified filters.
 
@@ -97,9 +97,9 @@ class NodeState(ABC):
 
         Parameters
         ----------
-        message_ids : Optional[Union[str, Sequence[str]]] (default: None)
-            Message (object) ID or sequence of message (object) IDs to filter by.
-            If a sequence is provided, it is treated as an OR condition.
+        message_ids : Optional[Sequence[str]] (default: None)
+            Sequence of message (object) IDs to filter by. If a sequence is provided,
+            it is treated as an OR condition.
 
         Notes
         -----
