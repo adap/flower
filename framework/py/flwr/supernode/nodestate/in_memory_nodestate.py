@@ -69,19 +69,15 @@ class InMemoryNodeState(NodeState):
             self.msg_store[msg_id] = MessageEntry(message=message)
             return msg_id
 
-    def get_message(
+    def get_messages(
         self,
         *,
-        run_ids: Optional[Union[int, Sequence[int]]] = None,
+        run_ids: Optional[Sequence[int]] = None,
         is_reply: Optional[bool] = None,
         limit: Optional[int] = None,
     ) -> Sequence[Message]:
         """Retrieve messages based on the specified filters."""
         selected_messages: list[Message] = []
-
-        # Normalize run_id to a list for consistent processing
-        if isinstance(run_ids, int):
-            run_ids = [run_ids]
 
         with self.lock_msg_store:
             # Iterate through all messages in the store
@@ -117,10 +113,10 @@ class InMemoryNodeState(NodeState):
 
         return selected_messages
 
-    def delete_message(
+    def delete_messages(
         self,
         *,
-        message_ids: Optional[Union[str, Sequence[str]]] = None,
+        message_ids: Optional[Sequence[str]] = None,
     ) -> None:
         """Delete messages based on the specified filters."""
         with self.lock_msg_store:
@@ -128,10 +124,6 @@ class InMemoryNodeState(NodeState):
                 # If no message IDs are provided, clear the entire store
                 self.msg_store.clear()
                 return
-
-            # Normalize message_ids to a list for consistent processing
-            if isinstance(message_ids, str):
-                message_ids = [message_ids]
 
             # Remove specified messages from the store
             for msg_id in message_ids:

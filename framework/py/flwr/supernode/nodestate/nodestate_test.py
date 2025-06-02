@@ -99,20 +99,20 @@ class StateTest(unittest.TestCase):
         self.state.store_message(msg)
 
         # Basic retrieval with no filters
-        retrieved_msg = self.state.get_message()[0]
+        retrieved_msg = self.state.get_messages()[0]
 
         self.assertIn("test_msg", retrieved_msg.metadata.message_id)
         self.assertEqual(retrieved_msg, msg)
 
         # Ensure message won't be retrieved again
-        result = self.state.get_message()
+        result = self.state.get_messages()
         self.assertEqual(len(result), 0)
 
     @parameterized.expand(  # type: ignore
         [
-            ({"run_ids": 1}, {"msg1", "msg2"}),
-            ({"run_ids": 1, "is_reply": False}, {"msg2"}),
-            ({"run_ids": 1, "limit": 1}, {"msg1", "msg2"}),
+            ({"run_ids": [1]}, {"msg1", "msg2"}),
+            ({"run_ids": [1], "is_reply": False}, {"msg2"}),
+            ({"run_ids": [1], "limit": 1}, {"msg1", "msg2"}),
             ({"run_ids": [2, 3]}, {"msg3", "msg4"}),
             ({"is_reply": True}, {"msg1", "msg4"}),
             ({"is_reply": True, "limit": 1}, {"msg1", "msg4"}),
@@ -132,7 +132,7 @@ class StateTest(unittest.TestCase):
         self.state.store_message(make_dummy_message(3, True, "msg4"))
 
         # Execute
-        result = self.state.get_message(**filters)
+        result = self.state.get_messages(**filters)
         result_ids = {msg.metadata.message_id for msg in result}
 
         # Assert
@@ -151,10 +151,10 @@ class StateTest(unittest.TestCase):
         self.state.store_message(msg2)
 
         # Execute: delete one message
-        self.state.delete_message(message_ids="msg1")
+        self.state.delete_messages(message_ids=["msg1"])
 
         # Assert: msg1 should be deleted, msg2 should remain
-        msgs = self.state.get_message()
+        msgs = self.state.get_messages()
         msg_ids = {msg.metadata.message_id for msg in msgs}
         self.assertNotIn("msg1", msg_ids)
         self.assertIn("msg2", msg_ids)
