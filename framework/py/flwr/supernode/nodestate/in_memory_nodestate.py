@@ -18,7 +18,7 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
 from threading import Lock
-from typing import Optional, Union
+from typing import Optional
 
 from flwr.common import Context, Message
 from flwr.common.typing import Run
