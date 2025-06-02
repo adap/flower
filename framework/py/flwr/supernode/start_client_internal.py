@@ -33,7 +33,7 @@ from grpc import RpcError
 
 from flwr.app.error import Error
 from flwr.cli.config_utils import get_fab_metadata
-from flwr.client.clientapp.app import flwr_clientapp
+from flwr.supernode.runtime.app import flwr_clientapp
 from flwr.client.clientapp.clientappio_servicer import (
     ClientAppInputs,
     ClientAppIoServicer,

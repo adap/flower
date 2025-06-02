@@ -12,11 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower AppIO service."""
-
-
-from ...supernode.runtime.app import flwr_clientapp as flwr_clientapp
-
-__all__ = [
-    "flwr_clientapp",
-]
+"""Flower SuperNode components."""

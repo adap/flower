@@ -55,7 +55,7 @@ from flwr.proto.clientappio_pb2 import (
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 
-from .utils import get_load_client_app_fn
+from ...client.clientapp.utils import get_load_client_app_fn
 
 
 def flwr_clientapp() -> None:
