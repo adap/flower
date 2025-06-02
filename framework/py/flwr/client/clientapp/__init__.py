@@ -13,10 +13,3 @@
 # limitations under the License.
 # ==============================================================================
 """Flower AppIO service."""
-
-
-from ...supernode.runtime.run_clientapp import flwr_clientapp as flwr_clientapp
-
-__all__ = [
-    "flwr_clientapp",
-]
