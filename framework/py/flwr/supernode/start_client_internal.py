@@ -63,6 +63,7 @@ from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.supernode.cli.flwr_clientapp import flwr_clientapp
 from flwr.supernode.nodestate import NodeStateFactory
+from flwr.supernode.servicer.clientappio import ClientAppInputs, ClientAppIoServicer
 
 
 # pylint: disable=import-outside-toplevel
