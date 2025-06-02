@@ -50,6 +50,7 @@ def push_object_to_servicer(
     obj: InflatableObject,
     stub: Union[FleetStub, ServerAppIoStub],
     node: Node,
+    run_id: int,
     object_ids_to_push: Optional[set[str]] = None,
 ) -> set[str]:
     """Recursively deflate an object and push it to the servicer.
@@ -63,7 +64,7 @@ def push_object_to_servicer(
     if children := obj.children:
         for child in children.values():
             pushed_object_ids |= push_object_to_servicer(
-                child, stub, node, object_ids_to_push
+                child, stub, node, run_id, object_ids_to_push
             )
 
     # Deflate object and push
@@ -74,6 +75,7 @@ def push_object_to_servicer(
         _: PushObjectResponse = stub.PushObject(
             PushObjectRequest(
                 node=node,
+                run_id=run_id,
                 object_id=object_id,
                 object_content=object_content,
             )
@@ -87,11 +89,12 @@ def pull_object_from_servicer(
     object_id: str,
     stub: Union[FleetStub, ServerAppIoStub],
     node: Node,
+    run_id: int,
 ) -> InflatableObject:
     """Recursively inflate an object by pulling it from the servicer."""
     # Pull object
     object_proto: PullObjectResponse = stub.PullObject(
-        PullObjectRequest(node=node, object_id=object_id)
+        PullObjectRequest(node=node, run_id=run_id, object_id=object_id)
     )
     object_content = object_proto.object_content
 
@@ -106,7 +109,7 @@ def pull_object_from_servicer(
     children: dict[str, InflatableObject] = {}
     for child_object_id in children_obj_ids:
         children[child_object_id] = pull_object_from_servicer(
-            child_object_id, stub, node
+            child_object_id, stub, node, run_id
         )
 
     # Inflate object passing its children
