@@ -54,9 +54,10 @@ from flwr.proto.clientappio_pb2 import (
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 
 
-def run_clientapp(  # pylint: disable=R0914
+def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     clientappio_api_address: str,
     run_once: bool,
+    run_id: Optional[int] = None,  # pylint: disable=unused-argument
     token: Optional[int] = None,
     flwr_dir: Optional[str] = None,
     certificates: Optional[bytes] = None,
