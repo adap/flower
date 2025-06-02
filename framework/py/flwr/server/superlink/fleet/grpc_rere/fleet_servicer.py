@@ -184,6 +184,11 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             request.object_id,
         )
 
+        # state = self.state_factory.state()
+        # if request.node.node_id not in state.get_nodes():
+        #     # Cancel insertion in ObjectStore
+        #     context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
+
         if not check_body_len_consistency(request.object_content):
             # Cancel insertion in ObjectStore
             context.abort(
@@ -212,6 +217,11 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             "[ServerAppIoServicer.PullObject] Pull Object with object_id=%s",
             request.object_id,
         )
+
+        # state = self.state_factory.state()
+        # if request.node.node_id not in state.get_nodes():
+        #     # Cancel insertion in ObjectStore
+        #     context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
 
         # Init store
         store = self.objectstore_factory.store()
