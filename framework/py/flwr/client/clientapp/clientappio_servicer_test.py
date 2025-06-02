@@ -19,7 +19,7 @@ import unittest
 from os import urandom
 from unittest.mock import Mock, patch
 
-from flwr.supernode.runtime.app import (
+from flwr.supernode.runtime.run_clientapp import (
     get_token,
     pull_clientappinputs,
     push_clientappoutputs,
