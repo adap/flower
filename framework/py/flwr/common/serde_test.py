@@ -371,6 +371,24 @@ def test_recorddict_serialization_deserialization() -> None:
     assert original == deserialized
 
 
+def test_recorddict_key_order_stability() -> None:
+    """Test that RecordDict preserves key order."""
+    # Prepare
+    maker = RecordMaker(state=1)
+    original = maker.recorddict(10, 5, 5)
+
+    # Execute
+    proto = recorddict_to_proto(original)
+    deserialized = recorddict_from_proto(proto)
+
+    # Assert
+    assert isinstance(proto, ProtoRecordDict)
+    assert original == deserialized
+
+    # Check that keys are in the same order
+    assert list(original.keys()) == list(deserialized.keys())
+
+
 @pytest.mark.parametrize(
     "content_fn, error_fn",
     [
