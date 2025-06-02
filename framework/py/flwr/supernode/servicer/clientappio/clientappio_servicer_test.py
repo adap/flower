@@ -17,7 +17,7 @@
 
 import unittest
 from os import urandom
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from flwr.common import Context, typing
 from flwr.common.constant import RUN_ID_NUM_BYTES
@@ -55,14 +55,6 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.servicer = ClientAppIoServicer()
         self.maker = RecordMaker()
         self.mock_stub = Mock()
-        self.patcher = patch(
-            "flwr.client.clientapp.app.ClientAppIoStub", return_value=self.mock_stub
-        )
-        self.patcher.start()
-
-    def tearDown(self) -> None:
-        """Cleanup."""
-        self.patcher.stop()
 
     def test_set_inputs(self) -> None:
         """Test setting ClientApp inputs."""

@@ -33,10 +33,6 @@ from grpc import RpcError
 
 from flwr.app.error import Error
 from flwr.cli.config_utils import get_fab_metadata
-from flwr.client.clientapp.clientappio_servicer import (
-    ClientAppInputs,
-    ClientAppIoServicer,
-)
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.client.run_info_store import DeprecatedRunInfoStore
