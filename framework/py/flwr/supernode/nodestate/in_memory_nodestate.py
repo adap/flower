@@ -59,3 +59,92 @@ class InMemoryNodeState(NodeState):
         if self.node_id is None:
             raise ValueError("Node ID not set")
         return self.node_id
+
+    def store_message(self, message: Message) -> Optional[str]:
+        """Store a message."""
+        with self.lock_msg_store:
+            msg_id = message.metadata.message_id
+            if msg_id == "" or msg_id in self.msg_store:
+                return None
+            self.msg_store[msg_id] = MessageEntry(message=message)
+            return msg_id
+
+    def get_messages(
+        self,
+        *,
+        run_ids: Optional[Sequence[int]] = None,
+        is_reply: Optional[bool] = None,
+        limit: Optional[int] = None,
+    ) -> Sequence[Message]:
+        """Retrieve messages based on the specified filters."""
+        selected_messages: list[Message] = []
+
+        with self.lock_msg_store:
+            # Iterate through all messages in the store
+            for object_id in list(self.msg_store.keys()):
+                entry = self.msg_store[object_id]
+                message = entry.message
+
+                # Skip messages that have already been retrieved
+                if entry.is_retrieved:
+                    continue
+
+                # Skip messages whose run_id doesn't match the filter
+                if run_ids is not None:
+                    if message.metadata.run_id not in run_ids:
+                        continue
+
+                # If is_reply filter is set, filter for reply/non-reply messages
+                if is_reply is not None:
+                    is_reply_message = message.metadata.reply_to_message_id != ""
+                    # XOR logic to filter mismatched types (reply vs non-reply)
+                    if is_reply ^ is_reply_message:
+                        continue
+
+                # Add the message to the result set
+                selected_messages.append(message)
+
+                # Mark the message as retrieved
+                entry.is_retrieved = True
+
+                # Stop if the number of collected messages reaches the limit
+                if limit is not None and len(selected_messages) >= limit:
+                    break
+
+        return selected_messages
+
+    def delete_messages(
+        self,
+        *,
+        message_ids: Optional[Sequence[str]] = None,
+    ) -> None:
+        """Delete messages based on the specified filters."""
+        with self.lock_msg_store:
+            if message_ids is None:
+                # If no message IDs are provided, clear the entire store
+                self.msg_store.clear()
+                return
+
+            # Remove specified messages from the store
+            for msg_id in message_ids:
+                self.msg_store.pop(msg_id, None)
+
+    def store_run(self, run: Run) -> None:
+        """Store a run."""
+        with self.lock_run_store:
+            self.run_store[run.run_id] = run
+
+    def get_run(self, run_id: int) -> Optional[Run]:
+        """Retrieve a run by its ID."""
+        with self.lock_run_store:
+            return self.run_store.get(run_id)
+
+    def store_context(self, context: Context) -> None:
+        """Store a context."""
+        with self.lock_ctx_store:
+            self.ctx_store[context.run_id] = context
+
+    def get_context(self, run_id: int) -> Optional[Context]:
+        """Retrieve a context by its run ID."""
+        with self.lock_ctx_store:
+            return self.ctx_store.get(run_id)
