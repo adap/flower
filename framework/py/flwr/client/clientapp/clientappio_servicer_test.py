@@ -19,11 +19,6 @@ import unittest
 from os import urandom
 from unittest.mock import Mock, patch
 
-from flwr.supernode.runtime.run_clientapp import (
-    get_token,
-    pull_clientappinputs,
-    push_clientappoutputs,
-)
 from flwr.common import Context, typing
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.message import make_message
@@ -43,6 +38,11 @@ from flwr.proto.clientappio_pb2 import (
 )
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.run_pb2 import Run as ProtoRun
+from flwr.supernode.runtime.run_clientapp import (
+    get_token,
+    pull_clientappinputs,
+    push_clientappoutputs,
+)
 
 from .clientappio_servicer import ClientAppInputs, ClientAppIoServicer, ClientAppOutputs
 

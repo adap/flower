@@ -33,7 +33,6 @@ from grpc import RpcError
 
 from flwr.app.error import Error
 from flwr.cli.config_utils import get_fab_metadata
-from flwr.supernode.runtime.run_clientapp import flwr_clientapp
 from flwr.client.clientapp.clientappio_servicer import (
     ClientAppInputs,
     ClientAppIoServicer,
@@ -62,6 +61,7 @@ from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
+from flwr.supernode.cli.flwr_clientapp import flwr_clientapp
 from flwr.supernode.nodestate import NodeStateFactory
 
 
