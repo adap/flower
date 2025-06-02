@@ -175,13 +175,14 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
 
     def deflate(self) -> bytes:
         """Deflate object."""
+        protos = record_value_dict_to_proto(
+            self,
+            [bool, int, float, str, bytes],
+            ProtoConfigRecordValue,
+        )
         obj_body = ProtoConfigRecord(
-            data=record_value_dict_to_proto(
-                self,
-                [bool, int, float, str, bytes],
-                ProtoConfigRecordValue,
-            )
-        ).SerializeToString(deterministic=True)
+            items=[ProtoConfigRecord.Item(key=k, value=v) for k, v in protos.items()]
+        ).SerializeToString()
         return add_header_to_object_body(object_body=obj_body, obj=self)
 
     @classmethod
@@ -209,11 +210,11 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
 
         obj_body = get_object_body(object_content, cls)
         config_record_proto = ProtoConfigRecord.FromString(obj_body)
-
+        protos = {item.key: item.value for item in config_record_proto.items}
         return ConfigRecord(
             config_dict=cast(
                 dict[str, ConfigRecordValues],
-                record_value_dict_from_proto(config_record_proto.data),
+                record_value_dict_from_proto(protos),
             ),
             keep_input=False,
         )
