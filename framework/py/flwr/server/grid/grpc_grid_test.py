@@ -23,8 +23,8 @@ import grpc
 
 from flwr.app.error import Error
 from flwr.common import RecordDict
-from flwr.common.inflatable import get_desdendant_object_ids
 from flwr.common.message import Message
+from flwr.common.serde import message_from_proto, recorddict_from_proto
 from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -97,17 +97,11 @@ class TestGrpcGrid(unittest.TestCase):
         """Test pushing valid messages."""
         # Prepare
         msgs = [Message(RecordDict(), 0, "query") for _ in range(2)]
-        # We compute the object ids of the messages and its descendant
-        objs_to_push1 = get_desdendant_object_ids(msgs[0])
-        objs_to_push1.add(msgs[0].object_id)
-        objs_to_push2 = get_desdendant_object_ids(msgs[1])
-        objs_to_push2.add(msgs[1].object_id)
-
         mock_response = Mock(
             message_ids=["id1", "id2"],
             objects_to_push={
-                "id1": ObjectIDs(object_ids=objs_to_push1),
-                "id2": ObjectIDs(object_ids=objs_to_push2),
+                "id1": ObjectIDs(object_ids=["a", "aa"]),
+                "id2": ObjectIDs(object_ids=["b", "bb"]),
             },
         )
         self.mock_stub.PushMessages.return_value = mock_response
@@ -142,6 +136,26 @@ class TestGrpcGrid(unittest.TestCase):
         # The response from the ServerAppIoServicer is in the form of Protobuf Messages
         mock_response.messages_list = [ok_message, error_message]
         self.mock_stub.PullMessages.return_value = mock_response
+        # Mock response of PullObject. Here we care about replying with a successful
+        # response that carries a generic deflated Message object.
+        obj_content1_msg = message_from_proto(ok_message).deflate()
+        obj_content1_rd = recorddict_from_proto(ok_message.content).deflate()
+        obj_content2 = message_from_proto(error_message).deflate()
+        # Because we are pulling two Messages, we'll be calling the helper function
+        # twice The message carrying content has two objects (Message itself and
+        # recorddict for content) so the stub will be called twice. The final Mock
+        # represents the Message carrying the error
+        self.mock_stub.PullObject.side_effect = [
+            Mock(
+                object_found=True,
+                object_available=True,
+                object_content=obj_content1_msg,
+            ),
+            Mock(
+                object_found=True, object_available=True, object_content=obj_content1_rd
+            ),
+            Mock(object_found=True, object_available=True, object_content=obj_content2),
+        ]
         msg_ids = ["id1", "id2", "id3"]
 
         # Execute
@@ -160,8 +174,14 @@ class TestGrpcGrid(unittest.TestCase):
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
         # Prepare
-        mock_response = Mock(message_ids=["id1"])
+        mock_response = Mock(
+            message_ids=["id1"],
+            objects_to_push={
+                "id1": ObjectIDs(object_ids=["a", "aa"]),
+            },
+        )
         self.mock_stub.PushMessages.return_value = mock_response
+        self.mock_stub.PushObject.return_value = Mock(stored=True)
         # The response message must include either `content` (i.e. a recorddict) or
         # an `Error`. We choose the latter in this case
         run_id = 1234
@@ -170,9 +190,16 @@ class TestGrpcGrid(unittest.TestCase):
         )
         mssg.metadata.reply_to_message_id = "id1"
         message_res_list = [mssg]
-
+        # Mock response of PullObject. Here we care about replying with a successful
+        # response that carries a generic deflated Message object.
+        obj_mssg = message_from_proto(mssg).deflate()
+        obj_mssg_rd = recorddict_from_proto(mssg.content).deflate()
         mock_response.messages_list = message_res_list
         self.mock_stub.PullMessages.return_value = mock_response
+        self.mock_stub.PullObject.side_effect = [
+            Mock(object_found=True, object_available=True, object_content=obj_mssg),
+            Mock(object_found=True, object_available=True, object_content=obj_mssg_rd),
+        ]
         msgs = [Message(RecordDict(), 0, "query")]
 
         # Execute
@@ -186,8 +213,12 @@ class TestGrpcGrid(unittest.TestCase):
         """Test send and receive messages but time out."""
         # Prepare
         sleep_fn = time.sleep
-        mock_response = Mock(message_ids=["id1"])
+        mock_response = Mock(
+            message_ids=["id1"],
+            objects_to_push={"id1": ObjectIDs(object_ids=["a", "b"])},
+        )
         self.mock_stub.PushMessages.return_value = mock_response
+        self.mock_stub.PushObject.return_value = Mock(stored=True)
         mock_response = Mock(messages_list=[])
         self.mock_stub.PullMessages.return_value = mock_response
         msgs = [Message(RecordDict(), 0, "query")]

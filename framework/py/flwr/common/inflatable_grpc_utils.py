@@ -96,7 +96,7 @@ def pull_object_from_servicer(
     """Recursively inflate an object by pulling it from the servicer."""
     # Pull object
     object_available = False
-    while not (object_available):
+    while not object_available:
         object_proto: PullObjectResponse = stub.PullObject(
             PullObjectRequest(node=node, run_id=run_id, object_id=object_id)
         )
