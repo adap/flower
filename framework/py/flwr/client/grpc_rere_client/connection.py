@@ -263,7 +263,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Construct the Message
         in_message: Optional[Message] = (
             pull_object_from_servicer(
-                object_id=message_proto.metadata.message_id, stub=stub, node=node
+                object_id=message_proto.metadata.message_id,
+                stub=stub,
+                node=node,
+                run_id=message_proto.metadata.run_id,
             )
             if message_proto
             else None
@@ -314,7 +317,11 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         if response.objects_to_push:
             objs_to_push = set(response.objects_to_push[message.object_id].object_ids)
             push_object_to_servicer(
-                message, stub, node, object_ids_to_push=objs_to_push
+                message,
+                stub,
+                node,
+                run_id=message.metadata.run_id,
+                object_ids_to_push=objs_to_push,
             )
             log(DEBUG, f"Pushed {len(objs_to_push)} objects to servicer.")
 

@@ -257,6 +257,7 @@ class GrpcGrid(Grid):
                         msg,
                         self._stub,
                         node=self.node,
+                        run_id=cast(Run, self._run).run_id,
                         object_ids_to_push=obj_ids_to_push,
                     )
 
@@ -286,7 +287,10 @@ class GrpcGrid(Grid):
             for msg_proto in res.messages_list:
                 inflated_msgs.append(
                     pull_object_from_servicer(
-                        msg_proto.metadata.message_id, self._stub, node=self.node
+                        msg_proto.metadata.message_id,
+                        self._stub,
+                        node=self.node,
+                        run_id=cast(Run, self._run).run_id,
                     )
                 )
 
