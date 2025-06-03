@@ -48,6 +48,7 @@ def flwr_clientapp() -> None:
         token=args.token,
         flwr_dir=args.flwr_dir,
         certificates=None,
+        parent_pid=args.parent_pid,
     )
 
 
@@ -74,7 +75,7 @@ def _parse_args_run_flwr_clientapp() -> argparse.ArgumentParser:
         type=int,
         default=None,
         help="The PID of the parent process. When set, the process will terminate "
-        "when the parent process exits."
+        "when the parent process exits.",
     )
     add_args_flwr_app_common(parser=parser)
     return parser

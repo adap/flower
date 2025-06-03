@@ -15,9 +15,8 @@
 """Main loop for Flower SuperNode."""
 
 
-import multiprocessing
 import os
-import threading
+import subprocess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -57,7 +56,6 @@ from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.supernode.nodestate import NodeStateFactory
-from flwr.supernode.runtime.run_clientapp import run_clientapp
 from flwr.supernode.servicer.clientappio import ClientAppInputs, ClientAppIoServicer
 
 
@@ -142,7 +140,6 @@ def start_client_internal(
     run_info_store: Optional[DeprecatedRunInfoStore] = None
     state_factory = NodeStateFactory()
     state = state_factory.state()
-    mp_spawn_context = multiprocessing.get_context("spawn")
 
     runs: dict[int, Run] = {}
 
@@ -258,18 +255,17 @@ def start_client_internal(
                         else clientappio_api_address
                     )
                     # Start ClientApp subprocess
-                    proc = mp_spawn_context.Process(
-                        target=_run_flwr_clientapp,
-                        kwargs={
-                            "main_pid": os.getpid(),
-                            "clientappio_api_address": io_address,
-                            "run_once": True,
-                            "token": token,
-                        },
-                        daemon=True,
-                    )
-                    proc.start()
-                    proc.join()
+                    command = [
+                        "flwr-clientapp",
+                        "--clientappio-api-address",
+                        io_address,
+                        "--token",
+                        str(token),
+                        "--parent-pid",
+                        str(os.getpid()),
+                        "--insecure",
+                    ]
+                    subprocess.run(command, check=False)
                 else:
                     # Wait for output to become available
                     while not clientappio_servicer.has_outputs():
@@ -413,33 +409,6 @@ def _make_fleet_connection_retry_invoker(
         ),
         on_success=_on_success,
         on_backoff=_on_backoff,
-    )
-
-
-def _run_flwr_clientapp(  # pylint: disable=R0917
-    main_pid: int,
-    clientappio_api_address: str,
-    run_once: bool,
-    token: Optional[int] = None,
-    flwr_dir: Optional[str] = None,
-    certificates: Optional[bytes] = None,
-) -> None:
-    # Monitor the main process in case of SIGKILL
-    def main_process_monitor() -> None:
-        while True:
-            time.sleep(1)
-            if os.getppid() != main_pid:
-                os.kill(os.getpid(), 9)
-
-    threading.Thread(target=main_process_monitor, daemon=True).start()
-
-    # Run flwr-clientapp
-    run_clientapp(
-        clientappio_api_address=clientappio_api_address,
-        run_once=run_once,
-        token=token,
-        flwr_dir=flwr_dir,
-        certificates=certificates,
     )
 
 
