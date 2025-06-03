@@ -37,8 +37,6 @@ from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
-from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
-from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
@@ -204,6 +202,35 @@ class GrpcGrid(Grid):
         )
         return [node.node_id for node in res.nodes]
 
+    def _try_push_message(self, run_id: int, message: Message) -> str:
+        """Push one message and its associated objects."""
+        # Compute mapping of message descendants
+        descendants_mapping = get_message_to_descendant_id_mapping(message)
+
+        # Call GrpcServerAppIoStub method
+        res: PushInsMessagesResponse = self._stub.PushMessages(
+            PushInsMessagesRequest(
+                messages_list=[message_to_proto(message)],
+                run_id=run_id,
+                msg_to_descendant_mapping=descendants_mapping,
+            )
+        )
+
+        # Push objects
+        msg_id = res.message_ids[0]
+        # If Message was added to the LinkState correctly
+        if msg_id is not None:
+            obj_ids_to_push = set(res.objects_to_push[msg_id].object_ids)
+            # Push only object that are not in the store
+            push_object_to_servicer(
+                message,
+                self._stub,
+                node=self.node,
+                run_id=run_id,
+                object_ids_to_push=obj_ids_to_push,
+            )
+        return msg_id
+
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.
 
@@ -212,61 +239,34 @@ class GrpcGrid(Grid):
         """
         # Construct Messages
         run_id = cast(Run, self._run).run_id
-        message_proto_list: list[ProtoMessage] = []
-        descendants_mapping: dict[str, ObjectIDs] = {}
-        for msg in messages:
-            # Populate metadata
-            msg.metadata.__dict__["_run_id"] = run_id
-            msg.metadata.__dict__["_src_node_id"] = self.node.node_id
-            msg.metadata.__dict__["_message_id"] = msg.object_id
-            # Check message
-            self._check_message(msg)
-            # Convert to proto
-            msg_proto = message_to_proto(msg)
-            # Add to list
-            message_proto_list.append(msg_proto)
-            # Get descendants mapping for this message
-            descendants_mapping.update(get_message_to_descendant_id_mapping(msg))
-
+        message_ids: list[str] = []
         try:
-            # Call GrpcServerAppIoStub method
-            res: PushInsMessagesResponse = self._stub.PushMessages(
-                PushInsMessagesRequest(
-                    messages_list=message_proto_list,
-                    run_id=run_id,
-                    msg_to_descendant_mapping=descendants_mapping,
-                )
-            )
-            if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
-                message_proto_list
-            ):
-                log(
-                    WARNING,
-                    "Not all messages could be pushed to the SuperLink. The returned "
-                    "list has `None` for those messages (the order is preserved as "
-                    "passed to `push_messages`). This could be due to a malformed "
-                    "message.",
-                )
-            # Push objects
-            for msg, msg_ids in zip(messages, res.message_ids):
-                # If Message was added to the LinkState correctly
-                if msg_ids is not None:
-                    obj_ids_to_push = set(res.objects_to_push[msg_ids].object_ids)
-                    # Push only object that are not in the store
-                    push_object_to_servicer(
-                        msg,
-                        self._stub,
-                        node=self.node,
-                        run_id=run_id,
-                        object_ids_to_push=obj_ids_to_push,
-                    )
+            for msg in messages:
+                # Populate metadata
+                msg.metadata.__dict__["_run_id"] = run_id
+                msg.metadata.__dict__["_src_node_id"] = self.node.node_id
+                msg.metadata.__dict__["_message_id"] = msg.object_id
+                # Check message
+                self._check_message(msg)
+                # Try pushing message and its objects
+                message_ids.append(self._try_push_message(run_id, msg))
 
-            return list(res.message_ids)
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
                 log(ERROR, ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED)
                 return []
             raise
+
+        if None in message_ids:
+            log(
+                WARNING,
+                "Not all messages could be pushed to the SuperLink. The returned "
+                "list has `None` for those messages (the order is preserved as "
+                "passed to `push_messages`). This could be due to a malformed "
+                "message.",
+            )
+
+        return message_ids
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
