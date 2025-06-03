@@ -468,10 +468,15 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         store = self.objectstore_factory.store()
 
         # Fetch from store
-        if content := store.get(request.object_id):
-            return PullObjectResponse(object_found=True, object_content=content)
-
-        return PullObjectResponse(object_found=False)
+        content = store.get(request.object_id)
+        if content is not None:
+            object_available = content != b""
+            return PullObjectResponse(
+                object_found=True,
+                object_available=object_available,
+                object_content=content,
+            )
+        return PullObjectResponse(object_found=False, object_available=False)
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:

@@ -67,5 +67,6 @@ message PullObjectRequest {
 }
 message PullObjectResponse {
   bool object_found = 1;
-  bytes object_content = 2;
+  bool object_available = 2;
+  bytes object_content = 3;
 }
