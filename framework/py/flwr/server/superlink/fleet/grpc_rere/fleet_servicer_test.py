@@ -410,7 +410,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
 
-        # Run is running but node id isn't recognized
+        # Run is running but node ID isn't recognized
         self._transition_run_status(run_id, 2)
         req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
@@ -484,6 +484,8 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         res: PullObjectResponse = self._pull_object(req)
 
         # Assert object content is b"" (it was never pushed)
+        assert res.object_found
+        assert not res.object_available
         assert res.object_content == b""
 
         # Put object in store, then check it can be pulled
@@ -494,6 +496,8 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         res = self._pull_object(req)
 
         # Assert, identical object pulled
+        assert res.object_found
+        assert res.object_available
         assert obj_b == res.object_content
 
     def test_pull_object_fails(self) -> None:
@@ -505,7 +509,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             self._pull_object(request=req)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
 
-        # Run is running but node id isn't recognized
+        # Run is running but node ID isn't recognized
         self._transition_run_status(run_id, 2)
         req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
@@ -519,4 +523,4 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         )
         res: PullObjectResponse = self._pull_object(req)
         # Empty response
-        assert res == PullObjectResponse()
+        assert not res.object_found
