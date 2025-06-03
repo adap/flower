@@ -274,12 +274,13 @@ class GrpcGrid(Grid):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
+        run_id = cast(Run, self._run).run_id
         try:
             # Pull Messages
             res: PullResMessagesResponse = self._stub.PullMessages(
                 PullResMessagesRequest(
                     message_ids=message_ids,
-                    run_id=cast(Run, self._run).run_id,
+                    run_id=run_id,
                 )
             )
             # Pull Messages from store
@@ -290,7 +291,7 @@ class GrpcGrid(Grid):
                     msg_proto.metadata.message_id,
                     self._stub,
                     node=self.node,
-                    run_id=cast(Run, self._run).run_id,
+                    run_id=run_id,
                 )
                 inflated_msgs.append(cast(Message, message))
 
