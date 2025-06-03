@@ -302,9 +302,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     def get_fab(fab_hash: str, run_id: int) -> Fab:
         # Call FleetAPI
         get_fab_request = GetFabRequest(node=node, hash_str=fab_hash, run_id=run_id)
-        get_fab_response: GetFabResponse = stub.GetFab(
-            request=get_fab_request,
-        )
+        get_fab_response: GetFabResponse = stub.GetFab(request=get_fab_request)
 
         return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
 
