@@ -384,6 +384,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         node_id = self.state.create_node(heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
+        self._transition_run_status(run_id, 2)
 
         # Pre-register object
         self.store.preregister(object_ids=[obj.object_id])
@@ -402,14 +403,21 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_push_object_fails(self) -> None:
         """Test `PushObject` in unsupported scenarios."""
-        # No node_id or run_id match
-        req = PushObjectRequest(node=Node(node_id=123), run_id=456)
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Run is not running
+        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+
+        # Run is running but node id isn't recognized
+        self._transition_run_status(run_id, 2)
+        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
 
-        # Correct node ID and run Id but invalid object_content
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Correct node ID but invalid object_content
         node_id = self.state.create_node(heartbeat_interval=30)
         obj_b = b"extra content"
         object_id = get_object_id(obj_b)
@@ -461,6 +469,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PullObject` functionality."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        self._transition_run_status(run_id, 2)
         node_id = self.state.create_node(heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
@@ -489,14 +498,21 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_pull_object_fails(self) -> None:
         """Test `PullObject` in unsuported scenarios."""
-        # Attempt pulling with madeup node Id and run ID
-        req = PullObjectRequest(node=Node(node_id=123), run_id=456)
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Run is not running
+        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
-            self._push_object(request=req)
+            self._pull_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+
+        # Run is running but node id isn't recognized
+        self._transition_run_status(run_id, 2)
+        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._pull_object(request=req)
         assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
 
         # Attempt pulling object that doesn't exist
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
         node_id = self.state.create_node(heartbeat_interval=30)
         req = PullObjectRequest(
             node=Node(node_id=node_id), run_id=run_id, object_id="1234"

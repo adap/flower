@@ -685,6 +685,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_push_object_succesful(self) -> None:
         """Test `PushObject`."""
         # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        self._transition_run_status(run_id, 2)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
@@ -694,6 +696,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Execute
         req = PushObjectRequest(
             node=Node(node_id=SUPERLINK_NODE_ID),
+            run_id=run_id,
             object_id=obj.object_id,
             object_content=obj_b,
         )
@@ -704,11 +707,30 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_push_object_fails(self) -> None:
         """Test `PushObject` in unsupported scenarios."""
-        # Create invalid object_content
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Run is not running
+        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+
+        # Run is running but node id isn't recognized
+        self._transition_run_status(run_id, 2)
+        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+
+        # Correct node ID but invalid object_content
         obj_b = b"extra content"
         object_id = get_object_id(obj_b)
         # Execute (doesn't match structure)
-        req = PushObjectRequest(object_id=object_id, object_content=obj_b)
+        req = PushObjectRequest(
+            node=Node(node_id=SUPERLINK_NODE_ID),
+            run_id=run_id,
+            object_id=object_id,
+            object_content=obj_b,
+        )
         with self.assertRaises(grpc.RpcError) as e:
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
@@ -717,17 +739,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
-        # Push valid object but using wrong Node in request
-        req = PushObjectRequest(
-            node=Node(node_id=123), object_id=obj.object_id, object_content=obj_b
-        )
-        with self.assertRaises(grpc.RpcError) as e:
-            self._push_object(request=req)
-        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-
         # Push valid object but it hasn't been pre-registered
         req = PushObjectRequest(
             node=Node(node_id=SUPERLINK_NODE_ID),
+            run_id=run_id,
             object_id=obj.object_id,
             object_content=obj_b,
         )
@@ -744,6 +759,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Execute
         req = PushObjectRequest(
             node=Node(node_id=SUPERLINK_NODE_ID),
+            run_id=run_id,
             object_id=fake_object_id,
             object_content=obj_b,
         )
@@ -755,6 +771,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_pull_object_successful(self) -> None:
         """Test `PullObject` functionality."""
         # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        self._transition_run_status(run_id, 2)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
@@ -763,7 +781,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Pull
         req = PullObjectRequest(
-            node=Node(node_id=SUPERLINK_NODE_ID), object_id=obj.object_id
+            node=Node(node_id=SUPERLINK_NODE_ID), run_id=run_id, object_id=obj.object_id
         )
         res: PullObjectResponse = self._pull_object(req)
 
@@ -773,7 +791,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Put object in store, then check it can be pulled
         self.store.put(object_id=obj.object_id, object_content=obj_b)
         req = PullObjectRequest(
-            node=Node(node_id=SUPERLINK_NODE_ID), object_id=obj.object_id
+            node=Node(node_id=SUPERLINK_NODE_ID), run_id=run_id, object_id=obj.object_id
         )
         res = self._pull_object(req)
 
@@ -782,14 +800,24 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_pull_object_fails(self) -> None:
         """Test `PullObject` in unsuported scenarios."""
-        # Attempt pulling without superlink node id
-        req = PullObjectRequest(node=Node(node_id=123))
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Run is not running
+        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
-            self._push_object(request=req)
+            self._pull_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+
+        # Run is running but node id isn't recognized
+        self._transition_run_status(run_id, 2)
+        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._pull_object(request=req)
         assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
 
         # Attempt pulling object that doesn't exist
-        req = PullObjectRequest(node=Node(node_id=SUPERLINK_NODE_ID), object_id="1234")
+        req = PullObjectRequest(
+            node=Node(node_id=SUPERLINK_NODE_ID), run_id=run_id, object_id="1234"
+        )
         res: PullObjectResponse = self._pull_object(req)
         # Empty response
         assert res == PullObjectResponse()

@@ -20,6 +20,7 @@ from logging import DEBUG, ERROR, INFO
 import grpc
 from google.protobuf.json_format import MessageToDict
 
+from flwr.common.constant import Status
 from flwr.common.inflatable import check_body_len_consistency
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
@@ -49,7 +50,7 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
-from flwr.server.superlink.utils import abort_grpc_context
+from flwr.server.superlink.utils import abort_grpc_context, check_abort
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supercore.object_store.object_store import NoObjectInStoreError
 
@@ -185,6 +186,16 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         )
 
         state = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_msg = check_abort(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+        )
+        if abort_msg:
+            abort_grpc_context(abort_msg, context)
+
         if request.node.node_id not in state.get_nodes(run_id=request.run_id):
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
@@ -219,6 +230,16 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         )
 
         state = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_msg = check_abort(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+        )
+        if abort_msg:
+            abort_grpc_context(abort_msg, context)
+
         if request.node.node_id not in state.get_nodes(run_id=request.run_id):
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
