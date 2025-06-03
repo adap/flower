@@ -416,7 +416,7 @@ def _make_fleet_connection_retry_invoker(
     )
 
 
-def _run_flwr_clientapp(
+def _run_flwr_clientapp(  # pylint: disable=R0917
     main_pid: int,
     clientappio_api_address: str,
     run_once: bool,
