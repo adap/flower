@@ -409,11 +409,39 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Push an object to the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PushObject")
 
+        # Init state
+        state: LinkState = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
+
+        if request.node.node_id != SUPERLINK_NODE_ID:
+            # Cancel insertion in ObjectStore
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
+
         if not check_body_len_consistency(request.object_content):
             # Cancel insertion in ObjectStore
-            context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION, "Unexpected object length."
+            )
 
-        return PushObjectResponse()
+        # Init store
+        store = self.objectstore_factory.store()
+
+        # Insert in store
+        stored = False
+        try:
+            store.put(request.object_id, request.object_content)
+            stored = True
+        except (NoObjectInStoreError, ValueError) as e:
+            log(ERROR, str(e))
+
+        return PushObjectResponse(stored=stored)
 
     def PullObject(
         self, request: PullObjectRequest, context: grpc.ServicerContext
@@ -421,7 +449,34 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
 
-        return PullObjectResponse()
+        # Init state
+        state: LinkState = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
+
+        if request.node.node_id != SUPERLINK_NODE_ID:
+            # Cancel insertion in ObjectStore
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
+
+        # Init store
+        store = self.objectstore_factory.store()
+
+        # Fetch from store
+        content = store.get(request.object_id)
+        if content is not None:
+            object_available = content != b""
+            return PullObjectResponse(
+                object_found=True,
+                object_available=object_available,
+                object_content=content,
+            )
+        return PullObjectResponse(object_found=False, object_available=False)
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
