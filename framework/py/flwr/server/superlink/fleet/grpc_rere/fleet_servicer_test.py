@@ -484,6 +484,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         res: PullObjectResponse = self._pull_object(req)
 
         # Assert object content is b"" (it was never pushed)
+        assert res.object_found
         assert res.object_content == b""
 
         # Put object in store, then check it can be pulled
@@ -494,6 +495,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         res = self._pull_object(req)
 
         # Assert, identical object pulled
+        assert res.object_found
         assert obj_b == res.object_content
 
     def test_pull_object_fails(self) -> None:
@@ -519,4 +521,4 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         )
         res: PullObjectResponse = self._pull_object(req)
         # Empty response
-        assert res == PullObjectResponse()
+        assert not res.object_found

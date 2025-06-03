@@ -469,9 +469,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Fetch from store
         if content := store.get(request.object_id):
-            return PullObjectResponse(object_content=content)
+            return PullObjectResponse(object_found=True, object_content=content)
 
-        return PullObjectResponse()
+        return PullObjectResponse(object_found=False)
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:

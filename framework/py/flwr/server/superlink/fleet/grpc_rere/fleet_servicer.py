@@ -249,6 +249,6 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
         # Fetch from store
         if content := store.get(request.object_id):
-            return PullObjectResponse(object_content=content)
+            return PullObjectResponse(object_found=True, object_content=content)
 
-        return PullObjectResponse()
+        return PullObjectResponse(object_found=False)
