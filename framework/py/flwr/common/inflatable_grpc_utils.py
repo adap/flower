@@ -17,6 +17,7 @@
 
 from typing import Optional, Union
 
+from flwr.client.grpc_rere_client.grpc_adapter import GrpcAdapter
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PullObjectRequest,
@@ -48,7 +49,7 @@ inflatable_class_registry: dict[str, type[InflatableObject]] = {
 
 def push_object_to_servicer(
     obj: InflatableObject,
-    stub: Union[FleetStub, ServerAppIoStub],
+    stub: Union[FleetStub, ServerAppIoStub, GrpcAdapter],
     node: Node,
     run_id: int,
     object_ids_to_push: Optional[set[str]] = None,
@@ -87,7 +88,7 @@ def push_object_to_servicer(
 
 def pull_object_from_servicer(
     object_id: str,
-    stub: Union[FleetStub, ServerAppIoStub],
+    stub: Union[FleetStub, ServerAppIoStub, GrpcAdapter],
     node: Node,
     run_id: int,
 ) -> InflatableObject:
