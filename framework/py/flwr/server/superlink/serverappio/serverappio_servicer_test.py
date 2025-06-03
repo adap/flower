@@ -714,7 +714,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
 
-        # Run is running but node id isn't recognized
+        # Run is running but node ID isn't recognized
         self._transition_run_status(run_id, 2)
         req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
@@ -807,7 +807,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             self._pull_object(request=req)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
 
-        # Run is running but node id isn't recognized
+        # Run is running but node ID isn't recognized
         self._transition_run_status(run_id, 2)
         req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
