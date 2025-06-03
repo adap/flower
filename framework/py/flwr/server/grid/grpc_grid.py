@@ -285,14 +285,14 @@ class GrpcGrid(Grid):
             # Pull Messages from store
             inflated_msgs: list[Message] = []
             for msg_proto in res.messages_list:
-                inflated_msgs.append(
-                    pull_object_from_servicer(
-                        msg_proto.metadata.message_id,
-                        self._stub,
-                        node=self.node,
-                        run_id=cast(Run, self._run).run_id,
-                    )
+
+                message = pull_object_from_servicer(
+                    msg_proto.metadata.message_id,
+                    self._stub,
+                    node=self.node,
+                    run_id=cast(Run, self._run).run_id,
                 )
+                inflated_msgs.append(cast(Message, message))
 
             return inflated_msgs
 
