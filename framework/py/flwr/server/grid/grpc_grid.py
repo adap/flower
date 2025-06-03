@@ -257,7 +257,7 @@ class GrpcGrid(Grid):
                         msg,
                         self._stub,
                         node=self.node,
-                        run_id=cast(Run, self._run).run_id,
+                        run_id=run_id,
                         object_ids_to_push=obj_ids_to_push,
                     )
 
