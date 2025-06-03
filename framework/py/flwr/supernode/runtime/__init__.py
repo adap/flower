@@ -12,13 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface for SuperNode."""
-
-
-from .flower_supernode import flower_supernode
-from .flwr_clientapp import flwr_clientapp
-
-__all__ = [
-    "flower_supernode",
-    "flwr_clientapp",
-]
+"""Flower SuperNode components."""
