@@ -43,7 +43,7 @@ Deployed Flower systems have at least two types of network connections:
   typically run on the users workstation, is used to interface with a deployed Flower
   federation consisting of SuperLink and SuperNodes. From a networking perspective, the
   ``flwr`` CLI acts as a gRPC client and the SuperLink acts as a gRPC server. The
-  ``flwr`` CLI is the only way for a user (AI researchers, data scientist) to inferface
+  ``flwr`` CLI is the only way for a user (AI researchers, data scientist) to interface
   with a deployed Flower federation. They cannot, for example, interface directly with
   SuperNodes connected to the SuperLink. The ``flwr`` CLI to SuperLink connection should
   always use TLS, but ``insecure`` mode is supported for local testing.
