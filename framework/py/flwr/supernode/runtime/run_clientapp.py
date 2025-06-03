@@ -60,6 +60,7 @@ def run_clientapp(  # pylint: disable=R0914
     token: Optional[int] = None,
     flwr_dir: Optional[str] = None,
     certificates: Optional[bytes] = None,
+    parent_pid
 ) -> None:
     """Run Flower ClientApp process."""
     channel = create_channel(
