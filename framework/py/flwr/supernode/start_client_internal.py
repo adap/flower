@@ -17,7 +17,6 @@
 
 import multiprocessing
 import os
-import sys
 import threading
 import time
 from collections.abc import Iterator
@@ -57,8 +56,8 @@ from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
-from flwr.supernode.cli.flwr_clientapp import flwr_clientapp
 from flwr.supernode.nodestate import NodeStateFactory
+from flwr.supernode.runtime.run_clientapp import run_clientapp
 from flwr.supernode.servicer.clientappio import ClientAppInputs, ClientAppIoServicer
 
 
@@ -259,18 +258,14 @@ def start_client_internal(
                         else clientappio_api_address
                     )
                     # Start ClientApp subprocess
-                    command = [
-                        "flwr-clientapp",
-                        "--clientappio-api-address",
-                        io_address,
-                        "--token",
-                        str(token),
-                    ]
-                    command.append("--insecure")
-
                     proc = mp_spawn_context.Process(
                         target=_run_flwr_clientapp,
-                        args=(command, os.getpid()),
+                        kwargs={
+                            "main_pid": os.getpid(),
+                            "clientappio_api_address": io_address,
+                            "run_once": True,
+                            "token": token,
+                        },
                         daemon=True,
                     )
                     proc.start()
@@ -421,7 +416,14 @@ def _make_fleet_connection_retry_invoker(
     )
 
 
-def _run_flwr_clientapp(args: list[str], main_pid: int) -> None:
+def _run_flwr_clientapp(
+    main_pid: int,
+    clientappio_api_address: str,
+    run_once: bool,
+    token: Optional[int] = None,
+    flwr_dir: Optional[str] = None,
+    certificates: Optional[bytes] = None,
+) -> None:
     # Monitor the main process in case of SIGKILL
     def main_process_monitor() -> None:
         while True:
@@ -431,9 +433,14 @@ def _run_flwr_clientapp(args: list[str], main_pid: int) -> None:
 
     threading.Thread(target=main_process_monitor, daemon=True).start()
 
-    # Run the command
-    sys.argv = args
-    flwr_clientapp()
+    # Run flwr-clientapp
+    run_clientapp(
+        clientappio_api_address=clientappio_api_address,
+        run_once=run_once,
+        token=token,
+        flwr_dir=flwr_dir,
+        certificates=certificates,
+    )
 
 
 def run_clientappio_api_grpc(
