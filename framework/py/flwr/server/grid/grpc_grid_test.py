@@ -97,11 +97,12 @@ class TestGrpcGrid(unittest.TestCase):
         """Test pushing valid messages."""
         # Prepare
         msgs = [Message(RecordDict(), 0, "query") for _ in range(2)]
+        obj_ids = [msg.object_id for msg in msgs]
         mock_response = Mock(
-            message_ids=["id1", "id2"],
+            message_ids=obj_ids,
             objects_to_push={
-                "id1": ObjectIDs(object_ids=["a", "aa"]),
-                "id2": ObjectIDs(object_ids=["b", "bb"]),
+                obj_ids[0]: ObjectIDs(object_ids=["a", "aa"]),
+                obj_ids[1]: ObjectIDs(object_ids=["b", "bb"]),
             },
         )
         self.mock_stub.PushMessages.return_value = mock_response
@@ -117,6 +118,7 @@ class TestGrpcGrid(unittest.TestCase):
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PushInsMessagesRequest)
         self.assertEqual(msg_ids, mock_response.message_ids)
+        self.assertEqual(msg_ids, obj_ids)
         for message in args[0].messages_list:
             self.assertEqual(message.metadata.run_id, 61016)
 
