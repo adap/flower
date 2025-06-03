@@ -27,7 +27,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable import get_desdendant_object_ids
+from flwr.common.inflatable import get_desdendant_object_ids, get_object_id
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
 from flwr.common.typing import RunStatus
@@ -37,6 +37,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+)
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
@@ -98,6 +104,16 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.Fleet/GetFab",
             request_serializer=GetFabRequest.SerializeToString,
             response_deserializer=GetFabResponse.FromString,
+        )
+        self._push_object = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PushObject",
+            request_serializer=PushObjectRequest.SerializeToString,
+            response_deserializer=PushObjectResponse.FromString,
+        )
+        self._pull_object = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PullObject",
+            request_serializer=PullObjectRequest.SerializeToString,
+            response_deserializer=PullObjectResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -360,3 +376,147 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Execute & Assert
         self._assert_get_fab_not_allowed(node_id, fab_hash, run_id)
+
+    def test_push_object_succesful(self) -> None:
+        """Test `PushObject`."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        node_id = self.state.create_node(heartbeat_interval=30)
+        obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
+        obj_b = obj.deflate()
+        self._transition_run_status(run_id, 2)
+
+        # Pre-register object
+        self.store.preregister(object_ids=[obj.object_id])
+
+        # Execute
+        req = PushObjectRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            object_id=obj.object_id,
+            object_content=obj_b,
+        )
+        res: PushObjectResponse = self._push_object(request=req)
+
+        # Empty response
+        assert res.stored
+
+    def test_push_object_fails(self) -> None:
+        """Test `PushObject` in unsupported scenarios."""
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Run is not running
+        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+
+        # Run is running but node id isn't recognized
+        self._transition_run_status(run_id, 2)
+        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+
+        # Correct node ID but invalid object_content
+        node_id = self.state.create_node(heartbeat_interval=30)
+        obj_b = b"extra content"
+        object_id = get_object_id(obj_b)
+        # Execute (doesn't match structure)
+        req = PushObjectRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            object_id=object_id,
+            object_content=obj_b,
+        )
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+
+        # Prepare
+        obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
+        obj_b = obj.deflate()
+
+        # Push valid object but it hasn't been pre-registered
+        req = PushObjectRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            object_id=obj.object_id,
+            object_content=obj_b,
+        )
+        res: PushObjectResponse = self._push_object(request=req)
+
+        # Assert: object not inserted
+        assert not res.stored
+
+        # Push valid object but its hash doesnt match the one passed in the request
+        # Preregister under a different object-id
+        fake_object_id = get_object_id(b"1234")
+        self.store.preregister(object_ids=[fake_object_id])
+
+        # Execute
+        req = PushObjectRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            object_id=fake_object_id,
+            object_content=obj_b,
+        )
+        res = self._push_object(request=req)
+
+        # Assert: object not inserted
+        assert not res.stored
+
+    def test_pull_object_successful(self) -> None:
+        """Test `PullObject` functionality."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        self._transition_run_status(run_id, 2)
+        node_id = self.state.create_node(heartbeat_interval=30)
+        obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
+        obj_b = obj.deflate()
+
+        # Preregister object
+        self.store.preregister(object_ids=[obj.object_id])
+
+        # Pull
+        req = PullObjectRequest(
+            node=Node(node_id=node_id), run_id=run_id, object_id=obj.object_id
+        )
+        res: PullObjectResponse = self._pull_object(req)
+
+        # Assert object content is b"" (it was never pushed)
+        assert res.object_content == b""
+
+        # Put object in store, then check it can be pulled
+        self.store.put(object_id=obj.object_id, object_content=obj_b)
+        req = PullObjectRequest(
+            node=Node(node_id=node_id), run_id=run_id, object_id=obj.object_id
+        )
+        res = self._pull_object(req)
+
+        # Assert, identical object pulled
+        assert obj_b == res.object_content
+
+    def test_pull_object_fails(self) -> None:
+        """Test `PullObject` in unsuported scenarios."""
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Run is not running
+        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._pull_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+
+        # Run is running but node id isn't recognized
+        self._transition_run_status(run_id, 2)
+        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._pull_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+
+        # Attempt pulling object that doesn't exist
+        node_id = self.state.create_node(heartbeat_interval=30)
+        req = PullObjectRequest(
+            node=Node(node_id=node_id), run_id=run_id, object_id="1234"
+        )
+        res: PullObjectResponse = self._pull_object(req)
+        # Empty response
+        assert res == PullObjectResponse()

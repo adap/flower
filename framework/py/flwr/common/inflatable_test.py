@@ -216,6 +216,10 @@ def test_check_body_length() -> None:
     # Inconsistent: fails
     assert not check_body_len_consistency(obj_b_)
 
+    # Create object that doesn't comply with serialized object structure
+    obj_ = b"this is a test"
+    assert not check_body_len_consistency(obj_)
+
 
 @pytest.mark.parametrize(
     "children",

@@ -409,10 +409,25 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Push an object to the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PushObject")
 
+        # Init state
+        state: LinkState = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
+
+        if request.node.node_id != SUPERLINK_NODE_ID:
+            # Cancel insertion in ObjectStore
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
+
         if not check_body_len_consistency(request.object_content):
             # Cancel insertion in ObjectStore
             context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION, "Unexpected object length"
+                grpc.StatusCode.FAILED_PRECONDITION, "Unexpected object length."
             )
 
         # Init store
@@ -433,6 +448,21 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PullObjectResponse:
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
+
+        # Init state
+        state: LinkState = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
+
+        if request.node.node_id != SUPERLINK_NODE_ID:
+            # Cancel insertion in ObjectStore
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
 
         # Init store
         store = self.objectstore_factory.store()
