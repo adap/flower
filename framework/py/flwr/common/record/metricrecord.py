@@ -180,7 +180,7 @@ class MetricRecord(TypedDict[str, MetricRecordValues], InflatableObject):
         MetricRecord
             The inflated MetricRecord.
         """
-        if children is not None:
+        if children:
             raise ValueError("`MetricRecord` objects do not have children.")
 
         obj_body = get_object_body(object_content, cls)

@@ -15,10 +15,8 @@
 """Main loop for Flower SuperNode."""
 
 
-import multiprocessing
 import os
-import sys
-import threading
+import subprocess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -56,7 +54,6 @@ from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
-from flwr.supernode.cli.flwr_clientapp import flwr_clientapp
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppInputs, ClientAppIoServicer
 
@@ -144,7 +141,6 @@ def start_client_internal(
     state_factory = NodeStateFactory()
     ffs_factory = FfsFactory(get_flwr_dir(flwr_path) / "supernode" / "ffs")  # type: ignore
     object_store_factory = ObjectStoreFactory()
-    mp_spawn_context = multiprocessing.get_context("spawn")
 
     # Initialize NodeState, Ffs, and ObjectStore
     state = state_factory.state()
@@ -232,16 +228,11 @@ def start_client_internal(
                         io_address,
                         "--token",
                         str(token),
+                        "--parent-pid",
+                        str(os.getpid()),
+                        "--insecure",
                     ]
-                    command.append("--insecure")
-
-                    proc = mp_spawn_context.Process(
-                        target=_run_flwr_clientapp,
-                        args=(command, os.getpid()),
-                        daemon=True,
-                    )
-                    proc.start()
-                    proc.join()
+                    subprocess.run(command, check=False)
                 else:
                     # Wait for output to become available
                     while not clientappio_servicer.has_outputs():
@@ -459,21 +450,6 @@ def _make_fleet_connection_retry_invoker(
         on_success=_on_success,
         on_backoff=_on_backoff,
     )
-
-
-def _run_flwr_clientapp(args: list[str], main_pid: int) -> None:
-    # Monitor the main process in case of SIGKILL
-    def main_process_monitor() -> None:
-        while True:
-            time.sleep(1)
-            if os.getppid() != main_pid:
-                os.kill(os.getpid(), 9)
-
-    threading.Thread(target=main_process_monitor, daemon=True).start()
-
-    # Run the command
-    sys.argv = args
-    flwr_clientapp()
 
 
 def run_clientappio_api_grpc(
