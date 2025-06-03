@@ -85,11 +85,12 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
         node = Node(node_id=456)
+        run_id = 1234
         # +2 due to the RecordDict and Message
         expected_obj_count += 2
 
         # Execute
-        pushed_object_ids = push_object_to_servicer(obj, self.mock_stub, node)
+        pushed_object_ids = push_object_to_servicer(obj, self.mock_stub, node, run_id)
 
         # Assert
         # Expected number of objects were pushed
@@ -106,6 +107,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         }
         obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
         node = Node(node_id=456)
+        run_id = 1234
 
         # Compute descendants
         descendants = list(get_desdendant_object_ids(obj))
@@ -115,7 +117,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
 
         # Execute
         pushed_object_ids = push_object_to_servicer(
-            obj, self.mock_stub, node, obj_to_push
+            obj, self.mock_stub, node, run_id, obj_to_push
         )
 
         # Assert
@@ -135,12 +137,15 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
         node = Node(node_id=456)
+        run_id = 1234
         # +2 due to the RecordDict and Message
         expected_obj_count += 2
 
         # Execute
-        push_object_to_servicer(obj, self.mock_stub, node)
-        pulled_obj = pull_object_from_servicer(obj.object_id, self.mock_stub, node)
+        push_object_to_servicer(obj, self.mock_stub, node, run_id)
+        pulled_obj = pull_object_from_servicer(
+            obj.object_id, self.mock_stub, node, run_id
+        )
 
         # Assert
         # Expected number of objects were pulled
