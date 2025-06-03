@@ -42,8 +42,7 @@ from flwr.common.constant import (
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
-
-from ..start_client_internal import start_client_internal
+from flwr.supernode.start_client_internal import start_client_internal
 
 
 def flower_supernode() -> None:
