@@ -23,7 +23,9 @@ import grpc
 
 from flwr.app.error import Error
 from flwr.common import RecordDict
+from flwr.common.inflatable import get_desdendant_object_ids
 from flwr.common.message import Message
+from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
@@ -94,9 +96,22 @@ class TestGrpcGrid(unittest.TestCase):
     def test_push_messages_valid(self) -> None:
         """Test pushing valid messages."""
         # Prepare
-        mock_response = Mock(message_ids=["id1", "id2"])
-        self.mock_stub.PushMessages.return_value = mock_response
         msgs = [Message(RecordDict(), 0, "query") for _ in range(2)]
+        # We compute the object ids of the messages and its descendant
+        objs_to_push1 = get_desdendant_object_ids(msgs[0])
+        objs_to_push1.add(msgs[0].object_id)
+        objs_to_push2 = get_desdendant_object_ids(msgs[1])
+        objs_to_push2.add(msgs[1].object_id)
+
+        mock_response = Mock(
+            message_ids=["id1", "id2"],
+            objects_to_push={
+                "id1": ObjectIDs(object_ids=objs_to_push1),
+                "id2": ObjectIDs(object_ids=objs_to_push2),
+            },
+        )
+        self.mock_stub.PushMessages.return_value = mock_response
+        self.mock_stub.PushObject.return_value = Mock(stored=True)
 
         # Execute
         msg_ids = self.grid.push_messages(msgs)

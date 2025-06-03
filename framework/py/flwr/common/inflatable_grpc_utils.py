@@ -95,11 +95,12 @@ def pull_object_from_servicer(
 ) -> InflatableObject:
     """Recursively inflate an object by pulling it from the servicer."""
     # Pull object
-    object_content = b""
-    while object_content == b"":
+    object_available = False
+    while not (object_available):
         object_proto: PullObjectResponse = stub.PullObject(
             PullObjectRequest(node=node, run_id=run_id, object_id=object_id)
         )
+        object_available = object_proto.object_available
         object_content = object_proto.object_content
         sleep(0.1)
 
