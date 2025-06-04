@@ -72,11 +72,13 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
 
         def push_object(request: PushObjectRequest) -> PushObjectResponse:
             self.mock_store[request.object_id] = request.object_content
-            return PushObjectResponse()
+            return PushObjectResponse(stored=True)
 
         def pull_object(request: PullObjectRequest) -> PullObjectResponse:
             return PullObjectResponse(
-                object_content=self.mock_store[request.object_id], object_available=True
+                object_content=self.mock_store[request.object_id],
+                object_found=True,
+                object_available=True,
             )
 
         self.mock_stub.PushObject.side_effect = push_object
