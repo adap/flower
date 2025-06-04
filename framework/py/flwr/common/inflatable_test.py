@@ -271,7 +271,7 @@ def test_object_content_validator() -> None:
     # The head does not have three distinct parts
     head_decoded = head.decode(encoding="utf-8")
     head_parts = head_decoded.split(HEAD_VALUE_DIVIDER)
-    obj_type, children_str, body_len = head_parts
+    obj_type, _, body_len = head_parts
     # construct head (but don't pass children part) and object
     obj_wrong_head = (obj_type + HEAD_VALUE_DIVIDER + body_len).encode(encoding="utf-8")
     almost_correct_obj = obj_wrong_head + HEAD_BODY_DIVIDER + body
