@@ -35,14 +35,28 @@ def safe_max(items: List[Any], scoring_fn: Callable[[Any], float]) -> Any:
 
 
 def get_backend_config(cfg):
-    """Get the backend configuration for the federated learning system.
+    """Get the backend configuration for Ray-based federated learning execution.
+
+    This function is used by the FLSimulation class to configure Ray backend settings
+    for distributed federated learning execution. It extracts client resource
+    requirements from the configuration and formats them for Ray's distributed
+    computing framework.
 
     Args:
-        cfg: Configuration object containing client resource settings
+        cfg: Configuration object containing client resource settings under
+             cfg.tool.tracefl.client_resources (cpus, gpus)
 
     Returns
     -------
-        dict: Dictionary containing backend configuration parameters
+        dict: Dictionary containing backend configuration parameters including:
+            - client_resources: CPU/GPU allocation per client
+            - init_args: Ray initialization arguments
+            - actor: Framework-specific actor configurations
+
+    Note:
+        This is specifically designed for Ray-based distributed FL execution.
+        The returned configuration is used by FLSimulation when setting up
+        the distributed computing environment for federated learning.
     """
     client_resources = {
         "num_cpus": cfg.tool.tracefl.client_resources.cpus,
@@ -85,14 +99,19 @@ def set_exp_key(cfg):
     -------
         str: A unique key identifying the experiment configuration
     """
-    if (
-        cfg.tool.tracefl.strategy.noise_multiplier == -1
-        and cfg.tool.tracefl.strategy.clipping_norm == -1
-    ):
-        key = (
+    # Check if DP is enabled
+    dp_enabled = (
+        cfg.tool.tracefl.strategy.noise_multiplier > 0
+        and cfg.tool.tracefl.strategy.clipping_norm > 0
+    )
+
+    if dp_enabled:
+        dp_key = (
+            f"DP-(noise{cfg.tool.tracefl.strategy.noise_multiplier}+"
+            f"clip{cfg.tool.tracefl.strategy.clipping_norm})-"
             f"{cfg.tool.tracefl.exp_key}-"
             f"{cfg.tool.tracefl.model.name}-{cfg.tool.tracefl.dataset.name}-"
-            f"noise_rate{cfg.tool.tracefl.strategy.noise_rate}-"
+            f"faulty_clients[[]]-"
             f"TClients{cfg.tool.tracefl.data_dist.num_clients}-"
             f"{cfg.tool.tracefl.strategy.name}-(R{cfg.tool.tracefl.strategy.num_rounds}"
             f"-clientsPerR{cfg.tool.tracefl.strategy.clients_per_round})"
@@ -102,9 +121,23 @@ def set_exp_key(cfg):
             f"-epochs{cfg.tool.tracefl.client.epochs}-"
             f"lr{cfg.tool.tracefl.client.lr}"
         )
-        return key
+        return dp_key
 
-    raise ValueError("Invalid config")
+    # Non-DP experiment key
+    non_dp_key = (
+        f"NonDP-{cfg.tool.tracefl.exp_key}-"
+        f"{cfg.tool.tracefl.model.name}-{cfg.tool.tracefl.dataset.name}-"
+        f"faulty_clients[[]]-"
+        f"TClients{cfg.tool.tracefl.data_dist.num_clients}-"
+        f"{cfg.tool.tracefl.strategy.name}-(R{cfg.tool.tracefl.strategy.num_rounds}"
+        f"-clientsPerR{cfg.tool.tracefl.strategy.clients_per_round})"
+        f"-{cfg.tool.tracefl.data_dist.dist_type}"
+        f"{cfg.tool.tracefl.data_dist.dirichlet_alpha}"
+        f"-batch{cfg.tool.tracefl.data_dist.batch_size}"
+        f"-epochs{cfg.tool.tracefl.client.epochs}-"
+        f"lr{cfg.tool.tracefl.client.lr}"
+    )
+    return non_dp_key
 
 
 def get_prov_eval_metrics(labels, predicted_labels):

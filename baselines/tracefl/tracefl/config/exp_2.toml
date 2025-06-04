@@ -34,9 +34,9 @@ channels = 3
 name = "fedavg"
 num_rounds = 2
 clients_per_round = 4
-noise_multiplier = -1  
-clipping_norm = -1       
-noise_rate = "None"
+# Differential Privacy Settings
+noise_multiplier = 0.001  # Match dp_noise from shell script
+clipping_norm = 15.0      # Match dp_clip from shell script
 
 [tool.tracefl.data_dist]
 dist_type = "non_iid_dirichlet"
@@ -54,7 +54,8 @@ version = 1
 disable_existing_loggers = false
 
 [tool.tracefl.logging.formatters.simple]
-format = "[%(levelname)s] - %(message)s"
+format = "[%(asctime)s][%(name)s] %(message)s"
+datefmt = "%Y-%m-%d %H:%M:%S,%f"
 
 [tool.tracefl.logging.handlers.console]
 class = "logging.StreamHandler"

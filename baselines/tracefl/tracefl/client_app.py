@@ -5,8 +5,8 @@ system. It provides the client implementation that handles local model training 
 evaluation.
 """
 
-import copy
 import json
+import os
 
 import toml
 import torch
@@ -14,16 +14,9 @@ from omegaconf import OmegaConf
 
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
-from tracefl.dataset import (
-    get_clients_server_data,
-)
-from tracefl.fls import FLSimulation
-from tracefl.models import (
-    get_parameters,
-    initialize_model,
-    set_parameters,
-    train_neural_network,
-)
+from tracefl.dataset import get_clients_server_data
+from tracefl.models_train_eval import train_neural_network
+from tracefl.models_utils import get_parameters, initialize_model, set_parameters
 
 
 class FlowerClient(NumPyClient):
@@ -39,6 +32,7 @@ class FlowerClient(NumPyClient):
         net,
         trainloader,
         local_epochs,
+        *,
         partition_id,
         cfg,
         ds_dict,
@@ -124,7 +118,8 @@ class FlowerClient(NumPyClient):
         -------
             tuple: Loss value, number of test examples, and evaluation metrics
         """
-        pass
+        # Placeholder for evaluation logic - not needed for now
+        return 0.0, 0, {}
 
 
 def client_fn(context: Context):
@@ -137,32 +132,42 @@ def client_fn(context: Context):
     -------
         Client: Configured TraceFL client instance
     """
-    possible_configs = ["exp_1", "exp_2"]
-    config_key = next((k for k in possible_configs if k in context.run_config), "exp_1")
+    # ========== Experiment Configuration ==========
+    config_key = os.environ.get("EXPERIMENT", "exp_1")
+    print(f"Config key: {config_key}")
+
     config_path = str(context.run_config[config_key])
     config = toml.load(config_path)
     cfg = OmegaConf.create(config)
 
+    # Override dirichlet_alpha if specified (for exp_3 data distribution experiments)
+    dirichlet_alpha = os.environ.get("DIRICHLET_ALPHA")
+    if dirichlet_alpha and config_key == "exp_3":
+        dirichlet_alpha_float = float(dirichlet_alpha)
+        cfg.tool.tracefl.dirichlet_alpha = dirichlet_alpha_float
+        cfg.tool.tracefl.data_dist.dirichlet_alpha = dirichlet_alpha_float
+        print(f"Client overriding dirichlet_alpha to: {dirichlet_alpha_float}")
+
+    # ========== Client Data Preparation ==========
     partition_id = int(context.node_config["partition-id"])
     ds_dict = get_clients_server_data(cfg)
-
     client_train_data = ds_dict["client2data"].get(str(partition_id))
 
-    sim = FLSimulation(copy.deepcopy(cfg), 0.0, 0.0, 0.0, 0.0)
-    sim.set_clients_data(ds_dict["client2data"])
-    sim.set_strategy()
+    # ========== Model Initialization ==========
     model_dict = initialize_model(cfg.tool.tracefl.model.name, cfg.tool.tracefl.dataset)
     local_epochs = int(context.run_config["local-epochs"])
+
+    # ========== Return Configured Client ==========
     return FlowerClient(
         model_dict["model"],
         client_train_data,
         local_epochs,
-        partition_id,
-        cfg,
-        ds_dict,
-        cfg.tool.tracefl.model.arch,
-        model_dict,
-        ds_dict["client2data"],
+        partition_id=partition_id,
+        cfg=cfg,
+        ds_dict=ds_dict,
+        arch=cfg.tool.tracefl.model.arch,
+        model_dict=model_dict,
+        client2data=ds_dict["client2data"],
     ).to_client()
 
 

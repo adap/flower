@@ -26,8 +26,8 @@ def _get_all_layers_in_neural_network(net):
     layers = []
     for layer in net.children():
         # If the layer has no submodules and is Conv2d or Linear, collect it.
-        if len(list(layer.children())) == 0 and (
-            isinstance(layer, torch.nn.Conv2d) or isinstance(layer, torch.nn.Linear)
+        if len(list(layer.children())) == 0 and isinstance(
+            layer, (torch.nn.Conv2d, torch.nn.Linear)
         ):
             layers.append(layer)
         # If the layer has submodules, recurse into them.

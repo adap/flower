@@ -9,8 +9,6 @@ partitioned, please include all those functions and logic in the
 defined here of course.
 """
 
-import logging
-
 from tracefl.dataset_preparation import ClientsAndServerDatasets
 
 
@@ -28,8 +26,7 @@ def medical_dataset2labels(dname):
             7: "Cancer-associated Stroma",
             8: "Colorectal Adenocarcinoma",
         }
-    else:
-        return None
+    return None
 
 
 def fix_dataset_keys(dataset):
@@ -66,7 +63,6 @@ def get_clients_server_data(cfg):
             - "client2class": mapping of client IDs to class counts.
             - "fds": the federated dataset object.
     """
-    logging.info("Creating dataset from scratch (no cache)...")
     ds_prep = ClientsAndServerDatasets(cfg)
     ds_dict = ds_prep.get_data()
     ds_dict = fix_dataset_keys(ds_dict)

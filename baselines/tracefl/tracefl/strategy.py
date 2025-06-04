@@ -1,8 +1,8 @@
-"""Federated Learning Strategy Module.
+"""TraceFL Federated Learning Strategy Module.
 
-This module implements the core federated learning strategy for the TraceFL system. It
-includes the main strategy class that coordinates the federated learning process,
-handles client selection, model aggregation, and provenance tracking.
+This module implements custom federated learning strategies for TraceFL, including the
+FedAvgSave strategy which extends the standard FedAvg algorithm with provenance tracking
+capabilities.
 """
 
 # strategy.py
@@ -13,8 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 from tracefl.global_data import update_round_data
-from tracefl.models import initialize_model, set_parameters
-from tracefl.utils import get_backend_config
+from tracefl.models_utils import initialize_model, set_parameters
 
 
 class FedAvgSave(fl.server.strategy.FedAvg):
@@ -30,17 +29,18 @@ class FedAvgSave(fl.server.strategy.FedAvg):
     def __init__(self, cfg, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.cfg = cfg
-        self.backend_config = get_backend_config(cfg)
-        # These dictionaries are updated each round.
         self.client2ws = {}  # Mapping: client ID -> client model weights (if available)
         self.client2num_examples = (
             {}
         )  # Mapping: client ID -> number of training examples
         self.client2class = {}  # Mapping: client ID -> client-to-class mapping
         self.initial_parameters = None  # Will store the initial global model parameters
+        # Initialize attribute to avoid pylint warnings
+        self.gm_ws = None
 
     def set_initial_parameters(self, initial_parameters):
         """Store the initial global model parameters."""
+        # EXTRA: Not essential for basic FL - used for provenance tracking
         self.initial_parameters = initial_parameters
 
     def aggregate_fit(self, server_round, results, failures):
@@ -70,28 +70,30 @@ class FedAvgSave(fl.server.strategy.FedAvg):
         if aggregated_parameters is not None:
             # Convert aggregated parameters to a PyTorch state_dict.
             gm_ws = self.get_state_dict_from_parameters(aggregated_parameters)
+            # EXTRA: Not essential for basic FL - used for provenance tracking
             self.gm_ws = gm_ws  # Save for provenance
             logging.info("Aggregated global model for round %s", server_round)
 
             # Process each client result.
             for client_proxy, fit_res in results:
-                cid = client_proxy.cid  # ✅ Real client ID
+                cid = client_proxy.cid
+                # EXTRA: Not essential for basic FL - used for provenance tracking
                 self.client2ws[cid] = self.get_state_dict_from_parameters(
                     fit_res.parameters
                 )
                 self.client2num_examples[cid] = fit_res.num_examples
 
-                # ✅ Collect class distribution if present
+                # EXTRA: Not essential for basic FL - used for provenance tracking
                 if "class_distribution" in fit_res.metrics:
                     self.client2class[cid] = fit_res.metrics["class_distribution"]
                 else:
                     self.client2class[cid] = {}
 
-            # Store initial global model parameters on the first round
+            # EXTRA: Not essential for basic FL - used for provenance tracking
             if self.initial_parameters is None:
                 self.initial_parameters = aggregated_parameters
 
-            # Update round-level provenance info
+            # EXTRA: Not essential for basic FL - used for provenance tracking
             update_round_data(
                 server_round,
                 self.initial_parameters,

@@ -20,7 +20,8 @@ def round_lambda_prov(
     prov_global_model: Any,
     client2model: Dict[str, Any],
     client2num_examples: Dict[str, int],
-    ALLROUNDSCLIENTS2CLASS: Dict[str, Dict[int, int]],
+    *,
+    all_rounds_clients2class: Dict[str, Dict[int, int]],
     central_test_data: Any,
     server_round: int,
 ) -> Dict[str, Any]:
@@ -32,7 +33,7 @@ def round_lambda_prov(
         prov_global_model: The global model for provenance analysis
         client2model: Dictionary mapping client IDs to their models
         client2num_examples: Dictionary mapping client IDs to number of examples
-        ALLROUNDSCLIENTS2CLASS: Dictionary mapping client IDs to class distributions
+        all_rounds_clients2class: Dictionary mapping client IDs to class distributions
         central_test_data: Test dataset for evaluation
         server_round: Current server round number
 
@@ -48,15 +49,15 @@ def round_lambda_prov(
         client2model=client2model,
         client2num_examples=client2num_examples,
         prov_global_model=prov_global_model,
-        all_rounds_clients2class=ALLROUNDSCLIENTS2CLASS,
+        all_rounds_clients2class=all_rounds_clients2class,
         t=None,
     )
 
     try:
         prov_result_dict = round_prov.run()
-    except Exception as e:
+    except (ValueError, KeyError, RuntimeError) as e:
         logging.error(
-            f"Error in running provenance for round {server_round}. Error: {e}"
+            "Error in running provenance for round %s. Error: %s", server_round, e
         )
         prov_result_dict = {"Error": str(e)}
 

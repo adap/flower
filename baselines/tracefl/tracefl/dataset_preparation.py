@@ -14,7 +14,7 @@ from typing import Any
 
 import medmnist
 import torch
-import torchvision.transforms as transforms
+import torchvision
 from datasets import Dataset, DatasetDict
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import (
@@ -23,6 +23,7 @@ from flwr_datasets.partitioner import (
     ShardPartitioner,
 )
 from medmnist import INFO
+from torchvision import transforms
 from torchvision.transforms import (
     Compose,
     Normalize,
@@ -74,6 +75,7 @@ def _get_medmnist(data_flag="pathmnist", download=True):
     hf_dataset = DatasetDict({"train": hf_train_dataset, "test": hf_test_dataset})
 
     logging.info("conversion to hf_dataset done")
+
     return hf_dataset
 
 
@@ -157,7 +159,7 @@ def train_test_transforms_factory(cfg):
     test_transforms = None
     if cfg.dname == "cifar10":
 
-        def apply_train_transformCifar(example):
+        def apply_train_transform_cifar(example):
             transform = Compose(
                 [
                     Resize((32, 32)),
@@ -173,7 +175,7 @@ def train_test_transforms_factory(cfg):
             del example["img"]
             return example
 
-        def apply_test_transformCifar(example):
+        def apply_test_transform_cifar(example):
             transform = Compose(
                 [
                     Resize((32, 32)),
@@ -189,11 +191,11 @@ def train_test_transforms_factory(cfg):
             del example["img"]
             return example
 
-        train_transforms = apply_train_transformCifar
-        test_transforms = apply_test_transformCifar
+        train_transforms = apply_train_transform_cifar
+        test_transforms = apply_test_transform_cifar
     elif cfg.dname == "mnist":
 
-        def apply_train_transformMnist(example):
+        def apply_train_transform_mnist(example):
 
             transform = Compose(
                 [Resize((32, 32)), ToTensor(), Normalize((0.1307,), (0.3081,))]
@@ -205,7 +207,7 @@ def train_test_transforms_factory(cfg):
             example["label"] = torch.tensor(example["label"])
             return example
 
-        def apply_test_transformMnist(example):
+        def apply_test_transform_mnist(example):
             transform = Compose(
                 [Resize((32, 32)), ToTensor(), Normalize((0.1307,), (0.3081,))]
             )
@@ -218,8 +220,8 @@ def train_test_transforms_factory(cfg):
 
             return example
 
-        train_transforms = apply_train_transformMnist
-        test_transforms = apply_test_transformMnist
+        train_transforms = apply_train_transform_mnist
+        test_transforms = apply_test_transform_mnist
     elif cfg.dname in ["pathmnist", "organamnist"]:
         tfms = transforms.Compose(
             [Resize((32, 32)), ToTensor(), Normalize(mean=[0.5], std=[0.5])]
@@ -266,16 +268,16 @@ def _initialize_image_dataset(cfg, dat_partitioner_func, fetch_only_test_data):
     target_label_col = "label"
 
     d = dat_partitioner_func(cfg, target_label_col, fetch_only_test_data)
-    transforms = train_test_transforms_factory(cfg=cfg)
+    transform_funcs = train_test_transforms_factory(cfg=cfg)
     d["client2data"] = {
         k: v.map(
-            transforms["train"], batched=True, batch_size=256, num_proc=8
+            transform_funcs["train"], batched=True, batch_size=256, num_proc=8
         ).with_format("torch")
         for k, v in d["client2data"].items()
     }
     d["server_data"] = (
         d["server_data"]
-        .map(transforms["test"], batched=True, batch_size=256, num_proc=8)
+        .map(transform_funcs["test"], batched=True, batch_size=256, num_proc=8)
         .with_format("torch")
     )
     return d
@@ -371,7 +373,7 @@ def _load_dist_based_clients_server_datasets(
     raise ValueError(f"Unknown dataset: {cfg.dname}")
 
 
-def getLabelsCount(partition, target_label_col):
+def get_labels_count(partition, target_label_col):
     """Count the number of occurrences for each label in a dataset partition.
 
     Parameters
@@ -417,7 +419,7 @@ def _fix_partition(cfg, c_partition, target_label_col):
             - 'partition': The cleaned and possibly truncated dataset partition.
             - 'partition_labels_count': The count of labels in the partition.
     """
-    label2count = getLabelsCount(c_partition, target_label_col)
+    label2count = get_labels_count(c_partition, target_label_col)
 
     filtered_labels = {
         label: count for label, count in label2count.items() if count >= 10
@@ -442,12 +444,12 @@ def _fix_partition(cfg, c_partition, target_label_col):
     if len(ds) % cfg.batch_size == 1:
         ds = ds.select(range(len(ds) - 1))
 
-    partition_labels_count = getLabelsCount(ds, target_label_col)
+    partition_labels_count = get_labels_count(ds, target_label_col)
     return {"partition": ds, "partition_labels_count": partition_labels_count}
 
 
 def _partition_helper(
-    partitioner, cfg, target_label_col, fetch_only_test_data, subtask
+    partitioner, cfg, target_label_col, _fetch_only_test_data, subtask
 ):
     """Partition the dataset among clients and prepare the server test data.
 
@@ -467,8 +469,8 @@ def _partition_helper(
             - dname: Dataset name.
     target_label_col : str
         The label key used for partitioning.
-    fetch_only_test_data : bool
-        If True, only test data is processed.
+    _fetch_only_test_data : bool
+        If True, only test data is processed (unused, kept for API compatibility).
     subtask : optional
         If specified, indicates a subset of data to be used.
 
@@ -492,7 +494,7 @@ def _partition_helper(
         partitioner.dataset = hf_dataset["train"]
         fds = partitioner
 
-        logging.info(f"max data size {cfg.max_server_data_size}")
+        logging.info("max data size %s", cfg.max_server_data_size)
 
         if cfg.max_server_data_size < len(hf_dataset["test"]):
             server_data = hf_dataset["test"].select(range(cfg.max_server_data_size))
@@ -515,20 +517,21 @@ def _partition_helper(
             server_data = fds.load_split("test")
         else:
             server_data = fds.load_split("test").select(range(cfg.max_server_data_size))
-    logging.info(f"Partition helper: Keys in the dataset are: {server_data[0].keys()}")
+    # Keys in the dataset: {server_data[0].keys()}
 
     for cid in range(cfg.num_clients):
         client_partition = fds.load_partition(cid)
         temp_dict = {}
 
         if cfg.max_per_client_data_size > 0:
-            logging.info(f" Fixing partition for client {cid}")
+            # Fixing partition for client {cid}
             temp_dict = _fix_partition(cfg, client_partition, target_label_col)
         else:
-            logging.info(f" No data partition fix requried for client {cid}")
+            logging.info(" No data partition fix requried for client %s", cid)
+
             temp_dict = {
                 "partition": client_partition,
-                "partition_labels_count": getLabelsCount(
+                "partition_labels_count": get_labels_count(
                     client_partition, target_label_col
                 ),
             }
@@ -538,6 +541,7 @@ def _partition_helper(
             clients_class.append(temp_dict["partition_labels_count"])
 
     logging.info(" -- fix partition is done --")
+
     client2data = {f"{id}": v for id, v in enumerate(clients_data)}
     client2class = {f"{id}": v for id, v in enumerate(clients_class)}
     return {
@@ -625,7 +629,7 @@ def _sharded_data_distribution(
 
 
 def _pathological_partitioner(
-    dataset: Dataset, num_clients: int, alpha: float = 0.5, cfg: Any = None
+    _dataset: Dataset, num_clients: int, _alpha: float = 0.5, cfg: Any = None
 ) -> DatasetDict:
     """Partition the dataset among clients using a pathological strategy.
 
@@ -635,12 +639,13 @@ def _pathological_partitioner(
 
     Parameters
     ----------
-    dataset : Dataset
-        The dataset to partition.
+    _dataset : Dataset
+        The dataset to partition (unused, kept for compatibility).
     num_clients : int
         Number of clients to partition the data among.
-    alpha : float, optional
-        Concentration parameter for the Dirichlet distribution (default is 0.5).
+    _alpha : float, optional
+        Concentration parameter for the Dirichlet distribution
+        (unused, kept for compatibility).
     cfg : Any, optional
         Configuration object containing dataset parameters.
 
@@ -649,6 +654,7 @@ def _pathological_partitioner(
     DatasetDict
         A dictionary mapping client IDs to their respective datasets.
     """
+    # Note: _dataset and _alpha parameters are unused but kept for API compatibility
     partitioner = PathologicalPartitioner(
         num_partitions=num_clients,
         partition_by="label",
@@ -674,6 +680,12 @@ class ClientsAndServerDatasets:
         """
         self.cfg = cfg
         self.data_dist_partitioner_func = None
+        # Initialize attributes to avoid pylint warnings
+        self.client2data = {}
+        self.server_testdata = None
+        self.client2class = {}
+        self.fds = None
+
         self._set_distriubtion_partitioner()
         self._setup()
 
@@ -681,7 +693,7 @@ class ClientsAndServerDatasets:
         """Set the data distribution partitioner function based on the configuration.
 
         The method selects the partitioner function to use (e.g. Dirichlet, sharded, or
-        pathological) based on cfg.data_dist.dist_type.
+        pathological) based on cfg.tool.tracefl.data_dist.dist_type.
         """
         if self.cfg.tool.tracefl.data_dist.dist_type == "non_iid_dirichlet":
             self.data_dist_partitioner_func = _dirichlet_data_distribution
@@ -725,14 +737,15 @@ class ClientsAndServerDatasets:
         self.server_testdata = d["server_data"]
         self.client2class = d["client2class"]
         self.fds = d["fds"]
-        logging.info(f"client2class: {self.client2class}")
 
-        logging.info(f"> client2class {self.client2class}")
+        logging.info("client2class: %s", self.client2class)
+
+        logging.info("> client2class %s", self.client2class)
 
         data_per_client = [len(dl) for dl in self.client2data.values()]
-        logging.info(f"Data per client in experiment {data_per_client}")
+        logging.info("Data per client in experiment %s", data_per_client)
         min_data = min(len(dl) for dl in self.client2data.values())
-        logging.info(f"Min data on a client: {min_data}")
+        logging.info("Min data on a client: %s", min_data)
 
     def _setup(self):
         """Initialize the Hugging Face dataset.
@@ -775,17 +788,18 @@ def _initialize_dataset(cfg_dataset):
     Dataset
         The initialized dataset.
     """
-    import torchvision  # Import here to avoid circular imports
-
     if cfg_dataset.name == "cifar10":
         return _initialize_image_dataset(
             cfg_dataset,
             torchvision.datasets.CIFAR10,
             "CIFAR10",
         )
-    elif cfg_dataset.name == "cifar100":
+    if cfg_dataset.name == "cifar100":
         return _initialize_image_dataset(
             cfg_dataset,
             torchvision.datasets.CIFAR100,
             "CIFAR100",
         )
+
+    # Return None for unknown dataset types
+    return None

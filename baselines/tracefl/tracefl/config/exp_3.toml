@@ -1,9 +1,9 @@
 [tool.tracefl]
-exp_key = "artifact_exp"
+exp_key = "varying_data_dist"
 num_clients = 10
 clients_per_round = 4
 num_rounds = 2
-dirichlet_alpha = 0.3
+dirichlet_alpha = 0.3  # This will be overridden by environment variable
 batch_size = 32
 
 [tool.tracefl.device]
@@ -34,15 +34,15 @@ channels = 3
 name = "fedavg"
 num_rounds = 2
 clients_per_round = 4
-# Differential Privacy Settings
-noise_multiplier = -1  # Match dp_noise from shell script
-clipping_norm = -1      # Match dp_clip from shell script
+# No Differential Privacy for data distribution experiments
+noise_multiplier = -1
+clipping_norm = -1
 
 [tool.tracefl.data_dist]
 dist_type = "non_iid_dirichlet"
 num_clients = 10
 batch_size = 32
-dirichlet_alpha = 0.3
+dirichlet_alpha = 0.3  # This will be dynamically overridden
 dname = "mnist"
 mname = "resnet18"
 max_per_client_data_size = 2048
