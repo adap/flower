@@ -34,7 +34,13 @@ from .inflatable import (
     get_object_children_ids_from_object_content,
     get_object_type_from_object_content,
 )
-from .message import DEFAULT_TTL, Message, MessageInitializationError, make_message
+from .message import (
+    DEFAULT_TTL,
+    Message,
+    MessageInitializationError,
+    make_message,
+    remove_content_from_message,
+)
 from .serde import message_to_proto
 from .serde_test import RecordMaker
 
@@ -477,13 +483,13 @@ def test_remove_content_from_message() -> None:
     )
 
     # Execute (expected content to be an empty RecordDict)
-    msg_ = msg.remove_content()
+    msg_ = remove_content_from_message(msg)
     assert msg_.content == RecordDict()
     assert msg_.metadata == msg.metadata
 
     # Prepare message w/ error
     msg = make_message(error=Error(code=1), metadata=RecordMaker(1).metadata())
     # Execute (expected to have an identical message returned)
-    msg_ = msg.remove_content()
+    msg_ = remove_content_from_message(msg)
     assert msg_.error == msg.error
     assert msg_.object_id == msg.object_id
