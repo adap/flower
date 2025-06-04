@@ -162,9 +162,10 @@ class StateTest(unittest.TestCase):
     def test_get_run_ids_with_pending_messages(self) -> None:
         """Test retrieving run IDs with pending messages."""
         # Prepare: store messages for runs 1, 2, and 3
-        # Run 1 has a pending message, run 2 has a token, run 3 has a reply
-        # run 4 has a retrieved message (not pending)
-        # run 5 used to have a token but it was deleted
+        # Run 1 has a pending message, run 2 has a token, run 3 has a reply,
+        # run 4 has a retrieved message (not pending),
+        #  and run 5 was assigned a token but was later deleted due to
+        # `flwr-clientapp` finishing the handling of a message.
         self.state.store_message(make_dummy_message(1, False, "msg1"))
         self.state.store_message(make_dummy_message(2, False, "msg2"))
         self.state.store_message(make_dummy_message(3, True, "msg3"))
@@ -178,7 +179,7 @@ class StateTest(unittest.TestCase):
         # Execute
         run_ids = self.state.get_run_ids_with_pending_messages()
 
-        # Assert: only run 1 should be returned
+        # Assert: run 1 and run 5 should be returned
         self.assertEqual(set(run_ids), {1, 5})
 
     def test_create_verify_and_delete_token(self) -> None:

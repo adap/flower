@@ -22,6 +22,7 @@ from threading import Lock
 from typing import Optional
 
 from flwr.common import Context, Message
+from flwr.common.constant import FLWR_APP_TOKEN_LENGTH
 from flwr.common.typing import Run
 
 from .nodestate import NodeState
@@ -171,7 +172,7 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
 
     def create_token(self, run_id: int) -> str:
         """Create a token for the given run ID."""
-        token = secrets.token_hex(128)  # Generate a random token
+        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
         with self.lock_token_store:
             if run_id in self.token_store:
                 raise ValueError("Token already created for this run ID")
