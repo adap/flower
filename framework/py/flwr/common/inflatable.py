@@ -134,7 +134,7 @@ def _get_object_head(object_content: bytes) -> bytes:
 def _get_object_body(object_content: bytes) -> bytes:
     """Return object body from object content."""
     index = object_content.find(HEAD_BODY_DIVIDER)
-    return object_content[index + 1 :]
+    return object_content[index + len(HEAD_BODY_DIVIDER):]
 
 
 def is_valid_sha256_hash(object_id: str) -> bool:
