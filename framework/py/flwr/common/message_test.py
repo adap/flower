@@ -479,6 +479,7 @@ def test_remove_content_from_message() -> None:
     # Execute (expected content to be an empty RecordDict)
     msg_ = msg.remove_content()
     assert msg_.content == RecordDict()
+    assert msg_.metadata == msg.metadata
 
     # Prepare message w/ error
     msg = make_message(error=Error(code=1), metadata=RecordMaker(1).metadata())
