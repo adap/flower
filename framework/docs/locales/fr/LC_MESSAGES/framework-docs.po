@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-06-02 00:08+0000\n"
+"POT-Creation-Date: 2025-06-04 00:07+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -6074,8 +6074,8 @@ msgid ""
 "changed via the ``FLWR_LOG_LEVEL`` environment variable to any other "
 "levels that Python's `logging module "
 "<https://docs.python.org/3/library/logging.html#logging-levels>`_ "
-"supports. For example, to launch your ``SuperLink`` showing ``DEBUG`` "
-"logs do:"
+"supports. For example, to launch your ``SuperLink`` with ``DEBUG`` logs, "
+"use:"
 msgstr ""
 
 #: ../../source/how-to-configure-logging.rst:31
@@ -6131,7 +6131,7 @@ msgid ""
 "the duration of the run. This could be anything from intermediate results"
 " such as the history of training losses (e.g. as a list of `float` values"
 " with a new entry appended each time the ``ClientApp`` is executed), "
-"certain parts of the model that should persist at the client side, or "
+"certain parts of the model that should persist on the client side, or "
 "some other arbitrary Python objects. These items would need to be "
 "serialized before saving them into the context."
 msgstr ""
@@ -6170,12 +6170,12 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-design-stateful-clients.rst:88
-msgid "Make the ``context.state`` reachable withing your client class"
+msgid "Make the ``context.state`` reachable within your client class"
 msgstr ""
 
 #: ../../source/how-to-design-stateful-clients.rst:89
 msgid ""
-"Initialise the appropiate record type (in this example we use "
+"Initialise the appropriate record type (in this example we use "
 "ConfigRecord_) and save/read your entry when required."
 msgstr ""
 
@@ -6653,7 +6653,7 @@ msgstr "L'abstraction :code:`Stratégie`"
 #: ../../source/how-to-implement-strategies.rst:17
 #, fuzzy
 msgid ""
-"All strategy implementation are derived from the abstract base class "
+"All strategy implementations are derived from the abstract base class "
 "``flwr.server.strategy.Strategy``, both built-in implementations and "
 "third party implementations. This means that custom strategy "
 "implementations have the exact same capabilities at their disposal as "
@@ -30359,7 +30359,7 @@ msgid ""
 " with a deployed Flower federation consisting of SuperLink and "
 "SuperNodes. From a networking perspective, the ``flwr`` CLI acts as a "
 "gRPC client and the SuperLink acts as a gRPC server. The ``flwr`` CLI is "
-"the only way for a user (AI researchers, data scientist) to inferface "
+"the only way for a user (AI researchers, data scientist) to interface "
 "with a deployed Flower federation. They cannot, for example, interface "
 "directly with SuperNodes connected to the SuperLink. The ``flwr`` CLI to "
 "SuperLink connection should always use TLS, but ``insecure`` mode is "
@@ -31118,9 +31118,10 @@ msgstr ""
 "sans envoyer de mesures."
 
 #: ../../source/ref-telemetry.md:58
+#, fuzzy
 msgid ""
-"The inspect Flower telemetry without sending any anonymous usage metrics,"
-" use both environment variables:"
+"To inspect Flower telemetry without sending any anonymous usage metrics, "
+"use both environment variables:"
 msgstr ""
 "L'inspecteur Flower telemetry sans envoyer de métriques d'utilisation "
 "anonymes, utilise les deux variables d'environnement :"
@@ -31297,7 +31298,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Check the `source code <https://github.com/adap/flower/tree/main/examples"
-"/quickstart-fastai>`_ of this tutorial in ``examples/quickstart-fasai`` "
+"/quickstart-fastai>`_ of this tutorial in ``examples/quickstart-fastai`` "
 "in the Flower GitHub repository."
 msgstr ""
 "Félicitations ! Tu as réussi à construire et à faire fonctionner ton "
@@ -32376,11 +32377,11 @@ msgstr ""
 msgid ""
 "Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` "
 "defined above by means of a ``client_fn()`` callback. Note that the "
-"``context`` enables you to get access to hyperparemeters defined in your "
+"``context`` enables you to get access to hyperparameters defined in your "
 "``pyproject.toml`` to configure the run. In this tutorial we access the "
 "`local-epochs` setting to control the number of epochs a ``ClientApp`` "
 "will perform when running the ``fit()`` method. You could define "
-"additioinal hyperparameters in ``pyproject.toml`` and access them here."
+"additional hyperparameters in ``pyproject.toml`` and access them here."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:261
@@ -34963,7 +34964,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|967a8bf9d6c14cdd8948fce8b75ca6bc|"
+msgid "|9ebe8262c4194c44ba4a2be53c980aee|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -34982,7 +34983,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|ac7a8d58d51a41fabeaa868e5736ff67|"
+msgid "|c88f55f67d464e8d801e8b0439319406|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -35014,7 +35015,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|dcff43e865c44d6a96b29fa499a6fc51|"
+msgid "|eec321d625ed4b979c8b85739cba24a0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -35035,7 +35036,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|71cc359afa22476e92264e99292bd109|"
+msgid "|b5b85bb0f2e746b3b21bbc93064f1713|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -35057,7 +35058,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|135933cea091442182b81324216f40ed|"
+msgid "|d3a699b267c24d189bbcd5c7d88aa24c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -35078,7 +35079,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|e484b55a0c9b426dbf3025eea769c973|"
+msgid "|3f52e8713ba1464190546013d5071ca9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -35104,7 +35105,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|098cb730392848bc860f4113150e2cd2|"
+msgid "|c900d15cd53c48fa9534b4f3b52e6a7c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -35123,7 +35124,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|0b3b2de22eb3416582bb41bbe5f70a75|"
+msgid "|24d650391e6b470bb8e3ca6bf72765a7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -35354,7 +35355,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|e053b98d409c46cbb290a525e911cf1e|"
+msgid "|4ef0c0ddaf284853b908ec4826eda70e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -35389,7 +35390,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|5b9359f31d8f474ca35c53f64c012975|"
+msgid "|6adf6e99472145168f733cd3cb69edbd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -35422,7 +35423,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|8920230c6e7d42aa8ab16489589c34ee|"
+msgid "|c61759bdc5a4499b89fe87ba431e3864|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -35453,7 +35454,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|6a2c70ddd6e44cbdbf5053b74edd7141|"
+msgid "|d3a42aea8c914a12b431caf494172210|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -35513,7 +35514,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|d2e794a010b8458f8ef7a9566e5fe62d|"
+msgid "|406fac62cefb4c298cdb1a63db37ec87|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -35657,7 +35658,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|4ff5cbd7b624471daca8b1c17933fa41|"
+msgid "|9ffff0a65f2342a8bea9f0e9d282580d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -53155,5 +53156,133 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|497ea844d8d947bcbb290cee1a70008c|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "By default, the Flower logger uses "
+#~ "logging level ``INFO``. This can be "
+#~ "changed via the ``FLWR_LOG_LEVEL`` environment"
+#~ " variable to any other levels that"
+#~ " Python's `logging module "
+#~ "<https://docs.python.org/3/library/logging.html#logging-"
+#~ "levels>`_ supports. For example, to "
+#~ "launch your ``SuperLink`` showing ``DEBUG``"
+#~ " logs do:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When a ``ClientApp`` is executed it "
+#~ "receives a Context_. This context is "
+#~ "unique for each ``ClientApp``, meaning "
+#~ "that subsequent executions of the same"
+#~ " ``ClientApp`` from the same node "
+#~ "will receive the same ``Context`` "
+#~ "object. In the ``Context``, the "
+#~ "``.state`` attribute can be used to "
+#~ "store information that you would like"
+#~ " the ``ClientApp`` to have access to"
+#~ " for the duration of the run. "
+#~ "This could be anything from intermediate"
+#~ " results such as the history of "
+#~ "training losses (e.g. as a list of"
+#~ " `float` values with a new entry "
+#~ "appended each time the ``ClientApp`` is"
+#~ " executed), certain parts of the "
+#~ "model that should persist at the "
+#~ "client side, or some other arbitrary "
+#~ "Python objects. These items would need"
+#~ " to be serialized before saving them"
+#~ " into the context."
+#~ msgstr ""
+
+#~ msgid "Make the ``context.state`` reachable withing your client class"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Initialise the appropiate record type "
+#~ "(in this example we use ConfigRecord_)"
+#~ " and save/read your entry when "
+#~ "required."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**CLI to SuperLink (Exec API)**: The "
+#~ "``flwr`` `CLI command <ref-api-"
+#~ "cli.html>`_, typically run on the users"
+#~ " workstation, is used to interface "
+#~ "with a deployed Flower federation "
+#~ "consisting of SuperLink and SuperNodes. "
+#~ "From a networking perspective, the "
+#~ "``flwr`` CLI acts as a gRPC client"
+#~ " and the SuperLink acts as a "
+#~ "gRPC server. The ``flwr`` CLI is "
+#~ "the only way for a user (AI "
+#~ "researchers, data scientist) to inferface "
+#~ "with a deployed Flower federation. They"
+#~ " cannot, for example, interface directly"
+#~ " with SuperNodes connected to the "
+#~ "SuperLink. The ``flwr`` CLI to SuperLink"
+#~ " connection should always use TLS, "
+#~ "but ``insecure`` mode is supported for"
+#~ " local testing."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Finally, we can construct a "
+#~ "``ClientApp`` using the ``FlowerClient`` "
+#~ "defined above by means of a "
+#~ "``client_fn()`` callback. Note that the "
+#~ "``context`` enables you to get access"
+#~ " to hyperparemeters defined in your "
+#~ "``pyproject.toml`` to configure the run. "
+#~ "In this tutorial we access the "
+#~ "`local-epochs` setting to control the "
+#~ "number of epochs a ``ClientApp`` will"
+#~ " perform when running the ``fit()`` "
+#~ "method. You could define additioinal "
+#~ "hyperparameters in ``pyproject.toml`` and "
+#~ "access them here."
+#~ msgstr ""
+
+#~ msgid "|967a8bf9d6c14cdd8948fce8b75ca6bc|"
+#~ msgstr ""
+
+#~ msgid "|ac7a8d58d51a41fabeaa868e5736ff67|"
+#~ msgstr ""
+
+#~ msgid "|dcff43e865c44d6a96b29fa499a6fc51|"
+#~ msgstr ""
+
+#~ msgid "|71cc359afa22476e92264e99292bd109|"
+#~ msgstr ""
+
+#~ msgid "|135933cea091442182b81324216f40ed|"
+#~ msgstr ""
+
+#~ msgid "|e484b55a0c9b426dbf3025eea769c973|"
+#~ msgstr ""
+
+#~ msgid "|098cb730392848bc860f4113150e2cd2|"
+#~ msgstr ""
+
+#~ msgid "|0b3b2de22eb3416582bb41bbe5f70a75|"
+#~ msgstr ""
+
+#~ msgid "|e053b98d409c46cbb290a525e911cf1e|"
+#~ msgstr ""
+
+#~ msgid "|5b9359f31d8f474ca35c53f64c012975|"
+#~ msgstr ""
+
+#~ msgid "|8920230c6e7d42aa8ab16489589c34ee|"
+#~ msgstr ""
+
+#~ msgid "|6a2c70ddd6e44cbdbf5053b74edd7141|"
+#~ msgstr ""
+
+#~ msgid "|d2e794a010b8458f8ef7a9566e5fe62d|"
+#~ msgstr ""
+
+#~ msgid "|4ff5cbd7b624471daca8b1c17933fa41|"
 #~ msgstr ""
 

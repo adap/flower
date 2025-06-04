@@ -16,6 +16,8 @@
 
 
 import gc
+import os
+import threading
 import time
 from logging import DEBUG, ERROR, INFO
 from typing import Optional
@@ -54,14 +56,19 @@ from flwr.proto.clientappio_pb2 import (
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 
 
-def run_clientapp(  # pylint: disable=R0914
+def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     clientappio_api_address: str,
     run_once: bool,
     token: Optional[int] = None,
     flwr_dir: Optional[str] = None,
     certificates: Optional[bytes] = None,
+    parent_pid: Optional[int] = None,
 ) -> None:
     """Run Flower ClientApp process."""
+    # Monitor the main process in case of SIGKILL
+    if parent_pid is not None:
+        start_parent_process_monitor(parent_pid)
+
     channel = create_channel(
         server_address=clientappio_api_address,
         insecure=(certificates is None),
@@ -149,6 +156,20 @@ def run_clientapp(  # pylint: disable=R0914
         log(ERROR, "GRPC error occurred: %s", str(e))
     finally:
         channel.close()
+
+
+def start_parent_process_monitor(
+    parent_pid: int,
+) -> None:
+    """Monitor the parent process and exit if it terminates."""
+
+    def monitor() -> None:
+        while True:
+            time.sleep(0.2)
+            if os.getppid() != parent_pid:
+                os.kill(os.getpid(), 9)
+
+    threading.Thread(target=monitor, daemon=True).start()
 
 
 def get_token(stub: grpc.Channel) -> Optional[int]:
