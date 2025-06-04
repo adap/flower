@@ -57,13 +57,13 @@ def validate_object_content(content: bytes) -> None:
                 )
 
         # Check that object type is recognized
-        if obj_type not in inflatable_class_registry.keys():
+        if obj_type not in inflatable_class_registry:
             raise ValueError(f"Object of type {obj_type} is not supported.")
 
         # Check if the body length matches in the head
         # matches that of the body
         actual_body_len = len(body)
-        if actual_body_len != body_len:
+        if actual_body_len != int(body_len):
             raise ValueError(
                 f"Object content length expected {body_len} bytes but got "
                 f"{actual_body_len} bytes."
@@ -72,5 +72,5 @@ def validate_object_content(content: bytes) -> None:
     except ValueError as err:
         log(ERROR, err)
         raise UnexpectedObjectContentError(
-            object_id=get_object_id(content), reason=err
+            object_id=get_object_id(content), reason=str(err)
         ) from err
