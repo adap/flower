@@ -210,7 +210,7 @@ class GrpcGrid(Grid):
         # Call GrpcServerAppIoStub method
         res: PushInsMessagesResponse = self._stub.PushMessages(
             PushInsMessagesRequest(
-                messages_list=[message_to_proto(message)],
+                messages_list=[message_to_proto(message.remove_content())],
                 run_id=run_id,
                 msg_to_descendant_mapping=descendants_mapping,
             )

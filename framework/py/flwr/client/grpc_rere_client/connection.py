@@ -305,7 +305,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             return
 
         # Serialize Message
-        message_proto = message_to_proto(message=message)
+        message_proto = message_to_proto(message=message.remove_content())
         descendants_mapping = get_message_to_descendant_id_mapping(message)
         request = PushMessagesRequest(
             node=node,

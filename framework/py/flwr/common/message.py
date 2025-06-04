@@ -418,6 +418,16 @@ class Message(InflatableObject):
             error=error,
         )
 
+    def remove_content(self) -> Message:
+        """Return a copy of the Message but with an empty RecordDict as content.
+
+        If message has no content, it returns itself.
+        """
+        if self.has_error():
+            return self
+
+        return make_message(metadata=self.metadata, content=RecordDict())
+
 
 def make_message(
     metadata: Metadata, content: RecordDict | None = None, error: Error | None = None
