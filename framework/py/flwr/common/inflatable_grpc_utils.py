@@ -103,10 +103,8 @@ def push_object_to_servicer(
     object_id = get_object_id(object_content)
     # Push always if no object set is specified, or if the object is in the set
     if object_ids_to_push is None or object_id in object_ids_to_push:
-        try:
-            push_object_fn(object_id, object_content)
-        except ObjectIdNotPreregisteredError:
-            raise  # Raise if the object ID is not pre-registered
+        # The function may raise an error if the object ID is not pre-registered
+        push_object_fn(object_id, object_content)
         pushed_object_ids.add(object_id)
 
     return pushed_object_ids
@@ -136,12 +134,11 @@ def pull_object_from_servicer(
     # Pull object
     while True:
         try:
+            # The function may raise an error if the object ID is not pre-registered
             object_content: bytes = pull_object_fn(object_id)
             break  # Exit loop if object is successfully pulled
         except ObjectUnavailableError:
             sleep(0.1)  # Retry after a short delay
-        except ObjectIdNotPreregisteredError:
-            raise  # Raise if the object ID is not pre-registered
 
     # Extract object class and object_ids of children
     obj_type, children_obj_ids, _ = get_object_head_values_from_object_content(
