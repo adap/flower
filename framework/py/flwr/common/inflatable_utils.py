@@ -14,7 +14,6 @@
 # ==============================================================================
 """InflatableObject utilities."""
 
-from logging import ERROR
 
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 from .inflatable import (
@@ -23,7 +22,6 @@ from .inflatable import (
     is_valid_sha256_hash,
 )
 from .inflatable_grpc_utils import inflatable_class_registry
-from .logger import log
 
 
 def validate_object_content(content: bytes) -> None:
@@ -71,7 +69,6 @@ def validate_object_content(content: bytes) -> None:
             )
 
     except ValueError as err:
-        log(ERROR, err)
         raise UnexpectedObjectContentError(
             object_id=get_object_id(content), reason=str(err)
         ) from err
