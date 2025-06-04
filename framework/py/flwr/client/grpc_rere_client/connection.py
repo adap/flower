@@ -31,6 +31,8 @@ from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTER
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.inflatable_grpc_utils import (
+    make_pull_object_fn_grpc,
+    make_push_object_fn_grpc,
     pull_object_from_servicer,
     push_object_to_servicer,
 )
@@ -265,9 +267,11 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
                 Message,
                 pull_object_from_servicer(
                     object_id=message_proto.metadata.message_id,
-                    stub=stub,
-                    node=node,
-                    run_id=message_proto.metadata.run_id,
+                    pull_object_fn=make_pull_object_fn_grpc(
+                        pull_object_grpc=stub.PullObject,
+                        node=node,
+                        run_id=message_proto.metadata.run_id,
+                    ),
                 ),
             )
 
@@ -318,9 +322,11 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             objs_to_push = set(response.objects_to_push[message.object_id].object_ids)
             push_object_to_servicer(
                 message,
-                stub,
-                node,
-                run_id=message.metadata.run_id,
+                push_object_fn=make_push_object_fn_grpc(
+                    push_object_grpc=stub.PushObject,
+                    node=node,
+                    run_id=message.metadata.run_id,
+                ),
                 object_ids_to_push=objs_to_push,
             )
             log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
