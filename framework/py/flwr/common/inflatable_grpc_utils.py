@@ -170,7 +170,7 @@ def make_pull_object_fn_grpc(
     pull_object_grpc : Callable[[PullObjectRequest], PullObjectResponse]
         The gRPC function to pull objects, e.g., `FleetStub.PullObject`.
     node : Node
-        The node from which to pull the object.
+        The node making the request.
     run_id : int
         The run ID for the current operation.
 
@@ -206,7 +206,7 @@ def make_push_object_fn_grpc(
     push_object_grpc : Callable[[PushObjectRequest], PushObjectResponse]
         The gRPC function to push objects, e.g., `FleetStub.PushObject`.
     node : Node
-        The node to which to push the object.
+        The node making the request.
     run_id : int
         The run ID for the current operation.
 
