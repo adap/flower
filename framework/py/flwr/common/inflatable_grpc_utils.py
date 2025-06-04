@@ -51,7 +51,6 @@ class ObjectUnavailableError(Exception):
 
     def __init__(self, object_id: str):
         super().__init__(f"Object with ID '{object_id}' is not yet available.")
-        self.object_id = object_id
 
 
 class ObjectIdNotPreregisteredError(Exception):
@@ -59,7 +58,6 @@ class ObjectIdNotPreregisteredError(Exception):
 
     def __init__(self, object_id: str):
         super().__init__(f"Object with ID '{object_id}' could not be found.")
-        self.object_id = object_id
 
 
 def push_object_to_servicer(
