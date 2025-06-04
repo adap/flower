@@ -138,7 +138,7 @@ HEAD_VALUE_DIVIDER = " "
 # Constants for serialization
 INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
 
-# Constant fod `flwr-serverapp` and `flwr-clientapp` CLI commands
+# Constants for `flwr-serverapp` and `flwr-clientapp` CLI commands
 FLWR_APP_TOKEN_LENGTH = 128  # Length of the token used
 
 
