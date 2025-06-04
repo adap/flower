@@ -127,12 +127,14 @@ def add_header_to_object_body(object_body: bytes, obj: InflatableObject) -> byte
 
 def _get_object_head(object_content: bytes) -> bytes:
     """Return object head from object content."""
-    return object_content.split(HEAD_BODY_DIVIDER, 1)[0]
+    index = object_content.find(HEAD_BODY_DIVIDER)
+    return object_content[:index]
 
 
 def _get_object_body(object_content: bytes) -> bytes:
     """Return object body from object content."""
-    return object_content.split(HEAD_BODY_DIVIDER, 1)[1]
+    index = object_content.find(HEAD_BODY_DIVIDER)
+    return object_content[index + 1 :]
 
 
 def is_valid_sha256_hash(object_id: str) -> bool:

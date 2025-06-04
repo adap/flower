@@ -18,6 +18,7 @@
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 from .inflatable import (
     UnexpectedObjectContentError,
+    _get_object_head,
     get_object_id,
     is_valid_sha256_hash,
 )
@@ -28,14 +29,14 @@ def validate_object_content(content: bytes) -> None:
     """Validate the deflated content of an InflatableObject."""
     try:
         # Check if there is a head-body divider
-        parts = content.split(HEAD_BODY_DIVIDER, 1)
-        if len(parts) != 2:
+        index = content.find(HEAD_BODY_DIVIDER)
+        if index == -1:
             raise ValueError(
                 "Unexpected format for object content. Head and body "
                 "could not be split."
             )
 
-        head, body = parts
+        head = _get_object_head(content)
 
         # check if the head has three parts:
         # <object_type> <children_ids> <object_body_len>
@@ -61,7 +62,7 @@ def validate_object_content(content: bytes) -> None:
                 raise ValueError(f"Object of type {obj_type} is not supported.")
 
         # Check if the body length in the head matches that of the body
-        actual_body_len = len(body)
+        actual_body_len = len(content) - len(head) - len(HEAD_BODY_DIVIDER)
         if actual_body_len != int(body_len):
             raise ValueError(
                 f"Object content length expected {body_len} bytes but got "
