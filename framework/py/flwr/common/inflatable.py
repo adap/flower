@@ -26,8 +26,8 @@ from .logger import log
 
 
 class UnexpectedObjectContentError(Exception):
-    """Exception raised when the content of an object does not follow the structure
-    (i.e. head, body, parts in the head) expected for an InflatableObject to have."""
+    """Exception raised when the content of an object does not conform to the expected
+    structure for an InflatableObject (i.e., head, body, and values within the head)."""
 
     def __init__(self, object_id: str, reason: str):
         super().__init__(
