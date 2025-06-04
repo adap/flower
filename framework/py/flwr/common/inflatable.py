@@ -25,6 +25,16 @@ from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 from .logger import log
 
 
+class UnexpectedObjectContentError(Exception):
+    """Exception raised when the content of an object does not follow the structure
+    (i.e. head, body, parts in the head) expected for an InflatableObject to have."""
+
+    def __init__(self, object_id: str, reason: str):
+        super().__init__(
+            f"Object with ID '{object_id}' has an unexpected structure. {reason}"
+        )
+
+
 class InflatableObject:
     """Base class for inflatable objects."""
 
