@@ -60,8 +60,7 @@ def validate_object_content(content: bytes) -> None:
         if obj_type not in inflatable_class_registry:
             raise ValueError(f"Object of type {obj_type} is not supported.")
 
-        # Check if the body length matches in the head
-        # matches that of the body
+        # Check if the body length in the head matches that of the body
         actual_body_len = len(body)
         if actual_body_len != int(body_len):
             raise ValueError(
