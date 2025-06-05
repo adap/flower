@@ -36,6 +36,7 @@ from flwr.common.constant import (
 )
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.proto.node_pb2 import NodeInfo
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
 
@@ -66,8 +67,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def __init__(self) -> None:
 
-        # Map node_id to (online_until, heartbeat_interval)
-        self.node_ids: dict[int, tuple[float, float]] = {}
+        # Map node_id to (online_until, heartbeat_interval, grpc-peer)
+        self.node_ids: dict[int, tuple[float, float, str]] = {}
         self.public_key_to_node_id: dict[bytes, int] = {}
         self.node_id_to_public_key: dict[int, bytes] = {}
 
@@ -317,7 +318,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.message_res_store)
 
-    def create_node(self, heartbeat_interval: float) -> int:
+    def create_node(
+        self, heartbeat_interval: float, metadata: Optional[dict[str, str]] = None
+    ) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(
@@ -329,10 +332,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
-            # Mark the node online until time.time() + heartbeat_interval
+            # Mark the node online util time.time() + heartbeat_interval
             self.node_ids[node_id] = (
                 time.time() + heartbeat_interval,
                 heartbeat_interval,
+                metadata,
             )
             return node_id
 
@@ -362,9 +366,27 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             current_time = time.time()
             return {
                 node_id
-                for node_id, (online_until, _) in self.node_ids.items()
+                for node_id, (online_until, _, _) in self.node_ids.items()
                 if online_until > current_time
             }
+
+    def get_nodes_info(self) -> list[NodeInfo]:
+        """Retrieve info about all connected nodes."""
+        nodes_info = []
+        current_time = time.time()
+        for node_id, (online_until, _, metadata) in self.node_ids.items():
+            is_online = online_until > current_time
+            loc_n = float(metadata.pop('coo_n'))
+            loc_e = float(metadata.pop('coo_e'))
+            node_info = NodeInfo(
+                node_id=node_id, is_online=is_online, metadata=metadata, loc={'coo_e': loc_e, 'coo_n': loc_n}
+            )
+            # add back
+            metadata["coo_n"] = loc_n
+            metadata["coo_e"] = loc_e
+            nodes_info.append(node_info)
+
+        return nodes_info
 
     def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
         """Set `public_key` for the specified `node_id`."""
@@ -586,6 +608,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 self.node_ids[node_id] = (
                     time.time() + HEARTBEAT_PATIENCE * heartbeat_interval,
                     heartbeat_interval,
+                    self.node_ids[node_id][-1],
                 )
                 return True
         return False

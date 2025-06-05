@@ -16,13 +16,30 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 class CreateNodeRequest(google.protobuf.message.Message):
     """CreateNode messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class MetadataEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        value: typing.Text
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Text = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
     HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
+    METADATA_FIELD_NUMBER: builtins.int
     heartbeat_interval: builtins.float
+    @property
+    def metadata(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
     def __init__(self,
         *,
         heartbeat_interval: builtins.float = ...,
+        metadata: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["heartbeat_interval",b"heartbeat_interval"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["heartbeat_interval",b"heartbeat_interval","metadata",b"metadata"]) -> None: ...
 global___CreateNodeRequest = CreateNodeRequest
 
 class CreateNodeResponse(google.protobuf.message.Message):

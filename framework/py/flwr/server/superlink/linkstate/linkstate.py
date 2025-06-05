@@ -21,6 +21,7 @@ from typing import Optional
 from flwr.common import Context, Message
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.proto.node_pb2 import NodeInfo
 
 
 class LinkState(abc.ABC):  # pylint: disable=R0904
@@ -127,7 +128,9 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Get all instruction Message IDs for the given run_id."""
 
     @abc.abstractmethod
-    def create_node(self, heartbeat_interval: float) -> int:
+    def create_node(
+        self, heartbeat_interval: float, metadata: Optional[dict[str, str]] = None
+    ) -> int:
         """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod
@@ -143,6 +146,10 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
+
+    @abc.abstractmethod
+    def get_nodes_info(self) -> list[NodeInfo]:
+        """Retrieve info about all connected nodes."""
 
     @abc.abstractmethod
     def set_node_public_key(self, node_id: int, public_key: bytes) -> None:

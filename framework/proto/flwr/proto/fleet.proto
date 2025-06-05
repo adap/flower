@@ -52,7 +52,10 @@ service Fleet {
 }
 
 // CreateNode messages
-message CreateNodeRequest { double heartbeat_interval = 1; }
+message CreateNodeRequest {
+  double heartbeat_interval = 1;
+  map<string, string> metadata = 2;
+}
 message CreateNodeResponse { Node node = 1; }
 
 // DeleteNode messages

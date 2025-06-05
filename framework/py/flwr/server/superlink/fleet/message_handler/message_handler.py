@@ -59,11 +59,15 @@ from ...utils import store_mapping_and_register_objects
 
 def create_node(
     request: CreateNodeRequest,  # pylint: disable=unused-argument
+    peer: str,
     state: LinkState,
 ) -> CreateNodeResponse:
     """."""
     # Create node
-    node_id = state.create_node(heartbeat_interval=request.heartbeat_interval)
+    node_id = state.create_node(
+        heartbeat_interval=request.heartbeat_interval,
+        metadata={"address": peer, **request.metadata},
+    )
     return CreateNodeResponse(node=Node(node_id=node_id))
 
 

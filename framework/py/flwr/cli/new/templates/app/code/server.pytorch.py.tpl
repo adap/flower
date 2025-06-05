@@ -1,10 +1,20 @@
 """$project_name: A Flower / $framework_str app."""
 
-from flwr.common import Context, ndarrays_to_parameters
+from typing import List, Tuple
+from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 from $import_name.task import Net, get_weights
 
+
+# Define metric aggregation function
+def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+    # Multiply accuracy of each client by number of examples used
+    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
+    examples = [num_examples for num_examples, _ in metrics]
+
+    # Aggregate and return custom metric (weighted average)
+    return {"accuracy": sum(accuracies) / sum(examples)}
 
 def server_fn(context: Context):
     # Read from config
@@ -20,6 +30,7 @@ def server_fn(context: Context):
         fraction_fit=fraction_fit,
         fraction_evaluate=1.0,
         min_available_clients=2,
+        evaluate_metrics_aggregation_fn=weighted_average,
         initial_parameters=parameters,
     )
     config = ServerConfig(num_rounds=num_rounds)

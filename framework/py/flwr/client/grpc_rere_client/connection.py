@@ -207,11 +207,25 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     heartbeat_sender = HeartbeatSender(send_node_heartbeat)
 
-    def create_node() -> Optional[int]:
+    def create_node(
+        node_name: str, node_city: str, node_country: str, coo_n: str, coo_e: str, flops:str
+    ) -> Optional[int]:
         """Set create_node."""
         # Call FleetAPI
         create_node_request = CreateNodeRequest(
-            heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
+            heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
+            metadata={
+                "name": node_name,
+                "city": node_city,
+                "country": node_country,
+                "coo_n": coo_n,
+                "coo_e": coo_e,
+                "flops": flops,
+            },
+        )
+        create_node_response = retry_invoker.invoke(
+            stub.CreateNode,
+            request=create_node_request,
         )
         create_node_response = stub.CreateNode(request=create_node_request)
 
