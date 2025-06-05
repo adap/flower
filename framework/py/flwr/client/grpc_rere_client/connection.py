@@ -228,10 +228,6 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
                 "flops": flops,
             },
         )
-        create_node_response = retry_invoker.invoke(
-            stub.CreateNode,
-            request=create_node_request,
-        )
         create_node_response = stub.CreateNode(request=create_node_request)
 
         # Remember the node and start the heartbeat sender
