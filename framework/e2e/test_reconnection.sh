@@ -130,4 +130,5 @@ if [ "$found_success" = false ]; then
     kill $cl1_pid; kill $cl2_pid
     sleep 3
     check_and_kill "$sl_pids"
+    sleep 2
 fi
