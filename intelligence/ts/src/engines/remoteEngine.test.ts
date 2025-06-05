@@ -23,6 +23,8 @@ const INT_TIMESTAMP = 1741267187353;
 vi.mock('./constants', () => ({
   DEFAULT_MODEL: 'meta/llama3.2-1b/instruct-fp16',
   REMOTE_URL: REMOTE_URL,
+  VERSION: '0.1.7',
+  SDK: 'TS',
 }));
 
 import { getTimestamp, CryptographyHandler, KeyManager, NetworkService } from './remoteEngine';

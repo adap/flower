@@ -31,7 +31,7 @@ Step 1: Set Up
        :substitutions:
 
        $ git clone --depth=1 --branch v|stable_flwr_version| https://github.com/adap/flower.git _tmp \
-                   && mv _tmp/src/docker/complete . \
+                   && mv _tmp/framework/docker/complete . \
                    && rm -rf _tmp && cd complete
 
 2. Create a new Flower project (PyTorch):

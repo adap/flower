@@ -78,9 +78,3 @@ and activate the virtual environment with:
 .. code-block:: shell
 
     conda activate flower-3.10.12
-
-And then?
----------
-
-As soon as you created your virtual environment you clone one of the `Flower examples
-<https://github.com/adap/flower/tree/main/examples/>`_.
