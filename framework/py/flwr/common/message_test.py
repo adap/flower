@@ -26,7 +26,7 @@ import pytest
 
 from ..app.error import Error
 from ..app.metadata import Metadata
-from . import RecordDict
+from . import ConfigRecord, RecordDict
 from .constant import MESSAGE_TTL_TOLERANCE
 from .date import now
 from .inflatable import (
@@ -34,7 +34,13 @@ from .inflatable import (
     get_object_children_ids_from_object_content,
     get_object_type_from_object_content,
 )
-from .message import DEFAULT_TTL, Message, MessageInitializationError, make_message
+from .message import (
+    DEFAULT_TTL,
+    Message,
+    MessageInitializationError,
+    make_message,
+    remove_content_from_message,
+)
 from .serde import message_to_proto
 from .serde_test import RecordMaker
 
@@ -467,3 +473,23 @@ def test_object_id_excludes_message_id_in_metadata() -> None:
 
     # Assert
     assert object_id == msg.object_id
+
+
+def test_remove_content_from_message() -> None:
+    """Test remove_content method."""
+    # Prepare message w/ content
+    msg = make_message(
+        content=RecordDict({"a": ConfigRecord()}), metadata=RecordMaker(1).metadata()
+    )
+
+    # Execute (expected content to be an empty RecordDict)
+    msg_ = remove_content_from_message(msg)
+    assert msg_.content == RecordDict()
+    assert msg_.metadata == msg.metadata
+
+    # Prepare message w/ error
+    msg = make_message(error=Error(code=1), metadata=RecordMaker(1).metadata())
+    # Execute (expected to have an identical message returned)
+    msg_ = remove_content_from_message(msg)
+    assert msg_.error == msg.error
+    assert msg_.object_id == msg.object_id
