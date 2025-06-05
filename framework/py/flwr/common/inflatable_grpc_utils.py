@@ -100,6 +100,10 @@ def pull_object_from_servicer(
         object_proto: PullObjectResponse = stub.PullObject(
             PullObjectRequest(node=node, run_id=run_id, object_id=object_id)
         )
+        if not object_proto.object_found:
+            raise KeyError(
+                f"Object with ID {object_id} could not be found in the ObjectStore."
+            )
         object_available = object_proto.object_available
         object_content = object_proto.object_content
         sleep(0.1)

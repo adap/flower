@@ -261,15 +261,20 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         in_message: Optional[Message] = None
 
         if message_proto:
-            in_message = cast(
-                Message,
-                pull_object_from_servicer(
-                    object_id=message_proto.metadata.message_id,
-                    stub=stub,
-                    node=node,
-                    run_id=message_proto.metadata.run_id,
-                ),
-            )
+            try:
+                in_message = cast(
+                    Message,
+                    pull_object_from_servicer(
+                        object_id=message_proto.metadata.message_id,
+                        stub=stub,
+                        node=node,
+                        run_id=message_proto.metadata.run_id,
+                    ),
+                )
+            except RunNotRunningException:
+                log(ERROR, "Run stopped running.")
+            except KeyError as ke:
+                log(ERROR, ke)
 
         if in_message:
             # The deflated message doesn't contain the message_id (its own object_id)
