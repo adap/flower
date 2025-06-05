@@ -391,7 +391,7 @@ def start_client_internal(
                             node_country=node_country,
                             coo_n=coo_n,
                             coo_e=coo_e,
-                            flops=flops
+                            flops=flops,
                         )
                     ) is None:
                         raise ValueError(

@@ -376,10 +376,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         current_time = time.time()
         for node_id, (online_until, _, metadata) in self.node_ids.items():
             is_online = online_until > current_time
-            loc_n = float(metadata.pop('coo_n'))
-            loc_e = float(metadata.pop('coo_e'))
+            loc_n = float(metadata.pop("coo_n"))
+            loc_e = float(metadata.pop("coo_e"))
             node_info = NodeInfo(
-                node_id=node_id, is_online=is_online, metadata=metadata, loc={'coo_e': loc_e, 'coo_n': loc_n}
+                node_id=node_id,
+                is_online=is_online,
+                metadata=metadata,
+                loc={"coo_e": loc_e, "coo_n": loc_n},
             )
             # add back
             metadata["coo_n"] = loc_n

@@ -208,7 +208,12 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     heartbeat_sender = HeartbeatSender(send_node_heartbeat)
 
     def create_node(
-        node_name: str, node_city: str, node_country: str, coo_n: str, coo_e: str, flops:str
+        node_name: str,
+        node_city: str,
+        node_country: str,
+        coo_n: str,
+        coo_e: str,
+        flops: str,
     ) -> Optional[int]:
         """Set create_node."""
         # Call FleetAPI
