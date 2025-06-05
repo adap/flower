@@ -30,9 +30,13 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
-        run: python -m poetry install --all-extras
+        run: |
+          cd dev
+          python -m poetry install --all-extras
       - name: Check docs format
-        run: docstrfmt --check intelligence/docs/source
+        run: |
+          cd dev
+          docstrfmt --check ../intelligence/docs/source
   build_ts_docs:
     runs-on: ubuntu-22.04
     name: Build TypeScript Docs
@@ -95,9 +99,34 @@ jobs:
           name: swift-docs
           path: intelligence/docs/source/swift-api-ref/
 
+  build_kt_docs:
+    runs-on: ubuntu-22.04
+    name: Build Kotlin Docs
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build Kotlin docs
+        run: |
+          ./intelligence/dev/build-kt-docs.sh
+
+      - name: Upload Kotlin docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kt-docs
+          path: intelligence/docs/source/kt-api-ref/
+
   build_and_deploy:
     runs-on: ubuntu-22.04
-    needs: [build_ts_docs, build_swift_docs]
+    needs: [build_ts_docs, build_swift_docs, build_kt_docs]
     name: Deploy Docs
     steps:
       - uses: actions/checkout@v4
@@ -110,7 +139,9 @@ jobs:
         run: sudo apt install pandoc
       - name: Install Flower dependencies (mandatory only)
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
-        run: python -m poetry install --extras "simulation"
+        run: |
+          cd framework
+          python -m poetry install --extras "simulation"
       - name: Download TS docs
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         uses: actions/download-artifact@v4
@@ -123,6 +154,12 @@ jobs:
         with:
           name: swift-docs
           path: intelligence/docs/source/swift-api-ref/
+      - name: Download Kotlin docs
+        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
+        uses: actions/download-artifact@v4
+        with:
+          name: kt-docs
+          path: intelligence/docs/source/kt-api-ref/
       - name: Build final docs
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         run: |
