@@ -23,7 +23,7 @@ from datetime import datetime, timedelta, timezone
 from itertools import product
 from typing import Optional
 from unittest.mock import patch
-from uuid import UUID
+from uuid import uuid4
 
 from parameterized import parameterized
 
@@ -394,15 +394,19 @@ class StateTest(unittest.TestCase):
 
         # Insert one reply Message and retrieve it to mark it as delivered
         msg_res_0 = Message(Error(0), reply_to=msg_ins_list[0])
+        # pylint: disable-next=W0212
+        msg_res_0.metadata._message_id = str(uuid4())  # type: ignore
 
         _ = state.store_message_res(message=msg_res_0)
         retrieved_msg_res_0 = state.get_message_res(
-            message_ids={UUID(msg_res_0.metadata.reply_to_message_id)}
+            message_ids={msg_res_0.metadata.reply_to_message_id}
         )[0]
         assert retrieved_msg_res_0.error.code == 0
 
         # Insert one reply Message, but don't retrieve it
         msg_res_1 = Message(RecordDict(), reply_to=msg_ins_list[1])
+        # pylint: disable-next=W0212
+        msg_res_1.metadata._message_id = str(uuid4())  # type: ignore
         _ = state.store_message_res(message=msg_res_1)
 
         # Situation now:
@@ -756,8 +760,14 @@ class StateTest(unittest.TestCase):
         _ = state.store_message_ins(message=msg1)
 
         # Store replies
-        state.store_message_res(Message(RecordDict(), reply_to=msg0))
-        state.store_message_res(Message(RecordDict(), reply_to=msg1))
+        msg_rp0 = Message(RecordDict(), reply_to=msg0)
+        # pylint: disable-next=W0212
+        msg_rp0.metadata._message_id = str(uuid4())  # type: ignore
+        state.store_message_res(msg_rp0)
+        msg_rp1 = Message(RecordDict(), reply_to=msg1)
+        # pylint: disable-next=W0212
+        msg_rp1.metadata._message_id = str(uuid4())  # type: ignore
+        state.store_message_res(msg_rp1)
 
         # Execute
         num = state.num_message_res()
@@ -929,6 +939,8 @@ class StateTest(unittest.TestCase):
 
         # Create and store reply Messages
         res_message_0 = Message(content=RecordDict(), reply_to=in_message_0)
+        # pylint: disable-next=W0212
+        res_message_0.metadata._message_id = str(uuid4())  # type: ignore
         state.store_message_res(res_message_0)
 
         # Execute
@@ -1028,6 +1040,7 @@ class StateTest(unittest.TestCase):
             state.store_message_ins(message=msg)
 
             reply_msg = Message(RecordDict(), reply_to=msg)
+            reply_msg.metadata._message_id = str(uuid4())  # type: ignore
             reply_msg.metadata.created_at = msg_res_created_at
             reply_msg.metadata.ttl = msg_res_ttl
 
@@ -1117,7 +1130,8 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         message_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
         # Execute
-        message_res_list = state.get_message_res(message_ids={UUID(message_ins_id)})
+        message_res_list = state.get_message_res(message_ids={message_ins_id})
+        print(message_res_list)
 
         # Assert
         assert len(message_res_list) == 1
@@ -1143,6 +1157,7 @@ class StateTest(unittest.TestCase):
         ins_msg = state.get_message_ins(node_id=node_id, limit=1)[0]
         # Create reply and insert
         res_msg = Message(RecordDict(), reply_to=ins_msg)
+        res_msg.metadata._message_id = str(uuid4())  # type: ignore
         state.store_message_res(res_msg)
         assert state.num_message_res() == 1
 
@@ -1341,7 +1356,7 @@ def create_ins_message(
     return ProtoMessage(
         metadata=ProtoMetadata(
             run_id=run_id,
-            message_id="",
+            message_id=str(uuid4()),
             src_node_id=src_node_id,
             dst_node_id=dst_node_id,
             group_id="",
@@ -1349,7 +1364,7 @@ def create_ins_message(
             message_type="query",
             created_at=now().timestamp(),
         ),
-        content=ProtoRecordDict(arrays={}, metrics={}, configs={}),
+        content=ProtoRecordDict(),
     )
 
 

@@ -12,11 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower SuperNode."""
-
-
-from .app import run_supernode as run_supernode
-
-__all__ = [
-    "run_supernode",
-]
+"""Legacy components previously located in ``flwr.server``."""

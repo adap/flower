@@ -25,7 +25,7 @@ def save_results_as_pickle(
         If path is a directory, the default_filename will be used.
         path doesn't exist, it will be created. If file exists, a
         randomly generated suffix will be added to the file name. This
-        is done to avoid overwritting results.
+        is done to avoid overwriting results.
     extra_results : Dict
         A dictionary containing additional results you would like
         to be saved to disk. Default: {} (an empty dictionary)

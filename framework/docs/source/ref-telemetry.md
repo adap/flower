@@ -55,7 +55,7 @@ We wanted to make it very easy for you to inspect what anonymous usage metrics a
 FLWR_TELEMETRY_LOGGING=1 python server.py # or client.py
 ```
 
-The inspect Flower telemetry without sending any anonymous usage metrics, use both environment variables:
+To inspect Flower telemetry without sending any anonymous usage metrics, use both environment variables:
 
 ```bash
 FLWR_TELEMETRY_ENABLED=0 FLWR_TELEMETRY_LOGGING=1 python server.py # or client.py

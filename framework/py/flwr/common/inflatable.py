@@ -18,9 +18,11 @@
 from __future__ import annotations
 
 import hashlib
-from typing import TypeVar
+from logging import ERROR
+from typing import TypeVar, cast
 
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
+from .logger import log
 
 
 class InflatableObject:
@@ -55,12 +57,23 @@ class InflatableObject:
     @property
     def object_id(self) -> str:
         """Get object_id."""
-        return get_object_id(self.deflate())
+        if self.is_dirty or "_object_id" not in self.__dict__:
+            self.__dict__["_object_id"] = get_object_id(self.deflate())
+        return cast(str, self.__dict__["_object_id"])
 
     @property
     def children(self) -> dict[str, InflatableObject] | None:
         """Get all child objects as a dictionary or None if there are no children."""
         return None
+
+    @property
+    def is_dirty(self) -> bool:
+        """Check if the object is dirty after the last deflation.
+
+        An object is considered dirty if its content has changed since the last its
+        object ID was computed.
+        """
+        return True
 
 
 T = TypeVar("T", bound=InflatableObject)
@@ -112,6 +125,29 @@ def _get_object_body(object_content: bytes) -> bytes:
     return object_content.split(HEAD_BODY_DIVIDER, 1)[1]
 
 
+def is_valid_sha256_hash(object_id: str) -> bool:
+    """Check if the given string is a valid SHA-256 hash.
+
+    Parameters
+    ----------
+    object_id : str
+        The string to check.
+
+    Returns
+    -------
+    bool
+        ``True`` if the string is a valid SHA-256 hash, ``False`` otherwise.
+    """
+    if len(object_id) != 64:
+        return False
+    try:
+        # If base 16 int conversion succeeds, it's a valid hexadecimal str
+        int(object_id, 16)
+        return True
+    except ValueError:
+        return False
+
+
 def get_object_type_from_object_content(object_content: bytes) -> str:
     """Return object type from bytes."""
     return get_object_head_values_from_object_content(object_content)[0]
@@ -129,8 +165,12 @@ def get_object_body_len_from_object_content(object_content: bytes) -> int:
 
 def check_body_len_consistency(object_content: bytes) -> bool:
     """Check that the object body is of length as specified in the head."""
-    body_len = get_object_body_len_from_object_content(object_content)
-    return body_len == len(_get_object_body(object_content))
+    try:
+        body_len = get_object_body_len_from_object_content(object_content)
+        return body_len == len(_get_object_body(object_content))
+    except ValueError:
+        log(ERROR, "Object content does match the expected format.")
+        return False
 
 
 def get_object_head_values_from_object_content(
@@ -155,3 +195,23 @@ def get_object_head_values_from_object_content(
     obj_type, children_str, body_len = head.split(HEAD_VALUE_DIVIDER)
     children_ids = children_str.split(",") if children_str else []
     return obj_type, children_ids, int(body_len)
+
+
+def _get_descendants_object_ids_recursively(obj: InflatableObject) -> set[str]:
+
+    descendants: set[str] = set()
+    if children := obj.children:
+        for child in children.values():
+            descendants |= _get_descendants_object_ids_recursively(child)
+
+    descendants.add(obj.object_id)
+
+    return descendants
+
+
+def get_desdendant_object_ids(obj: InflatableObject) -> set[str]:
+    """Get a set of object IDs of all descendants."""
+    descendants = _get_descendants_object_ids_recursively(obj)
+    # Exclude Object ID of parent object
+    descendants.discard(obj.object_id)
+    return descendants

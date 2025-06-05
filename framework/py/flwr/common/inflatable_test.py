@@ -29,11 +29,13 @@ from .inflatable import (
     _get_object_head,
     add_header_to_object_body,
     check_body_len_consistency,
+    get_desdendant_object_ids,
     get_object_body,
     get_object_body_len_from_object_content,
     get_object_head_values_from_object_content,
     get_object_id,
     get_object_type_from_object_content,
+    is_valid_sha256_hash,
 )
 
 
@@ -178,6 +180,24 @@ def test_get_object_type_from_object_content() -> None:
     assert get_object_type_from_object_content(obj_b) == obj.__class__.__qualname__
 
 
+def test_is_valid_sha256_hash_valid() -> None:
+    """Test helper function that checks if a string is a valid SHA256 hash."""
+    # Prepare
+    valid_hash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+    # Execute & assert
+    assert is_valid_sha256_hash(valid_hash)
+
+
+def test_is_valid_sha256_hash_invalid() -> None:
+    """Test helper function that checks if a string is a valid SHA256 hash."""
+    # Prepare
+    invalid_hash = "invalid_hash"
+
+    # Execute & assert
+    assert not is_valid_sha256_hash(invalid_hash)
+
+
 def test_check_body_length() -> None:
     """Test helper function that checks if the specified body length in the object head
     matches the actual length of the object body."""
@@ -195,3 +215,26 @@ def test_check_body_length() -> None:
     obj_b_ = obj_b + b"more content"
     # Inconsistent: fails
     assert not check_body_len_consistency(obj_b_)
+
+    # Create object that doesn't comply with serialized object structure
+    obj_ = b"this is a test"
+    assert not check_body_len_consistency(obj_)
+
+
+@pytest.mark.parametrize(
+    "children",
+    [
+        [],
+        [CustomDataClass(b"child1 data")],
+        [CustomDataClass(b"child1 data"), CustomDataClass(b"child2 data")],
+    ],
+)
+def test_get_desdendants(children: list[InflatableObject]) -> None:
+    """Test computing list of object IDs for all descendants."""
+    data = b"this is a test"
+    obj = CustomDataClass(data)
+
+    obj.children = {child.object_id: child for child in children}
+
+    # Assert
+    assert get_desdendant_object_ids(obj) == {child.object_id for child in children}

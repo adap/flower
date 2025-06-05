@@ -43,6 +43,7 @@ from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 
 try:
     from starlette.applications import Starlette
@@ -113,9 +114,10 @@ async def pull_message(request: PullMessagesRequest) -> PullMessagesResponse:
     """Pull PullMessages."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+    store: ObjectStore = cast(ObjectStoreFactory, app.state.OBJECTSTORE_FACTORY).store()
 
     # Handle message
-    return message_handler.pull_messages(request=request, state=state)
+    return message_handler.pull_messages(request=request, state=state, store=store)
 
 
 @rest_request_response(PushMessagesRequest)
@@ -123,9 +125,10 @@ async def push_message(request: PushMessagesRequest) -> PushMessagesResponse:
     """Pull PushMessages."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+    store: ObjectStore = cast(ObjectStoreFactory, app.state.OBJECTSTORE_FACTORY).store()
 
     # Handle message
-    return message_handler.push_messages(request=request, state=state)
+    return message_handler.push_messages(request=request, state=state, store=store)
 
 
 @rest_request_response(SendNodeHeartbeatRequest)

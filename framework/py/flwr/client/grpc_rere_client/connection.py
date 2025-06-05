@@ -14,29 +14,33 @@
 # ==============================================================================
 """Contextmanager for a gRPC request-response channel to the Flower server."""
 
-
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from copy import copy
-from logging import ERROR
+from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from flwr.app.metadata import Metadata
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.heartbeat import HeartbeatSender
+from flwr.common.inflatable_grpc_utils import (
+    pull_object_from_servicer,
+    push_object_to_servicer,
+)
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
-from flwr.common.retry_invoker import RetryInvoker
+from flwr.common.message import Message, get_message_to_descendant_id_mapping
+from flwr.common.retry_invoker import RetryInvoker, _wrap_stub
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
 )
-from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
+from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -45,6 +49,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
@@ -73,10 +78,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
-        Optional[Callable[[], Optional[int]]],
-        Optional[Callable[[], None]],
-        Optional[Callable[[int], Run]],
-        Optional[Callable[[str, int], Fab]],
+        Callable[[], Optional[int]],
+        Callable[[], None],
+        Callable[[int], Run],
+        Callable[[str, int], Fab],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -158,6 +163,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     # If the status code is PERMISSION_DENIED, additionally raise RunNotRunningException
     retry_invoker.should_giveup = _should_giveup_fn
 
+    # Wrap stub
+    _wrap_stub(stub, retry_invoker)
     ###########################################################################
     # send_node_heartbeat/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
@@ -202,10 +209,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         create_node_request = CreateNodeRequest(
             heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
         )
-        create_node_response = retry_invoker.invoke(
-            stub.CreateNode,
-            request=create_node_request,
-        )
+        create_node_response = stub.CreateNode(request=create_node_request)
 
         # Remember the node and start the heartbeat sender
         nonlocal node
@@ -226,7 +230,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)
-        retry_invoker.invoke(stub.DeleteNode, request=delete_node_request)
+        stub.DeleteNode(request=delete_node_request)
 
         # Cleanup
         node = None
@@ -240,9 +244,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         # Request instructions (message) from server
         request = PullMessagesRequest(node=node)
-        response: PullMessagesResponse = retry_invoker.invoke(
-            stub.PullMessages, request=request
-        )
+        response: PullMessagesResponse = stub.PullMessages(request=request)
 
         # Get the current Messages
         message_proto = (
@@ -256,7 +258,24 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             message_proto = None
 
         # Construct the Message
-        in_message = message_from_proto(message_proto) if message_proto else None
+        in_message: Optional[Message] = None
+
+        if message_proto:
+            in_message = cast(
+                Message,
+                pull_object_from_servicer(
+                    object_id=message_proto.metadata.message_id,
+                    stub=stub,
+                    node=node,
+                    run_id=message_proto.metadata.run_id,
+                ),
+            )
+
+        if in_message:
+            # The deflated message doesn't contain the message_id (its own object_id)
+            # Inject
+            # pylint: disable-next=W0212
+            in_message.metadata._message_id = message_proto.metadata.message_id  # type: ignore
 
         # Remember `metadata` of the in message
         nonlocal metadata
@@ -278,6 +297,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "No current message")
             return
 
+        # Set message_id
+        message.metadata.__dict__["_message_id"] = message.object_id
         # Validate out message
         if not validate_out_message(message, metadata):
             log(ERROR, "Invalid out message")
@@ -285,8 +306,24 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         # Serialize Message
         message_proto = message_to_proto(message=message)
-        request = PushMessagesRequest(node=node, messages_list=[message_proto])
-        _ = retry_invoker.invoke(stub.PushMessages, request)
+        descendants_mapping = get_message_to_descendant_id_mapping(message)
+        request = PushMessagesRequest(
+            node=node,
+            messages_list=[message_proto],
+            msg_to_descendant_mapping=descendants_mapping,
+        )
+        response: PushMessagesResponse = stub.PushMessages(request=request)
+
+        if response.objects_to_push:
+            objs_to_push = set(response.objects_to_push[message.object_id].object_ids)
+            push_object_to_servicer(
+                message,
+                stub,
+                node,
+                run_id=message.metadata.run_id,
+                object_ids_to_push=objs_to_push,
+            )
+            log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
 
         # Cleanup
         metadata = None
@@ -294,10 +331,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     def get_run(run_id: int) -> Run:
         # Call FleetAPI
         get_run_request = GetRunRequest(node=node, run_id=run_id)
-        get_run_response: GetRunResponse = retry_invoker.invoke(
-            stub.GetRun,
-            request=get_run_request,
-        )
+        get_run_response: GetRunResponse = stub.GetRun(request=get_run_request)
 
         # Return fab_id and fab_version
         return run_from_proto(get_run_response.run)
@@ -305,10 +339,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     def get_fab(fab_hash: str, run_id: int) -> Fab:
         # Call FleetAPI
         get_fab_request = GetFabRequest(node=node, hash_str=fab_hash, run_id=run_id)
-        get_fab_response: GetFabResponse = retry_invoker.invoke(
-            stub.GetFab,
-            request=get_fab_request,
-        )
+        get_fab_response: GetFabResponse = stub.GetFab(request=get_fab_request)
 
         return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
 

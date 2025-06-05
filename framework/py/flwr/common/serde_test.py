@@ -39,6 +39,9 @@ from flwr.proto.recorddict_pb2 import MetricRecord as ProtoMetricRecord
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.proto.run_pb2 import Run as ProtoRun
 
+from ..app.error import Error
+from ..app.metadata import Metadata
+
 # pylint: enable=E0611
 from . import (
     Array,
@@ -49,7 +52,6 @@ from . import (
     RecordDict,
     typing,
 )
-from .message import Error, Metadata
 from .serde import (
     array_from_proto,
     array_record_from_proto,
@@ -210,10 +212,10 @@ class RecordMaker:
         min_max_bytes_size = (10, 1000)
 
         dtype = self.rng.choice(dtypes)
-        shape = [
+        shape = tuple(
             self.rng.randint(1, max_shape_size)
             for _ in range(self.rng.randint(1, max_shape_dim))
-        ]
+        )
         stype = self.rng.choice(stypes)
         data = self.randbytes(self.rng.randint(*min_max_bytes_size))
         return Array(dtype=dtype, shape=shape, stype=stype, data=data)
@@ -367,6 +369,24 @@ def test_recorddict_serialization_deserialization() -> None:
     # Assert
     assert isinstance(proto, ProtoRecordDict)
     assert original == deserialized
+
+
+def test_recorddict_key_order_stability() -> None:
+    """Test that RecordDict preserves key order."""
+    # Prepare
+    maker = RecordMaker(state=1)
+    original = maker.recorddict(10, 5, 5)
+
+    # Execute
+    proto = recorddict_to_proto(original)
+    deserialized = recorddict_from_proto(proto)
+
+    # Assert
+    assert isinstance(proto, ProtoRecordDict)
+    assert original == deserialized
+
+    # Check that keys are in the same order
+    assert list(original.keys()) == list(deserialized.keys())
 
 
 @pytest.mark.parametrize(

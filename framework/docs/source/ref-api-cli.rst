@@ -29,7 +29,7 @@ Basic Commands
 ~~~~~~~~~~~~~~~~~~~~
 
 .. argparse::
-    :module: flwr.client.supernode.app
+    :module: flwr.supernode.cli.flower_supernode
     :func: _parse_args_run_supernode
     :prog: flower-supernode
 

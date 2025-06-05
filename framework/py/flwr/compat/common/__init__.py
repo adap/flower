@@ -12,20 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract base class NodeState."""
-
-
-import abc
-from typing import Optional
-
-
-class NodeState(abc.ABC):
-    """Abstract NodeState."""
-
-    @abc.abstractmethod
-    def set_node_id(self, node_id: Optional[int]) -> None:
-        """Set the node ID."""
-
-    @abc.abstractmethod
-    def get_node_id(self) -> int:
-        """Get the node ID."""
+"""Legacy components previously located in ``flwr.common``."""

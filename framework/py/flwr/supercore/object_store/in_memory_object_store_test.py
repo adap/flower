@@ -12,27 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""In-memory NodeState implementation."""
+"""Tests for InMemoryObjectStore."""
 
 
-from typing import Optional
+import unittest
 
-from flwr.client.nodestate.nodestate import NodeState
+from .in_memory_object_store import InMemoryObjectStore
+from .object_store import ObjectStore
+from .object_store_test import ObjectStoreTest
 
 
-class InMemoryNodeState(NodeState):
-    """In-memory NodeState implementation."""
+class InMemoryObjectStoreTest(ObjectStoreTest):
+    """Test InMemoryObjectStore implementation."""
 
-    def __init__(self) -> None:
-        # Store node_id
-        self.node_id: Optional[int] = None
+    __test__ = True
 
-    def set_node_id(self, node_id: Optional[int]) -> None:
-        """Set the node ID."""
-        self.node_id = node_id
+    def object_store_factory(self) -> ObjectStore:
+        """Provide ObjectStore implementation to test."""
+        return InMemoryObjectStore()
 
-    def get_node_id(self) -> int:
-        """Get the node ID."""
-        if self.node_id is None:
-            raise ValueError("Node ID not set")
-        return self.node_id
+
+if __name__ == "__main__":
+    unittest.main()

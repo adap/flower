@@ -27,7 +27,7 @@ from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Any, Optional
+from typing import Any, Callable, Optional, TypeVar
 
 import grpc
 import yaml
@@ -37,13 +37,13 @@ from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
-from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.auth_plugin import ExecAuthPlugin, ExecAuthzPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
     AUTH_TYPE_YAML_KEY,
+    AUTHZ_TYPE_YAML_KEY,
     CLIENT_OCTET,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
-    FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     FLEET_API_REST_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
@@ -60,7 +60,7 @@ from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     public_key_to_bytes,
 )
@@ -71,17 +71,12 @@ from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.server.serverapp.app import flwr_serverapp
 from flwr.simulation.app import flwr_simulation
+from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
 
-from .client_manager import ClientManager
-from .history import History
-from .server import Server, init_defaults, run_fl
-from .server_config import ServerConfig
-from .strategy import Strategy
 from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
-from .superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.linkstate import LinkStateFactory
@@ -90,6 +85,7 @@ from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
+P = TypeVar("P", ExecAuthPlugin, ExecAuthzPlugin)
 
 
 try:
@@ -97,6 +93,7 @@ try:
         add_ee_args_superlink,
         get_dashboard_server,
         get_exec_auth_plugins,
+        get_exec_authz_plugins,
         get_exec_event_log_writer_plugins,
         get_fleet_event_log_writer_plugins,
     )
@@ -110,6 +107,10 @@ except ImportError:
         """Return all Exec API authentication plugins."""
         raise NotImplementedError("No authentication plugins are currently supported.")
 
+    def get_exec_authz_plugins() -> dict[str, type[ExecAuthzPlugin]]:
+        """Return all Exec API authorization plugins."""
+        raise NotImplementedError("No authorization plugins are currently supported.")
+
     def get_exec_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
         """Return all Exec API event log writer plugins."""
         raise NotImplementedError(
@@ -121,148 +122,6 @@ except ImportError:
         raise NotImplementedError(
             "No event log writer plugins are currently supported."
         )
-
-
-def start_server(  # pylint: disable=too-many-arguments,too-many-locals
-    *,
-    server_address: str = FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
-    server: Optional[Server] = None,
-    config: Optional[ServerConfig] = None,
-    strategy: Optional[Strategy] = None,
-    client_manager: Optional[ClientManager] = None,
-    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
-) -> History:
-    """Start a Flower server using the gRPC transport layer.
-
-    Warning
-    -------
-    This function is deprecated since 1.13.0. Use the :code:`flower-superlink` command
-    instead to start a SuperLink.
-
-    Parameters
-    ----------
-    server_address : Optional[str]
-        The IPv4 or IPv6 address of the server. Defaults to `"[::]:8080"`.
-    server : Optional[flwr.server.Server] (default: None)
-        A server implementation, either `flwr.server.Server` or a subclass
-        thereof. If no instance is provided, then `start_server` will create
-        one.
-    config : Optional[ServerConfig] (default: None)
-        Currently supported values are `num_rounds` (int, default: 1) and
-        `round_timeout` in seconds (float, default: None).
-    strategy : Optional[flwr.server.Strategy] (default: None).
-        An implementation of the abstract base class
-        `flwr.server.strategy.Strategy`. If no strategy is provided, then
-        `start_server` will use `flwr.server.strategy.FedAvg`.
-    client_manager : Optional[flwr.server.ClientManager] (default: None)
-        An implementation of the abstract base class
-        `flwr.server.ClientManager`. If no implementation is provided, then
-        `start_server` will use
-        `flwr.server.client_manager.SimpleClientManager`.
-    grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
-        The maximum length of gRPC messages that can be exchanged with the
-        Flower clients. The default should be sufficient for most models.
-        Users who train very large models might need to increase this
-        value. Note that the Flower clients need to be started with the
-        same value (see `flwr.client.start_client`), otherwise clients will
-        not know about the increased limit and block larger messages.
-    certificates : Tuple[bytes, bytes, bytes] (default: None)
-        Tuple containing root certificate, server certificate, and private key
-        to start a secure SSL-enabled server. The tuple is expected to have
-        three bytes elements in the following order:
-
-            * CA certificate.
-            * server certificate.
-            * server private key.
-
-    Returns
-    -------
-    hist : flwr.server.history.History
-        Object containing training and evaluation metrics.
-
-    Examples
-    --------
-    Starting an insecure server::
-
-        start_server()
-
-    Starting a TLS-enabled server::
-
-        start_server(
-            certificates=(
-                Path("/crts/root.pem").read_bytes(),
-                Path("/crts/localhost.crt").read_bytes(),
-                Path("/crts/localhost.key").read_bytes()
-            )
-        )
-    """
-    msg = (
-        "flwr.server.start_server() is deprecated."
-        "\n\tInstead, use the `flower-superlink` CLI command to start a SuperLink "
-        "as shown below:"
-        "\n\n\t\t$ flower-superlink --insecure"
-        "\n\n\tTo view usage and all available options, run:"
-        "\n\n\t\t$ flower-superlink --help"
-        "\n\n\tUsing `start_server()` is deprecated."
-    )
-    warn_deprecated_feature(name=msg)
-
-    event(EventType.START_SERVER_ENTER)
-
-    # Parse IP address
-    parsed_address = parse_address(server_address)
-    if not parsed_address:
-        sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-
-    # Initialize server and server config
-    initialized_server, initialized_config = init_defaults(
-        server=server,
-        config=config,
-        strategy=strategy,
-        client_manager=client_manager,
-    )
-    log(
-        INFO,
-        "Starting Flower server, config: %s",
-        initialized_config,
-    )
-
-    # Start gRPC server
-    grpc_server = start_grpc_server(
-        client_manager=initialized_server.client_manager(),
-        server_address=address,
-        max_message_length=grpc_max_message_length,
-        certificates=certificates,
-    )
-    log(
-        INFO,
-        "Flower ECE: gRPC server running (%s rounds), SSL is %s",
-        initialized_config.num_rounds,
-        "enabled" if certificates is not None else "disabled",
-    )
-
-    # Graceful shutdown
-    register_exit_handlers(
-        event_type=EventType.START_SERVER_LEAVE,
-        exit_message="Flower server terminated gracefully.",
-        grpc_servers=[grpc_server],
-    )
-
-    # Start training
-    hist = run_fl(
-        server=initialized_server,
-        config=initialized_config,
-    )
-
-    # Stop the gRPC server
-    grpc_server.stop(grace=1)
-
-    event(EventType.START_SERVER_LEAVE)
-
-    return hist
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
@@ -293,10 +152,13 @@ def run_superlink() -> None:
     verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", None)
 
     auth_plugin: Optional[ExecAuthPlugin] = None
+    authz_plugin: Optional[ExecAuthzPlugin] = None
     event_log_plugin: Optional[EventLogWriterPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
-        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path), verify_tls_cert)
+        auth_plugin, authz_plugin = _try_obtain_exec_auth_plugins(
+            Path(cfg_path), verify_tls_cert
+        )
         # Enable event logging if the args.enable_event_log is True
         if args.enable_event_log:
             event_log_plugin = _try_obtain_exec_event_log_writer_plugin()
@@ -306,6 +168,9 @@ def run_superlink() -> None:
 
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
+
+    # Initialize ObjectStoreFactory
+    objectstore_factory = ObjectStoreFactory()
 
     # Start Exec API
     executor = load_executor(args)
@@ -319,6 +184,7 @@ def run_superlink() -> None:
             [args.executor_config] if args.executor_config else args.executor_config
         ),
         auth_plugin=auth_plugin,
+        authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
     )
     grpc_servers = [exec_server]
@@ -343,6 +209,7 @@ def run_superlink() -> None:
             address=serverappio_address,
             state_factory=state_factory,
             ffs_factory=ffs_factory,
+            objectstore_factory=objectstore_factory,
             certificates=None,  # ServerAppIo API doesn't support SSL yet
         )
         grpc_servers.append(serverappio_server)
@@ -388,6 +255,7 @@ def run_superlink() -> None:
                     args.ssl_certfile,
                     state_factory,
                     ffs_factory,
+                    objectstore_factory,
                     num_workers,
                 ),
                 daemon=True,
@@ -421,6 +289,7 @@ def run_superlink() -> None:
                 address=fleet_address,
                 state_factory=state_factory,
                 ffs_factory=ffs_factory,
+                objectstore_factory=objectstore_factory,
                 certificates=certificates,
                 interceptors=interceptors,
             )
@@ -430,6 +299,7 @@ def run_superlink() -> None:
                 address=fleet_address,
                 state_factory=state_factory,
                 ffs_factory=ffs_factory,
+                objectstore_factory=objectstore_factory,
                 certificates=certificates,
             )
             grpc_servers.append(fleet_server)
@@ -611,33 +481,50 @@ def _try_load_public_keys_node_authentication(
     return node_public_keys
 
 
-def _try_obtain_exec_auth_plugin(
+def _try_obtain_exec_auth_plugins(
     config_path: Path, verify_tls_cert: bool
-) -> Optional[ExecAuthPlugin]:
+) -> tuple[ExecAuthPlugin, ExecAuthzPlugin]:
+    """Obtain Exec API authentication and authorization plugins."""
     # Load YAML file
     with config_path.open("r", encoding="utf-8") as file:
         config: dict[str, Any] = yaml.safe_load(file)
 
-    # Load authentication configuration
-    auth_config: dict[str, Any] = config.get("authentication", {})
-    auth_type: str = auth_config.get(AUTH_TYPE_YAML_KEY, "")
+    def _load_plugin(
+        section: str, yaml_key: str, loader: Callable[[], dict[str, type[P]]]
+    ) -> P:
+        section_cfg = config.get(section, {})
+        auth_plugin_name = section_cfg.get(yaml_key, "")
+        try:
+            plugins: dict[str, type[P]] = loader()
+            plugin_cls: type[P] = plugins[auth_plugin_name]
+            return plugin_cls(
+                user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
+            )
+        except KeyError:
+            if auth_plugin_name:
+                sys.exit(
+                    f"{yaml_key}: {auth_plugin_name} is not supported. "
+                    f"Please provide a valid {section} type in the configuration."
+                )
+            sys.exit(f"No {section} type is provided in the configuration.")
+        except NotImplementedError:
+            sys.exit(f"No {section} plugins are currently supported.")
 
     # Load authentication plugin
-    try:
-        all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
-        auth_plugin_class = all_plugins[auth_type]
-        return auth_plugin_class(
-            user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
-        )
-    except KeyError:
-        if auth_type != "":
-            sys.exit(
-                f'Authentication type "{auth_type}" is not supported. '
-                "Please provide a valid authentication type in the configuration."
-            )
-        sys.exit("No authentication type is provided in the configuration.")
-    except NotImplementedError:
-        sys.exit("No authentication plugins are currently supported.")
+    auth_plugin = _load_plugin(
+        section="authentication",
+        yaml_key=AUTH_TYPE_YAML_KEY,
+        loader=get_exec_auth_plugins,
+    )
+
+    # Load authorization plugin
+    authz_plugin = _load_plugin(
+        section="authorization",
+        yaml_key=AUTHZ_TYPE_YAML_KEY,
+        loader=get_exec_authz_plugins,
+    )
+
+    return auth_plugin, authz_plugin
 
 
 def _try_obtain_exec_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]:
@@ -668,10 +555,11 @@ def _try_obtain_fleet_event_log_writer_plugin() -> Optional[EventLogWriterPlugin
         sys.exit("No Fleet API event log writer plugins are currently supported.")
 
 
-def _run_fleet_api_grpc_rere(
+def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
     address: str,
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
+    objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
@@ -680,6 +568,7 @@ def _run_fleet_api_grpc_rere(
     fleet_servicer = FleetServicer(
         state_factory=state_factory,
         ffs_factory=ffs_factory,
+        objectstore_factory=objectstore_factory,
     )
     fleet_add_servicer_to_server_fn = add_FleetServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
@@ -700,6 +589,7 @@ def _run_fleet_api_grpc_adapter(
     address: str,
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
+    objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (GrpcAdapter)."""
@@ -707,6 +597,7 @@ def _run_fleet_api_grpc_adapter(
     fleet_servicer = GrpcAdapterServicer(
         state_factory=state_factory,
         ffs_factory=ffs_factory,
+        objectstore_factory=objectstore_factory,
     )
     fleet_add_servicer_to_server_fn = add_GrpcAdapterServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
@@ -731,6 +622,7 @@ def _run_fleet_api_rest(
     ssl_certfile: Optional[str],
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
+    objectstore_factory: ObjectStoreFactory,
     num_workers: int,
 ) -> None:
     """Run ServerAppIo API (REST-based)."""
@@ -746,6 +638,7 @@ def _run_fleet_api_rest(
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
     fast_api_app.state.STATE_FACTORY = state_factory
     fast_api_app.state.FFS_FACTORY = ffs_factory
+    fast_api_app.state.OBJECTSTORE_FACTORY = objectstore_factory
 
     uvicorn.run(
         app="flwr.server.superlink.fleet.rest_rere.rest_api:app",
