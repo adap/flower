@@ -35,8 +35,14 @@ from .object_store import NoObjectInStoreError, ObjectStore
 class MockInflatable(InflatableObject):
     """Mock InflatableObject for testing purposes."""
 
-    def __init__(self, data: bytes):
+    def __init__(self, data: bytes, children: Optional[list[InflatableObject]] = None) -> None:
         self.data = data
+        self._children = children or []
+
+    @property
+    def children(self) -> dict[str, InflatableObject]:
+        """Return children objects."""
+        return {child.object_id: child for child in self._children}
 
     def deflate(self) -> bytes:
         """Deflate object."""
@@ -49,9 +55,7 @@ class MockInflatable(InflatableObject):
         children: Optional[dict[str, InflatableObject]] = None,
     ) -> InflatableObject:
         """Inflate the object from bytes."""
-        if children:
-            raise AssertionError("MockInflatable does not support children.")
-        return cls(get_object_body(object_content, cls))
+        return cls(get_object_body(object_content, cls), children=children)
 
 
 class ObjectStoreTest(unittest.TestCase):
