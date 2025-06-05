@@ -35,7 +35,9 @@ from .object_store import NoObjectInStoreError, ObjectStore
 class MockInflatable(InflatableObject):
     """Mock InflatableObject for testing purposes."""
 
-    def __init__(self, data: bytes, children: Optional[list[InflatableObject]] = None) -> None:
+    def __init__(
+        self, data: bytes, children: Optional[list[InflatableObject]] = None
+    ) -> None:
         self.data = data
         self._children = children or []
 
@@ -55,7 +57,10 @@ class MockInflatable(InflatableObject):
         children: Optional[dict[str, InflatableObject]] = None,
     ) -> InflatableObject:
         """Inflate the object from bytes."""
-        return cls(get_object_body(object_content, cls), children=children)
+        return cls(
+            get_object_body(object_content, cls),
+            children=list((children or {}).values()),
+        )
 
 
 class ObjectStoreTest(unittest.TestCase):
@@ -271,6 +276,49 @@ class ObjectStoreTest(unittest.TestCase):
         # Extract nonexistent id
         with self.assertRaises(NoObjectInStoreError):
             object_store.get_message_descendant_ids(msg_object_id="1234")
+
+    # pylint: disable-next=too-many-locals
+    def test_put_and_get_object_with_children(self) -> None:
+        """Test put and get methods with an object that has children."""
+        # Prepare: Define object hierarchy
+        grandchild = MockInflatable(b"grandchild")
+        child1 = MockInflatable(b"child1", children=[grandchild])
+        child2 = MockInflatable(b"child2")
+        parent1 = MockInflatable(b"parent1", children=[child1, child2])
+        parent2 = MockInflatable(b"parent2", children=[child2])
+
+        # Prepare: List all objects in insertion order
+        objects = [grandchild, child1, child2, parent1, parent2]
+        contents = [obj.deflate() for obj in objects]
+        ids = [get_object_id(content) for content in contents]
+
+        # Execute: Preregister and put all objects
+        object_store = self.object_store_factory()
+        object_store.preregister(object_ids=ids)
+        for obj_id, content in zip(ids, contents):
+            object_store.put(obj_id, content)
+
+        # Assert: All objects should be in the store
+        self.assertEqual(len(object_store), 5)
+
+        # Execute: Retrieve parent1 and its children
+        for i in range(4):  # grandchild, child1, child2, parent1
+            retrieved = object_store.get(ids[i])
+
+            # Assert: Retrieved object should match the original content
+            self.assertEqual(retrieved, contents[i])
+
+        # Assert: Only parent2 and child2 should remain
+        self.assertEqual(len(object_store), 2)
+
+        # Execute: Retrieve parent2
+        retrieved = object_store.get(ids[4])
+
+        # Assert: Retrieved object should match the original content
+        self.assertEqual(retrieved, contents[4])
+
+        # Assert: The store should now be empty
+        self.assertEqual(len(object_store), 0)
 
 
 class InMemoryStateTest(ObjectStoreTest):

@@ -143,3 +143,13 @@ class ObjectStore(abc.ABC):
         bool
             True if the object_id is in the store, False otherwise.
         """
+
+    @abc.abstractmethod
+    def __len__(self) -> int:
+        """Return the number of objects in the store.
+
+        Returns
+        -------
+        int
+            The number of objects currently stored.
+        """
