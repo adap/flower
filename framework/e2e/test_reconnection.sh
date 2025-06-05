@@ -35,9 +35,6 @@ check_and_kill() {
   done
 }
 
-# Install Flower app
-pip install -e . --no-deps
-
 # Remove any duplicates
 sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
 
@@ -88,7 +85,7 @@ sleep 5
 # We execute `flwr run` to begin the training
 timeout 2m flwr run "." e2e &
 echo "Executing flwr run to start training"
-sleep 10
+sleep 8
 
 # Kill first client as soon as the training starts, the flwr-serverapp should just 
 # receive a failure in this case and continue the rounds when enough clients are 
