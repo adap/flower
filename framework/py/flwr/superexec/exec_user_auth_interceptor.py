@@ -106,7 +106,7 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 # Store user info in contextvars for authenticated users
                 shared_user_info.set(user_info)
                 # Check if the user is authorized
-                if not self.authz_plugin.verify_user_authorization(user_info):
+                if not self.authz_plugin.verify_user_authorization(user_info, request):
                     context.abort(
                         grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
                     )
@@ -125,7 +125,7 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 # Store user info in contextvars for authenticated users
                 shared_user_info.set(user_info)
                 # Check if the user is authorized
-                if not self.authz_plugin.verify_user_authorization(user_info):
+                if not self.authz_plugin.verify_user_authorization(user_info, request):
                     context.abort(
                         grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
                     )

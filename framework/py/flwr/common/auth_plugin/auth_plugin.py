@@ -20,6 +20,8 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
+from google.protobuf.message import Message as GrpcMessage
+
 from flwr.common.typing import UserInfo
 from flwr.proto.exec_pb2_grpc import ExecStub
 
@@ -84,7 +86,9 @@ class ExecAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
         """Abstract constructor."""
 
     @abstractmethod
-    def verify_user_authorization(self, user_info: UserInfo) -> bool:
+    def verify_user_authorization(
+        self, user_info: UserInfo, request: GrpcMessage
+    ) -> bool:
         """Verify user authorization request."""
 
 
