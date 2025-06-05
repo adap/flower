@@ -35,7 +35,11 @@ from flwr.common.inflatable_grpc_utils import (
     push_object_to_servicer,
 )
 from flwr.common.logger import log
-from flwr.common.message import Message, get_message_to_descendant_id_mapping
+from flwr.common.message import (
+    Message,
+    get_message_to_descendant_id_mapping,
+    remove_content_from_message,
+)
 from flwr.common.retry_invoker import RetryInvoker, _wrap_stub
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -305,7 +309,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             return
 
         # Serialize Message
-        message_proto = message_to_proto(message=message)
+        message_proto = message_to_proto(message=remove_content_from_message(message))
         descendants_mapping = get_message_to_descendant_id_mapping(message)
         request = PushMessagesRequest(
             node=node,
