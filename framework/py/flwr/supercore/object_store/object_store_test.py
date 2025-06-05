@@ -17,13 +17,41 @@
 
 import unittest
 from abc import abstractmethod
+from typing import Optional
 
 from parameterized import parameterized
 
-from flwr.common.inflatable import get_object_id
+from flwr.common.inflatable import (
+    InflatableObject,
+    add_header_to_object_body,
+    get_object_body,
+    get_object_id,
+)
 
 from .in_memory_object_store import InMemoryObjectStore
 from .object_store import NoObjectInStoreError, ObjectStore
+
+
+class MockInflatable(InflatableObject):
+    """Mock InflatableObject for testing purposes."""
+
+    def __init__(self, data: bytes):
+        self.data = data
+
+    def deflate(self) -> bytes:
+        """Deflate object."""
+        return add_header_to_object_body(self.data, self)
+
+    @classmethod
+    def inflate(
+        cls,
+        object_content: bytes,
+        children: Optional[dict[str, InflatableObject]] = None,
+    ) -> InflatableObject:
+        """Inflate the object from bytes."""
+        if children:
+            raise AssertionError("MockInflatable does not support children.")
+        return cls(get_object_body(object_content, cls))
 
 
 class ObjectStoreTest(unittest.TestCase):
@@ -53,7 +81,7 @@ class ObjectStoreTest(unittest.TestCase):
         """Test put and get methods."""
         # Prepare
         object_store = self.object_store_factory()
-        object_content = b"test_value"
+        object_content = MockInflatable(b"test_value").deflate()
         object_id = get_object_id(object_content)
         object_store.preregister(object_ids=[object_id])
 
@@ -68,7 +96,7 @@ class ObjectStoreTest(unittest.TestCase):
         """Test put method with an existing object_id."""
         # Prepare
         object_store = self.object_store_factory()
-        object_content = b"test_value"
+        object_content = MockInflatable(b"test_value").deflate()
         object_id = get_object_id(object_content)
         object_store.preregister(object_ids=[object_id])
 
@@ -84,7 +112,7 @@ class ObjectStoreTest(unittest.TestCase):
         """Test put method with an object_id that does not match that of content."""
         # Prepare
         object_store = self.object_store_factory()
-        object_content = b"test_value"
+        object_content = MockInflatable(b"test_value").deflate()
         object_id = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         object_store.preregister(object_ids=[object_id])
 
@@ -101,7 +129,7 @@ class ObjectStoreTest(unittest.TestCase):
         """Test delete method."""
         # Prepare
         object_store = self.object_store_factory()
-        object_content = b"test_value"
+        object_content = MockInflatable(b"test_value").deflate()
         object_id = get_object_id(object_content)
         object_store.preregister(object_ids=[object_id])
         object_store.put(object_id, object_content)
@@ -126,10 +154,10 @@ class ObjectStoreTest(unittest.TestCase):
         """Test clear method."""
         # Prepare
         object_store = self.object_store_factory()
-        object_content1 = b"test_value1"
+        object_content1 = MockInflatable(b"test_value1").deflate()
         object_id1 = get_object_id(object_content1)
         object_store.preregister(object_ids=[object_id1])
-        object_content2 = b"test_value2"
+        object_content2 = MockInflatable(b"test_value2").deflate()
         object_id2 = get_object_id(object_content2)
         object_store.preregister(object_ids=[object_id2])
 
@@ -159,7 +187,7 @@ class ObjectStoreTest(unittest.TestCase):
         """Test __contains__ method."""
         # Prepare
         object_store = self.object_store_factory()
-        object_content = b"test_value"
+        object_content = MockInflatable(b"test_value").deflate()
         object_id = get_object_id(object_content)
         object_store.preregister(object_ids=[object_id])
         object_store.put(object_id, object_content)
@@ -177,7 +205,7 @@ class ObjectStoreTest(unittest.TestCase):
         """Test put without preregistering first."""
         # Prepare
         object_store = self.object_store_factory()
-        object_content = b"test_value"
+        object_content = MockInflatable(b"test_value").deflate()
         object_id = get_object_id(object_content)
 
         # Execute
@@ -188,9 +216,9 @@ class ObjectStoreTest(unittest.TestCase):
         """Test preregister functionality."""
         # Prepare
         object_store = self.object_store_factory()
-        object_content1 = b"test_value1"
+        object_content1 = MockInflatable(b"test_value1").deflate()
         object_id1 = get_object_id(object_content1)
-        object_content2 = b"test_value2"
+        object_content2 = MockInflatable(b"test_value2").deflate()
         object_id2 = get_object_id(object_content2)
 
         # Execute (preregister all)
@@ -199,7 +227,7 @@ class ObjectStoreTest(unittest.TestCase):
         # Assert (none was present)
         self.assertEqual([object_id1, object_id2], not_present)
 
-        object_content3 = b"test_value3"
+        object_content3 = MockInflatable(b"test_value3").deflate()
         object_id3 = get_object_id(object_content3)
         # Execute (preregister new object)
         not_present = object_store.preregister(object_ids=[object_id3])
@@ -220,7 +248,7 @@ class ObjectStoreTest(unittest.TestCase):
         """Test setting and getting mapping of message object id and its descendants."""
         # Prepare
         object_store = self.object_store_factory()
-        object_content = b"test_value"
+        object_content = MockInflatable(b"test_value").deflate()
         object_id = get_object_id(object_content)
 
         # Execute
