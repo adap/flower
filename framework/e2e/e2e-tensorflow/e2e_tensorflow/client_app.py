@@ -14,6 +14,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 # Load CIFAR-10 from Hugging Face
 dataset = load_dataset("uoft-cs/cifar10")
+np.stack(dataset["train"]["img"])
 
 # Convert to NumPy arrays
 x_train = np.stack(dataset["train"]["image"]).astype("float32") / 255.0
