@@ -29,6 +29,8 @@ from flwr.common.constant import (
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.inflatable_grpc_utils import (
+    make_pull_object_fn_grpc,
+    make_push_object_fn_grpc,
     pull_object_from_servicer,
     push_object_to_servicer,
 )
@@ -227,9 +229,11 @@ class GrpcGrid(Grid):
             # Push only object that are not in the store
             push_object_to_servicer(
                 message,
-                self._stub,
-                node=self.node,
-                run_id=run_id,
+                push_object_fn=make_push_object_fn_grpc(
+                    push_object_grpc=self._stub.PushObject,
+                    node=self.node,
+                    run_id=run_id,
+                ),
                 object_ids_to_push=obj_ids_to_push,
             )
         return msg_id
@@ -292,9 +296,11 @@ class GrpcGrid(Grid):
 
                 message = pull_object_from_servicer(
                     msg_proto.metadata.message_id,
-                    self._stub,
-                    node=self.node,
-                    run_id=run_id,
+                    pull_object_fn=make_pull_object_fn_grpc(
+                        pull_object_grpc=self._stub.PullObject,
+                        node=self.node,
+                        run_id=run_id,
+                    ),
                 )
                 inflated_msgs.append(cast(Message, message))
 
