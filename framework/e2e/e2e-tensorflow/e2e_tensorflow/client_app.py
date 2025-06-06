@@ -1,7 +1,9 @@
 import os
+
 import numpy as np
 import tensorflow as tf
 from datasets import load_dataset
+
 from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
@@ -20,7 +22,6 @@ y_train = np.array(dataset["train"]["label"])
 x_test = np.stack(dataset["test"]["image"]).astype("float32") / 255.0
 y_test = np.array(dataset["test"]["label"])
 
-# Subset for simulation/testing
 x_train, y_train = x_train[:SUBSET_SIZE], y_train[:SUBSET_SIZE]
 x_test, y_test = x_test[:10], y_test[:10]
 
