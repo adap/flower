@@ -52,9 +52,9 @@ from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
-from flwr.server.superlink.ffs import FfsFactory
-from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.supernode.nodestate import NodeStateFactory
+from flwr.server.superlink.ffs import Ffs, FfsFactory
+from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
+from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppInputs, ClientAppIoServicer
 
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
@@ -145,7 +145,7 @@ def start_client_internal(
     # Initialize NodeState, Ffs, and ObjectStore
     state = state_factory.state()
     ffs = ffs_factory.ffs()
-    _store = object_store_factory.store()
+    store = object_store_factory.store()
 
     with _init_connection(
         transport=transport,
@@ -166,63 +166,20 @@ def start_client_internal(
 
         # pylint: disable=too-many-nested-blocks
         while True:
-            # Pull message
-            if (message := receive()) is None:
-                time.sleep(3)
-                continue
-
-            # Log message reception
-            log(INFO, "")
-            if message.metadata.group_id:
-                log(
-                    INFO,
-                    "[RUN %s, ROUND %s]",
-                    message.metadata.run_id,
-                    message.metadata.group_id,
-                )
-            else:
-                log(INFO, "[RUN %s]", message.metadata.run_id)
-            log(
-                INFO,
-                "Received: %s message %s",
-                message.metadata.message_type,
-                message.metadata.message_id,
+            # The signature of the function will change after
+            # completing the transition to the `NodeState`-based SuperNode
+            run_id = _pull_and_store_message(
+                state=state,
+                ffs=ffs,
+                object_store=store,
+                node_config=node_config,
+                receive=receive,
+                get_run=get_run,
+                get_fab=get_fab,
             )
 
-            # Ensure the run and FAB are available
-            run_id = message.metadata.run_id
-            try:
-                # Check if the message is from an unknown run
-                if (run_info := state.get_run(run_id)) is None:
-                    # Pull run info from SuperLink
-                    run_info = get_run(run_id)
-                    state.store_run(run_info)
-
-                    # Pull and store the FAB
-                    fab = get_fab(run_info.fab_hash, run_id)
-                    ffs.put(fab.content, {})
-
-                    # Initialize the context
-                    run_cfg = get_fused_config_from_fab(fab.content, run_info)
-                    run_ctx = Context(
-                        run_id=run_id,
-                        node_id=state.get_node_id(),
-                        node_config=node_config,
-                        state=RecordDict(),
-                        run_config=run_cfg,
-                    )
-                    state.store_context(run_ctx)
-
-                # Store the message in the state
-                state.store_message(message)
-            except RunNotRunningException:
-                log(
-                    INFO,
-                    "Run ID %s is not in `RUNNING` status. Ignoring message %s.",
-                    run_id,
-                    message.metadata.message_id,
-                )
-                time.sleep(3)
+            if run_id == 0:
+                time.sleep(3)  # Wait for 3s before asking again
                 continue
 
             try:
@@ -300,6 +257,82 @@ def start_client_internal(
                     run_id,
                 )
                 log(INFO, "")
+
+
+def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
+    state: NodeState,
+    ffs: Ffs,
+    object_store: ObjectStore,  # pylint: disable=unused-argument
+    node_config: UserConfig,
+    receive: Callable[[], Optional[Message]],
+    get_run: Callable[[int], Run],
+    get_fab: Callable[[str, int], Fab],
+) -> int:
+    """Pull a message from the SuperLink and store it in the state.
+
+    This function current returns 0 if no message is received,
+    or run_id if a message is received and processed successfully.
+    This behavior will change in the future to return None after
+    completing transition to the `NodeState`-based SuperNode.
+    """
+    # Pull message
+    if (message := receive()) is None:
+        return 0
+
+    # Log message reception
+    log(INFO, "")
+    if message.metadata.group_id:
+        log(
+            INFO,
+            "[RUN %s, ROUND %s]",
+            message.metadata.run_id,
+            message.metadata.group_id,
+        )
+    else:
+        log(INFO, "[RUN %s]", message.metadata.run_id)
+    log(
+        INFO,
+        "Received: %s message %s",
+        message.metadata.message_type,
+        message.metadata.message_id,
+    )
+
+    # Ensure the run and FAB are available
+    run_id = message.metadata.run_id
+    try:
+        # Check if the message is from an unknown run
+        if (run_info := state.get_run(run_id)) is None:
+            # Pull run info from SuperLink
+            run_info = get_run(run_id)
+            state.store_run(run_info)
+
+            # Pull and store the FAB
+            fab = get_fab(run_info.fab_hash, run_id)
+            ffs.put(fab.content, {})
+
+            # Initialize the context
+            run_cfg = get_fused_config_from_fab(fab.content, run_info)
+            run_ctx = Context(
+                run_id=run_id,
+                node_id=state.get_node_id(),
+                node_config=node_config,
+                state=RecordDict(),
+                run_config=run_cfg,
+            )
+            state.store_context(run_ctx)
+
+        # Store the message in the state
+        state.store_message(message)
+    except RunNotRunningException:
+        log(
+            INFO,
+            "Run ID %s is not in `RUNNING` status. Ignoring message %s.",
+            run_id,
+            message.metadata.message_id,
+        )
+        return 0
+
+    return run_id
 
 
 @contextmanager
