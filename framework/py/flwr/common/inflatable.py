@@ -215,3 +215,15 @@ def get_desdendant_object_ids(obj: InflatableObject) -> set[str]:
     # Exclude Object ID of parent object
     descendants.discard(obj.object_id)
     return descendants
+
+
+def get_all_nested_objects(obj: InflatableObject) -> dict[str, InflatableObject]:
+    """Get a dictionary of all nested objects, including the object itself."""
+    ret: dict[str, InflatableObject] = {}
+    if children := obj.children:
+        for child in children.values():
+            ret.update(get_all_nested_objects(child))
+
+    ret[obj.object_id] = obj
+
+    return ret

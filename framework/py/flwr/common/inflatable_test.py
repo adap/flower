@@ -29,6 +29,7 @@ from .inflatable import (
     _get_object_head,
     add_header_to_object_body,
     check_body_len_consistency,
+    get_all_nested_objects,
     get_desdendant_object_ids,
     get_object_body,
     get_object_body_len_from_object_content,
@@ -238,3 +239,23 @@ def test_get_desdendants(children: list[InflatableObject]) -> None:
 
     # Assert
     assert get_desdendant_object_ids(obj) == {child.object_id for child in children}
+
+
+def test_get_all_nested_object_ids() -> None:
+    """Test getting all nested object IDs."""
+    # Prepare
+    obj = CustomDataClass(b"this is a test")
+    child1 = CustomDataClass(b"child1 data")
+    child2 = CustomDataClass(b"child2 data")
+    obj.children = {
+        child1.object_id: child1,
+        child2.object_id: child2,
+    }
+
+    # Assert
+    expected_objects = {
+        child1.object_id: child1,
+        child2.object_id: child2,
+        obj.object_id: obj,
+    }
+    assert get_all_nested_objects(obj) == expected_objects
