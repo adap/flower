@@ -1,6 +1,8 @@
 import os
 
+import numpy as np
 import tensorflow as tf
+from datasets import load_dataset
 
 from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
@@ -10,12 +12,24 @@ SUBSET_SIZE = 1000
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-# Load model and data (MobileNetV2, CIFAR-10)
-model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+# Load CIFAR-10 from Hugging Face
+dataset = load_dataset("uoft-cs/cifar10")
+
+# Convert to NumPy arrays
+x_train = np.stack(dataset["train"]["img"]).astype("float32") / 255.0
+y_train = np.array(dataset["train"]["label"])
+
+x_test = np.stack(dataset["test"]["img"]).astype("float32") / 255.0
+y_test = np.array(dataset["test"]["label"])
+
 x_train, y_train = x_train[:SUBSET_SIZE], y_train[:SUBSET_SIZE]
 x_test, y_test = x_test[:10], y_test[:10]
+
+# Load model (MobileNetV2, CIFAR-10)
+model = tf.keras.applications.MobileNetV2(
+    input_shape=(32, 32, 3), classes=10, weights=None
+)
+model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
 
 # Define Flower client

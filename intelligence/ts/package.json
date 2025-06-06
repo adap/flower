@@ -72,7 +72,7 @@
   },
   "dependencies": {
     "@huggingface/transformers": "^3.4.0",
-    "@mlc-ai/web-llm": "^0.2.78",
+    "@mlc-ai/web-llm": "^0.2.79",
     "get-random-values": "^3.0.0"
   },
   "browser": {
