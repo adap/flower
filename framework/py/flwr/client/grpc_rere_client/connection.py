@@ -30,18 +30,16 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.heartbeat import HeartbeatSender
+from flwr.common.inflatable import get_all_nested_objects
 from flwr.common.inflatable_grpc_utils import (
+    inflate_object_from_contents,
     make_pull_object_fn_grpc,
     make_push_object_fn_grpc,
-    pull_object_from_servicer,
-    push_object_to_servicer,
+    pull_objects,
+    push_objects,
 )
 from flwr.common.logger import log
-from flwr.common.message import (
-    Message,
-    get_message_to_descendant_id_mapping,
-    remove_content_from_message,
-)
+from flwr.common.message import Message, remove_content_from_message
 from flwr.common.retry_invoker import RetryInvoker, _wrap_stub
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -62,6 +60,7 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
+from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
@@ -267,23 +266,21 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         in_message: Optional[Message] = None
 
         if message_proto:
-            in_message = cast(
-                Message,
-                pull_object_from_servicer(
-                    object_id=message_proto.metadata.message_id,
-                    pull_object_fn=make_pull_object_fn_grpc(
-                        pull_object_grpc=stub.PullObject,
-                        node=node,
-                        run_id=message_proto.metadata.run_id,
-                    ),
+            msg_id = message_proto.metadata.message_id
+            all_object_contents = pull_objects(
+                list(response.objects_to_pull[msg_id].object_ids) + [msg_id],
+                pull_object_fn=make_pull_object_fn_grpc(
+                    pull_object_grpc=stub.PullObject,
+                    node=node,
+                    run_id=message_proto.metadata.run_id,
                 ),
             )
-
-        if in_message:
+            in_message = cast(
+                Message, inflate_object_from_contents(msg_id, all_object_contents)
+            )
             # The deflated message doesn't contain the message_id (its own object_id)
             # Inject
-            # pylint: disable-next=W0212
-            in_message.metadata._message_id = message_proto.metadata.message_id  # type: ignore
+            in_message.metadata.__dict__["_message_id"] = msg_id
 
         # Remember `metadata` of the in message
         nonlocal metadata
@@ -312,20 +309,25 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Invalid out message")
             return
 
+        # Get all nested objects
+        all_objects = get_all_nested_objects(message)
+        all_object_ids = list(all_objects.keys())
+        msg_id = all_object_ids[-1]  # Last object is the message itself
+        descendant_ids = all_object_ids[:-1]  # All but the last object are descendants
+
         # Serialize Message
         message_proto = message_to_proto(message=remove_content_from_message(message))
-        descendants_mapping = get_message_to_descendant_id_mapping(message)
         request = PushMessagesRequest(
             node=node,
             messages_list=[message_proto],
-            msg_to_descendant_mapping=descendants_mapping,
+            msg_to_descendant_mapping={msg_id: ObjectIDs(object_ids=descendant_ids)},
         )
         response: PushMessagesResponse = stub.PushMessages(request=request)
 
         if response.objects_to_push:
             objs_to_push = set(response.objects_to_push[message.object_id].object_ids)
-            push_object_to_servicer(
-                message,
+            push_objects(
+                all_objects,
                 push_object_fn=make_push_object_fn_grpc(
                     push_object_grpc=stub.PushObject,
                     node=node,

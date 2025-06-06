@@ -218,7 +218,11 @@ def get_desdendant_object_ids(obj: InflatableObject) -> set[str]:
 
 
 def get_all_nested_objects(obj: InflatableObject) -> dict[str, InflatableObject]:
-    """Get a dictionary of all nested objects, including the object itself."""
+    """Get a dictionary of all nested objects, including the object itself.
+
+    The dictionary keys are object IDs, ordered by post-order traversal: child objects
+    appear before their parent.
+    """
     ret: dict[str, InflatableObject] = {}
     if children := obj.children:
         for child in children.values():
