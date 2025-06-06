@@ -30,6 +30,14 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
+from .constant import (
+    MAX_CONCURRENT_PULLS,
+    MAX_CONCURRENT_PUSHES,
+    PULL_BACKOFF_CAP,
+    PULL_INITIAL_BACKOFF,
+    PULL_MAX_TIME,
+    PULL_MAX_TRIES_PER_OBJECT,
+)
 from .inflatable import (
     InflatableObject,
     get_object_head_values_from_object_content,
@@ -237,7 +245,7 @@ def push_objects(
     *,
     object_ids_to_push: Optional[set[str]] = None,
     keep_objects: bool = False,
-    max_concurrent_pushes: int = 4,
+    max_concurrent_pushes: int = MAX_CONCURRENT_PUSHES,
 ) -> None:
     """Push multiple objects to the servicer.
 
@@ -256,7 +264,7 @@ def push_objects(
         If `True`, the original objects will be kept in the `objects` dictionary
         after pushing. If `False`, they will be removed from the dictionary to avoid
         high memory usage.
-    max_concurrent_pushes : int (default: 4)
+    max_concurrent_pushes : int (default: MAX_CONCURRENT_PUSHES)
         The maximum number of concurrent pushes to perform.
     """
     if object_ids_to_push is not None:
@@ -283,11 +291,11 @@ def pull_objects(  # pylint: disable=too-many-arguments
     object_ids: list[str],
     pull_object_fn: Callable[[str], bytes],
     *,
-    max_concurrent_pulls: int = 4,
-    max_time: Optional[float] = None,
-    max_tries_per_object: Optional[int] = None,
-    initial_backoff: float = 1.0,
-    backoff_cap: float = 10.0,
+    max_concurrent_pulls: int = MAX_CONCURRENT_PULLS,
+    max_time: Optional[float] = PULL_MAX_TIME,
+    max_tries_per_object: Optional[int] = PULL_MAX_TRIES_PER_OBJECT,
+    initial_backoff: float = PULL_INITIAL_BACKOFF,
+    backoff_cap: float = PULL_BACKOFF_CAP,
 ) -> dict[str, bytes]:
     """Pull multiple objects from the servicer.
 
@@ -300,18 +308,18 @@ def pull_objects(  # pylint: disable=too-many-arguments
         The function should raise `ObjectUnavailableError` if the object is not yet
         available, or `ObjectIdNotPreregisteredError` if the object ID is not
         pre-registered.
-    max_concurrent_pulls : int (default: 4)
+    max_concurrent_pulls : int (default: MAX_CONCURRENT_PULLS)
         The maximum number of concurrent pulls to perform.
-    max_time : Optional[float] (default: None)
+    max_time : Optional[float] (default: PULL_MAX_TIME)
         The maximum time to wait for all pulls to complete. If `None`, waits
         indefinitely.
-    max_tries_per_object : Optional[int] (default: None)
+    max_tries_per_object : Optional[int] (default: PULL_MAX_TRIES_PER_OBJECT)
         The maximum number of attempts to pull each object. If `None`, pulls
         indefinitely until the object is available.
-    initial_backoff : float (default: 1.0)
+    initial_backoff : float (default: PULL_INITIAL_BACKOFF)
         The initial backoff time in seconds for retrying pulls after an
         `ObjectUnavailableError`.
-    backoff_cap : float (default: 10.0)
+    backoff_cap : float (default: PULL_BACKOFF_CAP)
         The maximum backoff time in seconds. Backoff times will not exceed this value.
 
     Returns
