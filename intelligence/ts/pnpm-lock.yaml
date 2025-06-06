@@ -12,8 +12,8 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
       '@mlc-ai/web-llm':
-        specifier: ^0.2.78
-        version: 0.2.78
+        specifier: ^0.2.79
+        version: 0.2.79
       get-random-values:
         specifier: ^3.0.0
         version: 3.0.0
@@ -462,8 +462,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@mlc-ai/web-llm@0.2.78':
-    resolution: {integrity: sha512-ptqDNzHnfDyNZj7vjp9IaY5U/QDweXMe5wNzErOmRT1gqj8AaMvcqbj7HroPDzhXJGM7BZpDjANV5MhXhKOosA==}
+  '@mlc-ai/web-llm@0.2.79':
+    resolution: {integrity: sha512-Hy1ZHQ0o2bZGZoVnGK48+fts/ZSKwLe96xjvqL/6C59Mem9HoHTcFE07NC2E23mRmhd01tL655N6CPeYmwWgwQ==}
 
   '@napi-rs/wasm-runtime@0.2.7':
     resolution: {integrity: sha512-5yximcFK5FNompXfJFoWanu5l8v1hNGqNHh9du1xETp9HWk/B/PzvchX55WYOPaIeNglG8++68AAiauBAtbnzw==}
@@ -2461,7 +2461,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@mlc-ai/web-llm@0.2.78':
+  '@mlc-ai/web-llm@0.2.79':
     dependencies:
       loglevel: 1.9.2
 
