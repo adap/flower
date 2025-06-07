@@ -29,11 +29,16 @@ from flwr.common.constant import (
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.inflatable_grpc_utils import (
+    make_pull_object_fn_grpc,
+    make_push_object_fn_grpc,
     pull_object_from_servicer,
     push_object_to_servicer,
 )
 from flwr.common.logger import log, warn_deprecated_feature
-from flwr.common.message import get_message_to_descendant_id_mapping
+from flwr.common.message import (
+    get_message_to_descendant_id_mapping,
+    remove_content_from_message,
+)
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
@@ -210,7 +215,7 @@ class GrpcGrid(Grid):
         # Call GrpcServerAppIoStub method
         res: PushInsMessagesResponse = self._stub.PushMessages(
             PushInsMessagesRequest(
-                messages_list=[message_to_proto(message)],
+                messages_list=[message_to_proto(remove_content_from_message(message))],
                 run_id=run_id,
                 msg_to_descendant_mapping=descendants_mapping,
             )
@@ -224,9 +229,11 @@ class GrpcGrid(Grid):
             # Push only object that are not in the store
             push_object_to_servicer(
                 message,
-                self._stub,
-                node=self.node,
-                run_id=run_id,
+                push_object_fn=make_push_object_fn_grpc(
+                    push_object_grpc=self._stub.PushObject,
+                    node=self.node,
+                    run_id=run_id,
+                ),
                 object_ids_to_push=obj_ids_to_push,
             )
         return msg_id
@@ -289,9 +296,11 @@ class GrpcGrid(Grid):
 
                 message = pull_object_from_servicer(
                     msg_proto.metadata.message_id,
-                    self._stub,
-                    node=self.node,
-                    run_id=run_id,
+                    pull_object_fn=make_pull_object_fn_grpc(
+                        pull_object_grpc=self._stub.PullObject,
+                        node=self.node,
+                        run_id=run_id,
+                    ),
                 )
                 inflated_msgs.append(cast(Message, message))
 

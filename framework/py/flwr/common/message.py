@@ -426,6 +426,17 @@ def make_message(
     return Message(metadata=metadata, content=content, error=error)  # type: ignore
 
 
+def remove_content_from_message(message: Message) -> Message:
+    """Return a copy of the Message but with an empty RecordDict as content.
+
+    If message has no content, it returns itself.
+    """
+    if message.has_error():
+        return message
+
+    return make_message(metadata=message.metadata, content=RecordDict())
+
+
 def _limit_reply_ttl(
     current: float, reply_ttl: float | None, reply_to: Message
 ) -> float:
