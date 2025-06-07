@@ -15,12 +15,14 @@
 """In-memory NodeState implementation."""
 
 
+import secrets
 from collections.abc import Sequence
 from dataclasses import dataclass
 from threading import Lock
 from typing import Optional
 
 from flwr.common import Context, Message
+from flwr.common.constant import FLWR_APP_TOKEN_LENGTH
 from flwr.common.typing import Run
 
 from .nodestate import NodeState
@@ -34,7 +36,7 @@ class MessageEntry:
     is_retrieved: bool = False
 
 
-class InMemoryNodeState(NodeState):
+class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attributes
     """In-memory NodeState implementation."""
 
     def __init__(self) -> None:
@@ -49,6 +51,9 @@ class InMemoryNodeState(NodeState):
         # Store run ID to Context mapping
         self.ctx_store: dict[int, Context] = {}
         self.lock_ctx_store = Lock()
+        # Store run ID to token mapping
+        self.token_store: dict[int, str] = {}
+        self.lock_token_store = Lock()
 
     def set_node_id(self, node_id: Optional[int]) -> None:
         """Set the node ID."""
@@ -148,3 +153,38 @@ class InMemoryNodeState(NodeState):
         """Retrieve a context by its run ID."""
         with self.lock_ctx_store:
             return self.ctx_store.get(run_id)
+
+    def get_run_ids_with_pending_messages(self) -> Sequence[int]:
+        """Retrieve run IDs that have at least one pending message."""
+        # Collect run IDs from messages
+        with self.lock_msg_store:
+            ret = {
+                entry.message.metadata.run_id
+                for entry in self.msg_store.values()
+                if entry.message.metadata.reply_to_message_id == ""
+                and not entry.is_retrieved
+            }
+
+        # Remove run IDs that have tokens stored (indicating they are in progress)
+        with self.lock_token_store:
+            ret -= set(self.token_store.keys())
+            return list(ret)
+
+    def create_token(self, run_id: int) -> str:
+        """Create a token for the given run ID."""
+        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
+        with self.lock_token_store:
+            if run_id in self.token_store:
+                raise ValueError("Token already created for this run ID")
+            self.token_store[run_id] = token
+        return token
+
+    def verify_token(self, run_id: int, token: str) -> bool:
+        """Verify a token for the given run ID."""
+        with self.lock_token_store:
+            return self.token_store.get(run_id) == token
+
+    def delete_token(self, run_id: int) -> None:
+        """Delete the token for the given run ID."""
+        with self.lock_token_store:
+            self.token_store.pop(run_id, None)
