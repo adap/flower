@@ -32,7 +32,7 @@ from .constant import MESSAGE_TTL_TOLERANCE
 from .inflatable import (
     InflatableObject,
     add_header_to_object_body,
-    get_desdendant_object_ids,
+    get_descendant_object_ids,
     get_object_body,
     get_object_children_ids_from_object_content,
 )
@@ -524,6 +524,6 @@ def get_message_to_descendant_id_mapping(message: Message) -> dict[str, ObjectID
     """Construct a mapping between message object_id and that of its descendants."""
     return {
         message.object_id: ObjectIDs(
-            object_ids=list(get_desdendant_object_ids(message))
+            object_ids=list(get_descendant_object_ids(message))
         )
     }

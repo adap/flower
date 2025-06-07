@@ -29,7 +29,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable import get_desdendant_object_ids, get_object_id
+from flwr.common.inflatable import get_descendant_object_ids, get_object_id
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
@@ -326,7 +326,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # to pull. To achieve this, we need to at least register the Objects in the
         # message into the store. Note this would normally be done when the
         # servicer handles a PushMessageRequest
-        descendants = list(get_desdendant_object_ids(message))
+        descendants = list(get_descendant_object_ids(message))
         message_obj_id = message.metadata.message_id
         # Store mapping
         self.store.set_message_descendant_ids(
