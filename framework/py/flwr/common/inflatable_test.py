@@ -251,11 +251,15 @@ def test_get_all_nested_object_ids() -> None:
         child1.object_id: child1,
         child2.object_id: child2,
     }
-
-    # Assert
     expected_objects = {
         child1.object_id: child1,
         child2.object_id: child2,
         obj.object_id: obj,
     }
-    assert get_all_nested_objects(obj) == expected_objects
+
+    # Execute
+    all_objects = get_all_nested_objects(obj)
+
+    # Assert
+    assert all_objects == expected_objects
+    assert list(all_objects.keys()) == list(expected_objects.keys())
