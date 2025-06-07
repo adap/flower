@@ -15,11 +15,25 @@
 """Flower in-memory ObjectStore implementation."""
 
 
+from dataclasses import dataclass
 from typing import Optional
 
-from flwr.common.inflatable import get_object_id, is_valid_sha256_hash
+from flwr.common.inflatable import (
+    get_object_children_ids_from_object_content,
+    get_object_id,
+    is_valid_sha256_hash,
+)
 
 from .object_store import NoObjectInStoreError, ObjectStore
+
+
+@dataclass
+class ObjectEntry:
+    """Data class representing an object entry in the store."""
+
+    content: bytes
+    is_available: bool
+    ref_count: int
 
 
 class InMemoryObjectStore(ObjectStore):
@@ -27,7 +41,7 @@ class InMemoryObjectStore(ObjectStore):
 
     def __init__(self, verify: bool = True) -> None:
         self.verify = verify
-        self.store: dict[str, bytes] = {}
+        self.store: dict[str, ObjectEntry] = {}
         # Mapping the Object ID of a message to the list of children object IDs
         self.msg_children_objects_mapping: dict[str, list[str]] = {}
 
@@ -39,7 +53,11 @@ class InMemoryObjectStore(ObjectStore):
             if not is_valid_sha256_hash(obj_id):
                 raise ValueError(f"Invalid object ID format: {obj_id}")
             if obj_id not in self.store:
-                self.store[obj_id] = b""
+                self.store[obj_id] = ObjectEntry(
+                    content=b"",  # Initially empty content
+                    is_available=False,  # Initially not available
+                    ref_count=0,  # Reference count starts at 0
+                )
                 new_objects.append(obj_id)
 
         return new_objects
@@ -59,10 +77,23 @@ class InMemoryObjectStore(ObjectStore):
                 raise ValueError(f"Object ID {object_id} does not match content hash")
 
         # Return if object is already present in the store
-        if self.store[object_id] != b"":
+        if self.store[object_id].is_available:
             return
 
-        self.store[object_id] = object_content
+        # Check if all children objects are preregistered
+        children_ids = get_object_children_ids_from_object_content(object_content)
+        if not all(child_id in self.store for child_id in children_ids):
+            raise NoObjectInStoreError(
+                f"Not all children of object with ID '{object_id}' were pre-registered."
+            )
+
+        # Update the object entry in the store
+        self.store[object_id].is_available = True
+        self.store[object_id].content = object_content
+
+        # Increase the reference count for all children objects
+        for child_id in children_ids:
+            self.store[child_id].ref_count += 1
 
     def set_message_descendant_ids(
         self, msg_object_id: str, descendant_ids: list[str]
@@ -82,7 +113,37 @@ class InMemoryObjectStore(ObjectStore):
 
     def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store."""
-        return self.store.get(object_id)
+        # Check if the object ID is pre-registered
+        if object_id not in self.store:
+            return None
+
+        # Check if the object is available (i.e., has been put into the store)
+        object_entry = self.store[object_id]
+        if not object_entry.is_available:
+            return b""
+
+        # Recursively decrease the reference count for the object
+        self._try_delete(object_id)
+
+        return object_entry.content
+
+    def _try_delete(self, object_id: str) -> None:
+        """Delete the object if its reference count is zero."""
+        object_entry = self.store[object_id]
+
+        # Delete the object if it has no references left
+        if object_entry.ref_count == 0:
+            del self.store[object_id]
+
+            # Decrease the reference count of its children
+            children_ids = get_object_children_ids_from_object_content(
+                object_entry.content
+            )
+            for child_id in children_ids:
+                self.store[child_id].ref_count -= 1
+
+                # Recursively try to delete the child object
+                self._try_delete(child_id)
 
     def delete(self, object_id: str) -> None:
         """Delete an object from the store."""
@@ -96,3 +157,7 @@ class InMemoryObjectStore(ObjectStore):
     def __contains__(self, object_id: str) -> bool:
         """Check if an object_id is in the store."""
         return object_id in self.store
+
+    def __len__(self) -> int:
+        """Get the number of objects in the store."""
+        return len(self.store)
