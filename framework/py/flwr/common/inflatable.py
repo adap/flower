@@ -197,28 +197,20 @@ def get_object_head_values_from_object_content(
     return obj_type, children_ids, int(body_len)
 
 
-def _get_descendants_object_ids_recursively(obj: InflatableObject) -> set[str]:
-
-    descendants: set[str] = set()
-    if children := obj.children:
-        for child in children.values():
-            descendants |= _get_descendants_object_ids_recursively(child)
-
-    descendants.add(obj.object_id)
-
-    return descendants
-
-
 def get_desdendant_object_ids(obj: InflatableObject) -> set[str]:
     """Get a set of object IDs of all descendants."""
-    descendants = _get_descendants_object_ids_recursively(obj)
+    descendants = set(get_all_nested_objects(obj).keys())
     # Exclude Object ID of parent object
     descendants.discard(obj.object_id)
     return descendants
 
 
 def get_all_nested_objects(obj: InflatableObject) -> dict[str, InflatableObject]:
-    """Get a dictionary of all nested objects, including the object itself."""
+    """Get a dictionary of all nested objects, including the object itself.
+
+    Each key in the dictionary is an object ID, and the entries are ordered by post-
+    order traversal, i.e., child objects appear before their respective parents.
+    """
     ret: dict[str, InflatableObject] = {}
     if children := obj.children:
         for child in children.values():
