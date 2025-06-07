@@ -32,7 +32,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
-from .inflatable import get_all_nested_objects, get_desdendant_object_ids
+from .inflatable import get_all_nested_objects, get_descendant_object_ids
 from .inflatable_grpc_utils import (
     ObjectIdNotPreregisteredError,
     ObjectUnavailableError,
@@ -129,7 +129,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
 
         # Compute descendants
-        descendants = list(get_desdendant_object_ids(obj))
+        descendants = list(get_descendant_object_ids(obj))
         # Take first two
         obj_to_push = set([obj.object_id] + descendants[:2])
         expected_obj_count = 3
