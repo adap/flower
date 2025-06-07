@@ -209,7 +209,7 @@ def get_object_head_values_from_object_content(
     return obj_type, children_ids, int(body_len)
 
 
-def get_desdendant_object_ids(obj: InflatableObject) -> set[str]:
+def get_descendant_object_ids(obj: InflatableObject) -> set[str]:
     """Get a set of object IDs of all descendants."""
     descendants = set(get_all_nested_objects(obj).keys())
     # Exclude Object ID of parent object
