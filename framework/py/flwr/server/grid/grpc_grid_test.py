@@ -26,10 +26,7 @@ from flwr.common import RecordDict
 from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.inflatable import get_all_nested_objects
 from flwr.common.message import Message
-from flwr.common.serde import (
-    message_from_proto,
-    message_to_proto,
-)
+from flwr.common.serde import message_to_proto
 from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -42,7 +39,6 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushInsMessagesRequest,
 )
 
-from ..superlink.linkstate.linkstate_test import create_res_message
 from .grpc_grid import GrpcGrid
 
 
@@ -208,9 +204,9 @@ class TestGrpcGrid(unittest.TestCase):
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
-        # Prepare
+        # Prepare: Create an instruction message and mock responses
         msg = self._prep_message(Message(RecordDict(), 0, "query"))
-        mock_response = Mock(
+        self.mock_stub.PushMessages.return_value = Mock(
             message_ids=[msg.object_id],
             objects_to_push={
                 msg.object_id: ObjectIDs(
@@ -218,23 +214,19 @@ class TestGrpcGrid(unittest.TestCase):
                 ),
             },
         )
-        self.mock_stub.PushMessages.return_value = mock_response
         self.mock_stub.PushObject.return_value = Mock(stored=True)
-        # The response message must include either `content` (i.e. a recorddict) or
-        # an `Error`. We choose the latter in this case
-        run_id = 1234
-        mssg = create_res_message(
-            src_node_id=123, dst_node_id=456, run_id=run_id, error=Error(code=0)
+
+        # Prepare: create an error reply message and mock responses
+        reply = Message(Error(0), reply_to=msg)
+        reply.metadata.__dict__["_message_id"] = reply.object_id
+        self.mock_stub.PullMessages.return_value = Mock(
+            messages_list=[message_to_proto(reply)],
+            objects_to_pull={
+                reply.object_id: Mock(object_ids=[reply.object_id]),
+            },
         )
-        mssg.metadata.reply_to_message_id = msg.object_id
-        message_res_list = [mssg]
-        # Mock response of PullObject. Here we care about replying with a successful
-        # response that carries a generic deflated Message object.
-        obj_mssg = message_from_proto(mssg).deflate()
-        mock_response.messages_list = message_res_list
-        self.mock_stub.PullMessages.return_value = mock_response
         self.mock_stub.PullObject.return_value = Mock(
-            object_found=True, object_available=True, object_content=obj_mssg
+            object_found=True, object_available=True, object_content=reply.deflate()
         )
 
         # Execute
@@ -242,7 +234,8 @@ class TestGrpcGrid(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(ret_msgs), 1)
-        self.assertEqual(ret_msgs[0].metadata.reply_to_message_id, msg.object_id)
+        self.assertEqual(ret_msgs[0].metadata, reply.metadata)
+        self.assertEqual(ret_msgs[0].error, reply.error)
 
     def test_send_and_receive_messages_timeout(self) -> None:
         """Test send and receive messages but time out."""
