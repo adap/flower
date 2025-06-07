@@ -32,7 +32,12 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
 from .inflatable import get_desdendant_object_ids
-from .inflatable_grpc_utils import pull_object_from_servicer, push_object_to_servicer
+from .inflatable_grpc_utils import (
+    make_pull_object_fn_grpc,
+    make_push_object_fn_grpc,
+    pull_object_from_servicer,
+    push_object_to_servicer,
+)
 
 base_cases = [
     ({"a": ConfigRecord({"a": 123, "b": 123})}, 1),  # Single w/o children
@@ -67,11 +72,13 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
 
         def push_object(request: PushObjectRequest) -> PushObjectResponse:
             self.mock_store[request.object_id] = request.object_content
-            return PushObjectResponse()
+            return PushObjectResponse(stored=True)
 
         def pull_object(request: PullObjectRequest) -> PullObjectResponse:
             return PullObjectResponse(
-                object_content=self.mock_store[request.object_id], object_available=True
+                object_content=self.mock_store[request.object_id],
+                object_found=True,
+                object_available=True,
             )
 
         self.mock_stub.PushObject.side_effect = push_object
@@ -90,9 +97,12 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         run_id = 1234
         # +2 due to the RecordDict and Message
         expected_obj_count += 2
+        push_object_fn = make_push_object_fn_grpc(
+            self.mock_stub.PushObject, node, run_id
+        )
 
         # Execute
-        pushed_object_ids = push_object_to_servicer(obj, self.mock_stub, node, run_id)
+        pushed_object_ids = push_object_to_servicer(obj, push_object_fn)
 
         # Assert
         # Expected number of objects were pushed
@@ -110,6 +120,9 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
         node = Node(node_id=456)
         run_id = 1234
+        push_object_fn = make_push_object_fn_grpc(
+            self.mock_stub.PushObject, node, run_id
+        )
 
         # Compute descendants
         descendants = list(get_desdendant_object_ids(obj))
@@ -118,9 +131,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         expected_obj_count = 3
 
         # Execute
-        pushed_object_ids = push_object_to_servicer(
-            obj, self.mock_stub, node, run_id, obj_to_push
-        )
+        pushed_object_ids = push_object_to_servicer(obj, push_object_fn, obj_to_push)
 
         # Assert
         # Expected number of objects were pushed
@@ -142,12 +153,16 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         run_id = 1234
         # +2 due to the RecordDict and Message
         expected_obj_count += 2
+        push_object_fn = make_push_object_fn_grpc(
+            self.mock_stub.PushObject, node, run_id
+        )
+        pull_object_fn = make_pull_object_fn_grpc(
+            self.mock_stub.PullObject, node, run_id
+        )
 
         # Execute
-        push_object_to_servicer(obj, self.mock_stub, node, run_id)
-        pulled_obj = pull_object_from_servicer(
-            obj.object_id, self.mock_stub, node, run_id
-        )
+        push_object_to_servicer(obj, push_object_fn)
+        pulled_obj = pull_object_from_servicer(obj.object_id, pull_object_fn)
 
         # Assert
         # Expected number of objects were pulled
