@@ -30,6 +30,7 @@ from .inflatable import (
     _get_object_head,
     add_header_to_object_body,
     check_body_len_consistency,
+    get_all_nested_objects,
     get_desdendant_object_ids,
     get_object_body,
     get_object_body_len_from_object_content,
@@ -286,3 +287,27 @@ def test_object_content_validator() -> None:
     almost_correct_obj = obj_wrong_head + HEAD_BODY_DIVIDER + body
     with pytest.raises(UnexpectedObjectContentError):
         validate_object_content(almost_correct_obj)
+
+
+def test_get_all_nested_object_ids() -> None:
+    """Test getting all nested object IDs."""
+    # Prepare
+    obj = CustomDataClass(b"this is a test")
+    child1 = CustomDataClass(b"child1 data")
+    child2 = CustomDataClass(b"child2 data")
+    obj.children = {
+        child1.object_id: child1,
+        child2.object_id: child2,
+    }
+    expected_objects = {
+        child1.object_id: child1,
+        child2.object_id: child2,
+        obj.object_id: obj,
+    }
+
+    # Execute
+    all_objects = get_all_nested_objects(obj)
+
+    # Assert
+    assert all_objects == expected_objects
+    assert list(all_objects.keys()) == list(expected_objects.keys())
