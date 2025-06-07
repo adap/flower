@@ -16,6 +16,7 @@
 
 
 import unittest
+from itertools import product
 from typing import Union
 from unittest.mock import Mock
 
@@ -31,33 +32,30 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
-from .inflatable import get_desdendant_object_ids
+from .inflatable import get_all_nested_objects
 from .inflatable_grpc_utils import (
+    ObjectIdNotPreregisteredError,
+    ObjectUnavailableError,
     make_pull_object_fn_grpc,
     make_push_object_fn_grpc,
-    pull_object_from_servicer,
-    push_object_to_servicer,
+    pull_objects,
+    push_objects,
 )
 
 base_cases = [
-    ({"a": ConfigRecord({"a": 123, "b": 123})}, 1),  # Single w/o children
+    ({"a": ConfigRecord({"a": 123, "b": 123})},),  # Single w/o children
     (
         {
             "a": ConfigRecord({"a": 123, "b": 123}),
             "b": ConfigRecord({"a": 123, "b": 123}),
         },
-        1,
     ),  # Two identical
-    (
-        {"a": ConfigRecord({"a": 123, "b": 123}), "b": ConfigRecord()},
-        2,
-    ),  # Different
+    ({"a": ConfigRecord({"a": 123, "b": 123}), "b": ConfigRecord()},),  # Different
     (
         {
             "a": ConfigRecord({"a": 123, "b": 123}),
             "b": ArrayRecord([np.array([1, 2]), np.array([3, 4])]),
         },
-        4,
     ),  # Mixed with children
 ]
 
@@ -71,101 +69,154 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         self.mock_stub = Mock()
 
         def push_object(request: PushObjectRequest) -> PushObjectResponse:
+            if request.object_id not in self.mock_store:
+                return PushObjectResponse(stored=False)
             self.mock_store[request.object_id] = request.object_content
             return PushObjectResponse(stored=True)
 
         def pull_object(request: PullObjectRequest) -> PullObjectResponse:
+            obj_content = self.mock_store.get(request.object_id, b"")
             return PullObjectResponse(
-                object_content=self.mock_store[request.object_id],
-                object_found=True,
-                object_available=True,
+                object_content=obj_content,
+                object_found=request.object_id in self.mock_store,
+                object_available=obj_content != b"",
             )
 
         self.mock_stub.PushObject.side_effect = push_object
         self.mock_stub.PullObject.side_effect = pull_object
-
-    @parameterized.expand(base_cases)  # type: ignore
-    def test_push_object_with_helper_function(
-        self,
-        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
-        expected_obj_count: int,
-    ) -> None:
-        """Use helper function to push an object recursively."""
-        # Prepare
-        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
         node = Node(node_id=456)
         run_id = 1234
-        # +2 due to the RecordDict and Message
-        expected_obj_count += 2
-        push_object_fn = make_push_object_fn_grpc(
+        self.push_object_fn = make_push_object_fn_grpc(
             self.mock_stub.PushObject, node, run_id
         )
-
-        # Execute
-        pushed_object_ids = push_object_to_servicer(obj, push_object_fn)
-
-        # Assert
-        # Expected number of objects were pushed
-        assert self.mock_stub.PushObject.call_count == expected_obj_count
-        assert len(self.mock_store) == expected_obj_count
-        assert len(pushed_object_ids) == expected_obj_count
-
-    def test_push_objects_filtering_by_obj_ids_list(self) -> None:
-        """Test pushing objects based on list of object_ids to push."""
-        # Prepare
-        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]] = {
-            "a": ConfigRecord({"a": 123, "b": 123}),
-            "b": ArrayRecord([np.array([1, 2]), np.array([3, 4])]),
-        }
-        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
-        node = Node(node_id=456)
-        run_id = 1234
-        push_object_fn = make_push_object_fn_grpc(
-            self.mock_stub.PushObject, node, run_id
-        )
-
-        # Compute descendants
-        descendants = list(get_desdendant_object_ids(obj))
-        # Take first two
-        obj_to_push = set([obj.object_id] + descendants[:2])
-        expected_obj_count = 3
-
-        # Execute
-        pushed_object_ids = push_object_to_servicer(obj, push_object_fn, obj_to_push)
-
-        # Assert
-        # Expected number of objects were pushed
-        assert self.mock_stub.PushObject.call_count == expected_obj_count
-        assert len(self.mock_store) == expected_obj_count
-        assert len(pushed_object_ids) == expected_obj_count
-        assert obj_to_push == pushed_object_ids
-
-    @parameterized.expand(base_cases)  # type: ignore
-    def test_pull_object_with_helper_function(
-        self,
-        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
-        expected_obj_count: int,
-    ) -> None:
-        """Use helper function to pull an object recursively."""
-        # Prepare
-        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
-        node = Node(node_id=456)
-        run_id = 1234
-        # +2 due to the RecordDict and Message
-        expected_obj_count += 2
-        push_object_fn = make_push_object_fn_grpc(
-            self.mock_stub.PushObject, node, run_id
-        )
-        pull_object_fn = make_pull_object_fn_grpc(
+        self.pull_object_fn = make_pull_object_fn_grpc(
             self.mock_stub.PullObject, node, run_id
         )
 
-        # Execute
-        push_object_to_servicer(obj, push_object_fn)
-        pulled_obj = pull_object_from_servicer(obj.object_id, pull_object_fn)
+    @parameterized.expand(product([case[0] for case in base_cases], [True, False]))  # type: ignore
+    def test_push_objects(
+        self,
+        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+        filter_by_obj_ids: bool,
+    ) -> None:
+        """Test pushing objects with push_objects helper function."""
+        # Prepare
+        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
+        # Prepare: Pre-register all objects
+        all_objects = get_all_nested_objects(obj)
+        expected_obj_count = len(all_objects)
+        for obj_id in all_objects:
+            self.mock_store[obj_id] = b""
+        # Prepare: Filter by object IDs if specified
+        object_ids_to_push = None
+        if filter_by_obj_ids:
+            object_ids_to_push = set(list(all_objects.keys())[:2])  # Take first two
+            expected_obj_count = len(object_ids_to_push)
 
-        # Assert
-        # Expected number of objects were pulled
+        # Execute
+        push_objects(
+            all_objects, self.push_object_fn, object_ids_to_push=object_ids_to_push
+        )
+
+        # Assert: Expected number of objects were pushed
+        num_pushed_objects = sum(b != b"" for b in self.mock_store.values())
+        assert self.mock_stub.PushObject.call_count == expected_obj_count
+        assert num_pushed_objects == expected_obj_count
+
+    @parameterized.expand(base_cases)  # type: ignore
+    def test_pull_objects_success(
+        self,
+        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+    ) -> None:
+        """Test pulling objects with pull_objects helper function."""
+        # Prepare
+        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
+        # Prepare: Pre-register all objects
+        all_objects = get_all_nested_objects(obj)
+        expected_obj_count = len(all_objects)
+        for obj_id in all_objects:
+            self.mock_store[obj_id] = b""
+        # Prepare: Push objects
+        push_objects(all_objects, self.push_object_fn, keep_objects=True)
+
+        # Execute
+        pulled_objects = pull_objects(list(all_objects.keys()), self.pull_object_fn)
+
+        # Assert: Expected number of objects were pulled
         assert self.mock_stub.PullObject.call_count == expected_obj_count
-        assert pulled_obj.object_id == obj.object_id
-        self.assertNotEqual(pulled_obj, obj)
+        assert pulled_objects == {k: v.deflate() for k, v in all_objects.items()}
+
+    @parameterized.expand(base_cases)  # type: ignore
+    def test_pull_objects_no_preregistration_failure(
+        self,
+        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+    ) -> None:
+        """Test pulling objects without pre-registering them."""
+        # Prepare
+        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
+        # Prepare: Pre-register all objects
+        all_objects = get_all_nested_objects(obj)
+        all_object_ids = list(all_objects.keys())
+        all_objects.pop(
+            obj.object_id
+        )  # Remove one object to simulate no pre-registration
+        for obj_id in all_objects:
+            self.mock_store[obj_id] = b""
+        # Prepare: Push objects
+        push_objects(all_objects, self.push_object_fn)
+
+        # Execute and assert
+        with self.assertRaises(ObjectIdNotPreregisteredError):
+            _ = pull_objects(all_object_ids, self.pull_object_fn)
+
+    @parameterized.expand(base_cases)  # type: ignore
+    def test_pull_objects_exceeding_max_time_failure(
+        self,
+        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+    ) -> None:
+        """Test pulling objects exceeding max time."""
+        # Prepare
+        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
+        # Prepare: Pre-register all objects
+        all_objects = get_all_nested_objects(obj)
+        all_object_ids = list(all_objects.keys())
+        all_objects.pop(obj.object_id)  # Remove one object to simulate unavailability
+        for obj_id in all_object_ids:
+            self.mock_store[obj_id] = b""
+        # Prepare: Push objects
+        push_objects(all_objects, self.push_object_fn)
+
+        # Execute
+        with self.assertRaises(ObjectUnavailableError):
+            _ = pull_objects(
+                all_object_ids,
+                self.pull_object_fn,
+                max_time=0.001,
+                initial_backoff=0.0015,
+            )
+
+    @parameterized.expand(base_cases)  # type: ignore
+    def test_pull_objects_exceeding_max_tries_failure(
+        self,
+        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+    ) -> None:
+        """Test pulling objects exceeding max tries."""
+        # Prepare
+        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
+        # Prepare: Pre-register all objects
+        all_objects = get_all_nested_objects(obj)
+        all_object_ids = list(all_objects.keys())
+        all_objects.pop(obj.object_id)  # Remove one object to simulate unavailability
+        for obj_id in all_object_ids:
+            self.mock_store[obj_id] = b""
+        # Prepare: Push objects
+        push_objects(all_objects, self.push_object_fn)
+
+        # Execute
+        with self.assertRaises(ObjectUnavailableError):
+            _ = pull_objects(
+                all_object_ids,
+                self.pull_object_fn,
+                max_tries_per_object=3,
+                initial_backoff=0.0001,  # Small backoff to trigger retries quickly
+            )
