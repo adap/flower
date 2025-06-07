@@ -24,8 +24,12 @@ import grpc
 from flwr.app.error import Error
 from flwr.common import RecordDict
 from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.common.inflatable import get_all_nested_objects
 from flwr.common.message import Message
-from flwr.common.serde import message_from_proto, recorddict_from_proto
+from flwr.common.serde import (
+    message_from_proto,
+    message_to_proto,
+)
 from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -103,6 +107,7 @@ class TestGrpcGrid(unittest.TestCase):
         message.metadata._run_id = 61016  # type: ignore
         # pylint: disable-next=W0212
         message.metadata._src_node_id = SUPERLINK_NODE_ID  # type: ignore
+        message.metadata.__dict__["_message_id"] = message.object_id
         return message
 
     def test_push_messages_valid(self) -> None:
@@ -149,45 +154,44 @@ class TestGrpcGrid(unittest.TestCase):
 
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""
-        # Prepare
-        mock_response = Mock()
-        # A Message must have either content or error set so we prepare
-        run_id = 12345
-        ok_message = create_res_message(src_node_id=123, dst_node_id=456, run_id=run_id)
-        ok_message.metadata.reply_to_message_id = "id2"
+        # Prepare: Create instruction messages
+        ins1 = self._prep_message(Message(RecordDict(), 123, "query"))
+        ins2 = self._prep_message(Message(RecordDict(), 456, "query"))
 
-        error_message = create_res_message(
-            src_node_id=123, dst_node_id=789, run_id=run_id, error=Error(code=0)
+        # Prepare: Create a normal reply
+        ok_msg = Message(RecordDict(), reply_to=ins1)
+        ok_msg.metadata.__dict__["_message_id"] = ok_msg.object_id
+        ok_msg_all_objs = get_all_nested_objects(ok_msg)
+        ok_msg_descendant_ids = set(ok_msg_all_objs.keys()) - {ok_msg.object_id}
+
+        # Prepare: Create an error reply
+        err_msg = Message(Error(0), reply_to=ins2)
+        err_msg.metadata.__dict__["_message_id"] = err_msg.object_id
+        err_msg_all_objs = get_all_nested_objects(err_msg)
+        error_msg_descendant_ids = set(err_msg_all_objs.keys()) - {err_msg.object_id}
+
+        # Prepare: Mock the objectStore
+        obj_store = {k: v.deflate() for k, v in ok_msg_all_objs.items()}
+        obj_store.update({k: v.deflate() for k, v in err_msg_all_objs.items()})
+
+        # Prepare: Mock the response of PushMessages
+        self.mock_stub.PullMessages.return_value = Mock(
+            messages_list=[message_to_proto(ok_msg), message_to_proto(err_msg)],
+            objects_to_pull={
+                ok_msg.object_id: Mock(object_ids=ok_msg_descendant_ids),
+                err_msg.object_id: Mock(object_ids=error_msg_descendant_ids),
+            },
         )
-        error_message.metadata.reply_to_message_id = "id3"
-        # The response from the ServerAppIoServicer is in the form of Protobuf Messages
-        mock_response.messages_list = [ok_message, error_message]
-        self.mock_stub.PullMessages.return_value = mock_response
-        # Mock response of PullObject. Here we care about replying with a successful
-        # response that carries a generic deflated Message object.
-        obj_content1_msg = message_from_proto(ok_message).deflate()
-        obj_content1_rd = recorddict_from_proto(ok_message.content).deflate()
-        obj_content2 = message_from_proto(error_message).deflate()
-        # Because we are pulling two Messages, we'll be calling the helper function
-        # twice The message carrying content has two objects (Message itself and
-        # recorddict for content) so the stub will be called twice. The final Mock
-        # represents the Message carrying the error
-        self.mock_stub.PullObject.side_effect = [
-            Mock(
-                object_found=True,
-                object_available=True,
-                object_content=obj_content1_msg,
-            ),
-            Mock(
-                object_found=True, object_available=True, object_content=obj_content1_rd
-            ),
-            Mock(object_found=True, object_available=True, object_content=obj_content2),
-        ]
-        msg_ids = ["id1", "id2", "id3"]
+
+        # Prepare: Mock response of PullObject
+        self.mock_stub.PullObject.side_effect = lambda req: Mock(
+            object_found=True,
+            object_available=True,
+            object_content=obj_store[req.object_id],
+        )
 
         # Execute
-        msgs = self.grid.pull_messages(msg_ids)
-        reply_tos = {msg.metadata.reply_to_message_id for msg in msgs}
+        msgs = list(self.grid.pull_messages([ins1.object_id, ins2.object_id]))
         args, kwargs = self.mock_stub.PullMessages.call_args
 
         # Assert
@@ -195,8 +199,12 @@ class TestGrpcGrid(unittest.TestCase):
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PullResMessagesRequest)
-        self.assertEqual(args[0].message_ids, msg_ids)
-        self.assertEqual(reply_tos, {"id2", "id3"})
+        self.assertEqual(args[0].message_ids, [ins1.object_id, ins2.object_id])
+        self.assertEqual(msgs[0].metadata, ok_msg.metadata)
+        self.assertEqual(msgs[0].content, ok_msg.content)
+        self.assertEqual(msgs[1].metadata, err_msg.metadata)
+        self.assertEqual(msgs[1].error, err_msg.error)
+        self.assertEqual(self.mock_stub.PullObject.call_count, len(obj_store))
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""

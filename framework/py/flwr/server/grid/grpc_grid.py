@@ -306,8 +306,11 @@ class GrpcGrid(Grid):
                         run_id=run_id,
                     ),
                 )
-                message = inflate_object_from_contents(msg_id, all_object_contents)
-                inflated_msgs.append(cast(Message, message))
+                message = cast(
+                    Message, inflate_object_from_contents(msg_id, all_object_contents)
+                )
+                message.metadata.__dict__["_message_id"] = msg_id
+                inflated_msgs.append(message)
 
             return inflated_msgs
 
