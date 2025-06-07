@@ -32,15 +32,13 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
-from .inflatable import get_all_nested_objects, get_desdendant_object_ids
+from .inflatable import get_all_nested_objects
 from .inflatable_grpc_utils import (
     ObjectIdNotPreregisteredError,
     ObjectUnavailableError,
     make_pull_object_fn_grpc,
     make_push_object_fn_grpc,
-    pull_object_from_servicer,
     pull_objects,
-    push_object_to_servicer,
     push_objects,
 )
 
@@ -94,85 +92,6 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         self.pull_object_fn = make_pull_object_fn_grpc(
             self.mock_stub.PullObject, node, run_id
         )
-
-    @parameterized.expand(base_cases)  # type: ignore
-    def test_push_object_with_helper_function(
-        self,
-        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
-    ) -> None:
-        """Use helper function to push an object recursively."""
-        # Prepare
-        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
-        # Prepare: pre-register all objects
-        all_objects = get_all_nested_objects(obj)
-        expected_obj_count = len(all_objects)
-        for obj_id in all_objects:
-            self.mock_store[obj_id] = b""
-
-        # Execute
-        pushed_object_ids = push_object_to_servicer(obj, self.push_object_fn)
-
-        # Assert
-        # Expected number of objects were pushed
-        num_pushed_objects = sum(b != b"" for b in self.mock_store.values())
-        assert self.mock_stub.PushObject.call_count == expected_obj_count
-        assert num_pushed_objects == expected_obj_count
-        assert len(pushed_object_ids) == expected_obj_count
-
-    def test_push_objects_filtering_by_obj_ids_list(self) -> None:
-        """Test pushing objects based on list of object_ids to push."""
-        # Prepare
-        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]] = {
-            "a": ConfigRecord({"a": 123, "b": 123}),
-            "b": ArrayRecord([np.array([1, 2]), np.array([3, 4])]),
-        }
-        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
-
-        # Compute descendants
-        descendants = list(get_desdendant_object_ids(obj))
-        # Take first two
-        obj_to_push = set([obj.object_id] + descendants[:2])
-        expected_obj_count = 3
-        # Prepare: pre-register the objects
-        for obj_id in obj_to_push:
-            self.mock_store[obj_id] = b""
-
-        # Execute
-        pushed_object_ids = push_object_to_servicer(
-            obj, self.push_object_fn, obj_to_push
-        )
-
-        # Assert
-        # Expected number of objects were pushed
-        num_pushed_objects = sum(b != b"" for b in self.mock_store.values())
-        assert self.mock_stub.PushObject.call_count == expected_obj_count
-        assert num_pushed_objects == expected_obj_count
-        assert len(pushed_object_ids) == expected_obj_count
-        assert obj_to_push == pushed_object_ids
-
-    @parameterized.expand(base_cases)  # type: ignore
-    def test_pull_object_with_helper_function(
-        self,
-        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
-    ) -> None:
-        """Use helper function to pull an object recursively."""
-        # Prepare
-        obj = Message(RecordDict(records), dst_node_id=123, message_type="query")
-        # Prepare: pre-register all objects
-        all_objects = get_all_nested_objects(obj)
-        expected_obj_count = len(all_objects)
-        for obj_id in all_objects:
-            self.mock_store[obj_id] = b""
-
-        # Execute
-        push_object_to_servicer(obj, self.push_object_fn)
-        pulled_obj = pull_object_from_servicer(obj.object_id, self.pull_object_fn)
-
-        # Assert
-        # Expected number of objects were pulled
-        assert self.mock_stub.PullObject.call_count == expected_obj_count
-        assert pulled_obj.object_id == obj.object_id
-        self.assertNotEqual(pulled_obj, obj)
 
     @parameterized.expand(product([case[0] for case in base_cases], [True, False]))  # type: ignore
     def test_push_objects(

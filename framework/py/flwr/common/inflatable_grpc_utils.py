@@ -19,7 +19,6 @@ import concurrent.futures
 import random
 import threading
 import time
-from time import sleep
 from typing import Callable, Optional
 
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
@@ -38,11 +37,7 @@ from .constant import (
     PULL_MAX_TIME,
     PULL_MAX_TRIES_PER_OBJECT,
 )
-from .inflatable import (
-    InflatableObject,
-    get_object_head_values_from_object_content,
-    get_object_id,
-)
+from .inflatable import InflatableObject, get_object_head_values_from_object_content
 from .message import Message
 from .record import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 
@@ -70,102 +65,6 @@ class ObjectIdNotPreregisteredError(Exception):
 
     def __init__(self, object_id: str):
         super().__init__(f"Object with ID '{object_id}' could not be found.")
-
-
-def push_object_to_servicer(
-    obj: InflatableObject,
-    push_object_fn: Callable[[str, bytes], None],
-    object_ids_to_push: Optional[set[str]] = None,
-) -> set[str]:
-    """Recursively deflate an object and push it to the servicer.
-
-    Objects with the same ID are not pushed twice. If `object_ids_to_push` is set,
-    only objects with those IDs are pushed. It returns the set of pushed object
-    IDs.
-
-    Parameters
-    ----------
-    obj : InflatableObject
-        The object to push.
-    push_object_fn : Callable[[str, bytes], None]
-        A function that takes an object ID and its content as bytes, and pushes
-        it to the servicer. This function should raise `ObjectIdNotPreregisteredError`
-        if the object ID is not pre-registered.
-    object_ids_to_push : Optional[set[str]] (default: None)
-        A set of object IDs to push. If object ID of the given object is not in this
-        set, the object will not be pushed.
-
-    Returns
-    -------
-    set[str]
-        A set of object IDs that were pushed to the servicer.
-    """
-    pushed_object_ids: set[str] = set()
-    # Push children if it has any
-    if children := obj.children:
-        for child in children.values():
-            pushed_object_ids |= push_object_to_servicer(
-                child, push_object_fn, object_ids_to_push
-            )
-
-    # Deflate object and push
-    object_content = obj.deflate()
-    object_id = get_object_id(object_content)
-    # Push always if no object set is specified, or if the object is in the set
-    if object_ids_to_push is None or object_id in object_ids_to_push:
-        # The function may raise an error if the object ID is not pre-registered
-        push_object_fn(object_id, object_content)
-        pushed_object_ids.add(object_id)
-
-    return pushed_object_ids
-
-
-def pull_object_from_servicer(
-    object_id: str,
-    pull_object_fn: Callable[[str], bytes],
-) -> InflatableObject:
-    """Recursively inflate an object by pulling it from the servicer.
-
-    Parameters
-    ----------
-    object_id : str
-        The ID of the object to pull.
-    pull_object_fn : Callable[[str], bytes]
-        A function that takes an object ID and returns the object content as bytes.
-        The function should raise `ObjectUnavailableError` if the object is not yet
-        available, or `ObjectIdNotPreregisteredError` if the object ID is not
-        pre-registered.
-
-    Returns
-    -------
-    InflatableObject
-        The pulled object.
-    """
-    # Pull object
-    while True:
-        try:
-            # The function may raise an error if the object ID is not pre-registered
-            object_content: bytes = pull_object_fn(object_id)
-            break  # Exit loop if object is successfully pulled
-        except ObjectUnavailableError:
-            sleep(0.1)  # Retry after a short delay
-
-    # Extract object class and object_ids of children
-    obj_type, children_obj_ids, _ = get_object_head_values_from_object_content(
-        object_content=object_content
-    )
-    # Resolve object class
-    cls_type = inflatable_class_registry[obj_type]
-
-    # Pull all children objects
-    children: dict[str, InflatableObject] = {}
-    for child_object_id in children_obj_ids:
-        children[child_object_id] = pull_object_from_servicer(
-            child_object_id, pull_object_fn
-        )
-
-    # Inflate object passing its children
-    return cls_type.inflate(object_content, children=children)
 
 
 def make_pull_object_fn_grpc(
