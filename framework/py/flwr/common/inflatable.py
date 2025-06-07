@@ -25,6 +25,16 @@ from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 from .logger import log
 
 
+class UnexpectedObjectContentError(Exception):
+    """Exception raised when the content of an object does not conform to the expected
+    structure for an InflatableObject (i.e., head, body, and values within the head)."""
+
+    def __init__(self, object_id: str, reason: str):
+        super().__init__(
+            f"Object with ID '{object_id}' has an unexpected structure. {reason}"
+        )
+
+
 class InflatableObject:
     """Base class for inflatable objects."""
 
@@ -117,12 +127,14 @@ def add_header_to_object_body(object_body: bytes, obj: InflatableObject) -> byte
 
 def _get_object_head(object_content: bytes) -> bytes:
     """Return object head from object content."""
-    return object_content.split(HEAD_BODY_DIVIDER, 1)[0]
+    index = object_content.find(HEAD_BODY_DIVIDER)
+    return object_content[:index]
 
 
 def _get_object_body(object_content: bytes) -> bytes:
     """Return object body from object content."""
-    return object_content.split(HEAD_BODY_DIVIDER, 1)[1]
+    index = object_content.find(HEAD_BODY_DIVIDER)
+    return object_content[index + len(HEAD_BODY_DIVIDER) :]
 
 
 def is_valid_sha256_hash(object_id: str) -> bool:
