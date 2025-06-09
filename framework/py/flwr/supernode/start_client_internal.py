@@ -178,7 +178,7 @@ def start_client_internal(
                 get_fab=get_fab,
             )
 
-            if run_id == 0:
+            if run_id is None:
                 time.sleep(3)  # Wait for 3s before asking again
                 continue
 
@@ -267,39 +267,41 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     receive: Callable[[], Optional[Message]],
     get_run: Callable[[int], Run],
     get_fab: Callable[[str, int], Fab],
-) -> int:
+) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
-    This function current returns 0 if no message is received,
+    This function current returns None if no message is received,
     or run_id if a message is received and processed successfully.
     This behavior will change in the future to return None after
     completing transition to the `NodeState`-based SuperNode.
     """
-    # Pull message
-    if (message := receive()) is None:
-        return 0
+    message = None
+    try:
+        # Pull message
+        if (message := receive()) is None:
+            return None
 
-    # Log message reception
-    log(INFO, "")
-    if message.metadata.group_id:
+        # Log message reception
+        log(INFO, "")
+        if message.metadata.group_id:
+            log(
+                INFO,
+                "[RUN %s, ROUND %s]",
+                message.metadata.run_id,
+                message.metadata.group_id,
+            )
+        else:
+            log(INFO, "[RUN %s]", message.metadata.run_id)
         log(
             INFO,
-            "[RUN %s, ROUND %s]",
-            message.metadata.run_id,
-            message.metadata.group_id,
+            "Received: %s message %s",
+            message.metadata.message_type,
+            message.metadata.message_id,
         )
-    else:
-        log(INFO, "[RUN %s]", message.metadata.run_id)
-    log(
-        INFO,
-        "Received: %s message %s",
-        message.metadata.message_type,
-        message.metadata.message_id,
-    )
 
-    # Ensure the run and FAB are available
-    run_id = message.metadata.run_id
-    try:
+        # Ensure the run and FAB are available
+        run_id = message.metadata.run_id
+
         # Check if the message is from an unknown run
         if (run_info := state.get_run(run_id)) is None:
             # Pull run info from SuperLink
@@ -324,13 +326,20 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
         # Store the message in the state
         state.store_message(message)
     except RunNotRunningException:
-        log(
-            INFO,
-            "Run ID %s is not in `RUNNING` status. Ignoring message %s.",
-            run_id,
-            message.metadata.message_id,
-        )
-        return 0
+        if message is None:
+            log(
+                INFO,
+                "Run transitioned to a non-`RUNNING` status while receiving a message. "
+                "Ignoring the message.",
+            )
+        else:
+            log(
+                INFO,
+                "Run ID %s is not in `RUNNING` status. Ignoring message %s.",
+                run_id,
+                message.metadata.message_id,
+            )
+        return None
 
     return run_id
 
