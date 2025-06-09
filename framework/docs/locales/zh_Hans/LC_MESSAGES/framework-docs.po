@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-04 00:07+0000\n"
+"POT-Creation-Date: 2025-06-09 00:08+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -12262,9 +12262,8 @@ msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
 msgid ""
-"alias of :py:class:`~numpy.ndarray`\\ [:py:class:`tuple`\\ "
-"[:py:class:`int`, ...], :py:class:`~numpy.dtype`\\ "
-"[:py:obj:`~typing.Any`]]"
+"alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
+":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
 msgstr ""
 "alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
 ":py:class:`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
@@ -12278,7 +12277,7 @@ msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 #, fuzzy
 msgid ""
 "alias of :py:class:`list`\\ [:py:class:`~numpy.ndarray`\\ "
-"[:py:class:`tuple`\\ [:py:class:`int`, ...], :py:class:`~numpy.dtype`\\ "
+"[:py:obj:`~typing.Any`, :py:class:`~numpy.dtype`\\ "
 "[:py:obj:`~typing.Any`]]]"
 msgstr ""
 "alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, "
@@ -35804,7 +35803,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|9ebe8262c4194c44ba4a2be53c980aee|"
+msgid "|16b74fb052cc4b93b11bb54f5a965637|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -35819,7 +35818,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|c88f55f67d464e8d801e8b0439319406|"
+msgid "|3ab7f8d3932b4d9a9c5f93f52fb97183|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -35843,7 +35842,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|eec321d625ed4b979c8b85739cba24a0|"
+msgid "|d8809b99c8b1406987518fd2d588e98a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -35861,7 +35860,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|b5b85bb0f2e746b3b21bbc93064f1713|"
+msgid "|e6b97e49aa25444a8917ffeb41140493|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -35878,7 +35877,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|d3a699b267c24d189bbcd5c7d88aa24c|"
+msgid "|2de181ad9c3b46f88b2e55be716ceeb9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -35893,7 +35892,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|3f52e8713ba1464190546013d5071ca9|"
+msgid "|1af177cb011a407198484e0a689b3483|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -35914,7 +35913,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|c900d15cd53c48fa9534b4f3b52e6a7c|"
+msgid "|04de4e1a24ef46a69b0c3fa107ba64d5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -35929,7 +35928,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|24d650391e6b470bb8e3ca6bf72765a7|"
+msgid "|eefbcab399994d848017a865e3399861|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -36089,7 +36088,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|4ef0c0ddaf284853b908ec4826eda70e|"
+msgid "|e170f401b7954a12a00b529f54594fc5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -36114,7 +36113,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|6adf6e99472145168f733cd3cb69edbd|"
+msgid "|fd3783347f4c448ea65a3e2747aea4da|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -36140,7 +36139,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|c61759bdc5a4499b89fe87ba431e3864|"
+msgid "|a2f7c60a162e469e97445b3942dcc5f4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -36163,7 +36162,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|d3a42aea8c914a12b431caf494172210|"
+msgid "|902c355a35404a16a3be39b692938451|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -36210,7 +36209,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|406fac62cefb4c298cdb1a63db37ec87|"
+msgid "|63350c37183742fbb67a5e34b1c533ae|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -36318,7 +36317,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|9ffff0a65f2342a8bea9f0e9d282580d|"
+msgid "|867a7872e4dd40a1811bfd20e4d6f62f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -47588,5 +47587,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|4ff5cbd7b624471daca8b1c17933fa41|"
+#~ msgstr ""
+
+#~ msgid "|9ebe8262c4194c44ba4a2be53c980aee|"
+#~ msgstr ""
+
+#~ msgid "|c88f55f67d464e8d801e8b0439319406|"
+#~ msgstr ""
+
+#~ msgid "|eec321d625ed4b979c8b85739cba24a0|"
+#~ msgstr ""
+
+#~ msgid "|b5b85bb0f2e746b3b21bbc93064f1713|"
+#~ msgstr ""
+
+#~ msgid "|d3a699b267c24d189bbcd5c7d88aa24c|"
+#~ msgstr ""
+
+#~ msgid "|3f52e8713ba1464190546013d5071ca9|"
+#~ msgstr ""
+
+#~ msgid "|c900d15cd53c48fa9534b4f3b52e6a7c|"
+#~ msgstr ""
+
+#~ msgid "|24d650391e6b470bb8e3ca6bf72765a7|"
+#~ msgstr ""
+
+#~ msgid "|4ef0c0ddaf284853b908ec4826eda70e|"
+#~ msgstr ""
+
+#~ msgid "|6adf6e99472145168f733cd3cb69edbd|"
+#~ msgstr ""
+
+#~ msgid "|c61759bdc5a4499b89fe87ba431e3864|"
+#~ msgstr ""
+
+#~ msgid "|d3a42aea8c914a12b431caf494172210|"
+#~ msgstr ""
+
+#~ msgid "|406fac62cefb4c298cdb1a63db37ec87|"
+#~ msgstr ""
+
+#~ msgid "|9ffff0a65f2342a8bea9f0e9d282580d|"
 #~ msgstr ""
 
