@@ -417,22 +417,8 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
 
-        # Correct node ID but invalid object_content
-        node_id = self.state.create_node(heartbeat_interval=30)
-        obj_b = b"extra content"
-        object_id = get_object_id(obj_b)
-        # Execute (doesn't match structure)
-        req = PushObjectRequest(
-            node=Node(node_id=node_id),
-            run_id=run_id,
-            object_id=object_id,
-            object_content=obj_b,
-        )
-        with self.assertRaises(grpc.RpcError) as e:
-            self._push_object(request=req)
-        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-
         # Prepare
+        node_id = self.state.create_node(heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 

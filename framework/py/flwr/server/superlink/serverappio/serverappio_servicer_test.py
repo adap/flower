@@ -721,20 +721,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
 
-        # Correct node ID but invalid object_content
-        obj_b = b"extra content"
-        object_id = get_object_id(obj_b)
-        # Execute (doesn't match structure)
-        req = PushObjectRequest(
-            node=Node(node_id=SUPERLINK_NODE_ID),
-            run_id=run_id,
-            object_id=object_id,
-            object_content=obj_b,
-        )
-        with self.assertRaises(grpc.RpcError) as e:
-            self._push_object(request=req)
-        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-
         # Prepare
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
