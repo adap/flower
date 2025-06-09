@@ -23,7 +23,11 @@ import grpc
 
 from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
-from flwr.common.inflatable import check_body_len_consistency, get_descendant_object_ids
+from flwr.common.inflatable import (
+    UnexpectedObjectContentError,
+    get_descendant_object_ids,
+)
+from flwr.common.inflatable_utils import validate_object_content
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -424,11 +428,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
 
-        if not check_body_len_consistency(request.object_content):
-            # Cancel insertion in ObjectStore
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION, "Unexpected object length."
-            )
+        # Ensure the object content is valid
+        try:
+            validate_object_content(content=request.object_content)
+        except UnexpectedObjectContentError as ex:
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(ex))
 
         # Init store
         store = self.objectstore_factory.store()

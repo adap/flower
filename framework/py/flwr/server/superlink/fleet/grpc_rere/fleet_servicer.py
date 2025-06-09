@@ -21,7 +21,8 @@ import grpc
 from google.protobuf.json_format import MessageToDict
 
 from flwr.common.constant import Status
-from flwr.common.inflatable import check_body_len_consistency
+from flwr.common.inflatable import UnexpectedObjectContentError
+from flwr.common.inflatable_utils import validate_object_content
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
@@ -200,11 +201,11 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
 
-        if not check_body_len_consistency(request.object_content):
-            # Cancel insertion in ObjectStore
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION, "Unexpected object length"
-            )
+        # Ensure the object content is valid
+        try:
+            validate_object_content(content=request.object_content)
+        except UnexpectedObjectContentError as ex:
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(ex))
 
         # Init store
         store = self.objectstore_factory.store()
