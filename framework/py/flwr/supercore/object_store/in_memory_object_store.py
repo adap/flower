@@ -18,6 +18,7 @@
 from typing import Optional
 
 from flwr.common.inflatable import get_object_id, is_valid_sha256_hash
+from flwr.common.inflatable_utils import validate_object_content
 
 from .object_store import NoObjectInStoreError, ObjectStore
 
@@ -52,11 +53,14 @@ class InMemoryObjectStore(ObjectStore):
                 f"Object with ID '{object_id}' was not pre-registered."
             )
 
-        # Verify object_id and object_content match
         if self.verify:
+            # Verify object_id and object_content match
             object_id_from_content = get_object_id(object_content)
             if object_id != object_id_from_content:
                 raise ValueError(f"Object ID {object_id} does not match content hash")
+
+            # Validate object content
+            validate_object_content(content=object_content)
 
         # Return if object is already present in the store
         if self.store[object_id] != b"":

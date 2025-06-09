@@ -27,7 +27,6 @@ from flwr.common.inflatable import (
     UnexpectedObjectContentError,
     get_descendant_object_ids,
 )
-from flwr.common.inflatable_utils import validate_object_content
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -428,12 +427,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
 
-        # Ensure the object content is valid
-        try:
-            validate_object_content(content=request.object_content)
-        except UnexpectedObjectContentError as ex:
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(ex))
-
         # Init store
         store = self.objectstore_factory.store()
 
@@ -444,6 +437,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             stored = True
         except (NoObjectInStoreError, ValueError) as e:
             log(ERROR, str(e))
+        except UnexpectedObjectContentError as e:
+            # Object content is not valid
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         return PushObjectResponse(stored=stored)
 
