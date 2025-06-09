@@ -29,11 +29,9 @@ from .inflatable import (
     _get_object_body,
     _get_object_head,
     add_header_to_object_body,
-    check_body_len_consistency,
     get_all_nested_objects,
     get_descendant_object_ids,
     get_object_body,
-    get_object_body_len_from_object_content,
     get_object_head_values_from_object_content,
     get_object_id,
     get_object_type_from_object_content,
@@ -199,29 +197,6 @@ def test_is_valid_sha256_hash_invalid() -> None:
 
     # Execute & assert
     assert not is_valid_sha256_hash(invalid_hash)
-
-
-def test_check_body_length() -> None:
-    """Test helper function that checks if the specified body length in the object head
-    matches the actual length of the object body."""
-    data = b"this is a test"
-    obj = CustomDataClass(data)
-    obj_b = obj.deflate()
-
-    # Body length is measured correctly
-    assert get_object_body_len_from_object_content(obj_b) == len(data)
-
-    # Consistent: passes
-    assert check_body_len_consistency(obj_b)
-
-    # Extend content artificially
-    obj_b_ = obj_b + b"more content"
-    # Inconsistent: fails
-    assert not check_body_len_consistency(obj_b_)
-
-    # Create object that doesn't comply with serialized object structure
-    obj_ = b"this is a test"
-    assert not check_body_len_consistency(obj_)
 
 
 @pytest.mark.parametrize(

@@ -18,11 +18,9 @@
 from __future__ import annotations
 
 import hashlib
-from logging import ERROR
 from typing import TypeVar, cast
 
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
-from .logger import log
 
 
 class UnexpectedObjectContentError(Exception):
@@ -173,16 +171,6 @@ def get_object_children_ids_from_object_content(object_content: bytes) -> list[s
 def get_object_body_len_from_object_content(object_content: bytes) -> int:
     """Return length of the object body."""
     return get_object_head_values_from_object_content(object_content)[2]
-
-
-def check_body_len_consistency(object_content: bytes) -> bool:
-    """Check that the object body is of length as specified in the head."""
-    try:
-        body_len = get_object_body_len_from_object_content(object_content)
-        return body_len == len(_get_object_body(object_content))
-    except ValueError:
-        log(ERROR, "Object content does match the expected format.")
-        return False
 
 
 def get_object_head_values_from_object_content(
