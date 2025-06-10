@@ -321,17 +321,26 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(INFO, "[Node] POST /%s: success", PATH_PULL_MESSAGES)
             msg_id = message_proto.metadata.message_id
 
-            def fn(request: PullObjectRequest) -> PullObjectResponse:
+            def fn(request: PullObjectRequest) -> Optional[PullObjectResponse]:
                 return _request(
                     req=request, res_type=PullObjectResponse, api_path=PATH_PULL_OBJECT
                 )
 
-            all_object_contents = pull_objects(
-                list(res.objects_to_pull[msg_id].object_ids) + [msg_id],
-                pull_object_fn=make_pull_object_fn_rest(
-                    pull_object_rest=fn, node=node, run_id=message_proto.metadata.run_id
-                ),
-            )
+            try:
+                all_object_contents = pull_objects(
+                    list(res.objects_to_pull[msg_id].object_ids) + [msg_id],
+                    pull_object_fn=make_pull_object_fn_rest(
+                        pull_object_rest=fn,
+                        node=node,
+                        run_id=message_proto.metadata.run_id,
+                    ),
+                )
+            except ValueError as e:
+                log(
+                    ERROR,
+                    "Pulling objects failed. Potential irrecoverable error: %s",
+                    str(e),
+                )
             in_message = cast(
                 Message, inflate_object_from_contents(msg_id, all_object_contents)
             )
@@ -392,21 +401,29 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         if res and res.objects_to_push:
             objs_to_push = set(res.objects_to_push[message.object_id].object_ids)
 
-            def fn(request: PushObjectRequest) -> PushObjectResponse:
+            def fn(request: PushObjectRequest) -> Optional[PushObjectResponse]:
                 return _request(
                     req=request, res_type=PushObjectResponse, api_path=PATH_PUSH_OBJECT
                 )
 
-            push_objects(
-                all_objects,
-                push_object_fn=make_push_object_fn_rest(
-                    push_object_rest=fn,
-                    node=node,
-                    run_id=message_proto.metadata.run_id,
-                ),
-                object_ids_to_push=objs_to_push,
-            )
-            log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
+            try:
+                push_objects(
+                    all_objects,
+                    push_object_fn=make_push_object_fn_rest(
+                        push_object_rest=fn,
+                        node=node,
+                        run_id=message_proto.metadata.run_id,
+                    ),
+                    object_ids_to_push=objs_to_push,
+                )
+                log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
+            except ValueError as e:
+                log(
+                    ERROR,
+                    "Pushing objects failed. Potential irrecoverable error: %s",
+                    str(e),
+                )
+                log(ERROR, str(e))
 
         # Cleanup
         metadata = None
