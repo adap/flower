@@ -289,6 +289,11 @@ async function sendRequest(
       case 504:
         code = FailureCode.TimeoutError;
         break;
+      case 500:
+        if (response.statusText.includes('context size')) {
+          code = FailureCode.MaxContextSizeExceededError;
+        }
+        break;
 
       default:
         break;
