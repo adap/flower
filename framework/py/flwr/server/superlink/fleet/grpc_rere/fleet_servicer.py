@@ -192,8 +192,6 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             )
         except InvalidRunStatusException as e:
             abort_grpc_context(e.message, context)
-        except KeyError as e:
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
         except UnexpectedObjectContentError as e:
             # Object content is not valid
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
