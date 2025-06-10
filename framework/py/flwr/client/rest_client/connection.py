@@ -17,7 +17,6 @@
 from collections.abc import Iterator
 from contextlib import contextmanager
 from copy import copy
-from functools import partial
 from logging import DEBUG, ERROR, INFO, WARN
 from typing import Callable, Optional, TypeVar, Union, cast
 
@@ -321,9 +320,11 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         if message_proto:
             log(INFO, "[Node] POST /%s: success", PATH_PULL_MESSAGES)
             msg_id = message_proto.metadata.message_id
-            fn: Callable[[PullObjectRequest], PullObjectResponse] = partial(
-                _request, res_type=PullObjectResponse, api_path=PATH_PULL_OBJECT
-            )
+
+            def fn(request: PullObjectRequest) -> PullObjectResponse:
+                return _request(
+                    req=request, res_type=PullObjectResponse, api_path=PATH_PULL_OBJECT
+                )
 
             all_object_contents = pull_objects(
                 list(res.objects_to_pull[msg_id].object_ids) + [msg_id],
@@ -380,18 +381,22 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         # Send the request
         res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
-
-        if res.objects_to_push:
+        if res:
             log(
                 INFO,
                 "[Node] POST /%s: success, created result %s",
                 PATH_PUSH_MESSAGES,
                 res.results,  # pylint: disable=no-member
             )
+
+        if res and res.objects_to_push:
             objs_to_push = set(res.objects_to_push[message.object_id].object_ids)
-            fn: Callable[[PushObjectRequest], PushObjectResponse] = partial(
-                _request, res_type=PushObjectResponse, api_path=PATH_PUSH_OBJECT
-            )
+
+            def fn(request: PushObjectRequest) -> PushObjectResponse:
+                return _request(
+                    req=request, res_type=PushObjectResponse, api_path=PATH_PUSH_OBJECT
+                )
+
             push_objects(
                 all_objects,
                 push_object_fn=make_push_object_fn_rest(
