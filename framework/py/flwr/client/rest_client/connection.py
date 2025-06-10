@@ -381,14 +381,13 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Send the request
         res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
 
-        log(
-            INFO,
-            "[Node] POST /%s: success, created result %s",
-            PATH_PUSH_MESSAGES,
-            res.results,  # pylint: disable=no-member
-        )
-
         if res.objects_to_push:
+            log(
+                INFO,
+                "[Node] POST /%s: success, created result %s",
+                PATH_PUSH_MESSAGES,
+                res.results,  # pylint: disable=no-member
+            )
             objs_to_push = set(res.objects_to_push[message.object_id].object_ids)
             fn: Callable[[PushObjectRequest], PushObjectResponse] = partial(
                 _request, res_type=PushObjectResponse, api_path=PATH_PUSH_OBJECT
