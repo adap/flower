@@ -321,10 +321,13 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(INFO, "[Node] POST /%s: success", PATH_PULL_MESSAGES)
             msg_id = message_proto.metadata.message_id
 
-            def fn(request: PullObjectRequest) -> Optional[PullObjectResponse]:
-                return _request(
+            def fn(request: PullObjectRequest) -> PullObjectResponse:
+                res = _request(
                     req=request, res_type=PullObjectResponse, api_path=PATH_PULL_OBJECT
                 )
+                if res is None:
+                    raise ValueError("PushObjectResponse is None.")
+                return res
 
             try:
                 all_object_contents = pull_objects(
@@ -401,10 +404,13 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         if res and res.objects_to_push:
             objs_to_push = set(res.objects_to_push[message.object_id].object_ids)
 
-            def fn(request: PushObjectRequest) -> Optional[PushObjectResponse]:
-                return _request(
+            def fn(request: PushObjectRequest) -> PushObjectResponse:
+                res = _request(
                     req=request, res_type=PushObjectResponse, api_path=PATH_PUSH_OBJECT
                 )
+                if res is None:
+                    raise ValueError("PushObjectResponse is None.")
+                return res
 
             try:
                 push_objects(

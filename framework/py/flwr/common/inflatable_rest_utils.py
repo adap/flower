@@ -29,7 +29,7 @@ from .inflatable_utils import ObjectIdNotPreregisteredError, ObjectUnavailableEr
 
 
 def make_pull_object_fn_rest(
-    pull_object_rest: Callable[[PullObjectRequest], PullObjectResponse | None],
+    pull_object_rest: Callable[[PullObjectRequest], PullObjectResponse],
     node: Node,
     run_id: int,
 ) -> Callable[[str], bytes]:
@@ -54,9 +54,7 @@ def make_pull_object_fn_rest(
 
     def pull_object_fn(object_id: str) -> bytes:
         request = PullObjectRequest(node=node, run_id=run_id, object_id=object_id)
-        response: PullObjectResponse | None = pull_object_rest(request)
-        if response is None:
-            raise ValueError("PullObjectResponse is None.")
+        response: PullObjectResponse = pull_object_rest(request)
         if not response.object_found:
             raise ObjectIdNotPreregisteredError(object_id)
         if not response.object_available:
@@ -67,7 +65,7 @@ def make_pull_object_fn_rest(
 
 
 def make_push_object_fn_rest(
-    push_object_rest: Callable[[PushObjectRequest], PushObjectResponse | None],
+    push_object_rest: Callable[[PushObjectRequest], PushObjectResponse],
     node: Node,
     run_id: int,
 ) -> Callable[[str, bytes], None]:
@@ -94,9 +92,7 @@ def make_push_object_fn_rest(
         request = PushObjectRequest(
             node=node, run_id=run_id, object_id=object_id, object_content=object_content
         )
-        response: PushObjectResponse | None = push_object_rest(request)
-        if response is None:
-            raise ValueError("PushObjectResponse is None.")
+        response: PushObjectResponse = push_object_rest(request)
         if not response.stored:
             raise ObjectIdNotPreregisteredError(object_id)
 
