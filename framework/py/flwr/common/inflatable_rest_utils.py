@@ -37,8 +37,8 @@ def make_pull_object_fn_rest(
 
     Parameters
     ----------
-    pull_object_grpc : Callable[[PullObjectRequest], PullObjectResponse]
-        The gRPC function to pull objects, e.g., `FleetStub.PullObject`.
+    pull_object_rest : Callable[[PullObjectRequest], PullObjectResponse]
+        A function that makes a POST request against the `/push-object` REST endpoint
     node : Node
         The node making the request.
     run_id : int
@@ -69,12 +69,12 @@ def make_push_object_fn_rest(
     node: Node,
     run_id: int,
 ) -> Callable[[str, bytes], None]:
-    """Create a push object function that uses gRPC to push objects.
+    """Create a push object function that uses REST to push objects.
 
     Parameters
     ----------
-    push_object_grpc : Callable[[PushObjectRequest], PushObjectResponse]
-        The gRPC function to push objects, e.g., `FleetStub.PushObject`.
+    push_object_rest : Callable[[PushObjectRequest], PushObjectResponse]
+        A function that makes a POST request against the `/pull-object` REST endpoint
     node : Node
         The node making the request.
     run_id : int
