@@ -408,6 +408,9 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             )
             log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
 
+        # Cleanup
+        metadata = None
+
     def get_run(run_id: int) -> Run:
         # Construct the request
         req = GetRunRequest(node=node, run_id=run_id)
