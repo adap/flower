@@ -19,6 +19,7 @@ from typing import Optional
 
 from flwr.common import Message, log
 from flwr.common.constant import Status
+from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.serde import (
     fab_to_proto,
     message_from_proto,
@@ -42,7 +43,13 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
-from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ObjectIDs,
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -203,3 +210,52 @@ def get_fab(
         return GetFabResponse(fab=fab_to_proto(fab))
 
     raise ValueError(f"Found no FAB with hash: {request.hash_str}")
+
+
+def push_object(
+    request: PushObjectRequest, state: LinkState, store: ObjectStore
+) -> PushObjectResponse:
+    """Push Object."""
+    abort_msg = check_abort(
+        request.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+    )
+    if abort_msg:
+        raise InvalidRunStatusException(abort_msg)
+
+    stored = False
+    try:
+        store.put(request.object_id, request.object_content)
+        stored = True
+    except (NoObjectInStoreError, ValueError) as e:
+        log(ERROR, str(e))
+    except UnexpectedObjectContentError as e:
+        # Object content is not valid
+        log(ERROR, str(e))
+        raise
+    return PushObjectResponse(stored=stored)
+
+
+def pull_object(
+    request: PullObjectRequest, state: LinkState, store: ObjectStore
+) -> PullObjectResponse:
+    """Pull Object."""
+    abort_msg = check_abort(
+        request.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+    )
+    if abort_msg:
+        raise InvalidRunStatusException(abort_msg)
+
+    # Fetch from store
+    content = store.get(request.object_id)
+    if content is not None:
+        object_available = content != b""
+        return PullObjectResponse(
+            object_found=True,
+            object_available=object_available,
+            object_content=content,
+        )
+    return PullObjectResponse(object_found=False, object_available=False)
