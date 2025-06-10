@@ -27,6 +27,7 @@ from flwr.common.inflatable import (
     get_object_body,
     get_object_id,
 )
+from flwr.common.inflatable_test import CustomDataClass
 
 from .in_memory_object_store import InMemoryObjectStore
 from .object_store import NoObjectInStoreError, ObjectStore

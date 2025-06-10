@@ -159,6 +159,56 @@ class StateTest(unittest.TestCase):
         self.assertNotIn("msg1", msg_ids)
         self.assertIn("msg2", msg_ids)
 
+    def test_get_run_ids_with_pending_messages(self) -> None:
+        """Test retrieving run IDs with pending messages."""
+        # Prepare: store messages for runs 1, 2, and 3
+        # Run 1 has a pending message, run 2 has a token, run 3 has a reply,
+        # run 4 has a retrieved message (not pending),
+        #  and run 5 was assigned a token but was later deleted due to
+        # `flwr-clientapp` finishing the handling of a message.
+        self.state.store_message(make_dummy_message(1, False, "msg1"))
+        self.state.store_message(make_dummy_message(2, False, "msg2"))
+        self.state.store_message(make_dummy_message(3, True, "msg3"))
+        self.state.store_message(make_dummy_message(4, False, "msg4"))
+        self.state.store_message(make_dummy_message(5, False, "msg5"))
+        self.state.get_messages(run_ids=[4])
+        self.state.create_token(2)
+        self.state.create_token(5)
+        self.state.delete_token(5)
+
+        # Execute
+        run_ids = self.state.get_run_ids_with_pending_messages()
+
+        # Assert: run 1 and run 5 should be returned
+        self.assertEqual(set(run_ids), {1, 5})
+
+    def test_create_verify_and_delete_token(self) -> None:
+        """Test creating, verifying, and deleting tokens."""
+        # Prepare
+        run_id = 42
+
+        # Execute: create a token
+        token = self.state.create_token(run_id)
+
+        # Assert: token should be valid
+        self.assertTrue(self.state.verify_token(run_id, token))
+
+        # Execute: delete the token
+        self.state.delete_token(run_id)
+
+        # Assert: token should no longer be valid
+        self.assertFalse(self.state.verify_token(run_id, token))
+
+    def test_create_token_already_exists(self) -> None:
+        """Test creating a token that already exists."""
+        # Prepare
+        run_id = 42
+        self.state.create_token(run_id)
+
+        # Execute and assert: should raise ValueError
+        with self.assertRaises(ValueError):
+            self.state.create_token(run_id)
+
 
 def make_dummy_message(
     run_id: int = 110, is_reply: bool = False, msg_id: str = ""

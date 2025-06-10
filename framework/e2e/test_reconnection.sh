@@ -35,9 +35,6 @@ check_and_kill() {
   done
 }
 
-# Install Flower app
-pip install -e . --no-deps
-
 # Remove any duplicates
 sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
 
@@ -88,7 +85,7 @@ sleep 5
 # We execute `flwr run` to begin the training
 timeout 2m flwr run "." e2e &
 echo "Executing flwr run to start training"
-sleep 10
+sleep 8
 
 # Kill first client as soon as the training starts, the flwr-serverapp should just 
 # receive a failure in this case and continue the rounds when enough clients are 
@@ -115,8 +112,10 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
         echo "Training worked correctly!"
         found_success=true
         kill $cl1_pid; kill $cl2_pid
-        sleep 3
+        sleep 2  # Allow some time for SuperNodes to terminate
         check_and_kill "$sl_pids"
+        sleep 2  # Allow some time for SuperLink to terminate
+        exit 0
     else
         echo "Waiting for training ... ($elapsed seconds elapsed)"
     fi
@@ -128,6 +127,8 @@ done
 if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
     kill $cl1_pid; kill $cl2_pid
-    sleep 3
+    sleep 2  # Allow some time for SuperNodes to terminate
     check_and_kill "$sl_pids"
+    sleep 2  # Allow some time for SuperLink to terminate
+    exit 1
 fi

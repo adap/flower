@@ -29,7 +29,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable import get_desdendant_object_ids, get_object_id
+from flwr.common.inflatable import get_descendant_object_ids, get_object_id
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
@@ -326,7 +326,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # to pull. To achieve this, we need to at least register the Objects in the
         # message into the store. Note this would normally be done when the
         # servicer handles a PushMessageRequest
-        descendants = list(get_desdendant_object_ids(message))
+        descendants = list(get_descendant_object_ids(message))
         message_obj_id = message.metadata.message_id
         # Store mapping
         self.store.set_message_descendant_ids(
@@ -717,20 +717,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Run is running but node ID isn't recognized
         self._transition_run_status(run_id, 2)
         req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
-        with self.assertRaises(grpc.RpcError) as e:
-            self._push_object(request=req)
-        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-
-        # Correct node ID but invalid object_content
-        obj_b = b"extra content"
-        object_id = get_object_id(obj_b)
-        # Execute (doesn't match structure)
-        req = PushObjectRequest(
-            node=Node(node_id=SUPERLINK_NODE_ID),
-            run_id=run_id,
-            object_id=object_id,
-            object_content=obj_b,
-        )
         with self.assertRaises(grpc.RpcError) as e:
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION

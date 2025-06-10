@@ -27,7 +27,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable import get_desdendant_object_ids, get_object_id
+from flwr.common.inflatable import get_descendant_object_ids, get_object_id
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
 from flwr.common.typing import RunStatus
@@ -214,7 +214,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # to pull. To achieve this, we need to at least register the Objects in the
         # message into the store. Note this would normally be done when the
         # servicer handles a PushMessageRequest
-        descendants = list(get_desdendant_object_ids(message))
+        descendants = list(get_descendant_object_ids(message))
         message_obj_id = message.metadata.message_id
         # Store mapping
         self.store.set_message_descendant_ids(
@@ -417,22 +417,8 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
 
-        # Correct node ID but invalid object_content
-        node_id = self.state.create_node(heartbeat_interval=30)
-        obj_b = b"extra content"
-        object_id = get_object_id(obj_b)
-        # Execute (doesn't match structure)
-        req = PushObjectRequest(
-            node=Node(node_id=node_id),
-            run_id=run_id,
-            object_id=object_id,
-            object_content=obj_b,
-        )
-        with self.assertRaises(grpc.RpcError) as e:
-            self._push_object(request=req)
-        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-
         # Prepare
+        node_id = self.state.create_node(heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 

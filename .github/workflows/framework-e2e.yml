@@ -162,8 +162,7 @@ jobs:
           - directory: e2e-tensorflow
             e2e: e2e_tensorflow
             dataset: |
-              import tensorflow as tf
-              tf.keras.datasets.cifar10.load_data()
+              from datasets import load_dataset;import numpy as np;dataset = load_dataset(\"uoft-cs/cifar10\");np.stack(dataset[\"train\"][\"img\"])
 
           - directory: e2e-opacus
             e2e: e2e_opacus
@@ -250,9 +249,9 @@ jobs:
       - name: Run driver test with client authentication
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory == 'e2e-bare-auth' }}
         run: ./../test_superlink.sh "${{ matrix.directory }}" client-auth
-      - name: Run reconnection test with SQLite database
-        if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory == 'e2e-bare' }}
-        run: ./../test_reconnection.sh sqlite
+      # - name: Run reconnection test with SQLite database (Temporarily disabled due to in-memory ObjectStore)
+      #   if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory == 'e2e-bare' }}
+      #   run: ./../test_reconnection.sh sqlite
       - name: Cache save Python location
         id: cache-save-python
         uses: actions/cache/save@v4

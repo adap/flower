@@ -18,11 +18,19 @@
 from __future__ import annotations
 
 import hashlib
-from logging import ERROR
 from typing import TypeVar, cast
 
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
-from .logger import log
+
+
+class UnexpectedObjectContentError(Exception):
+    """Exception raised when the content of an object does not conform to the expected
+    structure for an InflatableObject (i.e., head, body, and values within the head)."""
+
+    def __init__(self, object_id: str, reason: str):
+        super().__init__(
+            f"Object with ID '{object_id}' has an unexpected structure. {reason}"
+        )
 
 
 class InflatableObject:
@@ -117,12 +125,14 @@ def add_header_to_object_body(object_body: bytes, obj: InflatableObject) -> byte
 
 def _get_object_head(object_content: bytes) -> bytes:
     """Return object head from object content."""
-    return object_content.split(HEAD_BODY_DIVIDER, 1)[0]
+    index = object_content.find(HEAD_BODY_DIVIDER)
+    return object_content[:index]
 
 
 def _get_object_body(object_content: bytes) -> bytes:
     """Return object body from object content."""
-    return object_content.split(HEAD_BODY_DIVIDER, 1)[1]
+    index = object_content.find(HEAD_BODY_DIVIDER)
+    return object_content[index + len(HEAD_BODY_DIVIDER) :]
 
 
 def is_valid_sha256_hash(object_id: str) -> bool:
@@ -163,16 +173,6 @@ def get_object_body_len_from_object_content(object_content: bytes) -> int:
     return get_object_head_values_from_object_content(object_content)[2]
 
 
-def check_body_len_consistency(object_content: bytes) -> bool:
-    """Check that the object body is of length as specified in the head."""
-    try:
-        body_len = get_object_body_len_from_object_content(object_content)
-        return body_len == len(_get_object_body(object_content))
-    except ValueError:
-        log(ERROR, "Object content does match the expected format.")
-        return False
-
-
 def get_object_head_values_from_object_content(
     object_content: bytes,
 ) -> tuple[str, list[str], int]:
@@ -197,21 +197,25 @@ def get_object_head_values_from_object_content(
     return obj_type, children_ids, int(body_len)
 
 
-def _get_descendants_object_ids_recursively(obj: InflatableObject) -> set[str]:
-
-    descendants: set[str] = set()
-    if children := obj.children:
-        for child in children.values():
-            descendants |= _get_descendants_object_ids_recursively(child)
-
-    descendants.add(obj.object_id)
-
-    return descendants
-
-
-def get_desdendant_object_ids(obj: InflatableObject) -> set[str]:
+def get_descendant_object_ids(obj: InflatableObject) -> set[str]:
     """Get a set of object IDs of all descendants."""
-    descendants = _get_descendants_object_ids_recursively(obj)
+    descendants = set(get_all_nested_objects(obj).keys())
     # Exclude Object ID of parent object
     descendants.discard(obj.object_id)
     return descendants
+
+
+def get_all_nested_objects(obj: InflatableObject) -> dict[str, InflatableObject]:
+    """Get a dictionary of all nested objects, including the object itself.
+
+    Each key in the dictionary is an object ID, and the entries are ordered by post-
+    order traversal, i.e., child objects appear before their respective parents.
+    """
+    ret: dict[str, InflatableObject] = {}
+    if children := obj.children:
+        for child in children.values():
+            ret.update(get_all_nested_objects(child))
+
+    ret[obj.object_id] = obj
+
+    return ret

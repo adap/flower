@@ -25,18 +25,19 @@ import pytest
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 from .inflatable import (
     InflatableObject,
+    UnexpectedObjectContentError,
     _get_object_body,
     _get_object_head,
     add_header_to_object_body,
-    check_body_len_consistency,
-    get_desdendant_object_ids,
+    get_all_nested_objects,
+    get_descendant_object_ids,
     get_object_body,
-    get_object_body_len_from_object_content,
     get_object_head_values_from_object_content,
     get_object_id,
     get_object_type_from_object_content,
     is_valid_sha256_hash,
 )
+from .inflatable_utils import validate_object_content
 
 
 @dataclass
@@ -198,29 +199,6 @@ def test_is_valid_sha256_hash_invalid() -> None:
     assert not is_valid_sha256_hash(invalid_hash)
 
 
-def test_check_body_length() -> None:
-    """Test helper function that checks if the specified body length in the object head
-    matches the actual length of the object body."""
-    data = b"this is a test"
-    obj = CustomDataClass(data)
-    obj_b = obj.deflate()
-
-    # Body length is measured correctly
-    assert get_object_body_len_from_object_content(obj_b) == len(data)
-
-    # Consistent: passes
-    assert check_body_len_consistency(obj_b)
-
-    # Extend content artificially
-    obj_b_ = obj_b + b"more content"
-    # Inconsistent: fails
-    assert not check_body_len_consistency(obj_b_)
-
-    # Create object that doesn't comply with serialized object structure
-    obj_ = b"this is a test"
-    assert not check_body_len_consistency(obj_)
-
-
 @pytest.mark.parametrize(
     "children",
     [
@@ -237,4 +215,74 @@ def test_get_desdendants(children: list[InflatableObject]) -> None:
     obj.children = {child.object_id: child for child in children}
 
     # Assert
-    assert get_desdendant_object_ids(obj) == {child.object_id for child in children}
+    assert get_descendant_object_ids(obj) == {child.object_id for child in children}
+
+
+def test_object_content_validator() -> None:
+    """Test validator."""
+    # A valid message
+    data = b"this is a test"
+    obj = CustomDataClass(data)
+    obj_b = obj.deflate()
+
+    validate_object_content(obj_b)
+
+    # The message has a longer content than what's recorded in the head
+    with pytest.raises(UnexpectedObjectContentError):
+        validate_object_content(obj_b + b"extra_bytes")
+
+    # The head specifies an object_type that's not supported
+    obj_b_wrong_type = obj_b.replace(
+        obj.__class__.__qualname__.encode("utf-8"), b"blabla"
+    )
+    with pytest.raises(UnexpectedObjectContentError):
+        validate_object_content(obj_b_wrong_type)
+
+    # The content doesn't have a head-body divider
+    parts = obj_b.split(HEAD_BODY_DIVIDER, 1)
+    head, body = parts
+    with pytest.raises(UnexpectedObjectContentError):
+        validate_object_content(head + body)
+
+    # The head does not have three distinct parts
+    head_decoded = head.decode(encoding="utf-8")
+    head_parts = head_decoded.split(HEAD_VALUE_DIVIDER)
+    obj_type, _, body_len = head_parts
+    # construct head (but don't pass children part) and object
+    obj_wrong_head = (obj_type + HEAD_VALUE_DIVIDER + body_len).encode(encoding="utf-8")
+    almost_correct_obj = obj_wrong_head + HEAD_BODY_DIVIDER + body
+    with pytest.raises(UnexpectedObjectContentError):
+        validate_object_content(almost_correct_obj)
+
+    # The message head carries some children IDs but these
+    # aren't valid SHA256
+    obj_wrong_head = (
+        obj_type + HEAD_VALUE_DIVIDER + "abcd12345" + HEAD_VALUE_DIVIDER + body_len
+    ).encode(encoding="utf-8")
+    almost_correct_obj = obj_wrong_head + HEAD_BODY_DIVIDER + body
+    with pytest.raises(UnexpectedObjectContentError):
+        validate_object_content(almost_correct_obj)
+
+
+def test_get_all_nested_object_ids() -> None:
+    """Test getting all nested object IDs."""
+    # Prepare
+    obj = CustomDataClass(b"this is a test")
+    child1 = CustomDataClass(b"child1 data")
+    child2 = CustomDataClass(b"child2 data")
+    obj.children = {
+        child1.object_id: child1,
+        child2.object_id: child2,
+    }
+    expected_objects = {
+        child1.object_id: child1,
+        child2.object_id: child2,
+        obj.object_id: obj,
+    }
+
+    # Execute
+    all_objects = get_all_nested_objects(obj)
+
+    # Assert
+    assert all_objects == expected_objects
+    assert list(all_objects.keys()) == list(expected_objects.keys())
