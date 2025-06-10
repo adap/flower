@@ -27,7 +27,7 @@ from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Any, Callable, Optional, Union, cast
+from typing import Any, Callable, Optional, TypeVar
 
 import grpc
 import yaml
@@ -85,6 +85,7 @@ from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
+P = TypeVar("P", ExecAuthPlugin, ExecAuthzPlugin)
 
 
 try:
@@ -151,15 +152,13 @@ def run_superlink() -> None:
     verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", None)
 
     auth_plugin: Optional[ExecAuthPlugin] = None
-    authz_plugin: Optional[ExecAuthzPlugin] = None  # pylint: disable=unused-variable
+    authz_plugin: Optional[ExecAuthzPlugin] = None
     event_log_plugin: Optional[EventLogWriterPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
-        # pylint: disable=unused-variable
-        auth_plugin, authz_plugin = _try_obtain_exec_auth_plugins(  # noqa: F841
+        auth_plugin, authz_plugin = _try_obtain_exec_auth_plugins(
             Path(cfg_path), verify_tls_cert
         )
-        # pylint: enable=unused-variable
         # Enable event logging if the args.enable_event_log is True
         if args.enable_event_log:
             event_log_plugin = _try_obtain_exec_event_log_writer_plugin()
@@ -185,6 +184,7 @@ def run_superlink() -> None:
             [args.executor_config] if args.executor_config else args.executor_config
         ),
         auth_plugin=auth_plugin,
+        authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
     )
     grpc_servers = [exec_server]
@@ -490,15 +490,13 @@ def _try_obtain_exec_auth_plugins(
         config: dict[str, Any] = yaml.safe_load(file)
 
     def _load_plugin(
-        section: str,
-        yaml_key: str,
-        loader: Callable[[], dict[str, type[Union[ExecAuthPlugin, ExecAuthzPlugin]]]],
-    ) -> Union[ExecAuthPlugin, ExecAuthzPlugin]:
+        section: str, yaml_key: str, loader: Callable[[], dict[str, type[P]]]
+    ) -> P:
         section_cfg = config.get(section, {})
         auth_plugin_name = section_cfg.get(yaml_key, "")
         try:
-            plugins = loader()
-            plugin_cls = plugins[auth_plugin_name]
+            plugins: dict[str, type[P]] = loader()
+            plugin_cls: type[P] = plugins[auth_plugin_name]
             return plugin_cls(
                 user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
             )
@@ -513,23 +511,17 @@ def _try_obtain_exec_auth_plugins(
             sys.exit(f"No {section} plugins are currently supported.")
 
     # Load authentication plugin
-    auth_plugin = cast(
-        ExecAuthPlugin,
-        _load_plugin(
-            section="authentication",
-            yaml_key=AUTH_TYPE_YAML_KEY,
-            loader=get_exec_auth_plugins,
-        ),
+    auth_plugin = _load_plugin(
+        section="authentication",
+        yaml_key=AUTH_TYPE_YAML_KEY,
+        loader=get_exec_auth_plugins,
     )
 
     # Load authorization plugin
-    authz_plugin = cast(
-        ExecAuthzPlugin,
-        _load_plugin(
-            section="authorization",
-            yaml_key=AUTHZ_TYPE_YAML_KEY,
-            loader=get_exec_authz_plugins,
-        ),
+    authz_plugin = _load_plugin(
+        section="authorization",
+        yaml_key=AUTHZ_TYPE_YAML_KEY,
+        loader=get_exec_authz_plugins,
     )
 
     return auth_plugin, authz_plugin

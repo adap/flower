@@ -15,34 +15,25 @@
 """Main loop for Flower SuperNode."""
 
 
-import multiprocessing
 import os
-import sys
-import threading
+import subprocess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import INFO, WARN
 from os import urandom
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
-from flwr.app.error import Error
-from flwr.cli.config_utils import get_fab_metadata
-from flwr.client.clientapp.app import flwr_clientapp
-from flwr.client.clientapp.clientappio_servicer import (
-    ClientAppInputs,
-    ClientAppIoServicer,
-)
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
-from flwr.client.run_info_store import DeprecatedRunInfoStore
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Message
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Message, RecordDict
 from flwr.common.address import parse_address
+from flwr.common.config import get_flwr_dir, get_fused_config_from_fab
 from flwr.common.constant import (
     CLIENT_OCTET,
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
@@ -54,7 +45,6 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
-    ErrorCode,
 )
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import generic_create_grpc_server
@@ -62,7 +52,12 @@ from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
+from flwr.server.superlink.ffs import FfsFactory
+from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supernode.nodestate import NodeStateFactory
+from flwr.supernode.servicer.clientappio import ClientAppInputs, ClientAppIoServicer
+
+DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
 
 # pylint: disable=import-outside-toplevel
@@ -142,13 +137,15 @@ def start_client_internal(
         certificates=None,
     )
 
-    # DeprecatedRunInfoStore gets initialized when the first connection is established
-    run_info_store: Optional[DeprecatedRunInfoStore] = None
+    # Initialize factories
     state_factory = NodeStateFactory()
-    state = state_factory.state()
-    mp_spawn_context = multiprocessing.get_context("spawn")
+    ffs_factory = FfsFactory(get_flwr_dir(flwr_path) / "supernode" / "ffs")  # type: ignore
+    object_store_factory = ObjectStoreFactory()
 
-    runs: dict[int, Run] = {}
+    # Initialize NodeState, Ffs, and ObjectStore
+    state = state_factory.state()
+    ffs = ffs_factory.ffs()
+    _store = object_store_factory.store()
 
     with _init_connection(
         transport=transport,
@@ -161,73 +158,79 @@ def start_client_internal(
     ) as conn:
         receive, send, create_node, _, get_run, get_fab = conn
 
-        # Register node when connecting the first time
-        if run_info_store is None:
-            # Call create_node fn to register node
-            # and store node_id in state
-            if (node_id := create_node()) is None:
-                raise ValueError("Failed to register SuperNode with the SuperLink")
-            state.set_node_id(node_id)
-            run_info_store = DeprecatedRunInfoStore(
-                node_id=state.get_node_id(),
-                node_config=node_config,
-            )
+        # Call create_node fn to register node
+        # and store node_id in state
+        if (node_id := create_node()) is None:
+            raise ValueError("Failed to register SuperNode with the SuperLink")
+        state.set_node_id(node_id)
 
         # pylint: disable=too-many-nested-blocks
         while True:
-            try:
-                # Receive
-                message = receive()
-                if message is None:
-                    time.sleep(3)  # Wait for 3s before asking again
-                    continue
+            # Pull message
+            if (message := receive()) is None:
+                time.sleep(3)
+                continue
 
-                log(INFO, "")
-                if len(message.metadata.group_id) > 0:
-                    log(
-                        INFO,
-                        "[RUN %s, ROUND %s]",
-                        message.metadata.run_id,
-                        message.metadata.group_id,
-                    )
+            # Log message reception
+            log(INFO, "")
+            if message.metadata.group_id:
                 log(
                     INFO,
-                    "Received: %s message %s",
-                    message.metadata.message_type,
+                    "[RUN %s, ROUND %s]",
+                    message.metadata.run_id,
+                    message.metadata.group_id,
+                )
+            else:
+                log(INFO, "[RUN %s]", message.metadata.run_id)
+            log(
+                INFO,
+                "Received: %s message %s",
+                message.metadata.message_type,
+                message.metadata.message_id,
+            )
+
+            # Ensure the run and FAB are available
+            run_id = message.metadata.run_id
+            try:
+                # Check if the message is from an unknown run
+                if (run_info := state.get_run(run_id)) is None:
+                    # Pull run info from SuperLink
+                    run_info = get_run(run_id)
+                    state.store_run(run_info)
+
+                    # Pull and store the FAB
+                    fab = get_fab(run_info.fab_hash, run_id)
+                    ffs.put(fab.content, {})
+
+                    # Initialize the context
+                    run_cfg = get_fused_config_from_fab(fab.content, run_info)
+                    run_ctx = Context(
+                        run_id=run_id,
+                        node_id=state.get_node_id(),
+                        node_config=node_config,
+                        state=RecordDict(),
+                        run_config=run_cfg,
+                    )
+                    state.store_context(run_ctx)
+
+                # Store the message in the state
+                state.store_message(message)
+            except RunNotRunningException:
+                log(
+                    INFO,
+                    "Run ID %s is not in `RUNNING` status. Ignoring message %s.",
+                    run_id,
                     message.metadata.message_id,
                 )
+                time.sleep(3)
+                continue
 
-                # Get run info
-                run_id = message.metadata.run_id
-                if run_id not in runs:
-                    runs[run_id] = get_run(run_id)
-
-                run: Run = runs[run_id]
-                if get_fab is not None and run.fab_hash:
-                    fab = get_fab(run.fab_hash, run_id)
-                    fab_id, fab_version = get_fab_metadata(fab.content)
-                else:
-                    fab = None
-                    fab_id, fab_version = run.fab_id, run.fab_version
-
-                run.fab_id, run.fab_version = fab_id, fab_version
-
-                # Register context for this run
-                run_info_store.register_context(
-                    run_id=run_id,
-                    run=run,
-                    flwr_path=flwr_path,
-                    fab=fab,
-                )
-
-                # Retrieve context for this run
-                context = run_info_store.retrieve_context(run_id=run_id)
-                # Create an error reply message that will never be used to prevent
-                # the used-before-assignment linting error
-                reply_message = Message(
-                    Error(code=ErrorCode.UNKNOWN, reason="Unknown"),
-                    reply_to=message,
-                )
+            try:
+                # Retrieve message, context, run and fab for this run
+                message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
+                context = cast(Context, state.get_context(run_id))
+                run = cast(Run, state.get_run(run_id))
+                fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0])  # type: ignore
 
                 # Two isolation modes:
                 # 1. `subprocess`: SuperNode is starting the ClientApp
@@ -268,16 +271,11 @@ def start_client_internal(
                         io_address,
                         "--token",
                         str(token),
+                        "--parent-pid",
+                        str(os.getpid()),
+                        "--insecure",
                     ]
-                    command.append("--insecure")
-
-                    proc = mp_spawn_context.Process(
-                        target=_run_flwr_clientapp,
-                        args=(command, os.getpid()),
-                        daemon=True,
-                    )
-                    proc.start()
-                    proc.join()
+                    subprocess.run(command, check=False)
                 else:
                     # Wait for output to become available
                     while not clientappio_servicer.has_outputs():
@@ -287,10 +285,7 @@ def start_client_internal(
                 reply_message, context = outputs.message, outputs.context
 
                 # Update node state
-                run_info_store.update_context(
-                    run_id=run_id,
-                    context=context,
-                )
+                state.store_context(context)
 
                 # Send
                 send(reply_message)
@@ -422,21 +417,6 @@ def _make_fleet_connection_retry_invoker(
         on_success=_on_success,
         on_backoff=_on_backoff,
     )
-
-
-def _run_flwr_clientapp(args: list[str], main_pid: int) -> None:
-    # Monitor the main process in case of SIGKILL
-    def main_process_monitor() -> None:
-        while True:
-            time.sleep(1)
-            if os.getppid() != main_pid:
-                os.kill(os.getpid(), 9)
-
-    threading.Thread(target=main_process_monitor, daemon=True).start()
-
-    # Run the command
-    sys.argv = args
-    flwr_clientapp()
 
 
 def run_clientappio_api_grpc(

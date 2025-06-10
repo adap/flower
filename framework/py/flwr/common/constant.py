@@ -138,6 +138,17 @@ HEAD_VALUE_DIVIDER = " "
 # Constants for serialization
 INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
 
+# Constants for `flwr-serverapp` and `flwr-clientapp` CLI commands
+FLWR_APP_TOKEN_LENGTH = 128  # Length of the token used
+
+# Constants for object pushing and pulling
+MAX_CONCURRENT_PUSHES = 8  # Default maximum number of concurrent pushes
+MAX_CONCURRENT_PULLS = 8  # Default maximum number of concurrent pulls
+PULL_MAX_TIME = 7200  # Default maximum time to wait for pulling objects
+PULL_MAX_TRIES_PER_OBJECT = 500  # Default maximum number of tries to pull an object
+PULL_INITIAL_BACKOFF = 1  # Initial backoff time for pulling objects
+PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
+
 
 class MessageType:
     """Message type."""

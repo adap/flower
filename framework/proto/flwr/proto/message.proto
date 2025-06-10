@@ -53,14 +53,20 @@ message ObjectIDs { repeated string object_ids = 1; }
 // PushObject messages
 message PushObjectRequest {
   Node node = 1;
-  string object_id = 2;
-  bytes object_content = 3;
+  uint64 run_id = 2;
+  string object_id = 3;
+  bytes object_content = 4;
 }
-message PushObjectResponse {}
+message PushObjectResponse { bool stored = 1; }
 
 // PullObject messages
 message PullObjectRequest {
   Node node = 1;
-  string object_id = 2;
+  uint64 run_id = 2;
+  string object_id = 3;
 }
-message PullObjectResponse { bytes object_content = 1; }
+message PullObjectResponse {
+  bool object_found = 1;
+  bool object_available = 2;
+  bytes object_content = 3;
+}

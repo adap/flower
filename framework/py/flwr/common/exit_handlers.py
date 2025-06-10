@@ -30,6 +30,7 @@ SIGNAL_TO_EXIT_CODE: dict[int, int] = {
     signal.SIGINT: ExitCode.GRACEFUL_EXIT_SIGINT,
     signal.SIGTERM: ExitCode.GRACEFUL_EXIT_SIGTERM,
 }
+registered_exit_handlers: list[Callable[[], None]] = []
 
 # SIGQUIT is not available on Windows
 if hasattr(signal, "SIGQUIT"):
@@ -41,6 +42,7 @@ def register_exit_handlers(
     exit_message: Optional[str] = None,
     grpc_servers: Optional[list[Server]] = None,
     bckg_threads: Optional[list[Thread]] = None,
+    exit_handlers: Optional[list[Callable[[], None]]] = None,
 ) -> None:
     """Register exit handlers for `SIGINT`, `SIGTERM` and `SIGQUIT` signals.
 
@@ -56,8 +58,12 @@ def register_exit_handlers(
     bckg_threads: Optional[List[Thread]] (default: None)
         An optional list of threads that need to be gracefully
         terminated before exiting.
+    exit_handlers: Optional[List[Callable[[], None]]] (default: None)
+        An optional list of exit handlers to be called before exiting.
+        Additional exit handlers can be added using `add_exit_handler`.
     """
     default_handlers: dict[int, Callable[[int, FrameType], None]] = {}
+    registered_exit_handlers.extend(exit_handlers or [])
 
     def graceful_exit_handler(signalnum: int, _frame: FrameType) -> None:
         """Exit handler to be registered with `signal.signal`.
@@ -67,6 +73,9 @@ def register_exit_handlers(
         """
         # Reset to default handler
         signal.signal(signalnum, default_handlers[signalnum])  # type: ignore
+
+        for handler in registered_exit_handlers:
+            handler()
 
         if grpc_servers is not None:
             for grpc_server in grpc_servers:
@@ -87,3 +96,24 @@ def register_exit_handlers(
     for sig in SIGNAL_TO_EXIT_CODE:
         default_handler = signal.signal(sig, graceful_exit_handler)  # type: ignore
         default_handlers[sig] = default_handler  # type: ignore
+
+
+def add_exit_handler(exit_handler: Callable[[], None]) -> None:
+    """Add an exit handler to be called on graceful exit.
+
+    This function allows you to register additional exit handlers
+    that will be executed when the application exits gracefully,
+    if `register_exit_handlers` was called.
+
+    Parameters
+    ----------
+    exit_handler : Callable[[], None]
+        A callable that takes no arguments and performs cleanup or
+        other actions before the application exits.
+
+    Notes
+    -----
+    This method is not thread-safe, and it allows you to add the
+    same exit handler multiple times.
+    """
+    registered_exit_handlers.append(exit_handler)

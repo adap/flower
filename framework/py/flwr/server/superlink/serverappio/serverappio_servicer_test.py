@@ -18,7 +18,7 @@
 import tempfile
 import unittest
 from typing import Optional
-from uuid import uuid4
+from unittest.mock import patch
 
 import grpc
 from parameterized import parameterized
@@ -29,6 +29,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.inflatable import get_descendant_object_ids, get_object_id
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
@@ -39,9 +40,12 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PullObjectRequest,
+    PullObjectResponse,
     PushObjectRequest,
     PushObjectResponse,
 )
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
@@ -125,6 +129,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()
         objectstore_factory = ObjectStoreFactory()
+        self.store = objectstore_factory.store()
 
         self.status_to_msg = _STATUS_TO_MSG
 
@@ -171,6 +176,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.ServerAppIo/PushObject",
             request_serializer=PushObjectRequest.SerializeToString,
             response_deserializer=PushObjectResponse.FromString,
+        )
+        self._pull_object = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PullObject",
+            request_serializer=PullObjectRequest.SerializeToString,
+            response_deserializer=PullObjectResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -311,21 +321,84 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         self._assert_push_ins_messages_not_allowed(message_ins, run_id)
 
-    def test_successful_pull_messages_if_running(self) -> None:
-        """Test `PullMessages` success."""
+    def _register_in_object_store(self, message: Message) -> list[str]:
+        # When pulling a Message, the response also must include the IDs of the objects
+        # to pull. To achieve this, we need to at least register the Objects in the
+        # message into the store. Note this would normally be done when the
+        # servicer handles a PushMessageRequest
+        descendants = list(get_descendant_object_ids(message))
+        message_obj_id = message.metadata.message_id
+        # Store mapping
+        self.store.set_message_descendant_ids(
+            msg_object_id=message_obj_id, descendant_ids=descendants
+        )
+        # Preregister
+        obj_ids_registered = self.store.preregister(descendants + [message_obj_id])
+
+        return obj_ids_registered
+
+    @parameterized.expand(
+        [
+            # The normal case:
+            # The message is recognized by both `LinkState` and `ObjectStore`
+            (True,),
+            # The failure case:
+            # The message is found in `LinkState` but not in `ObjectStore`
+            (False,),
+        ]
+    )  # type: ignore
+    def test_pull_messages_if_running(self, register_in_store: bool) -> None:
+        """Test `PullMessages` success if objects are registered in ObjectStore."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        node_id = self.state.create_node(heartbeat_interval=30)
         # Transition status to running. PullResMessagesRequest is only
         # allowed in running status.
         self._transition_run_status(run_id, 2)
-        request = PullResMessagesRequest(message_ids=[], run_id=run_id)
+
+        # Push Messages and reply
+        message_ins = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        # pylint: disable-next=W0212
+        message_ins.metadata._message_id = message_ins.object_id  # type: ignore
+        msg_id = self.state.store_message_ins(message=message_ins)
+        msg_ = self.state.get_message_ins(node_id=node_id, limit=1)[0]
+
+        reply_msg = Message(RecordDict(), reply_to=msg_)
+        # pylint: disable-next=W0212
+        reply_msg.metadata._message_id = reply_msg.object_id  # type: ignore
+        self.state.store_message_res(message=reply_msg)
+
+        # Register response in ObjectStore (so pulling message request can be completed)
+        obj_ids_registered: list[str] = []
+        if register_in_store:
+            obj_ids_registered = self._register_in_object_store(reply_msg)
+
+        request = PullResMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
 
         # Execute
         response, call = self._pull_messages.with_call(request=request)
 
         # Assert
         assert isinstance(response, PullResMessagesResponse)
-        assert grpc.StatusCode.OK == call.code()
+        assert call.code() == grpc.StatusCode.OK
+
+        object_ids_in_response = {
+            obj_id
+            for obj_ids in response.objects_to_pull.values()
+            for obj_id in obj_ids.object_ids
+        }
+        if register_in_store:
+            # Assert expected object_ids
+            assert set(obj_ids_registered) == object_ids_in_response
+            assert reply_msg.object_id == list(response.objects_to_pull.keys())[0]
+        else:
+            assert set() == object_ids_in_response
+            # Ins message was deleted
+            assert self.state.num_message_ins() == 0
 
     @parameterized.expand(
         [
@@ -352,6 +425,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
             )
         )
+        # pylint: disable-next=W0212
+        message_ins.metadata._message_id = message_ins.object_id  # type: ignore
+
         msg_id = self.state.store_message_ins(message=message_ins)
         msg_ = self.state.get_message_ins(node_id=node_id, limit=1)[0]
 
@@ -362,10 +438,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             reply_msg = Message(error, reply_to=msg_)
 
         # pylint: disable-next=W0212
-        reply_msg.metadata._message_id = str(uuid4())  # type: ignore
+        reply_msg.metadata._message_id = reply_msg.object_id  # type: ignore
 
         self.state.store_message_res(message=reply_msg)
-
+        # Register response in ObjectStore (so pulling message request can be completed)
+        self._register_in_object_store(reply_msg)
         request = PullResMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
 
         # Execute
@@ -405,6 +482,51 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Execute & Assert
         self._assert_pull_messages_not_allowed(run_id)
+
+    def test_pull_message_from_expired_message_error(self) -> None:
+        """Test that the servicer correctly handles the registration in the ObjectStore
+        of an Error message created by the LinkState due to an expired TTL."""
+        # Prepare
+        node_id = self.state.create_node(heartbeat_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+
+        # Transition status to running.
+        self._transition_run_status(run_id, 2)
+
+        # Push Messages and reply
+        message_ins = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        msg_id = self.state.store_message_ins(message=message_ins)
+
+        # Simulate situation where the message has expired in the LinkState
+        # This will trigger the creation of an Error message
+        with patch(
+            "time.time",
+            side_effect=lambda: message_ins.metadata.created_at
+            + message_ins.metadata.ttl
+            + 0.1,
+        ):  # over TTL limit
+
+            request = PullResMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
+
+            # Execute
+            response, call = self._pull_messages.with_call(request=request)
+
+            # Assert
+            assert isinstance(response, PullResMessagesResponse)
+            assert grpc.StatusCode.OK == call.code()
+
+            # Assert that objects to pull points to a message carrying an error
+            msg_res = message_from_proto(response.messages_list[0])
+            assert msg_res.has_error()
+            # objects_to_pull is expected to be {msg_obj_id: msg_obj_id}
+            assert list(response.objects_to_pull.keys()) == [msg_res.object_id]
+            assert list(response.objects_to_pull.values())[0].object_ids == [
+                msg_res.object_id
+            ]
 
     def test_push_serverapp_outputs_successful_if_running(self) -> None:
         """Test `PushServerAppOutputs` success."""
@@ -560,23 +682,132 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert not response.success
 
-    def test_push_object(self) -> None:
+    def test_push_object_succesful(self) -> None:
         """Test `PushObject`."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        self._transition_run_status(run_id, 2)
+        obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
+        obj_b = obj.deflate()
+
+        # Pre-register object
+        self.store.preregister(object_ids=[obj.object_id])
+
+        # Execute
+        req = PushObjectRequest(
+            node=Node(node_id=SUPERLINK_NODE_ID),
+            run_id=run_id,
+            object_id=obj.object_id,
+            object_content=obj_b,
+        )
+        res: PushObjectResponse = self._push_object(request=req)
+
+        # Empty response
+        assert res.stored
+
+    def test_push_object_fails(self) -> None:
+        """Test `PushObject` in unsupported scenarios."""
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Run is not running
+        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+
+        # Run is running but node ID isn't recognized
+        self._transition_run_status(run_id, 2)
+        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+
         # Prepare
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
-        # Execute
-        req = PushObjectRequest(object_id=obj.object_id, object_content=obj_b)
+        # Push valid object but it hasn't been pre-registered
+        req = PushObjectRequest(
+            node=Node(node_id=SUPERLINK_NODE_ID),
+            run_id=run_id,
+            object_id=obj.object_id,
+            object_content=obj_b,
+        )
         res: PushObjectResponse = self._push_object(request=req)
 
-        # Empty response
-        assert res == PushObjectResponse()
+        # Assert: object not inserted
+        assert not res.stored
 
-        # Create invalid object_content
-        obj_b_ = obj_b + b"extra content"
+        # Push valid object but its hash doesnt match the one passed in the request
+        # Preregister under a different object-id
+        fake_object_id = get_object_id(b"1234")
+        self.store.preregister(object_ids=[fake_object_id])
+
         # Execute
-        req = PushObjectRequest(object_id=obj.object_id, object_content=obj_b_)
+        req = PushObjectRequest(
+            node=Node(node_id=SUPERLINK_NODE_ID),
+            run_id=run_id,
+            object_id=fake_object_id,
+            object_content=obj_b,
+        )
+        res = self._push_object(request=req)
+
+        # Assert: object not inserted
+        assert not res.stored
+
+    def test_pull_object_successful(self) -> None:
+        """Test `PullObject` functionality."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        self._transition_run_status(run_id, 2)
+        obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
+        obj_b = obj.deflate()
+
+        # Preregister object
+        self.store.preregister(object_ids=[obj.object_id])
+
+        # Pull
+        req = PullObjectRequest(
+            node=Node(node_id=SUPERLINK_NODE_ID), run_id=run_id, object_id=obj.object_id
+        )
+        res: PullObjectResponse = self._pull_object(req)
+
+        # Assert object content is b"" (it was never pushed)
+        assert res.object_found
+        assert not res.object_available
+        assert res.object_content == b""
+
+        # Put object in store, then check it can be pulled
+        self.store.put(object_id=obj.object_id, object_content=obj_b)
+        req = PullObjectRequest(
+            node=Node(node_id=SUPERLINK_NODE_ID), run_id=run_id, object_id=obj.object_id
+        )
+        res = self._pull_object(req)
+
+        # Assert, identical object pulled
+        assert res.object_found
+        assert res.object_available
+        assert obj_b == res.object_content
+
+    def test_pull_object_fails(self) -> None:
+        """Test `PullObject` in unsuported scenarios."""
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        # Run is not running
+        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
-            self._push_object(request=req)
+            self._pull_object(request=req)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+
+        # Run is running but node ID isn't recognized
+        self._transition_run_status(run_id, 2)
+        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
+        with self.assertRaises(grpc.RpcError) as e:
+            self._pull_object(request=req)
+        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+
+        # Attempt pulling object that doesn't exist
+        req = PullObjectRequest(
+            node=Node(node_id=SUPERLINK_NODE_ID), run_id=run_id, object_id="1234"
+        )
+        res: PullObjectResponse = self._pull_object(req)
+        # Empty response
+        assert not res.object_found

@@ -59,7 +59,7 @@ def ndarray_to_array(ndarray: NDArray) -> Array:
         data=ndarray.tobytes(),
         dtype=str(ndarray.dtype),
         stype="numpy.ndarray.tobytes",
-        shape=list(ndarray.shape),
+        shape=tuple(ndarray.shape),
     )
 
 
@@ -86,7 +86,7 @@ def test_parameters_to_array_and_back() -> None:
     parameters = ndarrays_to_parameters([ndarray])
 
     array = Array(
-        data=parameters.tensors[0], dtype="", stype=parameters.tensor_type, shape=[]
+        data=parameters.tensors[0], dtype="", stype=parameters.tensor_type, shape=()
     )
 
     parameters = Parameters(tensors=[array.data], tensor_type=array.stype)
@@ -475,7 +475,7 @@ def test_constructor_with_deprecated_arguments() -> None:
     """Test constructor with deprecated arguments."""
     # Prepare
     array_rec = ArrayRecord(
-        OrderedDict({"weights": Array("mock", [2, 3], "mock", b"123")})
+        OrderedDict({"weights": Array("mock", (2, 3), "mock", b"123")})
     )
     metric_rec = MetricRecord({"accuracy": 0.95})
     config_rec = ConfigRecord({"lr": 0.01})

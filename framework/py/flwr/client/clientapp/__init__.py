@@ -13,10 +13,3 @@
 # limitations under the License.
 # ==============================================================================
 """Flower AppIO service."""
-
-
-from .app import flwr_clientapp as flwr_clientapp
-
-__all__ = [
-    "flwr_clientapp",
-]

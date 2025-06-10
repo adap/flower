@@ -114,9 +114,10 @@ async def pull_message(request: PullMessagesRequest) -> PullMessagesResponse:
     """Pull PullMessages."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+    store: ObjectStore = cast(ObjectStoreFactory, app.state.OBJECTSTORE_FACTORY).store()
 
     # Handle message
-    return message_handler.pull_messages(request=request, state=state)
+    return message_handler.pull_messages(request=request, state=state, store=store)
 
 
 @rest_request_response(PushMessagesRequest)
@@ -124,7 +125,7 @@ async def push_message(request: PushMessagesRequest) -> PushMessagesResponse:
     """Pull PushMessages."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
-    store: ObjectStore = cast(ObjectStoreFactory, app.state.STATE_FACTORY).store()
+    store: ObjectStore = cast(ObjectStoreFactory, app.state.OBJECTSTORE_FACTORY).store()
 
     # Handle message
     return message_handler.push_messages(request=request, state=state, store=store)

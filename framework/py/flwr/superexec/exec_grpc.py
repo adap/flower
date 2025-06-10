@@ -21,7 +21,7 @@ from typing import Optional
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.auth_plugin import ExecAuthPlugin, ExecAuthzPlugin
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
@@ -45,6 +45,7 @@ def run_exec_api_grpc(
     certificates: Optional[tuple[bytes, bytes, bytes]],
     config: UserConfig,
     auth_plugin: Optional[ExecAuthPlugin] = None,
+    authz_plugin: Optional[ExecAuthzPlugin] = None,
     event_log_plugin: Optional[EventLogWriterPlugin] = None,
 ) -> grpc.Server:
     """Run Exec API (gRPC, request-response)."""
@@ -57,8 +58,8 @@ def run_exec_api_grpc(
         auth_plugin=auth_plugin,
     )
     interceptors: list[grpc.ServerInterceptor] = []
-    if auth_plugin is not None:
-        interceptors.append(ExecUserAuthInterceptor(auth_plugin))
+    if auth_plugin is not None and authz_plugin is not None:
+        interceptors.append(ExecUserAuthInterceptor(auth_plugin, authz_plugin))
     # Event log interceptor must be added after user auth interceptor
     if event_log_plugin is not None:
         interceptors.append(ExecEventLogInterceptor(event_log_plugin))
