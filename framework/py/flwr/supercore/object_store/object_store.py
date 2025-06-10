@@ -39,11 +39,14 @@ class ObjectStore(abc.ABC):
     """
 
     @abc.abstractmethod
-    def preregister(self, object_ids: list[str]) -> list[str]:
+    def preregister(self, run_id: int, object_ids: list[str]) -> list[str]:
         """Identify and preregister missing objects in the `ObjectStore`.
 
         Parameters
         ----------
+        run_id : int
+            The ID of the run for which to preregister objects.
+
         object_ids : list[str]
             A list of object IDs to check against the store. Any object ID not already
             present will be preregistered.
@@ -84,12 +87,34 @@ class ObjectStore(abc.ABC):
 
     @abc.abstractmethod
     def delete(self, object_id: str) -> None:
-        """Delete an object from the store.
+        """Delete an object and its unreferenced descendants from the store.
+
+        This method attempts to recursively delete the specified object and its 
+        descendants, if they are not referenced by any other object.
 
         Parameters
         ----------
         object_id : str
             The object_id under which the object is stored.
+
+        Notes
+        -----
+        The object of the given object_id will NOT be deleted if it is still referenced
+        by any other object in the store.
+        """
+
+    @abc.abstractmethod
+    def delete_objects_in_run(self, run_id: int) -> None:
+        """Delete all objects that were registered in a specific run.
+
+        Parameters
+        ----------
+        run_id : int
+            The ID of the run for which to delete objects.
+
+        Notes
+        -----
+        Objects that are still registered in other runs will NOT be deleted.
         """
 
     @abc.abstractmethod
@@ -128,6 +153,17 @@ class ObjectStore(abc.ABC):
         list[str]
             A list of object IDs of all descendant objects of the ``Message``.
         """
+
+    @abc.abstractmethod
+    def delete_message_descendant_ids(self, msg_object_id: str) -> None:
+        """Delete the mapping from a ``Message`` object ID to its descendants.
+
+        Parameters
+        ----------
+        msg_object_id : str
+            The object ID of the ``Message``.
+        """
+
 
     @abc.abstractmethod
     def __contains__(self, object_id: str) -> bool:

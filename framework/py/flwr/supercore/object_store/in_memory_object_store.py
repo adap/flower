@@ -24,6 +24,7 @@ from flwr.common.inflatable import (
     is_valid_sha256_hash,
 )
 from flwr.common.inflatable_utils import validate_object_content
+import threading
 
 from .object_store import NoObjectInStoreError, ObjectStore
 
@@ -35,6 +36,7 @@ class ObjectEntry:
     content: bytes
     is_available: bool
     ref_count: int
+    runs: set[int]
 
 
 class InMemoryObjectStore(ObjectStore):
@@ -43,34 +45,41 @@ class InMemoryObjectStore(ObjectStore):
     def __init__(self, verify: bool = True) -> None:
         self.verify = verify
         self.store: dict[str, ObjectEntry] = {}
+        self.lock_store = threading.RLock()
         # Mapping the Object ID of a message to the list of children object IDs
         self.msg_children_objects_mapping: dict[str, list[str]] = {}
+        # Mapping each run ID to a set of object IDs that are used in that run
+        self.run_objects_mapping: dict[str, set[str]] = {}
 
-    def preregister(self, object_ids: list[str]) -> list[str]:
+    def preregister(self, run_id: int, object_ids: list[str]) -> list[str]:
         """Identify and preregister missing objects."""
         new_objects = []
+        if run_id not in self.run_objects_mapping:
+            self.run_objects_mapping[run_id] = set()
+
         for obj_id in object_ids:
             # Verify object ID format (must be a valid sha256 hash)
             if not is_valid_sha256_hash(obj_id):
                 raise ValueError(f"Invalid object ID format: {obj_id}")
-            if obj_id not in self.store:
-                self.store[obj_id] = ObjectEntry(
-                    content=b"",  # Initially empty content
-                    is_available=False,  # Initially not available
-                    ref_count=0,  # Reference count starts at 0
-                )
-                new_objects.append(obj_id)
+            with self.lock_store:
+                if obj_id not in self.store:
+                    self.store[obj_id] = ObjectEntry(
+                        content=b"",  # Initially empty content
+                        is_available=False,  # Initially not available
+                        ref_count=0,  # Reference count starts at 0
+                        runs={run_id},  # Run count starts at 1
+                    )
+                    new_objects.append(obj_id)
+                elif obj_id not in self.run_objects_mapping[run_id]:
+                    # If the object is already registered but not in this run,
+                    # increment the run count
+                    self.store[obj_id].runs.add(run_id)
+                    self.run_objects_mapping[run_id].add(obj_id)
 
         return new_objects
 
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store."""
-        # Only allow adding the object if it has been preregistered
-        if object_id not in self.store:
-            raise NoObjectInStoreError(
-                f"Object with ID '{object_id}' was not pre-registered."
-            )
-
         if self.verify:
             # Verify object_id and object_content match
             object_id_from_content = get_object_id(object_content)
@@ -79,25 +88,32 @@ class InMemoryObjectStore(ObjectStore):
 
             # Validate object content
             validate_object_content(content=object_content)
+        
+        with self.lock_store:
+            # Only allow adding the object if it has been preregistered
+            if object_id not in self.store:
+                raise NoObjectInStoreError(
+                    f"Object with ID '{object_id}' was not pre-registered."
+                )
 
-        # Return if object is already present in the store
-        if self.store[object_id].is_available:
-            return
+            # Return if object is already present in the store
+            if self.store[object_id].is_available:
+                return
 
-        # Check if all children objects are preregistered
-        children_ids = get_object_children_ids_from_object_content(object_content)
-        if not all(child_id in self.store for child_id in children_ids):
-            raise NoObjectInStoreError(
-                f"Not all children of object with ID '{object_id}' were pre-registered."
-            )
+            # Check if all children objects are preregistered
+            children_ids = get_object_children_ids_from_object_content(object_content)
+            if not all(child_id in self.store for child_id in children_ids):
+                raise NoObjectInStoreError(
+                    f"Not all children of object with ID '{object_id}' were pre-registered."
+                )
 
-        # Update the object entry in the store
-        self.store[object_id].is_available = True
-        self.store[object_id].content = object_content
+            # Update the object entry in the store
+            self.store[object_id].is_available = True
+            self.store[object_id].content = object_content
 
-        # Increase the reference count for all children objects
-        for child_id in children_ids:
-            self.store[child_id].ref_count += 1
+            # Increase the reference count for all children objects
+            for child_id in children_ids:
+                self.store[child_id].ref_count += 1
 
     def set_message_descendant_ids(
         self, msg_object_id: str, descendant_ids: list[str]
@@ -117,19 +133,17 @@ class InMemoryObjectStore(ObjectStore):
 
     def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store."""
-        # Check if the object ID is pre-registered
-        if object_id not in self.store:
-            return None
+        with self.lock_store:
+            # Check if the object ID is pre-registered
+            if object_id not in self.store:
+                return None
 
-        # Check if the object is available (i.e., has been put into the store)
-        object_entry = self.store[object_id]
-        if not object_entry.is_available:
-            return b""
+            # Check if the object is available (i.e., has been put into the store)
+            object_entry = self.store[object_id]
+            if not object_entry.is_available:
+                return b""
 
-        # Recursively decrease the reference count for the object
-        self._try_delete(object_id)
-
-        return object_entry.content
+            return object_entry.content
 
     def _try_delete(self, object_id: str) -> None:
         """Delete the object if its reference count is zero."""
@@ -150,9 +164,27 @@ class InMemoryObjectStore(ObjectStore):
                 self._try_delete(child_id)
 
     def delete(self, object_id: str) -> None:
-        """Delete an object from the store."""
-        if object_id in self.store:
-            del self.store[object_id]
+        """Delete an object and its unreferenced descendants from the store."""
+        with self.lock_store:
+            object_entry = self.store[object_id]
+
+            # Delete the object if it has no references left
+            if object_entry.is_available and object_entry.ref_count == 0:
+                del self.store[object_id]
+                for run_id in object_entry.runs:
+                    # Remove the object from the run's mapping
+                    if run_id in self.run_objects_mapping:
+                        self.run_objects_mapping[run_id].discard(object_id)
+
+                # Decrease the reference count of its children
+                children_ids = get_object_children_ids_from_object_content(
+                    object_entry.content
+                )
+                for child_id in children_ids:
+                    self.store[child_id].ref_count -= 1
+
+                    # Recursively try to delete the child object
+                    self.delete(child_id)
 
     def clear(self) -> None:
         """Clear the store."""
