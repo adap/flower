@@ -27,7 +27,11 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable import get_descendant_object_ids, get_object_id
+from flwr.common.inflatable import (
+    get_descendant_object_ids,
+    get_object_id,
+    get_object_tree,
+)
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
 from flwr.common.typing import RunStatus
@@ -39,6 +43,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushMessagesResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ObjectTree,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -148,7 +153,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         request = PushMessagesRequest(
             node=Node(node_id=node_id),
             messages_list=[msg_proto],
-            msg_to_descendant_mapping=descendant_mapping,
+            message_object_trees=[get_object_tree(message)],
         )
 
         # Execute
@@ -221,7 +226,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             msg_object_id=message_obj_id, descendant_ids=descendants
         )
         # Preregister
-        obj_ids_registered = self.store.preregister(descendants + [message_obj_id])
+        obj_ids_registered = self.store.preregister(get_object_tree(message))
 
         return obj_ids_registered
 
@@ -387,7 +392,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         self._transition_run_status(run_id, 2)
 
         # Pre-register object
-        self.store.preregister(object_ids=[obj.object_id])
+        self.store.preregister(get_object_tree(obj))
 
         # Execute
         req = PushObjectRequest(
@@ -431,7 +436,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Push valid object but its hash doesnt match the one passed in the request
         # Preregister under a different object-id
         fake_object_id = get_object_id(b"1234")
-        self.store.preregister(object_ids=[fake_object_id])
+        self.store.preregister(ObjectTree(object_id=fake_object_id))
 
         # Execute
         req = PushObjectRequest(
@@ -455,7 +460,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         obj_b = obj.deflate()
 
         # Preregister object
-        self.store.preregister(object_ids=[obj.object_id])
+        self.store.preregister(get_object_tree(obj))
 
         # Pull
         req = PullObjectRequest(

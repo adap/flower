@@ -18,6 +18,8 @@
 import abc
 from typing import Optional
 
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
+
 
 class NoObjectInStoreError(Exception):
     """Error when trying to access an element in the ObjectStore that does not exist."""
@@ -39,14 +41,14 @@ class ObjectStore(abc.ABC):
     """
 
     @abc.abstractmethod
-    def preregister(self, object_ids: list[str]) -> list[str]:
+    def preregister(self, object_tree: ObjectTree) -> list[str]:
         """Identify and preregister missing objects in the `ObjectStore`.
 
         Parameters
         ----------
-        object_ids : list[str]
-            A list of object IDs to check against the store. Any object ID not already
-            present will be preregistered.
+        object_tree : ObjectTree
+            The object tree containing the objects to preregister. This tree should
+            contain all objects that are expected to be stored in the `ObjectStore`.
 
         Returns
         -------
