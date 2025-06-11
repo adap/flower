@@ -14,6 +14,7 @@
 # ==============================================================================
 """Contextmanager for a gRPC request-response channel to the Flower server."""
 
+
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from copy import copy
