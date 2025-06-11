@@ -35,7 +35,7 @@ from flwr.common.logger import log as logger
 from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from .utils import init_channel, try_obtain_cli_auth_plugin, unauthenticated_exc_handler
+from .utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
 
 class AllLogsRetrieved(BaseException):
@@ -95,7 +95,7 @@ def stream_logs(
     latest_timestamp = 0.0
     res = None
     try:
-        with unauthenticated_exc_handler():
+        with flwr_cli_grpc_exc_handler():
             for res in stub.StreamLogs(req, timeout=duration):
                 print(res.log_output, end="")
         raise AllLogsRetrieved()
@@ -116,7 +116,7 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     req = StreamLogsRequest(run_id=run_id, after_timestamp=0.0)
 
     try:
-        with unauthenticated_exc_handler():
+        with flwr_cli_grpc_exc_handler():
             # Enforce timeout for graceful exit
             for res in stub.StreamLogs(req, timeout=timeout):
                 print(res.log_output)

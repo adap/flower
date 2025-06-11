@@ -10,7 +10,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-version:
+    name: Check version consistency
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.14.0'
+          registry-url: https://registry.npmjs.org
+
+      - name: Run version consistency check
+        run: ./intelligence/dev/check-version-consistency.sh
+
   publish-typescript:
+    needs: check-version
     if: ${{ github.repository == 'adap/flower' }}
     name: Publish Flower Intelligence TypeScript SDK to NPM
     runs-on: ubuntu-22.04
@@ -43,6 +60,7 @@ jobs:
         run: pnpm publish . --access public --no-git-checks
 
   publish-kotlin:
+    needs: check-version
     if: ${{ github.repository == 'adap/flower' }}
     name: Publish Flower Intelligence Kotlin SDK to Maven Central
     runs-on: ubuntu-22.04
@@ -63,9 +81,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-
-      - name: Make publish script executable
-        run: chmod +x intelligence/kt/dev/publish.sh
 
       - name: Publish Kotlin package
         working-directory: intelligence/kt

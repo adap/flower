@@ -28,11 +28,22 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
+from flwr.common.inflatable import get_all_nested_objects
+from flwr.common.inflatable_grpc_utils import (
+    make_pull_object_fn_grpc,
+    make_push_object_fn_grpc,
+)
+from flwr.common.inflatable_utils import (
+    inflate_object_from_contents,
+    pull_objects,
+    push_objects,
+)
 from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.message import remove_content_from_message
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
-from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
+from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
-from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
+from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
@@ -163,7 +174,7 @@ class GrpcGrid(Grid):
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            message.metadata.message_id == ""
+            message.metadata.message_id != ""
             and message.metadata.reply_to_message_id == ""
             and message.metadata.ttl > 0
         ):
@@ -198,6 +209,41 @@ class GrpcGrid(Grid):
         )
         return [node.node_id for node in res.nodes]
 
+    def _try_push_message(self, run_id: int, message: Message) -> str:
+        """Push one message and its associated objects."""
+        # Compute mapping of message descendants
+        all_objects = get_all_nested_objects(message)
+        all_object_ids = list(all_objects.keys())
+        msg_id = all_object_ids[-1]  # Last object is the message itself
+        descendant_ids = all_object_ids[:-1]  # All but the last object are descendants
+
+        # Call GrpcServerAppIoStub method
+        res: PushInsMessagesResponse = self._stub.PushMessages(
+            PushInsMessagesRequest(
+                messages_list=[message_to_proto(remove_content_from_message(message))],
+                run_id=run_id,
+                msg_to_descendant_mapping={
+                    msg_id: ObjectIDs(object_ids=descendant_ids)
+                },
+            )
+        )
+
+        # Push objects
+        # If Message was added to the LinkState correctly
+        if msg_id is not None:
+            obj_ids_to_push = set(res.objects_to_push[msg_id].object_ids)
+            # Push only object that are not in the store
+            push_objects(
+                all_objects,
+                push_object_fn=make_push_object_fn_grpc(
+                    push_object_grpc=self._stub.PushObject,
+                    node=self.node,
+                    run_id=run_id,
+                ),
+                object_ids_to_push=obj_ids_to_push,
+            )
+        return msg_id
+
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.
 
@@ -206,39 +252,34 @@ class GrpcGrid(Grid):
         """
         # Construct Messages
         run_id = cast(Run, self._run).run_id
-        message_proto_list: list[ProtoMessage] = []
-        for msg in messages:
-            # Populate metadata
-            msg.metadata.__dict__["_run_id"] = run_id
-            msg.metadata.__dict__["_src_node_id"] = self.node.node_id
-            # Check message
-            self._check_message(msg)
-            # Convert to proto
-            msg_proto = message_to_proto(msg)
-            # Add to list
-            message_proto_list.append(msg_proto)
-
+        message_ids: list[str] = []
         try:
-            # Call GrpcServerAppIoStub method
-            res: PushInsMessagesResponse = self._stub.PushMessages(
-                PushInsMessagesRequest(messages_list=message_proto_list, run_id=run_id)
-            )
-            if len([msg_id for msg_id in res.message_ids if msg_id]) != len(
-                message_proto_list
-            ):
-                log(
-                    WARNING,
-                    "Not all messages could be pushed to the SuperLink. The returned "
-                    "list has `None` for those messages (the order is preserved as "
-                    "passed to `push_messages`). This could be due to a malformed "
-                    "message.",
-                )
-            return list(res.message_ids)
+            for msg in messages:
+                # Populate metadata
+                msg.metadata.__dict__["_run_id"] = run_id
+                msg.metadata.__dict__["_src_node_id"] = self.node.node_id
+                msg.metadata.__dict__["_message_id"] = msg.object_id
+                # Check message
+                self._check_message(msg)
+                # Try pushing message and its objects
+                message_ids.append(self._try_push_message(run_id, msg))
+
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
                 log(ERROR, ERROR_MESSAGE_PUSH_MESSAGES_RESOURCE_EXHAUSTED)
                 return []
             raise
+
+        if None in message_ids:
+            log(
+                WARNING,
+                "Not all messages could be pushed to the SuperLink. The returned "
+                "list has `None` for those messages (the order is preserved as "
+                "passed to `push_messages`). This could be due to a malformed "
+                "message.",
+            )
+
+        return message_ids
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
@@ -246,17 +287,35 @@ class GrpcGrid(Grid):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
+        run_id = cast(Run, self._run).run_id
         try:
             # Pull Messages
             res: PullResMessagesResponse = self._stub.PullMessages(
                 PullResMessagesRequest(
                     message_ids=message_ids,
-                    run_id=cast(Run, self._run).run_id,
+                    run_id=run_id,
                 )
             )
-            # Convert Message from Protobuf representation
-            msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
-            return msgs
+            # Pull Messages from store
+            inflated_msgs: list[Message] = []
+            for msg_proto in res.messages_list:
+                msg_id = msg_proto.metadata.message_id
+                all_object_contents = pull_objects(
+                    list(res.objects_to_pull[msg_id].object_ids) + [msg_id],
+                    pull_object_fn=make_pull_object_fn_grpc(
+                        pull_object_grpc=self._stub.PullObject,
+                        node=self.node,
+                        run_id=run_id,
+                    ),
+                )
+                message = cast(
+                    Message, inflate_object_from_contents(msg_id, all_object_contents)
+                )
+                message.metadata.__dict__["_message_id"] = msg_id
+                inflated_msgs.append(message)
+
+            return inflated_msgs
+
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
                 log(ERROR, ERROR_MESSAGE_PULL_MESSAGES_RESOURCE_EXHAUSTED)

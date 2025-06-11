@@ -12,86 +12,88 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""InflatableObject utils."""
+"""InflatableObject gRPC utils."""
 
 
-from typing import Union
+from typing import Callable
 
-from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
     PushObjectResponse,
 )
-from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
-from .inflatable import (
-    InflatableObject,
-    get_object_head_values_from_object_content,
-    get_object_id,
-)
-from .record import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
-
-# Helper registry that maps names of classes to their type
-inflatable_class_registry: dict[str, type[InflatableObject]] = {
-    Array.__qualname__: Array,
-    ArrayRecord.__qualname__: ArrayRecord,
-    ConfigRecord.__qualname__: ConfigRecord,
-    MetricRecord.__qualname__: MetricRecord,
-    RecordDict.__qualname__: RecordDict,
-}
+from .inflatable_utils import ObjectIdNotPreregisteredError, ObjectUnavailableError
 
 
-def push_object_to_servicer(
-    obj: InflatableObject, stub: Union[FleetStub, ServerAppIoStub]
-) -> set[str]:
-    """Recursively deflate an object and push it to the servicer.
+def make_pull_object_fn_grpc(
+    pull_object_grpc: Callable[[PullObjectRequest], PullObjectResponse],
+    node: Node,
+    run_id: int,
+) -> Callable[[str], bytes]:
+    """Create a pull object function that uses gRPC to pull objects.
 
-    Objects with the same ID are not pushed twice. It returns the set of pushed object
-    IDs.
+    Parameters
+    ----------
+    pull_object_grpc : Callable[[PullObjectRequest], PullObjectResponse]
+        The gRPC function to pull objects, e.g., `FleetStub.PullObject`.
+    node : Node
+        The node making the request.
+    run_id : int
+        The run ID for the current operation.
+
+    Returns
+    -------
+    Callable[[str], bytes]
+        A function that takes an object ID and returns the object content as bytes.
+        The function raises `ObjectIdNotPreregisteredError` if the object ID is not
+        pre-registered, or `ObjectUnavailableError` if the object is not yet available.
     """
-    pushed_object_ids: set[str] = set()
-    # Push children if it has any
-    if children := obj.children:
-        for child in children.values():
-            pushed_object_ids |= push_object_to_servicer(child, stub)
 
-    # Deflate object and push
-    object_content = obj.deflate()
-    object_id = get_object_id(object_content)
-    _: PushObjectResponse = stub.PushObject(
-        PushObjectRequest(
-            object_id=object_id,
-            object_content=object_content,
+    def pull_object_fn(object_id: str) -> bytes:
+        request = PullObjectRequest(node=node, run_id=run_id, object_id=object_id)
+        response: PullObjectResponse = pull_object_grpc(request)
+        if not response.object_found:
+            raise ObjectIdNotPreregisteredError(object_id)
+        if not response.object_available:
+            raise ObjectUnavailableError(object_id)
+        return response.object_content
+
+    return pull_object_fn
+
+
+def make_push_object_fn_grpc(
+    push_object_grpc: Callable[[PushObjectRequest], PushObjectResponse],
+    node: Node,
+    run_id: int,
+) -> Callable[[str, bytes], None]:
+    """Create a push object function that uses gRPC to push objects.
+
+    Parameters
+    ----------
+    push_object_grpc : Callable[[PushObjectRequest], PushObjectResponse]
+        The gRPC function to push objects, e.g., `FleetStub.PushObject`.
+    node : Node
+        The node making the request.
+    run_id : int
+        The run ID for the current operation.
+
+    Returns
+    -------
+    Callable[[str, bytes], None]
+        A function that takes an object ID and its content as bytes, and pushes it
+        to the servicer. The function raises `ObjectIdNotPreregisteredError` if
+        the object ID is not pre-registered.
+    """
+
+    def push_object_fn(object_id: str, object_content: bytes) -> None:
+        request = PushObjectRequest(
+            node=node, run_id=run_id, object_id=object_id, object_content=object_content
         )
-    )
-    pushed_object_ids.add(object_id)
+        response: PushObjectResponse = push_object_grpc(request)
+        if not response.stored:
+            raise ObjectIdNotPreregisteredError(object_id)
 
-    return pushed_object_ids
-
-
-def pull_object_from_servicer(
-    object_id: str, stub: Union[FleetStub, ServerAppIoStub]
-) -> InflatableObject:
-    """Recursively inflate an object by pulling it from the servicer."""
-    # Pull object
-    object_proto: PullObjectResponse = stub.PullObject(
-        PullObjectRequest(object_id=object_id)
-    )
-    object_content = object_proto.object_content
-
-    # Extract object class and object_ids of children
-    obj_type, children_obj_ids, _ = get_object_head_values_from_object_content(
-        object_content=object_content
-    )
-    # Resolve object class
-    cls_type = inflatable_class_registry[obj_type]
-
-    # Pull all children objects
-    children: dict[str, InflatableObject] = {}
-    for child_object_id in children_obj_ids:
-        children[child_object_id] = pull_object_from_servicer(child_object_id, stub)
-
-    # Inflate object passing its children
-    return cls_type.inflate(object_content, children=children)
+    return push_object_fn

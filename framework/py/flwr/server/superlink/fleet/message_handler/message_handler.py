@@ -14,12 +14,12 @@
 # ==============================================================================
 """Fleet API message handlers."""
 
-
+from logging import ERROR
 from typing import Optional
-from uuid import UUID
 
-from flwr.common import Message
+from flwr.common import Message, log
 from flwr.common.constant import Status
+from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.serde import (
     fab_to_proto,
     message_from_proto,
@@ -43,6 +43,13 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ObjectIDs,
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -52,6 +59,9 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
+from flwr.supercore.object_store import NoObjectInStoreError, ObjectStore
+
+from ...utils import store_mapping_and_register_objects
 
 
 def create_node(
@@ -87,7 +97,9 @@ def send_node_heartbeat(
 
 
 def pull_messages(
-    request: PullMessagesRequest, state: LinkState
+    request: PullMessagesRequest,
+    state: LinkState,
+    store: ObjectStore,
 ) -> PullMessagesResponse:
     """Pull Messages handler."""
     # Get node_id if client node is not anonymous
@@ -99,14 +111,31 @@ def pull_messages(
 
     # Convert to Messages
     msg_proto = []
+    objects_to_pull: dict[str, ObjectIDs] = {}
     for msg in message_list:
-        msg_proto.append(message_to_proto(msg))
+        try:
+            msg_proto.append(message_to_proto(msg))
 
-    return PullMessagesResponse(messages_list=msg_proto)
+            msg_object_id = msg.metadata.message_id
+            descendants = store.get_message_descendant_ids(msg_object_id)
+            # Include the object_id of the message itself
+            objects_to_pull[msg_object_id] = ObjectIDs(
+                object_ids=descendants + [msg_object_id]
+            )
+        except NoObjectInStoreError as e:
+            log(ERROR, e.message)
+            # Delete message ins from state
+            state.delete_messages(message_ins_ids={msg_object_id})
+
+    return PullMessagesResponse(
+        messages_list=msg_proto, objects_to_pull=objects_to_pull
+    )
 
 
 def push_messages(
-    request: PushMessagesRequest, state: LinkState
+    request: PushMessagesRequest,
+    state: LinkState,
+    store: ObjectStore,
 ) -> PushMessagesResponse:
     """Push Messages handler."""
     # Convert Message from proto
@@ -122,12 +151,16 @@ def push_messages(
         raise InvalidRunStatusException(abort_msg)
 
     # Store Message in State
-    message_id: Optional[UUID] = state.store_message_res(message=msg)
+    message_id: Optional[str] = state.store_message_res(message=msg)
+
+    # Store Message object to descendants mapping and preregister objects
+    objects_to_push = store_mapping_and_register_objects(store, request=request)
 
     # Build response
     response = PushMessagesResponse(
         reconnect=Reconnect(reconnect=5),
         results={str(message_id): 0},
+        objects_to_push=objects_to_push,
     )
     return response
 
@@ -177,3 +210,52 @@ def get_fab(
         return GetFabResponse(fab=fab_to_proto(fab))
 
     raise ValueError(f"Found no FAB with hash: {request.hash_str}")
+
+
+def push_object(
+    request: PushObjectRequest, state: LinkState, store: ObjectStore
+) -> PushObjectResponse:
+    """Push Object."""
+    abort_msg = check_abort(
+        request.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+    )
+    if abort_msg:
+        raise InvalidRunStatusException(abort_msg)
+
+    stored = False
+    try:
+        store.put(request.object_id, request.object_content)
+        stored = True
+    except (NoObjectInStoreError, ValueError) as e:
+        log(ERROR, str(e))
+    except UnexpectedObjectContentError as e:
+        # Object content is not valid
+        log(ERROR, str(e))
+        raise
+    return PushObjectResponse(stored=stored)
+
+
+def pull_object(
+    request: PullObjectRequest, state: LinkState, store: ObjectStore
+) -> PullObjectResponse:
+    """Pull Object."""
+    abort_msg = check_abort(
+        request.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+    )
+    if abort_msg:
+        raise InvalidRunStatusException(abort_msg)
+
+    # Fetch from store
+    content = store.get(request.object_id)
+    if content is not None:
+        object_available = content != b""
+        return PullObjectResponse(
+            object_found=True,
+            object_available=object_available,
+            object_content=content,
+        )
+    return PullObjectResponse(object_found=False, object_available=False)

@@ -12,27 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""In-memory NodeState implementation."""
+"""Flower command line interface for SuperNode."""
 
 
-from typing import Optional
+from .flower_supernode import flower_supernode
+from .flwr_clientapp import flwr_clientapp
 
-from flwr.client.nodestate.nodestate import NodeState
-
-
-class InMemoryNodeState(NodeState):
-    """In-memory NodeState implementation."""
-
-    def __init__(self) -> None:
-        # Store node_id
-        self.node_id: Optional[int] = None
-
-    def set_node_id(self, node_id: Optional[int]) -> None:
-        """Set the node ID."""
-        self.node_id = node_id
-
-    def get_node_id(self) -> int:
-        """Get the node ID."""
-        if self.node_id is None:
-            raise ValueError("Node ID not set")
-        return self.node_id
+__all__ = [
+    "flower_supernode",
+    "flwr_clientapp",
+]

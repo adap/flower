@@ -19,11 +19,6 @@ class ServerAppIoStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.CreateRun = channel.unary_unary(
-                '/flwr.proto.ServerAppIo/CreateRun',
-                request_serializer=flwr_dot_proto_dot_run__pb2.CreateRunRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_run__pb2.CreateRunResponse.FromString,
-                )
         self.GetNodes = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/GetNodes',
                 request_serializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesRequest.SerializeToString,
@@ -93,13 +88,6 @@ class ServerAppIoStub(object):
 
 class ServerAppIoServicer(object):
     """Missing associated documentation comment in .proto file."""
-
-    def CreateRun(self, request, context):
-        """Request run_id
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
     def GetNodes(self, request, context):
         """Return a set of nodes
@@ -195,11 +183,6 @@ class ServerAppIoServicer(object):
 
 def add_ServerAppIoServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'CreateRun': grpc.unary_unary_rpc_method_handler(
-                    servicer.CreateRun,
-                    request_deserializer=flwr_dot_proto_dot_run__pb2.CreateRunRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_run__pb2.CreateRunResponse.SerializeToString,
-            ),
             'GetNodes': grpc.unary_unary_rpc_method_handler(
                     servicer.GetNodes,
                     request_deserializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesRequest.FromString,
@@ -274,23 +257,6 @@ def add_ServerAppIoServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class ServerAppIo(object):
     """Missing associated documentation comment in .proto file."""
-
-    @staticmethod
-    def CreateRun(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/CreateRun',
-            flwr_dot_proto_dot_run__pb2.CreateRunRequest.SerializeToString,
-            flwr_dot_proto_dot_run__pb2.CreateRunResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetNodes(request,

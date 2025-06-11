@@ -15,9 +15,9 @@
 """Flower server."""
 
 
+from ..compat.server.app import start_server as start_server  # Deprecated
 from . import strategy
 from . import workflow as workflow
-from .app import start_server as start_server
 from .client_manager import ClientManager as ClientManager
 from .client_manager import SimpleClientManager as SimpleClientManager
 from .compat import LegacyContext as LegacyContext

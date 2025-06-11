@@ -90,9 +90,10 @@ def test_pull_messages() -> None:
     # Prepare
     request = PullMessagesRequest(node=Node(node_id=1234))
     state = MagicMock()
+    store = MagicMock()
 
     # Execute
-    pull_messages(request=request, state=state)
+    pull_messages(request=request, state=state, store=store)
 
     # Assert
     state.create_node.assert_not_called()
@@ -123,9 +124,10 @@ def test_push_messages() -> None:
 
     request = PushMessagesRequest(messages_list=[message_to_proto(msg)])
     state = MagicMock()
+    store = MagicMock()
 
     # Execute
-    push_messages(request=request, state=state)
+    push_messages(request=request, state=state, store=store)
 
     # Assert
     state.create_node.assert_not_called()

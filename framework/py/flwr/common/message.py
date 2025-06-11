@@ -22,12 +22,28 @@ from typing import Any, cast, overload
 
 from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
+from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
+from flwr.proto.message_pb2 import Metadata as ProtoMetadata  # pylint: disable=E0611
+from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 
 from ..app.error import Error
 from ..app.metadata import Metadata
 from .constant import MESSAGE_TTL_TOLERANCE
+from .inflatable import (
+    InflatableObject,
+    add_header_to_object_body,
+    get_descendant_object_ids,
+    get_object_body,
+    get_object_children_ids_from_object_content,
+)
 from .logger import log
 from .record import RecordDict
+from .serde_utils import (
+    error_from_proto,
+    error_to_proto,
+    metadata_from_proto,
+    metadata_to_proto,
+)
 
 DEFAULT_TTL = 43200  # This is 12 hours
 MESSAGE_INIT_ERROR_MESSAGE = (
@@ -58,7 +74,7 @@ class MessageInitializationError(TypeError):
         super().__init__(message or MESSAGE_INIT_ERROR_MESSAGE)
 
 
-class Message:
+class Message(InflatableObject):
     """Represents a message exchanged between ClientApp and ServerApp.
 
     This class encapsulates the payload and metadata necessary for communication
@@ -331,12 +347,94 @@ class Message:
         )
         return f"{self.__class__.__qualname__}({view})"
 
+    @property
+    def children(self) -> dict[str, InflatableObject] | None:
+        """Return a dictionary of a single RecordDict with its Object IDs as key."""
+        return {self.content.object_id: self.content} if self.has_content() else None
+
+    def deflate(self) -> bytes:
+        """Deflate message."""
+        # Exclude message_id from serialization
+        proto_metadata: ProtoMetadata = metadata_to_proto(self.metadata)
+        proto_metadata.message_id = ""
+        # Store message metadata and error in object body
+        obj_body = ProtoMessage(
+            metadata=proto_metadata,
+            content=None,
+            error=error_to_proto(self.error) if self.has_error() else None,
+        ).SerializeToString(deterministic=True)
+
+        return add_header_to_object_body(object_body=obj_body, obj=self)
+
+    @classmethod
+    def inflate(
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
+    ) -> Message:
+        """Inflate an Message from bytes.
+
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content of the Message.
+        children : Optional[dict[str, InflatableObject]] (default: None)
+            Dictionary of children InflatableObjects mapped to their Object IDs.
+            These children enable the full inflation of the Message.
+
+        Returns
+        -------
+        Message
+            The inflated Message.
+        """
+        if children is None:
+            children = {}
+
+        # Get the children id from the deflated message
+        children_ids = get_object_children_ids_from_object_content(object_content)
+
+        # If the message had content, only one children is possible
+        # If the message carried an error, the returned listed should be empty
+        if children_ids != list(children.keys()):
+            raise ValueError(
+                f"Mismatch in children object IDs: expected {children_ids}, but "
+                f"received {list(children.keys())}. The provided children must exactly "
+                "match the IDs specified in the object head."
+            )
+
+        # Inflate content
+        obj_body = get_object_body(object_content, cls)
+        proto_message = ProtoMessage.FromString(obj_body)
+
+        # Prepare content if error wasn't set in protobuf message
+        if proto_message.HasField("error"):
+            content = None
+            error = error_from_proto(proto_message.error)
+        else:
+            content = cast(RecordDict, children[children_ids[0]])
+            error = None
+        # Return message
+        return make_message(
+            metadata=metadata_from_proto(proto_message.metadata),
+            content=content,
+            error=error,
+        )
+
 
 def make_message(
     metadata: Metadata, content: RecordDict | None = None, error: Error | None = None
 ) -> Message:
     """Create a message with the provided metadata, content, and error."""
     return Message(metadata=metadata, content=content, error=error)  # type: ignore
+
+
+def remove_content_from_message(message: Message) -> Message:
+    """Return a copy of the Message but with an empty RecordDict as content.
+
+    If message has no content, it returns itself.
+    """
+    if message.has_error():
+        return message
+
+    return make_message(metadata=message.metadata, content=RecordDict())
 
 
 def _limit_reply_ttl(
@@ -420,3 +518,12 @@ def _check_arg_types(  # pylint: disable=too-many-arguments, R0917
     ):
         return
     raise MessageInitializationError()
+
+
+def get_message_to_descendant_id_mapping(message: Message) -> dict[str, ObjectIDs]:
+    """Construct a mapping between message object_id and that of its descendants."""
+    return {
+        message.object_id: ObjectIDs(
+            object_ids=list(get_descendant_object_ids(message))
+        )
+    }

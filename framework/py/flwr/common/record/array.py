@@ -62,8 +62,8 @@ class Array(InflatableObject):
         A string representing the data type of the serialized object (e.g. `"float32"`).
         Only required if you are not passing in a ndarray or a tensor.
 
-    shape : Optional[list[int]] (default: None)
-        A list representing the shape of the unserialized array-like object. Only
+    shape : Optional[tuple[int, ...]] (default: None)
+        A tuple representing the shape of the unserialized array-like object. Only
         required if you are not passing in a ndarray or a tensor.
 
     stype : Optional[str] (default: None)
@@ -107,13 +107,13 @@ class Array(InflatableObject):
     """
 
     dtype: str
-    shape: list[int]
+    shape: tuple[int, ...]
     stype: str
     data: bytes
 
     @overload
     def __init__(  # noqa: E704
-        self, dtype: str, shape: list[int], stype: str, data: bytes
+        self, dtype: str, shape: tuple[int, ...], stype: str, data: bytes
     ) -> None: ...
 
     @overload
@@ -126,7 +126,7 @@ class Array(InflatableObject):
         self,
         *args: Any,
         dtype: str | None = None,
-        shape: list[int] | None = None,
+        shape: tuple[int, ...] | None = None,
         stype: str | None = None,
         data: bytes | None = None,
         ndarray: NDArray | None = None,
@@ -134,7 +134,7 @@ class Array(InflatableObject):
     ) -> None:
         # Determine the initialization method and validate input arguments.
         # Support three initialization formats:
-        # 1. Array(dtype: str, shape: list[int], stype: str, data: bytes)
+        # 1. Array(dtype: str, shape: tuple[int, ...], stype: str, data: bytes)
         # 2. Array(ndarray: NDArray)
         # 3. Array(torch_tensor: torch.Tensor)
 
@@ -181,7 +181,7 @@ class Array(InflatableObject):
             if (
                 len(all_args) == 4  # pylint: disable=too-many-boolean-expressions
                 and isinstance(all_args[0], str)
-                and isinstance(all_args[1], list)
+                and isinstance(all_args[1], tuple)
                 and all(isinstance(i, int) for i in all_args[1])
                 and isinstance(all_args[2], str)
                 and isinstance(all_args[3], bytes)
@@ -221,7 +221,7 @@ class Array(InflatableObject):
         data = buffer.getvalue()
         return Array(
             dtype=str(ndarray.dtype),
-            shape=list(ndarray.shape),
+            shape=tuple(ndarray.shape),
             stype=SType.NUMPY,
             data=data,
         )
@@ -291,7 +291,33 @@ class Array(InflatableObject):
         proto_array = ArrayProto.FromString(obj_body)
         return cls(
             dtype=proto_array.dtype,
-            shape=list(proto_array.shape),
+            shape=tuple(proto_array.shape),
             stype=proto_array.stype,
             data=proto_array.data,
         )
+
+    @property
+    def object_id(self) -> str:
+        """Get object ID."""
+        ret = super().object_id
+        self.is_dirty = False  # Reset dirty flag
+        return ret
+
+    @property
+    def is_dirty(self) -> bool:
+        """Check if the object is dirty after the last deflation."""
+        if "_is_dirty" not in self.__dict__:
+            self.__dict__["_is_dirty"] = True
+        return cast(bool, self.__dict__["_is_dirty"])
+
+    @is_dirty.setter
+    def is_dirty(self, value: bool) -> None:
+        """Set the dirty flag."""
+        self.__dict__["_is_dirty"] = value
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        """Set attribute with special handling for dirty state."""
+        if name in ("dtype", "shape", "stype", "data"):
+            # Mark as dirty if any of the main attributes are set
+            self.is_dirty = True
+        super().__setattr__(name, value)

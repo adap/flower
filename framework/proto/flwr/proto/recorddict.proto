@@ -66,16 +66,37 @@ message ConfigRecordValue {
 }
 
 message ArrayRecord {
-  repeated string data_keys = 1;
-  repeated Array data_values = 2;
+  message Item {
+    string key = 1;
+    Array value = 2;
+  }
+  repeated Item items = 1;
 }
 
-message MetricRecord { map<string, MetricRecordValue> data = 1; }
+message MetricRecord {
+  message Item {
+    string key = 1;
+    MetricRecordValue value = 2;
+  }
+  repeated Item items = 1;
+}
 
-message ConfigRecord { map<string, ConfigRecordValue> data = 1; }
+message ConfigRecord {
+  message Item {
+    string key = 1;
+    ConfigRecordValue value = 2;
+  }
+  repeated Item items = 1;
+}
 
 message RecordDict {
-  map<string, ArrayRecord> arrays = 1;
-  map<string, MetricRecord> metrics = 2;
-  map<string, ConfigRecord> configs = 3;
+  message Item {
+    string key = 1;
+    oneof value {
+      ArrayRecord array_record = 2;
+      MetricRecord metric_record = 3;
+      ConfigRecord config_record = 4;
+    }
+  }
+  repeated Item items = 1;
 }

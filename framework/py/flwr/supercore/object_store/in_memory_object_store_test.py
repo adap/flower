@@ -12,11 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower SuperNode."""
+"""Tests for InMemoryObjectStore."""
 
 
-from .app import run_supernode as run_supernode
+import unittest
 
-__all__ = [
-    "run_supernode",
-]
+from .in_memory_object_store import InMemoryObjectStore
+from .object_store import ObjectStore
+from .object_store_test import ObjectStoreTest
+
+
+class InMemoryObjectStoreTest(ObjectStoreTest):
+    """Test InMemoryObjectStore implementation."""
+
+    __test__ = True
+
+    def object_store_factory(self) -> ObjectStore:
+        """Provide ObjectStore implementation to test."""
+        return InMemoryObjectStore()
+
+
+if __name__ == "__main__":
+    unittest.main()

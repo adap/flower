@@ -289,11 +289,11 @@ class UserAuthCredentials:
 
 
 @dataclass
-class UserInfo:
+class AccountInfo:
     """User information for event log."""
 
-    user_id: Optional[str]
-    user_name: Optional[str]
+    flwr_aid: Optional[str]
+    account_name: Optional[str]
 
 
 @dataclass

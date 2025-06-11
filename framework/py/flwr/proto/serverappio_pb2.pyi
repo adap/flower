@@ -42,29 +42,67 @@ global___GetNodesResponse = GetNodesResponse
 class PushInsMessagesRequest(google.protobuf.message.Message):
     """PushMessages messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class MsgToDescendantMappingEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        @property
+        def value(self) -> flwr.proto.message_pb2.ObjectIDs: ...
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Optional[flwr.proto.message_pb2.ObjectIDs] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
     MESSAGES_LIST_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
+    MSG_TO_DESCENDANT_MAPPING_FIELD_NUMBER: builtins.int
     @property
     def messages_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.message_pb2.Message]: ...
     run_id: builtins.int
+    @property
+    def msg_to_descendant_mapping(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.message_pb2.ObjectIDs]: ...
     def __init__(self,
         *,
         messages_list: typing.Optional[typing.Iterable[flwr.proto.message_pb2.Message]] = ...,
         run_id: builtins.int = ...,
+        msg_to_descendant_mapping: typing.Optional[typing.Mapping[typing.Text, flwr.proto.message_pb2.ObjectIDs]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list","run_id",b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list","msg_to_descendant_mapping",b"msg_to_descendant_mapping","run_id",b"run_id"]) -> None: ...
 global___PushInsMessagesRequest = PushInsMessagesRequest
 
 class PushInsMessagesResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class ObjectsToPushEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        @property
+        def value(self) -> flwr.proto.message_pb2.ObjectIDs: ...
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Optional[flwr.proto.message_pb2.ObjectIDs] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
     MESSAGE_IDS_FIELD_NUMBER: builtins.int
+    OBJECTS_TO_PUSH_FIELD_NUMBER: builtins.int
     @property
     def message_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    @property
+    def objects_to_push(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.message_pb2.ObjectIDs]: ...
     def __init__(self,
         *,
         message_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        objects_to_push: typing.Optional[typing.Mapping[typing.Text, flwr.proto.message_pb2.ObjectIDs]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["message_ids",b"message_ids"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["message_ids",b"message_ids","objects_to_push",b"objects_to_push"]) -> None: ...
 global___PushInsMessagesResponse = PushInsMessagesResponse
 
 class PullResMessagesRequest(google.protobuf.message.Message):
@@ -85,14 +123,33 @@ global___PullResMessagesRequest = PullResMessagesRequest
 
 class PullResMessagesResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class ObjectsToPullEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        @property
+        def value(self) -> flwr.proto.message_pb2.ObjectIDs: ...
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Optional[flwr.proto.message_pb2.ObjectIDs] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
     MESSAGES_LIST_FIELD_NUMBER: builtins.int
+    OBJECTS_TO_PULL_FIELD_NUMBER: builtins.int
     @property
     def messages_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.message_pb2.Message]: ...
+    @property
+    def objects_to_pull(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.message_pb2.ObjectIDs]: ...
     def __init__(self,
         *,
         messages_list: typing.Optional[typing.Iterable[flwr.proto.message_pb2.Message]] = ...,
+        objects_to_pull: typing.Optional[typing.Mapping[typing.Text, flwr.proto.message_pb2.ObjectIDs]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list","objects_to_pull",b"objects_to_pull"]) -> None: ...
 global___PullResMessagesResponse = PullResMessagesResponse
 
 class PullServerAppInputsRequest(google.protobuf.message.Message):

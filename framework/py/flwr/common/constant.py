@@ -115,6 +115,9 @@ AUTH_TYPE_YAML_KEY = "auth_type"  # For key name in YAML file
 ACCESS_TOKEN_KEY = "flwr-oidc-access-token"
 REFRESH_TOKEN_KEY = "flwr-oidc-refresh-token"
 
+# Constants for user authorization
+AUTHZ_TYPE_YAML_KEY = "authz_type"  # For key name in YAML file
+
 # Constants for node authentication
 PUBLIC_KEY_HEADER = "flwr-public-key-bin"  # Must end with "-bin" for binary data
 SIGNATURE_HEADER = "flwr-signature-bin"  # Must end with "-bin" for binary data
@@ -134,6 +137,17 @@ HEAD_VALUE_DIVIDER = " "
 
 # Constants for serialization
 INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
+
+# Constants for `flwr-serverapp` and `flwr-clientapp` CLI commands
+FLWR_APP_TOKEN_LENGTH = 128  # Length of the token used
+
+# Constants for object pushing and pulling
+MAX_CONCURRENT_PUSHES = 8  # Default maximum number of concurrent pushes
+MAX_CONCURRENT_PULLS = 8  # Default maximum number of concurrent pulls
+PULL_MAX_TIME = 7200  # Default maximum time to wait for pulling objects
+PULL_MAX_TRIES_PER_OBJECT = 500  # Default maximum number of tries to pull an object
+PULL_INITIAL_BACKOFF = 1  # Initial backoff time for pulling objects
+PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
 
 
 class MessageType:
