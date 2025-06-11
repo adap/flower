@@ -76,7 +76,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
 
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
         run_id = self.executor.start_run(
             request.fab.content,
             user_config_from_proto(request.override_config),
