@@ -168,8 +168,7 @@ class DeploymentEngine(Executor):
 
             # Call SuperLink to create run
             run_id = self._create_run(
-                Fab(hashlib.sha256(fab_file).hexdigest(), fab_file),
-                override_config,
+                Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
             )
 
             # Register context for the Run
