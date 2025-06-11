@@ -28,7 +28,7 @@ from flwr.common.dummy_grpc_handlers_test import (
     get_noop_unary_unary_handler,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
-from flwr.common.typing import Actor, Event, LogEntry, UserInfo
+from flwr.common.typing import AccountInfo, Actor, Event, LogEntry
 
 from .fleet_event_log_interceptor import FleetEventLogInterceptor
 
@@ -43,7 +43,7 @@ class DummyFleetLogPlugin(EventLogWriterPlugin):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: Optional[UserInfo],
+        account_info: Optional[AccountInfo],
         method_name: str,
     ) -> LogEntry:
         """Compose pre-event log entry from the provided request and context."""
@@ -62,7 +62,7 @@ class DummyFleetLogPlugin(EventLogWriterPlugin):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: Optional[UserInfo],
+        account_info: Optional[AccountInfo],
         method_name: str,
         response: Optional[Union[GrpcMessage, BaseException]],
     ) -> LogEntry:
@@ -90,7 +90,7 @@ class TestFleetEventLogInterceptor(unittest.TestCase):
         """Set up the test."""
         self.log_plugin = DummyFleetLogPlugin()
         self.interceptor = FleetEventLogInterceptor(log_plugin=self.log_plugin)
-        # For the Fleet interceptor, user_info is always passed as None.
+        # For the Fleet interceptor, account_info is always passed as None.
 
     def get_expected_logs(self, method_name: str) -> list[LogEntry]:
         """Return the expected before/after log entries."""
