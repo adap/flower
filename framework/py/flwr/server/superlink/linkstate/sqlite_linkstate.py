@@ -102,7 +102,8 @@ CREATE TABLE IF NOT EXISTS run(
     finished_at           TEXT,
     sub_status            TEXT,
     details               TEXT,
-    federation_options    BLOB
+    federation_options    BLOB,
+    flwr_aid              TEXT
 );
 """
 
