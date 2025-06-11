@@ -46,10 +46,11 @@ class InMemoryObjectStore(ObjectStore):
         self.verify = verify
         self.store: dict[str, ObjectEntry] = {}
         self.lock_store = threading.RLock()
-        # Mapping the Object ID of a message to the list of children object IDs
-        self.msg_children_objects_mapping: dict[str, list[str]] = {}
+        # Mapping the Object ID of a message to the list of descendant object IDs
+        self.msg_descendant_objects_mapping: dict[str, list[str]] = {}
+        self.lock_msg_mapping = threading.RLock()
         # Mapping each run ID to a set of object IDs that are used in that run
-        self.run_objects_mapping: dict[str, set[str]] = {}
+        self.run_objects_mapping: dict[int, set[str]] = {}
 
     def preregister(self, run_id: int, object_ids: list[str]) -> list[str]:
         """Identify and preregister missing objects."""
@@ -67,12 +68,13 @@ class InMemoryObjectStore(ObjectStore):
                         content=b"",  # Initially empty content
                         is_available=False,  # Initially not available
                         ref_count=0,  # Reference count starts at 0
-                        runs={run_id},  # Run count starts at 1
+                        runs={run_id},  # Start with the current run ID
                     )
+                    self.run_objects_mapping[run_id].add(obj_id)
                     new_objects.append(obj_id)
                 elif obj_id not in self.run_objects_mapping[run_id]:
                     # If the object is already registered but not in this run,
-                    # increment the run count
+                    # add the run ID to its runs
                     self.store[obj_id].runs.add(run_id)
                     self.run_objects_mapping[run_id].add(obj_id)
 
@@ -121,20 +123,23 @@ class InMemoryObjectStore(ObjectStore):
     ) -> None:
         """Store the mapping from a ``Message`` object ID to the object IDs of its
         descendants."""
-        self.msg_children_objects_mapping[msg_object_id] = descendant_ids
+        with self.lock_msg_mapping:
+            self.msg_descendant_objects_mapping[msg_object_id] = descendant_ids
 
     def get_message_descendant_ids(self, msg_object_id: str) -> list[str]:
         """Retrieve the object IDs of all descendants of a given Message."""
-        if msg_object_id not in self.msg_children_objects_mapping:
-            raise NoObjectInStoreError(
-                f"No message registered in Object Store with ID '{msg_object_id}'. "
-                "Mapping to descendants could not be found."
-            )
-        return self.msg_children_objects_mapping[msg_object_id]
+        with self.lock_msg_mapping:
+            if msg_object_id not in self.msg_descendant_objects_mapping:
+                raise NoObjectInStoreError(
+                    f"No message registered in Object Store with ID '{msg_object_id}'. "
+                    "Mapping to descendants could not be found."
+                )
+            return self.msg_descendant_objects_mapping[msg_object_id]
 
     def delete_message_descendant_ids(self, msg_object_id: str) -> None:
         """Delete the mapping from a ``Message`` object ID to its descendants."""
-        self.msg_children_objects_mapping.pop(msg_object_id, None)
+        with self.lock_msg_mapping:
+            self.msg_descendant_objects_mapping.pop(msg_object_id, None)
 
     def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store."""
@@ -153,7 +158,9 @@ class InMemoryObjectStore(ObjectStore):
     def delete(self, object_id: str) -> None:
         """Delete an object and its unreferenced descendants from the store."""
         with self.lock_store:
-            object_entry = self.store[object_id]
+            # If the object is not in the store, nothing to delete
+            if (object_entry := self.store.get(object_id)) is None:
+                return
 
             # Delete the object if it has no references left
             if object_entry.is_available and object_entry.ref_count == 0:
@@ -178,25 +185,38 @@ class InMemoryObjectStore(ObjectStore):
         with self.lock_store:
             if run_id not in self.run_objects_mapping:
                 return
-            for object_id in self.run_objects_mapping[run_id]:
-                if object_entry := self.store[object_id]:
-                    object_entry.runs.discard(run_id)
-                    # If the object is no longer referenced by any run,
-                    # delete it and all its unreferenced descendants
-                    if len(object_entry.runs) == 0:
-                        self.delete(object_id)
+            for object_id in list(self.run_objects_mapping[run_id]):
+                # Check if the object is still in the store
+                if (object_entry := self.store.get(object_id)) is None:
+                    continue
+
+                # Remove the run ID from the object's runs
+                object_entry.runs.discard(run_id)
+
+                # Trigger recursive deletion if the object is no longer referenced
+                if object_entry.ref_count == 0 and not object_entry.runs:
+                    self.delete(object_id)
+
+                    # If the object is a message, delete its descendants mapping
+                    if object_id in self.msg_descendant_objects_mapping:
+                        self.delete_message_descendant_ids(object_id)
 
             # Remove the run from the mapping
             del self.run_objects_mapping[run_id]
 
     def clear(self) -> None:
         """Clear the store."""
-        self.store.clear()
+        with self.lock_store:
+            self.store.clear()
+            self.msg_descendant_objects_mapping.clear()
+            self.run_objects_mapping.clear()
 
     def __contains__(self, object_id: str) -> bool:
         """Check if an object_id is in the store."""
-        return object_id in self.store
+        with self.lock_store:
+            return object_id in self.store
 
     def __len__(self) -> int:
         """Get the number of objects in the store."""
-        return len(self.store)
+        with self.lock_store:
+            return len(self.store)

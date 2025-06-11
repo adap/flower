@@ -1353,10 +1353,10 @@ def create_ins_message(
     run_id: int,
 ) -> ProtoMessage:
     """Create a Message for testing."""
-    return ProtoMessage(
+    proto = ProtoMessage(
         metadata=ProtoMetadata(
             run_id=run_id,
-            message_id=str(uuid4()),
+            message_id="",
             src_node_id=src_node_id,
             dst_node_id=dst_node_id,
             group_id="",
@@ -1366,6 +1366,8 @@ def create_ins_message(
         ),
         content=ProtoRecordDict(),
     )
+    proto.metadata.message_id = message_from_proto(proto).object_id
+    return proto
 
 
 def create_res_message(
@@ -1384,7 +1386,7 @@ def create_res_message(
         out_msg = Message(error, reply_to=in_msg)
     else:
         out_msg = Message(RecordDict(), reply_to=in_msg)
-
+    out_msg.metadata.__dict__["_message_id"] = out_msg.object_id
     return message_to_proto(out_msg)
 
 
