@@ -74,7 +74,7 @@ class Executor(ABC):
         fab_file: bytes,
         override_config: UserConfig,
         federation_options: ConfigRecord,
-        flwr_aid: Optional[str] = None,
+        flwr_aid: Optional[str],
     ) -> Optional[int]:
         """Start a run using the given Flower FAB ID and version.
 
