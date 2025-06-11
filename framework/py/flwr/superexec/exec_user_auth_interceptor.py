@@ -21,7 +21,7 @@ from typing import Any, Callable, Union
 import grpc
 
 from flwr.common.auth_plugin import ExecAuthPlugin, ExecAuthzPlugin
-from flwr.common.typing import UserInfo
+from flwr.common.typing import AccountInfo
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetAuthTokensResponse,
@@ -45,8 +45,8 @@ Response = Union[
 ]
 
 
-shared_user_info: contextvars.ContextVar[UserInfo] = contextvars.ContextVar(
-    "user_info", default=UserInfo(flwr_aid=None, user_name=None)
+shared_user_info: contextvars.ContextVar[AccountInfo] = contextvars.ContextVar(
+    "user_info", default=AccountInfo(flwr_aid=None, user_name=None)
 )
 
 

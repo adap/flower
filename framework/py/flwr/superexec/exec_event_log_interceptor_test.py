@@ -30,7 +30,7 @@ from flwr.common.dummy_grpc_handlers_test import (
     get_noop_unary_unary_handler,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
-from flwr.common.typing import Actor, Event, LogEntry, UserInfo
+from flwr.common.typing import AccountInfo, Actor, Event, LogEntry
 from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
 from flwr.superexec.exec_user_auth_interceptor import shared_user_info
 
@@ -45,7 +45,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: Optional[UserInfo],
+        user_info: Optional[AccountInfo],
         method_name: str,
     ) -> LogEntry:
         """Compose pre-event log entry from the provided request and context."""
@@ -64,7 +64,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: Optional[UserInfo],
+        user_info: Optional[AccountInfo],
         method_name: str,
         response: Optional[Union[GrpcMessage, BaseException]],
     ) -> LogEntry:
@@ -94,7 +94,9 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         self.interceptor = ExecEventLogInterceptor(log_plugin=self.log_plugin)
         # Because shared_user_info.get() is read-only, we need to set the user info
         # and store the token to reset it after the test.
-        self.expected_user_info = UserInfo(flwr_aid="flwr_aid", user_name="user_name")
+        self.expected_user_info = AccountInfo(
+            flwr_aid="flwr_aid", user_name="user_name"
+        )
         self.token = shared_user_info.set(self.expected_user_info)
 
     def tearDown(self) -> None:

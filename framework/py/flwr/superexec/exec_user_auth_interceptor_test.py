@@ -29,7 +29,7 @@ from flwr.common.dummy_grpc_handlers_test import (
     get_noop_unary_stream_handler,
     get_noop_unary_unary_handler,
 )
-from flwr.common.typing import UserInfo
+from flwr.common.typing import AccountInfo
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetLoginDetailsRequest,
@@ -50,9 +50,11 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
     def setUp(self) -> None:
         """Set up test fixtures."""
         # Set a known default for shared_user_info and store the token.
-        self.default_user_info = UserInfo(flwr_aid=None, user_name=None)
+        self.default_user_info = AccountInfo(flwr_aid=None, user_name=None)
         self.token = shared_user_info.set(self.default_user_info)
-        self.expected_user_info = UserInfo(flwr_aid="flwr_aid", user_name="user_name")
+        self.expected_user_info = AccountInfo(
+            flwr_aid="flwr_aid", user_name="user_name"
+        )
 
     def tearDown(self) -> None:
         """Reset shared_user_info to its previous state to prevent state leakage."""
@@ -280,11 +282,13 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
-        # Reset the shared UserInfo before each test
+        # Reset the shared AccountInfo before each test
         self.default_token = shared_user_info.set(
-            UserInfo(flwr_aid=None, user_name=None)
+            AccountInfo(flwr_aid=None, user_name=None)
         )
-        self.expected_user_info = UserInfo(flwr_aid="flwr_aid", user_name="user_name")
+        self.expected_user_info = AccountInfo(
+            flwr_aid="flwr_aid", user_name="user_name"
+        )
 
         # A dummy authorization plugin
         self.authz_plugin = MagicMock()
