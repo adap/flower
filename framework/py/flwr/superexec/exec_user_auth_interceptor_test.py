@@ -50,9 +50,9 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
     def setUp(self) -> None:
         """Set up test fixtures."""
         # Set a known default for shared_user_info and store the token.
-        self.default_user_info = UserInfo(user_id=None, user_name=None)
+        self.default_user_info = UserInfo(flwr_aid=None, user_name=None)
         self.token = shared_user_info.set(self.default_user_info)
-        self.expected_user_info = UserInfo(user_id="user_id", user_name="user_name")
+        self.expected_user_info = UserInfo(flwr_aid="flwr_aid", user_name="user_name")
 
     def tearDown(self) -> None:
         """Reset shared_user_info to its previous state to prevent state leakage."""
@@ -96,7 +96,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         self.assertEqual(response, "dummy_response")
         # Assert `shared_user_info` is not set
         user_info_from_context = shared_user_info.get()
-        self.assertIsNone(user_info_from_context.user_id)
+        self.assertIsNone(user_info_from_context.flwr_aid)
         self.assertIsNone(user_info_from_context.user_name)
 
     @parameterized.expand(
@@ -204,7 +204,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         # Assert `shared_user_info` is set
         user_info_from_context = shared_user_info.get()
         self.assertEqual(
-            user_info_from_context.user_id, self.expected_user_info.user_id
+            user_info_from_context.flwr_aid, self.expected_user_info.flwr_aid
         )
         self.assertEqual(
             user_info_from_context.user_name, self.expected_user_info.user_name
@@ -282,9 +282,9 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         """Set up test fixtures."""
         # Reset the shared UserInfo before each test
         self.default_token = shared_user_info.set(
-            UserInfo(user_id=None, user_name=None)
+            UserInfo(flwr_aid=None, user_name=None)
         )
-        self.expected_user_info = UserInfo(user_id="user_id", user_name="user_name")
+        self.expected_user_info = UserInfo(flwr_aid="flwr_aid", user_name="user_name")
 
         # A dummy authorization plugin
         self.authz_plugin = MagicMock()
