@@ -15,12 +15,11 @@
 """Fleet API gRPC request-response servicer."""
 
 
-from logging import DEBUG, ERROR, INFO
+from logging import DEBUG, INFO
 
 import grpc
 from google.protobuf.json_format import MessageToDict
 
-from flwr.common.constant import Status
 from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
@@ -50,9 +49,8 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
-from flwr.server.superlink.utils import abort_grpc_context, check_abort
+from flwr.server.superlink.utils import abort_grpc_context
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.supercore.object_store.object_store import NoObjectInStoreError
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
@@ -185,36 +183,20 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             request.object_id,
         )
 
-        state = self.state_factory.state()
-
-        # Abort if the run is not running
-        abort_msg = check_abort(
-            request.run_id,
-            [Status.PENDING, Status.STARTING, Status.FINISHED],
-            state,
-        )
-        if abort_msg:
-            abort_grpc_context(abort_msg, context)
-
-        if request.node.node_id not in state.get_nodes(run_id=request.run_id):
-            # Cancel insertion in ObjectStore
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
-
-        # Init store
-        store = self.objectstore_factory.store()
-
-        # Insert in store
-        stored = False
         try:
-            store.put(request.object_id, request.object_content)
-            stored = True
-        except (NoObjectInStoreError, ValueError) as e:
-            log(ERROR, str(e))
+            # Insert in Store
+            res = message_handler.push_object(
+                request=request,
+                state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
         except UnexpectedObjectContentError as e:
             # Object content is not valid
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
-        return PushObjectResponse(stored=stored)
+        return res
 
     def PullObject(
         self, request: PullObjectRequest, context: grpc.ServicerContext
@@ -226,31 +208,14 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             request.object_id,
         )
 
-        state = self.state_factory.state()
-
-        # Abort if the run is not running
-        abort_msg = check_abort(
-            request.run_id,
-            [Status.PENDING, Status.STARTING, Status.FINISHED],
-            state,
-        )
-        if abort_msg:
-            abort_grpc_context(abort_msg, context)
-
-        if request.node.node_id not in state.get_nodes(run_id=request.run_id):
-            # Cancel insertion in ObjectStore
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
-
-        # Init store
-        store = self.objectstore_factory.store()
-
-        # Fetch from store
-        content = store.get(request.object_id)
-        if content is not None:
-            object_available = content != b""
-            return PullObjectResponse(
-                object_found=True,
-                object_available=object_available,
-                object_content=content,
+        try:
+            # Fetch from store
+            res = message_handler.pull_object(
+                request=request,
+                state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
             )
-        return PullObjectResponse(object_found=False, object_available=False)
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res

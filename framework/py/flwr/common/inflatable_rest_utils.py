@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""InflatableObject gRPC utils."""
+"""InflatableObject REST utils."""
 
 
 from typing import Callable
@@ -28,17 +28,17 @@ from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from .inflatable_utils import ObjectIdNotPreregisteredError, ObjectUnavailableError
 
 
-def make_pull_object_fn_grpc(
-    pull_object_grpc: Callable[[PullObjectRequest], PullObjectResponse],
+def make_pull_object_fn_rest(
+    pull_object_rest: Callable[[PullObjectRequest], PullObjectResponse],
     node: Node,
     run_id: int,
 ) -> Callable[[str], bytes]:
-    """Create a pull object function that uses gRPC to pull objects.
+    """Create a pull object function that uses REST to pull objects.
 
     Parameters
     ----------
-    pull_object_grpc : Callable[[PullObjectRequest], PullObjectResponse]
-        The gRPC function to pull objects, e.g., `FleetStub.PullObject`.
+    pull_object_rest : Callable[[PullObjectRequest], PullObjectResponse]
+        A function that makes a POST request against the `/push-object` REST endpoint
     node : Node
         The node making the request.
     run_id : int
@@ -54,7 +54,7 @@ def make_pull_object_fn_grpc(
 
     def pull_object_fn(object_id: str) -> bytes:
         request = PullObjectRequest(node=node, run_id=run_id, object_id=object_id)
-        response: PullObjectResponse = pull_object_grpc(request)
+        response: PullObjectResponse = pull_object_rest(request)
         if not response.object_found:
             raise ObjectIdNotPreregisteredError(object_id)
         if not response.object_available:
@@ -64,17 +64,17 @@ def make_pull_object_fn_grpc(
     return pull_object_fn
 
 
-def make_push_object_fn_grpc(
-    push_object_grpc: Callable[[PushObjectRequest], PushObjectResponse],
+def make_push_object_fn_rest(
+    push_object_rest: Callable[[PushObjectRequest], PushObjectResponse],
     node: Node,
     run_id: int,
 ) -> Callable[[str, bytes], None]:
-    """Create a push object function that uses gRPC to push objects.
+    """Create a push object function that uses REST to push objects.
 
     Parameters
     ----------
-    push_object_grpc : Callable[[PushObjectRequest], PushObjectResponse]
-        The gRPC function to push objects, e.g., `FleetStub.PushObject`.
+    push_object_rest : Callable[[PushObjectRequest], PushObjectResponse]
+        A function that makes a POST request against the `/pull-object` REST endpoint
     node : Node
         The node making the request.
     run_id : int
@@ -92,7 +92,7 @@ def make_push_object_fn_grpc(
         request = PushObjectRequest(
             node=node, run_id=run_id, object_id=object_id, object_content=object_content
         )
-        response: PushObjectResponse = push_object_grpc(request)
+        response: PushObjectResponse = push_object_rest(request)
         if not response.stored:
             raise ObjectIdNotPreregisteredError(object_id)
 
