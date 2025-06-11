@@ -292,7 +292,7 @@ class UserAuthCredentials:
 class UserInfo:
     """User information for event log."""
 
-    user_id: Optional[str]
+    flwr_aid: Optional[str]
     user_name: Optional[str]
 
 

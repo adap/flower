@@ -52,7 +52,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         return LogEntry(
             timestamp="before_timestamp",
             actor=Actor(
-                actor_id=user_info.user_id if user_info else None,
+                actor_id=user_info.flwr_aid if user_info else None,
                 description=user_info.user_name if user_info else None,
                 ip_address="1.2.3.4",
             ),
@@ -72,7 +72,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         return LogEntry(
             timestamp="after_timestamp",
             actor=Actor(
-                actor_id=user_info.user_id if user_info else None,
+                actor_id=user_info.flwr_aid if user_info else None,
                 description=user_info.user_name if user_info else None,
                 ip_address="5.6.7.8",
             ),
@@ -94,7 +94,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         self.interceptor = ExecEventLogInterceptor(log_plugin=self.log_plugin)
         # Because shared_user_info.get() is read-only, we need to set the user info
         # and store the token to reset it after the test.
-        self.expected_user_info = UserInfo(user_id="user_id", user_name="user_name")
+        self.expected_user_info = UserInfo(flwr_aid="flwr_aid", user_name="user_name")
         self.token = shared_user_info.set(self.expected_user_info)
 
     def tearDown(self) -> None:
@@ -108,7 +108,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
             LogEntry(
                 timestamp="before_timestamp",
                 actor=Actor(
-                    actor_id=self.expected_user_info.user_id,
+                    actor_id=self.expected_user_info.flwr_aid,
                     description=self.expected_user_info.user_name,
                     ip_address="1.2.3.4",
                 ),
@@ -118,7 +118,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
             LogEntry(
                 timestamp="after_timestamp",
                 actor=Actor(
-                    actor_id=self.expected_user_info.user_id,
+                    actor_id=self.expected_user_info.flwr_aid,
                     description=self.expected_user_info.user_name,
                     ip_address="5.6.7.8",
                 ),
