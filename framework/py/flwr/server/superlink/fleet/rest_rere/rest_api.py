@@ -38,6 +38,12 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
+)
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
@@ -131,6 +137,28 @@ async def push_message(request: PushMessagesRequest) -> PushMessagesResponse:
     return message_handler.push_messages(request=request, state=state, store=store)
 
 
+@rest_request_response(PullObjectRequest)
+async def pull_object(request: PullObjectRequest) -> PullObjectResponse:
+    """Pull PullObject."""
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+    store: ObjectStore = cast(ObjectStoreFactory, app.state.OBJECTSTORE_FACTORY).store()
+
+    # Handle message
+    return message_handler.pull_object(request=request, state=state, store=store)
+
+
+@rest_request_response(PushObjectRequest)
+async def push_object(request: PushObjectRequest) -> PushObjectResponse:
+    """Pull PushObject."""
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+    store: ObjectStore = cast(ObjectStoreFactory, app.state.OBJECTSTORE_FACTORY).store()
+
+    # Handle message
+    return message_handler.push_object(request=request, state=state, store=store)
+
+
 @rest_request_response(SendNodeHeartbeatRequest)
 async def send_node_heartbeat(
     request: SendNodeHeartbeatRequest,
@@ -171,6 +199,8 @@ routes = [
     Route("/api/v0/fleet/delete-node", delete_node, methods=["POST"]),
     Route("/api/v0/fleet/pull-messages", pull_message, methods=["POST"]),
     Route("/api/v0/fleet/push-messages", push_message, methods=["POST"]),
+    Route("/api/v0/fleet/pull-object", pull_object, methods=["POST"]),
+    Route("/api/v0/fleet/push-object", push_object, methods=["POST"]),
     Route("/api/v0/fleet/send-node-heartbeat", send_node_heartbeat, methods=["POST"]),
     Route("/api/v0/fleet/get-run", get_run, methods=["POST"]),
     Route("/api/v0/fleet/get-fab", get_fab, methods=["POST"]),
