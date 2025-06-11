@@ -74,6 +74,7 @@ class Executor(ABC):
         fab_file: bytes,
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str] = None,
     ) -> Optional[int]:
         """Start a run using the given Flower FAB ID and version.
 
@@ -88,6 +89,8 @@ class Executor(ABC):
             The config overrides dict sent by the user (using `flwr run`).
         federation_options: ConfigRecord
             The federation options sent by the user (using `flwr run`).
+        flwr_aid : Optional[str]
+            The ID of the user starting the run, if authentication is enabled.
 
         Returns
         -------

@@ -132,6 +132,7 @@ class DeploymentEngine(Executor):
         self,
         fab: Fab,
         override_config: UserConfig,
+        flwr_aid: Optional[str] = None,
     ) -> int:
         fab_hash = self.ffs.put(fab.content, {})
         if fab_hash != fab.hash_str:
@@ -161,6 +162,7 @@ class DeploymentEngine(Executor):
         fab_file: bytes,
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str] = None,
     ) -> Optional[int]:
         """Start run using the Flower Deployment Engine."""
         run_id = None
@@ -168,7 +170,9 @@ class DeploymentEngine(Executor):
 
             # Call SuperLink to create run
             run_id = self._create_run(
-                Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
+                Fab(hashlib.sha256(fab_file).hexdigest(), fab_file),
+                override_config,
+                flwr_aid,
             )
 
             # Register context for the Run
