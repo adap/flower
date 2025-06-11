@@ -17,16 +17,10 @@
 
 import unittest
 from abc import abstractmethod
-from typing import Optional
 
 from parameterized import parameterized
 
-from flwr.common.inflatable import (
-    InflatableObject,
-    add_header_to_object_body,
-    get_object_body,
-    get_object_id,
-)
+from flwr.common.inflatable import get_object_id
 from flwr.common.inflatable_test import CustomDataClass
 
 from .in_memory_object_store import InMemoryObjectStore

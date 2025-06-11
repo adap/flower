@@ -15,6 +15,7 @@
 """Flower in-memory ObjectStore implementation."""
 
 
+import threading
 from dataclasses import dataclass
 from typing import Optional
 
@@ -24,7 +25,6 @@ from flwr.common.inflatable import (
     is_valid_sha256_hash,
 )
 from flwr.common.inflatable_utils import validate_object_content
-import threading
 
 from .object_store import NoObjectInStoreError, ObjectStore
 
@@ -35,8 +35,8 @@ class ObjectEntry:
 
     content: bytes
     is_available: bool
-    ref_count: int
-    runs: set[int]
+    ref_count: int  # Number of references (direct parents) to this object
+    runs: set[int]  # Set of run IDs that used this object
 
 
 class InMemoryObjectStore(ObjectStore):
@@ -88,7 +88,7 @@ class InMemoryObjectStore(ObjectStore):
 
             # Validate object content
             validate_object_content(content=object_content)
-        
+
         with self.lock_store:
             # Only allow adding the object if it has been preregistered
             if object_id not in self.store:
@@ -104,7 +104,8 @@ class InMemoryObjectStore(ObjectStore):
             children_ids = get_object_children_ids_from_object_content(object_content)
             if not all(child_id in self.store for child_id in children_ids):
                 raise NoObjectInStoreError(
-                    f"Not all children of object with ID '{object_id}' were pre-registered."
+                    f"Not all children of object with ID '{object_id}' "
+                    "were pre-registered."
                 )
 
             # Update the object entry in the store
@@ -131,6 +132,10 @@ class InMemoryObjectStore(ObjectStore):
             )
         return self.msg_children_objects_mapping[msg_object_id]
 
+    def delete_message_descendant_ids(self, msg_object_id: str) -> None:
+        """Delete the mapping from a ``Message`` object ID to its descendants."""
+        self.msg_children_objects_mapping.pop(msg_object_id, None)
+
     def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store."""
         with self.lock_store:
@@ -145,24 +150,6 @@ class InMemoryObjectStore(ObjectStore):
 
             return object_entry.content
 
-    def _try_delete(self, object_id: str) -> None:
-        """Delete the object if its reference count is zero."""
-        object_entry = self.store[object_id]
-
-        # Delete the object if it has no references left
-        if object_entry.is_available and object_entry.ref_count == 0:
-            del self.store[object_id]
-
-            # Decrease the reference count of its children
-            children_ids = get_object_children_ids_from_object_content(
-                object_entry.content
-            )
-            for child_id in children_ids:
-                self.store[child_id].ref_count -= 1
-
-                # Recursively try to delete the child object
-                self._try_delete(child_id)
-
     def delete(self, object_id: str) -> None:
         """Delete an object and its unreferenced descendants from the store."""
         with self.lock_store:
@@ -171,10 +158,10 @@ class InMemoryObjectStore(ObjectStore):
             # Delete the object if it has no references left
             if object_entry.is_available and object_entry.ref_count == 0:
                 del self.store[object_id]
+
+                # Remove the object from the run's mapping
                 for run_id in object_entry.runs:
-                    # Remove the object from the run's mapping
-                    if run_id in self.run_objects_mapping:
-                        self.run_objects_mapping[run_id].discard(object_id)
+                    self.run_objects_mapping[run_id].discard(object_id)
 
                 # Decrease the reference count of its children
                 children_ids = get_object_children_ids_from_object_content(
@@ -185,6 +172,22 @@ class InMemoryObjectStore(ObjectStore):
 
                     # Recursively try to delete the child object
                     self.delete(child_id)
+
+    def delete_objects_in_run(self, run_id: int) -> None:
+        """Delete all objects that were registered in a specific run."""
+        with self.lock_store:
+            if run_id not in self.run_objects_mapping:
+                return
+            for object_id in self.run_objects_mapping[run_id]:
+                if object_entry := self.store[object_id]:
+                    object_entry.runs.discard(run_id)
+                    # If the object is no longer referenced by any run,
+                    # delete it and all its unreferenced descendants
+                    if len(object_entry.runs) == 0:
+                        self.delete(object_id)
+
+            # Remove the run from the mapping
+            del self.run_objects_mapping[run_id]
 
     def clear(self) -> None:
         """Clear the store."""

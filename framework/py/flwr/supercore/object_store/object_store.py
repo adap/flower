@@ -89,7 +89,7 @@ class ObjectStore(abc.ABC):
     def delete(self, object_id: str) -> None:
         """Delete an object and its unreferenced descendants from the store.
 
-        This method attempts to recursively delete the specified object and its 
+        This method attempts to recursively delete the specified object and its
         descendants, if they are not referenced by any other object.
 
         Parameters
@@ -163,7 +163,6 @@ class ObjectStore(abc.ABC):
         msg_object_id : str
             The object ID of the ``Message``.
         """
-
 
     @abc.abstractmethod
     def __contains__(self, object_id: str) -> bool:
