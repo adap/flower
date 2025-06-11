@@ -50,10 +50,10 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
     def setUp(self) -> None:
         """Set up test fixtures."""
         # Set a known default for shared_account_info and store the token.
-        self.default_account_info = AccountInfo(flwr_aid=None, user_name=None)
+        self.default_account_info = AccountInfo(flwr_aid=None, account_name=None)
         self.token = shared_account_info.set(self.default_account_info)
         self.expected_account_info = AccountInfo(
-            flwr_aid="flwr_aid", user_name="user_name"
+            flwr_aid="flwr_aid", account_name="account_name"
         )
 
     def tearDown(self) -> None:
@@ -99,7 +99,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         # Assert `shared_account_info` is not set
         account_info_from_context = shared_account_info.get()
         self.assertIsNone(account_info_from_context.flwr_aid)
-        self.assertIsNone(account_info_from_context.user_name)
+        self.assertIsNone(account_info_from_context.account_name)
 
     @parameterized.expand(
         [
@@ -209,7 +209,8 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             account_info_from_context.flwr_aid, self.expected_account_info.flwr_aid
         )
         self.assertEqual(
-            account_info_from_context.user_name, self.expected_account_info.user_name
+            account_info_from_context.account_name,
+            self.expected_account_info.account_name,
         )
 
     @parameterized.expand(
@@ -284,10 +285,10 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         """Set up test fixtures."""
         # Reset the shared AccountInfo before each test
         self.default_token = shared_account_info.set(
-            AccountInfo(flwr_aid=None, user_name=None)
+            AccountInfo(flwr_aid=None, account_name=None)
         )
         self.expected_account_info = AccountInfo(
-            flwr_aid="flwr_aid", user_name="user_name"
+            flwr_aid="flwr_aid", account_name="account_name"
         )
 
         # A dummy authorization plugin
