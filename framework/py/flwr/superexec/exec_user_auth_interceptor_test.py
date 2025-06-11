@@ -29,7 +29,7 @@ from flwr.common.dummy_grpc_handlers_test import (
     get_noop_unary_stream_handler,
     get_noop_unary_unary_handler,
 )
-from flwr.common.typing import UserInfo
+from flwr.common.typing import AccountInfo
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetLoginDetailsRequest,
@@ -40,7 +40,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.superexec.exec_user_auth_interceptor import (
     ExecUserAuthInterceptor,
-    shared_user_info,
+    shared_account_info,
 )
 
 
@@ -49,14 +49,16 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
-        # Set a known default for shared_user_info and store the token.
-        self.default_user_info = UserInfo(flwr_aid=None, user_name=None)
-        self.token = shared_user_info.set(self.default_user_info)
-        self.expected_user_info = UserInfo(flwr_aid="flwr_aid", user_name="user_name")
+        # Set a known default for shared_account_info and store the token.
+        self.default_account_info = AccountInfo(flwr_aid=None, user_name=None)
+        self.token = shared_account_info.set(self.default_account_info)
+        self.expected_account_info = AccountInfo(
+            flwr_aid="flwr_aid", user_name="user_name"
+        )
 
     def tearDown(self) -> None:
-        """Reset shared_user_info to its previous state to prevent state leakage."""
-        shared_user_info.reset(self.token)
+        """Reset shared_account_info to its previous state to prevent state leakage."""
+        shared_account_info.reset(self.token)
 
     @parameterized.expand(
         [
@@ -94,10 +96,10 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
 
         # Assert response is as expected
         self.assertEqual(response, "dummy_response")
-        # Assert `shared_user_info` is not set
-        user_info_from_context = shared_user_info.get()
-        self.assertIsNone(user_info_from_context.flwr_aid)
-        self.assertIsNone(user_info_from_context.user_name)
+        # Assert `shared_account_info` is not set
+        account_info_from_context = shared_account_info.get()
+        self.assertIsNone(account_info_from_context.flwr_aid)
+        self.assertIsNone(account_info_from_context.user_name)
 
     @parameterized.expand(
         [
@@ -171,7 +173,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         # Set up validate_tokens_in_metadata to return a tuple indicating valid tokens
         dummy_auth_plugin.validate_tokens_in_metadata.return_value = (
             True,
-            self.expected_user_info,
+            self.expected_account_info,
         )
         # Set up verify user authorization to return True. The return value must be True
         # because the authorization plugin is expected to be called after a successful
@@ -201,13 +203,13 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             # Assert response is as expected
             self.assertEqual(response, "dummy_response")
 
-        # Assert `shared_user_info` is set
-        user_info_from_context = shared_user_info.get()
+        # Assert `shared_account_info` is set
+        account_info_from_context = shared_account_info.get()
         self.assertEqual(
-            user_info_from_context.flwr_aid, self.expected_user_info.flwr_aid
+            account_info_from_context.flwr_aid, self.expected_account_info.flwr_aid
         )
         self.assertEqual(
-            user_info_from_context.user_name, self.expected_user_info.user_name
+            account_info_from_context.user_name, self.expected_account_info.user_name
         )
 
     @parameterized.expand(
@@ -236,7 +238,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         expected_refresh_tokens_value = [("new-token", "value")]
         dummy_auth_plugin.refresh_tokens.return_value = (
             expected_refresh_tokens_value,
-            self.default_user_info,
+            self.default_account_info,
         )
         # Set up verify user authorization to return True. The return value must be True
         # because the authorization plugin is expected to be called after a successful
@@ -280,11 +282,13 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
-        # Reset the shared UserInfo before each test
-        self.default_token = shared_user_info.set(
-            UserInfo(flwr_aid=None, user_name=None)
+        # Reset the shared AccountInfo before each test
+        self.default_token = shared_account_info.set(
+            AccountInfo(flwr_aid=None, user_name=None)
         )
-        self.expected_user_info = UserInfo(flwr_aid="flwr_aid", user_name="user_name")
+        self.expected_account_info = AccountInfo(
+            flwr_aid="flwr_aid", user_name="user_name"
+        )
 
         # A dummy authorization plugin
         self.authz_plugin = MagicMock()
@@ -293,12 +297,12 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         self.auth_plugin = MagicMock()
         self.auth_plugin.validate_tokens_in_metadata.return_value = (
             True,
-            self.expected_user_info,
+            self.expected_account_info,
         )
 
     def tearDown(self) -> None:
-        """Reset shared_user_info."""
-        shared_user_info.reset(self.default_token)
+        """Reset shared_account_info."""
+        shared_account_info.reset(self.default_token)
 
     @parameterized.expand(
         [
@@ -342,7 +346,7 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
             self.assertEqual(result, "dummy_response")
         # Authz plugin should have been called once
         self.authz_plugin.verify_user_authorization.assert_called_once_with(
-            self.expected_user_info
+            self.expected_account_info
         )
 
     @parameterized.expand(

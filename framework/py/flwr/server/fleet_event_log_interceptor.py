@@ -59,7 +59,7 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             log_entry = self.log_plugin.compose_log_before_event(
                 request=request,
                 context=context,
-                user_info=None,
+                account_info=None,
                 method_name=method_name,
             )
             self.log_plugin.write_log(log_entry)
@@ -75,7 +75,7 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                 log_entry = self.log_plugin.compose_log_after_event(
                     request=request,
                     context=context,
-                    user_info=None,
+                    account_info=None,
                     method_name=method_name,
                     response=unary_response or error,
                 )
