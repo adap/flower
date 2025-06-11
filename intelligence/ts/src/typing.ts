@@ -229,6 +229,16 @@ export enum FailureCode {
    * Indicates that the requested feature is not implemented.
    */
   NotImplementedError,
+
+  /**
+   * Indicates that an error happened while running the inference.
+   */
+  RuntimeError = 500,
+
+  /**
+   * Indicates that the context size exceeded the model limit or the hardware limit.
+   */
+  MaxContextSizeExceededError,
 }
 
 /**
