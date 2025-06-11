@@ -24,7 +24,7 @@ import grpc
 
 from flwr.common import now
 from flwr.common.auth_plugin import ExecAuthPlugin
-from flwr.common.constant import LOG_STREAM_INTERVAL, Status, SubStatus
+from flwr.common.constant import FAB_MAX_SIZE, LOG_STREAM_INTERVAL, Status, SubStatus
 from flwr.common.logger import log
 from flwr.common.serde import (
     config_record_from_proto,
@@ -74,6 +74,13 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     ) -> StartRunResponse:
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
+
+        if len(request.fab.content) > FAB_MAX_SIZE:
+            log(
+                ERROR,
+                f"FAB size exceeds maximum allowed size of {FAB_MAX_SIZE} bytes.",
+            )
+            return StartRunResponse()
 
         run_id = self.executor.start_run(
             request.fab.content,
