@@ -8,6 +8,7 @@ from pathlib import Path
 from secrets import token_hex
 
 from easydict import EasyDict
+
 from flwr.common import log
 from flwr.server import Server
 from flwr.server.history import History

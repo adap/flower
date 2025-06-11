@@ -40,7 +40,7 @@ class LogisticRegression(nn.Module):
         return output_tensor
 
 
-def train(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+def train(
     net: nn.Module,
     trainloader: DataLoader,
     device: torch.device,
@@ -75,7 +75,7 @@ def train(  # pylint: disable=too-many-arguments, too-many-positional-arguments
         )
 
 
-def _train_one_epoch(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+def _train_one_epoch(
     net: nn.Module,
     global_params: list[Parameter],
     trainloader: DataLoader,

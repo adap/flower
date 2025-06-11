@@ -2,21 +2,22 @@
 
 import numpy as np
 import torch
+from torch.utils.data import DataLoader
+
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 from flwr.common.typing import NDArrays, Scalar
-from torch.utils.data import DataLoader
 
-from fedprox.dataset import load_data
-from fedprox.model import get_weights, instantiate_model, set_weights, test, train
-from fedprox.utils import context_to_easydict
+from .dataset import load_data
+from .model import get_weights, instantiate_model, set_weights, test, train
+from .utils import context_to_easydict
 
 
 # pylint: disable=too-many-arguments
 class FlowerClient(NumPyClient):  # pylint: disable=too-many-instance-attributes
     """Standard Flower client for CNN training."""
 
-    def __init__(  # pylint: disable=too-many-positional-arguments
+    def __init__(
         self,
         net: torch.nn.Module,
         trainloader: DataLoader,

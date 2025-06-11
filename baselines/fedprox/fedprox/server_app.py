@@ -4,6 +4,8 @@ import json
 from collections.abc import Callable
 
 import torch
+from torch.utils.data import DataLoader
+
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.common.typing import NDArrays, Scalar
 from flwr.server import (
@@ -12,13 +14,12 @@ from flwr.server import (
     ServerConfig,
     SimpleClientManager,
 )
-from torch.utils.data import DataLoader
 
-from fedprox.dataset import prepare_test_loader
-from fedprox.model import get_weights, instantiate_model, set_weights, test
-from fedprox.server import ResultsSaverServer, history_saver
-from fedprox.strategy import FedAvgWithStragglerDrop
-from fedprox.utils import context_to_easydict
+from .dataset import prepare_test_loader
+from .model import get_weights, instantiate_model, set_weights, test
+from .server import ResultsSaverServer, history_saver
+from .strategy import FedAvgWithStragglerDrop
+from .utils import context_to_easydict
 
 
 def gen_evaluate_fn(
