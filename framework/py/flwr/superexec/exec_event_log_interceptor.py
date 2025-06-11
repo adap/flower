@@ -24,7 +24,7 @@ from google.protobuf.message import Message as GrpcMessage
 from flwr.common.event_log_plugin.event_log_plugin import EventLogWriterPlugin
 from flwr.common.typing import LogEntry
 
-from .exec_user_auth_interceptor import shared_user_info
+from .exec_user_auth_interceptor import shared_account_info
 
 
 class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
@@ -62,7 +62,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             log_entry = self.log_plugin.compose_log_before_event(
                 request=request,
                 context=context,
-                user_info=shared_user_info.get(),
+                account_info=shared_account_info.get(),
                 method_name=method_name,
             )
             self.log_plugin.write_log(log_entry)
@@ -81,7 +81,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                     log_entry = self.log_plugin.compose_log_after_event(
                         request=request,
                         context=context,
-                        user_info=shared_user_info.get(),
+                        account_info=shared_account_info.get(),
                         method_name=method_name,
                         response=unary_response or error,
                     )
@@ -111,7 +111,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                         log_entry = self.log_plugin.compose_log_after_event(
                             request=request,
                             context=context,
-                            user_info=shared_user_info.get(),
+                            account_info=shared_account_info.get(),
                             method_name=method_name,
                             response=stream_response or error,
                         )

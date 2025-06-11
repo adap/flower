@@ -86,7 +86,7 @@ class ExecAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
         """Abstract constructor."""
 
     @abstractmethod
-    def verify_user_authorization(self, user_info: AccountInfo) -> bool:
+    def verify_user_authorization(self, account_info: AccountInfo) -> bool:
         """Verify user authorization request."""
 
 

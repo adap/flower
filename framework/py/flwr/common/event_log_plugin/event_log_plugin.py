@@ -36,7 +36,7 @@ class EventLogWriterPlugin(ABC):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: Optional[AccountInfo],
+        account_info: Optional[AccountInfo],
         method_name: str,
     ) -> LogEntry:
         """Compose pre-event log entry from the provided request and context."""
@@ -46,7 +46,7 @@ class EventLogWriterPlugin(ABC):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: Optional[AccountInfo],
+        account_info: Optional[AccountInfo],
         method_name: str,
         response: Optional[Union[GrpcMessage, BaseException]],
     ) -> LogEntry:

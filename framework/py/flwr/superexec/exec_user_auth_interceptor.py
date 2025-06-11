@@ -45,8 +45,8 @@ Response = Union[
 ]
 
 
-shared_user_info: contextvars.ContextVar[AccountInfo] = contextvars.ContextVar(
-    "user_info", default=AccountInfo(flwr_aid=None, user_name=None)
+shared_account_info: contextvars.ContextVar[AccountInfo] = contextvars.ContextVar(
+    "account_info", default=AccountInfo(flwr_aid=None, user_name=None)
 )
 
 
@@ -93,20 +93,20 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 return call(request, context)  # type: ignore
 
             # For other requests, check if the user is authenticated
-            valid_tokens, user_info = self.auth_plugin.validate_tokens_in_metadata(
+            valid_tokens, account_info = self.auth_plugin.validate_tokens_in_metadata(
                 metadata
             )
             if valid_tokens:
-                if user_info is None:
+                if account_info is None:
                     context.abort(
                         grpc.StatusCode.UNAUTHENTICATED,
                         "Tokens validated, but user info not found",
                     )
                     raise grpc.RpcError()
                 # Store user info in contextvars for authenticated users
-                shared_user_info.set(user_info)
+                shared_account_info.set(account_info)
                 # Check if the user is authorized
-                if not self.authz_plugin.verify_user_authorization(user_info):
+                if not self.authz_plugin.verify_user_authorization(account_info):
                     context.abort(
                         grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
                     )
@@ -114,18 +114,18 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 return call(request, context)  # type: ignore
 
             # If the user is not authenticated, refresh tokens
-            tokens, user_info = self.auth_plugin.refresh_tokens(metadata)
+            tokens, account_info = self.auth_plugin.refresh_tokens(metadata)
             if tokens is not None:
-                if user_info is None:
+                if account_info is None:
                     context.abort(
                         grpc.StatusCode.UNAUTHENTICATED,
                         "Tokens refreshed, but user info not found",
                     )
                     raise grpc.RpcError()
                 # Store user info in contextvars for authenticated users
-                shared_user_info.set(user_info)
+                shared_account_info.set(account_info)
                 # Check if the user is authorized
-                if not self.authz_plugin.verify_user_authorization(user_info):
+                if not self.authz_plugin.verify_user_authorization(account_info):
                     context.abort(
                         grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
                     )
