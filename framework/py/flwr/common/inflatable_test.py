@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
+from unittest.mock import patch
 
 import pytest
 
@@ -36,6 +37,7 @@ from .inflatable import (
     get_object_id,
     get_object_type_from_object_content,
     is_valid_sha256_hash,
+    no_object_id_recompute,
 )
 from .inflatable_utils import validate_object_content
 
@@ -286,3 +288,32 @@ def test_get_all_nested_object_ids() -> None:
     # Assert
     assert all_objects == expected_objects
     assert list(all_objects.keys()) == list(expected_objects.keys())
+
+
+def test_no_object_id_recompute() -> None:
+    """Test that no recompute of object ID is done."""
+    # Prepare
+    obj = CustomDataClass(b"this is a test")
+    original_object_id = obj.object_id
+
+    with patch(
+        "flwr.common.inflatable.get_object_id", side_effect=get_object_id
+    ) as mock_get_object_id:
+        # Execute: Access object_id multiple times within the context manager
+        with no_object_id_recompute():
+            for _ in range(5):
+                obj_id = obj.object_id  # Accessing object_id should not recompute it
+
+        # Assert: the mock deflate was called only once
+        assert mock_get_object_id.call_count == 1
+        assert obj_id == original_object_id
+
+    with patch(
+        "flwr.common.inflatable.get_object_id", side_effect=get_object_id
+    ) as mock_get_object_id:
+        # Execute: Access object_id outside the context manager
+        for _ in range(5):
+            obj_id = obj.object_id
+
+        # Assert: Accessing object_id outside the context manager recomputes it
+        assert mock_get_object_id.call_count == 5

@@ -18,6 +18,9 @@
 from __future__ import annotations
 
 import hashlib
+import threading
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import TypeVar, cast
 
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
@@ -31,6 +34,33 @@ class UnexpectedObjectContentError(Exception):
         super().__init__(
             f"Object with ID '{object_id}' has an unexpected structure. {reason}"
         )
+
+
+_ctx = threading.local()
+
+
+def _is_recompute_enabled() -> bool:
+    """Check if recomputing object IDs is enabled."""
+    return getattr(_ctx, "recompute_object_id_enabled", True)
+
+
+def _get_computed_object_ids() -> set[str]:
+    """Get the set of computed object IDs."""
+    return getattr(_ctx, "computed_object_ids", set())
+
+
+@contextmanager
+def no_object_id_recompute() -> Iterator[None]:
+    """Context manager to disable recomputing object IDs."""
+    old_value = _is_recompute_enabled()
+    old_set = _get_computed_object_ids()
+    _ctx.recompute_object_id_enabled = False
+    _ctx.computed_object_ids = set()
+    try:
+        yield
+    finally:
+        _ctx.recompute_object_id_enabled = old_value
+        _ctx.computed_object_ids = old_set
 
 
 class InflatableObject:
@@ -65,8 +95,23 @@ class InflatableObject:
     @property
     def object_id(self) -> str:
         """Get object_id."""
+        # If recomputing object ID is disabled and the object ID is already computed,
+        # return the cached object ID.
+        if (
+            not _is_recompute_enabled()
+            and (obj_id := self.__dict__.get("_object_id"))
+            in _get_computed_object_ids()
+        ):
+            return cast(str, obj_id)
+
         if self.is_dirty or "_object_id" not in self.__dict__:
-            self.__dict__["_object_id"] = get_object_id(self.deflate())
+            obj_id = get_object_id(self.deflate())
+            self.__dict__["_object_id"] = obj_id
+
+            # If recomputing object ID is disabled, add the object ID to the set of
+            # computed object IDs to avoid recomputing it within the context.
+            if not _is_recompute_enabled():
+                _get_computed_object_ids().add(obj_id)
         return cast(str, self.__dict__["_object_id"])
 
     @property
