@@ -53,7 +53,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
             timestamp="before_timestamp",
             actor=Actor(
                 actor_id=account_info.flwr_aid if account_info else None,
-                description=account_info.user_name if account_info else None,
+                description=account_info.account_name if account_info else None,
                 ip_address="1.2.3.4",
             ),
             event=Event(action=method_name, run_id=None, fab_hash=None),
@@ -73,7 +73,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
             timestamp="after_timestamp",
             actor=Actor(
                 actor_id=account_info.flwr_aid if account_info else None,
-                description=account_info.user_name if account_info else None,
+                description=account_info.account_name if account_info else None,
                 ip_address="5.6.7.8",
             ),
             event=Event(action=method_name, run_id=None, fab_hash=None),
@@ -95,7 +95,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         # Because shared_account_info.get() is read-only, we need to set the user info
         # and store the token to reset it after the test.
         self.expected_account_info = AccountInfo(
-            flwr_aid="flwr_aid", user_name="user_name"
+            flwr_aid="flwr_aid", account_name="account_name"
         )
         self.token = shared_account_info.set(self.expected_account_info)
 
@@ -111,7 +111,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
                 timestamp="before_timestamp",
                 actor=Actor(
                     actor_id=self.expected_account_info.flwr_aid,
-                    description=self.expected_account_info.user_name,
+                    description=self.expected_account_info.account_name,
                     ip_address="1.2.3.4",
                 ),
                 event=Event(action=method_name, run_id=None, fab_hash=None),
@@ -121,7 +121,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
                 timestamp="after_timestamp",
                 actor=Actor(
                     actor_id=self.expected_account_info.flwr_aid,
-                    description=self.expected_account_info.user_name,
+                    description=self.expected_account_info.account_name,
                     ip_address="5.6.7.8",
                 ),
                 event=Event(action=method_name, run_id=None, fab_hash=None),
