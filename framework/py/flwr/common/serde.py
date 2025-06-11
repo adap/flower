@@ -630,6 +630,7 @@ def run_to_proto(run: typing.Run) -> ProtoRun:
         running_at=run.running_at,
         finished_at=run.finished_at,
         status=run_status_to_proto(run.status),
+        flwr_aid=run.flwr_aid,
     )
     return proto
 
@@ -647,6 +648,7 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         running_at=run_proto.running_at,
         finished_at=run_proto.finished_at,
         status=run_status_from_proto(run_proto.status),
+        flwr_aid=run_proto.flwr_aid,
     )
     return run
 

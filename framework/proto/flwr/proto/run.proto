@@ -33,6 +33,7 @@ message Run {
   string running_at = 8;
   string finished_at = 9;
   RunStatus status = 10;
+  string flwr_aid = 11;
 }
 
 message RunStatus {
