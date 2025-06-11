@@ -92,7 +92,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         """Initialize."""
         self.log_plugin = DummyLogPlugin()
         self.interceptor = ExecEventLogInterceptor(log_plugin=self.log_plugin)
-        # Because shared_account_info.get() is read-only, we need to set the user info
+        # Because shared_account_info.get() is read-only, we need to set the account info
         # and store the token to reset it after the test.
         self.expected_account_info = AccountInfo(
             flwr_aid="flwr_aid", account_name="account_name"
