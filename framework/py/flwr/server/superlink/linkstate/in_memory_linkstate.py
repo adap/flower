@@ -421,6 +421,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             sub_status="",
                             details="",
                         ),
+                        flwr_aid="",
                     ),
                 )
                 self.run_ids[run_id] = run_record

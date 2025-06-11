@@ -102,7 +102,8 @@ CREATE TABLE IF NOT EXISTS run(
     finished_at           TEXT,
     sub_status            TEXT,
     details               TEXT,
-    federation_options    BLOB
+    federation_options    BLOB,
+    flwr_aid              TEXT
 );
 """
 
@@ -735,8 +736,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 "INSERT INTO run "
                 "(run_id, active_until, heartbeat_interval, fab_id, fab_version, "
                 "fab_hash, override_config, federation_options, pending_at, "
-                "starting_at, running_at, finished_at, sub_status, details) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                "starting_at, running_at, finished_at, sub_status, details, flwr_aid) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             override_config_json = json.dumps(override_config)
             data = [
@@ -749,6 +750,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 override_config_json,
                 configrecord_to_bytes(federation_options),
                 now().isoformat(),
+                "",
                 "",
                 "",
                 "",
@@ -836,6 +838,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                     sub_status=row["sub_status"],
                     details=row["details"],
                 ),
+                flwr_aid=row["flwr_aid"],
             )
         log(ERROR, "`run_id` does not exist.")
         return None

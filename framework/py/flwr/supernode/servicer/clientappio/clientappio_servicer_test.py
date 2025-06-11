@@ -81,6 +81,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             running_at="",
             finished_at="",
             status=typing.RunStatus(status="pending", sub_status="", details=""),
+            flwr_aid="user123",
         )
         fab = typing.Fab(
             hash_str="abc123#$%",
