@@ -28,7 +28,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
-from flwr.common.inflatable import get_all_nested_objects
+from flwr.common.inflatable import get_all_nested_objects, get_object_tree
 from flwr.common.inflatable_grpc_utils import (
     make_pull_object_fn_grpc,
     make_push_object_fn_grpc,

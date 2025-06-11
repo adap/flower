@@ -23,6 +23,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import TypeVar, cast
 
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 
 
@@ -264,3 +265,12 @@ def get_all_nested_objects(obj: InflatableObject) -> dict[str, InflatableObject]
     ret[obj.object_id] = obj
 
     return ret
+
+
+def get_object_tree(obj: InflatableObject) -> ObjectTree:
+    """Get a tree representation of the InflatableObject."""
+    tree_children = set()
+    if children := obj.children:
+        for child in children.values():
+            tree_children.add(get_object_tree(child))
+    return ObjectTree(object_id=obj.object_id, children=tree_children)

@@ -74,7 +74,7 @@ message PullMessagesResponse {
 message PushMessagesRequest {
   Node node = 1;
   repeated Message messages_list = 2;
-  map<string, ObjectIDs> msg_to_descendant_mapping = 3;
+  repeated ObjectTree message_object_trees = 3;
 }
 message PushMessagesResponse {
   Reconnect reconnect = 1;
