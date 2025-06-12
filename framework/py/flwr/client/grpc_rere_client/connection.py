@@ -14,6 +14,7 @@
 # ==============================================================================
 """Contextmanager for a gRPC request-response channel to the Flower server."""
 
+
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from copy import copy
@@ -30,11 +31,17 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.heartbeat import HeartbeatSender
-from flwr.common.inflatable import get_all_nested_objects
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_object_tree,
+    no_object_id_recompute,
+)
 from flwr.common.inflatable_grpc_utils import (
-    inflate_object_from_contents,
     make_pull_object_fn_grpc,
     make_push_object_fn_grpc,
+)
+from flwr.common.inflatable_utils import (
+    inflate_object_from_contents,
     pull_objects,
     push_objects,
 )
@@ -60,7 +67,6 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
-from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
@@ -309,33 +315,36 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Invalid out message")
             return
 
-        # Get all nested objects
-        all_objects = get_all_nested_objects(message)
-        all_object_ids = list(all_objects.keys())
-        msg_id = all_object_ids[-1]  # Last object is the message itself
-        descendant_ids = all_object_ids[:-1]  # All but the last object are descendants
+        with no_object_id_recompute():
+            # Get all nested objects
+            all_objects = get_all_nested_objects(message)
+            object_tree = get_object_tree(message)
 
-        # Serialize Message
-        message_proto = message_to_proto(message=remove_content_from_message(message))
-        request = PushMessagesRequest(
-            node=node,
-            messages_list=[message_proto],
-            msg_to_descendant_mapping={msg_id: ObjectIDs(object_ids=descendant_ids)},
-        )
-        response: PushMessagesResponse = stub.PushMessages(request=request)
-
-        if response.objects_to_push:
-            objs_to_push = set(response.objects_to_push[message.object_id].object_ids)
-            push_objects(
-                all_objects,
-                push_object_fn=make_push_object_fn_grpc(
-                    push_object_grpc=stub.PushObject,
-                    node=node,
-                    run_id=message.metadata.run_id,
-                ),
-                object_ids_to_push=objs_to_push,
+            # Serialize Message
+            message_proto = message_to_proto(
+                message=remove_content_from_message(message)
             )
-            log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
+            request = PushMessagesRequest(
+                node=node,
+                messages_list=[message_proto],
+                message_object_trees=[object_tree],
+            )
+            response: PushMessagesResponse = stub.PushMessages(request=request)
+
+            if response.objects_to_push:
+                objs_to_push = set(
+                    response.objects_to_push[message.object_id].object_ids
+                )
+                push_objects(
+                    all_objects,
+                    push_object_fn=make_push_object_fn_grpc(
+                        push_object_grpc=stub.PushObject,
+                        node=node,
+                        run_id=message.metadata.run_id,
+                    ),
+                    object_ids_to_push=objs_to_push,
+                )
+                log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
 
         # Cleanup
         metadata = None

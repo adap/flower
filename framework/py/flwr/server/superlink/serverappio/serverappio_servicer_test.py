@@ -29,7 +29,11 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable import get_descendant_object_ids, get_object_id
+from flwr.common.inflatable import (
+    get_descendant_object_ids,
+    get_object_id,
+    get_object_tree,
+)
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
@@ -40,6 +44,7 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ObjectTree,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -198,7 +203,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_get_node_if_running(self) -> None:
         """Test `GetNode` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
 
         # Transition status to running. GetNodesRequest is only allowed
         # in running status.
@@ -234,7 +239,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `GetNodes` not sucessful if RunStatus is pending."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
 
         self._transition_run_status(run_id, num_transitions)
 
@@ -245,7 +250,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushMessages` success."""
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         message_ins = create_ins_message(
             src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
@@ -260,7 +265,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         request = PushInsMessagesRequest(
             messages_list=[message_ins],
             run_id=run_id,
-            msg_to_descendant_mapping=descendant_mapping,
+            message_object_trees=[get_object_tree(message)],
         )
 
         # Execute
@@ -311,7 +316,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushInsMessages` not successful if RunStatus is not running."""
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         message_ins = create_ins_message(
             src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
         )
@@ -333,7 +338,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             msg_object_id=message_obj_id, descendant_ids=descendants
         )
         # Preregister
-        obj_ids_registered = self.store.preregister(descendants + [message_obj_id])
+        obj_ids_registered = self.store.preregister(
+            message.metadata.run_id, get_object_tree(message)
+        )
 
         return obj_ids_registered
 
@@ -350,7 +357,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_pull_messages_if_running(self, register_in_store: bool) -> None:
         """Test `PullMessages` success if objects are registered in ObjectStore."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         node_id = self.state.create_node(heartbeat_interval=30)
         # Transition status to running. PullResMessagesRequest is only
         # allowed in running status.
@@ -414,7 +421,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PullMessages` deletes messages from LinkState."""
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
 
         # Transition status to running.
         self._transition_run_status(run_id, 2)
@@ -476,7 +483,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PullMessages` not successful if RunStatus is not running."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
 
         self._transition_run_status(run_id, num_transitions)
 
@@ -488,7 +495,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         of an Error message created by the LinkState due to an expired TTL."""
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
 
         # Transition status to running.
         self._transition_run_status(run_id, 2)
@@ -531,7 +538,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_push_serverapp_outputs_successful_if_running(self) -> None:
         """Test `PushServerAppOutputs` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
 
         maker = RecordMaker()
         context = Context(
@@ -582,7 +589,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PushServerAppOutputs` not successful if RunStatus is not running."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
 
         maker = RecordMaker()
         context = Context(
@@ -610,7 +617,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `UpdateRunStatus` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         _ = self.state.get_run_status({run_id})[run_id]
         next_run_status = RunStatus(Status.STARTING, "", "")
 
@@ -635,7 +642,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_update_run_status_not_successful_if_finished(self) -> None:
         """Test `UpdateRunStatus` not successful."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         _ = self.state.get_run_status({run_id})[run_id]
         _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
         run_status = self.state.get_run_status({run_id})[run_id]
@@ -654,7 +661,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_send_app_heartbeat(self, num_transitions: int) -> None:
         """Test `SendAppHeartbeat` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to starting or running.
         self._transition_run_status(run_id, num_transitions)
         request = SendAppHeartbeatRequest(run_id=run_id, heartbeat_interval=30)
@@ -671,7 +678,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_send_app_heartbeat_not_successful(self, num_transitions: int) -> None:
         """Test `SendAppHeartbeat` not successful when status is pending or finished."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Stay in pending or transition to finished
         self._transition_run_status(run_id, num_transitions)
         request = SendAppHeartbeatRequest(run_id=run_id, heartbeat_interval=30)
@@ -685,13 +692,13 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_push_object_succesful(self) -> None:
         """Test `PushObject`."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, 2)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
         # Pre-register object
-        self.store.preregister(object_ids=[obj.object_id])
+        self.store.preregister(run_id, get_object_tree(obj))
 
         # Execute
         req = PushObjectRequest(
@@ -707,7 +714,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_push_object_fails(self) -> None:
         """Test `PushObject` in unsupported scenarios."""
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Run is not running
         req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
@@ -740,7 +747,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Push valid object but its hash doesnt match the one passed in the request
         # Preregister under a different object-id
         fake_object_id = get_object_id(b"1234")
-        self.store.preregister(object_ids=[fake_object_id])
+        self.store.preregister(run_id, ObjectTree(object_id=fake_object_id))
 
         # Execute
         req = PushObjectRequest(
@@ -757,13 +764,13 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_pull_object_successful(self) -> None:
         """Test `PullObject` functionality."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, 2)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
         # Preregister object
-        self.store.preregister(object_ids=[obj.object_id])
+        self.store.preregister(run_id, get_object_tree(obj))
 
         # Pull
         req = PullObjectRequest(
@@ -790,7 +797,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_pull_object_fails(self) -> None:
         """Test `PullObject` in unsuported scenarios."""
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Run is not running
         req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:

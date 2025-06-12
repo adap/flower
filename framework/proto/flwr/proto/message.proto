@@ -50,6 +50,11 @@ message Metadata {
 
 message ObjectIDs { repeated string object_ids = 1; }
 
+message ObjectTree {
+  string object_id = 1;
+  repeated ObjectTree children = 2;
+}
+
 // PushObject messages
 message PushObjectRequest {
   Node node = 1;
@@ -70,3 +75,11 @@ message PullObjectResponse {
   bool object_available = 2;
   bytes object_content = 3;
 }
+
+// ConfirmMessageReceived messages
+message ConfirmMessageReceivedRequest {
+  Node node = 1;
+  uint64 run_id = 2;
+  string message_object_id = 3;
+}
+message ConfirmMessageReceivedResponse {}

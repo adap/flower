@@ -20,7 +20,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
-from flwr.common.typing import UserInfo
+from flwr.common.typing import AccountInfo
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 from ..typing import UserAuthCredentials, UserAuthLoginDetails
@@ -53,7 +53,7 @@ class ExecAuthPlugin(ABC):
     @abstractmethod
     def validate_tokens_in_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> tuple[bool, Optional[UserInfo]]:
+    ) -> tuple[bool, Optional[AccountInfo]]:
         """Validate authentication tokens in the provided metadata."""
 
     @abstractmethod
@@ -63,7 +63,9 @@ class ExecAuthPlugin(ABC):
     @abstractmethod
     def refresh_tokens(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> tuple[Optional[Sequence[tuple[str, Union[str, bytes]]]], Optional[UserInfo]]:
+    ) -> tuple[
+        Optional[Sequence[tuple[str, Union[str, bytes]]]], Optional[AccountInfo]
+    ]:
         """Refresh authentication tokens in the provided metadata."""
 
 
@@ -84,7 +86,7 @@ class ExecAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
         """Abstract constructor."""
 
     @abstractmethod
-    def verify_user_authorization(self, user_info: UserInfo) -> bool:
+    def verify_user_authorization(self, account_info: AccountInfo) -> bool:
         """Verify user authorization request."""
 
 

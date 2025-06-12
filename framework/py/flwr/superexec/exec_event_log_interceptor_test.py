@@ -30,9 +30,9 @@ from flwr.common.dummy_grpc_handlers_test import (
     get_noop_unary_unary_handler,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
-from flwr.common.typing import Actor, Event, LogEntry, UserInfo
+from flwr.common.typing import AccountInfo, Actor, Event, LogEntry
 from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
-from flwr.superexec.exec_user_auth_interceptor import shared_user_info
+from flwr.superexec.exec_user_auth_interceptor import shared_account_info
 
 
 class DummyLogPlugin(EventLogWriterPlugin):
@@ -45,15 +45,15 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: Optional[UserInfo],
+        account_info: Optional[AccountInfo],
         method_name: str,
     ) -> LogEntry:
         """Compose pre-event log entry from the provided request and context."""
         return LogEntry(
             timestamp="before_timestamp",
             actor=Actor(
-                actor_id=user_info.user_id if user_info else None,
-                description=user_info.user_name if user_info else None,
+                actor_id=account_info.flwr_aid if account_info else None,
+                description=account_info.account_name if account_info else None,
                 ip_address="1.2.3.4",
             ),
             event=Event(action=method_name, run_id=None, fab_hash=None),
@@ -64,7 +64,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: Optional[UserInfo],
+        account_info: Optional[AccountInfo],
         method_name: str,
         response: Optional[Union[GrpcMessage, BaseException]],
     ) -> LogEntry:
@@ -72,8 +72,8 @@ class DummyLogPlugin(EventLogWriterPlugin):
         return LogEntry(
             timestamp="after_timestamp",
             actor=Actor(
-                actor_id=user_info.user_id if user_info else None,
-                description=user_info.user_name if user_info else None,
+                actor_id=account_info.flwr_aid if account_info else None,
+                description=account_info.account_name if account_info else None,
                 ip_address="5.6.7.8",
             ),
             event=Event(action=method_name, run_id=None, fab_hash=None),
@@ -92,15 +92,17 @@ class TestExecEventLogInterceptor(unittest.TestCase):
         """Initialize."""
         self.log_plugin = DummyLogPlugin()
         self.interceptor = ExecEventLogInterceptor(log_plugin=self.log_plugin)
-        # Because shared_user_info.get() is read-only, we need to set the user info
-        # and store the token to reset it after the test.
-        self.expected_user_info = UserInfo(user_id="user_id", user_name="user_name")
-        self.token = shared_user_info.set(self.expected_user_info)
+        # Because shared_account_info.get() is read-only, we need to set the account
+        # info and store the token to reset it after the test.
+        self.expected_account_info = AccountInfo(
+            flwr_aid="flwr_aid", account_name="account_name"
+        )
+        self.token = shared_account_info.set(self.expected_account_info)
 
     def tearDown(self) -> None:
         """Cleanup."""
-        # Reset shared_user_info to its previous state
-        shared_user_info.reset(self.token)
+        # Reset shared_account_info to its previous state
+        shared_account_info.reset(self.token)
 
     def get_expected_logs(self, method_name: str) -> list[LogEntry]:
         """Get the expected log entries for the given method name."""
@@ -108,8 +110,8 @@ class TestExecEventLogInterceptor(unittest.TestCase):
             LogEntry(
                 timestamp="before_timestamp",
                 actor=Actor(
-                    actor_id=self.expected_user_info.user_id,
-                    description=self.expected_user_info.user_name,
+                    actor_id=self.expected_account_info.flwr_aid,
+                    description=self.expected_account_info.account_name,
                     ip_address="1.2.3.4",
                 ),
                 event=Event(action=method_name, run_id=None, fab_hash=None),
@@ -118,8 +120,8 @@ class TestExecEventLogInterceptor(unittest.TestCase):
             LogEntry(
                 timestamp="after_timestamp",
                 actor=Actor(
-                    actor_id=self.expected_user_info.user_id,
-                    description=self.expected_user_info.user_name,
+                    actor_id=self.expected_account_info.flwr_aid,
+                    description=self.expected_account_info.account_name,
                     ip_address="5.6.7.8",
                 ),
                 event=Event(action=method_name, run_id=None, fab_hash=None),

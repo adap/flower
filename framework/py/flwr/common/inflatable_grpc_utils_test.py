@@ -24,6 +24,12 @@ import numpy as np
 from parameterized import parameterized
 
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, RecordDict
+from flwr.common.inflatable_utils import (
+    ObjectIdNotPreregisteredError,
+    ObjectUnavailableError,
+    pull_objects,
+    push_objects,
+)
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PullObjectRequest,
     PullObjectResponse,
@@ -33,14 +39,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
 from .inflatable import get_all_nested_objects
-from .inflatable_grpc_utils import (
-    ObjectIdNotPreregisteredError,
-    ObjectUnavailableError,
-    make_pull_object_fn_grpc,
-    make_push_object_fn_grpc,
-    pull_objects,
-    push_objects,
-)
+from .inflatable_grpc_utils import make_pull_object_fn_grpc, make_push_object_fn_grpc
 
 base_cases = [
     ({"a": ConfigRecord({"a": 123, "b": 123})},),  # Single w/o children
