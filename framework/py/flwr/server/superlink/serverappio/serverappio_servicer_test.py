@@ -338,7 +338,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             msg_object_id=message_obj_id, descendant_ids=descendants
         )
         # Preregister
-        obj_ids_registered = self.store.preregister(get_object_tree(message))
+        obj_ids_registered = self.store.preregister(
+            message.metadata.run_id, get_object_tree(message)
+        )
 
         return obj_ids_registered
 
@@ -696,7 +698,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         obj_b = obj.deflate()
 
         # Pre-register object
-        self.store.preregister(get_object_tree(obj))
+        self.store.preregister(run_id, get_object_tree(obj))
 
         # Execute
         req = PushObjectRequest(
@@ -745,7 +747,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Push valid object but its hash doesnt match the one passed in the request
         # Preregister under a different object-id
         fake_object_id = get_object_id(b"1234")
-        self.store.preregister(ObjectTree(object_id=fake_object_id))
+        self.store.preregister(run_id, ObjectTree(object_id=fake_object_id))
 
         # Execute
         req = PushObjectRequest(
@@ -768,7 +770,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         obj_b = obj.deflate()
 
         # Preregister object
-        self.store.preregister(get_object_tree(obj))
+        self.store.preregister(run_id, get_object_tree(obj))
 
         # Pull
         req = PullObjectRequest(

@@ -75,16 +75,20 @@ def store_mapping_and_register_objects(
 ) -> dict[str, ObjectIDs]:
     """Store Message object to descendants mapping and preregister objects."""
     objects_to_push: dict[str, ObjectIDs] = {}
+    msg_id_to_run_id = {
+        msg.metadata.message_id: msg.metadata.run_id for msg in request.messages_list
+    }
     for object_tree in request.message_object_trees:
         all_object_ids = [obj.object_id for obj in iterate_object_tree(object_tree)]
         msg_object_id, descendant_ids = all_object_ids[-1], all_object_ids[:-1]
+        run_id = msg_id_to_run_id[msg_object_id]
         # Store mapping
         store.set_message_descendant_ids(
             msg_object_id=msg_object_id, descendant_ids=descendant_ids
         )
 
         # Preregister
-        object_ids_just_registered = store.preregister(object_tree)
+        object_ids_just_registered = store.preregister(run_id, object_tree)
         # Keep track of objects that need to be pushed
         objects_to_push[msg_object_id] = ObjectIDs(
             object_ids=object_ids_just_registered

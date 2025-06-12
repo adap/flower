@@ -148,8 +148,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             detail="`messages_list` must not be empty",
         )
         message_ids: list[Optional[str]] = []
-        while request.messages_list:
-            message_proto = request.messages_list.pop(0)
+        for message_proto in request.messages_list:
             message = message_from_proto(message_proto=message_proto)
             validation_errors = validate_message(message, is_reply_message=False)
             _raise_if(
@@ -215,7 +214,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                     msg_object_id=message_obj_id, descendant_ids=descendants
                 )
                 # Preregister
-                store.preregister(get_object_tree(msg_res))
+                store.preregister(request.run_id, get_object_tree(msg_res))
 
         # Delete the instruction Messages and their replies if found
         message_ins_ids_to_delete = {
