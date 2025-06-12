@@ -140,10 +140,7 @@ class StateTest(unittest.TestCase):
         result_userA = state.get_run_ids("userA")
 
         # Assert
-        assert run_id1 in result_userA
-        assert run_id3 in result_userA
-        assert run_id2 not in result_userA
-        assert len(result_userA) == 2
+        assert result_userA == {run_id1, run_id3}
 
         # Execute - Only the run for "userB" should be returned
         result_userB = state.get_run_ids("userB")
