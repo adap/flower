@@ -785,10 +785,18 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: set[bytes] = {row["public_key"] for row in rows}
         return result
 
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
-        query = "SELECT run_id FROM run;"
-        rows = self.query(query)
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified.
+
+        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
+        """
+        if flwr_aid:
+            rows = self.query(
+                "SELECT run_id FROM run WHERE flwr_aid = ?;",
+                (flwr_aid,),
+            )
+        else:
+            rows = self.query("SELECT run_id FROM run;", ())
         return {convert_sint64_to_uint64(row["run_id"]) for row in rows}
 
     def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
