@@ -30,7 +30,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.heartbeat import HeartbeatSender
-from flwr.common.inflatable import get_all_nested_objects
+from flwr.common.inflatable import get_all_nested_objects, no_object_id_recompute
 from flwr.common.inflatable_rest_utils import (
     make_pull_object_fn_rest,
     make_push_object_fn_rest,
@@ -377,59 +377,68 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Invalid out message")
             return
 
-        # Get all nested objects
-        all_objects = get_all_nested_objects(message)
-        all_object_ids = list(all_objects.keys())
-        msg_id = all_object_ids[-1]  # Last object is the message itself
-        descendant_ids = all_object_ids[:-1]  # All but the last object are descendants
+        with no_object_id_recompute():
+            # Get all nested objects
+            all_objects = get_all_nested_objects(message)
+            all_object_ids = list(all_objects.keys())
+            msg_id = all_object_ids[-1]  # Last object is the message itself
+            descendant_ids = all_object_ids[
+                :-1
+            ]  # All but the last object are descendants
 
-        # Serialize Message
-        message_proto = message_to_proto(message=remove_content_from_message(message))
-        req = PushMessagesRequest(
-            node=node,
-            messages_list=[message_proto],
-            msg_to_descendant_mapping={msg_id: ObjectIDs(object_ids=descendant_ids)},
-        )
-
-        # Send the request
-        res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
-        if res:
-            log(
-                INFO,
-                "[Node] POST /%s: success, created result %s",
-                PATH_PUSH_MESSAGES,
-                res.results,  # pylint: disable=no-member
+            # Serialize Message
+            message_proto = message_to_proto(
+                message=remove_content_from_message(message)
+            )
+            req = PushMessagesRequest(
+                node=node,
+                messages_list=[message_proto],
+                msg_to_descendant_mapping={
+                    msg_id: ObjectIDs(object_ids=descendant_ids)
+                },
             )
 
-        if res and res.objects_to_push:
-            objs_to_push = set(res.objects_to_push[message.object_id].object_ids)
-
-            def fn(request: PushObjectRequest) -> PushObjectResponse:
-                res = _request(
-                    req=request, res_type=PushObjectResponse, api_path=PATH_PUSH_OBJECT
-                )
-                if res is None:
-                    raise ValueError("PushObjectResponse is None.")
-                return res
-
-            try:
-                push_objects(
-                    all_objects,
-                    push_object_fn=make_push_object_fn_rest(
-                        push_object_rest=fn,
-                        node=node,
-                        run_id=message_proto.metadata.run_id,
-                    ),
-                    object_ids_to_push=objs_to_push,
-                )
-                log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
-            except ValueError as e:
+            # Send the request
+            res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
+            if res:
                 log(
-                    ERROR,
-                    "Pushing objects failed. Potential irrecoverable error: %s",
-                    str(e),
+                    INFO,
+                    "[Node] POST /%s: success, created result %s",
+                    PATH_PUSH_MESSAGES,
+                    res.results,  # pylint: disable=no-member
                 )
-                log(ERROR, str(e))
+
+            if res and res.objects_to_push:
+                objs_to_push = set(res.objects_to_push[message.object_id].object_ids)
+
+                def fn(request: PushObjectRequest) -> PushObjectResponse:
+                    res = _request(
+                        req=request,
+                        res_type=PushObjectResponse,
+                        api_path=PATH_PUSH_OBJECT,
+                    )
+                    if res is None:
+                        raise ValueError("PushObjectResponse is None.")
+                    return res
+
+                try:
+                    push_objects(
+                        all_objects,
+                        push_object_fn=make_push_object_fn_rest(
+                            push_object_rest=fn,
+                            node=node,
+                            run_id=message_proto.metadata.run_id,
+                        ),
+                        object_ids_to_push=objs_to_push,
+                    )
+                    log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
+                except ValueError as e:
+                    log(
+                        ERROR,
+                        "Pushing objects failed. Potential irrecoverable error: %s",
+                        str(e),
+                    )
+                    log(ERROR, str(e))
 
         # Cleanup
         metadata = None

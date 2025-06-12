@@ -28,7 +28,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
-from flwr.common.inflatable import get_all_nested_objects
+from flwr.common.inflatable import get_all_nested_objects, no_object_id_recompute
 from flwr.common.inflatable_grpc_utils import (
     make_pull_object_fn_grpc,
     make_push_object_fn_grpc,
@@ -262,7 +262,8 @@ class GrpcGrid(Grid):
                 # Check message
                 self._check_message(msg)
                 # Try pushing message and its objects
-                message_ids.append(self._try_push_message(run_id, msg))
+                with no_object_id_recompute():
+                    message_ids.append(self._try_push_message(run_id, msg))
 
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
