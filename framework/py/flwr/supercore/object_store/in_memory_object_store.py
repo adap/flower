@@ -87,6 +87,7 @@ class InMemoryObjectStore(ObjectStore):
                     # Add to the list of new objects
                     new_objects.append(obj_id)
                 else:
+                    # Object is in store, retrieve it
                     obj_entry = self.store[obj_id]
 
                     # Add to the list of new objects if not available
@@ -124,8 +125,8 @@ class InMemoryObjectStore(ObjectStore):
                 return
 
             # Update the object entry in the store
-            self.store[object_id].is_available = True
             self.store[object_id].content = object_content
+            self.store[object_id].is_available = True
 
     def set_message_descendant_ids(
         self, msg_object_id: str, descendant_ids: list[str]
@@ -157,12 +158,8 @@ class InMemoryObjectStore(ObjectStore):
             if object_id not in self.store:
                 return None
 
-            # Check if the object is available (i.e., has been put into the store)
-            object_entry = self.store[object_id]
-            if not object_entry.is_available:
-                return b""
-
-            return object_entry.content
+            # Return content (if not yet available, it will b"")
+            return self.store[object_id]
 
     def delete(self, object_id: str) -> None:
         """Delete an object and its unreferenced descendants from the store."""
