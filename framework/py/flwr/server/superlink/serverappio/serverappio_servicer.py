@@ -52,6 +52,8 @@ from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
     ObjectIDs,
     PullObjectRequest,
     PullObjectResponse,
@@ -479,6 +481,25 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 object_content=content,
             )
         return PullObjectResponse(object_found=False, object_available=False)
+
+    def ConfirmMessageReceived(
+        self, request: ConfirmMessageReceivedRequest, context: grpc.ServicerContext
+    ) -> ConfirmMessageReceivedResponse:
+        """Confirm message received."""
+        log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
+
+        # Init state
+        state: LinkState = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
+
+        raise NotImplementedError
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
