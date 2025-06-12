@@ -90,7 +90,8 @@ class Executor(ABC):
         federation_options: ConfigRecord
             The federation options sent by the user (using `flwr run`).
         flwr_aid : Optional[str]
-            The ID of the user starting the run, if authentication is enabled.
+            The Flower Account ID of the user starting the run, if authentication is
+            enabled.
 
         Returns
         -------
