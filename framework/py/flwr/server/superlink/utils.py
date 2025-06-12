@@ -76,7 +76,7 @@ def store_mapping_and_register_objects(
     """Store Message object to descendants mapping and preregister objects."""
     if not request.messages_list:
         return {}
-    
+
     objects_to_push: dict[str, ObjectIDs] = {}
 
     # Get run_id from the first message in the list

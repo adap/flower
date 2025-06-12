@@ -199,13 +199,14 @@ class InMemoryObjectStore(ObjectStore):
                 # Remove the run ID from the object's runs
                 object_entry.runs.discard(run_id)
 
-                # Trigger recursive deletion if the object is no longer referenced
-                if object_entry.ref_count == 0 and not object_entry.runs:
+                # Only message objects are allowed to have a `ref_count` of 0,
+                # and every message object must have a `ref_count` of 0
+                if object_entry.ref_count == 0:
+                    # Delete the message object and its unreferenced descendants
                     self.delete(object_id)
 
-                    # If the object is a message, delete its descendants mapping
-                    if object_id in self.msg_descendant_objects_mapping:
-                        self.delete_message_descendant_ids(object_id)
+                    # Delete the message's descendants mapping
+                    self.delete_message_descendant_ids(object_id)
 
             # Remove the run from the mapping
             del self.run_objects_mapping[run_id]
