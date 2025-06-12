@@ -451,8 +451,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             return self.node_public_keys.copy()
 
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified. Otherwise, retrieve
+        all run IDs for the specified `flwr_aid`."""
         with self.lock:
             return set(self.run_ids.keys())
 

@@ -168,8 +168,9 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Create a new run for the specified `fab_hash`."""
 
     @abc.abstractmethod
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified. Otherwise, retrieve
+        all run IDs for the specified `flwr_aid`."""
 
     @abc.abstractmethod
     def get_run(self, run_id: int) -> Optional[Run]:
