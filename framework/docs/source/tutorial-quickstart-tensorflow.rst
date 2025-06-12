@@ -1,3 +1,7 @@
+:og:description: Learn how to train a Convolutional Neural Network on CIFAR-10 using federated learning with Flower and TensorFlow in this step-by-step tutorial.
+.. meta::
+    :description: Learn how to train a Convolutional Neural Network on CIFAR-10 using federated learning with Flower and TensorFlow in this step-by-step tutorial.
+
 .. _quickstart-tensorflow:
 
 Quickstart TensorFlow
@@ -273,18 +277,3 @@ Congratulations! You've successfully built and run your first federated learning
 .. |quickstart_tf_link| replace:: ``examples/quickstart-tensorflow``
 
 .. _quickstart_tf_link: https://github.com/adap/flower/blob/main/examples/quickstart-tensorflow
-
-Video tutorial
---------------
-
-.. note::
-
-    The video shown below shows how to setup a TensorFlow + Flower project using our
-    previously recommended APIs. A new video tutorial will be released that shows the
-    new APIs (as the content above does)
-
-.. meta::
-    :description: Check out this Federated Learning quickstart tutorial for using Flower with TensorFlow to train a CNN model on CIFAR-10.
-
-.. youtube:: FGTc2TQq7VM
-    :width: 100%

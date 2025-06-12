@@ -1,3 +1,7 @@
+:og:description: Learn how to train a Convolutional Neural Network on CIFAR-10 using federated learning with Flower and PyTorch in this step-by-step tutorial.
+.. meta::
+    :description: Learn how to train a Convolutional Neural Network on CIFAR-10 using federated learning with Flower and PyTorch in this step-by-step tutorial.
+
 .. _quickstart-pytorch:
 
 Quickstart PyTorch
@@ -349,18 +353,3 @@ Congratulations! You've successfully built and run your first federated learning
     <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch>`_ of the
     extended version of this tutorial in ``examples/quickstart-pytorch`` in the Flower
     GitHub repository.
-
-Video tutorial
---------------
-
-.. note::
-
-    The video shown below shows how to setup a PyTorch + Flower project using our
-    previously recommended APIs. A new video tutorial will be released that shows the
-    new APIs (as the content above does)
-
-.. meta::
-    :description: Check out this Federated Learning quickstart tutorial for using Flower with PyTorch to train a CNN model on MNIST.
-
-.. youtube:: jOmmuzMIQ4c
-    :width: 100%

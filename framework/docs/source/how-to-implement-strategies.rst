@@ -1,3 +1,7 @@
+:og:description: Create custom federated learning strategies in Flower by modifying client sampling, training, aggregation, and evaluation for enhanced flexibility and control.
+.. meta::
+    :description: Create custom federated learning strategies in Flower by modifying client sampling, training, aggregation, and evaluation for enhanced flexibility and control.
+
 Implement strategies
 ====================
 
@@ -10,7 +14,7 @@ the same API described below.
 The ``Strategy`` abstraction
 ----------------------------
 
-All strategy implementation are derived from the abstract base class
+All strategy implementations are derived from the abstract base class
 ``flwr.server.strategy.Strategy``, both built-in implementations and third party
 implementations. This means that custom strategy implementations have the exact same
 capabilities at their disposal as built-in ones.

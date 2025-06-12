@@ -5,7 +5,7 @@ description = ""
 authors = ["Steven Hé (Sīchàng) <sichang.he@dukekunshan.edu.cn>"]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.11"
+python = ">=3.9.2,<3.11"
 numpy = ">=1.23,<2.0"
 tensorflow-cpu = ">=2.12,<3.0"
 pandas = ">=2.0,<3.0"

@@ -40,12 +40,12 @@ classifiers = [
 python = ">=3.10.0, <3.11.0"  # don't change this
 flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
-torch = "1.13.1"
-scikit-learn = "1.3.0"
+torch = "2.6.0"
+scikit-learn = "1.5.0"
 xgboost = "2.0.0"
 torchmetrics = "1.1.2"
-tqdm = "4.66.1"
-torchvision = "0.14.1"
+tqdm = "4.66.3"
+torchvision = "0.21.0"
 wandb = "0.15.12"
 
 [tool.poetry.dev-dependencies]
@@ -57,7 +57,7 @@ pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
-ruff = "==0.0.272"
+ruff = "==0.4.5"
 types-requests = "==2.27.7"
 virtualenv = "^20.21.0"
 

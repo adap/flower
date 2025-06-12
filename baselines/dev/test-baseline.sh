@@ -36,10 +36,6 @@ echo "- pylint: start"
 python -m pylint ./$1
 echo "- pylint: done"
 
-echo "- flake8: start"
-python -m flake8 .
-echo "- flake8: done"
-
 echo "- pytest: start"
 python -m pytest . || ([ $? -eq 5 ] || [ $? -eq 0 ])
 echo "- pytest: done"

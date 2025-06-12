@@ -1,3 +1,7 @@
+:og:description: Learn how to train a logistic regression on MNIST using federated learning with Flower and scikit-learn in this step-by-step tutorial.
+.. meta::
+    :description: Learn how to train a logistic regression on MNIST using federated learning with Flower and scikit-learn in this step-by-step tutorial.
+
 .. _quickstart-scikitlearn:
 
 Quickstart scikit-learn
@@ -225,10 +229,10 @@ The rest of the functionality is directly inspired by the centralized case:
 
 Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` defined above by
 means of a ``client_fn()`` callback. Note that the ``context`` enables you to get access
-to hyperparemeters defined in your ``pyproject.toml`` to configure the run. In this
+to hyperparameters defined in your ``pyproject.toml`` to configure the run. In this
 tutorial we access the `local-epochs` setting to control the number of epochs a
 ``ClientApp`` will perform when running the ``fit()`` method. You could define
-additioinal hyperparameters in ``pyproject.toml`` and access them here.
+additional hyperparameters in ``pyproject.toml`` and access them here.
 
 .. code-block:: python
 

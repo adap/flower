@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """VerticalSizePartitioner class."""
-# flake8: noqa: E501
+# noqa: E501
 # pylint: disable=C0301, R0902, R0913
 from math import floor
 from typing import Literal, Optional, Union, cast
@@ -91,7 +91,7 @@ class VerticalSizePartitioner(Partitioner):
     >>> print([partition.column_names for partition in partitions])
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=R0917
         self,
         partition_sizes: Union[list[int], list[float]],
         active_party_columns: Optional[Union[str, list[str]]] = None,

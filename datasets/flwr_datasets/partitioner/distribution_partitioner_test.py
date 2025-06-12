@@ -55,7 +55,7 @@ def _dummy_distribution_setup(
 
 
 # pylint: disable=R0913
-def _get_partitioner(
+def _get_partitioner(  # pylint: disable=R0917
     num_partitions: int,
     num_unique_labels_per_partition: int,
     num_samples: int,

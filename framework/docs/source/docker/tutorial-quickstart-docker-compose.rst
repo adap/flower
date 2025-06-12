@@ -1,3 +1,7 @@
+:og:description: Learn how to quickly set up Flower using Docker Compose, enable TLS, and persist application state for federated learning with minimal configuration effort.
+.. meta::
+    :description: Learn how to quickly set up Flower using Docker Compose, enable TLS, and persist application state for federated learning with minimal configuration effort.
+
 Quickstart with Docker Compose
 ==============================
 
@@ -27,7 +31,7 @@ Step 1: Set Up
        :substitutions:
 
        $ git clone --depth=1 --branch v|stable_flwr_version| https://github.com/adap/flower.git _tmp \
-                   && mv _tmp/src/docker/complete . \
+                   && mv _tmp/framework/docker/complete . \
                    && rm -rf _tmp && cd complete
 
 2. Create a new Flower project (PyTorch):

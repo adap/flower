@@ -1,8 +1,8 @@
-peft==0.6.2
+peft==0.14.0
 datasets==2.20.0
 evaluate==0.3.0
 sentencepiece==0.2.0
 protobuf==5.27.1
-bitsandbytes==0.45.0
+bitsandbytes==0.45.1
 hf_transfer==0.1.8
-git+https://github.com/bigcode-project/bigcode-evaluation-harness.git@6116c6a9a5672c69bd624373cfbc8938b7acc249
+git+https://github.com/yan-gao-GY/bigcode-evaluation-harness.git

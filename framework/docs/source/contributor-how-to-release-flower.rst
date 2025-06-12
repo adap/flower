@@ -7,32 +7,30 @@ future.
 During the release
 ------------------
 
-The version number of a release is stated in ``pyproject.toml``. To release a new
-version of Flower, the following things need to happen (in that order):
+The version number of a release is stated in ``./framework/pyproject.toml``. To release
+a new version of Flower, the following things need to happen (in that order):
 
-1. Run ``python3 ./dev/update_changelog.py <YOUR_GH_TOKEN>`` in order to add every new
-   change to the changelog (feel free to make manual changes to the changelog afterwards
-   until it looks good).
-2. Once the changelog has been updated with all the changes, run
-   ``./dev/prepare-release-changelog.sh v<NEW_VERSION>``, where ``<NEW_VERSION>`` is the
-   version stated in ``pyproject.toml`` (notice the ``v`` added before it). This will
-   replace the ``Unreleased`` header of the changelog by the version and current date,
-   and it will add a thanking message for the contributors. Open a pull request with
-   those changes.
-3. Once the pull request is merged, tag the release commit with the version number as
-   soon as the PR is merged: ``git tag v<NEW_VERSION>`` (notice the ``v`` added before
-   the version number), then ``git push --tags``. This will create a draft release on
-   GitHub containing the correct artifacts and the relevant part of the changelog.
-4. Check the draft release on GitHub, and if everything is good, publish it.
+1. Run ``python3 ./framework/dev/update_changelog.py <YOUR_GH_TOKEN>`` to add all new
+   changes to the changelog. You can make manual edits to the changelog afterward to
+   improve its formatting or wording. This script will also replace the ``##
+   Unreleased`` header with the new version number and current date, and add a thank-you
+   message for contributors. Open a pull request with these changes.
+2. Once the pull request is merged, tag the release commit with the version number:
+   ``git tag v<NEW_VERSION>`` (notice the ``v`` added before the version number), then
+   ``git push --tags``. This will create a draft release on GitHub containing the
+   correct artifacts and the relevant part of the changelog.
+3. Check the draft release on GitHub, and if everything is good, publish it.
 
 After the release
 -----------------
 
 Create a pull request which contains the following changes:
 
-1. Increase the minor version in ``pyproject.toml`` by one.
-2. Update all files which contain the current version number if necessary.
-3. Add a new ``Unreleased`` section in ``changelog.md``.
+1. Increase the minor version in ``pyproject.toml`` by one and update all files which
+   contain the current version number (if necessary) by running
+   ``./framework/dev/update_version.py``.
+2. Add a new ``## Unreleased`` section at the top of
+   ``./framework/docs/source/ref-changelog.md`` to prepare for future changes.
 
 Merge the pull request on the same day (i.e., before a new nightly release gets
 published to PyPI).
