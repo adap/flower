@@ -512,6 +512,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         store.delete(request.message_object_id)
         store.delete_message_descendant_ids(request.message_object_id)
 
+        return ConfirmMessageReceivedResponse()
+
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
     """Raise a `ValueError` with a detailed message if a validation error occurs."""

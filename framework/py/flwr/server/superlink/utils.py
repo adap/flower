@@ -15,7 +15,7 @@
 """SuperLink utilities."""
 
 
-from typing import Union
+from typing import Optional, Union
 
 import grpc
 
@@ -40,7 +40,7 @@ def check_abort(
     run_id: int,
     abort_status_list: list[str],
     state: LinkState,
-    store: ObjectStore,
+    store: Optional[ObjectStore] = None,
 ) -> Union[str, None]:
     """Check if the status of the provided `run_id` is in `abort_status_list`."""
     run_status: RunStatus = state.get_run_status({run_id})[run_id]
@@ -52,7 +52,7 @@ def check_abort(
         return msg
 
     # Clear the objects of the run from the store if the run is finished
-    if run_status.status == Status.FINISHED:
+    if store and run_status.status == Status.FINISHED:
         store.delete_objects_in_run(run_id)
 
     return None
@@ -68,7 +68,7 @@ def abort_if(
     run_id: int,
     abort_status_list: list[str],
     state: LinkState,
-    store: ObjectStore,
+    store: Optional[ObjectStore],
     context: grpc.ServicerContext,
 ) -> None:
     """Abort context if status of the provided `run_id` is in `abort_status_list`."""
