@@ -74,7 +74,15 @@ def store_mapping_and_register_objects(
     store: ObjectStore, request: Union[PushInsMessagesRequest, PushMessagesRequest]
 ) -> dict[str, ObjectIDs]:
     """Store Message object to descendants mapping and preregister objects."""
+    if not request.messages_list:
+        return {}
+
     objects_to_push: dict[str, ObjectIDs] = {}
+
+    # Get run_id from the first message in the list
+    # All messages of a request should in the same run
+    run_id = request.messages_list[0].metadata.run_id
+
     for object_tree in request.message_object_trees:
         all_object_ids = [obj.object_id for obj in iterate_object_tree(object_tree)]
         msg_object_id, descendant_ids = all_object_ids[-1], all_object_ids[:-1]
@@ -84,7 +92,7 @@ def store_mapping_and_register_objects(
         )
 
         # Preregister
-        object_ids_just_registered = store.preregister(object_tree)
+        object_ids_just_registered = store.preregister(run_id, object_tree)
         # Keep track of objects that need to be pushed
         objects_to_push[msg_object_id] = ObjectIDs(
             object_ids=object_ids_just_registered
