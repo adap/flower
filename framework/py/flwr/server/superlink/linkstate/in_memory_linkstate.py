@@ -398,6 +398,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         fab_hash: Optional[str],
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str],
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
@@ -421,6 +422,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             sub_status="",
                             details="",
                         ),
+                        flwr_aid=flwr_aid if flwr_aid else "",
                     ),
                 )
                 self.run_ids[run_id] = run_record
