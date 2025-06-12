@@ -26,8 +26,8 @@ from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.inflatable import (
     UnexpectedObjectContentError,
     get_descendant_object_ids,
-    no_object_id_recompute,
     get_object_tree,
+    no_object_id_recompute,
 )
 from flwr.common.logger import log
 from flwr.common.serde import (

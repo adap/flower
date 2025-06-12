@@ -279,7 +279,7 @@ def get_object_tree(obj: InflatableObject) -> ObjectTree:
 
 def iterate_object_tree(
     tree: ObjectTree,
-) -> Iterator[str]:
+) -> Iterator[ObjectTree]:
     """Iterate over the object tree and yield object IDs.
 
     This function performs a post-order traversal of the tree, yielding the object ID of
@@ -287,4 +287,4 @@ def iterate_object_tree(
     """
     for child in tree.children:
         yield from iterate_object_tree(child)
-    yield tree.object_id
+    yield tree

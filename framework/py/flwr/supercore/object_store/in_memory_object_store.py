@@ -41,7 +41,8 @@ class InMemoryObjectStore(ObjectStore):
         """Identify and preregister missing objects."""
         new_objects = []
 
-        for obj_id in iterate_object_tree(object_tree):
+        for tree_node in iterate_object_tree(object_tree):
+            obj_id = tree_node.object_id
             # Verify object ID format (must be a valid sha256 hash)
             if not is_valid_sha256_hash(obj_id):
                 raise ValueError(f"Invalid object ID format: {obj_id}")
