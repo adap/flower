@@ -49,6 +49,10 @@ service Fleet {
 
   // Pull Object
   rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
+
+  // Confirm Message Received
+  rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
+      returns (ConfirmMessageReceivedResponse) {}
 }
 
 // CreateNode messages

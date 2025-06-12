@@ -78,6 +78,11 @@ class ServerAppIoStub:
         flwr.proto.message_pb2.PullObjectResponse]
     """Pull Object"""
 
+    ConfirmMessageReceived: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.message_pb2.ConfirmMessageReceivedRequest,
+        flwr.proto.message_pb2.ConfirmMessageReceivedResponse]
+    """Confirm Message Received"""
+
 
 class ServerAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -182,6 +187,14 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.message_pb2.PullObjectResponse:
         """Pull Object"""
+        pass
+
+    @abc.abstractmethod
+    def ConfirmMessageReceived(self,
+        request: flwr.proto.message_pb2.ConfirmMessageReceivedRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.message_pb2.ConfirmMessageReceivedResponse:
+        """Confirm Message Received"""
         pass
 
 

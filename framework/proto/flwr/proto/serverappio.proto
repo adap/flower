@@ -67,6 +67,10 @@ service ServerAppIo {
 
   // Pull Object
   rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
+
+  // Confirm Message Received
+  rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
+      returns (ConfirmMessageReceivedResponse) {}
 }
 
 // GetNodes messages

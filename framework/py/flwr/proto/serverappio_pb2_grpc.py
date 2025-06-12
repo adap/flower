@@ -84,6 +84,11 @@ class ServerAppIoStub(object):
                 request_serializer=flwr_dot_proto_dot_message__pb2.PullObjectRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_message__pb2.PullObjectResponse.FromString,
                 )
+        self.ConfirmMessageReceived = channel.unary_unary(
+                '/flwr.proto.ServerAppIo/ConfirmMessageReceived',
+                request_serializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedResponse.FromString,
+                )
 
 
 class ServerAppIoServicer(object):
@@ -180,6 +185,13 @@ class ServerAppIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ConfirmMessageReceived(self, request, context):
+        """Confirm Message Received
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ServerAppIoServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -247,6 +259,11 @@ def add_ServerAppIoServicer_to_server(servicer, server):
                     servicer.PullObject,
                     request_deserializer=flwr_dot_proto_dot_message__pb2.PullObjectRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_message__pb2.PullObjectResponse.SerializeToString,
+            ),
+            'ConfirmMessageReceived': grpc.unary_unary_rpc_method_handler(
+                    servicer.ConfirmMessageReceived,
+                    request_deserializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -476,5 +493,22 @@ class ServerAppIo(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/PullObject',
             flwr_dot_proto_dot_message__pb2.PullObjectRequest.SerializeToString,
             flwr_dot_proto_dot_message__pb2.PullObjectResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ConfirmMessageReceived(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/ConfirmMessageReceived',
+            flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedRequest.SerializeToString,
+            flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

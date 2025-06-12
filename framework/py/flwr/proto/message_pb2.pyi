@@ -225,3 +225,29 @@ class PullObjectResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["object_available",b"object_available","object_content",b"object_content","object_found",b"object_found"]) -> None: ...
 global___PullObjectResponse = PullObjectResponse
+
+class ConfirmMessageReceivedRequest(google.protobuf.message.Message):
+    """ConfirmMessageReceived messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_FIELD_NUMBER: builtins.int
+    RUN_ID_FIELD_NUMBER: builtins.int
+    MESSAGE_OBJECT_ID_FIELD_NUMBER: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
+    run_id: builtins.int
+    message_object_id: typing.Text
+    def __init__(self,
+        *,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
+        run_id: builtins.int = ...,
+        message_object_id: typing.Text = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["message_object_id",b"message_object_id","node",b"node","run_id",b"run_id"]) -> None: ...
+global___ConfirmMessageReceivedRequest = ConfirmMessageReceivedRequest
+
+class ConfirmMessageReceivedResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___ConfirmMessageReceivedResponse = ConfirmMessageReceivedResponse

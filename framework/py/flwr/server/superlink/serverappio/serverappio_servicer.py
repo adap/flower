@@ -52,6 +52,8 @@ from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
     ObjectIDs,
     PullObjectRequest,
     PullObjectResponse,
@@ -148,8 +150,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             detail="`messages_list` must not be empty",
         )
         message_ids: list[Optional[str]] = []
-        while request.messages_list:
-            message_proto = request.messages_list.pop(0)
+        for message_proto in request.messages_list:
             message = message_from_proto(message_proto=message_proto)
             validation_errors = validate_message(message, is_reply_message=False)
             _raise_if(
@@ -215,7 +216,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                     msg_object_id=message_obj_id, descendant_ids=descendants
                 )
                 # Preregister
-                store.preregister(get_object_tree(msg_res))
+                store.preregister(request.run_id, get_object_tree(msg_res))
 
         # Delete the instruction Messages and their replies if found
         message_ins_ids_to_delete = {
@@ -480,6 +481,25 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 object_content=content,
             )
         return PullObjectResponse(object_found=False, object_available=False)
+
+    def ConfirmMessageReceived(
+        self, request: ConfirmMessageReceivedRequest, context: grpc.ServicerContext
+    ) -> ConfirmMessageReceivedResponse:
+        """Confirm message received."""
+        log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
+
+        # Init state
+        state: LinkState = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
+
+        raise NotImplementedError
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:

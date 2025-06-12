@@ -75,3 +75,11 @@ message PullObjectResponse {
   bool object_available = 2;
   bytes object_content = 3;
 }
+
+// ConfirmMessageReceived messages
+message ConfirmMessageReceivedRequest {
+  Node node = 1;
+  uint64 run_id = 2;
+  string message_object_id = 3;
+}
+message ConfirmMessageReceivedResponse {}

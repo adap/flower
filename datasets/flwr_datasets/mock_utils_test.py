@@ -210,7 +210,7 @@ def generate_random_audio_column(
 ) -> list[dict[str, Any]]:
     """Simulate the audio column.
 
-    Audio column in the datset is comprised from an array or floats, sample_rate and a
+    Audio column in the dataset is comprised from an array or floats, sample_rate and a
     path.
     """
     # Generate numpy images
