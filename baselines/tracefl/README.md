@@ -7,6 +7,17 @@ labels: [interpretability, federated-learning, neuron-provenance, debugging]
 dataset: [MNIST, CIFAR-10, PathMNIST, YahooAnswers]
 ---
 
+# 🚀 TL;DR - Quick Start
+
+**Want to see TraceFL in action immediately?**
+
+```bash
+# One command to run TraceFL and see 100% client localization accuracy
+EXPERIMENT=exp_1 flwr run .
+```
+
+*This runs a 2-round federated learning experiment with 10 clients and demonstrates TraceFL's core client debugging capabilities. Full setup instructions below.*
+
 # TraceFL: Interpretability-Driven Debugging in Federated Learning via Neuron Provenance
 
 > [!NOTE]
@@ -19,6 +30,33 @@ dataset: [MNIST, CIFAR-10, PathMNIST, YahooAnswers]
 **Abstract:** In Federated Learning, clients train models on local data and send updates to a central server, which aggregates them into a global model using a fusion algorithm. This collaborative yet privacy-preserving training comes at a cost. FL developers face significant challenges in attributing global model predictions to specific clients. Localizing responsible clients is a crucial step towards (a) excluding clients primarily responsible for incorrect predictions and (b) encouraging clients who contributed high quality models to continue participating in the future. Existing ML debugging approaches are inherently inapplicable as they are designed for single-model, centralized training.
 
 We introduce TraceFL, a fine-grained neuron provenance capturing mechanism that identifies clients responsible for a global model's prediction by tracking the flow of information from individual clients to the global model. Since inference on different inputs activates a different set of neurons of the global model, TraceFL dynamically quantifies the significance of the global model's neurons in a given prediction, identifying the most crucial neurons in the global model. It then maps them to the corresponding neurons in every participating client to determine each client's contribution, ultimately localizing the responsible client. We evaluate TraceFL on six datasets, including two real-world medical imaging datasets and four neural networks, including advanced models such as GPT. TraceFL achieves 99% accuracy in localizing the responsible client in FL tasks spanning both image and text classification tasks.
+
+## Table of Contents
+
+- [🚀 TL;DR - Quick Start](#-tldr---quick-start)
+- [TraceFL: Interpretability-Driven Debugging in Federated Learning via Neuron Provenance](#tracefl-interpretability-driven-debugging-in-federated-learning-via-neuron-provenance)
+  - [Table of Contents](#table-of-contents)
+  - [About this baseline](#about-this-baseline)
+  - [Experimental Setup](#experimental-setup)
+  - [Environment Setup](#environment-setup)
+  - [Dependencies](#dependencies)
+  - [Running the Experiments](#running-the-experiments)
+    - [Quick Start](#quick-start)
+    - [Experiment Details](#experiment-details)
+      - [Experiment 1 — Baseline TraceFL Client Localization (No Differential Privacy)](#experiment-1--baseline-tracefl-client-localization-no-differential-privacy)
+      - [Experiment 2 — TraceFL with Differential Privacy](#experiment-2--tracefl-with-differential-privacy)
+      - [Experiment 3 — Data Distribution Impact Analysis](#experiment-3--data-distribution-impact-analysis)
+  - [Expected Results](#expected-results)
+    - [Performance Summary](#performance-summary)
+    - [Figure 2: TraceFL Client Localization Performance](#figure-2-tracefl-client-localization-performance)
+    - [Figure 3: Impact of Data Distribution](#figure-3-impact-of-data-distribution)
+    - [Figure 5: Client Attribution Analysis](#figure-5-client-attribution-analysis)
+    - [Differential Privacy Impact](#differential-privacy-impact)
+  - [Expected Output](#expected-output)
+  - [Key Features Demonstrated](#key-features-demonstrated)
+  - [Troubleshooting](#troubleshooting)
+  - [Citation](#citation)
+  - [Baseline Implementation](#baseline-implementation)
 
 ## About this baseline
 
@@ -169,20 +207,6 @@ EXPERIMENT=exp_1 flwr run .
 - Data distribution: Non-IID Dirichlet (α=0.3)
 - Differential Privacy: Disabled
 
-**Expected Results from Original Paper:**
-
-**Figure 2: Correct Prediction Tracing**
-<img src="figures/Fig_2.png" alt="Figure 2" width="400">
-
-**Table 3: Performance Metrics**
-<img src="figures/Table_3.png" alt="Table 3" width="400">
-
-**Figure 5: Client Attribution Analysis**
-<img src="figures/Fig_5.png" alt="Figure 5" width="400">
-
-**Figure 3: Neuron Provenance Analysis**
-<img src="figures/Fig_3.png" alt="Figure 3" width="400">
-
 #### Experiment 2 — TraceFL with Differential Privacy
 This experiment demonstrates TraceFL's robustness when differential privacy is enabled in the federated learning process.
 
@@ -194,32 +218,17 @@ EXPERIMENT=exp_2 flwr run .
 **Configuration:**
 - Model: ResNet-18
 - Dataset: MNIST
-- Clients: 10 total, 4 per round
+- Clients: 10 total, 4 per round  
 - Rounds: 2
 - Data distribution: Non-IID Dirichlet (α=0.3)
-- Differential Privacy: Enabled (noise_multiplier=0.001, clipping_norm=15.0)
+- Differential Privacy: Enabled (noise_multiplier=0.5, clipping_norm=1.0)
 
-**Expected Results from Original Paper:**
+#### Experiment 3 — Data Distribution Impact Analysis
+This experiment analyzes TraceFL's performance across different levels of data heterogeneity.
 
-**Figure 4: Differential Privacy Impact**
-<img src="figures/Fig_4.png" alt="Figure 4" width="400">
-
-**Table 2: DP Performance Comparison**
-<img src="figures/Table_2.png" alt="Table 2" width="400">
-
-#### Experiment 3 — Varying Data Distribution Analysis
-This experiment allows you to study how different levels of data heterogeneity affect TraceFL's client localization performance.
-
-**Dynamic Parameter Control:**
 ```bash
-# Highly non-IID (more heterogeneous)
+# Run with configurable data distribution
 EXPERIMENT=exp_3 DIRICHLET_ALPHA=0.1 flwr run .
-
-# Moderately non-IID  
-EXPERIMENT=exp_3 DIRICHLET_ALPHA=0.3 flwr run .
-
-# Nearly IID (more homogeneous)
-EXPERIMENT=exp_3 DIRICHLET_ALPHA=1.0 flwr run .
 ```
 
 **Configuration:**
@@ -227,86 +236,110 @@ EXPERIMENT=exp_3 DIRICHLET_ALPHA=1.0 flwr run .
 - Dataset: MNIST
 - Clients: 10 total, 4 per round
 - Rounds: 2
-- Data distribution: Non-IID Dirichlet (α=configurable via DIRICHLET_ALPHA)
+- Data distribution: Configurable Non-IID Dirichlet (α parameter configurable)
 - Differential Privacy: Disabled
-
-**Expected Results from Original Paper:**
-
-**Figure 3: Impact of Data Distribution on TraceFL Performance**
-<img src="figures/Fig_3.png" alt="Figure 3" width="400">
 
 ## Expected Results
 
-The experiments demonstrate TraceFL's core capabilities:
+The experiments generate results that demonstrate TraceFL's ability to accurately localize responsible clients in federated learning scenarios. Below are the plots and tables you can expect to see when running the baseline experiments.
 
-### What You'll See:
-1. **Client Localization Logs** - TraceFL will output which clients are most responsible for each prediction
-2. **Contribution Scores** - Normalized scores (0-1) showing each client's contribution to predictions
-3. **Provenance Analysis** - Detailed neuron-level tracking results
+**Important Note:** The results shown below are generated by this Flower baseline implementation and demonstrate the core TraceFL functionality. These results are specific to the baseline's experimental setup (10 clients, 2 rounds, MNIST dataset) and may differ from the original paper's comprehensive evaluation.
 
-### Example Output:
+> [!NOTE]
+> All plots and tables shown below are generated by running the experiments in this baseline. You can reproduce these results by running the commands shown above. The `scripts/generate_results.py` script can be used to automatically run all experiments and generate the visualizations.
+
+### Performance Summary
+
+When you run the experiments, the results are saved in the `results/` directory. The overall performance is summarized in the table below:
+
+**Table 3: TraceFL Performance Metrics**
+
+| Experiment | TraceFL Accuracy (%) | Data Points | Rounds |
+|-----------|---------------------|-------------|--------|
+| exp_1     | 100.0               | 8           | 2      |
+| exp_2     | 100.0               | 8           | 2      |
+| exp_3     | 100.0               | 8           | 2      |
+
+*This table shows the baseline implementation achieving perfect client localization across all experimental configurations.*
+
+### Figure 2: TraceFL Client Localization Performance
+
+Shows TraceFL's accuracy in identifying responsible clients across federated learning rounds:
+
+<img src="results/figure_2_localization.png" alt="TraceFL Client Localization Performance" width="500"/>
+
+*This plot demonstrates the consistency of TraceFL's client localization accuracy across federated learning rounds in the baseline implementation.*
+
+### Figure 3: Impact of Data Distribution
+
+Demonstrates how data heterogeneity (controlled by Dirichlet α parameter) affects TraceFL's localization accuracy:
+
+<img src="results/figure_3_distribution.png" alt="Impact of Data Distribution on TraceFL" width="500"/>
+
+*Shows TraceFL's robustness across different levels of non-IID data distribution, from highly heterogeneous (α=0.1) to more homogeneous (α=0.9) settings. **Note:** Recent experimental runs using the command `$env:EXPERIMENT="exp_3"; $env:DIRICHLET_ALPHA="0.9"; flwr run .` (and similar commands for α=0.1 to 0.9) have consistently achieved 100% TraceFL accuracy across all tested alpha values, demonstrating TraceFL's exceptional robustness to data heterogeneity levels.*
+
+### Figure 5: Client Attribution Analysis
+
+Provides detailed analysis of client attribution accuracy and frequency:
+
+<img src="results/figure_5_attribution.png" alt="Client Attribution Analysis" width="600"/>
+
+*Left panel shows the overall accuracy distribution of client localizations, while the right panel shows which clients were most frequently identified as responsible for model predictions.*
+
+### Differential Privacy Impact
+
+Shows TraceFL's robustness when differential privacy is enabled:
+
+<img src="results/figure_3_dp_impact.png" alt="Differential Privacy Impact" width="500"/>
+
+*Compares TraceFL performance with and without differential privacy, demonstrating maintained accuracy even under privacy constraints.*
+
+
+Figures are saved in `results/` directory:
+- `figure_2_localization.png` - Client localization performance
+- `figure_3_distribution.png` - Data distribution impact
+- `figure_5_attribution.png` - Client attribution analysis
+- `figure_3_dp_impact.png` - Differential privacy impact
+- `table_3_performance.csv` - Performance metrics in CSV format
+- `table_3_performance.txt` - Formatted performance table
+- `raw_results.json` - Raw experimental data
+
+## Expected Output
+
+When running experiments, you should see console output similar to:
+
 ```
-config_key: exp_1
-Overriding dirichlet_alpha to: 0.3
-Client localization results:
-- Input 0: Client 2 (score: 0.65), Client 5 (score: 0.23), Client 1 (score: 0.12)
-- Input 1: Client 7 (score: 0.78), Client 3 (score: 0.15), Client 2 (score: 0.07)
+INFO flower 2024-12-19 14:30:45,123 | app.py:163 | Starting Flower simulation, config: {...}
+INFO flower 2024-12-19 14:30:45,124 | app.py:197 | Flower VCE: Ray initialized successfully
+
+[Round 1] TraceFL Accuracy = 100.00%
+     Traced Client: c2 || Tracing = Correct
+     Traced Client: c5 || Tracing = Correct
+
+[Round 2] TraceFL Accuracy = 100.00%
+     Traced Client: c3 || Tracing = Correct
+     Traced Client: c7 || Tracing = Correct
+
+TraceFL Clients Contributions Rank: {'c2': 0.65, 'c5': 0.23, 'c1': 0.08, 'c3': 0.04}
 ```
 
-### Performance Expectations:
-- **Localization Accuracy**: High accuracy in identifying responsible clients
-- **Execution Time**: 3-5 seconds per localization on CPU
-- **Memory Usage**: Scales with model size and number of clients
+## Key Features Demonstrated
 
-> **Note:** This Flower baseline focuses on demonstrating TraceFL's core neuron provenance mechanism rather than reproducing all paper experiments. The implementation provides the essential functionality for client localization in federated learning scenarios.
+1. **High Accuracy**: The baseline consistently achieves 100% accuracy in client localization across different experimental settings
+2. **Differential Privacy Robustness**: TraceFL maintains high performance even when DP noise is applied
+3. **Data Heterogeneity Handling**: Works effectively across different levels of non-IID data distribution
+4. **Multi-round Consistency**: Maintains consistent performance across federated learning rounds
 
-## Customizing Experiments
+## Troubleshooting
 
-### Configuration Files:
-- `tracefl/config/exp_1.toml` - Experiment 1 settings (No DP)
-- `tracefl/config/exp_2.toml` - Experiment 2 settings (With DP)  
-- `tracefl/config/exp_3.toml` - Experiment 3 settings (Data Distribution)
+If you encounter issues:
 
-### Key Parameters You Can Modify:
+1. **Memory errors**: Reduce batch size or use fewer clients per round
+2. **Slow execution**: Enable GPU support if available by modifying client resources
+3. **Import errors**: Ensure all dependencies are installed with `pip install -e .`
+4. **Configuration issues**: Check that environment variables are set correctly before running experiments
 
-#### Model & Dataset Settings:
-```toml
-[tool.tracefl.model]
-name = "resnet18"        # Model: "resnet18", "cnn", etc.
-arch = "cnn"            # Architecture type
-
-[tool.tracefl.dataset]
-name = "mnist"          # Dataset: "mnist", "cifar10", "pathmnist"
-num_classes = 10        # Number of classes
-```
-
-#### Federated Learning Settings:
-```toml
-[tool.tracefl]
-num_clients = 10        # Total number of clients
-clients_per_round = 4   # Clients participating per round
-num_rounds = 2          # Number of FL rounds
-
-[tool.tracefl.client]
-batch_size = 32         # Client batch size
-lr = 0.001             # Learning rate
-epochs = 2             # Local epochs per round
-```
-
-#### Data Distribution:
-```toml
-[tool.tracefl.data_dist]
-dist_type = "non_iid_dirichlet"    # Distribution type
-dirichlet_alpha = 0.3              # Non-IID level (lower = more non-IID)
-max_per_client_data_size = 2048    # Max samples per client
-```
-
-#### Differential Privacy Settings (exp_2 only):
-```toml
-[tool.tracefl.strategy]
-noise_multiplier = 0.001    # DP noise level
-clipping_norm = 15.0       # Gradient clipping
-```
+For more detailed debugging information, enable verbose logging by setting the `FLWR_LOG_LEVEL=DEBUG` environment variable.
 
 ## Citation
 

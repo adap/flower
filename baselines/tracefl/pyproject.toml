@@ -30,7 +30,8 @@ dependencies = [
   "numpy==1.26.4",
   "pandas==2.2.2",
   "scikit-learn==1.4.2",
-  "matplotlib==3.8.3",
+  "matplotlib>=3.5.0",
+  "seaborn>=0.11.0",
   
   # Provenance
   "networkx==3.2.1",
