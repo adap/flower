@@ -77,7 +77,7 @@ message GetNodesResponse { repeated Node nodes = 1; }
 message PushInsMessagesRequest {
   repeated Message messages_list = 1;
   uint64 run_id = 2;
-  map<string, ObjectIDs> msg_to_descendant_mapping = 3;
+  repeated ObjectTree message_object_trees = 3;
 }
 message PushInsMessagesResponse {
   repeated string message_ids = 1;
