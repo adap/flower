@@ -28,6 +28,7 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.inflatable import (
+    get_all_nested_objects,
     get_descendant_object_ids,
     get_object_id,
     get_object_tree,
@@ -43,6 +44,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushMessagesResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
     ObjectTree,
     PullObjectRequest,
     PullObjectResponse,
@@ -119,6 +122,11 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.Fleet/PullObject",
             request_serializer=PullObjectRequest.SerializeToString,
             response_deserializer=PullObjectResponse.FromString,
+        )
+        self._confirm_message_received = self._channel.unary_unary(
+            "/flwr.proto.Fleet/ConfirmMessageReceived",
+            request_serializer=ConfirmMessageReceivedRequest.SerializeToString,
+            response_deserializer=ConfirmMessageReceivedResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -505,3 +513,39 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         res: PullObjectResponse = self._pull_object(req)
         # Empty response
         assert not res.object_found
+
+    def test_confirm_message_received_successful(self) -> None:
+        """Test `ConfirmMessageReceived` functionality."""
+        # Prepare
+        node_id = self.state.create_node(heartbeat_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        self._transition_run_status(run_id, 2)
+
+        # Prepare: Create a message
+        msg_proto = create_res_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+        )
+        message = message_from_proto(msg_proto)
+        # pylint: disable-next=E1137
+        message.content["test_config"] = ConfigRecord({"a": 123, "b": [4, 5, 6]})
+        message.metadata.__dict__["_message_id"] = message.object_id
+
+        # Prepare: Store message in ObjectStore
+        all_objects = get_all_nested_objects(message)
+        self._register_in_object_store(message)
+        for obj_id, obj in all_objects.items():
+            self.store.put(object_id=obj_id, object_content=obj.deflate())
+
+        # Assert: Message is in ObjectStore
+        assert len(self.store) == len(all_objects)
+
+        # Execute: Confirm message received
+        req = ConfirmMessageReceivedRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            message_object_id=message.object_id,
+        )
+        self._confirm_message_received(request=req)
+
+        # Assert: Message is removed from ObjectStore
+        assert len(self.store) == 0
