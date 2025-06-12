@@ -10,7 +10,7 @@ The [MMLU](https://huggingface.co/datasets/lukaemon/mmlu) dataset is used for th
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/benchmarks/flowertune-llm/evaluation/general-nlp ./flowertune-eval-general-nlp && rm -rf flower && cd flowertune-eval-general-nlp
 ```
 
-Create a new Python environment (we recommend Python 3.10), activate it, then install dependencies with:
+Create a new Python environment (we recommend Python 3.11), activate it, then install dependencies with:
 
 ```shell
 # From a new python environment, run:
@@ -27,6 +27,7 @@ huggingface-cli login
 
 ```bash
 python eval.py \
+--base-model-name-path=your-base-model-name \ # e.g., mistralai/Mistral-7B-v0.3
 --peft-path=/path/to/fine-tuned-peft-model-dir/ \ # e.g., ./peft_1
 --run-name=fl  \ # specified name for this run  
 --batch-size=16 \

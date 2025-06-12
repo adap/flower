@@ -32,7 +32,7 @@ from flwr_datasets.visualization.utils import _validate_parameters
 # pylint: disable=too-many-arguments,too-many-locals
 
 
-def plot_label_distributions(
+def plot_label_distributions(  # pylint: disable=R0917
     partitioner: Partitioner,
     label_name: str,
     plot_type: str = "bar",
@@ -245,5 +245,7 @@ def plot_label_distributions(
             plot_kwargs,
             legend_kwargs,
         )
-    assert axis is not None
-    return axis.figure, axis, dataframe
+    assert axis is not None, "axis is None after plotting"
+    figure = axis.figure
+    assert isinstance(figure, Figure), "figure extraction from axes is not a Figure"
+    return figure, axis, dataframe

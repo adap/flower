@@ -32,6 +32,7 @@ from flwr_datasets.mock_utils_test import (
     _load_mocked_dataset_dict_by_partial_download,
 )
 from flwr_datasets.partitioner import IidPartitioner, NaturalIdPartitioner, Partitioner
+from flwr_datasets.preprocessor.divider import Divider
 
 mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
 
@@ -567,6 +568,57 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             _ = fds.load_partition(0)
+
+    def test_incorrect_two_partitioners(self) -> None:
+        """Test if the method raises ValueError with incorrect partitioners."""
+        partitioner = IidPartitioner(num_partitions=10)
+        partitioners: dict[str, Union[Partitioner, int]] = {
+            "train": partitioner,
+            "test": partitioner,
+        }
+        first_split = "train"
+        second_split = "test"
+        with self.assertRaises(ValueError) as context:
+            FederatedDataset(
+                dataset="mnist",
+                partitioners=partitioners,
+            )
+        self.assertIn(
+            f"The same partitioner object is used for multiple splits: "
+            f"('{first_split}', '{second_split}'). "
+            "Each partitioner should be a separate object.",
+            str(context.exception),
+        )
+
+    def test_incorrect_three_partitioners(self) -> None:
+        """Test if the method raises ValueError with incorrect partitioners."""
+        partitioner = IidPartitioner(num_partitions=10)
+        partitioners: dict[str, Union[int, Partitioner]] = {
+            "train1": partitioner,
+            "train2": 10,
+            "test": partitioner,
+        }
+        divider = Divider(
+            divide_config={
+                "train1": 0.5,
+                "train2": 0.5,
+            },
+            divide_split="train",
+        )
+
+        with self.assertRaises(
+            ValueError,
+        ) as context:
+
+            FederatedDataset(
+                dataset="mnist", partitioners=partitioners, preprocessor=divider
+            )
+
+        self.assertIn(
+            "The same partitioner object is used for multiple splits: "
+            "('train1', 'test'). Each partitioner should be a separate object.",
+            str(context.exception),
+        )
 
 
 def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
