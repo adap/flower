@@ -132,7 +132,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         # Handle `flwr ls --runs`
         if not request.HasField("run_id"):
-            return _create_list_runs_response(state.get_run_ids(), state)
+            return _create_list_runs_response(state.get_run_ids(None), state)
         # Handle `flwr ls --run-id <run_id>`
         return _create_list_runs_response({request.run_id}, state)
 

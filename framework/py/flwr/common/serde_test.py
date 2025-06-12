@@ -471,6 +471,7 @@ def test_run_serialization_deserialization() -> None:
         running_at="2021-01-03T12:00:50Z",
         finished_at="",
         status=typing.RunStatus(status="running", sub_status="", details="OK"),
+        flwr_aid="user123",
     )
 
     # Execute
