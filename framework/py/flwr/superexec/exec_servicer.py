@@ -105,11 +105,12 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         if not run:
             context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
 
-        # Assign `flwr_aid` if auth_plugin is enabled
-        flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
-
-        # Exit if `flwr_aid` does not match the run's `flwr_aid`
-        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=cast(Run, run), context=context)
+        # If user auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
+        if self.auth_plugin:
+            flwr_aid = shared_account_info.get().flwr_aid
+            _check_flwr_aid_in_run(
+                flwr_aid=flwr_aid, run=cast(Run, run), context=context
+            )
 
         after_timestamp = request.after_timestamp + 1e-6
         while context.is_active():
@@ -145,7 +146,20 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         # Build a set of run IDs for `flwr ls --runs`
         if not request.HasField("run_id"):
-            run_ids = state.get_run_ids(flwr_aid=flwr_aid)
+            if self.auth_plugin:
+                # If no `run_id` is specified and user auth is enabled,
+                # return run IDs for the authenticated user
+                flwr_aid = shared_account_info.get().flwr_aid
+                if flwr_aid is None:
+                    context.abort(
+                        grpc.StatusCode.PERMISSION_DENIED,
+                        "️⛔️ User authentication is enabled, but `flwr_aid` is None",
+                    )
+                run_ids = state.get_run_ids(flwr_aid=flwr_aid)
+            else:
+                # If no `run_id` is specified and no user auth is enabled,
+                # return all run IDs
+                run_ids = state.get_run_ids(None)
         # Build a set of run IDs for `flwr ls --run-id <run_id>`
         else:
             # Retrieve run ID and run
@@ -156,10 +170,13 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             if not run:
                 context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
 
-            # Exit if `flwr_aid` does not match the run's `flwr_aid`
-            _check_flwr_aid_in_run(
-                flwr_aid=flwr_aid, run=cast(Run, run), context=context
-            )
+            # If user auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
+            if self.auth_plugin:
+                flwr_aid = shared_account_info.get().flwr_aid
+                _check_flwr_aid_in_run(
+                    flwr_aid=flwr_aid, run=cast(Run, run), context=context
+                )
+
             run_ids = {run_id}
 
         return _create_list_runs_response(run_ids, state)
@@ -179,11 +196,12 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         if not run:
             context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
 
-        # Assign `flwr_aid` if auth_plugin is enabled
-        flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
-
-        # Exit if `flwr_aid` does not match the run's `flwr_aid`
-        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=cast(Run, run), context=context)
+        # If user auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
+        if self.auth_plugin:
+            flwr_aid = shared_account_info.get().flwr_aid
+            _check_flwr_aid_in_run(
+                flwr_aid=flwr_aid, run=cast(Run, run), context=context
+            )
 
         run_status = state.get_run_status({run_id})[run_id]
         if run_status.status == Status.FINISHED:
@@ -267,11 +285,26 @@ def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsR
 
 
 def _check_flwr_aid_in_run(
-    flwr_aid: Optional[str],
-    run: Run,
-    context: grpc.ServicerContext,
+    flwr_aid: Optional[str], run: Run, context: grpc.ServicerContext
 ) -> None:
-    if run.flwr_aid and flwr_aid is not None and run.flwr_aid != flwr_aid:
+    """Guard clause to check if `flwr_aid` matches the run's `flwr_aid`."""
+    # `flwr_aid` must not be None. Abort if it is None.
+    if flwr_aid is None:
+        context.abort(
+            grpc.StatusCode.PERMISSION_DENIED,
+            "️⛔️ User authentication is enabled, but `flwr_aid` is None",
+        )
+
+    run_flwr_aid = run.flwr_aid
+    if run_flwr_aid is None:
+        context.abort(
+            grpc.StatusCode.PERMISSION_DENIED,
+            "⛔️ User authentication is enabled, but the run is not associated "
+            "with a `flwr_aid`.",
+        )
+
+    # Exit if `flwr_aid` does not match the run's `flwr_aid`
+    if run_flwr_aid != flwr_aid:
         context.abort(
             grpc.StatusCode.PERMISSION_DENIED,
             "⛔️ Run ID does not belong to the user",
