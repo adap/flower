@@ -159,7 +159,7 @@ class InMemoryObjectStore(ObjectStore):
                 return None
 
             # Return content (if not yet available, it will b"")
-            return self.store[object_id]
+            return self.store[object_id].content
 
     def delete(self, object_id: str) -> None:
         """Delete an object and its unreferenced descendants from the store."""
