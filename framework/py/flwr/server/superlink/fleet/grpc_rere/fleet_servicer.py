@@ -232,4 +232,13 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             request.message_object_id,
         )
 
-        raise NotImplementedError
+        try:
+            res = message_handler.confirm_message_received(
+                request=request,
+                state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res

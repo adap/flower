@@ -47,6 +47,9 @@ from flwr.common.message import remove_content_from_message
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
@@ -308,6 +311,13 @@ class GrpcGrid(Grid):
                         node=self.node,
                         run_id=run_id,
                     ),
+                )
+
+                # Confirm that the message has been received
+                self._stub.ConfirmMessageReceived(
+                    ConfirmMessageReceivedRequest(
+                        node=self.node, run_id=run_id, message_object_id=msg_id
+                    )
                 )
                 message = cast(
                     Message, inflate_object_from_contents(msg_id, all_object_contents)
