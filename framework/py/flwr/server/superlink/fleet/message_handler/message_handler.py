@@ -44,6 +44,8 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
     ObjectIDs,
     PullObjectRequest,
     PullObjectResponse,
@@ -146,6 +148,7 @@ def push_messages(
         msg.metadata.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
+        store,
     )
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
@@ -165,7 +168,9 @@ def push_messages(
     return response
 
 
-def get_run(request: GetRunRequest, state: LinkState) -> GetRunResponse:
+def get_run(
+    request: GetRunRequest, state: LinkState, store: ObjectStore
+) -> GetRunResponse:
     """Get run information."""
     run = state.get_run(request.run_id)
 
@@ -177,6 +182,7 @@ def get_run(request: GetRunRequest, state: LinkState) -> GetRunResponse:
         request.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
+        store,
     )
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
@@ -193,7 +199,7 @@ def get_run(request: GetRunRequest, state: LinkState) -> GetRunResponse:
 
 
 def get_fab(
-    request: GetFabRequest, ffs: Ffs, state: LinkState  # pylint: disable=W0613
+    request: GetFabRequest, ffs: Ffs, state: LinkState, store: ObjectStore
 ) -> GetFabResponse:
     """Get FAB."""
     # Abort if the run is not running
@@ -201,6 +207,7 @@ def get_fab(
         request.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
+        store,
     )
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
@@ -220,6 +227,7 @@ def push_object(
         request.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
+        store,
     )
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
@@ -245,6 +253,7 @@ def pull_object(
         request.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
+        store,
     )
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
@@ -259,3 +268,25 @@ def pull_object(
             object_content=content,
         )
     return PullObjectResponse(object_found=False, object_available=False)
+
+
+def confirm_message_received(
+    request: ConfirmMessageReceivedRequest,
+    state: LinkState,
+    store: ObjectStore,
+) -> ConfirmMessageReceivedResponse:
+    """Confirm message received handler."""
+    abort_msg = check_abort(
+        request.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+        store,
+    )
+    if abort_msg:
+        raise InvalidRunStatusException(abort_msg)
+
+    # Delete the message object
+    store.delete(request.message_object_id)
+    store.delete_message_descendant_ids(request.message_object_id)
+
+    return ConfirmMessageReceivedResponse()
