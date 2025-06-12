@@ -47,7 +47,7 @@ def test_start_run() -> None:
         run_res.proc = proc
 
     executor = MagicMock()
-    executor.start_run = lambda _, __, ___: run_res.run_id
+    executor.start_run.return_value = run_res.run_id
 
     context_mock = MagicMock()
 
@@ -80,7 +80,7 @@ class TestExecServicer(unittest.TestCase):
         run_ids = set()
         for _ in range(3):
             run_id = self.state.create_run(
-                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord()
+                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), "user123"
             )
             run_ids.add(run_id)
 
@@ -97,7 +97,7 @@ class TestExecServicer(unittest.TestCase):
         # Prepare
         for _ in range(3):
             run_id = self.state.create_run(
-                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord()
+                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), "user123"
             )
 
         # Execute
@@ -112,7 +112,7 @@ class TestExecServicer(unittest.TestCase):
         """Test StopRun method of ExecServicer."""
         # Prepare
         run_id = self.state.create_run(
-            "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigRecord()
+            "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigRecord(), "user123"
         )
         self.servicer.executor = MagicMock()
         expected_run_status = RunStatus(Status.FINISHED, SubStatus.STOPPED, "")

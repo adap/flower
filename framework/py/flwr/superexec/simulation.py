@@ -77,6 +77,7 @@ class SimulationEngine(Executor):
         fab_file: bytes,
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str],
     ) -> Optional[int]:
         """Start run using the Flower Simulation Engine."""
         try:
@@ -96,7 +97,12 @@ class SimulationEngine(Executor):
             fab_id, fab_version = get_fab_metadata(fab.content)
 
             run_id = self.linkstate.create_run(
-                fab_id, fab_version, fab_hash, override_config, federation_options
+                fab_id,
+                fab_version,
+                fab_hash,
+                override_config,
+                federation_options,
+                flwr_aid,
             )
 
             # Create an empty context for the Run
