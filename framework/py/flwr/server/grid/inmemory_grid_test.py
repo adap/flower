@@ -189,7 +189,7 @@ class TestInMemoryGrid(unittest.TestCase):
         """Test messages are deleted in sqlite state once messages are pulled."""
         # Prepare
         state = LinkStateFactory("").state()
-        run_id = state.create_run("", "", "", {}, ConfigRecord())
+        run_id = state.create_run("", "", "", {}, ConfigRecord(), "")
         self.grid = InMemoryGrid(MagicMock(state=lambda: state))
         self.grid.set_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.grid, self.num_nodes)
@@ -216,7 +216,7 @@ class TestInMemoryGrid(unittest.TestCase):
         # Prepare
         state_factory = LinkStateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
-        run_id = state.create_run("", "", "", {}, ConfigRecord())
+        run_id = state.create_run("", "", "", {}, ConfigRecord(), "")
         self.grid = InMemoryGrid(state_factory)
         self.grid.set_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.grid, self.num_nodes)
