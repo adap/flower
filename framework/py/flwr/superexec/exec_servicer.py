@@ -50,6 +50,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
+from .exec_user_auth_interceptor import shared_account_info
 from .executor import Executor
 
 
@@ -75,10 +76,12 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
 
+        flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
         run_id = self.executor.start_run(
             request.fab.content,
             user_config_from_proto(request.override_config),
             config_record_from_proto(request.federation_options),
+            flwr_aid,
         )
 
         if run_id is None:
