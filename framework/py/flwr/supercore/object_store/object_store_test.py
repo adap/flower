@@ -20,8 +20,9 @@ from abc import abstractmethod
 
 from parameterized import parameterized
 
-from flwr.common.inflatable import get_object_id
+from flwr.common.inflatable import get_object_id, get_object_tree
 from flwr.common.inflatable_test import CustomDataClass
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 from .in_memory_object_store import InMemoryObjectStore
 from .object_store import NoObjectInStoreError, ObjectStore
@@ -57,7 +58,7 @@ class ObjectStoreTest(unittest.TestCase):
         obj = CustomDataClass(data=b"test_value")
         object_content = obj.deflate()
         object_id = get_object_id(object_content)
-        object_store.preregister(object_ids=[object_id])
+        object_store.preregister(get_object_tree(obj))
 
         # Execute
         object_store.put(object_id, object_content)
@@ -73,7 +74,7 @@ class ObjectStoreTest(unittest.TestCase):
         obj = CustomDataClass(data=b"test_value")
         object_content = obj.deflate()
         object_id = get_object_id(object_content)
-        object_store.preregister(object_ids=[object_id])
+        object_store.preregister(get_object_tree(obj))
 
         # Execute
         object_store.put(object_id, object_content)
@@ -90,16 +91,11 @@ class ObjectStoreTest(unittest.TestCase):
         obj = CustomDataClass(data=b"test_value")
         object_content = obj.deflate()
         object_id = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        object_store.preregister(object_ids=[object_id])
+        object_store.preregister(ObjectTree(object_id=object_id))
 
-        # Execute
-        try:
+        # Execute and assert
+        with self.assertRaises(ValueError):
             object_store.put(object_id, object_content)
-            # Assert
-            raise AssertionError("Expected ValueError not raised")
-        except ValueError:
-            # Assert
-            assert True
 
     def test_delete(self) -> None:
         """Test delete method."""
@@ -108,7 +104,7 @@ class ObjectStoreTest(unittest.TestCase):
         obj = CustomDataClass(data=b"test_value")
         object_content = obj.deflate()
         object_id = get_object_id(object_content)
-        object_store.preregister(object_ids=[object_id])
+        object_store.preregister(get_object_tree(obj))
         object_store.put(object_id, object_content)
 
         # Execute
@@ -134,11 +130,11 @@ class ObjectStoreTest(unittest.TestCase):
         obj = CustomDataClass(data=b"test_value1")
         object_content1 = obj.deflate()
         object_id1 = get_object_id(object_content1)
-        object_store.preregister(object_ids=[object_id1])
+        object_store.preregister(get_object_tree(obj))
         obj = CustomDataClass(data=b"test_value2")
         object_content2 = obj.deflate()
         object_id2 = get_object_id(object_content2)
-        object_store.preregister(object_ids=[object_id2])
+        object_store.preregister(get_object_tree(obj))
 
         object_store.put(object_id1, object_content1)
         object_store.put(object_id2, object_content2)
@@ -169,7 +165,7 @@ class ObjectStoreTest(unittest.TestCase):
         obj = CustomDataClass(data=b"test_value1")
         object_content = obj.deflate()
         object_id = get_object_id(object_content)
-        object_store.preregister(object_ids=[object_id])
+        object_store.preregister(get_object_tree(obj))
         object_store.put(object_id, object_content)
         unavailable = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
@@ -197,24 +193,25 @@ class ObjectStoreTest(unittest.TestCase):
         """Test preregister functionality."""
         # Prepare
         object_store = self.object_store_factory()
-        obj = CustomDataClass(data=b"test_value1")
-        object_content1 = obj.deflate()
+        obj1 = CustomDataClass(data=b"test_value1")
+        object_content1 = obj1.deflate()
         object_id1 = get_object_id(object_content1)
-        obj = CustomDataClass(data=b"test_value2")
-        object_content2 = obj.deflate()
+        obj2 = CustomDataClass(data=b"test_value2")
+        object_content2 = obj2.deflate()
         object_id2 = get_object_id(object_content2)
 
         # Execute (preregister all)
-        not_present = object_store.preregister(object_ids=[object_id1, object_id2])
+        not_present = object_store.preregister(get_object_tree(obj1))
+        not_present += object_store.preregister(get_object_tree(obj2))
 
         # Assert (none was present)
         self.assertEqual([object_id1, object_id2], not_present)
 
-        obj = CustomDataClass(data=b"test_value3")
-        object_content3 = obj.deflate()
+        obj3 = CustomDataClass(data=b"test_value3")
+        object_content3 = obj3.deflate()
         object_id3 = get_object_id(object_content3)
         # Execute (preregister new object)
-        not_present = object_store.preregister(object_ids=[object_id3])
+        not_present = object_store.preregister(get_object_tree(obj3))
         # Assert (only new message is not present)
         self.assertEqual([object_id3], not_present)
 
@@ -226,7 +223,7 @@ class ObjectStoreTest(unittest.TestCase):
 
         # Execute
         with self.assertRaises(ValueError):
-            object_store.preregister(object_ids=[invalid_object_id])
+            object_store.preregister(ObjectTree(object_id=invalid_object_id))
 
     def test_get_message_descendants_ids(self) -> None:
         """Test setting and getting mapping of message object id and its descendants."""
