@@ -29,7 +29,11 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable import get_descendant_object_ids, get_object_id
+from flwr.common.inflatable import (
+    get_descendant_object_ids,
+    get_object_id,
+    get_object_tree,
+)
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
@@ -40,6 +44,7 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ObjectTree,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -260,7 +265,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         request = PushInsMessagesRequest(
             messages_list=[message_ins],
             run_id=run_id,
-            msg_to_descendant_mapping=descendant_mapping,
+            message_object_trees=[get_object_tree(message)],
         )
 
         # Execute
@@ -333,7 +338,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             msg_object_id=message_obj_id, descendant_ids=descendants
         )
         # Preregister
-        obj_ids_registered = self.store.preregister(descendants + [message_obj_id])
+        obj_ids_registered = self.store.preregister(get_object_tree(message))
 
         return obj_ids_registered
 
@@ -691,7 +696,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         obj_b = obj.deflate()
 
         # Pre-register object
-        self.store.preregister(object_ids=[obj.object_id])
+        self.store.preregister(get_object_tree(obj))
 
         # Execute
         req = PushObjectRequest(
@@ -740,7 +745,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Push valid object but its hash doesnt match the one passed in the request
         # Preregister under a different object-id
         fake_object_id = get_object_id(b"1234")
-        self.store.preregister(object_ids=[fake_object_id])
+        self.store.preregister(ObjectTree(object_id=fake_object_id))
 
         # Execute
         req = PushObjectRequest(
@@ -763,7 +768,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         obj_b = obj.deflate()
 
         # Preregister object
-        self.store.preregister(object_ids=[obj.object_id])
+        self.store.preregister(get_object_tree(obj))
 
         # Pull
         req = PullObjectRequest(

@@ -26,6 +26,7 @@ from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.inflatable import (
     UnexpectedObjectContentError,
     get_descendant_object_ids,
+    get_object_tree,
     no_object_id_recompute,
 )
 from flwr.common.logger import log
@@ -214,7 +215,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                     msg_object_id=message_obj_id, descendant_ids=descendants
                 )
                 # Preregister
-                store.preregister(descendants + [message_obj_id])
+                store.preregister(get_object_tree(msg_res))
 
         # Delete the instruction Messages and their replies if found
         message_ins_ids_to_delete = {
