@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "e2e-bare"
+version = "1.0.0"
+description = "Bare Federated Learning test with Flower"
+license = "Apache-2.0"
+dependencies = ["flwr[simulation,rest] @ {root:parent:parent:uri}"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "e2e_bare.server_app:app"
+clientapp = "e2e_bare.client_app:app"
+
+[tool.flwr.app.config]
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10

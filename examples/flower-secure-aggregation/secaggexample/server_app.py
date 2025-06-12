@@ -3,14 +3,14 @@
 from logging import DEBUG
 from typing import List, Tuple
 
-from flwr.common import Context, Metrics, ndarrays_to_parameters
-from flwr.common.logger import update_console_handler
-from flwr.server import Driver, LegacyContext, ServerApp, ServerConfig
-from flwr.server.strategy import FedAvg
-from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
-
 from secaggexample.task import get_weights, make_net
 from secaggexample.workflow_with_log import SecAggPlusWorkflowWithLogs
+
+from flwr.common import Context, Metrics, ndarrays_to_parameters
+from flwr.common.logger import update_console_handler
+from flwr.server import Grid, LegacyContext, ServerApp, ServerConfig
+from flwr.server.strategy import FedAvg
+from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
 
 
 # Define metric aggregation function
@@ -28,7 +28,7 @@ app = ServerApp()
 
 
 @app.main()
-def main(driver: Driver, context: Context) -> None:
+def main(grid: Grid, context: Context) -> None:
 
     is_demo = context.run_config["is-demo"]
 
@@ -40,6 +40,7 @@ def main(driver: Driver, context: Context) -> None:
     strategy = FedAvg(
         # Select all available clients
         fraction_fit=1.0,
+        min_fit_clients=5,
         # Disable evaluation in demo
         fraction_evaluate=(0.0 if is_demo else context.run_config["fraction-evaluate"]),
         min_available_clients=5,
@@ -77,4 +78,4 @@ def main(driver: Driver, context: Context) -> None:
     workflow = DefaultWorkflow(fit_workflow=fit_workflow)
 
     # Execute
-    workflow(driver, context)
+    workflow(grid, context)

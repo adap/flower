@@ -15,6 +15,7 @@
 """Flower Datasets Partitioner package."""
 
 
+from .continuous_partitioner import ContinuousPartitioner
 from .dirichlet_partitioner import DirichletPartitioner
 from .distribution_partitioner import DistributionPartitioner
 from .exponential_partitioner import ExponentialPartitioner
@@ -27,9 +28,13 @@ from .natural_id_partitioner import NaturalIdPartitioner
 from .partitioner import Partitioner
 from .pathological_partitioner import PathologicalPartitioner
 from .shard_partitioner import ShardPartitioner
+from .size_partitioner import SizePartitioner
 from .square_partitioner import SquarePartitioner
+from .vertical_even_partitioner import VerticalEvenPartitioner
+from .vertical_size_partitioner import VerticalSizePartitioner
 
 __all__ = [
+    "ContinuousPartitioner",
     "DirichletPartitioner",
     "DistributionPartitioner",
     "ExponentialPartitioner",
@@ -42,5 +47,8 @@ __all__ = [
     "Partitioner",
     "PathologicalPartitioner",
     "ShardPartitioner",
+    "SizePartitioner",
     "SquarePartitioner",
+    "VerticalEvenPartitioner",
+    "VerticalSizePartitioner",
 ]

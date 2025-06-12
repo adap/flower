@@ -10,7 +10,7 @@ flwr >= 0.18.0
 torch >= 1.10.1
 torchvision == 0.11.2
 numpy >= 1.20.0
-tqdm == 4.62.3
+tqdm == 4.66.3
 matplotlib >= 3.5.0
 scikit-image >= 0.18.1
 scikit-learn >= 0.24.2
@@ -19,7 +19,7 @@ virtualenv >= 20.24.6
 
 ##### dev-dependencies
 isort == 5.13.2
-black == 24.2.0
+black == 24.3.0
 docformatter == 1.7.5
 mypy == 0.961
 pylint == 2.8.2

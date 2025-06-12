@@ -44,8 +44,8 @@ matplotlib = "3.7.1"
 coloredlogs = "15.0.1"
 omegaconf = "2.3.0"
 tqdm = "4.66.3"
-torch = { url = "https://download.pytorch.org/whl/cu117/torch-2.0.1%2Bcu117-cp310-cp310-linux_x86_64.whl" }
-torchvision = { url = "https://download.pytorch.org/whl/cu117/torchvision-0.15.2%2Bcu117-cp310-cp310-linux_x86_64.whl" }
+torch = "2.6.0"
+torchvision = "0.21.0"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.13.2"
@@ -56,7 +56,7 @@ pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
-ruff = "==0.0.272"
+ruff = "==0.4.5"
 types-requests = "==2.27.7"
 virtualenv = "==20.21.0"
 
