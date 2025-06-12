@@ -1,25 +1,21 @@
-"""Define your client class and a function to construct such clients.
-
-Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function
-to instantiate your client.
-"""
+"""fedpft: A Flower Baseline."""
 
 from collections import OrderedDict
-from typing import Callable, Dict, List, Tuple
+from typing import Dict, Tuple
 
-import flwr as fl
 import torch
-from flwr.common.typing import NDArrays, Scalar
-from hydra.utils import instantiate
-from omegaconf import DictConfig
 from torch import nn
 from torch.utils.data import DataLoader
 
-from fedpft.models import extract_features, test, train
+from fedpft.dataset import load_data
+from fedpft.model import clip_vit, extract_features, resnet50, test, train, transform
 from fedpft.utils import gmmparam_to_ndarrays, learn_gmm
+from flwr.client import ClientApp, NumPyClient
+from flwr.common import Context
+from flwr.common.typing import NDArrays, Scalar
 
 
-class FedPFTClient(fl.client.NumPyClient):
+class FedPFTClient(NumPyClient):
     """Flower FedPFTClient."""
 
     # pylint: disable=too-many-arguments
@@ -131,42 +127,58 @@ class FedAvgClient(FedPFTClient):
         return self.get_parameters(config={}), len(self.trainloader.dataset), {}
 
 
-# pylint: disable=too-many-arguments
-def generate_client_fn(
-    client_cfg: DictConfig,
-    trainloaders: List[DataLoader],
-    testloaders: List[DataLoader],
-    feature_extractor: torch.nn.Module,
-    num_classes: int,
-    device: torch.device,
-) -> Callable[[str], fl.client.NumPyClient]:
-    """Generate the client function that creates the Flower Clients.
+def client_fn(context: Context):
+    """Construct a Client that will be run in a ClientApp."""
+    # Load model and data
 
-    Parameters
-    ----------
-    client_cfg : DictConfig
-        Type of client
-    trainloaders : List[DataLoader]
-        List of train dataloaders for clients
-    testloaders : List[DataLoader]
-        List of test dataloaders for clients
-    feature_extractor : torch.nn.Module
-        Pre-trained model as the backbone
-    num_classes : int
-        Number of classes in the dataset
-    device : torch.device
-        Device to load the `feature_extractor`
-    """
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+    dataset = str(context.run_config["dataset"])
+    batch_size = int(context.run_config["batch-size"])
+    dirichlet_alpha = float(context.run_config["dirichlet-alpha"])
+    partition_by = str(context.run_config["partition-by"])
+    image_column_name = str(context.run_config["image-column-name"])
+    image_input_size = int(context.run_config["image-input-size"])
+    seed = int(context.run_config["seed"])
 
-    def client_fn(cid: str) -> fl.client.NumPyClient:
-        """Create a FedPFT client."""
-        return instantiate(
-            client_cfg,
-            trainloader=trainloaders[int(cid)],
-            testloader=testloaders[int(cid)],
-            feature_extractor=feature_extractor,
-            num_classes=num_classes,
-            device=device,
+    if dataset == "cifar100":
+        trans = transform([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    else:
+        trans = transform(
+            [0.48145466, 0.4578275, 0.40821073], [0.26862954, 0.26130258, 0.27577711]
         )
 
-    return client_fn
+    client = (
+        FedPFTClient if context.run_config["strategy"] == "fedpft" else FedAvgClient
+    )
+    trainloader, valloader = load_data(
+        partition_id,
+        num_partitions,
+        dataset,
+        batch_size,
+        dirichlet_alpha,
+        partition_by,
+        image_column_name,
+        trans,
+        image_input_size,
+        seed,
+    )
+    feature_extractor = (
+        clip_vit if context.run_config["feature-extractor"] == "clip_vit" else resnet50
+    )
+    num_classes = int(context.run_config["num-classes"])
+    device = torch.device(str(context.run_config["device"]))
+
+    return client(
+        trainloader=trainloader,
+        testloader=valloader,
+        feature_extractor=feature_extractor(
+            str(context.run_config["feature-extractor-name"])
+        ),
+        num_classes=num_classes,
+        device=device,
+    ).to_client()
+
+
+# Flower ClientApp
+app = ClientApp(client_fn)

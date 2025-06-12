@@ -1,4 +1,4 @@
-"""Models, training and eval functions."""
+"""fedpft: A Flower Baseline."""
 
 import logging
 from typing import List, Optional, Tuple
@@ -15,7 +15,7 @@ from torchvision import models
 from transformers import CLIPModel
 
 
-def resnet50() -> torch.nn.modules:
+def resnet50(name: str) -> nn.Module:
     """Return ResNet-50 model as feature extractor."""
     resnet50_model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
 
@@ -30,7 +30,7 @@ def resnet50() -> torch.nn.modules:
     return resnet50_model
 
 
-def clip_vit(name: str) -> torch.nn.modules:
+def clip_vit(name: str) -> nn.Module:
     """Return CLIP-ViT as feature extractor.
 
     Parameters

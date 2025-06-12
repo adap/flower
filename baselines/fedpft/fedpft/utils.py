@@ -1,4 +1,4 @@
-"""Utility functions."""
+"""fedpft: A Flower Baseline."""
 
 from dataclasses import dataclass
 from typing import List
