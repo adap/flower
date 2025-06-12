@@ -20,7 +20,7 @@ export interface Message {
   /**
    * The role of the sender (e.g., "user", "system", "assistant").
    */
-  role: string;
+  role: 'user' | 'system' | 'assistant';
 
   /**
    * The content of the message.
