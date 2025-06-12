@@ -1,22 +1,9 @@
 ---
-
----
 title: TraceFL: Interpretability-Driven Debugging in Federated Learning via Neuron Provenance
 url: https://arxiv.org/abs/2312.13632
 labels: [interpretability, federated-learning, neuron-provenance, debugging]
 dataset: [MNIST, CIFAR-10, PathMNIST, YahooAnswers]
 ---
-
-# 🚀 TL;DR - Quick Start
-
-**Want to see TraceFL in action immediately?**
-
-```bash
-# One command to run TraceFL and see 100% client localization accuracy
-EXPERIMENT=exp_1 flwr run .
-```
-
-*This runs a 2-round federated learning experiment with 10 clients and demonstrates TraceFL's core client debugging capabilities. Full setup instructions below.*
 
 # TraceFL: Interpretability-Driven Debugging in Federated Learning via Neuron Provenance
 
@@ -33,7 +20,6 @@ We introduce TraceFL, a fine-grained neuron provenance capturing mechanism that 
 
 ## Table of Contents
 
-- [🚀 TL;DR - Quick Start](#-tldr---quick-start)
 - [TraceFL: Interpretability-Driven Debugging in Federated Learning via Neuron Provenance](#tracefl-interpretability-driven-debugging-in-federated-learning-via-neuron-provenance)
   - [Table of Contents](#table-of-contents)
   - [About this baseline](#about-this-baseline)
