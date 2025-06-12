@@ -141,9 +141,6 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         log(INFO, "ExecServicer.List")
         state = self.linkstate_factory.state()
 
-        # Assign `flwr_aid` if auth_plugin is enabled
-        flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
-
         # Build a set of run IDs for `flwr ls --runs`
         if not request.HasField("run_id"):
             if self.auth_plugin:
