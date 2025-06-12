@@ -219,6 +219,19 @@ class ObjectStoreTest(unittest.TestCase):
         # Assert (only new message is not present)
         self.assertEqual([object_id3], not_present)
 
+        # Execute (pre-register an available object)
+        object_store.put(object_id1, object_content1)
+        not_present = object_store.preregister(self.run_id, get_object_tree(obj1))
+
+        # Assert none was not present
+        self.assertEqual([], not_present)
+
+        # Execute (pre-register an unavailable object)
+        not_present = object_store.preregister(self.run_id, get_object_tree(obj2))
+
+        # Assert the unavailable object is returned
+        self.assertEqual([object_id2], not_present)
+
     @parameterized.expand([(""), ("invalid")])  # type: ignore
     def test_preregister_with_invalid_object_id(self, invalid_object_id) -> None:
         """Test preregistering with object_id that is not a valid SHA256."""
