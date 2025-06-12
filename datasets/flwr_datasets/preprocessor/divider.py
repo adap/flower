@@ -17,13 +17,13 @@
 
 import collections
 import warnings
-from typing import Dict, List, Optional, Union, cast
+from typing import Optional, Union, cast
 
 import datasets
 from datasets import DatasetDict
 
 
-# flake8: noqa: E501
+# noqa: E501
 # pylint: disable=line-too-long
 class Divider:
     """Dive existing split(s) of the dataset and assign them custom names.
@@ -101,28 +101,28 @@ class Divider:
     def __init__(
         self,
         divide_config: Union[
-            Dict[str, float],
-            Dict[str, int],
-            Dict[str, Dict[str, float]],
-            Dict[str, Dict[str, int]],
+            dict[str, float],
+            dict[str, int],
+            dict[str, dict[str, float]],
+            dict[str, dict[str, int]],
         ],
         divide_split: Optional[str] = None,
         drop_remaining_splits: bool = False,
     ) -> None:
-        self._single_split_config: Union[Dict[str, float], Dict[str, int]]
+        self._single_split_config: Union[dict[str, float], dict[str, int]]
         self._multiple_splits_config: Union[
-            Dict[str, Dict[str, float]], Dict[str, Dict[str, int]]
+            dict[str, dict[str, float]], dict[str, dict[str, int]]
         ]
 
         self._config_type = _determine_config_type(divide_config)
         self._check_type_correctness(divide_config)
         if self._config_type == "single-split":
             self._single_split_config = cast(
-                Union[Dict[str, float], Dict[str, int]], divide_config
+                Union[dict[str, float], dict[str, int]], divide_config
             )
         else:
             self._multiple_splits_config = cast(
-                Union[Dict[str, Dict[str, float]], Dict[str, Dict[str, int]]],
+                Union[dict[str, dict[str, float]], dict[str, dict[str, int]]],
                 divide_config,
             )
         self._divide_split = divide_split
@@ -141,7 +141,7 @@ class Divider:
     def resplit(self, dataset: DatasetDict) -> DatasetDict:
         """Resplit the dataset according to the configuration."""
         resplit_dataset = {}
-        dataset_splits: List[str] = list(dataset.keys())
+        dataset_splits: list[str] = list(dataset.keys())
         # Change the "single-split" config to look like "multiple-split" config
         if self._config_type == "single-split":
             # First, if the `divide_split` is None determine the split
@@ -154,7 +154,7 @@ class Divider:
                     )
                 self._divide_split = dataset_splits[0]
             self._multiple_splits_config = cast(
-                Union[Dict[str, Dict[str, float]], Dict[str, Dict[str, int]]],
+                Union[dict[str, dict[str, float]], dict[str, dict[str, int]]],
                 {self._divide_split: self._single_split_config},
             )
 
@@ -226,7 +226,7 @@ class Divider:
             )
 
     def _check_duplicate_splits_in_config_and_original_dataset(
-        self, dataset_splits: List[str]
+        self, dataset_splits: list[str]
     ) -> None:
         """Check duplicates along the new split values and dataset splits.
 
@@ -303,10 +303,10 @@ class Divider:
     def _check_type_correctness(
         self,
         divide_config: Union[
-            Dict[str, float],
-            Dict[str, int],
-            Dict[str, Dict[str, float]],
-            Dict[str, Dict[str, int]],
+            dict[str, float],
+            dict[str, int],
+            dict[str, dict[str, float]],
+            dict[str, dict[str, int]],
         ],
     ) -> None:
         assert self._config_type in [
@@ -356,10 +356,10 @@ class Divider:
 
 def _determine_config_type(
     config: Union[
-        Dict[str, float],
-        Dict[str, int],
-        Dict[str, Dict[str, float]],
-        Dict[str, Dict[str, int]],
+        dict[str, float],
+        dict[str, int],
+        dict[str, dict[str, float]],
+        dict[str, dict[str, int]],
     ],
 ) -> str:
     """Determine configuration type of `divide_config` based on the dict structure.
