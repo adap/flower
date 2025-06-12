@@ -19,7 +19,7 @@ import subprocess
 import unittest
 from datetime import datetime
 from types import SimpleNamespace
-from typing import cast
+from typing import Optional, cast
 from unittest.mock import MagicMock, Mock, patch
 
 import grpc
@@ -175,8 +175,10 @@ class TestExecServicerAuth(unittest.TestCase):
             ("", None),
             (None, ""),
         ]
-    )
-    def test_streamlogs_auth_unsucessful(self, context_flwr_aid, run_flwr_aid) -> None:
+    )  # type: ignore
+    def test_streamlogs_auth_unsucessful(
+        self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
+    ) -> None:
         """Test StreamLogs unsuccessful."""
         # Prepare
         run_id = self.state.create_run(
@@ -244,8 +246,10 @@ class TestExecServicerAuth(unittest.TestCase):
             ("", None),
             (None, ""),
         ]
-    )
-    def test_stoprun_auth_unsuccessful(self, context_flwr_aid, run_flwr_aid) -> None:
+    )  # type: ignore
+    def test_stoprun_auth_unsuccessful(
+        self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
+    ) -> None:
         """Test StopRun unsuccessful with missing or mismatched flwr_aid."""
         # Prepare
         run_id = self.state.create_run(
@@ -297,8 +301,10 @@ class TestExecServicerAuth(unittest.TestCase):
             ("", None),
             (None, ""),
         ]
-    )
-    def test_listruns_auth_unsuccessful(self, context_flwr_aid, run_flwr_aid) -> None:
+    )  # type: ignore
+    def test_listruns_auth_unsuccessful(
+        self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
+    ) -> None:
         """Test ListRuns unsuccessful with missing or mismatched flwr_aid."""
         # Prepare
         run_id = self.state.create_run(
