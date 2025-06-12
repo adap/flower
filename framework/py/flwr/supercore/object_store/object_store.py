@@ -56,8 +56,8 @@ class ObjectStore(abc.ABC):
         Returns
         -------
         list[str]
-            A list of object IDs that were not present in the `ObjectStore` and have now
-            been preregistered.
+            A list of object IDs that were either not previously preregistered
+            in the `ObjectStore`, or were preregistered but are not yet available.
         """
 
     @abc.abstractmethod

@@ -86,11 +86,18 @@ class InMemoryObjectStore(ObjectStore):
 
                     # Add to the list of new objects
                     new_objects.append(obj_id)
-                elif obj_id not in self.run_objects_mapping[run_id]:
+                else:
+                    obj_entry = self.store[obj_id]
+
+                    # Add to the list of new objects if not available
+                    if not obj_entry.is_available:
+                        new_objects.append(obj_id)
+
                     # If the object is already registered but not in this run,
                     # add the run ID to its runs
-                    self.store[obj_id].runs.add(run_id)
-                    self.run_objects_mapping[run_id].add(obj_id)
+                    if obj_id not in self.run_objects_mapping[run_id]:
+                        obj_entry.runs.add(run_id)
+                        self.run_objects_mapping[run_id].add(obj_id)
 
         return new_objects
 
