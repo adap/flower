@@ -295,8 +295,9 @@ def _check_flwr_aid_in_run(
             "️⛔️ User authentication is enabled, but `flwr_aid` is None",
         )
 
+    # `run.flwr_aid` must not be an empty string. Abort if it is empty.
     run_flwr_aid = run.flwr_aid
-    if run_flwr_aid is None:
+    if not run_flwr_aid:
         context.abort(
             grpc.StatusCode.PERMISSION_DENIED,
             "⛔️ User authentication is enabled, but the run is not associated "
