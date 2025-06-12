@@ -320,5 +320,6 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
                 fg=typer.colors.RED,
                 bold=True,
             )
+            typer.secho(e.details(), fg=typer.colors.RED, bold=True)
             raise typer.Exit(code=1) from None
         raise

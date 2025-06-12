@@ -274,5 +274,5 @@ def _check_flwr_aid_in_run(
     ):
         context.abort(
             grpc.StatusCode.PERMISSION_DENIED,
-            "Run ID does not belong to the user",
+            "⛔️ Run ID does not belong to the user",
         )
