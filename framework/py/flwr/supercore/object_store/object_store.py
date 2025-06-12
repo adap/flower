@@ -47,7 +47,7 @@ class ObjectStore(abc.ABC):
         Parameters
         ----------
         object_tree : ObjectTree
-            The object tree containing the objects to preregister. This tree should
+            The object tree containing the IDs of objects to preregister. This tree should
             contain all objects that are expected to be stored in the `ObjectStore`.
 
         Returns

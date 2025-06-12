@@ -77,10 +77,10 @@ def store_mapping_and_register_objects(
     objects_to_push: dict[str, ObjectIDs] = {}
     for object_tree in request.message_object_trees:
         all_object_ids = [obj.object_id for obj in iterate_object_tree(object_tree)]
-        msg_object_id = all_object_ids[-1]
+        msg_object_id, descendant_ids = all_object_ids[-1], all_object_ids[:-1]
         # Store mapping
         store.set_message_descendant_ids(
-            msg_object_id=msg_object_id, descendant_ids=all_object_ids[:-1]
+            msg_object_id=msg_object_id, descendant_ids=descendant_ids
         )
 
         # Preregister
