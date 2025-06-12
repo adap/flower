@@ -104,6 +104,14 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         if not state.get_run(run_id):
             context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
 
+        # Assign `flwr_aid` if auth_plugin is enabled
+        flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
+
+        # Exit if `flwr_aid` does not match the run's `flwr_aid`
+        _check_flwr_aid_in_run(
+            flwr_aid=flwr_aid, run_id=request.run_id, state=state, context=context
+        )
+
         after_timestamp = request.after_timestamp + 1e-6
         while context.is_active():
             log_msg, latest_timestamp = state.get_serverapp_log(run_id, after_timestamp)
@@ -133,11 +141,21 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         log(INFO, "ExecServicer.List")
         state = self.linkstate_factory.state()
 
-        # Handle `flwr ls --runs`
+        # Assign `flwr_aid` if auth_plugin is enabled
+        flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
+
+        # Build a set of run IDs for `flwr ls --runs`
         if not request.HasField("run_id"):
-            return _create_list_runs_response(state.get_run_ids(), state)
-        # Handle `flwr ls --run-id <run_id>`
-        return _create_list_runs_response({request.run_id}, state)
+            run_ids = state.get_run_ids(flwr_aid=flwr_aid)
+        # Build a set of run IDs for `flwr ls --run-id <run_id>`
+        else:
+            # Exit if `flwr_aid` does not match the run's `flwr_aid`
+            _check_flwr_aid_in_run(
+                flwr_aid=flwr_aid, run_id=request.run_id, state=state, context=context
+            )
+            run_ids = {request.run_id}
+
+        return _create_list_runs_response(run_ids, state)
 
     def StopRun(
         self, request: StopRunRequest, context: grpc.ServicerContext
@@ -145,6 +163,14 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Stop a given run ID."""
         log(INFO, "ExecServicer.StopRun")
         state = self.linkstate_factory.state()
+
+        # Assign `flwr_aid` if auth_plugin is enabled
+        flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
+
+        # Exit if `flwr_aid` does not match the run's `flwr_aid`
+        _check_flwr_aid_in_run(
+            flwr_aid=flwr_aid, run_id=request.run_id, state=state, context=context
+        )
 
         # Exit if `run_id` not found
         if not state.get_run(request.run_id):
@@ -231,3 +257,22 @@ def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsR
         run_dict={run_id: run_to_proto(run) for run_id, run in run_dict.items() if run},
         now=now().isoformat(),
     )
+
+
+def _check_flwr_aid_in_run(
+    flwr_aid: Optional[str],
+    run_id: int,
+    state: LinkState,
+    context: grpc.ServicerContext,
+) -> None:
+    run = state.get_run(run_id)
+    if (
+        run is not None
+        and run.flwr_aid
+        and flwr_aid is not None
+        and run.flwr_aid != flwr_aid
+    ):
+        context.abort(
+            grpc.StatusCode.PERMISSION_DENIED,
+            "Run ID does not belong to the user",
+        )
