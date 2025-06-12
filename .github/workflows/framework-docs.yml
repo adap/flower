@@ -29,11 +29,10 @@ jobs:
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
         run: sudo apt install pandoc
-      - name: Install Flower dependencies (mandatory only)
-        run: python -m poetry install --extras "simulation"
-      - name: Install Flower Datasets
+      - name: Install Flower Framework and Flower Datasets with dependencies
         run: |
-          cd datasets
+          cd framework
+          python -m poetry add ../datasets
           python -m poetry install
       - name: Build docs
         run: ./dev/build-docs.sh ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}

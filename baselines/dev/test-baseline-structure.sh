@@ -13,7 +13,7 @@ echo "Testing baseline under the path: $baseline_path"
 declare -a structure_exceptions=()
 
 # List of require to check
-declare -a required_files=("client.py" "dataset.py" "dataset_preparation.py" "main.py" "models.py" "server.py" "strategy.py" "utils.py")
+declare -a required_files=("client_app.py" "dataset.py" "model.py" "server_app.py" "strategy.py" "utils.py")
 
 # Check and pass the test if the baseline directory is in the list of exceptions
 for exception in "${structure_exceptions[@]}"; do

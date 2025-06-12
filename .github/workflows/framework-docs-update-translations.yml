@@ -30,6 +30,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd framework
           python -m poetry install
           pip install sphinx==7.3.7
 

@@ -93,7 +93,7 @@ class PathologicalPartitioner(Partitioner):
     >>> partition = fds.load_partition(0)
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=R0917
         self,
         num_partitions: int,
         partition_by: str,

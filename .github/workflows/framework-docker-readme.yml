@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'src/docker/**/README.md'
+      - 'framework/docker/**/README.md'
 
 jobs:
     collect:
@@ -24,7 +24,7 @@ jobs:
             list-files: "json"
             filters: |
               readme:
-                - added|modified: 'src/docker/**/README.md'
+                - added|modified: 'framework/docker/**/README.md'
 
     update:
       if: ${{ needs.collect.outputs.readme_files != '' && toJson(fromJson(needs.collect.outputs.readme_files)) != '[]' }}
