@@ -17,8 +17,13 @@
 
 from typing import Optional
 
-from flwr.common.inflatable import get_object_id, is_valid_sha256_hash
+from flwr.common.inflatable import (
+    get_object_id,
+    is_valid_sha256_hash,
+    iterate_object_tree,
+)
 from flwr.common.inflatable_utils import validate_object_content
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 from .object_store import NoObjectInStoreError, ObjectStore
 
@@ -32,10 +37,12 @@ class InMemoryObjectStore(ObjectStore):
         # Mapping the Object ID of a message to the list of children object IDs
         self.msg_children_objects_mapping: dict[str, list[str]] = {}
 
-    def preregister(self, object_ids: list[str]) -> list[str]:
+    def preregister(self, object_tree: ObjectTree) -> list[str]:
         """Identify and preregister missing objects."""
         new_objects = []
-        for obj_id in object_ids:
+
+        for tree_node in iterate_object_tree(object_tree):
+            obj_id = tree_node.object_id
             # Verify object ID format (must be a valid sha256 hash)
             if not is_valid_sha256_hash(obj_id):
                 raise ValueError(f"Invalid object ID format: {obj_id}")

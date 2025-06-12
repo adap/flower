@@ -30,7 +30,11 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.heartbeat import HeartbeatSender
-from flwr.common.inflatable import get_all_nested_objects, no_object_id_recompute
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_object_tree,
+    no_object_id_recompute,
+)
 from flwr.common.inflatable_rest_utils import (
     make_pull_object_fn_rest,
     make_push_object_fn_rest,
@@ -60,7 +64,6 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
-from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PullObjectRequest,
     PullObjectResponse,
@@ -380,11 +383,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         with no_object_id_recompute():
             # Get all nested objects
             all_objects = get_all_nested_objects(message)
-            all_object_ids = list(all_objects.keys())
-            msg_id = all_object_ids[-1]  # Last object is the message itself
-            descendant_ids = all_object_ids[
-                :-1
-            ]  # All but the last object are descendants
+            object_tree = get_object_tree(message)
 
             # Serialize Message
             message_proto = message_to_proto(
@@ -393,9 +392,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             req = PushMessagesRequest(
                 node=node,
                 messages_list=[message_proto],
-                msg_to_descendant_mapping={
-                    msg_id: ObjectIDs(object_ids=descendant_ids)
-                },
+                message_object_trees=[object_tree],
             )
 
             # Send the request

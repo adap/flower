@@ -50,6 +50,11 @@ message Metadata {
 
 message ObjectIDs { repeated string object_ids = 1; }
 
+message ObjectTree {
+  string object_id = 1;
+  repeated ObjectTree children = 2;
+}
+
 // PushObject messages
 message PushObjectRequest {
   Node node = 1;
