@@ -169,7 +169,7 @@ class InMemoryObjectStore(ObjectStore):
                 return
 
             # Delete the object if it has no references left
-            if object_entry.is_available and object_entry.ref_count == 0:
+            if object_entry.ref_count == 0:
                 del self.store[object_id]
 
                 # Remove the object from the run's mapping

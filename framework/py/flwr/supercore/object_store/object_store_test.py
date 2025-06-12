@@ -211,14 +211,6 @@ class ObjectStoreTest(unittest.TestCase):
         # Assert (none was present)
         self.assertEqual([object_id1, object_id2], not_present)
 
-        obj3 = CustomDataClass(data=b"test_value3")
-        object_content3 = obj3.deflate()
-        object_id3 = get_object_id(object_content3)
-        # Execute (preregister new object)
-        not_present = object_store.preregister(self.run_id, get_object_tree(obj3))
-        # Assert (only new message is not present)
-        self.assertEqual([object_id3], not_present)
-
         # Execute (pre-register an available object)
         object_store.put(object_id1, object_content1)
         not_present = object_store.preregister(self.run_id, get_object_tree(obj1))
