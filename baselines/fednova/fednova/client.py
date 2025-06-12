@@ -120,10 +120,10 @@ def gen_clients_fednova(  # pylint: disable=too-many-arguments
     data_sizes: List,
     model: DictConfig,
     exp_config: DictConfig,
-) -> Callable[[str], FedNovaClient]:
+) -> Callable[[str], fl.client.Client]:
     """Return a generator function to create a FedNova client."""
 
-    def client_fn(cid: str) -> FedNovaClient:
+    def client_fn(cid: str) -> fl.client.Client:
         """Create a Flower client representing a single organization."""
         # Load model
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -144,6 +144,6 @@ def gen_clients_fednova(  # pylint: disable=too-many-arguments
             num_epochs,
             client_dataset_ratio,
             exp_config,
-        )
+        ).to_client()
 
     return client_fn

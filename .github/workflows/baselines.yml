@@ -36,7 +36,7 @@ jobs:
                 FILTER+=$(echo "$DIR: ${BASELINES_PATH}/**\n")
             done < <(find baselines -maxdepth 1 \
                 -name ".*" -prune -o \
-                -path "baselines/doc" -prune -o \
+                -path "baselines/docs" -prune -o \
                 -path "baselines/dev" -prune -o \
                 -path "baselines/baseline_template" -prune -o \
                 -path "baselines/flwr_baselines" -prune -o \
@@ -78,7 +78,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: baselines/${{ matrix.baseline }}
-        run: python -m poetry install
+        run: pip install ."[dev]"
 
       - name: Testing ${{ matrix.baseline }}
         working-directory: baselines

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "e2e-bare-https"
+version = "1.0.0"
+description = "HTTPS-enabled bare Federated Learning test with Flower"
+license = "Apache-2.0"
+dependencies = ["flwr @ {root:parent:parent:uri}"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "e2e_bare_https.server_app:app"
+clientapp = "e2e_bare_https.client_app:app"
+
+[tool.flwr.app.config]
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
