@@ -121,6 +121,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            None,
             context,
         )
 
@@ -135,7 +136,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         state = self.state_factory.state()
 
         # Abort if the run is finished
-        abort_if(request.run_id, [Status.FINISHED], state, context)
+        abort_if(request.run_id, [Status.FINISHED], state, None, context)
 
         # Update the run status
         state.update_run_status(

@@ -67,6 +67,9 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
@@ -273,14 +276,23 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         if message_proto:
             msg_id = message_proto.metadata.message_id
+            run_id = message_proto.metadata.run_id
             all_object_contents = pull_objects(
                 list(response.objects_to_pull[msg_id].object_ids) + [msg_id],
                 pull_object_fn=make_pull_object_fn_grpc(
                     pull_object_grpc=stub.PullObject,
                     node=node,
-                    run_id=message_proto.metadata.run_id,
+                    run_id=run_id,
                 ),
             )
+
+            # Confirm that the message has been received
+            stub.ConfirmMessageReceived(
+                ConfirmMessageReceivedRequest(
+                    node=node, run_id=run_id, message_object_id=msg_id
+                )
+            )
+
             in_message = cast(
                 Message, inflate_object_from_contents(msg_id, all_object_contents)
             )

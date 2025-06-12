@@ -111,14 +111,16 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Get available nodes."""
         log(DEBUG, "ServerAppIoServicer.GetNodes")
 
-        # Init state
-        state: LinkState = self.state_factory.state()
+        # Init state and store
+        state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            store,
             context,
         )
 
@@ -132,14 +134,16 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Push a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PushMessages")
 
-        # Init state
-        state: LinkState = self.state_factory.state()
+        # Init state and store
+        state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            store,
             context,
         )
 
@@ -167,9 +171,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             message_id: Optional[str] = state.store_message_ins(message=message)
             message_ids.append(message_id)
 
-        # Init store
-        store = self.objectstore_factory.store()
-
         # Store Message object to descendants mapping and preregister objects
         objects_to_push = store_mapping_and_register_objects(store, request=request)
 
@@ -186,10 +187,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Pull a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PullMessages")
 
-        # Init state
-        state: LinkState = self.state_factory.state()
-
-        # Init store
+        # Init state and store
+        state = self.state_factory.state()
         store = self.objectstore_factory.store()
 
         # Abort if the run is not running
@@ -197,6 +196,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            store,
             context,
         )
 
@@ -332,14 +332,16 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Push ServerApp process outputs."""
         log(DEBUG, "ServerAppIoServicer.PushServerAppOutputs")
 
-        # Init state
+        # Init state and store
         state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            store,
             context,
         )
 
@@ -352,16 +354,23 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Update the status of a run."""
         log(DEBUG, "ServerAppIoServicer.UpdateRunStatus")
 
-        # Init state
+        # Init state and store
         state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is finished
-        abort_if(request.run_id, [Status.FINISHED], state, context)
+        abort_if(request.run_id, [Status.FINISHED], state, store, context)
 
         # Update the run status
         state.update_run_status(
             run_id=request.run_id, new_status=run_status_from_proto(request.run_status)
         )
+
+        # If the run is finished, delete the run from ObjectStore
+        if request.run_status.status == Status.FINISHED:
+            # Delete all objects related to the run
+            store.delete_objects_in_run(request.run_id)
+
         return UpdateRunStatusResponse()
 
     def PushLogs(
@@ -416,23 +425,22 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Push an object to the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PushObject")
 
-        # Init state
-        state: LinkState = self.state_factory.state()
+        # Init state and store
+        state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            store,
             context,
         )
 
         if request.node.node_id != SUPERLINK_NODE_ID:
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
-
-        # Init store
-        store = self.objectstore_factory.store()
 
         # Insert in store
         stored = False
@@ -453,23 +461,22 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
 
-        # Init state
-        state: LinkState = self.state_factory.state()
+        # Init state and store
+        state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            store,
             context,
         )
 
         if request.node.node_id != SUPERLINK_NODE_ID:
             # Cancel insertion in ObjectStore
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
-
-        # Init store
-        store = self.objectstore_factory.store()
 
         # Fetch from store
         content = store.get(request.object_id)
@@ -488,18 +495,24 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Confirm message received."""
         log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
 
-        # Init state
-        state: LinkState = self.state_factory.state()
+        # Init state and store
+        state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            store,
             context,
         )
 
-        raise NotImplementedError
+        # Delete the message object
+        store.delete(request.message_object_id)
+        store.delete_message_descendant_ids(request.message_object_id)
+
+        return ConfirmMessageReceivedResponse()
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
