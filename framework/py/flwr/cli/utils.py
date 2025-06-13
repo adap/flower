@@ -323,4 +323,11 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
             # pylint: disable=E1101
             typer.secho(e.details(), fg=typer.colors.RED, bold=True)
             raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.NOT_FOUND and e.details() == "Run ID not found":
+            typer.secho(
+                "❌ Run ID not found.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
         raise
