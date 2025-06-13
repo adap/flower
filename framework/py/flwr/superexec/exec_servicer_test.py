@@ -312,7 +312,3 @@ class TestExecServicerAuth(unittest.TestCase):
         ):
             response = self.servicer.ListRuns(request, ctx)
             self.assertEqual(set(response.run_dict.keys()), {run_id})
-
-
-if __name__ == "__main__":
-    unittest.main()
