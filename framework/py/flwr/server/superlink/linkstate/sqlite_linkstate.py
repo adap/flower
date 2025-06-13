@@ -39,13 +39,11 @@ from flwr.common.constant import (
 )
 from flwr.common.message import make_message
 from flwr.common.record import ConfigRecord
-from flwr.common.serde import recorddict_from_proto, recorddict_to_proto
 from flwr.common.serde_utils import error_from_proto, error_to_proto
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
 from flwr.proto.error_pb2 import Error as ProtoError
-from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
 from flwr.server.utils.validator import validate_message
@@ -138,7 +136,6 @@ CREATE TABLE IF NOT EXISTS message_ins(
     delivered_at            TEXT,
     ttl                     REAL,
     message_type            TEXT,
-    content                 BLOB NULL,
     error                   BLOB NULL,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
@@ -157,7 +154,6 @@ CREATE TABLE IF NOT EXISTS message_res(
     delivered_at            TEXT,
     ttl                     REAL,
     message_type            TEXT,
-    content                 BLOB NULL,
     error                   BLOB NULL,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
@@ -1164,13 +1160,10 @@ def message_to_dict(message: Message) -> dict[str, Any]:
         "delivered_at": message.metadata.delivered_at,
         "ttl": message.metadata.ttl,
         "message_type": message.metadata.message_type,
-        "content": None,
         "error": None,
     }
 
-    if message.has_content():
-        result["content"] = recorddict_to_proto(message.content).SerializeToString()
-    else:
+    if message.has_error():
         result["error"] = error_to_proto(message.error).SerializeToString()
 
     return result
@@ -1178,9 +1171,7 @@ def message_to_dict(message: Message) -> dict[str, Any]:
 
 def dict_to_message(message_dict: dict[str, Any]) -> Message:
     """Transform dict to Message."""
-    content, error = None, None
-    if (b_content := message_dict.pop("content")) is not None:
-        content = recorddict_from_proto(ProtoRecordDict.FromString(b_content))
+    error = None
     if (b_error := message_dict.pop("error")) is not None:
         error = error_from_proto(ProtoError.FromString(b_error))
 
@@ -1188,7 +1179,7 @@ def dict_to_message(message_dict: dict[str, Any]) -> Message:
     metadata = Metadata(
         **{k: v for k, v in message_dict.items() if k not in ["delivered_at"]}
     )
-    msg = make_message(metadata=metadata, content=content, error=error)
+    msg = make_message(metadata=metadata, error=error)
     msg.metadata.delivered_at = message_dict["delivered_at"]
     return msg
 
