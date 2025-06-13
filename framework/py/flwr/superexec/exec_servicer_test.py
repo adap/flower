@@ -40,6 +40,19 @@ from flwr.server.superlink.linkstate import LinkStateFactory
 
 from .exec_servicer import ExecServicer
 
+FLWR_AID_MISMATCH_CASES = (
+    # (context_flwr_aid, run_flwr_aid)
+    ("user-123", "user-xyz"),
+    ("user-234", ""),
+    ("", "user-234"),
+    ("user-345", None),
+    (None, "user-456"),
+    (None, None),
+    ("", ""),
+    ("", None),
+    (None, ""),
+)
+
 
 def test_start_run() -> None:
     """Test StartRun method of ExecServicer."""
@@ -162,20 +175,7 @@ class TestExecServicerAuth(unittest.TestCase):
         return ctx
 
     # Test all invalid cases for StreamLogs with authentication
-    @parameterized.expand(
-        [
-            # (context_flwr_aid, run_flwr_aid)
-            ("user-123", "user-xyz"),
-            ("user-234", ""),
-            ("", "user-234"),
-            ("user-345", None),
-            (None, "user-456"),
-            (None, None),
-            ("", ""),
-            ("", None),
-            (None, ""),
-        ]
-    )  # type: ignore
+    @parameterized.expand(FLWR_AID_MISMATCH_CASES)  # type: ignore
     def test_streamlogs_auth_unsucessful(
         self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
     ) -> None:
@@ -233,20 +233,7 @@ class TestExecServicerAuth(unittest.TestCase):
             self.assertEqual(msgs[0].latest_timestamp, 1.0)
 
     # Test all invalid cases for StopRun with authentication
-    @parameterized.expand(
-        [
-            # (context_flwr_aid, run_flwr_aid)
-            ("user-123", "user-xyz"),
-            ("user-234", ""),
-            ("", "user-234"),
-            ("user-345", None),
-            (None, "user-456"),
-            (None, None),
-            ("", ""),
-            ("", None),
-            (None, ""),
-        ]
-    )  # type: ignore
+    @parameterized.expand(FLWR_AID_MISMATCH_CASES)  # type: ignore
     def test_stoprun_auth_unsuccessful(
         self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
     ) -> None:
@@ -288,20 +275,7 @@ class TestExecServicerAuth(unittest.TestCase):
             self.assertEqual(cast(Run, run).status.sub_status, SubStatus.STOPPED)
 
     # Test all invalid cases for ListRuns with authentication
-    @parameterized.expand(
-        [
-            # (context_flwr_aid, run_flwr_aid)
-            ("user-123", "user-xyz"),
-            ("user-234", ""),
-            ("", "user-234"),
-            ("user-345", None),
-            (None, "user-456"),
-            (None, None),
-            ("", ""),
-            ("", None),
-            (None, ""),
-        ]
-    )  # type: ignore
+    @parameterized.expand(FLWR_AID_MISMATCH_CASES)  # type: ignore
     def test_listruns_auth_unsuccessful(
         self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
     ) -> None:
