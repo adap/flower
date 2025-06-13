@@ -24,7 +24,12 @@ import grpc
 
 from flwr.common import now
 from flwr.common.auth_plugin import ExecAuthPlugin
-from flwr.common.constant import LOG_STREAM_INTERVAL, Status, SubStatus
+from flwr.common.constant import (
+    LOG_STREAM_INTERVAL,
+    RUN_ID_NOT_FOUND_MESSAGE,
+    Status,
+    SubStatus,
+)
 from flwr.common.logger import log
 from flwr.common.serde import (
     config_record_from_proto,
@@ -103,7 +108,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         # Exit if `run_id` not found
         if not run:
-            context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+            context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
 
         # If user auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
         if self.auth_plugin:
@@ -165,7 +170,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
             # Exit if `run_id` not found
             if not run:
-                context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+                context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
 
             # If user auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
             if self.auth_plugin:
@@ -191,7 +196,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         # Exit if `run_id` not found
         if not run:
-            context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+            context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
 
         # If user auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
         if self.auth_plugin:

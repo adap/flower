@@ -478,7 +478,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if they have not sent a heartbeat before `active_until`.
         """
         current = now()
-        for record in [self.run_ids[run_id] for run_id in run_ids]:
+        for record in (self.run_ids.get(run_id) for run_id in run_ids):
+            if record is None:
+                continue
             with record.lock:
                 if record.run.status.status in (Status.STARTING, Status.RUNNING):
                     if record.active_until < current.timestamp():
