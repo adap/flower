@@ -54,6 +54,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 
 from .exec_user_auth_interceptor import shared_account_info
 from .executor import Executor
@@ -62,15 +63,17 @@ from .executor import Executor
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """SuperExec API servicer."""
 
-    def __init__(
+    def __init__(  # pylint: disable=R0913, R0917
         self,
         linkstate_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
+        objectstore_factory: ObjectStoreFactory,
         executor: Executor,
         auth_plugin: Optional[ExecAuthPlugin] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
+        self.objectstore_factory = objectstore_factory
         self.executor = executor
         self.executor.initialize(linkstate_factory, ffs_factory)
         self.auth_plugin = auth_plugin
@@ -135,6 +138,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             run_status = state.get_run_status({run_id})[run_id]
             if run_status.status == Status.FINISHED:
                 log(INFO, "All logs for run ID `%s` returned", run_id)
+
+                # Delete objects of the run from the object store
+                self.objectstore_factory.store().delete_objects_in_run(run_id)
                 break
 
             time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
@@ -181,7 +187,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
             run_ids = {run_id}
 
-        return _create_list_runs_response(run_ids, state)
+        # Init the object store
+        store = self.objectstore_factory.store()
+        return _create_list_runs_response(run_ids, state, store)
 
     def StopRun(
         self, request: StopRunRequest, context: grpc.ServicerContext
@@ -222,6 +230,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
             # Delete Messages and their replies for the `run_id`
             state.delete_messages(message_ids)
+
+            # Delete objects of the run from the object store
+            self.objectstore_factory.store().delete_objects_in_run(run_id)
 
         return StopRunResponse(success=update_success)
 
@@ -277,11 +288,19 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         )
 
 
-def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:
+def _create_list_runs_response(
+    run_ids: set[int], state: LinkState, store: ObjectStore
+) -> ListRunsResponse:
     """Create response for `flwr ls --runs` and `flwr ls --run-id <run_id>`."""
-    run_dict = {run_id: state.get_run(run_id) for run_id in run_ids}
+    run_dict = {run_id: run for run_id in run_ids if (run := state.get_run(run_id))}
+
+    # Delete objects of finished runs from the object store
+    for run_id, run in run_dict.items():
+        if run.status.status == Status.FINISHED:
+            store.delete_objects_in_run(run_id)
+
     return ListRunsResponse(
-        run_dict={run_id: run_to_proto(run) for run_id, run in run_dict.items() if run},
+        run_dict={run_id: run_to_proto(run) for run_id, run in run_dict.items()},
         now=now().isoformat(),
     )
 

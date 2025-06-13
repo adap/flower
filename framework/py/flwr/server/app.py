@@ -178,6 +178,7 @@ def run_superlink() -> None:
         address=exec_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
+        objectstore_factory=objectstore_factory,
         executor=executor,
         certificates=certificates,
         config=parse_config_args(
