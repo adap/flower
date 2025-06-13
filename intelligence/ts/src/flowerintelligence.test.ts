@@ -20,6 +20,7 @@ vi.mock('./constants', () => ({
   REMOTE_URL: process.env.FI_DEV_REMOTE_URL,
   VERSION: '0.1.8',
   SDK: 'TS',
+  ALLOWED_ROLES: ['system', 'assistant', 'user'],
 }));
 
 import emojiRegex from 'emoji-regex';

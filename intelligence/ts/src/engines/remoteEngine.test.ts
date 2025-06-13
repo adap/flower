@@ -25,6 +25,7 @@ vi.mock('./constants', () => ({
   REMOTE_URL: REMOTE_URL,
   VERSION: '0.1.7',
   SDK: 'TS',
+  ALLOWED_ROLES: ['system', 'assistant', 'user'],
 }));
 
 import { getTimestamp, CryptographyHandler, KeyManager, NetworkService } from './remoteEngine';
