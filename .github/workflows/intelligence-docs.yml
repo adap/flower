@@ -85,14 +85,16 @@ jobs:
         run: brew install sourcedocs
       - name: Build Swift docs
         run: |
-          export XCODEBUILD_LOG_PATH=./build/xcodebuild.log
-          mkdir -p ./build
+          LOGFILE=$(find /var/folders -name 'xcodebuild-*.log' 2>/dev/null | sort -r | head -n 1)
+          echo "📄 Will capture xcodebuild log from: $LOGFILE"
 
           sourcedocs generate --module-name FlowerIntelligence -- -scheme Flwr -destination 'platform=macOS,arch=arm64,name=My Mac' || {
             echo "❌ sourcedocs failed. Dumping xcodebuild log:"
-            cat "$XCODEBUILD_LOG_PATH" || echo "⚠️ Log not found at $XCODEBUILD_LOG_PATH"
+            cat "$LOGFILE" || echo "⚠️ Failed to find xcodebuild log at $LOGFILE"
+            cp "$LOGFILE" ./build/xcodebuild.log || echo "⚠️ Could not copy log to ./build/"
             exit 1
           }
+            
           mkdir -p intelligence/docs/source/swift-api-ref
           cp -r Documentation/Reference/* intelligence/docs/source/swift-api-ref/
           mv intelligence/docs/source/swift-api-ref/README.md intelligence/docs/source/swift-api-ref/index.md
