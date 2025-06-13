@@ -75,7 +75,7 @@ def test_start_run() -> None:
     request.fab.content = b"test"
 
     # Create a instance of FlowerServiceServicer
-    servicer = ExecServicer(Mock(), Mock(), executor=executor)
+    servicer = ExecServicer(Mock(), Mock(), Mock(), executor=executor)
 
     # Execute
     response = servicer.StartRun(request, context_mock)
@@ -87,9 +87,11 @@ class TestExecServicer(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
+        self.store = Mock()
         self.servicer = ExecServicer(
             linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
             ffs_factory=FfsFactory("./tmp"),
+            objectstore_factory=Mock(store=Mock(return_value=self.store)),
             executor=Mock(),
         )
         self.state = self.servicer.linkstate_factory.state()
@@ -149,6 +151,7 @@ class TestExecServicer(unittest.TestCase):
         self.assertIsNotNone(run_state)
         if run_state is not None:
             self.assertEqual(run_state.status, expected_run_status)
+        self.store.delete_objects_in_run.assert_called_once_with(run_id)
 
 
 class TestExecServicerAuth(unittest.TestCase):
@@ -159,6 +162,7 @@ class TestExecServicerAuth(unittest.TestCase):
         self.servicer = ExecServicer(
             linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
             ffs_factory=FfsFactory("./tmp"),
+            objectstore_factory=Mock(),
             executor=Mock(),
             auth_plugin=Mock(),
         )
