@@ -527,7 +527,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         )
         message = message_from_proto(msg_proto)
         # pylint: disable-next=E1137
-        message.content["test_config"] = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         message.metadata.__dict__["_message_id"] = message.object_id
 
         # Prepare: Store message in ObjectStore
