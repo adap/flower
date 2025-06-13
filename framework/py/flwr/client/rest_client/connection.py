@@ -65,6 +65,8 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -88,6 +90,7 @@ PATH_PUSH_OBJECT: str = "/api/v0/fleet/push-object"
 PATH_SEND_NODE_HEARTBEAT: str = "api/v0/fleet/send-node-heartbeat"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
 PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
+PATH_CONFIRM_MESSAGE_RECEIVED: str = "/api/v0/fleet/confirm-message-received"
 
 T = TypeVar("T", bound=GrpcMessage)
 
@@ -323,6 +326,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         if message_proto:
             log(INFO, "[Node] POST /%s: success", PATH_PULL_MESSAGES)
             msg_id = message_proto.metadata.message_id
+            run_id = message_proto.metadata.run_id
 
             def fn(request: PullObjectRequest) -> PullObjectResponse:
                 res = _request(
@@ -338,8 +342,17 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
                     pull_object_fn=make_pull_object_fn_rest(
                         pull_object_rest=fn,
                         node=node,
-                        run_id=message_proto.metadata.run_id,
+                        run_id=run_id,
                     ),
+                )
+
+                # Confirm that the message has been received
+                _request(
+                    req=ConfirmMessageReceivedRequest(
+                        node=node, run_id=run_id, message_object_id=msg_id
+                    ),
+                    res_type=ConfirmMessageReceivedResponse,
+                    api_path=PATH_CONFIRM_MESSAGE_RECEIVED,
                 )
             except ValueError as e:
                 log(

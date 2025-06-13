@@ -30,6 +30,7 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.inflatable import (
+    get_all_nested_objects,
     get_descendant_object_ids,
     get_object_id,
     get_object_tree,
@@ -41,6 +42,10 @@ from flwr.common.typing import RunStatus
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
+)
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
 )
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
@@ -120,7 +125,7 @@ def test_raise_if_true() -> None:
         raise AssertionError() from err
 
 
-class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
+class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
     """ServerAppIoServicer tests for allowed RunStatuses."""
 
     def setUp(self) -> None:
@@ -186,6 +191,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.ServerAppIo/PullObject",
             request_serializer=PullObjectRequest.SerializeToString,
             response_deserializer=PullObjectResponse.FromString,
+        )
+        self._confirm_message_received = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/ConfirmMessageReceived",
+            request_serializer=ConfirmMessageReceivedRequest.SerializeToString,
+            response_deserializer=ConfirmMessageReceivedResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -818,3 +828,45 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         res: PullObjectResponse = self._pull_object(req)
         # Empty response
         assert not res.object_found
+
+    def test_confirm_message_received_successful(self) -> None:
+        """Test `ConfirmMessageReceived` success."""
+        # Prepare
+        node_id = self.state.create_node(heartbeat_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        self._transition_run_status(run_id, 2)
+        proto = create_ins_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+        )
+        message_ins = message_from_proto(proto)
+        message_res = Message(
+            RecordDict({"cfg": ConfigRecord({"key": "value"})}), reply_to=message_ins
+        )
+
+        # Prepare: Save reply message in ObjectStore
+        all_objects = get_all_nested_objects(message_res)
+        self.store.preregister(run_id, get_object_tree(message_res))
+        self.store.set_message_descendant_ids(
+            msg_object_id=message_res.object_id,
+            descendant_ids=list(get_descendant_object_ids(message_res)),
+        )
+        for obj_id, obj in all_objects.items():
+            self.store.put(object_id=obj_id, object_content=obj.deflate())
+
+        # Assert: All objects are stored in the ObjectStore
+        assert len(self.store) == len(all_objects)
+
+        # Execute: Confirm message received
+        request = ConfirmMessageReceivedRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            message_object_id=message_res.object_id,
+        )
+        response, call = self._confirm_message_received.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, ConfirmMessageReceivedResponse)
+        assert grpc.StatusCode.OK == call.code()
+
+        # Assert: Message is removed from LinkState
+        assert len(self.store) == 0
