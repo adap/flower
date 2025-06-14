@@ -74,7 +74,7 @@ Dataset:
 
 **2.5 📋 FedFitTech Baseline:** <p align="justify"> FedFitTech Baseline is your foundational setup for fitness technology applications using Federated Learning (FL). To get started, use the default hyperparameters provided, which ensure a stable starting point for your experiments. Feel free to explore different configurations by adjusting these hyperparameters to optimize performance and achieve better results tailored to your specific needs.  </p>
     
-**2.6 ⚙️ FL Trainig Hyperparameters:** <p align="justify">By default, the main hyperparameters used are shown in the table below. For a complete list of hyperparameters, please refer to the configuration file in `baselines/fedfittech/fedfittech/config/base.yaml`.</p>
+**2.6 ⚙️ FL Trainig Hyperparameters:** <p align="justify">By default, the main hyperparameters used are shown in the table below. For a complete list of hyperparameters, please refer to the configuration file in `/baselines/fedfittech/fedfittech/config/base.yaml`.</p>
 
 
 | Description | Value |
@@ -203,11 +203,11 @@ This repository contains the necessary code and resources to reproduce the basel
 </p>
 
 > \[!Note\]
-> Upon running the experiment, a `baselines/fedfittech/fedfittech/Flower_log` folder will be generated, containing all the plots and CSV files.
+> Upon running the experiment, a `/baselines/fedfittech/fedfittech/Flower_log` folder will be generated, containing all the plots and CSV files.
 
 Figure 2 illustrates the mean F1 score for all clients using FedFitTech over 100 global rounds.
 <p align="center">
-  <img src="baselines/fedfittech/fedfittech/Results_to_compare/F1_scores_baseline.svg" width="85%" />
+  <img src="/baselines/fedfittech/fedfittech/Results_to_compare/F1_scores_baseline.svg" width="85%" />
 </p>
 <p align="center">
   <em>Figure 2: F1 score vs Clients for FedFitTech baseline</em>
@@ -215,7 +215,7 @@ Figure 2 illustrates the mean F1 score for all clients using FedFitTech over 100
 
 Figure 3 illustrates the Convergence of the F1 score over 100 global rounds for the FedFitTech baseline having **mean F1 score of 0.68**.
 <p align="center">
-  <img src="baselines/fedfittech/fedfittech/Results_to_compare/F1_scores_convergence_linegraph_baseline.svg" width="85%" />
+  <img src="/baselines/fedfittech/fedfittech/Results_to_compare/F1_scores_convergence_linegraph_baseline.svg" width="85%" />
 </p>
 <p align="center">
   <em>Figure 3: Convergence of the F1 score over 100 global rounds for the FedFitTech baseline.</em>
@@ -223,7 +223,7 @@ Figure 3 illustrates the Convergence of the F1 score over 100 global rounds for 
 
 Figures 4 depict the label-based F1-scores for the FedFitTech baseline. The actual label names in these figures are as follows:</p>
 <p align="center">
-  <img src="baselines/fedfittech/fedfittech/Results_to_compare/clients_vs_label_F1_scores_heatmaps_Normal.svg" width="85%" />
+  <img src="/baselines/fedfittech/fedfittech/Results_to_compare/clients_vs_label_F1_scores_heatmaps_Normal.svg" width="85%" />
 </p>
 <p align="center">
   <em>Figure 4 (Client-Label Based F1-Scores of the FedFitTech)</em>
@@ -263,7 +263,7 @@ S: Bench-dips
 </p>
 
 > \[!Tip\]
-> To perform an experiment with the case study, you just need to change the `Early Stopping` flag in the configuration file located at `baselines/fedfittech/fedfittech/config/base.yaml`. The updated hyperparameters will be as shown below. 
+> To perform an experiment with the case study, you just need to change the `Early Stopping` flag in the configuration file located at `/baselines/fedfittech/fedfittech/config/base.yaml`. The updated hyperparameters will be as shown below. 
 
 
 | Description | Value |
@@ -283,7 +283,7 @@ S: Bench-dips
 | Early Stopping | **True** |
 
 > \[!Note\]
-> For logs related to early stopping, an `baselines/fedfittech/fedfittech/Early_stoppinng_logs` folder will be created. This folder will store client-specific early stopping metadata
+> For logs related to early stopping, an `/baselines/fedfittech/fedfittech/Early_stoppinng_logs` folder will be created. This folder will store client-specific early stopping metadata
 
 **7.3 🧾 Early stopping metadata**
 
@@ -326,7 +326,7 @@ Config records for Client Id 18: Best Validatio F1 score 0.750440226645707, Coun
 
 
 <p align="center">
-  <img src="baselines/fedfittech/fedfittech/Results_to_compare/Global_rounds_vs_clients_single_bar_plot.svg" width="85%" />
+  <img src="/baselines/fedfittech/fedfittech/Results_to_compare/Global_rounds_vs_clients_single_bar_plot.svg" width="85%" />
 </p>
 <p align="center">
   <em>Figure 5: The figure shows the number of training rounds each client attended in the case study. The Y-axis represents the F1-score, and the X-axis represents client IDs. Red indicates communication cost, green shows saved communication rounds, and the dashed black line is the mean. </em>
@@ -338,7 +338,7 @@ Figure 6 illustrates that some clients did not improve their local F1-score even
 </p>
 
 <p align="center">
-  <img src="baselines/fedfittech/fedfittech/Results_to_compare/F1_scores_convergence_with_early_stopping_linegraph.svg" alt="Figure 2" width="85%" />
+  <img src="/baselines/fedfittech/fedfittech/Results_to_compare/F1_scores_convergence_with_early_stopping_linegraph.svg" alt="Figure 2" width="85%" />
 </p>
 <p align="center">
   <em> Figure 6: Communication rounds (X-axis) vs. F1-scores (Y-axis). The dashed black line shows the mean values of all local performances, and triangles depict early-stopped clients' rounds. </em>
@@ -350,7 +350,7 @@ Figure 6 illustrates that some clients did not improve their local F1-score even
 <p align="justify"> Figure 7 shows the difference of F1-score (y-axis) over clients(x-axis) </p>
 
 <p align="center">
-  <img src="baselines/fedfittech/fedfittech/Results_to_compare/F1_scores_comparison_double_bar_plot.svg" width="85%" />
+  <img src="/baselines/fedfittech/fedfittech/Results_to_compare/F1_scores_comparison_double_bar_plot.svg" width="85%" />
 </p>
 <p align="center">
   <em>Figure 7: F1-Score Comparison: FedFitTech vs. Case Study </em>
@@ -362,8 +362,8 @@ Figure 6 illustrates that some clients did not improve their local F1-score even
 Figures 4 and 8 depict the label-based F1-scores for the FedFitTech baseline and the case study, respectively. The actual label names in these figures are as follows:</p>
 
 <p align="center">
-  <img src="baselines/fedfittech/fedfittech/Results_to_compare/clients_vs_label_F1_scores_heatmaps_Normal.svg" width="49%" />
-  <img src="baselines/fedfittech/fedfittech/Results_to_compare/clients_vs_label_F1_scores_heatmaps_Early_Stopping.svg" width="49%" />
+  <img src="/baselines/fedfittech/fedfittech/Results_to_compare/clients_vs_label_F1_scores_heatmaps_Normal.svg" width="49%" />
+  <img src="/baselines/fedfittech/fedfittech/Results_to_compare/clients_vs_label_F1_scores_heatmaps_Early_Stopping.svg" width="49%" />
 </p>
 <p align="center">
   <em>Figure 4 (Client-Label Based F1-Scores of the FedFitTech), Figure 8 (Client-Label Based F1-Scores of the Case Study)</em>
