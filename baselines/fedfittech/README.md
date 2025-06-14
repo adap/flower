@@ -99,7 +99,7 @@ Dataset:
 **3.1 🪞 Clone Repository**
 Change the working directory to FedFitTech where project.toml is located.
 ```
-cd baselines/FedFitTech
+cd baselines/fedfittech
 ```
 
 > \[!TIP\]
