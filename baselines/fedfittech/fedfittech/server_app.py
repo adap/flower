@@ -1,42 +1,30 @@
 """FedFitTech: A Flower / PyTorch app."""
 
-import os
-import sys
 from typing import List, Tuple
 
 import torch
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 
 from fedfittech.flwr_utils.client_utils import *
 from fedfittech.flwr_utils.server_plotting_function import *
 from fedfittech.my_strategy import CustomFedAvg
 from fedfittech.task import get_weights
-from flwr.common import (
-    ConfigsRecord,
-    Context,
-    Metrics,
-    RecordSet,
-    ndarrays_to_parameters,
-)
+from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
 
 
 def fit_config(server_round: int):
     """Returns the configuration dictionary for each round."""
-
     return {"server_round": server_round}
 
 
 def evaluate_config(server_round: int):
     """Returns the configuration dictionary for each round."""
-
     return {"server_round": server_round}
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     """A function that will aggregate the metrics from all clients after evaluation."""
-
     # metrics_df = weighted_average_plottinng(metrics, plt_path)
 
     return {}

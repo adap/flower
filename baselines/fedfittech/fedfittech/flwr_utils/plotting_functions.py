@@ -114,7 +114,6 @@ def plot_GM_performance_after_FL_training(
         directory_name (str): Directory to save the plot if save_fig=True.
         save_fig (bool): Whether to save the figure to a file. Defaults to True.
     """
-
     categories = df.columns.values
     values = df.iloc[GLOBAL_ROUND - 1].values
 
@@ -426,7 +425,6 @@ class advanced_plot:
     ) -> plt:
         """4 sonsors are subplotted and Grounth Truth vs Predicted Labels can be
         analysed via colour map."""
-
         data = user_test_features_all[client_num]
 
         # Number to labels:
@@ -548,7 +546,6 @@ class advanced_plot:
     ) -> plt:
         """4 sensors are subplotted, and Ground Truth vs Predicted Labels can be
         analyzed via color map."""
-
         data = user_test_features_all[client_num]
 
         # Number to labels:
@@ -798,7 +795,6 @@ class common_plots:
             directory_name (str, optional): Directory to save the figure if save_fig=True.
             save_fig (bool, optional): Whether to save the figure. Defaults to False.
         """
-
         # Calculate mean
         mean_value = np.mean(final_fscores)
 

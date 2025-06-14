@@ -13,16 +13,11 @@ import pandas as pd
 import torch
 from omegaconf import DictConfig
 
-from fedfittech.flwr_utils.client_utils import (
-    get_model_plot_directory,
-    get_net_and_config,
-    get_weights,
-    set_weights,
-)
+from fedfittech.flwr_utils.client_utils import get_net_and_config, set_weights
 from fedfittech.flwr_utils.server_plotting_function import (
     weighted_eval_average_plottinng,
 )
-from flwr.common import Parameters, Scalar, parameters_to_ndarrays
+from flwr.common import Scalar, parameters_to_ndarrays
 from flwr.server.strategy import FedAvg
 
 
@@ -97,7 +92,6 @@ class CustomFedAvg(FedAvg):
         failures,
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation accuracy using weighted average."""
-
         if not results:
             return None, {}
 

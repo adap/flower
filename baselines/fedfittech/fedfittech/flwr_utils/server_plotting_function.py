@@ -113,7 +113,6 @@ def weighted_eval_average_plottinng(
     metrics: List[Tuple[int, Metrics]] - A list of metrics from all clients
     plt_path: str - The path to save the plots
     """
-
     # best_f1 = float(0)
     best_df = None
     best_server_round = None
@@ -212,7 +211,7 @@ def weighted_eval_average_plottinng(
             "Validation F1 score"
         ]
 
-    f1_score_csv_path = os.path.join(csv_path, f"Validation_F1_Scores.csv")
+    f1_score_csv_path = os.path.join(csv_path, "Validation_F1_Scores.csv")
     # result_table.loc[result_table["Server_Round"] <= server_round]
     transform_val_f1_Df = val_f1_df.loc[val_f1_df["Server_Round"] <= server_round]
     transform_val_f1_Df.to_csv(

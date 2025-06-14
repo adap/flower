@@ -1,7 +1,8 @@
 """# ------------------------------------------------------------------------ # Coded
 for preparing WEAR dataset to run TinyHAR model in Federated Learning system by:
 Zeyneddin Oz # E-Mail: zeyneddin.oez@uni-siegen.de #
-------------------------------------------------------------------------"""
+------------------------------------------------------------------------
+"""
 
 import os
 import warnings
@@ -24,7 +25,6 @@ def get_learning_type_name(input_string: str) -> str:
 
     Example: federated_learning -> Federated Learning
     """
-
     # Split the string on underscores, capitalize each word, and join with a space
     return " ".join(word.capitalize() for word in input_string.split("_"))
 
@@ -45,7 +45,6 @@ def load_data(user_path: os.path, keep_NULL=True) -> [np.array, np.array]:
     Input: Path of a csv file.
     Output: Cleaned and scaled pandas dataframes transformed to numpy matrix and array as features and labels.
     """
-
     # Read csv file as a pandas dataframe from path:
     user_df = pd.read_csv(user_path)
 
@@ -106,7 +105,6 @@ def manual_data_split(
 
     In general, aim is to split the first a percent of each rows as testing data when a new label starts.
     """
-
     # Initialize test arrays:
     y_test_label = []
     X_test_features = []
@@ -155,7 +153,6 @@ def take_most_common_label_in_a_window(
     Output:
         1- torch.Tensor type array includes label of each windows.
     """
-
     # Calculate the maximum index to consider, ignoring the last incomplete chunk:
     max_index = (arr.size(0) // sequence_length) * sequence_length
 
@@ -199,7 +196,6 @@ def generate_dataloaders(
         1- Torch data loader for training,
         2- Torch data loader for testing.
     """
-
     # ############################# Convert lists to torch tensors #################
     train_features_tensor = torch.tensor(train_features, dtype=torch.float32)
     train_labels_tensor = torch.tensor(train_labels, dtype=torch.long)
@@ -263,7 +259,6 @@ def add_pred_to_all_data(user_labels, user_test_labels, user_pred_labels: list) 
     Output:
         final_array:      Labels array like user_labels, but testing labels are replaced with predictions.
     """
-
     final_array = []
 
     num = 0

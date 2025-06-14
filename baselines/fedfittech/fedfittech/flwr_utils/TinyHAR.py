@@ -427,9 +427,8 @@ class TinyHAR(nn.Module):
         self.cross_channel_aggregation_type = cross_channel_aggregation_type
         self.temporal_info_interaction_type = temporal_info_interaction_type
         self.temporal_info_aggregation_type = temporal_info_aggregation_type
-        """
-        PART 1 , ============= Channel wise Feature Extraction =============================        
-        """
+        """PART 1 , ============= Channel wise Feature Extraction
+        ============================="""
         filter_num_list = [1]
         for i in range(nb_conv_layers - 1):
             filter_num_list.append(filter_num)
@@ -457,15 +456,13 @@ class TinyHAR(nn.Module):
                 )
         self.layers_conv = nn.ModuleList(layers_conv)
         downsampling_length = self.get_the_shape(input_shape)
-        """
-        PART2 , ================ Cross Channel interaction  =================================
-        """
+        """PART2 , ================ Cross Channel interaction
+        ================================="""
         self.channel_interaction = crosschannel_interaction[
             cross_channel_interaction_type
         ](input_shape[3], filter_num)
-        """
-        PART3 , =============== Cross Channel Fusion  ====================================
-        """
+        """PART3 , =============== Cross Channel Fusion
+        ===================================="""
         if cross_channel_aggregation_type == "FC":
             self.channel_fusion = crosschannel_aggregation[
                 cross_channel_aggregation_type
@@ -480,15 +477,13 @@ class TinyHAR(nn.Module):
             ](input_shape[3], 2 * filter_num)
 
         self.activation = nn.ReLU()
-        """
-        PART4  , ============= Temporal information Extraction =========================
-        """
+        """PART4  , ============= Temporal information Extraction
+        ========================="""
         self.temporal_interaction = temporal_interaction[
             temporal_info_interaction_type
         ](input_shape[3], 2 * filter_num)
-        """
-        PART 5 , =================== Temporal information Aggregation ================
-        """
+        """PART 5 , =================== Temporal information Aggregation
+        ================"""
         self.dropout = nn.Dropout(dropout)
         if temporal_info_aggregation_type == "FC":
             self.flatten = nn.Flatten()
@@ -550,7 +545,7 @@ class TinyHAR(nn.Module):
 
         """cross temporal interaction """
         x = self.temporal_interaction(x)
-        """cross temporal fusion """
+        """Cross temporal fusion."""
         if self.temporal_info_aggregation_type == "FC":
             x = self.flatten(x)
             x = self.activation(self.temporal_fusion(x))  # B L C

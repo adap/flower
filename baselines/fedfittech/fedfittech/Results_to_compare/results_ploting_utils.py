@@ -1,13 +1,26 @@
+"""Utility functions for plotting and comparing model results."""
+
 import os
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from matplotlib.lines import Line2D
 
 
 def plot_f1_scores_baseline(df):
+    """Plot baseline F1 scores from a DataFrame.
+
+    This function generates a bar plot to visualize the F1 scores
+    of different models or configurations from the provided DataFrame.
+
+    Args:
+        df (pandas.DataFrame): A DataFrame containing model names and their corresponding F1 scores.
+                               Expected to have columns like 'Model' and 'F1 Score'.
+
+    Returns:
+        None: Displays the plot using matplotlib or seaborn.
+    """
     print(df)
     sns.set_style("whitegrid")
     plt.figure(figsize=(12, 8))
@@ -17,7 +30,7 @@ def plot_f1_scores_baseline(df):
     mean_f1_score_baseline = round(mean_f1_score_baseline, 2)
 
     # Create the bar plot using seaborn
-    ax = sns.barplot(
+    sns.barplot(
         x="Client_Id",
         y="F1_score_Normal",
         data=df,
@@ -51,7 +64,16 @@ def plot_f1_scores_baseline(df):
 
 
 def plot_f1_scores_comparison(df_distributed):
+    """Plot a comparison of F1 scores.
 
+    This function generates F1 scores comparison double bar plot
+
+    Args:
+        df_distributed (pandas.DataFrame): A DataFrame containing F1 scores for different clients
+
+    Returns:
+        None: Displays the plot using matplotlib or seaborn.
+    """
     # Convert to long format
     df_melted = df_distributed.melt(
         id_vars="Client_Id", var_name="Model", value_name="F1 Score"
@@ -151,7 +173,19 @@ def plot_f1_scores_comparison(df_distributed):
 
 
 def plot_f1_convergence(df_f1_scores):
+    """Plot the convergence of F1 scores over time or communication rounds.
 
+    This function visualizes how the F1 score changes during training or
+    federated communication rounds, helping to analyze model convergence.
+
+    Args:
+        df_f1_scores (pandas.DataFrame): A DataFrame containing F1 scores across
+                                         different rounds or epochs. Expected to have
+                                         columns like 'Round' and 'F1 Score'.
+
+    Returns:
+        None: Displays the plot using matplotlib or seaborn.
+    """
     print(df_f1_scores.head())
     df_f1_scores.columns = [
         col.replace("Client_Id_", "") for col in df_f1_scores.columns
@@ -243,6 +277,27 @@ def plot_heat_map_of_table(
     learning_type_name=None,
     type=None,
 ) -> plt:
+    """Generate and optionally save a heatmap from a label-based F1 score table.
+
+    This function creates a heatmap from a DataFrame containing F1 scores
+    across multiple labels and clients. It formats the table, renames columns
+    with alphabetical labels (A, B, C, ...), and visualizes it using seaborn.
+    Optionally, it can save the figure to a specified directory.
+
+    Args:
+        label_based_result_table (pd.DataFrame): A DataFrame where rows represent clients
+            and columns represent labels. Each cell contains the corresponding F1 score.
+        directory_name (os.path): Path to the directory where the figure should be saved,
+            if `save_fig` is True.
+        save_fig (bool, optional): Whether to save the generated heatmap as an image.
+            Defaults to True.
+        learning_type_name (str, optional): Optional string to include in the saved filename
+            or title for context.
+        type (str, optional): Optional string to further customize the filename or plot title.
+
+    Returns:
+        matplotlib.pyplot: The pyplot object with the heatmap.
+    """
 
     # any nan values will be 0.0
     label_based_result_table = label_based_result_table.fillna(0.0)
@@ -310,10 +365,24 @@ def plot_heat_map_of_table(
 def plot_f1_convergence_with_stop_round(
     df_ES_f1_vs_round, df_distributed_metrics_for_plot3
 ):
-    """
-    df_ES_f1_vs_round (pd.Dataframe): contains f1 scoress for all rounds
-    df_distributed_metrics_for_plot3: pd.Dataframe having clients ids with early stopping round
+    """Plot the convergence of F1 scores with early stopping rounds per client.
 
+    This function visualizes F1 score progression across server rounds for
+    each client. If early stopping round data is available, the function
+    nullifies F1 scores beyond that point to reflect training termination.
+    It generates a line plot showing per-client convergence trends over time.
+
+    Args:
+        df_ES_f1_vs_round (pd.DataFrame): A DataFrame where each row represents
+            a server round and each column (except 'Server_Round') represents
+            a client with its F1 score for that round.
+
+        df_distributed_metrics_for_plot3 (pd.DataFrame): A DataFrame containing
+            early stopping information per client. Expected to have at least the
+            following columns: 'Client_Id' and 'Training stop round'.
+
+    Returns:
+        None: Displays a convergence line plot using seaborn and matplotlib.
     """
     pd.set_option("display.max_rows", None)  # Show all rows
 
@@ -438,6 +507,24 @@ def plot_f1_convergence_with_stop_round(
 
 
 def plot_global_rounds(EA_dist_metric: pd.DataFrame, Global_rounds=100):
+    """Plot training duration and computation savings for clients using early stopping.
+
+    This function generates a stacked bar chart showing how many global rounds
+    each client trained before stopping early, and how many rounds they skipped
+    (computation saved). It uses color-coded bars: one for the active training period
+    and one for the saved rounds.
+
+    Args:
+        EA_dist_metric (pd.DataFrame): DataFrame containing at least the following columns:
+            - 'Client_Id': Unique identifier for each client.
+            - 'Training stop round': The round number at which the client stopped training
+              (NaNs are assumed to have trained full `Global_rounds`).
+        Global_rounds (int, optional): Total number of global rounds in the training process.
+            Defaults to 100.
+
+    Returns:
+        None: Displays the plot using matplotlib.
+    """
 
     EA_dist_metric["Training stop round"] = EA_dist_metric[
         "Training stop round"

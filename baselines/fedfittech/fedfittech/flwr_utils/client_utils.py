@@ -6,9 +6,7 @@
 # ----------------------------------------------------------------------------------------
 
 import glob
-import json
 import os
-import time
 from datetime import datetime
 
 import numpy as np
@@ -167,7 +165,8 @@ def load_config(config_path: str, config_file: str) -> DictConfig:
         config_path (str): Path to the configuration directory.
         config_file (str): Name of the configuration file.
 
-    Returns:
+    Returns
+    -------
         DictConfig: Loaded configuration.
     """
     # Construct the full path to the config file
@@ -202,15 +201,15 @@ def get_model_plot_directory(
     OmegaConf.save(config=config, f=file_path)
 
     if plt_dir:
-        plt_directory_name = os.path.join(root_log_path, f"Experiment_one_Plots")
+        plt_directory_name = os.path.join(root_log_path, "Experiment_one_Plots")
         os.makedirs(
             plt_directory_name, exist_ok=True
         )  # Creates directory if it doesn't exist
     if model_dir:
-        model_directory_name = os.path.join(root_log_path, f"Experiment_one_Models")
+        model_directory_name = os.path.join(root_log_path, "Experiment_one_Models")
         os.makedirs(model_directory_name, exist_ok=True)
     if csv_dir:
-        csv_directory_name = os.path.join(root_log_path, f"Experiment_Result_CSVs")
+        csv_directory_name = os.path.join(root_log_path, "Experiment_Result_CSVs")
         os.makedirs(csv_directory_name, exist_ok=True)
 
     return plt_directory_name, model_directory_name, csv_directory_name, root_log_path

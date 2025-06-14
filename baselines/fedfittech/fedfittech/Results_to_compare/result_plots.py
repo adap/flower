@@ -1,13 +1,17 @@
-"""Plotting function to compare the reesults of the different approaches i.e. One with
-early stopping and one without early stopping."""
+"""Plotting function to compare the reesults of the different approaches.
 
-import os
+i.e. One with early stopping and one without early stopping.
+"""
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-import seaborn as sns
-from results_ploting_utils import *
+from results_ploting_utils import (
+    plot_f1_convergence,
+    plot_f1_convergence_with_stop_round,
+    plot_f1_scores_baseline,
+    plot_f1_scores_comparison,
+    plot_global_rounds,
+    plot_heat_map_of_table,
+)
 
 # Files paths - Global rounds vs Clients [F1 scores]
 ES_f1_vs_round_path = "./dataframes/Validation_F1_Scores_vs_rounds_with_EA.csv"
@@ -95,15 +99,23 @@ df_distributed_metrics_for_plot3 = pd.DataFrame(data_3)
 
 
 # Function to plot the Barcharts, linegraph, Heatmaps
-# plot_f1_scores_baseline(data_4)
+plot_f1_scores_baseline(data_4)
 
-# plot_f1_scores_comparison(df_distributed_metrics_for_plot1)
+plot_f1_scores_comparison(df_distributed_metrics_for_plot1)
 
 plot_f1_convergence(Df_NORMAL_f1_vs_round)
 
-# plot_f1_convergence_with_stop_round(Df_ES_f1_vs_round, df_distributed_metrics_for_plot3)
+plot_f1_convergence_with_stop_round(Df_ES_f1_vs_round, df_distributed_metrics_for_plot3)
 #
-# plot_heat_map_of_table(df_ES_client_vs_labels_f1scores, directory_name="Results_to_compare", type= "Early_Stopping")
-# plot_heat_map_of_table(df_Normal_client_vs_labels_f1scores, directory_name="Results_to_compare", type="Normal")
+plot_heat_map_of_table(
+    df_ES_client_vs_labels_f1scores,
+    directory_name="Results_to_compare",
+    type="Early_Stopping",
+)
+plot_heat_map_of_table(
+    df_Normal_client_vs_labels_f1scores,
+    directory_name="Results_to_compare",
+    type="Normal",
+)
 
-# plot_global_rounds(EA_dist_metric=Df_ES_dist_metric, Global_rounds=100)
+plot_global_rounds(EA_dist_metric=Df_ES_dist_metric, Global_rounds=100)
