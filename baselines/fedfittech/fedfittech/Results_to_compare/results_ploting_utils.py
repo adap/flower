@@ -9,18 +9,7 @@ import seaborn as sns
 
 
 def plot_f1_scores_baseline(df):
-    """Plot baseline F1 scores from a DataFrame.
-
-    This function generates a bar plot to visualize the F1 scores
-    of different models or configurations from the provided DataFrame.
-
-    Args:
-        df (pandas.DataFrame): A DataFrame containing model names and their corresponding F1 scores.
-                               Expected to have columns like 'Model' and 'F1 Score'.
-
-    Returns:
-        None: Displays the plot using matplotlib or seaborn.
-    """
+    """Plot baseline F1 scores from a DataFrame."""
     print(df)
     sns.set_style("whitegrid")
     plt.figure(figsize=(12, 8))
@@ -64,16 +53,7 @@ def plot_f1_scores_baseline(df):
 
 
 def plot_f1_scores_comparison(df_distributed):
-    """Plot a comparison of F1 scores.
-
-    This function generates F1 scores comparison double bar plot
-
-    Args:
-        df_distributed (pandas.DataFrame): A DataFrame containing F1 scores for different clients
-
-    Returns:
-        None: Displays the plot using matplotlib or seaborn.
-    """
+    """Plot a comparison of F1 scores."""
     # Convert to long format
     df_melted = df_distributed.melt(
         id_vars="Client_Id", var_name="Model", value_name="F1 Score"
@@ -86,7 +66,6 @@ def plot_f1_scores_comparison(df_distributed):
     plt.figure(figsize=(12, 8))
 
     S_FL = "blue"
-    ES_FL = "orange"
 
     # Plot using Seaborn
     ax = sns.barplot(
@@ -125,12 +104,6 @@ def plot_f1_scores_comparison(df_distributed):
     handles, labels = ax.get_legend_handles_labels()
     print(handles)
     print(labels)
-
-    # All legends to show
-    # show_legend = [handles[0], handles[1], line1, line2]  # Show first two bars + both lines
-    # show_labels = ["Clients F1 Score for FedFitTech","Clients F1 Score for ES-FedFitTech",
-    #               f"Mean F1 Score for FedFitTech = {mean_f1_score_normal}",
-    #              f"Mean F1 Score for ES-FedFitTech = {mean_f1_score_es}"]
 
     show_legend = [line1, line2]  # Show first two bars + both lines
     show_labels = [
@@ -173,19 +146,7 @@ def plot_f1_scores_comparison(df_distributed):
 
 
 def plot_f1_convergence(df_f1_scores):
-    """Plot the convergence of F1 scores over time or communication rounds.
-
-    This function visualizes how the F1 score changes during training or
-    federated communication rounds, helping to analyze model convergence.
-
-    Args:
-        df_f1_scores (pandas.DataFrame): A DataFrame containing F1 scores across
-                                         different rounds or epochs. Expected to have
-                                         columns like 'Round' and 'F1 Score'.
-
-    Returns:
-        None: Displays the plot using matplotlib or seaborn.
-    """
+    """Plot the convergence of F1 scores over time or communication rounds."""
     print(df_f1_scores.head())
     df_f1_scores.columns = [
         col.replace("Client_Id_", "") for col in df_f1_scores.columns
@@ -277,28 +238,7 @@ def plot_heat_map_of_table(
     learning_type_name=None,
     type=None,
 ) -> plt:
-    """Generate and optionally save a heatmap from a label-based F1 score table.
-
-    This function creates a heatmap from a DataFrame containing F1 scores
-    across multiple labels and clients. It formats the table, renames columns
-    with alphabetical labels (A, B, C, ...), and visualizes it using seaborn.
-    Optionally, it can save the figure to a specified directory.
-
-    Args:
-        label_based_result_table (pd.DataFrame): A DataFrame where rows represent clients
-            and columns represent labels. Each cell contains the corresponding F1 score.
-        directory_name (os.path): Path to the directory where the figure should be saved,
-            if `save_fig` is True.
-        save_fig (bool, optional): Whether to save the generated heatmap as an image.
-            Defaults to True.
-        learning_type_name (str, optional): Optional string to include in the saved filename
-            or title for context.
-        type (str, optional): Optional string to further customize the filename or plot title.
-
-    Returns:
-        matplotlib.pyplot: The pyplot object with the heatmap.
-    """
-
+    """Generate and optionally save a heatmap from a label-based F1 score table."""
     # any nan values will be 0.0
     label_based_result_table = label_based_result_table.fillna(0.0)
     # Set the figure size
@@ -308,9 +248,8 @@ def plot_heat_map_of_table(
     labels_alpha = [chr(65 + i) for i in range(len(label_based_result_table.columns))]
     print(labels_alpha)
 
-    printable_labels = {
-        col: label for col, label in zip(label_based_result_table.columns, labels_alpha)
-    }
+    printable_labels = dict(zip(label_based_result_table.columns, labels_alpha))
+
     print(printable_labels)
 
     label_based_result_table.index = label_based_result_table.index.str.replace(
@@ -320,19 +259,15 @@ def plot_heat_map_of_table(
 
     label_based_result_table.columns = labels_alpha
     # Create the heatmap
-    ax = sns.heatmap(
+    sns.heatmap(
         label_based_result_table,
         annot=True,  # Show the F1-scores in each cell
-        fmt=".2f",  # Format the numbers with two decimal places
-        cmap="coolwarm",  # Use a diverging colormap to highlight low and high values
+        fmt=".2f",  # Format the numbers with two
+        cmap="coolwarm",  # Use a diverging colormap
         annot_kws={"size": 11},
         cbar_kws={"shrink": 1},
     )  # Add a color bar label: cbar_kws={'label': 'F1 Score'}
 
-    title = f"Federated Learning - F1-Score Heatmap {type}"
-    # ax.figure.colorbar(ax.collections[0]).ax.yaxis.set_tick_params(labelsize=14)
-    # Add titles and labels
-    # plt.title(title, fontsize=16, fontweight='bold')
     plt.xlabel("", fontsize=12, fontweight="bold")
     plt.ylabel("", fontsize=12, fontweight="bold")
     plt.xticks(rotation=0, fontsize=17, fontweight="bold")
@@ -365,25 +300,7 @@ def plot_heat_map_of_table(
 def plot_f1_convergence_with_stop_round(
     df_ES_f1_vs_round, df_distributed_metrics_for_plot3
 ):
-    """Plot the convergence of F1 scores with early stopping rounds per client.
-
-    This function visualizes F1 score progression across server rounds for
-    each client. If early stopping round data is available, the function
-    nullifies F1 scores beyond that point to reflect training termination.
-    It generates a line plot showing per-client convergence trends over time.
-
-    Args:
-        df_ES_f1_vs_round (pd.DataFrame): A DataFrame where each row represents
-            a server round and each column (except 'Server_Round') represents
-            a client with its F1 score for that round.
-
-        df_distributed_metrics_for_plot3 (pd.DataFrame): A DataFrame containing
-            early stopping information per client. Expected to have at least the
-            following columns: 'Client_Id' and 'Training stop round'.
-
-    Returns:
-        None: Displays a convergence line plot using seaborn and matplotlib.
-    """
+    """Plot the convergence of F1 scores with early stopping rounds per client."""
     pd.set_option("display.max_rows", None)  # Show all rows
 
     pd.set_option("display.max_columns", None)  # Show all columns
@@ -394,7 +311,7 @@ def plot_f1_convergence_with_stop_round(
     ]
     print(df_ES_f1_vs_round.head())
     mean_f1_scores = df_ES_f1_vs_round.iloc[:, 1:].mean(axis=1)
-    # print(df_distributed_metrics_for_plot3)     # columns as = Client_Id, F1_score_ES, F1_score_Normal, Training stop round
+    # print(df_distributed_metrics_for_plot3)
 
     for _, row in df_distributed_metrics_for_plot3.iterrows():
         if pd.notna(row["Training stop round"]):
@@ -415,7 +332,7 @@ def plot_f1_convergence_with_stop_round(
     # Get unique clients and assign colors using Seaborn's palette
     unique_clients = df_melted_es_f1["Client_Id"].unique()
     palette = sns.color_palette("Paired", len(unique_clients))
-    client_colors = {client: color for client, color in zip(unique_clients, palette)}
+    client_colors = client_colors = dict(zip(unique_clients, palette))
 
     # Step 2: Create the line plot
     plt.figure(figsize=(12, 8))  # Set the figure size
@@ -446,6 +363,7 @@ def plot_f1_convergence_with_stop_round(
             for _, row2 in df_ES_f1_vs_round.iterrows():
                 x = stop_round
                 y = df_ES_f1_vs_round.iloc[int(stop_round - 1), client_id + 1]
+                print(row2)
                 break
             line_color = client_colors[f"{int(client_id)}"]
             plt.plot(
@@ -457,24 +375,18 @@ def plot_f1_convergence_with_stop_round(
                 alpha=0.8,
                 markersize=7,
             )
-            # plt.plot( x, y, linestyle="dashdot", color=line_color, alpha=0.8, linewidth=0.9)
-    #
-    # early_stopping_legend = Line2D([0], [0], linestyle="dashdot", color="black", lw=1.5, label="Early Stopping Point")
 
     # Customize the plot
     plt.xlabel("", fontsize=14)
     plt.ylabel("", fontsize=14)
     plt.xticks(rotation=0, fontsize=18, fontweight="bold")
     plt.yticks(fontsize=18, fontweight="bold")
-    # plt.title('F1 Score Convergence for 24 Clients Across 100 Global Rounds with Early Stopping', fontsize=14, fontweight='bold')
     plt.legend(
         title="Clients",
         bbox_to_anchor=(1.05, 1),
         loc="upper left",
         prop={"size": 13, "weight": "bold"},
     )  # Place legend outside the plot
-    # Add legend with extra entry for early stopping
-    # plt.legend(title="Legend", bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8, handles=[early_stopping_legend] + plt.gca().get_legend().legend_handles)
 
     # plt.grid(True, which='both', linestyle='--', alpha=0.7)
     plt.xlim(0)  # Start x-axis from 0
@@ -509,34 +421,20 @@ def plot_f1_convergence_with_stop_round(
 def plot_global_rounds(EA_dist_metric: pd.DataFrame, Global_rounds=100):
     """Plot training duration and computation savings for clients using early stopping.
 
-    This function generates a stacked bar chart showing how many global rounds
-    each client trained before stopping early, and how many rounds they skipped
-    (computation saved). It uses color-coded bars: one for the active training period
-    and one for the saved rounds.
-
-    Args:
-        EA_dist_metric (pd.DataFrame): DataFrame containing at least the following columns:
-            - 'Client_Id': Unique identifier for each client.
-            - 'Training stop round': The round number at which the client stopped training
-              (NaNs are assumed to have trained full `Global_rounds`).
-        Global_rounds (int, optional): Total number of global rounds in the training process.
-            Defaults to 100.
-
-    Returns:
-        None: Displays the plot using matplotlib.
+    This function visualizes the training duration and computation savings achieved by
+    applying early stopping techniques in a federated learning setup. It fills any
+    missing values in the "Training stop round" column with the specified number of
+    global rounds and plots the results.
     """
-
     EA_dist_metric["Training stop round"] = EA_dist_metric[
         "Training stop round"
     ].fillna(Global_rounds)
     plt.figure(figsize=(12, 8))  # Set the figure size
-    df = EA_dist_metric[["Client_Id", "Training stop round"]]
     print(EA_dist_metric)
 
     sns.set_theme(style="whitegrid")
-    # Plot a bar chart
-    # sns.barplot(data=df, x="Client_Id", y="Training stop round", color= "red", saturation=0.5, width=0.6)
 
+    # Plot a bar chart
     EA_dist_metric["Remaining Rounds"] = (
         Global_rounds - EA_dist_metric["Training stop round"]
     )
@@ -561,28 +459,18 @@ def plot_global_rounds(EA_dist_metric: pd.DataFrame, Global_rounds=100):
 
     for _, row in EA_dist_metric.iterrows():
         if pd.notna(row["Training stop round"]):
-            x = [row["Client_Id"], row["Client_Id"]]
+            # x = [row["Client_Id"], row["Client_Id"]]
             y_co = row["Training stop round"]
-            y = [y_co, Global_rounds]
-            comp_saved = int(Global_rounds - y_co)
-            # print(f"x = {x} , y = {y_co}")
-            # plt.plot( x, y, linestyle="dashdot", color="black", alpha=1, linewidth=1.5)
-            # plt.text(x[0]+0.2, y[0]+3, f"CS = {comp_saved}", fontsize=10, color="black", rotation=90)
-        else:
-            x = [row["Client_Id"], row["Client_Id"]]
-            y = [0, Global_rounds]
-            # plt.plot( x, y, linestyle="dashdot", color="gray", alpha=0.7, linewidth=0.7)
-            # plt.text(x[0]+0.05, y[0]+10, f"No Computation Saved", fontsize=10, color="gray", rotation=90)
+            # y = [y_co, Global_rounds]
+            # comp_saved = int(Global_rounds - y_co)
+            print(y_co)
 
-    # plt.plot([], [], color="black", linestyle="dashdot", label="CS = Computation Saved (Server Rounds)")
-    # Formatting
     plt.xlabel("", fontsize=14)
     plt.ylabel("", fontsize=14)
     plt.xticks(
         ticks=EA_dist_metric["Client_Id"], rotation=0, fontsize=17, fontweight="bold"
     )
     plt.yticks(fontsize=17, fontweight="bold")
-    # plt.title("Global Round vs. Client ID with Computation Saved through Early Stopping", fontsize=16)
 
     # Add a horizontal line at the mean value of Validation F1 score
     plt.axhline(
@@ -594,10 +482,6 @@ def plot_global_rounds(EA_dist_metric: pd.DataFrame, Global_rounds=100):
         zorder=10,
     )
 
-    # Add the mean value as text
-    # plt.text(x=21, y=mean_global_round_value +1, s=f"Mean Global Round {mean_global_round_value}", color='black', fontsize=17, ha='center')
-    # plt.legend(loc="upper left", bbox_to_anchor=(1, 1), fontsize=12)
-    # plt.legend(loc="upper left",fontsize= 12)
     plt.tight_layout()
     # Save High-Quality Figure
 

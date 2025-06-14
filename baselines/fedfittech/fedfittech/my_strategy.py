@@ -1,10 +1,6 @@
-# ----------------------------------------------------------------------------------------
-# Implementation of Federated learning using Flower Framework with WEAR dataset
-# Server strategy fuctionns
-# ----------------------------------------------------------------------------------------
-# Adaption by: Shreyas Korde
-# E-Mail: shreyas.korde@student.uni-siegen.de
-# ----------------------------------------------------------------------------------------
+"""Implemented custom Strategy for server app."""
+
+# pylint: disable=invalid-name
 
 import os
 from typing import Dict, Optional, Tuple
@@ -13,15 +9,17 @@ import pandas as pd
 import torch
 from omegaconf import DictConfig
 
-from fedfittech.flwr_utils.client_utils import get_net_and_config, set_weights
+from fedfittech.flwr_utils.client_utils import get_net_and_config
 from fedfittech.flwr_utils.server_plotting_function import (
     weighted_eval_average_plottinng,
 )
+from fedfittech.task import set_weights
 from flwr.common import Scalar, parameters_to_ndarrays
 from flwr.server.strategy import FedAvg
 
 
 class CustomFedAvg(FedAvg):
+    """Re-implementation of FedAvg."""
 
     def __init__(
         self,
@@ -44,7 +42,8 @@ class CustomFedAvg(FedAvg):
             plot_path (str | Path): Directory path for saving plots.
             csv_dir_path (str | Path): Directory path for saving CSVs.
             val_f1_df (pd.DataFrame): DataFrame containing validation F1 scores.
-            val_f1_client_vs_labels_table (pd.DataFrame): DataFrame containing F1 scores per client and label.
+            val_f1_client_vs_labels_table (pd.DataFrame): DataFrame containing F1
+                scores per client and label.
             *args (Any): Additional positional arguments.
             **kwargs (Any): Additional keyword arguments.
         """
@@ -56,13 +55,17 @@ class CustomFedAvg(FedAvg):
         self.val_f1_df = (
             val_f1_df  # Dataframe to store val_f1 scores of all clients per round
         )
-        self.val_f1_client_vs_labels_table = val_f1_client_vs_labels_table  # Dataframe for F1 scores of cliennts vs labels
+        # Dataframe for F1 scores of cliennts vs labels
+        self.val_f1_client_vs_labels_table = val_f1_client_vs_labels_table
 
     def aggregate_fit(self, server_round, results, failures):
-        """
-        Once the global model is aggregated then it will be saved in the model directory as global
-        model per round:
-        server_round (int): The current server round number
+        """Save global model.
+
+        Once the global model is aggregated then it will be saved in the model
+        directory as global model per round.
+
+        Args:
+            server_round (int): The current server round number
         """
         parameters_aggregated, metrics_aggregated = super().aggregate_fit(
             server_round, results, failures
@@ -74,8 +77,6 @@ class CustomFedAvg(FedAvg):
         # instantiate model
         model, cfg = get_net_and_config()
         set_weights(model, nndarrays)
-
-        # _, model_path = get_model_plot_directory(plt_dir=False, model_dir=True, server_round=server_round)
 
         # Save the global model in the standard PyTorch way
         torch.save(
@@ -99,8 +100,6 @@ class CustomFedAvg(FedAvg):
         aggregated_loss, aggregated_metrics = super().aggregate_evaluate(
             server_round, results, failures
         )
-
-        self.val_f1_client_vs_labels_table
 
         metrics_df, self.best_eval_f1, self.val_f1_df = weighted_eval_average_plottinng(
             cfg=self.cfg,

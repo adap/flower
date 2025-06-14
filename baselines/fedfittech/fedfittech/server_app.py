@@ -1,12 +1,16 @@
-"""FedFitTech: A Flower / PyTorch app."""
+"""Flower Server App."""
 
 from typing import List, Tuple
 
+import numpy as np
+import pandas as pd
 import torch
 from omegaconf import OmegaConf
 
-from fedfittech.flwr_utils.client_utils import *
-from fedfittech.flwr_utils.server_plotting_function import *
+from fedfittech.flwr_utils.client_utils import (
+    get_model_plot_directory,
+    get_net_and_config,
+)
 from fedfittech.my_strategy import CustomFedAvg
 from fedfittech.task import get_weights
 from flwr.common import Context, Metrics, ndarrays_to_parameters
@@ -14,25 +18,24 @@ from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 
 
 def fit_config(server_round: int):
-    """Returns the configuration dictionary for each round."""
+    """Return the configuration dictionary for each round."""
     return {"server_round": server_round}
 
 
 def evaluate_config(server_round: int):
-    """Returns the configuration dictionary for each round."""
+    """Return the configuration dictionary for each round."""
     return {"server_round": server_round}
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    """A function that will aggregate the metrics from all clients after evaluation."""
+    """Aggregate the metrics from all clients after evaluation."""
     # metrics_df = weighted_average_plottinng(metrics, plt_path)
 
     return {}
 
 
 def server_fn(context: Context):
-
-    DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    """Server Function to start the Flower server."""
     print(f"Cuda is available on Server = {torch.cuda.is_available()}\n")
 
     net, cfg = get_net_and_config()

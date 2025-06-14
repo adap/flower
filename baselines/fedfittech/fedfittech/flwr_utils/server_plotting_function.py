@@ -1,10 +1,4 @@
-# ----------------------------------------------------------------------------------------
-# Implementation of Federated learning using Flower Framework with WEAR dataset
-# Functions needed only for server_app
-# ----------------------------------------------------------------------------------------
-# Adaption by: Shreyas Korde
-# E-Mail: shreyas.korde@student.uni-siegen.de
-# ----------------------------------------------------------------------------------------
+"""Helpful functions for plotting results."""
 
 import matplotlib
 import pandas as pd
@@ -19,6 +13,7 @@ import seaborn as sns
 
 
 def ploting_averaage_metrics(df, plt_path, server_round="Final"):
+    """Plot the metrics."""
     server_round = str(server_round)
     # Set Seaborn style for better visuals
     sns.set(style="whitegrid")
@@ -55,12 +50,7 @@ def ploting_averaage_metrics(df, plt_path, server_round="Final"):
 
 
 def weighted_average_plottinng(metrics, plt_path, server_round="final"):
-    """A funtion to convert aggrigrasted metrics to a dataframe and save it as a CSV
-    file.
-
-    metrics: List[Tuple[int, Metrics]] - A list of metrics from all clients
-    plt_path: str - The path to save the CSV file
-    """
+    """Convert aggrigrasted metrics to a dataframe."""
     server_round = str(server_round)
     data = {}
     data["Client_Id"] = []
@@ -107,12 +97,7 @@ def weighted_eval_average_plottinng(
     results,
     server_round,
 ):
-    """A funtion to convert aggrigrasted metrics to a dataframe and save it as a CSV
-    file.
-
-    metrics: List[Tuple[int, Metrics]] - A list of metrics from all clients
-    plt_path: str - The path to save the plots
-    """
+    """Convert aggrigrasted metrics to a dataframe and save it as CSV."""
     # best_f1 = float(0)
     best_df = None
     best_server_round = None
@@ -153,9 +138,6 @@ def weighted_eval_average_plottinng(
                         f1_labels_df.loc[client, label] = round(
                             f1_labels_scores[client][label]["f1-score"], 2
                         )
-            # print(f1_labels_df)
-            # f1_labels_csv_path = os.path.join(csv_path, f'Client_vs_label_F1scores_{server_round}_round.csv')
-            # f1_labels_df.to_csv(f1_labels_csv_path, index=True, sep=';', quoting=csv.QUOTE_MINIMAL)
 
     if server_round == cfg.GLOBAL_ROUND:
         # Save F1_scores_vs_labels_clientwise_dict into jasonn format

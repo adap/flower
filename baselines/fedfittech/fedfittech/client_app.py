@@ -1,14 +1,17 @@
-"""FedFitTech: A Flower / PyTorch app."""
+"""FedFitTech: A Flower / Client PyTorch app."""
 
 import json
 import os
 from datetime import datetime
 
+import numpy as np
 import torch
 
-from fedfittech.flwr_utils.client_utils import *
 from fedfittech.flwr_utils.client_utils import get_net_and_config, load_data_for_client
-from fedfittech.flwr_utils.utils_for_tinyhar import *
+from fedfittech.flwr_utils.utils_for_tinyhar import (
+    evaluation_functions,
+    training_functions,
+)
 from fedfittech.task import get_weights, set_weights
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import ConfigsRecord, Context
@@ -16,6 +19,9 @@ from flwr.common import ConfigsRecord, Context
 
 # Defin Flower Client
 class FlowerClient(NumPyClient):
+    """Standard Flower client."""
+
+    # pylint: disable=too-many-arguments
     def __init__(self, context: Context, net, trainloader, valloader, config):
         self.cfg = config
         self.net = net
@@ -27,9 +33,7 @@ class FlowerClient(NumPyClient):
         self.DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Cuda is available for client = {torch.cuda.is_available()}")
 
-        self.client_state = (
-            context.state
-        )  # add a reference to the state of ClientApp to track best_f1_score and has_converged_flag
+        self.client_state = context.state
         if "early_stop_metrics" not in self.client_state:
             self.client_state["early_stop_metrics"] = ConfigsRecord()
             context_early_stop = self.client_state["early_stop_metrics"]
@@ -43,29 +47,34 @@ class FlowerClient(NumPyClient):
             context_early_stop["Training_stop_round"] = np.nan
 
     def fit(self, parameters, config):
-
+        """Implement fit function for a given client."""
         server_round = config.get("server_round", 0)
         set_weights(self.net, parameters)
         context_early_stop = self.client_state["early_stop_metrics"]
 
         config_reco_msg = (
             f"Config records for Client Id {self.cfg.sub_id}: "
-            f"Best Validation F1 score {context_early_stop['context_best_val_f1_score']}, "
-            f"Counter value {context_early_stop['counter']}, for server rounnd {context_early_stop['Training_stop_round']} "
+            f"Best Val F1 score {context_early_stop['context_best_val_f1_score']}, "
+            f"Counter value {context_early_stop['counter']}, "
+            f"for server rounnd {context_early_stop['Training_stop_round']} "
             f"Has_converged = {context_early_stop['has_converged']}"
         )
         print(config_reco_msg)
 
         if context_early_stop["has_converged"]:
-            fit_log_msg = f"+++++++++ Early stopping triggered for Client {self.cfg.sub_id} at Fit. No further training required. +++++++++\n"
+            fit_log_msg = (
+                "++++++++ Early stopping triggered for Client "
+                f"{self.cfg.sub_id} at Fit. No further training required. ++++++++\n"
+            )
             print(fit_log_msg)
 
-            if context_early_stop["print_status"] == False:
+            if not context_early_stop["print_status"]:
                 context_early_stop["Training_stop_round"] = server_round
                 msg_wth_stp_rnd = (
                     f"Config records for Client Id {self.cfg.sub_id}: "
-                    f"Best Validatio F1 score {context_early_stop['context_best_val_f1_score']}, "
-                    f"Counter value {context_early_stop['counter']}, for server round {context_early_stop['Training_stop_round']} "
+                    f"Best Val F1 {context_early_stop['context_best_val_f1_score']}, "
+                    f"Counter value {context_early_stop['counter']}, "
+                    f"for server round {context_early_stop['Training_stop_round']} "
                     f"Has_converged = {context_early_stop['has_converged']}"
                 )
 
@@ -80,9 +89,7 @@ class FlowerClient(NumPyClient):
                     with open(
                         fit_log_file, "w"
                     ) as f:  # "w" mode creates the file if missing
-                        f.write(
-                            "                        Early Stopping in Fit Log.                        \n\n"
-                        )
+                        f.write("             Early Stopping in Fit Log.         \n\n")
                 # Append the new log entry
                 with open(fit_log_file, "a") as f:
                     f.write(fit_log_msg)
@@ -95,7 +102,7 @@ class FlowerClient(NumPyClient):
                 {},
             )
 
-        elif context_early_stop["has_converged"] == False:
+        elif not context_early_stop["has_converged"]:
             loss, accuracy = training_functions.train_model_federated(
                 self.net,
                 self.trainloader,
@@ -120,6 +127,7 @@ class FlowerClient(NumPyClient):
             )
 
     def evaluate(self, parameters, config):
+        """Implement evaluate function for a given client."""
         server_round = config.get("server_round", 0)
         set_weights(self.net, parameters)
         context_early_stop = self.client_state["early_stop_metrics"]
@@ -176,7 +184,9 @@ class FlowerClient(NumPyClient):
                 f1_scores_window = f1_scores[-self.patience :]
                 print(f1_scores_window)
                 print(
-                    f"Client id {self.cfg.sub_id} f1_diff is {round(max(f1_scores_window) - min(f1_scores_window), 2)} and threshold is {self.threshold}"
+                    f"Client id {self.cfg.sub_id} f1_diff is "
+                    f"{round(max(f1_scores_window) - min(f1_scores_window), 2)} "
+                    f"and threshold is {self.threshold}"
                 )
                 context_early_stop["context_best_val_f1_score"] = fscore
                 if (
@@ -185,16 +195,16 @@ class FlowerClient(NumPyClient):
                 ):
                     context_early_stop["has_converged"] = True
                     print(
-                        f"+++++++++++++++++++++++++++++ Early stopping triggerd for client {self.cfg.sub_id} +++++++++++++++++++++++++++++++"
+                        f"+++++++++++++++++++++++++++++ Early stopping triggerd for "
+                        f"client {self.cfg.sub_id} +++++++++++++++++++++++++++++++"
                     )
 
         return loss, len(self.valloader.dataset), metrics
 
 
 def client_fn(context: Context):
-    # Load model and data
+    """Flower Client Function represetinng a single organization."""
     partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
     net, added_cfg = get_net_and_config()
     trainloader, valloader, cfg = load_data_for_client(added_cfg, user_num=partition_id)
     config = cfg

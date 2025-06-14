@@ -1,9 +1,4 @@
-# ----------------------------------------------------------------------------------------
-# Implementation of Federated learning using Flower Framework with WEAR dataset
-# ----------------------------------------------------------------------------------------
-# Adaption by: Shreyas Korde
-# E-Mail: shreyas.korde@student.uni-siegen.de
-# ----------------------------------------------------------------------------------------
+"""Client utils funnctions."""
 
 import glob
 import os
@@ -12,14 +7,18 @@ from datetime import datetime
 import numpy as np
 from omegaconf import DictConfig, OmegaConf
 
-from fedfittech.flwr_utils.utils_for_tinyhar import *
+from fedfittech.flwr_utils.utils_for_tinyhar import (
+    extract_number,
+    generate_dataloaders,
+    load_data,
+    manual_data_split,
+)
 
-from .plotting_functions import *
 from .TinyHAR import TinyHAR
 
 
 def load_data_for_client(cfg, user_num):
-
+    """Load data for cliets."""
     PATH = os.path.join(os.getcwd(), "./fedfittech/inertial_data/")
 
     # Get the list of CSV file paths in order:s
@@ -83,69 +82,29 @@ def load_data_for_client(cfg, user_num):
         batch_size=cfg.BATCH_SIZE,
         sequence_length=cfg.WINDOW_SIZE,
     )
-
     training_dataloader_all.append(trainloader)
     testing_dataloader_all.append(testloader)
     cfg.num_train_examples = len(X_user_train_features)
     cfg.num_test_examples = len(X_user_test_features)
-    # print(f'**** Dataloaders are ready for Subject No. {user_num} \n**** Having data path as: "{csv_file_paths[user_num]}"\n')
-    # print(f"**** The length of Trainloadaer is {len(trainloader)} and Training samples is {len(X_user_train_features)}")
-    # print(f"**** The length of Valloader is {len(testloader)} and validation examples is {len(X_user_test_features)} \n")
-
     return training_dataloader_all, testing_dataloader_all, cfg
 
 
 def get_net_and_config():
-
+    """Get the model and config hyperparameters."""
     config_path = "./fedfittech/config"
     config_file_name = "base.yaml"
     cfg = load_config(config_path=config_path, config_file=config_file_name)
 
-    # Hyperparameters loaded from config file
-    LEARNING_RATE = cfg.LEARNING_RATE  # 0.3 | 0.1 | 0.01 | 0.001 | # 0.0001
-    LOCAL_EPOCH = cfg.LOCAL_EPOCH  # 1 | 2 | 4 | 8 | 16
-    BATCH_SIZE = cfg.BATCH_SIZE  # 8 | 16 | 32 | 64 | 128
-    OPTIMIZER = cfg.OPTIMIZER  # 'SGD' | 'Adam'
-    WINDOW_SIZE = cfg.WINDOW_SIZE  # 50, 100
-    GLOBAL_ROUND = cfg.GLOBAL_ROUND  # 100
-
     preference_for_NULL = cfg.preference_for_NULL
     if preference_for_NULL in ["true", "yes", "1"]:
-        KEEP_NULL = True
+        print("Preference for NULL Class is True.")
 
     elif preference_for_NULL in ["false", "no", "0"]:
-        KEEP_NULL = False
         del cfg.labels_set["NULL"]
 
     else:
         raise ValueError("Invalid input. Please enter True, False, Yes, No, 1, or 0.")
 
-    # Preference for saving the model
-    preference_for_saving_result = "1"
-    if preference_for_saving_result in ["true", "yes", "1"]:
-        SAVE_EXPERIMENT = True
-
-    elif preference_for_saving_result in ["false", "no", "0"]:
-        SAVE_EXPERIMENT = False
-    else:
-        raise ValueError(
-            "**** Invalid input. Please enter True, False, Yes, No, 1, or 0."
-        )
-
-    # Saving hyperparameters:
-    hyperparameters = {
-        "LEARNING_RATE": cfg.LEARNING_RATE,
-        "LOCAL_EPOCH": cfg.LOCAL_EPOCH,
-        "BATCH_SIZE": cfg.BATCH_SIZE,
-        "OPTIMIZER": cfg.OPTIMIZER,
-        "WINDOW_SIZE": cfg.WINDOW_SIZE,
-        "GLOBAL_ROUND": cfg.GLOBAL_ROUND,
-    }
-
-    LEARNING_TYPE = "federated_learning"
-
-    # Number to labels:
-    reversed_labels_set = {v: k for k, v in cfg.labels_set.items()}
     cfg.NUM_CLASS = len(cfg.labels_set)  # 19
     cfg.NUM_FEATURES = cfg.NUM_FEATURES  # 3 * 4  # ((x, y, z) * (RA, RL, LA, LL))
 
@@ -159,7 +118,7 @@ def get_net_and_config():
 
 
 def load_config(config_path: str, config_file: str) -> DictConfig:
-    """Loads a YAML configuration file using OmegaConf.
+    """Load YAML configuration file using OmegaConf.
 
     Args:
         config_path (str): Path to the configuration directory.
@@ -184,6 +143,7 @@ def load_config(config_path: str, config_file: str) -> DictConfig:
 def get_model_plot_directory(
     plt_dir=True, model_dir=True, csv_dir=True, config=None, server_round="_"
 ):
+    """Get the directories for saving the model, results."""
     server_round = str(server_round)
     # Generate directory name with current date and time
     file_date = datetime.now().strftime("%d-%m-%Y_%H-%M")
