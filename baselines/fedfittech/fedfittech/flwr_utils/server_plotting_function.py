@@ -3,10 +3,19 @@
 import matplotlib
 import pandas as pd
 
+from fedfittech.Results_to_compare.results_ploting_utils import (
+    plot_f1_convergence,
+    plot_f1_convergence_with_stop_round,
+    plot_f1_scores_comparison,
+    plot_global_rounds,
+    plot_heat_map_of_table,
+)
+
 matplotlib.use("Agg")
 import csv
 import json
 import os
+from typing import Dict, List, Union
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -101,7 +110,8 @@ def weighted_eval_average_plottinng(
     # best_f1 = float(0)
     best_df = None
     best_server_round = None
-    data = {}
+    # data = {}
+    data: Dict[str, List[Union[int, float, str]]] = {}
     data["Client_Id"] = []
     data["Validation loss"] = []
     data["Validation Accuracy"] = []
@@ -148,11 +158,15 @@ def weighted_eval_average_plottinng(
             json.dump(f1_labels_scores, json_file, indent=4)
         f1_labels_csv_path = os.path.join(
             csv_path, f"Client_vs_label_F1scores_{server_round}_round.csv"
-        )
+        )  # Save F1 scores vs labels clientwise in CSV format
         f1_labels_df.to_csv(
             f1_labels_csv_path, index=True, sep=";", quoting=csv.QUOTE_MINIMAL
         )
-        print(f1_labels_scores)
+        f1_vs_labels = pd.read_csv(f1_labels_csv_path, sep=";")
+        plot_heat_map_of_table(
+            f1_vs_labels,
+            plt_path,
+        )  # plot the heatmap of F1 scores vs labels clientwise
 
     pd.set_option("display.max_columns", None)
     pd.set_option("display.max_rows", None)
@@ -198,6 +212,48 @@ def weighted_eval_average_plottinng(
     transform_val_f1_Df = val_f1_df.loc[val_f1_df["Server_Round"] <= server_round]
     transform_val_f1_Df.to_csv(
         f1_score_csv_path, index=False, sep=";", quoting=csv.QUOTE_MINIMAL
+    )
+
+    f1_vs_rounds = pd.read_csv(f1_score_csv_path, sep=";")
+    ## Plots if Early stopping triggered
+    if cfg.Early_stopping in ["true", "yes", "1"] and server_round == cfg.GLOBAL_ROUND:
+        baseline_dist_metrics_path = (
+            "./fedfittech/Results_to_compare/dataframes/"
+            "Client_Distributed_Metrics_100_round_normal.csv"
+        )
+        client_dist_metric_path = metrics_csv_path
+        df_ES_dist_metric = pd.read_csv(client_dist_metric_path, sep=";")
+        baseline_dist_metric = pd.read_csv(baseline_dist_metrics_path, sep=";")
+        df_dist_comparison = {
+            "Client_Id": df_ES_dist_metric["Client_Id"],
+            "F1_score_Normal": baseline_dist_metric["Validation F1 score"],
+            "F1_score_ES": df_ES_dist_metric["Validation F1 score"],
+        }
+        df_dist_comparison = pd.DataFrame(df_dist_comparison)
+        # F1 scores comparison plot
+        plot_f1_scores_comparison(df_dist_comparison, plt_path)
+
+        # plot the F1 scores vs server rounds convergence
+        df_data_3 = {
+            "Client_Id": df_ES_dist_metric["Client_Id"],
+            "F1_score_ES": df_ES_dist_metric["Validation F1 score"],
+            "F1_score_Normal": baseline_dist_metric["Validation F1 score"],
+            "Training stop round": df_ES_dist_metric["Training stop round"],
+        }
+        df_es_convergence = pd.DataFrame(df_data_3)
+        plot_f1_convergence_with_stop_round(f1_vs_rounds, df_es_convergence, plt_path)
+
+        # Plot Computationn saved bar plot
+        plot_global_rounds(
+            EA_dist_metric=df_ES_dist_metric,
+            path=plt_path,
+            Global_rounds=cfg.GLOBAL_ROUND,
+        )
+
+    # Save f1 convergence data
+    plot_f1_convergence(
+        f1_vs_rounds,
+        path=plt_path,
     )
 
     return df_sorted, best_eval_f1, val_f1_df

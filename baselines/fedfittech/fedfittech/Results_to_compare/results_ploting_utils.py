@@ -1,7 +1,5 @@
 """Utility functions for plotting and comparing model results."""
 
-import os
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -52,7 +50,7 @@ def plot_f1_scores_baseline(df):
     plt.savefig("F1_scores_baseline.pdf", format="pdf", dpi=1200, bbox_inches="tight")
 
 
-def plot_f1_scores_comparison(df_distributed):
+def plot_f1_scores_comparison(df_distributed, path: str):
     """Plot a comparison of F1 scores."""
     # Convert to long format
     df_melted = df_distributed.melt(
@@ -121,21 +119,21 @@ def plot_f1_scores_comparison(df_distributed):
     plt.tight_layout()
     # plt.gca().legend_.remove()
     # Save High-Quality Figure
-
+    path_fig = path
     plt.savefig(
-        "F1_scores_comparison_double_bar_plot.eps",
+        f"{path_fig}/F1_scores_comparison_double_bar_plot.eps",
         format="eps",
         dpi=1200,
         bbox_inches="tight",
     )
     plt.savefig(
-        "F1_scores_comparison_double_bar_plot.svg",
+        f"{path_fig}/F1_scores_comparison_double_bar_plot.svg",
         format="svg",
         dpi=1200,
         bbox_inches="tight",
     )
     plt.savefig(
-        "F1_scores_comparison_double_bar_plot.pdf",
+        f"{path_fig}/F1_scores_comparison_double_bar_plot.pdf",
         format="pdf",
         dpi=1200,
         bbox_inches="tight",
@@ -145,7 +143,7 @@ def plot_f1_scores_comparison(df_distributed):
     print("F1 scores comparison double bar plot saved successfully")
 
 
-def plot_f1_convergence(df_f1_scores):
+def plot_f1_convergence(df_f1_scores, path: str):
     """Plot the convergence of F1 scores over time or communication rounds."""
     print(df_f1_scores.head())
     df_f1_scores.columns = [
@@ -206,22 +204,22 @@ def plot_f1_convergence(df_f1_scores):
 
     plt.tight_layout()
     # plt.gca().legend_.remove()
-
+    fig_path = path
     # Save High-Quality Figure
     plt.savefig(
-        "F1_scores_convergence_linegraph_baseline.eps",
+        f"{fig_path}/F1_scores_convergence.eps",
         format="eps",
         dpi=1200,
         bbox_inches="tight",
     )
     plt.savefig(
-        "F1_scores_convergence_linegraph_baseline.svg",
+        f"{fig_path}/F1_scores_convergence.svg",
         format="svg",
         dpi=1200,
         bbox_inches="tight",
     )
     plt.savefig(
-        "F1_scores_convergence_linegraph_baseline.pdf",
+        f"{fig_path}/F1_scores_convergence.pdf",
         format="pdf",
         dpi=1200,
         bbox_inches="tight",
@@ -233,24 +231,23 @@ def plot_f1_convergence(df_f1_scores):
 
 def plot_heat_map_of_table(
     label_based_result_table: pd.DataFrame,
-    directory_name: os.path,
-    save_fig=True,
-    learning_type_name=None,
+    directory_name: str,
     type=None,
-) -> plt:
+):
     """Generate and optionally save a heatmap from a label-based F1 score table."""
+    label_based_result_table = label_based_result_table.rename(
+        columns={"Unnamed: 0": "Client_Id"}
+    )
+    label_based_result_table = label_based_result_table.set_index("Client_Id")
+
     # any nan values will be 0.0
     label_based_result_table = label_based_result_table.fillna(0.0)
     # Set the figure size
     plt.figure(figsize=(12, 8))
-    print(label_based_result_table.columns)
 
     labels_alpha = [chr(65 + i) for i in range(len(label_based_result_table.columns))]
-    print(labels_alpha)
 
-    printable_labels = dict(zip(label_based_result_table.columns, labels_alpha))
-
-    print(printable_labels)
+    # printable_labels = dict(zip(label_based_result_table.columns, labels_alpha))
 
     label_based_result_table.index = label_based_result_table.index.str.replace(
         "Client_Id_", ""
@@ -274,42 +271,47 @@ def plot_heat_map_of_table(
     plt.yticks(fontsize=17, rotation=0, fontweight="bold")
     # Show the plot
     plt.tight_layout()
+    path_fig = directory_name
     plt.savefig(
-        f"clients_vs_label_F1_scores_heatmaps_{type}.eps",
+        f"{path_fig}/clients_vs_label_F1_scores_heatmaps.eps",
         format="eps",
         dpi=1200,
         bbox_inches="tight",
     )
     plt.savefig(
-        f"clients_vs_label_F1_scores_heatmaps_{type}.svg",
+        f"{path_fig}/clients_vs_label_F1_scores_heatmaps.svg",
         format="svg",
         dpi=1200,
         bbox_inches="tight",
     )
     plt.savefig(
-        f"clients_vs_label_F1_scores_heatmaps_{type}.pdf",
+        f"{path_fig}/clients_vs_label_F1_scores_heatmaps.pdf",
         format="pdf",
         dpi=1200,
         bbox_inches="tight",
     )
+    # fig = plt.gcf()  # Get the current figure
     plt.clf()
     plt.close()
     print(f"clients_vs_label_F1_scores_heatmaps_{type} saved successfully")
 
+    return
+
 
 def plot_f1_convergence_with_stop_round(
-    df_ES_f1_vs_round, df_distributed_metrics_for_plot3
+    df_ES_f1_vs_round,
+    df_distributed_metrics_for_plot3,
+    path: str,
 ):
     """Plot the convergence of F1 scores with early stopping rounds per client."""
     pd.set_option("display.max_rows", None)  # Show all rows
 
     pd.set_option("display.max_columns", None)  # Show all columns
 
-    print(df_ES_f1_vs_round.head())
     df_ES_f1_vs_round.columns = [
         col.replace("Client_Id_", "") for col in df_ES_f1_vs_round.columns
     ]
-    print(df_ES_f1_vs_round.head())
+
     mean_f1_scores = df_ES_f1_vs_round.iloc[:, 1:].mean(axis=1)
     # print(df_distributed_metrics_for_plot3)
 
@@ -324,7 +326,7 @@ def plot_f1_convergence_with_stop_round(
     df_melted_es_f1 = df_ES_f1_vs_round.melt(
         id_vars=["Server_Round"], var_name="Client_Id", value_name="F1_Score"
     )
-    print(df_ES_f1_vs_round)
+
     sns.set_context("talk", font_scale=1.2)  # Adjust context and font scale
     plt.rcParams["font.family"] = "Times New Roman"  # Set font style
     sns.set_style("white")
@@ -358,14 +360,14 @@ def plot_f1_convergence_with_stop_round(
 
     for _, row in df_distributed_metrics_for_plot3.iterrows():
         if pd.notna(row["Training stop round"]):
-            stop_round = row["Training stop round"]
-            client_id = int(row["Client_Id"])
+            stop_round = int(row["Training stop round"])
+            client = int(row["Client_Id"])
             for _, row2 in df_ES_f1_vs_round.iterrows():
                 x = stop_round
-                y = df_ES_f1_vs_round.iloc[int(stop_round - 1), client_id + 1]
+                y = df_ES_f1_vs_round.iloc[int(stop_round - 1), client + 1]
                 print(row2)
                 break
-            line_color = client_colors[f"{int(client_id)}"]
+            line_color = client_colors[f"{int(client)}"]
             plt.plot(
                 x,
                 y,
@@ -393,22 +395,22 @@ def plot_f1_convergence_with_stop_round(
     plt.ylim(0)  # Start y-axis from 0
     plt.tight_layout()
     # plt.gca().legend_.remove()
-
+    fig_path = path
     # Save High-Quality Figure
     plt.savefig(
-        "F1_scores_convergence_with_early_stopping_linegraph.eps",
+        f"{fig_path}/F1_scores_convergence_with_early_stopping_linegraph.eps",
         format="eps",
         dpi=1200,
         bbox_inches="tight",
     )
     plt.savefig(
-        "F1_scores_convergence_with_early_stopping_linegraph.svg",
+        f"{fig_path}/F1_scores_convergence_with_early_stopping_linegraph.svg",
         format="svg",
         dpi=1200,
         bbox_inches="tight",
     )
     plt.savefig(
-        "F1_scores_convergence_with_early_stopping_linegraph.pdf",
+        f"{fig_path}/F1_scores_convergence_with_early_stopping_linegraph.pdf",
         format="pdf",
         dpi=1200,
         bbox_inches="tight",
@@ -418,7 +420,11 @@ def plot_f1_convergence_with_stop_round(
     print("F1 scores convergence with early stopping linegraph saved successfully")
 
 
-def plot_global_rounds(EA_dist_metric: pd.DataFrame, Global_rounds=100):
+def plot_global_rounds(
+    EA_dist_metric: pd.DataFrame,
+    path: str,
+    Global_rounds=100,
+):
     """Plot training duration and computation savings for clients using early stopping.
 
     This function visualizes the training duration and computation savings achieved by
@@ -438,8 +444,6 @@ def plot_global_rounds(EA_dist_metric: pd.DataFrame, Global_rounds=100):
     EA_dist_metric["Remaining Rounds"] = (
         Global_rounds - EA_dist_metric["Training stop round"]
     )
-
-    print(EA_dist_metric)
 
     # Plot stacked bars
     for i, row in EA_dist_metric.iterrows():
@@ -484,21 +488,21 @@ def plot_global_rounds(EA_dist_metric: pd.DataFrame, Global_rounds=100):
 
     plt.tight_layout()
     # Save High-Quality Figure
-
+    fig_path = path
     plt.savefig(
-        "Global_rounds_vs_clients_single_bar_plot.eps",
+        f"{fig_path}/Comp_saved_Global_rounds_vs_clients_single_bar_plot.eps",
         format="eps",
         dpi=1200,
         bbox_inches="tight",
     )
     plt.savefig(
-        "Global_rounds_vs_clients_single_bar_plot.svg",
+        f"{fig_path}/Comp_saved_Global_rounds_vs_clients_single_bar_plot.svg",
         format="svg",
         dpi=1200,
         bbox_inches="tight",
     )
     plt.savefig(
-        "Global_rounds_vs_clients_single_bar_plot.pdf",
+        f"{fig_path}/Comp_saved_Global_rounds_vs_clients_single_bar_plot.pdf",
         format="pdf",
         dpi=1200,
         bbox_inches="tight",

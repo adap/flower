@@ -14,7 +14,7 @@ from fedfittech.flwr_utils.utils_for_tinyhar import (
 )
 from fedfittech.task import get_weights, set_weights
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import ConfigsRecord, Context
+from flwr.common import ConfigRecord, Context
 
 
 # Defin Flower Client
@@ -34,9 +34,17 @@ class FlowerClient(NumPyClient):
         print(f"Cuda is available for client = {torch.cuda.is_available()}")
 
         self.client_state = context.state
+
         if "early_stop_metrics" not in self.client_state:
-            self.client_state["early_stop_metrics"] = ConfigsRecord()
-            context_early_stop = self.client_state["early_stop_metrics"]
+            self.client_state["early_stop_metrics"] = ConfigRecord()
+
+            record = self.client_state.get("early_stop_metrics")
+            if not isinstance(record, ConfigRecord):
+                record = ConfigRecord()
+                self.client_state["early_stop_metrics"] = record
+
+            context_early_stop: ConfigRecord = record
+
             context_early_stop["context_best_val_f1_score"] = 0.0
             context_early_stop["counter"] = 0
             context_early_stop["has_converged"] = False
@@ -45,18 +53,20 @@ class FlowerClient(NumPyClient):
             context_early_stop["log_file_name"] = f"Early_stopping_{file_date1}.txt"
             context_early_stop["f1_scores_list"] = []
             context_early_stop["Training_stop_round"] = np.nan
+        # print(f"Configs records{self.client_state['early_stop_metrics']}")
 
     def fit(self, parameters, config):
         """Implement fit function for a given client."""
         server_round = config.get("server_round", 0)
         set_weights(self.net, parameters)
+        # Dictconfig to store early stopping metrics
         context_early_stop = self.client_state["early_stop_metrics"]
 
         config_reco_msg = (
             f"Config records for Client Id {self.cfg.sub_id}: "
             f"Best Val F1 score {context_early_stop['context_best_val_f1_score']}, "
             f"Counter value {context_early_stop['counter']}, "
-            f"for server rounnd {context_early_stop['Training_stop_round']} "
+            f"for server round {context_early_stop['Training_stop_round']} "
             f"Has_converged = {context_early_stop['has_converged']}"
         )
         print(config_reco_msg)
@@ -130,6 +140,7 @@ class FlowerClient(NumPyClient):
         """Implement evaluate function for a given client."""
         server_round = config.get("server_round", 0)
         set_weights(self.net, parameters)
+        # Dictconfig to store early stopping metrics
         context_early_stop = self.client_state["early_stop_metrics"]
 
         loss, accuracy, precision, recall, fscore = evaluation_functions.evaluate_model(
@@ -182,12 +193,6 @@ class FlowerClient(NumPyClient):
             f1_scores.append(fscore)
             if len(f1_scores) > self.patience:
                 f1_scores_window = f1_scores[-self.patience :]
-                print(f1_scores_window)
-                print(
-                    f"Client id {self.cfg.sub_id} f1_diff is "
-                    f"{round(max(f1_scores_window) - min(f1_scores_window), 2)} "
-                    f"and threshold is {self.threshold}"
-                )
                 context_early_stop["context_best_val_f1_score"] = fscore
                 if (
                     round(max(f1_scores_window) - min(f1_scores_window), 2)
