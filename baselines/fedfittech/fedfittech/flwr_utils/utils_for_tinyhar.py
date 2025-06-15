@@ -88,8 +88,11 @@ def manual_data_split(
 ]:
     """Split data manually."""
     # Initialize test arrays as lists:
-    y_test_label: list = []
-    X_test_features: list = []
+    # y_test_label = []
+    # X_test_features = []
+
+    y_test_label: List[np.generic] = []
+    X_test_features: List[NDArray[np.generic]] = []
 
     # Ensure inputs are NumPy arrays
     X_features = np.array(X_features)
@@ -111,9 +114,9 @@ def manual_data_split(
 
         # Add the first 20% to the test sets:
 
-        y_test_label.extend(y_labels[start_idx : start_idx + split_index].tolist())
+        y_test_label.extend(y_labels[start_idx : start_idx + split_index])
 
-        X_test_features.extend(X_features[start_idx : start_idx + split_index].tolist())
+        X_test_features.extend(X_features[start_idx : start_idx + split_index])
 
         # Remove the first 20% from the original arrays:
         y_labels = np.delete(y_labels, np.s_[start_idx : start_idx + split_index])
@@ -125,10 +128,13 @@ def manual_data_split(
         start_idx = end_idx - split_index
 
     # Convert to numpy arrays:
-    y_test_label = np.array(y_test_label)
-    X_test_features = np.vstack(X_test_features)
+    # y_test_label = np.array(y_test_label)
+    # To (with type hint):
+    y_test_label_np: NDArray[np.generic] = np.array(y_test_label)
+    # X_test_features = np.array(X_test_features)
+    X_test_features_np: NDArray[np.generic] = np.array(X_test_features)
 
-    return X_features, y_labels, X_test_features, y_test_label
+    return X_features, y_labels, X_test_features_np, y_test_label_np
 
 
 def take_most_common_label_in_a_window(
@@ -154,13 +160,13 @@ def take_most_common_label_in_a_window(
 
 
 def generate_dataloaders(
-    train_features: np.array,
-    train_labels: np.array,
-    test_features: np.array,
-    test_labels: np.array,
+    train_features: NDArray[np.float32],
+    train_labels: NDArray[np.int64],
+    test_features: NDArray[np.float32],
+    test_labels: NDArray[np.int64],
     batch_size=32,
     sequence_length=50,
-) -> [torch.utils.data.dataloader.DataLoader, torch.utils.data.dataloader.DataLoader]:
+) -> Tuple[DataLoader, DataLoader]:
     """Generate dataloaders."""
     # ############################# Convert lists to torch tensors #################
     train_features_tensor = torch.tensor(train_features, dtype=torch.float32)

@@ -133,6 +133,9 @@ def load_config(config_path: str, config_file: str) -> DictConfig:
 
     # Load the configuration
     config = OmegaConf.load(config_file)
+    # Runtime type check to ensure it's DictConfig
+    if not isinstance(config, DictConfig):
+        raise TypeError("Expected a DictConfig but got a ListConfig or other type.")
 
     # Disable struct mode if you want to modify the config dynamically
     OmegaConf.set_struct(config, False)
