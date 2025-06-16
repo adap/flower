@@ -91,7 +91,6 @@ P = TypeVar("P", ExecAuthPlugin, ExecAuthzPlugin)
 try:
     from flwr.ee import (
         add_ee_args_superlink,
-        get_dashboard_server,
         get_exec_auth_plugins,
         get_exec_authz_plugins,
         get_exec_event_log_writer_plugins,
@@ -332,17 +331,6 @@ def run_superlink() -> None:
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
-
-    # Add Dashboard server if available
-    if dashboard_address := getattr(args, "dashboard_address", None):
-        dashboard_address_str, _, _ = _format_address(dashboard_address)
-        dashboard_server = get_dashboard_server(
-            address=dashboard_address_str,
-            state_factory=state_factory,
-            certificates=None,
-        )
-
-        grpc_servers.append(dashboard_server)
 
     # Graceful shutdown
     register_exit_handlers(
