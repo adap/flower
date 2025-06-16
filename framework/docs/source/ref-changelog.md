@@ -18,9 +18,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Introduces user authorization feature that integrates with the existing authentication protocol. When authentication is enabled, commands like `flwr ls`, `flwr log`, and `flwr stop` are restricted to displaying or affecting only the runs submitted by the authenticated user. This is enforced using a new identifier (`flwr_aid`, i.e., Flower Account ID) attached to user accounts and runs. Additionally, fine-grained access control can be enforced for CLI operations based on assigned roles.
 
-- **Add `ContinuousPartitioner` for regression tasks** ([#5235](https://github.com/adap/flower/pull/5235))
-
-  Introduces `ContinuousPartitioner`, a new partitioning strategy for datasets with continuous-valued targets. It supports federated regression and tabular tasks by controlling non-IIDness through a strictness parameter, improving applicability in domains like chemistry, energy, and finance. See the [documentation](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.ContinuousPartitioner.html) for more details.
 
 - **Add Floco baseline for personalized federated learning** ([#4941](https://github.com/adap/flower/pull/4941))
 
@@ -28,7 +25,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Add FEMNIST support to FedProx baseline** ([#5290](https://github.com/adap/flower/pull/5290))
 
-  Adds FEMNIST dataset to FedProx with preprocessing matching the original paper—subsampling 'a'-'j' and assigning 5 classes per device. Updates `README.md` with results and enables running via `run_experiments.sh`. Fixes label mapping in `viz()` for accuracy and loss plots. More details: [FedProx Baseline Documentation](https://flower.ai/docs/baselines/fedprox.html)
+  Adds FEMNIST dataset to FedProx with preprocessing matching the original paper—subsampling 'a'-'j' and assigning 5 classes per device. More details: [FedProx Baseline Documentation](https://flower.ai/docs/baselines/fedprox.html)
 
 - **Upgrade StatAvg baseline to new Flower format** ([#4952](https://github.com/adap/flower/pull/4952))
 
