@@ -43,18 +43,11 @@ data class Progress(
  * @property toolCalls An optional list of tool calls associated with the message.
  */
 @Serializable
-data class Message(
-  val role: String,
-  val content: String,
-  val toolCalls: List<ToolCall>? = null
-) {
+data class Message(val role: String, val content: String, val toolCalls: List<ToolCall>? = null) {
   init {
     val allowedRoles = setOf("user", "system", "assistant")
     if (role !in allowedRoles) {
-      throw Failure(
-        FailureCode.InvalidArgumentsError,
-        "Invalid message role: $role"
-      )
+      throw Failure(FailureCode.InvalidArgumentsError, "Invalid message role: $role")
     }
   }
 }
