@@ -247,10 +247,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             try:
                 msg_object_id = msg.metadata.message_id
                 descendants = store.get_message_descendant_ids(msg_object_id)
-                # Include the object_id of the message itself
-                objects_to_pull[msg_object_id] = ObjectIDs(
-                    object_ids=descendants + [msg_object_id]
-                )
+                # Add mapping of message object ID to its descendants
+                objects_to_pull[msg_object_id] = ObjectIDs(object_ids=descendants)
             except NoObjectInStoreError as e:
                 log(ERROR, e.message)
                 # Delete message ins from state
