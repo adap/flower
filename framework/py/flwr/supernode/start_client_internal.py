@@ -241,11 +241,20 @@ def start_client_internal(
                 outputs = clientappio_servicer.get_outputs()
                 reply_message, context = outputs.message, outputs.context
 
-                # Update node state
+                # Update context in the state
                 state.store_context(context)
 
                 # Send
                 send(reply_message)
+
+                # Delete messages from the state
+                state.delete_messages(
+                    message_ids=[
+                        message.metadata.message_id,
+                        message.metadata.reply_to_message_id,
+                    ]
+                )
+
                 log(INFO, "Sent reply")
 
             except RunNotRunningException:
