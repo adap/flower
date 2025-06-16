@@ -18,7 +18,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Introduces user authorization feature that integrates with the existing authentication protocol. When authentication is enabled, commands like `flwr ls`, `flwr log`, and `flwr stop` are restricted to displaying or affecting only the runs submitted by the authenticated user. This is enforced using a new identifier (`flwr_aid`, i.e., Flower Account ID) attached to user accounts and runs. Additionally, fine-grained access control can be enforced for CLI operations based on assigned roles.
 
-
 - **Add Floco baseline for personalized federated learning** ([#4941](https://github.com/adap/flower/pull/4941))
 
   Introduces Floco, a method that enhances both personalized and global model performance in non-IID cross-silo federated learning. It trains a shared solution simplex across clients, promoting collaboration among similar clients and reducing interference from dissimilar ones. Learn more in [Floco Baseline Documentation](https://flower.ai/docs/baselines/floco.html).
