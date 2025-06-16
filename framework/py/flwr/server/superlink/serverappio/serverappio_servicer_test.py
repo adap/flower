@@ -540,7 +540,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             # Assert that objects to pull points to a message carrying an error
             msg_res = message_from_proto(response.messages_list[0])
             assert msg_res.has_error()
-            # objects_to_pull is expected to be {msg_obj_id: msg_obj_id}
+            # objects_to_pull is expected to be {msg_obj_id: []}
             assert list(response.objects_to_pull.keys()) == [msg_res.object_id]
             assert list(response.objects_to_pull.values())[0].object_ids == []
 
