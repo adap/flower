@@ -25,7 +25,7 @@ from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.inflatable import (
     UnexpectedObjectContentError,
-    get_descendant_object_ids,
+    get_all_nested_objects,
     get_object_tree,
     no_object_id_recompute,
 )
@@ -181,7 +181,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             objects_to_push=objects_to_push,
         )
 
-    def PullMessages(
+    def PullMessages(  # pylint: disable=R0914
         self, request: PullResMessagesRequest, context: grpc.ServicerContext
     ) -> PullResMessagesResponse:
         """Pull a set of Messages."""
@@ -209,14 +209,18 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         for msg_res in messages_res:
             if msg_res.metadata.src_node_id == SUPERLINK_NODE_ID:
                 with no_object_id_recompute():
-                    descendants = list(get_descendant_object_ids(msg_res))
+                    all_objects = get_all_nested_objects(msg_res)
+                    descendants = list(all_objects.keys())[:-1]
                     message_obj_id = msg_res.metadata.message_id
-                # Store mapping
-                store.set_message_descendant_ids(
-                    msg_object_id=message_obj_id, descendant_ids=descendants
-                )
-                # Preregister
-                store.preregister(request.run_id, get_object_tree(msg_res))
+                    # Store mapping
+                    store.set_message_descendant_ids(
+                        msg_object_id=message_obj_id, descendant_ids=descendants
+                    )
+                    # Preregister
+                    store.preregister(request.run_id, get_object_tree(msg_res))
+                    # Store objects
+                    for obj_id, obj in all_objects.items():
+                        store.put(obj_id, obj.deflate())
 
         # Delete the instruction Messages and their replies if found
         message_ins_ids_to_delete = {

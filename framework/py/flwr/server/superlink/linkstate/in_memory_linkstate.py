@@ -249,7 +249,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 inquired_in_message_ids=message_ids,
                 found_in_message_dict=self.message_ins_store,
                 node_id_to_online_until={
-                    node_id: self.node_ids[node_id][0] for node_id in dst_node_ids
+                    node_id: self.node_ids[node_id][0]
+                    for node_id in dst_node_ids
+                    if node_id in self.node_ids
                 },
                 current_time=current,
             )

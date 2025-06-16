@@ -305,7 +305,7 @@ class GrpcGrid(Grid):
             for msg_proto in res.messages_list:
                 msg_id = msg_proto.metadata.message_id
                 all_object_contents = pull_objects(
-                    list(res.objects_to_pull[msg_id].object_ids) + [msg_id],
+                    list(res.objects_to_pull[msg_id].object_ids),
                     pull_object_fn=make_pull_object_fn_grpc(
                         pull_object_grpc=self._stub.PullObject,
                         node=self.node,
