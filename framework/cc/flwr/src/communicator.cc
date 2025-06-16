@@ -176,6 +176,7 @@ void send(Communicator *communicator, flwr::proto::TaskRes task_res) {
 
   flwr::proto::PushTaskResRequest request;
   *request.add_task_res_list() = new_task_res;
+  request.set_allocated_node(new flwr::proto::Node(*node));
   flwr::proto::PushTaskResResponse response;
 
   communicator->send_push_task_res(request, &response);
