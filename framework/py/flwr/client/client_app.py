@@ -20,6 +20,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Callable, Optional
 
+from flwr.app.metadata import validate_message_type
 from flwr.client.client import Client
 from flwr.client.message_handler.message_handler import (
     handle_legacy_message_from_msgtype,
@@ -28,7 +29,6 @@ from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFnExt, Mod
 from flwr.common import Context, Message, MessageType
 from flwr.common.logger import warn_deprecated_feature
-from flwr.common.message import validate_message_type
 
 from .typing import ClientAppCallable
 

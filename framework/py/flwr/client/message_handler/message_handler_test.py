@@ -293,6 +293,7 @@ class TestMessageValidation(unittest.TestCase):
         valid_message = make_message(
             metadata=self.valid_out_metadata, content=RecordDict()
         )
+        valid_message.metadata.__dict__["_message_id"] = valid_message.object_id
 
         # Assert
         self.assertTrue(validate_out_message(valid_message, self.in_metadata))

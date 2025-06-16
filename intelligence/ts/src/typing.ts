@@ -13,6 +13,8 @@
 // limitations under the License.
 // =============================================================================
 
+import { ALLOWED_ROLES } from './constants';
+
 /**
  * Represents a message in a chat session.
  */
@@ -20,7 +22,7 @@ export interface Message {
   /**
    * The role of the sender (e.g., "user", "system", "assistant").
    */
-  role: string;
+  role: (typeof ALLOWED_ROLES)[number];
 
   /**
    * The content of the message.

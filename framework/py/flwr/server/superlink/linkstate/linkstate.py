@@ -17,7 +17,6 @@
 
 import abc
 from typing import Optional
-from uuid import UUID
 
 from flwr.common import Context, Message
 from flwr.common.record import ConfigRecord
@@ -28,13 +27,13 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
     """Abstract LinkState."""
 
     @abc.abstractmethod
-    def store_message_ins(self, message: Message) -> Optional[UUID]:
+    def store_message_ins(self, message: Message) -> Optional[str]:
         """Store one Message.
 
         Usually, the ServerAppIo API calls this to schedule instructions.
 
         Stores the value of the `message` in the link state and, if successful,
-        returns the `message_id` (UUID) of the `message`. If, for any reason,
+        returns the `message_id` (str) of the `message`. If, for any reason,
         storing the `message` fails, `None` is returned.
 
         Constraints
@@ -61,12 +60,12 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def store_message_res(self, message: Message) -> Optional[UUID]:
+    def store_message_res(self, message: Message) -> Optional[str]:
         """Store one Message.
 
         Usually, the Fleet API calls this for Nodes returning results.
 
-        Stores the Message and, if successful, returns the `message_id` (UUID) of
+        Stores the Message and, if successful, returns the `message_id` (str) of
         the `message`. If storing the `message` fails, `None` is returned.
 
         Constraints
@@ -78,7 +77,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+    def get_message_res(self, message_ids: set[str]) -> list[Message]:
         """Get reply Messages for the given Message IDs.
 
         This method is typically called by the ServerAppIo API to obtain
@@ -94,7 +93,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Parameters
         ----------
-        message_ids : set[UUID]
+        message_ids : set[str]
             A set of Message IDs used to retrieve reply Messages responding to them.
 
         Returns
@@ -113,18 +112,18 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Calculate the number of reply Messages in store."""
 
     @abc.abstractmethod
-    def delete_messages(self, message_ins_ids: set[UUID]) -> None:
+    def delete_messages(self, message_ins_ids: set[str]) -> None:
         """Delete a Message and its reply based on provided Message IDs.
 
         Parameters
         ----------
-        message_ins_ids : set[UUID]
+        message_ins_ids : set[str]
             A set of Message IDs. For each ID in the set, the corresponding
             Message and its associated reply Message will be deleted.
         """
 
     @abc.abstractmethod
-    def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
+    def get_message_ids_from_run_id(self, run_id: int) -> set[str]:
         """Get all instruction Message IDs for the given run_id."""
 
     @abc.abstractmethod
@@ -165,12 +164,16 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         fab_hash: Optional[str],
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str],
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
 
     @abc.abstractmethod
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified.
+
+        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
+        """
 
     @abc.abstractmethod
     def get_run(self, run_id: int) -> Optional[Run]:

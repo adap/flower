@@ -33,6 +33,7 @@ message Run {
   string running_at = 8;
   string finished_at = 9;
   RunStatus status = 10;
+  string flwr_aid = 11;
 }
 
 message RunStatus {
@@ -43,15 +44,6 @@ message RunStatus {
   // failure details
   string details = 3;
 }
-
-// CreateRun
-message CreateRunRequest {
-  string fab_id = 1;
-  string fab_version = 2;
-  map<string, Scalar> override_config = 3;
-  Fab fab = 4;
-}
-message CreateRunResponse { uint64 run_id = 1; }
 
 // GetRun
 message GetRunRequest {

@@ -21,8 +21,13 @@ from unittest.mock import Mock, patch
 
 import grpc
 
+from flwr.app.error import Error
 from flwr.common import RecordDict
-from flwr.common.message import Error, Message
+from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.common.inflatable import get_all_nested_objects
+from flwr.common.message import Message
+from flwr.common.serde import message_to_proto
+from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
@@ -34,7 +39,6 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushInsMessagesRequest,
 )
 
-from ..superlink.linkstate.linkstate_test import create_res_message
 from .grpc_grid import GrpcGrid
 
 
@@ -90,12 +94,46 @@ class TestGrpcGrid(unittest.TestCase):
         self.assertEqual(args[0].run_id, 61016)
         self.assertEqual(node_ids, [404, 200])
 
+    def _prep_message(self, message: Message) -> Message:
+        # We need to be able to specify the actual object IDs
+        # in the mocked responses, due to this we need to set
+        # elements in the metadata that would be normally be
+        # set when pushing a message.
+        # pylint: disable-next=W0212
+        message.metadata._run_id = 61016  # type: ignore
+        # pylint: disable-next=W0212
+        message.metadata._src_node_id = SUPERLINK_NODE_ID  # type: ignore
+        message.metadata.__dict__["_message_id"] = message.object_id
+        return message
+
     def test_push_messages_valid(self) -> None:
         """Test pushing valid messages."""
         # Prepare
-        mock_response = Mock(message_ids=["id1", "id2"])
-        self.mock_stub.PushMessages.return_value = mock_response
-        msgs = [Message(RecordDict(), 0, "query") for _ in range(2)]
+        msg1 = self._prep_message(Message(RecordDict(), 0, "query.A"))
+        msg2 = self._prep_message(Message(RecordDict(), 0, "query.B"))
+
+        msgs = [msg1, msg2]
+        mock_response_msg1 = Mock(
+            message_ids=[msg1.object_id],
+            objects_to_push={
+                msg1.object_id: ObjectIDs(
+                    object_ids=[msg1.object_id, RecordDict().object_id]
+                ),
+            },
+        )
+        mock_response_msg2 = Mock(
+            message_ids=[msg2.object_id],
+            objects_to_push={
+                msg2.object_id: ObjectIDs(
+                    object_ids=[msg2.object_id, RecordDict().object_id]
+                ),
+            },
+        )
+        self.mock_stub.PushMessages.side_effect = [
+            mock_response_msg1,
+            mock_response_msg2,
+        ]
+        self.mock_stub.PushObject.return_value = Mock(stored=True)
 
         # Execute
         msg_ids = self.grid.push_messages(msgs)
@@ -106,44 +144,50 @@ class TestGrpcGrid(unittest.TestCase):
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PushInsMessagesRequest)
-        self.assertEqual(msg_ids, mock_response.message_ids)
+        self.assertEqual(msg_ids, [msg1.object_id, msg2.object_id])
         for message in args[0].messages_list:
             self.assertEqual(message.metadata.run_id, 61016)
 
-    def test_push_messages_invalid(self) -> None:
-        """Test pushing invalid messages."""
-        # Prepare
-        mock_response = Mock(message_ids=["id1", "id2"])
-        self.mock_stub.PushMessages.return_value = mock_response
-        msgs = [Message(RecordDict(), 0, "query") for _ in range(2)]
-        # Use invalid run_id
-        msgs[1].metadata.__dict__["_message_id"] = "invalid message id"
-
-        # Execute and assert
-        with self.assertRaises(ValueError):
-            self.grid.push_messages(msgs)
-
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""
-        # Prepare
-        mock_response = Mock()
-        # A Message must have either content or error set so we prepare
-        run_id = 12345
-        ok_message = create_res_message(src_node_id=123, dst_node_id=456, run_id=run_id)
-        ok_message.metadata.reply_to_message_id = "id2"
+        # Prepare: Create instruction messages
+        ins1 = self._prep_message(Message(RecordDict(), 123, "query"))
+        ins2 = self._prep_message(Message(RecordDict(), 456, "query"))
 
-        error_message = create_res_message(
-            src_node_id=123, dst_node_id=789, run_id=run_id, error=Error(code=0)
+        # Prepare: Create a normal reply
+        ok_msg = Message(RecordDict(), reply_to=ins1)
+        ok_msg.metadata.__dict__["_message_id"] = ok_msg.object_id
+        ok_msg_all_objs = get_all_nested_objects(ok_msg)
+        ok_msg_descendant_ids = set(ok_msg_all_objs.keys()) - {ok_msg.object_id}
+
+        # Prepare: Create an error reply
+        err_msg = Message(Error(0), reply_to=ins2)
+        err_msg.metadata.__dict__["_message_id"] = err_msg.object_id
+        err_msg_all_objs = get_all_nested_objects(err_msg)
+        error_msg_descendant_ids = set(err_msg_all_objs.keys()) - {err_msg.object_id}
+
+        # Prepare: Mock the objectStore
+        obj_store = {k: v.deflate() for k, v in ok_msg_all_objs.items()}
+        obj_store.update({k: v.deflate() for k, v in err_msg_all_objs.items()})
+
+        # Prepare: Mock the response of PushMessages
+        self.mock_stub.PullMessages.return_value = Mock(
+            messages_list=[message_to_proto(ok_msg), message_to_proto(err_msg)],
+            objects_to_pull={
+                ok_msg.object_id: Mock(object_ids=ok_msg_descendant_ids),
+                err_msg.object_id: Mock(object_ids=error_msg_descendant_ids),
+            },
         )
-        error_message.metadata.reply_to_message_id = "id3"
-        # The response from the ServerAppIoServicer is in the form of Protobuf Messages
-        mock_response.messages_list = [ok_message, error_message]
-        self.mock_stub.PullMessages.return_value = mock_response
-        msg_ids = ["id1", "id2", "id3"]
+
+        # Prepare: Mock response of PullObject
+        self.mock_stub.PullObject.side_effect = lambda req: Mock(
+            object_found=True,
+            object_available=True,
+            object_content=obj_store[req.object_id],
+        )
 
         # Execute
-        msgs = self.grid.pull_messages(msg_ids)
-        reply_tos = {msg.metadata.reply_to_message_id for msg in msgs}
+        msgs = list(self.grid.pull_messages([ins1.object_id, ins2.object_id]))
         args, kwargs = self.mock_stub.PullMessages.call_args
 
         # Assert
@@ -151,48 +195,70 @@ class TestGrpcGrid(unittest.TestCase):
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PullResMessagesRequest)
-        self.assertEqual(args[0].message_ids, msg_ids)
-        self.assertEqual(reply_tos, {"id2", "id3"})
+        self.assertEqual(args[0].message_ids, [ins1.object_id, ins2.object_id])
+        self.assertEqual(msgs[0].metadata, ok_msg.metadata)
+        self.assertEqual(msgs[0].content, ok_msg.content)
+        self.assertEqual(msgs[1].metadata, err_msg.metadata)
+        self.assertEqual(msgs[1].error, err_msg.error)
+        self.assertEqual(self.mock_stub.PullObject.call_count, len(obj_store))
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
-        # Prepare
-        mock_response = Mock(message_ids=["id1"])
-        self.mock_stub.PushMessages.return_value = mock_response
-        # The response message must include either `content` (i.e. a recorddict) or
-        # an `Error`. We choose the latter in this case
-        run_id = 1234
-        mssg = create_res_message(
-            src_node_id=123, dst_node_id=456, run_id=run_id, error=Error(code=0)
+        # Prepare: Create an instruction message and mock responses
+        msg = self._prep_message(Message(RecordDict(), 0, "query"))
+        self.mock_stub.PushMessages.return_value = Mock(
+            message_ids=[msg.object_id],
+            objects_to_push={
+                msg.object_id: ObjectIDs(
+                    object_ids=[msg.object_id, RecordDict().object_id]
+                ),
+            },
         )
-        mssg.metadata.reply_to_message_id = "id1"
-        message_res_list = [mssg]
+        self.mock_stub.PushObject.return_value = Mock(stored=True)
 
-        mock_response.messages_list = message_res_list
-        self.mock_stub.PullMessages.return_value = mock_response
-        msgs = [Message(RecordDict(), 0, "query")]
+        # Prepare: create an error reply message and mock responses
+        reply = Message(Error(0), reply_to=msg)
+        reply.metadata.__dict__["_message_id"] = reply.object_id
+        self.mock_stub.PullMessages.return_value = Mock(
+            messages_list=[message_to_proto(reply)],
+            objects_to_pull={
+                reply.object_id: Mock(object_ids=[reply.object_id]),
+            },
+        )
+        self.mock_stub.PullObject.return_value = Mock(
+            object_found=True, object_available=True, object_content=reply.deflate()
+        )
 
         # Execute
-        ret_msgs = list(self.grid.send_and_receive(msgs))
+        ret_msgs = list(self.grid.send_and_receive([msg]))
 
         # Assert
         self.assertEqual(len(ret_msgs), 1)
-        self.assertEqual(ret_msgs[0].metadata.reply_to_message_id, "id1")
+        self.assertEqual(ret_msgs[0].metadata, reply.metadata)
+        self.assertEqual(ret_msgs[0].error, reply.error)
 
     def test_send_and_receive_messages_timeout(self) -> None:
         """Test send and receive messages but time out."""
         # Prepare
+        msg = self._prep_message(Message(RecordDict(), 0, "query"))
         sleep_fn = time.sleep
-        mock_response = Mock(message_ids=["id1"])
+        mock_response = Mock(
+            message_ids=[msg.object_id],
+            objects_to_push={
+                msg.object_id: ObjectIDs(
+                    object_ids=[msg.object_id, RecordDict().object_id]
+                ),
+            },
+        )
         self.mock_stub.PushMessages.return_value = mock_response
+        self.mock_stub.PushObject.return_value = Mock(stored=True)
         mock_response = Mock(messages_list=[])
         self.mock_stub.PullMessages.return_value = mock_response
-        msgs = [Message(RecordDict(), 0, "query")]
 
         # Execute
         with patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01)):
             start_time = time.time()
-            ret_msgs = list(self.grid.send_and_receive(msgs, timeout=0.15))
+            ret_msgs = list(self.grid.send_and_receive([msg], timeout=0.15))
 
         # Assert
         self.assertLess(time.time() - start_time, 0.2)

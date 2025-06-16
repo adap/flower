@@ -18,10 +18,10 @@
 import threading
 import time
 from bisect import bisect_right
+from collections import defaultdict
 from dataclasses import dataclass, field
 from logging import ERROR, WARNING
 from typing import Optional
-from uuid import UUID, uuid4
 
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
@@ -76,15 +76,18 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.run_ids: dict[int, RunRecord] = {}
         self.contexts: dict[int, Context] = {}
         self.federation_options: dict[int, ConfigRecord] = {}
-        self.message_ins_store: dict[UUID, Message] = {}
-        self.message_res_store: dict[UUID, Message] = {}
-        self.message_ins_id_to_message_res_id: dict[UUID, UUID] = {}
+        self.message_ins_store: dict[str, Message] = {}
+        self.message_res_store: dict[str, Message] = {}
+        self.message_ins_id_to_message_res_id: dict[str, str] = {}
+
+        # Map flwr_aid to run_ids for O(1) reverse index lookup
+        self.flwr_aid_to_run_ids: dict[str, set[int]] = defaultdict(set)
 
         self.node_public_keys: set[bytes] = set()
 
         self.lock = threading.RLock()
 
-    def store_message_ins(self, message: Message) -> Optional[UUID]:
+    def store_message_ins(self, message: Message) -> Optional[str]:
         """Store one Message."""
         # Validate message
         errors = validate_message(message, is_reply_message=False)
@@ -112,12 +115,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             )
             return None
 
-        # Create message_id
-        message_id = uuid4()
-
-        # Store Message
-        # pylint: disable-next=W0212
-        message.metadata._message_id = str(message_id)  # type: ignore
+        message_id = message.metadata.message_id
         with self.lock:
             self.message_ins_store[message_id] = message
 
@@ -153,7 +151,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         return message_ins_list
 
     # pylint: disable=R0911
-    def store_message_res(self, message: Message) -> Optional[UUID]:
+    def store_message_res(self, message: Message) -> Optional[str]:
         """Store one Message."""
         # Validate message
         errors = validate_message(message, is_reply_message=True)
@@ -165,7 +163,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             # Check if the Message it is replying to exists and is valid
             msg_ins_id = res_metadata.reply_to_message_id
-            msg_ins = self.message_ins_store.get(UUID(msg_ins_id))
+            msg_ins = self.message_ins_store.get(msg_ins_id)
 
             # Ensure that dst_node_id of original Message matches the src_node_id of
             # reply Message.
@@ -220,22 +218,17 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             log(ERROR, "`metadata.run_id` is invalid")
             return None
 
-        # Create message_id
-        message_id = uuid4()
-
-        # Store Message
-        # pylint: disable-next=W0212
-        message.metadata._message_id = str(message_id)  # type: ignore
+        message_id = message.metadata.message_id
         with self.lock:
             self.message_res_store[message_id] = message
-            self.message_ins_id_to_message_res_id[UUID(msg_ins_id)] = message_id
+            self.message_ins_id_to_message_res_id[msg_ins_id] = message_id
 
         # Return the new message_id
         return message_id
 
-    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+    def get_message_res(self, message_ids: set[str]) -> list[Message]:
         """Get reply Messages for the given Message IDs."""
-        ret: dict[UUID, Message] = {}
+        ret: dict[str, Message] = {}
 
         with self.lock:
             current = time.time()
@@ -287,7 +280,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         return list(ret.values())
 
-    def delete_messages(self, message_ins_ids: set[UUID]) -> None:
+    def delete_messages(self, message_ins_ids: set[str]) -> None:
         """Delete a Message and its reply based on provided Message IDs."""
         if not message_ins_ids:
             return
@@ -304,9 +297,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     )
                     del self.message_res_store[message_res_id]
 
-    def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
+    def get_message_ids_from_run_id(self, run_id: int) -> set[str]:
         """Get all instruction Message IDs for the given run_id."""
-        message_id_list: set[UUID] = set()
+        message_id_list: set[str] = set()
         with self.lock:
             for message_id, message in self.message_ins_store.items():
                 if message.metadata.run_id == run_id:
@@ -409,6 +402,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         fab_hash: Optional[str],
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str],
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
@@ -432,9 +426,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             sub_status="",
                             details="",
                         ),
+                        flwr_aid=flwr_aid if flwr_aid else "",
                     ),
                 )
                 self.run_ids[run_id] = run_record
+                # Add run_id to the flwr_aid_to_run_ids mapping if flwr_aid is provided
+                if flwr_aid:
+                    self.flwr_aid_to_run_ids[flwr_aid].add(run_id)
 
                 # Record federation options. Leave empty if not passed
                 self.federation_options[run_id] = federation_options
@@ -462,9 +460,15 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             return self.node_public_keys.copy()
 
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified.
+
+        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
+        """
         with self.lock:
+            if flwr_aid is not None:
+                # Return run IDs for the specified flwr_aid
+                return set(self.flwr_aid_to_run_ids.get(flwr_aid, ()))
             return set(self.run_ids.keys())
 
     def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
@@ -474,7 +478,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if they have not sent a heartbeat before `active_until`.
         """
         current = now()
-        for record in [self.run_ids[run_id] for run_id in run_ids]:
+        for record in (self.run_ids.get(run_id) for run_id in run_ids):
+            if record is None:
+                continue
             with record.lock:
                 if record.run.status.status in (Status.STARTING, Status.RUNNING):
                     if record.active_until < current.timestamp():
