@@ -14,9 +14,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Introduces a content-addressable messaging system that breaks messages into a tree of uniquely identified, SHA256-hashed objects. This model allows objects to be pushed and pulled efficiently, avoiding redundant uploads and enabling scalable message streaming and broadcasting. Core enhancements include the new `InflatableObject` abstraction and `ObjectStore` for storing and retrieving message content, with `Array`, `Message`, and `*Record` classes now inherit from `InflatableObject`. New utilities and RPCs facilitate recursive object handling, ID recomputation avoidance, and safe deletion. The framework's servicers, REST, and gRPC layers were refactored to integrate this system, improving real-world deployment scalability and communication efficiency.
 
-- **Implement user authorization and enforce access control** ([#5428](https://github.com/adap/flower/pull/5428), [#5505](https://github.com/adap/flower/pull/5505), [#5506](https://github.com/adap/flower/pull/5506), [#5422](https://github.com/adap/flower/pull/5422), [#5510](https://github.com/adap/flower/pull/5510), [#5421](https://github.com/adap/flower/pull/5421), [#5420](https://github.com/adap/flower/pull/5420), [#5448](https://github.com/adap/flower/pull/5448), [#5447](https://github.com/adap/flower/pull/5447), [#5503](https://github.com/adap/flower/pull/5503), [#5501](https://github.com/adap/flower/pull/5501), [#5502](https://github.com/adap/flower/pull/5502), [#5511](https://github.com/adap/flower/pull/5511))
+- **Improve user authorization and access control** ([#5428](https://github.com/adap/flower/pull/5428), [#5505](https://github.com/adap/flower/pull/5505), [#5506](https://github.com/adap/flower/pull/5506), [#5422](https://github.com/adap/flower/pull/5422), [#5510](https://github.com/adap/flower/pull/5510), [#5421](https://github.com/adap/flower/pull/5421), [#5420](https://github.com/adap/flower/pull/5420), [#5448](https://github.com/adap/flower/pull/5448), [#5447](https://github.com/adap/flower/pull/5447), [#5503](https://github.com/adap/flower/pull/5503), [#5501](https://github.com/adap/flower/pull/5501), [#5502](https://github.com/adap/flower/pull/5502), [#5511](https://github.com/adap/flower/pull/5511))
 
-  Introduces user authorization feature that integrates with the existing authentication protocol. When authentication is enabled, commands like `flwr ls`, `flwr log`, and `flwr stop` are restricted to displaying or affecting only the runs submitted by the authenticated user. This is enforced using a new identifier (`flwr_aid`, i.e., Flower Account ID) attached to user accounts and runs. Additionally, fine-grained access control can be enforced for CLI operations based on assigned roles.
+  Improves user authorization feature that integrates with the existing authentication protocol. When authentication is enabled, commands like `flwr ls`, `flwr log`, and `flwr stop` are restricted to displaying or affecting only the runs submitted by the authenticated user. This is enforced using the Flower Account ID. Additionally, fine-grained access control can be enforced for CLI operations based on assigned roles (RBAC).
 
 - **Add Floco baseline for personalized federated learning** ([#4941](https://github.com/adap/flower/pull/4941))
 
@@ -26,15 +26,15 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Adds FEMNIST dataset to FedProx with preprocessing matching the original paper—subsampling 'a'-'j' and assigning 5 classes per device. More details: [FedProx Baseline Documentation](https://flower.ai/docs/baselines/fedprox.html)
 
-- **Upgrade StatAvg baseline to new Flower format** ([#4952](https://github.com/adap/flower/pull/4952))
+- **Upgrade StatAvg baseline to new Flower App format** ([#4952](https://github.com/adap/flower/pull/4952))
 
-  The StatAvg baseline is updated to use the new Flower format. Changes include removing Hydra, switching to `pyproject.toml` configs, using `ClientApp` and `ServerApp`, and saving results via a custom `Server` class. More details: [StatAvg Baseline Documentation](https://flower.ai/docs/baselines/statavg.html).
+  The StatAvg baseline is updated to use the new Flower App format. Changes include removing Hydra, switching to `pyproject.toml` configs, using `ClientApp` and `ServerApp`, and saving results via a custom `Server` class. More details: [StatAvg Baseline Documentation](https://flower.ai/docs/baselines/statavg.html).
 
 - **Add guide for running Flower on Google Cloud Platform** ([#5327](https://github.com/adap/flower/pull/5327))
 
   The documentation now includes a detailed guide on deploying and running Flower on Google Cloud Platform (GCP). It provides step-by-step instructions for managing Flower workloads in a GCP environment. For more information, refer to the [official guide](https://flower.ai/docs/framework/how-to-run-flower-on-gcp.html).
 
-- **Implement ServerApp heartbeat monitoring** ([#5228](https://github.com/adap/flower/pull/5228), [#5370](https://github.com/adap/flower/pull/5370), [#5358](https://github.com/adap/flower/pull/5358), [#5332](https://github.com/adap/flower/pull/5332), [#5322](https://github.com/adap/flower/pull/5322), [#5324](https://github.com/adap/flower/pull/5324), [#5230](https://github.com/adap/flower/pull/5230), [#5325](https://github.com/adap/flower/pull/5325))
+- **Implement `ServerApp` heartbeat monitoring** ([#5228](https://github.com/adap/flower/pull/5228), [#5370](https://github.com/adap/flower/pull/5370), [#5358](https://github.com/adap/flower/pull/5358), [#5332](https://github.com/adap/flower/pull/5332), [#5322](https://github.com/adap/flower/pull/5322), [#5324](https://github.com/adap/flower/pull/5324), [#5230](https://github.com/adap/flower/pull/5230), [#5325](https://github.com/adap/flower/pull/5325))
 
   Adds heartbeat support to `ServerApp` processes, enabling the `SuperLink` to detect crashed or terminated processes and mark them as `finished:failed` when no final status is received.
 
@@ -42,9 +42,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Extends the `NodeState` interface and implementation to manage all SuperNode state.
 
-- **Refactor SuperNode for improved deployment and maintainability** ([#5398](https://github.com/adap/flower/pull/5398), [#5397](https://github.com/adap/flower/pull/5397), [#5443](https://github.com/adap/flower/pull/5443), [#5410](https://github.com/adap/flower/pull/5410), [#5411](https://github.com/adap/flower/pull/5411), [#5469](https://github.com/adap/flower/pull/5469), [#5419](https://github.com/adap/flower/pull/5419))
+- **Refactor SuperNode for improved robustness and maintainability** ([#5398](https://github.com/adap/flower/pull/5398), [#5397](https://github.com/adap/flower/pull/5397), [#5443](https://github.com/adap/flower/pull/5443), [#5410](https://github.com/adap/flower/pull/5410), [#5411](https://github.com/adap/flower/pull/5411), [#5469](https://github.com/adap/flower/pull/5469), [#5419](https://github.com/adap/flower/pull/5419))
 
-  Ongoing refactoring of SuperNode improves modularity, simplifies client execution, removes grpc-bidi and unused code, and centralizes connection logic. These changes align SuperNode's behavior more closely with SuperLink to enhance deployment readiness.
+  Ongoing refactoring of SuperNode improves modularity, simplifies client execution, removes gRPC bidirectional streaming and unused code, and centralizes connection logic. These changes align SuperNode's behavior more closely with SuperLink to make Flower the best platform for robust enterprise deployments..
 
 - **Restructure Flower** ([#5465](https://github.com/adap/flower/pull/5465), [#5476](https://github.com/adap/flower/pull/5476), [#5460](https://github.com/adap/flower/pull/5460), [#5409](https://github.com/adap/flower/pull/5409), [#5408](https://github.com/adap/flower/pull/5408), [#5396](https://github.com/adap/flower/pull/5396), [#5389](https://github.com/adap/flower/pull/5389), [#5392](https://github.com/adap/flower/pull/5392), [#5461](https://github.com/adap/flower/pull/5461))
 
