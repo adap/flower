@@ -189,7 +189,8 @@ export class FlowerIntelligence {
       options.stream,
       options.onStreamEvent,
       options.tools,
-      options.encrypt
+      options.encrypt,
+      options.signal
     );
   }
 

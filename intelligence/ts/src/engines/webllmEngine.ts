@@ -38,8 +38,14 @@ async function runQuery(
   stream?: boolean,
   onStreamEvent?: (event: StreamEvent) => void,
   temperature?: number,
-  maxTokens?: number
+  maxTokens?: number,
+  signal?: AbortSignal
 ) {
+  if (signal) {
+    signal.addEventListener('abort', () => {
+      engine.interruptGenerate();
+    });
+  }
   if (stream && onStreamEvent) {
     const reply = await engine.chat.completions.create({
       stream: true,
@@ -48,6 +54,7 @@ async function runQuery(
       max_tokens: maxTokens,
     });
     for await (const chunk of reply) {
+      if (signal?.aborted) break;
       onStreamEvent({ chunk: chunk.choices[0]?.delta?.content ?? '' });
     }
     return await engine.getMessage();
@@ -71,7 +78,9 @@ export class WebllmEngine extends BaseEngine {
     maxCompletionTokens?: number,
     stream?: boolean,
     onStreamEvent?: (event: StreamEvent) => void,
-    _tools?: Tool[]
+    _tools?: Tool[],
+    _encrypt?: boolean,
+    signal?: AbortSignal
   ): Promise<ChatResponseResult> {
     const modelConfigRes = await getEngineModelConfig(model, 'webllm');
     if (!modelConfigRes.ok) {
@@ -93,7 +102,8 @@ export class WebllmEngine extends BaseEngine {
         stream,
         onStreamEvent,
         temperature,
-        maxCompletionTokens
+        maxCompletionTokens,
+        signal
       );
       return {
         ok: true,
