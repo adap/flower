@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.19.0 (2025-06-13)
+## v1.19.0 (2025-06-16)
 
 ### Thanks to our contributors
 
@@ -8,217 +8,69 @@ We would like to give our special thanks to all the contributors who made the ne
 
 `Adam Tupper`, `Andrej Jovanović`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Haoran Jie`, `Heng Pan`, `Javier`, `Kevin Ta`, `Mohammad Naseri`, `Ragnar`, `Robert Steiner`, `William Lindskog`, `ashley09`, `dennis-grinwald`, `sukrucildirr` <!---TOKEN_v1.19.0-->
 
+### What's new?
 
-### User authorization
-- **feat(framework) Add** `flwr_aid` **to** `Run` ([#5506](https://github.com/adap/flower/pull/5506))
-- **feat(framework) Add user authorization logic to user authentication gRPC interceptor** ([#5422](https://github.com/adap/flower/pull/5422))
-- **feat(framework) Add** `flwr_aid` **to** `LinkState.get_run_ids` **method** ([#5510](https://github.com/adap/flower/pull/5510))
-- **feat(framework) Add get authorization plugin to SuperLink** ([#5421](https://github.com/adap/flower/pull/5421))
-- **feat(framework) Add** `ExecAuthzPlugin` **ABC** ([#5420](https://github.com/adap/flower/pull/5420))
-- **fix(framework) Use covariant loader signature to support** `ExecAuthPlugin` **and** `ExecAuthzPlugin` ([#5448](https://github.com/adap/flower/pull/5448))
-- **fix(framework) Check** `user_info` **is valid when refreshing authentication tokens** ([#5447](https://github.com/adap/flower/pull/5447))
-- **refactor(framework) Rename** `user_name` **to** `account_name` ([#5503](https://github.com/adap/flower/pull/5503))
-- **refactor(framework) Rename** `UserInfo.user_id` **to** `UserInfo.flwr_aid` ([#5501](https://github.com/adap/flower/pull/5501))
-- **refactor(framework) Rename** `UserInfo` **to** `AccountInfo` ([#5502](https://github.com/adap/flower/pull/5502))
+- **Revamp messaging system with content-addressable object model** ([#5513](https://github.com/adap/flower/pull/5513), [#5477](https://github.com/adap/flower/pull/5477), [#5424](https://github.com/adap/flower/pull/5424), [#5379](https://github.com/adap/flower/pull/5379), [#5353](https://github.com/adap/flower/pull/5353), [#5372](https://github.com/adap/flower/pull/5372), [#5507](https://github.com/adap/flower/pull/5507), [#5364](https://github.com/adap/flower/pull/5364), [#5517](https://github.com/adap/flower/pull/5517), [#5514](https://github.com/adap/flower/pull/5514), [#5342](https://github.com/adap/flower/pull/5342), [#5393](https://github.com/adap/flower/pull/5393), [#5508](https://github.com/adap/flower/pull/5508), [#5504](https://github.com/adap/flower/pull/5504), [#5335](https://github.com/adap/flower/pull/5335), [#5341](https://github.com/adap/flower/pull/5341), [#5430](https://github.com/adap/flower/pull/5430), [#5308](https://github.com/adap/flower/pull/5308), [#5487](https://github.com/adap/flower/pull/5487), [#5509](https://github.com/adap/flower/pull/5509), [#5438](https://github.com/adap/flower/pull/5438), [#5369](https://github.com/adap/flower/pull/5369), [#5354](https://github.com/adap/flower/pull/5354), [#5486](https://github.com/adap/flower/pull/5486), [#5380](https://github.com/adap/flower/pull/5380), [#5496](https://github.com/adap/flower/pull/5496), [#5399](https://github.com/adap/flower/pull/5399), [#5489](https://github.com/adap/flower/pull/5489), [#5446](https://github.com/adap/flower/pull/5446), [#5432](https://github.com/adap/flower/pull/5432), [#5456](https://github.com/adap/flower/pull/5456), [#5442](https://github.com/adap/flower/pull/5442), [#5462](https://github.com/adap/flower/pull/5462), [#5429](https://github.com/adap/flower/pull/5429), [#5497](https://github.com/adap/flower/pull/5497), [#5435](https://github.com/adap/flower/pull/5435), [#5371](https://github.com/adap/flower/pull/5371), [#5450](https://github.com/adap/flower/pull/5450), [#5384](https://github.com/adap/flower/pull/5384), [#5488](https://github.com/adap/flower/pull/5488), [#5434](https://github.com/adap/flower/pull/5434), [#5425](https://github.com/adap/flower/pull/5425), [#5475](https://github.com/adap/flower/pull/5475), [#5458](https://github.com/adap/flower/pull/5458), [#5494](https://github.com/adap/flower/pull/5494), [#5449](https://github.com/adap/flower/pull/5449), [#5492](https://github.com/adap/flower/pull/5492), [#5426](https://github.com/adap/flower/pull/5426), [#5445](https://github.com/adap/flower/pull/5445), [#5467](https://github.com/adap/flower/pull/5467), [#5474](https://github.com/adap/flower/pull/5474))
 
-### Run heartbeat
-- **feat(framework) Add utils for heart beat protocols** ([#5228](https://github.com/adap/flower/pull/5228))
-- **feat(framework) Enable app heartbeat from** `flwr-simulation` ([#5370](https://github.com/adap/flower/pull/5370))
-- **feat(framework) Add** `is_running` **property to** `HeartbeatSender` ([#5358](https://github.com/adap/flower/pull/5358))
-- **feat(framework) Add ServerApp heartbeat** ([#5332](https://github.com/adap/flower/pull/5332))
-- **feat(framework) Add** `SendAppHeartbeat` **to** `ServerAppIo` **service** ([#5322](https://github.com/adap/flower/pull/5322))
-- **feat(framework) Add and implement** `LinkState.acknowledge_app_heartbeat` ([#5324](https://github.com/adap/flower/pull/5324))
-- **refactor(framework) Use** `HeartbeatSender` **for SuperNode heartbeats** ([#5230](https://github.com/adap/flower/pull/5230))
-- **refactor(framework) Move heartbeat-related protocol to a separate file** ([#5325](https://github.com/adap/flower/pull/5325))
+  Introduces a content-addressable messaging system that breaks messages into a tree of uniquely identified, SHA256-hashed objects. This model allows objects to be pushed and pulled efficiently, avoiding redundant uploads and enabling scalable message streaming and broadcasting. Core enhancements include the new `InflatableObject` abstraction and `ObjectStore` for storing and retrieving message content, with `Array`, `Message`, and `*Record` classes now inherit from `InflatableObject`. New utilities and RPCs facilitate recursive object handling, ID precomputation avoidance, and safe deletion. The framework's servicers, REST, and gRPC layers were refactored to integrate this system, improving real-world deployment scalability and communication efficiency between ServerApp and SuperLink.
 
+- **Implement user authorization and enforce access control** ([#5506](https://github.com/adap/flower/pull/5506), [#5422](https://github.com/adap/flower/pull/5422), [#5510](https://github.com/adap/flower/pull/5510), [#5421](https://github.com/adap/flower/pull/5421), [#5420](https://github.com/adap/flower/pull/5420), [#5448](https://github.com/adap/flower/pull/5448), [#5447](https://github.com/adap/flower/pull/5447), [#5503](https://github.com/adap/flower/pull/5503), [#5501](https://github.com/adap/flower/pull/5501), [#5502](https://github.com/adap/flower/pull/5502), [#5511](https://github.com/adap/flower/pull/5511))
 
-### Content-addressable message
-- **feat(framework) Add** `ConfirmMessageReceived` **RPC** ([#5513](https://github.com/adap/flower/pull/5513))
-- **feat(framework) Introduce validator function of object content** ([#5477](https://github.com/adap/flower/pull/5477))
-- **feat(framework) Add preregister functionality to** `ObjecStore` ([#5424](https://github.com/adap/flower/pull/5424))
-- **feat(framework) Add helpers to push and pull** `InflatableObjects` **recursively** ([#5379](https://github.com/adap/flower/pull/5379))
-- **feat(framework) Add** `children` **property to** `InflatableObject` ([#5353](https://github.com/adap/flower/pull/5353))
-- **feat(framework) Add** `Pull/PushObjectRequest` **to** `Fleet API` ([#5372](https://github.com/adap/flower/pull/5372))
-- **feat(framework) Use** `ObjectTree` **for pre-registration** ([#5507](https://github.com/adap/flower/pull/5507))
-- **feat(framework) Make** `RecordDict` **an** `InflatableObject` ([#5364](https://github.com/adap/flower/pull/5364))
-- **feat(framework) Trigger object deletion in** `ExecServicer` ([#5517](https://github.com/adap/flower/pull/5517))
-- **feat(framework) Implement and call RPCs for safe object deletion** ([#5514](https://github.com/adap/flower/pull/5514))
-- **feat(framework) Make** `Array` **,** `ConfigRecord` **and** `MetricRecord` **inflatable** ([#5342](https://github.com/adap/flower/pull/5342))
-- **feat(framework) Make** `Message` **an** `InflatableObject` ([#5393](https://github.com/adap/flower/pull/5393))
-- **feat(framework) Use** `no_object_id_recompute` **when pushing messages** ([#5508](https://github.com/adap/flower/pull/5508))
-- **feat(framework) Add** `no_object_id_recompute` **context to avoid recomputing IDs** ([#5504](https://github.com/adap/flower/pull/5504))
-- **feat(framework) Introduce** `Inflatable` **class** ([#5335](https://github.com/adap/flower/pull/5335))
-- **feat(framework) Introduce** `inflate` **functionality in** `InflatableObject` ([#5341](https://github.com/adap/flower/pull/5341))
-- **feat(framework) Add descendant computation helper** ([#5430](https://github.com/adap/flower/pull/5430))
-- **feat(framework) Introduce ObjectStore** ([#5308](https://github.com/adap/flower/pull/5308))
-- **feat(framework) Use new utils for pushing and pulling objects** ([#5487](https://github.com/adap/flower/pull/5487))
-- **feat(framework) Count references and runs in** `ObjectStore` ([#5509](https://github.com/adap/flower/pull/5509))
-- **feat(framework) Load both authorization and authentication plugins** ([#5438](https://github.com/adap/flower/pull/5438))
-- **feat(framework) Add** `Pull/PushObjectRequest` **to** `ServerAppIo` ([#5369](https://github.com/adap/flower/pull/5369))
-- **feat(framework) Make** `ArrayRecord` **an** `InflatableObject` ([#5354](https://github.com/adap/flower/pull/5354))
-- **feat(framework) Add utils for pushing and pulling objects** ([#5486](https://github.com/adap/flower/pull/5486))
-- **feat(framework) Include child object IDs in the object head** ([#5380](https://github.com/adap/flower/pull/5380))
-- **refactor(framework) Move generic inflatable utils out of gRPC utils** ([#5496](https://github.com/adap/flower/pull/5496))
-- **refactor(framework) Extend** `InflatableObject` **helper functions to include** `Message` ([#5399](https://github.com/adap/flower/pull/5399))
-- **fix(framework) Fix typo of** `get_descendant_object_ids` **function name** ([#5489](https://github.com/adap/flower/pull/5489))
-- **refactor(framework) Introduce** `NoObjectInStoreError` ([#5446](https://github.com/adap/flower/pull/5446))
-- **refactor(framework) Move** `message_id` **creation out of** `LinkState` **and use** `.object_id` **in Deployment** ([#5432](https://github.com/adap/flower/pull/5432))
-- **refactor(framework) Make record protocol serialization/deserialization deterministic** ([#5456](https://github.com/adap/flower/pull/5456))
-- **refactor(framework) Update Servicers to provide list of objects to pull from** `ObjectStore` ([#5442](https://github.com/adap/flower/pull/5442))
-- **refactor(framework) Pass** `run_id` **in Object requests to servicers** ([#5462](https://github.com/adap/flower/pull/5462))
-- **refactor(framework) Cache** `.object_id` **and introduce** `.is_dirty` ([#5429](https://github.com/adap/flower/pull/5429))
-- **refactor(framework) Make** `REST` **work with content-addressable messaging system** ([#5497](https://github.com/adap/flower/pull/5497))
-- **refactor(framework) Change the type of** `Array.shape` **to** `tuple[int, ...]` **from** `list[int]` **to make it immutable** ([#5435](https://github.com/adap/flower/pull/5435))
-- **refactor(framework) Add** `get_object_head_values_from_object_content` **utility function** ([#5371](https://github.com/adap/flower/pull/5371))
-- **refactor(framework) Implement push and pull objects in servicers** ([#5450](https://github.com/adap/flower/pull/5450))
-- **refactor(framework) Add** `ObjectStore` **factory to** `ServerAppIoServicer` **and** `FleetServicer` ([#5384](https://github.com/adap/flower/pull/5384))
-- **refactor(framework) Remove old util functions for pushing and pulling objects** ([#5488](https://github.com/adap/flower/pull/5488))
-- **refactor(framework) Enable preregistration of objects in** `ObjectStore` **via the servicers** ([#5434](https://github.com/adap/flower/pull/5434))
-- **refactor(framework) Extend protos to support for** `ObjectStore` ([#5425](https://github.com/adap/flower/pull/5425))
-- **refactor(framework) Remove** `Message` **content before sending** ([#5475](https://github.com/adap/flower/pull/5475))
-- **fix(framework) Fix** `ObjectStore` **usage in** `rest_api.py` ([#5458](https://github.com/adap/flower/pull/5458))
-- **refactor(framework) Move** `PushObject` **and** `PullObject` **logic in** `FleetServicer` **to message_handler file** ([#5494](https://github.com/adap/flower/pull/5494))
-- **refactor(framework) Switch to new messaging system** ([#5449](https://github.com/adap/flower/pull/5449))
-- **refactor(framework) Make use of new object content validator** ([#5492](https://github.com/adap/flower/pull/5492))
-- **refactor(framework) Exclude** `message_id` **from** `Message` **deflate** ([#5426](https://github.com/adap/flower/pull/5426))
-- **refactor(framework) Update gRPC utils for** `InflatableObjects` ([#5445](https://github.com/adap/flower/pull/5445))
-- **fix(framework) Update children condition in** `MetricRecord` ([#5467](https://github.com/adap/flower/pull/5467))
-- **refactor(framework) Make pull/push object helper functions accept** `Callable` ([#5474](https://github.com/adap/flower/pull/5474))
+  Introduces user authorization feature that integrate with existing authentication. When authentication is enabled, commands like `flwr ls`, `flwr log`, and `flwr stop` are restricted to displaying or affecting only the runs submitted by the authenticated user. This is enforced using a new identifier (`flwr_aid`, i.e., Flower Account ID) attached to user accounts and runs. Additionally, role-based access control is implemented via OpenFGA, enabling fine-grained permission management for CLI operations based on assigned roles.
 
+- **Add `ContinuousPartitioner` for regression tasks** ([#5235](https://github.com/adap/flower/pull/5235))
 
-### Introduce `NodeState`
-- **feat(framework) Add** `NodeState.create/verify/delete_token` **methods and** `.get_run_ids_with_pending_messages` **method** ([#5470](https://github.com/adap/flower/pull/5470))
-- **feat(framework) Use** `NodeState` **to store incoming messages** ([#5473](https://github.com/adap/flower/pull/5473))
-- **feat(framework) Extend** `NodeState` **ABC** ([#5402](https://github.com/adap/flower/pull/5402))
+  Introduces `ContinuousPartitioner`, a new partitioning strategy for datasets with continuous-valued targets. It supports federated regression and tabular tasks by controlling non-IIDness through a strictness parameter, improving applicability in domains like chemistry, energy, and finance. See the [documentation](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.ContinuousPartitioner.html) for more details.
 
-### Floco Baseline
-- **feat(baselines) Add Floco Baseline** ([#4941](https://github.com/adap/flower/pull/4941))
+- **Add Floco baseline for personalized federated learning** ([#4941](https://github.com/adap/flower/pull/4941))
 
-### FEMNIST Baseline
-- **feat(baselines) Add FEMNIST and reproduce results** ([#5290](https://github.com/adap/flower/pull/5290))
+  Introduces Floco, a method that enhances both personalized and global model performance in non-IID cross-silo federated learning. It trains a shared solution simplex across clients, promoting collaboration among similar clients and reducing interference from dissimilar ones. Learn more in [Floco Baseline Documentation](https://flower.ai/docs/baselines/floco.html).
 
-### Upgrade baseline
-- **refactor(baselines) Upgrade StatAvg Baseline to new flwr format** ([#4952](https://github.com/adap/flower/pull/4952))
+- **Add FEMNIST support to FedProx baseline** ([#5290](https://github.com/adap/flower/pull/5290))
 
-### New Partitioner
-- **feat(datasets) Add ContinuousPartitioner with test** ([#5235](https://github.com/adap/flower/pull/5235))
+  Adds FEMNIST dataset to FedProx with preprocessing matching the original paper—subsampling 'a'-'j' and assigning 5 classes per device. Updates `README.md` with results and enables running via `run_experiments.sh`. Fixes label mapping in `viz()` for accuracy and loss plots. More details: [FedProx Baseline Documentation](https://flower.ai/docs/baselines/fedprox.html)
 
+- **Upgrade StatAvg baseline to new Flower format** ([#4952](https://github.com/adap/flower/pull/4952))
 
-### CI/CD
-- **feat(framework) Bump version of Alpine base image to 3.22** ([#5498](https://github.com/adap/flower/pull/5498))
-- **ci(:skip) Add** `## Unreleased` **header** ([#5265](https://github.com/adap/flower/pull/5265))
-- **ci(:skip) Bump versions to** `v1.19.0` ([#5266](https://github.com/adap/flower/pull/5266))
-- **refactor(framework:skip) Bump** `poetry` **to 2.1.3** ([#5328](https://github.com/adap/flower/pull/5328))
-- **ci(framework) Add Dependabot for Docker base images** ([#5500](https://github.com/adap/flower/pull/5500))
-- **refactor(:skip) Update baselines template and baselines CI installation step** ([#5346](https://github.com/adap/flower/pull/5346))
-- **ci(:skip) Remove label Under Discussion from query** ([#5318](https://github.com/adap/flower/pull/5318))
-- **ci(framework) Add workflow that notifies Flower maintainer if issue was closed by community m…** ([#5256](https://github.com/adap/flower/pull/5256))
-- **ci(:skip) Add Type Bug to bug issue template** ([#5298](https://github.com/adap/flower/pull/5298))
-- **ci(framework) Add workflow to ping org member if stale under discussion issue** ([#5257](https://github.com/adap/flower/pull/5257))
-- **ci(framework) Fix E2E tensorflow dataset loading** ([#5483](https://github.com/adap/flower/pull/5483))
-- **fix(framework) Add option to label bot PRs as Bot** ([#5440](https://github.com/adap/flower/pull/5440))
-- **ci(:skip) Add heartbeat CI** ([#5304](https://github.com/adap/flower/pull/5304))
-- **ci(:skip) Remove title from feature request** ([#5313](https://github.com/adap/flower/pull/5313))
-- **feat(framework) Add workflow to label PR as Maintainer or Contributor** ([#5381](https://github.com/adap/flower/pull/5381))
-- **feat(framework) Add workflow to ping for stale PRs** ([#5385](https://github.com/adap/flower/pull/5385))
-- **build(deps-dev): bump vite from 6.2.6 to 6.2.7 in /intelligence/ts** ([#5316](https://github.com/adap/flower/pull/5316))
-- **build(deps): bump torch from 2.4.0 to 2.6.0 in /examples/quickstart-huggingface** ([#5260](https://github.com/adap/flower/pull/5260))
-- **build(deps): bump torch from 2.4.0 to 2.7.0 in /examples/flowertune-llm** ([#5349](https://github.com/adap/flower/pull/5349))
-- **ci(:skip) Remove notify Flower maintainer for external dev closing i…** ([#5319](https://github.com/adap/flower/pull/5319))
-- **fix(framework) Fix Flower version update tool** ([#5296](https://github.com/adap/flower/pull/5296))
-- **fix(framework) Bump Flower version in** `pyproject.toml` ([#5294](https://github.com/adap/flower/pull/5294))
-- **ci(framework) Remove declaring const fetch, already in actions github-script v6** ([#5317](https://github.com/adap/flower/pull/5317))
-- **ci(framework:skip) Disable reconnection test due to lack of file-based** `ObjectStore` ([#5482](https://github.com/adap/flower/pull/5482))
-- **ci(framework) Update docker/build-push-action to 6.15.0** ([#5282](https://github.com/adap/flower/pull/5282))
-- **ci(:skip) Change feature request template and automatically add Type Feature** ([#5223](https://github.com/adap/flower/pull/5223))
-- **ci(framework) Remove auto triage workflow** ([#5225](https://github.com/adap/flower/pull/5225))
-- **ci(framework:skip) Adjust Slack notifications for stale issues** ([#5326](https://github.com/adap/flower/pull/5326))
+  The StatAvg baseline is updated to use the new Flower format. Changes include removing Hydra, switching to `pyproject.toml` configs, using `ClientApp` and `ServerApp`, and saving results via a custom `Server` class. More details: [StatAvg Baseline Documentation](https://flower.ai/docs/baselines/statavg.html).
 
+- **Add guide for running Flower on Google Cloud Platform** ([#5327](https://github.com/adap/flower/pull/5327))
 
-### GCP guide
-- **docs(framework) Add guide on how to run Flower on GCP** ([#5327](https://github.com/adap/flower/pull/5327))
+  The documentation now includes a detailed guide on deploying and running Flower on Google Cloud Platform (GCP). It provides step-by-step instructions for managing Flower workloads in a GCP environment. For more information, refer to the [official guide](https://flower.ai/docs/framework/how-to-run-flower-on-gcp.html).
 
-### Doc
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5345](https://github.com/adap/flower/pull/5345))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5400](https://github.com/adap/flower/pull/5400))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5406](https://github.com/adap/flower/pull/5406))
-- **docs(framework) Remove links to deprecated video tutorials** ([#5401](https://github.com/adap/flower/pull/5401))
-- **docs(framework) Update Docker READMEs for 1.18.0** ([#5283](https://github.com/adap/flower/pull/5283))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5416](https://github.com/adap/flower/pull/5416))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5337](https://github.com/adap/flower/pull/5337))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5436](https://github.com/adap/flower/pull/5436))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5373](https://github.com/adap/flower/pull/5373))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5471](https://github.com/adap/flower/pull/5471))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5395](https://github.com/adap/flower/pull/5395))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5279](https://github.com/adap/flower/pull/5279))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5288](https://github.com/adap/flower/pull/5288))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5457](https://github.com/adap/flower/pull/5457))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5305](https://github.com/adap/flower/pull/5305))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5365](https://github.com/adap/flower/pull/5365))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#5491](https://github.com/adap/flower/pull/5491))
-- **docs(framework) Fix small issues** ([#5463](https://github.com/adap/flower/pull/5463))
-- **docs(framework) Fix paths in docker docs** ([#5367](https://github.com/adap/flower/pull/5367))
+- **Implement ServerApp heartbeat monitoring** ([#5228](https://github.com/adap/flower/pull/5228), [#5370](https://github.com/adap/flower/pull/5370), [#5358](https://github.com/adap/flower/pull/5358), [#5332](https://github.com/adap/flower/pull/5332), [#5322](https://github.com/adap/flower/pull/5322), [#5324](https://github.com/adap/flower/pull/5324), [#5230](https://github.com/adap/flower/pull/5230), [#5325](https://github.com/adap/flower/pull/5325))
 
-- **docs(framework) Add Flower Components Network Interface and Comm Model** ([#5360](https://github.com/adap/flower/pull/5360))
-- **docs(framework) Update Flower with Deployment Engine Page** ([#5374](https://github.com/adap/flower/pull/5374))
-- **docs(framework) Compare Flower Simulation to Deployment Runtime** ([#5361](https://github.com/adap/flower/pull/5361))
-- **refactor(examples) Update** `custom-mods` **example** ([#5063](https://github.com/adap/flower/pull/5063))
+  Adds heartbeat support to `ServerApp` processes, enabling the `SuperLink` to detect crashed or terminated processes and mark them as `finished:failed` when no final status is received.
 
-### Bugfixes
-- **fix(datasets) Fix partition inconsistencies across dataset splits** ([#5340](https://github.com/adap/flower/pull/5340))
-- **fix(framework) Fix** `devcontainer.json` **config due to failing** `taplo` **build** ([#5366](https://github.com/adap/flower/pull/5366))
-- **fix(framework) Ensure** `ClientManager` **update-to-date and fix** `test_reconnection.sh` ([#5478](https://github.com/adap/flower/pull/5478))
+- **Extend `NodeState` to improve SuperNode state management** ([#5470](https://github.com/adap/flower/pull/5470), [#5473](https://github.com/adap/flower/pull/5473), [#5402](https://github.com/adap/flower/pull/5402), [#5521](https://github.com/adap/flower/pull/5521))
 
-### General Improvements
-- **fix(framework) Fix the CLI output for** `flwr ls/stop/log` **when run ID is not found** ([#5516](https://github.com/adap/flower/pull/5516))
-- **feat(framework) Bump setuptools version to 78.1.1** ([#5499](https://github.com/adap/flower/pull/5499))
-- **feat(framework) Allow registering exit handlers** ([#4927](https://github.com/adap/flower/pull/4927))
-- **refactor(framework) Rename "ping" to "heartbeat"** ([#5310](https://github.com/adap/flower/pull/5310))
-- **refactor(framework) Move utils functions out of** `serde.py` ([#5343](https://github.com/adap/flower/pull/5343))
-- **fix(baselines) Upgrade torch versions** ([#5359](https://github.com/adap/flower/pull/5359))
-- **refactor(framework) Move** `start_server` **to** `flwr.compat` ([#5413](https://github.com/adap/flower/pull/5413))
-- **refactor(framework) Move** `Array` **into separate module** ([#5299](https://github.com/adap/flower/pull/5299))
-- **refactor(:skip) Fix typos in docstrings and comments** ([#5433](https://github.com/adap/flower/pull/5433))
-- **refactor(framework) Move** `Metadata` **and** `Error` **to own modules** ([#5390](https://github.com/adap/flower/pull/5390))
-- **refactor(framework) Rename** `unauthenticated_exc_handler` **to a generic CLI exception handler** ([#5427](https://github.com/adap/flower/pull/5427))
-- **refactor(framework) Set upper limit for** `click` ([#5350](https://github.com/adap/flower/pull/5350))
-- **refactor(framework) Move** `start_client` **into** `flwr.compat.client` ([#5394](https://github.com/adap/flower/pull/5394))
-- **fix(framework) Add Python 3.10 and 3.11 to SuperLink Docker README** ([#5295](https://github.com/adap/flower/pull/5295))
-- **refactor(framework) Rename** `Heartbeat` **to** `SendNodeHeartbeat` ([#5315](https://github.com/adap/flower/pull/5315))
-- **refactor(framework) Wrap stub with** `RetryInvoker` **on client side** ([#5468](https://github.com/adap/flower/pull/5468))
-- **refactor(framework) Delete** `CreateRun` **RPC** ([#5412](https://github.com/adap/flower/pull/5412))
-- **refactor(examples) Bump version of** `torch` **and** `torchvision` **used in examples** ([#5348](https://github.com/adap/flower/pull/5348))
-- **refactor(:skip) Fix typos** ([#5444](https://github.com/adap/flower/pull/5444))
+  Extends the `NodeState` interface and implementation to manage all SuperNode state.
 
-### Restructure Flower
-- **fix(framework) Fix cyclic import error on Windows** ([#5465](https://github.com/adap/flower/pull/5465))
-- **refactor(framework) Move into a separate function the code logic of pulling messages in SuperNode** ([#5476](https://github.com/adap/flower/pull/5476))
-- **refactor(framework) Move** `ClientAppIoServicer` **to** `flwr.supernode.servicer` ([#5460](https://github.com/adap/flower/pull/5460))
-- **refactor(framework) Move** `flwr.supernode.app` **to** `flwr.supernode.cli.flower_supernode` ([#5409](https://github.com/adap/flower/pull/5409))
-- **refactor(framework) Move SuperNode code to** `flwr.supernode` **module** ([#5408](https://github.com/adap/flower/pull/5408))
-- **refactor(framework) Move** `nodestate` **module to** `flwr.supernode` ([#5396](https://github.com/adap/flower/pull/5396))
-- **refactor(framework) Introduce new flwr subpackages** ([#5389](https://github.com/adap/flower/pull/5389))
-- **refactor(framework) Move** `Metadata` **and** `Error` **to** `supercore` ([#5392](https://github.com/adap/flower/pull/5392))
-- **refactor(framework) Move** `flwr-clientapp` **code to** `flwr.supernode` ([#5461](https://github.com/adap/flower/pull/5461))
+- **Refactor SuperNode for improved deployment and maintainability** ([#5398](https://github.com/adap/flower/pull/5398), [#5397](https://github.com/adap/flower/pull/5397), [#5443](https://github.com/adap/flower/pull/5443), [#5410](https://github.com/adap/flower/pull/5410), [#5411](https://github.com/adap/flower/pull/5411), [#5469](https://github.com/adap/flower/pull/5469), [#5419](https://github.com/adap/flower/pull/5419))
 
-### Revamp SuperNode
-- **refactor(framework) Remove in-process Client execution from SuperNode main loop** ([#5398](https://github.com/adap/flower/pull/5398))
-- **refactor(framework) Remove grpc-bidi support from SuperNode main loop** ([#5397](https://github.com/adap/flower/pull/5397))
-- **refactor(framework) Trim unnecessary code in** `flwr.supernode.start_client_internal` ([#5443](https://github.com/adap/flower/pull/5443))
-- **refactor(framework) Centralize connection code in** `start_client_internal.py` ([#5410](https://github.com/adap/flower/pull/5410))
-- **refactor(framework) Remove unused** `try-except` **block in SuperNode** ([#5411](https://github.com/adap/flower/pull/5411))
-- **refactor(framework) Run** `flwr-clientapp` **command in SuperNode** ([#5469](https://github.com/adap/flower/pull/5469))
-- **refactor(framework) Remove unused code in** `compat.client.app` **to facilitate SuperNode refactoring** ([#5419](https://github.com/adap/flower/pull/5419))
+  Ongoing refactoring of SuperNode improves modularity, simplifies client execution, removes grpc-bidi and unused code, and centralizes connection logic. These changes align SuperNode's behavior more closely with SuperLink to enhance deployment readiness.
 
-### Build FAB in memory
-- **feat(framework) Add** `build_fab` **function to build FAB in memory** ([#5334](https://github.com/adap/flower/pull/5334))
+- **Restructure Flower** ([#5465](https://github.com/adap/flower/pull/5465), [#5476](https://github.com/adap/flower/pull/5476), [#5460](https://github.com/adap/flower/pull/5460), [#5409](https://github.com/adap/flower/pull/5409), [#5408](https://github.com/adap/flower/pull/5408), [#5396](https://github.com/adap/flower/pull/5396), [#5389](https://github.com/adap/flower/pull/5389), [#5392](https://github.com/adap/flower/pull/5392), [#5461](https://github.com/adap/flower/pull/5461))
 
-### Update mods
-- **feat(framework) Log for both incoming and outgoing messages in** `message_size_mod` **and** `arrays_size_mod` ([#5437](https://github.com/adap/flower/pull/5437))
+  Reorganizes infrastructure code into dedicated submodules to improve maintainability and clarify the separation from user-facing components.
 
-### Guard clause for flwr CLI
-- **break(framework) Add** `flwr_aid` **-** `run_id` **guard clause to** `ExecServicer.ListRuns` **,** `.StreamLogs` **, and** `.StopRun` ([#5511](https://github.com/adap/flower/pull/5511))
+- **Improve CI/CD workflows** ([#5498](https://github.com/adap/flower/pull/5498), [#5265](https://github.com/adap/flower/pull/5265), [#5266](https://github.com/adap/flower/pull/5266), [#5328](https://github.com/adap/flower/pull/5328), [#5500](https://github.com/adap/flower/pull/5500), [#5346](https://github.com/adap/flower/pull/5346), [#5318](https://github.com/adap/flower/pull/5318), [#5256](https://github.com/adap/flower/pull/5256), [#5298](https://github.com/adap/flower/pull/5298), [#5257](https://github.com/adap/flower/pull/5257), [#5483](https://github.com/adap/flower/pull/5483), [#5440](https://github.com/adap/flower/pull/5440), [#5304](https://github.com/adap/flower/pull/5304), [#5313](https://github.com/adap/flower/pull/5313), [#5381](https://github.com/adap/flower/pull/5381), [#5385](https://github.com/adap/flower/pull/5385), [#5316](https://github.com/adap/flower/pull/5316), [#5260](https://github.com/adap/flower/pull/5260), [#5349](https://github.com/adap/flower/pull/5349), [#5319](https://github.com/adap/flower/pull/5319), [#5296](https://github.com/adap/flower/pull/5296), [#5294](https://github.com/adap/flower/pull/5294), [#5317](https://github.com/adap/flower/pull/5317), [#5482](https://github.com/adap/flower/pull/5482), [#5282](https://github.com/adap/flower/pull/5282), [#5223](https://github.com/adap/flower/pull/5223), [#5225](https://github.com/adap/flower/pull/5225), [#5326](https://github.com/adap/flower/pull/5326))
 
+  Refines CI workflows, templates, and automation; improves Docker, dependency, and version management; removes legacy jobs and adds proactive maintainer tools.
+
+- **Improve documentation and examples** ([#5345](https://github.com/adap/flower/pull/5345), [#5400](https://github.com/adap/flower/pull/5400), [#5406](https://github.com/adap/flower/pull/5406), [#5401](https://github.com/adap/flower/pull/5401), [#5283](https://github.com/adap/flower/pull/5283), [#5416](https://github.com/adap/flower/pull/5416), [#5337](https://github.com/adap/flower/pull/5337), [#5436](https://github.com/adap/flower/pull/5436), [#5373](https://github.com/adap/flower/pull/5373), [#5471](https://github.com/adap/flower/pull/5471), [#5395](https://github.com/adap/flower/pull/5395), [#5279](https://github.com/adap/flower/pull/5279), [#5288](https://github.com/adap/flower/pull/5288), [#5457](https://github.com/adap/flower/pull/5457), [#5305](https://github.com/adap/flower/pull/5305), [#5365](https://github.com/adap/flower/pull/5365), [#5491](https://github.com/adap/flower/pull/5491), [#5463](https://github.com/adap/flower/pull/5463), [#5367](https://github.com/adap/flower/pull/5367), [#5360](https://github.com/adap/flower/pull/5360), [#5374](https://github.com/adap/flower/pull/5374), [#5361](https://github.com/adap/flower/pull/5361), [#5063](https://github.com/adap/flower/pull/5063))
+
+  Adds documentation for the Flower Components Network Interface and Communication Model, updates the Deployment Engine page, and clarifies the distinctions between simulation and deployment. The `custom-mods` example has also been revised.
+
+- **Build FAB in memory with new utility function** ([#5334](https://github.com/adap/flower/pull/5334))
+
+- **Add logging for incoming and outgoing messages in size modifiers** ([#5437](https://github.com/adap/flower/pull/5437))
+
+- **Bugfixes** ([#5340](https://github.com/adap/flower/pull/5340), [#5366](https://github.com/adap/flower/pull/5366), [#5478](https://github.com/adap/flower/pull/5478))
+
+- **General improvements** ([#5516](https://github.com/adap/flower/pull/5516), [#5499](https://github.com/adap/flower/pull/5499), [#4927](https://github.com/adap/flower/pull/4927), [#5310](https://github.com/adap/flower/pull/5310), [#5343](https://github.com/adap/flower/pull/5343), [#5359](https://github.com/adap/flower/pull/5359), [#5413](https://github.com/adap/flower/pull/5413), [#5299](https://github.com/adap/flower/pull/5299), [#5433](https://github.com/adap/flower/pull/5433), [#5390](https://github.com/adap/flower/pull/5390), [#5427](https://github.com/adap/flower/pull/5427), [#5350](https://github.com/adap/flower/pull/5350), [#5394](https://github.com/adap/flower/pull/5394), [#5295](https://github.com/adap/flower/pull/5295), [#5315](https://github.com/adap/flower/pull/5315), [#5468](https://github.com/adap/flower/pull/5468), [#5412](https://github.com/adap/flower/pull/5412), [#5348](https://github.com/adap/flower/pull/5348), [#5444](https://github.com/adap/flower/pull/5444))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
 ## v1.18.0 (2025-04-23)
 
