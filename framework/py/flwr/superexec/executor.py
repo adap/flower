@@ -22,8 +22,8 @@ from typing import Optional
 
 from flwr.common import ConfigRecord
 from flwr.common.typing import UserConfig
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.supercore.ffs import FfsFactory
 
 
 @dataclass
