@@ -63,7 +63,7 @@ public struct Message: Codable, Sendable {
     guard let parsed = Role(rawValue: roleString) else {
       throw Failure(
         code: .invalidArgumentsError,
-        message: "Invalid message role: \(roleString)"
+        message: "Invalid message role: \(roleString). Available roles are: \(Role.allCases.map(\.rawValue).joined(separator: \", \"))."
       )
     }
 
