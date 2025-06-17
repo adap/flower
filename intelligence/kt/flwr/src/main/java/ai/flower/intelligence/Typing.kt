@@ -47,7 +47,7 @@ data class Message(val role: String, val content: String, val toolCalls: List<To
   init {
     val allowedRoles = setOf("user", "system", "assistant")
     if (role !in allowedRoles) {
-      throw Failure(FailureCode.InvalidArgumentsError, "Invalid message role: $role")
+      throw Failure(FailureCode.InvalidArgumentsError, "Invalid message role: $role. Available roles are: ${allowedRoles.joinToString(", ")}.")
     }
   }
 }
