@@ -56,9 +56,9 @@ from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
     PushSimulationOutputsRequest,
     PushSimulationOutputsResponse,
 )
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_if
+from flwr.supercore.ffs import FfsFactory
 
 
 class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
