@@ -45,9 +45,12 @@ data class Progress(
 @Serializable
 data class Message(val role: String, val content: String, val toolCalls: List<ToolCall>? = null) {
   init {
-    val allowedRoles = setOf("user", "system", "assistant")
-    if (role !in allowedRoles) {
-      throw Failure(FailureCode.InvalidArgumentsError, "Invalid message role: $role. Available roles are: ${allowedRoles.joinToString(", ")}.")
+    if (role !in Constants.ALLOWED_ROLES) {
+      throw Failure(
+        FailureCode.InvalidArgumentsError,
+        "Invalid message role: $role. " +
+          "Available roles are: ${Constants.ALLOWED_ROLES.joinToString(", ")}.",
+      )
     }
   }
 }
