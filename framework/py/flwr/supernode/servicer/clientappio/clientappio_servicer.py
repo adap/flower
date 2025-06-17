@@ -37,13 +37,20 @@ from flwr.common.typing import Fab, Run
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2_grpc
 from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
+    GetRunIdsWithPendingMessagesRequest,
+    GetRunIdsWithPendingMessagesResponse,
     GetTokenRequest,
     GetTokenResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
+    RequestTokenRequest,
+    RequestTokenResponse,
 )
+from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supernode.nodestate import NodeStateFactory
 
 
 @dataclass
@@ -69,11 +76,57 @@ class ClientAppOutputs:
 class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     """ClientAppIo API servicer."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        state_factory: NodeStateFactory,
+        ffs_factory: FfsFactory,
+        objectstore_factory: ObjectStoreFactory,
+    ) -> None:
+        self.state_factory = state_factory
+        self.ffs_factory = ffs_factory
+        self.objectstore_factory = objectstore_factory
+
         self.clientapp_input: Optional[ClientAppInputs] = None
         self.clientapp_output: Optional[ClientAppOutputs] = None
         self.token_returned: bool = False
         self.inputs_returned: bool = False
+
+    def GetRunIdsWithPendingMessages(
+        self,
+        request: GetRunIdsWithPendingMessagesRequest,
+        context: grpc.ServicerContext,
+    ) -> GetRunIdsWithPendingMessagesResponse:
+        """Get run IDs with pending messages."""
+        log(DEBUG, "ClientAppIo.GetRunIdsWithPendingMessages")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Get run IDs with pending messages
+        run_ids = state.get_run_ids_with_pending_messages()
+
+        # Return run IDs
+        return GetRunIdsWithPendingMessagesResponse(run_ids=run_ids)
+
+    def RequestToken(
+        self, request: RequestTokenRequest, context: grpc.ServicerContext
+    ) -> RequestTokenResponse:
+        """Request token."""
+        log(DEBUG, "ClientAppIo.RequestToken")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Attempt to create a token for the provided run ID
+        try:
+            token = state.create_token(request.run_id)
+        except ValueError:
+            # Return an empty token if A token already exists for this run ID,
+            # indicating the run is in progress
+            return RequestTokenResponse(token="")
+
+        # Return the token
+        return RequestTokenResponse(token=token)
 
     def GetToken(
         self, request: GetTokenRequest, context: grpc.ServicerContext
