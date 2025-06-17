@@ -18,22 +18,30 @@
 import time
 from collections import namedtuple
 from contextlib import ExitStack
+from copy import copy
 from itertools import product
 from typing import Any, Callable, Optional, Union
 
 import pytest
 
-from . import RecordDict
+from ..app.error import Error
+from ..app.metadata import Metadata
+from . import ConfigRecord, RecordDict
 from .constant import MESSAGE_TTL_TOLERANCE
 from .date import now
+from .inflatable import (
+    get_object_body,
+    get_object_children_ids_from_object_content,
+    get_object_type_from_object_content,
+)
 from .message import (
     DEFAULT_TTL,
-    Error,
     Message,
     MessageInitializationError,
-    Metadata,
     make_message,
+    remove_content_from_message,
 )
+from .serde import message_to_proto
 from .serde_test import RecordMaker
 
 
@@ -378,3 +386,110 @@ def test_create_reply_message_failure(args: Any, kwargs: dict[str, Any]) -> None
     # Execute
     with pytest.raises(MessageInitializationError):
         Message(*args, reply_to=msg, **kwargs)
+
+
+def test_inflate_deflate_message_with_content() -> None:
+    """Test inflation and deflation of a Message carrying a RecordDict."""
+    # Prepare
+    msg = make_message(content=RecordDict(), metadata=RecordMaker(1).metadata())
+
+    # Assert
+    # Expected children
+    assert msg.children == {msg.content.object_id: msg.content}
+
+    msg_b = msg.deflate()
+
+    # Assert
+    # Class name matches
+    assert get_object_type_from_object_content(msg_b) == msg.__class__.__qualname__
+    # Header contains the Object ID of the message content
+    assert get_object_children_ids_from_object_content(msg_b) == [msg.content.object_id]
+    # Body of deflated Message matches its direct protobuf serialization
+    # when the content is removed
+    msg_copy = copy(msg)
+    msg_copy.content = None  # type: ignore
+    msg_copy.metadata.__dict__["_message_id"] = ""
+    assert message_to_proto(msg_copy).SerializeToString(
+        deterministic=True
+    ) == get_object_body(msg_b, Message)
+
+    msg_ = Message.inflate(msg_b, children=msg.children)
+    # Assert
+    # Both objects are identical
+    assert msg.object_id == msg_.object_id
+
+    # Assert
+    # Inflate but passing no children
+    with pytest.raises(ValueError):
+        Message.inflate(msg_b)
+    # Inflate but passing children with wrong Object ID
+    with pytest.raises(ValueError):
+        Message.inflate(msg_b, children={"123": RecordDict()})
+
+
+def test_inflate_deflate_message_with_error() -> None:
+    """Test inflation and deflation of a Message carrying an Error."""
+    # Prepare
+    msg = make_message(error=Error(code=1), metadata=RecordMaker(1).metadata())
+
+    # Assert
+    # Expected children
+    assert msg.children is None
+
+    msg_b = msg.deflate()
+
+    # Assert
+    # Class name matches
+    assert get_object_type_from_object_content(msg_b) == msg.__class__.__qualname__
+    # Header contains the Object ID of the message content
+    assert get_object_children_ids_from_object_content(msg_b) == []
+    # Body of deflated Message matches its direct protobuf serialization
+    msg_copy = copy(msg)
+    msg_copy.metadata.__dict__["_message_id"] = ""
+    assert message_to_proto(msg_copy).SerializeToString(
+        deterministic=True
+    ) == get_object_body(msg_b, Message)
+
+    # Inflate without passing any children
+    msg_ = Message.inflate(msg_b)
+    # Assert
+    # Both objects are identical
+    assert msg.object_id == msg_.object_id
+
+    # Assert
+    # Inflate but passing children
+    with pytest.raises(ValueError):
+        Message.inflate(msg_b, children={"123": RecordDict()})
+
+
+def test_object_id_excludes_message_id_in_metadata() -> None:
+    """Test inflation and deflation of a Message carrying an Error."""
+    # Prepare
+    msg = make_message(error=Error(code=1), metadata=RecordMaker(1).metadata())
+    object_id = msg.object_id
+
+    # Modify message_id
+    msg.metadata.__dict__["_message_id"] = "1234"
+
+    # Assert
+    assert object_id == msg.object_id
+
+
+def test_remove_content_from_message() -> None:
+    """Test remove_content method."""
+    # Prepare message w/ content
+    msg = make_message(
+        content=RecordDict({"a": ConfigRecord()}), metadata=RecordMaker(1).metadata()
+    )
+
+    # Execute (expected content to be an empty RecordDict)
+    msg_ = remove_content_from_message(msg)
+    assert msg_.content == RecordDict()
+    assert msg_.metadata == msg.metadata
+
+    # Prepare message w/ error
+    msg = make_message(error=Error(code=1), metadata=RecordMaker(1).metadata())
+    # Execute (expected to have an identical message returned)
+    msg_ = remove_content_from_message(msg)
+    assert msg_.error == msg.error
+    assert msg_.object_id == msg.object_id

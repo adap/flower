@@ -20,6 +20,8 @@ from typing import Any, TypeVar, cast
 from google.protobuf.message import Message as GrpcMessage
 
 # pylint: disable=E0611
+from flwr.proto.error_pb2 import Error as ProtoError
+from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recorddict_pb2 import (
     BoolList,
     BytesList,
@@ -29,8 +31,12 @@ from flwr.proto.recorddict_pb2 import (
     UintList,
 )
 
+from ..app.error import Error
+from ..app.metadata import Metadata
 from .constant import INT64_MAX_VALUE
 from .record.typeddict import TypedDict
+
+# pylint: enable=E0611
 
 _type_to_field: dict[type, str] = {
     float: "double",
@@ -103,6 +109,8 @@ def record_value_dict_to_proto(
 ) -> dict[str, T]:
     """Serialize the record value dict to ProtoBuf.
 
+    This function will preserve the order of the keys in the input dictionary.
+
     Note: `bool` MUST be put in the front of allowd_types if it exists.
     """
     # Move bool to the front
@@ -121,3 +129,47 @@ def record_value_dict_from_proto(
 ) -> dict[str, Any]:
     """Deserialize the record value dict from ProtoBuf."""
     return {k: _record_value_from_proto(v) for k, v in value_dict_proto.items()}
+
+
+def error_to_proto(error: Error) -> ProtoError:
+    """Serialize Error to ProtoBuf."""
+    reason = error.reason if error.reason else ""
+    return ProtoError(code=error.code, reason=reason)
+
+
+def error_from_proto(error_proto: ProtoError) -> Error:
+    """Deserialize Error from ProtoBuf."""
+    reason = error_proto.reason if len(error_proto.reason) > 0 else None
+    return Error(code=error_proto.code, reason=reason)
+
+
+def metadata_to_proto(metadata: Metadata) -> ProtoMetadata:
+    """Serialize `Metadata` to ProtoBuf."""
+    proto = ProtoMetadata(  # pylint: disable=E1101
+        run_id=metadata.run_id,
+        message_id=metadata.message_id,
+        src_node_id=metadata.src_node_id,
+        dst_node_id=metadata.dst_node_id,
+        reply_to_message_id=metadata.reply_to_message_id,
+        group_id=metadata.group_id,
+        ttl=metadata.ttl,
+        message_type=metadata.message_type,
+        created_at=metadata.created_at,
+    )
+    return proto
+
+
+def metadata_from_proto(metadata_proto: ProtoMetadata) -> Metadata:
+    """Deserialize `Metadata` from ProtoBuf."""
+    metadata = Metadata(
+        run_id=metadata_proto.run_id,
+        message_id=metadata_proto.message_id,
+        src_node_id=metadata_proto.src_node_id,
+        dst_node_id=metadata_proto.dst_node_id,
+        reply_to_message_id=metadata_proto.reply_to_message_id,
+        group_id=metadata_proto.group_id,
+        created_at=metadata_proto.created_at,
+        ttl=metadata_proto.ttl,
+        message_type=metadata_proto.message_type,
+    )
+    return metadata

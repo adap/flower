@@ -1,4 +1,4 @@
-:og:description: Build statelful ClientApps in Flower with context objects, enabling efficient simulations and deployments.
+:og:description: Build stateful ClientApps in Flower with context objects, enabling efficient simulations and deployments.
 .. meta::
     :description: Build stateful ClientApps in Flower with context objects, enabling efficient simulations and deployments.
 
@@ -35,7 +35,7 @@ attribute can be used to store information that you would like the ``ClientApp``
 access to for the duration of the run. This could be anything from intermediate results
 such as the history of training losses (e.g. as a list of `float` values with a new
 entry appended each time the ``ClientApp`` is executed), certain parts of the model that
-should persist at the client side, or some other arbitrary Python objects. These items
+should persist on the client side, or some other arbitrary Python objects. These items
 would need to be serialized before saving them into the context.
 
 Saving metrics to the context
@@ -79,14 +79,14 @@ Let's begin with a simple setting in which ``ClientApp`` is defined as follows. 
         return SimpleClient().to_client()
 
 
-    # Finally, construct the clinetapp instance by means of the `client_fn` callback
+    # Finally, construct the ClientApp instance by means of the `client_fn` callback
     app = ClientApp(client_fn=client_fn)
 
 Let's say we want to save that randomly generated integer and append it to a list that
 persists in the context. To do that, you'll need to do two key things:
 
-1. Make the ``context.state`` reachable withing your client class
-2. Initialise the appropiate record type (in this example we use ConfigRecord_) and
+1. Make the ``context.state`` reachable within your client class
+2. Initialise the appropriate record type (in this example we use ConfigRecord_) and
    save/read your entry when required.
 
 .. code-block:: python
@@ -121,7 +121,7 @@ persists in the context. To do that, you'll need to do two key things:
         return SimpleClient(context).to_client()  # Note we pass the context
 
 
-    # Finally, construct the clinetapp instance by means of the `client_fn` callback
+    # Finally, construct the ClientApp instance by means of the `client_fn` callback
     app = ClientApp(client_fn=client_fn)
 
 If you run the app, you'll see an output similar to the one below. See how after each

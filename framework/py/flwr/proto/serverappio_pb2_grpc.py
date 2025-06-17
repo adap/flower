@@ -19,11 +19,6 @@ class ServerAppIoStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.CreateRun = channel.unary_unary(
-                '/flwr.proto.ServerAppIo/CreateRun',
-                request_serializer=flwr_dot_proto_dot_run__pb2.CreateRunRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_run__pb2.CreateRunResponse.FromString,
-                )
         self.GetNodes = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/GetNodes',
                 request_serializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesRequest.SerializeToString,
@@ -89,17 +84,15 @@ class ServerAppIoStub(object):
                 request_serializer=flwr_dot_proto_dot_message__pb2.PullObjectRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_message__pb2.PullObjectResponse.FromString,
                 )
+        self.ConfirmMessageReceived = channel.unary_unary(
+                '/flwr.proto.ServerAppIo/ConfirmMessageReceived',
+                request_serializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedResponse.FromString,
+                )
 
 
 class ServerAppIoServicer(object):
     """Missing associated documentation comment in .proto file."""
-
-    def CreateRun(self, request, context):
-        """Request run_id
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
     def GetNodes(self, request, context):
         """Return a set of nodes
@@ -192,14 +185,16 @@ class ServerAppIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ConfirmMessageReceived(self, request, context):
+        """Confirm Message Received
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ServerAppIoServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'CreateRun': grpc.unary_unary_rpc_method_handler(
-                    servicer.CreateRun,
-                    request_deserializer=flwr_dot_proto_dot_run__pb2.CreateRunRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_run__pb2.CreateRunResponse.SerializeToString,
-            ),
             'GetNodes': grpc.unary_unary_rpc_method_handler(
                     servicer.GetNodes,
                     request_deserializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesRequest.FromString,
@@ -265,6 +260,11 @@ def add_ServerAppIoServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_message__pb2.PullObjectRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_message__pb2.PullObjectResponse.SerializeToString,
             ),
+            'ConfirmMessageReceived': grpc.unary_unary_rpc_method_handler(
+                    servicer.ConfirmMessageReceived,
+                    request_deserializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
             'flwr.proto.ServerAppIo', rpc_method_handlers)
@@ -274,23 +274,6 @@ def add_ServerAppIoServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class ServerAppIo(object):
     """Missing associated documentation comment in .proto file."""
-
-    @staticmethod
-    def CreateRun(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/CreateRun',
-            flwr_dot_proto_dot_run__pb2.CreateRunRequest.SerializeToString,
-            flwr_dot_proto_dot_run__pb2.CreateRunResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetNodes(request,
@@ -510,5 +493,22 @@ class ServerAppIo(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/PullObject',
             flwr_dot_proto_dot_message__pb2.PullObjectRequest.SerializeToString,
             flwr_dot_proto_dot_message__pb2.PullObjectResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ConfirmMessageReceived(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/ConfirmMessageReceived',
+            flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedRequest.SerializeToString,
+            flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
