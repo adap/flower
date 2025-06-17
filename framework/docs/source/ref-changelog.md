@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## v1.19.0 (2025-06-17)
 
 ### Thanks to our contributors
