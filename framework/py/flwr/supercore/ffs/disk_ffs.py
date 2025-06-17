@@ -20,7 +20,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from flwr.server.superlink.ffs.ffs import Ffs
+from .ffs import Ffs
 
 
 class DiskFfs(Ffs):  # pylint: disable=R0904

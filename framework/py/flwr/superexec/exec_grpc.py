@@ -27,8 +27,8 @@ from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
 from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
 from flwr.superexec.exec_user_auth_interceptor import ExecUserAuthInterceptor

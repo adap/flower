@@ -58,9 +58,9 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunResponse,
     Run,
 )
-from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
+from flwr.supercore.ffs import Ffs
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStore
 
 from ...utils import store_mapping_and_register_objects
