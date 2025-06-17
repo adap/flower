@@ -104,6 +104,7 @@ def pull_messages(
     store: ObjectStore,
 ) -> PullMessagesResponse:
     """Pull Messages handler."""
+    print(f"ObjectStore size: {len(store)}")
     # Get node_id if client node is not anonymous
     node = request.node  # pylint: disable=no-member
     node_id: int = node.node_id

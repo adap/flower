@@ -115,8 +115,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state = self.state_factory.state()
         store = self.objectstore_factory.store()
 
-        print(f"ObjectStore size: {len(store)}")
-
         # Abort if the run is not running
         abort_if(
             request.run_id,
