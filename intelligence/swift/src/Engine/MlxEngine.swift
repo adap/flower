@@ -112,14 +112,14 @@ class MlxEngine: Engine {
         }
       }
     }
-    return Message(role: "assistant", content: result.output)
+    return try Message(role: "assistant", content: result.output)
   }
 
   func fetchModel(model: String, callback: @escaping (Progress) -> Void) async throws {
     modelConfiguration = modelMapping[model] ?? ModelRegistry.llama3_2_1B_4bit
     let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     let base = documents.appending(component: "huggingface")
-    if case .id(let id) = modelConfiguration.id {
+    if case .id(let id, _) = modelConfiguration.id {
       let modelUrl = base.appending(component: "models").appending(component: id)
       if FileManager.default.fileExists(atPath: modelUrl.path) { return }
     }
