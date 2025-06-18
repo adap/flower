@@ -21,7 +21,7 @@ public struct Progress: Codable {
   public let description: String?
 }
 
-enum Role: String, Codable, Sendable {
+enum Role: String, Codable, Sendable, CaseIterable {
   case user
   case system
   case assistant
@@ -45,9 +45,10 @@ public struct Message: Codable, Sendable {
 
   public init(role: String, content: String, toolCalls: [ToolCall]? = nil) throws {
     guard let parsed = Role(rawValue: role) else {
+      let validRoles = Role.allCases.map(\.rawValue).joined(separator: ", ")
       throw Failure(
         code: .invalidArgumentsError,
-        message: "Invalid message role: \(role). Available roles are: \(Role.allCases.map(\.rawValue).joined(separator: \", \"))."
+        message: "Invalid message role: \(role). Available roles are: \(validRoles)."
       )
     }
     self._role = parsed
@@ -61,9 +62,10 @@ public struct Message: Codable, Sendable {
     let roleString = try container.decode(String.self, forKey: .role)
 
     guard let parsed = Role(rawValue: roleString) else {
+      let validRoles = Role.allCases.map(\.rawValue).joined(separator: ", ")
       throw Failure(
         code: .invalidArgumentsError,
-        message: "Invalid message role: \(roleString). Available roles are: \(Role.allCases.map(\.rawValue).joined(separator: \", \"))."
+        message: "Invalid message role: \(roleString). Available roles are: \(validRoles)."
       )
     }
 
