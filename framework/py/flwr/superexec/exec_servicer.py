@@ -88,7 +88,8 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         if len(request.fab.content) > FAB_MAX_SIZE:
             log(
                 ERROR,
-                f"FAB size exceeds maximum allowed size of {FAB_MAX_SIZE} bytes.",
+                "FAB size exceeds maximum allowed size of %d bytes.",
+                FAB_MAX_SIZE,
             )
             return StartRunResponse()
 
