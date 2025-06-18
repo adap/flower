@@ -162,11 +162,13 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
                     self._server = components.server
                     self._config = components.config
                     self._strategy = components.strategy
+                    self._client_results_strategy = components.client_results_strategy
                     self._client_manager = components.client_manager
                 start_grid(
                     server=self._server,
                     config=self._config,
                     strategy=self._strategy,
+                    client_results_strategy=self._client_results_strategy,
                     client_manager=self._client_manager,
                     grid=grid,
                 )
