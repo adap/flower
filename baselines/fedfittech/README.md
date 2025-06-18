@@ -9,7 +9,7 @@ Dataset:
   - "https://mariusbock.github.io/wear/"
 ---
 
-# 🌟 FedFitTech: A Baseline in Federated Learning for Fitness Tracking
+# FedFitTech: A Baseline in Federated Learning for Fitness Tracking
 
 <p align="justify">  This repository introduces FedFitTech, which is a Federated Learning baseline specifically designed for Fitness Technology (FitTech) using the Flower framework, enabling reproducible experiments and benchmarking. As an example usage of FedFitTech, we also included a case study that incorporates a client-side early stopping strategy.  </p>
 
