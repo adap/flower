@@ -31,9 +31,8 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log
 from flwr.common.typing import Fab, RunStatus, UserConfig
-from flwr.server.superlink.ffs import Ffs
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.supercore.ffs import Ffs, FfsFactory
 
 from .executor import Executor
 

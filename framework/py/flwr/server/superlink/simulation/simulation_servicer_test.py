@@ -34,10 +34,10 @@ from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
     PushSimulationOutputsRequest,
     PushSimulationOutputsResponse,
 )
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 from flwr.server.superlink.utils import _STATUS_TO_MSG
+from flwr.supercore.ffs import FfsFactory
 
 
 class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902

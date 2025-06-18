@@ -90,7 +90,7 @@ UBUNTU_VARIANT = Variant(
 
 # alpine base image
 ALPINE_VARIANT = Variant(
-    Distro(DistroName.ALPINE, "3.19"),
+    Distro(DistroName.ALPINE, "3.22"),
     CpuVariant(),
 )
 
