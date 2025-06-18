@@ -44,7 +44,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from .utils import init_channel, try_obtain_cli_auth_plugin, unauthenticated_exc_handler
+from .utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
 _RunListType = tuple[int, str, str, str, str, str, str, str, str]
 
@@ -130,23 +130,16 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
             # Display information about a specific run ID
             if run_id is not None:
                 typer.echo(f"🔍 Displaying information for run ID {run_id}...")
-                restore_output()
-                _display_one_run(stub, run_id, output_format)
+                formatted_runs = _display_one_run(stub, run_id)
             # By default, list all runs
             else:
                 typer.echo("📄 Listing all runs...")
-                restore_output()
-                _list_runs(stub, output_format)
-
-        except ValueError as err:
-            if suppress_output:
-                redirect_output(captured_output)
-            typer.secho(
-                f"❌ {err}",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1) from err
+                formatted_runs = _list_runs(stub)
+            restore_output()
+            if output_format == CliOutputFormat.JSON:
+                Console().print_json(_to_json(formatted_runs))
+            else:
+                Console().print(_to_table(formatted_runs))
         finally:
             if channel:
                 channel.close()
@@ -300,37 +293,23 @@ def _to_json(run_list: list[_RunListType]) -> str:
     return json.dumps({"success": True, "runs": runs_list})
 
 
-def _list_runs(
-    stub: ExecStub,
-    output_format: str = CliOutputFormat.DEFAULT,
-) -> None:
+def _list_runs(stub: ExecStub) -> list[_RunListType]:
     """List all runs."""
-    with unauthenticated_exc_handler():
+    with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    formatted_runs = _format_runs(run_dict, res.now)
-    if output_format == CliOutputFormat.JSON:
-        Console().print_json(_to_json(formatted_runs))
-    else:
-        Console().print(_to_table(formatted_runs))
+    return _format_runs(run_dict, res.now)
 
 
-def _display_one_run(
-    stub: ExecStub,
-    run_id: int,
-    output_format: str = CliOutputFormat.DEFAULT,
-) -> None:
+def _display_one_run(stub: ExecStub, run_id: int) -> list[_RunListType]:
     """Display information about a specific run."""
-    with unauthenticated_exc_handler():
+    with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:
+        # This won't be reached as an gRPC error is raised if run_id is invalid
         raise ValueError(f"Run ID {run_id} not found")
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    formatted_runs = _format_runs(run_dict, res.now)
-    if output_format == CliOutputFormat.JSON:
-        Console().print_json(_to_json(formatted_runs))
-    else:
-        Console().print(_to_table(formatted_runs))
+    return _format_runs(run_dict, res.now)

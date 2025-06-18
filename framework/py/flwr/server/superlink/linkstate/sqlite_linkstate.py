@@ -24,7 +24,6 @@ import time
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
-from uuid import UUID, uuid4
 
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
@@ -40,12 +39,8 @@ from flwr.common.constant import (
 )
 from flwr.common.message import make_message
 from flwr.common.record import ConfigRecord
-from flwr.common.serde import (
-    error_from_proto,
-    error_to_proto,
-    recorddict_from_proto,
-    recorddict_to_proto,
-)
+from flwr.common.serde import recorddict_from_proto, recorddict_to_proto
+from flwr.common.serde_utils import error_from_proto, error_to_proto
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
@@ -107,7 +102,8 @@ CREATE TABLE IF NOT EXISTS run(
     finished_at           TEXT,
     sub_status            TEXT,
     details               TEXT,
-    federation_options    BLOB
+    federation_options    BLOB,
+    flwr_aid              TEXT
 );
 """
 
@@ -255,19 +251,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return result
 
-    def store_message_ins(self, message: Message) -> Optional[UUID]:
+    def store_message_ins(self, message: Message) -> Optional[str]:
         """Store one Message."""
         # Validate message
         errors = validate_message(message=message, is_reply_message=False)
         if any(errors):
             log(ERROR, errors)
             return None
-        # Create message_id
-        message_id = uuid4()
 
         # Store Message
-        # pylint: disable-next=W0212
-        message.metadata._message_id = str(message_id)  # type: ignore
         data = (message_to_dict(message),)
 
         # Convert values from uint64 to sint64 for SQLite
@@ -307,7 +299,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # This may need to be changed in the future version with more integrity checks.
         self.query(query, data)
 
-        return message_id
+        return message.metadata.message_id
 
     def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
         """Get all Messages that have not been delivered yet."""
@@ -370,7 +362,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return result
 
-    def store_message_res(self, message: Message) -> Optional[UUID]:
+    def store_message_res(self, message: Message) -> Optional[str]:
         """Store one Message."""
         # Validate message
         errors = validate_message(message=message, is_reply_message=True)
@@ -422,12 +414,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             )
             return None
 
-        # Create message_id
-        message_id = uuid4()
-
         # Store Message
-        # pylint: disable-next=W0212
-        message.metadata._message_id = str(message_id)  # type: ignore
         data = (message_to_dict(message),)
 
         # Convert values from uint64 to sint64 for SQLite
@@ -446,12 +433,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             log(ERROR, "`run` is invalid")
             return None
 
-        return message_id
+        return message.metadata.message_id
 
-    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+    def get_message_res(self, message_ids: set[str]) -> list[Message]:
         """Get reply Messages for the given Message IDs."""
         # pylint: disable-msg=too-many-locals
-        ret: dict[UUID, Message] = {}
+        ret: dict[str, Message] = {}
 
         # Verify Message IDs
         current = time.time()
@@ -461,12 +448,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             WHERE message_id IN ({",".join(["?"] * len(message_ids))});
         """
         rows = self.query(query, tuple(str(message_id) for message_id in message_ids))
-        found_message_ins_dict: dict[UUID, Message] = {}
+        found_message_ins_dict: dict[str, Message] = {}
         for row in rows:
             convert_sint64_values_in_dict_to_uint64(
                 row, ["run_id", "src_node_id", "dst_node_id"]
             )
-            found_message_ins_dict[UUID(row["message_id"])] = dict_to_message(row)
+            found_message_ins_dict[row["message_id"]] = dict_to_message(row)
 
         ret = verify_message_ids(
             inquired_message_ids=message_ids,
@@ -555,7 +542,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: dict[str, int] = rows[0]
         return result["num"]
 
-    def delete_messages(self, message_ins_ids: set[UUID]) -> None:
+    def delete_messages(self, message_ins_ids: set[str]) -> None:
         """Delete a Message and its reply based on provided Message IDs."""
         if not message_ins_ids:
             return
@@ -581,7 +568,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             self.conn.execute(query_1, data)
             self.conn.execute(query_2, data)
 
-    def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
+    def get_message_ids_from_run_id(self, run_id: int) -> set[str]:
         """Get all instruction Message IDs for the given run_id."""
         if self.conn is None:
             raise AttributeError("LinkState not initialized")
@@ -598,7 +585,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         with self.conn:
             rows = self.conn.execute(query, data).fetchall()
 
-        return {UUID(row["message_id"]) for row in rows}
+        return {row["message_id"] for row in rows}
 
     def create_node(self, heartbeat_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
@@ -733,6 +720,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         fab_hash: Optional[str],
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str],
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
@@ -749,8 +737,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 "INSERT INTO run "
                 "(run_id, active_until, heartbeat_interval, fab_id, fab_version, "
                 "fab_hash, override_config, federation_options, pending_at, "
-                "starting_at, running_at, finished_at, sub_status, details) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                "starting_at, running_at, finished_at, sub_status, details, flwr_aid) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             override_config_json = json.dumps(override_config)
             data = [
@@ -768,6 +756,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 "",
                 "",
                 "",
+                flwr_aid or "",
             ]
             self.query(query, tuple(data))
             return uint64_run_id
@@ -796,10 +785,18 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: set[bytes] = {row["public_key"] for row in rows}
         return result
 
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
-        query = "SELECT run_id FROM run;"
-        rows = self.query(query)
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified.
+
+        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
+        """
+        if flwr_aid:
+            rows = self.query(
+                "SELECT run_id FROM run WHERE flwr_aid = ?;",
+                (flwr_aid,),
+            )
+        else:
+            rows = self.query("SELECT run_id FROM run;", ())
         return {convert_sint64_to_uint64(row["run_id"]) for row in rows}
 
     def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
@@ -850,6 +847,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                     sub_status=row["sub_status"],
                     details=row["details"],
                 ),
+                flwr_aid=row["flwr_aid"],
             )
         log(ERROR, "`run_id` does not exist.")
         return None

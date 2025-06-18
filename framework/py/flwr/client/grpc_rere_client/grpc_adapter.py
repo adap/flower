@@ -50,6 +50,8 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -169,3 +171,9 @@ class GrpcAdapter:
     ) -> PullObjectResponse:
         """."""
         return self._send_and_receive(request, PullObjectResponse, **kwargs)
+
+    def ConfirmMessageReceived(  # pylint: disable=C0103
+        self, request: ConfirmMessageReceivedRequest, **kwargs: Any
+    ) -> ConfirmMessageReceivedResponse:
+        """."""
+        return self._send_and_receive(request, ConfirmMessageReceivedResponse, **kwargs)

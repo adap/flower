@@ -230,6 +230,7 @@ class Run:  # pylint: disable=too-many-instance-attributes
     running_at: str
     finished_at: str
     status: RunStatus
+    flwr_aid: str
 
     @classmethod
     def create_empty(cls, run_id: int) -> "Run":
@@ -245,6 +246,7 @@ class Run:  # pylint: disable=too-many-instance-attributes
             running_at="",
             finished_at="",
             status=RunStatus(status="", sub_status="", details=""),
+            flwr_aid="",
         )
 
 
@@ -289,11 +291,11 @@ class UserAuthCredentials:
 
 
 @dataclass
-class UserInfo:
+class AccountInfo:
     """User information for event log."""
 
-    user_id: Optional[str]
-    user_name: Optional[str]
+    flwr_aid: Optional[str]
+    account_name: Optional[str]
 
 
 @dataclass

@@ -26,7 +26,7 @@ import {
   Result,
 } from './typing';
 import { WebllmEngine } from './engines/webllmEngine';
-import { DEFAULT_MODEL } from './constants';
+import { ALLOWED_ROLES, DEFAULT_MODEL } from './constants';
 import { isNode } from './env';
 
 /**
@@ -155,6 +155,19 @@ export class FlowerIntelligence {
       messages = [{ role: 'user', content: inputOrOptions }];
     } else {
       ({ messages, ...options } = inputOrOptions);
+
+      if (messages.some((msg) => !ALLOWED_ROLES.includes(msg.role))) {
+        return {
+          ok: false,
+          failure: {
+            code: FailureCode.InvalidArgumentsError,
+            description: `Invalid message role${messages.length > 1 ? 's' : ''}: ${messages
+              .filter((msg) => !ALLOWED_ROLES.includes(msg.role))
+              .map((msg) => msg.role)
+              .join(', ')}`,
+          },
+        };
+      }
     }
 
     const model = options.model ?? DEFAULT_MODEL;

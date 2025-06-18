@@ -20,11 +20,9 @@ from typing import Any, cast
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import ClientAppOutputCode, ClientAppOutputStatus
-from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
-from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recorddict_pb2 import Array as ProtoArray
 from flwr.proto.recorddict_pb2 import ArrayRecord as ProtoArrayRecord
 from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
@@ -55,8 +53,15 @@ from . import (
     typing,
 )
 from .constant import INT64_MAX_VALUE
-from .message import Error, Message, Metadata, make_message
-from .serde_utils import record_value_dict_from_proto, record_value_dict_to_proto
+from .message import Message, make_message
+from .serde_utils import (
+    error_from_proto,
+    error_to_proto,
+    metadata_from_proto,
+    metadata_to_proto,
+    record_value_dict_from_proto,
+    record_value_dict_to_proto,
+)
 
 #  === Parameters message ===
 
@@ -373,14 +378,19 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
 
 def array_to_proto(array: Array) -> ProtoArray:
     """Serialize Array to ProtoBuf."""
-    return ProtoArray(**vars(array))
+    return ProtoArray(
+        dtype=array.dtype,
+        shape=array.shape,
+        stype=array.stype,
+        data=array.data,
+    )
 
 
 def array_from_proto(array_proto: ProtoArray) -> Array:
     """Deserialize Array from ProtoBuf."""
     return Array(
         dtype=array_proto.dtype,
-        shape=list(array_proto.shape),
+        shape=tuple(array_proto.shape),
         stype=array_proto.stype,
         data=array_proto.data,
     )
@@ -389,8 +399,10 @@ def array_from_proto(array_proto: ProtoArray) -> Array:
 def array_record_to_proto(record: ArrayRecord) -> ProtoArrayRecord:
     """Serialize ArrayRecord to ProtoBuf."""
     return ProtoArrayRecord(
-        data_keys=record.keys(),
-        data_values=map(array_to_proto, record.values()),
+        items=[
+            ProtoArrayRecord.Item(key=k, value=array_to_proto(v))
+            for k, v in record.items()
+        ]
     )
 
 
@@ -400,7 +412,7 @@ def array_record_from_proto(
     """Deserialize ArrayRecord from ProtoBuf."""
     return ArrayRecord(
         array_dict=OrderedDict(
-            zip(record_proto.data_keys, map(array_from_proto, record_proto.data_values))
+            {item.key: array_from_proto(item.value) for item in record_proto.items}
         ),
         keep_input=False,
     )
@@ -408,17 +420,19 @@ def array_record_from_proto(
 
 def metric_record_to_proto(record: MetricRecord) -> ProtoMetricRecord:
     """Serialize MetricRecord to ProtoBuf."""
+    protos = record_value_dict_to_proto(record, [float, int], ProtoMetricRecordValue)
     return ProtoMetricRecord(
-        data=record_value_dict_to_proto(record, [float, int], ProtoMetricRecordValue)
+        items=[ProtoMetricRecord.Item(key=k, value=v) for k, v in protos.items()]
     )
 
 
 def metric_record_from_proto(record_proto: ProtoMetricRecord) -> MetricRecord:
     """Deserialize MetricRecord from ProtoBuf."""
+    protos = {item.key: item.value for item in record_proto.items}
     return MetricRecord(
         metric_dict=cast(
             dict[str, typing.MetricRecordValues],
-            record_value_dict_from_proto(record_proto.data),
+            record_value_dict_from_proto(protos),
         ),
         keep_input=False,
     )
@@ -426,39 +440,26 @@ def metric_record_from_proto(record_proto: ProtoMetricRecord) -> MetricRecord:
 
 def config_record_to_proto(record: ConfigRecord) -> ProtoConfigRecord:
     """Serialize ConfigRecord to ProtoBuf."""
+    protos = record_value_dict_to_proto(
+        record,
+        [bool, int, float, str, bytes],
+        ProtoConfigRecordValue,
+    )
     return ProtoConfigRecord(
-        data=record_value_dict_to_proto(
-            record,
-            [bool, int, float, str, bytes],
-            ProtoConfigRecordValue,
-        )
+        items=[ProtoConfigRecord.Item(key=k, value=v) for k, v in protos.items()]
     )
 
 
 def config_record_from_proto(record_proto: ProtoConfigRecord) -> ConfigRecord:
     """Deserialize ConfigRecord from ProtoBuf."""
+    protos = {item.key: item.value for item in record_proto.items}
     return ConfigRecord(
         config_dict=cast(
             dict[str, typing.ConfigRecordValues],
-            record_value_dict_from_proto(record_proto.data),
+            record_value_dict_from_proto(protos),
         ),
         keep_input=False,
     )
-
-
-# === Error message ===
-
-
-def error_to_proto(error: Error) -> ProtoError:
-    """Serialize Error to ProtoBuf."""
-    reason = error.reason if error.reason else ""
-    return ProtoError(code=error.code, reason=reason)
-
-
-def error_from_proto(error_proto: ProtoError) -> Error:
-    """Deserialize Error from ProtoBuf."""
-    reason = error_proto.reason if len(error_proto.reason) > 0 else None
-    return Error(code=error_proto.code, reason=reason)
 
 
 # === RecordDict message ===
@@ -466,28 +467,33 @@ def error_from_proto(error_proto: ProtoError) -> Error:
 
 def recorddict_to_proto(recorddict: RecordDict) -> ProtoRecordDict:
     """Serialize RecordDict to ProtoBuf."""
-    return ProtoRecordDict(
-        arrays={
-            k: array_record_to_proto(v) for k, v in recorddict.array_records.items()
-        },
-        metrics={
-            k: metric_record_to_proto(v) for k, v in recorddict.metric_records.items()
-        },
-        configs={
-            k: config_record_to_proto(v) for k, v in recorddict.config_records.items()
-        },
-    )
+    item_cls = ProtoRecordDict.Item
+    items: list[ProtoRecordDict.Item] = []
+    for k, v in recorddict.items():
+        if isinstance(v, ArrayRecord):
+            items += [item_cls(key=k, array_record=array_record_to_proto(v))]
+        elif isinstance(v, MetricRecord):
+            items += [item_cls(key=k, metric_record=metric_record_to_proto(v))]
+        elif isinstance(v, ConfigRecord):
+            items += [item_cls(key=k, config_record=config_record_to_proto(v))]
+        else:
+            raise ValueError(f"Unsupported record type: {type(v)}")
+    return ProtoRecordDict(items=items)
 
 
 def recorddict_from_proto(recorddict_proto: ProtoRecordDict) -> RecordDict:
     """Deserialize RecordDict from ProtoBuf."""
     ret = RecordDict()
-    for k, arr_record_proto in recorddict_proto.arrays.items():
-        ret[k] = array_record_from_proto(arr_record_proto)
-    for k, m_record_proto in recorddict_proto.metrics.items():
-        ret[k] = metric_record_from_proto(m_record_proto)
-    for k, c_record_proto in recorddict_proto.configs.items():
-        ret[k] = config_record_from_proto(c_record_proto)
+    for item in recorddict_proto.items:
+        field = item.WhichOneof("value")
+        if field == "array_record":
+            ret[item.key] = array_record_from_proto(item.array_record)
+        elif field == "metric_record":
+            ret[item.key] = metric_record_from_proto(item.metric_record)
+        elif field == "config_record":
+            ret[item.key] = config_record_from_proto(item.config_record)
+        else:
+            raise ValueError(f"Unsupported record type: {field}")
     return ret
 
 
@@ -547,41 +553,6 @@ def user_config_value_from_proto(scalar_msg: Scalar) -> typing.UserConfigValue:
     scalar_field = scalar_msg.WhichOneof("scalar")
     scalar = getattr(scalar_msg, cast(str, scalar_field))
     return cast(typing.UserConfigValue, scalar)
-
-
-# === Metadata messages ===
-
-
-def metadata_to_proto(metadata: Metadata) -> ProtoMetadata:
-    """Serialize `Metadata` to ProtoBuf."""
-    proto = ProtoMetadata(  # pylint: disable=E1101
-        run_id=metadata.run_id,
-        message_id=metadata.message_id,
-        src_node_id=metadata.src_node_id,
-        dst_node_id=metadata.dst_node_id,
-        reply_to_message_id=metadata.reply_to_message_id,
-        group_id=metadata.group_id,
-        ttl=metadata.ttl,
-        message_type=metadata.message_type,
-        created_at=metadata.created_at,
-    )
-    return proto
-
-
-def metadata_from_proto(metadata_proto: ProtoMetadata) -> Metadata:
-    """Deserialize `Metadata` from ProtoBuf."""
-    metadata = Metadata(
-        run_id=metadata_proto.run_id,
-        message_id=metadata_proto.message_id,
-        src_node_id=metadata_proto.src_node_id,
-        dst_node_id=metadata_proto.dst_node_id,
-        reply_to_message_id=metadata_proto.reply_to_message_id,
-        group_id=metadata_proto.group_id,
-        created_at=metadata_proto.created_at,
-        ttl=metadata_proto.ttl,
-        message_type=metadata_proto.message_type,
-    )
-    return metadata
 
 
 # === Message messages ===
@@ -659,6 +630,7 @@ def run_to_proto(run: typing.Run) -> ProtoRun:
         running_at=run.running_at,
         finished_at=run.finished_at,
         status=run_status_to_proto(run.status),
+        flwr_aid=run.flwr_aid,
     )
     return proto
 
@@ -676,6 +648,7 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         running_at=run_proto.running_at,
         finished_at=run_proto.finished_at,
         status=run_status_from_proto(run_proto.status),
+        flwr_aid=run_proto.flwr_aid,
     )
     return run
 
