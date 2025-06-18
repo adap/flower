@@ -199,6 +199,8 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     if len(fab_bytes) > FAB_MAX_SIZE:
         raise ValueError(
             f"FAB size exceeds maximum allowed size of {FAB_MAX_SIZE} bytes."
+            "To reduce the package size, consider ignoring unnecessary files "
+            "via your `.gitignore` file or excluding them from the build."
         )
 
     fab_hash = hashlib.sha256(fab_bytes).hexdigest()
