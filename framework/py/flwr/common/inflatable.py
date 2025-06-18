@@ -18,9 +18,51 @@
 from __future__ import annotations
 
 import hashlib
-from typing import TypeVar
+import threading
+from collections.abc import Iterator
+from contextlib import contextmanager
+from typing import TypeVar, cast
+
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
+
+
+class UnexpectedObjectContentError(Exception):
+    """Exception raised when the content of an object does not conform to the expected
+    structure for an InflatableObject (i.e., head, body, and values within the head)."""
+
+    def __init__(self, object_id: str, reason: str):
+        super().__init__(
+            f"Object with ID '{object_id}' has an unexpected structure. {reason}"
+        )
+
+
+_ctx = threading.local()
+
+
+def _is_recompute_enabled() -> bool:
+    """Check if recomputing object IDs is enabled."""
+    return getattr(_ctx, "recompute_object_id_enabled", True)
+
+
+def _get_computed_object_ids() -> set[str]:
+    """Get the set of computed object IDs."""
+    return getattr(_ctx, "computed_object_ids", set())
+
+
+@contextmanager
+def no_object_id_recompute() -> Iterator[None]:
+    """Context manager to disable recomputing object IDs."""
+    old_value = _is_recompute_enabled()
+    old_set = _get_computed_object_ids()
+    _ctx.recompute_object_id_enabled = False
+    _ctx.computed_object_ids = set()
+    try:
+        yield
+    finally:
+        _ctx.recompute_object_id_enabled = old_value
+        _ctx.computed_object_ids = old_set
 
 
 class InflatableObject:
@@ -55,12 +97,38 @@ class InflatableObject:
     @property
     def object_id(self) -> str:
         """Get object_id."""
-        return get_object_id(self.deflate())
+        # If recomputing object ID is disabled and the object ID is already computed,
+        # return the cached object ID.
+        if (
+            not _is_recompute_enabled()
+            and (obj_id := self.__dict__.get("_object_id"))
+            in _get_computed_object_ids()
+        ):
+            return cast(str, obj_id)
+
+        if self.is_dirty or "_object_id" not in self.__dict__:
+            obj_id = get_object_id(self.deflate())
+            self.__dict__["_object_id"] = obj_id
+
+            # If recomputing object ID is disabled, add the object ID to the set of
+            # computed object IDs to avoid recomputing it within the context.
+            if not _is_recompute_enabled():
+                _get_computed_object_ids().add(obj_id)
+        return cast(str, self.__dict__["_object_id"])
 
     @property
     def children(self) -> dict[str, InflatableObject] | None:
         """Get all child objects as a dictionary or None if there are no children."""
         return None
+
+    @property
+    def is_dirty(self) -> bool:
+        """Check if the object is dirty after the last deflation.
+
+        An object is considered dirty if its content has changed since the last its
+        object ID was computed.
+        """
+        return True
 
 
 T = TypeVar("T", bound=InflatableObject)
@@ -104,12 +172,37 @@ def add_header_to_object_body(object_body: bytes, obj: InflatableObject) -> byte
 
 def _get_object_head(object_content: bytes) -> bytes:
     """Return object head from object content."""
-    return object_content.split(HEAD_BODY_DIVIDER, 1)[0]
+    index = object_content.find(HEAD_BODY_DIVIDER)
+    return object_content[:index]
 
 
 def _get_object_body(object_content: bytes) -> bytes:
     """Return object body from object content."""
-    return object_content.split(HEAD_BODY_DIVIDER, 1)[1]
+    index = object_content.find(HEAD_BODY_DIVIDER)
+    return object_content[index + len(HEAD_BODY_DIVIDER) :]
+
+
+def is_valid_sha256_hash(object_id: str) -> bool:
+    """Check if the given string is a valid SHA-256 hash.
+
+    Parameters
+    ----------
+    object_id : str
+        The string to check.
+
+    Returns
+    -------
+    bool
+        ``True`` if the string is a valid SHA-256 hash, ``False`` otherwise.
+    """
+    if len(object_id) != 64:
+        return False
+    try:
+        # If base 16 int conversion succeeds, it's a valid hexadecimal str
+        int(object_id, 16)
+        return True
+    except ValueError:
+        return False
 
 
 def get_object_type_from_object_content(object_content: bytes) -> str:
@@ -125,12 +218,6 @@ def get_object_children_ids_from_object_content(object_content: bytes) -> list[s
 def get_object_body_len_from_object_content(object_content: bytes) -> int:
     """Return length of the object body."""
     return get_object_head_values_from_object_content(object_content)[2]
-
-
-def check_body_len_consistency(object_content: bytes) -> bool:
-    """Check that the object body is of length as specified in the head."""
-    body_len = get_object_body_len_from_object_content(object_content)
-    return body_len == len(_get_object_body(object_content))
 
 
 def get_object_head_values_from_object_content(
@@ -155,3 +242,49 @@ def get_object_head_values_from_object_content(
     obj_type, children_str, body_len = head.split(HEAD_VALUE_DIVIDER)
     children_ids = children_str.split(",") if children_str else []
     return obj_type, children_ids, int(body_len)
+
+
+def get_descendant_object_ids(obj: InflatableObject) -> set[str]:
+    """Get a set of object IDs of all descendants."""
+    descendants = set(get_all_nested_objects(obj).keys())
+    # Exclude Object ID of parent object
+    descendants.discard(obj.object_id)
+    return descendants
+
+
+def get_all_nested_objects(obj: InflatableObject) -> dict[str, InflatableObject]:
+    """Get a dictionary of all nested objects, including the object itself.
+
+    Each key in the dictionary is an object ID, and the entries are ordered by post-
+    order traversal, i.e., child objects appear before their respective parents.
+    """
+    ret: dict[str, InflatableObject] = {}
+    if children := obj.children:
+        for child in children.values():
+            ret.update(get_all_nested_objects(child))
+
+    ret[obj.object_id] = obj
+
+    return ret
+
+
+def get_object_tree(obj: InflatableObject) -> ObjectTree:
+    """Get a tree representation of the InflatableObject."""
+    tree_children = []
+    if children := obj.children:
+        for child in children.values():
+            tree_children.append(get_object_tree(child))
+    return ObjectTree(object_id=obj.object_id, children=tree_children)
+
+
+def iterate_object_tree(
+    tree: ObjectTree,
+) -> Iterator[ObjectTree]:
+    """Iterate over the object tree and yield object IDs.
+
+    This function performs a post-order traversal of the tree, yielding the object ID of
+    each node after all its children have been yielded.
+    """
+    for child in tree.children:
+        yield from iterate_object_tree(child)
+    yield tree

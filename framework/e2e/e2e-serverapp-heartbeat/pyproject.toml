@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "e2e-serverapp-heartbeat"
+version = "1.0.0"
+description = "Test heartbeat for runs."
+license = "Apache-2.0"
+dependencies = ["flwr @ {root:parent:parent:uri}"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "e2e_serverapp_heartbeat.server_app:app"
+clientapp = "e2e_serverapp_heartbeat.client_app:app"
+
+[tool.flwr.app.config]
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
+
+[tool.flwr.federations.e2e]
+address = "127.0.0.1:9093"
+insecure = true

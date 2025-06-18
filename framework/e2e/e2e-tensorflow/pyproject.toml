@@ -11,6 +11,8 @@ dependencies = [
     "flwr[simulation] @ {root:parent:parent:uri}",
     "tensorflow-cpu>=2.9.1,!=2.11.1",
     "tensorflow-io-gcs-filesystem<0.35.0",
+    "datasets>=3.6.0",
+    "Pillow>=11.2.1",
 ]
 
 [tool.hatch.build.targets.wheel]

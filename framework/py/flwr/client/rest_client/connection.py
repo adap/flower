@@ -14,26 +14,40 @@
 # ==============================================================================
 """Contextmanager for a REST request-response channel to the Flower server."""
 
-
 from collections.abc import Iterator
 from contextlib import contextmanager
 from copy import copy
-from logging import ERROR, INFO, WARN
-from typing import Callable, Optional, TypeVar, Union
+from logging import DEBUG, ERROR, INFO, WARN
+from typing import Callable, Optional, TypeVar, Union, cast
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
+from flwr.app.metadata import Metadata
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.heartbeat import HeartbeatSender
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_object_tree,
+    no_object_id_recompute,
+)
+from flwr.common.inflatable_rest_utils import (
+    make_pull_object_fn_rest,
+    make_push_object_fn_rest,
+)
+from flwr.common.inflatable_utils import (
+    inflate_object_from_contents,
+    pull_objects,
+    push_objects,
+)
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message, remove_content_from_message
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
+from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -50,6 +64,14 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
@@ -63,9 +85,12 @@ PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
 PATH_PULL_MESSAGES: str = "/api/v0/fleet/pull-messages"
 PATH_PUSH_MESSAGES: str = "/api/v0/fleet/push-messages"
+PATH_PULL_OBJECT: str = "/api/v0/fleet/pull-object"
+PATH_PUSH_OBJECT: str = "/api/v0/fleet/push-object"
 PATH_SEND_NODE_HEARTBEAT: str = "api/v0/fleet/send-node-heartbeat"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
 PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
+PATH_CONFIRM_MESSAGE_RECEIVED: str = "/api/v0/fleet/confirm-message-received"
 
 T = TypeVar("T", bound=GrpcMessage)
 
@@ -86,10 +111,10 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
-        Optional[Callable[[], Optional[int]]],
-        Optional[Callable[[], None]],
-        Optional[Callable[[int], Run]],
-        Optional[Callable[[str, int], Fab]],
+        Callable[[], Optional[int]],
+        Callable[[], None],
+        Callable[[int], Run],
+        Callable[[str, int], Fab],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -295,14 +320,58 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         ):
             message_proto = None
 
-        # Return the Message if available
-        nonlocal metadata
-        message = None
-        if message_proto is not None:
-            message = message_from_proto(message_proto)
-            metadata = copy(message.metadata)
+        # Construct the Message
+        in_message: Optional[Message] = None
+
+        if message_proto:
             log(INFO, "[Node] POST /%s: success", PATH_PULL_MESSAGES)
-        return message
+            msg_id = message_proto.metadata.message_id
+            run_id = message_proto.metadata.run_id
+
+            def fn(request: PullObjectRequest) -> PullObjectResponse:
+                res = _request(
+                    req=request, res_type=PullObjectResponse, api_path=PATH_PULL_OBJECT
+                )
+                if res is None:
+                    raise ValueError("PushObjectResponse is None.")
+                return res
+
+            try:
+                all_object_contents = pull_objects(
+                    list(res.objects_to_pull[msg_id].object_ids) + [msg_id],
+                    pull_object_fn=make_pull_object_fn_rest(
+                        pull_object_rest=fn,
+                        node=node,
+                        run_id=run_id,
+                    ),
+                )
+
+                # Confirm that the message has been received
+                _request(
+                    req=ConfirmMessageReceivedRequest(
+                        node=node, run_id=run_id, message_object_id=msg_id
+                    ),
+                    res_type=ConfirmMessageReceivedResponse,
+                    api_path=PATH_CONFIRM_MESSAGE_RECEIVED,
+                )
+            except ValueError as e:
+                log(
+                    ERROR,
+                    "Pulling objects failed. Potential irrecoverable error: %s",
+                    str(e),
+                )
+            in_message = cast(
+                Message, inflate_object_from_contents(msg_id, all_object_contents)
+            )
+            # The deflated message doesn't contain the message_id (its own object_id)
+            # Inject
+            in_message.metadata.__dict__["_message_id"] = msg_id
+
+        # Remember `metadata` of the in message
+        nonlocal metadata
+        metadata = copy(in_message.metadata) if in_message else None
+
+        return in_message
 
     def send(message: Message) -> None:
         """Send Message result back to server."""
@@ -317,29 +386,72 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "No current message")
             return
 
+        # Set message_id
+        message.metadata.__dict__["_message_id"] = message.object_id
         # Validate out message
         if not validate_out_message(message, metadata):
             log(ERROR, "Invalid out message")
             return
+
+        with no_object_id_recompute():
+            # Get all nested objects
+            all_objects = get_all_nested_objects(message)
+            object_tree = get_object_tree(message)
+
+            # Serialize Message
+            message_proto = message_to_proto(
+                message=remove_content_from_message(message)
+            )
+            req = PushMessagesRequest(
+                node=node,
+                messages_list=[message_proto],
+                message_object_trees=[object_tree],
+            )
+
+            # Send the request
+            res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
+            if res:
+                log(
+                    INFO,
+                    "[Node] POST /%s: success, created result %s",
+                    PATH_PUSH_MESSAGES,
+                    res.results,  # pylint: disable=no-member
+                )
+
+            if res and res.objects_to_push:
+                objs_to_push = set(res.objects_to_push[message.object_id].object_ids)
+
+                def fn(request: PushObjectRequest) -> PushObjectResponse:
+                    res = _request(
+                        req=request,
+                        res_type=PushObjectResponse,
+                        api_path=PATH_PUSH_OBJECT,
+                    )
+                    if res is None:
+                        raise ValueError("PushObjectResponse is None.")
+                    return res
+
+                try:
+                    push_objects(
+                        all_objects,
+                        push_object_fn=make_push_object_fn_rest(
+                            push_object_rest=fn,
+                            node=node,
+                            run_id=message_proto.metadata.run_id,
+                        ),
+                        object_ids_to_push=objs_to_push,
+                    )
+                    log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
+                except ValueError as e:
+                    log(
+                        ERROR,
+                        "Pushing objects failed. Potential irrecoverable error: %s",
+                        str(e),
+                    )
+                    log(ERROR, str(e))
+
+        # Cleanup
         metadata = None
-
-        # Serialize ProtoBuf to bytes
-        message_proto = message_to_proto(message=message)
-
-        # Serialize ProtoBuf to bytes
-        req = PushMessagesRequest(node=node, messages_list=[message_proto])
-
-        # Send the request
-        res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
-        if res is None:
-            return
-
-        log(
-            INFO,
-            "[Node] POST /%s: success, created result %s",
-            PATH_PUSH_MESSAGES,
-            res.results,  # pylint: disable=no-member
-        )
 
     def get_run(run_id: int) -> Run:
         # Construct the request

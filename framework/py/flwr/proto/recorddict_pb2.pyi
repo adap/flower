@@ -197,23 +197,34 @@ global___ConfigRecordValue = ConfigRecordValue
 
 class ArrayRecord(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    DATA_KEYS_FIELD_NUMBER: builtins.int
-    DATA_VALUES_FIELD_NUMBER: builtins.int
+    class Item(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        @property
+        def value(self) -> global___Array: ...
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Optional[global___Array] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+    ITEMS_FIELD_NUMBER: builtins.int
     @property
-    def data_keys(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
-    @property
-    def data_values(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Array]: ...
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ArrayRecord.Item]: ...
     def __init__(self,
         *,
-        data_keys: typing.Optional[typing.Iterable[typing.Text]] = ...,
-        data_values: typing.Optional[typing.Iterable[global___Array]] = ...,
+        items: typing.Optional[typing.Iterable[global___ArrayRecord.Item]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["data_keys",b"data_keys","data_values",b"data_values"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items",b"items"]) -> None: ...
 global___ArrayRecord = ArrayRecord
 
 class MetricRecord(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    class DataEntry(google.protobuf.message.Message):
+    class Item(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
         KEY_FIELD_NUMBER: builtins.int
         VALUE_FIELD_NUMBER: builtins.int
@@ -228,19 +239,19 @@ class MetricRecord(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
-    DATA_FIELD_NUMBER: builtins.int
+    ITEMS_FIELD_NUMBER: builtins.int
     @property
-    def data(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___MetricRecordValue]: ...
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___MetricRecord.Item]: ...
     def __init__(self,
         *,
-        data: typing.Optional[typing.Mapping[typing.Text, global___MetricRecordValue]] = ...,
+        items: typing.Optional[typing.Iterable[global___MetricRecord.Item]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["data",b"data"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items",b"items"]) -> None: ...
 global___MetricRecord = MetricRecord
 
 class ConfigRecord(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    class DataEntry(google.protobuf.message.Message):
+    class Item(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
         KEY_FIELD_NUMBER: builtins.int
         VALUE_FIELD_NUMBER: builtins.int
@@ -255,77 +266,48 @@ class ConfigRecord(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
-    DATA_FIELD_NUMBER: builtins.int
+    ITEMS_FIELD_NUMBER: builtins.int
     @property
-    def data(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___ConfigRecordValue]: ...
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ConfigRecord.Item]: ...
     def __init__(self,
         *,
-        data: typing.Optional[typing.Mapping[typing.Text, global___ConfigRecordValue]] = ...,
+        items: typing.Optional[typing.Iterable[global___ConfigRecord.Item]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["data",b"data"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items",b"items"]) -> None: ...
 global___ConfigRecord = ConfigRecord
 
 class RecordDict(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    class ArraysEntry(google.protobuf.message.Message):
+    class Item(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
         KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
+        ARRAY_RECORD_FIELD_NUMBER: builtins.int
+        METRIC_RECORD_FIELD_NUMBER: builtins.int
+        CONFIG_RECORD_FIELD_NUMBER: builtins.int
         key: typing.Text
         @property
-        def value(self) -> global___ArrayRecord: ...
+        def array_record(self) -> global___ArrayRecord: ...
+        @property
+        def metric_record(self) -> global___MetricRecord: ...
+        @property
+        def config_record(self) -> global___ConfigRecord: ...
         def __init__(self,
             *,
             key: typing.Text = ...,
-            value: typing.Optional[global___ArrayRecord] = ...,
+            array_record: typing.Optional[global___ArrayRecord] = ...,
+            metric_record: typing.Optional[global___MetricRecord] = ...,
+            config_record: typing.Optional[global___ConfigRecord] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["array_record",b"array_record","config_record",b"config_record","metric_record",b"metric_record","value",b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["array_record",b"array_record","config_record",b"config_record","key",b"key","metric_record",b"metric_record","value",b"value"]) -> None: ...
+        def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["array_record","metric_record","config_record"]]: ...
 
-    class MetricsEntry(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
-        key: typing.Text
-        @property
-        def value(self) -> global___MetricRecord: ...
-        def __init__(self,
-            *,
-            key: typing.Text = ...,
-            value: typing.Optional[global___MetricRecord] = ...,
-            ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
-
-    class ConfigsEntry(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
-        key: typing.Text
-        @property
-        def value(self) -> global___ConfigRecord: ...
-        def __init__(self,
-            *,
-            key: typing.Text = ...,
-            value: typing.Optional[global___ConfigRecord] = ...,
-            ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
-
-    ARRAYS_FIELD_NUMBER: builtins.int
-    METRICS_FIELD_NUMBER: builtins.int
-    CONFIGS_FIELD_NUMBER: builtins.int
+    ITEMS_FIELD_NUMBER: builtins.int
     @property
-    def arrays(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___ArrayRecord]: ...
-    @property
-    def metrics(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___MetricRecord]: ...
-    @property
-    def configs(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___ConfigRecord]: ...
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___RecordDict.Item]: ...
     def __init__(self,
         *,
-        arrays: typing.Optional[typing.Mapping[typing.Text, global___ArrayRecord]] = ...,
-        metrics: typing.Optional[typing.Mapping[typing.Text, global___MetricRecord]] = ...,
-        configs: typing.Optional[typing.Mapping[typing.Text, global___ConfigRecord]] = ...,
+        items: typing.Optional[typing.Iterable[global___RecordDict.Item]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["arrays",b"arrays","configs",b"configs","metrics",b"metrics"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items",b"items"]) -> None: ...
 global___RecordDict = RecordDict

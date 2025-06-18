@@ -29,7 +29,7 @@ from flwr.common.dummy_grpc_handlers_test import (
     get_noop_unary_stream_handler,
     get_noop_unary_unary_handler,
 )
-from flwr.common.typing import UserInfo
+from flwr.common.typing import AccountInfo
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetLoginDetailsRequest,
@@ -40,7 +40,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.superexec.exec_user_auth_interceptor import (
     ExecUserAuthInterceptor,
-    shared_user_info,
+    shared_account_info,
 )
 
 
@@ -49,14 +49,16 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
-        # Set a known default for shared_user_info and store the token.
-        self.default_user_info = UserInfo(user_id=None, user_name=None)
-        self.token = shared_user_info.set(self.default_user_info)
-        self.expected_user_info = UserInfo(user_id="user_id", user_name="user_name")
+        # Set a known default for shared_account_info and store the token.
+        self.default_account_info = AccountInfo(flwr_aid=None, account_name=None)
+        self.token = shared_account_info.set(self.default_account_info)
+        self.expected_account_info = AccountInfo(
+            flwr_aid="flwr_aid", account_name="account_name"
+        )
 
     def tearDown(self) -> None:
-        """Reset shared_user_info to its previous state to prevent state leakage."""
-        shared_user_info.reset(self.token)
+        """Reset shared_account_info to its previous state to prevent state leakage."""
+        shared_account_info.reset(self.token)
 
     @parameterized.expand(
         [
@@ -73,11 +75,18 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         dummy_request = request
         dummy_context = MagicMock()
         dummy_auth_plugin = MagicMock()
+        dummy_authz_plugin = MagicMock()
         handler_call_details = MagicMock()
 
         # Set up validate_tokens_in_metadata to return a tuple indicating invalid tokens
         dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
-        interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
+        # Set up validate user authorization to return True. The return value is
+        # irrelevant because no user authentication is required for requests of type
+        # GetLoginDetailsRequest and GetAuthTokensRequest.
+        dummy_authz_plugin.verify_user_authorization.return_value = True
+        interceptor = ExecUserAuthInterceptor(
+            auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
+        )
         intercepted_handler = interceptor.intercept_service(
             get_noop_unary_unary_handler, handler_call_details
         )
@@ -87,10 +96,10 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
 
         # Assert response is as expected
         self.assertEqual(response, "dummy_response")
-        # Assert `shared_user_info` is not set
-        user_info_from_context = shared_user_info.get()
-        self.assertIsNone(user_info_from_context.user_id)
-        self.assertIsNone(user_info_from_context.user_name)
+        # Assert `shared_account_info` is not set
+        account_info_from_context = shared_account_info.get()
+        self.assertIsNone(account_info_from_context.flwr_aid)
+        self.assertIsNone(account_info_from_context.account_name)
 
     @parameterized.expand(
         [
@@ -109,12 +118,19 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         dummy_request = request
         dummy_context = MagicMock()
         dummy_auth_plugin = MagicMock()
+        dummy_authz_plugin = MagicMock()
         handler_call_details = MagicMock()
 
         # Set up validate_tokens_in_metadata to return a tuple indicating invalid tokens
         dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
-        dummy_auth_plugin.refresh_tokens.return_value = None
-        interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
+        dummy_auth_plugin.refresh_tokens.return_value = (None, None)
+        # Set up verify user authorization to return True. The return value is
+        # irrelevant because the authentication will fail and the authorization
+        # plugin will not be called.
+        dummy_authz_plugin.verify_user_authorization.return_value = True
+        interceptor = ExecUserAuthInterceptor(
+            auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
+        )
         continuation: Union[
             Callable[[Any], NoOpUnaryUnaryHandler],
             Callable[[Any], NoOpUnaryStreamHandler],
@@ -151,14 +167,21 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         dummy_request = request
         dummy_context = MagicMock()
         dummy_auth_plugin = MagicMock()
+        dummy_authz_plugin = MagicMock()
         handler_call_details = MagicMock()
 
         # Set up validate_tokens_in_metadata to return a tuple indicating valid tokens
         dummy_auth_plugin.validate_tokens_in_metadata.return_value = (
             True,
-            self.expected_user_info,
+            self.expected_account_info,
         )
-        interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
+        # Set up verify user authorization to return True. The return value must be True
+        # because the authorization plugin is expected to be called after a successful
+        # token validation.
+        dummy_authz_plugin.verify_user_authorization.return_value = True
+        interceptor = ExecUserAuthInterceptor(
+            auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
+        )
         continuation: Union[
             Callable[[Any], NoOpUnaryUnaryHandler],
             Callable[[Any], NoOpUnaryStreamHandler],
@@ -180,13 +203,14 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
             # Assert response is as expected
             self.assertEqual(response, "dummy_response")
 
-        # Assert `shared_user_info` is set
-        user_info_from_context = shared_user_info.get()
+        # Assert `shared_account_info` is set
+        account_info_from_context = shared_account_info.get()
         self.assertEqual(
-            user_info_from_context.user_id, self.expected_user_info.user_id
+            account_info_from_context.flwr_aid, self.expected_account_info.flwr_aid
         )
         self.assertEqual(
-            user_info_from_context.user_name, self.expected_user_info.user_name
+            account_info_from_context.account_name,
+            self.expected_account_info.account_name,
         )
 
     @parameterized.expand(
@@ -206,15 +230,25 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         dummy_request = request
         dummy_context = MagicMock()
         dummy_auth_plugin = MagicMock()
+        dummy_authz_plugin = MagicMock()
         handler_call_details = MagicMock()
 
         # Set up validate_tokens_in_metadata to return a tuple indicating invalid tokens
         dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
         # Set up refresh tokens
         expected_refresh_tokens_value = [("new-token", "value")]
-        dummy_auth_plugin.refresh_tokens.return_value = expected_refresh_tokens_value
+        dummy_auth_plugin.refresh_tokens.return_value = (
+            expected_refresh_tokens_value,
+            self.default_account_info,
+        )
+        # Set up verify user authorization to return True. The return value must be True
+        # because the authorization plugin is expected to be called after a successful
+        # token refresh.
+        dummy_authz_plugin.verify_user_authorization.return_value = True
 
-        interceptor = ExecUserAuthInterceptor(auth_plugin=dummy_auth_plugin)
+        interceptor = ExecUserAuthInterceptor(
+            auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
+        )
         continuation: Union[
             Callable[[Any], NoOpUnaryUnaryHandler],
             Callable[[Any], NoOpUnaryStreamHandler],
@@ -241,4 +275,122 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         # Assert refresh tokens were sent in initial metadata
         dummy_context.send_initial_metadata.assert_called_once_with(
             expected_refresh_tokens_value
+        )
+
+
+class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
+    """Test the ExecUserAuthInterceptor authorization logic."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        # Reset the shared AccountInfo before each test
+        self.default_token = shared_account_info.set(
+            AccountInfo(flwr_aid=None, account_name=None)
+        )
+        self.expected_account_info = AccountInfo(
+            flwr_aid="flwr_aid", account_name="account_name"
+        )
+
+        # A dummy authorization plugin
+        self.authz_plugin = MagicMock()
+
+        # A dummy authentication plugin that always validates tokens
+        self.auth_plugin = MagicMock()
+        self.auth_plugin.validate_tokens_in_metadata.return_value = (
+            True,
+            self.expected_account_info,
+        )
+
+    def tearDown(self) -> None:
+        """Reset shared_account_info."""
+        shared_account_info.reset(self.default_token)
+
+    @parameterized.expand(
+        [
+            (ListRunsRequest()),
+            (StartRunRequest()),
+            (StopRunRequest()),
+            (StreamLogsRequest()),
+        ]
+    )  # type: ignore
+    def test_authorization_successful(self, request: GrpcMessage) -> None:
+        """Test RPC calls successful when authorization is approved.
+
+        When AuthZ plugin approves, the RPC calls should succeed.
+        """
+        dummy_context = MagicMock()
+        handler_call_details = MagicMock()
+
+        # Authorization approves
+        self.authz_plugin.verify_user_authorization.return_value = True
+
+        interceptor = ExecUserAuthInterceptor(
+            auth_plugin=self.auth_plugin, authz_plugin=self.authz_plugin
+        )
+
+        # Pick correct continuation for unary vs stream
+        continuation: Union[
+            Callable[[Any], NoOpUnaryUnaryHandler],
+            Callable[[Any], NoOpUnaryStreamHandler],
+        ] = get_noop_unary_unary_handler
+        if isinstance(request, StreamLogsRequest):
+            continuation = get_noop_unary_stream_handler
+
+        intercepted = interceptor.intercept_service(continuation, handler_call_details)
+
+        # Execute & Assert
+        if isinstance(request, StreamLogsRequest):
+            result = list(intercepted.unary_stream(request, dummy_context))
+            self.assertEqual(result, ["stream response 1", "stream response 2"])
+        else:
+            result = intercepted.unary_unary(request, dummy_context)
+            self.assertEqual(result, "dummy_response")
+        # Authz plugin should have been called once
+        self.authz_plugin.verify_user_authorization.assert_called_once_with(
+            self.expected_account_info
+        )
+
+    @parameterized.expand(
+        [
+            (ListRunsRequest()),
+            (StartRunRequest()),
+            (StopRunRequest()),
+            (StreamLogsRequest()),
+        ]
+    )  # type: ignore
+    def test_authorization_failure(self, request: GrpcMessage) -> None:
+        """Test RPC calls not successful when authorization fails.
+
+        When AuthZ plugin denies, the calls should be aborted with PERMISSION_DENIED.
+        """
+        dummy_context = MagicMock()
+        handler_call_details = MagicMock()
+
+        # Authorization denies
+        self.authz_plugin.verify_user_authorization.return_value = False
+
+        interceptor = ExecUserAuthInterceptor(
+            auth_plugin=self.auth_plugin, authz_plugin=self.authz_plugin
+        )
+
+        continuation: Union[
+            Callable[[Any], NoOpUnaryUnaryHandler],
+            Callable[[Any], NoOpUnaryStreamHandler],
+        ] = get_noop_unary_unary_handler
+        if isinstance(request, StreamLogsRequest):
+            continuation = get_noop_unary_stream_handler
+
+        intercepted = interceptor.intercept_service(continuation, handler_call_details)
+
+        # Execute & Assert
+        if isinstance(request, StreamLogsRequest):
+            with self.assertRaises(grpc.RpcError):
+                _ = intercepted.unary_stream(request, dummy_context)
+        else:
+            with self.assertRaises(grpc.RpcError):
+                _ = intercepted.unary_unary(request, dummy_context)
+
+        # Ensure abort was called with PERMISSION_DENIED
+        dummy_context.abort.assert_called_once_with(
+            grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
         )
