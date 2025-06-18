@@ -40,7 +40,7 @@ from flwr.supernode.runtime.run_clientapp import (
     push_clientappoutputs,
 )
 
-from .clientappio_servicer import ClientAppInputs, ClientAppIoServicer, ClientAppOutputs
+from .clientappio_servicer import ClientAppIoServicer, ClientAppOutputs
 
 
 class TestClientAppIoServicer(unittest.TestCase):
@@ -51,69 +51,6 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.servicer = ClientAppIoServicer(Mock(), Mock(), Mock())
         self.maker = RecordMaker()
         self.mock_stub = Mock()
-
-    def test_set_inputs(self) -> None:
-        """Test setting ClientApp inputs."""
-        # Prepare
-        message = make_message(
-            metadata=self.maker.metadata(),
-            content=self.maker.recorddict(2, 2, 1),
-        )
-        context = Context(
-            run_id=1,
-            node_id=1,
-            node_config={"nodeconfig1": 4.2},
-            state=self.maker.recorddict(2, 2, 1),
-            run_config={"runconfig1": 6.1},
-        )
-        run = typing.Run(
-            run_id=1,
-            fab_id="lorem",
-            fab_version="ipsum",
-            fab_hash="dolor",
-            override_config=self.maker.user_config(),
-            pending_at="2021-01-01T00:00:00Z",
-            starting_at="",
-            running_at="",
-            finished_at="",
-            status=typing.RunStatus(status="pending", sub_status="", details=""),
-            flwr_aid="user123",
-        )
-        fab = typing.Fab(
-            hash_str="abc123#$%",
-            content=b"\xf3\xf5\xf8\x98",
-        )
-
-        client_input = ClientAppInputs(message, context, run, fab)
-        client_output = ClientAppOutputs(message, context)
-
-        # Execute and assert
-        # - when ClientAppInputs is not None, ClientAppOutputs is None
-        with self.assertRaises(ValueError):
-            self.servicer.clientapp_input = client_input
-            self.servicer.clientapp_output = None
-            self.servicer.set_inputs(client_input)
-
-        # Execute and assert
-        # - when ClientAppInputs is None, ClientAppOutputs is not None
-        with self.assertRaises(ValueError):
-            self.servicer.clientapp_input = None
-            self.servicer.clientapp_output = client_output
-            self.servicer.set_inputs(client_input)
-
-        # Execute and assert
-        # - when ClientAppInputs and ClientAppOutputs is not None
-        with self.assertRaises(ValueError):
-            self.servicer.clientapp_input = client_input
-            self.servicer.clientapp_output = client_output
-            self.servicer.set_inputs(client_input)
-
-        # Execute and assert
-        # - when ClientAppInputs is set at .clientapp_input
-        self.servicer.clientapp_input = None
-        self.servicer.clientapp_output = None
-        self.servicer.set_inputs(client_input)
-        assert client_input == self.servicer.clientapp_input
 
     def test_get_outputs(self) -> None:
         """Test getting ClientApp outputs."""

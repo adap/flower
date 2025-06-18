@@ -22,7 +22,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional, Union, cast
+from typing import Callable, Optional, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -53,7 +53,7 @@ from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
-from flwr.supernode.servicer.clientappio import ClientAppInputs, ClientAppIoServicer
+from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
@@ -185,12 +185,6 @@ def start_client_internal(
                 continue
 
             try:
-                # Retrieve message, context, run and fab for this run
-                message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
-                context = cast(Context, state.get_context(run_id))
-                run = cast(Run, state.get_run(run_id))
-                fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0])  # type: ignore
-
                 # Two isolation modes:
                 # 1. `subprocess`: SuperNode is starting the ClientApp
                 #    process as a subprocess.
@@ -200,16 +194,6 @@ def start_client_internal(
 
                 # Mode 1: SuperNode starts ClientApp as subprocess
                 start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
-
-                # Share Message and Context with servicer
-                clientappio_servicer.set_inputs(
-                    clientapp_input=ClientAppInputs(
-                        message=message,
-                        context=context,
-                        run=run,
-                        fab=fab,
-                    ),
-                )
 
                 if start_subprocess:
                     _octet, _colon, _port = clientappio_api_address.rpartition(":")
@@ -226,6 +210,7 @@ def start_client_internal(
                         "--parent-pid",
                         str(os.getpid()),
                         "--insecure",
+                        "--run-once",
                     ]
                     subprocess.run(command, check=False)
                 else:
@@ -245,8 +230,8 @@ def start_client_internal(
                 # Delete messages from the state
                 state.delete_messages(
                     message_ids=[
-                        message.metadata.message_id,
-                        message.metadata.reply_to_message_id,
+                        reply_message.metadata.message_id,
+                        reply_message.metadata.reply_to_message_id,
                     ]
                 )
 

@@ -88,7 +88,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.clientapp_input: Optional[ClientAppInputs] = None
         self.clientapp_output: Optional[ClientAppOutputs] = None
         self.token_returned: bool = False
-        self.inputs_returned: bool = False
 
     def GetRunIdsWithPendingMessages(
         self,
@@ -160,8 +159,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Pull Message, Context, and Run."""
         log(DEBUG, "ClientAppIo.PullClientAppInputs")
 
-        # Initialize state connection
+        # Initialize state and ffs connection
         state = self.state_factory.state()
+        ffs = self.ffs_factory.ffs()
 
         # Validate the token
         run_id = state.get_run_id_by_token(request.token)
@@ -170,22 +170,19 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 grpc.StatusCode.PERMISSION_DENIED,
                 "Invalid token.",
             )
+            raise RuntimeError("This line should never be reached.")
 
-        # Fail if no ClientAppInputs are available
-        if self.clientapp_input is None:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "No inputs available.",
-            )
-        clientapp_input = cast(ClientAppInputs, self.clientapp_input)
+        # Retrieve message, context, run and fab for this run
+        message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
+        context = cast(Context, state.get_context(run_id))
+        run = cast(Run, state.get_run(run_id))
+        fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0])  # type: ignore
 
-        # Success
-        self.inputs_returned = True
         return PullClientAppInputsResponse(
-            message=message_to_proto(clientapp_input.message),
-            context=context_to_proto(clientapp_input.context),
-            run=run_to_proto(clientapp_input.run),
-            fab=fab_to_proto(clientapp_input.fab) if clientapp_input.fab else None,
+            message=message_to_proto(message),
+            context=context_to_proto(context),
+            run=run_to_proto(run),
+            fab=fab_to_proto(fab),
         )
 
     def PushClientAppOutputs(
@@ -204,21 +201,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 grpc.StatusCode.PERMISSION_DENIED,
                 "Invalid token.",
             )
+            raise RuntimeError("This line should never be reached.")
 
-        # Fail if no ClientAppInputs are available
-        if not self.clientapp_input:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "No inputs available.",
-            )
-
-        # Fail if inputs weren't delivered in a previous call
-        if not self.inputs_returned:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "Inputs haven't been delivered."
-                "Inputs must be delivered before can be returned only once.",
-            )
+        # Delete the token
+        state.delete_token(run_id)
 
         # Preconditions met
         try:
@@ -240,21 +226,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         proto_status = clientappstatus_to_proto(status=status)
         return PushClientAppOutputsResponse(status=proto_status)
 
-    def set_inputs(self, clientapp_input: ClientAppInputs) -> None:
-        """Set ClientApp inputs.
-
-        Parameters
-        ----------
-        clientapp_input : ClientAppInputs
-            The inputs to the ClientApp.
-        """
-        if self.clientapp_input is not None or self.clientapp_output is not None:
-            raise ValueError(
-                "ClientAppInputs and ClientAppOutputs must not be set before "
-                "calling `set_inputs`."
-            )
-        self.clientapp_input = clientapp_input
-
     def has_outputs(self) -> bool:
         """Check if ClientAppOutputs are available."""
         return self.clientapp_output is not None
@@ -266,8 +237,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
 
         # Set outputs to a local variable and clear state
         output: ClientAppOutputs = self.clientapp_output
-        self.clientapp_input = None
         self.clientapp_output = None
-        self.inputs_returned = False
 
         return output
