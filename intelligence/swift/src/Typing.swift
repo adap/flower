@@ -21,8 +21,15 @@ public struct Progress: Codable {
   public let description: String?
 }
 
+enum Role: String, Codable, Sendable, CaseIterable {
+  case user
+  case system
+  case assistant
+}
+
 /// Represents a message in a chat session.
 public struct Message: Codable, Sendable {
+  private let _role: Role
   /// The role of the sender (e.g., "user", "system", "assistant").
   public let role: String
 
@@ -32,10 +39,47 @@ public struct Message: Codable, Sendable {
   /// An optional list of calls to specific tools
   public let toolCalls: [ToolCall]?
 
-  public init(role: String, content: String, toolCalls: [ToolCall]? = nil) {
+  enum CodingKeys: String, CodingKey {
+    case role, content, toolCalls
+  }
+
+  public init(role: String, content: String, toolCalls: [ToolCall]? = nil) throws {
+    guard let parsed = Role(rawValue: role) else {
+      let validRoles = Role.allCases.map(\.rawValue).joined(separator: ", ")
+      throw Failure(
+        code: .invalidArgumentsError,
+        message: "Invalid message role: \(role). Available roles are: \(validRoles)."
+      )
+    }
+    self._role = parsed
     self.role = role
     self.content = content
     self.toolCalls = toolCalls
+  }
+
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let roleString = try container.decode(String.self, forKey: .role)
+
+    guard let parsed = Role(rawValue: roleString) else {
+      let validRoles = Role.allCases.map(\.rawValue).joined(separator: ", ")
+      throw Failure(
+        code: .invalidArgumentsError,
+        message: "Invalid message role: \(roleString). Available roles are: \(validRoles)."
+      )
+    }
+
+    self._role = parsed
+    self.role = roleString
+    self.content = try container.decode(String.self, forKey: .content)
+    self.toolCalls = try container.decodeIfPresent([ToolCall].self, forKey: .toolCalls)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(role, forKey: .role)
+    try container.encode(content, forKey: .content)
+    try container.encodeIfPresent(toolCalls, forKey: .toolCalls)
   }
 }
 
