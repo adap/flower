@@ -69,7 +69,7 @@ class RemoteEngine: RemoteEngineProtocol {
           accumulatedResponse += deltaContent
         }
       }
-      return Message(
+      return try Message(
         role: "assistant",
         content: accumulatedResponse
       )
@@ -82,7 +82,7 @@ class RemoteEngine: RemoteEngineProtocol {
     guard let message = response.choices.first?.message else {
       throw Failure(code: .remoteError, message: "No message found in response")
     }
-    return Message(
+    return try Message(
       role: message.role,
       content: message.content ?? "",
       toolCalls: message.toolCalls
