@@ -132,15 +132,19 @@ def start_client_internal(
     if insecure is None:
         insecure = root_certificates is None
 
-    _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
-        address=clientappio_api_address,
-        certificates=None,
-    )
-
     # Initialize factories
     state_factory = NodeStateFactory()
     ffs_factory = FfsFactory(get_flwr_dir(flwr_path) / "supernode" / "ffs")  # type: ignore
     object_store_factory = ObjectStoreFactory()
+
+    # Launch ClientAppIo API server
+    _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
+        address=clientappio_api_address,
+        state_factory=state_factory,
+        ffs_factory=ffs_factory,
+        objectstore_factory=object_store_factory,
+        certificates=None,
+    )
 
     # Initialize NodeState, Ffs, and ObjectStore
     state = state_factory.state()
@@ -472,10 +476,17 @@ def _make_fleet_connection_retry_invoker(
 
 def run_clientappio_api_grpc(
     address: str,
+    state_factory: NodeStateFactory,
+    ffs_factory: FfsFactory,
+    objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> tuple[grpc.Server, ClientAppIoServicer]:
     """Run ClientAppIo API gRPC server."""
-    clientappio_servicer: grpc.Server = ClientAppIoServicer()
+    clientappio_servicer: grpc.Server = ClientAppIoServicer(
+        state_factory=state_factory,
+        ffs_factory=ffs_factory,
+        objectstore_factory=objectstore_factory,
+    )
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
     clientappio_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(

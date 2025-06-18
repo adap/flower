@@ -52,7 +52,7 @@ class TestClientAppIoServicer(unittest.TestCase):
 
     def setUp(self) -> None:
         """Initialize."""
-        self.servicer = ClientAppIoServicer()
+        self.servicer = ClientAppIoServicer(Mock(), Mock(), Mock())
         self.maker = RecordMaker()
         self.mock_stub = Mock()
 

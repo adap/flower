@@ -22,17 +22,33 @@ import "flwr/proto/run.proto";
 import "flwr/proto/message.proto";
 
 service ClientAppIo {
+
+  // Get run IDs with pending messages
+  rpc GetRunIdsWithPendingMessages(GetRunIdsWithPendingMessagesRequest)
+      returns (GetRunIdsWithPendingMessagesResponse) {}
+
+  // Request token
+  rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
+
   // Get token
   rpc GetToken(GetTokenRequest) returns (GetTokenResponse) {}
 
-  // Get Message, Context, and Run
+  // Pull client app inputs
   rpc PullClientAppInputs(PullClientAppInputsRequest)
       returns (PullClientAppInputsResponse) {}
 
-  // Send updated Message and Context
+  // Push client app outputs
   rpc PushClientAppOutputs(PushClientAppOutputsRequest)
       returns (PushClientAppOutputsResponse) {}
 }
+
+message GetRunIdsWithPendingMessagesRequest {}
+message GetRunIdsWithPendingMessagesResponse {
+  repeated uint64 run_ids = 1; // List of run IDs
+}
+
+message RequestTokenRequest { uint64 run_id = 1; }
+message RequestTokenResponse { string token = 1; }
 
 enum ClientAppOutputCode {
   SUCCESS = 0;
