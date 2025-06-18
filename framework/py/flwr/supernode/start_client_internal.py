@@ -21,7 +21,6 @@ import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import INFO, WARN
-from os import urandom
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -39,7 +38,6 @@ from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_SUBPROCESS,
     MAX_RETRY_DELAY,
-    RUN_ID_NUM_BYTES,
     SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -200,9 +198,6 @@ def start_client_internal(
                 #    (via `flwr-clientapp`), for example, in a separate
                 #    Docker container.
 
-                # Generate SuperNode token
-                token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
-
                 # Mode 1: SuperNode starts ClientApp as subprocess
                 start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
 
@@ -213,9 +208,7 @@ def start_client_internal(
                         context=context,
                         run=run,
                         fab=fab,
-                        token=token,
                     ),
-                    token_returned=start_subprocess,
                 )
 
                 if start_subprocess:
@@ -230,8 +223,6 @@ def start_client_internal(
                         "flwr-clientapp",
                         "--clientappio-api-address",
                         io_address,
-                        "--token",
-                        str(token),
                         "--parent-pid",
                         str(os.getpid()),
                         "--insecure",

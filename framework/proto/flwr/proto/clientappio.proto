@@ -63,7 +63,7 @@ message ClientAppOutputStatus {
 message GetTokenRequest {}
 message GetTokenResponse { uint64 token = 1; }
 
-message PullClientAppInputsRequest { uint64 token = 1; }
+message PullClientAppInputsRequest { string token = 1; }
 message PullClientAppInputsResponse {
   Message message = 1;
   Context context = 2;
@@ -72,7 +72,7 @@ message PullClientAppInputsResponse {
 }
 
 message PushClientAppOutputsRequest {
-  uint64 token = 1;
+  string token = 1;
   Message message = 2;
   Context context = 3;
 }

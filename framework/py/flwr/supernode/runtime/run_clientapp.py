@@ -46,12 +46,14 @@ from flwr.common.typing import Fab, Run
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
-    GetTokenRequest,
-    GetTokenResponse,
+    GetRunIdsWithPendingMessagesRequest,
+    GetRunIdsWithPendingMessagesResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
+    RequestTokenRequest,
+    RequestTokenResponse,
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 
@@ -59,7 +61,7 @@ from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     clientappio_api_address: str,
     run_once: bool,
-    token: Optional[int] = None,
+    token: Optional[str] = None,
     flwr_dir: Optional[str] = None,
     certificates: Optional[bytes] = None,
     parent_pid: Optional[int] = None,
@@ -84,9 +86,8 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
 
         while True:
             # If token is not set, loop until token is received from SuperNode
-            while token is None:
+            if token is None:
                 token = get_token(stub)
-                time.sleep(1)
 
             # Pull Message, Context, Run and (optional) FAB from SuperNode
             message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
@@ -172,23 +173,26 @@ def start_parent_process_monitor(
     threading.Thread(target=monitor, daemon=True).start()
 
 
-def get_token(stub: grpc.Channel) -> Optional[int]:
+def get_token(stub: ClientAppIoStub) -> str:
     """Get a token from SuperNode."""
     log(DEBUG, "[flwr-clientapp] Request token")
-    try:
-        res: GetTokenResponse = stub.GetToken(GetTokenRequest())
-        log(DEBUG, "[GetToken] Received token: %s", res.token)
-        return res.token
-    except grpc.RpcError as e:
-        if e.code() == grpc.StatusCode.FAILED_PRECONDITION:  # pylint: disable=no-member
-            log(DEBUG, "[GetToken] No token available yet")
-        else:
-            log(ERROR, "[GetToken] gRPC error occurred: %s", str(e))
-        return None
+    while True:
+        res: GetRunIdsWithPendingMessagesResponse = stub.GetRunIdsWithPendingMessages(
+            GetRunIdsWithPendingMessagesRequest()
+        )
+
+        for run_id in res.run_ids:
+            tk_res: RequestTokenResponse = stub.RequestToken(
+                RequestTokenRequest(run_id=run_id)
+            )
+            if tk_res.token:
+                return tk_res.token
+
+        time.sleep(1)  # Wait before retrying to get run IDs
 
 
 def pull_clientappinputs(
-    stub: grpc.Channel, token: int
+    stub: ClientAppIoStub, token: str
 ) -> tuple[Message, Context, Run, Optional[Fab]]:
     """Pull ClientAppInputs from SuperNode."""
     log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", token)
@@ -207,7 +211,7 @@ def pull_clientappinputs(
 
 
 def push_clientappoutputs(
-    stub: grpc.Channel, token: int, message: Message, context: Context
+    stub: ClientAppIoStub, token: str, message: Message, context: Context
 ) -> PushClientAppOutputsResponse:
     """Push ClientAppOutputs to SuperNode."""
     log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", token)

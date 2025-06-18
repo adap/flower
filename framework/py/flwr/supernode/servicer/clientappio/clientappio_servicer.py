@@ -61,7 +61,6 @@ class ClientAppInputs:
     context: Context
     run: Run
     fab: Optional[Fab]
-    token: int
 
 
 @dataclass
@@ -140,7 +139,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 grpc.StatusCode.FAILED_PRECONDITION,
                 "No inputs available.",
             )
-        clientapp_input = cast(ClientAppInputs, self.clientapp_input)
 
         # Fail if token was already returned in a previous call
         if self.token_returned:
@@ -154,13 +152,24 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # - token hasn't been returned before,
         # return token
         self.token_returned = True
-        return GetTokenResponse(token=clientapp_input.token)
+        return GetTokenResponse(token=123)  # To be deleted
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
     ) -> PullClientAppInputsResponse:
         """Pull Message, Context, and Run."""
         log(DEBUG, "ClientAppIo.PullClientAppInputs")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Validate the token
+        run_id = state.get_run_id_by_token(request.token)
+        if run_id is None or not state.verify_token(run_id, request.token):
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token.",
+            )
 
         # Fail if no ClientAppInputs are available
         if self.clientapp_input is None:
@@ -169,21 +178,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 "No inputs available.",
             )
         clientapp_input = cast(ClientAppInputs, self.clientapp_input)
-
-        # Fail if token wasn't returned in a previous call
-        if not self.token_returned:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "Token hasn't been returned."
-                "Token must be returned before can be returned only once.",
-            )
-
-        # Fail if token isn't matching
-        if request.token != clientapp_input.token:
-            context.abort(
-                grpc.StatusCode.INVALID_ARGUMENT,
-                "Mismatch between ClientApp and SuperNode token",
-            )
 
         # Success
         self.inputs_returned = True
@@ -200,20 +194,22 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Push Message and Context."""
         log(DEBUG, "ClientAppIo.PushClientAppOutputs")
 
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Validate the token
+        run_id = state.get_run_id_by_token(request.token)
+        if run_id is None or not state.verify_token(run_id, request.token):
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token.",
+            )
+
         # Fail if no ClientAppInputs are available
         if not self.clientapp_input:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 "No inputs available.",
-            )
-        clientapp_input = cast(ClientAppInputs, self.clientapp_input)
-
-        # Fail if token wasn't returned in a previous call
-        if not self.token_returned:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "Token hasn't been returned."
-                "Token must be returned before can be returned only once.",
             )
 
         # Fail if inputs weren't delivered in a previous call
@@ -222,13 +218,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 grpc.StatusCode.FAILED_PRECONDITION,
                 "Inputs haven't been delivered."
                 "Inputs must be delivered before can be returned only once.",
-            )
-
-        # Fail if token isn't matching
-        if request.token != clientapp_input.token:
-            context.abort(
-                grpc.StatusCode.INVALID_ARGUMENT,
-                "Mismatch between ClientApp and SuperNode token",
             )
 
         # Preconditions met
@@ -251,32 +240,20 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         proto_status = clientappstatus_to_proto(status=status)
         return PushClientAppOutputsResponse(status=proto_status)
 
-    def set_inputs(
-        self, clientapp_input: ClientAppInputs, token_returned: bool
-    ) -> None:
+    def set_inputs(self, clientapp_input: ClientAppInputs) -> None:
         """Set ClientApp inputs.
 
         Parameters
         ----------
         clientapp_input : ClientAppInputs
             The inputs to the ClientApp.
-        token_returned : bool
-            A boolean indicating if the token has been returned.
-            Set to `True` when passing the token to `flwr-clientap`
-            and `False` otherwise.
         """
-        if (
-            self.clientapp_input is not None
-            or self.clientapp_output is not None
-            or self.token_returned
-        ):
+        if self.clientapp_input is not None or self.clientapp_output is not None:
             raise ValueError(
                 "ClientAppInputs and ClientAppOutputs must not be set before "
                 "calling `set_inputs`."
             )
-        log(DEBUG, "ClientAppInputs set (token: %s)", clientapp_input.token)
         self.clientapp_input = clientapp_input
-        self.token_returned = token_returned
 
     def has_outputs(self) -> bool:
         """Check if ClientAppOutputs are available."""
@@ -291,7 +268,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         output: ClientAppOutputs = self.clientapp_output
         self.clientapp_input = None
         self.clientapp_output = None
-        self.token_returned = False
         self.inputs_returned = False
 
         return output
