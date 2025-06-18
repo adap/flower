@@ -209,6 +209,20 @@ class StateTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.state.create_token(run_id)
 
+    def test_get_run_id_by_token(self) -> None:
+        """Test retrieving run ID by token."""
+        # Prepare
+        run_id = 42
+        token = self.state.create_token(run_id)
+
+        # Execute: get run ID by token
+        retrieved_run_id1 = self.state.get_run_id_by_token(token)
+        retrieved_run_id2 = self.state.get_run_id_by_token("nonexistent_token")
+
+        # Assert: should return the correct run ID
+        self.assertEqual(retrieved_run_id1, run_id)
+        self.assertIsNone(retrieved_run_id2)
+
 
 def make_dummy_message(
     run_id: int = 110, is_reply: bool = False, msg_id: str = ""

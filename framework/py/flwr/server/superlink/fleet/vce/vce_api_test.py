@@ -129,6 +129,7 @@ def register_messages_into_state(
                 sub_status="",
                 details="",
             ),
+            flwr_aid="user123",
         ),
     )
     # Artificially add Messages to state so they can be processed

@@ -22,8 +22,8 @@ from typing import Optional
 
 from flwr.common import ConfigRecord
 from flwr.common.typing import UserConfig
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.supercore.ffs import FfsFactory
 
 
 @dataclass
@@ -74,6 +74,7 @@ class Executor(ABC):
         fab_file: bytes,
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str],
     ) -> Optional[int]:
         """Start a run using the given Flower FAB ID and version.
 
@@ -88,6 +89,9 @@ class Executor(ABC):
             The config overrides dict sent by the user (using `flwr run`).
         federation_options: ConfigRecord
             The federation options sent by the user (using `flwr run`).
+        flwr_aid : Optional[str]
+            The Flower Account ID of the user starting the run, if authentication is
+            enabled.
 
         Returns
         -------

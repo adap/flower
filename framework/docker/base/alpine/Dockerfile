@@ -25,7 +25,7 @@
 # hadolint global ignore=DL3018
 ARG PYTHON_VERSION=3.11
 ARG DISTRO=alpine
-ARG DISTRO_VERSION=3.19
+ARG DISTRO_VERSION=3.22
 FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} AS compile
 
 # Install system dependencies

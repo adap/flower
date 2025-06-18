@@ -52,7 +52,7 @@ from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
-from flwr.server.superlink.ffs import Ffs, FfsFactory
+from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppInputs, ClientAppIoServicer
@@ -241,11 +241,20 @@ def start_client_internal(
                 outputs = clientappio_servicer.get_outputs()
                 reply_message, context = outputs.message, outputs.context
 
-                # Update node state
+                # Update context in the state
                 state.store_context(context)
 
                 # Send
                 send(reply_message)
+
+                # Delete messages from the state
+                state.delete_messages(
+                    message_ids=[
+                        message.metadata.message_id,
+                        message.metadata.reply_to_message_id,
+                    ]
+                )
+
                 log(INFO, "Sent reply")
 
             except RunNotRunningException:

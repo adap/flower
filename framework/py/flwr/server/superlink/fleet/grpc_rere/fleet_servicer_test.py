@@ -27,7 +27,12 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable import get_descendant_object_ids, get_object_id
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_descendant_object_ids,
+    get_object_id,
+    get_object_tree,
+)
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
 from flwr.common.typing import RunStatus
@@ -39,6 +44,9 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushMessagesResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
+    ObjectTree,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -47,13 +55,13 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import (
     create_ins_message,
     create_res_message,
 )
 from flwr.server.superlink.utils import _STATUS_TO_MSG
+from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
 
@@ -115,6 +123,11 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=PullObjectRequest.SerializeToString,
             response_deserializer=PullObjectResponse.FromString,
         )
+        self._confirm_message_received = self._channel.unary_unary(
+            "/flwr.proto.Fleet/ConfirmMessageReceived",
+            request_serializer=ConfirmMessageReceivedRequest.SerializeToString,
+            response_deserializer=ConfirmMessageReceivedResponse.FromString,
+        )
 
     def tearDown(self) -> None:
         """Clean up grpc server."""
@@ -132,7 +145,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushMessages` success."""
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PushMessages RPC is only allowed in
         # running status.
         self._transition_run_status(run_id, 2)
@@ -148,7 +161,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         request = PushMessagesRequest(
             node=Node(node_id=node_id),
             messages_list=[msg_proto],
-            msg_to_descendant_mapping=descendant_mapping,
+            message_object_trees=[get_object_tree(message)],
         )
 
         # Execute
@@ -203,7 +216,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushMessages` not successful if RunStatus is not running."""
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
@@ -221,7 +234,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             msg_object_id=message_obj_id, descendant_ids=descendants
         )
         # Preregister
-        obj_ids_registered = self.store.preregister(descendants + [message_obj_id])
+        obj_ids_registered = self.store.preregister(
+            message.metadata.run_id, get_object_tree(message)
+        )
 
         return obj_ids_registered
 
@@ -239,7 +254,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
 
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PullMessagesRequest is only
         # allowed in running status.
         self._transition_run_status(run_id, 2)
@@ -284,7 +299,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `GetRun` success."""
         # Prepare
         self.state.create_node(heartbeat_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. GetRun RPC is only allowed in running status.
         self._transition_run_status(run_id, 2)
         request = GetRunRequest(run_id=run_id)
@@ -316,7 +331,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_get_run_not_successful_if_not_running(self, num_transitions: int) -> None:
         """Test `GetRun` not successful if RunStatus is not running."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
@@ -328,7 +343,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         node_id = self.state.create_node(heartbeat_interval=30)
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
-        run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord())
+        run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord(), "")
 
         # Transition status to running. GetFab RPC is only allowed in running status.
         self._transition_run_status(run_id, 2)
@@ -370,7 +385,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         node_id = self.state.create_node(heartbeat_interval=30)
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
-        run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord())
+        run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord(), "")
 
         self._transition_run_status(run_id, num_transitions)
 
@@ -380,14 +395,14 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_push_object_succesful(self) -> None:
         """Test `PushObject`."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         node_id = self.state.create_node(heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
         self._transition_run_status(run_id, 2)
 
         # Pre-register object
-        self.store.preregister(object_ids=[obj.object_id])
+        self.store.preregister(run_id, get_object_tree(obj))
 
         # Execute
         req = PushObjectRequest(
@@ -403,7 +418,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_push_object_fails(self) -> None:
         """Test `PushObject` in unsupported scenarios."""
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Run is not running
         req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
@@ -431,7 +446,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Push valid object but its hash doesnt match the one passed in the request
         # Preregister under a different object-id
         fake_object_id = get_object_id(b"1234")
-        self.store.preregister(object_ids=[fake_object_id])
+        self.store.preregister(run_id, ObjectTree(object_id=fake_object_id))
 
         # Execute
         req = PushObjectRequest(
@@ -448,14 +463,14 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_pull_object_successful(self) -> None:
         """Test `PullObject` functionality."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, 2)
         node_id = self.state.create_node(heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
         # Preregister object
-        self.store.preregister(object_ids=[obj.object_id])
+        self.store.preregister(run_id, get_object_tree(obj))
 
         # Pull
         req = PullObjectRequest(
@@ -482,7 +497,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_pull_object_fails(self) -> None:
         """Test `PullObject` in unsuported scenarios."""
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Run is not running
         req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
@@ -498,3 +513,39 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         res: PullObjectResponse = self._pull_object(req)
         # Empty response
         assert not res.object_found
+
+    def test_confirm_message_received_successful(self) -> None:
+        """Test `ConfirmMessageReceived` functionality."""
+        # Prepare
+        node_id = self.state.create_node(heartbeat_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        self._transition_run_status(run_id, 2)
+
+        # Prepare: Create a message
+        msg_proto = create_res_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+        )
+        message = message_from_proto(msg_proto)
+        # pylint: disable-next=E1137
+        message.content["test_config"] = ConfigRecord({"a": 123, "b": [4, 5, 6]})
+        message.metadata.__dict__["_message_id"] = message.object_id
+
+        # Prepare: Store message in ObjectStore
+        all_objects = get_all_nested_objects(message)
+        self._register_in_object_store(message)
+        for obj_id, obj in all_objects.items():
+            self.store.put(object_id=obj_id, object_content=obj.deflate())
+
+        # Assert: Message is in ObjectStore
+        assert len(self.store) == len(all_objects)
+
+        # Execute: Confirm message received
+        req = ConfirmMessageReceivedRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            message_object_id=message.object_id,
+        )
+        self._confirm_message_received(request=req)
+
+        # Assert: Message is removed from ObjectStore
+        assert len(self.store) == 0

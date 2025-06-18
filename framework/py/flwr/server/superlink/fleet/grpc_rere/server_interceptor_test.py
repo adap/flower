@@ -61,9 +61,9 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_res_message
+from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
 from .server_interceptor import AuthenticateServerInterceptor
@@ -209,7 +209,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_push_messages(self, metadata: list[Any]) -> Any:
         """Test PushMessages."""
         node_id = self._create_node_and_set_public_key()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PushMessages is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
@@ -222,7 +222,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_pull_object(self, metadata: list[Any]) -> Any:
         """Test PullObject."""
         node_id = self._create_node_and_set_public_key()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PushMessages is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
@@ -234,7 +234,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_push_object(self, metadata: list[Any]) -> Any:
         """Test PushObject."""
         node_id = self._create_node_and_set_public_key()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PushMessages is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
@@ -249,7 +249,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_get_run(self, metadata: list[Any]) -> Any:
         """Test GetRun."""
         node_id = self._create_node_and_set_public_key()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. GetRun is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
@@ -266,7 +266,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test GetFab."""
         fab_hash = self.ffs.put(b"mock fab content", {})
         node_id = self._create_node_and_set_public_key()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. GetFabRequest is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))

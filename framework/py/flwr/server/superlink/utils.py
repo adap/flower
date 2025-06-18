@@ -15,11 +15,12 @@
 """SuperLink utilities."""
 
 
-from typing import Union
+from typing import Optional, Union
 
 import grpc
 
 from flwr.common.constant import Status, SubStatus
+from flwr.common.inflatable import iterate_object_tree
 from flwr.common.typing import RunStatus
 from flwr.proto.fleet_pb2 import PushMessagesRequest  # pylint: disable=E0611
 from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
@@ -39,6 +40,7 @@ def check_abort(
     run_id: int,
     abort_status_list: list[str],
     state: LinkState,
+    store: Optional[ObjectStore] = None,
 ) -> Union[str, None]:
     """Check if the status of the provided `run_id` is in `abort_status_list`."""
     run_status: RunStatus = state.get_run_status({run_id})[run_id]
@@ -48,6 +50,10 @@ def check_abort(
         if run_status.sub_status == SubStatus.STOPPED:
             msg += " Stopped by user."
         return msg
+
+    # Clear the objects of the run from the store if the run is finished
+    if store and run_status.status == Status.FINISHED:
+        store.delete_objects_in_run(run_id)
 
     return None
 
@@ -62,10 +68,11 @@ def abort_if(
     run_id: int,
     abort_status_list: list[str],
     state: LinkState,
+    store: Optional[ObjectStore],
     context: grpc.ServicerContext,
 ) -> None:
     """Abort context if status of the provided `run_id` is in `abort_status_list`."""
-    msg = check_abort(run_id, abort_status_list, state)
+    msg = check_abort(run_id, abort_status_list, state, store)
     abort_grpc_context(msg, context)
 
 
@@ -73,21 +80,27 @@ def store_mapping_and_register_objects(
     store: ObjectStore, request: Union[PushInsMessagesRequest, PushMessagesRequest]
 ) -> dict[str, ObjectIDs]:
     """Store Message object to descendants mapping and preregister objects."""
+    if not request.messages_list:
+        return {}
+
     objects_to_push: dict[str, ObjectIDs] = {}
-    for (
-        message_obj_id,
-        descendant_obj_ids,
-    ) in request.msg_to_descendant_mapping.items():
-        descendants = list(descendant_obj_ids.object_ids)
+
+    # Get run_id from the first message in the list
+    # All messages of a request should in the same run
+    run_id = request.messages_list[0].metadata.run_id
+
+    for object_tree in request.message_object_trees:
+        all_object_ids = [obj.object_id for obj in iterate_object_tree(object_tree)]
+        msg_object_id, descendant_ids = all_object_ids[-1], all_object_ids[:-1]
         # Store mapping
         store.set_message_descendant_ids(
-            msg_object_id=message_obj_id, descendant_ids=descendants
+            msg_object_id=msg_object_id, descendant_ids=descendant_ids
         )
 
         # Preregister
-        object_ids_just_registered = store.preregister(descendants + [message_obj_id])
+        object_ids_just_registered = store.preregister(run_id, object_tree)
         # Keep track of objects that need to be pushed
-        objects_to_push[message_obj_id] = ObjectIDs(
+        objects_to_push[msg_object_id] = ObjectIDs(
             object_ids=object_ids_just_registered
         )
 

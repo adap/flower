@@ -151,6 +151,10 @@ PULL_INITIAL_BACKOFF = 1  # Initial backoff time for pulling objects
 PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
 
 
+# ExecServicer constants
+RUN_ID_NOT_FOUND_MESSAGE = "Run ID not found"
+
+
 class MessageType:
     """Message type."""
 

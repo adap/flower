@@ -27,8 +27,9 @@ from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
 from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
 from flwr.superexec.exec_user_auth_interceptor import ExecUserAuthInterceptor
 
@@ -42,6 +43,7 @@ def run_exec_api_grpc(
     executor: Executor,
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
+    objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     config: UserConfig,
     auth_plugin: Optional[ExecAuthPlugin] = None,
@@ -54,6 +56,7 @@ def run_exec_api_grpc(
     exec_servicer: grpc.Server = ExecServicer(
         linkstate_factory=state_factory,
         ffs_factory=ffs_factory,
+        objectstore_factory=objectstore_factory,
         executor=executor,
         auth_plugin=auth_plugin,
     )

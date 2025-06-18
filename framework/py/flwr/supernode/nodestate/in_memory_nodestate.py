@@ -51,8 +51,9 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
         # Store run ID to Context mapping
         self.ctx_store: dict[int, Context] = {}
         self.lock_ctx_store = Lock()
-        # Store run ID to token mapping
+        # Store run ID to token mapping and token to run ID mapping
         self.token_store: dict[int, str] = {}
+        self.token_to_run_id: dict[str, int] = {}
         self.lock_token_store = Lock()
 
     def set_node_id(self, node_id: Optional[int]) -> None:
@@ -177,6 +178,7 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
             if run_id in self.token_store:
                 raise ValueError("Token already created for this run ID")
             self.token_store[run_id] = token
+            self.token_to_run_id[token] = run_id
         return token
 
     def verify_token(self, run_id: int, token: str) -> bool:
@@ -187,4 +189,11 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
     def delete_token(self, run_id: int) -> None:
         """Delete the token for the given run ID."""
         with self.lock_token_store:
-            self.token_store.pop(run_id, None)
+            token = self.token_store.pop(run_id, None)
+            if token is not None:
+                self.token_to_run_id.pop(token, None)
+
+    def get_run_id_by_token(self, token: str) -> Optional[int]:
+        """Get the run ID associated with a given token."""
+        with self.lock_token_store:
+            return self.token_to_run_id.get(token)
