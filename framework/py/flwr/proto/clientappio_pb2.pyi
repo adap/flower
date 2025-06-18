@@ -108,10 +108,10 @@ global___GetTokenResponse = GetTokenResponse
 class PullClientAppInputsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TOKEN_FIELD_NUMBER: builtins.int
-    token: builtins.int
+    token: typing.Text
     def __init__(self,
         *,
-        token: builtins.int = ...,
+        token: typing.Text = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
 global___PullClientAppInputsRequest = PullClientAppInputsRequest
@@ -146,14 +146,14 @@ class PushClientAppOutputsRequest(google.protobuf.message.Message):
     TOKEN_FIELD_NUMBER: builtins.int
     MESSAGE_FIELD_NUMBER: builtins.int
     CONTEXT_FIELD_NUMBER: builtins.int
-    token: builtins.int
+    token: typing.Text
     @property
     def message(self) -> flwr.proto.message_pb2.Message: ...
     @property
     def context(self) -> flwr.proto.message_pb2.Context: ...
     def __init__(self,
         *,
-        token: builtins.int = ...,
+        token: typing.Text = ...,
         message: typing.Optional[flwr.proto.message_pb2.Message] = ...,
         context: typing.Optional[flwr.proto.message_pb2.Context] = ...,
         ) -> None: ...
