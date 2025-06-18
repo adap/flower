@@ -126,6 +126,43 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Return the token
         return RequestTokenResponse(token=token)
 
+    def GetRunIdsWithPendingMessages(
+        self,
+        request: GetRunIdsWithPendingMessagesRequest,
+        context: grpc.ServicerContext,
+    ) -> GetRunIdsWithPendingMessagesResponse:
+        """Get run IDs with pending messages."""
+        log(DEBUG, "ClientAppIo.GetRunIdsWithPendingMessages")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Get run IDs with pending messages
+        run_ids = state.get_run_ids_with_pending_messages()
+
+        # Return run IDs
+        return GetRunIdsWithPendingMessagesResponse(run_ids=run_ids)
+
+    def RequestToken(
+        self, request: RequestTokenRequest, context: grpc.ServicerContext
+    ) -> RequestTokenResponse:
+        """Request token."""
+        log(DEBUG, "ClientAppIo.RequestToken")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Attempt to create a token for the provided run ID
+        try:
+            token = state.create_token(request.run_id)
+        except ValueError:
+            # Return an empty token if A token already exists for this run ID,
+            # indicating the run is in progress
+            return RequestTokenResponse(token="")
+
+        # Return the token
+        return RequestTokenResponse(token=token)
+
     def GetToken(
         self, request: GetTokenRequest, context: grpc.ServicerContext
     ) -> GetTokenResponse:
