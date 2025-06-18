@@ -112,7 +112,7 @@ class MlxEngine: Engine {
         }
       }
     }
-    return Message(role: "assistant", content: result.output)
+    return try Message(role: "assistant", content: result.output)
   }
 
   func fetchModel(model: String, callback: @escaping (Progress) -> Void) async throws {
