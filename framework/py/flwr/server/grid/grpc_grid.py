@@ -313,12 +313,12 @@ class GrpcGrid(Grid):
                     ),
                 )
 
-                # Confirm that the message has been received
-                self._stub.ConfirmMessageReceived(
-                    ConfirmMessageReceivedRequest(
-                        node=self.node, run_id=run_id, message_object_id=msg_id
-                    )
-                )
+                # # Confirm that the message has been received
+                # self._stub.ConfirmMessageReceived(
+                #     ConfirmMessageReceivedRequest(
+                #         node=self.node, run_id=run_id, message_object_id=msg_id
+                #     )
+                # )
                 message = cast(
                     Message, inflate_object_from_contents(msg_id, all_object_contents)
                 )
