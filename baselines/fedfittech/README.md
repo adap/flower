@@ -52,7 +52,7 @@ Dataset:
 > [!NOTE]
 > <p align="justify"> By default, the code will run on a GPU if available; otherwise, it will run on the CPU. This example runs much faster when the `ClientApp` have access to a GPU. If your system has one, try running the example with GPU support.
   
-> Although it is not compulsory to use a GPU for training the TinyHAR model, as it can be efficiently trained on a CPU with minimal computation time, more complex models like DeepConvLSTM, typically used for Human Activity Recognition (HAR) tasks, often require a GPU to achieve reasonable training times.  </p>
+> Although it is not compulsory to use a GPU for training the TinyHAR model, as it can be efficiently trained on a CPU with minimal computation time.</p>
 
 **Contributors**: Shreyas Korde, Zeyneddin Oz, Marius Bock
 
@@ -105,13 +105,6 @@ cd baselines/fedfittech
 > \[!TIP\]
 > The structure of the project has explained below.
 
-> [!NOTE]
-> If you don't have miniconda installed then you can visit [Miniconda Installation](https://www.anaconda.com/docs/getting-started/miniconda/install#macos-linux-installation:how-do-i-verify-my-installers-integrity)
-
-Create Anaconda environment
-```
-conda create -n fedfittech python==3.10
-```
 
 
 **3.2 Create and Activate the environment**
@@ -123,37 +116,15 @@ pyenv virtualenv 3.10.14 FedFitTech
 # Activate it
 pyenv activate FedFitTech
 
-```
-**OR**
-```bash
-# Create Anaconda environment
-conda create -n fedfittech python==3.10
+# Install the project dependencies
+pip install -e .
 
-# activate the evironment
-conda activate FedFitTech
 ```
+
 
 > [!NOTE]
 > `fedfittech` refers to the name of the environment.
 
-
-**3.3 Install PyTorch distribution**
-```bash
-# Install dependencies
-pip install flwr[simulation] flwr-datasets[vision] torch torchvision
-#  OR
-# Install dependencies including developer packages
-pip install -e ".[dev]" 
-```
-
-> \[!TIP\]
-> For more information related to **PyTorch Cuda** visit [Start Locally PyTorch](https://pytorch.org/get-started/locally/)
-
-**3.4 Install other requirements**
-```
-pip install -r requirements.txt
-
-```
 ## 4. Project Structure
 
 
