@@ -15,7 +15,7 @@ Dataset:
 
 **Paper:** [link](https://arxiv.org)
 
-**Author** [Zeyneddin Oz](https://orcid.org/0000-0002-4216-9854), [Shreyas Korde](https://orcid.org/0009-0000-3771-3096), [Marius Bock](https://orcid.org/0000-0001-7401-928X), [Kristof Van Laerhoven](https://orcid.org/0000-0001-5296-5347)
+**Authors** [Zeyneddin Oz](https://orcid.org/0000-0002-4216-9854), [Shreyas Korde](https://orcid.org/0009-0000-3771-3096), [Marius Bock](https://orcid.org/0000-0001-7401-928X), [Kristof Van Laerhoven](https://orcid.org/0000-0001-5296-5347)
 
 **Affiliation:** [**University of Siegen**](https://www.uni-siegen.de/start/), [Ubiquitous Computing](https://ubi29.informatik.uni-siegen.de/usi/)
 
@@ -74,7 +74,7 @@ Dataset:
 
 **2.5 FedFitTech Baseline:** <p align="justify"> FedFitTech Baseline is your foundational setup for fitness technology applications using Federated Learning (FL). To get started, use the default hyperparameters provided, which ensure a stable starting point for your experiments. Feel free to explore different configurations by adjusting these hyperparameters to optimize performance and achieve better results tailored to your specific needs.  </p>
     
-**2.6 FL Trainig Hyperparameters:** <p align="justify">By default, the main hyperparameters used are shown in the table below. For a complete list of hyperparameters, please refer to the configuration file in `/baselines/fedfittech/fedfittech/config/base.yaml`.</p>
+**2.6 FL Training Hyperparameters:** <p align="justify">By default, the main hyperparameters used are shown in the table below. For a complete list of hyperparameters, please refer to the configuration file in `/baselines/fedfittech/fedfittech/config/base.yaml`.</p>
 
 
 | Description | Value |
@@ -94,7 +94,7 @@ Dataset:
 | Early Stopping | False |
 
 
-## 3. Envirnnomental Setup
+## 3. Envirnomental Setup
 
 **3.1 Clone Repository**
 Change the working directory to FedFitTech where project.toml is located.
@@ -135,9 +135,9 @@ FedFitTech/
 │   ├── flwr_utils/
 │   │   ├── TinyHAR.py                      # Defines TinyHAR Model
 │   │   ├── client_utils.py                 # Utility function for client 
-│   │   ├── my_strategy_plotting.py         # Defies plotting functions
-│   │   ├── server_plotting_function.py     # Defies server side plottinng methods
-│   │   └── utils_for_tinyhar.py            # Defines functions for data cleaning, processing
+│   │   ├── my_strategy_plotting.py         # Defines plotting functions
+│   │   ├── server_plotting_function.py     # Defines server side plotting methods
+│   │   └── utils_for_tinyhar.py            # Defines functions for data cleaning and processing
 │   ├── client_app.py                       # Defines ClientApp
 │   ├── my_strategy.py                      # Defines custom FedAvg strategy for ServerApp
 │   ├── server_app.py                       # Defines ServerApp
@@ -157,7 +157,7 @@ FedFitTech/
 └── README.md
 ```
 
-## 5. Runing Experiment
+## 5. Running Experiment
 
 
 > \[!TIP\]
@@ -259,7 +259,7 @@ S: Bench-dips
 | Early Stopping | **True** |
 
 > \[!Note\]
-> For logs related to early stopping, an `/baselines/fedfittech/fedfittech/Early_stoppinng_logs` folder will be created. This folder will store client-specific early stopping metadata
+> For logs related to early stopping, an `/baselines/fedfittech/fedfittech/Early_stoppigit ng_logs` folder will be created. This folder will store client-specific early stopping metadata
 
 **7.3 Early stopping metadata**
 
@@ -273,21 +273,21 @@ Initially, the server round value will be set to `np.nan`. Once early stopping i
                         Early Stopping in Fit Log.                        
 
 +++++++++ Early stopping triggered for Client 5 at Fit. No further training required. +++++++++
-Config records for Client Id 5: Best Validatio F1 score 0.30341428672751103, Counter value 0, for server round 25 Has_converged = True
+Config records for Client Id 5: Best Validation F1 score 0.30341428672751103, Counter value 0, for server round 25 Has_converged = True
 +++++++++ Early stopping triggered for Client 15 at Fit. No further training required. +++++++++
-Config records for Client Id 15: Best Validatio F1 score 0.5544575872359317, Counter value 0, for server round 27 Has_converged = True
+Config records for Client Id 15: Best Validation F1 score 0.5544575872359317, Counter value 0, for server round 27 Has_converged = True
 +++++++++ Early stopping triggered for Client 10 at Fit. No further training required. +++++++++
-Config records for Client Id 10: Best Validatio F1 score 0.4166345252593648, Counter value 0, for server round 28 Has_converged = True
+Config records for Client Id 10: Best Validation F1 score 0.4166345252593648, Counter value 0, for server round 28 Has_converged = True
 +++++++++ Early stopping triggered for Client 7 at Fit. No further training required. +++++++++
-Config records for Client Id 7: Best Validatio F1 score 0.6434438207487768, Counter value 0, for server round 34 Has_converged = True
+Config records for Client Id 7: Best Validation F1 score 0.6434438207487768, Counter value 0, for server round 34 Has_converged = True
 +++++++++ Early stopping triggered for Client 14 at Fit. No further training required. +++++++++
-Config records for Client Id 14: Best Validatio F1 score 0.5862694737076439, Counter value 0, for server round 68 Has_converged = True
+Config records for Client Id 14: Best Validation F1 score 0.5862694737076439, Counter value 0, for server round 68 Has_converged = True
 +++++++++ Early stopping triggered for Client 17 at Fit. No further training required. +++++++++
-Config records for Client Id 17: Best Validatio F1 score 0.7534962813629125, Counter value 0, for server round 74 Has_converged = True
+Config records for Client Id 17: Best Validation F1 score 0.7534962813629125, Counter value 0, for server round 74 Has_converged = True
 +++++++++ Early stopping triggered for Client 4 at Fit. No further training required. +++++++++
-Config records for Client Id 4: Best Validatio F1 score 0.48267210946367445, Counter value 0, for server round 80 Has_converged = True
+Config records for Client Id 4: Best Validation F1 score 0.48267210946367445, Counter value 0, for server round 80 Has_converged = True
 +++++++++ Early stopping triggered for Client 18 at Fit. No further training required. +++++++++
-Config records for Client Id 18: Best Validatio F1 score 0.750440226645707, Counter value 0, for server round 93 Has_converged = True
+Config records for Client Id 18: Best Validation F1 score 0.750440226645707, Counter value 0, for server round 93 Has_converged = True
 
 ```
 
