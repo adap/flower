@@ -32,7 +32,7 @@ from flwr.common import Context, Message
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import ErrorCode
 from flwr.common.grpc import create_channel, on_channel_state_change
-from flwr.common.logger import log
+from flwr.common.logger import log, mask_string
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import (
     context_from_proto,
@@ -195,7 +195,8 @@ def pull_clientappinputs(
     stub: ClientAppIoStub, token: str
 ) -> tuple[Message, Context, Run, Optional[Fab]]:
     """Pull ClientAppInputs from SuperNode."""
-    log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", token)
+    masked_token = mask_string(token)
+    log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", masked_token)
     try:
         res: PullClientAppInputsResponse = stub.PullClientAppInputs(
             PullClientAppInputsRequest(token=token)
@@ -214,7 +215,8 @@ def push_clientappoutputs(
     stub: ClientAppIoStub, token: str, message: Message, context: Context
 ) -> PushClientAppOutputsResponse:
     """Push ClientAppOutputs to SuperNode."""
-    log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", token)
+    masked_token = mask_string(token)
+    log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", masked_token)
     proto_message = message_to_proto(message)
     proto_context = context_to_proto(context)
 
