@@ -21,7 +21,8 @@ from logging import DEBUG, INFO
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.constant import CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS
 from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.logger import log, mask_string
+from flwr.common.logger import log
+from flwr.supercore.utils import mask_string
 from flwr.supernode.runtime.run_clientapp import run_clientapp
 
 

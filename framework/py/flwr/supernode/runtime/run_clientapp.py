@@ -32,7 +32,7 @@ from flwr.common import Context, Message
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import ErrorCode
 from flwr.common.grpc import create_channel, on_channel_state_change
-from flwr.common.logger import log, mask_string
+from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import (
     context_from_proto,
@@ -56,6 +56,7 @@ from flwr.proto.clientappio_pb2 import (
     RequestTokenResponse,
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
+from flwr.supercore.utils import mask_string
 
 
 def run_clientapp(  # pylint: disable=R0913, R0914, R0917
