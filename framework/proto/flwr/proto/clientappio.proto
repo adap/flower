@@ -30,9 +30,6 @@ service ClientAppIo {
   // Request token
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
 
-  // Get token
-  rpc GetToken(GetTokenRequest) returns (GetTokenResponse) {}
-
   // Pull client app inputs
   rpc PullClientAppInputs(PullClientAppInputsRequest)
       returns (PullClientAppInputsResponse) {}
@@ -59,9 +56,6 @@ message ClientAppOutputStatus {
   ClientAppOutputCode code = 1;
   string message = 2;
 }
-
-message GetTokenRequest {}
-message GetTokenResponse { uint64 token = 1; }
 
 message PullClientAppInputsRequest { string token = 1; }
 message PullClientAppInputsResponse {

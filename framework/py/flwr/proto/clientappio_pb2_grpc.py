@@ -24,11 +24,6 @@ class ClientAppIoStub(object):
                 request_serializer=flwr_dot_proto_dot_clientappio__pb2.RequestTokenRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_clientappio__pb2.RequestTokenResponse.FromString,
                 )
-        self.GetToken = channel.unary_unary(
-                '/flwr.proto.ClientAppIo/GetToken',
-                request_serializer=flwr_dot_proto_dot_clientappio__pb2.GetTokenRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_clientappio__pb2.GetTokenResponse.FromString,
-                )
         self.PullClientAppInputs = channel.unary_unary(
                 '/flwr.proto.ClientAppIo/PullClientAppInputs',
                 request_serializer=flwr_dot_proto_dot_clientappio__pb2.PullClientAppInputsRequest.SerializeToString,
@@ -53,13 +48,6 @@ class ClientAppIoServicer(object):
 
     def RequestToken(self, request, context):
         """Request token
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetToken(self, request, context):
-        """Get token
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -91,11 +79,6 @@ def add_ClientAppIoServicer_to_server(servicer, server):
                     servicer.RequestToken,
                     request_deserializer=flwr_dot_proto_dot_clientappio__pb2.RequestTokenRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_clientappio__pb2.RequestTokenResponse.SerializeToString,
-            ),
-            'GetToken': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetToken,
-                    request_deserializer=flwr_dot_proto_dot_clientappio__pb2.GetTokenRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_clientappio__pb2.GetTokenResponse.SerializeToString,
             ),
             'PullClientAppInputs': grpc.unary_unary_rpc_method_handler(
                     servicer.PullClientAppInputs,
@@ -148,23 +131,6 @@ class ClientAppIo(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ClientAppIo/RequestToken',
             flwr_dot_proto_dot_clientappio__pb2.RequestTokenRequest.SerializeToString,
             flwr_dot_proto_dot_clientappio__pb2.RequestTokenResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def GetToken(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ClientAppIo/GetToken',
-            flwr_dot_proto_dot_clientappio__pb2.GetTokenRequest.SerializeToString,
-            flwr_dot_proto_dot_clientappio__pb2.GetTokenResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
