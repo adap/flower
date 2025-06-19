@@ -19,7 +19,7 @@ from .TinyHAR import TinyHAR
 
 def load_data_for_client(cfg, user_num):
     """Load data for cliets."""
-    PATH = os.path.join(os.getcwd(), "./fedfittech/inertial_data/")
+    PATH = os.path.join(os.getcwd(), "./inertial_data/")
 
     # Get the list of CSV file paths in order:s
     csv_file_paths = sorted(glob.glob(os.path.join(PATH, "*.csv")), key=extract_number)
@@ -91,18 +91,16 @@ def load_data_for_client(cfg, user_num):
 
 def get_net_and_config():
     """Get the model and config hyperparameters."""
-    config_path = "./fedfittech/config"
+    config_path = "./config"
     config_file_name = "base.yaml"
     cfg = load_config(config_path=config_path, config_file=config_file_name)
 
     preference_for_NULL = cfg.preference_for_NULL
-    if preference_for_NULL in ["true", "yes", "1"]:
-        print("Preference for NULL Class is True.")
 
-    elif preference_for_NULL in ["false", "no", "0"]:
+    if preference_for_NULL in ["False", "no", "0"]:
         del cfg.labels_set["NULL"]
 
-    else:
+    elif preference_for_NULL not in ["True", "yes", "1", "False", "No", "0"]:
         raise ValueError("Invalid input. Please enter True, False, Yes, No, 1, or 0.")
 
     cfg.NUM_CLASS = len(cfg.labels_set)  # 19
@@ -154,9 +152,7 @@ def get_model_plot_directory(
     model_directory_name = None
     csv_directory_name = None
 
-    root_log_path = os.path.join(
-        "./fedfittech/Flower_log", f"Experiment_One_Logs_{file_date}"
-    )
+    root_log_path = os.path.join("./Flower_log", f"Experiment_One_Logs_{file_date}")
     os.makedirs(root_log_path, exist_ok=True)
     file_path = os.path.join(root_log_path, "hyperparameters.json")
 

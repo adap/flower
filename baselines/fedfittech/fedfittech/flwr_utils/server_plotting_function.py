@@ -3,7 +3,7 @@
 import matplotlib
 import pandas as pd
 
-from fedfittech.Results_to_compare.results_ploting_utils import (
+from fedfittech.flwr_utils.my_strategy_plotting import (
     plot_f1_convergence,
     plot_f1_convergence_with_stop_round,
     plot_f1_scores_comparison,
@@ -218,7 +218,7 @@ def weighted_eval_average_plottinng(
     ## Plots if Early stopping triggered
     if cfg.Early_stopping in ["true", "yes", "1"] and server_round == cfg.GLOBAL_ROUND:
         baseline_dist_metrics_path = (
-            "./fedfittech/Results_to_compare/dataframes/"
+            "./Results_to_compare/fedfittech_original_results/"
             "Client_Distributed_Metrics_100_round_normal.csv"
         )
         client_dist_metric_path = metrics_csv_path

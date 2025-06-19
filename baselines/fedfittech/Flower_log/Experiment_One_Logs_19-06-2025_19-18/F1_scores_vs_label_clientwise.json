@@ -1,0 +1,4010 @@
+{
+    "Client_Id_17": {
+        "NULL": {
+            "precision": 0.5321888412017167,
+            "recall": 0.9323308270676691,
+            "f1-score": 0.6775956284153005,
+            "support": 133.0,
+            "accuracy": 0.932330846786499,
+            "loss": 2.0986859798431396
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 0.8181818181818182,
+            "f1-score": 0.9,
+            "support": 11.0,
+            "accuracy": 0.8181818127632141,
+            "loss": 2.2128350734710693
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.2692307692307692,
+            "recall": 0.7,
+            "f1-score": 0.3888888888888889,
+            "support": 10.0,
+            "accuracy": 0.699999988079071,
+            "loss": 2.331016778945923
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.75,
+            "recall": 0.6,
+            "f1-score": 0.6666666666666666,
+            "support": 10.0,
+            "accuracy": 0.6000000238418579,
+            "loss": 2.431016683578491
+        },
+        "jogging (butt-kicks)": {
+            "precision": 0.6666666666666666,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.3333333333333333,
+            "support": 9.0,
+            "accuracy": 0.2222222238779068,
+            "loss": 2.8087947368621826
+        },
+        "stretching (triceps)": {
+            "precision": 0.7,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.7368421052631579,
+            "support": 9.0,
+            "accuracy": 0.7777777910232544,
+            "loss": 2.2532389163970947
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1-score": 0.75,
+            "support": 10.0,
+            "accuracy": 0.6000000238418579,
+            "loss": 2.431016683578491
+        },
+        "push-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.3333333333333333,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.3333333333333333,
+            "support": 9.0,
+            "accuracy": 0.3333333432674408,
+            "loss": 2.697683572769165
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.5324675324675324,
+        "macro avg": {
+            "precision": 0.2763905058122361,
+            "recall": 0.2623076830833064,
+            "f1-score": 0.25192947136319366,
+            "support": 308.0
+        },
+        "weighted avg": {
+            "precision": 0.38075786874070133,
+            "recall": 0.5324675324675324,
+            "f1-score": 0.4243745229940226,
+            "support": 308.0
+        }
+    },
+    "Client_Id_21": {
+        "NULL": {
+            "precision": 0.35570469798657717,
+            "recall": 0.9636363636363636,
+            "f1-score": 0.5196078431372549,
+            "support": 55.0,
+            "accuracy": 0.9636363387107849,
+            "loss": 2.067380428314209
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.875,
+            "support": 9.0,
+            "accuracy": 0.7777777910232544,
+            "loss": 2.2532389163970947
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.3684210526315789,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.5,
+            "support": 9.0,
+            "accuracy": 0.7777777910232544,
+            "loss": 2.2532389163970947
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.875,
+            "recall": 0.875,
+            "f1-score": 0.875,
+            "support": 8.0,
+            "accuracy": 0.875,
+            "loss": 2.1560165882110596
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 9.0,
+            "accuracy": 0.3333333432674408,
+            "loss": 2.697683572769165
+        },
+        "stretching (triceps)": {
+            "precision": 1.0,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.875,
+            "support": 9.0,
+            "accuracy": 0.7777777910232544,
+            "loss": 2.2532389163970947
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.875,
+            "recall": 0.875,
+            "f1-score": 0.875,
+            "support": 8.0,
+            "accuracy": 0.875,
+            "loss": 2.1560165882110596
+        },
+        "push-ups": {
+            "precision": 0.8333333333333334,
+            "recall": 0.625,
+            "f1-score": 0.7142857142857143,
+            "support": 8.0,
+            "accuracy": 0.625,
+            "loss": 2.4060165882110596
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 9.0,
+            "accuracy": 0.3333333432674408,
+            "loss": 2.697683572769165
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.4714285714285714,
+        "macro avg": {
+            "precision": 0.38460310968165734,
+            "recall": 0.3336124401913875,
+            "f1-score": 0.3280996609169984,
+            "support": 210.0
+        },
+        "weighted avg": {
+            "precision": 0.3787914977600601,
+            "recall": 0.4714285714285714,
+            "f1-score": 0.36925103374683205,
+            "support": 210.0
+        }
+    },
+    "Client_Id_5": {
+        "NULL": {
+            "precision": 0.38,
+            "recall": 0.95,
+            "f1-score": 0.5428571428571428,
+            "support": 60.0,
+            "accuracy": 0.949999988079071,
+            "loss": 2.081016778945923
+        },
+        "jogging": {
+            "precision": 0.3333333333333333,
+            "recall": 0.125,
+            "f1-score": 0.18181818181818182,
+            "support": 8.0,
+            "accuracy": 0.125,
+            "loss": 2.9060168266296387
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.42857142857142855,
+            "recall": 0.75,
+            "f1-score": 0.5454545454545454,
+            "support": 8.0,
+            "accuracy": 0.75,
+            "loss": 2.2810165882110596
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.30434782608695654,
+            "recall": 0.875,
+            "f1-score": 0.45161290322580644,
+            "support": 8.0,
+            "accuracy": 0.875,
+            "loss": 2.1560165882110596
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.4,
+            "f1-score": 0.5714285714285714,
+            "support": 5.0,
+            "accuracy": 0.4000000059604645,
+            "loss": 2.631016492843628
+        },
+        "stretching (triceps)": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 11.0,
+            "accuracy": 1.0,
+            "loss": 2.0310168266296387
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups": {
+            "precision": 0.45454545454545453,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.5555555555555556,
+            "support": 7.0,
+            "accuracy": 0.7142857313156128,
+            "loss": 2.3167307376861572
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0,
+            "accuracy": 0.0,
+            "loss": 3.0310165882110596
+        },
+        "accuracy": 0.4158878504672897,
+        "macro avg": {
+            "precision": 0.20530516013353542,
+            "recall": 0.2533834586466166,
+            "f1-score": 0.20256457370209494,
+            "support": 214.0
+        },
+        "weighted avg": {
+            "precision": 0.236036630307252,
+            "recall": 0.4158878504672897,
+            "f1-score": 0.279198810100227,
+            "support": 214.0
+        }
+    },
+    "Client_Id_1": {
+        "NULL": {
+            "precision": 0.4492753623188406,
+            "recall": 0.9587628865979382,
+            "f1-score": 0.6118421052631579,
+            "support": 97.0,
+            "accuracy": 0.9587628841400146,
+            "loss": 2.072254180908203
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 0.625,
+            "f1-score": 0.7692307692307693,
+            "support": 8.0,
+            "accuracy": 0.625,
+            "loss": 2.4060165882110596
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.3333333333333333,
+            "recall": 0.7,
+            "f1-score": 0.45161290322580644,
+            "support": 10.0,
+            "accuracy": 0.699999988079071,
+            "loss": 2.331016778945923
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.4,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5,
+            "support": 9.0,
+            "accuracy": 0.6666666865348816,
+            "loss": 2.3643500804901123
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.09090909090909091,
+            "f1-score": 0.16666666666666666,
+            "support": 11.0,
+            "accuracy": 0.09090909361839294,
+            "loss": 2.940107822418213
+        },
+        "stretching (triceps)": {
+            "precision": 0.4,
+            "recall": 0.6,
+            "f1-score": 0.48,
+            "support": 10.0,
+            "accuracy": 0.6000000238418579,
+            "loss": 2.431016683578491
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.3333333333333333,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.16666666666666666,
+            "support": 9.0,
+            "accuracy": 0.1111111119389534,
+            "loss": 2.919905662536621
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0,
+            "accuracy": 0.0,
+            "loss": 3.0310165882110596
+        },
+        "push-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 14.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "sit-ups": {
+            "precision": 0.6666666666666666,
+            "recall": 0.18181818181818182,
+            "f1-score": 0.2857142857142857,
+            "support": 11.0,
+            "accuracy": 0.1818181872367859,
+            "loss": 2.849198818206787
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 13.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.4368231046931408,
+        "macro avg": {
+            "precision": 0.2411899313501144,
+            "recall": 0.2070667335317362,
+            "f1-score": 0.1806175471982817,
+            "support": 277.0
+        },
+        "weighted avg": {
+            "precision": 0.3026945011248888,
+            "recall": 0.4368231046931408,
+            "f1-score": 0.30972869990188096,
+            "support": 277.0
+        }
+    },
+    "Client_Id_2": {
+        "NULL": {
+            "precision": 0.5535055350553506,
+            "recall": 0.9259259259259259,
+            "f1-score": 0.6928406466512702,
+            "support": 162.0,
+            "accuracy": 0.9259259104728699,
+            "loss": 2.105091094970703
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 0.7647058823529411,
+            "f1-score": 0.8666666666666667,
+            "support": 17.0,
+            "accuracy": 0.7647058963775635,
+            "loss": 2.266310930252075
+        },
+        "jogging (rotating arms)": {
+            "precision": NaN,
+            "recall": NaN,
+            "f1-score": NaN,
+            "support": 0.0,
+            "accuracy": 0.0,
+            "loss": NaN
+        },
+        "jogging (skipping)": {
+            "precision": 0.13333333333333333,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.16666666666666666,
+            "support": 9.0,
+            "accuracy": 0.2222222238779068,
+            "loss": 2.8087947368621826
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.7916666666666666,
+            "recall": 0.8636363636363636,
+            "f1-score": 0.8260869565217391,
+            "support": 22.0,
+            "accuracy": 0.8636363744735718,
+            "loss": 2.1673803329467773
+        },
+        "jogging (butt-kicks)": {
+            "precision": 0.6,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.42857142857142855,
+            "support": 9.0,
+            "accuracy": 0.3333333432674408,
+            "loss": 2.697683334350586
+        },
+        "stretching (triceps)": {
+            "precision": 1.0,
+            "recall": 0.5833333333333334,
+            "f1-score": 0.7368421052631579,
+            "support": 12.0,
+            "accuracy": 0.5833333134651184,
+            "loss": 2.447683572769165
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 15.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 8.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 1.0,
+            "recall": 0.2,
+            "f1-score": 0.3333333333333333,
+            "support": 10.0,
+            "accuracy": 0.20000000298023224,
+            "loss": 2.831017017364502
+        },
+        "sit-ups (complex)": {
+            "precision": 1.0,
+            "recall": 0.08333333333333333,
+            "f1-score": 0.15384615384615385,
+            "support": 12.0,
+            "accuracy": 0.0833333358168602,
+            "loss": 2.947683572769165
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.5774647887323944,
+        "macro avg": {
+            "precision": 0.36547252972529726,
+            "recall": 0.2764716885631919,
+            "f1-score": 0.27064003467706016,
+            "support": 355.0
+        },
+        "weighted avg": {
+            "precision": 0.475167784072207,
+            "recall": 0.5774647887323944,
+            "f1-score": 0.47847746413363,
+            "support": 355.0
+        }
+    },
+    "Client_Id_3": {
+        "NULL": {
+            "precision": 0.668769716088328,
+            "recall": 0.9217391304347826,
+            "f1-score": 0.7751371115173674,
+            "support": 230.0,
+            "accuracy": 0.9217391014099121,
+            "loss": 2.1092779636383057
+        },
+        "jogging": {
+            "precision": 0.75,
+            "recall": 0.9,
+            "f1-score": 0.8181818181818182,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.53125,
+            "recall": 0.9444444444444444,
+            "f1-score": 0.68,
+            "support": 18.0,
+            "accuracy": 0.9444444179534912,
+            "loss": 2.0865724086761475
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.75,
+            "recall": 0.8571428571428571,
+            "f1-score": 0.8,
+            "support": 14.0,
+            "accuracy": 0.8571428656578064,
+            "loss": 2.1738741397857666
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.2,
+            "support": 9.0,
+            "accuracy": 0.1111111119389534,
+            "loss": 2.919905662536621
+        },
+        "stretching (triceps)": {
+            "precision": 0.2,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.21052631578947367,
+            "support": 9.0,
+            "accuracy": 0.2222222238779068,
+            "loss": 2.8087947368621826
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 9.0,
+            "accuracy": 0.3333333432674408,
+            "loss": 2.697683572769165
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1-score": 0.75,
+            "support": 10.0,
+            "accuracy": 0.6000000238418579,
+            "loss": 2.431016683578491
+        },
+        "push-ups": {
+            "precision": 0.10526315789473684,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.14285714285714285,
+            "support": 9.0,
+            "accuracy": 0.2222222238779068,
+            "loss": 2.8087947368621826
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 15.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.6346153846153846,
+        "macro avg": {
+            "precision": 0.3160675196833192,
+            "recall": 0.2690639642584723,
+            "f1-score": 0.25666854675504225,
+            "support": 416.0
+        },
+        "weighted avg": {
+            "precision": 0.5099204401955963,
+            "recall": 0.6346153846153846,
+            "f1-score": 0.545393761919789,
+            "support": 416.0
+        }
+    },
+    "Client_Id_8": {
+        "NULL": {
+            "precision": 0.375,
+            "recall": 0.8823529411764706,
+            "f1-score": 0.5263157894736842,
+            "support": 68.0,
+            "accuracy": 0.8823529481887817,
+            "loss": 2.1486639976501465
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 0.9,
+            "f1-score": 0.9473684210526315,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (rotating arms)": {
+            "precision": 1.0,
+            "recall": 0.1,
+            "f1-score": 0.18181818181818182,
+            "support": 10.0,
+            "accuracy": 0.10000000149011612,
+            "loss": 2.9310169219970703
+        },
+        "jogging (skipping)": {
+            "precision": 0.47058823529411764,
+            "recall": 0.8,
+            "f1-score": 0.5925925925925926,
+            "support": 10.0,
+            "accuracy": 0.800000011920929,
+            "loss": 2.2310166358947754
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.8181818181818182,
+            "recall": 0.9,
+            "f1-score": 0.8571428571428571,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.4444444444444444,
+            "f1-score": 0.6153846153846154,
+            "support": 9.0,
+            "accuracy": 0.4444444477558136,
+            "loss": 2.5865721702575684
+        },
+        "stretching (triceps)": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
+            "support": 8.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.875,
+            "recall": 0.7,
+            "f1-score": 0.7777777777777778,
+            "support": 10.0,
+            "accuracy": 0.699999988079071,
+            "loss": 2.331016778945923
+        },
+        "push-ups": {
+            "precision": 0.4230769230769231,
+            "recall": 0.8461538461538461,
+            "f1-score": 0.5641025641025641,
+            "support": 13.0,
+            "accuracy": 0.8461538553237915,
+            "loss": 2.1848630905151367
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.46987951807228917,
+        "macro avg": {
+            "precision": 0.35588668297646625,
+            "recall": 0.34594480167235586,
+            "f1-score": 0.3132311414859891,
+            "support": 249.0
+        },
+        "weighted avg": {
+            "precision": 0.35356506238859176,
+            "recall": 0.46987951807228917,
+            "f1-score": 0.3587926826142848,
+            "support": 249.0
+        }
+    },
+    "Client_Id_10": {
+        "NULL": {
+            "precision": 0.61875,
+            "recall": 0.5439560439560439,
+            "f1-score": 0.5789473684210527,
+            "support": 182.0,
+            "accuracy": 0.5439560413360596,
+            "loss": 2.487061023712158
+        },
+        "jogging": {
+            "precision": 0.75,
+            "recall": 0.9,
+            "f1-score": 0.8181818181818182,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "jogging (skipping)": {
+            "precision": 0.14035087719298245,
+            "recall": 1.0,
+            "f1-score": 0.24615384615384617,
+            "support": 8.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.16666666666666666,
+            "recall": 0.9,
+            "f1-score": 0.28125,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.4444444444444444,
+            "f1-score": 0.6153846153846154,
+            "support": 9.0,
+            "accuracy": 0.4444444477558136,
+            "loss": 2.5865721702575684
+        },
+        "stretching (triceps)": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
+            "support": 10.0,
+            "accuracy": 0.800000011920929,
+            "loss": 2.2310166358947754
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (shoulders)": {
+            "precision": NaN,
+            "recall": NaN,
+            "f1-score": NaN,
+            "support": 0.0,
+            "accuracy": 0.0,
+            "loss": NaN
+        },
+        "stretching (hamstrings)": {
+            "precision": NaN,
+            "recall": NaN,
+            "f1-score": NaN,
+            "support": 0.0,
+            "accuracy": 0.0,
+            "loss": NaN
+        },
+        "stretching (lumbar rotation)": {
+            "precision": NaN,
+            "recall": NaN,
+            "f1-score": NaN,
+            "support": 0.0,
+            "accuracy": 0.0,
+            "loss": NaN
+        },
+        "push-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "sit-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0,
+            "accuracy": 0.0,
+            "loss": 3.0310165882110596
+        },
+        "lunges": {
+            "precision": NaN,
+            "recall": NaN,
+            "f1-score": NaN,
+            "support": 0.0,
+            "accuracy": 0.0,
+            "loss": NaN
+        },
+        "lunges (complex)": {
+            "precision": NaN,
+            "recall": NaN,
+            "f1-score": NaN,
+            "support": 0.0,
+            "accuracy": 0.0,
+            "loss": NaN
+        },
+        "bench-dips": {
+            "precision": NaN,
+            "recall": NaN,
+            "f1-score": NaN,
+            "support": 0.0,
+            "accuracy": 0.0,
+            "loss": NaN
+        },
+        "accuracy": 0.46440677966101696,
+        "macro avg": {
+            "precision": 0.28275134952766534,
+            "recall": 0.35295388372311454,
+            "f1-score": 0.26375434900232475,
+            "support": 295.0
+        },
+        "weighted avg": {
+            "precision": 0.48102363960749334,
+            "recall": 0.46440677966101696,
+            "f1-score": 0.4500315946814609,
+            "support": 295.0
+        }
+    },
+    "Client_Id_6": {
+        "NULL": {
+            "precision": 0.36809815950920244,
+            "recall": 0.9230769230769231,
+            "f1-score": 0.5263157894736842,
+            "support": 65.0,
+            "accuracy": 0.9230769276618958,
+            "loss": 2.1079399585723877
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 0.8571428571428571,
+            "f1-score": 0.9230769230769231,
+            "support": 14.0,
+            "accuracy": 0.8571428656578064,
+            "loss": 2.1738741397857666
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
+            "support": 9.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.5333333333333333,
+            "recall": 0.8,
+            "f1-score": 0.64,
+            "support": 10.0,
+            "accuracy": 0.800000011920929,
+            "loss": 2.2310166358947754
+        },
+        "jogging (butt-kicks)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (triceps)": {
+            "precision": 0.4,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.2857142857142857,
+            "support": 9.0,
+            "accuracy": 0.2222222238779068,
+            "loss": 2.8087947368621826
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 13.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.8333333333333334,
+            "recall": 0.5,
+            "f1-score": 0.625,
+            "support": 10.0,
+            "accuracy": 0.5,
+            "loss": 2.5310168266296387
+        },
+        "push-ups": {
+            "precision": 0.7272727272727273,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.8,
+            "support": 9.0,
+            "accuracy": 0.8888888955116272,
+            "loss": 2.142127752304077
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.5714285714285714,
+            "recall": 0.36363636363636365,
+            "f1-score": 0.4444444444444444,
+            "support": 11.0,
+            "accuracy": 0.3636363744735718,
+            "loss": 2.6673803329467773
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.432,
+        "macro avg": {
+            "precision": 0.25088418201107904,
+            "recall": 0.29236669762985545,
+            "f1-score": 0.2497132338268072,
+            "support": 250.0
+        },
+        "weighted avg": {
+            "precision": 0.28409686346373464,
+            "recall": 0.432,
+            "f1-score": 0.31577568279673546,
+            "support": 250.0
+        }
+    },
+    "Client_Id_15": {
+        "NULL": {
+            "precision": 0.4678362573099415,
+            "recall": 0.9523809523809523,
+            "f1-score": 0.6274509803921569,
+            "support": 84.0,
+            "accuracy": 0.9523809552192688,
+            "loss": 2.0786359310150146
+        },
+        "jogging": {
+            "precision": 0.9,
+            "recall": 1.0,
+            "f1-score": 0.9473684210526315,
+            "support": 9.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.2962962962962963,
+            "recall": 1.0,
+            "f1-score": 0.45714285714285713,
+            "support": 8.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.9090909090909091,
+            "recall": 0.9090909090909091,
+            "f1-score": 0.9090909090909091,
+            "support": 11.0,
+            "accuracy": 0.9090909361839294,
+            "loss": 2.1219258308410645
+        },
+        "jogging (butt-kicks)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (triceps)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 1.0,
+            "recall": 0.4166666666666667,
+            "f1-score": 0.5882352941176471,
+            "support": 12.0,
+            "accuracy": 0.4166666567325592,
+            "loss": 2.6143503189086914
+        },
+        "push-ups": {
+            "precision": 0.3181818181818182,
+            "recall": 0.875,
+            "f1-score": 0.4666666666666667,
+            "support": 8.0,
+            "accuracy": 0.875,
+            "loss": 2.1560165882110596
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.8181818181818182,
+            "recall": 1.0,
+            "f1-score": 0.9,
+            "support": 9.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "sit-ups (complex)": {
+            "precision": 1.0,
+            "recall": 0.2,
+            "f1-score": 0.3333333333333333,
+            "support": 10.0,
+            "accuracy": 0.20000000298023224,
+            "loss": 2.831017017364502
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.5,
+        "macro avg": {
+            "precision": 0.3005045841610939,
+            "recall": 0.33437571200729094,
+            "f1-score": 0.2752257085155896,
+            "support": 260.0
+        },
+        "weighted avg": {
+            "precision": 0.352606564974986,
+            "recall": 0.5,
+            "f1-score": 0.37351858152167755,
+            "support": 260.0
+        }
+    },
+    "Client_Id_23": {
+        "NULL": {
+            "precision": 0.4845360824742268,
+            "recall": 0.9894736842105263,
+            "f1-score": 0.6505190311418685,
+            "support": 95.0,
+            "accuracy": 0.9894737005233765,
+            "loss": 2.0415432453155518
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 10.0,
+            "accuracy": 1.0,
+            "loss": 2.0310168266296387
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
+            "support": 7.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.6923076923076923,
+            "recall": 0.9,
+            "f1-score": 0.782608695652174,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (butt-kicks)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (triceps)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.875,
+            "recall": 0.875,
+            "f1-score": 0.875,
+            "support": 8.0,
+            "accuracy": 0.875,
+            "loss": 2.1560165882110596
+        },
+        "push-ups": {
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1-score": 0.4,
+            "support": 8.0,
+            "accuracy": 0.25,
+            "loss": 2.7810168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "sit-ups": {
+            "precision": 1.0,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.36363636363636365,
+            "support": 9.0,
+            "accuracy": 0.2222222238779068,
+            "loss": 2.8087947368621826
+        },
+        "sit-ups (complex)": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 9.0,
+            "accuracy": 0.3333333432674408,
+            "loss": 2.697683572769165
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.5254901960784314,
+        "macro avg": {
+            "precision": 0.3360619530586975,
+            "recall": 0.29315943367189906,
+            "f1-score": 0.2669349521279161,
+            "support": 255.0
+        },
+        "weighted avg": {
+            "precision": 0.38544054153514434,
+            "recall": 0.5254901960784314,
+            "f1-score": 0.39646322426559416,
+            "support": 255.0
+        }
+    },
+    "Client_Id_18": {
+        "NULL": {
+            "precision": 0.38125,
+            "recall": 0.9838709677419355,
+            "f1-score": 0.5495495495495496,
+            "support": 62.0,
+            "accuracy": 0.9838709831237793,
+            "loss": 2.0471458435058594
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 9.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.35,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.4827586206896552,
+            "support": 9.0,
+            "accuracy": 0.7777777910232544,
+            "loss": 2.2532389163970947
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.5,
+            "recall": 0.6,
+            "f1-score": 0.5454545454545454,
+            "support": 10.0,
+            "accuracy": 0.6000000238418579,
+            "loss": 2.431016683578491
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.125,
+            "f1-score": 0.2222222222222222,
+            "support": 8.0,
+            "accuracy": 0.125,
+            "loss": 2.9060168266296387
+        },
+        "stretching (triceps)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.4,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.2857142857142857,
+            "support": 9.0,
+            "accuracy": 0.2222222238779068,
+            "loss": 2.8087947368621826
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.6,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.42857142857142855,
+            "support": 9.0,
+            "accuracy": 0.3333333432674408,
+            "loss": 2.697683572769165
+        },
+        "push-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 1.0,
+            "recall": 0.4,
+            "f1-score": 0.5714285714285714,
+            "support": 10.0,
+            "accuracy": 0.4000000059604645,
+            "loss": 2.631016731262207
+        },
+        "sit-ups (complex)": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 9.0,
+            "accuracy": 0.3333333432674408,
+            "loss": 2.697683572769165
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.4304932735426009,
+        "macro avg": {
+            "precision": 0.3279605263157895,
+            "recall": 0.2513440860215054,
+            "f1-score": 0.24135259071738197,
+            "support": 223.0
+        },
+        "weighted avg": {
+            "precision": 0.3443385650224215,
+            "recall": 0.4304932735426009,
+            "f1-score": 0.3196954261590105,
+            "support": 223.0
+        }
+    },
+    "Client_Id_12": {
+        "NULL": {
+            "precision": 0.5871559633027523,
+            "recall": 0.847682119205298,
+            "f1-score": 0.6937669376693767,
+            "support": 151.0,
+            "accuracy": 0.8476821184158325,
+            "loss": 2.1833348274230957
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 0.3,
+            "f1-score": 0.46153846153846156,
+            "support": 10.0,
+            "accuracy": 0.30000001192092896,
+            "loss": 2.7310168743133545
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.32142857142857145,
+            "recall": 0.9,
+            "f1-score": 0.47368421052631576,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.6363636363636364,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.7,
+            "support": 9.0,
+            "accuracy": 0.7777777910232544,
+            "loss": 2.2532389163970947
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.36363636363636365,
+            "f1-score": 0.5333333333333333,
+            "support": 11.0,
+            "accuracy": 0.3636363744735718,
+            "loss": 2.6673803329467773
+        },
+        "stretching (triceps)": {
+            "precision": 0.4444444444444444,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.5925925925925926,
+            "support": 9.0,
+            "accuracy": 0.8888888955116272,
+            "loss": 2.142127752304077
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 1.0,
+            "recall": 0.1,
+            "f1-score": 0.18181818181818182,
+            "support": 10.0,
+            "accuracy": 0.10000000149011612,
+            "loss": 2.9310169219970703
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1-score": 0.75,
+            "support": 10.0,
+            "accuracy": 0.6000000238418579,
+            "loss": 2.431016683578491
+        },
+        "push-ups": {
+            "precision": 0.19444444444444445,
+            "recall": 1.0,
+            "f1-score": 0.32558139534883723,
+            "support": 7.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.5306748466257669,
+        "macro avg": {
+            "precision": 0.32546510842020254,
+            "recall": 0.3041044815530699,
+            "f1-score": 0.2480165848856368,
+            "support": 326.0
+        },
+        "weighted avg": {
+            "precision": 0.44160496936007715,
+            "recall": 0.5306748466257669,
+            "f1-score": 0.4392892205348078,
+            "support": 326.0
+        }
+    },
+    "Client_Id_11": {
+        "NULL": {
+            "precision": 0.29605263157894735,
+            "recall": 0.8490566037735849,
+            "f1-score": 0.43902439024390244,
+            "support": 53.0,
+            "accuracy": 0.849056601524353,
+            "loss": 2.181960105895996
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
+            "support": 10.0,
+            "accuracy": 0.800000011920929,
+            "loss": 2.2310166358947754
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.4375,
+            "recall": 1.0,
+            "f1-score": 0.6086956521739131,
+            "support": 7.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.8333333333333334,
+            "recall": 0.9090909090909091,
+            "f1-score": 0.8695652173913043,
+            "support": 11.0,
+            "accuracy": 0.9090909361839294,
+            "loss": 2.1219258308410645
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.875,
+            "support": 9.0,
+            "accuracy": 0.7777777910232544,
+            "loss": 2.2532389163970947
+        },
+        "stretching (triceps)": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 9.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 1.0,
+            "recall": 0.7,
+            "f1-score": 0.8235294117647058,
+            "support": 10.0,
+            "accuracy": 0.699999988079071,
+            "loss": 2.331016778945923
+        },
+        "push-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.4189189189189189,
+        "macro avg": {
+            "precision": 0.27983610341643583,
+            "recall": 0.3176802784548564,
+            "f1-score": 0.2822024430318722,
+            "support": 222.0
+        },
+        "weighted avg": {
+            "precision": 0.28680160423581474,
+            "recall": 0.4189189189189189,
+            "f1-score": 0.31444976738860464,
+            "support": 222.0
+        }
+    },
+    "Client_Id_20": {
+        "NULL": {
+            "precision": 0.4876847290640394,
+            "recall": 0.9801980198019802,
+            "f1-score": 0.6513157894736842,
+            "support": 101.0,
+            "accuracy": 0.9801980257034302,
+            "loss": 2.050818920135498
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.9411764705882353,
+            "support": 9.0,
+            "accuracy": 0.8888888955116272,
+            "loss": 2.142127752304077
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.47058823529411764,
+            "recall": 0.8,
+            "f1-score": 0.5925925925925926,
+            "support": 10.0,
+            "accuracy": 0.800000011920929,
+            "loss": 2.2310166358947754
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.6363636363636364,
+            "recall": 0.875,
+            "f1-score": 0.7368421052631579,
+            "support": 8.0,
+            "accuracy": 0.875,
+            "loss": 2.1560165882110596
+        },
+        "jogging (butt-kicks)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (triceps)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 1.0,
+            "recall": 0.4444444444444444,
+            "f1-score": 0.6153846153846154,
+            "support": 9.0,
+            "accuracy": 0.4444444477558136,
+            "loss": 2.5865721702575684
+        },
+        "push-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 1.0,
+            "recall": 0.2,
+            "f1-score": 0.3333333333333333,
+            "support": 10.0,
+            "accuracy": 0.20000000298023224,
+            "loss": 2.831017017364502
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.4866920152091255,
+        "macro avg": {
+            "precision": 0.24182297898535757,
+            "recall": 0.2204490185860691,
+            "f1-score": 0.20371815298082202,
+            "support": 263.0
+        },
+        "weighted avg": {
+            "precision": 0.3309998063852405,
+            "recall": 0.4866920152091255,
+            "f1-score": 0.3610111810340771,
+            "support": 263.0
+        }
+    },
+    "Client_Id_13": {
+        "NULL": {
+            "precision": 0.710691823899371,
+            "recall": 0.9868995633187773,
+            "f1-score": 0.8263254113345521,
+            "support": 229.0,
+            "accuracy": 0.9868995547294617,
+            "loss": 2.0441174507141113
+        },
+        "jogging": {
+            "precision": 0.5,
+            "recall": 0.2727272727272727,
+            "f1-score": 0.35294117647058826,
+            "support": 11.0,
+            "accuracy": 0.27272728085517883,
+            "loss": 2.7582895755767822
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.25806451612903225,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.4,
+            "support": 9.0,
+            "accuracy": 0.8888888955116272,
+            "loss": 2.142127752304077
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.75,
+            "recall": 0.9,
+            "f1-score": 0.8181818181818182,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.2,
+            "support": 9.0,
+            "accuracy": 0.1111111119389534,
+            "loss": 2.919905662536621
+        },
+        "stretching (triceps)": {
+            "precision": 0.6666666666666666,
+            "recall": 0.8,
+            "f1-score": 0.7272727272727273,
+            "support": 10.0,
+            "accuracy": 0.800000011920929,
+            "loss": 2.2310166358947754
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 1.0,
+            "recall": 0.4,
+            "f1-score": 0.5714285714285714,
+            "support": 10.0,
+            "accuracy": 0.4000000059604645,
+            "loss": 2.631016969680786
+        },
+        "push-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.8888888888888888,
+            "recall": 0.8,
+            "f1-score": 0.8421052631578947,
+            "support": 10.0,
+            "accuracy": 0.800000011920929,
+            "loss": 2.2310166358947754
+        },
+        "sit-ups (complex)": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 9.0,
+            "accuracy": 0.3333333432674408,
+            "loss": 2.697683572769165
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.6801007556675063,
+        "macro avg": {
+            "precision": 0.35654273134652414,
+            "recall": 0.28910316680944126,
+            "f1-score": 0.27569762988663954,
+            "support": 397.0
+        },
+        "weighted avg": {
+            "precision": 0.558253309505473,
+            "recall": 0.6801007556675063,
+            "f1-score": 0.5858961106730454,
+            "support": 397.0
+        }
+    },
+    "Client_Id_22": {
+        "NULL": {
+            "precision": 0.18699186991869918,
+            "recall": 0.92,
+            "f1-score": 0.3108108108108108,
+            "support": 25.0,
+            "accuracy": 0.9200000166893005,
+            "loss": 2.1110167503356934
+        },
+        "jogging": {
+            "precision": 0.7692307692307693,
+            "recall": 1.0,
+            "f1-score": 0.8695652173913043,
+            "support": 10.0,
+            "accuracy": 1.0,
+            "loss": 2.0310168266296387
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.2222222222222222,
+            "recall": 0.4444444444444444,
+            "f1-score": 0.2962962962962963,
+            "support": 9.0,
+            "accuracy": 0.4444444477558136,
+            "loss": 2.5865721702575684
+        },
+        "jogging (sidesteps)": {
+            "precision": 1.0,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.875,
+            "support": 9.0,
+            "accuracy": 0.7777777910232544,
+            "loss": 2.2532389163970947
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.2,
+            "support": 9.0,
+            "accuracy": 0.1111111119389534,
+            "loss": 2.919905662536621
+        },
+        "stretching (triceps)": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
+            "support": 10.0,
+            "accuracy": 0.800000011920929,
+            "loss": 2.2310166358947754
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.9,
+            "recall": 1.0,
+            "f1-score": 0.9473684210526315,
+            "support": 9.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "push-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 8.0,
+            "accuracy": 0.5,
+            "loss": 2.5310165882110596
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.3473684210526316,
+        "macro avg": {
+            "precision": 0.31991815059851003,
+            "recall": 0.292280701754386,
+            "f1-score": 0.2660313842687683,
+            "support": 190.0
+        },
+        "weighted avg": {
+            "precision": 0.3077216023172377,
+            "recall": 0.3473684210526316,
+            "f1-score": 0.27134803748708364,
+            "support": 190.0
+        }
+    },
+    "Client_Id_19": {
+        "NULL": {
+            "precision": 0.610236220472441,
+            "recall": 0.9281437125748503,
+            "f1-score": 0.7363420427553444,
+            "support": 167.0,
+            "accuracy": 0.9281437397003174,
+            "loss": 2.1028733253479004
+        },
+        "jogging": {
+            "precision": 0.8888888888888888,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.8888888888888888,
+            "support": 9.0,
+            "accuracy": 0.8888888955116272,
+            "loss": 2.142127752304077
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.32,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.47058823529411764,
+            "support": 9.0,
+            "accuracy": 0.8888888955116272,
+            "loss": 2.142127752304077
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.5882352941176471,
+            "recall": 1.0,
+            "f1-score": 0.7407407407407407,
+            "support": 10.0,
+            "accuracy": 1.0,
+            "loss": 2.0310168266296387
+        },
+        "jogging (butt-kicks)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (triceps)": {
+            "precision": 1.0,
+            "recall": 0.5454545454545454,
+            "f1-score": 0.7058823529411765,
+            "support": 11.0,
+            "accuracy": 0.5454545617103577,
+            "loss": 2.485562324523926
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.8,
+            "recall": 0.4,
+            "f1-score": 0.5333333333333333,
+            "support": 10.0,
+            "accuracy": 0.4000000059604645,
+            "loss": 2.631016731262207
+        },
+        "push-ups": {
+            "precision": 0.3333333333333333,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.4444444444444444,
+            "support": 9.0,
+            "accuracy": 0.6666666865348816,
+            "loss": 2.3643500804901123
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups (complex)": {
+            "precision": 1.0,
+            "recall": 0.125,
+            "f1-score": 0.2222222222222222,
+            "support": 8.0,
+            "accuracy": 0.125,
+            "loss": 2.9060168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.591044776119403,
+        "macro avg": {
+            "precision": 0.29161545983222686,
+            "recall": 0.2864759317091494,
+            "f1-score": 0.249602224243172,
+            "support": 335.0
+        },
+        "weighted avg": {
+            "precision": 0.4437964231644004,
+            "recall": 0.591044776119403,
+            "f1-score": 0.4820526556974956,
+            "support": 335.0
+        }
+    },
+    "Client_Id_9": {
+        "NULL": {
+            "precision": 0.2331288343558282,
+            "recall": 0.926829268292683,
+            "f1-score": 0.37254901960784315,
+            "support": 41.0,
+            "accuracy": 0.9268292784690857,
+            "loss": 2.104187488555908
+        },
+        "jogging": {
+            "precision": 1.0,
+            "recall": 0.9,
+            "f1-score": 0.9473684210526315,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.6666666666666666,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.7619047619047619,
+            "support": 9.0,
+            "accuracy": 0.8888888955116272,
+            "loss": 2.142127752304077
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.5833333333333334,
+            "recall": 0.7,
+            "f1-score": 0.6363636363636364,
+            "support": 10.0,
+            "accuracy": 0.699999988079071,
+            "loss": 2.331016778945923
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
+            "support": 10.0,
+            "accuracy": 0.800000011920929,
+            "loss": 2.2310166358947754
+        },
+        "stretching (triceps)": {
+            "precision": 1.0,
+            "recall": 0.3,
+            "f1-score": 0.46153846153846156,
+            "support": 10.0,
+            "accuracy": 0.30000001192092896,
+            "loss": 2.7310168743133545
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 1.0,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.36363636363636365,
+            "support": 9.0,
+            "accuracy": 0.2222222238779068,
+            "loss": 2.8087947368621826
+        },
+        "push-ups": {
+            "precision": 0.4,
+            "recall": 0.2,
+            "f1-score": 0.26666666666666666,
+            "support": 10.0,
+            "accuracy": 0.20000000298023224,
+            "loss": 2.831017017364502
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.5,
+            "recall": 0.1,
+            "f1-score": 0.16666666666666666,
+            "support": 10.0,
+            "accuracy": 0.10000000149011612,
+            "loss": 2.9310169219970703
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.3611111111111111,
+        "macro avg": {
+            "precision": 0.33595414917662253,
+            "recall": 0.26515475681072603,
+            "f1-score": 0.2560833098066274,
+            "support": 216.0
+        },
+        "weighted avg": {
+            "precision": 0.32125747936075133,
+            "recall": 0.3611111111111111,
+            "f1-score": 0.27351531178500565,
+            "support": 216.0
+        }
+    },
+    "Client_Id_7": {
+        "NULL": {
+            "precision": 0.4830917874396135,
+            "recall": 0.8928571428571429,
+            "f1-score": 0.6269592476489029,
+            "support": 112.0,
+            "accuracy": 0.8928571343421936,
+            "loss": 2.138159990310669
+        },
+        "jogging": {
+            "precision": 0.8571428571428571,
+            "recall": 0.6,
+            "f1-score": 0.7058823529411765,
+            "support": 10.0,
+            "accuracy": 0.6000000238418579,
+            "loss": 2.431016683578491
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.32142857142857145,
+            "recall": 0.9,
+            "f1-score": 0.47368421052631576,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.5625,
+            "recall": 0.9,
+            "f1-score": 0.6923076923076923,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.2,
+            "support": 9.0,
+            "accuracy": 0.1111111119389534,
+            "loss": 2.919905662536621
+        },
+        "stretching (triceps)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 9.0,
+            "accuracy": 0.3333333432674408,
+            "loss": 2.697683572769165
+        },
+        "push-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.9,
+            "recall": 1.0,
+            "f1-score": 0.9473684210526315,
+            "support": 9.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "sit-ups (complex)": {
+            "precision": 1.0,
+            "recall": 0.18181818181818182,
+            "f1-score": 0.3076923076923077,
+            "support": 11.0,
+            "accuracy": 0.1818181872367859,
+            "loss": 2.849198818206787
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.48771929824561405,
+        "macro avg": {
+            "precision": 0.3223243797900548,
+            "recall": 0.25890104047998785,
+            "f1-score": 0.234415485903633,
+            "support": 285.0
+        },
+        "weighted avg": {
+            "precision": 0.38111226132965265,
+            "recall": 0.48771929824561405,
+            "f1-score": 0.37596178760883525,
+            "support": 285.0
+        }
+    },
+    "Client_Id_16": {
+        "NULL": {
+            "precision": 0.6213235294117647,
+            "recall": 0.9388888888888889,
+            "f1-score": 0.7477876106194691,
+            "support": 180.0,
+            "accuracy": 0.9388889074325562,
+            "loss": 2.092128276824951
+        },
+        "jogging": {
+            "precision": 0.8888888888888888,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.8888888888888888,
+            "support": 9.0,
+            "accuracy": 0.8888888955116272,
+            "loss": 2.142127752304077
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.34615384615384615,
+            "recall": 0.9,
+            "f1-score": 0.5,
+            "support": 10.0,
+            "accuracy": 0.8999999761581421,
+            "loss": 2.131016731262207
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.5714285714285714,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.6956521739130435,
+            "support": 9.0,
+            "accuracy": 0.8888888955116272,
+            "loss": 2.142127752304077
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.2,
+            "support": 9.0,
+            "accuracy": 0.1111111119389534,
+            "loss": 2.919905662536621
+        },
+        "stretching (triceps)": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 9.0,
+            "accuracy": 0.3333333432674408,
+            "loss": 2.697683572769165
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 1.0,
+            "recall": 0.7272727272727273,
+            "f1-score": 0.8421052631578947,
+            "support": 11.0,
+            "accuracy": 0.7272727489471436,
+            "loss": 2.303744077682495
+        },
+        "push-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 1.0,
+            "recall": 0.3,
+            "f1-score": 0.46153846153846156,
+            "support": 10.0,
+            "accuracy": 0.30000001192092896,
+            "loss": 2.7310168743133545
+        },
+        "sit-ups (complex)": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 10.0,
+            "accuracy": 0.5,
+            "loss": 2.5310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.6114285714285714,
+        "macro avg": {
+            "precision": 0.3909365703096353,
+            "recall": 0.29412546517809673,
+            "f1-score": 0.289612582357075,
+            "support": 350.0
+        },
+        "weighted avg": {
+            "precision": 0.5069789454243235,
+            "recall": 0.6114285714285714,
+            "f1-score": 0.5163081390100285,
+            "support": 350.0
+        }
+    },
+    "Client_Id_0": {
+        "NULL": {
+            "precision": 0.2564102564102564,
+            "recall": 0.9259259259259259,
+            "f1-score": 0.40160642570281124,
+            "support": 54.0,
+            "accuracy": 0.9259259104728699,
+            "loss": 2.105090856552124
+        },
+        "jogging": {
+            "precision": 0.6666666666666666,
+            "recall": 0.9090909090909091,
+            "f1-score": 0.7692307692307693,
+            "support": 22.0,
+            "accuracy": 0.9090909361839294,
+            "loss": 2.1219258308410645
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 14.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "jogging (skipping)": {
+            "precision": 0.4,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.47058823529411764,
+            "support": 14.0,
+            "accuracy": 0.5714285969734192,
+            "loss": 2.4595882892608643
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.6363636363636364,
+            "recall": 0.875,
+            "f1-score": 0.7368421052631579,
+            "support": 16.0,
+            "accuracy": 0.875,
+            "loss": 2.1560168266296387
+        },
+        "jogging (butt-kicks)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 13.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (triceps)": {
+            "precision": 1.0,
+            "recall": 0.09090909090909091,
+            "f1-score": 0.16666666666666666,
+            "support": 11.0,
+            "accuracy": 0.09090909361839294,
+            "loss": 2.940107822418213
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 1.0,
+            "recall": 0.125,
+            "f1-score": 0.2222222222222222,
+            "support": 8.0,
+            "accuracy": 0.125,
+            "loss": 2.9060168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.8,
+            "recall": 0.36363636363636365,
+            "f1-score": 0.5,
+            "support": 11.0,
+            "accuracy": 0.3636363744735718,
+            "loss": 2.6673805713653564
+        },
+        "push-ups": {
+            "precision": 0.4,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.2857142857142857,
+            "support": 9.0,
+            "accuracy": 0.2222222238779068,
+            "loss": 2.8087947368621826
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 15.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 17.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 18.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "accuracy": 0.35842293906810035,
+        "macro avg": {
+            "precision": 0.2715495031284505,
+            "recall": 0.21490595174805702,
+            "f1-score": 0.18699319526810687,
+            "support": 279.0
+        },
+        "weighted avg": {
+            "precision": 0.2713069487263035,
+            "recall": 0.35842293906810035,
+            "f1-score": 0.24612929237238923,
+            "support": 279.0
+        }
+    },
+    "Client_Id_4": {
+        "NULL": {
+            "precision": 0.5078740157480315,
+            "recall": 0.8896551724137931,
+            "f1-score": 0.6466165413533834,
+            "support": 145.0,
+            "accuracy": 0.8896551728248596,
+            "loss": 2.141361951828003
+        },
+        "jogging": {
+            "precision": 0.8888888888888888,
+            "recall": 1.0,
+            "f1-score": 0.9411764705882353,
+            "support": 8.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.3157894736842105,
+            "recall": 0.75,
+            "f1-score": 0.4444444444444444,
+            "support": 8.0,
+            "accuracy": 0.75,
+            "loss": 2.2810165882110596
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.3333333333333333,
+            "recall": 0.8571428571428571,
+            "f1-score": 0.48,
+            "support": 7.0,
+            "accuracy": 0.8571428656578064,
+            "loss": 2.1738736629486084
+        },
+        "jogging (butt-kicks)": {
+            "precision": 1.0,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.2,
+            "support": 9.0,
+            "accuracy": 0.1111111119389534,
+            "loss": 2.919905662536621
+        },
+        "stretching (triceps)": {
+            "precision": 1.0,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.4444444444444444,
+            "support": 7.0,
+            "accuracy": 0.2857142984867096,
+            "loss": 2.745302438735962
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 13.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "push-ups": {
+            "precision": 0.5,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5714285714285714,
+            "support": 9.0,
+            "accuracy": 0.6666666865348816,
+            "loss": 2.3643500804901123
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "sit-ups": {
+            "precision": 1.0,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.2857142857142857,
+            "support": 6.0,
+            "accuracy": 0.1666666716337204,
+            "loss": 2.8643500804901123
+        },
+        "sit-ups (complex)": {
+            "precision": 1.0,
+            "recall": 0.2,
+            "f1-score": 0.3333333333333333,
+            "support": 10.0,
+            "accuracy": 0.20000000298023224,
+            "loss": 2.831017017364502
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 13.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0,
+            "accuracy": 0.0,
+            "loss": 3.0310170650482178
+        },
+        "accuracy": 0.5062893081761006,
+        "macro avg": {
+            "precision": 0.3445203006133929,
+            "recall": 0.25931351366923056,
+            "f1-score": 0.2287977942792999,
+            "support": 318.0
+        },
+        "weighted avg": {
+            "precision": 0.38400154879680093,
+            "recall": 0.5062893081761006,
+            "f1-score": 0.38775456955374005,
+            "support": 318.0
+        }
+    },
+    "Client_Id_14": {
+        "NULL": {
+            "precision": 0.576,
+            "recall": 0.935064935064935,
+            "f1-score": 0.7128712871287128,
+            "support": 154.0,
+            "accuracy": 0.9350649118423462,
+            "loss": 2.095952033996582
+        },
+        "jogging": {
+            "precision": 0.875,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.8235294117647058,
+            "support": 9.0,
+            "accuracy": 0.7777777910232544,
+            "loss": 2.2532389163970947
+        },
+        "jogging (rotating arms)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "jogging (skipping)": {
+            "precision": 0.3,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.41379310344827586,
+            "support": 9.0,
+            "accuracy": 0.6666666865348816,
+            "loss": 2.3643500804901123
+        },
+        "jogging (sidesteps)": {
+            "precision": 0.5714285714285714,
+            "recall": 1.0,
+            "f1-score": 0.7272727272727273,
+            "support": 8.0,
+            "accuracy": 1.0,
+            "loss": 2.0310165882110596
+        },
+        "jogging (butt-kicks)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (triceps)": {
+            "precision": 0.8571428571428571,
+            "recall": 0.6,
+            "f1-score": 0.7058823529411765,
+            "support": 10.0,
+            "accuracy": 0.6000000238418579,
+            "loss": 2.431016683578491
+        },
+        "stretching (lunging)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (shoulders)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (hamstrings)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "stretching (lumbar rotation)": {
+            "precision": 1.0,
+            "recall": 0.5555555555555556,
+            "f1-score": 0.7142857142857143,
+            "support": 9.0,
+            "accuracy": 0.5555555820465088,
+            "loss": 2.475461006164551
+        },
+        "push-ups": {
+            "precision": 0.25,
+            "recall": 0.25,
+            "f1-score": 0.25,
+            "support": 8.0,
+            "accuracy": 0.25,
+            "loss": 2.7810168266296387
+        },
+        "push-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "sit-ups": {
+            "precision": 1.0,
+            "recall": 0.2,
+            "f1-score": 0.3333333333333333,
+            "support": 10.0,
+            "accuracy": 0.20000000298023224,
+            "loss": 2.831017017364502
+        },
+        "sit-ups (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "burpees": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "lunges (complex)": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "bench-dips": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0,
+            "accuracy": 0.0,
+            "loss": 3.0310168266296387
+        },
+        "accuracy": 0.5642633228840125,
+        "macro avg": {
+            "precision": 0.28576691729323306,
+            "recall": 0.26237183868762814,
+            "f1-score": 0.2463667331670866,
+            "support": 319.0
+        },
+        "weighted avg": {
+            "precision": 0.4182503358710255,
+            "recall": 0.5642633228840125,
+            "f1-score": 0.4562915077248808,
+            "support": 319.0
+        }
+    }
+}

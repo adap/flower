@@ -12,6 +12,15 @@ dependencies = [
     "flwr-datasets[vision]>=0.5.0",
     "torch==2.5.1",
     "torchvision==0.20.1",
+    "scikit-learn==1.6.1",
+    "pandas==2.2.3",
+    "matplotlib==3.10.0",
+    "numpy==2.2.2",
+    "joblib==1.4.2",
+    "seaborn==0.13.2",
+    "plotly==6.0.0",
+    "einops==0.8.0",
+    "omegaconf==2.3.0",
 ]
 
 [tool.hatch.metadata]
@@ -29,15 +38,7 @@ dev = [
     "pytest-watch==4.2.0",
     "ruff==0.1.9",
     "types-requests==2.31.0.20240125",
-    "scikit-learn==1.6.1",
-    "pandas==2.2.3",
-    "matplotlib==3.10.0",
-    "numpy==2.2.2",
-    "joblib==1.4.2",
-    "seaborn==0.13.2",
-    "plotly==6.0.0",
-    "einops==0.8.0",
-    "omegaconf==2.3.0",
+    
 ]
 
 [tool.isort]

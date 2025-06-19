@@ -17,9 +17,8 @@ examples/**/dataset/**
 # Flower Baselines
 baselines/datasets/leaf
 
-
-baselines/fedfittech/fedfittech/Flower_log
-baselines/fedfittech/fedfittech/Early_stopping_logs
+baselines/fedfittech/Flower_log
+baselines/fedfittech/Early_stopping_logs
 
 # Swift auto-generated documentation
 Documentation

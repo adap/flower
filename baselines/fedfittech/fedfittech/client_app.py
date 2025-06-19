@@ -89,7 +89,7 @@ class FlowerClient(NumPyClient):
                 )
 
                 # Define log file path inside the Flower logs directory
-                log_dir = "./fedfittech/Early_stopping_logs/"
+                log_dir = "./Early_stopping_logs/"
                 os.makedirs(log_dir, exist_ok=True)  # Ensure directory exists
                 file_name = context_early_stop["log_file_name"]
                 fit_log_file = os.path.join(log_dir, file_name)
