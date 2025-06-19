@@ -217,6 +217,8 @@ def push_clientappoutputs(
     """Push ClientAppOutputs to SuperNode."""
     masked_token = mask_string(token)
     log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", masked_token)
+    # Set message ID
+    message.metadata.__dict__["_message_id"] = message.object_id
     proto_message = message_to_proto(message)
     proto_context = context_to_proto(context)
 

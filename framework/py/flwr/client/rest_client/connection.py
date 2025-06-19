@@ -16,7 +16,6 @@
 
 from collections.abc import Iterator
 from contextlib import contextmanager
-from copy import copy
 from logging import DEBUG, ERROR, INFO, WARN
 from typing import Callable, Optional, TypeVar, Union, cast
 
@@ -24,8 +23,6 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
-from flwr.app.metadata import Metadata
-from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
@@ -178,7 +175,6 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         log(ERROR, "Client authentication is not supported for this transport type.")
 
     # Shared variables for inner functions
-    metadata: Optional[Metadata] = None
     node: Optional[Node] = None
 
     ###########################################################################
@@ -367,10 +363,6 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             # Inject
             in_message.metadata.__dict__["_message_id"] = msg_id
 
-        # Remember `metadata` of the in message
-        nonlocal metadata
-        metadata = copy(in_message.metadata) if in_message else None
-
         return in_message
 
     def send(message: Message) -> None:
@@ -378,19 +370,6 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
-            return
-
-        # Get incoming message
-        nonlocal metadata
-        if metadata is None:
-            log(ERROR, "No current message")
-            return
-
-        # Set message_id
-        message.metadata.__dict__["_message_id"] = message.object_id
-        # Validate out message
-        if not validate_out_message(message, metadata):
-            log(ERROR, "Invalid out message")
             return
 
         with no_object_id_recompute():
@@ -449,9 +428,6 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
                         str(e),
                     )
                     log(ERROR, str(e))
-
-        # Cleanup
-        metadata = None
 
     def get_run(run_id: int) -> Run:
         # Construct the request
