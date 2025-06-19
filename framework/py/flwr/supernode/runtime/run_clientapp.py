@@ -56,6 +56,7 @@ from flwr.proto.clientappio_pb2 import (
     RequestTokenResponse,
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
+from flwr.supercore.utils import mask_string
 
 
 def run_clientapp(  # pylint: disable=R0913, R0914, R0917
@@ -195,7 +196,8 @@ def pull_clientappinputs(
     stub: ClientAppIoStub, token: str
 ) -> tuple[Message, Context, Run, Optional[Fab]]:
     """Pull ClientAppInputs from SuperNode."""
-    log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", token)
+    masked_token = mask_string(token)
+    log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", masked_token)
     try:
         res: PullClientAppInputsResponse = stub.PullClientAppInputs(
             PullClientAppInputsRequest(token=token)
@@ -214,7 +216,8 @@ def push_clientappoutputs(
     stub: ClientAppIoStub, token: str, message: Message, context: Context
 ) -> PushClientAppOutputsResponse:
     """Push ClientAppOutputs to SuperNode."""
-    log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", token)
+    masked_token = mask_string(token)
+    log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", masked_token)
     # Set message ID
     message.metadata.__dict__["_message_id"] = message.object_id
     proto_message = message_to_proto(message)
