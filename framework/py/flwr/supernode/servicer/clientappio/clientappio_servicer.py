@@ -15,13 +15,12 @@
 """ClientAppIo API servicer."""
 
 
-from dataclasses import dataclass
 from logging import DEBUG
-from typing import Optional, cast
+from typing import cast
 
 import grpc
 
-from flwr.common import Context, Message
+from flwr.common import Context
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -48,24 +47,6 @@ from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supernode.nodestate import NodeStateFactory
-
-
-@dataclass
-class ClientAppInputs:
-    """Specify the inputs to the ClientApp."""
-
-    message: Message
-    context: Context
-    run: Run
-    fab: Optional[Fab]
-
-
-@dataclass
-class ClientAppOutputs:
-    """Specify the outputs from the ClientApp."""
-
-    message: Message
-    context: Context
 
 
 # pylint: disable=C0103,W0613,W0201

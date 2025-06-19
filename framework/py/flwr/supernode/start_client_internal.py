@@ -45,9 +45,11 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.exit import ExitCode, flwr_exit
+from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
+from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.supercore.ffs import Ffs, FfsFactory
@@ -136,12 +138,19 @@ def start_client_internal(
     object_store_factory = ObjectStoreFactory()
 
     # Launch ClientAppIo API server
-    run_clientappio_api_grpc(
+    clientappio_server = run_clientappio_api_grpc(
         address=clientappio_api_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=object_store_factory,
         certificates=None,
+    )
+
+    # Register handlers for graceful shutdown
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERNODE_LEAVE,
+        exit_message="SuperNode terminated gracefully.",
+        grpc_servers=[clientappio_server],
     )
 
     # Initialize NodeState, Ffs, and ObjectStore
@@ -470,7 +479,7 @@ def run_clientappio_api_grpc(
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
-) -> tuple[grpc.Server, ClientAppIoServicer]:
+) -> grpc.Server:
     """Run ClientAppIo API gRPC server."""
     clientappio_servicer: grpc.Server = ClientAppIoServicer(
         state_factory=state_factory,
@@ -489,4 +498,4 @@ def run_clientappio_api_grpc(
     )
     log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
     clientappio_grpc_server.start()
-    return clientappio_grpc_server, clientappio_servicer
+    return clientappio_grpc_server

@@ -15,10 +15,8 @@
 """ClientAppIo API Servicer."""
 
 
-from .clientappio_servicer import ClientAppInputs, ClientAppIoServicer, ClientAppOutputs
+from .clientappio_servicer import ClientAppIoServicer
 
 __all__ = [
-    "ClientAppInputs",
     "ClientAppIoServicer",
-    "ClientAppOutputs",
 ]
