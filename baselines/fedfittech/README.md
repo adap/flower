@@ -401,7 +401,7 @@ S: Bench-dips
 
 ### For any questions, feel free to contact us via email.
 
-** Contact Information**
+**Contact Information**
 
 Shreyas Korde: shreyas.korde@student.uni-siegen.de
 
