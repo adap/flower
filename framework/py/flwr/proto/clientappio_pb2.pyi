@@ -7,6 +7,7 @@ import flwr.proto.fab_pb2
 import flwr.proto.message_pb2
 import flwr.proto.run_pb2
 import google.protobuf.descriptor
+import google.protobuf.internal.containers
 import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.message
 import typing
@@ -31,6 +32,48 @@ UNKNOWN_ERROR: ClientAppOutputCode.ValueType  # 2
 global___ClientAppOutputCode = ClientAppOutputCode
 
 
+class GetRunIdsWithPendingMessagesRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___GetRunIdsWithPendingMessagesRequest = GetRunIdsWithPendingMessagesRequest
+
+class GetRunIdsWithPendingMessagesResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_IDS_FIELD_NUMBER: builtins.int
+    @property
+    def run_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]:
+        """List of run IDs"""
+        pass
+    def __init__(self,
+        *,
+        run_ids: typing.Optional[typing.Iterable[builtins.int]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_ids",b"run_ids"]) -> None: ...
+global___GetRunIdsWithPendingMessagesResponse = GetRunIdsWithPendingMessagesResponse
+
+class RequestTokenRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+global___RequestTokenRequest = RequestTokenRequest
+
+class RequestTokenResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    TOKEN_FIELD_NUMBER: builtins.int
+    token: typing.Text
+    def __init__(self,
+        *,
+        token: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
+global___RequestTokenResponse = RequestTokenResponse
+
 class ClientAppOutputStatus(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     CODE_FIELD_NUMBER: builtins.int
@@ -45,30 +88,13 @@ class ClientAppOutputStatus(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["code",b"code","message",b"message"]) -> None: ...
 global___ClientAppOutputStatus = ClientAppOutputStatus
 
-class GetTokenRequest(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    def __init__(self,
-        ) -> None: ...
-global___GetTokenRequest = GetTokenRequest
-
-class GetTokenResponse(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    TOKEN_FIELD_NUMBER: builtins.int
-    token: builtins.int
-    def __init__(self,
-        *,
-        token: builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
-global___GetTokenResponse = GetTokenResponse
-
 class PullClientAppInputsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TOKEN_FIELD_NUMBER: builtins.int
-    token: builtins.int
+    token: typing.Text
     def __init__(self,
         *,
-        token: builtins.int = ...,
+        token: typing.Text = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
 global___PullClientAppInputsRequest = PullClientAppInputsRequest
@@ -103,14 +129,14 @@ class PushClientAppOutputsRequest(google.protobuf.message.Message):
     TOKEN_FIELD_NUMBER: builtins.int
     MESSAGE_FIELD_NUMBER: builtins.int
     CONTEXT_FIELD_NUMBER: builtins.int
-    token: builtins.int
+    token: typing.Text
     @property
     def message(self) -> flwr.proto.message_pb2.Message: ...
     @property
     def context(self) -> flwr.proto.message_pb2.Context: ...
     def __init__(self,
         *,
-        token: builtins.int = ...,
+        token: typing.Text = ...,
         message: typing.Optional[flwr.proto.message_pb2.Message] = ...,
         context: typing.Optional[flwr.proto.message_pb2.Context] = ...,
         ) -> None: ...

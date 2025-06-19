@@ -15,16 +15,14 @@
 """ClientAppIo API servicer."""
 
 
-from dataclasses import dataclass
-from logging import DEBUG, ERROR
-from typing import Optional, cast
+from logging import DEBUG
+from typing import cast
 
 import grpc
 
-from flwr.common import Context, Message, typing
+from flwr.common import Context
 from flwr.common.logger import log
 from flwr.common.serde import (
-    clientappstatus_to_proto,
     context_from_proto,
     context_to_proto,
     fab_to_proto,
@@ -37,71 +35,70 @@ from flwr.common.typing import Fab, Run
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2_grpc
 from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
-    GetTokenRequest,
-    GetTokenResponse,
+    GetRunIdsWithPendingMessagesRequest,
+    GetRunIdsWithPendingMessagesResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
+    RequestTokenRequest,
+    RequestTokenResponse,
 )
-
-
-@dataclass
-class ClientAppInputs:
-    """Specify the inputs to the ClientApp."""
-
-    message: Message
-    context: Context
-    run: Run
-    fab: Optional[Fab]
-    token: int
-
-
-@dataclass
-class ClientAppOutputs:
-    """Specify the outputs from the ClientApp."""
-
-    message: Message
-    context: Context
+from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supernode.nodestate import NodeStateFactory
 
 
 # pylint: disable=C0103,W0613,W0201
 class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     """ClientAppIo API servicer."""
 
-    def __init__(self) -> None:
-        self.clientapp_input: Optional[ClientAppInputs] = None
-        self.clientapp_output: Optional[ClientAppOutputs] = None
-        self.token_returned: bool = False
-        self.inputs_returned: bool = False
+    def __init__(
+        self,
+        state_factory: NodeStateFactory,
+        ffs_factory: FfsFactory,
+        objectstore_factory: ObjectStoreFactory,
+    ) -> None:
+        self.state_factory = state_factory
+        self.ffs_factory = ffs_factory
+        self.objectstore_factory = objectstore_factory
 
-    def GetToken(
-        self, request: GetTokenRequest, context: grpc.ServicerContext
-    ) -> GetTokenResponse:
-        """Get token."""
-        log(DEBUG, "ClientAppIo.GetToken")
+    def GetRunIdsWithPendingMessages(
+        self,
+        request: GetRunIdsWithPendingMessagesRequest,
+        context: grpc.ServicerContext,
+    ) -> GetRunIdsWithPendingMessagesResponse:
+        """Get run IDs with pending messages."""
+        log(DEBUG, "ClientAppIo.GetRunIdsWithPendingMessages")
 
-        # Fail if no ClientAppInputs are available
-        if self.clientapp_input is None:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "No inputs available.",
-            )
-        clientapp_input = cast(ClientAppInputs, self.clientapp_input)
+        # Initialize state connection
+        state = self.state_factory.state()
 
-        # Fail if token was already returned in a previous call
-        if self.token_returned:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "Token already returned. A token can be returned only once.",
-            )
+        # Get run IDs with pending messages
+        run_ids = state.get_run_ids_with_pending_messages()
 
-        # If
-        # - ClientAppInputs is set, and
-        # - token hasn't been returned before,
-        # return token
-        self.token_returned = True
-        return GetTokenResponse(token=clientapp_input.token)
+        # Return run IDs
+        return GetRunIdsWithPendingMessagesResponse(run_ids=run_ids)
+
+    def RequestToken(
+        self, request: RequestTokenRequest, context: grpc.ServicerContext
+    ) -> RequestTokenResponse:
+        """Request token."""
+        log(DEBUG, "ClientAppIo.RequestToken")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Attempt to create a token for the provided run ID
+        try:
+            token = state.create_token(request.run_id)
+        except ValueError:
+            # Return an empty token if A token already exists for this run ID,
+            # indicating the run is in progress
+            return RequestTokenResponse(token="")
+
+        # Return the token
+        return RequestTokenResponse(token=token)
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
@@ -109,36 +106,30 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Pull Message, Context, and Run."""
         log(DEBUG, "ClientAppIo.PullClientAppInputs")
 
-        # Fail if no ClientAppInputs are available
-        if self.clientapp_input is None:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "No inputs available.",
-            )
-        clientapp_input = cast(ClientAppInputs, self.clientapp_input)
+        # Initialize state and ffs connection
+        state = self.state_factory.state()
+        ffs = self.ffs_factory.ffs()
 
-        # Fail if token wasn't returned in a previous call
-        if not self.token_returned:
+        # Validate the token
+        run_id = state.get_run_id_by_token(request.token)
+        if run_id is None or not state.verify_token(run_id, request.token):
             context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "Token hasn't been returned."
-                "Token must be returned before can be returned only once.",
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token.",
             )
+            raise RuntimeError("This line should never be reached.")
 
-        # Fail if token isn't matching
-        if request.token != clientapp_input.token:
-            context.abort(
-                grpc.StatusCode.INVALID_ARGUMENT,
-                "Mismatch between ClientApp and SuperNode token",
-            )
+        # Retrieve message, context, run and fab for this run
+        message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
+        context = cast(Context, state.get_context(run_id))
+        run = cast(Run, state.get_run(run_id))
+        fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0])  # type: ignore
 
-        # Success
-        self.inputs_returned = True
         return PullClientAppInputsResponse(
-            message=message_to_proto(clientapp_input.message),
-            context=context_to_proto(clientapp_input.context),
-            run=run_to_proto(clientapp_input.run),
-            fab=fab_to_proto(clientapp_input.fab) if clientapp_input.fab else None,
+            message=message_to_proto(message),
+            context=context_to_proto(context),
+            run=run_to_proto(run),
+            fab=fab_to_proto(fab),
         )
 
     def PushClientAppOutputs(
@@ -147,98 +138,24 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Push Message and Context."""
         log(DEBUG, "ClientAppIo.PushClientAppOutputs")
 
-        # Fail if no ClientAppInputs are available
-        if not self.clientapp_input:
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Validate the token
+        run_id = state.get_run_id_by_token(request.token)
+        if run_id is None or not state.verify_token(run_id, request.token):
             context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "No inputs available.",
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token.",
             )
-        clientapp_input = cast(ClientAppInputs, self.clientapp_input)
+            raise RuntimeError("This line should never be reached.")
 
-        # Fail if token wasn't returned in a previous call
-        if not self.token_returned:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "Token hasn't been returned."
-                "Token must be returned before can be returned only once.",
-            )
+        # Save the message and context to the state
+        state.store_message(message_from_proto(request.message))
+        state.store_context(context_from_proto(request.context))
 
-        # Fail if inputs weren't delivered in a previous call
-        if not self.inputs_returned:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "Inputs haven't been delivered."
-                "Inputs must be delivered before can be returned only once.",
-            )
+        # Remove the token to make the run eligible for processing
+        # A run associated with a token cannot be handled until its token is cleared
+        state.delete_token(run_id)
 
-        # Fail if token isn't matching
-        if request.token != clientapp_input.token:
-            context.abort(
-                grpc.StatusCode.INVALID_ARGUMENT,
-                "Mismatch between ClientApp and SuperNode token",
-            )
-
-        # Preconditions met
-        try:
-            # Update Message and Context
-            self.clientapp_output = ClientAppOutputs(
-                message=message_from_proto(request.message),
-                context=context_from_proto(request.context),
-            )
-
-            # Set status
-            code = typing.ClientAppOutputCode.SUCCESS
-            status = typing.ClientAppOutputStatus(code=code, message="Success")
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            log(ERROR, "ClientApp failed to push message to SuperNode, %s", e)
-            code = typing.ClientAppOutputCode.UNKNOWN_ERROR
-            status = typing.ClientAppOutputStatus(code=code, message="Unkonwn error")
-
-        # Return status to ClientApp process
-        proto_status = clientappstatus_to_proto(status=status)
-        return PushClientAppOutputsResponse(status=proto_status)
-
-    def set_inputs(
-        self, clientapp_input: ClientAppInputs, token_returned: bool
-    ) -> None:
-        """Set ClientApp inputs.
-
-        Parameters
-        ----------
-        clientapp_input : ClientAppInputs
-            The inputs to the ClientApp.
-        token_returned : bool
-            A boolean indicating if the token has been returned.
-            Set to `True` when passing the token to `flwr-clientap`
-            and `False` otherwise.
-        """
-        if (
-            self.clientapp_input is not None
-            or self.clientapp_output is not None
-            or self.token_returned
-        ):
-            raise ValueError(
-                "ClientAppInputs and ClientAppOutputs must not be set before "
-                "calling `set_inputs`."
-            )
-        log(DEBUG, "ClientAppInputs set (token: %s)", clientapp_input.token)
-        self.clientapp_input = clientapp_input
-        self.token_returned = token_returned
-
-    def has_outputs(self) -> bool:
-        """Check if ClientAppOutputs are available."""
-        return self.clientapp_output is not None
-
-    def get_outputs(self) -> ClientAppOutputs:
-        """Get ClientApp outputs."""
-        if self.clientapp_output is None:
-            raise ValueError("ClientAppOutputs not set before calling `get_outputs`.")
-
-        # Set outputs to a local variable and clear state
-        output: ClientAppOutputs = self.clientapp_output
-        self.clientapp_input = None
-        self.clientapp_output = None
-        self.token_returned = False
-        self.inputs_returned = False
-
-        return output
+        return PushClientAppOutputsResponse()
