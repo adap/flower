@@ -17,7 +17,6 @@
 
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
-from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
@@ -25,8 +24,6 @@ from typing import Callable, Optional, Union, cast
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from flwr.app.metadata import Metadata
-from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
@@ -163,7 +160,6 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     if adapter_cls is None:
         adapter_cls = FleetStub
     stub = adapter_cls(channel)
-    metadata: Optional[Metadata] = None
     node: Optional[Node] = None
 
     def _should_giveup_fn(e: Exception) -> bool:
@@ -300,10 +296,6 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             # Inject
             in_message.metadata.__dict__["_message_id"] = msg_id
 
-        # Remember `metadata` of the in message
-        nonlocal metadata
-        metadata = copy(in_message.metadata) if in_message else None
-
         # Return the message if available
         return in_message
 
@@ -312,19 +304,6 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
-            return
-
-        # Get the metadata of the incoming message
-        nonlocal metadata
-        if metadata is None:
-            log(ERROR, "No current message")
-            return
-
-        # Set message_id
-        message.metadata.__dict__["_message_id"] = message.object_id
-        # Validate out message
-        if not validate_out_message(message, metadata):
-            log(ERROR, "Invalid out message")
             return
 
         with no_object_id_recompute():
@@ -357,9 +336,6 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
                     object_ids_to_push=objs_to_push,
                 )
                 log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
-
-        # Cleanup
-        metadata = None
 
     def get_run(run_id: int) -> Run:
         # Call FleetAPI
