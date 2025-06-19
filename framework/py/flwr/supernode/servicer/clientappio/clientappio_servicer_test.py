@@ -40,7 +40,7 @@ from flwr.supernode.runtime.run_clientapp import (
     push_clientappoutputs,
 )
 
-from .clientappio_servicer import ClientAppIoServicer, ClientAppOutputs
+from .clientappio_servicer import ClientAppIoServicer
 
 
 class TestClientAppIoServicer(unittest.TestCase):
@@ -51,35 +51,6 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.servicer = ClientAppIoServicer(Mock(), Mock(), Mock())
         self.maker = RecordMaker()
         self.mock_stub = Mock()
-
-    def test_get_outputs(self) -> None:
-        """Test getting ClientApp outputs."""
-        # Prepare
-        message = make_message(
-            metadata=self.maker.metadata(),
-            content=self.maker.recorddict(2, 2, 1),
-        )
-        context = Context(
-            run_id=1,
-            node_id=1,
-            node_config={"nodeconfig1": 4.2},
-            state=self.maker.recorddict(2, 2, 1),
-            run_config={"runconfig1": 6.1},
-        )
-        client_output = ClientAppOutputs(message, context)
-
-        # Execute and assert - when `ClientAppOutputs` is None
-        self.servicer.clientapp_output = None
-        with self.assertRaises(ValueError):
-            # `ClientAppOutputs` should not be None
-            _ = self.servicer.get_outputs()
-
-        # Execute and assert - when `ClientAppOutputs` is not None
-        self.servicer.clientapp_output = client_output
-        output = self.servicer.get_outputs()
-        assert isinstance(output, ClientAppOutputs)
-        assert output == client_output
-        assert self.servicer.clientapp_output is None
 
     def test_pull_clientapp_inputs(self) -> None:
         """Test pulling messages from SuperNode."""

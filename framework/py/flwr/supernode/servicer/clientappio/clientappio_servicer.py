@@ -16,15 +16,14 @@
 
 
 from dataclasses import dataclass
-from logging import DEBUG, ERROR
+from logging import DEBUG
 from typing import Optional, cast
 
 import grpc
 
-from flwr.common import Context, Message, typing
+from flwr.common import Context, Message
 from flwr.common.logger import log
 from flwr.common.serde import (
-    clientappstatus_to_proto,
     context_from_proto,
     context_to_proto,
     fab_to_proto,
@@ -82,8 +81,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
-
-        self.clientapp_output: Optional[ClientAppOutputs] = None
 
     def GetRunIdsWithPendingMessages(
         self,
@@ -172,40 +169,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
             raise RuntimeError("This line should never be reached.")
 
-        # Delete the token
+        # Save the message and context to the state
+        state.store_message(message_from_proto(request.message))
+        state.store_context(context_from_proto(request.context))
+
+        # Remove the token to make the run eligible for processing
+        # A run associated with a token cannot be handled until its token is cleared
         state.delete_token(run_id)
 
-        # Preconditions met
-        try:
-            # Update Message and Context
-            self.clientapp_output = ClientAppOutputs(
-                message=message_from_proto(request.message),
-                context=context_from_proto(request.context),
-            )
-
-            # Set status
-            code = typing.ClientAppOutputCode.SUCCESS
-            status = typing.ClientAppOutputStatus(code=code, message="Success")
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            log(ERROR, "ClientApp failed to push message to SuperNode, %s", e)
-            code = typing.ClientAppOutputCode.UNKNOWN_ERROR
-            status = typing.ClientAppOutputStatus(code=code, message="Unkonwn error")
-
-        # Return status to ClientApp process
-        proto_status = clientappstatus_to_proto(status=status)
-        return PushClientAppOutputsResponse(status=proto_status)
-
-    def has_outputs(self) -> bool:
-        """Check if ClientAppOutputs are available."""
-        return self.clientapp_output is not None
-
-    def get_outputs(self) -> ClientAppOutputs:
-        """Get ClientApp outputs."""
-        if self.clientapp_output is None:
-            raise ValueError("ClientAppOutputs not set before calling `get_outputs`.")
-
-        # Set outputs to a local variable and clear state
-        output: ClientAppOutputs = self.clientapp_output
-        self.clientapp_output = None
-
-        return output
+        return PushClientAppOutputsResponse()

@@ -136,7 +136,7 @@ def start_client_internal(
     object_store_factory = ObjectStoreFactory()
 
     # Launch ClientAppIo API server
-    _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
+    run_clientappio_api_grpc(
         address=clientappio_api_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
@@ -180,72 +180,39 @@ def start_client_internal(
                 get_fab=get_fab,
             )
 
-            if run_id is None:
-                time.sleep(3)  # Wait for 3s before asking again
-                continue
+            # Two isolation modes:
+            # 1. `subprocess`: SuperNode is starting the ClientApp
+            #    process as a subprocess.
+            # 2. `process`: ClientApp process gets started separately
+            #    (via `flwr-clientapp`), for example, in a separate
+            #    Docker container.
 
-            try:
-                # Two isolation modes:
-                # 1. `subprocess`: SuperNode is starting the ClientApp
-                #    process as a subprocess.
-                # 2. `process`: ClientApp process gets started separately
-                #    (via `flwr-clientapp`), for example, in a separate
-                #    Docker container.
+            # Mode 1: SuperNode starts ClientApp as subprocess
+            start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
 
-                # Mode 1: SuperNode starts ClientApp as subprocess
-                start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
-
-                if start_subprocess:
-                    _octet, _colon, _port = clientappio_api_address.rpartition(":")
-                    io_address = (
-                        f"{CLIENT_OCTET}:{_port}"
-                        if _octet == SERVER_OCTET
-                        else clientappio_api_address
-                    )
-                    # Start ClientApp subprocess
-                    command = [
-                        "flwr-clientapp",
-                        "--clientappio-api-address",
-                        io_address,
-                        "--parent-pid",
-                        str(os.getpid()),
-                        "--insecure",
-                        "--run-once",
-                    ]
-                    subprocess.run(command, check=False)
-                else:
-                    # Wait for output to become available
-                    while not clientappio_servicer.has_outputs():
-                        time.sleep(0.1)
-
-                outputs = clientappio_servicer.get_outputs()
-                reply_message, context = outputs.message, outputs.context
-
-                # Update context in the state
-                state.store_context(context)
-
-                # Send
-                send(reply_message)
-
-                # Delete messages from the state
-                state.delete_messages(
-                    message_ids=[
-                        reply_message.metadata.message_id,
-                        reply_message.metadata.reply_to_message_id,
-                    ]
+            if start_subprocess and run_id is not None:
+                _octet, _colon, _port = clientappio_api_address.rpartition(":")
+                io_address = (
+                    f"{CLIENT_OCTET}:{_port}"
+                    if _octet == SERVER_OCTET
+                    else clientappio_api_address
                 )
+                # Start ClientApp subprocess
+                command = [
+                    "flwr-clientapp",
+                    "--clientappio-api-address",
+                    io_address,
+                    "--parent-pid",
+                    str(os.getpid()),
+                    "--insecure",
+                    "--run-once",
+                ]
+                subprocess.run(command, check=False)
 
-                log(INFO, "Sent reply")
+            _push_messages(state=state, send=send)
 
-            except RunNotRunningException:
-                log(INFO, "")
-                log(
-                    INFO,
-                    "SuperNode aborted sending the reply message. "
-                    "Run ID %s is not in `RUNNING` status.",
-                    run_id,
-                )
-                log(INFO, "")
+            # Sleep for 3 seconds before the next iteration
+            time.sleep(3)
 
 
 def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
@@ -331,6 +298,53 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
         return None
 
     return run_id
+
+
+def _push_messages(
+    state: NodeState,
+    send: Callable[[Message], None],
+) -> None:
+    """Push reply messages to the SuperLink."""
+    # Get messages to send
+    reply_messages = state.get_messages(is_reply=True)
+
+    for message in reply_messages:
+        # Log message sending
+        log(INFO, "")
+        if message.metadata.group_id:
+            log(
+                INFO,
+                "[RUN %s, ROUND %s]",
+                message.metadata.run_id,
+                message.metadata.group_id,
+            )
+        else:
+            log(INFO, "[RUN %s]", message.metadata.run_id)
+        log(
+            INFO,
+            "Sending: %s message",
+            message.metadata.message_type,
+        )
+
+        # Send the message
+        try:
+            send(message)
+            log(INFO, "Sent successfully")
+        except RunNotRunningException:
+            log(
+                INFO,
+                "Run ID %s is not in `RUNNING` status. Ignoring reply message %s.",
+                message.metadata.run_id,
+                message.metadata.message_id,
+            )
+        finally:
+            # Delete the message from the state
+            state.delete_messages(
+                message_ids=[
+                    message.metadata.message_id,
+                    message.metadata.reply_to_message_id,
+                ]
+            )
 
 
 @contextmanager
