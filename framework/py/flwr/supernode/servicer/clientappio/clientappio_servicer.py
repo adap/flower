@@ -39,8 +39,6 @@ from flwr.proto import clientappio_pb2_grpc
 from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     GetRunIdsWithPendingMessagesRequest,
     GetRunIdsWithPendingMessagesResponse,
-    GetTokenRequest,
-    GetTokenResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
     PushClientAppOutputsRequest,
@@ -85,9 +83,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
 
-        self.clientapp_input: Optional[ClientAppInputs] = None
         self.clientapp_output: Optional[ClientAppOutputs] = None
-        self.token_returned: bool = False
 
     def GetRunIdsWithPendingMessages(
         self,
@@ -125,33 +121,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
 
         # Return the token
         return RequestTokenResponse(token=token)
-
-    def GetToken(
-        self, request: GetTokenRequest, context: grpc.ServicerContext
-    ) -> GetTokenResponse:
-        """Get token."""
-        log(DEBUG, "ClientAppIo.GetToken")
-
-        # Fail if no ClientAppInputs are available
-        if self.clientapp_input is None:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "No inputs available.",
-            )
-
-        # Fail if token was already returned in a previous call
-        if self.token_returned:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "Token already returned. A token can be returned only once.",
-            )
-
-        # If
-        # - ClientAppInputs is set, and
-        # - token hasn't been returned before,
-        # return token
-        self.token_returned = True
-        return GetTokenResponse(token=123)  # To be deleted
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext

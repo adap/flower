@@ -79,7 +79,6 @@ class TestClientAppIoServicer(unittest.TestCase):
         output = self.servicer.get_outputs()
         assert isinstance(output, ClientAppOutputs)
         assert output == client_output
-        assert self.servicer.clientapp_input is None
         assert self.servicer.clientapp_output is None
 
     def test_pull_clientapp_inputs(self) -> None:

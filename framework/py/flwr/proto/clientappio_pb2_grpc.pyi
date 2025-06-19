@@ -18,11 +18,6 @@ class ClientAppIoStub:
         flwr.proto.clientappio_pb2.RequestTokenResponse]
     """Request token"""
 
-    GetToken: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.clientappio_pb2.GetTokenRequest,
-        flwr.proto.clientappio_pb2.GetTokenResponse]
-    """Get token"""
-
     PullClientAppInputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.clientappio_pb2.PullClientAppInputsRequest,
         flwr.proto.clientappio_pb2.PullClientAppInputsResponse]
@@ -49,14 +44,6 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.clientappio_pb2.RequestTokenResponse:
         """Request token"""
-        pass
-
-    @abc.abstractmethod
-    def GetToken(self,
-        request: flwr.proto.clientappio_pb2.GetTokenRequest,
-        context: grpc.ServicerContext,
-    ) -> flwr.proto.clientappio_pb2.GetTokenResponse:
-        """Get token"""
         pass
 
     @abc.abstractmethod
