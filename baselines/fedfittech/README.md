@@ -130,22 +130,27 @@ pip install -e .
 
 
 ```shell
-FedFitTech/
+FedFitTech/ 
 ├── FedFitTech/
-│   ├── config/                             # Configuration for entire project
-│   │   └── base.yaml
 │   ├── flwr_utils/
 │   │   ├── TinyHAR.py                      # Defines TinyHAR Model
 │   │   ├── client_utils.py                 # Utility function for client 
-│   │   ├── plotting_functions.py           # Defies plotting methods
+│   │   ├── my_strategy_plotting.py         # Defies plotting functions
 │   │   ├── server_plotting_function.py     # Defies server side plottinng methods
 │   │   └── utils_for_tinyhar.py            # Defines functions for data cleaning, processing
-│   ├── inertial_data/                      # Data subjectwise
-│   │   └── *.csv  
 │   ├── client_app.py                       # Defines ClientApp
 │   ├── my_strategy.py                      # Defines custom FedAvg strategy for ServerApp
 │   ├── server_app.py                       # Defines ServerApp
-│   └── task.py                                          
+│   └── task.py
+├── config/                                 # Configuration for entire project
+│   └── base.yaml
+├── inertial_data/                          # Data subjectwise
+│   └── *.csv
+├── Results_to_compare/                     # Results for comparison with FedFitTech Baseline
+│   ├── fedfittech_original_results/        # original baseline results
+│   │   └── *.csv
+│   ├── plots_with_name/                    # Labeled results plots
+│   └── *fedfittech_original plots       
 ├── pyproject.toml                          # Project metadata like dependencies and configs
 ├── requirements.txt                        # Other Requirements for the project
 ├── LICENSE
