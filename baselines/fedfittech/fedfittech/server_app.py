@@ -10,14 +10,13 @@ from omegaconf import OmegaConf
 from fedfittech.flwr_utils.client_utils import (
     get_model_plot_directory,
     get_net_and_config,
+    download_all_inertial_data,
 )
 from fedfittech.my_strategy import CustomFedAvg
 from fedfittech.task import get_weights
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from fedfittech.flwr_utils.client_utils import (
-    download_data_for_client
-)
+
 
 def fit_config(server_round: int):
     """Return the configuration dictionary for each round."""
@@ -39,11 +38,12 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 def server_fn(context: Context):
     """Server Function to start the Flower server."""
     print(f"Cuda is available on Server = {torch.cuda.is_available()}\n")
-    # Download the data if not alreaday done
-    download_data_for_client()
+
 
     net, cfg = get_net_and_config()
     print(OmegaConf.to_yaml(cfg))
+    # Download inertial data if not already downloaded
+    download_all_inertial_data(cfg)
 
     # Read from config
     num_rounds = cfg.GLOBAL_ROUND

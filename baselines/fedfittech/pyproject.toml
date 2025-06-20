@@ -21,6 +21,7 @@ dependencies = [
     "plotly==6.0.0",
     "einops==0.8.0",
     "omegaconf==2.3.0",
+    "beautifulsoup4==4.13.4",
 ]
 
 [tool.hatch.metadata]

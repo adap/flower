@@ -19,4 +19,5 @@ labels_set: {'NULL': 0, 'jogging': 1, 'jogging (rotating arms)': 2, 'jogging (sk
 fraction_fit: 1.0
 fraction_evaluate: 1.0
 Early_stopping: '0'  # '1'= Yes, '0' = No
+Data_download_path: "https://ubi29.informatik.uni-siegen.de/wear_dataset/raw/inertial/50hz/"
 

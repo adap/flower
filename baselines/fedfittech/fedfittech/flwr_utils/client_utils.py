@@ -3,7 +3,8 @@
 import glob
 import os
 from datetime import datetime
-
+import requests
+from bs4 import BeautifulSoup
 import numpy as np
 from omegaconf import DictConfig, OmegaConf
 
@@ -183,3 +184,52 @@ def get_model_plot_directory(
         os.makedirs(csv_directory_name, exist_ok=True)
 
     return plt_directory_name, model_directory_name, csv_directory_name, root_log_path
+
+
+
+def download_all_inertial_data(cfg):
+    """Download inertial dataset."""
+    base_url = cfg.Data_download_path
+    data_dir = "./inertial_data/"
+
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir, exist_ok=True)
+        # Get directory listing
+        print("Fetching file list...")
+        response = requests.get(base_url)
+        if response.status_code != 200:
+            print(f"Failed to access inertial data URL: HTTP {response.status_code}")
+            return
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+        links = soup.find_all('a')
+
+        # Extract all .csv filenames
+        csv_files = [link.get('href') for link in links if link.get('href', '').endswith('.csv')]
+
+        if not csv_files:
+            print("No CSV files found.")
+            return
+
+        print(f"Found {len(csv_files)} CSV files. Starting download...")
+
+        os.makedirs(data_dir, exist_ok=True)
+
+        for filename in csv_files:
+            file_url = base_url + filename
+            file_path = os.path.join(data_dir, filename)
+
+            print(f"Downloading {filename}...")
+            file_response = requests.get(file_url, timeout=10)
+            if file_response.status_code == 200:
+                with open(file_path, 'wb') as f:
+                    f.write(file_response.content)
+            else:
+                print(f"Failed to download {filename} (HTTP {file_response.status_code})")
+
+        print("Download complete.")
+    elif os.path.exists(data_dir):
+        print(f"Data directory '{data_dir}' already exists. Skipping download.")    
+
+
+
