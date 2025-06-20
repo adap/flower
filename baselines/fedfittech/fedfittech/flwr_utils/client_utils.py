@@ -16,6 +16,17 @@ from fedfittech.flwr_utils.utils_for_tinyhar import (
 
 from .TinyHAR import TinyHAR
 
+def download_data_for_client():
+    """Load data for clients from WEAR repository."""
+    DOWNLOAD_URL = (f"https://ubi29.informatik.uni-siegen.de/"
+                    f"wear_dataset/raw/inertial/50hz/")
+    # Download the dataset if not already downloaded
+    if not os.path.exists("./inertial_data/"):
+        print("Downloading inertial data from WEAR repository...")
+        os.makedirs("./inertial_data/", exist_ok=True)
+        os.system(f"wget -P ./inertial_data/ {DOWNLOAD_URL}*.csv") 
+    # PATH = os.path.join(os.getcwd(), "./inertial_data/")
+
 
 def load_data_for_client(cfg, user_num):
     """Load data for cliets."""
