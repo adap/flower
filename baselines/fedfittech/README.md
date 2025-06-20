@@ -144,8 +144,6 @@ FedFitTech/
 │   └── task.py
 ├── config/                                 # Configuration for entire project
 │   └── base.yaml
-├── inertial_data/                          # Data subjectwise
-│   └── *.csv
 ├── Results_to_compare/                     # Results for comparison with FedFitTech Baseline
 │   ├── fedfittech_original_results/        # original baseline results
 │   │   └── *.csv
