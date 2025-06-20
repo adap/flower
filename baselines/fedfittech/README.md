@@ -65,6 +65,7 @@ Dataset:
 
 
 **2.3 Data splitting:** <p align="justify">In the WEAR dataset, participants perform the same activities multiple times across different time periods to simulate realistic scenarios. This variability means that activity patterns can change over time due to factors like fatigue, weather conditions, and ground changes. To account for this, the dataset is split such that the first 20% of each labeled activity in the time series is used for testing, and the remaining 80% is used for training. This approach ensures that the testing data includes varied patterns, such as a person jogging both at the beginning and later in the exercise session.</p>
+If the `server.py` script fails to download the inertial data automatically due to a server timeout or other issues, you can download it manually. The data used for this baseline is available [here](https://ubi29.informatik.uni-siegen.de/wear_dataset/raw/inertial/50hz/). Click on the link to manually download the WEAR dataset. Ensure you create an `inertial_data` folder in the `/baselines/fedfittech/` directory. The updated repository structure should look like this: `/baselines/fedfittech/inertial_data/*.csv`.
 
 **2.4 Client setting:** In the dataset, 2 participants were re-recorded in a different season and environment, resulting in 24 subjects. These 2 additional subjects are treated as separate devices for the same individuals to reflect real-world FitTech scenarios, thus setting the number of clients to 24.
 
