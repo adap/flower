@@ -23,7 +23,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, Normalize, ToTensor
+from torchvision.transforms import (
+    Compose,
+    Normalize,
+    ToTensor,
+    RandomHorizontalFlip,
+    RandomCrop,
+)
 from flwr.common import Parameters
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import PathologicalPartitioner
@@ -33,9 +39,9 @@ from flwr_datasets.preprocessor import Merger
 DataLoaders = Tuple[DataLoader, DataLoader]
 
 # Constants
-NUM_CLASSES = 100
-CIFAR_MEAN = (0.5, 0.5, 0.5)
-CIFAR_STD = (0.5, 0.5, 0.5)
+NUM_CLASSES = 10
+CIFAR_MEAN = (0.485, 0.456, 0.406)
+CIFAR_STD = (0.229, 0.224, 0.225)
 
 '''
 MobileNet in PyTorch.
@@ -43,141 +49,61 @@ See the paper "MobileNets: Efficient Convolutional Neural Networks for Mobile Vi
 for more details.
 '''
 
+import torch
+import torch.nn as nn
 
-class Block(nn.Module):
-    """Implements a MobileNet block with depthwise and pointwise convolutions.
 
-    This block is the fundamental building block of MobileNet architecture,
-    implementing the depthwise separable convolution that significantly reduces
-    computational cost compared to standard convolutions.
+class FourConvNet(nn.Module):
+    def __init__(self, num_classes=10):
+        super(FourConvNet, self).__init__()
 
-    The block consists of two main operations:
-    1. Depthwise convolution: applies a single filter per input channel
-    2. Pointwise convolution: 1x1 convolution to change the number of channels
-
-    Args:
-        in_planes (int): Number of input channels
-        out_planes (int): Number of output channels
-        stride (int, optional): Stride for depthwise convolution. Defaults to 1
-
-    Note:
-        - BatchNorm is used after each convolution with track_running_stats=False
-          to support federated learning scenarios
-        - ReLU activation is applied after each BatchNorm
-        - All convolutions are bias-free as BatchNorm is used
-    """
-
-    def __init__(self, in_planes: int, out_planes: int, stride: int = 1) -> None:
-        super().__init__()
-        self.conv1 = nn.Conv2d(
-            in_planes,
-            in_planes,
-            kernel_size=3,
-            stride=stride,
-            padding=1,
-            groups=in_planes,  # Depthwise convolution
-            bias=False,
+        # Feature extraction part
+        self.feature_extractor = nn.Sequential(
+            # First convolutional block
+            nn.Sequential(
+                nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(
+                    64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False
+                ),
+                nn.ReLU(),
+                nn.MaxPool2d(
+                    kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False
+                ),
+            ),
+            # Second convolutional block
+            nn.Sequential(
+                nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(
+                    64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False
+                ),
+                nn.ReLU(),
+                nn.MaxPool2d(
+                    kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False
+                ),
+            ),
+            # Third convolutional block
+            nn.Sequential(
+                nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(
+                    64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=False
+                ),
+                nn.ReLU(),
+                nn.MaxPool2d(
+                    kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False
+                ),
+            ),
         )
-        self.bn1 = nn.BatchNorm2d(in_planes, track_running_stats=False)
-        self.conv2 = nn.Conv2d(
-            in_planes,
-            out_planes,
-            kernel_size=1,  # Pointwise convolution
-            stride=1,
-            padding=0,
-            bias=False,
-        )
-        self.bn2 = nn.BatchNorm2d(out_planes, track_running_stats=False)
+
+        # Classifier part
+        self.classifier = nn.Linear(
+            1024, num_classes
+        )  # Note: input feature dimension should match actual feature map size
 
     def forward(self, x):
-        out = F.relu(self.bn1(self.conv1(x)))
-        out = F.relu(self.bn2(self.conv2(out)))
-        return out
-
-
-class MobileNetCifar(nn.Module):
-    """MobileNet architecture for CIFAR-10 dataset.
-
-    The network consists of depthwise separable convolutions which significantly
-    reduce the number of parameters compared to standard convolutions while
-    maintaining good performance.
-
-    Args:
-        num_classes (int, optional): Number of output classes. Defaults to 10.
-    """
-
-    # Architecture configuration
-    # Format: (channels, stride). If single int, stride=1
-    cfg = [
-        64,  # Conv 64, stride 1
-        (128, 2),  # Conv 128, stride 2
-        128,  # Conv 128, stride 1
-        (256, 2),  # Conv 256, stride 2
-        256,  # Conv 256, stride 1
-        (512, 2),  # Conv 512, stride 2
-        512,
-        512,
-        512,
-        512,
-        512,  # 5x Conv 512, stride 1
-        (1024, 2),  # Conv 1024, stride 2
-        1024,  # Conv 1024, stride 1
-    ]
-
-    def __init__(self, num_classes: int = NUM_CLASSES) -> None:
-        super().__init__()
-
-        # Feature extraction layers
-        self.feature_extractor = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(32, track_running_stats=False),
-            nn.ReLU(inplace=True),
-            *self._make_layers(in_planes=32),
-            nn.AvgPool2d(2),
-            nn.Flatten(),
-        )
-
-        # Classification layer
-        self.classifier = nn.Linear(1024, num_classes)
-
-    def _make_layers(self, in_planes: int) -> List[nn.Module]:
-        """Constructs the convolutional layers based on the configuration.
-
-        Args:
-            in_planes (int): Number of input channels for the first layer
-
-        Returns:
-            List[nn.Module]: List of Block modules forming the network backbone
-        """
-        layers = []
-        for x in self.cfg:
-            out_planes = x if isinstance(x, int) else x[0]
-            stride = 1 if isinstance(x, int) else x[1]
-            layers.append(Block(in_planes, out_planes, stride))
-            in_planes = out_planes
-        return layers
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward pass of the model.
-
-        Args:
-            x (torch.Tensor): Input tensor of shape (batch_size, 3, H, W)
-
-        Returns:
-            torch.Tensor: Output tensor of shape (batch_size, num_classes)
-        """
-        return self.classifier(self.feature_extractor(x))
-
-    def extract_features(self, x: torch.Tensor) -> torch.Tensor:
-        """Extract features from the input using only the feature extractor.
-
-        Args:
-            x (torch.Tensor): Input tensor of shape (batch_size, 3, H, W)
-
-        Returns:
-            torch.Tensor: Features of shape (batch_size, 1024)
-        """
-        return self.feature_extractor(x)
+        x = self.feature_extractor(x)
+        x = torch.flatten(x, 1)  # Flatten the feature map
+        x = self.classifier(x)
+        return x
 
 
 fds = None  # Cache FederatedDataset
@@ -225,12 +151,12 @@ def load_data(
         # Initialize dataset with Dirichlet partitioning for non-IID data distribution
         partitioner = PathologicalPartitioner(
             num_partitions=num_partitions,
-            partition_by="fine_label",
+            partition_by="label",
             num_classes_per_partition=num_classes_per_client,
             seed=seed,
         )
         fds = FederatedDataset(
-            dataset="uoft-cs/cifar100",
+            dataset="uoft-cs/cifar10",
             partitioners={"train": partitioner},
             preprocessor=Merger({"train": ("train", "test")}),
         )
@@ -243,7 +169,12 @@ def load_data(
 
     # Define image transformations
     pytorch_transforms = Compose(
-        [ToTensor(), Normalize(mean=CIFAR_MEAN, std=CIFAR_STD)]
+        [
+            ToTensor(),
+            Normalize(mean=CIFAR_MEAN, std=CIFAR_STD),
+            RandomHorizontalFlip(),
+            RandomCrop(32, padding=4),
+        ]
     )
 
     def apply_transforms(batch):
@@ -260,7 +191,7 @@ def load_data(
 
 
 def train(
-    net: MobileNetCifar,
+    net: FourConvNet,
     trainloader: DataLoader,
     epochs: int,
     lr: float,
@@ -279,7 +210,7 @@ def train(
     features across clients.
 
     Args:
-        net (MobileNetCifar): The neural network model with separate body and head
+        net (FourConvNet): The neural network model with separate body and head
         trainloader (DataLoader): DataLoader for the training dataset
         epochs (int): Number of training epochs
         lr (float): Learning rate for the feature extractor
@@ -312,7 +243,7 @@ def train(
         for batch in trainloader:
             # Move data to appropriate device
             images = batch["img"].to(device)
-            labels = batch["fine_label"].to(device)
+            labels = batch["label"].to(device)
 
             # Forward and backward passes
             optimizer.zero_grad()
@@ -327,13 +258,12 @@ def train(
 
 
 def test(
-    net: MobileNetCifar,
+    net: FourConvNet,
     testloader: DataLoader,
     trainloader: DataLoader,
     device: torch.device,
     finetune_epochs: int,
     lr: float,
-    momentum: float,
 ) -> Tuple[float, float]:
     """Evaluate model performance with local fine-tuning.
 
@@ -346,13 +276,12 @@ def test(
     learning.
 
     Args:
-        net (MobileNetCifar): The neural network model to evaluate
+        net (FourConvNet): The neural network model to evaluate
         testloader (DataLoader): DataLoader for test/validation data
         trainloader (DataLoader): DataLoader for fine-tuning
         device (torch.device): Device to run computations on (CPU/GPU)
         finetune_epochs (int): Number of epochs for fine-tuning
         lr (float): Learning rate for fine-tuning
-        momentum (float): Momentum factor for SGD optimizer
 
     Returns:
         Tuple[float, float]: Contains:
@@ -360,7 +289,7 @@ def test(
             - Classification accuracy on test dataset
     """
     # First fine-tune the model on local data
-    finetune(net, trainloader, finetune_epochs, lr, momentum, device)
+    finetune(net, trainloader, finetune_epochs, lr, device)
 
     # Evaluate the fine-tuned model
     net.to(device)
@@ -373,7 +302,7 @@ def test(
     with torch.no_grad():
         for batch in testloader:
             images = batch["img"].to(device)
-            labels = batch["fine_label"].to(device)
+            labels = batch["label"].to(device)
 
             outputs = net(images)
             total_loss += criterion(outputs, labels).item()
@@ -386,11 +315,10 @@ def test(
 
 
 def finetune(
-    net: MobileNetCifar,
+    net: FourConvNet,
     trainloader: DataLoader,
     finetune_epochs: int,
     lr: float,
-    momentum: float,
     device: torch.device,
 ) -> None:
     """Fine-tune the entire model on local data.
@@ -405,24 +333,23 @@ def finetune(
     fine-tuning updates all model parameters to better fit local data patterns.
 
     Args:
-        net (MobileNetCifar): The neural network model to fine-tune
+        net (FourConvNet): The neural network model to fine-tune
         trainloader (DataLoader): DataLoader for the training dataset
         finetune_epochs (int): Number of fine-tuning epochs
         lr (float): Learning rate for fine-tuning
-        momentum (float): Momentum factor for SGD optimizer
         device (torch.device): Device to run computations on (CPU/GPU)
     """
     net.to(device)
     criterion = torch.nn.CrossEntropyLoss().to(device)
 
     # Unlike training, we fine-tune all parameters including the classifier
-    optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=momentum)
+    optimizer = torch.optim.SGD(net.parameters(), lr=lr)
 
     net.train()
     for _ in range(finetune_epochs):
         for batch in trainloader:
             images = batch["img"].to(device)
-            labels = batch["fine_label"].to(device)
+            labels = batch["label"].to(device)
 
             optimizer.zero_grad()
             outputs = net(images)

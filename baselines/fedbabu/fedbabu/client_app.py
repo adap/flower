@@ -27,24 +27,16 @@ from torch.utils.data import DataLoader
 from flwr.client import NumPyClient, ClientApp
 from flwr.common import Context, Scalar, Config, Parameters
 
-from fedbabu.task import (
-    MobileNetCifar,
-    load_data,
-    get_weights,
-    set_weights,
-    train,
-    test,
-)
+from fedbabu.task import FourConvNet, load_data, get_weights, set_weights, train, test
 
 # Default hyperparameters and configuration
 NUM_CLASSES = 10  # Number of classes in CIFAR-10 dataset
-DEFAULT_ALPHA = 0.1  # Dirichlet concentration parameter for non-IID data distribution
 DEFAULT_BATCH_SIZE = 32  # Mini-batch size for training and evaluation
 DEFAULT_LEARNING_RATE = 0.1  # Initial learning rate for SGD optimizer
 DEFAULT_MOMENTUM = 0.9  # Momentum factor for SGD optimizer
-DEFALUT_LOCAL_EPOCHS = 1  # Number of local training epochs per round
+DEFALUT_LOCAL_EPOCHS = 4  # Number of local training epochs per round
 DEFAULT_FINETUNE_EPOCHS = 1  # Number of epochs for fine-tuning before evaluation
-DEFAULT_NUM_CLASSES_PER_CLIENT = 10  # Number of classes per client in non-IID setting
+DEFAULT_NUM_CLASSES_PER_CLIENT = 2  # Number of classes per client in non-IID setting
 DEFAULT_TRAIN_TEST_SPLIT_RATIO = 0.2  # Ratio for test set in local data
 DEFAULT_SEED = 42  # Random seed for reproducibility
 
@@ -66,7 +58,7 @@ class FedBABUClient(NumPyClient):
     federation while allowing local specialization during evaluation.
 
     Args:
-        net (MobileNetCifar): The neural network model with separate body and head
+        net (FourConvNet): The neural network model with separate body and head
         trainloader (DataLoader): DataLoader for the local training dataset
         valloader (DataLoader): DataLoader for the local validation dataset
         local_epochs (int): Number of local training epochs per federated round
@@ -77,7 +69,7 @@ class FedBABUClient(NumPyClient):
 
     def __init__(
         self,
-        net: MobileNetCifar,
+        net: FourConvNet,
         trainloader: DataLoader,
         valloader: DataLoader,
         local_epochs: int,
@@ -118,7 +110,6 @@ class FedBABUClient(NumPyClient):
         """
         # Update local model with global parameters
         set_weights(self.net, parameters)
-
         # Perform local training
         train_loss = train(
             net=self.net,
@@ -169,7 +160,6 @@ class FedBABUClient(NumPyClient):
             device=self.device,
             finetune_epochs=self.finetune_epochs,
             lr=self.lr,
-            momentum=self.momentum,
         )
 
         return loss, len(self.valloader.dataset), {"loss": loss, "accuracy": accuracy}
@@ -203,7 +193,7 @@ def client_fn(context: Context) -> NumPyClient:
         NumPyClient: A configured FedBABUClient instance ready for federation
     """
     # Initialize model
-    net = MobileNetCifar()
+    net = FourConvNet()
 
     # Extract configuration from context
     partition_id = context.node_config["partition-id"]

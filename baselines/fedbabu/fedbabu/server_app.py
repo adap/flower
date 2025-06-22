@@ -25,7 +25,7 @@ from flwr.common import Context, Metrics, Parameters, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
-from fedbabu.task import MobileNetCifar, get_weights
+from fedbabu.task import FourConvNet, get_weights
 
 # Server configuration constants
 MIN_AVAILABLE_CLIENTS = 2  # Minimum number of clients required for federation
@@ -36,7 +36,7 @@ def get_initial_parameters() -> Parameters:
     """Initialize model parameters for federated learning.
 
     This function creates the initial global model state by:
-    1. Instantiating a fresh MobileNetCifar model
+    1. Instantiating a fresh FourConvNet model
     2. Extracting its parameters
     3. Converting parameters to Flower's format
 
@@ -47,7 +47,7 @@ def get_initial_parameters() -> Parameters:
         Parameters: Initial model parameters ready for distribution to clients
     """
     # Create a new model instance and get its parameters
-    model = MobileNetCifar()
+    model = FourConvNet()
     ndarrays = get_weights(model)
     return ndarrays_to_parameters(ndarrays)
 
