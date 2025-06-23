@@ -1,6 +1,6 @@
 ---
 Title: "FedFitTech: A Baseline in Federated Learning for Fitness Tracking"
-url: "[http://arxiv.org/abs/2506.16840](http://arxiv.org/abs/2506.16840)"
+url: "[http://arxiv.org/abs/2506.16840]"
 Labels:
   - TinyHAR
   - "https://publikationen.bibliothek.kit.edu/1000150216"
