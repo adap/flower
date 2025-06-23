@@ -81,95 +81,82 @@ pip install -e .
 
 ## Setting up a Jetson Orin NX
 
-> These steps have been validated for a Jetson Orin NX Dev Kit.
+> These steps have been validated for a Jetson Orin NX Dev Kit using JetPack 6.1.
 
-1. **Install JetPack 6.0 on your Jetson device**
+1. **Install JetPack 6.1 on your Jetson device**
 
-   - Download the JetPack 6.0 image from [NVIDIA-embedded](https://developer.nvidia.com/embedded/jetpack-sdk-60), note that you might need an NVIDIA developer account. For our testing, we used the reComputer J4012 model and installed JetPack 6.0 by following the instructions provided by [Seeed Studio](https://wiki.seeedstudio.com/reComputer_J4012_Flash_Jetpack/). (Optional) If you are using an older Jetson model, you may still download and install JetPack 5.1.2 from NVIDIA’s website, although the current setup has been validated with JetPack 6.0.
-   
+   - Download the JetPack 6.1 image from [NVIDIA-embedded](https://developer.nvidia.com/embedded/jetpack-sdk-61). You might need an NVIDIA developer account. For our testing, we used the reComputer J4012 model and followed the instructions provided by [Seeed Studio](https://wiki.seeedstudio.com/reComputer_J4012_Flash_Jetpack/) to flash JetPack 6.1.
+
    - Installation procedures may vary slightly depending on the Jetson model you own. Please refer to the appropriate instructions on the NVIDIA Embedded site or the Seeed Studio site for your specific board.
 
 2. **Set up the device.** The first time you boot your Orin NX you should plug it into a display to complete the installation process. After that, a display is no longer needed for this example but you could still use it instead of connecting to your device over ssh.
 
-3. **Set up Docker**: Docker comes pre-installed with the Ubuntu image provided by NVIDIA. But for convenience, we will create a new user group and add our user to it (with the idea of not having to use `sudo` for every command involving docker (e.g. `docker run`, `docker ps`, etc)). More details about what this entails can be found in the [Docker documentation](https://docs.docker.com/engine/install/linux-postinstall/). You can achieve this by doing:
-
-   ```bash
-   sudo usermod -aG docker $USER
-   # apply changes to current shell (or logout/reboot)
-   newgrp docker
-   ```
-
-4. **Update OS and install utilities.** Then, install some useful utilities:
+3. **Set up Python environment**: Instead of using Docker, we recommend setting up a native Python environment using `venv`. This allows more flexible control over dependencies while avoiding container overhead.
 
    ```bash
    sudo apt update && sudo apt upgrade -y
-   # now reboot
+   sudo apt install python3-venv python3-pip libopenblas-dev libjpeg-dev libomp-dev
+   python3 -m venv ~/flower-venv
+   source ~/flower-venv/bin/activate
+   pip install --upgrade pip setuptools wheel
+   ```
+
+4. **Install ML dependencies.**
+
+   Install PyTorch and torchvision using JetPack 6.1-compatible wheels:
+
+   ```bash
+   # PyTorch (JetPack 6.1, PyTorch 2.7.0)
+   wget https://pypi.jetson-ai-lab.dev/jp6/cu126/+f/6ef/f643c0a7acda9/torch-2.7.0-cp310-cp310-linux_aarch64.whl#sha256=6eff643c0a7acda92734cc798338f733ff35c7df1a4434576f5ff7c66fc97319 -O torch-2.7.0-cp310-cp310-linux_aarch64.whl
+   pip install torch-2.7.0-cp310-cp310-linux_aarch64.whl
+
+   # torchvision
+   wget https://pypi.jetson-ai-lab.dev/jp6/cu126/+f/daa/bff3a07259968/torchvision-0.22.0-cp310-cp310-linux_aarch64.whl
+   pip install torchvision-0.22.0-cp310-cp310-linux_aarch64.whl
+   ```
+
+   - If you encounter an error related to `libcusparseLt.so.0`, install it with:
+     ```bash
+     sudo apt install libcusparse-12-0
+     ```
+
+   - If you face issues with NumPy compatibility:
+     ```bash
+     pip install numpy==1.26.4
+     ```
+
+5. **Install Flower and related libraries**
+
+   ```bash
+   pip install flwr flwr-datasets datasets
+   ```
+
+6. **Update OS and install monitoring tools.**
+
+   ```bash
+   sudo apt install python3-pip -y
+   sudo pip3 install -U jetson-stats
    sudo reboot
    ```
 
-   Login again and (optional) install the following packages:
+   After reboot, you can launch `jtop` by simply typing `jtop` in the terminal. You may also install `tmux` for terminal multiplexing:
 
-   <img align="right" style="padding-top: 40px; padding-left: 15px" width="575" height="380" src="_static/tmux_jtop_view.gif">
+   ```bash
+   sudo apt install tmux -y
+   echo set -g mouse on > ~/.tmux.conf
+   ```
 
-   - [jtop](https://github.com/rbonghi/jetson_stats),  to monitor CPU/GPU utilization, power consumption and, many more. You can read more about it in [this blog post](https://jetsonhacks.com/2023/02/07/jtop-the-ultimate-tool-for-monitoring-nvidia-jetson-devices/).
-
-     ```bash
-     # First we need to install pip3
-     sudo apt install python3-pip -y
-     # finally, install jtop
-     sudo pip3 install -U jetson-stats
-     # now reboot (or run `sudo systemctl restart jtop.service` and login again)
-     sudo reboot
-     ```
-
-     Now you have installed `jtop`, just launch it by running the `jtop` command on your terminal. An interactive panel similar to the one shown on the right will show up. `jtop` allows you to monitor and control many features of your Jetson device. Read more in the [jtop documentation](https://rnext.it/jetson_stats/jtop/jtop.html)
-
-   - [TMUX](https://github.com/tmux/tmux/wiki), a terminal multiplexer. As its name suggests, it allows you to divide a single terminal window into multiple panels. In this way, you could (for example) use one panel to show your terminal and another to show `jtop`. That's precisely what the visualization on the right shows.
-
-     ```bash
-     # install tmux
-     sudo apt install tmux -y
-     # add mouse support
-     echo set -g mouse on > ~/.tmux.conf
-     ```
-
-5. **Power modes**. The Jetson devices can operate at different power modes, each making use of more or less CPU cores clocked at different frequencies. The right power mode might very much depend on the application and scenario. When power consumption is not a limiting factor, we could use the highest 30W mode using all 8 or 6 CPU cores. On the other hand, if the devices are battery-powered we might want to make use of a low-power mode using 10W and 2 CPU cores. All the details regarding the different power modes of a Jetson Orin can be found [here](https://docs.nvidia.com/jetson/archives/r36.2/DeveloperGuide/SO/JetsonOrinSeries.html#power-modes-profiles). For this demo, we'll be setting the device to high-performance mode:
+7. **Power modes**. Jetson devices can operate in different power modes. Set to high-performance mode for this example:
 
    ```bash
    sudo /usr/sbin/nvpmodel -m 2 # 15W with 4cpus @ 2.0GHz
    ```
 
-   Jetson Stats (that you launch via `jtop`) also allows you to see and set the power mode on your device. Navigate to the `CTRL` panel and click on one of the `NVM modes` available.
+   You can also use `jtop` to set power modes interactively.
 
-6. **Build base client image**. Before running a Flower client, we need to install `Flower` and other ML dependencies (i.e. PyTorch or Tensorflow). Instead of installing this manually via `pip3 install ...`, you can use the pre-built Docker images provided by NVIDIA. In this way, we can be confident that the ML infrastructure is optimized for these devices. Build your Flower client image with:
+8. **Run your FL experiments with Flower.**
 
-   ```bash
-   # On your Jetson's terminal run
-   ./build_jetson_flower_client.sh --pytorch # or --tensorflow
-   # Bear in mind this might take a few minutes since the base images need to be downloaded (~7GB) and decompressed.
-   # To the above script pass the additional flag `--no-cache` to re-build the image.
-   # We use the DustyNV’s base image that supports JetPack 6.0 to ensure compatibility with PyTorch v2.0.0 and above.
-   ```
-
-   Once your script is finished, verify your `flower_client` Docker image is present. If you type `docker images` you'll see something like the following:
-
-   ```bash
-   REPOSITORY      TAG       IMAGE ID       CREATED          SIZE
-   flower_client   latest    87e935a8ee37   18 seconds ago   12.6GB
-   ```
-
-7. **Access your client image**. Before launching the Flower client, we need to run the image we just created. To keep things simpler, let's run the image in interactive mode (`-it`), mount the entire repository you cloned inside the `/client` directory of your container (`` -v `pwd`:/client ``), and use the NVIDIA runtime so we can access the GPU `--runtime nvidia`:
-
-   ```bash
-   # first ensure you are in the `embedded-devices` directory. If you are not, use the `cd` command to navigate to it
-
-   # run the client container (This command does not launch the Flower client. It simply opens an interactive shell inside the Docker container. The client can be run following the steps in the next section of the readme)
-   docker run -it --rm --runtime nvidia -v `pwd`:/client flower_client
-   # this will take you to a shell that looks something like this:
-   root@6e6ce826b8bb:/client# <here you can run python commands or any command as usual>
-   ```
-
-8. **Run your FL experiments with Flower**. Follow the steps in the section below.
+   Navigate to your project directory, activate your virtual environment, and follow the instructions provided in the section below to launch Flower server and clients.
 
 
 ## Embedded Federated AI
