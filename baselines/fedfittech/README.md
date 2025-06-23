@@ -1,6 +1,6 @@
 ---
 Title: "FedFitTech: A Baseline in Federated Learning for Fitness Tracking"
-url: "https://arxiv.org"
+url: "[https://arxiv.org](http://arxiv.org/abs/2506.16840)"
 Labels:
   - TinyHAR
   - "https://publikationen.bibliothek.kit.edu/1000150216"
@@ -13,7 +13,7 @@ Dataset:
 
 <p align="justify">  This repository introduces FedFitTech, which is a Federated Learning baseline specifically designed for Fitness Technology (FitTech) using the Flower framework, enabling reproducible experiments and benchmarking. As an example usage of FedFitTech, we also included a case study that incorporates a client-side early stopping strategy.  </p>
 
-**Paper:** [link](https://arxiv.org)
+**Paper:** [link]([https://arxiv.org](http://arxiv.org/abs/2506.16840))
 
 **Authors** [Zeyneddin Oz](https://orcid.org/0000-0002-4216-9854), [Shreyas Korde](https://orcid.org/0009-0000-3771-3096), [Marius Bock](https://orcid.org/0000-0001-7401-928X), [Kristof Van Laerhoven](https://orcid.org/0000-0001-5296-5347)
 
