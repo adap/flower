@@ -117,7 +117,7 @@ def load_data(
     batch_size: int,
     seed: int,
 ) -> DataLoaders:
-    """Load and prepare CIFAR-100 data for federated learning.
+    """Load and prepare CIFAR-10 data for federated learning.
 
     This function handles dataset preparation through the following steps:
     1. Creates non-IID data partitions using the PathologicalPartitioner
@@ -191,6 +191,7 @@ def load_data(
 
 
 def train(
+    algorithm: str,
     net: FourConvNet,
     trainloader: DataLoader,
     epochs: int,
@@ -198,22 +199,25 @@ def train(
     momentum: float,
     device: torch.device,
 ) -> float:
-    """Train the model using FedBABU strategy.
+    """Train the model on the local dataset using FedBABU or FedAvg.
 
-    This method implements the core FedBABU training logic:
+    This method implements two training strategies based on the algorithm argument:
+
+    FedBABU:
     1. Freezes the classifier (head) by setting its learning rate to 0
     2. Trains only the feature extractor (body) with the specified learning rate
     3. Uses SGD optimizer with momentum for training
 
-    The training follows the FedBABU strategy where only the feature extractor
-    is trained while keeping the classifier frozen, helping learn generalizable
-    features across clients.
+    FedAvg:
+    1. Trains the entire model (both body and head) with the specified learning rate
+    2. Uses SGD optimizer with momentum for training
 
     Args:
+        algorithm (str): Training strategy to use ("fedbabu" or "fedavg")
         net (FourConvNet): The neural network model with separate body and head
         trainloader (DataLoader): DataLoader for the training dataset
         epochs (int): Number of training epochs
-        lr (float): Learning rate for the feature extractor
+        lr (float): Learning rate for the optimizer
         momentum (float): Momentum factor for SGD optimizer
         device (torch.device): Device to run computations on (CPU/GPU)
 
@@ -229,7 +233,9 @@ def train(
             {"params": net.feature_extractor.parameters(), "lr": lr},
             {
                 "params": net.classifier.parameters(),
-                "lr": 0.0,  # Freeze classifier weights
+                "lr": (
+                    0.0 if algorithm == "fedbabu" else lr
+                ),  # Freeze classifier weights if algorithm is FedBABU
             },
         ],
         momentum=momentum,
@@ -265,22 +271,26 @@ def test(
     finetune_epochs: int,
     lr: float,
 ) -> Tuple[float, float]:
-    """Evaluate model performance with local fine-tuning.
+    """Evaluate the model on local validation data after optional fine-tuning.
 
-    The evaluation process in FedBABU consists of two steps:
+    The evaluation process is designed for FedBABU but can be used for FedAvg as well:
+
+    FedBABU:
     1. Fine-tune the entire model (both body and head) on local training data
-    2. Evaluate the fine-tuned model on local test data
+    2. Evaluate the fine-tuned model on local validation data
+    This allows the model to adapt to local data distributions while
+    maintaining the benefits of federated feature learning.
 
-    This approach allows each client to adapt the shared feature extractor to
-    their local data distribution while maintaining the benefits of federated
-    learning.
+    FedAvg:
+    1. (Optionally) skip fine-tuning and evaluate the model as-is
+    2. Evaluate directly on local validation data
 
     Args:
         net (FourConvNet): The neural network model to evaluate
         testloader (DataLoader): DataLoader for test/validation data
-        trainloader (DataLoader): DataLoader for fine-tuning
+        trainloader (DataLoader): DataLoader for fine-tuning (FedBABU)
         device (torch.device): Device to run computations on (CPU/GPU)
-        finetune_epochs (int): Number of epochs for fine-tuning
+        finetune_epochs (int): Number of epochs for fine-tuning (FedBABU)
         lr (float): Learning rate for fine-tuning
 
     Returns:
@@ -321,16 +331,10 @@ def finetune(
     lr: float,
     device: torch.device,
 ) -> None:
-    """Fine-tune the entire model on local data.
+    """Fine-tune the entire model on local data (FedBABU personalization step).
 
-    This method implements a key component of FedBABU where both feature extractor
-    and classifier are fine-tuned together. The process involves:
-    1. Setting up SGD optimizer for all model parameters
-    2. Training the entire model on local data
-    3. Allowing the model to adapt to local data distribution
-
-    Unlike the training phase where only the feature extractor is updated,
-    fine-tuning updates all model parameters to better fit local data patterns.
+    This method fine-tunes both the feature extractor and classifier on local data.
+    Used in FedBABU for local adaptation before evaluation.
 
     Args:
         net (FourConvNet): The neural network model to fine-tune

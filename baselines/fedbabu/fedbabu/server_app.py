@@ -1,8 +1,7 @@
 """FedBABU Server Application.
 
 This module implements the Federated Learning server for the FedBABU (Federated Learning
-with Body and Head Update) approach, as described in the paper "FedBABU: Towards Enhanced
-Representation Learning in Federated Learning via Backbone Update".
+with Body and Head Update) approach, as described in the paper "FedBABU: Towards Enhanced Representation for Federated Image Classification".
 
 Key Features:
 - Coordinates federated learning across multiple clients

@@ -1,23 +1,29 @@
-"""FedBABU Client Application.
+"""Federated Learning Client Application.
 
-This module implements the Federated Learning client for the FedBABU (Federated Learning
-with Body and Head Update) approach, as described in the paper "FedBABU: Towards Enhanced
-Representation Learning in Federated Learning via Backbone Update".
+This module implements client-side training for both FedBABU (Federated Learning
+with Body and Head Update) and FedAvg approaches, as described in the paper
+"FedBABU: Towards Enhanced Representation for Federated Image Classification".
 
 Key Features:
-- Implements FedBABU client-side training logic with feature extractor (body) and
-  classifier (head) separation
-- Supports non-IID data distribution using Dirichlet sampling
-- Provides local fine-tuning before evaluation
+- Implements both FedBABU and FedAvg training strategies
+- Uses feature extractor (body) and classifier (head) separation for FedBABU
+- Supports non-IID data distribution using class-based partitioning
+- Provides local fine-tuning before evaluation for FedBABU
 - Handles model parameter aggregation and distribution
 - Configurable hyperparameters through Flower's Context system
 
-The training process follows these steps:
+The training process varies by algorithm:
+FedBABU:
 1. During training (fit), only the feature extractor is updated while the classifier
    remains frozen
 2. Before evaluation, the entire model is fine-tuned on local data
 3. The client maintains synchronization with the global model while preserving local
    adaptations
+
+FedAvg:
+1. During training (fit), the entire model is updated
+2. No special treatment during evaluation
+3. Full model synchronization with the global state
 """
 
 from typing import Dict, Tuple
@@ -45,19 +51,26 @@ CIFAR_MEAN = (0.5071, 0.4867, 0.4408)
 CIFAR_STD = (0.2675, 0.2565, 0.2761)
 
 
-class FedBABUClient(NumPyClient):
-    """Flower client implementing FedBABU training strategy.
+class FlowerClient(NumPyClient):
+    """Flower client implementing FedBABU and FedAvg training strategies.
 
-    This client implements the FedBABU approach where the feature extractor (body) and
-    classifier (head) are trained differently:
+    This client supports two training strategies:
+
+    FedBABU:
     - During federation (fit), only the body is updated while the head remains frozen
     - During evaluation, both body and head are fine-tuned on local data
     - The client maintains synchronization with the global model state
 
-    The training process is designed to learn general features in the body through
-    federation while allowing local specialization during evaluation.
+    FedAvg:
+    - During federation (fit), the entire model is updated
+    - No special treatment during evaluation
+    - Full model synchronization across clients
+
+    The training process is designed to either learn general features through
+    federation (FedBABU) or perform standard federated averaging (FedAvg).
 
     Args:
+        algorithm (str): Training strategy to use ("fedbabu" or "fedavg")
         net (FourConvNet): The neural network model with separate body and head
         trainloader (DataLoader): DataLoader for the local training dataset
         valloader (DataLoader): DataLoader for the local validation dataset
@@ -65,10 +78,14 @@ class FedBABUClient(NumPyClient):
         finetune_epochs (int): Number of epochs for fine-tuning before evaluation
         lr (float): Learning rate for SGD optimizer
         momentum (float): Momentum factor for SGD optimizer
+
+    Raises:
+        AssertionError: If algorithm is not "fedbabu" or "fedavg"
     """
 
     def __init__(
         self,
+        algorithm: str,
         net: FourConvNet,
         trainloader: DataLoader,
         valloader: DataLoader,
@@ -77,6 +94,8 @@ class FedBABUClient(NumPyClient):
         lr: float,
         momentum: float,
     ) -> None:
+        assert algorithm in ["fedbabu", "fedavg"], "Unsupported algorithm"
+        self.algorithm = algorithm
         self.net = net
         self.trainloader = trainloader
         self.valloader = valloader
@@ -90,11 +109,18 @@ class FedBABUClient(NumPyClient):
     def fit(
         self, parameters: Parameters, config: Config
     ) -> Tuple[Parameters, int, Dict[str, Scalar]]:
-        """Train the model's feature extractor on the local dataset.
+        """Train the model on the local dataset.
 
-        This method implements the core FedBABU training logic:
+        This method implements two training strategies based on self.algorithm:
+
+        FedBABU:
         1. Updates local model with received global parameters
-        2. Trains only the feature extractor (body) while keeping classifier (head) frozen
+        2. Trains only the feature extractor (body) while keeping classifier frozen
+        3. Returns updated parameters and training metrics
+
+        FedAvg:
+        1. Updates local model with received global parameters
+        2. Trains the entire model without freezing any parts
         3. Returns updated parameters and training metrics
 
         Args:
@@ -112,6 +138,7 @@ class FedBABUClient(NumPyClient):
         set_weights(self.net, parameters)
         # Perform local training
         train_loss = train(
+            algorithm=self.algorithm,
             net=self.net,
             trainloader=self.trainloader,
             epochs=self.local_epochs,
@@ -129,25 +156,31 @@ class FedBABUClient(NumPyClient):
     def evaluate(
         self, parameters: Parameters, config: Config
     ) -> Tuple[float, int, Dict[str, Scalar]]:
-        """Evaluate the model on local validation data after fine-tuning.
+        """Evaluate the model on local validation data.
 
-        The evaluation process in FedBABU consists of two steps:
+        The evaluation process varies by algorithm:
+
+        FedBABU:
         1. Fine-tune the entire model (both body and head) on local training data
         2. Evaluate the fine-tuned model on local validation data
+        This allows the model to adapt to local data distributions while
+        maintaining the benefits of federated feature learning
 
-        This approach allows the model to adapt to local data distributions while
-        maintaining the benefits of federated feature learning.
+        FedAvg:
+        1. Use the global model parameters as-is
+        2. Evaluate directly on local validation data
+        This maintains consistent model behavior across all clients
 
         Args:
             parameters (Parameters): Current global model parameters from the server
             config (Config): Evaluation configuration including:
-                           - finetune-epochs: Number of fine-tuning epochs
+                           - finetune-epochs: Number of fine-tuning epochs (FedBABU only)
 
         Returns:
             Tuple[float, int, Dict[str, Scalar]]: Contains:
                 - Validation loss value
                 - Number of validation samples
-                - Dictionary with metrics (e.g., accuracy)
+                - Dictionary with metrics (loss and accuracy)
         """
         # Update local model with global parameters
         set_weights(self.net, parameters)
@@ -166,31 +199,38 @@ class FedBABUClient(NumPyClient):
 
 
 def client_fn(context: Context) -> NumPyClient:
-    """Create and configure a Flower client instance for FedBABU.
+    """Create and configure a Flower client instance.
 
     This factory function creates a new client instance for each round of federated
     learning. It handles:
     1. Model initialization
-    2. Configuration extraction from context
-    3. Data loading and partitioning
-    4. Client instantiation with appropriate parameters
+    2. Algorithm selection (FedBABU or FedAvg)
+    3. Configuration extraction from context
+    4. Data loading and partitioning
+    5. Client instantiation with appropriate parameters
 
-    The function supports non-IID data distribution through Dirichlet sampling,
-    controlled by the alpha parameter (lower alpha = more non-IID).
+    The function supports non-IID data distribution through class-based partitioning,
+    where each client receives data from a limited number of classes to simulate
+    realistic federated learning scenarios.
 
     Args:
         context (Context): Contains configuration at different scopes:
-            - node_config: Client-specific settings (partition ID, total partitions)
+            - node_config: Client-specific settings:
+                * partition-id: ID of this client's data partition
+                * num-partitions: Total number of data partitions
             - run_config: Federation-wide settings including:
-                * alpha: Dirichlet concentration parameter
+                * algorithm: Training strategy ("fedbabu" or "fedavg")
                 * local-epochs: Number of local training epochs
+                * finetune-epochs: Number of fine-tuning epochs
                 * lr: Learning rate
                 * momentum: SGD momentum factor
                 * batch-size: Training batch size
-                * fraction-fit: Fraction of clients selected per round
+                * num-classes-per-client: Number of classes per client
+                * train-test-split-ratio: Ratio for local validation set
+                * seed: Random seed for reproducibility
 
     Returns:
-        NumPyClient: A configured FedBABUClient instance ready for federation
+        NumPyClient: A configured FlowerClient instance ready for federation
     """
     # Initialize model
     net = FourConvNet()
@@ -222,7 +262,7 @@ def client_fn(context: Context) -> NumPyClient:
     )
 
     # Create and return client instance
-    return FedBABUClient(
+    return FlowerClient(
         net=net,
         trainloader=trainloader,
         valloader=valloader,
