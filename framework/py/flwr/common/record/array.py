@@ -276,7 +276,11 @@ class Array(InflatableObject):
         # it can happend that chunks carry the exact same data
         # for example when the array has only zeros
         children_list = self.slice_array()
-        children_ids = [obj_id for obj_id, _ in children_list]
+        # Let's not save the entire object_id but a mapping to those
+        # that will be carried in the object head
+        # (replace a long object_id with a single scalar)
+        unique_children = list(self.children.keys())
+        children_ids = [unique_children.index(ch_id) for ch_id, _ in children_list]
 
         # The deflated Array carries everything but the data
         # The `arraychunk_ids` will be used during Array inflation
@@ -323,7 +327,9 @@ class Array(InflatableObject):
         )
 
         # Verify children ids in body match those passed for inflation
-        chunk_ids = cast(list[str], array_metadata["arraychunk_ids"])
+        chunk_ids_indices = cast(list[str], array_metadata["arraychunk_ids"])
+        # Convert indices back to IDs
+        chunk_ids = [list(children.keys())[i] for i in chunk_ids_indices]
         unique_arrayschunks = set(chunk_ids)
         children_obj_ids = set(children.keys())
         if unique_arrayschunks != children_obj_ids:
