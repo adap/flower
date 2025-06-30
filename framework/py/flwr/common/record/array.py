@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
-from ..constant import SType
+from ..constant import MAX_ARRAY_CHUNK_SIZE, SType
 from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..typing import NDArray
 from .arraychunk import ArrayChunk
@@ -255,13 +255,27 @@ class Array(InflatableObject):
     @property
     def children(self) -> dict[str, InflatableObject]:
         """Return a dictionary of ArrayChunks with their Object IDs as keys."""
-        chunk = ArrayChunk(self.data)
-        return {chunk.object_id: chunk}
+        return dict(self.slice_array())
+
+    def slice_array(self) -> list[tuple[str, InflatableObject]]:
+        """Slice Array data and construct a list of ArrayChunks."""
+        children: list[tuple[str, InflatableObject]] = []
+        data_view = memoryview(self.data)
+        for start in range(0, len(data_view), MAX_ARRAY_CHUNK_SIZE):
+            end = min(start + MAX_ARRAY_CHUNK_SIZE, len(data_view))
+            ac = ArrayChunk(data_view[start:end])
+            children.append((ac.object_id, ac))
+        return children
 
     def deflate(self) -> bytes:
         """Deflate the Array."""
         array_metadata: dict[str, str | tuple[int, ...] | list[str]] = {}
-        children_ids = list(self.children.keys())
+
+        # We want to record all object_id even if repeated
+        # it can happend that chunks carry the exact same data
+        # for example when the array has only zeros
+        children_list = self.slice_array()
+        children_ids = [obj_id for obj_id, _ in children_list]
 
         # The deflated Array carries everything but the data
         # The `arraychunk_ids` will be used during Array inflation
