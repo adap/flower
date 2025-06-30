@@ -115,9 +115,9 @@ pip install -e .
    pip install torchvision-0.22.0-cp310-cp310-linux_aarch64.whl
    ```
 
-   - If you encounter an error related to `libcusparseLt.so.0`, install it with:
+   - If you encounter an error related to `libcusparseLt.so.0`, 'libcudart.so.12', or 'libcublas.so', install it with:
      ```bash
-     sudo apt install libcusparse-12-0
+     sudo apt install -y nvidia-jetpack
      ```
 
    - If you face issues with NumPy compatibility:
