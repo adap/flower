@@ -26,7 +26,12 @@ from typing import TYPE_CHECKING, Any, cast, overload
 import numpy as np
 
 from ..constant import MAX_ARRAY_CHUNK_SIZE, SType
-from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
+from ..inflatable import (
+    InflatableObject,
+    add_header_to_object_body,
+    get_object_body,
+    get_object_children_ids_from_object_content,
+)
 from ..typing import NDArray
 from .arraychunk import ArrayChunk
 
@@ -280,7 +285,7 @@ class Array(InflatableObject):
         # that will be carried in the object head
         # (replace a long object_id with a single scalar)
         unique_children = list(self.children.keys())
-        children_ids = [unique_children.index(ch_id) for ch_id, _ in children_list]
+        arraychunk_ids = [unique_children.index(ch_id) for ch_id, _ in children_list]
 
         # The deflated Array carries everything but the data
         # The `arraychunk_ids` will be used during Array inflation
@@ -289,7 +294,7 @@ class Array(InflatableObject):
             "dtype": self.dtype,
             "shape": self.shape,
             "stype": self.stype,
-            "arraychunk_ids": children_ids,
+            "arraychunk_ids": arraychunk_ids,
         }
 
         # Serialize metadata dict
@@ -321,6 +326,8 @@ class Array(InflatableObject):
 
         obj_body = get_object_body(object_content, cls)
 
+        # Extract children IDs from head
+        children_ids = get_object_children_ids_from_object_content(object_content)
         # Decode the Array body
         array_metadata: dict[str, str | tuple[int, ...] | list[int]] = json.loads(
             obj_body.decode(encoding="utf-8")
@@ -329,7 +336,8 @@ class Array(InflatableObject):
         # Verify children ids in body match those passed for inflation
         chunk_ids_indices = cast(list[int], array_metadata["arraychunk_ids"])
         # Convert indices back to IDs
-        chunk_ids = [list(children.keys())[i] for i in chunk_ids_indices]
+        chunk_ids = [children_ids[i] for i in chunk_ids_indices]
+        # Check consistency
         unique_arrayschunks = set(chunk_ids)
         children_obj_ids = set(children.keys())
         if unique_arrayschunks != children_obj_ids:
