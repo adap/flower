@@ -260,6 +260,7 @@ class Array(InflatableObject):
     def slice_array(self) -> list[tuple[str, InflatableObject]]:
         """Slice Array data and construct a list of ArrayChunks."""
         children: list[tuple[str, InflatableObject]] = []
+        # memoryview allows for zero-copy slicing
         data_view = memoryview(self.data)
         for start in range(0, len(data_view), MAX_ARRAY_CHUNK_SIZE):
             end = min(start + MAX_ARRAY_CHUNK_SIZE, len(data_view))
