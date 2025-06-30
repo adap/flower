@@ -270,7 +270,7 @@ class Array(InflatableObject):
 
     def deflate(self) -> bytes:
         """Deflate the Array."""
-        array_metadata: dict[str, str | tuple[int, ...] | list[str]] = {}
+        array_metadata: dict[str, str | tuple[int, ...] | list[int]] = {}
 
         # We want to record all object_id even if repeated
         # it can happend that chunks carry the exact same data
@@ -322,12 +322,12 @@ class Array(InflatableObject):
         obj_body = get_object_body(object_content, cls)
 
         # Decode the Array body
-        array_metadata: dict[str, str | tuple[int, ...] | list[str]] = json.loads(
+        array_metadata: dict[str, str | tuple[int, ...] | list[int]] = json.loads(
             obj_body.decode(encoding="utf-8")
         )
 
         # Verify children ids in body match those passed for inflation
-        chunk_ids_indices = cast(list[str], array_metadata["arraychunk_ids"])
+        chunk_ids_indices = cast(list[int], array_metadata["arraychunk_ids"])
         # Convert indices back to IDs
         chunk_ids = [list(children.keys())[i] for i in chunk_ids_indices]
         unique_arrayschunks = set(chunk_ids)
