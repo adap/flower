@@ -15,6 +15,7 @@
 """Unit tests for Array."""
 
 
+import json
 import sys
 import unittest
 from io import BytesIO
@@ -25,12 +26,11 @@ from unittest.mock import Mock
 import numpy as np
 from parameterized import parameterized
 
-from flwr.common.serde import array_to_proto
-
 from ..constant import SType
 from ..inflatable import get_object_body, get_object_type_from_object_content
 from ..typing import NDArray
 from .array import Array
+from .arraychunk import ArrayChunk
 
 
 def _get_buffer_from_ndarray(array: NDArray) -> bytes:
@@ -175,24 +175,36 @@ class TestArray(unittest.TestCase):
         arr = Array(np.random.randn(5, 5))
 
         # Assert
-        # Array has no children
-        assert arr.children is None
+        # Array has at least one children
+        single_arraychunk = ArrayChunk(arr.data)
+        children = {single_arraychunk.object_id: single_arraychunk}
+        assert arr.children == children
 
         arr_b = arr.deflate()
 
         # Assert
         # Class name matches
         assert get_object_type_from_object_content(arr_b) == arr.__class__.__qualname__
-        # Body of deflfated Array matches its direct protobuf serialization
-        assert get_object_body(arr_b, Array) == array_to_proto(arr).SerializeToString()
+        # Body of deflfated Array contains array metadata and ids or its chunks
+        chunk_ids = list(children.keys())
+        body = {
+            "dtype": arr.dtype,
+            "shape": arr.shape,
+            "stype": arr.stype,
+            "arraychunk_ids": chunk_ids,
+        }
+        body_end = json.dumps(body).encode("utf-8")
+        assert get_object_body(arr_b, Array) == body_end
 
         # Inflate
-        arr_ = Array.inflate(arr_b)
+        arr_ = Array.inflate(arr_b, children=arr.children)
 
         # Assert
         # Both objects are identical
         assert arr.object_id == arr_.object_id
 
         # Assert
+        # Not passing children raises ValueError (Array must have children)
+        self.assertRaises(ValueError, Array.inflate, arr_b)
         # Inflate passing children raises ValueError
         self.assertRaises(ValueError, Array.inflate, arr_b, children={"123": arr})
