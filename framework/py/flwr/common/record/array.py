@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from dataclasses import dataclass
 from io import BytesIO
@@ -24,11 +25,10 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
-from flwr.proto.recorddict_pb2 import Array as ArrayProto  # pylint: disable=E0611
-
 from ..constant import SType
 from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..typing import NDArray
+from .arraychunk import ArrayChunk
 
 if TYPE_CHECKING:
     import torch
@@ -252,16 +252,26 @@ class Array(InflatableObject):
         ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
         return cast(NDArray, ndarray_deserialized)
 
+    @property
+    def children(self) -> dict[str, InflatableObject]:
+        """Return a dictionary of ArrayChunks with their Object IDs as keys."""
+        chunk = ArrayChunk(self.data)
+        return {chunk.object_id: chunk}
+
     def deflate(self) -> bytes:
         """Deflate the Array."""
-        array_proto = ArrayProto(
-            dtype=self.dtype,
-            shape=self.shape,
-            stype=self.stype,
-            data=self.data,
-        )
+        array_metadata: dict[str, str | tuple[int, ...] | list[str]] = {}
+        children_ids = list(self.children.keys())
 
-        obj_body = array_proto.SerializeToString(deterministic=True)
+        array_metadata = {
+            "dtype": self.dtype,
+            "shape": self.shape,
+            "stype": self.stype,
+            "arraychunk_ids": children_ids,
+        }
+
+        # Serialize metadata dict
+        obj_body = json.dumps(array_metadata).encode("utf-8")
         return add_header_to_object_body(object_body=obj_body, obj=self)
 
     @classmethod
@@ -276,25 +286,45 @@ class Array(InflatableObject):
             The deflated object content of the Array.
 
         children : Optional[dict[str, InflatableObject]] (default: None)
-            Must be ``None``. ``Array`` does not support child objects.
-            Providing any children will raise a ``ValueError``.
+            Must be ``None``. ``Array`` must have child objects.
+            Providing no children will raise a ``ValueError``.
 
         Returns
         -------
         Array
             The inflated Array.
         """
-        if children:
-            raise ValueError("`Array` objects do not have children.")
+        if not children:
+            raise ValueError("`Array` objects must have children.")
 
         obj_body = get_object_body(object_content, cls)
-        proto_array = ArrayProto.FromString(obj_body)
-        return cls(
-            dtype=proto_array.dtype,
-            shape=tuple(proto_array.shape),
-            stype=proto_array.stype,
-            data=proto_array.data,
+        array_metadata: dict[str, str | tuple[int, ...] | list[str]] = json.loads(
+            obj_body.decode(encoding="utf-8")
         )
+
+        chunk_ids = cast(list[str], array_metadata["arraychunk_ids"])
+        unique_arrayschunks = set(chunk_ids)
+        children_obj_ids = set(children.keys())
+        if unique_arrayschunks != children_obj_ids:
+            raise ValueError(
+                "Unexpected set of `children`. "
+                f"Expected {unique_arrayschunks} but got {children_obj_ids}."
+            )
+
+        array = cls(
+            dtype=cast(str, array_metadata["dtype"]),
+            shape=cast(tuple[int], tuple(array_metadata["shape"])),
+            stype=cast(str, array_metadata["stype"]),
+            data=b"",
+        )
+
+        # Now inject data from chunks
+        buff = bytearray()
+        for ch_id in chunk_ids:
+            buff += cast(ArrayChunk, children[ch_id]).data
+
+        array.data = bytes(buff)
+        return array
 
     @property
     def object_id(self) -> str:
