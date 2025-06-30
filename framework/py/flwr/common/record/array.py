@@ -25,8 +25,13 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
-from ..constant import SType
-from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
+from ..constant import MAX_ARRAY_CHUNK_SIZE, SType
+from ..inflatable import (
+    InflatableObject,
+    add_header_to_object_body,
+    get_object_body,
+    get_object_children_ids_from_object_content,
+)
 from ..typing import NDArray
 from .arraychunk import ArrayChunk
 
@@ -255,13 +260,32 @@ class Array(InflatableObject):
     @property
     def children(self) -> dict[str, InflatableObject]:
         """Return a dictionary of ArrayChunks with their Object IDs as keys."""
-        chunk = ArrayChunk(self.data)
-        return {chunk.object_id: chunk}
+        return dict(self.slice_array())
+
+    def slice_array(self) -> list[tuple[str, InflatableObject]]:
+        """Slice Array data and construct a list of ArrayChunks."""
+        children: list[tuple[str, InflatableObject]] = []
+        # memoryview allows for zero-copy slicing
+        data_view = memoryview(self.data)
+        for start in range(0, len(data_view), MAX_ARRAY_CHUNK_SIZE):
+            end = min(start + MAX_ARRAY_CHUNK_SIZE, len(data_view))
+            ac = ArrayChunk(data_view[start:end])
+            children.append((ac.object_id, ac))
+        return children
 
     def deflate(self) -> bytes:
         """Deflate the Array."""
-        array_metadata: dict[str, str | tuple[int, ...] | list[str]] = {}
-        children_ids = list(self.children.keys())
+        array_metadata: dict[str, str | tuple[int, ...] | list[int]] = {}
+
+        # We want to record all object_id even if repeated
+        # it can happend that chunks carry the exact same data
+        # for example when the array has only zeros
+        children_list = self.slice_array()
+        # Let's not save the entire object_id but a mapping to those
+        # that will be carried in the object head
+        # (replace a long object_id with a single scalar)
+        unique_children = list(self.children.keys())
+        arraychunk_ids = [unique_children.index(ch_id) for ch_id, _ in children_list]
 
         # The deflated Array carries everything but the data
         # The `arraychunk_ids` will be used during Array inflation
@@ -270,7 +294,7 @@ class Array(InflatableObject):
             "dtype": self.dtype,
             "shape": self.shape,
             "stype": self.stype,
-            "arraychunk_ids": children_ids,
+            "arraychunk_ids": arraychunk_ids,
         }
 
         # Serialize metadata dict
@@ -302,13 +326,18 @@ class Array(InflatableObject):
 
         obj_body = get_object_body(object_content, cls)
 
+        # Extract children IDs from head
+        children_ids = get_object_children_ids_from_object_content(object_content)
         # Decode the Array body
-        array_metadata: dict[str, str | tuple[int, ...] | list[str]] = json.loads(
+        array_metadata: dict[str, str | tuple[int, ...] | list[int]] = json.loads(
             obj_body.decode(encoding="utf-8")
         )
 
         # Verify children ids in body match those passed for inflation
-        chunk_ids = cast(list[str], array_metadata["arraychunk_ids"])
+        chunk_ids_indices = cast(list[int], array_metadata["arraychunk_ids"])
+        # Convert indices back to IDs
+        chunk_ids = [children_ids[i] for i in chunk_ids_indices]
+        # Check consistency
         unique_arrayschunks = set(chunk_ids)
         children_obj_ids = set(children.keys())
         if unique_arrayschunks != children_obj_ids:
