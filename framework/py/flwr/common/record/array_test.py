@@ -219,7 +219,9 @@ class TestArray(unittest.TestCase):
         # Not passing children raises ValueError (Array must have children)
         self.assertRaises(ValueError, Array.inflate, arr_b)
         # Inflate passing non-existant children raises ValueError
-        self.assertRaises(ValueError, Array.inflate, arr_b, children={"123": arr})
+        self.assertRaises(
+            ValueError, Array.inflate, arr_b, children={"123": ArrayChunk(b"")}
+        )
 
     def test_slicing_and_concatenation(self) -> None:
         """Test Array slicing."""
