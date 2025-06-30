@@ -26,8 +26,8 @@ from flwr.common.logger import log
 from flwr.proto.simulationio_pb2_grpc import (  # pylint: disable=E0611
     add_SimulationIoServicer_to_server,
 )
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.supercore.ffs import FfsFactory
 
 from .simulationio_servicer import SimulationIoServicer
 

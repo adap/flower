@@ -12,11 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""ClientAppIo API Servicer."""
+"""Tests for utility functions for the infrastructure."""
 
 
-from .clientappio_servicer import ClientAppIoServicer
+from .utils import mask_string
 
-__all__ = [
-    "ClientAppIoServicer",
-]
+
+def test_mask_string() -> None:
+    """Test the `mask_string` function."""
+    assert mask_string("abcdefghi") == "abcd...fghi"
+    assert mask_string("abcdefghijklm") == "abcd...jklm"
+    assert mask_string("abc") == "abc"
+    assert mask_string("a") == "a"
+    assert mask_string("") == ""
+    assert mask_string("1234567890", head=2, tail=3) == "12...890"
+    assert mask_string("1234567890", head=5, tail=4) == "12345...7890"

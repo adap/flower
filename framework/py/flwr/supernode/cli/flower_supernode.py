@@ -40,7 +40,6 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 from flwr.supernode.start_client_internal import start_client_internal
 
@@ -65,12 +64,6 @@ def flower_supernode() -> None:
     authentication_keys = _try_setup_client_authentication(args)
 
     log(DEBUG, "Isolation mode: %s", args.isolation)
-
-    # Register handlers for graceful shutdown
-    register_exit_handlers(
-        event_type=EventType.RUN_SUPERNODE_LEAVE,
-        exit_message="SuperNode terminated gracefully.",
-    )
 
     start_client_internal(
         server_address=args.superlink,

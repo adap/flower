@@ -210,3 +210,18 @@ class NodeState(ABC):
         run_id : int
             The ID of the run for which to delete the token.
         """
+
+    @abstractmethod
+    def get_run_id_by_token(self, token: str) -> Optional[int]:
+        """Get the run ID associated with a given token.
+
+        Parameters
+        ----------
+        token : str
+            The token to look up.
+
+        Returns
+        -------
+        Optional[int]
+            The run ID if the token is valid, otherwise None.
+        """

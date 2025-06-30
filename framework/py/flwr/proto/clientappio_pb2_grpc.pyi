@@ -8,29 +8,42 @@ import grpc
 
 class ClientAppIoStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
-    GetToken: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.clientappio_pb2.GetTokenRequest,
-        flwr.proto.clientappio_pb2.GetTokenResponse]
-    """Get token"""
+    GetRunIdsWithPendingMessages: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.clientappio_pb2.GetRunIdsWithPendingMessagesRequest,
+        flwr.proto.clientappio_pb2.GetRunIdsWithPendingMessagesResponse]
+    """Get run IDs with pending messages"""
+
+    RequestToken: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.clientappio_pb2.RequestTokenRequest,
+        flwr.proto.clientappio_pb2.RequestTokenResponse]
+    """Request token"""
 
     PullClientAppInputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.clientappio_pb2.PullClientAppInputsRequest,
         flwr.proto.clientappio_pb2.PullClientAppInputsResponse]
-    """Get Message, Context, and Run"""
+    """Pull client app inputs"""
 
     PushClientAppOutputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.clientappio_pb2.PushClientAppOutputsRequest,
         flwr.proto.clientappio_pb2.PushClientAppOutputsResponse]
-    """Send updated Message and Context"""
+    """Push client app outputs"""
 
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def GetToken(self,
-        request: flwr.proto.clientappio_pb2.GetTokenRequest,
+    def GetRunIdsWithPendingMessages(self,
+        request: flwr.proto.clientappio_pb2.GetRunIdsWithPendingMessagesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.clientappio_pb2.GetTokenResponse:
-        """Get token"""
+    ) -> flwr.proto.clientappio_pb2.GetRunIdsWithPendingMessagesResponse:
+        """Get run IDs with pending messages"""
+        pass
+
+    @abc.abstractmethod
+    def RequestToken(self,
+        request: flwr.proto.clientappio_pb2.RequestTokenRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.clientappio_pb2.RequestTokenResponse:
+        """Request token"""
         pass
 
     @abc.abstractmethod
@@ -38,7 +51,7 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.clientappio_pb2.PullClientAppInputsRequest,
         context: grpc.ServicerContext,
     ) -> flwr.proto.clientappio_pb2.PullClientAppInputsResponse:
-        """Get Message, Context, and Run"""
+        """Pull client app inputs"""
         pass
 
     @abc.abstractmethod
@@ -46,7 +59,7 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.clientappio_pb2.PushClientAppOutputsRequest,
         context: grpc.ServicerContext,
     ) -> flwr.proto.clientappio_pb2.PushClientAppOutputsResponse:
-        """Send updated Message and Context"""
+        """Push client app outputs"""
         pass
 
 

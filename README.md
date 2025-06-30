@@ -10,6 +10,7 @@
     <a href="https://flower.ai/blog">Blog</a> |
     <a href="https://flower.ai/docs/">Docs</a> |
     <a href="https://flower.ai/events/flower-ai-summit-2025">Summit</a> |
+    <a href="https://flower.ai/events/flower-ai-day-2025">AI Day</a> |
     <a href="https://flower.ai/join-slack">Slack</a>
     <br /><br />
 </p>

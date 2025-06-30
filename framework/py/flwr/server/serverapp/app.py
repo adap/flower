@@ -107,11 +107,6 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
-    grid = GrpcGrid(
-        serverappio_service_address=serverappio_api_address,
-        root_certificates=certificates,
-    )
-
     # Resolve directory where FABs are installed
     flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
@@ -119,9 +114,16 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     hash_run_id = None
     run_status = None
     heartbeat_sender = None
+    grid = None
     while True:
 
         try:
+            # Initialize the GrpcGrid
+            grid = GrpcGrid(
+                serverappio_service_address=serverappio_api_address,
+                root_certificates=certificates,
+            )
+
             # Pull ServerAppInputs from LinkState
             req = PullServerAppInputsRequest()
             log(DEBUG, "[flwr-serverapp] Pull ServerAppInputs")
@@ -236,13 +238,17 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                 log_uploader = None
 
             # Update run status
-            if run_status:
+            if run_status and grid:
                 run_status_proto = run_status_to_proto(run_status)
                 grid._stub.UpdateRunStatus(
                     UpdateRunStatusRequest(
                         run_id=run.run_id, run_status=run_status_proto
                     )
                 )
+
+            # Close the Grpc connection
+            if grid:
+                grid.close()
 
             event(
                 EventType.FLWR_SERVERAPP_RUN_LEAVE,
