@@ -263,6 +263,9 @@ class Array(InflatableObject):
         array_metadata: dict[str, str | tuple[int, ...] | list[str]] = {}
         children_ids = list(self.children.keys())
 
+        # The deflated Array carries everything but the data
+        # The `arraychunk_ids` will be used during Array inflation
+        # to rematerialize the data from ArrayChunk objects.
         array_metadata = {
             "dtype": self.dtype,
             "shape": self.shape,
@@ -298,10 +301,13 @@ class Array(InflatableObject):
             raise ValueError("`Array` objects must have children.")
 
         obj_body = get_object_body(object_content, cls)
+
+        # Decode the Array body
         array_metadata: dict[str, str | tuple[int, ...] | list[str]] = json.loads(
             obj_body.decode(encoding="utf-8")
         )
 
+        # Verify children ids in body match those passed for inflation
         chunk_ids = cast(list[str], array_metadata["arraychunk_ids"])
         unique_arrayschunks = set(chunk_ids)
         children_obj_ids = set(children.keys())
@@ -311,6 +317,7 @@ class Array(InflatableObject):
                 f"Expected {unique_arrayschunks} but got {children_obj_ids}."
             )
 
+        # Materialize Array with empty data
         array = cls(
             dtype=cast(str, array_metadata["dtype"]),
             shape=cast(tuple[int], tuple(array_metadata["shape"])),
