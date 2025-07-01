@@ -64,7 +64,6 @@ def run_exec_api_grpc(
     executor.set_config(config)
 
     license_plugin: Optional[LicensePlugin] = get_license_plugin()
-    license_plugin = license_plugin if license_plugin else None
     if license_plugin:
         license_plugin.get_license_info()
         if not license_plugin.check_license():
