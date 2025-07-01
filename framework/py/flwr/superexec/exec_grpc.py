@@ -63,7 +63,8 @@ def run_exec_api_grpc(
     """Run Exec API (gRPC, request-response)."""
     executor.set_config(config)
 
-    license_checker = get_license_checker()() if get_license_checker() else None
+    license_plugin: LicensePlugin = get_license_checker()
+    license_checker = license_plugin() if license_plugin else None
     if license_checker:
         license_checker.get_license_info()
         if not license_checker.check_license():
