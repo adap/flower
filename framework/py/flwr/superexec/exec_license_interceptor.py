@@ -39,8 +39,8 @@ class ExecLicenseInterceptor(grpc.ServerInterceptor):
         """Flower server interceptor license logic.
 
         Intercept all unary-unary/unary-stream calls from users and check the license.
-        Continue RPC call if license check is enabled and passes, else, terminate
-        RPC call by setting context to abort.
+        Continue RPC call if license check is enabled and passes, else, terminate RPC
+        call by setting context to abort.
         """
         # One of the method handlers in
         # `flwr.superexec.exec_servicer.ExecServicer`
