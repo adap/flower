@@ -43,7 +43,7 @@ try:
     from flwr.ee import get_license_checker
 except ImportError:
 
-    def get_license_checker() -> Optional[type[LicensePlugin]]:
+    def get_license_checker() -> Optional[LicensePlugin]:
         """Return the license checker."""
 
 
@@ -64,7 +64,7 @@ def run_exec_api_grpc(
     executor.set_config(config)
 
     license_plugin: LicensePlugin = get_license_checker()
-    license_checker = license_plugin() if license_plugin else None
+    license_checker = license_plugin if license_plugin else None
     if license_checker:
         license_checker.get_license_info()
         if not license_checker.check_license():
