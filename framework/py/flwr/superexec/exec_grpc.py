@@ -44,7 +44,7 @@ try:
 except ImportError:
 
     def get_license_plugin() -> Optional[LicensePlugin]:
-        """Return the license checker."""
+        """Return the license plugin."""
 
 
 # pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals

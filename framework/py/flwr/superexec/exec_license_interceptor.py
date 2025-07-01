@@ -28,7 +28,7 @@ class ExecLicenseInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Exec API interceptor for license checking."""
 
     def __init__(self, license_plugin: LicensePlugin) -> None:
-        """Initialize the interceptor with a license checker."""
+        """Initialize the interceptor with a license plugin."""
         self.license_plugin = license_plugin
 
     def intercept_service(
