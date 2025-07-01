@@ -16,7 +16,7 @@
 
 
 from logging import INFO
-from typing import Optional, Union
+from typing import Optional
 
 import grpc
 
@@ -43,7 +43,7 @@ try:
     from flwr.ee import get_license_checker
 except ImportError:
 
-    def get_license_checker() -> Union[None, type[LicensePlugin]]:
+    def get_license_checker() -> Optional[type[LicensePlugin]]:
         """Return the license checker."""
 
 
