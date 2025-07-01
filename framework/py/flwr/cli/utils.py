@@ -320,8 +320,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
             typer.secho(
-                "❌ Authorization failed. Please contact your administrator"
-                " to check your permissions.",
+                "❌ Permission denied. Please contact your administrator.",
                 fg=typer.colors.RED,
                 bold=True,
             )
