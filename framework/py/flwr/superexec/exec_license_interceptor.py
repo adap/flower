@@ -21,7 +21,7 @@ from typing import Any, Callable, Union
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.license_plugin import LicensePlugin
+from flwr.supercore.license_plugin import LicensePlugin
 
 
 class ExecLicenseInterceptor(grpc.ServerInterceptor):

@@ -27,7 +27,6 @@ from flwr.common.dummy_grpc_handlers_test import (
     get_noop_unary_stream_handler,
     get_noop_unary_unary_handler,
 )
-from flwr.common.license_plugin import LicensePlugin
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetLoginDetailsRequest,
@@ -36,6 +35,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StopRunRequest,
     StreamLogsRequest,
 )
+from flwr.supercore.license_plugin import LicensePlugin
 from flwr.superexec.exec_license_interceptor import ExecLicenseInterceptor
 
 HandlerContinuation = Callable[[grpc.HandlerCallDetails], grpc.RpcMethodHandler]
