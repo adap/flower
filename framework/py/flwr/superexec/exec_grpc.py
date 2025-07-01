@@ -78,7 +78,7 @@ def run_exec_api_grpc(
     )
     interceptors: list[grpc.ServerInterceptor] = []
     if license_checker is not None:
-        interceptors.append(ExecLicenseInterceptor(license_checker))  # type: ignore
+        interceptors.append(ExecLicenseInterceptor(license_checker))
     if auth_plugin is not None and authz_plugin is not None:
         interceptors.append(ExecUserAuthInterceptor(auth_plugin, authz_plugin))
     # Event log interceptor must be added after user auth interceptor

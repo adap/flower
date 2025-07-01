@@ -24,7 +24,7 @@ from google.protobuf.message import Message as GrpcMessage
 from flwr.supercore.license_plugin import LicensePlugin
 
 
-class ExecLicenseInterceptor(grpc.ServerInterceptor):
+class ExecLicenseInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Exec API interceptor for license checking."""
 
     def __init__(self, license_checker: LicensePlugin) -> None:
@@ -61,7 +61,7 @@ class ExecLicenseInterceptor(grpc.ServerInterceptor):
                 context.abort(grpc.StatusCode.PERMISSION_DENIED, "License check failed")
                 raise grpc.RpcError()
 
-            return call(request, context)
+            return call(request, context)  # type: ignore
 
         if method_handler.unary_unary:
             message_handler = grpc.unary_unary_rpc_method_handler

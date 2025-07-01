@@ -57,7 +57,7 @@ class TestExecLicenseInterceptor(unittest.TestCase):
             (GetLoginDetailsRequest(),),
             (GetAuthTokensRequest(),),
         ]
-    )
+    )  # type: ignore
     def test_license_interceptor_successful(self, request: GrpcMessage) -> None:
         """Test all RPC calls are successful when check_license() is successful."""
         # Prepare
@@ -97,7 +97,7 @@ class TestExecLicenseInterceptor(unittest.TestCase):
             (GetLoginDetailsRequest(),),
             (GetAuthTokensRequest(),),
         ]
-    )
+    )  # type: ignore
     def test_license_failure(self, request: GrpcMessage) -> None:
         """Test all RPC calls are unsuccessful when check_license() fails."""
         # Prepare
