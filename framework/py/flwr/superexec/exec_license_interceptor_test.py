@@ -46,7 +46,7 @@ class TestExecLicenseInterceptor(unittest.TestCase):
 
     def setUp(self) -> None:
         """Initialize."""
-        self.license_checker = MagicMock(spec=LicensePlugin)
+        self.license_plugin = MagicMock(spec=LicensePlugin)
 
     @parameterized.expand(
         [
@@ -61,8 +61,8 @@ class TestExecLicenseInterceptor(unittest.TestCase):
     def test_license_interceptor_successful(self, request: GrpcMessage) -> None:
         """Test all RPC calls are successful when check_license() is successful."""
         # Prepare
-        self.license_checker.check_license.return_value = True
-        interceptor = ExecLicenseInterceptor(self.license_checker)
+        self.license_plugin.check_license.return_value = True
+        interceptor = ExecLicenseInterceptor(self.license_plugin)
         dummy_ctx = MagicMock()
         handler_call_details = MagicMock()
 
@@ -83,8 +83,8 @@ class TestExecLicenseInterceptor(unittest.TestCase):
             result = handler.unary_unary(request, dummy_ctx)
             self.assertEqual(result, "dummy_response")
 
-        #  license_checker.check_license called once
-        self.license_checker.check_license.assert_called_once()
+        #  license_plugin.check_license called once
+        self.license_plugin.check_license.assert_called_once()
         #  context.abort never called
         dummy_ctx.abort.assert_not_called()
 
@@ -101,8 +101,8 @@ class TestExecLicenseInterceptor(unittest.TestCase):
     def test_license_failure(self, request: GrpcMessage) -> None:
         """Test all RPC calls are unsuccessful when check_license() fails."""
         # Prepare
-        self.license_checker.check_license.return_value = False
-        interceptor = ExecLicenseInterceptor(self.license_checker)
+        self.license_plugin.check_license.return_value = False
+        interceptor = ExecLicenseInterceptor(self.license_plugin)
         dummy_ctx = MagicMock()
         handler_call_details = MagicMock()
 

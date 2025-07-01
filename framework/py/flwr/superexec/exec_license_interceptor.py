@@ -27,9 +27,9 @@ from flwr.supercore.license_plugin import LicensePlugin
 class ExecLicenseInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Exec API interceptor for license checking."""
 
-    def __init__(self, license_checker: LicensePlugin) -> None:
+    def __init__(self, license_plugin: LicensePlugin) -> None:
         """Initialize the interceptor with a license checker."""
-        self.license_checker = license_checker
+        self.license_plugin = license_plugin
 
     def intercept_service(
         self,
@@ -57,7 +57,7 @@ class ExecLicenseInterceptor(grpc.ServerInterceptor):  # type: ignore
             """Handle the method call with license checking."""
             call = method_handler.unary_unary or method_handler.unary_stream
 
-            if not self.license_checker.check_license():
+            if not self.license_plugin.check_license():
                 context.abort(grpc.StatusCode.PERMISSION_DENIED, "License check failed")
                 raise grpc.RpcError()
 
