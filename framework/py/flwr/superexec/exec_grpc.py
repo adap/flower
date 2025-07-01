@@ -47,7 +47,7 @@ except ImportError:
         """Return the license checker."""
 
 
-# pylint: disable-next=too-many-arguments, too-many-positional-arguments
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
 def run_exec_api_grpc(
     address: str,
     executor: Executor,
