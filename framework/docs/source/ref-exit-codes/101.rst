@@ -9,7 +9,7 @@ The license of the SuperLink is invalid, causing it to exit prematurely on start
 Possible causes of invalid license include:
 1. ``FLWR_LICENSE_KEY`` environment variable not set. This is required when starting
    the SuperLink Enterprise version.
-2. 
+2. ``FLWR_LICENSE_KEY`` environment variable set to an invalid license key.
 
 How to Resolve
 --------------
