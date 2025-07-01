@@ -40,10 +40,10 @@ from .exec_servicer import ExecServicer
 from .executor import Executor
 
 try:
-    from flwr.ee import get_license_checker
+    from flwr.ee import get_license_plugin
 except ImportError:
 
-    def get_license_checker() -> Optional[LicensePlugin]:
+    def get_license_plugin() -> Optional[LicensePlugin]:
         """Return the license checker."""
 
 
@@ -63,11 +63,11 @@ def run_exec_api_grpc(
     """Run Exec API (gRPC, request-response)."""
     executor.set_config(config)
 
-    license_plugin: Optional[LicensePlugin] = get_license_checker()
-    license_checker = license_plugin if license_plugin else None
-    if license_checker:
-        license_checker.get_license_info()
-        if not license_checker.check_license():
+    license_plugin: Optional[LicensePlugin] = get_license_plugin()
+    license_plugin = license_plugin if license_plugin else None
+    if license_plugin:
+        license_plugin.get_license_info()
+        if not license_plugin.check_license():
             flwr_exit(ExitCode.SUPERLINK_LICENSE_INVALID)
 
     exec_servicer: grpc.Server = ExecServicer(
@@ -78,8 +78,8 @@ def run_exec_api_grpc(
         auth_plugin=auth_plugin,
     )
     interceptors: list[grpc.ServerInterceptor] = []
-    if license_checker is not None:
-        interceptors.append(ExecLicenseInterceptor(license_checker))
+    if license_plugin is not None:
+        interceptors.append(ExecLicenseInterceptor(license_plugin))
     if auth_plugin is not None and authz_plugin is not None:
         interceptors.append(ExecUserAuthInterceptor(auth_plugin, authz_plugin))
     # Event log interceptor must be added after user auth interceptor
