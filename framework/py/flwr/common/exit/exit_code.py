@@ -63,7 +63,7 @@ EXIT_CODE_HELP = {
     ExitCode.SUPERLINK_THREAD_CRASH: "An important background thread has crashed.",
     ExitCode.SUPERLINK_LICENSE_INVALID: (
         "The license is invalid or has expired. "
-        "Please contact us at `hello@flower.ai` to renew your license."
+        "Please contact `hello@flower.ai` for assistance."
     ),
     # ServerApp-specific exit codes (200-299)
     # SuperNode-specific exit codes (300-399)
