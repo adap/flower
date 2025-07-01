@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-18 00:07+0000\n"
+"POT-Creation-Date: 2025-07-01 00:09+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -10804,7 +10804,7 @@ msgstr ""
 msgid ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.record.array.Array.from_numpy_ndarray:1
 #: flwr.common.record.conversion_utils.array_from_numpy:1 of
@@ -11334,53 +11334,62 @@ msgstr ""
 msgid "Initializing with a PyTorch tensor::"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 msgid ":py:obj:`deflate <flwr.common.Array.deflate>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #: flwr.common.record.array.Array.deflate:1 of
 msgid "Deflate the Array."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 msgid ""
 ":py:obj:`from_numpy_ndarray <flwr.common.Array.from_numpy_ndarray>`\\ "
 "\\(ndarray\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 msgid ""
 ":py:obj:`from_torch_tensor <flwr.common.Array.from_torch_tensor>`\\ "
 "\\(tensor\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #: flwr.common.record.array.Array.from_torch_tensor:1 of
 msgid "Create Array from PyTorch tensor."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 msgid ""
 ":py:obj:`inflate <flwr.common.Array.inflate>`\\ \\(object\\_content\\[\\,"
 " children\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #: flwr.common.record.array.Array.inflate:1 of
 msgid "Inflate an Array from bytes."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 msgid ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #: flwr.common.record.array.Array.numpy:1 of
 msgid "Return the array as a NumPy array."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:40
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
+msgid ":py:obj:`slice_array <flwr.common.Array.slice_array>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
+#: flwr.common.record.array.Array.slice_array:1 of
+msgid "Slice Array data and construct a list of ArrayChunks."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:43
 #: ../../source/ref-api/flwr.common.ArrayRecord.rst:76
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:25
 #: ../../source/ref-api/flwr.common.Code.rst:19
@@ -11423,16 +11432,8 @@ msgstr ""
 msgid ":py:obj:`children <flwr.common.Array.children>`\\"
 msgstr ""
 
-#: flwr.common.Array.children:1 flwr.common.Array.children:1:<autosummary>:1
-#: flwr.common.ConfigRecord.children:1
-#: flwr.common.ConfigRecord.children:1:<autosummary>:1
-#: flwr.common.ConfigsRecord.children:1
-#: flwr.common.ConfigsRecord.children:1:<autosummary>:1
-#: flwr.common.MetricRecord.children:1
-#: flwr.common.MetricRecord.children:1:<autosummary>:1
-#: flwr.common.MetricsRecord.children:1
-#: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
-msgid "Get all child objects as a dictionary or None if there are no children."
+#: flwr.common.Array.children:1 flwr.common.Array.children:1:<autosummary>:1 of
+msgid "Return a dictionary of ArrayChunks with their Object IDs as keys."
 msgstr ""
 
 #: flwr.common.Array.children:1:<autosummary>:1 of
@@ -11495,8 +11496,8 @@ msgstr ""
 
 #: flwr.common.record.array.Array.inflate:5 of
 msgid ""
-"Must be ``None``. ``Array`` does not support child objects. Providing any"
-" children will raise a ``ValueError``."
+"Must be ``None``. ``Array`` must have child objects. Providing no "
+"children will raise a ``ValueError``."
 msgstr ""
 
 #: flwr.common.record.array.Array.inflate:9 of
@@ -12022,6 +12023,17 @@ msgstr ""
 
 #: flwr.common.ConfigRecord.children:1:<autosummary>:1 of
 msgid ":py:obj:`children <flwr.common.ConfigRecord.children>`\\"
+msgstr ""
+
+#: flwr.common.ConfigRecord.children:1
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigsRecord.children:1
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1
+#: flwr.common.MetricRecord.children:1
+#: flwr.common.MetricRecord.children:1:<autosummary>:1
+#: flwr.common.MetricsRecord.children:1
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
+msgid "Get all child objects as a dictionary or None if there are no children."
 msgstr ""
 
 #: flwr.common.ConfigRecord.children:1:<autosummary>:1 of
@@ -30397,7 +30409,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|ab00717b4fcf4c4e88fbacebdb2e5104|"
+msgid "|fc57576a231747128ff75a61f1e9cd39|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30412,7 +30424,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|35704bcb67b04aae88cf73d7789f84e9|"
+msgid "|767520b7ffeb4d7d84e3516a0df30f33|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30434,7 +30446,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|4dbaa50ad7fb424ea1464f49a22fbd1b|"
+msgid "|e7952261d68d49168c6162814e1d5c43|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30450,7 +30462,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|ce96ff6f413b4bc48f67dd282cac3530|"
+msgid "|92ae92ba3c614abf8f4dee65f60324ae|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -30466,7 +30478,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|9a9e82799fac424cba1d5f74948681ee|"
+msgid "|45ce570042ec49eeab9b77b509234534|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -30481,7 +30493,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|84fb402f085348b5b3cace4bb6259ec2|"
+msgid "|5402b15bbe564f8e84624ad1972a0202|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -30501,7 +30513,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|b4469692621449e6a5eed641772b352b|"
+msgid "|51d802738fa9409a819e56cc34188e4e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -30516,7 +30528,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|cbae2e70533343d2801e4f5e93771349|"
+msgid "|52f745311ab64879ab56a1e8ebe340ae|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -30656,7 +30668,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|9881cccc8a124ddcae73aea78eb7a42a|"
+msgid "|e1bcdcd42c6145bdb2d82d43c62838ee|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -30680,7 +30692,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|2a1779a818904423a30071e1e0c56dd9|"
+msgid "|53979a42c30f44b09629e09e16b29a8d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -30704,7 +30716,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|c82f8049e9c14f5f8d86000f09775f15|"
+msgid "|678bf760161d42f696df097625bf8292|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -30727,7 +30739,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|e541665f503b4d7dbe1647d4b015b613|"
+msgid "|b497d66068144c95a1333c8dd3bf3f8e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -30765,7 +30777,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|ad22c7c9041d4bb68e95276c87497743|"
+msgid "|26357e35cb164955a9ffc069e14b5b42|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -30859,7 +30871,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|df37c0910c6e4e11ac9d883480b20d39|"
+msgid "|69a7af741bd04e93954bc2707cebbdb0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -47974,5 +47986,53 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|867a7872e4dd40a1811bfd20e4d6f62f|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Must be ``None``. ``Array`` does not "
+#~ "support child objects. Providing any "
+#~ "children will raise a ``ValueError``."
+#~ msgstr ""
+
+#~ msgid "|ab00717b4fcf4c4e88fbacebdb2e5104|"
+#~ msgstr ""
+
+#~ msgid "|35704bcb67b04aae88cf73d7789f84e9|"
+#~ msgstr ""
+
+#~ msgid "|4dbaa50ad7fb424ea1464f49a22fbd1b|"
+#~ msgstr ""
+
+#~ msgid "|ce96ff6f413b4bc48f67dd282cac3530|"
+#~ msgstr ""
+
+#~ msgid "|9a9e82799fac424cba1d5f74948681ee|"
+#~ msgstr ""
+
+#~ msgid "|84fb402f085348b5b3cace4bb6259ec2|"
+#~ msgstr ""
+
+#~ msgid "|b4469692621449e6a5eed641772b352b|"
+#~ msgstr ""
+
+#~ msgid "|cbae2e70533343d2801e4f5e93771349|"
+#~ msgstr ""
+
+#~ msgid "|9881cccc8a124ddcae73aea78eb7a42a|"
+#~ msgstr ""
+
+#~ msgid "|2a1779a818904423a30071e1e0c56dd9|"
+#~ msgstr ""
+
+#~ msgid "|c82f8049e9c14f5f8d86000f09775f15|"
+#~ msgstr ""
+
+#~ msgid "|e541665f503b4d7dbe1647d4b015b613|"
+#~ msgstr ""
+
+#~ msgid "|ad22c7c9041d4bb68e95276c87497743|"
+#~ msgstr ""
+
+#~ msgid "|df37c0910c6e4e11ac9d883480b20d39|"
 #~ msgstr ""
 
