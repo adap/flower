@@ -45,7 +45,7 @@ class TestExecLicenseInterceptor(unittest.TestCase):
     """Test the ExecLicenseInterceptor license-check logic."""
 
     def setUp(self) -> None:
-        # Dummy license plugin; real code inherits from LicensePlugin
+        """Initialize."""
         self.license_checker = MagicMock(spec=LicensePlugin)
 
     @parameterized.expand(
