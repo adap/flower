@@ -16,14 +16,16 @@
 
 
 from logging import INFO
-from typing import Optional
+from typing import Optional, Union
 
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.auth_plugin import ExecAuthPlugin, ExecAuthzPlugin
 from flwr.common.event_log_plugin import EventLogWriterPlugin
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import generic_create_grpc_server
+from flwr.common.license_plugin import LicensePlugin
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
 from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
@@ -31,10 +33,18 @@ from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
+from flwr.superexec.exec_license_interceptor import ExecLicenseInterceptor
 from flwr.superexec.exec_user_auth_interceptor import ExecUserAuthInterceptor
 
 from .exec_servicer import ExecServicer
 from .executor import Executor
+
+try:
+    from flwr.ee import get_license_checker
+except ImportError:
+
+    def get_license_checker() -> Union[None, type[LicensePlugin]]:
+        """Return the license checker."""
 
 
 # pylint: disable-next=too-many-arguments, too-many-positional-arguments
@@ -53,6 +63,12 @@ def run_exec_api_grpc(
     """Run Exec API (gRPC, request-response)."""
     executor.set_config(config)
 
+    license_checker = get_license_checker()() if get_license_checker() else None
+    if license_checker:
+        license_checker.get_license_info()
+        if not license_checker.check_license():
+            flwr_exit(ExitCode.SUPERLINK_LICENSE_INVALID)
+
     exec_servicer: grpc.Server = ExecServicer(
         linkstate_factory=state_factory,
         ffs_factory=ffs_factory,
@@ -61,6 +77,8 @@ def run_exec_api_grpc(
         auth_plugin=auth_plugin,
     )
     interceptors: list[grpc.ServerInterceptor] = []
+    if license_checker is not None:
+        interceptors.append(ExecLicenseInterceptor(license_checker))  # type: ignore
     if auth_plugin is not None and authz_plugin is not None:
         interceptors.append(ExecUserAuthInterceptor(auth_plugin, authz_plugin))
     # Event log interceptor must be added after user auth interceptor
