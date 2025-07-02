@@ -193,6 +193,7 @@ class FlowerClient(NumPyClient):
             device=self.device,
             finetune_epochs=self.finetune_epochs,
             lr=config.get("lr", self.lr),
+            momentum=self.momentum,
         )
 
         return loss, len(self.valloader.dataset), {"loss": loss, "accuracy": accuracy}

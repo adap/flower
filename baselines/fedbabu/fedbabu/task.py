@@ -282,6 +282,7 @@ def test(
     trainloader: DataLoader,
     device: torch.device,
     finetune_epochs: int,
+    momentum: float,
     lr: float,
 ) -> Tuple[float, float]:
     """Evaluate the model on local validation data after optional fine-tuning.
@@ -304,6 +305,7 @@ def test(
         trainloader (DataLoader): DataLoader for fine-tuning (FedBABU)
         device (torch.device): Device to run computations on (CPU/GPU)
         finetune_epochs (int): Number of epochs for fine-tuning (FedBABU)
+        momentum (float): Momentum factor for SGD optimizer (FedBABU)
         lr (float): Learning rate for fine-tuning
 
     Returns:
@@ -312,7 +314,7 @@ def test(
             - Classification accuracy on test dataset
     """
     # First fine-tune the model on local data
-    finetune(net, trainloader, finetune_epochs, lr, device)
+    finetune(net, trainloader, finetune_epochs, lr, momentum, device)
 
     # Evaluate the fine-tuned model
     net.to(device)
@@ -342,6 +344,7 @@ def finetune(
     trainloader: DataLoader,
     finetune_epochs: int,
     lr: float,
+    momentum: float,
     device: torch.device,
 ) -> None:
     """Fine-tune the entire model on local data (FedBABU personalization step).
@@ -354,13 +357,14 @@ def finetune(
         trainloader (DataLoader): DataLoader for the training dataset
         finetune_epochs (int): Number of fine-tuning epochs
         lr (float): Learning rate for fine-tuning
+        momentum (float): Momentum factor for SGD optimizer
         device (torch.device): Device to run computations on (CPU/GPU)
     """
     net.to(device)
     criterion = torch.nn.CrossEntropyLoss().to(device)
 
     # Unlike training, we fine-tune all parameters including the classifier
-    optimizer = torch.optim.SGD(net.parameters(), lr=lr)
+    optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=momentum)
 
     net.train()
     for _ in range(finetune_epochs):
