@@ -16,27 +16,37 @@ dependencies = [
     "flwr-datasets[vision]>=0.3.0",
     "torch==2.2.1",
     "torchvision==0.17.1",
+    "matplotlib==3.10.3"
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "KarhouTam"
+publisher = "Jiahao Tan"
 
 [tool.flwr.app.components]
 serverapp = "fedbabu.server_app:app"
 clientapp = "fedbabu.client_app:app"
 
 [tool.flwr.app.config]
-num-server-rounds = 3
-fraction-fit = 0.5
-local-epochs = 1
-finetune-epochs = 1
-alpha = 0.1
+algorithm = "fedbabu" # ["fedbabu", "fedavg"]
+num-server-rounds = 80
+fraction-fit = 0.1
+train_test_split_ratio = 0.2
+local-epochs = 4
+finetune-epochs = 5
+num_classes_per_client = 2
+lr = 0.1
+momentum = 0.9
+batch-size = 50
+seed = 42
 
 [tool.flwr.federations]
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
+options.num-supernodes = 100
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.5  # GPU fraction allocated to each client
+
