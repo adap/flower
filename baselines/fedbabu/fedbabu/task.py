@@ -168,21 +168,34 @@ def load_data(
     )
 
     # Define image transformations
-    pytorch_transforms = Compose(
+    cifar10_transforms_train = Compose(
         [
+            RandomCrop(32, padding=4),
+            RandomHorizontalFlip(),
             ToTensor(),
             Normalize(mean=CIFAR_MEAN, std=CIFAR_STD),
-            RandomHorizontalFlip(),
-            RandomCrop(32, padding=4),
         ]
     )
+    cifar10_transforms_test = Compose(
+        [ToTensor(), Normalize(mean=CIFAR_MEAN, std=CIFAR_STD)]
+    )
 
-    def apply_transforms(batch):
+    def apply_transforms_train(batch):
         """Apply transforms to the partition from FederatedDataset."""
-        batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
+        batch["img"] = [cifar10_transforms_train(img) for img in batch["img"]]
         return batch
 
-    partition_train_test = partition_train_test.with_transform(apply_transforms)
+    def apply_transforms_test(batch):
+        """Apply transforms to the partition from FederatedDataset."""
+        batch["img"] = [cifar10_transforms_test(img) for img in batch["img"]]
+        return batch
+
+    partition_train_test["train"] = partition_train_test["train"].with_transform(
+        apply_transforms_train
+    )
+    partition_train_test["test"] = partition_train_test["test"].with_transform(
+        apply_transforms_test
+    )
     trainloader = DataLoader(
         partition_train_test["train"], batch_size=batch_size, shuffle=True
     )

@@ -113,12 +113,29 @@ def server_fn(context: Context) -> ServerAppComponents:
     # Get initial model parameters
     initial_parameters = get_initial_parameters()
 
+    def on_fit_and_evaluate_config_fn(server_round: int) -> dict:
+        """Configuration function for client training and evaluation.
+
+        Args:
+            server_round: Current round number of the server
+
+        Returns:
+            dict: Configuration dictionary containing:
+                - lr: Learning rate for the current round, adjusted at specific intervals
+        """
+        lr = context.run_config["lr"]
+        if (server_round + 1) in [num_rounds // 2, (num_rounds * 3) // 4]:
+            lr *= 0.1
+        return {"lr": lr}
+
     # Configure federated averaging strategy
     strategy = FedAvg(
         fraction_fit=fraction_fit,
         fraction_evaluate=EVALUATE_FRACTION,
         min_available_clients=MIN_AVAILABLE_CLIENTS,
         initial_parameters=initial_parameters,
+        on_fit_config_fn=on_fit_and_evaluate_config_fn,
+        on_evaluate_config_fn=on_fit_and_evaluate_config_fn,
         evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
     )
 

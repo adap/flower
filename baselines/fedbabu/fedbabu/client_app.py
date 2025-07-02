@@ -142,7 +142,7 @@ class FlowerClient(NumPyClient):
             net=self.net,
             trainloader=self.trainloader,
             epochs=self.local_epochs,
-            lr=self.lr,
+            lr=config.get("lr", self.lr),
             momentum=self.momentum,
             device=self.device,
         )
@@ -192,7 +192,7 @@ class FlowerClient(NumPyClient):
             trainloader=self.trainloader,
             device=self.device,
             finetune_epochs=self.finetune_epochs,
-            lr=self.lr,
+            lr=config.get("lr", self.lr),
         )
 
         return loss, len(self.valloader.dataset), {"loss": loss, "accuracy": accuracy}
@@ -236,6 +236,7 @@ def client_fn(context: Context) -> NumPyClient:
     net = FourConvNet()
 
     # Extract configuration from context
+    algorithm = context.run_config["algorithm"]
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
     local_epochs = context.run_config.get("local-epochs", DEFALUT_LOCAL_EPOCHS)
@@ -263,6 +264,7 @@ def client_fn(context: Context) -> NumPyClient:
 
     # Create and return client instance
     return FlowerClient(
+        algorithm=algorithm,
         net=net,
         trainloader=trainloader,
         valloader=valloader,
