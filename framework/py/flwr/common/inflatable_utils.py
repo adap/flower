@@ -40,9 +40,11 @@ from .inflatable import (
 )
 from .message import Message
 from .record import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
+from .record.arraychunk import ArrayChunk
 
 # Helper registry that maps names of classes to their type
 inflatable_class_registry: dict[str, type[InflatableObject]] = {
+    ArrayChunk.__qualname__: ArrayChunk,
     Array.__qualname__: Array,
     ArrayRecord.__qualname__: ArrayRecord,
     ConfigRecord.__qualname__: ConfigRecord,
