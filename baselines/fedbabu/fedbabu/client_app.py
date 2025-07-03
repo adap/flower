@@ -29,11 +29,10 @@ FedAvg:
 from typing import Dict, Tuple
 
 import torch
+from fedbabu.task import FourConvNet, get_weights, load_data, set_weights, test, train
+from flwr.client import ClientApp, NumPyClient
+from flwr.common import Config, Context, Parameters, Scalar
 from torch.utils.data import DataLoader
-from flwr.client import NumPyClient, ClientApp
-from flwr.common import Context, Scalar, Config, Parameters
-
-from fedbabu.task import FourConvNet, load_data, get_weights, set_weights, train, test
 
 # Default hyperparameters and configuration
 NUM_CLASSES = 10  # Number of classes in CIFAR-10 dataset

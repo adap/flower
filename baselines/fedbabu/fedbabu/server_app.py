@@ -20,11 +20,10 @@ The server process follows these steps:
 
 from typing import List, Tuple
 
+from fedbabu.task import FourConvNet, get_weights
 from flwr.common import Context, Metrics, Parameters, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
-
-from fedbabu.task import FourConvNet, get_weights
 
 # Server configuration constants
 MIN_AVAILABLE_CLIENTS = 2  # Minimum number of clients required for federation

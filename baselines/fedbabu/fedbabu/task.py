@@ -22,18 +22,18 @@ from typing import List, Tuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader
-from torchvision.transforms import (
-    Compose,
-    Normalize,
-    ToTensor,
-    RandomHorizontalFlip,
-    RandomCrop,
-)
 from flwr.common import Parameters
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import PathologicalPartitioner
 from flwr_datasets.preprocessor import Merger
+from torch.utils.data import DataLoader
+from torchvision.transforms import (
+    Compose,
+    Normalize,
+    RandomCrop,
+    RandomHorizontalFlip,
+    ToTensor,
+)
 
 # Type aliases
 DataLoaders = Tuple[DataLoader, DataLoader]
