@@ -1,10 +1,11 @@
 """catboost-quickstart: A Flower / CatBoost app."""
 
-import copy
-import random
+from catboost import CatBoostClassifier, sum_models
 import json
 from logging import INFO, WARN
+import random
 from time import sleep
+from catboost_quickstart.task import convert_to_catboost, convert_to_model_dict
 
 from flwr.common import ConfigRecord, Context, Message, MessageType, RecordDict
 from flwr.common.logger import log
@@ -54,18 +55,26 @@ def main(grid: Grid, context: Context) -> None:
         log(INFO, "Received %s/%s results", len(replies), len(messages))
 
         # Collect received model and metric
-        model_dicts = []
+        model_list = []
         auc_list = []
         for msg in replies:
             if msg.has_content():
-                model_dicts.append(json.loads(msg.content["metric_and_model"]["model_dict"]))
+                cbc_init = convert_to_catboost(msg.content["metric_and_model"]["model_dict"])
+                model_list.append(cbc_init)
                 auc_list.append(msg.content["metric_and_model"]["AUC"])
             else:
                 log(WARN, f"message {msg.metadata.message_id} as an error.")
 
         # Perform bagging
-        global_model = copy.deepcopy(model_dicts[0]) if server_round == 0 else json.loads(global_model)
-        global_model = bagging_trees(model_dicts, global_model, server_round)
+        merged_clients_model = sum_models(model_list)
+        if server_round == 0:
+            global_model = merged_clients_model
+        else:
+            cbc_init_g = convert_to_catboost(global_model)
+            global_model = sum_models([cbc_init_g, merged_clients_model])
+
+        # Convert and serialize model for transmission
+        global_model = convert_to_model_dict(global_model)
         global_model = json.dumps(global_model).encode('utf-8')
 
         # Log average eval AUC
@@ -89,11 +98,3 @@ def construct_messages(
         )
         messages.append(message)
     return messages
-
-
-def bagging_trees(model_dicts, global_model, server_round):
-    """Perform bagging strategy on clients' models."""
-    ind_s = 1 if server_round == 0 else 0
-    for idx in range(ind_s, len(model_dicts)):
-        global_model["oblivious_trees"].extend(model_dicts[idx]["oblivious_trees"])
-    return global_model
