@@ -1,0 +1,68 @@
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Abstract base class SchedulerPlugin."""
+
+
+from abc import ABC, abstractmethod
+from typing import Callable, Optional
+from collections.abc import Sequence
+
+from flwr.common.typing import Fab, Run
+
+
+class SchedulerPlugin(ABC):
+    """Abstract base class for Scheduler plugins."""
+
+    def __init__(
+        self,
+        appio_api_address: str,
+        flwr_dir: str,
+        get_run: Callable[[int], Run],
+        get_fab: Callable[[str], Fab],
+    ) -> None:
+        self.appio_api_address = appio_api_address
+        self.flwr_dir = flwr_dir
+        self.get_run = get_run
+        self.get_fab = get_fab
+
+    @abstractmethod
+    def select_run_id(self, candidate_run_ids: Sequence[int]) -> Optional[int]:
+        """Select a run ID to execute from a sequence of candidates.
+
+        A candidate run ID is one that has at least one pending message and is
+        not currently in progress (i.e., not associated with a token).
+
+        Parameters
+        ----------
+        candidate_run_ids : Sequence[int]
+            A sequence of candidate run IDs to choose from.
+
+        Returns
+        -------
+        Optional[int]
+            The selected run ID, or None if no suitable candidate is found.
+        """
+
+    @abstractmethod
+    def launch_app(self, run_id: int, token: str) -> None:
+        """Launch the application associated with a given run ID and token.
+
+        Parameters
+        ----------
+        run_id : int
+            The ID of the run to be launched.
+        token : str
+            The token associated with the run.
+        """
