@@ -23,7 +23,7 @@ def main(grid: Grid, context: Context) -> None:
     fraction_sample = context.run_config["fraction-sample"]
 
     # Init global model
-    global_model = False
+    global_model = ""
 
     for server_round in range(num_rounds):
         log(INFO, "")  # Add newline for log readability
