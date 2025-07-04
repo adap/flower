@@ -123,6 +123,5 @@ class TestExecLicenseInterceptor(unittest.TestCase):
         # The interceptor should have called context.abort(...) once
         dummy_ctx.abort.assert_called_once_with(
             grpc.StatusCode.PERMISSION_DENIED,
-            "❗️ License check failed. Please try again soon. If you continue to "
-            "see this error, please contact the SuperLink administrator.",
+            "❗️ License check failed. Please contact the SuperLink administrator.",
         )
