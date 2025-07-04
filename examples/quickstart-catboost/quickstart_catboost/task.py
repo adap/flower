@@ -1,10 +1,11 @@
 """quickstart-catboost: A Flower / CatBoost app."""
 
-import json
-import tempfile
-
+from catboost import CatBoostClassifier
 from datasets import Dataset
-
+import json
+from pandas import DataFrame, Series
+import tempfile
+from typing import Tuple
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
@@ -12,26 +13,34 @@ from flwr_datasets.partitioner import IidPartitioner
 fds = None  # Cache FederatedDataset
 
 
-def model_temp_file(model, dump):
-    """Generate temp file path."""
+def convert_to_model_dict(model_input: CatBoostClassifier) -> dict:
+    """Convert CatBoost object to model dict."""
     with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
-        if dump:
-            json.dump(json.loads(model), open(tmp.name, "w+"))
-        else:
-            model.save_model(tmp.name, format="json")
+        model_input.save_model(tmp.name, format="json")
         tmp_path = tmp.name
-    return tmp_path
+    model_dict = json.load(open(tmp_path, "r"))
+    return model_dict
 
 
-def preprocess(partition: Dataset):
+def convert_to_catboost(model_input: bytes) -> CatBoostClassifier:
+    """Convert serialized model dict to CatBoost object."""
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
+        json.dump(json.loads(model_input), open(tmp.name, "w"))
+        tmp_path = tmp.name
+    cbc_init = CatBoostClassifier()
+    cbc_init.load_model(tmp_path, "json")
+    return cbc_init
+
+
+def preprocess(
+    partition: Dataset,
+) -> Tuple[Tuple[DataFrame, Series], Tuple[DataFrame, Series]]:
     """Pre-process adult-census-income data."""
     # Divide data on each node: 80% train, 20% test
-    # partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
-    partition_train_test = partition.train_test_split(test_size=0.003, seed=42)
+    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
 
     # Load train and test data
-    # train_ds = partition_train_test["train"]
-    train_ds = partition_train_test["test"]
+    train_ds = partition_train_test["train"]
     test_ds = partition_train_test["test"]
     train_df = train_ds.to_pandas()
     test_df = test_ds.to_pandas()
@@ -52,7 +61,7 @@ def preprocess(partition: Dataset):
     return (X_train, y_train), (X_test, y_test)
 
 
-def load_data(partition_id: int, num_partitions: int):
+def load_data(partition_id: int, num_partitions: int) -> Tuple[tuple, tuple, list]:
     """Load partition adult-census-income data."""
     # Only initialize `FederatedDataset` once
     global fds

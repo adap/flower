@@ -1,1 +1,1 @@
-"""catboost-quickstart: A Flower / CatBoost app."""
+"""quickstart-catboost: A Flower / CatBoost app."""

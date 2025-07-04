@@ -1,11 +1,11 @@
 """quickstart-catboost: A Flower / CatBoost app."""
 
-import copy
+from catboost import CatBoostClassifier, sum_models
 import json
-import random
-
 from logging import INFO, WARN
+import random
 from time import sleep
+from quickstart_catboost.task import convert_to_catboost, convert_to_model_dict
 
 from flwr.common import ConfigRecord, Context, Message, MessageType, RecordDict
 from flwr.common.logger import log
@@ -39,7 +39,7 @@ def sample_nodes(grid: Grid, context: Context) -> list[int]:
 def construct_messages(
     node_ids: list[int],
     record: RecordDict,
-    message_type: str,
+    message_type: MessageType,
     server_round: int,
 ) -> list[Message]:
 
@@ -55,15 +55,6 @@ def construct_messages(
     return messages
 
 
-def bagging_trees(model_dicts, global_model, server_round) -> bytes:
-    """Perform bagging strategy on clients' models."""
-    ind_s = 1 if server_round == 0 else 0
-    for idx in range(ind_s, len(model_dicts)):
-        global_model["oblivious_trees"].extend(model_dicts[idx]["oblivious_trees"])
-    global_model = json.dumps(global_model).encode("utf-8")
-    return global_model
-
-
 @app.main()
 def main(grid: Grid, context: Context) -> None:
 
@@ -71,6 +62,7 @@ def main(grid: Grid, context: Context) -> None:
 
     # Init global model
     global_model = b""  # init with empty list
+
     for server_round in range(num_rounds):
         log(INFO, "")  # Add newline for log readability
         log(INFO, "Starting round %s/%s", server_round + 1, num_rounds)
@@ -80,9 +72,9 @@ def main(grid: Grid, context: Context) -> None:
 
         # Create messages
         gmodel_record = ConfigRecord({"model": global_model})
-        record_dict = RecordDict({"gmodel": gmodel_record})
+        recorddict = RecordDict({"gmodel": gmodel_record})
         messages = construct_messages(
-            node_ids, record_dict, MessageType.TRAIN, server_round
+            node_ids, recorddict, MessageType.TRAIN, server_round
         )
 
         # Send messages and wait for all results
@@ -90,26 +82,29 @@ def main(grid: Grid, context: Context) -> None:
         log(INFO, "Received %s/%s results", len(replies), len(messages))
 
         # Collect received model and metric
-        model_dicts = []
+        model_list = []
         auc_list = []
         for msg in replies:
             if msg.has_content():
-                model_dicts.append(
-                    json.loads(msg.content["metric_and_model"]["model_dict"])
+                cbc_init = convert_to_catboost(
+                    msg.content["metric_and_model"]["model_dict"]
                 )
+                model_list.append(cbc_init)
                 auc_list.append(msg.content["metric_and_model"]["AUC"])
             else:
                 log(WARN, f"message {msg.metadata.message_id} as an error.")
 
-        # Load corresponding model based on server round
-        global_model = (
-            copy.deepcopy(model_dicts[0])
-            if server_round == 0
-            else json.loads(global_model)
-        )
-
         # Perform bagging
-        global_model = bagging_trees(model_dicts, global_model, server_round)
+        merged_clients_model = sum_models(model_list)
+        if server_round == 0:
+            global_model = merged_clients_model
+        else:
+            cbc_init_g = convert_to_catboost(global_model)
+            global_model = sum_models([cbc_init_g, merged_clients_model])
+
+        # Convert and serialize model for transmission
+        global_model = convert_to_model_dict(global_model)
+        global_model = json.dumps(global_model).encode("utf-8")
 
         # Log average eval AUC
         log(INFO, f"Avg eval AUC: {sum(auc_list)/len(auc_list):.3f}")

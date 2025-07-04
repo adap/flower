@@ -6,18 +6,18 @@ framework: [catboost]
 
 # Federated Learning with CatBoost and Flower (Quickstart Example)
 
-This example demonstrates how to perform [CatBoost](https://catboost.ai) within Flower using `catboost` package.
+This example demonstrates how to perform [CatBoost](https://catboost.ai) within Flower using the `catboost` package.
 We use [adult-census-income](https://huggingface.co/datasets/scikit-learn/adult-census-income) dataset for this example to perform a binary classification task.
 Tree-based with bagging method is used for aggregation on the server.
 
 ## Tree-based bagging aggregation
 
-Bagging (bootstrap) aggregation is an ensemble meta-algorithm in machine learning, used for enhancing the stability and accuracy of machine learning algorithms. Here, we leverage this algorithm for CatBoost trees.
+Bagging (bootstrap) aggregation is an ensemble meta-algorithm in machine learning, used for enhancing the stability and accuracy of machine learning algorithms. Here, we leverage this algorithm for learning CatBoost trees in a federated learning environment.
 
-Specifically, each client is treated as a bootstrap by random subsampling (data partitioning in FL). At each FL round, all clients boost a number of trees (in this example, 1 tree) based on the local bootstrap samples.
-Then, the clients' trees are aggregated on the server, and concatenates them to the global model from previous round. The aggregated tree ensemble is regarded as a new global model.
+Specifically, each client is treated as a bootstrap by random sub-sampling (data partitioning in FL). At each FL round, all clients boost a number of trees (in this example, 1 tree) based on the local bootstrap samples.
+Then, the clients' trees are aggregated on the server, and concatenates them to the global model from previous round. The aggregated tree ensemble is regarded as the new global model.
 
-This way, let's consider a scenario with M clients. Given FL round R, the bagging models consist of (M * R) trees.
+For instance, if we consider a scenario with M clients, then at any given federation round R, the bagging models consist of (M\*R) trees in total.
 
 ## Set up the project
 
@@ -27,16 +27,16 @@ Start by cloning the example project:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git _tmp \
-        && mv _tmp/examples/catboost-quickstart . \
+        && mv _tmp/examples/quickstart-catboost . \
         && rm -rf _tmp \
-        && cd catboost-quickstart
+        && cd quickstart-catboost
 ```
 
-This will create a new directory called `catboost-quickstart` with the following structure:
+This will create a new directory called `quickstart-catboost` with the following structure:
 
 ```shell
-catboost-quickstart
-├── catboost_quickstart
+quickstart-catboost
+├── quickstart_catboost
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
@@ -47,7 +47,7 @@ catboost-quickstart
 
 ### Install dependencies and project
 
-Install the dependencies defined in `pyproject.toml` as well as the `catboost_quickstart` package.
+Install the dependencies defined in `pyproject.toml` as well as the `quickstart_catboost` package.
 
 ```bash
 pip install -e .

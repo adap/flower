@@ -1,9 +1,12 @@
 """quickstart-catboost: A Flower / CatBoost app."""
 
-import json
-
 from catboost import CatBoostClassifier, Pool
-from quickstart_catboost.task import load_data, model_temp_file
+import json
+from quickstart_catboost.task import (
+    convert_to_catboost,
+    convert_to_model_dict,
+    load_data,
+)
 
 from flwr.client import ClientApp
 from flwr.common import Context, Message, ConfigRecord, RecordDict
@@ -13,7 +16,7 @@ app = ClientApp()
 
 
 @app.train()
-def train(msg: Message, context: Context):
+def train(msg: Message, context: Context) -> Message:
 
     # Load partition
     partition_id = context.node_config["partition-id"]
@@ -28,25 +31,16 @@ def train(msg: Message, context: Context):
     depth = context.run_config["depth"]
     cbc = CatBoostClassifier(
         iterations=iterations,
-        one_hot_max_size=len(cat_features),
         learning_rate=learning_rate,
-        model_size_reg=100,
-        max_ctr_complexity=2,
-        ctr_target_border_count=1,
         depth=depth,
         random_seed=42,
-        verbose=False,
+        verbose=0,
         cat_features=cat_features,
     )
 
     # Load global model
     global_model_dict = msg.content["gmodel"]["model"]
-    if global_model_dict:
-        tmp_path = model_temp_file(global_model_dict, dump=True)
-        cbc_init = CatBoostClassifier()
-        cbc_init.load_model(tmp_path, "json")
-    else:
-        cbc_init = None
+    cbc_init = convert_to_catboost(global_model_dict) if global_model_dict else None
 
     # Local training
     cbc.fit(X_train, y_train, init_model=cbc_init)
@@ -56,15 +50,15 @@ def train(msg: Message, context: Context):
     metrics = cbc.eval_metrics(eval_pool, metrics=["AUC"])
     auc = metrics["AUC"][-1]
 
-    # Extract boosted trees and construct reply message
-    tmp_path = model_temp_file(cbc, dump=False)
-    model_dict = json.load(open(tmp_path, "r"))
+    # Extract boosted trees
+    model_dict = convert_to_model_dict(cbc)
     num_trees = len(model_dict["oblivious_trees"])
     model_dict["oblivious_trees"] = model_dict["oblivious_trees"][
         num_trees - iterations : num_trees
     ]
     model_dict_b = json.dumps(model_dict).encode("utf-8")
 
+    # Construct reply message
     metric_and_model_record = ConfigRecord({"AUC": auc, "model_dict": model_dict_b})
     content = RecordDict({"metric_and_model": metric_and_model_record})
     return Message(content=content, reply_to=msg)
