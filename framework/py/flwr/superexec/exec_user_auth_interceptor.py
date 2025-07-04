@@ -108,7 +108,9 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 # Check if the user is authorized
                 if not self.authz_plugin.verify_user_authorization(account_info):
                     context.abort(
-                        grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
+                        grpc.StatusCode.PERMISSION_DENIED,
+                        "❗️ User not authorized. "
+                        "Please contact the SuperLink administrator.",
                     )
                     raise grpc.RpcError()
                 return call(request, context)  # type: ignore
@@ -127,7 +129,9 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 # Check if the user is authorized
                 if not self.authz_plugin.verify_user_authorization(account_info):
                     context.abort(
-                        grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
+                        grpc.StatusCode.PERMISSION_DENIED,
+                        "❗️ User not authorized. "
+                        "Please contact the SuperLink administrator.",
                     )
                     raise grpc.RpcError()
 
