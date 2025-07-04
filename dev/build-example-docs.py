@@ -64,6 +64,7 @@ categories = {
 urls = {
     # Frameworks
     "Android": "https://www.android.com/",
+    "catboost": "https://catboost.ai/docs/en/",
     "C++": "https://isocpp.org/",
     "Docker": "https://www.docker.com/",
     "JAX": "https://jax.readthedocs.io/en/latest/",
