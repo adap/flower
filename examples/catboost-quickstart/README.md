@@ -10,16 +10,14 @@ This example demonstrates how to perform [CatBoost](https://catboost.ai) within 
 We use [adult-census-income](https://huggingface.co/datasets/scikit-learn/adult-census-income) dataset for this example to perform a binary classification task.
 Tree-based with bagging method is used for aggregation on the server.
 
-
 ## Tree-based bagging aggregation
 
 Bagging (bootstrap) aggregation is an ensemble meta-algorithm in machine learning, used for enhancing the stability and accuracy of machine learning algorithms. Here, we leverage this algorithm for CatBoost trees.
 
-Specifically, each client is treated as a bootstrap by random subsampling (data partitioning in FL). At each FL round, all clients boost a number of trees (in this example, 1 tree) based on the local bootstrap samples. 
+Specifically, each client is treated as a bootstrap by random subsampling (data partitioning in FL). At each FL round, all clients boost a number of trees (in this example, 1 tree) based on the local bootstrap samples.
 Then, the clients' trees are aggregated on the server, and concatenates them to the global model from previous round. The aggregated tree ensemble is regarded as a new global model.
 
 This way, let's consider a scenario with M clients. Given FL round R, the bagging models consist of (M * R) trees.
-
 
 ## Set up the project
 

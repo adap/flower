@@ -2,7 +2,11 @@
 
 from catboost import CatBoostClassifier, Pool
 import json
-from catboost_quickstart.task import convert_to_catboost, convert_to_model_dict, load_data
+from catboost_quickstart.task import (
+    convert_to_catboost,
+    convert_to_model_dict,
+    load_data,
+)
 
 from flwr.client import ClientApp
 from flwr.common import Context, Message, ConfigRecord, RecordDict
@@ -17,14 +21,22 @@ def train(msg: Message, context: Context):
     # Load partition
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    (X_train, y_train), (X_test, y_test), cat_features = load_data(partition_id, num_partitions)
+    (X_train, y_train), (X_test, y_test), cat_features = load_data(
+        partition_id, num_partitions
+    )
 
     # Instantiate local model
     iterations = context.run_config["local-epochs"]
     learning_rate = context.run_config["learning-rate"]
     depth = context.run_config["depth"]
-    cbc = CatBoostClassifier(iterations=iterations, learning_rate=learning_rate, depth=depth, random_seed=42, verbose=0,
-                             cat_features=cat_features)
+    cbc = CatBoostClassifier(
+        iterations=iterations,
+        learning_rate=learning_rate,
+        depth=depth,
+        random_seed=42,
+        verbose=0,
+        cat_features=cat_features,
+    )
 
     # Load global model
     global_model_dict = msg.content["gmodel"]["model"]
@@ -41,8 +53,10 @@ def train(msg: Message, context: Context):
     # Extract boosted trees
     model_dict = convert_to_model_dict(cbc)
     num_trees = len(model_dict["oblivious_trees"])
-    model_dict["oblivious_trees"] = model_dict["oblivious_trees"][num_trees - iterations : num_trees]
-    model_dict_b = json.dumps(model_dict).encode('utf-8')
+    model_dict["oblivious_trees"] = model_dict["oblivious_trees"][
+        num_trees - iterations : num_trees
+    ]
+    model_dict_b = json.dumps(model_dict).encode("utf-8")
 
     # Construct reply message
     metric_and_model_record = ConfigRecord({"AUC": auc, "model_dict": model_dict_b})

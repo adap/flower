@@ -18,7 +18,9 @@ def train(msg: Message, context: Context):
     # Load partition
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    (X_train, y_train), (X_test, y_test), cat_features = load_data(partition_id, num_partitions)
+    (X_train, y_train), (X_test, y_test), cat_features = load_data(
+        partition_id, num_partitions
+    )
 
     # Instantiate local model
     iterations = context.run_config["local-epochs"]
@@ -34,7 +36,8 @@ def train(msg: Message, context: Context):
         depth=depth,
         random_seed=42,
         verbose=False,
-        cat_features=cat_features)
+        cat_features=cat_features,
+    )
 
     # Load global model
     global_model_dict = msg.content["gmodel"]["model"]
@@ -57,8 +60,10 @@ def train(msg: Message, context: Context):
     tmp_path = model_temp_file(cbc, dump=False)
     model_dict = json.load(open(tmp_path, "r"))
     num_trees = len(model_dict["oblivious_trees"])
-    model_dict["oblivious_trees"] = model_dict["oblivious_trees"][num_trees - iterations : num_trees]
-    model_dict_b = json.dumps(model_dict).encode('utf-8')
+    model_dict["oblivious_trees"] = model_dict["oblivious_trees"][
+        num_trees - iterations : num_trees
+    ]
+    model_dict_b = json.dumps(model_dict).encode("utf-8")
 
     metric_and_model_record = ConfigRecord({"AUC": auc, "model_dict": model_dict_b})
     content = RecordDict({"metric_and_model": metric_and_model_record})

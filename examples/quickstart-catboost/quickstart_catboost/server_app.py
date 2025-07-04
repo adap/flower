@@ -60,7 +60,7 @@ def bagging_trees(model_dicts, global_model, server_round) -> bytes:
     ind_s = 1 if server_round == 0 else 0
     for idx in range(ind_s, len(model_dicts)):
         global_model["oblivious_trees"].extend(model_dicts[idx]["oblivious_trees"])
-    global_model = json.dumps(global_model).encode('utf-8')
+    global_model = json.dumps(global_model).encode("utf-8")
     return global_model
 
 
@@ -70,7 +70,7 @@ def main(grid: Grid, context: Context) -> None:
     num_rounds = context.run_config["num-server-rounds"]
 
     # Init global model
-    global_model = b''  # init with empty list
+    global_model = b""  # init with empty list
     for server_round in range(num_rounds):
         log(INFO, "")  # Add newline for log readability
         log(INFO, "Starting round %s/%s", server_round + 1, num_rounds)
@@ -94,13 +94,19 @@ def main(grid: Grid, context: Context) -> None:
         auc_list = []
         for msg in replies:
             if msg.has_content():
-                model_dicts.append(json.loads(msg.content["metric_and_model"]["model_dict"]))
+                model_dicts.append(
+                    json.loads(msg.content["metric_and_model"]["model_dict"])
+                )
                 auc_list.append(msg.content["metric_and_model"]["AUC"])
             else:
                 log(WARN, f"message {msg.metadata.message_id} as an error.")
 
         # Load corresponding model based on server round
-        global_model = copy.deepcopy(model_dicts[0]) if server_round == 0 else json.loads(global_model)
+        global_model = (
+            copy.deepcopy(model_dicts[0])
+            if server_round == 0
+            else json.loads(global_model)
+        )
 
         # Perform bagging
         global_model = bagging_trees(model_dicts, global_model, server_round)

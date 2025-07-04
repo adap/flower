@@ -59,7 +59,9 @@ def main(grid: Grid, context: Context) -> None:
         auc_list = []
         for msg in replies:
             if msg.has_content():
-                cbc_init = convert_to_catboost(msg.content["metric_and_model"]["model_dict"])
+                cbc_init = convert_to_catboost(
+                    msg.content["metric_and_model"]["model_dict"]
+                )
                 model_list.append(cbc_init)
                 auc_list.append(msg.content["metric_and_model"]["AUC"])
             else:
@@ -75,7 +77,7 @@ def main(grid: Grid, context: Context) -> None:
 
         # Convert and serialize model for transmission
         global_model = convert_to_model_dict(global_model)
-        global_model = json.dumps(global_model).encode('utf-8')
+        global_model = json.dumps(global_model).encode("utf-8")
 
         # Log average eval AUC
         log(INFO, f"Avg eval AUC: {sum(auc_list)/len(auc_list):.3f}")

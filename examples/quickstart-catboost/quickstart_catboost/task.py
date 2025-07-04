@@ -37,8 +37,12 @@ def preprocess(partition: Dataset):
     test_df = test_ds.to_pandas()
 
     # Construct labels
-    train_df["income"] = train_df["income"].apply(lambda x: 1 if x.strip() == ">50K" else 0)
-    test_df["income"] = test_df["income"].apply(lambda x: 1 if x.strip() == ">50K" else 0)
+    train_df["income"] = train_df["income"].apply(
+        lambda x: 1 if x.strip() == ">50K" else 0
+    )
+    test_df["income"] = test_df["income"].apply(
+        lambda x: 1 if x.strip() == ">50K" else 0
+    )
     feature_cols = [col for col in train_df.columns if col != "income"]
     X_train = train_df[feature_cols]
     y_train = train_df["income"]
@@ -61,10 +65,14 @@ def load_data(partition_id: int, num_partitions: int):
     partition = fds.load_partition(partition_id)
     train_data, test_data = preprocess(partition)
     cat_features = [
-        "workclass", "education",
-        "marital.status", "occupation",
-        "relationship", "race",
-        "sex", "native.country"
+        "workclass",
+        "education",
+        "marital.status",
+        "occupation",
+        "relationship",
+        "race",
+        "sex",
+        "native.country",
     ]
 
     return train_data, test_data, cat_features
