@@ -320,7 +320,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
             typer.secho(
-                "❌ Permission denied. Please contact the SuperLink administrator.",
+                "❌ Permission denied.",
                 fg=typer.colors.RED,
                 bold=True,
             )

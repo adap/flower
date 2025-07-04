@@ -58,7 +58,11 @@ class ExecLicenseInterceptor(grpc.ServerInterceptor):  # type: ignore
             call = method_handler.unary_unary or method_handler.unary_stream
 
             if not self.license_plugin.check_license():
-                context.abort(grpc.StatusCode.PERMISSION_DENIED, "License check failed")
+                context.abort(
+                    grpc.StatusCode.PERMISSION_DENIED,
+                    "❗️ License check failed. Please contact the SuperLink "
+                    "administrator.",
+                )
                 raise grpc.RpcError()
 
             return call(request, context)  # type: ignore
