@@ -6,7 +6,7 @@ framework: [torch]
 
 # Federated AI with Embedded Devices using Flower
 
-This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use Raspberry Pi as Flower clients, or better said, `SuperNodes`.  The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) example, but you could adjust it to follow [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) if you prefere using TensorFlow. The main difference compare to those examples is that here you'll learn how to use Flower's Deployment Engine to run FL across multiple embedded devices.
+This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use NVIDIA Jetson devices and Raspberry Pi as Flower clients, or better said, `SuperNodes`.  The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) example, but you could adjust it to follow [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) if you prefere using TensorFlow. The main difference compare to those examples is that here you'll learn how to use Flower's Deployment Engine to run FL across multiple embedded devices.
 
 ![Different was of running Flower FL on embedded devices](_static/diagram.png)
 
@@ -18,8 +18,8 @@ This example will show you how Flower makes it very easy to run Federated Learni
 This tutorial allows for a variety of settings (some shown in the diagrams above). As long as you have access to one embedded device, you can follow along. This is a list of components that you'll need:
 
 - For Flower server: A machine running Linux/macOS (e.g. your laptop). You can run the server on an embedded device too!
-- For Flower clients (one or more): Raspberry Pi 5 or 4 (or Zero 2), or anything similar to these.
-- A uSD card with 32GB or more.
+- For Flower clients (one or more): Raspberry Pi 5 or 4 (or Zero 2), or an NVIDIA Jetson Orin NX, or anything similar to these.
+- A uSD card with 32GB or more. While 32GB is enough for the RPi, a larger 64GB uSD card works best for the NVIDIA Jetson.
 - Software to flash the images to a uSD card:
   - For Raspberry Pi we recommend the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
   - For other devices [balenaEtcher](https://www.balena.io/etcher/) it's a great option.
@@ -78,6 +78,86 @@ pip install -e .
    - Follow the steps outlined in [Embedded Devices Setup](device_setup.md) to set it up for develpment. The objetive of this step is to have your Pi ready to join later as a Flower `SuperNode` to an existing federation.
 
 3. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
+
+## Setting up a Jetson Orin NX
+
+> These steps have been validated for a Jetson Orin NX Dev Kit using JetPack 6.1.
+
+1. **Install JetPack 6.1 on your Jetson device**
+
+   - Download the JetPack 6.1 image from [NVIDIA-embedded](https://developer.nvidia.com/embedded/jetpack-sdk-61). You might need an NVIDIA developer account. For our testing, we used the reComputer J4012 model and followed the instructions provided by [Seeed Studio](https://wiki.seeedstudio.com/reComputer_J4012_Flash_Jetpack/) to flash JetPack 6.1.
+
+   - Installation procedures may vary slightly depending on the Jetson model you own. Please refer to the appropriate instructions on the NVIDIA Embedded site or the Seeed Studio site for your specific board.
+
+2. **Set up the device.** The first time you boot your Orin NX you should plug it into a display to complete the installation process. After that, a display is no longer needed for this example but you could still use it instead of connecting to your device over ssh.
+
+3. **Set up Python environment**: Instead of using Docker, we recommend setting up a native Python environment using `venv`. This allows more flexible control over dependencies while avoiding container overhead.
+
+   ```bash
+   sudo apt update && sudo apt upgrade -y
+   sudo apt install python3-venv python3-pip libopenblas-dev libjpeg-dev libomp-dev
+   python3 -m venv ~/flower-venv
+   source ~/flower-venv/bin/activate
+   pip install --upgrade pip setuptools wheel
+   ```
+
+4. **Install ML dependencies.**
+
+   Install PyTorch and torchvision using JetPack 6.1-compatible wheels:
+
+   ```bash
+   # PyTorch (JetPack 6.1, PyTorch 2.7.0)
+   wget https://pypi.jetson-ai-lab.dev/jp6/cu126/+f/6ef/f643c0a7acda9/torch-2.7.0-cp310-cp310-linux_aarch64.whl#sha256=6eff643c0a7acda92734cc798338f733ff35c7df1a4434576f5ff7c66fc97319 -O torch-2.7.0-cp310-cp310-linux_aarch64.whl
+   pip install torch-2.7.0-cp310-cp310-linux_aarch64.whl
+
+   # torchvision
+   wget https://pypi.jetson-ai-lab.dev/jp6/cu126/+f/daa/bff3a07259968/torchvision-0.22.0-cp310-cp310-linux_aarch64.whl
+   pip install torchvision-0.22.0-cp310-cp310-linux_aarch64.whl
+   ```
+
+   - If you encounter an error related to `libcusparseLt.so.0`, 'libcudart.so.12', or 'libcublas.so', install it with:
+     ```bash
+     sudo apt install -y nvidia-jetpack
+     ```
+
+   - If you face issues with NumPy compatibility:
+     ```bash
+     pip install numpy==1.26.4
+     ```
+
+5. **Install Flower and related libraries**
+
+   ```bash
+   pip install flwr flwr-datasets datasets
+   ```
+
+6. **Update OS and install monitoring tools.**
+
+   ```bash
+   sudo apt install python3-pip -y
+   sudo pip3 install -U jetson-stats
+   sudo reboot
+   ```
+
+   After reboot, you can launch `jtop` by simply typing `jtop` in the terminal. You may also install `tmux` for terminal multiplexing:
+
+   ```bash
+   sudo apt install tmux -y
+   echo set -g mouse on > ~/.tmux.conf
+   ```
+
+7. **Power modes**. Jetson devices can operate in different power modes. Set to high-performance mode for this example:
+
+   ```bash
+   sudo /usr/sbin/nvpmodel -m 2 # 15W with 4cpus @ 2.0GHz
+   ```
+
+   You can also use `jtop` to set power modes interactively.
+
+8. **Run your FL experiments with Flower.**
+
+   Navigate to your project directory, activate your virtual environment, and follow the instructions provided in the section below to launch Flower server and clients.
+
 
 ## Embedded Federated AI
 
