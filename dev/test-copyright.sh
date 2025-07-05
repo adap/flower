@@ -10,6 +10,6 @@ while IFS= read -r -d '' file; do
         echo "::error file=$file::Wrong copyright line. Expected: copyright = f\"{datetime.date.today().year} Flower Labs GmbH\""
         EXIT_CODE=1
     fi
-done < <(find . -path "*/doc/source/conf.py" -print0)
+done < <(find . -path "*/docs/source/conf.py" -print0)
 
 exit $EXIT_CODE

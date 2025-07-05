@@ -210,7 +210,7 @@ def generate_random_audio_column(
 ) -> list[dict[str, Any]]:
     """Simulate the audio column.
 
-    Audio column in the datset is comprised from an array or floats, sample_rate and a
+    Audio column in the dataset is comprised from an array or floats, sample_rate and a
     path.
     """
     # Generate numpy images
@@ -409,7 +409,11 @@ def _load_mocked_dataset_by_partial_download(
         The dataset with the requested samples.
     """
     dataset = datasets.load_dataset(
-        dataset_name, name=subset_name, split=split_name, streaming=True
+        dataset_name,
+        name=subset_name,
+        split=split_name,
+        streaming=True,
+        trust_remote_code=True,
     )
     dataset_list = []
     # It's a list of dict such that each dict represent a single sample of the dataset

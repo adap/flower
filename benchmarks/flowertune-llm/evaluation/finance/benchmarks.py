@@ -122,7 +122,10 @@ def inference(dataset, model, tokenizer, batch_size):
                 **tokens, max_length=512, eos_token_id=tokenizer.eos_token_id
             )
             res_sentences = [tokenizer.decode(i, skip_special_tokens=True) for i in res]
-            out_text = [o.split("Answer: ")[1] for o in res_sentences]
+            out_text = [
+                o.split("Answer: ")[1] if len(o.split("Answer: ")) > 1 else "None"
+                for o in res_sentences
+            ]
             out_text_list += out_text
             torch.cuda.empty_cache()
 

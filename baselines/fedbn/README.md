@@ -16,7 +16,6 @@ dataset: [MNIST, MNIST-M, SVHN, USPS, SynthDigits]
 
 **Abstract:** The emerging paradigm of federated learning (FL) strives to enable collaborative training of deep models on the network edge without centrally aggregating raw data and hence improving data privacy. In most cases, the assumption of independent and identically distributed samples across local clients does not hold for federated learning setups. Under this setting, neural network training performance may vary significantly according to the data distribution and even hurt training convergence. Most of the previous work has focused on a difference in the distribution of labels or client shifts. Unlike those settings, we address an important problem of FL, e.g., different scanners/sensors in medical imaging, different scenery distribution in autonomous driving (highway vs. city), where local clients store examples with different distributions compared to other clients, which we denote as feature shift non-iid. In this work, we propose an effective method that uses local batch normalization to alleviate the feature shift before averaging models. The resulting scheme, called FedBN, outperforms both classical FedAvg, as well as the state-of-the-art for non-iid data (FedProx) on our extensive experiments. These empirical results are supported by a convergence analysis that shows in a simplified setting that FedBN has a faster convergence rate than FedAvg.
 
-
 ## About this baseline
 
 **What’s implemented:** Figure 3 in the paper: convergence in training loss comparing `FedBN` to `FedAvg` for five datasets.
@@ -25,8 +24,7 @@ dataset: [MNIST, MNIST-M, SVHN, USPS, SynthDigits]
 
 **Hardware Setup:** Using the default configurations, any machine with 8 CPU cores should be capable to run 100 rounds of FedAvg or FedBN in under 5 minutes. Therefore a GPU is not needed if you stick to the small model used in the paper and you limit clients to use a 10% of the data in each dataset (these are the default settings)
 
-**Contributors:** Meirui Jiang, Maria Boerner, Javier Fernandez-Marques
-
+**Contributors:** Meirui Jiang, Maria Boerner, Javier Fernandez-Marques and Andrej Jovanović
 
 ## Experimental Setup
 
@@ -66,19 +64,20 @@ A more detailed explanation of the datasets is given in the following table.
 | client_resources.num_cpu    | 2                  |
 | client_resources.num_gpus   | 0.0                |
 
+
 ## Environment Setup
 
 To construct the Python environment, simply run:
 
 ```bash
-# Set directory to use python 3.10 (install with `pyenv install <version>` if you don't have it)
-pyenv local 3.10.6
+# Create the virtual environment
+pyenv virtualenv 3.11.11 fedbn
 
-# Tell poetry to use python3.10
-poetry env use 3.10.6
+# Activate it
+pyenv activate fedbn
 
-# Install
-poetry install
+# Install the baseline
+pip install -e .
 ```
 
 Before running the experiments you'll need to download the five datasets for this baseline. We'll be using the pre-processed datasets created by the `FedBN` authors. Download the dataset from [here](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155149226_link_cuhk_edu_hk/EV1YgHfFC4RKjw06NL4JMdgBMU21CegM12SpXrSmGjt3XA?e=XK2rFs) and move the file into a new directory named `data`.
@@ -93,29 +92,35 @@ cd data ..
 
 ## Running the Experiments
 
-First, activate your environment via `poetry shell`. The commands below show how to run the experiments and modify some of its key hyperparameters via the cli. Each time you run an experiment, the log and results will be stored inside `outputs/<date>/<time>`. Please refer to [the Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower Simulation.
+First, activate your environment. The commands below show how to run the experiments and modify some of its key hyperparameters via the cli. Each time you run an experiment, the log and results will be stored inside `results/<algorithm_name>/`. Please refer to [the Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower Simulation.
 
 ```bash
 # run with default arguments
-python -m fedbn.main
-
+flwr run .
 # by default, the experiments run in CPU-only mode
 # allow for 5 clients in parallel on a gpu by doing
-python -m fedbn.main client_resources.num_gpus=0.2
+flwr run . --federation-config "client-resources.num_gpus=0.2"
 
 # By default, federated evaluation is disabled. Therefore the only metrics
 # returned to the server are those related to the training set
 # If you want to enable federated evaluation set `fraction_evaluate=1.0` to involve all clients
-python -m fedbn.main strategy.fraction_evaluate=1 # your code will run slower
+flwr run . --run-config "fraction-evaluate=1" # your code will run slower
 
 # adjust hyperparameters like the number of rounds or batch size like this
-python -m fedbn.main num_rounds=100 dataset.batch_size
+flwr run . --run-config "num_rounds=100 batch_size=16"
 
+# run with FedAvg clients leaving the rest default
+flwr run . --run-config "algorithm-name='FedAvg'"
+```
+
+⚠️ Changing the clients is a bit more complex compared to baselines using [flower-datasets](https://flower.ai/docs/datasets/). Specifically, we need to **change the number of clients in two places**. In the federation config and in the run config. The former actually controls the number of clients that are sampled, where the latter is just a reference so that the code can make use of this since the federation size is not passed explicitly to the run context.
+
+```bash
 # increase the number of clients like this (note this should be a multiple
 # of the number of dataset you involve in the experiment -- 5 by default)
 # this means that without changing other hyperparameters, you can only have
 # either 5,10,15,20,25,30,35,40,45 or 50 clients
-python -m fedbn.main num_clients=20
+flwr run . --run-config 'num-clients=20' --federation-config 'num-supernodes=20'
 
 # by default clients get assigned a 10th of the data in a dataset
 # this is because the datasets you downloaded were pre-processed by the authors
@@ -124,10 +129,7 @@ python -m fedbn.main num_clients=20
 # Please note that as you increase that value, the maximum number of clients
 # you can have in your experiment gets reduced (this is because partitions are fixed and
 # can't be -- unless you add support for it -- partitioned into smaller ones)
-python -m fedbn.main dataset.percent=0.2 # max allowed is 25 clients
-
-# run with FedAvg clients leaving the rest default
-python -m fedbn.main client=fedavg
+flwr run . --run-config "percent=0.2" # max allowed is 25 clients
 ```
 
 ## Limitations
@@ -136,7 +138,7 @@ The pre-processing of the five datasets provided by the authors, imposes some li
 
 Another limitation in the current implementation is that there should be the same number of clients for each dataset. Also, all clients should contain the same number of partitions of their respective datasets. You can remove these constrain my editing `dataset.get_data()`.
 
-The function `dataset.get_data()` contains a few `assert` that should make it easy find the right valid set of arguments for `num_clients` given the values of `dataset.percent` and `dataset.to_include`.
+The function `dataset.get_data()` contains a few `assert` that should make it easy find the right valid set of arguments for `num_clients` given the values of `percent` and `to-include`.
 
 ## Expected Results
 
@@ -145,15 +147,8 @@ Replicate the results shown below by running the following command. First ensure
 ```bash
 
 # Reproduces the results in Table 3 of the paper.
-python -m fedbn.main --multirun num_rounds=100 client=fedavg,fedbn
-
-# If you want to repeat the same experiment 5 times with different random seeds (none fixed in the code)
-# adding '+repeat_num=range(5)' adds an aunxhiliary new parameter (not used in the code) that forces the --multirun
-# to run a total of 2x5 configs
-python -m fedbn.main --multirun num_rounds=100 client=fedavg,fedbn client_resources.num_gpus=0.2 '+repeat_num=range(5)'
-
+bash run_experiment.sh
 # then use the notebook in docs/multirun_plot.ipynb to create the plot below
 # The results show each strategy averaged for the N runs you run the experiment
 ```
-
 ![FedBn vs FedAvg on all datasets](_static/train_loss.png)
