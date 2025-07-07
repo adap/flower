@@ -39,6 +39,7 @@ def train(msg: Message, context: Context) -> Message:
     )
 
     # Load global model
+    # Note: In the first round, the global model is empty since no trees boosted yet.
     global_model_dict = msg.content["gmodel"]["model"]
     cbc_init = convert_to_catboost(global_model_dict) if global_model_dict else None
 
@@ -53,6 +54,7 @@ def train(msg: Message, context: Context) -> Message:
     # Extract boosted trees
     model_dict = convert_to_model_dict(cbc)
     num_trees = len(model_dict["oblivious_trees"])
+    # Extract the last N=iterations trees for sever aggregation
     model_dict["oblivious_trees"] = model_dict["oblivious_trees"][
         num_trees - iterations : num_trees
     ]

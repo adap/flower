@@ -61,7 +61,7 @@ def main(grid: Grid, context: Context) -> None:
     num_rounds = context.run_config["num-server-rounds"]
 
     # Init global model
-    global_model = b""  # init with empty list
+    global_model = b""  # Init with empty list
 
     for server_round in range(num_rounds):
         log(INFO, "")  # Add newline for log readability
