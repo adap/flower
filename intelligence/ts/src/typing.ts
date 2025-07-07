@@ -260,7 +260,7 @@ export interface Progress {
   description?: string;
 }
 
-interface JSONSchema {
+interface JsonSchema {
   $defs?: Record<
     string,
     {
@@ -284,7 +284,7 @@ interface JSONSchema {
 
 interface JsonSchemaPayload {
   name: string;
-  schema: JSONSchema;
+  schema: JsonSchema;
 }
 
 export interface ResponseFormat {
