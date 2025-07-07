@@ -139,6 +139,7 @@ Quickstart examples:
 - [Quickstart (iOS [CoreML])](https://github.com/adap/flower/tree/main/examples/ios)
 - [Quickstart (MLX)](https://github.com/adap/flower/tree/main/examples/quickstart-mlx)
 - [Quickstart (XGBoost)](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
+- [Quickstart (CatBoost)](https://github.com/adap/flower/tree/main/examples/quickstart-catboost)
 
 Other [examples](https://github.com/adap/flower/tree/main/examples):
 
