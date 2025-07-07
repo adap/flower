@@ -4,7 +4,6 @@ import torch
 from app_pytorch.task import Net, load_data
 from app_pytorch.task import test as test_fn
 from app_pytorch.task import train as train_fn
-
 from flwr.client import ClientApp
 from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 
@@ -39,10 +38,12 @@ def train(msg: Message, context: Context):
 
     # Local training
     local_epochs = context.run_config["local-epochs"]
+    lr = msg.content["train-config"]["lr"]
     train_loss = train_fn(
         model,
         data_loader,
         local_epochs,
+        lr,
         device,
     )
 

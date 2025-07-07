@@ -61,11 +61,11 @@ def load_data(partition_id: int, num_partitions: int):
     return trainloader, testloader
 
 
-def train(net, trainloader, epochs, device):
+def train(net, trainloader, epochs, lr, device):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(net.parameters(), lr=lr)
     net.train()
     running_loss = 0.0
     for _ in range(epochs):
