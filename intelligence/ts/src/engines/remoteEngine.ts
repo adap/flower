@@ -254,7 +254,7 @@ export class RemoteEngine extends BaseEngine {
       message: {
         role: message.role as Message['role'],
         content: content,
-        ...(toolCalls && { tool_calls: toolCalls }),
+        ...(toolCalls && { toolCalls: toolCalls }),
       },
     };
   }

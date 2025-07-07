@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-18 00:07+0000\n"
+"POT-Creation-Date: 2025-07-05 00:07+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -365,7 +365,8 @@ msgstr "构建文档"
 #: ../../source/contributor-how-to-build-docker-images.rst:105
 #: ../../source/ref-exit-codes/000.rst:5 ../../source/ref-exit-codes/001.rst:5
 #: ../../source/ref-exit-codes/002.rst:5 ../../source/ref-exit-codes/003.rst:5
-#: ../../source/ref-exit-codes/100.rst:5 ../../source/ref-exit-codes/300.rst:5
+#: ../../source/ref-exit-codes/100.rst:5 ../../source/ref-exit-codes/101.rst:5
+#: ../../source/ref-exit-codes/102.rst:5 ../../source/ref-exit-codes/300.rst:5
 #: ../../source/ref-exit-codes/301.rst:5 ../../source/ref-exit-codes/302.rst:5
 #: ../../source/ref-exit-codes/600.rst:5 ../../source/ref-exit-codes/601.rst:5
 #: ../../source/ref-exit-codes/602.rst:5
@@ -11823,7 +11824,7 @@ msgstr "常见"
 msgid ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.record.array.Array.from_numpy_ndarray:1
 #: flwr.common.record.conversion_utils.array_from_numpy:1 of
@@ -12470,61 +12471,71 @@ msgstr "存放 ParametersRecord 实例的字典。"
 msgid "Initializing with a PyTorch tensor::"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.common.Array.deflate>`\\ \\(\\)"
 msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #: flwr.common.record.array.Array.deflate:1 of
 msgid "Deflate the Array."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_numpy_ndarray <flwr.common.Array.from_numpy_ndarray>`\\ "
 "\\(ndarray\\)"
 msgstr ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_torch_tensor <flwr.common.Array.from_torch_tensor>`\\ "
 "\\(tensor\\)"
 msgstr ":py:obj:`ndarray_to_bytes <flwr.common.ndarray_to_bytes>`\\ \\(ndarray\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #: flwr.common.record.array.Array.from_torch_tensor:1 of
 #, fuzzy
 msgid "Create Array from PyTorch tensor."
 msgstr "将参数对象转换为 NumPy ndarrays。"
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.common.Array.inflate>`\\ \\(object\\_content\\[\\,"
 " children\\]\\)"
 msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #: flwr.common.record.array.Array.inflate:1 of
 #, fuzzy
 msgid "Inflate an Array from bytes."
 msgstr "从字节反序列化 NumPy ndarray。"
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 msgstr "server.strategy.Strategy"
 
-#: ../../source/ref-api/flwr.common.Array.rst:38:<autosummary>:1
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
 #: flwr.common.record.array.Array.numpy:1 of
 #, fuzzy
 msgid "Return the array as a NumPy array."
 msgstr "以 NumPy ndarrays 列表形式返回模型参数"
 
-#: ../../source/ref-api/flwr.common.Array.rst:40
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`slice_array <flwr.common.Array.slice_array>`\\ \\(\\)"
+msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
+
+#: ../../source/ref-api/flwr.common.Array.rst:41:<autosummary>:1
+#: flwr.common.record.array.Array.slice_array:1 of
+msgid "Slice Array data and construct a list of ArrayChunks."
+msgstr ""
+
+#: ../../source/ref-api/flwr.common.Array.rst:43
 #: ../../source/ref-api/flwr.common.ArrayRecord.rst:76
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:25
 #: ../../source/ref-api/flwr.common.Code.rst:19
@@ -12569,16 +12580,8 @@ msgstr "属性"
 msgid ":py:obj:`children <flwr.common.Array.children>`\\"
 msgstr "server.strategy.Strategy"
 
-#: flwr.common.Array.children:1 flwr.common.Array.children:1:<autosummary>:1
-#: flwr.common.ConfigRecord.children:1
-#: flwr.common.ConfigRecord.children:1:<autosummary>:1
-#: flwr.common.ConfigsRecord.children:1
-#: flwr.common.ConfigsRecord.children:1:<autosummary>:1
-#: flwr.common.MetricRecord.children:1
-#: flwr.common.MetricRecord.children:1:<autosummary>:1
-#: flwr.common.MetricsRecord.children:1
-#: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
-msgid "Get all child objects as a dictionary or None if there are no children."
+#: flwr.common.Array.children:1 flwr.common.Array.children:1:<autosummary>:1 of
+msgid "Return a dictionary of ArrayChunks with their Object IDs as keys."
 msgstr ""
 
 #: flwr.common.Array.children:1:<autosummary>:1 of
@@ -12648,8 +12651,8 @@ msgstr ""
 
 #: flwr.common.record.array.Array.inflate:5 of
 msgid ""
-"Must be ``None``. ``Array`` does not support child objects. Providing any"
-" children will raise a ``ValueError``."
+"Must be ``None``. ``Array`` must have child objects. Providing no "
+"children will raise a ``ValueError``."
 msgstr ""
 
 #: flwr.common.record.array.Array.inflate:9 of
@@ -13268,6 +13271,17 @@ msgstr ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
 #, fuzzy
 msgid ":py:obj:`children <flwr.common.ConfigRecord.children>`\\"
 msgstr ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
+
+#: flwr.common.ConfigRecord.children:1
+#: flwr.common.ConfigRecord.children:1:<autosummary>:1
+#: flwr.common.ConfigsRecord.children:1
+#: flwr.common.ConfigsRecord.children:1:<autosummary>:1
+#: flwr.common.MetricRecord.children:1
+#: flwr.common.MetricRecord.children:1:<autosummary>:1
+#: flwr.common.MetricsRecord.children:1
+#: flwr.common.MetricsRecord.children:1:<autosummary>:1 of
+msgid "Get all child objects as a dictionary or None if there are no children."
+msgstr ""
 
 #: flwr.common.ConfigRecord.children:1:<autosummary>:1 of
 #, fuzzy
@@ -31687,6 +31701,8 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-exit-codes/100.rst:19
+#: ../../source/ref-exit-codes/101.rst:16
+#: ../../source/ref-exit-codes/102.rst:10
 #: ../../source/ref-exit-codes/300.rst:11
 #: ../../source/ref-exit-codes/301.rst:16
 #: ../../source/ref-exit-codes/302.rst:16
@@ -31705,7 +31721,58 @@ msgid "Ensure the SuperLink's configuration is correct."
 msgstr ""
 
 #: ../../source/ref-exit-codes/100.rst:23
+#: ../../source/ref-exit-codes/101.rst:20
 msgid "If the issue persists, please contact support for further assistance."
+msgstr ""
+
+#: ../../source/ref-exit-codes/101.rst:2
+msgid "[101] SUPERLINK_LICENSE_INVALID"
+msgstr ""
+
+#: ../../source/ref-exit-codes/101.rst:7
+msgid ""
+"The license of the SuperLink is invalid, causing it to exit prematurely "
+"on startup."
+msgstr ""
+
+#: ../../source/ref-exit-codes/101.rst:9
+msgid "Possible causes of invalid license include:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/101.rst:11
+msgid ""
+"``FLWR_LICENSE_KEY`` environment variable not set. This is required when "
+"starting the SuperLink Enterprise version."
+msgstr ""
+
+#: ../../source/ref-exit-codes/101.rst:13
+msgid "``FLWR_LICENSE_KEY`` environment variable set to an invalid license key."
+msgstr ""
+
+#: ../../source/ref-exit-codes/101.rst:18
+msgid ""
+"Set the ``FLWR_LICENSE_KEY`` as an environment variable when starting the"
+" SuperLink."
+msgstr ""
+
+#: ../../source/ref-exit-codes/101.rst:19
+msgid "Ensure the license key is valid."
+msgstr ""
+
+#: ../../source/ref-exit-codes/102.rst:2
+msgid "[102] SUPERLINK_LICENSE_MISSING"
+msgstr ""
+
+#: ../../source/ref-exit-codes/102.rst:7
+msgid ""
+"The SuperLink license is missing, causing it to exit prematurely on "
+"startup."
+msgstr ""
+
+#: ../../source/ref-exit-codes/102.rst:12
+msgid ""
+"Set the `FLWR_LICENSE_KEY` environment variable with a valid license key "
+"when starting the SuperLink."
 msgstr ""
 
 #: ../../source/ref-exit-codes/300.rst:2
@@ -36253,7 +36320,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|ab00717b4fcf4c4e88fbacebdb2e5104|"
+msgid "|c6e75721b909437dbd1c2b35f78a9363|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -36268,7 +36335,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|35704bcb67b04aae88cf73d7789f84e9|"
+msgid "|fb8c30a376b1473dbeeca583b3bb0d2b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -36292,7 +36359,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|4dbaa50ad7fb424ea1464f49a22fbd1b|"
+msgid "|e7529a9a3e7e456ab89807b88a368240|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -36310,7 +36377,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|ce96ff6f413b4bc48f67dd282cac3530|"
+msgid "|8b1a3ceda8aa474581fd38963291c0ec|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -36327,7 +36394,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|9a9e82799fac424cba1d5f74948681ee|"
+msgid "|4436660e4c024a5f8c28ed250c17783a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -36342,7 +36409,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|84fb402f085348b5b3cace4bb6259ec2|"
+msgid "|114bc2e95bf04b4c9024f0141f0d79cb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -36363,7 +36430,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|b4469692621449e6a5eed641772b352b|"
+msgid "|e0ba06bfaf424e84b75a6372a2629999|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -36378,7 +36445,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|cbae2e70533343d2801e4f5e93771349|"
+msgid "|048551ac907545deb367036f8e4e076f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -36538,7 +36605,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|9881cccc8a124ddcae73aea78eb7a42a|"
+msgid "|417094c62b1049d5abb3f7e2420dac73|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -36563,7 +36630,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|2a1779a818904423a30071e1e0c56dd9|"
+msgid "|7cce809e842c4edc8498e5d5a780b0c8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -36589,7 +36656,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|c82f8049e9c14f5f8d86000f09775f15|"
+msgid "|2df8e178f0a840dba801f41e0bfb0e61|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -36612,7 +36679,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|e541665f503b4d7dbe1647d4b015b613|"
+msgid "|c4a924a014384814a6f9182024bc39fd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -36659,7 +36726,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|ad22c7c9041d4bb68e95276c87497743|"
+msgid "|cadb25fb8f4c485f92b6611f284ddd8a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -36767,7 +36834,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|df37c0910c6e4e11ac9d883480b20d39|"
+msgid "|7a5a9d002a514d8a9843386e653cf6ee|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -48121,5 +48188,137 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|867a7872e4dd40a1811bfd20e4d6f62f|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Must be ``None``. ``Array`` does not "
+#~ "support child objects. Providing any "
+#~ "children will raise a ``ValueError``."
+#~ msgstr ""
+
+#~ msgid "|ab00717b4fcf4c4e88fbacebdb2e5104|"
+#~ msgstr ""
+
+#~ msgid "|35704bcb67b04aae88cf73d7789f84e9|"
+#~ msgstr ""
+
+#~ msgid "|4dbaa50ad7fb424ea1464f49a22fbd1b|"
+#~ msgstr ""
+
+#~ msgid "|ce96ff6f413b4bc48f67dd282cac3530|"
+#~ msgstr ""
+
+#~ msgid "|9a9e82799fac424cba1d5f74948681ee|"
+#~ msgstr ""
+
+#~ msgid "|84fb402f085348b5b3cace4bb6259ec2|"
+#~ msgstr ""
+
+#~ msgid "|b4469692621449e6a5eed641772b352b|"
+#~ msgstr ""
+
+#~ msgid "|cbae2e70533343d2801e4f5e93771349|"
+#~ msgstr ""
+
+#~ msgid "|9881cccc8a124ddcae73aea78eb7a42a|"
+#~ msgstr ""
+
+#~ msgid "|2a1779a818904423a30071e1e0c56dd9|"
+#~ msgstr ""
+
+#~ msgid "|c82f8049e9c14f5f8d86000f09775f15|"
+#~ msgstr ""
+
+#~ msgid "|e541665f503b4d7dbe1647d4b015b613|"
+#~ msgstr ""
+
+#~ msgid "|ad22c7c9041d4bb68e95276c87497743|"
+#~ msgstr ""
+
+#~ msgid "|df37c0910c6e4e11ac9d883480b20d39|"
+#~ msgstr ""
+
+#~ msgid "|fc57576a231747128ff75a61f1e9cd39|"
+#~ msgstr ""
+
+#~ msgid "|767520b7ffeb4d7d84e3516a0df30f33|"
+#~ msgstr ""
+
+#~ msgid "|e7952261d68d49168c6162814e1d5c43|"
+#~ msgstr ""
+
+#~ msgid "|92ae92ba3c614abf8f4dee65f60324ae|"
+#~ msgstr ""
+
+#~ msgid "|45ce570042ec49eeab9b77b509234534|"
+#~ msgstr ""
+
+#~ msgid "|5402b15bbe564f8e84624ad1972a0202|"
+#~ msgstr ""
+
+#~ msgid "|51d802738fa9409a819e56cc34188e4e|"
+#~ msgstr ""
+
+#~ msgid "|52f745311ab64879ab56a1e8ebe340ae|"
+#~ msgstr ""
+
+#~ msgid "|e1bcdcd42c6145bdb2d82d43c62838ee|"
+#~ msgstr ""
+
+#~ msgid "|53979a42c30f44b09629e09e16b29a8d|"
+#~ msgstr ""
+
+#~ msgid "|678bf760161d42f696df097625bf8292|"
+#~ msgstr ""
+
+#~ msgid "|b497d66068144c95a1333c8dd3bf3f8e|"
+#~ msgstr ""
+
+#~ msgid "|26357e35cb164955a9ffc069e14b5b42|"
+#~ msgstr ""
+
+#~ msgid "|69a7af741bd04e93954bc2707cebbdb0|"
+#~ msgstr ""
+
+#~ msgid "|2604e198ffb6467b84346ed001d58e10|"
+#~ msgstr ""
+
+#~ msgid "|a952cba05f064c959077b57e9da35467|"
+#~ msgstr ""
+
+#~ msgid "|101756e084b54422a2888f3f76dc86e8|"
+#~ msgstr ""
+
+#~ msgid "|84d5cef6b6824946ae972166b4642ece|"
+#~ msgstr ""
+
+#~ msgid "|9545638e72064cb29af65402f1c41b0f|"
+#~ msgstr ""
+
+#~ msgid "|a967f3afc23e4fb6b3f2a7210a28887d|"
+#~ msgstr ""
+
+#~ msgid "|29b5b0c728a64d9baf670c29e8f91870|"
+#~ msgstr ""
+
+#~ msgid "|932165be47b74d90a2c6675c900a3cb2|"
+#~ msgstr ""
+
+#~ msgid "|32198515baea40a7820ee635940f969a|"
+#~ msgstr ""
+
+#~ msgid "|ed94ce4ec07a4aa2ad9c27dd4b9d5f0d|"
+#~ msgstr ""
+
+#~ msgid "|e18ced1669ea45e2b6f5f39dca17cdd5|"
+#~ msgstr ""
+
+#~ msgid "|d7af74c68e934740aa09e348b6115413|"
+#~ msgstr ""
+
+#~ msgid "|08ee2e477cea420596d4695a66eacfb0|"
+#~ msgstr ""
+
+#~ msgid "|43f83028f1b048a98e353c79cabec221|"
 #~ msgstr ""
 
