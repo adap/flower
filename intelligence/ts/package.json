@@ -56,7 +56,6 @@
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.26.1",
     "@vitest/coverage-v8": "3.0.8",
-    "emoji-regex": "^10.4.0",
     "eslint": "^9.22.0",
     "eslint-import-resolver-typescript": "^4.1.0",
     "eslint-plugin-import": "^2.31.0",
