@@ -7,7 +7,14 @@ from time import sleep
 import torch
 from app_pytorch.task import Net
 
-from flwr.common import ArrayRecord, Context, Message, MessageType, RecordDict
+from flwr.common import (
+    ArrayRecord,
+    Context,
+    Message,
+    MessageType,
+    RecordDict,
+    ConfigRecord,
+)
 from flwr.common.logger import log
 from flwr.server import Grid, ServerApp
 
@@ -46,7 +53,12 @@ def main(grid: Grid, context: Context) -> None:
 
         # Create messages
         gmodel_record = ArrayRecord(global_model.state_dict())
-        recorddict = RecordDict({global_model_key: gmodel_record})
+        recorddict = RecordDict(
+            {
+                global_model_key: gmodel_record,
+                "train-config": ConfigRecord({"lr": 0.01}),
+            }
+        )
         messages = construct_messages(
             node_ids, recorddict, MessageType.TRAIN, server_round
         )
@@ -55,7 +67,7 @@ def main(grid: Grid, context: Context) -> None:
         replies = grid.send_and_receive(messages)
         log(INFO, "Received %s/%s results", len(replies), len(messages))
 
-        # Convert Parameter Records in messages back to PyTorch's state_dicts
+        # Convert ArrayRecords in messages back to PyTorch's state_dicts
         state_dicts = []
         avg_train_losses = []
         for msg in replies:

@@ -23,7 +23,14 @@ import {
 } from '@huggingface/transformers';
 
 import type { ProgressInfo, TextGenerationConfig } from '@huggingface/transformers';
-import { FailureCode, Message, Result, Progress, ChatResponseResult } from '../typing';
+import {
+  FailureCode,
+  Message,
+  Result,
+  Progress,
+  ChatResponseResult,
+  ResponseFormat,
+} from '../typing';
 
 import { getAvailableRAM } from '../env';
 import { BaseEngine } from './engine';
@@ -39,7 +46,9 @@ export class TransformersEngine extends BaseEngine {
     messages: Message[],
     model: string,
     temperature?: number,
+    topP?: number,
     maxCompletionTokens?: number,
+    _responseFormat?: ResponseFormat,
     stream?: boolean,
     onStreamEvent?: (event: { chunk: string }) => void
   ): Promise<ChatResponseResult> {
@@ -98,6 +107,7 @@ export class TransformersEngine extends BaseEngine {
           max_new_tokens: maxCompletionTokens ?? 1024,
           temperature: temperature ?? 1,
           return_dict_in_generate: true,
+          top_p: topP ?? 1,
         } as TextGenerationConfig,
         stopping_criteria: stoppingCriteriaList,
         ...(streamer && { streamer }),

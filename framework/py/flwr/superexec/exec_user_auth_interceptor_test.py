@@ -392,5 +392,6 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
 
         # Ensure abort was called with PERMISSION_DENIED
         dummy_context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
+            grpc.StatusCode.PERMISSION_DENIED,
+            "❗️ User not authorized. Please contact the SuperLink administrator.",
         )
