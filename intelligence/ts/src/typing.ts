@@ -260,6 +260,38 @@ export interface Progress {
   description?: string;
 }
 
+interface JsonSchema {
+  $defs?: Record<
+    string,
+    {
+      enum: string[];
+      title: string;
+      type: string;
+    }
+  >;
+  properties: Record<
+    string,
+    {
+      title: string;
+      type: string;
+      $ref?: string;
+    }
+  >;
+  required: string[];
+  title: string;
+  type: string;
+}
+
+interface JsonSchemaPayload {
+  name: string;
+  schema: JsonSchema;
+}
+
+export interface ResponseFormat {
+  type: 'json_schema';
+  json_schema: JsonSchemaPayload;
+}
+
 /**
  * Options to configure the chat interaction.
  */
@@ -278,6 +310,24 @@ export interface ChatOptions {
    * Maximum number of tokens to generate in the response.
    */
   maxCompletionTokens?: number;
+
+  /**
+   * An alternative to sampling with temperature, called nucleus sampling,
+   * where the model considers the results of the tokens with top_p
+   * probability mass. So 0.1 means only the tokens comprising the top 10%
+   * probability mass are considered.
+   * We generally recommend altering this or temperature but not both.
+   */
+  topP?: number;
+
+  /**
+   * An object specifying the format that the model must output.
+   * Setting to { "type": "json_schema", "json_schema": {...} }
+   * enables Structured Outputs which ensures the model will match
+   * your supplied JSON schema. Learn more in the OpenAI API
+   * [Structured Outputs guide](https://platform.openai.com/docs/guides/structured-outputs).
+   */
+  responseFormat?: ResponseFormat;
 
   /**
    * If true, the response will be streamed.

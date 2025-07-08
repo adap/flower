@@ -24,6 +24,7 @@ import {
   FailureCode,
   Message,
   Progress,
+  ResponseFormat,
   Result,
   StreamEvent,
   Tool,
@@ -38,14 +39,21 @@ async function runQuery(
   stream?: boolean,
   onStreamEvent?: (event: StreamEvent) => void,
   temperature?: number,
-  maxTokens?: number
+  topP?: number,
+  maxTokens?: number,
+  responseFormat?: ResponseFormat
 ) {
   if (stream && onStreamEvent) {
     const reply = await engine.chat.completions.create({
       stream: true,
       messages: messages as ChatCompletionMessageParam[],
       temperature,
+      top_p: topP,
       max_tokens: maxTokens,
+      response_format: {
+        type: 'json_object',
+        schema: JSON.stringify(responseFormat?.json_schema),
+      },
     });
     for await (const chunk of reply) {
       onStreamEvent({ chunk: chunk.choices[0]?.delta?.content ?? '' });
@@ -55,7 +63,12 @@ async function runQuery(
     const reply = await engine.chat.completions.create({
       messages: messages as ChatCompletionMessageParam[],
       temperature,
+      top_p: topP,
       max_tokens: maxTokens,
+      response_format: {
+        type: 'json_object',
+        schema: JSON.stringify(responseFormat?.json_schema),
+      },
     });
     return reply.choices[0].message.content ?? '';
   }
@@ -68,7 +81,9 @@ export class WebllmEngine extends BaseEngine {
     messages: Message[],
     model: string,
     temperature?: number,
+    topP?: number,
     maxCompletionTokens?: number,
+    responseFormat?: ResponseFormat,
     stream?: boolean,
     onStreamEvent?: (event: StreamEvent) => void,
     _tools?: Tool[]
@@ -93,7 +108,9 @@ export class WebllmEngine extends BaseEngine {
         stream,
         onStreamEvent,
         temperature,
-        maxCompletionTokens
+        topP,
+        maxCompletionTokens,
+        responseFormat
       );
       return {
         ok: true,

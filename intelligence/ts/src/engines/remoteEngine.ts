@@ -21,6 +21,7 @@ import {
   FailureCode,
   Message,
   Progress,
+  ResponseFormat,
   Result,
   StreamEvent,
   Tool,
@@ -64,7 +65,9 @@ export class RemoteEngine extends BaseEngine {
     messages: Message[],
     model: string,
     temperature?: number,
+    topP?: number,
     maxCompletionTokens?: number,
+    responseFormat?: ResponseFormat,
     stream?: boolean,
     onStreamEvent?: (event: StreamEvent) => void,
     tools?: Tool[],
@@ -86,7 +89,9 @@ export class RemoteEngine extends BaseEngine {
         model,
         encrypt,
         temperature,
+        topP,
         maxCompletionTokens,
+        responseFormat,
         onStreamEvent
       );
       if (!response.ok) return response;
@@ -96,7 +101,9 @@ export class RemoteEngine extends BaseEngine {
         messages,
         model,
         temperature,
+        topP,
         maxCompletionTokens,
+        responseFormat,
         false,
         tools,
         encrypt
@@ -138,7 +145,9 @@ export class RemoteEngine extends BaseEngine {
     messages: Message[],
     model: string,
     temperature?: number,
+    topP?: number,
     maxCompletionTokens?: number,
+    responseFormat?: ResponseFormat,
     stream?: boolean,
     tools?: Tool[],
     encrypt?: boolean
@@ -147,9 +156,11 @@ export class RemoteEngine extends BaseEngine {
       model,
       messages,
       ...(temperature && { temperature }),
+      ...(topP && { top_p: topP }),
       ...(maxCompletionTokens && {
         max_completion_tokens: maxCompletionTokens,
       }),
+      ...(responseFormat && { response_format: responseFormat }),
       ...(stream && { stream }),
       ...(tools && { tools }),
       ...(encrypt && { encrypt, encryption_id: this.cryptoHandler.encryptionId }),
@@ -168,14 +179,18 @@ export class RemoteEngine extends BaseEngine {
     model: string,
     encrypt: boolean,
     temperature?: number,
+    topP?: number,
     maxCompletionTokens?: number,
+    responseFormat?: ResponseFormat,
     onStreamEvent?: (event: StreamEvent) => void
   ): Promise<Result<string>> {
     const requestData = this.createRequestData(
       messages,
       model,
       temperature,
+      topP,
       maxCompletionTokens,
+      responseFormat,
       true,
       undefined,
       encrypt
