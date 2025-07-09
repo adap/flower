@@ -18,17 +18,16 @@ import { vi } from 'vitest';
 vi.mock('./constants', () => ({
   DEFAULT_MODEL: 'meta/llama3.2-1b/instruct-fp16',
   REMOTE_URL: process.env.FI_DEV_REMOTE_URL,
-  VERSION: '0.1.10',
+  VERSION: '0.1.12',
   SDK: 'TS',
   ALLOWED_ROLES: ['system', 'assistant', 'user'],
 }));
 
-import emojiRegex from 'emoji-regex';
 import { describe, expect, it, beforeEach, assert } from 'vitest';
 import { FlowerIntelligence } from './flowerintelligence';
 import { RemoteEngine } from './engines/remoteEngine';
 import { TransformersEngine } from './engines/transformersEngine';
-import { FailureCode } from './typing';
+import { FailureCode, ResponseFormat } from './typing';
 
 describe('FlowerIntelligence', () => {
   let fi: FlowerIntelligence;
@@ -149,29 +148,50 @@ describe('FlowerIntelligence', () => {
         }
       }
     });
-    it('generates some text with custom system prompt', { timeout: 10_000 }, async () => {
-      const data = await fi.chat({
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a helpful assistant that writes emails full of emojies',
+    it('generates some text with a specific format', { timeout: 10_000 }, async () => {
+      const myFormat: ResponseFormat = {
+        type: 'json_schema',
+        json_schema: {
+          name: 'car-description',
+          schema: {
+            $defs: {
+              CarType: {
+                enum: ['sedan', 'SUV', 'Truck', 'Coupe'],
+                title: 'CarType',
+                type: 'string',
+              },
+            },
+            properties: {
+              brand: { title: 'Brand', type: 'string' },
+              model: { title: 'Model', type: 'string' },
+              car_type: { $ref: '#/$defs/CarType', title: 'Car Type', type: 'string' },
+            },
+            required: ['brand', 'model', 'car_type'],
+            title: 'CarDescription',
+            type: 'object',
           },
+        },
+      };
+
+      const data = await fi.chat({
+        model: 'mistral/small-3.1-24b/instruct-q4',
+        messages: [
           {
             role: 'user',
             content:
-              'Can you write a single sentence email to announce a ground breaking research project?',
+              'Generate a JSON with the brand, model, car_type of the most iconic car from the 90s.',
           },
         ],
+        responseFormat: myFormat,
         forceRemote: true,
       });
-      const regex = emojiRegex();
 
       if (!data.ok) {
         assert.fail(data.failure.description);
       } else {
         expect(data.message.content).not.toBeNull();
         if (data.message.content) {
-          expect(regex.test(data.message.content)).toBe(true);
+          expect(JSON.parse(data.message.content).brand).not.toBeNull();
         }
       }
     });
