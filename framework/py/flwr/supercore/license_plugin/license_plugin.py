@@ -28,7 +28,3 @@ class LicensePlugin(ABC):
     @abstractmethod
     def check_license(self) -> bool:
         """Check if the license is valid."""
-
-    @abstractmethod
-    def get_license_info(self) -> None:
-        """Get information about the license."""
