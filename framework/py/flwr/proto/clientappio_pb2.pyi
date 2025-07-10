@@ -156,3 +156,52 @@ class PushClientAppOutputsResponse(google.protobuf.message.Message):
     def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["status",b"status"]) -> None: ...
 global___PushClientAppOutputsResponse = PushClientAppOutputsResponse
+
+class PullMessagesRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    TOKEN_FIELD_NUMBER: builtins.int
+    RUN_ID_FIELD_NUMBER: builtins.int
+    token: typing.Text
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        token: typing.Text = ...,
+        run_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id","token",b"token"]) -> None: ...
+global___PullMessagesRequest = PullMessagesRequest
+
+class PullMessagesResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    MESSAGE_FIELD_NUMBER: builtins.int
+    @property
+    def message(self) -> flwr.proto.message_pb2.Message: ...
+    def __init__(self,
+        *,
+        message: typing.Optional[flwr.proto.message_pb2.Message] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["message",b"message"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["message",b"message"]) -> None: ...
+global___PullMessagesResponse = PullMessagesResponse
+
+class PushMessagesRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    TOKEN_FIELD_NUMBER: builtins.int
+    MESSAGE_FIELD_NUMBER: builtins.int
+    token: typing.Text
+    @property
+    def message(self) -> flwr.proto.message_pb2.Message: ...
+    def __init__(self,
+        *,
+        token: typing.Text = ...,
+        message: typing.Optional[flwr.proto.message_pb2.Message] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["message",b"message"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["message",b"message","token",b"token"]) -> None: ...
+global___PushMessagesRequest = PushMessagesRequest
+
+class PushMessagesResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___PushMessagesResponse = PushMessagesResponse

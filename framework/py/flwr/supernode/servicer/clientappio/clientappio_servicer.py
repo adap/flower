@@ -39,8 +39,12 @@ from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     GetRunIdsWithPendingMessagesResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     RequestTokenRequest,
     RequestTokenResponse,
 )
@@ -159,3 +163,15 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         state.delete_token(run_id)
 
         return PushClientAppOutputsResponse()
+
+    def PullMessage(
+        self, request: PullMessagesRequest, context: grpc.ServicerContext
+    ) -> PullMessagesResponse:
+        """Pull one Message."""
+        raise NotImplementedError()
+
+    def PushMessage(
+        self, request: PushMessagesRequest, context: grpc.ServicerContext
+    ) -> PushMessagesResponse:
+        """Push one Message."""
+        raise NotImplementedError()
