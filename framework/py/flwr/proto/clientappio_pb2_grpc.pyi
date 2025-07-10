@@ -28,6 +28,16 @@ class ClientAppIoStub:
         flwr.proto.clientappio_pb2.PushClientAppOutputsResponse]
     """Push client app outputs"""
 
+    PushMessage: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.clientappio_pb2.PushMessagesRequest,
+        flwr.proto.clientappio_pb2.PushMessagesResponse]
+    """Push Message"""
+
+    PullMessage: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.clientappio_pb2.PullMessagesRequest,
+        flwr.proto.clientappio_pb2.PullMessagesResponse]
+    """Pull Message"""
+
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -60,6 +70,22 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.clientappio_pb2.PushClientAppOutputsResponse:
         """Push client app outputs"""
+        pass
+
+    @abc.abstractmethod
+    def PushMessage(self,
+        request: flwr.proto.clientappio_pb2.PushMessagesRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.clientappio_pb2.PushMessagesResponse:
+        """Push Message"""
+        pass
+
+    @abc.abstractmethod
+    def PullMessage(self,
+        request: flwr.proto.clientappio_pb2.PullMessagesRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.clientappio_pb2.PullMessagesResponse:
+        """Pull Message"""
         pass
 
 
