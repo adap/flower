@@ -231,6 +231,16 @@ export enum FailureCode {
    * Indicates that the requested feature is not implemented.
    */
   NotImplementedError,
+
+  /**
+   * Indicates an error that occurred during inference
+   */
+  RuntimeError = 500,
+
+  /**
+   * Indicates that the user aborted the request.
+   */
+  RequestAborted,
 }
 
 /**
@@ -359,6 +369,11 @@ export interface ChatOptions {
    * If true, enables end-to-end encryption for processing the request.
    */
   encrypt?: boolean;
+
+  /**
+   * Optional AbortSignal to cancel in-flight generation.
+   */
+  signal?: AbortSignal;
 }
 
 export type Result<T> = { ok: true; value: T } | { ok: false; failure: Failure };
