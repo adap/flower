@@ -71,7 +71,8 @@ export class RemoteEngine extends BaseEngine {
     stream?: boolean,
     onStreamEvent?: (event: StreamEvent) => void,
     tools?: Tool[],
-    encrypt = false
+    encrypt = false,
+    signal?: AbortSignal
   ): Promise<ChatResponseResult> {
     if (encrypt) {
       const keyRes = await this.cryptoHandler.initializeKeysAndExchange();
@@ -92,7 +93,8 @@ export class RemoteEngine extends BaseEngine {
         topP,
         maxCompletionTokens,
         responseFormat,
-        onStreamEvent
+        onStreamEvent,
+        signal
       );
       if (!response.ok) return response;
       return { ok: true, message: { role: 'assistant', content: response.value } };
@@ -112,7 +114,8 @@ export class RemoteEngine extends BaseEngine {
         requestData,
         '/v1/chat/completions',
         this.baseUrl,
-        this.getHeaders()
+        this.getHeaders(),
+        signal
       );
       if (!response.ok) {
         return response;
@@ -182,7 +185,8 @@ export class RemoteEngine extends BaseEngine {
     topP?: number,
     maxCompletionTokens?: number,
     responseFormat?: ResponseFormat,
-    onStreamEvent?: (event: StreamEvent) => void
+    onStreamEvent?: (event: StreamEvent) => void,
+    signal?: AbortSignal
   ): Promise<Result<string>> {
     const requestData = this.createRequestData(
       messages,
@@ -199,7 +203,8 @@ export class RemoteEngine extends BaseEngine {
       requestData,
       '/v1/chat/completions',
       this.baseUrl,
-      this.getHeaders()
+      this.getHeaders(),
+      signal
     );
 
     if (!response.ok) return response;
@@ -208,8 +213,35 @@ export class RemoteEngine extends BaseEngine {
     const decoder = new TextDecoder('utf-8');
     let accumulatedResponse = '';
 
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        void reader?.cancel();
+      });
+    }
+
     while (reader) {
-      const { done, value } = await reader.read();
+      if (signal?.aborted) {
+        break;
+      }
+      let result;
+      try {
+        result = await reader.read();
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          break;
+        }
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          break;
+        }
+        return {
+          ok: false,
+          failure: {
+            code: FailureCode.RequestAborted,
+            description: 'Request was aborted by the user.',
+          },
+        };
+      }
+      const { done, value } = result;
       if (done) break;
 
       const text = decoder.decode(value, { stream: true });
@@ -294,13 +326,39 @@ async function sendRequest(
   requestData: ChatCompletionsRequest,
   endpoint: string,
   baseUrl: string,
-  headers: Record<string, string>
+  headers: Record<string, string>,
+  signal?: AbortSignal
 ): Promise<Result<Response>> {
-  const response = await fetch(`${baseUrl}${endpoint}`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(requestData),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${baseUrl}${endpoint}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(requestData),
+      signal,
+    });
+  } catch (err: unknown) {
+    // Did the user abort?
+    if (
+      (err instanceof DOMException && err.name === 'AbortError') ||
+      (err instanceof Error && err.name === 'AbortError')
+    ) {
+      return {
+        ok: false,
+        failure: {
+          code: FailureCode.RequestAborted,
+          description: 'Request was aborted by the user.',
+        },
+      };
+    }
+    return {
+      ok: false,
+      failure: {
+        code: FailureCode.RemoteError,
+        description: String(err),
+      },
+    };
+  }
 
   if (!response.ok) {
     let code = FailureCode.RemoteError;
