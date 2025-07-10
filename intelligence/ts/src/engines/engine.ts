@@ -35,7 +35,8 @@ export interface Engine {
     stream?: boolean,
     onStreamEvent?: (event: StreamEvent) => void,
     tools?: Tool[],
-    encrypt?: boolean
+    encrypt?: boolean,
+    signal?: AbortSignal
   ): Promise<ChatResponseResult>;
   fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>>;
   isSupported(model: string): Promise<Result<void>>;
@@ -52,7 +53,8 @@ export abstract class BaseEngine implements Engine {
     _stream?: boolean,
     _onStreamEvent?: (event: StreamEvent) => void,
     _tools?: Tool[],
-    _encrypt?: boolean
+    _encrypt?: boolean,
+    _signal?: AbortSignal
   ): Promise<ChatResponseResult> {
     await Promise.resolve();
     return {
