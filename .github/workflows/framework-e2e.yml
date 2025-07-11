@@ -162,7 +162,8 @@ jobs:
           - directory: e2e-tensorflow
             e2e: e2e_tensorflow
             dataset: |
-              from datasets import load_dataset;dataset = load_dataset(\"uoft-cs/cifar10\")
+              import tensorflow_datasets as tfds
+              tfds.load("cifar10", split=["train", "test"], as_supervised=True)
 
           - directory: e2e-opacus
             e2e: e2e_opacus
