@@ -1,6 +1,5 @@
 import os
 
-import numpy as np
 import tensorflow as tf
 from datasets import load_dataset
 
@@ -14,16 +13,23 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 # Load CIFAR-10 from Hugging Face
 dataset = load_dataset("uoft-cs/cifar10")
+dataset.set_format(type="tensorflow", columns=["img", "label"])
 
-# Convert to NumPy arrays
-x_train = np.stack(dataset["train"]["img"]).astype("float32") / 255.0
-y_train = np.array(dataset["train"]["label"])
 
-x_test = np.stack(dataset["test"]["img"]).astype("float32") / 255.0
-y_test = np.array(dataset["test"]["label"])
+# Define train and test conversions
+def convert_to_tf_dataset(split):
+    return tf.data.Dataset.from_generator(
+        lambda: dataset[split],
+        output_signature={
+            "img": tf.TensorSpec(shape=(32, 32, 3), dtype=tf.uint8),
+            "label": tf.TensorSpec(shape=(), dtype=tf.int64),
+        },
+    ).map(lambda x: (tf.cast(x["img"], tf.float32) / 255.0, x["label"]))
 
-x_train, y_train = x_train[:SUBSET_SIZE], y_train[:SUBSET_SIZE]
-x_test, y_test = x_test[:10], y_test[:10]
+
+# Apply and batch/prefetch
+ds_train = convert_to_tf_dataset("train").batch(32).prefetch(tf.data.AUTOTUNE)
+ds_test = convert_to_tf_dataset("test").batch(32).prefetch(tf.data.AUTOTUNE)
 
 # Load model (MobileNetV2, CIFAR-10)
 model = tf.keras.applications.MobileNetV2(
@@ -39,13 +45,13 @@ class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
         model.set_weights(parameters)
-        model.fit(x_train, y_train, epochs=1, batch_size=32)
-        return model.get_weights(), len(x_train), {}
+        model.fit(ds_train, epochs=1, batch_size=32)
+        return model.get_weights(), len(ds_train), {}
 
     def evaluate(self, parameters, config):
         model.set_weights(parameters)
-        loss, accuracy = model.evaluate(x_test, y_test)
-        return loss, len(x_test), {"accuracy": accuracy}
+        loss, accuracy = model.evaluate(ds_test)
+        return loss, len(ds_test), {"accuracy": accuracy}
 
 
 def client_fn(context: Context):
