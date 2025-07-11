@@ -34,6 +34,11 @@ def preprocess(split, subset_size):
     )
 
 
+# Preprocess datasets
+ds_train = preprocess(ds_train, TRAIN_SUBSET_SIZE)
+ds_test = preprocess(ds_test, TEST_SUBSET_SIZE)
+
+
 # Load model (MobileNetV2, CIFAR-10)
 model = tf.keras.applications.MobileNetV2(
     input_shape=(32, 32, 3), classes=10, weights=None
@@ -48,12 +53,12 @@ class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
         model.set_weights(parameters)
-        model.fit(preprocess(ds_train, TRAIN_SUBSET_SIZE), epochs=1, batch_size=32)
+        model.fit(ds_train, epochs=1, batch_size=32)
         return model.get_weights(), len(ds_train), {}
 
     def evaluate(self, parameters, config):
         model.set_weights(parameters)
-        loss, accuracy = model.evaluate(preprocess(ds_test, TEST_SUBSET_SIZE))
+        loss, accuracy = model.evaluate(ds_test)
         return loss, len(ds_test), {"accuracy": accuracy}
 
 
