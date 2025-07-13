@@ -27,6 +27,8 @@ from pathlib import Path
 from queue import Empty, Queue
 from typing import Any, Optional
 import platform
+import os
+import importlib.util
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
@@ -84,6 +86,15 @@ def _check_ray_support(backend_name: str):
 def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
+
+    if getattr(args, "debug", False):
+        try:
+            import debugpy
+            debugpy.listen(("0.0.0.0", 5678))
+            print("[Flower] Debug mode enabled: waiting for debugger to attach on port 5678...")
+            debugpy.wait_for_client()
+        except ImportError:
+            print("[Flower] Debug mode requested, but debugpy is not installed. Please install debugpy for IDE debugging support.")
 
     event(
         EventType.CLI_FLOWER_SIMULATION_ENTER,
@@ -597,6 +608,11 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "--run-id",
         type=int,
         help="Sets the ID of the run started by the Simulation Engine.",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug mode for IDEs (e.g., VSCode breakpoints in user code). When set, Flower will wait for a debugger to attach on port 5678 before running user code. Requires debugpy to be installed.",
     )
 
     return parser
