@@ -84,4 +84,8 @@ The default algorithm used by all configuration files is `fedbabu`. To use `feda
 flwr run . 
 ```
 
-**Result:** Check [`plot.ipynb`](./plot.ipynb)
+**Result:** 
+
+<img src="./.assets/plot.png" width="400"/> 
+
+Plot notebook: [`plot.ipynb`](./plot.ipynb)
