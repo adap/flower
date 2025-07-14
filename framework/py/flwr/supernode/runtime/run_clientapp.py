@@ -50,8 +50,11 @@ from flwr.proto.clientappio_pb2 import (
     GetRunIdsWithPendingMessagesResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
+    PushMessagesRequest,
     RequestTokenRequest,
     RequestTokenResponse,
 )
@@ -199,10 +202,16 @@ def pull_clientappinputs(
     masked_token = mask_string(token)
     log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", masked_token)
     try:
+        # Pull Message
+        res_msg: PullMessagesResponse = stub.PullMessage(
+            PullMessagesRequest(token=token)
+        )
+        message = message_from_proto(res_msg.message)
+
+        # Pull Context, Run and (optional) FAB
         res: PullClientAppInputsResponse = stub.PullClientAppInputs(
             PullClientAppInputsRequest(token=token)
         )
-        message = message_from_proto(res.message)
         context = context_from_proto(res.context)
         run = run_from_proto(res.run)
         fab = fab_from_proto(res.fab) if res.fab else None
@@ -224,10 +233,13 @@ def push_clientappoutputs(
     proto_context = context_to_proto(context)
 
     try:
+
+        # Push Message
+        _ = stub.PushMessage(PushMessagesRequest(token=token, message=proto_message))
+
+        # Push Context
         res: PushClientAppOutputsResponse = stub.PushClientAppOutputs(
-            PushClientAppOutputsRequest(
-                token=token, message=proto_message, context=proto_context
-            )
+            PushClientAppOutputsRequest(token=token, context=proto_context)
         )
         return res
     except grpc.RpcError as e:
