@@ -78,9 +78,7 @@ message PushClientAppOutputsRequest {
 }
 message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1; }
 
-message PullMessagesRequest {
-  string token = 1;
-}
+message PullMessagesRequest { string token = 1; }
 
 message PullMessagesResponse { Message message = 1; }
 
