@@ -70,6 +70,13 @@ class ObjectIdNotPreregisteredError(Exception):
         super().__init__(f"Object with ID '{object_id}' could not be found.")
 
 
+def get_num_workers(max_concurrent: int) -> int:
+    """Get number of workers based on the number of CPU cores and the maximum
+    allowed."""
+    num_cores = os.cpu_count() or 1
+    return min(max_concurrent, num_cores)
+
+
 def push_objects(
     objects: dict[str, InflatableObject],
     push_object_fn: Callable[[str, bytes], None],
@@ -113,8 +120,7 @@ def push_objects(
         push_object_fn(obj_id, object_content)
 
     # Push all objects concurrently
-    num_cores = os.cpu_count() or 1
-    num_workers = min(max_concurrent_pushes, num_cores)
+    num_workers = get_num_workers(max_concurrent_pushes)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         list(executor.map(push, list(objects.keys())))
 
@@ -211,8 +217,7 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
                 return
 
     # Submit all pull tasks concurrently
-    num_cores = os.cpu_count() or 1
-    num_workers = min(max_concurrent_pulls, num_cores)
+    num_workers = get_num_workers(max_concurrent_pulls)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures = {
             executor.submit(pull_with_retries, obj_id): obj_id for obj_id in object_ids
