@@ -18,7 +18,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from flwr.common import Context
+from flwr.common import Context, Message, RecordDict
 from flwr.common.typing import Fab
 
 from .start_client_internal import _pull_and_store_message
@@ -63,13 +63,14 @@ class TestStartClientInternal(unittest.TestCase):
     def test_pull_and_store_message_with_known_run_id(self) -> None:
         """Test that a message of a known run ID is pulled and stored."""
         # Prepare
-        message = Mock()
-        message.metadata = Mock(
-            run_id=110,
-            group_id="test_group",
+        message = Message(
+            content=RecordDict(),
+            dst_node_id=self.node_id,
             message_type="query",
-            message_id="mock_message_id",
+            group_id="test_group",
         )
+        message.metadata.__dict__["_run_id"] = 110
+        message.metadata.__dict__["_message_id"] = message.object_id
         self.mock_receive.return_value = message
         self.mock_state.get_run.return_value = Mock()  # Mock non-None return
 
@@ -99,14 +100,15 @@ class TestStartClientInternal(unittest.TestCase):
     def test_pull_and_store_message_with_unknown_run_id(self) -> None:
         """Test that a message of an unknown run ID is pulled and stored."""
         # Prepare: Mock connection methods
-        mock_msg = Mock()
         run_id = 999
-        mock_msg.metadata = Mock(
-            run_id=run_id,
-            group_id="test_group",
+        message = Message(
+            content=RecordDict(),
+            dst_node_id=self.node_id,
             message_type="query",
-            message_id="mock_message_id",
+            group_id="test_group",
         )
+        message.metadata.__dict__["_run_id"] = run_id
+        message.metadata.__dict__["_message_id"] = message.object_id
         fab = Fab(
             hash_str="abc123",
             content=b"test_fab_content",
@@ -116,7 +118,7 @@ class TestStartClientInternal(unittest.TestCase):
             fab_hash=fab.hash_str,
             override_config={},
         )
-        self.mock_receive.return_value = mock_msg
+        self.mock_receive.return_value = message
         self.mock_get_run.return_value = mock_run
         self.mock_get_fab.return_value = fab
         self.mock_state.get_run.return_value = None
@@ -143,7 +145,7 @@ class TestStartClientInternal(unittest.TestCase):
         assert res == run_id
 
         # Assert: the message should be stored
-        self.mock_state.store_message.assert_called_once_with(mock_msg)
+        self.mock_state.store_message.assert_called_once_with(message)
 
         # Assert: the Run and FAB should be fetched and stored
         self.mock_get_run.assert_called_once_with(run_id)
