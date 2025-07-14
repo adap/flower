@@ -20,7 +20,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 from flwr.common.inflatable import (
-    get_object_children_ids_from_object_content,
     get_object_id,
     is_valid_sha256_hash,
     iterate_object_tree,
@@ -207,10 +206,7 @@ class InMemoryObjectStore(ObjectStore):
                     self.run_objects_mapping[run_id].discard(object_id)
 
                 # Decrease the reference count of its children
-                children_ids = get_object_children_ids_from_object_content(
-                    object_entry.content
-                )
-                for child_id in children_ids:
+                for child_id in object_entry.child_object_ids:
                     self.store[child_id].ref_count -= 1
 
                     # Recursively try to delete the child object
