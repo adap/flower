@@ -28,8 +28,8 @@ from flwr.common.inflatable import get_all_nested_objects
 from flwr.common.message import Message
 from flwr.common.serde import message_to_proto
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
-    PullResMessagesRequest,
-    PushInsMessagesRequest,
+    PullAppMessagesRequest,
+    PushAppMessagesRequest,
 )
 from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
@@ -143,7 +143,7 @@ class TestGrpcGrid(unittest.TestCase):
         self.mock_stub.GetRun.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
-        self.assertIsInstance(args[0], PushInsMessagesRequest)
+        self.assertIsInstance(args[0], PushAppMessagesRequest)
         self.assertEqual(msg_ids, [msg1.object_id, msg2.object_id])
         for message in args[0].messages_list:
             self.assertEqual(message.metadata.run_id, 61016)
@@ -194,7 +194,7 @@ class TestGrpcGrid(unittest.TestCase):
         self.mock_stub.GetRun.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
-        self.assertIsInstance(args[0], PullResMessagesRequest)
+        self.assertIsInstance(args[0], PullAppMessagesRequest)
         self.assertEqual(args[0].message_ids, [ins1.object_id, ins2.object_id])
         self.assertEqual(msgs[0].metadata, ok_msg.metadata)
         self.assertEqual(msgs[0].content, ok_msg.content)
