@@ -37,6 +37,12 @@ service ClientAppIo {
   // Push client app outputs
   rpc PushClientAppOutputs(PushClientAppOutputsRequest)
       returns (PushClientAppOutputsResponse) {}
+
+  // Push Message
+  rpc PushMessage(PushMessageRequest) returns (PushMessageResponse) {}
+
+  // Pull Message
+  rpc PullMessage(PullMessageRequest) returns (PullMessageResponse) {}
 }
 
 message GetRunIdsWithPendingMessagesRequest {}
@@ -71,3 +77,14 @@ message PushClientAppOutputsRequest {
   Context context = 3;
 }
 message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1; }
+
+message PullMessageRequest { string token = 1; }
+
+message PullMessageResponse { Message message = 1; }
+
+message PushMessageRequest {
+  string token = 1;
+  Message message = 2;
+}
+
+message PushMessageResponse {}
