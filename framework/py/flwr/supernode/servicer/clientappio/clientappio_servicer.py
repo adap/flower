@@ -39,8 +39,12 @@ from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     GetRunIdsWithPendingMessagesResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
+    PullMessageRequest,
+    PullMessageResponse,
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
+    PushMessageRequest,
+    PushMessageResponse,
     RequestTokenRequest,
     RequestTokenResponse,
 )
@@ -119,14 +123,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
             raise RuntimeError("This line should never be reached.")
 
-        # Retrieve message, context, run and fab for this run
-        message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
+        # Retrieve context, run and fab for this run
         context = cast(Context, state.get_context(run_id))
         run = cast(Run, state.get_run(run_id))
         fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0])  # type: ignore
 
         return PullClientAppInputsResponse(
-            message=message_to_proto(message),
             context=context_to_proto(context),
             run=run_to_proto(run),
             fab=fab_to_proto(fab),
@@ -150,8 +152,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
             raise RuntimeError("This line should never be reached.")
 
-        # Save the message and context to the state
-        state.store_message(message_from_proto(request.message))
+        # Save the context to the state
         state.store_context(context_from_proto(request.context))
 
         # Remove the token to make the run eligible for processing
@@ -159,3 +160,45 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         state.delete_token(run_id)
 
         return PushClientAppOutputsResponse()
+
+    def PullMessage(
+        self, request: PullMessageRequest, context: grpc.ServicerContext
+    ) -> PullMessageResponse:
+        """Pull one Message."""
+        # Initialize state and ffs connection
+        state = self.state_factory.state()
+
+        # Validate the token
+        run_id = state.get_run_id_by_token(request.token)
+        if run_id is None or not state.verify_token(run_id, request.token):
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token.",
+            )
+            raise RuntimeError("This line should never be reached.")
+
+        # Retrieve message, context, run and fab for this run
+        message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
+
+        return PullMessageResponse(message=message_to_proto(message))
+
+    def PushMessage(
+        self, request: PushMessageRequest, context: grpc.ServicerContext
+    ) -> PushMessageResponse:
+        """Push one Message."""
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Validate the token
+        run_id = state.get_run_id_by_token(request.token)
+        if run_id is None or not state.verify_token(run_id, request.token):
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token.",
+            )
+            raise RuntimeError("This line should never be reached.")
+
+        # Save the message and context to the state
+        state.store_message(message_from_proto(request.message))
+
+        return PushMessageResponse()
