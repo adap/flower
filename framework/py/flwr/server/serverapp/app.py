@@ -55,12 +55,12 @@ from flwr.common.serde import (
 )
 from flwr.common.telemetry import EventType, event
 from flwr.common.typing import RunNotRunningException, RunStatus
-from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
-from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
     PushServerAppOutputsRequest,
 )
+from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.server.grid.grpc_grid import GrpcGrid
 from flwr.server.run_serverapp import run as run_
 

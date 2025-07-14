@@ -42,6 +42,16 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullResMessagesRequest,
+    PullResMessagesResponse,
+    PullServerAppInputsRequest,
+    PullServerAppInputsResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
+    PushServerAppOutputsRequest,
+    PushServerAppOutputsResponse,
+)
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
@@ -72,14 +82,6 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullResMessagesRequest,
-    PullResMessagesResponse,
-    PullServerAppInputsRequest,
-    PullServerAppInputsResponse,
-    PushInsMessagesRequest,
-    PushInsMessagesResponse,
-    PushServerAppOutputsRequest,
-    PushServerAppOutputsResponse,
 )
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
