@@ -157,7 +157,7 @@ class PushClientAppOutputsResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["status",b"status"]) -> None: ...
 global___PushClientAppOutputsResponse = PushClientAppOutputsResponse
 
-class PullMessagesRequest(google.protobuf.message.Message):
+class PullMessageRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TOKEN_FIELD_NUMBER: builtins.int
     token: typing.Text
@@ -166,9 +166,9 @@ class PullMessagesRequest(google.protobuf.message.Message):
         token: typing.Text = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
-global___PullMessagesRequest = PullMessagesRequest
+global___PullMessageRequest = PullMessageRequest
 
-class PullMessagesResponse(google.protobuf.message.Message):
+class PullMessageResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MESSAGE_FIELD_NUMBER: builtins.int
     @property
@@ -179,9 +179,9 @@ class PullMessagesResponse(google.protobuf.message.Message):
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["message",b"message"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["message",b"message"]) -> None: ...
-global___PullMessagesResponse = PullMessagesResponse
+global___PullMessageResponse = PullMessageResponse
 
-class PushMessagesRequest(google.protobuf.message.Message):
+class PushMessageRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TOKEN_FIELD_NUMBER: builtins.int
     MESSAGE_FIELD_NUMBER: builtins.int
@@ -195,10 +195,10 @@ class PushMessagesRequest(google.protobuf.message.Message):
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["message",b"message"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["message",b"message","token",b"token"]) -> None: ...
-global___PushMessagesRequest = PushMessagesRequest
+global___PushMessageRequest = PushMessageRequest
 
-class PushMessagesResponse(google.protobuf.message.Message):
+class PushMessageResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
-global___PushMessagesResponse = PushMessagesResponse
+global___PushMessageResponse = PushMessageResponse
