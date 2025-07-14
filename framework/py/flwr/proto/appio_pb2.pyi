@@ -15,7 +15,10 @@ import typing_extensions
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class PushAppMessagesRequest(google.protobuf.message.Message):
-    """PushAppMessages messages (for both SeverApp and ClientApp)"""
+    """These messages are used by both ServerAppIo and ClientAppIo services
+
+    PushAppMessages messages
+    """
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MESSAGES_LIST_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
@@ -66,7 +69,7 @@ class PushAppMessagesResponse(google.protobuf.message.Message):
 global___PushAppMessagesResponse = PushAppMessagesResponse
 
 class PullAppMessagesRequest(google.protobuf.message.Message):
-    """PullAppMessages messages (for both SeverApp and ClientApp)"""
+    """PullAppMessages messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MESSAGE_IDS_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
@@ -113,7 +116,7 @@ class PullAppMessagesResponse(google.protobuf.message.Message):
 global___PullAppMessagesResponse = PullAppMessagesResponse
 
 class PullAppInputsRequest(google.protobuf.message.Message):
-    """PullAppInputs messages (for both SeverApp and ClientApp)"""
+    """PullAppInputs messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
@@ -141,7 +144,7 @@ class PullAppInputsResponse(google.protobuf.message.Message):
 global___PullAppInputsResponse = PullAppInputsResponse
 
 class PushAppOutputsRequest(google.protobuf.message.Message):
-    """PushAppInputs messages (for both SeverApp and ClientApp)"""
+    """PushAppInputs messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_ID_FIELD_NUMBER: builtins.int
     CONTEXT_FIELD_NUMBER: builtins.int
