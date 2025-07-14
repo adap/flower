@@ -1,15 +1,5 @@
 # Flower: A Friendly Federated AI Framework
 
-# Platform Support Notice: Ray, Windows, and Python Versions
-
-**Ray-based simulation is not supported on Windows with Python 3.13 or newer.**
-
-- Ray support on Windows is experimental and may not work as expected, even with Python 3.10/3.11.
-- For best results, use Python 3.10 or 3.11 on Linux/macOS, or run Flower in WSL2 on Windows.
-- If you encounter errors related to Ray or simulation on Windows, please check your Python version and consider using WSL2 or a Linux environment.
-
----
-
 <p align="center">
   <a href="https://flower.ai/">
     <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflwr-head.4d68867a.png&w=384&q=75" width="140px" alt="Flower Website" />
