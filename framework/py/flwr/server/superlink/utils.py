@@ -22,9 +22,9 @@ import grpc
 from flwr.common.constant import Status, SubStatus
 from flwr.common.inflatable import iterate_object_tree
 from flwr.common.typing import RunStatus
+from flwr.proto.appio_pb2 import PushInsMessagesRequest  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import PushMessagesRequest  # pylint: disable=E0611
 from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
-from flwr.proto.serverappio_pb2 import PushInsMessagesRequest  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState
 from flwr.supercore.object_store import ObjectStore
 

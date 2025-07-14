@@ -27,17 +27,17 @@ from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.inflatable import get_all_nested_objects
 from flwr.common.message import Message
 from flwr.common.serde import message_to_proto
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullResMessagesRequest,
+    PushInsMessagesRequest,
+)
 from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
     Run,
 )
-from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
-    GetNodesRequest,
-    PullResMessagesRequest,
-    PushInsMessagesRequest,
-)
+from flwr.proto.serverappio_pb2 import GetNodesRequest  # pylint: disable=E0611
 
 from .grpc_grid import GrpcGrid
 

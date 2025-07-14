@@ -39,6 +39,14 @@ from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullResMessagesRequest,
+    PullResMessagesResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
+    PushServerAppOutputsRequest,
+    PushServerAppOutputsResponse,
+)
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
@@ -63,12 +71,6 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullResMessagesRequest,
-    PullResMessagesResponse,
-    PushInsMessagesRequest,
-    PushInsMessagesResponse,
-    PushServerAppOutputsRequest,
-    PushServerAppOutputsResponse,
 )
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
