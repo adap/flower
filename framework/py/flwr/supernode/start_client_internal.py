@@ -47,6 +47,11 @@ from flwr.common.constant import (
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_object_tree,
+    no_object_id_recompute,
+)
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.telemetry import EventType
@@ -289,7 +294,16 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             state.store_context(run_ctx)
 
         # Store the message in the state
+        # This shall be removed after the transition to ObjectStore
         state.store_message(message)
+
+        # Store the message in ObjectStore
+        # This is a temporary solution to store messages in ObjectStore
+        with no_object_id_recompute():
+            object_store.preregister(run_id, get_object_tree(message))
+            for obj_id, obj in get_all_nested_objects(message).items():
+                object_store.put(obj_id, obj.deflate())
+
     except RunNotRunningException:
         if message is None:
             log(
