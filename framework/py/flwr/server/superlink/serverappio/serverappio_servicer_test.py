@@ -40,12 +40,12 @@ from flwr.common.serde import context_to_proto, message_from_proto, run_status_t
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
-    PullResMessagesRequest,
-    PullResMessagesResponse,
-    PushInsMessagesRequest,
-    PushInsMessagesResponse,
-    PushServerAppOutputsRequest,
-    PushServerAppOutputsResponse,
+    PullAppMessagesRequest,
+    PullAppMessagesResponse,
+    PushAppMessagesRequest,
+    PushAppMessagesResponse,
+    PushAppOutputsRequest,
+    PushAppOutputsResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
@@ -161,18 +161,18 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         )
         self._push_messages = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PushMessages",
-            request_serializer=PushInsMessagesRequest.SerializeToString,
-            response_deserializer=PushInsMessagesResponse.FromString,
+            request_serializer=PushAppMessagesRequest.SerializeToString,
+            response_deserializer=PushAppMessagesResponse.FromString,
         )
         self._pull_messages = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PullMessages",
-            request_serializer=PullResMessagesRequest.SerializeToString,
-            response_deserializer=PullResMessagesResponse.FromString,
+            request_serializer=PullAppMessagesRequest.SerializeToString,
+            response_deserializer=PullAppMessagesResponse.FromString,
         )
         self._push_serverapp_outputs = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PushServerAppOutputs",
-            request_serializer=PushServerAppOutputsRequest.SerializeToString,
-            response_deserializer=PushServerAppOutputsResponse.FromString,
+            request_serializer=PushAppOutputsRequest.SerializeToString,
+            response_deserializer=PushAppOutputsResponse.FromString,
         )
         self._update_run_status = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/UpdateRunStatus",
@@ -271,10 +271,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         message = message_from_proto(message_ins)
         descendant_mapping = get_message_to_descendant_id_mapping(message)
 
-        # Transition status to running. PushInsMessagesRequest is only
+        # Transition status to running. PushAppMessagesRequest is only
         # allowed in running status.
         self._transition_run_status(run_id, 2)
-        request = PushInsMessagesRequest(
+        request = PushAppMessagesRequest(
             messages_list=[message_ins],
             run_id=run_id,
             message_object_trees=[get_object_tree(message)],
@@ -284,7 +284,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         response, call = self._push_messages.with_call(request=request)
 
         # Assert
-        assert isinstance(response, PushInsMessagesResponse)
+        assert isinstance(response, PushAppMessagesResponse)
         assert grpc.StatusCode.OK == call.code()
 
         # Assert: check that response indicates all objects need pushing
@@ -308,7 +308,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     ) -> None:
         """Assert `PushInsMessages` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
-        request = PushInsMessagesRequest(messages_list=[message], run_id=run_id)
+        request = PushAppMessagesRequest(messages_list=[message], run_id=run_id)
 
         with self.assertRaises(grpc.RpcError) as e:
             self._push_messages.with_call(request=request)
@@ -371,7 +371,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         node_id = self.state.create_node(heartbeat_interval=30)
-        # Transition status to running. PullResMessagesRequest is only
+        # Transition status to running. PullAppMessagesRequest is only
         # allowed in running status.
         self._transition_run_status(run_id, 2)
 
@@ -396,13 +396,13 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         if register_in_store:
             obj_ids_registered = self._register_in_object_store(reply_msg)
 
-        request = PullResMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
+        request = PullAppMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
 
         # Execute
         response, call = self._pull_messages.with_call(request=request)
 
         # Assert
-        assert isinstance(response, PullResMessagesResponse)
+        assert isinstance(response, PullAppMessagesResponse)
         assert call.code() == grpc.StatusCode.OK
 
         object_ids_in_response = {
@@ -463,13 +463,13 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         self.state.store_message_res(message=reply_msg)
         # Register response in ObjectStore (so pulling message request can be completed)
         self._register_in_object_store(reply_msg)
-        request = PullResMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
+        request = PullAppMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
 
         # Execute
         response, call = self._pull_messages.with_call(request=request)
 
         # Assert
-        assert isinstance(response, PullResMessagesResponse)
+        assert isinstance(response, PullAppMessagesResponse)
         assert grpc.StatusCode.OK == call.code()
         assert self.state.num_message_ins() == 0
         assert self.state.num_message_res() == 0
@@ -477,7 +477,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     def _assert_pull_messages_not_allowed(self, run_id: int) -> None:
         """Assert `PullMessages` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
-        request = PullResMessagesRequest(run_id=run_id)
+        request = PullAppMessagesRequest(run_id=run_id)
 
         with self.assertRaises(grpc.RpcError) as e:
             self._pull_messages.with_call(request=request)
@@ -530,13 +530,13 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             + 0.1,
         ):  # over TTL limit
 
-            request = PullResMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
+            request = PullAppMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
 
             # Execute
             response, call = self._pull_messages.with_call(request=request)
 
             # Assert
-            assert isinstance(response, PullResMessagesResponse)
+            assert isinstance(response, PullAppMessagesResponse)
             assert grpc.StatusCode.OK == call.code()
 
             # Assert that objects to pull points to a message carrying an error
@@ -560,10 +560,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             run_config=maker.user_config(),
         )
 
-        # Transition status to running. PushServerAppOutputsRequest is only
+        # Transition status to running. PushAppOutputsRequest is only
         # allowed in running status.
         self._transition_run_status(run_id, 2)
-        request = PushServerAppOutputsRequest(
+        request = PushAppOutputsRequest(
             run_id=run_id, context=context_to_proto(context)
         )
 
@@ -571,7 +571,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         response, call = self._push_serverapp_outputs.with_call(request=request)
 
         # Assert
-        assert isinstance(response, PushServerAppOutputsResponse)
+        assert isinstance(response, PushAppOutputsResponse)
         assert grpc.StatusCode.OK == call.code()
 
     def _assert_push_serverapp_outputs_not_allowed(
@@ -579,7 +579,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     ) -> None:
         """Assert `PushServerAppOutputs` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
-        request = PushServerAppOutputsRequest(
+        request = PushAppOutputsRequest(
             run_id=run_id, context=context_to_proto(context)
         )
 
