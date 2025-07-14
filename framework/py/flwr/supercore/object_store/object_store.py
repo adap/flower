@@ -61,6 +61,22 @@ class ObjectStore(abc.ABC):
         """
 
     @abc.abstractmethod
+    def get_object_tree(self, object_id: str) -> ObjectTree:
+        """Get the object tree for a given object ID.
+
+        Parameters
+        ----------
+        object_id : str
+            The ID of the object for which to retrieve the object tree.
+
+        Returns
+        -------
+        ObjectTree
+            An ObjectTree representing the hierarchical structure of the object with
+            the given ID and its descendants.
+        """
+
+    @abc.abstractmethod
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store.
 

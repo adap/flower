@@ -19,7 +19,7 @@ from typing import Optional
 
 from flwr.common import Message, log
 from flwr.common.constant import Status
-from flwr.common.inflatable import UnexpectedObjectContentError
+from flwr.common.inflatable import UnexpectedObjectContentError, iterate_object_tree
 from flwr.common.serde import (
     fab_to_proto,
     message_from_proto,
@@ -119,11 +119,11 @@ def pull_messages(
             msg_proto.append(message_to_proto(msg))
 
             msg_object_id = msg.metadata.message_id
-            descendants = store.get_message_descendant_ids(msg_object_id)
-            # Include the object_id of the message itself
-            objects_to_pull[msg_object_id] = ObjectIDs(
-                object_ids=descendants + [msg_object_id]
-            )
+            obj_tree = store.get_object_tree(msg_object_id)
+            descendants = [node.object_id for node in iterate_object_tree(obj_tree)]
+            descendants = descendants[:-1]  # Exclude the message itself
+            # Add mapping of message object ID to its descendants
+            objects_to_pull[msg_object_id] = ObjectIDs(object_ids=descendants)
         except NoObjectInStoreError as e:
             log(ERROR, e.message)
             # Delete message ins from state
