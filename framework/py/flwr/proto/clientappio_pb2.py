@@ -17,15 +17,15 @@ from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 from flwr.proto import message_pb2 as flwr_dot_proto_dot_message__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x66lwr/proto/clientappio.proto\x12\x16\x66lwr.proto.clientappio\x1a\x14\x66lwr/proto/fab.proto\x1a\x14\x66lwr/proto/run.proto\x1a\x18\x66lwr/proto/message.proto\"%\n#GetRunIdsWithPendingMessagesRequest\"7\n$GetRunIdsWithPendingMessagesResponse\x12\x0f\n\x07run_ids\x18\x01 \x03(\x04\"%\n\x13RequestTokenRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\"%\n\x14RequestTokenResponse\x12\r\n\x05token\x18\x01 \x01(\t\"c\n\x15\x43lientAppOutputStatus\x12\x39\n\x04\x63ode\x18\x01 \x01(\x0e\x32+.flwr.proto.clientappio.ClientAppOutputCode\x12\x0f\n\x07message\x18\x02 \x01(\t\"+\n\x1aPullClientAppInputsRequest\x12\r\n\x05token\x18\x01 \x01(\t\"\x7f\n\x1bPullClientAppInputsResponse\x12$\n\x07\x63ontext\x18\x01 \x01(\x0b\x32\x13.flwr.proto.Context\x12\x1c\n\x03run\x18\x02 \x01(\x0b\x32\x0f.flwr.proto.Run\x12\x1c\n\x03\x66\x61\x62\x18\x03 \x01(\x0b\x32\x0f.flwr.proto.Fab\"R\n\x1bPushClientAppOutputsRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12$\n\x07\x63ontext\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Context\"]\n\x1cPushClientAppOutputsResponse\x12=\n\x06status\x18\x01 \x01(\x0b\x32-.flwr.proto.clientappio.ClientAppOutputStatus\"4\n\x13PullMessagesRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x0e\n\x06run_id\x18\x02 \x01(\x04\"<\n\x14PullMessagesResponse\x12$\n\x07message\x18\x01 \x01(\x0b\x32\x13.flwr.proto.Message\"J\n\x13PushMessagesRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12$\n\x07message\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Message\"\x16\n\x14PushMessagesResponse*L\n\x13\x43lientAppOutputCode\x12\x0b\n\x07SUCCESS\x10\x00\x12\x15\n\x11\x44\x45\x41\x44LINE_EXCEEDED\x10\x01\x12\x11\n\rUNKNOWN_ERROR\x10\x02\x32\xf9\x05\n\x0b\x43lientAppIo\x12\x9b\x01\n\x1cGetRunIdsWithPendingMessages\x12;.flwr.proto.clientappio.GetRunIdsWithPendingMessagesRequest\x1a<.flwr.proto.clientappio.GetRunIdsWithPendingMessagesResponse\"\x00\x12k\n\x0cRequestToken\x12+.flwr.proto.clientappio.RequestTokenRequest\x1a,.flwr.proto.clientappio.RequestTokenResponse\"\x00\x12\x80\x01\n\x13PullClientAppInputs\x12\x32.flwr.proto.clientappio.PullClientAppInputsRequest\x1a\x33.flwr.proto.clientappio.PullClientAppInputsResponse\"\x00\x12\x83\x01\n\x14PushClientAppOutputs\x12\x33.flwr.proto.clientappio.PushClientAppOutputsRequest\x1a\x34.flwr.proto.clientappio.PushClientAppOutputsResponse\"\x00\x12j\n\x0bPushMessage\x12+.flwr.proto.clientappio.PushMessagesRequest\x1a,.flwr.proto.clientappio.PushMessagesResponse\"\x00\x12j\n\x0bPullMessage\x12+.flwr.proto.clientappio.PullMessagesRequest\x1a,.flwr.proto.clientappio.PullMessagesResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x66lwr/proto/clientappio.proto\x12\x16\x66lwr.proto.clientappio\x1a\x14\x66lwr/proto/fab.proto\x1a\x14\x66lwr/proto/run.proto\x1a\x18\x66lwr/proto/message.proto\"%\n#GetRunIdsWithPendingMessagesRequest\"7\n$GetRunIdsWithPendingMessagesResponse\x12\x0f\n\x07run_ids\x18\x01 \x03(\x04\"%\n\x13RequestTokenRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\"%\n\x14RequestTokenResponse\x12\r\n\x05token\x18\x01 \x01(\t\"c\n\x15\x43lientAppOutputStatus\x12\x39\n\x04\x63ode\x18\x01 \x01(\x0e\x32+.flwr.proto.clientappio.ClientAppOutputCode\x12\x0f\n\x07message\x18\x02 \x01(\t\"+\n\x1aPullClientAppInputsRequest\x12\r\n\x05token\x18\x01 \x01(\t\"\x7f\n\x1bPullClientAppInputsResponse\x12$\n\x07\x63ontext\x18\x01 \x01(\x0b\x32\x13.flwr.proto.Context\x12\x1c\n\x03run\x18\x02 \x01(\x0b\x32\x0f.flwr.proto.Run\x12\x1c\n\x03\x66\x61\x62\x18\x03 \x01(\x0b\x32\x0f.flwr.proto.Fab\"R\n\x1bPushClientAppOutputsRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12$\n\x07\x63ontext\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Context\"]\n\x1cPushClientAppOutputsResponse\x12=\n\x06status\x18\x01 \x01(\x0b\x32-.flwr.proto.clientappio.ClientAppOutputStatus\"$\n\x13PullMessagesRequest\x12\r\n\x05token\x18\x01 \x01(\t\"<\n\x14PullMessagesResponse\x12$\n\x07message\x18\x01 \x01(\x0b\x32\x13.flwr.proto.Message\"J\n\x13PushMessagesRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12$\n\x07message\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Message\"\x16\n\x14PushMessagesResponse*L\n\x13\x43lientAppOutputCode\x12\x0b\n\x07SUCCESS\x10\x00\x12\x15\n\x11\x44\x45\x41\x44LINE_EXCEEDED\x10\x01\x12\x11\n\rUNKNOWN_ERROR\x10\x02\x32\xf9\x05\n\x0b\x43lientAppIo\x12\x9b\x01\n\x1cGetRunIdsWithPendingMessages\x12;.flwr.proto.clientappio.GetRunIdsWithPendingMessagesRequest\x1a<.flwr.proto.clientappio.GetRunIdsWithPendingMessagesResponse\"\x00\x12k\n\x0cRequestToken\x12+.flwr.proto.clientappio.RequestTokenRequest\x1a,.flwr.proto.clientappio.RequestTokenResponse\"\x00\x12\x80\x01\n\x13PullClientAppInputs\x12\x32.flwr.proto.clientappio.PullClientAppInputsRequest\x1a\x33.flwr.proto.clientappio.PullClientAppInputsResponse\"\x00\x12\x83\x01\n\x14PushClientAppOutputs\x12\x33.flwr.proto.clientappio.PushClientAppOutputsRequest\x1a\x34.flwr.proto.clientappio.PushClientAppOutputsResponse\"\x00\x12j\n\x0bPushMessage\x12+.flwr.proto.clientappio.PushMessagesRequest\x1a,.flwr.proto.clientappio.PushMessagesResponse\"\x00\x12j\n\x0bPullMessage\x12+.flwr.proto.clientappio.PullMessagesRequest\x1a,.flwr.proto.clientappio.PullMessagesResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'flwr.proto.clientappio_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_CLIENTAPPOUTPUTCODE']._serialized_start=970
-  _globals['_CLIENTAPPOUTPUTCODE']._serialized_end=1046
+  _globals['_CLIENTAPPOUTPUTCODE']._serialized_start=954
+  _globals['_CLIENTAPPOUTPUTCODE']._serialized_end=1030
   _globals['_GETRUNIDSWITHPENDINGMESSAGESREQUEST']._serialized_start=126
   _globals['_GETRUNIDSWITHPENDINGMESSAGESREQUEST']._serialized_end=163
   _globals['_GETRUNIDSWITHPENDINGMESSAGESRESPONSE']._serialized_start=165
@@ -45,13 +45,13 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_PUSHCLIENTAPPOUTPUTSRESPONSE']._serialized_start=659
   _globals['_PUSHCLIENTAPPOUTPUTSRESPONSE']._serialized_end=752
   _globals['_PULLMESSAGESREQUEST']._serialized_start=754
-  _globals['_PULLMESSAGESREQUEST']._serialized_end=806
-  _globals['_PULLMESSAGESRESPONSE']._serialized_start=808
-  _globals['_PULLMESSAGESRESPONSE']._serialized_end=868
-  _globals['_PUSHMESSAGESREQUEST']._serialized_start=870
-  _globals['_PUSHMESSAGESREQUEST']._serialized_end=944
-  _globals['_PUSHMESSAGESRESPONSE']._serialized_start=946
-  _globals['_PUSHMESSAGESRESPONSE']._serialized_end=968
-  _globals['_CLIENTAPPIO']._serialized_start=1049
-  _globals['_CLIENTAPPIO']._serialized_end=1810
+  _globals['_PULLMESSAGESREQUEST']._serialized_end=790
+  _globals['_PULLMESSAGESRESPONSE']._serialized_start=792
+  _globals['_PULLMESSAGESRESPONSE']._serialized_end=852
+  _globals['_PUSHMESSAGESREQUEST']._serialized_start=854
+  _globals['_PUSHMESSAGESREQUEST']._serialized_end=928
+  _globals['_PUSHMESSAGESRESPONSE']._serialized_start=930
+  _globals['_PUSHMESSAGESRESPONSE']._serialized_end=952
+  _globals['_CLIENTAPPIO']._serialized_start=1033
+  _globals['_CLIENTAPPIO']._serialized_end=1794
 # @@protoc_insertion_point(module_scope)

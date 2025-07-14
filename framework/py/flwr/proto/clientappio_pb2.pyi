@@ -152,15 +152,12 @@ global___PushClientAppOutputsResponse = PushClientAppOutputsResponse
 class PullMessagesRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TOKEN_FIELD_NUMBER: builtins.int
-    RUN_ID_FIELD_NUMBER: builtins.int
     token: typing.Text
-    run_id: builtins.int
     def __init__(self,
         *,
         token: typing.Text = ...,
-        run_id: builtins.int = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id","token",b"token"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
 global___PullMessagesRequest = PullMessagesRequest
 
 class PullMessagesResponse(google.protobuf.message.Message):
