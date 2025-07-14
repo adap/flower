@@ -80,7 +80,6 @@ message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1; }
 
 message PullMessagesRequest {
   string token = 1;
-  uint64 run_id = 2;
 }
 
 message PullMessagesResponse { Message message = 1; }
