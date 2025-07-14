@@ -15,6 +15,7 @@
 """InflatableObject utilities."""
 
 import concurrent.futures
+import os
 import random
 import threading
 import time
@@ -111,13 +112,14 @@ def push_objects(
                 del objects[obj_id]
         push_object_fn(obj_id, object_content)
 
-    with concurrent.futures.ThreadPoolExecutor(
-        max_workers=max_concurrent_pushes
-    ) as executor:
+    # Push all objects concurrently
+    num_cores = os.cpu_count() or 1
+    num_workers = min(max_concurrent_pushes, num_cores)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         list(executor.map(push, list(objects.keys())))
 
 
-def pull_objects(  # pylint: disable=too-many-arguments
+def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
     object_ids: list[str],
     pull_object_fn: Callable[[str], bytes],
     *,
@@ -209,9 +211,9 @@ def pull_objects(  # pylint: disable=too-many-arguments
                 return
 
     # Submit all pull tasks concurrently
-    with concurrent.futures.ThreadPoolExecutor(
-        max_workers=max_concurrent_pulls
-    ) as executor:
+    num_cores = os.cpu_count() or 1
+    num_workers = min(max_concurrent_pulls, num_cores)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures = {
             executor.submit(pull_with_retries, obj_id): obj_id for obj_id in object_ids
         }
