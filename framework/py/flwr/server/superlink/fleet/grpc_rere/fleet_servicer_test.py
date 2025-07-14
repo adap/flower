@@ -21,7 +21,7 @@ import unittest
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigRecord, Message
+from flwr.common import ConfigRecord
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     SUPERLINK_NODE_ID,
@@ -29,7 +29,6 @@ from flwr.common.constant import (
 )
 from flwr.common.inflatable import (
     get_all_nested_objects,
-    get_descendant_object_ids,
     get_object_id,
     get_object_tree,
 )
@@ -222,24 +221,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         self._assert_push_messages_not_allowed(node_id, run_id)
 
-    def _register_in_object_store(self, message: Message) -> list[str]:
-        # When pulling a Message, the response also must include the IDs of the objects
-        # to pull. To achieve this, we need to at least register the Objects in the
-        # message into the store. Note this would normally be done when the
-        # servicer handles a PushMessageRequest
-        descendants = list(get_descendant_object_ids(message))
-        message_obj_id = message.metadata.message_id
-        # Store mapping
-        self.store.set_message_descendant_ids(
-            msg_object_id=message_obj_id, descendant_ids=descendants
-        )
-        # Preregister
-        obj_ids_registered = self.store.preregister(
-            message.metadata.run_id, get_object_tree(message)
-        )
-
-        return obj_ids_registered
-
     @parameterized.expand(
         [
             (True,),
@@ -270,7 +251,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         self.state.store_message_ins(message=message_ins)
         obj_ids_registered: list[str] = []
         if register_in_store:
-            obj_ids_registered = self._register_in_object_store(message_ins)
+            obj_ids_registered = self.store.preregister(
+                run_id, get_object_tree(message_ins)
+            )
 
         request = PullMessagesRequest(node=Node(node_id=node_id))
 
@@ -531,7 +514,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Prepare: Store message in ObjectStore
         all_objects = get_all_nested_objects(message)
-        self._register_in_object_store(message)
+        self.store.preregister(run_id, get_object_tree(message))
         for obj_id, obj in all_objects.items():
             self.store.put(object_id=obj_id, object_content=obj.deflate())
 

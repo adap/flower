@@ -256,30 +256,6 @@ class ObjectStoreTest(unittest.TestCase):
                 self.run_id, ObjectTree(object_id=invalid_object_id)
             )
 
-    def test_set_get_delete_message_descendants_ids(self) -> None:
-        """Test setting and getting mapping of message object id and its descendants."""
-        # Prepare
-        object_store = self.object_store_factory()
-        object_content = CustomDataClass(b"test_value").deflate()
-        object_id = get_object_id(object_content)
-
-        # Execute
-        # Insert
-        object_store.set_message_descendant_ids(
-            msg_object_id=object_id, descendant_ids=["child1", "child2"]
-        )
-        # Extract correct
-        descendant_ids = object_store.get_message_descendant_ids(object_id)
-        # Delete
-        object_store.delete_message_descendant_ids(object_id)
-
-        # Assert
-        assert descendant_ids == ["child1", "child2"]
-
-        # Extract nonexistent id
-        with self.assertRaises(NoObjectInStoreError):
-            object_store.get_message_descendant_ids(object_id)
-
     # pylint: disable-next=too-many-locals
     def test_put_get_delete_object_with_children(self) -> None:
         """Test put and get methods with an object that has children."""

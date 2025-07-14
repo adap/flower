@@ -212,12 +212,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             if msg_res.metadata.src_node_id == SUPERLINK_NODE_ID:
                 with no_object_id_recompute():
                     all_objects = get_all_nested_objects(msg_res)
-                    descendants = list(all_objects.keys())[:-1]
-                    message_obj_id = msg_res.metadata.message_id
-                    # Store mapping
-                    store.set_message_descendant_ids(
-                        msg_object_id=message_obj_id, descendant_ids=descendants
-                    )
                     # Preregister
                     store.preregister(request.run_id, get_object_tree(msg_res))
                     # Store objects
@@ -516,7 +510,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Delete the message object
         store.delete(request.message_object_id)
-        store.delete_message_descendant_ids(request.message_object_id)
 
         return ConfirmMessageReceivedResponse()
 
