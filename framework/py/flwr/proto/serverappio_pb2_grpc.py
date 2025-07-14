@@ -2,6 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
+from flwr.proto import appio_pb2 as flwr_dot_proto_dot_appio__pb2
 from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
 from flwr.proto import heartbeat_pb2 as flwr_dot_proto_dot_heartbeat__pb2
 from flwr.proto import log_pb2 as flwr_dot_proto_dot_log__pb2
@@ -26,13 +27,13 @@ class ServerAppIoStub(object):
                 )
         self.PushMessages = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/PushMessages',
-                request_serializer=flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesResponse.FromString,
+                request_serializer=flwr_dot_proto_dot_appio__pb2.PushInsMessagesRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_appio__pb2.PushInsMessagesResponse.FromString,
                 )
         self.PullMessages = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/PullMessages',
-                request_serializer=flwr_dot_proto_dot_serverappio__pb2.PullResMessagesRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_serverappio__pb2.PullResMessagesResponse.FromString,
+                request_serializer=flwr_dot_proto_dot_appio__pb2.PullResMessagesRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_appio__pb2.PullResMessagesResponse.FromString,
                 )
         self.GetRun = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/GetRun',
@@ -46,13 +47,13 @@ class ServerAppIoStub(object):
                 )
         self.PullServerAppInputs = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/PullServerAppInputs',
-                request_serializer=flwr_dot_proto_dot_serverappio__pb2.PullServerAppInputsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_serverappio__pb2.PullServerAppInputsResponse.FromString,
+                request_serializer=flwr_dot_proto_dot_appio__pb2.PullServerAppInputsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_appio__pb2.PullServerAppInputsResponse.FromString,
                 )
         self.PushServerAppOutputs = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/PushServerAppOutputs',
-                request_serializer=flwr_dot_proto_dot_serverappio__pb2.PushServerAppOutputsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_serverappio__pb2.PushServerAppOutputsResponse.FromString,
+                request_serializer=flwr_dot_proto_dot_appio__pb2.PushServerAppOutputsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_appio__pb2.PushServerAppOutputsResponse.FromString,
                 )
         self.UpdateRunStatus = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/UpdateRunStatus',
@@ -202,13 +203,13 @@ def add_ServerAppIoServicer_to_server(servicer, server):
             ),
             'PushMessages': grpc.unary_unary_rpc_method_handler(
                     servicer.PushMessages,
-                    request_deserializer=flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesResponse.SerializeToString,
+                    request_deserializer=flwr_dot_proto_dot_appio__pb2.PushInsMessagesRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_appio__pb2.PushInsMessagesResponse.SerializeToString,
             ),
             'PullMessages': grpc.unary_unary_rpc_method_handler(
                     servicer.PullMessages,
-                    request_deserializer=flwr_dot_proto_dot_serverappio__pb2.PullResMessagesRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_serverappio__pb2.PullResMessagesResponse.SerializeToString,
+                    request_deserializer=flwr_dot_proto_dot_appio__pb2.PullResMessagesRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_appio__pb2.PullResMessagesResponse.SerializeToString,
             ),
             'GetRun': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRun,
@@ -222,13 +223,13 @@ def add_ServerAppIoServicer_to_server(servicer, server):
             ),
             'PullServerAppInputs': grpc.unary_unary_rpc_method_handler(
                     servicer.PullServerAppInputs,
-                    request_deserializer=flwr_dot_proto_dot_serverappio__pb2.PullServerAppInputsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_serverappio__pb2.PullServerAppInputsResponse.SerializeToString,
+                    request_deserializer=flwr_dot_proto_dot_appio__pb2.PullServerAppInputsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_appio__pb2.PullServerAppInputsResponse.SerializeToString,
             ),
             'PushServerAppOutputs': grpc.unary_unary_rpc_method_handler(
                     servicer.PushServerAppOutputs,
-                    request_deserializer=flwr_dot_proto_dot_serverappio__pb2.PushServerAppOutputsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_serverappio__pb2.PushServerAppOutputsResponse.SerializeToString,
+                    request_deserializer=flwr_dot_proto_dot_appio__pb2.PushServerAppOutputsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_appio__pb2.PushServerAppOutputsResponse.SerializeToString,
             ),
             'UpdateRunStatus': grpc.unary_unary_rpc_method_handler(
                     servicer.UpdateRunStatus,
@@ -304,8 +305,8 @@ class ServerAppIo(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/PushMessages',
-            flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesRequest.SerializeToString,
-            flwr_dot_proto_dot_serverappio__pb2.PushInsMessagesResponse.FromString,
+            flwr_dot_proto_dot_appio__pb2.PushInsMessagesRequest.SerializeToString,
+            flwr_dot_proto_dot_appio__pb2.PushInsMessagesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -321,8 +322,8 @@ class ServerAppIo(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/PullMessages',
-            flwr_dot_proto_dot_serverappio__pb2.PullResMessagesRequest.SerializeToString,
-            flwr_dot_proto_dot_serverappio__pb2.PullResMessagesResponse.FromString,
+            flwr_dot_proto_dot_appio__pb2.PullResMessagesRequest.SerializeToString,
+            flwr_dot_proto_dot_appio__pb2.PullResMessagesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -372,8 +373,8 @@ class ServerAppIo(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/PullServerAppInputs',
-            flwr_dot_proto_dot_serverappio__pb2.PullServerAppInputsRequest.SerializeToString,
-            flwr_dot_proto_dot_serverappio__pb2.PullServerAppInputsResponse.FromString,
+            flwr_dot_proto_dot_appio__pb2.PullServerAppInputsRequest.SerializeToString,
+            flwr_dot_proto_dot_appio__pb2.PullServerAppInputsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -389,8 +390,8 @@ class ServerAppIo(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ServerAppIo/PushServerAppOutputs',
-            flwr_dot_proto_dot_serverappio__pb2.PushServerAppOutputsRequest.SerializeToString,
-            flwr_dot_proto_dot_serverappio__pb2.PushServerAppOutputsResponse.FromString,
+            flwr_dot_proto_dot_appio__pb2.PushServerAppOutputsRequest.SerializeToString,
+            flwr_dot_proto_dot_appio__pb2.PushServerAppOutputsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
