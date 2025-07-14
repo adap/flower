@@ -31,7 +31,7 @@ from flwr.common.serde_test import RecordMaker
 # pylint:disable=E0611
 from flwr.proto.clientappio_pb2 import (
     PullClientAppInputsResponse,
-    PullMessagesResponse,
+    PullMessageResponse,
     PushClientAppOutputsResponse,
 )
 from flwr.proto.message_pb2 import Context as ProtoContext
@@ -69,7 +69,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             run=ProtoRun(run_id=61016, fab_id="mock/mock", fab_version="v1.0.0"),
             fab=fab_to_proto(mock_fab),
         )
-        self.mock_stub.PullMessage.return_value = PullMessagesResponse(
+        self.mock_stub.PullMessage.return_value = PullMessageResponse(
             message=message_to_proto(mock_message)
         )
         self.mock_stub.PullClientAppInputs.return_value = mock_response

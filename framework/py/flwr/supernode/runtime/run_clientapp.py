@@ -50,11 +50,11 @@ from flwr.proto.clientappio_pb2 import (
     GetRunIdsWithPendingMessagesResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
-    PullMessagesRequest,
-    PullMessagesResponse,
+    PullMessageRequest,
+    PullMessageResponse,
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
-    PushMessagesRequest,
+    PushMessageRequest,
     RequestTokenRequest,
     RequestTokenResponse,
 )
@@ -203,9 +203,7 @@ def pull_clientappinputs(
     log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", masked_token)
     try:
         # Pull Message
-        res_msg: PullMessagesResponse = stub.PullMessage(
-            PullMessagesRequest(token=token)
-        )
+        res_msg: PullMessageResponse = stub.PullMessage(PullMessageRequest(token=token))
         message = message_from_proto(res_msg.message)
 
         # Pull Context, Run and (optional) FAB
@@ -235,7 +233,7 @@ def push_clientappoutputs(
     try:
 
         # Push Message
-        _ = stub.PushMessage(PushMessagesRequest(token=token, message=proto_message))
+        _ = stub.PushMessage(PushMessageRequest(token=token, message=proto_message))
 
         # Push Context
         res: PushClientAppOutputsResponse = stub.PushClientAppOutputs(

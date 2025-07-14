@@ -15,7 +15,7 @@
 
 syntax = "proto3";
 
-package flwr.proto.clientappio;
+package flwr.proto;
 
 import "flwr/proto/fab.proto";
 import "flwr/proto/run.proto";
@@ -39,10 +39,10 @@ service ClientAppIo {
       returns (PushClientAppOutputsResponse) {}
 
   // Push Message
-  rpc PushMessage(PushMessagesRequest) returns (PushMessagesResponse) {}
+  rpc PushMessage(PushMessageRequest) returns (PushMessageResponse) {}
 
   // Pull Message
-  rpc PullMessage(PullMessagesRequest) returns (PullMessagesResponse) {}
+  rpc PullMessage(PullMessageRequest) returns (PullMessageResponse) {}
 }
 
 message GetRunIdsWithPendingMessagesRequest {}
@@ -76,13 +76,13 @@ message PushClientAppOutputsRequest {
 }
 message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1; }
 
-message PullMessagesRequest { string token = 1; }
+message PullMessageRequest { string token = 1; }
 
-message PullMessagesResponse { Message message = 1; }
+message PullMessageResponse { Message message = 1; }
 
-message PushMessagesRequest {
+message PushMessageRequest {
   string token = 1;
   Message message = 2;
 }
 
-message PushMessagesResponse {}
+message PushMessageResponse {}

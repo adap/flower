@@ -39,12 +39,12 @@ from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     GetRunIdsWithPendingMessagesResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
-    PullMessagesRequest,
-    PullMessagesResponse,
+    PullMessageRequest,
+    PullMessageResponse,
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
-    PushMessagesRequest,
-    PushMessagesResponse,
+    PushMessageRequest,
+    PushMessageResponse,
     RequestTokenRequest,
     RequestTokenResponse,
 )
@@ -162,8 +162,8 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         return PushClientAppOutputsResponse()
 
     def PullMessage(
-        self, request: PullMessagesRequest, context: grpc.ServicerContext
-    ) -> PullMessagesResponse:
+        self, request: PullMessageRequest, context: grpc.ServicerContext
+    ) -> PullMessageResponse:
         """Pull one Message."""
         # Initialize state and ffs connection
         state = self.state_factory.state()
@@ -180,11 +180,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Retrieve message, context, run and fab for this run
         message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
 
-        return PullMessagesResponse(message=message_to_proto(message))
+        return PullMessageResponse(message=message_to_proto(message))
 
     def PushMessage(
-        self, request: PushMessagesRequest, context: grpc.ServicerContext
-    ) -> PushMessagesResponse:
+        self, request: PushMessageRequest, context: grpc.ServicerContext
+    ) -> PushMessageResponse:
         """Push one Message."""
         # Initialize state connection
         state = self.state_factory.state()
@@ -201,4 +201,4 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Save the message and context to the state
         state.store_message(message_from_proto(request.message))
 
-        return PushMessagesResponse()
+        return PushMessageResponse()
