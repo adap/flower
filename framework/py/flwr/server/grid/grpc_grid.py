@@ -47,6 +47,12 @@ from flwr.common.message import remove_content_from_message
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullResMessagesRequest,
+    PullResMessagesResponse,
+    PushInsMessagesRequest,
+    PushInsMessagesResponse,
+)
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
 )
@@ -55,10 +61,6 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullResMessagesRequest,
-    PullResMessagesResponse,
-    PushInsMessagesRequest,
-    PushInsMessagesResponse,
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
