@@ -170,7 +170,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             response_deserializer=PullAppMessagesResponse.FromString,
         )
         self._push_serverapp_outputs = self._channel.unary_unary(
-            "/flwr.proto.ServerAppIo/PushServerAppOutputs",
+            "/flwr.proto.ServerAppIo/PushAppOutputs",
             request_serializer=PushAppOutputsRequest.SerializeToString,
             response_deserializer=PushAppOutputsResponse.FromString,
         )
