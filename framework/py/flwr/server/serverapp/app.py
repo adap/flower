@@ -56,9 +56,9 @@ from flwr.common.serde import (
 from flwr.common.telemetry import EventType, event
 from flwr.common.typing import RunNotRunningException, RunStatus
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
-    PullServerAppInputsRequest,
-    PullServerAppInputsResponse,
-    PushServerAppOutputsRequest,
+    PullAppInputsRequest,
+    PullAppInputsResponse,
+    PushAppOutputsRequest,
 )
 from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.server.grid.grpc_grid import GrpcGrid
@@ -125,9 +125,9 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             )
 
             # Pull ServerAppInputs from LinkState
-            req = PullServerAppInputsRequest()
+            req = PullAppInputsRequest()
             log(DEBUG, "[flwr-serverapp] Pull ServerAppInputs")
-            res: PullServerAppInputsResponse = grid._stub.PullServerAppInputs(req)
+            res: PullAppInputsResponse = grid._stub.PullAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)
                 run_status = None
@@ -207,10 +207,8 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             # Send resulting context
             context_proto = context_to_proto(updated_context)
             log(DEBUG, "[flwr-serverapp] Will push ServerAppOutputs")
-            out_req = PushServerAppOutputsRequest(
-                run_id=run.run_id, context=context_proto
-            )
-            _ = grid._stub.PushServerAppOutputs(out_req)
+            out_req = PushAppOutputsRequest(run_id=run.run_id, context=context_proto)
+            _ = grid._stub.PushAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
         except RunNotRunningException:

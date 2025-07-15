@@ -21,37 +21,39 @@ import "flwr/proto/message.proto";
 import "flwr/proto/fab.proto";
 import "flwr/proto/run.proto";
 
-// PushMessages messages
-message PushInsMessagesRequest {
+// These messages are used by both ServerAppIo and ClientAppIo services
+
+// PushAppMessages messages
+message PushAppMessagesRequest {
   repeated Message messages_list = 1;
   uint64 run_id = 2;
   repeated ObjectTree message_object_trees = 3;
 }
-message PushInsMessagesResponse {
+message PushAppMessagesResponse {
   repeated string message_ids = 1;
   map<string, ObjectIDs> objects_to_push = 2;
 }
 
-// PullMessages messages
-message PullResMessagesRequest {
+// PullAppMessages messages
+message PullAppMessagesRequest {
   repeated string message_ids = 1;
   uint64 run_id = 2;
 }
-message PullResMessagesResponse {
+message PullAppMessagesResponse {
   repeated Message messages_list = 1;
   map<string, ObjectIDs> objects_to_pull = 2;
 }
-// PullServerAppInputs messages
-message PullServerAppInputsRequest {}
-message PullServerAppInputsResponse {
+// PullAppInputs messages
+message PullAppInputsRequest {}
+message PullAppInputsResponse {
   Context context = 1;
   Run run = 2;
   Fab fab = 3;
 }
 
-// PushServerAppOutputs messages
-message PushServerAppOutputsRequest {
+// PushAppInputs messages
+message PushAppOutputsRequest {
   uint64 run_id = 1;
   Context context = 2;
 }
-message PushServerAppOutputsResponse {}
+message PushAppOutputsResponse {}

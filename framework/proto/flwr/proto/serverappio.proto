@@ -30,10 +30,10 @@ service ServerAppIo {
   rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
 
   // Create one or more messages
-  rpc PushMessages(PushInsMessagesRequest) returns (PushInsMessagesResponse) {}
+  rpc PushMessages(PushAppMessagesRequest) returns (PushAppMessagesResponse) {}
 
   // Get message results
-  rpc PullMessages(PullResMessagesRequest) returns (PullResMessagesResponse) {}
+  rpc PullMessages(PullAppMessagesRequest) returns (PullAppMessagesResponse) {}
 
   // Get run details
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
@@ -42,12 +42,10 @@ service ServerAppIo {
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
 
   // Pull ServerApp inputs
-  rpc PullServerAppInputs(PullServerAppInputsRequest)
-      returns (PullServerAppInputsResponse) {}
+  rpc PullAppInputs(PullAppInputsRequest) returns (PullAppInputsResponse) {}
 
   // Push ServerApp outputs
-  rpc PushServerAppOutputs(PushServerAppOutputsRequest)
-      returns (PushServerAppOutputsResponse) {}
+  rpc PushAppOutputs(PushAppOutputsRequest) returns (PushAppOutputsResponse) {}
 
   // Update the status of a given run
   rpc UpdateRunStatus(UpdateRunStatusRequest)
