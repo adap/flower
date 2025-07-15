@@ -19,7 +19,7 @@ from typing import Optional
 
 from flwr.common import Message, log
 from flwr.common.constant import Status
-from flwr.common.inflatable import UnexpectedObjectContentError
+from flwr.common.inflatable import UnexpectedObjectContentError, iterate_object_tree
 from flwr.common.serde import (
     fab_to_proto,
     message_from_proto,
