@@ -281,17 +281,16 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, PullMessagesResponse)
         assert call.code() == grpc.StatusCode.OK
 
-        object_ids_in_response = {
-            obj_id
-            for obj_ids in response.objects_to_pull.values()
-            for obj_id in obj_ids.object_ids
-        }
+        object_ids_in_response = []
+        for obj_id, descendant_ids in response.objects_to_pull.items():
+            object_ids_in_response += [obj_id] + list(descendant_ids.object_ids)
+
         if register_in_store:
             # Assert expected object_ids
-            assert set(obj_ids_registered) == object_ids_in_response
-            assert message_ins.object_id == list(response.objects_to_pull.keys())[0]
+            assert set(obj_ids_registered) == set(object_ids_in_response)
+            assert message_ins.object_id == object_ids_in_response[0]
         else:
-            assert set() == object_ids_in_response
+            assert set() == set(object_ids_in_response)
             # Ins message was deleted
             assert self.state.num_message_ins() == 0
 
