@@ -27,6 +27,7 @@ from flwr.common.inflatable import (
     UnexpectedObjectContentError,
     get_all_nested_objects,
     get_object_tree,
+    iterate_object_tree,
     no_object_id_recompute,
 )
 from flwr.common.logger import log
@@ -247,7 +248,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
             try:
                 msg_object_id = msg.metadata.message_id
-                descendants = store.get_message_descendant_ids(msg_object_id)
+                obj_tree = store.get_object_tree(msg_object_id)
+                descendants = [node.object_id for node in iterate_object_tree(obj_tree)]
+                descendants = descendants[:-1]  # Exclude the message itself
                 # Add mapping of message object ID to its descendants
                 objects_to_pull[msg_object_id] = ObjectIDs(object_ids=descendants)
             except NoObjectInStoreError as e:

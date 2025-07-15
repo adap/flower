@@ -20,7 +20,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 from flwr.common.inflatable import (
-    get_object_children_ids_from_object_content,
     get_object_id,
     is_valid_sha256_hash,
     iterate_object_tree,
@@ -37,6 +36,7 @@ class ObjectEntry:
 
     content: bytes
     is_available: bool
+    child_object_ids: list[str]  # List of child object IDs
     ref_count: int  # Number of references (direct parents) to this object
     runs: set[int]  # Set of run IDs that used this object
 
@@ -70,6 +70,9 @@ class InMemoryObjectStore(ObjectStore):
                     self.store[obj_id] = ObjectEntry(
                         content=b"",  # Initially empty content
                         is_available=False,  # Initially not available
+                        child_object_ids=[  # List of child object IDs
+                            child.object_id for child in tree_node.children
+                        ],
                         ref_count=0,  # Reference count starts at 0
                         runs={run_id},  # Start with the current run ID
                     )
@@ -101,6 +104,32 @@ class InMemoryObjectStore(ObjectStore):
                         self.run_objects_mapping[run_id].add(obj_id)
 
         return new_objects
+
+    def get_object_tree(self, object_id: str) -> ObjectTree:
+        """Get the object tree for a given object ID."""
+        with self.lock_store:
+            # Raise an exception if there's no object with the given ID
+            if not (object_entry := self.store.get(object_id)):
+                raise NoObjectInStoreError(
+                    f"Object with ID '{object_id}' was not pre-registered."
+                )
+
+            # Build the object trees of all children
+            try:
+                child_trees = [
+                    self.get_object_tree(child_id)
+                    for child_id in object_entry.child_object_ids
+                ]
+            except NoObjectInStoreError as e:
+                # Raise an error if any child object is missing
+                # This indicates an integrity issue
+                raise NoObjectInStoreError(
+                    f"Object tree for object ID '{object_id}' contains missing "
+                    "children. This may indicate a corrupted object store."
+                ) from e
+
+            # Create and return the ObjectTree for the current object
+            return ObjectTree(object_id=object_id, children=child_trees)
 
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store."""
@@ -177,10 +206,7 @@ class InMemoryObjectStore(ObjectStore):
                     self.run_objects_mapping[run_id].discard(object_id)
 
                 # Decrease the reference count of its children
-                children_ids = get_object_children_ids_from_object_content(
-                    object_entry.content
-                )
-                for child_id in children_ids:
+                for child_id in object_entry.child_object_ids:
                     self.store[child_id].ref_count -= 1
 
                     # Recursively try to delete the child object
