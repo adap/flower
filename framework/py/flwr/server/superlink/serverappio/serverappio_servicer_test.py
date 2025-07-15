@@ -31,7 +31,6 @@ from flwr.common.constant import (
 )
 from flwr.common.inflatable import (
     get_all_nested_objects,
-    get_descendant_object_ids,
     get_object_id,
     get_object_tree,
 )
@@ -338,24 +337,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Execute & Assert
         self._assert_push_ins_messages_not_allowed(message_ins, run_id)
 
-    def _register_in_object_store(self, message: Message) -> list[str]:
-        # When pulling a Message, the response also must include the IDs of the objects
-        # to pull. To achieve this, we need to at least register the Objects in the
-        # message into the store. Note this would normally be done when the
-        # servicer handles a PushMessageRequest
-        descendants = list(get_descendant_object_ids(message))
-        message_obj_id = message.metadata.message_id
-        # Store mapping
-        self.store.set_message_descendant_ids(
-            msg_object_id=message_obj_id, descendant_ids=descendants
-        )
-        # Preregister
-        obj_ids_registered = self.store.preregister(
-            message.metadata.run_id, get_object_tree(message)
-        )
-
-        return obj_ids_registered
-
     @parameterized.expand(
         [
             # The normal case:
@@ -394,7 +375,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Register response in ObjectStore (so pulling message request can be completed)
         obj_ids_registered: list[str] = []
         if register_in_store:
-            obj_ids_registered = self._register_in_object_store(reply_msg)
+            obj_ids_registered = self.store.preregister(
+                run_id, get_object_tree(reply_msg)
+            )
 
         request = PullAppMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
 
@@ -462,7 +445,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
 
         self.state.store_message_res(message=reply_msg)
         # Register response in ObjectStore (so pulling message request can be completed)
-        self._register_in_object_store(reply_msg)
+        self.store.preregister(run_id, get_object_tree(reply_msg))
         request = PullAppMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
 
         # Execute
@@ -847,10 +830,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Prepare: Save reply message in ObjectStore
         all_objects = get_all_nested_objects(message_res)
         self.store.preregister(run_id, get_object_tree(message_res))
-        self.store.set_message_descendant_ids(
-            msg_object_id=message_res.object_id,
-            descendant_ids=list(get_descendant_object_ids(message_res)),
-        )
         for obj_id, obj in all_objects.items():
             self.store.put(object_id=obj_id, object_content=obj.deflate())
 

@@ -287,6 +287,5 @@ def confirm_message_received(
 
     # Delete the message object
     store.delete(request.message_object_id)
-    store.delete_message_descendant_ids(request.message_object_id)
 
     return ConfirmMessageReceivedResponse()
