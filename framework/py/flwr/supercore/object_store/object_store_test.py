@@ -20,7 +20,7 @@ from abc import abstractmethod
 
 from parameterized import parameterized
 
-from flwr.common.inflatable import get_object_id, get_object_tree
+from flwr.common.inflatable import get_object_id, get_object_tree, iterate_object_tree
 from flwr.common.inflatable_test import CustomDataClass
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
@@ -223,6 +223,26 @@ class ObjectStoreTest(unittest.TestCase):
 
         # Assert the unavailable object is returned
         self.assertEqual([object_id2], not_present)
+
+    def test_get_object_tree(self) -> None:
+        """Test get_object_tree method."""
+        # Prepare
+        object_store = self.object_store_factory()
+        obj = CustomDataClass(
+            data=b"test_value", children=[CustomDataClass(data=b"child")]
+        )
+        obj_tree = get_object_tree(obj)
+        object_store.preregister(self.run_id, get_object_tree(obj))
+
+        # Execute
+        retrieved_tree = object_store.get_object_tree(obj_tree.object_id)
+        retrieved_tree_traversed = [
+            node.object_id for node in iterate_object_tree(retrieved_tree)
+        ]
+        obj_tree_traversed = [node.object_id for node in iterate_object_tree(obj_tree)]
+
+        # Assert
+        self.assertEqual(retrieved_tree_traversed, obj_tree_traversed)
 
     @parameterized.expand([(""), ("invalid")])  # type: ignore
     def test_preregister_with_invalid_object_id(self, invalid_object_id) -> None:
