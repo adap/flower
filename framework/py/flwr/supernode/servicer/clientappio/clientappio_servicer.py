@@ -35,18 +35,18 @@ from flwr.common.typing import Fab, Run
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2_grpc
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0401
+    PullAppInputsRequest,
+    PullAppInputsResponse,
     PullAppMessagesRequest,
     PullAppMessagesResponse,
     PushAppMessagesRequest,
     PushAppMessagesResponse,
+    PushAppOutputsRequest,
+    PushAppOutputsResponse,
 )
 from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     GetRunIdsWithPendingMessagesRequest,
     GetRunIdsWithPendingMessagesResponse,
-    PullClientAppInputsRequest,
-    PullClientAppInputsResponse,
-    PushClientAppOutputsRequest,
-    PushClientAppOutputsResponse,
     RequestTokenRequest,
     RequestTokenResponse,
 )
@@ -107,8 +107,8 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         return RequestTokenResponse(token=token)
 
     def PullClientAppInputs(
-        self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
-    ) -> PullClientAppInputsResponse:
+        self, request: PullAppInputsRequest, context: grpc.ServicerContext
+    ) -> PullAppInputsResponse:
         """Pull Message, Context, and Run."""
         log(DEBUG, "ClientAppIo.PullClientAppInputs")
 
@@ -130,15 +130,15 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         run = cast(Run, state.get_run(run_id))
         fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0])  # type: ignore
 
-        return PullClientAppInputsResponse(
+        return PullAppInputsResponse(
             context=context_to_proto(context),
             run=run_to_proto(run),
             fab=fab_to_proto(fab),
         )
 
     def PushClientAppOutputs(
-        self, request: PushClientAppOutputsRequest, context: grpc.ServicerContext
-    ) -> PushClientAppOutputsResponse:
+        self, request: PushAppOutputsRequest, context: grpc.ServicerContext
+    ) -> PushAppOutputsResponse:
         """Push Message and Context."""
         log(DEBUG, "ClientAppIo.PushClientAppOutputs")
 
@@ -161,7 +161,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # A run associated with a token cannot be handled until its token is cleared
         state.delete_token(run_id)
 
-        return PushClientAppOutputsResponse()
+        return PushAppOutputsResponse()
 
     def PullMessage(
         self, request: PullAppMessagesRequest, context: grpc.ServicerContext

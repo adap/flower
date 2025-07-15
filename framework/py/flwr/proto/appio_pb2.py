@@ -17,7 +17,7 @@ from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
 from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66lwr/proto/appio.proto\x12\nflwr.proto\x1a\x18\x66lwr/proto/message.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x14\x66lwr/proto/run.proto\"\x99\x01\n\x16PushAppMessagesRequest\x12*\n\rmessages_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.Message\x12\x0e\n\x06run_id\x18\x02 \x01(\x04\x12\x34\n\x14message_object_trees\x18\x03 \x03(\x0b\x32\x16.flwr.proto.ObjectTree\x12\r\n\x05token\x18\x04 \x01(\t\"\xcc\x01\n\x17PushAppMessagesResponse\x12\x13\n\x0bmessage_ids\x18\x01 \x03(\t\x12O\n\x0fobjects_to_push\x18\x02 \x03(\x0b\x32\x36.flwr.proto.PushAppMessagesResponse.ObjectsToPushEntry\x1aK\n\x12ObjectsToPushEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.flwr.proto.ObjectIDs:\x02\x38\x01\"L\n\x16PullAppMessagesRequest\x12\x13\n\x0bmessage_ids\x18\x01 \x03(\t\x12\x0e\n\x06run_id\x18\x02 \x01(\x04\x12\r\n\x05token\x18\x03 \x01(\t\"\xe3\x01\n\x17PullAppMessagesResponse\x12*\n\rmessages_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.Message\x12O\n\x0fobjects_to_pull\x18\x02 \x03(\x0b\x32\x36.flwr.proto.PullAppMessagesResponse.ObjectsToPullEntry\x1aK\n\x12ObjectsToPullEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.flwr.proto.ObjectIDs:\x02\x38\x01\"\x16\n\x14PullAppInputsRequest\"y\n\x15PullAppInputsResponse\x12$\n\x07\x63ontext\x18\x01 \x01(\x0b\x32\x13.flwr.proto.Context\x12\x1c\n\x03run\x18\x02 \x01(\x0b\x32\x0f.flwr.proto.Run\x12\x1c\n\x03\x66\x61\x62\x18\x03 \x01(\x0b\x32\x0f.flwr.proto.Fab\"M\n\x15PushAppOutputsRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12$\n\x07\x63ontext\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Context\"\x18\n\x16PushAppOutputsResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66lwr/proto/appio.proto\x12\nflwr.proto\x1a\x18\x66lwr/proto/message.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x14\x66lwr/proto/run.proto\"\x99\x01\n\x16PushAppMessagesRequest\x12*\n\rmessages_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.Message\x12\x0e\n\x06run_id\x18\x02 \x01(\x04\x12\x34\n\x14message_object_trees\x18\x03 \x03(\x0b\x32\x16.flwr.proto.ObjectTree\x12\r\n\x05token\x18\x04 \x01(\t\"\xcc\x01\n\x17PushAppMessagesResponse\x12\x13\n\x0bmessage_ids\x18\x01 \x03(\t\x12O\n\x0fobjects_to_push\x18\x02 \x03(\x0b\x32\x36.flwr.proto.PushAppMessagesResponse.ObjectsToPushEntry\x1aK\n\x12ObjectsToPushEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.flwr.proto.ObjectIDs:\x02\x38\x01\"L\n\x16PullAppMessagesRequest\x12\x13\n\x0bmessage_ids\x18\x01 \x03(\t\x12\x0e\n\x06run_id\x18\x02 \x01(\x04\x12\r\n\x05token\x18\x03 \x01(\t\"\xe3\x01\n\x17PullAppMessagesResponse\x12*\n\rmessages_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.Message\x12O\n\x0fobjects_to_pull\x18\x02 \x03(\x0b\x32\x36.flwr.proto.PullAppMessagesResponse.ObjectsToPullEntry\x1aK\n\x12ObjectsToPullEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.flwr.proto.ObjectIDs:\x02\x38\x01\"%\n\x14PullAppInputsRequest\x12\r\n\x05token\x18\x01 \x01(\t\"y\n\x15PullAppInputsResponse\x12$\n\x07\x63ontext\x18\x01 \x01(\x0b\x32\x13.flwr.proto.Context\x12\x1c\n\x03run\x18\x02 \x01(\x0b\x32\x0f.flwr.proto.Run\x12\x1c\n\x03\x66\x61\x62\x18\x03 \x01(\x0b\x32\x0f.flwr.proto.Fab\"\\\n\x15PushAppOutputsRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12$\n\x07\x63ontext\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Context\x12\r\n\x05token\x18\x03 \x01(\t\"\x18\n\x16PushAppOutputsResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -41,11 +41,11 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_PULLAPPMESSAGESRESPONSE_OBJECTSTOPULLENTRY']._serialized_start=702
   _globals['_PULLAPPMESSAGESRESPONSE_OBJECTSTOPULLENTRY']._serialized_end=777
   _globals['_PULLAPPINPUTSREQUEST']._serialized_start=779
-  _globals['_PULLAPPINPUTSREQUEST']._serialized_end=801
-  _globals['_PULLAPPINPUTSRESPONSE']._serialized_start=803
-  _globals['_PULLAPPINPUTSRESPONSE']._serialized_end=924
-  _globals['_PUSHAPPOUTPUTSREQUEST']._serialized_start=926
-  _globals['_PUSHAPPOUTPUTSREQUEST']._serialized_end=1003
-  _globals['_PUSHAPPOUTPUTSRESPONSE']._serialized_start=1005
-  _globals['_PUSHAPPOUTPUTSRESPONSE']._serialized_end=1029
+  _globals['_PULLAPPINPUTSREQUEST']._serialized_end=816
+  _globals['_PULLAPPINPUTSRESPONSE']._serialized_start=818
+  _globals['_PULLAPPINPUTSRESPONSE']._serialized_end=939
+  _globals['_PUSHAPPOUTPUTSREQUEST']._serialized_start=941
+  _globals['_PUSHAPPOUTPUTSREQUEST']._serialized_end=1033
+  _globals['_PUSHAPPOUTPUTSRESPONSE']._serialized_start=1035
+  _globals['_PUSHAPPOUTPUTSRESPONSE']._serialized_end=1059
 # @@protoc_insertion_point(module_scope)

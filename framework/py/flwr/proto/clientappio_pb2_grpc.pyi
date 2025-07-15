@@ -20,13 +20,13 @@ class ClientAppIoStub:
     """Request token"""
 
     PullClientAppInputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.clientappio_pb2.PullClientAppInputsRequest,
-        flwr.proto.clientappio_pb2.PullClientAppInputsResponse]
+        flwr.proto.appio_pb2.PullAppInputsRequest,
+        flwr.proto.appio_pb2.PullAppInputsResponse]
     """Pull client app inputs"""
 
     PushClientAppOutputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.clientappio_pb2.PushClientAppOutputsRequest,
-        flwr.proto.clientappio_pb2.PushClientAppOutputsResponse]
+        flwr.proto.appio_pb2.PushAppOutputsRequest,
+        flwr.proto.appio_pb2.PushAppOutputsResponse]
     """Push client app outputs"""
 
     PushMessage: grpc.UnaryUnaryMultiCallable[
@@ -59,17 +59,17 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def PullClientAppInputs(self,
-        request: flwr.proto.clientappio_pb2.PullClientAppInputsRequest,
+        request: flwr.proto.appio_pb2.PullAppInputsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.clientappio_pb2.PullClientAppInputsResponse:
+    ) -> flwr.proto.appio_pb2.PullAppInputsResponse:
         """Pull client app inputs"""
         pass
 
     @abc.abstractmethod
     def PushClientAppOutputs(self,
-        request: flwr.proto.clientappio_pb2.PushClientAppOutputsRequest,
+        request: flwr.proto.appio_pb2.PushAppOutputsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.clientappio_pb2.PushClientAppOutputsResponse:
+    ) -> flwr.proto.appio_pb2.PushAppOutputsResponse:
         """Push client app outputs"""
         pass
 

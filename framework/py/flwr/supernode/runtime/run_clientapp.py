@@ -44,19 +44,19 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Fab, Run
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullAppInputsRequest,
+    PullAppInputsResponse,
     PullAppMessagesRequest,
     PullAppMessagesResponse,
     PushAppMessagesRequest,
+    PushAppOutputsRequest,
+    PushAppOutputsResponse,
 )
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
     GetRunIdsWithPendingMessagesRequest,
     GetRunIdsWithPendingMessagesResponse,
-    PullClientAppInputsRequest,
-    PullClientAppInputsResponse,
-    PushClientAppOutputsRequest,
-    PushClientAppOutputsResponse,
     RequestTokenRequest,
     RequestTokenResponse,
 )
@@ -211,8 +211,8 @@ def pull_clientappinputs(
         message = message_from_proto(pull_msg_res.messages_list[0])
 
         # Pull Context, Run and (optional) FAB
-        res: PullClientAppInputsResponse = stub.PullClientAppInputs(
-            PullClientAppInputsRequest(token=token)
+        res: PullAppInputsResponse = stub.PullClientAppInputs(
+            PullAppInputsRequest(token=token)
         )
         context = context_from_proto(res.context)
         run = run_from_proto(res.run)
@@ -225,7 +225,7 @@ def pull_clientappinputs(
 
 def push_clientappoutputs(
     stub: ClientAppIoStub, token: str, message: Message, context: Context
-) -> PushClientAppOutputsResponse:
+) -> PushAppOutputsResponse:
     """Push ClientAppOutputs to SuperNode."""
     masked_token = mask_string(token)
     log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", masked_token)
@@ -242,8 +242,8 @@ def push_clientappoutputs(
         )
 
         # Push Context
-        res: PushClientAppOutputsResponse = stub.PushClientAppOutputs(
-            PushClientAppOutputsRequest(token=token, context=proto_context)
+        res: PushAppOutputsResponse = stub.PushClientAppOutputs(
+            PushAppOutputsRequest(token=token, context=proto_context)
         )
         return res
     except grpc.RpcError as e:

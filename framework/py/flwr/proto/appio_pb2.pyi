@@ -124,8 +124,13 @@ global___PullAppMessagesResponse = PullAppMessagesResponse
 class PullAppInputsRequest(google.protobuf.message.Message):
     """PullAppInputs messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    TOKEN_FIELD_NUMBER: builtins.int
+    token: typing.Text
     def __init__(self,
+        *,
+        token: typing.Text = ...,
         ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
 global___PullAppInputsRequest = PullAppInputsRequest
 
 class PullAppInputsResponse(google.protobuf.message.Message):
@@ -154,16 +159,19 @@ class PushAppOutputsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_ID_FIELD_NUMBER: builtins.int
     CONTEXT_FIELD_NUMBER: builtins.int
+    TOKEN_FIELD_NUMBER: builtins.int
     run_id: builtins.int
     @property
     def context(self) -> flwr.proto.message_pb2.Context: ...
+    token: typing.Text
     def __init__(self,
         *,
         run_id: builtins.int = ...,
         context: typing.Optional[flwr.proto.message_pb2.Context] = ...,
+        token: typing.Text = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["context",b"context"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["context",b"context","run_id",b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["context",b"context","run_id",b"run_id","token",b"token"]) -> None: ...
 global___PushAppOutputsRequest = PushAppOutputsRequest
 
 class PushAppOutputsResponse(google.protobuf.message.Message):

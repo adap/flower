@@ -46,7 +46,7 @@ message PullAppMessagesResponse {
   map<string, ObjectIDs> objects_to_pull = 2;
 }
 // PullAppInputs messages
-message PullAppInputsRequest {}
+message PullAppInputsRequest { string token = 1; }
 message PullAppInputsResponse {
   Context context = 1;
   Run run = 2;
@@ -57,5 +57,6 @@ message PullAppInputsResponse {
 message PushAppOutputsRequest {
   uint64 run_id = 1;
   Context context = 2;
+  string token = 3;
 }
 message PushAppOutputsResponse {}

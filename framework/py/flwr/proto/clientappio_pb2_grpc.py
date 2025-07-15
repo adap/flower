@@ -27,13 +27,13 @@ class ClientAppIoStub(object):
                 )
         self.PullClientAppInputs = channel.unary_unary(
                 '/flwr.proto.ClientAppIo/PullClientAppInputs',
-                request_serializer=flwr_dot_proto_dot_clientappio__pb2.PullClientAppInputsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_clientappio__pb2.PullClientAppInputsResponse.FromString,
+                request_serializer=flwr_dot_proto_dot_appio__pb2.PullAppInputsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_appio__pb2.PullAppInputsResponse.FromString,
                 )
         self.PushClientAppOutputs = channel.unary_unary(
                 '/flwr.proto.ClientAppIo/PushClientAppOutputs',
-                request_serializer=flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsResponse.FromString,
+                request_serializer=flwr_dot_proto_dot_appio__pb2.PushAppOutputsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_appio__pb2.PushAppOutputsResponse.FromString,
                 )
         self.PushMessage = channel.unary_unary(
                 '/flwr.proto.ClientAppIo/PushMessage',
@@ -107,13 +107,13 @@ def add_ClientAppIoServicer_to_server(servicer, server):
             ),
             'PullClientAppInputs': grpc.unary_unary_rpc_method_handler(
                     servicer.PullClientAppInputs,
-                    request_deserializer=flwr_dot_proto_dot_clientappio__pb2.PullClientAppInputsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_clientappio__pb2.PullClientAppInputsResponse.SerializeToString,
+                    request_deserializer=flwr_dot_proto_dot_appio__pb2.PullAppInputsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_appio__pb2.PullAppInputsResponse.SerializeToString,
             ),
             'PushClientAppOutputs': grpc.unary_unary_rpc_method_handler(
                     servicer.PushClientAppOutputs,
-                    request_deserializer=flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsResponse.SerializeToString,
+                    request_deserializer=flwr_dot_proto_dot_appio__pb2.PushAppOutputsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_appio__pb2.PushAppOutputsResponse.SerializeToString,
             ),
             'PushMessage': grpc.unary_unary_rpc_method_handler(
                     servicer.PushMessage,
@@ -181,8 +181,8 @@ class ClientAppIo(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ClientAppIo/PullClientAppInputs',
-            flwr_dot_proto_dot_clientappio__pb2.PullClientAppInputsRequest.SerializeToString,
-            flwr_dot_proto_dot_clientappio__pb2.PullClientAppInputsResponse.FromString,
+            flwr_dot_proto_dot_appio__pb2.PullAppInputsRequest.SerializeToString,
+            flwr_dot_proto_dot_appio__pb2.PullAppInputsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -198,8 +198,8 @@ class ClientAppIo(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.ClientAppIo/PushClientAppOutputs',
-            flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsRequest.SerializeToString,
-            flwr_dot_proto_dot_clientappio__pb2.PushClientAppOutputsResponse.FromString,
+            flwr_dot_proto_dot_appio__pb2.PushAppOutputsRequest.SerializeToString,
+            flwr_dot_proto_dot_appio__pb2.PushAppOutputsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
