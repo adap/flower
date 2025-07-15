@@ -30,8 +30,8 @@ from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.inflatable import (
     get_all_nested_objects,
-    iterate_object_tree,
     get_object_tree,
+    iterate_object_tree,
     no_object_id_recompute,
 )
 from flwr.common.inflatable_grpc_utils import (

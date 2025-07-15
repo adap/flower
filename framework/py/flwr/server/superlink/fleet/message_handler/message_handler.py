@@ -19,7 +19,7 @@ from typing import Optional
 
 from flwr.common import Message, log
 from flwr.common.constant import Status
-from flwr.common.inflatable import UnexpectedObjectContentError, iterate_object_tree
+from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.serde import (
     fab_to_proto,
     message_from_proto,
@@ -113,25 +113,20 @@ def pull_messages(
 
     # Convert to Messages
     msg_proto = []
-    objects_to_pull: dict[str, ObjectIDs] = {}
+    trees = []
     for msg in message_list:
         try:
             msg_proto.append(message_to_proto(msg))
 
             msg_object_id = msg.metadata.message_id
             obj_tree = store.get_object_tree(msg_object_id)
-            descendants = [node.object_id for node in iterate_object_tree(obj_tree)]
-            descendants = descendants[:-1]  # Exclude the message itself
-            # Add mapping of message object ID to its descendants
-            objects_to_pull[msg_object_id] = ObjectIDs(object_ids=descendants)
+            trees.append(obj_tree)
         except NoObjectInStoreError as e:
             log(ERROR, e.message)
             # Delete message ins from state
             state.delete_messages(message_ins_ids={msg_object_id})
 
-    return PullMessagesResponse(
-        messages_list=msg_proto, objects_to_pull=objects_to_pull
-    )
+    return PullMessagesResponse(messages_list=msg_proto, message_object_trees=trees)
 
 
 def push_messages(
