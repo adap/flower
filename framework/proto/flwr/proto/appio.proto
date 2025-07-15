@@ -28,6 +28,7 @@ message PushAppMessagesRequest {
   repeated Message messages_list = 1;
   uint64 run_id = 2;
   repeated ObjectTree message_object_trees = 3;
+  string token = 4;
 }
 message PushAppMessagesResponse {
   repeated string message_ids = 1;
@@ -38,6 +39,7 @@ message PushAppMessagesResponse {
 message PullAppMessagesRequest {
   repeated string message_ids = 1;
   uint64 run_id = 2;
+  string token = 3;
 }
 message PullAppMessagesResponse {
   repeated Message messages_list = 1;
