@@ -19,7 +19,9 @@ import os
 import random
 import threading
 import time
-from typing import Callable, Optional
+from typing import Callable, Optional, TypeVar, cast
+
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 from .constant import (
     HEAD_BODY_DIVIDER,
@@ -34,6 +36,7 @@ from .constant import (
 from .inflatable import (
     InflatableObject,
     UnexpectedObjectContentError,
+    iterate_object_tree,
     _get_object_head,
     get_object_head_values_from_object_content,
     get_object_id,
@@ -53,6 +56,8 @@ inflatable_class_registry: dict[str, type[InflatableObject]] = {
     MetricRecord.__qualname__: MetricRecord,
     RecordDict.__qualname__: RecordDict,
 }
+
+T = TypeVar("T", bound=InflatableObject)
 
 
 class ObjectUnavailableError(Exception):
@@ -348,3 +353,75 @@ def validate_object_content(content: bytes) -> None:
         raise UnexpectedObjectContentError(
             object_id=get_object_id(content), reason=str(err)
         ) from err
+
+
+def get_object_from_tree(
+    object_tree: ObjectTree,
+    pull_object_fn: Callable[[str], bytes],
+    confirm_object_received_fn: Callable[[str], None],
+    *,
+    return_type: type[T] = InflatableObject,
+    max_concurrent_pulls: int = MAX_CONCURRENT_PULLS,
+    max_time: Optional[float] = PULL_MAX_TIME,
+    max_tries_per_object: Optional[int] = PULL_MAX_TRIES_PER_OBJECT,
+    initial_backoff: float = PULL_INITIAL_BACKOFF,
+    backoff_cap: float = PULL_BACKOFF_CAP,
+) -> T:
+    """Get an object from the object tree.
+
+    Parameters
+    ----------
+    object_tree : ObjectTree
+        The object tree containing the object ID and its children.
+    pull_object_fn : Callable[[str], bytes]
+        A function that takes an object ID and returns the object content as bytes.
+    confirm_object_received_fn : Callable[[str], None]
+        A function to confirm that the object has been received.
+    return_type : type[T] (default: InflatableObject)
+        The type of the object to return. Must be a subclass of `InflatableObject`.
+    max_concurrent_pulls : int (default: MAX_CONCURRENT_PULLS)
+        The maximum number of concurrent pulls to perform.
+    max_time : Optional[float] (default: PULL_MAX_TIME)
+        The maximum time to wait for all pulls to complete. If `None`, waits
+        indefinitely.
+    max_tries_per_object : Optional[int] (default: PULL_MAX_TRIES_PER_OBJECT)
+        The maximum number of attempts to pull each object. If `None`, pulls
+        indefinitely until the object is available.
+    initial_backoff : float (default: PULL_INITIAL_BACKOFF)
+        The initial backoff time in seconds for retrying pulls after an
+        `ObjectUnavailableError`.
+    backoff_cap : float (default: PULL_BACKOFF_CAP)
+        The maximum backoff time in seconds. Backoff times will not exceed this value.
+
+    Returns
+    -------
+    T
+        An instance of the specified return type containing the inflated object.
+    """
+    # Pull the main object and all its descendants
+    pulled_object_contents = pull_objects(
+        [tree.object_id for tree in iterate_object_tree(object_tree)],
+        pull_object_fn,
+        max_concurrent_pulls=max_concurrent_pulls,
+        max_time=max_time,
+        max_tries_per_object=max_tries_per_object,
+        initial_backoff=initial_backoff,
+        backoff_cap=backoff_cap,
+    )
+
+    # Confirm that all objects were pulled
+    confirm_object_received_fn(object_tree.object_id)
+
+    # Inflate the main object
+    inflated_object = inflate_object_from_contents(
+        object_tree.object_id, pulled_object_contents, keep_object_contents=False
+    )
+    
+    # Check if the inflated object is of the expected type
+    if not isinstance(inflated_object, return_type):
+        raise TypeError(
+            f"Expected object of type {return_type.__name__}, "
+            f"but got {type(inflated_object).__name__}."
+        )
+
+    return cast(T, inflated_object)
