@@ -19,7 +19,7 @@ from typing import Optional
 
 from flwr.common import Message, log
 from flwr.common.constant import Status
-from flwr.common.inflatable import UnexpectedObjectContentError, iterate_object_tree
+from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.serde import (
     fab_to_proto,
     message_from_proto,
@@ -46,7 +46,6 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
     ConfirmMessageReceivedResponse,
-    ObjectIDs,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -116,10 +115,12 @@ def pull_messages(
     trees = []
     for msg in message_list:
         try:
-            msg_proto.append(message_to_proto(msg))
-
+            # Retrieve Message object tree from ObjectStore
             msg_object_id = msg.metadata.message_id
             obj_tree = store.get_object_tree(msg_object_id)
+
+            # Add Message and its object tree to the response
+            msg_proto.append(message_to_proto(msg))
             trees.append(obj_tree)
         except NoObjectInStoreError as e:
             log(ERROR, e.message)

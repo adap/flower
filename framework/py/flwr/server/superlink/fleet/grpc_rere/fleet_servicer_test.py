@@ -31,8 +31,8 @@ from flwr.common.inflatable import (
     get_all_nested_objects,
     get_descendant_object_ids,
     get_object_id,
-    iterate_object_tree,
     get_object_tree,
+    iterate_object_tree,
 )
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
@@ -282,16 +282,17 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, PullMessagesResponse)
         assert call.code() == grpc.StatusCode.OK
 
-        object_tree = response.message_object_trees[0]
-        object_ids_in_response = [
-            tree.object_id for tree in iterate_object_tree(object_tree)
-        ]
         if register_in_store:
+            object_tree = response.message_object_trees[0]
+            object_ids_in_response = [
+                tree.object_id for tree in iterate_object_tree(object_tree)
+            ]
             # Assert expected object_ids
             assert set(obj_ids_registered) == set(object_ids_in_response)
             assert message_ins.object_id == object_tree.object_id
         else:
-            assert len(object_ids_in_response) == 0
+            assert len(response.messages_list) == 0
+            assert len(response.message_object_trees) == 0
             # Ins message was deleted
             assert self.state.num_message_ins() == 0
 
