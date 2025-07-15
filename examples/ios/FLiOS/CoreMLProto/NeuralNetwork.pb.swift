@@ -4308,7 +4308,7 @@ struct CoreML_Specification_ConvolutionLayerParams {
 ///   The output blob's shape is ``[batch, channelsOut, depthOut, heightOut, widthOut]``.
 ///
 /// Type of padding can be ``custom``, ``valid``, or ``same``. Padded values are all zeros.
-/// Output spatial dimensions depend on the the type of padding. For details, refer to the
+/// Output spatial dimensions depend on the type of padding. For details, refer to the
 /// descriptions of the ``PaddingType`` field of this ``Convolution3DLayerParams`` message.
 ///
 /// Example
@@ -5219,7 +5219,7 @@ struct CoreML_Specification_Pooling3DLayerParams {
   /// SAME padding adds enough padding to each dimension such that the output
   /// has the same spatial dimensions as the input. Padding is added evenly to both
   /// sides of each dimension unless the total padding to add is odd, in which case the extra padding
-  /// is added to the back/bottom/right side of the respective dimension.  For example, if the the
+  /// is added to the back/bottom/right side of the respective dimension.  For example, if the
   /// total horizontal padding is 3, then there will be 1 padding on the left, and 2 padding on the right.
   enum Pooling3DPaddingType: SwiftProtobuf.Enum {
     typealias RawValue = Int
@@ -9493,7 +9493,7 @@ struct CoreML_Specification_ConstantPaddingLayerParams {
 
   ///*
   /// Length of this repeated field must be twice the rank of the first input.
-  /// 2*i-th and (2*i+1)-th values represent the amount of padding to be applied to the the i-th input
+  /// 2*i-th and (2*i+1)-th values represent the amount of padding to be applied to the i-th input
   /// dimension, "before" and "after" the input values, respectively.
   var padAmounts: [UInt64] = []
 

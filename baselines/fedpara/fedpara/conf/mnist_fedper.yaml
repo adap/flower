@@ -1,0 +1,45 @@
+---
+seed: 17
+
+num_clients: 100
+num_rounds: 100
+clients_per_round: 10
+num_epochs: 1
+batch_size: 10
+state_path: ./client_states/
+server_device: cuda
+client_device: cuda
+
+algorithm: fedper
+# fedavg in future
+
+client_resources:
+  num_cpus: 2
+  num_gpus: 0.1
+
+dataset_config:
+  name: MNIST
+  num_classes: 10
+  shard_size: 300
+
+  data_seed: ${seed}
+  
+model:
+  _target_: fedpara.models.FC
+  num_classes: ${dataset_config.num_classes}
+  hidden_size: 200
+
+hyperparams:
+  eta_l: 0.05
+  learning_decay: 0
+
+strategy:
+  _target_: flwr.server.strategy.FedAvg
+  fraction_fit: 0.00001
+  fraction_evaluate: 0.00001
+  min_evaluate_clients: ${clients_per_round}
+  min_fit_clients: ${clients_per_round}
+  min_available_clients: ${clients_per_round}
+
+
+exp_id: ${algorithm}_${dataset_config.name}

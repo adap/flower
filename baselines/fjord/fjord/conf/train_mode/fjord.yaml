@@ -1,0 +1,6 @@
+# @package _global_
+---
+defaults:
+  - ../common@
+
+knowledge_distillation: false

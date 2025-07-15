@@ -1,0 +1,17 @@
+# ignore __pycache__ directories
+__pycache__/
+
+# ignore .pyc files
+*.pyc
+
+# ignore .vscode directory
+.vscode/
+
+# ignore .npz files
+*.npz
+
+# ignore .csv files
+*.csv
+
+# ignore docker-compose.yaml file
+docker-compose.yml

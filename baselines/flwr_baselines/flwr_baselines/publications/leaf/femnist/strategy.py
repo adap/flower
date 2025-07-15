@@ -1,6 +1,5 @@
 """FedAvg with the same clients used for both training and evaluation."""
 
-
 from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import (

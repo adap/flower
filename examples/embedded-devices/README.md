@@ -1,142 +1,150 @@
-# Federated Learning on Embedded Devices with Flower
+---
+tags: [basic, vision, embedded]
+dataset: [Fashion-MNIST]
+framework: [torch]
+---
 
-This demo will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use NVIDIA Jetson devices and Raspberry Pi as Flower clients. This demo uses Flower with PyTorch. The source code used is mostly borrowed from the [example that Flower provides for CIFAR-10](https://github.com/adap/flower/tree/main/src/py/flwr_example/pytorch_cifar).
+# Federated AI with Embedded Devices using Flower
+
+This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use Raspberry Pi as Flower clients, or better said, `SuperNodes`.  The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) example, but you could adjust it to follow [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) if you prefere using TensorFlow. The main difference compare to those examples is that here you'll learn how to use Flower's Deployment Engine to run FL across multiple embedded devices.
+
+![Different was of running Flower FL on embedded devices](_static/diagram.png)
 
 ## Getting things ready
 
-This is a list of components that you'll need:
+> \[!NOTE\]
+> This example is designed for beginners that know a bit about Flower and/or ML but that are less familiar with embedded devices. If you already have a couple of devices up and running, clone this example and start the Flower clients after launching the Flower server.
 
-- For server: A machine running Linux/macOS.
-- For clients: either a Rapsberry Pi 3 B+ (RPi 4 would work too) or a Jetson Xavier-NX (or any other recent NVIDIA-Jetson device).
-- A 32GB uSD card and ideally UHS-1 or better. (not needed if you plan to use a Jetson TX2 instead)
-- Software to flash the images to a uSD card (e.g. [Etcher](https://www.balena.io/etcher/))
+This tutorial allows for a variety of settings (some shown in the diagrams above). As long as you have access to one embedded device, you can follow along. This is a list of components that you'll need:
 
-What follows is a step-by-step guide on how to setup your client/s and the server. In order to minimize the amount of setup and potential issues that might arise due to the hardware/software heterogenity between clients we'll be running the clients inside a Docker. We provide two docker images: one built for Jetson devices and make use of their GPU; and the other for CPU-only training suitable for Raspberry Pi (but would also work on Jetson devices). The following diagram illustrates the setup for this demo:
+- For Flower server: A machine running Linux/macOS (e.g. your laptop). You can run the server on an embedded device too!
+- For Flower clients (one or more): Raspberry Pi 5 or 4 (or Zero 2), or anything similar to these.
+- A uSD card with 32GB or more.
+- Software to flash the images to a uSD card:
+  - For Raspberry Pi we recommend the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
+  - For other devices [balenaEtcher](https://www.balena.io/etcher/) it's a great option.
 
-<!-- jetson xavier-nx image borrowed from: https://developer.nvidia.com/embedded/jetson-xavier-nx-devkit -->
+What follows is a step-by-step guide on how to setup your client/s and the server.
 
-![alt text](_static/diagram.png)
+## Clone this example
 
-## Clone this repo
+> \[!NOTE\]
+> Cloning the example and installing the project is only needed for the machine that's going to start the run. The embedded devices would typically run a Flower `SuperNode` for which only `flwr` and relevant libraries needed to run the `ClientApp` (more on this later) are needed.
 
-Start with cloning the Flower repo and checking out the example. We have prepared a single line which you can copy into your shell:
+Start with cloning this example on your laptop or desktop machine. We have prepared a single line which you can copy and execute:
 
-```bash
-$ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/embedded-devices . && rm -rf flower && cd embedded-devices
+```shell
+git clone --depth=1 https://github.com/adap/flower.git \
+          && mv flower/examples/embedded-devices . \
+          && rm -rf flower && cd embedded-devices
 ```
 
-## Setting up the server
+This will create a new directory called `embedded-devices` with the following structure:
 
-The only requirement for the server is to have flower installed. You can do so by running `pip install flwr` inside your virtualenv or conda environment.
-
-## Setting up a Jetson Xavier-NX
-
-> These steps have been validated for a Jetson Xavier-NX Dev Kit. An identical setup is needed for a Jetson Nano and Jetson TX2 once you get ssh access to them (i.e. jumping straight to point `4` below). For instructions on how to setup these devices please refer to the "getting started guides" for [Jetson Nano](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#intro) and [Jetson TX2](https://developer.nvidia.com/embedded/dlc/l4t-28-2-jetson-developer-kit-user-guide-ga).
-
-1. Download the Ubuntu 18.04 image from [NVIDIA-embedded](https://developer.nvidia.com/embedded/downloads), note that you'll need a NVIDIA developer account. This image comes with Docker pre-installed as well as PyTorch+Torchvision compiled with GPU support.
-
-2. Extract the image (~14GB) and flash it onto the uSD card using Etcher (or equivalent).
-
-3. Follow [the instructions](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit) to setup the device.
-
-4. Installing Docker: Docker comes pre-installed with the Ubuntu image provided by NVIDIA. But for convinience we will create a new user group and add our user to it (with the idea of not having to use `sudo` for every command involving docker (e.g. `docker run`, `docker ps`, etc)). More details about what this entails can be found in the [Docker documentation](https://docs.docker.com/engine/install/linux-postinstall/). You can achieve this by doing:
-
-   ```bash
-   $ sudo usermod -aG docker $USER
-   # apply changes to current shell (or logout/reboot)
-   $ newgrp docker
-   ```
-
-5. The minimal installation to run this example only requires an additional package, `git`, in order to clone this repo. Install `git` by:
-
-   ```bash
-   $ sudo apt-get update && sudo apt-get install git -y
-   ```
-
-6. (optional) additional packages:
-   <img align="right" style="padding-top: 40px; padding-left: 15px" width="575" height="380" src="_static/tmux_jtop_view.gif">
-
-   - [jtop](https://github.com/rbonghi/jetson_stats),  to monitor CPU/GPU utilization, power consumption and, many more.
-
-     ```bash
-     # First we need to install pip3
-     $ sudo apt-get install python3-pip -y
-     # updated pip3
-     $ sudo pip3 install -U pip
-     # finally, install jtop
-     $ sudo -H pip3 install -U jetson-stats
-     ```
-
-   - [TMUX](https://github.com/tmux/tmux/wiki), a terminal multiplexer.
-
-     ```bash
-     # install tmux
-     $ sudo apt-get install tmux -y
-     # add mouse support
-     $ echo set -g mouse on > ~/.tmux.conf
-     ```
-
-7. Power modes: The Jetson devices can operate at different power modes, each making use of more or less CPU cores clocked at different freqencies. The right power mode might very much depend on the application and scenario. When power consumption is not a limiting factor, we could use the highest 15W mode using all 6 CPU cores. On the other hand, if the devices are battery-powered we might want to make use of a low power mode using 10W and 2 CPU cores. All the details regarding the different power modes of a Jetson Xavier-NX can be found [here](https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%2520Linux%2520Driver%2520Package%2520Development%2520Guide%2Fpower_management_jetson_xavier.html%23wwpID0E0NO0HA). For this demo we'll be setting the device to the high performance mode:
-
-   ```bash
-   $ sudo /usr/sbin/nvpmodel -m 2 # 15W with 6cpus @ 1.4GHz
-   ```
-
-## Setting up a Raspberry Pi (3B+ or 4B)
-
-1. Install Ubuntu server 20.04 LTS 64-bit for Rapsberry Pi. You can do this by using one of the images provided [by Ubuntu](https://ubuntu.com/download/raspberry-pi) and then use Etcher. Alternativelly, astep-by-step installation guide, showing how to download and flash the image onto a uSD card and, go throught the first boot process, can be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#1-overview). Please note that the first time you boot your RPi it will automatically update the system (which will lock `sudo` and prevent running the commands below for a few minutes)
-
-2. Install docker (+ post-installation steps as in [Docker Docs](https://docs.docker.com/engine/install/linux-postinstall/)):
-
-   ```bash
-   # make sure your OS is up-to-date
-   $ sudo apt-get update
-
-   # get the installation script
-   $ curl -fsSL https://get.docker.com -o get-docker.sh
-
-   # install docker
-   $ sudo sh get-docker.sh
-
-   # add your user to the docker group
-   $ sudo usermod -aG docker $USER
-
-   # apply changes to current shell (or logout/reboot)
-   $ newgrp docker
-   ```
-
-. (optional) additional packages: you could install `TMUX` (see point `6` above) and `htop` as a replacement for `jtop` (which is only available for Jetson devices). Htop can be installed via: `sudo apt-get install htop -y`.
-
-## Running FL training with Flower
-
-For this demo we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. To keep the client side simple, the datasets will be downloaded when building the docker image. This will happen as the first stage in both `run_pi.sh` and `run_jetson.sh`.
-
-> If you'd like to make use of your own dataset you could [mount it](https://docs.docker.com/storage/volumes/) to the client docker container when calling `docker run`. We leave this an other more advanced topics for a future example.
-
-### Server
-
-Launch the server and define the model you'd like to train. The current code (see `utils.py`) provides two models for CIFAR-10: a small CNN (more suitable for Raspberry Pi) and, a ResNet18, which will run well on the gpu. Each model can be specified using the `--model` flag with options `Net` or `ResNet18`. Launch a FL training setup with one client and doing three rounds as:
-
-```bash
-# launch your server. It will be waiting until one client connects
-$ python server.py --server_address <YOUR_SERVER_IP:PORT> --rounds 3 --min_num_clients 1 --min_sample_size 1 --model ResNet18
+```shell
+embedded-devices
+├── embeddedexample
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-### Clients
-
-Asuming you have cloned this repo onto the device/s, then execute the appropiate script to run the docker image, connect with the server and proceed with the training. Note that you can use both a Jetson and a RPi simultaneously, just make sure you modify the script above when launching the server so it waits until 2 clients are online.
-
-#### For Jetson
+Install the dependencies defined in `pyproject.toml` as well as the `embeddedexample` package.
 
 ```bash
-$ ./run_jetson.sh --server_address=<SERVER_ADDRESS> --cid=0 --model=ResNet18
+pip install -e .
 ```
 
-#### For Raspberry Pi
+## Setting up a Raspberry Pi
 
-Depending on the model of RapsberryPi you have, running the smaller `Net` model might be the only option due to the higher RAM budget needed for ResNet18. It should be fine for a RaspberryPi 4 with 4GB of RAM to run a RestNet18 (with an appropiate batch size) but bear in mind that each batch might take several second to complete. The following would run the smaller `Net` model:
+> \[!TIP\]
+> This steps walk you through the process of setting up a Rapsberry Pi. If you have one already running and you have a Python environment with `flwr` installed already, you can skip this section entirely. Taking a quick look at the [Embedded Devices Setup](device_setup.md) page might be useful.
 
-```bash
-# note that pulling the base image, extracting the content might take a while (specially on a RPi 3) the first time you run this.
-$ ./run_pi.sh --server_address=<SERVER_ADDRESS> --cid=0 --model=Net
+![alt text](_static/rpi_imager.png)
+
+1. **Installing Ubuntu server on your Raspberry Pi** is easy with the [Raspberry Pi Imager](https://www.raspberrypi.com/software/). Before starting ensure you have a uSD card attached to your PC/Laptop and that it has sufficient space (ideally larger than 16GB). Then:
+
+   - Click on `CHOOSE OS` > `Raspberry Pi OS (other)` > `Raspberry Pi OS Lite (64-bit)`. Other versions of `Raspberry Pi OS` or even `Ubuntu Server` would likely work but try to use a `64-bit` one.
+   - Select the uSD you want to flash the OS onto. (This will be the uSD you insert in your Raspberry Pi)
+   - After selecting your storage, click on `Next`. Then, you'll be asked if you want to edit the settings of the image you are about to flash. This allows you to setup a custom username and password as well as indicate to which WiFi network your device should connect to. In the screenshot you can see some dummy values. This tutorial doesn't make any assumptions on these values, set them according to your needs.
+   - Finally, complete the remaining steps to start flashing the chosen OS onto the uSD card.
+
+2. **Preparations for your Flower experiments**
+
+   - SSH into your Rapsberry Pi.
+   - Follow the steps outlined in [Embedded Devices Setup](device_setup.md) to set it up for develpment. The objetive of this step is to have your Pi ready to join later as a Flower `SuperNode` to an existing federation.
+
+3. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
+
+## Embedded Federated AI
+
+> \[!TIP\]
+> Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to learn more about Flower's Deployment Engine, how setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) works. If you are already familiar with how the Deployment Engine works, you may want to learn how to run this same example using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.
+
+For this demo, we'll be using [Fashion-MNIST](https://huggingface.co/datasets/zalando-datasets/fashion_mnist), a popular dataset for image classification comprised of 10 classes (e.g. boot, dress, trouser) and a total of 70K `28x28` greyscale images. The training set contains 60K images.
+
+> \[!TIP\]
+> Refer to the [Flower Architecture](https://flower.ai/docs/framework/explanation-flower-architecture.html) page for an overview of the different components involved in a federation.
+
+### Ensure your embedded devices have some data
+
+Unless your devices already have some images that could be used to train a small CNN, we need to send a partition of the `Fashion-MNIST` dataset to each device that will run as a `SuperNode`. You can make use of the `generate_dataset.py` script to partition the `Fashion-MNIST` into N disjoint partitions that can be then given to each device in the federation.
+
+```shell
+# Partition the Fashion-MNIST dataset into two partitions
+python generate_dataset.py --num-supernodes=2
+```
+
+The above command will create two subdirectories in `./datasets`, one for each partition. Next, copy those dataset over to your devices. You can use `scp` for this. Like shown below. Repeat for all your devices.
+
+```shell
+# Copy one partition to a device
+scp -r datasets/fashionmnist_part_1 <user>@<device-ip>:/path/to/home
+```
+
+### Launching the Flower `SuperLink`
+
+On your development machine, launch the `SuperLink`. You will connnect Flower `SuperNodes` to it in the next step.
+
+> \[!NOTE\]
+> If you decide to run the `SuperLink` in a different machine, you'll need to adjust the `address` under the `[tool.flwr.federations.embedded-federation]` tag in the `pyproject.toml`.
+
+```shell
+flower-superlink --insecure
+```
+
+### Connecting Flower `SuperNodes`
+
+With the `SuperLink` up and running, now let's launch a `SuperNode` on each embedded device. In order to do this ensure you know what the IP of the machine running the `SuperLink` is and that you have copied the data to the device. Note with `--node-config` we set a key named `dataset-path`. That's the one expected by the `client_fn()` in [client_app.py](embeddedexample/client_app.py). This file will be automatically delivered to the `SuperNode` so it knows how to execute the `ClientApp` logic.
+
+> \[!NOTE\]
+> You don't need to clone this example to your embedded devices running as Flower `SuperNodes`. The code they will execute (in [embeddedexamples/client_app.py](embeddedexamples/client_app.py)) will automatically be delivered.
+
+Ensure the Python environment you created earlier when setting up your device has all dependencies installed. For this example you'll need the following:
+
+```shell
+# After activating your environment
+pip install -U flwr
+pip install torch torchvision datasets
+```
+
+Now, launch your `SuperNode` pointing it to the dataset you `scp`-ed earlier:
+
+```shell
+# Repeat for each embedded device (adjust SuperLink IP and dataset-path)
+flower-supernode --insecure --superlink="SUPERLINK_IP:9092" \
+                 --node-config="dataset-path='path/to/fashionmnist_part_1'"
+```
+
+Repeat for each embedded device that you want to connect to the `SuperLink`.
+
+### Run the Flower App
+
+With both the long-running server (`SuperLink`) and two `SuperNodes` up and running, we can now start run. Note that the command below points to a federation named `embedded-federation`. Its entry point is defined in the `pyproject.toml`. Run the following from your development machine where you have cloned this example to, e.g. your laptop.
+
+```shell
+flwr run . embedded-federation
 ```

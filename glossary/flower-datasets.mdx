@@ -1,0 +1,27 @@
+---
+title: "Flower Datasets"
+description: "Flower Datasets is a library that enables the creation of datasets for federated learning by partitioning centralized datasets to exhibit heterogeneity or using naturally partitioned datasets."
+date: "2024-05-24"
+author:
+  name: "Adam Narożniak"
+  position: "ML Engineer at Flower Labs"
+  website: "https://discuss.flower.ai/u/adam.narozniak/summary"
+related:
+    - text: "Flower Datasets documentation"
+      link: "https://flower.ai/docs/datasets/"
+    - text: "Flower Datasets GitHub page"
+      link: "https://github.com/adap/flower/tree/main/datasets"
+---
+
+Flower Datasets is a library that enables the creation of datasets for federated learning/analytics/evaluation by partitioning centralized datasets to exhibit heterogeneity or using naturally partitioned datasets. It was created by the Flower Labs team, which also created Flower - A Friendly Federated AI Framework.
+
+The key features include:
+* downloading datasets (HuggingFace `datasets` are used under the hood),
+* partitioning (simulate different levels of heterogeneity by using one of the implemented partitioning schemes or create your own),
+* creating centralized datasets (easily utilize centralized versions of the datasets),
+* reproducibility (repeat the experiments with the same results),
+* visualization (display the created partitions),
+* ML agnostic (easy integration with all popular ML frameworks).
+
+
+It is a supplementary library to Flower, with which it integrates easily.

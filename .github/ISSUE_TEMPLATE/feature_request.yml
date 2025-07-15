@@ -1,22 +1,39 @@
-name: Feature request
-description: Suggest a new baseline, strategy, example, ...
-labels: ['feature request']
+name: Request a Feature
+description: Submit a new feature, documentation improvement, or baseline idea
+labels: []
+assignees: []
+type: Feature
 
 body:
-- type: markdown
-  attributes:
-    value: >
-      #### If you want to propose a new feature, please check the PRs if someone already works on this feature.
-- type: textarea
-  attributes:
-    label: Describe the type of feature and its functionality.
-  validations:
-    required: true
-- type: textarea
-  attributes:
-    label: Describe step by step what files and adjustments are you planning to include.
-  validations:
-    required: true
-- type: textarea
-  attributes:
-    label: Is there something else you want to add?
+  - type: dropdown
+    id: type  
+    attributes:
+      label: Type
+      description: What kind of request is this?
+      options:
+        - Feature
+        - Documentation Improvement
+        - New Baseline
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Description
+      description: Please describe the feature, improvement, or baseline idea.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Planned Implementation
+      description: Describe step-by-step what files or changes you'd plan to make.
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Anything else we should know?
+    validations:
+      required: false

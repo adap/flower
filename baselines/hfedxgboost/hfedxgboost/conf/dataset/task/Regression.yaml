@@ -1,0 +1,14 @@
+task_type: "REG"
+
+metric:
+  name: "mse"
+  fn:
+    _target_: torchmetrics.MeanSquaredError
+
+criterion:
+  _target_: torch.nn.MSELoss
+
+
+xgb:
+  _target_:  xgboost.XGBRegressor
+  objective: "reg:squarederror"

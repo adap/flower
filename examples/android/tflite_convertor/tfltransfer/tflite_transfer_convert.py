@@ -17,17 +17,12 @@ Converts a pair of TF models to a TFLite transfer learning model.
 """
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import argparse
 
 # pylint: disable=g-bad-import-order
-from tfltransfer import bases
-from tfltransfer import heads
-from tfltransfer import optimizers
-from tfltransfer import tflite_transfer_converter
+from tfltransfer import bases, heads, optimizers, tflite_transfer_converter
 
 # pylint: enable=g-bad-import-order
 

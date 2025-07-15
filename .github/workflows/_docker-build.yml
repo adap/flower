@@ -1,0 +1,162 @@
+name: Reusable docker image build workflow
+
+on:
+  workflow_call:
+    inputs:
+      namespace-repository:
+        description: "The namespace and repository in the following format `namespace/repository` e.g. (flwr/base)."
+        required: true
+        type: string
+      file-dir:
+        description: "Path of the directory that contains the Dockerfile."
+        required: true
+        type: string
+      build-args:
+        description: "List of build-time variables."
+        required: false
+        type: string
+      tags:
+        description: "List of tags."
+        required: true
+        type: string
+    secrets:
+      dockerhub-user:
+        required: true
+      dockerhub-token:
+        required: true
+    outputs:
+      metadata:
+        description: "Metadata of the docker image."
+        value: ${{ jobs.build-manifest.outputs.metadata }}
+
+permissions:
+  contents: read
+
+# based on https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
+jobs:
+  build:
+    name: Build image
+    runs-on: ${{ matrix.platform.runner-os }}
+    timeout-minutes: 180
+    outputs:
+      build-id: ${{ steps.build-id.outputs.id }}
+    strategy:
+      fail-fast: true
+      matrix:
+        platform: [
+            { name: "amd64", docker: "linux/amd64", runner-os: "ubuntu-22.04" },
+            { name: "arm64", docker: "linux/arm64", runner-os: "ubuntu-4-core-arm64" },
+          ]
+    steps:
+      - name: Create build id
+        id: build-id
+        shell: python
+        run: |
+          import hashlib
+          import os
+
+          hash = hashlib.sha256('''${{ inputs.namespace-repository }}
+          ${{ inputs.file-dir }}
+          ${{ inputs.build-args }}'''.encode())
+          # Adds two spaces to the line breaks to ensure proper indentation
+          # when passing the multi-line string to the wretry.action.
+          # Without it, the multi-line string is passed like this:
+          #
+          # build-args: |
+          #   ARG1=
+          # ARG2=
+          # ARG3=
+          #
+          # This causes the Docker action to interpret ARG2 and ARG3 as keys instead
+          # of values ​​of the multi-line string.
+          build_args = '''${{ inputs.build-args }}'''.replace("\n", "\n  ")
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+              print(f"id={hash.hexdigest()}", file=fh)
+              print("build-args<<EOF", file=fh)
+              print(build_args, file=fh)
+              print("EOF", file=fh)
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        with:
+          images: ${{ inputs.namespace-repository }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          username: ${{ secrets.dockerhub-user }}
+          password: ${{ secrets.dockerhub-token }}
+
+      - name: Build and push
+        uses: Wandalen/wretry.action@e68c23e6309f2871ca8ae4763e7629b9c258e1ea # v3.8.0
+        id: build
+        with:
+          action: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+          attempt_limit: 60 # 60 attempts * (9 secs delay + 1 sec retry) = ~10 mins
+          attempt_delay: 9000 # 9 secs
+          with: |
+            pull: true
+            sbom: true
+            platforms: ${{ matrix.platform.docker }}
+            context: "{{defaultContext}}:${{ inputs.file-dir }}"
+            outputs: type=image,name=${{ inputs.namespace-repository }},push-by-digest=true,name-canonical=true,push=true
+            build-args: |
+              ${{ steps.build-id.outputs.build-args }}
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ fromJSON(steps.build.outputs.outputs).digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: digests-${{ steps.build-id.outputs.id }}-${{ matrix.platform.name }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  build-manifest:
+    name: Build and push docker manifest for all platforms
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    needs: build
+    outputs:
+      metadata: ${{ steps.meta.outputs.json }}
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          pattern: digests-${{ needs.build.outputs.build-id }}-*
+          path: /tmp/digests
+          merge-multiple: true
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        with:
+          images: ${{ inputs.namespace-repository }}
+          tags: ${{ inputs.tags }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          username: ${{ secrets.dockerhub-user }}
+          password: ${{ secrets.dockerhub-token }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+              $(printf '${{ inputs.namespace-repository }}@sha256:%s ' *)
+      - name: Inspect image
+        run: docker buildx imagetools inspect ${{ inputs.namespace-repository }}:${{ steps.meta.outputs.version }}

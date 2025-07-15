@@ -1,0 +1,55 @@
+---
+defaults: 
+  - dataset: cpusmall
+  - clients: cpusmall_5_clients
+  - wandb: default
+
+centralized: False
+use_wandb: False
+show_each_client_performance_on_its_local_data: False
+val_ratio: 0.0
+batch_size: "whole"
+n_estimators_client: ${clients.n_estimators_client}
+task_type: ${dataset.task.task_type}
+client_num: ${clients.client_num}
+
+XGBoost:
+  _target_:  ${dataset.task.xgb._target_}
+  objective: ${dataset.task.xgb.objective}
+  learning_rate: .1
+  max_depth: ${clients.xgb.max_depth}
+  n_estimators: ${clients.n_estimators_client}
+  subsample: 0.8
+  colsample_bylevel: 1
+  colsample_bynode: 1
+  colsample_bytree: 1
+  alpha: 5
+  gamma: 5
+  num_parallel_tree: 1
+  min_child_weight: 1
+
+server:
+    max_workers: None
+    device: "cpu"
+
+client_resources:
+    num_cpus: 1
+    num_gpus: 0.0
+
+strategy:
+  _target_: hfedxgboost.strategy.FedXgbNnAvg
+  _recursive_: true #everything to be instantiated
+  fraction_fit: 1.0 
+  fraction_evaluate: 0.0 # no clients will be sampled for federated evaluation (we will still perform global evaluation)
+  min_fit_clients: 1
+  min_evaluate_clients: 1
+  min_available_clients: ${client_num}
+  accept_failures: False
+
+run_experiment:
+  num_rounds: ${clients.num_rounds}
+  batch_size: 32
+  fraction_fit: 1.0
+  min_fit_clients: 1
+  fit_config:
+    num_iterations: ${clients.num_iterations}

@@ -1,0 +1,13 @@
+num_clients: 5
+num_rounds: 10000
+save_path: !!null
+local_address: !!null
+
+compressor:
+  _target_: dasha.compressors.RandKCompressor
+  number_of_coordinates: 1
+
+defaults:
+  - dataset: libsvm
+  - method: dasha
+  - model: linear_net_with_non_convex_loss

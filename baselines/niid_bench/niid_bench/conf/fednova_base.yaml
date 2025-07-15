@@ -1,0 +1,61 @@
+---
+# this is the config that will be loaded as default by main.py
+# Please follow the provided structure (this will ensuring all baseline follow
+# a similar configuration structure and hence be easy to customise)
+
+num_clients: 10
+num_epochs: 10
+batch_size: 64
+clients_per_round: 10
+learning_rate: 0.01
+num_rounds: 50
+partitioning: "dirichlet"
+dataset_name: "cifar10"
+dataset_seed: 42
+alpha: 0.5
+labels_per_client: 2 # only used when partitioning is label quantity
+momentum: 0.9
+weight_decay: 0.00001
+
+client_fn:
+  _target_: niid_bench.client_fednova.gen_client_fn
+  _recursive_: False
+  num_epochs: ${num_epochs}
+  learning_rate: ${learning_rate}
+  momentum: ${momentum}
+  weight_decay: ${weight_decay}
+
+dataset:
+  # dataset config
+  name: ${dataset_name}
+  partitioning: ${partitioning}
+  batch_size: ${batch_size} # batch_size = batch_size_ratio * total_local_data_size
+  val_split: 0.0
+  seed: ${dataset_seed}
+  alpha: ${alpha}
+  labels_per_client: ${labels_per_client}
+
+model:
+  # model config
+  _target_: niid_bench.models.CNN
+  input_dim: 400
+  hidden_dims: [120, 84]
+  num_classes: 10
+
+strategy:
+  _target_: niid_bench.strategy.FedNovaStrategy # points to your strategy (either custom or exiting in Flower)
+  # rest of strategy config
+  fraction_fit: 0.00001 # because we want the number of clients to sample on each round to be solely defined by min_fit_clients
+  fraction_evaluate: 0.0
+  min_fit_clients: ${clients_per_round}
+  min_available_clients: ${clients_per_round}
+  min_evaluate_clients: 0
+
+client:
+  # client config
+
+server_device: cpu
+
+client_resources:
+  num_cpus: 4
+  num_gpus: 0.0

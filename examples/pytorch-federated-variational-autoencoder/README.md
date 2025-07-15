@@ -1,73 +1,67 @@
-# Flower Example for Federated Variational Autoencoder using Pytorch
+---
+tags: [basic, vision, fds]
+dataset: [CIFAR-10]
+framework: [torch, torchvision]
+---
 
-This example demonstrates how a variational autoencoder (VAE) can be trained in a federated way using the Flower framework.
+# Federated Variational Autoencoder with PyTorch and Flower
 
-## Project Setup
+This example demonstrates how a variational autoencoder (VAE) can be trained in a federated way using the Flower framework. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the CIFAR-10 dataset.
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+## Set up the project
 
-```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/pytorch_federated_variational_autoencoder . && rm -rf flower && cd pytorch_federated_variational_autoencoder
-```
+### Clone the project
 
-This will create a new directory called `pytorch_federated_variational_autoencoder` containing the following files:
-
-```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- README.md
--- models.py
-```
-
-### Installing Dependencies
-
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
+Start by cloning the example project:
 
 ```shell
-poetry install
-poetry shell
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+              && mv _tmp/examples/pytorch-federated-variational-autoencoder . \
+              && rm -rf _tmp && cd pytorch-federated-variational-autoencoder
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+This will create a new directory called `pytorch-federated-variational-autoencoder` with the following structure:
 
 ```shell
-poetry run python3 -c "import flwr"
+pytorch-federated-variational-autoencoder
+├── README.md
+├── fedvaeexample
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+└── pyproject.toml      # Project metadata like dependencies and configs
 ```
 
-If you don't see any errors you're good to go!
+### Install dependencies and project
 
-#### pip
+Install the dependencies defined in `pyproject.toml` as well as the `fedvaeexample` package.
 
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
+```bash
+pip install -e .
 ```
 
-## Federating the Variational Autoencoder Model
+## Run the Project
 
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
-```shell
-poetry run python3 server.py
+### Run with the Simulation Engine
+
+> \[!NOTE\]
+> Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
+
+```bash
+flwr run .
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminals and run the following command in each:
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
-```shell
-poetry run python3 client.py
+```bash
+flwr run . --run-config num-server-rounds=5
 ```
 
-Alternatively you can run all of it in one shell as follows:
+### Run with the Deployment Engine
 
-```shell
-poetry run python3 server.py &
-poetry run python3 client.py &
-poetry run python3 client.py
-```
+Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
 
-You will see that the federated training of variational autoencoder has started. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
+If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.

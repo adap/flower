@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-version=${1:-3.8.17}
+version=${1:-3.9.20}
 
 # To install pyenv and virtualenv plugin
 function install_pyenv(){
@@ -17,7 +17,7 @@ then
     # To add the config to the right file (depends on the shell used)
     rcfile=$HOME/.$(basename $SHELL)rc
 
-    # Add $PYENV_ROOT environmnet variable
+    # Add $PYENV_ROOT environment variable
     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $rcfile
     # Add pyenv to $PATH
     echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> $rcfile

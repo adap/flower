@@ -1,3 +1,9 @@
+---
+tags: [mobile, vision, sdk]
+dataset: [CIFAR-10]
+framework: [Android, Kotlin, TensorFlowLite]
+---
+
 # Flower Android Client Example with Kotlin and TensorFlow Lite 2022
 
 This example is similar to the Flower Android Example in Java:

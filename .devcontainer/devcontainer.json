@@ -1,11 +1,18 @@
 {
   "dockerFile": "Dockerfile",
-  "postCreateCommand": "poetry install --extras \"simulation\"",
-  "extensions": ["ms-python.python"],
-  "settings": {
-    "files.watcherExclude": {},
-    "search.exclude": {},
-    "terminal.integrated.defaultProfile.linux": "bash"
+  "postCreateCommand": ".devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "files.watcherExclude": {},
+        "search.exclude": {},
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "ms-python.python",
+        "tamasfe.even-better-toml"
+      ]
+    }
   },
   "remoteUser": "flwr-vscode",
   "containerEnv": {

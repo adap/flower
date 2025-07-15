@@ -1,0 +1,40 @@
+
+dataset_name: ambient_context # or speech_commands
+num_clients: 5 # this also fixes min_sample_size (both values are the same always)
+fedstar: true # set false for supervised
+
+defaults:
+  - _self_
+  - L: L3
+
+server:
+  server_address: "localhost:8080"
+  rounds: 100
+  num_clients: ${num_clients}
+  fraction_fit: 0.8
+  gpu_memory: 2048
+  eval_step: 1
+  train_epochs: 1
+  batch_size: 64
+  dataset_name: ${dataset_name}
+  seed: 2021
+  verbose: 1
+
+client:
+  server_address: "localhost:8080"
+  num_clients: ${num_clients}
+  gpu_memory: 1024
+  dataset_name: ${dataset_name}
+  seed: 2021
+  batch_size: 64
+  learning_rate: 0.001
+  l_per: ${L.l_per}
+  u_per: ${L.u_per}
+  fedstar: ${fedstar}
+  class_distribute: false
+  verbose: 0
+
+hydra:
+  sweep:
+    dir: multirun
+    subdir: Table4/${dataset_name}/fedstar_${fedstar}/N_${num_clients}/L_${L}/${now:%Y-%m-%d}/${now:%H-%M-%S}

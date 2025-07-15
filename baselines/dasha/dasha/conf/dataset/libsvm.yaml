@@ -1,0 +1,8 @@
+type: libsvm
+
+path_to_dataset: !!null
+dataset_name: mushrooms
+
+_dataset_urls:
+  mushrooms: 
+    train: https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/mushrooms

@@ -1,0 +1,28 @@
+program: main.py
+method: random
+#metric part is just here for documentation
+#not needed as this is random strategy
+metric:
+  goal: minimize
+  name: server_loss
+parameters:
+  use_wandb: 
+    value: True
+  dataset:
+    value: [cpusmall]
+  clients:
+    value: cpusmall_5_clients
+  clients.n_estimators_client: 
+    values: [10,25,50,100,150,200,250]
+  clients.num_iterations:
+    values: [100,500]
+  clients.xgb.max_depth: 
+    values: [4,5,6,7,8]
+  clients.CNN.lr:
+    min: .00001
+    max: 0.001
+command:
+  - ${env}
+  - python
+  - ${program}
+  - ${args_no_hyphens}

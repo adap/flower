@@ -1,79 +1,71 @@
-# JAX: From Centralized To Federated
+---
+tags: [quickstart, linear regression]
+dataset: [Synthetic]
+framework: [JAX, FLAX]
+---
 
-This example demonstrates how an already existing centralized JAX-based machine learning project can be federated with Flower.
+# Federated Learning with JAX and Flower (Quickstart Example)
 
-This introductory example for Flower uses JAX, but you're not required to be a JAX expert to run the example. The example will help you to understand how Flower can be used to build federated learning use cases based on an existing JAX project.
+This introductory example to Flower uses JAX, but deep knowledge of JAX is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy. This example uses [FLAX](https://flax.readthedocs.io/en/latest/index.html) to define and train a small CNN model. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the MINST dataset.
 
-## Project Setup
+## Set up the project
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+### Clone the project
 
-```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-jax . && rm -rf flower && cd quickstart-jax
-```
-
-This will create a new directory called `quickstart-jax`, containing the following files:
-
-```shell
--- pyproject.toml
--- requirements.txt
--- jax_training.py
--- client.py
--- server.py
--- README.md
-```
-
-### Installing Dependencies
-
-Project dependencies (such as `jax` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
+Start by cloning the example project:
 
 ```shell
-poetry install
-poetry shell
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+        && mv _tmp/examples/quickstart-jax . \
+        && rm -rf _tmp \
+        && cd quickstart-jax
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+This will create a new directory called `quickstart-jax` with the following structure:
 
 ```shell
-poetry run python3 -c "import flwr"
+quickstart-jax
+├── jaxexample
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-If you don't see any errors you're good to go!
+### Install dependencies and project
 
-#### pip
+Install the dependencies defined in `pyproject.toml` as well as the `jaxexample` package.
 
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
+```bash
+pip install -e .
 ```
 
-## Run JAX Federated
+## Run the project
 
-This JAX example is based on the [Linear Regression with JAX](https://coax.readthedocs.io/en/latest/examples/linear_regression/jax.html) tutorial and uses a sklearn dataset (generating a random dataset for a regression pronlem). Feel free to consult the tutorial if you want to get a better understanding of JAX. If you play around with the dataset, please keep in mind that the data samples are generated randomly depending on the settings being done while calling the dataset function. Please checkout out the [scikit-learn tutorial for further information](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_regression.html). The file `jax_training.py` contains all the steps that are described in the tutorial. It loads the train and test dataset and a linear regression model, trains the model with the training set, and evaluates the trained model on the test set.
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
-The only things we need are a simple Flower server (in `server.py`) and a Flower client (in `client.py`). The Flower client basically takes model and training code tells Flower how to call it.
+### Run with the Simulation Engine
 
-Start the server in a terminal as follows:
+> \[!NOTE\]
+> Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
 
-```shell
-python3 server.py
+```bash
+flwr run .
 ```
 
-Now that the server is running and waiting for clients, we can start two clients that will participate in the federated learning process. To do so simply open two more terminal windows and run the following commands.
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
-Start client 1 in the first terminal:
-
-```shell
-python3 client.py
+```bash
+flwr run . --run-config "num-server-rounds=5 batch-size=32"
 ```
 
-Start client 2 in the second terminal:
+> \[!TIP\]
+> For a more detailed walk-through check our [quickstart JAX tutorial](https://flower.ai/docs/framework/tutorial-quickstart-jax.html)
 
-```shell
-python3 client.py
-```
+### Run with the Deployment Engine
 
-You are now training a JAX-based linear regression model, federated across two clients. The setup is of course simplified since both clients hold a similar dataset, but you can now continue with your own explorations. How about changing from a linear regression to a more sophisticated model? How about adding more clients?
+Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
+
+If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.

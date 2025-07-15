@@ -1,0 +1,67 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flowertune-llm"
+version = "1.0.0"
+description = "FlowerTune LLM: Federated LLM Fine-tuning with Flower"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.19.0",
+    "flwr-datasets>=0.5.0",
+    "torch==2.7.0",
+    "trl==0.8.1",
+    "bitsandbytes==0.45.4",
+    "scipy==1.13.0",
+    "peft==0.6.2",
+    "fschat[model_worker,webui]==0.2.35",
+    "transformers==4.50.3",
+    "sentencepiece==0.2.0",
+    "omegaconf==2.3.0",
+    "hf_transfer==0.1.8",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "flowertune_llm.server_app:app"
+clientapp = "flowertune_llm.client_app:app"
+
+[tool.flwr.app.config]
+dataset.name = "vicgalle/alpaca-gpt4"
+model.name = "openlm-research/open_llama_3b_v2"
+model.quantization = 4
+model.gradient-checkpointing = true
+model.lora.peft-lora-r = 32
+model.lora.peft-lora-alpha = 64
+train.save-every-round = 5
+train.learning-rate-max = 5e-5
+train.learning-rate-min = 1e-6
+train.seq-length = 512
+train.training-arguments.output-dir = ""
+train.training-arguments.learning-rate = ""
+train.training-arguments.per-device-train-batch-size = 16
+train.training-arguments.gradient-accumulation-steps = 1
+train.training-arguments.logging-steps = 10
+train.training-arguments.num-train-epochs = 3
+train.training-arguments.max-steps = 10
+train.training-arguments.save-steps = 1000
+train.training-arguments.save-total-limit = 10
+train.training-arguments.gradient-checkpointing = true
+train.training-arguments.lr-scheduler-type = "constant"
+strategy.fraction-fit = 0.1
+strategy.fraction-evaluate = 0.0
+num-server-rounds = 100
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 20
+options.backend.client-resources.num-cpus = 8
+options.backend.client-resources.num-gpus = 1.0

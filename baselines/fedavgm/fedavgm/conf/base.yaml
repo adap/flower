@@ -1,0 +1,24 @@
+---
+num_clients: 10
+num_rounds: 5  # original experiments (paper) uses 10000
+fraction_evaluate: 0 # fraction of clients used during validation
+num_cpus: 1
+num_gpus: 0
+
+noniid:
+  concentration: 0.1 # concentrations used in the paper [100., 10., 1., 0.5, 0.2, 0.1, 0.05, 0.0]
+  
+server:
+  momentum: 0.9
+  learning_rate: 1.0
+  reporting_fraction: 0.05  # values used in the paper 0.05, 0.1, 0.2 (not used for Figure 5), 0.4
+
+client:
+  local_epochs: 1   # in the paper it is used 1 or 5
+  batch_size: 64    # in the paper fixed at 64
+  lr: 0.01          # client learning rate
+
+defaults:
+  - strategy: custom-fedavgm
+  - model: cnn
+  - dataset: cifar10

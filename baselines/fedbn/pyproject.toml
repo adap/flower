@@ -1,0 +1,147 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fedbn"
+version = "1.0.0"
+description = ""
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]==1.17.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project.optional-dependencies]
+dev = [
+    "isort==5.13.2",
+    "black==24.2.0",
+    "docformatter==1.7.5",
+    "mypy==1.8.0",
+    "pylint==3.2.6",
+    "flake8==5.0.4",
+    "pytest==6.2.4",
+    "pytest-watch==4.2.0",
+    "ruff==0.1.9",
+    "types-requests==2.31.0.20240125",
+]
+
+[tool.isort]
+profile = "black"
+known_first_party = ["flwr"]
+
+[tool.black]
+line-length = 79
+target-version = ["py38", "py39", "py310", "py311"]
+
+[tool.pytest.ini_options]
+minversion = "6.2"
+addopts = "-qq"
+testpaths = ["flwr_baselines"]
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = false
+plugins = "numpy.typing.mypy_plugin"
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = "duplicate-code,too-few-public-methods,useless-import-alias,no-member,wrong-import-order"
+good-names = "i,j,k,_,x,y,X,Y,K,N"
+max-args = 10
+max-attributes = 15
+max-locals = 36
+max-branches = 20
+max-statements = 55
+
+[tool.pylint.typecheck]
+generated-members = "numpy.*, torch.*, tensorflow.*"
+
+[[tool.mypy.overrides]]
+module = ["importlib.metadata.*", "importlib_metadata.*"]
+follow_imports = "skip"
+follow_imports_for_stubs = true
+disallow_untyped_calls = false
+
+[[tool.mypy.overrides]]
+module = "torch.*"
+follow_imports = "skip"
+follow_imports_for_stubs = true
+
+[tool.docformatter]
+wrap-summaries = 79
+wrap-descriptions = 79
+
+[tool.ruff]
+target-version = "py38"
+line-length = 79
+select = ["D", "E", "F", "W", "B", "ISC", "C4"]
+fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
+ignore = ["B024", "B027"]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "proto",
+]
+
+[tool.ruff.pydocstyle]
+convention = "numpy"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "itsmaddox-j"
+
+[tool.flwr.app.components]
+serverapp = "fedbn.server_app:app"
+clientapp = "fedbn.client_app:app"
+
+[tool.flwr.app.config]
+algorithm-name = "FedBN"
+num-server-rounds = 10
+num-clients = 5 
+local-epochs = 1
+to-include = "MNIST,SVHN,USPS,SynthDigits,MNIST_M"
+batch-size = 32
+num-classes = 10
+percent = 0.1 #  fraction of partitions to include for each client. Note there are 10 partitions per dataset, therefore percent should be any of {0.1, 0.2, .... 0.8, 0.9, 1.0}
+learning-rate = 0.01
+results-save-dir = "results"
+fraction-evaluate = 0.0
+fraction-fit = 1.0
+
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 5 # This is here so that we can access the number of clients during training. Does not change the actual amount of clients.
+# any multiple of 5 between 5 and 50 (both included)
+# this value should be choosen taking dataset.percent into consideration
+# for example if percent=0.2 then at most we can have 25 clients, each
+# using two data partitions of the same dataset.
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.0

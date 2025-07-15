@@ -1,0 +1,5 @@
+defaults: 
+  - task: Binary_Classification
+dataset_name: "cod-rna"
+train_ratio: .75
+early_stop_patience_rounds: 10

@@ -1,0 +1,10 @@
+---
+_target_: fedpft.dataset.Dataset
+name: cifar100
+dataset: CIFAR100
+num_classes: 100
+image_column_name: img
+partition_by: fine_label
+num_clients: ${num_clients}
+dirichlet_alpha: ${dirichlet_alpha}
+batch_size: ${batch_size}

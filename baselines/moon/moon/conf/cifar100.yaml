@@ -1,0 +1,33 @@
+---
+# this is the config that will be loaded as default by main.py
+# Please follow the provided structure (this will ensuring all baseline follow
+# a similar configuration structure and hence be easy to customise)
+
+num_clients: 10
+num_epochs: 10
+fraction_fit: 1.0
+batch_size: 64
+learning_rate: 0.01
+mu: 1
+temperature: 0.5
+alg: moon
+seed: 0
+server_device: cpu
+num_rounds: 100
+
+client_resources:
+  num_cpus: 4
+  num_gpus: 0.5
+
+dataset:
+  # dataset config
+  name: cifar100
+  dir: ./data/moon/
+  partition: noniid
+  beta: 0.5
+
+model:
+  # model config
+  name: resnet50
+  output_dim: 256
+  dir: ./client_states/moon/cifar100/

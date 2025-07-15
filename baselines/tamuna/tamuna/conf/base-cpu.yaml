@@ -1,0 +1,34 @@
+meta:
+  n_repeats: 3
+  seed: 42
+
+dataset:
+  iid: True
+
+model:
+  _target_: tamuna.models.Net
+  num_classes: 10
+
+strategy:
+  _target_: tamuna.strategy.TamunaStrategy
+
+server:
+  clients_per_round: 10
+  num_clients: 1000
+  num_rounds: 35
+  # sparsity parameter, 2 <= s <= clients_per_round
+  s: 4
+  # probability of server communication, i.e. clients will in expectation do 1 / p local epochs
+  # number of local epochs each round is synchronized across the clients
+  p: 0.333
+  server_device: 'cpu'
+  uplink_factor: 1
+  downlink_factor: 1
+
+client:
+  client_resources:
+    num_cpus: 2
+    num_gpus: 0
+  learning_rate: 0.01
+  # eta should be between p / 2 and p * [(clients_per_round * (s - 1))/(s * (clients_per_round - 1))]
+  eta: 0.246

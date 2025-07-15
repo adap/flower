@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -375,7 +375,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         # Prepare
         distribution = np.array([0.0, 1.0, 0.0], dtype=np.float32)
         empty_classes = [False, False, True]
-        list_samples = [
+        list_samples: List[List[np.ndarray]] = [
             [
                 np.zeros((3, 1, 1), dtype=np.float32),
                 np.zeros((3, 1, 1), dtype=np.float32),

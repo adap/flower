@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fl-dp-sa"
+version = "1.0.0"
+description = "Central Differential Privacy and Secure Aggregation in Flower"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.19.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "fl_dp_sa.server_app:app"
+clientapp = "fl_dp_sa.client_app:app"
+
+[tool.flwr.app.config]
+# Parameters for the DP
+noise-multiplier = 0.2
+clipping-norm = 10
+num-sampled-clients = 20
+# Parameters for the SecAgg+ protocol
+num-shares = 7
+reconstruction-threshold = 4
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 100

@@ -1,0 +1,4 @@
+---
+_target_: fedavgm.dataset.cifar10
+num_classes: 10
+input_shape: [32, 32, 3]

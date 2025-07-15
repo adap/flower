@@ -1,0 +1,42 @@
+---
+
+num_clients: 100 # total number of clients
+num_epochs: 5 # number of local epochs
+batch_size: 50
+num_rounds: 1000
+fraction: 0.1 # participation ratio
+learning_rate: 0.1 
+learning_rate_decay : 0.998 # per round
+static_bn: false # static batch normalization (HeteroFL)
+exclusive_learning: false # exclusive learning baseline in DepthFL paper
+model_size: 1 # model size for exclusive learning
+
+client_resources:
+  num_cpus: 1
+  num_gpus: 0.5
+
+server_device: cuda
+
+dataset_config:
+  iid: true
+  beta: 0.5
+
+fit_config:
+  feddyn: true
+  kd: true
+  alpha: 0.1 # alpha for FedDyn
+  extended: true # if not extended : InclusiveFL
+  drop_client: false # with FedProx, clients shouldn't be dropped even if they are stragglers
+
+model:
+  _target_: depthfl.resnet.multi_resnet18
+  n_blocks: 4 # depth (1 ~ 4)
+  num_classes: 100
+
+strategy:
+  _target_: depthfl.strategy.FedDyn
+  fraction_fit: 0.00001 # because we want the number of clients to sample on each round to be solely defined by min_fit_clients
+  fraction_evaluate: 0.0
+  # min_fit_clients: ${clients_per_round}
+  min_evaluate_clients: 0
+  # min_available_clients: ${clients_per_round}

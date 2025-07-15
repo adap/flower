@@ -1,6 +1,5 @@
 """Runs CNN federated learning for MNIST dataset."""
 
-
 from pathlib import Path
 
 import flwr as fl

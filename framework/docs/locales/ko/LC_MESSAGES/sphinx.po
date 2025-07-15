@@ -1,0 +1,42 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024 Flower Labs GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower main\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-05-28 11:47+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ko\n"
+"Language-Team: ko <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ../../source/_templates/base.html:18
+msgid "About these documents"
+msgstr ""
+
+#: ../../source/_templates/base.html:21
+msgid "Index"
+msgstr ""
+
+#: ../../source/_templates/base.html:24
+#: ../../source/_templates/sidebar/search.html:2
+msgid "Search"
+msgstr ""
+
+#: ../../source/_templates/base.html:27
+msgid "Copyright"
+msgstr ""
+
+#: ../../source/_templates/sidebar/search.html:2
+msgid "Type / to search"
+msgstr ""
+

@@ -11,6 +11,8 @@ import android.util.Pair;
 import androidx.lifecycle.MutableLiveData;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
@@ -64,6 +66,7 @@ public class FlowerClient {
 
     public void loadData(int device_id) {
         try {
+            Log.d("FLOWERCLIENT_LOAD", "loadData: ");
             BufferedReader reader = new BufferedReader(new InputStreamReader(this.context.getAssets().open("data/partition_" + (device_id - 1) + "_train.txt")));
             String line;
             int i = 0;
@@ -137,4 +140,38 @@ public class FlowerClient {
 
         return normalizedRgb;
     }
+
+    // function to write to a file :
+
+    public void writeStringToFile( Context context , String fileName, String content) {
+        try {
+            // Get the app-specific external storage directory
+            File directory = context.getExternalFilesDir(null);
+
+            if (directory != null) {
+                File file = new File(directory, fileName);
+
+                // Check if the file exists
+                boolean fileExists = file.exists();
+
+                // Open a FileWriter in append mode
+                FileWriter writer = new FileWriter(file, true);
+
+                // If the file exists and is not empty, add a new line
+                if (fileExists && file.length() > 0) {
+                    writer.append("\n");
+                }
+
+                // Write the string to the file
+                writer.append(content);
+
+                // Close the FileWriter
+                writer.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace(); // Handle the exception as needed
+        }
+    }
+
+
 }

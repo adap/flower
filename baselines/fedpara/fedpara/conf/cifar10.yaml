@@ -1,0 +1,43 @@
+---
+seed: 121
+
+num_clients: 100
+num_rounds: 200
+clients_per_round: 16
+num_epochs: 5
+batch_size: 64
+algorithm: FedPara
+
+server_device: cuda
+
+client_resources:
+  num_cpus: 2
+  num_gpus: 0.125
+
+dataset_config:
+  name: CIFAR10
+  partition: non-iid
+  num_classes: 10
+  alpha: 0.5
+
+model:
+  _target_: fedpara.models.VGG
+  num_classes: ${dataset_config.num_classes}
+  param_type: lowrank # lowrank or standard
+  ratio: 0.1 # lowrank ratio
+
+hyperparams:
+  eta_l: 0.1
+  learning_decay: 0.992
+
+
+strategy:
+  _target_: flwr.server.strategy.FedAvg
+  fraction_fit: 0.00001
+  fraction_evaluate: 0.0
+  min_evaluate_clients: 0
+  min_fit_clients: ${clients_per_round}
+  min_available_clients: ${clients_per_round}
+  accept_failures: false
+
+exp_id: ${model.param_type}_${dataset_config.name}_${dataset_config.partition}_alpha${dataset_config.alpha}

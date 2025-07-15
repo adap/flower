@@ -1,4 +1,0 @@
-flwr~=1.4.0
-jax~=0.4.10
-numpy~=1.21.1
-scikit_learn~=1.2.2
