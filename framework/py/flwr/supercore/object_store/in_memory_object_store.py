@@ -157,29 +157,6 @@ class InMemoryObjectStore(ObjectStore):
             self.store[object_id].content = object_content
             self.store[object_id].is_available = True
 
-    def set_message_descendant_ids(
-        self, msg_object_id: str, descendant_ids: list[str]
-    ) -> None:
-        """Store the mapping from a ``Message`` object ID to the object IDs of its
-        descendants."""
-        with self.lock_msg_mapping:
-            self.msg_descendant_objects_mapping[msg_object_id] = descendant_ids
-
-    def get_message_descendant_ids(self, msg_object_id: str) -> list[str]:
-        """Retrieve the object IDs of all descendants of a given Message."""
-        with self.lock_msg_mapping:
-            if msg_object_id not in self.msg_descendant_objects_mapping:
-                raise NoObjectInStoreError(
-                    f"No message registered in Object Store with ID '{msg_object_id}'. "
-                    "Mapping to descendants could not be found."
-                )
-            return self.msg_descendant_objects_mapping[msg_object_id]
-
-    def delete_message_descendant_ids(self, msg_object_id: str) -> None:
-        """Delete the mapping from a ``Message`` object ID to its descendants."""
-        with self.lock_msg_mapping:
-            self.msg_descendant_objects_mapping.pop(msg_object_id, None)
-
     def get(self, object_id: str) -> Optional[bytes]:
         """Get an object from the store."""
         with self.lock_store:
@@ -230,9 +207,6 @@ class InMemoryObjectStore(ObjectStore):
                 if object_entry.ref_count == 0:
                     # Delete the message object and its unreferenced descendants
                     self.delete(object_id)
-
-                    # Delete the message's descendants mapping
-                    self.delete_message_descendant_ids(object_id)
 
             # Remove the run from the mapping
             del self.run_objects_mapping[run_id]
