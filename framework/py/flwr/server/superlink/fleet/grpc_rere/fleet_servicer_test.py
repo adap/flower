@@ -289,6 +289,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             ]
             # Assert expected object_ids
             assert set(obj_ids_registered) == set(object_ids_in_response)
+            # Assert the root node of the object tree is the message
             assert message_ins.object_id == object_tree.object_id
         else:
             assert len(response.messages_list) == 0
