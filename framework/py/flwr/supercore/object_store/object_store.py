@@ -143,46 +143,6 @@ class ObjectStore(abc.ABC):
         """
 
     @abc.abstractmethod
-    def set_message_descendant_ids(
-        self, msg_object_id: str, descendant_ids: list[str]
-    ) -> None:
-        """Store the mapping from a ``Message`` object ID to the object IDs of its
-        descendants.
-
-        Parameters
-        ----------
-        msg_object_id : str
-            The object ID of the ``Message``.
-        descendant_ids : list[str]
-            A list of object IDs representing all descendant objects of the ``Message``.
-        """
-
-    @abc.abstractmethod
-    def get_message_descendant_ids(self, msg_object_id: str) -> list[str]:
-        """Retrieve the object IDs of all descendants of a given ``Message``.
-
-        Parameters
-        ----------
-        msg_object_id : str
-            The object ID of the ``Message``.
-
-        Returns
-        -------
-        list[str]
-            A list of object IDs of all descendant objects of the ``Message``.
-        """
-
-    @abc.abstractmethod
-    def delete_message_descendant_ids(self, msg_object_id: str) -> None:
-        """Delete the mapping from a ``Message`` object ID to its descendants.
-
-        Parameters
-        ----------
-        msg_object_id : str
-            The object ID of the ``Message``.
-        """
-
-    @abc.abstractmethod
     def __contains__(self, object_id: str) -> bool:
         """Check if an object_id is in the store.
 
