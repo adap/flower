@@ -22,10 +22,18 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PullObjectResponse,
     PushObjectRequest,
     PushObjectResponse,
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
 from .inflatable_utils import ObjectIdNotPreregisteredError, ObjectUnavailableError
+
+
+ConfirmMessageReceivedProtobuf = Callable[
+        [ConfirmMessageReceivedRequest], ConfirmMessageReceivedResponse
+    ]
+
 
 
 def make_pull_object_fn_protobuf(
@@ -99,3 +107,34 @@ def make_push_object_fn_protobuf(
             raise ObjectIdNotPreregisteredError(object_id)
 
     return push_object_fn
+
+
+def make_confirm_message_received_fn_protobuf(
+    confirm_message_received_protobuf: ConfirmMessageReceivedProtobuf,
+    node: Node,
+    run_id: int,
+) -> Callable[[str], None]:
+    """Create a confirm message received function that uses gRPC.
+
+    Parameters
+    ----------
+    confirm_message_received_protobuf : ConfirmMessageReceivedProtobuf
+        A callable that takes a `ConfirmMessageReceivedRequest` and returns a 
+        `ConfirmMessageReceivedResponse`. This function is typically backed by 
+        a gRPC client stub.
+    node : Node
+        The node making the request.
+    run_id : int
+        The run ID for the current operation.
+
+    Returns
+    -------
+    Callable[[str], None]
+        A function that takes an object ID and confirms that the message has been received.
+    """
+
+    def confirm_message_received_fn(object_id: str) -> None:
+        request = ConfirmMessageReceivedRequest(node=node, run_id=run_id, message_object_id=object_id)
+        confirm_message_received_protobuf(request)
+
+    return confirm_message_received_fn
