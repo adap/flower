@@ -54,6 +54,9 @@ def test_pull_and_inflate_object_from_tree() -> None:
     )
     del inflatable_class_registry[CustomDataClass.__qualname__]
 
+    # Assert: Mypy or Pylance should recognize `result` as `CustomDataClass`
+    assert result.data == root.data  # This should pass type checking
+
     # Assert: Check that the result matches the root object
     assert result.object_id == root.object_id
     mock_pull_object.assert_called()
