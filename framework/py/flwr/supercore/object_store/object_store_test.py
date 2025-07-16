@@ -20,7 +20,7 @@ from abc import abstractmethod
 
 from parameterized import parameterized
 
-from flwr.common.inflatable import get_object_id, get_object_tree
+from flwr.common.inflatable import get_object_id, get_object_tree, iterate_object_tree
 from flwr.common.inflatable_test import CustomDataClass
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
@@ -224,6 +224,26 @@ class ObjectStoreTest(unittest.TestCase):
         # Assert the unavailable object is returned
         self.assertEqual([object_id2], not_present)
 
+    def test_get_object_tree(self) -> None:
+        """Test get_object_tree method."""
+        # Prepare
+        object_store = self.object_store_factory()
+        obj = CustomDataClass(
+            data=b"test_value", children=[CustomDataClass(data=b"child")]
+        )
+        obj_tree = get_object_tree(obj)
+        object_store.preregister(self.run_id, get_object_tree(obj))
+
+        # Execute
+        retrieved_tree = object_store.get_object_tree(obj_tree.object_id)
+        retrieved_tree_traversed = [
+            node.object_id for node in iterate_object_tree(retrieved_tree)
+        ]
+        obj_tree_traversed = [node.object_id for node in iterate_object_tree(obj_tree)]
+
+        # Assert
+        self.assertEqual(retrieved_tree_traversed, obj_tree_traversed)
+
     @parameterized.expand([(""), ("invalid")])  # type: ignore
     def test_preregister_with_invalid_object_id(self, invalid_object_id) -> None:
         """Test preregistering with object_id that is not a valid SHA256."""
@@ -235,30 +255,6 @@ class ObjectStoreTest(unittest.TestCase):
             object_store.preregister(
                 self.run_id, ObjectTree(object_id=invalid_object_id)
             )
-
-    def test_set_get_delete_message_descendants_ids(self) -> None:
-        """Test setting and getting mapping of message object id and its descendants."""
-        # Prepare
-        object_store = self.object_store_factory()
-        object_content = CustomDataClass(b"test_value").deflate()
-        object_id = get_object_id(object_content)
-
-        # Execute
-        # Insert
-        object_store.set_message_descendant_ids(
-            msg_object_id=object_id, descendant_ids=["child1", "child2"]
-        )
-        # Extract correct
-        descendant_ids = object_store.get_message_descendant_ids(object_id)
-        # Delete
-        object_store.delete_message_descendant_ids(object_id)
-
-        # Assert
-        assert descendant_ids == ["child1", "child2"]
-
-        # Extract nonexistent id
-        with self.assertRaises(NoObjectInStoreError):
-            object_store.get_message_descendant_ids(object_id)
 
     # pylint: disable-next=too-many-locals
     def test_put_get_delete_object_with_children(self) -> None:

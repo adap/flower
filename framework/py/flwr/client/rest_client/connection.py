@@ -14,6 +14,7 @@
 # ==============================================================================
 """Contextmanager for a REST request-response channel to the Flower server."""
 
+
 from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import DEBUG, ERROR, INFO, WARN
@@ -30,11 +31,12 @@ from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.inflatable import (
     get_all_nested_objects,
     get_object_tree,
+    iterate_object_tree,
     no_object_id_recompute,
 )
-from flwr.common.inflatable_rest_utils import (
-    make_pull_object_fn_rest,
-    make_push_object_fn_rest,
+from flwr.common.inflatable_protobuf_utils import (
+    make_pull_object_fn_protobuf,
+    make_push_object_fn_protobuf,
 )
 from flwr.common.inflatable_utils import (
     inflate_object_from_contents,
@@ -333,10 +335,11 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
                 return res
 
             try:
+                object_tree = res.message_object_trees[0]
                 all_object_contents = pull_objects(
-                    list(res.objects_to_pull[msg_id].object_ids) + [msg_id],
-                    pull_object_fn=make_pull_object_fn_rest(
-                        pull_object_rest=fn,
+                    [tree.object_id for tree in iterate_object_tree(object_tree)],
+                    pull_object_fn=make_pull_object_fn_protobuf(
+                        pull_object_protobuf=fn,
                         node=node,
                         run_id=run_id,
                     ),
@@ -413,8 +416,8 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
                 try:
                     push_objects(
                         all_objects,
-                        push_object_fn=make_push_object_fn_rest(
-                            push_object_rest=fn,
+                        push_object_fn=make_push_object_fn_protobuf(
+                            push_object_protobuf=fn,
                             node=node,
                             run_id=message_proto.metadata.run_id,
                         ),

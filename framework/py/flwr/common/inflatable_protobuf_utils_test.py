@@ -39,7 +39,10 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
 from .inflatable import get_all_nested_objects
-from .inflatable_grpc_utils import make_pull_object_fn_grpc, make_push_object_fn_grpc
+from .inflatable_protobuf_utils import (
+    make_pull_object_fn_protobuf,
+    make_push_object_fn_protobuf,
+)
 
 base_cases = [
     ({"a": ConfigRecord({"a": 123, "b": 123})},),  # Single w/o children
@@ -85,10 +88,10 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
         self.mock_stub.PullObject.side_effect = pull_object
         node = Node(node_id=456)
         run_id = 1234
-        self.push_object_fn = make_push_object_fn_grpc(
+        self.push_object_fn = make_push_object_fn_protobuf(
             self.mock_stub.PushObject, node, run_id
         )
-        self.pull_object_fn = make_pull_object_fn_grpc(
+        self.pull_object_fn = make_pull_object_fn_protobuf(
             self.mock_stub.PullObject, node, run_id
         )
 

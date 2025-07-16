@@ -27,6 +27,7 @@ from flwr.common.inflatable import (
     UnexpectedObjectContentError,
     get_all_nested_objects,
     get_object_tree,
+    iterate_object_tree,
     no_object_id_recompute,
 )
 from flwr.common.logger import log
@@ -211,12 +212,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             if msg_res.metadata.src_node_id == SUPERLINK_NODE_ID:
                 with no_object_id_recompute():
                     all_objects = get_all_nested_objects(msg_res)
-                    descendants = list(all_objects.keys())[:-1]
-                    message_obj_id = msg_res.metadata.message_id
-                    # Store mapping
-                    store.set_message_descendant_ids(
-                        msg_object_id=message_obj_id, descendant_ids=descendants
-                    )
                     # Preregister
                     store.preregister(request.run_id, get_object_tree(msg_res))
                     # Store objects
@@ -247,7 +242,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
             try:
                 msg_object_id = msg.metadata.message_id
-                descendants = store.get_message_descendant_ids(msg_object_id)
+                obj_tree = store.get_object_tree(msg_object_id)
+                descendants = [node.object_id for node in iterate_object_tree(obj_tree)]
+                descendants = descendants[:-1]  # Exclude the message itself
                 # Add mapping of message object ID to its descendants
                 objects_to_pull[msg_object_id] = ObjectIDs(object_ids=descendants)
             except NoObjectInStoreError as e:
@@ -513,7 +510,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Delete the message object
         store.delete(request.message_object_id)
-        store.delete_message_descendant_ids(request.message_object_id)
 
         return ConfirmMessageReceivedResponse()
 
