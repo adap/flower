@@ -19,7 +19,7 @@ import os
 import random
 import threading
 import time
-from typing import Callable, Optional, TypeVar, cast
+from typing import Callable, Optional, TypeVar
 
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
@@ -36,11 +36,11 @@ from .constant import (
 from .inflatable import (
     InflatableObject,
     UnexpectedObjectContentError,
-    iterate_object_tree,
     _get_object_head,
     get_object_head_values_from_object_content,
     get_object_id,
     is_valid_sha256_hash,
+    iterate_object_tree,
 )
 from .message import Message
 from .record import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
@@ -355,24 +355,24 @@ def validate_object_content(content: bytes) -> None:
         ) from err
 
 
-def get_object_from_tree(
+def pull_and_inflate_object_from_tree(  # pylint: disable=R0913
     object_tree: ObjectTree,
     pull_object_fn: Callable[[str], bytes],
     confirm_object_received_fn: Callable[[str], None],
     *,
-    return_type: type[T] = InflatableObject,
+    return_type: type[T] = InflatableObject,  # type: ignore
     max_concurrent_pulls: int = MAX_CONCURRENT_PULLS,
     max_time: Optional[float] = PULL_MAX_TIME,
     max_tries_per_object: Optional[int] = PULL_MAX_TRIES_PER_OBJECT,
     initial_backoff: float = PULL_INITIAL_BACKOFF,
     backoff_cap: float = PULL_BACKOFF_CAP,
 ) -> T:
-    """Get an object from the object tree.
+    """Pull and inflate the head object from the provided object tree.
 
     Parameters
     ----------
     object_tree : ObjectTree
-        The object tree containing the object ID and its children.
+        The object tree containing the object ID and its descendants.
     pull_object_fn : Callable[[str], bytes]
         A function that takes an object ID and returns the object content as bytes.
     confirm_object_received_fn : Callable[[str], None]
@@ -416,7 +416,7 @@ def get_object_from_tree(
     inflated_object = inflate_object_from_contents(
         object_tree.object_id, pulled_object_contents, keep_object_contents=False
     )
-    
+
     # Check if the inflated object is of the expected type
     if not isinstance(inflated_object, return_type):
         raise TypeError(
@@ -424,4 +424,4 @@ def get_object_from_tree(
             f"but got {type(inflated_object).__name__}."
         )
 
-    return cast(T, inflated_object)
+    return inflated_object
