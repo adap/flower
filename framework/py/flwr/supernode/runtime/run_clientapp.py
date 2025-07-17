@@ -32,6 +32,13 @@ from flwr.common import Context, Message
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import ErrorCode
 from flwr.common.grpc import create_channel, on_channel_state_change
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_object_tree,
+    no_object_id_recompute,
+)
+from flwr.common.inflatable_protobuf_utils import make_push_object_fn_protobuf
+from flwr.common.inflatable_utils import push_objects
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import (
@@ -61,6 +68,7 @@ from flwr.proto.clientappio_pb2 import (
     RequestTokenResponse,
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.supercore.utils import mask_string
 
 
@@ -236,10 +244,37 @@ def push_clientappoutputs(
 
     try:
 
-        # Push Message
-        _ = stub.PushMessage(
-            PushAppMessagesRequest(token=token, messages_list=[proto_message])
-        )
+        with no_object_id_recompute():
+            # Get object tree and all objects to push
+            object_tree = get_object_tree(message)
+
+            # Push Message
+            # This is temporary. The message should not contain its content
+            push_msg_res = stub.PushMessage(
+                PushAppMessagesRequest(
+                    token=token,
+                    messages_list=[proto_message],
+                    message_object_trees=[object_tree],
+                )
+            )
+
+            # Retrieve the object IDs to push
+            object_ids_to_push = set(
+                push_msg_res.objects_to_push[object_tree.object_id].object_ids
+            )
+
+            # Push all objects
+            all_objects = get_all_nested_objects(message)
+            del message, proto_message
+            push_objects(
+                all_objects,
+                make_push_object_fn_protobuf(
+                    stub.PushObject,
+                    Node(node_id=context.node_id),
+                    run_id=context.run_id,
+                ),
+                object_ids_to_push=object_ids_to_push,
+            )
 
         # Push Context
         res: PushAppOutputsResponse = stub.PushClientAppOutputs(
