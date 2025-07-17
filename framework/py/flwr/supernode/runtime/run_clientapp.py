@@ -42,6 +42,13 @@ from flwr.common.serde import (
     message_to_proto,
     run_from_proto,
 )
+from flwr.common.inflatable_utils import pull_and_inflate_object_from_tree
+from flwr.common.inflatable_protobuf_utils import (
+    make_confirm_message_received_fn_protobuf,
+    make_pull_object_fn_protobuf,
+    make_push_object_fn_protobuf,
+)
+
 from flwr.common.typing import Fab, Run
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PullAppInputsRequest,
@@ -52,6 +59,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppOutputsRequest,
     PushAppOutputsResponse,
 )
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
@@ -204,12 +212,6 @@ def pull_clientappinputs(
     masked_token = mask_string(token)
     log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", masked_token)
     try:
-        # Pull Message
-        pull_msg_res: PullAppMessagesResponse = stub.PullMessage(
-            PullAppMessagesRequest(token=token)
-        )
-        message = message_from_proto(pull_msg_res.messages_list[0])
-
         # Pull Context, Run and (optional) FAB
         res: PullAppInputsResponse = stub.PullClientAppInputs(
             PullAppInputsRequest(token=token)
@@ -217,6 +219,18 @@ def pull_clientappinputs(
         context = context_from_proto(res.context)
         run = run_from_proto(res.run)
         fab = fab_from_proto(res.fab) if res.fab else None
+
+        # Pull Message
+        pull_msg_res: PullAppMessagesResponse = stub.PullMessage(
+            PullAppMessagesRequest(token=token)
+        )
+        message = message_from_proto(pull_msg_res.messages_list[0])
+        
+        # Pull and inflate the message
+        pull_and_inflate_object_from_tree(
+            pull_msg_res.
+        )
+
         return message, context, run, fab
     except grpc.RpcError as e:
         log(ERROR, "[PullClientAppInputs] gRPC error occurred: %s", str(e))
