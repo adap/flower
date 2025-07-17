@@ -397,7 +397,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             # Assert expected object_ids
             assert set(obj_ids_registered) == set(object_ids_in_response)
             # Assert the root node of the object tree is the message
-            assert message_ins.object_id == object_tree.object_id
+            assert reply_msg.object_id == object_tree.object_id
         else:
             assert len(response.messages_list) == 0
             assert len(response.message_object_trees) == 0

@@ -236,12 +236,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                     request_name="PullMessages",
                     detail="`message.metadata` has mismatched `run_id`",
                 )
-            messages_list.append(message_to_proto(msg))
 
             try:
                 msg_object_id = msg.metadata.message_id
                 obj_tree = store.get_object_tree(msg_object_id)
-                # Add object tree to the response
+                # Add message and object tree to the response
+                messages_list.append(message_to_proto(msg))
                 trees.append(obj_tree)
             except NoObjectInStoreError as e:
                 log(ERROR, e.message)
