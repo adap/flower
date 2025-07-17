@@ -5,6 +5,7 @@ isort:skip_file
 import abc
 import flwr.proto.appio_pb2
 import flwr.proto.clientappio_pb2
+import flwr.proto.message_pb2
 import grpc
 
 class ClientAppIoStub:
@@ -38,6 +39,21 @@ class ClientAppIoStub:
         flwr.proto.appio_pb2.PullAppMessagesRequest,
         flwr.proto.appio_pb2.PullAppMessagesResponse]
     """Pull Message"""
+
+    PushObject: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.message_pb2.PushObjectRequest,
+        flwr.proto.message_pb2.PushObjectResponse]
+    """Push Object"""
+
+    PullObject: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.message_pb2.PullObjectRequest,
+        flwr.proto.message_pb2.PullObjectResponse]
+    """Pull Object"""
+
+    ConfirmMessageReceived: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.message_pb2.ConfirmMessageReceivedRequest,
+        flwr.proto.message_pb2.ConfirmMessageReceivedResponse]
+    """Confirm Message Received"""
 
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
@@ -87,6 +103,30 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.appio_pb2.PullAppMessagesResponse:
         """Pull Message"""
+        pass
+
+    @abc.abstractmethod
+    def PushObject(self,
+        request: flwr.proto.message_pb2.PushObjectRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.message_pb2.PushObjectResponse:
+        """Push Object"""
+        pass
+
+    @abc.abstractmethod
+    def PullObject(self,
+        request: flwr.proto.message_pb2.PullObjectRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.message_pb2.PullObjectResponse:
+        """Pull Object"""
+        pass
+
+    @abc.abstractmethod
+    def ConfirmMessageReceived(self,
+        request: flwr.proto.message_pb2.ConfirmMessageReceivedRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.message_pb2.ConfirmMessageReceivedResponse:
+        """Confirm Message Received"""
         pass
 
 
