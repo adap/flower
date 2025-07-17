@@ -35,17 +35,19 @@ from flwr.common.typing import Fab, Run
 
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2_grpc
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0401
+    PullAppInputsRequest,
+    PullAppInputsResponse,
+    PullAppMessagesRequest,
+    PullAppMessagesResponse,
+    PushAppMessagesRequest,
+    PushAppMessagesResponse,
+    PushAppOutputsRequest,
+    PushAppOutputsResponse,
+)
 from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     GetRunIdsWithPendingMessagesRequest,
     GetRunIdsWithPendingMessagesResponse,
-    PullClientAppInputsRequest,
-    PullClientAppInputsResponse,
-    PullMessageRequest,
-    PullMessageResponse,
-    PushClientAppOutputsRequest,
-    PushClientAppOutputsResponse,
-    PushMessageRequest,
-    PushMessageResponse,
     RequestTokenRequest,
     RequestTokenResponse,
 )
@@ -116,8 +118,8 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         return RequestTokenResponse(token=token)
 
     def PullClientAppInputs(
-        self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
-    ) -> PullClientAppInputsResponse:
+        self, request: PullAppInputsRequest, context: grpc.ServicerContext
+    ) -> PullAppInputsResponse:
         """Pull Message, Context, and Run."""
         log(DEBUG, "ClientAppIo.PullClientAppInputs")
 
@@ -139,15 +141,15 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         run = cast(Run, state.get_run(run_id))
         fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0])  # type: ignore
 
-        return PullClientAppInputsResponse(
+        return PullAppInputsResponse(
             context=context_to_proto(context),
             run=run_to_proto(run),
             fab=fab_to_proto(fab),
         )
 
     def PushClientAppOutputs(
-        self, request: PushClientAppOutputsRequest, context: grpc.ServicerContext
-    ) -> PushClientAppOutputsResponse:
+        self, request: PushAppOutputsRequest, context: grpc.ServicerContext
+    ) -> PushAppOutputsResponse:
         """Push Message and Context."""
         log(DEBUG, "ClientAppIo.PushClientAppOutputs")
 
@@ -170,11 +172,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # A run associated with a token cannot be handled until its token is cleared
         state.delete_token(run_id)
 
-        return PushClientAppOutputsResponse()
+        return PushAppOutputsResponse()
 
     def PullMessage(
-        self, request: PullMessageRequest, context: grpc.ServicerContext
-    ) -> PullMessageResponse:
+        self, request: PullAppMessagesRequest, context: grpc.ServicerContext
+    ) -> PullAppMessagesResponse:
         """Pull one Message."""
         # Initialize state and ffs connection
         state = self.state_factory.state()
@@ -188,14 +190,14 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
             raise RuntimeError("This line should never be reached.")
 
-        # Retrieve message, context, run and fab for this run
+        # Retrieve message for this run
         message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
 
-        return PullMessageResponse(message=message_to_proto(message))
+        return PullAppMessagesResponse(messages_list=[message_to_proto(message)])
 
     def PushMessage(
-        self, request: PushMessageRequest, context: grpc.ServicerContext
-    ) -> PushMessageResponse:
+        self, request: PushAppMessagesRequest, context: grpc.ServicerContext
+    ) -> PushAppMessagesResponse:
         """Push one Message."""
         # Initialize state connection
         state = self.state_factory.state()
@@ -209,8 +211,8 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
             raise RuntimeError("This line should never be reached.")
 
-        # Save the message and context to the state
-        state.store_message(message_from_proto(request.message))
+        # Save the message to the state
+        state.store_message(message_from_proto(request.messages_list[0]))
 
         return PushMessageResponse()
 
