@@ -174,14 +174,8 @@ class TestGrpcGrid(unittest.TestCase):
         self.mock_stub.PullMessages.return_value = Mock(
             messages_list=[message_to_proto(ok_msg), message_to_proto(err_msg)],
             message_object_trees=[
-                ObjectTree(
-                    object_id=ok_msg.object_id,
-                    children=[
-                        ObjectTree(object_id=child_id)
-                        for child_id in ok_msg_descendant_ids
-                    ],
-                ),
-                ObjectTree(object_id=err_msg.object_id, children=[]),
+                get_object_tree(ok_msg),
+                get_object_tree(err_msg),
             ],
         )
         # Prepare: Mock response of PullObject
@@ -226,9 +220,7 @@ class TestGrpcGrid(unittest.TestCase):
         reply.metadata.__dict__["_message_id"] = reply.object_id
         self.mock_stub.PullMessages.return_value = Mock(
             messages_list=[message_to_proto(reply)],
-            message_object_trees=[
-                ObjectTree(object_id=reply.object_id, children=[]),
-            ],
+            get_object_tree(reply),
         )
         self.mock_stub.PullObject.return_value = Mock(
             object_found=True, object_available=True, object_content=reply.deflate()
