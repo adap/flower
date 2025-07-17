@@ -321,8 +321,8 @@ class Array(InflatableObject):
         Array
             The inflated Array.
         """
-        if not children:
-            raise ValueError("`Array` objects must have children.")
+        if children is None:
+            children = {}
 
         obj_body = get_object_body(object_content, cls)
 

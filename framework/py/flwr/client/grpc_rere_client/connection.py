@@ -31,11 +31,12 @@ from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.inflatable import (
     get_all_nested_objects,
     get_object_tree,
+    iterate_object_tree,
     no_object_id_recompute,
 )
-from flwr.common.inflatable_grpc_utils import (
-    make_pull_object_fn_grpc,
-    make_push_object_fn_grpc,
+from flwr.common.inflatable_protobuf_utils import (
+    make_pull_object_fn_protobuf,
+    make_push_object_fn_protobuf,
 )
 from flwr.common.inflatable_utils import (
     inflate_object_from_contents,
@@ -273,10 +274,11 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         if message_proto:
             msg_id = message_proto.metadata.message_id
             run_id = message_proto.metadata.run_id
+            object_tree = response.message_object_trees[0]
             all_object_contents = pull_objects(
-                list(response.objects_to_pull[msg_id].object_ids) + [msg_id],
-                pull_object_fn=make_pull_object_fn_grpc(
-                    pull_object_grpc=stub.PullObject,
+                [tree.object_id for tree in iterate_object_tree(object_tree)],
+                pull_object_fn=make_pull_object_fn_protobuf(
+                    pull_object_protobuf=stub.PullObject,
                     node=node,
                     run_id=run_id,
                 ),
@@ -328,8 +330,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
                 )
                 push_objects(
                     all_objects,
-                    push_object_fn=make_push_object_fn_grpc(
-                        push_object_grpc=stub.PushObject,
+                    push_object_fn=make_push_object_fn_protobuf(
+                        push_object_protobuf=stub.PushObject,
                         node=node,
                         run_id=message.metadata.run_id,
                     ),
