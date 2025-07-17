@@ -232,7 +232,7 @@ class TestArray(unittest.TestCase):
         arr_ = Array.inflate(arr.deflate(), children=arr.children)
 
         # Assert: Array has no children
-        assert arr.children == {}
+        assert not arr.children
         # Assert: Both objects are identical
         assert arr.object_id == arr_.object_id
 
