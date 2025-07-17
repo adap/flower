@@ -214,7 +214,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Save the message to the state
         state.store_message(message_from_proto(request.messages_list[0]))
 
-        return PushMessageResponse()
+        return PushAppMessagesResponse()
 
     def PushObject(
         self, request: PushObjectRequest, context: grpc.ServicerContext
