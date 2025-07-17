@@ -321,9 +321,6 @@ class Array(InflatableObject):
         Array
             The inflated Array.
         """
-        if not children:
-            raise ValueError("`Array` objects must have children.")
-
         obj_body = get_object_body(object_content, cls)
 
         # Extract children IDs from head
