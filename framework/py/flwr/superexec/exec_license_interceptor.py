@@ -42,6 +42,10 @@ class ExecLicenseInterceptor(grpc.ServerInterceptor):  # type: ignore
         Continue RPC call if license check is enabled and passes, else, terminate RPC
         call by setting context to abort.
         """
+        # Only apply to Exec service
+        if not handler_call_details.method.startswith("/flwr.proto.Exec/"):
+            return continuation(handler_call_details)
+
         # One of the method handlers in
         # `flwr.superexec.exec_servicer.ExecServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
