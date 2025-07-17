@@ -221,7 +221,7 @@ def pull_clientappinputs(
         pull_msg_res: PullAppMessagesResponse = stub.PullMessage(
             PullAppMessagesRequest(token=token)
         )
-        run_id = run.run_id
+        run_id = context.run_id
         node = Node(node_id=context.node_id)
         object_tree = pull_msg_res.message_object_trees[0]
         message = pull_and_inflate_object_from_tree(
