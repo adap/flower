@@ -257,6 +257,7 @@ def push_clientappoutputs(
                     message_object_trees=[object_tree],
                 )
             )
+            del proto_message
 
             # Retrieve the object IDs to push
             object_ids_to_push = set(
@@ -265,7 +266,7 @@ def push_clientappoutputs(
 
             # Push all objects
             all_objects = get_all_nested_objects(message)
-            del message, proto_message
+            del message
             push_objects(
                 all_objects,
                 make_push_object_fn_protobuf(
