@@ -43,6 +43,16 @@ service ClientAppIo {
 
   // Pull Message
   rpc PullMessage(PullMessageRequest) returns (PullMessageResponse) {}
+
+  // Push Object
+  rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
+
+  // Pull Object
+  rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
+
+  // Confirm Message Received
+  rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
+      returns (ConfirmMessageReceivedResponse) {}
 }
 
 message GetRunIdsWithPendingMessagesRequest {}
