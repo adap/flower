@@ -33,6 +33,7 @@ from flwr.common.inflatable import (
     get_all_nested_objects,
     get_object_id,
     get_object_tree,
+    iterate_object_tree,
 )
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
@@ -388,18 +389,18 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         assert isinstance(response, PullAppMessagesResponse)
         assert call.code() == grpc.StatusCode.OK
 
-        object_ids_in_response = {
-            obj_id
-            for obj_ids in response.objects_to_pull.values()
-            for obj_id in obj_ids.object_ids
-        }
-        object_ids_in_response |= set(response.objects_to_pull.keys())
         if register_in_store:
+            object_tree = response.message_object_trees[0]
+            object_ids_in_response = [
+                tree.object_id for tree in iterate_object_tree(object_tree)
+            ]
             # Assert expected object_ids
-            assert set(obj_ids_registered) == object_ids_in_response
-            assert reply_msg.object_id == list(response.objects_to_pull.keys())[0]
+            assert set(obj_ids_registered) == set(object_ids_in_response)
+            # Assert the root node of the object tree is the message
+            assert reply_msg.object_id == object_tree.object_id
         else:
-            assert set() == object_ids_in_response
+            assert len(response.messages_list) == 0
+            assert len(response.message_object_trees) == 0
             # Ins message was deleted
             assert self.state.num_message_ins() == 0
 
@@ -525,9 +526,12 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             # Assert that objects to pull points to a message carrying an error
             msg_res = message_from_proto(response.messages_list[0])
             assert msg_res.has_error()
-            # objects_to_pull is expected to be {msg_obj_id: []}
-            assert list(response.objects_to_pull.keys()) == [msg_res.object_id]
-            assert list(response.objects_to_pull.values())[0].object_ids == []
+            object_tree = response.message_object_trees[0]
+            object_ids_in_response = [
+                tree.object_id for tree in iterate_object_tree(object_tree)
+            ]
+            # expected a single object id (that of the error message)
+            assert list(object_ids_in_response) == [msg_res.object_id]
 
     def test_push_serverapp_outputs_successful_if_running(self) -> None:
         """Test `PushServerAppOutputs` success."""
