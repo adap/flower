@@ -31,6 +31,7 @@ from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.inflatable import (
     get_all_nested_objects,
     get_object_tree,
+    iterate_object_tree,
     no_object_id_recompute,
 )
 from flwr.common.inflatable_protobuf_utils import (
@@ -304,10 +305,12 @@ class GrpcGrid(Grid):
             )
             # Pull Messages from store
             inflated_msgs: list[Message] = []
-            for msg_proto in res.messages_list:
+            for msg_proto, msg_tree in zip(res.messages_list, res.message_object_trees):
                 msg_id = msg_proto.metadata.message_id
                 all_object_contents = pull_objects(
-                    list(res.objects_to_pull[msg_id].object_ids) + [msg_id],
+                    object_ids=[
+                        tree.object_id for tree in iterate_object_tree(msg_tree)
+                    ],
                     pull_object_fn=make_pull_object_fn_protobuf(
                         pull_object_protobuf=self._stub.PullObject,
                         node=self.node,

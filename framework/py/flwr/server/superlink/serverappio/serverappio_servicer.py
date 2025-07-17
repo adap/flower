@@ -27,7 +27,6 @@ from flwr.common.inflatable import (
     UnexpectedObjectContentError,
     get_all_nested_objects,
     get_object_tree,
-    iterate_object_tree,
     no_object_id_recompute,
 )
 from flwr.common.logger import log
@@ -65,7 +64,6 @@ from flwr.proto.log_pb2 import (  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
     ConfirmMessageReceivedResponse,
-    ObjectIDs,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -227,7 +225,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Convert Messages to proto
         messages_list = []
-        objects_to_pull: dict[str, ObjectIDs] = {}
+        trees = []
         while messages_res:
             msg = messages_res.pop(0)
 
@@ -238,22 +236,20 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                     request_name="PullMessages",
                     detail="`message.metadata` has mismatched `run_id`",
                 )
-            messages_list.append(message_to_proto(msg))
 
             try:
                 msg_object_id = msg.metadata.message_id
                 obj_tree = store.get_object_tree(msg_object_id)
-                descendants = [node.object_id for node in iterate_object_tree(obj_tree)]
-                descendants = descendants[:-1]  # Exclude the message itself
-                # Add mapping of message object ID to its descendants
-                objects_to_pull[msg_object_id] = ObjectIDs(object_ids=descendants)
+                # Add message and object tree to the response
+                messages_list.append(message_to_proto(msg))
+                trees.append(obj_tree)
             except NoObjectInStoreError as e:
                 log(ERROR, e.message)
                 # Delete message ins from state
                 state.delete_messages(message_ins_ids={msg_object_id})
 
         return PullAppMessagesResponse(
-            messages_list=messages_list, objects_to_pull=objects_to_pull
+            messages_list=messages_list, message_object_trees=trees
         )
 
     def GetRun(

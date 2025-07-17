@@ -24,7 +24,7 @@ import grpc
 from flwr.app.error import Error
 from flwr.common import RecordDict
 from flwr.common.constant import SUPERLINK_NODE_ID
-from flwr.common.inflatable import get_all_nested_objects
+from flwr.common.inflatable import get_all_nested_objects, get_object_tree
 from flwr.common.message import Message
 from flwr.common.serde import message_to_proto
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
@@ -158,13 +158,11 @@ class TestGrpcGrid(unittest.TestCase):
         ok_msg = Message(RecordDict(), reply_to=ins1)
         ok_msg.metadata.__dict__["_message_id"] = ok_msg.object_id
         ok_msg_all_objs = get_all_nested_objects(ok_msg)
-        ok_msg_descendant_ids = set(ok_msg_all_objs.keys()) - {ok_msg.object_id}
 
         # Prepare: Create an error reply
         err_msg = Message(Error(0), reply_to=ins2)
         err_msg.metadata.__dict__["_message_id"] = err_msg.object_id
         err_msg_all_objs = get_all_nested_objects(err_msg)
-        error_msg_descendant_ids = set(err_msg_all_objs.keys()) - {err_msg.object_id}
 
         # Prepare: Mock the objectStore
         obj_store = {k: v.deflate() for k, v in ok_msg_all_objs.items()}
@@ -173,12 +171,11 @@ class TestGrpcGrid(unittest.TestCase):
         # Prepare: Mock the response of PushMessages
         self.mock_stub.PullMessages.return_value = Mock(
             messages_list=[message_to_proto(ok_msg), message_to_proto(err_msg)],
-            objects_to_pull={
-                ok_msg.object_id: Mock(object_ids=ok_msg_descendant_ids),
-                err_msg.object_id: Mock(object_ids=error_msg_descendant_ids),
-            },
+            message_object_trees=[
+                get_object_tree(ok_msg),
+                get_object_tree(err_msg),
+            ],
         )
-
         # Prepare: Mock response of PullObject
         self.mock_stub.PullObject.side_effect = lambda req: Mock(
             object_found=True,
@@ -221,9 +218,7 @@ class TestGrpcGrid(unittest.TestCase):
         reply.metadata.__dict__["_message_id"] = reply.object_id
         self.mock_stub.PullMessages.return_value = Mock(
             messages_list=[message_to_proto(reply)],
-            objects_to_pull={
-                reply.object_id: Mock(object_ids=[reply.object_id]),
-            },
+            message_object_trees=[get_object_tree(reply)],
         )
         self.mock_stub.PullObject.return_value = Mock(
             object_found=True, object_available=True, object_content=reply.deflate()
@@ -252,7 +247,7 @@ class TestGrpcGrid(unittest.TestCase):
         )
         self.mock_stub.PushMessages.return_value = mock_response
         self.mock_stub.PushObject.return_value = Mock(stored=True)
-        mock_response = Mock(messages_list=[])
+        mock_response = Mock(messages_list=[], message_object_trees=[])
         self.mock_stub.PullMessages.return_value = mock_response
 
         # Execute

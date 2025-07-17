@@ -15,12 +15,13 @@
 """ClientAppIo API servicer."""
 
 
-from logging import DEBUG
+from logging import DEBUG, ERROR
 from typing import cast
 
 import grpc
 
 from flwr.common import Context
+from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -50,8 +51,18 @@ from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     RequestTokenRequest,
     RequestTokenResponse,
 )
+from flwr.proto.message_pb2 import (
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
+)
+
+# pylint: disable=E0601
 from flwr.supercore.ffs import FfsFactory
-from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeStateFactory
 
 
@@ -204,3 +215,59 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         state.store_message(message_from_proto(request.messages_list[0]))
 
         return PushAppMessagesResponse()
+
+    def PushObject(
+        self, request: PushObjectRequest, context: grpc.ServicerContext
+    ) -> PushObjectResponse:
+        """Push an object to the ObjectStore."""
+        log(DEBUG, "ServerAppIoServicer.PushObject")
+
+        # Init state and store
+        store = self.objectstore_factory.store()
+
+        # Insert in store
+        stored = False
+        try:
+            store.put(request.object_id, request.object_content)
+            stored = True
+        except (NoObjectInStoreError, ValueError) as e:
+            log(ERROR, str(e))
+        except UnexpectedObjectContentError as e:
+            # Object content is not valid
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+
+        return PushObjectResponse(stored=stored)
+
+    def PullObject(
+        self, request: PullObjectRequest, context: grpc.ServicerContext
+    ) -> PullObjectResponse:
+        """Pull an object from the ObjectStore."""
+        log(DEBUG, "ServerAppIoServicer.PullObject")
+
+        # Init state and store
+        store = self.objectstore_factory.store()
+
+        # Fetch from store
+        content = store.get(request.object_id)
+        if content is not None:
+            object_available = content != b""
+            return PullObjectResponse(
+                object_found=True,
+                object_available=object_available,
+                object_content=content,
+            )
+        return PullObjectResponse(object_found=False, object_available=False)
+
+    def ConfirmMessageReceived(
+        self, request: ConfirmMessageReceivedRequest, context: grpc.ServicerContext
+    ) -> ConfirmMessageReceivedResponse:
+        """Confirm message received."""
+        log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
+
+        # Init state and store
+        store = self.objectstore_factory.store()
+
+        # Delete the message object
+        store.delete(request.message_object_id)
+
+        return ConfirmMessageReceivedResponse()
