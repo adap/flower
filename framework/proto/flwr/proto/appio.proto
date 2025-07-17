@@ -25,9 +25,10 @@ import "flwr/proto/run.proto";
 
 // PushAppMessages messages
 message PushAppMessagesRequest {
-  repeated Message messages_list = 1;
-  uint64 run_id = 2;
-  repeated ObjectTree message_object_trees = 3;
+  string token = 1;
+  repeated Message messages_list = 2;
+  uint64 run_id = 3;
+  repeated ObjectTree message_object_trees = 4;
 }
 message PushAppMessagesResponse {
   repeated string message_ids = 1;
@@ -36,15 +37,16 @@ message PushAppMessagesResponse {
 
 // PullAppMessages messages
 message PullAppMessagesRequest {
-  repeated string message_ids = 1;
-  uint64 run_id = 2;
+  string token = 1;
+  repeated string message_ids = 2;
+  uint64 run_id = 3;
 }
 message PullAppMessagesResponse {
   repeated Message messages_list = 1;
   map<string, ObjectIDs> objects_to_pull = 2;
 }
 // PullAppInputs messages
-message PullAppInputsRequest {}
+message PullAppInputsRequest { string token = 1; }
 message PullAppInputsResponse {
   Context context = 1;
   Run run = 2;
@@ -53,7 +55,8 @@ message PullAppInputsResponse {
 
 // PushAppInputs messages
 message PushAppOutputsRequest {
-  uint64 run_id = 1;
-  Context context = 2;
+  string token = 1;
+  uint64 run_id = 2;
+  Context context = 3;
 }
 message PushAppOutputsResponse {}
