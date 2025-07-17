@@ -133,7 +133,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
     def test_unary_unary_interceptor(self) -> None:
         """Test unary-unary RPC call logging."""
         handler_call_details = MagicMock()
-        handler_call_details.method = "dummy_method"
+        handler_call_details.method = "/flwr.proto.Exec/dummy_method"
         expected_method_name = handler_call_details.method
         continuation = get_noop_unary_unary_handler
         intercepted_handler = self.interceptor.intercept_service(
@@ -153,7 +153,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
     def test_unary_unary_interceptor_exception(self) -> None:
         """Test unary-unary RPC call when the handler raises a BaseException."""
         handler_call_details = MagicMock()
-        handler_call_details.method = "exception_method"
+        handler_call_details.method = "/flwr.proto.Exec/exception_method"
         expected_method_name = handler_call_details.method
 
         # pylint: disable=unused-argument
@@ -182,7 +182,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
     def test_unary_stream_interceptor(self) -> None:
         """Test unary-stream RPC call logging."""
         handler_call_details = MagicMock()
-        handler_call_details.method = "stream_method"
+        handler_call_details.method = "/flwr.proto.Exec/stream_method"
         expected_method_name = handler_call_details.method
         continuation = get_noop_unary_stream_handler
         intercepted_handler = self.interceptor.intercept_service(
@@ -205,7 +205,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
     def test_unary_stream_interceptor_exception(self) -> None:
         """Test unary-stream RPC call when the stream handler raises a BaseException."""
         handler_call_details = MagicMock()
-        handler_call_details.method = "stream_exception_method"
+        handler_call_details.method = "/flwr.proto.Exec/stream_exception_method"
         expected_method_name = handler_call_details.method
 
         # pylint: disable=unused-argument
