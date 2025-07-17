@@ -92,33 +92,18 @@ global___PullAppMessagesRequest = PullAppMessagesRequest
 
 class PullAppMessagesResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    class ObjectsToPullEntry(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
-        key: typing.Text
-        @property
-        def value(self) -> flwr.proto.message_pb2.ObjectIDs: ...
-        def __init__(self,
-            *,
-            key: typing.Text = ...,
-            value: typing.Optional[flwr.proto.message_pb2.ObjectIDs] = ...,
-            ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
-
     MESSAGES_LIST_FIELD_NUMBER: builtins.int
-    OBJECTS_TO_PULL_FIELD_NUMBER: builtins.int
+    MESSAGE_OBJECT_TREES_FIELD_NUMBER: builtins.int
     @property
     def messages_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.message_pb2.Message]: ...
     @property
-    def objects_to_pull(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.message_pb2.ObjectIDs]: ...
+    def message_object_trees(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.message_pb2.ObjectTree]: ...
     def __init__(self,
         *,
         messages_list: typing.Optional[typing.Iterable[flwr.proto.message_pb2.Message]] = ...,
-        objects_to_pull: typing.Optional[typing.Mapping[typing.Text, flwr.proto.message_pb2.ObjectIDs]] = ...,
+        message_object_trees: typing.Optional[typing.Iterable[flwr.proto.message_pb2.ObjectTree]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list","objects_to_pull",b"objects_to_pull"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["message_object_trees",b"message_object_trees","messages_list",b"messages_list"]) -> None: ...
 global___PullAppMessagesResponse = PullAppMessagesResponse
 
 class PullAppInputsRequest(google.protobuf.message.Message):
