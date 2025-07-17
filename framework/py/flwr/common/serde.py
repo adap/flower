@@ -19,7 +19,6 @@ from collections import OrderedDict
 from typing import Any, cast
 
 # pylint: disable=E0611
-from flwr.proto.clientappio_pb2 import ClientAppOutputCode, ClientAppOutputStatus
 from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
@@ -651,33 +650,6 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         flwr_aid=run_proto.flwr_aid,
     )
     return run
-
-
-# === ClientApp status messages ===
-
-
-def clientappstatus_to_proto(
-    status: typing.ClientAppOutputStatus,
-) -> ClientAppOutputStatus:
-    """Serialize `ClientAppOutputStatus` to ProtoBuf."""
-    code = ClientAppOutputCode.SUCCESS
-    if status.code == typing.ClientAppOutputCode.DEADLINE_EXCEEDED:
-        code = ClientAppOutputCode.DEADLINE_EXCEEDED
-    if status.code == typing.ClientAppOutputCode.UNKNOWN_ERROR:
-        code = ClientAppOutputCode.UNKNOWN_ERROR
-    return ClientAppOutputStatus(code=code, message=status.message)
-
-
-def clientappstatus_from_proto(
-    msg: ClientAppOutputStatus,
-) -> typing.ClientAppOutputStatus:
-    """Deserialize `ClientAppOutputStatus` from ProtoBuf."""
-    code = typing.ClientAppOutputCode.SUCCESS
-    if msg.code == ClientAppOutputCode.DEADLINE_EXCEEDED:
-        code = typing.ClientAppOutputCode.DEADLINE_EXCEEDED
-    if msg.code == ClientAppOutputCode.UNKNOWN_ERROR:
-        code = typing.ClientAppOutputCode.UNKNOWN_ERROR
-    return typing.ClientAppOutputStatus(code=code, message=msg.message)
 
 
 # === Run status ===
