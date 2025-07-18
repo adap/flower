@@ -17,8 +17,8 @@
 
 from collections.abc import Iterator
 from contextlib import contextmanager
-from logging import DEBUG, ERROR, INFO, WARN
-from typing import Callable, Optional, TypeVar, Union, cast
+from logging import ERROR, WARN
+from typing import Callable, Optional, TypeVar, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
@@ -28,26 +28,15 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.heartbeat import HeartbeatSender
-from flwr.common.inflatable import (
-    get_all_nested_objects,
-    get_object_tree,
-    iterate_object_tree,
-    no_object_id_recompute,
-)
 from flwr.common.inflatable_protobuf_utils import (
     make_confirm_message_received_fn_protobuf,
     make_pull_object_fn_protobuf,
     make_push_object_fn_protobuf,
 )
-from flwr.common.inflatable_utils import (
-    inflate_object_from_contents,
-    pull_objects,
-    push_objects,
-)
 from flwr.common.logger import log
 from flwr.common.message import Message, remove_content_from_message
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_to_proto, run_from_proto, message_from_proto
+from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -67,11 +56,11 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
     ConfirmMessageReceivedResponse,
+    ObjectTree,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
     PushObjectResponse,
-    ObjectTree,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
@@ -317,8 +306,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         """Set delete_node."""
         nonlocal node
         if node is None:
-            log(ERROR, "Node instance missing")
-            return
+            raise RuntimeError("Node instance missing")
 
         # Stop the heartbeat sender
         heartbeat_sender.stop()
@@ -338,14 +326,13 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         """Pull a message with its ObjectTree from SuperLink."""
         # Get Node
         if node is None:
-            log(ERROR, "Node instance missing")
-            return None
+            raise RuntimeError("Node instance missing")
 
         # Try to pull a message with its object tree from SuperLink
         req = PullMessagesRequest(node=node)
         res = _request(req, PullMessagesResponse, PATH_PULL_MESSAGES)
         if res is None:
-            return None
+            raise ValueError("PushMessagesResponse is None.")
 
         # If no messages are available, return None
         if len(res.messages_list) == 0:
@@ -365,8 +352,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         """Send the message with its ObjectTree to SuperLink."""
         # Get Node
         if node is None:
-            log(ERROR, "Node instance missing")
-            return
+            raise RuntimeError("Node instance missing")
 
         # Remove the content from the message if it has
         if message.has_content():
@@ -380,7 +366,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         )
         res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
         if res is None:
-            return None
+            raise ValueError("PushMessagesResponse is None.")
 
         # Get and return the object IDs to push
         object_ids_to_push = res.objects_to_push[object_tree.object_id]

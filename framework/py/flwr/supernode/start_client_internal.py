@@ -20,9 +20,10 @@ import subprocess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
+from functools import partial
 from logging import INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -47,23 +48,21 @@ from flwr.common.constant import (
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.inflatable import (
-    get_all_nested_objects,
-    get_object_tree,
-    no_object_id_recompute,
-    iterate_object_tree,
+from flwr.common.inflatable import iterate_object_tree
+from flwr.common.inflatable_utils import (
+    pull_objects,
+    push_object_contents_from_iterable,
 )
-from flwr.common.inflatable_utils import pull_objects, push_objects
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
-from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
@@ -240,7 +239,7 @@ def start_client_internal(
 
             _push_messages(
                 state=state,
-                store=store,
+                object_store=store,
                 send=send,
                 push_object=push_object,
             )
@@ -380,18 +379,27 @@ def _push_messages(
             message.metadata.message_type,
         )
 
+        # Get the object tree for the message
+        object_tree = object_store.get_object_tree(message.metadata.message_id)
+
         # Send the message
         try:
-            # Get the object tree for the message
-            object_tree = object_store.get_object_tree(message.metadata.message_id)
-            
             # Send the reply message with its ObjectTree
             send(message, object_tree)
 
-            with no_object_id_recompute():
-                # Get all objects in the message
-                push_objects
-
+            # Push object contents from the ObjectStore
+            run_id = message.metadata.run_id
+            push_object_contents_from_iterable(
+                (
+                    (tree.object_id, cast(bytes, object_store.get(tree.object_id)))
+                    for tree in iterate_object_tree(object_tree)
+                ),
+                # Use functools.partial to bind run_id explicitly,
+                # avoiding late binding issues and satisfying flake8 (B023)
+                # Equivalent to:
+                # lambda object_id, content: push_object(run_id, object_id, content)
+                push_object_fn=partial(push_object, run_id),
+            )
             log(INFO, "Sent successfully")
         except RunNotRunningException:
             log(
@@ -408,6 +416,11 @@ def _push_messages(
                     message.metadata.reply_to_message_id,
                 ]
             )
+
+            # Delete all its objects from the ObjectStore
+            # No need to delete objects of the message it replies to, as it is
+            # already deleted when the ClientApp calls `ConfirmMessageReceived`
+            object_store.delete(message.metadata.message_id)
 
 
 @contextmanager
