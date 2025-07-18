@@ -178,8 +178,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self, request: PullAppMessagesRequest, context: grpc.ServicerContext
     ) -> PullAppMessagesResponse:
         """Pull one Message."""
-        # Initialize state and ffs connection
+        # Initialize state and store connection
         state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Validate the token
         run_id = state.get_run_id_by_token(request.token)
@@ -193,7 +194,13 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Retrieve message for this run
         message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
 
-        return PullAppMessagesResponse(messages_list=[message_to_proto(message)])
+        # Retrieve the object tree for the message
+        object_tree = store.get_object_tree(message.metadata.message_id)
+
+        return PullAppMessagesResponse(
+            messages_list=[message_to_proto(message)],
+            message_object_trees=[object_tree],
+        )
 
     def PushMessage(
         self, request: PushAppMessagesRequest, context: grpc.ServicerContext
