@@ -112,24 +112,24 @@ def make_confirm_message_received_fn_protobuf(
     node: Node,
     run_id: int,
 ) -> Callable[[str], None]:
-    """Create a confirm message received function that uses gRPC.
+    """Create a confirm message received function that uses protobuf.
 
     Parameters
     ----------
     confirm_message_received_protobuf : ConfirmMessageReceivedProtobuf
         A callable that takes a `ConfirmMessageReceivedRequest` and returns a
-        `ConfirmMessageReceivedResponse`. This function is typically backed by
-        a gRPC client stub.
+        `ConfirmMessageReceivedResponse`, confirming message receipt.
+        This function is typically backed by a gRPC client stub.
     node : Node
         The node making the request.
     run_id : int
-        The run ID for the current operation.
+        The run ID for the current message.
 
     Returns
     -------
     Callable[[str], None]
-        A function that takes an object ID and confirms that the message
-        has been received.
+        A wrapper function that takes an object ID and confirms that
+        the message has been received.
     """
 
     def confirm_message_received_fn(object_id: str) -> None:
