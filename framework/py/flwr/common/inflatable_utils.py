@@ -19,6 +19,7 @@ import os
 import random
 import threading
 import time
+from collections.abc import Iterable, Iterator
 from typing import Callable, Optional, TypeVar
 
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
@@ -110,24 +111,61 @@ def push_objects(
     max_concurrent_pushes : int (default: MAX_CONCURRENT_PUSHES)
         The maximum number of concurrent pushes to perform.
     """
-    if object_ids_to_push is not None:
-        # Filter objects to push only those with IDs in the set
-        objects = {k: v for k, v in objects.items() if k in object_ids_to_push}
-
     lock = threading.Lock()
 
-    def push(obj_id: str) -> None:
-        """Push a single object."""
-        object_content = objects[obj_id].deflate()
-        if not keep_objects:
-            with lock:
-                del objects[obj_id]
-        push_object_fn(obj_id, object_content)
+    def iter_dict_items() -> Iterator[tuple[str, bytes]]:
+        """Iterate over the dictionary items."""
+        for obj_id in list(objects.keys()):
+            # Skip the object if no need to push it
+            if object_ids_to_push is not None and obj_id not in object_ids_to_push:
+                continue
 
-    # Push all objects concurrently
+            # Deflate the object content
+            object_content = objects[obj_id].deflate()
+            if not keep_objects:
+                with lock:
+                    del objects[obj_id]
+
+            yield obj_id, object_content
+
+    push_object_contents_from_iterable(
+        iter_dict_items(),
+        push_object_fn,
+        max_concurrent_pushes=max_concurrent_pushes,
+    )
+
+
+def push_object_contents_from_iterable(
+    object_contents: Iterable[tuple[str, bytes]],
+    push_object_fn: Callable[[str, bytes], None],
+    *,
+    max_concurrent_pushes: int = MAX_CONCURRENT_PUSHES,
+) -> None:
+    """Push multiple object contents to the servicer.
+
+    Parameters
+    ----------
+    object_contents : Iterable[tuple[str, bytes]]
+        An iterable of `(object_id, object_content)` pairs.
+        `object_id` is the object ID, and `object_content` is the object content.
+    push_object_fn : Callable[[str, bytes], None]
+        A function that takes an object ID and its content as bytes, and pushes
+        it to the servicer. This function should raise `ObjectIdNotPreregisteredError`
+        if the object ID is not pre-registered.
+    max_concurrent_pushes : int (default: MAX_CONCURRENT_PUSHES)
+        The maximum number of concurrent pushes to perform.
+    """
+
+    def push(args: tuple[str, bytes]) -> None:
+        """Push a single object."""
+        obj_id, obj_content = args
+        # Push the object using the provided function
+        push_object_fn(obj_id, obj_content)
+
+    # Push all object contents concurrently
     num_workers = get_num_workers(max_concurrent_pushes)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
-        list(executor.map(push, list(objects.keys())))
+        list(executor.map(push, object_contents))
 
 
 def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
