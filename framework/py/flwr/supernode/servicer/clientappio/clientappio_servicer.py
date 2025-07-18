@@ -198,7 +198,8 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         object_tree = store.get_object_tree(message.metadata.message_id)
 
         return PullAppMessagesResponse(
-            messages_list=[message_to_proto(message)], object_tree=object_tree
+            messages_list=[message_to_proto(message)],
+            message_object_trees=[object_tree],
         )
 
     def PushMessage(
