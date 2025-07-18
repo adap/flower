@@ -480,6 +480,10 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     def pull_object(run_id: int, object_id: str) -> bytes:
         """Pull the object from the SuperLink."""
+        # Check Node
+        if node is None:
+            raise RuntimeError("Node instance missing")
+
         fn = make_pull_object_fn_protobuf(
             pull_object_protobuf=_pull_object_protobuf,
             node=node,
@@ -489,6 +493,10 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     def push_object(run_id: int, object_id: str, contents: bytes) -> None:
         """Push the object to the SuperLink."""
+        # Check Node
+        if node is None:
+            raise RuntimeError("Node instance missing")
+
         fn = make_push_object_fn_protobuf(
             push_object_protobuf=_push_object_protobuf,
             node=node,
@@ -498,6 +506,10 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     def confirm_message_received(run_id: int, object_id: str) -> None:
         """Confirm that the message has been received."""
+        # Check Node
+        if node is None:
+            raise RuntimeError("Node instance missing")
+
         fn = make_confirm_message_received_fn_protobuf(
             confirm_message_received_protobuf=_confirm_message_received_protobuf,
             node=node,

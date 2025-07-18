@@ -172,7 +172,17 @@ def start_client_internal(
         max_retries=max_retries,
         max_wait_time=max_wait_time,
     ) as conn:
-        receive, send, create_node, _, get_run, get_fab = conn
+        (
+            receive,
+            send,
+            create_node,
+            _,
+            get_run,
+            get_fab,
+            pull_object,
+            push_object,
+            confirm_message_received,
+        ) = conn
 
         # Call create_node fn to register node
         # and store node_id in state
@@ -192,6 +202,8 @@ def start_client_internal(
                 receive=receive,
                 get_run=get_run,
                 get_fab=get_fab,
+                pull_object=pull_object,
+                confirm_message_received=confirm_message_received,
             )
 
             # Two isolation modes:
@@ -223,7 +235,12 @@ def start_client_internal(
                 ]
                 subprocess.run(command, check=False)
 
-            _push_messages(state=state, send=send)
+            _push_messages(
+                state=state,
+                store=store,
+                send=send,
+                push_object=push_object,
+            )
 
             # Sleep for 3 seconds before the next iteration
             time.sleep(3)
@@ -232,11 +249,13 @@ def start_client_internal(
 def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     state: NodeState,
     ffs: Ffs,
-    object_store: ObjectStore,  # pylint: disable=unused-argument
+    object_store: ObjectStore,
     node_config: UserConfig,
     receive: Callable[[], Optional[Message]],
     get_run: Callable[[int], Run],
     get_fab: Callable[[str, int], Fab],
+    pull_object: Callable[[int, str], bytes],  # pylint: disable=W0613
+    confirm_message_received: Callable[[int, str], None],  # pylint: disable=W0613
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -325,7 +344,9 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
 def _push_messages(
     state: NodeState,
+    store: ObjectStore,  # pylint: disable=W0613
     send: Callable[[Message], None],
+    push_object: Callable[[int, str, bytes], None],  # pylint: disable=W0613
 ) -> None:
     """Push reply messages to the SuperLink."""
     # Get messages to send
@@ -389,6 +410,9 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
         Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
+        Callable[[int, str], bytes],
+        Callable[[int, str, bytes], None],
+        Callable[[int, str], None],
     ]
 ]:
     """Establish a connection to the Fleet API server at SuperLink."""
