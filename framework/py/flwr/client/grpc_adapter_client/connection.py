@@ -49,6 +49,9 @@ def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
         Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
+        Callable[[int, str], bytes],
+        Callable[[int, str, bytes], None],
+        Callable[[int, str], None],
     ]
 ]:
     """Primitives for request/response-based interaction with a server via GrpcAdapter.
@@ -83,6 +86,9 @@ def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
     delete_node : Optional[Callable]
     get_run : Optional[Callable]
     get_fab : Optional[Callable]
+    pull_object : Callable[[str], bytes]
+    push_object : Callable[[str, bytes], None]
+    confirm_message_received : Callable[[str], None]
     """
     if authentication_keys is not None:
         log(ERROR, "Client authentication is not supported for this transport type.")

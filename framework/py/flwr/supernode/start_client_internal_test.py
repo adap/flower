@@ -24,7 +24,7 @@ from flwr.common.typing import Fab
 from .start_client_internal import _pull_and_store_message
 
 
-class TestStartClientInternal(unittest.TestCase):
+class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
     """Test cases for the main loop."""
 
     def setUp(self) -> None:
@@ -37,6 +37,9 @@ class TestStartClientInternal(unittest.TestCase):
         self.mock_receive = Mock()
         self.mock_get_run = Mock()
         self.mock_get_fab = Mock()
+        self.mock_push_object = Mock()
+        self.mock_pull_object = Mock()
+        self.mock_confirm_message_received = Mock()
 
     def test_pull_and_store_message_no_message(self) -> None:
         """Test that no message is pulled when there are no messages."""
@@ -52,6 +55,8 @@ class TestStartClientInternal(unittest.TestCase):
             receive=self.mock_receive,
             get_run=self.mock_get_run,
             get_fab=self.mock_get_fab,
+            pull_object=self.mock_pull_object,
+            confirm_message_received=self.mock_confirm_message_received,
         )
 
         # Assert
@@ -83,6 +88,8 @@ class TestStartClientInternal(unittest.TestCase):
             receive=self.mock_receive,
             get_run=self.mock_get_run,
             get_fab=self.mock_get_fab,
+            pull_object=self.mock_pull_object,
+            confirm_message_received=self.mock_confirm_message_received,
         )
 
         # Assert: the run ID should be returned
@@ -139,6 +146,8 @@ class TestStartClientInternal(unittest.TestCase):
                 receive=self.mock_receive,
                 get_run=self.mock_get_run,
                 get_fab=self.mock_get_fab,
+                pull_object=self.mock_pull_object,
+                confirm_message_received=self.mock_confirm_message_received,
             )
 
         # Assert: the run ID should be returned
