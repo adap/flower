@@ -244,7 +244,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             api_path=PATH_PULL_OBJECT,
         )
         if res is None:
-            raise ValueError("PullObjectResponse is None.")
+            raise ValueError(f"{PullObjectResponse.__name__} is None.")
         return res
 
     def _push_object_protobuf(request: PushObjectRequest) -> PushObjectResponse:
@@ -254,7 +254,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             api_path=PATH_PUSH_OBJECT,
         )
         if res is None:
-            raise ValueError("PushObjectResponse is None.")
+            raise ValueError(f"{PushObjectResponse.__name__} is None.")
         return res
 
     def _confirm_message_received_protobuf(
@@ -266,7 +266,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             api_path=PATH_CONFIRM_MESSAGE_RECEIVED,
         )
         if res is None:
-            raise ValueError("ConfirmMessageReceivedResponse is None.")
+            raise ValueError(f"{ConfirmMessageReceivedResponse.__name__} is None.")
         return res
 
     def send_node_heartbeat() -> bool:
