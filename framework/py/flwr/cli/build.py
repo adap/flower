@@ -184,7 +184,7 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
             # Read the file content manually
             file_contents = file_path.read_bytes()
 
-            archive_path = str(file_path.relative_to(app))
+            archive_path = str(file_path.relative_to(app)).replace("\\", "/")
             write_to_zip(fab_file, archive_path, file_contents)
 
             # Calculate file info
