@@ -215,10 +215,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Save the message to the state
         state.store_message(message_from_proto(request.messages_list[0]))
 
-        # Preregister the object tree of the message
-        store.preregister(run_id, request.message_object_trees[0])
+        # Store Message object to descendants mapping and preregister objects
+        objects_to_push = store_mapping_and_register_objects(store, request=request)
 
-        return PushAppMessagesResponse()
+        return PushAppMessagesResponse(objects_to_push=objects_to_push)
 
     def PushObject(
         self, request: PushObjectRequest, context: grpc.ServicerContext
