@@ -14,6 +14,7 @@
 # ==============================================================================
 """Utils for ObjectStore."""
 
+
 from typing import Union
 
 from flwr.proto.appio_pb2 import PushAppMessagesRequest  # pylint: disable=E0611
