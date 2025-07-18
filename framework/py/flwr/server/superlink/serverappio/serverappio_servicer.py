@@ -87,8 +87,7 @@ from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
-
-from ..utils import store_mapping_and_register_objects
+from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
