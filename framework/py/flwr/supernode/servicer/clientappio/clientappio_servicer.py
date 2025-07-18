@@ -199,8 +199,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self, request: PushAppMessagesRequest, context: grpc.ServicerContext
     ) -> PushAppMessagesResponse:
         """Push one Message."""
-        # Initialize state connection
+        # Initialize state and store connection
         state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Validate the token
         run_id = state.get_run_id_by_token(request.token)
@@ -214,7 +215,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Save the message to the state
         state.store_message(message_from_proto(request.messages_list[0]))
 
-        return PushAppMessagesResponse()
+        # Store Message object to descendants mapping and preregister objects
+        objects_to_push = store_mapping_and_register_objects(store, request=request)
+
+        return PushAppMessagesResponse(objects_to_push=objects_to_push)
 
     def PushObject(
         self, request: PushObjectRequest, context: grpc.ServicerContext
