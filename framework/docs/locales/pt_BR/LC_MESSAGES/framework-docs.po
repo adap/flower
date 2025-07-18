@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-05 00:07+0000\n"
+"POT-Creation-Date: 2025-07-18 00:08+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -10183,8 +10183,8 @@ msgstr ""
 #: flwr.common.record.metricrecord.MetricsRecord:12
 #: flwr.common.record.recorddict.RecordDict:14
 #: flwr.common.record.recorddict.RecordSet:12
-#: flwr.compat.client.app.start_client:51
-#: flwr.compat.client.app.start_numpy_client:36
+#: flwr.compat.client.app.start_client:49
+#: flwr.compat.client.app.start_numpy_client:34
 #: flwr.compat.server.app.start_server:46 flwr.server.grid.grid.Driver:14
 #: flwr.server.server_app.ServerApp:4
 #: flwr.server.server_app.ServerApp.lifespan:7
@@ -10739,12 +10739,11 @@ msgstr ""
 #: flwr.compat.client.app.start_client:31
 #: flwr.compat.client.app.start_numpy_client:29 of
 msgid ""
-"Configure the transport layer. Allowed values: - 'grpc-bidi': gRPC, "
-"bidirectional streaming - 'grpc-rere': gRPC, request-response "
-"(experimental) - 'rest': HTTP (experimental)"
+"**[Deprecated]** This argument is no longer supported and will be removed"
+" in a future release."
 msgstr ""
 
-#: flwr.compat.client.app.start_client:36 of
+#: flwr.compat.client.app.start_client:34 of
 msgid ""
 "Tuple containing the elliptic curve private key and public key for "
 "authentication from the cryptography library. Source: "
@@ -10752,32 +10751,32 @@ msgid ""
 "to establish an authenticated connection with the server."
 msgstr ""
 
-#: flwr.compat.client.app.start_client:41 of
+#: flwr.compat.client.app.start_client:39 of
 msgid ""
 "The maximum number of times the client will try to connect to the server "
 "before giving up in case of a connection error. If set to None, there is "
 "no limit to the number of tries."
 msgstr ""
 
-#: flwr.compat.client.app.start_client:45 of
+#: flwr.compat.client.app.start_client:43 of
 msgid ""
 "The maximum duration before the client stops trying to connect to the "
 "server in case of connection error. If set to None, there is no limit to "
 "the total time."
 msgstr ""
 
-#: flwr.compat.client.app.start_client:52
-#: flwr.compat.client.app.start_numpy_client:37 of
+#: flwr.compat.client.app.start_client:50
+#: flwr.compat.client.app.start_numpy_client:35 of
 msgid "Starting a gRPC client with an insecure server connection::"
 msgstr ""
 
-#: flwr.compat.client.app.start_client:59
-#: flwr.compat.client.app.start_numpy_client:44 of
+#: flwr.compat.client.app.start_client:57
+#: flwr.compat.client.app.start_numpy_client:42 of
 msgid "Starting a TLS-enabled gRPC client using system certificates::"
 msgstr ""
 
-#: flwr.compat.client.app.start_client:70
-#: flwr.compat.client.app.start_numpy_client:52 of
+#: flwr.compat.client.app.start_client:68
+#: flwr.compat.client.app.start_numpy_client:50 of
 msgid "Starting a TLS-enabled gRPC client using provided certificates::"
 msgstr ""
 
@@ -30463,7 +30462,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|c6e75721b909437dbd1c2b35f78a9363|"
+msgid "|7d728a54553a433a88f45356344afb8e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -30478,7 +30477,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|fb8c30a376b1473dbeeca583b3bb0d2b|"
+msgid "|f9c4f489e9e14412b756262111e9eee4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -30500,7 +30499,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|e7529a9a3e7e456ab89807b88a368240|"
+msgid "|3450ca269c194766b744d9b3901bba44|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -30516,7 +30515,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|8b1a3ceda8aa474581fd38963291c0ec|"
+msgid "|84f34d42d2334dd081280c0e1f73eb96|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -30532,7 +30531,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|4436660e4c024a5f8c28ed250c17783a|"
+msgid "|468c05b4e49d4820a2cee468a23173b5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -30547,7 +30546,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|114bc2e95bf04b4c9024f0141f0d79cb|"
+msgid "|bb495222283e485c985020449f7829cd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -30567,7 +30566,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|e0ba06bfaf424e84b75a6372a2629999|"
+msgid "|74647fee6eea4516a78c7d869deb7c46|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -30582,7 +30581,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|048551ac907545deb367036f8e4e076f|"
+msgid "|393dd38092e34f5e9579757b15fe8eb8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -30722,7 +30721,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|417094c62b1049d5abb3f7e2420dac73|"
+msgid "|2cb3eac40dd64841b80a3af6a6bf151a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -30746,7 +30745,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|7cce809e842c4edc8498e5d5a780b0c8|"
+msgid "|a131ee2e5e044947808a0eee84ea1653|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -30770,7 +30769,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|2df8e178f0a840dba801f41e0bfb0e61|"
+msgid "|999f128dc3cb40a0a6e30aa183e17257|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -30793,7 +30792,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|c4a924a014384814a6f9182024bc39fd|"
+msgid "|092143f39286443b887b59228bbecbba|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -30831,7 +30830,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|cadb25fb8f4c485f92b6611f284ddd8a|"
+msgid "|05279604174540d195a7342584808109|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -30925,7 +30924,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|7a5a9d002a514d8a9843386e653cf6ee|"
+msgid "|155f796db77342c0a7bd5209eb448982|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -48172,5 +48171,55 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|43f83028f1b048a98e353c79cabec221|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Configure the transport layer. Allowed "
+#~ "values: - 'grpc-bidi': gRPC, "
+#~ "bidirectional streaming - 'grpc-rere': "
+#~ "gRPC, request-response (experimental) - "
+#~ "'rest': HTTP (experimental)"
+#~ msgstr ""
+
+#~ msgid "|c6e75721b909437dbd1c2b35f78a9363|"
+#~ msgstr ""
+
+#~ msgid "|fb8c30a376b1473dbeeca583b3bb0d2b|"
+#~ msgstr ""
+
+#~ msgid "|e7529a9a3e7e456ab89807b88a368240|"
+#~ msgstr ""
+
+#~ msgid "|8b1a3ceda8aa474581fd38963291c0ec|"
+#~ msgstr ""
+
+#~ msgid "|4436660e4c024a5f8c28ed250c17783a|"
+#~ msgstr ""
+
+#~ msgid "|114bc2e95bf04b4c9024f0141f0d79cb|"
+#~ msgstr ""
+
+#~ msgid "|e0ba06bfaf424e84b75a6372a2629999|"
+#~ msgstr ""
+
+#~ msgid "|048551ac907545deb367036f8e4e076f|"
+#~ msgstr ""
+
+#~ msgid "|417094c62b1049d5abb3f7e2420dac73|"
+#~ msgstr ""
+
+#~ msgid "|7cce809e842c4edc8498e5d5a780b0c8|"
+#~ msgstr ""
+
+#~ msgid "|2df8e178f0a840dba801f41e0bfb0e61|"
+#~ msgstr ""
+
+#~ msgid "|c4a924a014384814a6f9182024bc39fd|"
+#~ msgstr ""
+
+#~ msgid "|cadb25fb8f4c485f92b6611f284ddd8a|"
+#~ msgstr ""
+
+#~ msgid "|7a5a9d002a514d8a9843386e653cf6ee|"
 #~ msgstr ""
 
