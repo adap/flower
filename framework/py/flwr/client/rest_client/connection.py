@@ -47,7 +47,7 @@ from flwr.common.inflatable_utils import (
 from flwr.common.logger import log
 from flwr.common.message import Message, remove_content_from_message
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_to_proto, run_from_proto
+from flwr.common.serde import message_to_proto, run_from_proto, message_from_proto
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -71,6 +71,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PullObjectResponse,
     PushObjectRequest,
     PushObjectResponse,
+    ObjectTree,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
@@ -109,8 +110,8 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     ] = None,
 ) -> Iterator[
     tuple[
-        Callable[[], Optional[Message]],
-        Callable[[Message], None],
+        Callable[[], Optional[tuple[Message, ObjectTree]]],
+        Callable[[Message, ObjectTree], set[str]],
         Callable[[], Optional[int]],
         Callable[[], None],
         Callable[[int], Run],
@@ -333,125 +334,57 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Cleanup
         node = None
 
-    def receive() -> Optional[Message]:
-        """Receive next Message from server."""
+    def receive() -> Optional[tuple[Message, ObjectTree]]:
+        """Pull a message with its ObjectTree from SuperLink."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
             return None
 
-        # Request instructions (message) from server
+        # Try to pull a message with its object tree from SuperLink
         req = PullMessagesRequest(node=node)
-
-        # Send the request
         res = _request(req, PullMessagesResponse, PATH_PULL_MESSAGES)
         if res is None:
             return None
 
-        # Get the current Messages
-        message_proto = None if len(res.messages_list) == 0 else res.messages_list[0]
+        # If no messages are available, return None
+        if len(res.messages_list) == 0:
+            return None
 
-        # Discard the current message if not valid
-        if message_proto is not None and not (
-            message_proto.metadata.dst_node_id == node.node_id
-        ):
-            message_proto = None
+        # Get the current Message and its object tree
+        message_proto = res.messages_list[0]
+        object_tree = res.message_object_trees[0]
 
         # Construct the Message
-        in_message: Optional[Message] = None
+        in_message = message_from_proto(message_proto)
 
-        if message_proto:
-            log(INFO, "[Node] POST /%s: success", PATH_PULL_MESSAGES)
-            msg_id = message_proto.metadata.message_id
-            run_id = message_proto.metadata.run_id
+        # Return the Message and its object tree
+        return in_message, object_tree
 
-            try:
-                object_tree = res.message_object_trees[0]
-                all_object_contents = pull_objects(
-                    [tree.object_id for tree in iterate_object_tree(object_tree)],
-                    pull_object_fn=make_pull_object_fn_protobuf(
-                        pull_object_protobuf=_pull_object_protobuf,
-                        node=node,
-                        run_id=run_id,
-                    ),
-                )
-
-                # Confirm that the message has been received
-                _request(
-                    req=ConfirmMessageReceivedRequest(
-                        node=node, run_id=run_id, message_object_id=msg_id
-                    ),
-                    res_type=ConfirmMessageReceivedResponse,
-                    api_path=PATH_CONFIRM_MESSAGE_RECEIVED,
-                )
-            except ValueError as e:
-                log(
-                    ERROR,
-                    "Pulling objects failed. Potential irrecoverable error: %s",
-                    str(e),
-                )
-            in_message = cast(
-                Message, inflate_object_from_contents(msg_id, all_object_contents)
-            )
-            # The deflated message doesn't contain the message_id (its own object_id)
-            # Inject
-            in_message.metadata.__dict__["_message_id"] = msg_id
-
-        return in_message
-
-    def send(message: Message) -> None:
-        """Send Message result back to server."""
+    def send(message: Message, object_tree: ObjectTree) -> set[str]:
+        """Send the message with its ObjectTree to SuperLink."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
             return
 
-        with no_object_id_recompute():
-            # Get all nested objects
-            all_objects = get_all_nested_objects(message)
-            object_tree = get_object_tree(message)
+        # Remove the content from the message if it has
+        if message.has_content():
+            message = remove_content_from_message(message)
 
-            # Serialize Message
-            message_proto = message_to_proto(
-                message=remove_content_from_message(message)
-            )
-            req = PushMessagesRequest(
-                node=node,
-                messages_list=[message_proto],
-                message_object_trees=[object_tree],
-            )
+        # Send the message with its ObjectTree to SuperLink
+        req = PushMessagesRequest(
+            node=node,
+            messages_list=[message_to_proto(message)],
+            message_object_trees=[object_tree],
+        )
+        res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
+        if res is None:
+            return None
 
-            # Send the request
-            res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
-            if res:
-                log(
-                    INFO,
-                    "[Node] POST /%s: success, created result %s",
-                    PATH_PUSH_MESSAGES,
-                    res.results,  # pylint: disable=no-member
-                )
-
-            if res and res.objects_to_push:
-                objs_to_push = set(res.objects_to_push[message.object_id].object_ids)
-
-                try:
-                    push_objects(
-                        all_objects,
-                        push_object_fn=make_push_object_fn_protobuf(
-                            push_object_protobuf=_push_object_protobuf,
-                            node=node,
-                            run_id=message_proto.metadata.run_id,
-                        ),
-                        object_ids_to_push=objs_to_push,
-                    )
-                    log(DEBUG, "Pushed %s objects to servicer.", len(objs_to_push))
-                except ValueError as e:
-                    log(
-                        ERROR,
-                        "Pushing objects failed. Potential irrecoverable error: %s",
-                        str(e),
-                    )
-                    log(ERROR, str(e))
+        # Get and return the object IDs to push
+        object_ids_to_push = res.objects_to_push[object_tree.object_id]
+        return set(object_ids_to_push.object_ids)
 
     def get_run(run_id: int) -> Run:
         # Construct the request

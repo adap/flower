@@ -51,7 +51,9 @@ from flwr.common.inflatable import (
     get_all_nested_objects,
     get_object_tree,
     no_object_id_recompute,
+    iterate_object_tree,
 )
+from flwr.common.inflatable_utils import pull_objects, push_objects
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.telemetry import EventType
@@ -61,6 +63,7 @@ from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
@@ -251,11 +254,11 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     ffs: Ffs,
     object_store: ObjectStore,
     node_config: UserConfig,
-    receive: Callable[[], Optional[Message]],
+    receive: Callable[[], Optional[tuple[Message, ObjectTree]]],
     get_run: Callable[[int], Run],
     get_fab: Callable[[str, int], Fab],
-    pull_object: Callable[[int, str], bytes],  # pylint: disable=W0613
-    confirm_message_received: Callable[[int, str], None],  # pylint: disable=W0613
+    pull_object: Callable[[int, str], bytes],
+    confirm_message_received: Callable[[int, str], None],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -267,8 +270,9 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     message = None
     try:
         # Pull message
-        if (message := receive()) is None:
+        if (recv := receive()) is None:
             return None
+        message, object_tree = recv
 
         # Log message reception
         log(INFO, "")
@@ -312,16 +316,22 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             )
             state.store_context(run_ctx)
 
+        # Preregister the object tree of the message
+        obj_ids_to_pull = object_store.preregister(run_id, object_tree)
+
         # Store the message in the state
-        # This shall be removed after the transition to ObjectStore
         state.store_message(message)
 
-        # Store the message in ObjectStore
-        # This is a temporary solution to store messages in ObjectStore
-        with no_object_id_recompute():
-            object_store.preregister(run_id, get_object_tree(message))
-            for obj_id, obj in get_all_nested_objects(message).items():
-                object_store.put(obj_id, obj.deflate())
+        # Pull and store objects of the message in the ObjectStore
+        obj_contents = pull_objects(
+            obj_ids_to_pull,
+            pull_object_fn=lambda obj_id: pull_object(run_id, obj_id),
+        )
+        for obj_id in list(obj_contents.keys()):
+            object_store.put(obj_id, obj_contents.pop(obj_id))
+
+        # Confirm that the message was received
+        confirm_message_received(run_id, message.metadata.message_id)
 
     except RunNotRunningException:
         if message is None:
@@ -344,8 +354,8 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
 def _push_messages(
     state: NodeState,
-    store: ObjectStore,  # pylint: disable=W0613
-    send: Callable[[Message], None],
+    object_store: ObjectStore,  # pylint: disable=W0613
+    send: Callable[[Message, ObjectTree], set[str]],
     push_object: Callable[[int, str, bytes], None],  # pylint: disable=W0613
 ) -> None:
     """Push reply messages to the SuperLink."""
@@ -372,7 +382,16 @@ def _push_messages(
 
         # Send the message
         try:
-            send(message)
+            # Get the object tree for the message
+            object_tree = object_store.get_object_tree(message.metadata.message_id)
+            
+            # Send the reply message with its ObjectTree
+            send(message, object_tree)
+
+            with no_object_id_recompute():
+                # Get all objects in the message
+                push_objects
+
             log(INFO, "Sent successfully")
         except RunNotRunningException:
             log(
@@ -404,8 +423,8 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
     max_wait_time: Optional[float] = None,
 ) -> Iterator[
     tuple[
-        Callable[[], Optional[Message]],
-        Callable[[Message], None],
+        Callable[[], Optional[tuple[Message, ObjectTree]]],
+        Callable[[Message, ObjectTree], set[str]],
         Callable[[], Optional[int]],
         Callable[[], None],
         Callable[[int], Run],
