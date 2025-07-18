@@ -35,6 +35,7 @@ from flwr.common.inflatable import (
     no_object_id_recompute,
 )
 from flwr.common.inflatable_protobuf_utils import (
+    make_confirm_message_received_fn_protobuf,
     make_pull_object_fn_protobuf,
     make_push_object_fn_protobuf,
 )
@@ -94,6 +95,9 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
+        Callable[[int, str], bytes],
+        Callable[[int, str, bytes], None],
+        Callable[[int, str], None],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -136,6 +140,9 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
     get_run : Optional[Callable]
+    pull_object : Callable[[str], bytes]
+    push_object : Callable[[str, bytes], None]
+    confirm_message_received : Callable[[str], None]
     """
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
@@ -354,9 +361,46 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
 
+    def pull_object(run_id: int, object_id: str) -> bytes:
+        """Pull the object from the SuperLink."""
+        fn = make_pull_object_fn_protobuf(
+            pull_object_protobuf=stub.PullObject,
+            node=node,
+            run_id=run_id,
+        )
+        return fn(object_id)
+
+    def push_object(run_id: int, object_id: str, contents: bytes) -> None:
+        """Push the object to the SuperLink."""
+        fn = make_push_object_fn_protobuf(
+            push_object_protobuf=stub.PushObject,
+            node=node,
+            run_id=run_id,
+        )
+        fn(object_id, contents)
+
+    def confirm_message_received(run_id: int, object_id: str) -> None:
+        """Confirm that the message has been received."""
+        fn = make_confirm_message_received_fn_protobuf(
+            confirm_message_received_protobuf=stub.ConfirmMessageReceived,
+            node=node,
+            run_id=run_id,
+        )
+        fn(object_id)
+
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node, get_run, get_fab)
+        yield (
+            receive,
+            send,
+            create_node,
+            delete_node,
+            get_run,
+            get_fab,
+            pull_object,
+            push_object,
+            confirm_message_received,
+        )
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
     # Cleanup

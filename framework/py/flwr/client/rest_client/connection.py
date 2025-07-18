@@ -35,6 +35,7 @@ from flwr.common.inflatable import (
     no_object_id_recompute,
 )
 from flwr.common.inflatable_protobuf_utils import (
+    make_confirm_message_received_fn_protobuf,
     make_pull_object_fn_protobuf,
     make_push_object_fn_protobuf,
 )
@@ -114,6 +115,9 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
+        Callable[[int, str], bytes],
+        Callable[[int, str, bytes], None],
+        Callable[[int, str], None],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -149,6 +153,9 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
     get_run : Optional[Callable]
+    pull_object : Callable[[str], bytes]
+    push_object : Callable[[str, bytes], None]
+    confirm_message_received : Callable[[str], None]
     """
     log(
         WARN,
@@ -229,6 +236,38 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         grpc_res = res_type()
         grpc_res.ParseFromString(res.content)
         return grpc_res
+
+    def _pull_object_protobuf(request: PullObjectRequest) -> PullObjectResponse:
+        res = _request(
+            req=request,
+            res_type=PullObjectResponse,
+            api_path=PATH_PULL_OBJECT,
+        )
+        if res is None:
+            raise ValueError("PullObjectResponse is None.")
+        return res
+
+    def _push_object_protobuf(request: PushObjectRequest) -> PushObjectResponse:
+        res = _request(
+            req=request,
+            res_type=PushObjectResponse,
+            api_path=PATH_PUSH_OBJECT,
+        )
+        if res is None:
+            raise ValueError("PushObjectResponse is None.")
+        return res
+
+    def _confirm_message_received_protobuf(
+        request: ConfirmMessageReceivedRequest,
+    ) -> ConfirmMessageReceivedResponse:
+        res = _request(
+            req=request,
+            res_type=ConfirmMessageReceivedResponse,
+            api_path=PATH_CONFIRM_MESSAGE_RECEIVED,
+        )
+        if res is None:
+            raise ValueError("ConfirmMessageReceivedResponse is None.")
+        return res
 
     def send_node_heartbeat() -> bool:
         # Get Node
@@ -326,20 +365,12 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             msg_id = message_proto.metadata.message_id
             run_id = message_proto.metadata.run_id
 
-            def fn(request: PullObjectRequest) -> PullObjectResponse:
-                res = _request(
-                    req=request, res_type=PullObjectResponse, api_path=PATH_PULL_OBJECT
-                )
-                if res is None:
-                    raise ValueError("PushObjectResponse is None.")
-                return res
-
             try:
                 object_tree = res.message_object_trees[0]
                 all_object_contents = pull_objects(
                     [tree.object_id for tree in iterate_object_tree(object_tree)],
                     pull_object_fn=make_pull_object_fn_protobuf(
-                        pull_object_protobuf=fn,
+                        pull_object_protobuf=_pull_object_protobuf,
                         node=node,
                         run_id=run_id,
                     ),
@@ -403,21 +434,11 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             if res and res.objects_to_push:
                 objs_to_push = set(res.objects_to_push[message.object_id].object_ids)
 
-                def fn(request: PushObjectRequest) -> PushObjectResponse:
-                    res = _request(
-                        req=request,
-                        res_type=PushObjectResponse,
-                        api_path=PATH_PUSH_OBJECT,
-                    )
-                    if res is None:
-                        raise ValueError("PushObjectResponse is None.")
-                    return res
-
                 try:
                     push_objects(
                         all_objects,
                         push_object_fn=make_push_object_fn_protobuf(
-                            push_object_protobuf=fn,
+                            push_object_protobuf=_push_object_protobuf,
                             node=node,
                             run_id=message_proto.metadata.run_id,
                         ),
@@ -457,9 +478,46 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             res.fab.content,
         )
 
+    def pull_object(run_id: int, object_id: str) -> bytes:
+        """Pull the object from the SuperLink."""
+        fn = make_pull_object_fn_protobuf(
+            pull_object_protobuf=_pull_object_protobuf,
+            node=node,
+            run_id=run_id,
+        )
+        return fn(object_id)
+
+    def push_object(run_id: int, object_id: str, contents: bytes) -> None:
+        """Push the object to the SuperLink."""
+        fn = make_push_object_fn_protobuf(
+            push_object_protobuf=_push_object_protobuf,
+            node=node,
+            run_id=run_id,
+        )
+        fn(object_id, contents)
+
+    def confirm_message_received(run_id: int, object_id: str) -> None:
+        """Confirm that the message has been received."""
+        fn = make_confirm_message_received_fn_protobuf(
+            confirm_message_received_protobuf=_confirm_message_received_protobuf,
+            node=node,
+            run_id=run_id,
+        )
+        fn(object_id)
+
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node, get_run, get_fab)
+        yield (
+            receive,
+            send,
+            create_node,
+            delete_node,
+            get_run,
+            get_fab,
+            pull_object,
+            push_object,
+            confirm_message_received,
+        )
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
     # Cleanup
