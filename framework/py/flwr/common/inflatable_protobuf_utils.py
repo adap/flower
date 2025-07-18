@@ -123,7 +123,7 @@ def make_confirm_message_received_fn_protobuf(
     node : Node
         The node making the request.
     run_id : int
-        The run ID for the current operation.
+        The run ID for the current message.
 
     Returns
     -------
