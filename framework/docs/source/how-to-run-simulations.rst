@@ -398,39 +398,6 @@ need to run the command ``ray stop`` in each node's terminal (including the head
     ``--num-gpus=<NUM_GPUS_FROM_NODE>`` in any ``ray start`` command (including when
     starting the head).
 
-Debugging Flower Simulations with IDEs
---------------------------------------
-
-Flower supports debugging your simulation code using IDEs such as VSCode or PyCharm. This is especially useful for setting breakpoints in your `server_app.py` or `client_app.py` and stepping through the code interactively.
-
-To enable debugging:
-
-1. **Install debugpy** (if not already installed):
-
-   .. code-block:: shell
-
-      pip install debugpy
-
-2. **Run your simulation with the `--debug` flag:**
-
-   .. code-block:: shell
-
-      flwr run --debug .
-
-   When `--debug` is set, Flower will wait for a debugger to attach on port 5678 before running user code.
-
-3. **Attach your IDE debugger:**
-   - In VSCode, open the Command Palette and select "Python: Attach using Process ID" or use the "Attach" configuration in your `launch.json` with port 5678.
-   - In PyCharm, use the "Attach to Process" feature or configure a remote debug configuration for port 5678.
-
-4. **Set breakpoints** in your user code (e.g., `server_app.py`, `client_app.py`).
-
-5. **Continue execution** in your IDE to step through the code as usual.
-
-.. note::
-
-   The `--debug` flag is intended for development and debugging only. Do not use it in production environments.
-
 FAQ for Simulations
 -------------------
 
