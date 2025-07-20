@@ -26,9 +26,6 @@ from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from queue import Empty, Queue
 from typing import Any, Optional
-import platform
-import os
-import importlib.util
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
@@ -66,35 +63,11 @@ def _replace_keys(d: Any, match: str, target: str) -> Any:
     return d
 
 
-def _check_ray_support(backend_name: str):
-    if backend_name.lower() == "ray":
-        if platform.system() == "Windows":
-            if sys.version_info >= (3, 13):
-                raise RuntimeError(
-                    "Ray is not supported on Windows with Python 3.13+. "
-                    "Please use Python 3.10/3.11, or run Flower in WSL2/Linux for simulation support."
-                )
-            else:
-                print(
-                    "Warning: Ray support on Windows is experimental and may not work as expected. "
-                    "For best results, use Linux, macOS, or WSL2."
-                )
-
-
 # Entry point from CLI
 # pylint: disable=too-many-locals
 def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
-
-    if getattr(args, "debug", False):
-        try:
-            import debugpy
-            debugpy.listen(("0.0.0.0", 5678))
-            print("[Flower] Debug mode enabled: waiting for debugger to attach on port 5678...")
-            debugpy.wait_for_client()
-        except ImportError:
-            print("[Flower] Debug mode requested, but debugpy is not installed. Please install debugpy for IDE debugging support.")
 
     event(
         EventType.CLI_FLOWER_SIMULATION_ENTER,
@@ -155,7 +128,6 @@ def run_simulation_from_cli() -> None:
     run = Run.create_empty(run_id)
     run.override_config = override_config
 
-    _check_ray_support(args.backend)
     _ = _run_simulation(
         server_app_attr=server_app_attr,
         client_app_attr=client_app_attr,
@@ -236,7 +208,6 @@ def run_simulation(
             "\n\tflwr.simulation.run_simulationt(...)",
         )
 
-    _check_ray_support(backend_name)
     _ = _run_simulation(
         num_supernodes=num_supernodes,
         client_app=client_app,
@@ -608,11 +579,6 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "--run-id",
         type=int,
         help="Sets the ID of the run started by the Simulation Engine.",
-    )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug mode for IDEs (e.g., VSCode breakpoints in user code). When set, Flower will wait for a debugger to attach on port 5678 before running user code. Requires debugpy to be installed.",
     )
 
     return parser
