@@ -19,6 +19,7 @@ import unittest
 from unittest.mock import Mock
 
 from flwr.common import Context, typing
+from flwr.common.inflatable import get_all_nested_objects, get_object_tree
 from flwr.common.message import make_message
 from flwr.common.serde import fab_to_proto, message_to_proto
 from flwr.common.serde_test import RecordMaker
@@ -28,6 +29,7 @@ from flwr.proto.appio_pb2 import (  # pylint:disable=E0611
     PushAppOutputsResponse,
 )
 from flwr.proto.message_pb2 import Context as ProtoContext  # pylint:disable=E0611
+from flwr.proto.message_pb2 import PullObjectResponse  # pylint:disable=E0611
 from flwr.proto.run_pb2 import Run as ProtoRun  # pylint:disable=E0611
 from flwr.supernode.runtime.run_clientapp import (
     pull_clientappinputs,
@@ -63,8 +65,18 @@ class TestClientAppIoServicer(unittest.TestCase):
             fab=fab_to_proto(mock_fab),
         )
         self.mock_stub.PullMessage.return_value = PullAppMessagesResponse(
-            messages_list=[message_to_proto(mock_message)]
+            messages_list=[message_to_proto(mock_message)],
+            message_object_trees=[get_object_tree(mock_message)],
         )
+        # Create series of responses for PullObject
+        # Adding responses for objects in a post-order traversal of object tree order
+        all_objects = get_all_nested_objects(mock_message)
+        self.mock_stub.PullObject.side_effect = [
+            PullObjectResponse(
+                object_found=True, object_available=True, object_content=obj.deflate()
+            )
+            for obj in all_objects.values()
+        ]
         self.mock_stub.PullClientAppInputs.return_value = mock_response
 
         # Execute
