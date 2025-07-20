@@ -22,6 +22,7 @@ from .inflatable_test import CustomDataClass
 from .inflatable_utils import (
     inflatable_class_registry,
     pull_and_inflate_object_from_tree,
+    push_object_contents_from_iterable,
 )
 
 
@@ -61,3 +62,21 @@ def test_pull_and_inflate_object_from_tree() -> None:
     assert result.object_id == root.object_id
     mock_pull_object.assert_called()
     mock_confirm_message_received.assert_called_once_with(root.object_id)
+
+
+def test_push_object_contents_from_iterable() -> None:
+    """Test pushing object contents from an iterable."""
+    # Prepare: Create a list of CustomDataClass objects
+    fake_pairs = [(f"fake_obj_id_{i}", b"fake_content_{i}") for i in range(10)]
+    # Prepare: Mock the functions
+    mock_push_object = Mock()
+
+    # Execute: Call the function under test
+    push_object_contents_from_iterable(
+        object_contents=fake_pairs,
+        push_object_fn=mock_push_object,
+    )
+
+    # Assert: Check that the push function was called with the correct objects
+    for obj_id, obj_content in fake_pairs:
+        mock_push_object.assert_any_call(obj_id, obj_content)
