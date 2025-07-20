@@ -37,15 +37,18 @@ from flwr.common.inflatable import (
     get_object_tree,
     no_object_id_recompute,
 )
-from flwr.common.inflatable_protobuf_utils import make_push_object_fn_protobuf
-from flwr.common.inflatable_utils import push_objects
+from flwr.common.inflatable_protobuf_utils import (
+    make_confirm_message_received_fn_protobuf,
+    make_pull_object_fn_protobuf,
+    make_push_object_fn_protobuf,
+)
+from flwr.common.inflatable_utils import pull_and_inflate_object_from_tree, push_objects
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
     fab_from_proto,
-    message_from_proto,
     message_to_proto,
     run_from_proto,
 )
@@ -212,12 +215,6 @@ def pull_clientappinputs(
     masked_token = mask_string(token)
     log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", masked_token)
     try:
-        # Pull Message
-        pull_msg_res: PullAppMessagesResponse = stub.PullMessage(
-            PullAppMessagesRequest(token=token)
-        )
-        message = message_from_proto(pull_msg_res.messages_list[0])
-
         # Pull Context, Run and (optional) FAB
         res: PullAppInputsResponse = stub.PullClientAppInputs(
             PullAppInputsRequest(token=token)
@@ -225,6 +222,26 @@ def pull_clientappinputs(
         context = context_from_proto(res.context)
         run = run_from_proto(res.run)
         fab = fab_from_proto(res.fab) if res.fab else None
+
+        # Pull and inflate the message
+        pull_msg_res: PullAppMessagesResponse = stub.PullMessage(
+            PullAppMessagesRequest(token=token)
+        )
+        run_id = context.run_id
+        node = Node(node_id=context.node_id)
+        object_tree = pull_msg_res.message_object_trees[0]
+        message = pull_and_inflate_object_from_tree(
+            object_tree,
+            make_pull_object_fn_protobuf(stub.PullObject, node, run_id),
+            make_confirm_message_received_fn_protobuf(
+                stub.ConfirmMessageReceived, node, run_id
+            ),
+            return_type=Message,
+        )
+
+        # Set the message ID
+        # The deflated message doesn't contain the message_id (its own object_id)
+        message.metadata.__dict__["_message_id"] = object_tree.object_id
         return message, context, run, fab
     except grpc.RpcError as e:
         log(ERROR, "[PullClientAppInputs] gRPC error occurred: %s", str(e))
