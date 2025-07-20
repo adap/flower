@@ -32,7 +32,6 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
 
     pip install -U "flwr[simulation]"
 
-Note: Ray is not supported on Windows with Python 3.13+. For best results, use Python 3.10/3.11 on Linux/macOS, or run Flower in WSL2 on Windows. Ray support on Windows is experimental and may not work as expected.
 """
 
     def start_simulation(*args, **kwargs):  # type: ignore
