@@ -318,7 +318,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
         # Preregister the object tree of the message
         obj_ids_to_pull = object_store.preregister(run_id, object_tree)
 
-        # Store the message in the state
+        # Store the message in the state (note this message has no content)
         state.store_message(message)
 
         # Pull and store objects of the message in the ObjectStore
