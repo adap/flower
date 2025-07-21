@@ -353,9 +353,9 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
 def _push_messages(
     state: NodeState,
-    object_store: ObjectStore,  # pylint: disable=W0613
+    object_store: ObjectStore,
     send: Callable[[Message, ObjectTree], set[str]],
-    push_object: Callable[[int, str, bytes], None],  # pylint: disable=W0613
+    push_object: Callable[[int, str, bytes], None],
 ) -> None:
     """Push reply messages to the SuperLink."""
     # Get messages to send
