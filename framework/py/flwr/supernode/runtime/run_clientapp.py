@@ -44,6 +44,7 @@ from flwr.common.inflatable_protobuf_utils import (
 )
 from flwr.common.inflatable_utils import pull_and_inflate_object_from_tree, push_objects
 from flwr.common.logger import log
+from flwr.common.message import remove_content_from_message
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import (
     context_from_proto,
@@ -256,7 +257,7 @@ def push_clientappoutputs(
     log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", masked_token)
     # Set message ID
     message.metadata.__dict__["_message_id"] = message.object_id
-    proto_message = message_to_proto(message)
+    proto_message = message_to_proto(remove_content_from_message(message))
     proto_context = context_to_proto(context)
 
     try:
