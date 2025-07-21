@@ -23,7 +23,7 @@ from contextlib import contextmanager
 from functools import partial
 from logging import INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional, Union, cast
+from typing import Callable, Optional, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -383,6 +383,17 @@ def _push_messages(
         object_tree = object_store.get_object_tree(message.metadata.message_id)
         # Counting the number of objects in the tree
         num_objects = sum(1 for _ in iterate_object_tree(object_tree))
+
+        # Define the iterator for yielding object contents
+        # This will yield (object_id, content) pairs
+        def yield_object_contents(_obj_tree: ObjectTree) -> Iterator[tuple[str, bytes]]:
+            for tree in iterate_object_tree(_obj_tree):
+                while (content := object_store.get(tree.object_id)) is None:
+                    # Wait for the content to be available
+                    time.sleep(0.5)
+
+                yield tree.object_id, content
+
         # Send the message
         try:
             # Send the reply message with its ObjectTree
@@ -391,10 +402,7 @@ def _push_messages(
             # Push object contents from the ObjectStore
             run_id = message.metadata.run_id
             push_object_contents_from_iterable(
-                (
-                    (tree.object_id, cast(bytes, object_store.get(tree.object_id)))
-                    for tree in iterate_object_tree(object_tree)
-                ),
+                yield_object_contents(object_tree),
                 total_to_push=num_objects,
                 # Use functools.partial to bind run_id explicitly,
                 # avoiding late binding issues and satisfying flake8 (B023)
