@@ -381,7 +381,8 @@ def _push_messages(
 
         # Get the object tree for the message
         object_tree = object_store.get_object_tree(message.metadata.message_id)
-
+        # Counting the number of objects in the tree
+        num_objects = sum(1 for _ in iterate_object_tree(object_tree))
         # Send the message
         try:
             # Send the reply message with its ObjectTree
@@ -394,6 +395,7 @@ def _push_messages(
                     (tree.object_id, cast(bytes, object_store.get(tree.object_id)))
                     for tree in iterate_object_tree(object_tree)
                 ),
+                total_to_push=num_objects,
                 # Use functools.partial to bind run_id explicitly,
                 # avoiding late binding issues and satisfying flake8 (B023)
                 # Equivalent to:

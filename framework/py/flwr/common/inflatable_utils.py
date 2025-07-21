@@ -115,6 +115,14 @@ def push_objects(
     """
     lock = threading.Lock()
 
+    total_to_push = 0
+
+    for obj_id in list(objects.keys()):
+        # Skip the object if no need to push it
+        if object_ids_to_push is not None and obj_id not in object_ids_to_push:
+            continue
+        total_to_push += 1
+
     def iter_dict_items() -> Iterator[tuple[str, bytes]]:
         """Iterate over the dictionary items."""
         for obj_id in list(objects.keys()):
@@ -132,6 +140,7 @@ def push_objects(
 
     push_object_contents_from_iterable(
         iter_dict_items(),
+        total_to_push,
         push_object_fn,
         max_concurrent_pushes=max_concurrent_pushes,
     )
@@ -139,6 +148,7 @@ def push_objects(
 
 def push_object_contents_from_iterable(
     object_contents: Iterable[tuple[str, bytes]],
+    total_to_push: int,
     push_object_fn: Callable[[str, bytes], None],
     *,
     max_concurrent_pushes: int = MAX_CONCURRENT_PUSHES,
@@ -157,10 +167,7 @@ def push_object_contents_from_iterable(
     max_concurrent_pushes : int (default: MAX_CONCURRENT_PUSHES)
         The maximum number of concurrent pushes to perform.
     """
-    # Convert to list to get length for progress bar
-    object_contents_list = list(object_contents)
-
-    pbar = tqdm(total=len(object_contents_list), desc="⬆️ Pushing objects", unit="obj")
+    pbar = tqdm(total=total_to_push, desc="⬆️ Pushing objects", unit="obj")
 
     def push(args: tuple[str, bytes]) -> None:
         """Push a single object."""
@@ -168,9 +175,10 @@ def push_object_contents_from_iterable(
         push_object_fn(obj_id, obj_content)
         pbar.update(1)
 
+    # Push all object contents concurrently
     num_workers = get_num_workers(max_concurrent_pushes)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
-        list(executor.map(push, object_contents_list))
+        list(executor.map(push, object_contents))
 
     pbar.close()
 
