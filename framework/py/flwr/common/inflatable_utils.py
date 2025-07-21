@@ -156,16 +156,24 @@ def push_object_contents_from_iterable(
         The maximum number of concurrent pushes to perform.
     """
 
+    from tqdm import tqdm
+
+    # Convert to list to get length for progress bar
+    object_contents_list = list(object_contents)
+
+    pbar = tqdm(total=len(object_contents_list), desc="⬆️ Pushing objects", unit="obj")
+
     def push(args: tuple[str, bytes]) -> None:
         """Push a single object."""
         obj_id, obj_content = args
-        # Push the object using the provided function
         push_object_fn(obj_id, obj_content)
+        pbar.update(1)
 
-    # Push all object contents concurrently
     num_workers = get_num_workers(max_concurrent_pushes)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
-        list(executor.map(push, object_contents))
+        list(executor.map(push, object_contents_list))
+
+    pbar.close()
 
 
 def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
@@ -214,11 +222,16 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
     if max_time is None:
         max_time = float("inf")
 
+    from tqdm import tqdm
+
     results: dict[str, bytes] = {}
     results_lock = threading.Lock()
     err_to_raise: Optional[Exception] = None
     early_stop = threading.Event()
     start = time.monotonic()
+
+    # Progress bar setup
+    pbar = tqdm(total=len(object_ids), desc="⬇️ Pulling objects", unit="obj")
 
     def pull_with_retries(object_id: str) -> None:
         """Attempt to pull a single object with retry and backoff."""
@@ -231,6 +244,7 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
                 object_content = pull_object_fn(object_id)
                 with results_lock:
                     results[object_id] = object_content
+                pbar.update(1)
                 return
 
             except ObjectUnavailableError as err:
@@ -268,6 +282,8 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
 
         # Wait for completion
         concurrent.futures.wait(futures)
+
+    pbar.close()
 
     if err_to_raise is not None:
         raise err_to_raise
