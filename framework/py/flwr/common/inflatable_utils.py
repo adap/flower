@@ -21,7 +21,9 @@ import threading
 import time
 from collections.abc import Iterable, Iterator
 from typing import Callable, Optional, TypeVar
+
 from tqdm import tqdm
+
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 from .constant import (
@@ -155,7 +157,6 @@ def push_object_contents_from_iterable(
     max_concurrent_pushes : int (default: MAX_CONCURRENT_PUSHES)
         The maximum number of concurrent pushes to perform.
     """
-
     # Convert to list to get length for progress bar
     object_contents_list = list(object_contents)
 
