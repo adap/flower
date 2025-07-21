@@ -384,8 +384,8 @@ def _push_messages(
 
         # Define the iterator for yielding object contents
         # This will yield (object_id, content) pairs
-        def yield_object_contents() -> Iterator[tuple[str, bytes]]:
-            for tree in iterate_object_tree(object_tree):
+        def yield_object_contents(_obj_tree: ObjectTree) -> Iterator[tuple[str, bytes]]:
+            for tree in iterate_object_tree(_obj_tree):
                 while (content := object_store.get(tree.object_id)) is None:
                     # Wait for the content to be available
                     time.sleep(0.5)
@@ -400,7 +400,7 @@ def _push_messages(
             # Push object contents from the ObjectStore
             run_id = message.metadata.run_id
             push_object_contents_from_iterable(
-                yield_object_contents(),
+                yield_object_contents(object_tree),
                 # Use functools.partial to bind run_id explicitly,
                 # avoiding late binding issues and satisfying flake8 (B023)
                 # Equivalent to:
