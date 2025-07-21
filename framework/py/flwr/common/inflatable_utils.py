@@ -21,7 +21,7 @@ import threading
 import time
 from collections.abc import Iterable, Iterator
 from typing import Callable, Optional, TypeVar
-
+from tqdm import tqdm
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 from .constant import (
@@ -156,8 +156,6 @@ def push_object_contents_from_iterable(
         The maximum number of concurrent pushes to perform.
     """
 
-    from tqdm import tqdm
-
     # Convert to list to get length for progress bar
     object_contents_list = list(object_contents)
 
@@ -221,8 +219,6 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
         max_tries_per_object = int(1e9)
     if max_time is None:
         max_time = float("inf")
-
-    from tqdm import tqdm
 
     results: dict[str, bytes] = {}
     results_lock = threading.Lock()
