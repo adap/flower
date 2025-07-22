@@ -381,8 +381,6 @@ def _push_messages(
 
         # Get the object tree for the message
         object_tree = object_store.get_object_tree(message.metadata.message_id)
-        # Counting the number of objects in the tree
-        num_objects = sum(1 for _ in iterate_object_tree(object_tree))
 
         # Define the iterator for yielding object contents
         # This will yield (object_id, content) pairs
@@ -409,7 +407,7 @@ def _push_messages(
             run_id = message.metadata.run_id
             push_object_contents_from_iterable(
                 yield_object_contents(object_tree, ids_obj_to_send),
-                total_to_push=num_objects,
+                total_to_push=len(ids_obj_to_send),
                 # Use functools.partial to bind run_id explicitly,
                 # avoiding late binding issues and satisfying flake8 (B023)
                 # Equivalent to:
