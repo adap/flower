@@ -23,7 +23,7 @@ from contextlib import contextmanager
 from functools import partial
 from logging import INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import cast, Callable, Optional, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -393,6 +393,17 @@ def _push_messages(
                     time.sleep(0.5)
 
                 yield tree.object_id, content
+
+        # Define the iterator for yielding object contents
+        # This will yield (object_id, content) pairs
+        def yield_object_contents(_obj_tree: ObjectTree) -> Iterator[tuple[str, bytes]]:
+            for tree in iterate_object_tree(_obj_tree):
+                while (content := object_store.get(tree.object_id)) == b"":
+                    # Wait for the content to be available
+                    time.sleep(0.5)
+                # At this point, content is guaranteed to be available
+                # therefore we can yield it after casting it to bytes
+                yield tree.object_id, cast(bytes, content)
 
         # Send the message
         try:
