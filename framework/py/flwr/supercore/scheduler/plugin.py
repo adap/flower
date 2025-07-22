@@ -19,7 +19,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from typing import Callable, Optional
 
-from flwr.common.typing import Fab, Run
+from flwr.common.typing import Run
 
 
 class SchedulerPlugin(ABC):
@@ -30,12 +30,10 @@ class SchedulerPlugin(ABC):
         appio_api_address: str,
         flwr_dir: str,
         get_run: Callable[[int], Run],
-        get_fab: Callable[[str], Fab],
     ) -> None:
         self.appio_api_address = appio_api_address
         self.flwr_dir = flwr_dir
         self.get_run = get_run
-        self.get_fab = get_fab
 
     @abstractmethod
     def select_run_id(self, candidate_run_ids: Sequence[int]) -> Optional[int]:
@@ -56,13 +54,18 @@ class SchedulerPlugin(ABC):
         """
 
     @abstractmethod
-    def launch_app(self, run_id: int, token: str) -> None:
+    def launch_app(self, token: str, run_id: int) -> None:
         """Launch the application associated with a given run ID and token.
+
+        This method starts the application process using the given `token`.
+        The `run_id` is used solely for bookkeeping purposes, allowing any
+        scheduler implementation to associate this launch with a specific run.
 
         Parameters
         ----------
-        run_id : int
-            The ID of the run to be launched.
         token : str
-            The token associated with the run.
+            The token required to run the application.
+        run_id : int
+           The ID of the run associated with the token, used for tracking or
+           logging purposes.
         """
