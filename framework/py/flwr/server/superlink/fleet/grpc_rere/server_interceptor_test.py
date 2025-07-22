@@ -28,7 +28,9 @@ from flwr.common.constant import (
     PUBLIC_KEY_HEADER,
     SIGNATURE_HEADER,
     SUPERLINK_NODE_ID,
+    SYSTEM_TIME_TOLERANCE,
     TIMESTAMP_HEADER,
+    TIMESTAMP_TOLERANCE,
     Status,
 )
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -179,7 +181,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _make_metadata_with_invalid_timestamp(self) -> list[Any]:
         """Create metadata with invalid timestamp."""
-        timestamp = (now() - datetime.timedelta(seconds=99)).isoformat()
+        timestamp = (
+            now()
+            - datetime.timedelta(seconds=TIMESTAMP_TOLERANCE + SYSTEM_TIME_TOLERANCE)
+        ).isoformat()
         signature = sign_message(self.node_sk, timestamp.encode("ascii"))
         return [
             (PUBLIC_KEY_HEADER, public_key_to_bytes(self.node_pk)),
