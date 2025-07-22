@@ -23,7 +23,7 @@ from .arraychunk import ArrayChunk
 def test_deflate_inflate() -> None:
     """Test deflate/inflate."""
     # Prepare
-    data = b"some data"
+    data = memoryview(b"some data")
     ac = ArrayChunk(data)
 
     # Deflate
@@ -39,7 +39,7 @@ def test_deflate_inflate() -> None:
 def test_inflate_passing_children() -> None:
     """ArrayChunk do not have children."""
     # Prepare
-    data = b"some data"
+    data = memoryview(b"some data")
     ac = ArrayChunk(data)
 
     # Deflate

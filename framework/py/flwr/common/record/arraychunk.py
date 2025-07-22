@@ -28,9 +28,6 @@ class ArrayChunk(InflatableObject):
 
     data: memoryview
 
-    def __init__(self, data: bytes) -> None:
-        self.data = memoryview(data)
-
     def deflate(self) -> bytes:
         """Deflate the ArrayChunk."""
         return add_header_to_object_body(object_body=self.data, obj=self)
