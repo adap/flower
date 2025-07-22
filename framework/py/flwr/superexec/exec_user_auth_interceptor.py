@@ -72,6 +72,10 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
         by validating auth metadata sent by the user. Continue RPC call if user is
         authenticated, else, terminate RPC call by setting context to abort.
         """
+        # Only apply to Exec service
+        if not handler_call_details.method.startswith("/flwr.proto.Exec/"):
+            return continuation(handler_call_details)
+
         # One of the method handlers in
         # `flwr.superexec.exec_servicer.ExecServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
@@ -108,7 +112,9 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 # Check if the user is authorized
                 if not self.authz_plugin.verify_user_authorization(account_info):
                     context.abort(
-                        grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
+                        grpc.StatusCode.PERMISSION_DENIED,
+                        "❗️ User not authorized. "
+                        "Please contact the SuperLink administrator.",
                     )
                     raise grpc.RpcError()
                 return call(request, context)  # type: ignore
@@ -127,7 +133,9 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 # Check if the user is authorized
                 if not self.authz_plugin.verify_user_authorization(account_info):
                     context.abort(
-                        grpc.StatusCode.PERMISSION_DENIED, "User not authorized"
+                        grpc.StatusCode.PERMISSION_DENIED,
+                        "❗️ User not authorized. "
+                        "Please contact the SuperLink administrator.",
                     )
                     raise grpc.RpcError()
 

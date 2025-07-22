@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import abc
+import flwr.proto.appio_pb2
 import flwr.proto.fab_pb2
 import flwr.proto.heartbeat_pb2
 import flwr.proto.log_pb2
@@ -19,13 +20,13 @@ class ServerAppIoStub:
     """Return a set of nodes"""
 
     PushMessages: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.serverappio_pb2.PushInsMessagesRequest,
-        flwr.proto.serverappio_pb2.PushInsMessagesResponse]
+        flwr.proto.appio_pb2.PushAppMessagesRequest,
+        flwr.proto.appio_pb2.PushAppMessagesResponse]
     """Create one or more messages"""
 
     PullMessages: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.serverappio_pb2.PullResMessagesRequest,
-        flwr.proto.serverappio_pb2.PullResMessagesResponse]
+        flwr.proto.appio_pb2.PullAppMessagesRequest,
+        flwr.proto.appio_pb2.PullAppMessagesResponse]
     """Get message results"""
 
     GetRun: grpc.UnaryUnaryMultiCallable[
@@ -38,14 +39,14 @@ class ServerAppIoStub:
         flwr.proto.fab_pb2.GetFabResponse]
     """Get FAB"""
 
-    PullServerAppInputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.serverappio_pb2.PullServerAppInputsRequest,
-        flwr.proto.serverappio_pb2.PullServerAppInputsResponse]
+    PullAppInputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PullAppInputsRequest,
+        flwr.proto.appio_pb2.PullAppInputsResponse]
     """Pull ServerApp inputs"""
 
-    PushServerAppOutputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.serverappio_pb2.PushServerAppOutputsRequest,
-        flwr.proto.serverappio_pb2.PushServerAppOutputsResponse]
+    PushAppOutputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PushAppOutputsRequest,
+        flwr.proto.appio_pb2.PushAppOutputsResponse]
     """Push ServerApp outputs"""
 
     UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
@@ -95,17 +96,17 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def PushMessages(self,
-        request: flwr.proto.serverappio_pb2.PushInsMessagesRequest,
+        request: flwr.proto.appio_pb2.PushAppMessagesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PushInsMessagesResponse:
+    ) -> flwr.proto.appio_pb2.PushAppMessagesResponse:
         """Create one or more messages"""
         pass
 
     @abc.abstractmethod
     def PullMessages(self,
-        request: flwr.proto.serverappio_pb2.PullResMessagesRequest,
+        request: flwr.proto.appio_pb2.PullAppMessagesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PullResMessagesResponse:
+    ) -> flwr.proto.appio_pb2.PullAppMessagesResponse:
         """Get message results"""
         pass
 
@@ -126,18 +127,18 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def PullServerAppInputs(self,
-        request: flwr.proto.serverappio_pb2.PullServerAppInputsRequest,
+    def PullAppInputs(self,
+        request: flwr.proto.appio_pb2.PullAppInputsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PullServerAppInputsResponse:
+    ) -> flwr.proto.appio_pb2.PullAppInputsResponse:
         """Pull ServerApp inputs"""
         pass
 
     @abc.abstractmethod
-    def PushServerAppOutputs(self,
-        request: flwr.proto.serverappio_pb2.PushServerAppOutputsRequest,
+    def PushAppOutputs(self,
+        request: flwr.proto.appio_pb2.PushAppOutputsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PushServerAppOutputsResponse:
+    ) -> flwr.proto.appio_pb2.PushAppOutputsResponse:
         """Push ServerApp outputs"""
         pass
 

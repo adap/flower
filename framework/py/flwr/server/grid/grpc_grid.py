@@ -31,11 +31,12 @@ from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.inflatable import (
     get_all_nested_objects,
     get_object_tree,
+    iterate_object_tree,
     no_object_id_recompute,
 )
-from flwr.common.inflatable_grpc_utils import (
-    make_pull_object_fn_grpc,
-    make_push_object_fn_grpc,
+from flwr.common.inflatable_protobuf_utils import (
+    make_pull_object_fn_protobuf,
+    make_push_object_fn_protobuf,
 )
 from flwr.common.inflatable_utils import (
     inflate_object_from_contents,
@@ -47,6 +48,12 @@ from flwr.common.message import remove_content_from_message
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullAppMessagesRequest,
+    PullAppMessagesResponse,
+    PushAppMessagesRequest,
+    PushAppMessagesResponse,
+)
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
 )
@@ -55,10 +62,6 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullResMessagesRequest,
-    PullResMessagesResponse,
-    PushInsMessagesRequest,
-    PushInsMessagesResponse,
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
@@ -223,8 +226,8 @@ class GrpcGrid(Grid):
         object_tree = get_object_tree(message)
 
         # Call GrpcServerAppIoStub method
-        res: PushInsMessagesResponse = self._stub.PushMessages(
-            PushInsMessagesRequest(
+        res: PushAppMessagesResponse = self._stub.PushMessages(
+            PushAppMessagesRequest(
                 messages_list=[message_to_proto(remove_content_from_message(message))],
                 run_id=run_id,
                 message_object_trees=[object_tree],
@@ -238,8 +241,8 @@ class GrpcGrid(Grid):
             # Push only object that are not in the store
             push_objects(
                 all_objects,
-                push_object_fn=make_push_object_fn_grpc(
-                    push_object_grpc=self._stub.PushObject,
+                push_object_fn=make_push_object_fn_protobuf(
+                    push_object_protobuf=self._stub.PushObject,
                     node=self.node,
                     run_id=run_id,
                 ),
@@ -294,20 +297,22 @@ class GrpcGrid(Grid):
         run_id = cast(Run, self._run).run_id
         try:
             # Pull Messages
-            res: PullResMessagesResponse = self._stub.PullMessages(
-                PullResMessagesRequest(
+            res: PullAppMessagesResponse = self._stub.PullMessages(
+                PullAppMessagesRequest(
                     message_ids=message_ids,
                     run_id=run_id,
                 )
             )
             # Pull Messages from store
             inflated_msgs: list[Message] = []
-            for msg_proto in res.messages_list:
+            for msg_proto, msg_tree in zip(res.messages_list, res.message_object_trees):
                 msg_id = msg_proto.metadata.message_id
                 all_object_contents = pull_objects(
-                    list(res.objects_to_pull[msg_id].object_ids) + [msg_id],
-                    pull_object_fn=make_pull_object_fn_grpc(
-                        pull_object_grpc=self._stub.PullObject,
+                    object_ids=[
+                        tree.object_id for tree in iterate_object_tree(msg_tree)
+                    ],
+                    pull_object_fn=make_pull_object_fn_protobuf(
+                        pull_object_protobuf=self._stub.PullObject,
                         node=self.node,
                         run_id=run_id,
                     ),

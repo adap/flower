@@ -29,6 +29,7 @@ from flwr.common.logger import log
 from flwr.common.message import Message
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.typing import Fab, Run
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 
 @contextmanager
@@ -43,12 +44,15 @@ def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
     ] = None,
 ) -> Iterator[
     tuple[
-        Callable[[], Optional[Message]],
-        Callable[[Message], None],
+        Callable[[], Optional[tuple[Message, ObjectTree]]],
+        Callable[[Message, ObjectTree], set[str]],
         Callable[[], Optional[int]],
         Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
+        Callable[[int, str], bytes],
+        Callable[[int, str, bytes], None],
+        Callable[[int, str], None],
     ]
 ]:
     """Primitives for request/response-based interaction with a server via GrpcAdapter.
@@ -77,12 +81,15 @@ def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
 
     Returns
     -------
-    receive : Callable
-    send : Callable
+    receive : Callable[[], Optional[tuple[Message, ObjectTree]]]
+    send : Callable[[Message, ObjectTree], set[str]]
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
     get_run : Optional[Callable]
     get_fab : Optional[Callable]
+    pull_object : Callable[[str], bytes]
+    push_object : Callable[[str, bytes], None]
+    confirm_message_received : Callable[[str], None]
     """
     if authentication_keys is not None:
         log(ERROR, "Client authentication is not supported for this transport type.")

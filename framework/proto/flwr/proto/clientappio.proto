@@ -20,6 +20,7 @@ package flwr.proto;
 import "flwr/proto/fab.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/message.proto";
+import "flwr/proto/appio.proto";
 
 service ClientAppIo {
 
@@ -31,12 +32,28 @@ service ClientAppIo {
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
 
   // Pull client app inputs
-  rpc PullClientAppInputs(PullClientAppInputsRequest)
-      returns (PullClientAppInputsResponse) {}
+  rpc PullClientAppInputs(PullAppInputsRequest)
+      returns (PullAppInputsResponse) {}
 
   // Push client app outputs
-  rpc PushClientAppOutputs(PushClientAppOutputsRequest)
-      returns (PushClientAppOutputsResponse) {}
+  rpc PushClientAppOutputs(PushAppOutputsRequest)
+      returns (PushAppOutputsResponse) {}
+
+  // Push Message
+  rpc PushMessage(PushAppMessagesRequest) returns (PushAppMessagesResponse) {}
+
+  // Pull Message
+  rpc PullMessage(PullAppMessagesRequest) returns (PullAppMessagesResponse) {}
+
+  // Push Object
+  rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
+
+  // Pull Object
+  rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
+
+  // Confirm Message Received
+  rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
+      returns (ConfirmMessageReceivedResponse) {}
 }
 
 message GetRunIdsWithPendingMessagesRequest {}
@@ -46,28 +63,3 @@ message GetRunIdsWithPendingMessagesResponse {
 
 message RequestTokenRequest { uint64 run_id = 1; }
 message RequestTokenResponse { string token = 1; }
-
-enum ClientAppOutputCode {
-  SUCCESS = 0;
-  DEADLINE_EXCEEDED = 1;
-  UNKNOWN_ERROR = 2;
-}
-message ClientAppOutputStatus {
-  ClientAppOutputCode code = 1;
-  string message = 2;
-}
-
-message PullClientAppInputsRequest { string token = 1; }
-message PullClientAppInputsResponse {
-  Message message = 1;
-  Context context = 2;
-  Run run = 3;
-  Fab fab = 4;
-}
-
-message PushClientAppOutputsRequest {
-  string token = 1;
-  Message message = 2;
-  Context context = 3;
-}
-message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1; }

@@ -3,7 +3,9 @@
 isort:skip_file
 """
 import abc
+import flwr.proto.appio_pb2
 import flwr.proto.clientappio_pb2
+import flwr.proto.message_pb2
 import grpc
 
 class ClientAppIoStub:
@@ -19,14 +21,39 @@ class ClientAppIoStub:
     """Request token"""
 
     PullClientAppInputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.clientappio_pb2.PullClientAppInputsRequest,
-        flwr.proto.clientappio_pb2.PullClientAppInputsResponse]
+        flwr.proto.appio_pb2.PullAppInputsRequest,
+        flwr.proto.appio_pb2.PullAppInputsResponse]
     """Pull client app inputs"""
 
     PushClientAppOutputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.clientappio_pb2.PushClientAppOutputsRequest,
-        flwr.proto.clientappio_pb2.PushClientAppOutputsResponse]
+        flwr.proto.appio_pb2.PushAppOutputsRequest,
+        flwr.proto.appio_pb2.PushAppOutputsResponse]
     """Push client app outputs"""
+
+    PushMessage: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PushAppMessagesRequest,
+        flwr.proto.appio_pb2.PushAppMessagesResponse]
+    """Push Message"""
+
+    PullMessage: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PullAppMessagesRequest,
+        flwr.proto.appio_pb2.PullAppMessagesResponse]
+    """Pull Message"""
+
+    PushObject: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.message_pb2.PushObjectRequest,
+        flwr.proto.message_pb2.PushObjectResponse]
+    """Push Object"""
+
+    PullObject: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.message_pb2.PullObjectRequest,
+        flwr.proto.message_pb2.PullObjectResponse]
+    """Pull Object"""
+
+    ConfirmMessageReceived: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.message_pb2.ConfirmMessageReceivedRequest,
+        flwr.proto.message_pb2.ConfirmMessageReceivedResponse]
+    """Confirm Message Received"""
 
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
@@ -48,18 +75,58 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def PullClientAppInputs(self,
-        request: flwr.proto.clientappio_pb2.PullClientAppInputsRequest,
+        request: flwr.proto.appio_pb2.PullAppInputsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.clientappio_pb2.PullClientAppInputsResponse:
+    ) -> flwr.proto.appio_pb2.PullAppInputsResponse:
         """Pull client app inputs"""
         pass
 
     @abc.abstractmethod
     def PushClientAppOutputs(self,
-        request: flwr.proto.clientappio_pb2.PushClientAppOutputsRequest,
+        request: flwr.proto.appio_pb2.PushAppOutputsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.clientappio_pb2.PushClientAppOutputsResponse:
+    ) -> flwr.proto.appio_pb2.PushAppOutputsResponse:
         """Push client app outputs"""
+        pass
+
+    @abc.abstractmethod
+    def PushMessage(self,
+        request: flwr.proto.appio_pb2.PushAppMessagesRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.appio_pb2.PushAppMessagesResponse:
+        """Push Message"""
+        pass
+
+    @abc.abstractmethod
+    def PullMessage(self,
+        request: flwr.proto.appio_pb2.PullAppMessagesRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.appio_pb2.PullAppMessagesResponse:
+        """Pull Message"""
+        pass
+
+    @abc.abstractmethod
+    def PushObject(self,
+        request: flwr.proto.message_pb2.PushObjectRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.message_pb2.PushObjectResponse:
+        """Push Object"""
+        pass
+
+    @abc.abstractmethod
+    def PullObject(self,
+        request: flwr.proto.message_pb2.PullObjectRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.message_pb2.PullObjectResponse:
+        """Pull Object"""
+        pass
+
+    @abc.abstractmethod
+    def ConfirmMessageReceived(self,
+        request: flwr.proto.message_pb2.ConfirmMessageReceivedRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.message_pb2.ConfirmMessageReceivedResponse:
+        """Confirm Message Received"""
         pass
 
 

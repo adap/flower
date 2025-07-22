@@ -35,7 +35,7 @@ specify the name of the database file.
     $ sudo chown -R 49999:49999 state
     $ docker run --rm \
          --volume ./state/:/app/state flwr/superlink:|stable_flwr_version| \
-         --database state.db \
+         --database state/state.db \
          <additional-args>
 
 As soon as the SuperLink starts, the file ``state.db`` is created in the ``state``

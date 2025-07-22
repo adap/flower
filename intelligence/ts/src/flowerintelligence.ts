@@ -185,11 +185,14 @@ export class FlowerIntelligence {
       messages,
       model,
       options.temperature,
+      options.topP,
       options.maxCompletionTokens,
+      options.responseFormat,
       options.stream,
       options.onStreamEvent,
       options.tools,
-      options.encrypt
+      options.encrypt,
+      options.signal
     );
   }
 

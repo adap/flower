@@ -21,6 +21,7 @@ import {
   FailureCode,
   Message,
   Progress,
+  ResponseFormat,
   Result,
   StreamEvent,
   Tool,
@@ -64,11 +65,14 @@ export class RemoteEngine extends BaseEngine {
     messages: Message[],
     model: string,
     temperature?: number,
+    topP?: number,
     maxCompletionTokens?: number,
+    responseFormat?: ResponseFormat,
     stream?: boolean,
     onStreamEvent?: (event: StreamEvent) => void,
     tools?: Tool[],
-    encrypt = false
+    encrypt = false,
+    signal?: AbortSignal
   ): Promise<ChatResponseResult> {
     if (encrypt) {
       const keyRes = await this.cryptoHandler.initializeKeysAndExchange();
@@ -86,8 +90,11 @@ export class RemoteEngine extends BaseEngine {
         model,
         encrypt,
         temperature,
+        topP,
         maxCompletionTokens,
-        onStreamEvent
+        responseFormat,
+        onStreamEvent,
+        signal
       );
       if (!response.ok) return response;
       return { ok: true, message: { role: 'assistant', content: response.value } };
@@ -96,7 +103,9 @@ export class RemoteEngine extends BaseEngine {
         messages,
         model,
         temperature,
+        topP,
         maxCompletionTokens,
+        responseFormat,
         false,
         tools,
         encrypt
@@ -105,7 +114,8 @@ export class RemoteEngine extends BaseEngine {
         requestData,
         '/v1/chat/completions',
         this.baseUrl,
-        this.getHeaders()
+        this.getHeaders(),
+        signal
       );
       if (!response.ok) {
         return response;
@@ -138,7 +148,9 @@ export class RemoteEngine extends BaseEngine {
     messages: Message[],
     model: string,
     temperature?: number,
+    topP?: number,
     maxCompletionTokens?: number,
+    responseFormat?: ResponseFormat,
     stream?: boolean,
     tools?: Tool[],
     encrypt?: boolean
@@ -147,9 +159,11 @@ export class RemoteEngine extends BaseEngine {
       model,
       messages,
       ...(temperature && { temperature }),
+      ...(topP && { top_p: topP }),
       ...(maxCompletionTokens && {
         max_completion_tokens: maxCompletionTokens,
       }),
+      ...(responseFormat && { response_format: responseFormat }),
       ...(stream && { stream }),
       ...(tools && { tools }),
       ...(encrypt && { encrypt, encryption_id: this.cryptoHandler.encryptionId }),
@@ -168,14 +182,19 @@ export class RemoteEngine extends BaseEngine {
     model: string,
     encrypt: boolean,
     temperature?: number,
+    topP?: number,
     maxCompletionTokens?: number,
-    onStreamEvent?: (event: StreamEvent) => void
+    responseFormat?: ResponseFormat,
+    onStreamEvent?: (event: StreamEvent) => void,
+    signal?: AbortSignal
   ): Promise<Result<string>> {
     const requestData = this.createRequestData(
       messages,
       model,
       temperature,
+      topP,
       maxCompletionTokens,
+      responseFormat,
       true,
       undefined,
       encrypt
@@ -184,7 +203,8 @@ export class RemoteEngine extends BaseEngine {
       requestData,
       '/v1/chat/completions',
       this.baseUrl,
-      this.getHeaders()
+      this.getHeaders(),
+      signal
     );
 
     if (!response.ok) return response;
@@ -193,42 +213,84 @@ export class RemoteEngine extends BaseEngine {
     const decoder = new TextDecoder('utf-8');
     let accumulatedResponse = '';
 
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        void reader?.cancel();
+      });
+    }
+
     while (reader) {
-      const { done, value } = await reader.read();
+      if (signal?.aborted) {
+        break;
+      }
+      let result;
+      try {
+        result = await reader.read();
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          break;
+        }
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          break;
+        }
+        return {
+          ok: false,
+          failure: {
+            code: FailureCode.RequestAborted,
+            description: 'Request was aborted by the user.',
+          },
+        };
+      }
+      const { done, value } = result;
       if (done) break;
 
-      const chunk = decoder.decode(value, { stream: true });
-      const dataArray = chunk.split(/(?<=})\s*(?={)/g);
+      const text = decoder.decode(value, { stream: true });
+      const parts = text.split(/(?<=})\s*(?={)/g);
 
-      for (const data of dataArray) {
+      for (const part of parts) {
+        if (!part.trim()) continue;
+
+        let parsed: unknown;
         try {
-          const { object: _, choices } = JSON.parse(data) as {
-            object: string;
-            choices: StreamChoice[];
-          };
-          for (const choice of choices) {
-            const deltaContent = choice.delta.content;
+          parsed = JSON.parse(part);
+        } catch (err) {
+          console.error('Invalid JSON chunk:', part, err);
+          continue;
+        }
 
-            if (deltaContent) {
-              let content: string;
-              if (encrypt) {
-                const decryptedResult = await this.cryptoHandler.decryptMessage(deltaContent);
-                if (!decryptedResult.ok) {
-                  return decryptedResult;
-                }
-                content = decryptedResult.value;
-              } else {
-                content = deltaContent;
-              }
-              onStreamEvent?.({ chunk: content });
-              accumulatedResponse += content;
+        if (isStreamChunk(parsed)) {
+          for (const choice of parsed.choices) {
+            const delta = choice.delta.content;
+            if (!delta) continue;
+
+            let content = delta;
+            if (encrypt) {
+              const decrypted = await this.cryptoHandler.decryptMessage(delta);
+              if (!decrypted.ok) return decrypted;
+              content = decrypted.value;
             }
+
+            onStreamEvent?.({ chunk: content });
+            accumulatedResponse += content;
           }
-        } catch (error) {
-          console.error('Error parsing JSON chunk:', error);
+        } else if (isFinalChunk(parsed)) {
+          break;
+        } else if (isHTTPError(parsed)) {
+          return {
+            ok: false,
+            failure: { code: FailureCode.ConnectionError, description: parsed.detail },
+          };
+        } else if (isGenericError(parsed)) {
+          return {
+            ok: false,
+            failure: { code: FailureCode.RemoteError, description: parsed.error },
+          };
+        } else {
+          console.warn('Unknown stream shape:', parsed);
         }
       }
     }
+
     return { ok: true, value: accumulatedResponse };
   }
 
@@ -254,7 +316,7 @@ export class RemoteEngine extends BaseEngine {
       message: {
         role: message.role as Message['role'],
         content: content,
-        ...(toolCalls && { tool_calls: toolCalls }),
+        ...(toolCalls && { toolCalls: toolCalls }),
       },
     };
   }
@@ -264,13 +326,39 @@ async function sendRequest(
   requestData: ChatCompletionsRequest,
   endpoint: string,
   baseUrl: string,
-  headers: Record<string, string>
+  headers: Record<string, string>,
+  signal?: AbortSignal
 ): Promise<Result<Response>> {
-  const response = await fetch(`${baseUrl}${endpoint}`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(requestData),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${baseUrl}${endpoint}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(requestData),
+      signal,
+    });
+  } catch (err: unknown) {
+    // Did the user abort?
+    if (
+      (err instanceof DOMException && err.name === 'AbortError') ||
+      (err instanceof Error && err.name === 'AbortError')
+    ) {
+      return {
+        ok: false,
+        failure: {
+          code: FailureCode.RequestAborted,
+          description: 'Request was aborted by the user.',
+        },
+      };
+    }
+    return {
+      ok: false,
+      failure: {
+        code: FailureCode.RemoteError,
+        description: String(err),
+      },
+    };
+  }
 
   if (!response.ok) {
     let code = FailureCode.RemoteError;
@@ -676,4 +764,50 @@ interface ChatCompletionsResponse {
   model: string;
   choices: Choice[];
   usage: Usage;
+}
+
+interface StreamChunk {
+  object: 'chat.completion.chunk';
+  choices: StreamChoice[];
+}
+
+interface FinalChunk {
+  object: 'chat.completion.chunk';
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
+
+interface HTTPError {
+  detail: string;
+}
+
+interface GenericError {
+  error: string;
+}
+
+function isStreamChunk(o: unknown): o is StreamChunk {
+  return typeof o === 'object' && o !== null && 'choices' in o && Array.isArray(o.choices);
+}
+
+function isFinalChunk(o: unknown): o is FinalChunk {
+  return (
+    typeof o === 'object' &&
+    o !== null &&
+    'usage' in o &&
+    typeof o.usage === 'object' &&
+    o.usage !== null &&
+    'prompt_tokens' in o.usage &&
+    typeof o.usage.prompt_tokens === 'number'
+  );
+}
+
+function isHTTPError(o: unknown): o is HTTPError {
+  return typeof o === 'object' && o !== null && 'detail' in o && typeof o.detail === 'string';
+}
+
+function isGenericError(o: unknown): o is GenericError {
+  return typeof o === 'object' && o !== null && 'error' in o && typeof o.error === 'string';
 }

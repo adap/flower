@@ -20,6 +20,7 @@ import subprocess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
+from functools import partial
 from logging import INFO, WARN
 from pathlib import Path
 from typing import Callable, Optional, Union
@@ -47,11 +48,17 @@ from flwr.common.constant import (
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
+from flwr.common.inflatable import iterate_object_tree
+from flwr.common.inflatable_utils import (
+    pull_objects,
+    push_object_contents_from_iterable,
+)
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
@@ -167,7 +174,17 @@ def start_client_internal(
         max_retries=max_retries,
         max_wait_time=max_wait_time,
     ) as conn:
-        receive, send, create_node, _, get_run, get_fab = conn
+        (
+            receive,
+            send,
+            create_node,
+            _,
+            get_run,
+            get_fab,
+            pull_object,
+            push_object,
+            confirm_message_received,
+        ) = conn
 
         # Call create_node fn to register node
         # and store node_id in state
@@ -187,6 +204,8 @@ def start_client_internal(
                 receive=receive,
                 get_run=get_run,
                 get_fab=get_fab,
+                pull_object=pull_object,
+                confirm_message_received=confirm_message_received,
             )
 
             # Two isolation modes:
@@ -218,7 +237,12 @@ def start_client_internal(
                 ]
                 subprocess.run(command, check=False)
 
-            _push_messages(state=state, send=send)
+            _push_messages(
+                state=state,
+                object_store=store,
+                send=send,
+                push_object=push_object,
+            )
 
             # Sleep for 3 seconds before the next iteration
             time.sleep(3)
@@ -227,11 +251,13 @@ def start_client_internal(
 def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     state: NodeState,
     ffs: Ffs,
-    object_store: ObjectStore,  # pylint: disable=unused-argument
+    object_store: ObjectStore,
     node_config: UserConfig,
-    receive: Callable[[], Optional[Message]],
+    receive: Callable[[], Optional[tuple[Message, ObjectTree]]],
     get_run: Callable[[int], Run],
     get_fab: Callable[[str, int], Fab],
+    pull_object: Callable[[int, str], bytes],
+    confirm_message_received: Callable[[int, str], None],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -243,8 +269,9 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     message = None
     try:
         # Pull message
-        if (message := receive()) is None:
+        if (recv := receive()) is None:
             return None
+        message, object_tree = recv
 
         # Log message reception
         log(INFO, "")
@@ -288,8 +315,23 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             )
             state.store_context(run_ctx)
 
-        # Store the message in the state
+        # Preregister the object tree of the message
+        obj_ids_to_pull = object_store.preregister(run_id, object_tree)
+
+        # Store the message in the state (note this message has no content)
         state.store_message(message)
+
+        # Pull and store objects of the message in the ObjectStore
+        obj_contents = pull_objects(
+            obj_ids_to_pull,
+            pull_object_fn=lambda obj_id: pull_object(run_id, obj_id),
+        )
+        for obj_id in list(obj_contents.keys()):
+            object_store.put(obj_id, obj_contents.pop(obj_id))
+
+        # Confirm that the message was received
+        confirm_message_received(run_id, message.metadata.message_id)
+
     except RunNotRunningException:
         if message is None:
             log(
@@ -311,7 +353,9 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
 def _push_messages(
     state: NodeState,
-    send: Callable[[Message], None],
+    object_store: ObjectStore,
+    send: Callable[[Message, ObjectTree], set[str]],
+    push_object: Callable[[int, str, bytes], None],
 ) -> None:
     """Push reply messages to the SuperLink."""
     # Get messages to send
@@ -335,9 +379,34 @@ def _push_messages(
             message.metadata.message_type,
         )
 
+        # Get the object tree for the message
+        object_tree = object_store.get_object_tree(message.metadata.message_id)
+
+        # Define the iterator for yielding object contents
+        # This will yield (object_id, content) pairs
+        def yield_object_contents(_obj_tree: ObjectTree) -> Iterator[tuple[str, bytes]]:
+            for tree in iterate_object_tree(_obj_tree):
+                while (content := object_store.get(tree.object_id)) is None:
+                    # Wait for the content to be available
+                    time.sleep(0.5)
+
+                yield tree.object_id, content
+
         # Send the message
         try:
-            send(message)
+            # Send the reply message with its ObjectTree
+            send(message, object_tree)
+
+            # Push object contents from the ObjectStore
+            run_id = message.metadata.run_id
+            push_object_contents_from_iterable(
+                yield_object_contents(object_tree),
+                # Use functools.partial to bind run_id explicitly,
+                # avoiding late binding issues and satisfying flake8 (B023)
+                # Equivalent to:
+                # lambda object_id, content: push_object(run_id, object_id, content)
+                push_object_fn=partial(push_object, run_id),
+            )
             log(INFO, "Sent successfully")
         except RunNotRunningException:
             log(
@@ -355,6 +424,11 @@ def _push_messages(
                 ]
             )
 
+            # Delete all its objects from the ObjectStore
+            # No need to delete objects of the message it replies to, as it is
+            # already deleted when the ClientApp calls `ConfirmMessageReceived`
+            object_store.delete(message.metadata.message_id)
+
 
 @contextmanager
 def _init_connection(  # pylint: disable=too-many-positional-arguments
@@ -369,12 +443,15 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
     max_wait_time: Optional[float] = None,
 ) -> Iterator[
     tuple[
-        Callable[[], Optional[Message]],
-        Callable[[Message], None],
+        Callable[[], Optional[tuple[Message, ObjectTree]]],
+        Callable[[Message, ObjectTree], set[str]],
         Callable[[], Optional[int]],
         Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
+        Callable[[int, str], bytes],
+        Callable[[int, str, bytes], None],
+        Callable[[int, str], None],
     ]
 ]:
     """Establish a connection to the Fleet API server at SuperLink."""
