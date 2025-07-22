@@ -1,0 +1,109 @@
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Flower app scheduler process."""
+
+
+import time
+from typing import Optional
+
+from flwr.common.config import get_flwr_dir
+from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.grpc import create_channel, on_channel_state_change
+from flwr.common.telemetry import EventType
+from flwr.common.typing import Fab, Run
+from flwr.proto.clientappio_pb2 import (
+    GetRunIdsWithPendingMessagesRequest,
+    RequestTokenRequest,
+)
+from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
+
+from .plugin import SchedulerPlugin
+
+
+def run_app_scheduler(
+    plugin_class: type[SchedulerPlugin],
+    appio_api_address: str,
+    flwr_dir: Optional[str] = None,
+) -> None:
+    """Run the Flower app scheduler.
+
+    Parameters
+    ----------
+    plugin_class : type[SchedulerPlugin]
+        The class of the scheduler plugin to use.
+    appio_api_address : str
+        The address of the AppIO API.
+    flwr_dir : Optional[str] (default: None)
+        The Flower directory.
+    """
+    # Create the channel to the AppIO API
+    # No TLS support for now, so insecure connection
+    channel = create_channel(
+        server_address=appio_api_address,
+        insecure=True,
+        root_certificates=None,
+    )
+    channel.subscribe(on_channel_state_change)
+
+    # Register exit handlers to close the channel on exit
+    register_exit_handlers(
+        event_type=EventType.FLWR_APP_SCHEDULER_RUN_LEAVE,
+        exit_message="Flower app scheduler terminated gracefully.",
+        exit_handlers=[lambda: channel.close()],
+    )
+
+    # Create the gRPC stub for the AppIO API
+    # We shall merge the ClientAppIo and ServerAppIo in the future
+    # so we can use the same stub for both.
+    # For now, we use ClientAppIoStub.
+    stub = ClientAppIoStub(channel)
+
+    def get_run(run_id: int) -> Run:
+        raise NotImplementedError("GetRun RPC is not yet available.")
+
+    def get_fab(fab_id: str) -> Fab:
+        raise NotImplementedError("GetFab RPC is not yet available.")
+
+    # Create the scheduler plugin instance
+    plugin = plugin_class(
+        appio_api_address=appio_api_address,
+        flwr_dir=get_flwr_dir(flwr_dir),
+        get_run=get_run,
+        get_fab=get_fab,
+    )
+
+    # Start the scheduler loop
+    try:
+        while True:
+            # Fetch suitable run IDs
+            get_runs_req = GetRunIdsWithPendingMessagesRequest()
+            get_runs_res = stub.GetRunIdsWithPendingMessages(get_runs_req)
+
+            # Allow the plugin to select a run ID
+            run_id = plugin.select_run_id(candidate_run_ids=get_runs_res.run_ids)
+
+            # Apply for a token if a run ID was selected
+            if run_id is not None:
+                tk_req = RequestTokenRequest(run_id=run_id)
+                tk_res = stub.RequestToken(tk_req)
+
+                # Launch the app if a token was granted; do nothing if not
+                if tk_res.token:
+                    plugin.launch_app(run_id=run_id, token=tk_res.token)
+
+            # Sleep for a while before checking again
+            time.sleep(1)
+    finally:
+        channel.close()
