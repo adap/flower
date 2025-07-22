@@ -13,3 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 """Flower App Scheduler."""
+
+
+from .plugin import SchedulerPlugin
+
+__all__ = [
+    "SchedulerPlugin",
+]

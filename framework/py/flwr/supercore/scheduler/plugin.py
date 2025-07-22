@@ -16,8 +16,8 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Callable, Optional
 from collections.abc import Sequence
+from typing import Callable, Optional
 
 from flwr.common.typing import Fab, Run
 
