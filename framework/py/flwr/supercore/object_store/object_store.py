@@ -99,8 +99,10 @@ class ObjectStore(abc.ABC):
 
         Returns
         -------
-        bytes
-            The object stored under the given object_id.
+        Optional[bytes]
+            The object stored under the given object_id if it exists, else None.
+            The returned bytes will be b"" if the object is not yet available,
+            but has been preregistered.
         """
 
     @abc.abstractmethod
