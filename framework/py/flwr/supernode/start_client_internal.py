@@ -382,6 +382,8 @@ def _push_messages(
         # Get the object tree for the message
         object_tree = object_store.get_object_tree(message.metadata.message_id)
 
+        # Define the iterator for yielding object contents
+        # This will yield (object_id, content) pairs
         def yield_object_contents(
             _obj_tree: ObjectTree, obj_id_set: set[str]
         ) -> Iterator[tuple[str, bytes]]:
