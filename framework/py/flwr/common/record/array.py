@@ -394,7 +394,9 @@ class Array(InflatableObject):
         if name in ("dtype", "shape", "stype", "data"):
             # Mark as dirty if any of the main attributes are set
             self.is_dirty = True
-            # Clear cached object ID and chunks
+            # Clear cached object ID
             self.__dict__.pop("_object_id", None)
-            self.__dict__.pop("_chunks", None)
+            # Clear cached chunks if data is set
+            if name == "data":
+                self.__dict__.pop("_chunks", None)
         super().__setattr__(name, value)
