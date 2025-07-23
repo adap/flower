@@ -323,7 +323,7 @@ class GrpcGrid(Grid):
                         ),
                     )
                 except ObjectUnavailableError as e:
-                    # A ObjectUnavailableError indicates that the object is not yet
+                    # An ObjectUnavailableError indicates that the object is not yet
                     # available. If this point has been reached, it means that the
                     # Grid has tried to pull the object for the maximum number of times
                     # or for the maximum time allowed, so we return an inflated message
