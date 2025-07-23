@@ -26,7 +26,7 @@ from flwr.supercore.scheduler import SchedulerPlugin
 class SimpleClientAppSchedulerPlugin(SchedulerPlugin):
     """Simple Flower ClientApp Scheduler plugin.
 
-    The scheduler always selects the first candidate run ID.
+    The plugin always selects the first candidate run ID.
     """
 
     def select_run_id(self, candidate_run_ids: Sequence[int]) -> Optional[int]:
