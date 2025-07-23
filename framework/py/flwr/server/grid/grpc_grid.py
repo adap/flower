@@ -272,8 +272,8 @@ class GrpcGrid(Grid):
                     msg.metadata.__dict__["_message_id"] = msg.object_id
                     # Check message
                     self._check_message(msg)
-                  # Try pushing messages and their objects
-                  message_ids = self._try_push_message_objects(run_id, messages)
+                # Try pushing messages and their objects
+                message_ids = self._try_push_messages(run_id, messages)
 
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
