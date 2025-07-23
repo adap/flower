@@ -21,13 +21,15 @@ from typing import Optional
 from flwr.common.config import get_flwr_dir
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
+from flwr.common.serde import run_from_proto
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Run
-from flwr.proto.clientappio_pb2 import (
+from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0611
     GetRunIdsWithPendingMessagesRequest,
     RequestTokenRequest,
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
+from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
 
 from .plugin import SchedulerPlugin
 
@@ -71,12 +73,14 @@ def run_app_scheduler(
     stub = ClientAppIoStub(channel)
 
     def get_run(run_id: int) -> Run:
-        raise NotImplementedError("GetRun RPC is not yet available.")
+        _req = GetRunRequest(run_id=run_id)
+        _res = stub.GetRun(_req)
+        return run_from_proto(_res.run)
 
     # Create the scheduler plugin instance
     plugin = plugin_class(
         appio_api_address=appio_api_address,
-        flwr_dir=get_flwr_dir(flwr_dir),
+        flwr_dir=flwr_dir,
         get_run=get_run,
     )
 
@@ -88,7 +92,9 @@ def run_app_scheduler(
             get_runs_res = stub.GetRunIdsWithPendingMessages(get_runs_req)
 
             # Allow the plugin to select a run ID
-            run_id = plugin.select_run_id(candidate_run_ids=get_runs_res.run_ids)
+            run_id = None
+            if get_runs_res.run_ids:
+                run_id = plugin.select_run_id(candidate_run_ids=get_runs_res.run_ids)
 
             # Apply for a token if a run ID was selected
             if run_id is not None:
@@ -97,7 +103,7 @@ def run_app_scheduler(
 
                 # Launch the app if a token was granted; do nothing if not
                 if tk_res.token:
-                    plugin.launch_app(run_id=run_id, token=tk_res.token)
+                    plugin.launch_app(token=tk_res.token, run_id=run_id)
 
             # Sleep for a while before checking again
             time.sleep(1)
