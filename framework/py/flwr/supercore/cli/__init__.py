@@ -15,10 +15,8 @@
 """Flower command line interface for shared infrastructure components."""
 
 
-from .flower_supernode import flower_supernode
-from .flwr_clientapp import flwr_clientapp
+from .flwr_app_scheduler import flwr_app_scheduler
 
 __all__ = [
-    "flower_supernode",
-    "flwr_clientapp",
+    "flwr_app_scheduler",
 ]

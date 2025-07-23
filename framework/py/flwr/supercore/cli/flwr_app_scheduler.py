@@ -19,7 +19,10 @@ import argparse
 from logging import INFO
 
 from flwr.common import EventType, event
+from flwr.common.constant import SchedulerPluginType
 from flwr.common.logger import log
+from flwr.supercore.scheduler import run_app_scheduler
+from flwr.supernode.scheduler import SimpleClientAppSchedulerPlugin
 
 
 def flwr_app_scheduler() -> None:
@@ -32,8 +35,10 @@ def flwr_app_scheduler() -> None:
     # Trigger telemetry event
     event(EventType.FLWR_APP_SCHEDULER_RUN_ENTER)
 
-    raise NotImplementedError(
-        "The `flwr-app-scheduler` command is not implemented yet."
+    run_app_scheduler(
+        plugin_class=_get_plugin_class(args.plugin_type),
+        appio_api_address=args.appio_api_address,
+        flwr_dir=args.flwr_dir,
     )
 
 
@@ -44,6 +49,13 @@ def _parse_args() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--appio-api-address", type=str, required=True, help="Address of the AppIO API"
+    )
+    parser.add_argument(
+        "--plugin-type",
+        type=str,
+        choices=SchedulerPluginType.all(),
+        required=True,
+        help="The type of plugin to use.",
     )
     parser.add_argument(
         "--insecure",
@@ -64,3 +76,10 @@ def _parse_args() -> argparse.ArgumentParser:
         """,
     )
     return parser
+
+
+def _get_plugin_class(plugin_type: str) -> type[SimpleClientAppSchedulerPlugin]:
+    """Get the plugin class based on the plugin type."""
+    if plugin_type == SchedulerPluginType.CLIENT_APP:
+        return SimpleClientAppSchedulerPlugin
+    raise ValueError(f"Unknown plugin type: {plugin_type}")

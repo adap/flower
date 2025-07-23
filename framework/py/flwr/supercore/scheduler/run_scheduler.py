@@ -22,7 +22,7 @@ from flwr.common.config import get_flwr_dir
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.telemetry import EventType
-from flwr.common.typing import Fab, Run
+from flwr.common.typing import Run
 from flwr.proto.clientappio_pb2 import (
     GetRunIdsWithPendingMessagesRequest,
     RequestTokenRequest,
@@ -73,15 +73,11 @@ def run_app_scheduler(
     def get_run(run_id: int) -> Run:
         raise NotImplementedError("GetRun RPC is not yet available.")
 
-    def get_fab(fab_id: str) -> Fab:
-        raise NotImplementedError("GetFab RPC is not yet available.")
-
     # Create the scheduler plugin instance
     plugin = plugin_class(
         appio_api_address=appio_api_address,
         flwr_dir=get_flwr_dir(flwr_dir),
         get_run=get_run,
-        get_fab=get_fab,
     )
 
     # Start the scheduler loop

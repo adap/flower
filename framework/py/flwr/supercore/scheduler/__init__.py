@@ -16,7 +16,9 @@
 
 
 from .plugin import SchedulerPlugin
+from .run_scheduler import run_app_scheduler
 
 __all__ = [
     "SchedulerPlugin",
+    "run_app_scheduler",
 ]
