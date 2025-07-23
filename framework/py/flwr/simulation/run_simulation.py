@@ -27,6 +27,8 @@ from pathlib import Path
 from queue import Empty, Queue
 from typing import Any, Optional
 
+import platform
+
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
 from flwr.client import ClientApp
@@ -63,6 +65,21 @@ def _replace_keys(d: Any, match: str, target: str) -> Any:
     return d
 
 
+def _check_ray_support(backend_name: str):
+    if backend_name.lower() == "ray":
+        if platform.system() == "Windows":
+            if sys.version_info >= (3, 13):
+                raise RuntimeError(
+                    "Ray is not supported on Windows with Python 3.13+. "
+                    "Please use Python 3.10/3.11, or run Flower in WSL2/Linux for simulation support."
+                )
+            else:
+                print(
+                    "Warning: Ray support on Windows is experimental and may not work as expected. "
+                    "For best results, use Linux, macOS, or WSL2."
+                )
+
+
 # Entry point from CLI
 # pylint: disable=too-many-locals
 def run_simulation_from_cli() -> None:
@@ -81,6 +98,8 @@ def run_simulation_from_cli() -> None:
             "variable to true.",
             code_example='TF_FORCE_GPU_ALLOW_GROWTH="true" flower-simulation <...>',
         )
+
+    _check_ray_support(args.backend)
 
     # Load JSON config
     backend_config_dict = json.loads(args.backend_config)
@@ -207,6 +226,8 @@ def run_simulation(
             code_example='import os;os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"'
             "\n\tflwr.simulation.run_simulationt(...)",
         )
+
+    _check_ray_support(backend_name)
 
     _ = _run_simulation(
         num_supernodes=num_supernodes,

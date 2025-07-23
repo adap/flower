@@ -2,6 +2,23 @@
 .. meta::
     :description: Run federated learning simulations in Flower using the VirtualClientEngine for scalable, resource-aware, and multi-node simulations on any system configuration.
 
+Platform support
+----------------
+
+**Ray-based simulation is not supported on Windows with Python 3.13 or newer.**
+
+- Ray support on Windows is experimental and may not work as expected, even with Python 3.10/3.11.
+- For best results, use Python 3.10 or 3.11 on Linux/macOS, or run Flower in WSL2 on Windows.
+- If you encounter errors related to Ray or simulation on Windows, please check your Python version and consider using WSL2 or a Linux environment.
+
+.. note::
+
+   The Ray team currently flags Python 3.13 support as "beta".
+
+.. note::
+
+   Flower does not officially support Python 3.13 yet.
+
 .. |clientapp_link| replace:: ``ClientApp``
 
 .. |message_link| replace:: ``Message``
