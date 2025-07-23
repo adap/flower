@@ -218,29 +218,35 @@ class GrpcGrid(Grid):
         )
         return [node.node_id for node in res.nodes]
 
-    def _try_push_message(self, run_id: int, message: Message) -> str:
-        """Push one message and its associated objects."""
-        # Compute mapping of message descendants
-        all_objects = get_all_nested_objects(message)
-        msg_id = message.object_id
-        object_tree = get_object_tree(message)
+    def _try_push_message_objects(
+        self, run_id: int, messages: Iterable[Message]
+    ) -> list[str]:
+        """Push all messages and its associated objects."""
+        # Prepare all Messages to be sent in a single request
+        proto_messages = []
+        object_trees = []
+        all_objects = {}
+        for msg in messages:
+            proto_messages.append(message_to_proto(remove_content_from_message(msg)))
+            all_objects[msg.object_id] = get_all_nested_objects(msg)
+            object_trees.append(get_object_tree(msg))
 
         # Call GrpcServerAppIoStub method
         res: PushAppMessagesResponse = self._stub.PushMessages(
             PushAppMessagesRequest(
-                messages_list=[message_to_proto(remove_content_from_message(message))],
+                messages_list=proto_messages,
                 run_id=run_id,
-                message_object_trees=[object_tree],
+                message_object_trees=object_trees,
             )
         )
 
         # Push objects
         # If Message was added to the LinkState correctly
-        if msg_id is not None:
+        for msg_id in res.message_ids:
             obj_ids_to_push = set(res.objects_to_push[msg_id].object_ids)
             # Push only object that are not in the store
             push_objects(
-                all_objects,
+                all_objects[msg_id],
                 push_object_fn=make_push_object_fn_protobuf(
                     push_object_protobuf=self._stub.PushObject,
                     node=self.node,
@@ -248,7 +254,7 @@ class GrpcGrid(Grid):
                 ),
                 object_ids_to_push=obj_ids_to_push,
             )
-        return msg_id
+        return cast(list[str], res.message_ids)
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.
@@ -268,8 +274,8 @@ class GrpcGrid(Grid):
                 # Check message
                 self._check_message(msg)
                 # Try pushing message and its objects
-                with no_object_id_recompute():
-                    message_ids.append(self._try_push_message(run_id, msg))
+            with no_object_id_recompute():
+                message_ids = self._try_push_message_objects(run_id, messages)
 
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:  # pylint: disable=E1101
