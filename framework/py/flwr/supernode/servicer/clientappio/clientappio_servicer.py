@@ -59,6 +59,7 @@ from flwr.proto.message_pb2 import (
     PushObjectRequest,
     PushObjectResponse,
 )
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
 # pylint: disable=E0601
 from flwr.supercore.ffs import FfsFactory
@@ -117,6 +118,23 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
 
         # Return the token
         return RequestTokenResponse(token=token)
+
+    def GetRun(
+        self, request: GetRunRequest, context: grpc.ServicerContext
+    ) -> GetRunResponse:
+        """Get run information."""
+        log(DEBUG, "ClientAppIo.GetRun")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Retrieve run information
+        run = state.get_run(request.run_id)
+
+        if run is None:
+            return GetRunResponse()
+
+        return GetRunResponse(run=run_to_proto(run))
 
     def PullClientAppInputs(
         self, request: PullAppInputsRequest, context: grpc.ServicerContext
