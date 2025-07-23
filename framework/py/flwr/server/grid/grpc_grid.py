@@ -218,9 +218,7 @@ class GrpcGrid(Grid):
         )
         return [node.node_id for node in res.nodes]
 
-    def _try_push_message_objects(
-        self, run_id: int, messages: Iterable[Message]
-    ) -> list[str]:
+    def _try_push_messages(self, run_id: int, messages: Iterable[Message]) -> list[str]:
         """Push all messages and its associated objects."""
         # Prepare all Messages to be sent in a single request
         proto_messages = []
