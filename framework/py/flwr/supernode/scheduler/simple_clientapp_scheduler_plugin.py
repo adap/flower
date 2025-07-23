@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simple Flower ClientApp Scheduler."""
+"""Simple Flower ClientApp Scheduler plugin."""
 
 
 import os
@@ -23,8 +23,8 @@ from typing import Optional
 from flwr.supercore.scheduler import SchedulerPlugin
 
 
-class SimpleClientAppScheduler(SchedulerPlugin):
-    """Simple Flower ClientApp Scheduler.
+class SimpleClientAppSchedulerPlugin(SchedulerPlugin):
+    """Simple Flower ClientApp Scheduler plugin.
 
     The scheduler always selects the first candidate run ID.
     """

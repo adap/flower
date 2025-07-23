@@ -15,8 +15,8 @@
 """Flower ClientApp Scheduler."""
 
 
-from .simple_clientapp_scheduler import SimpleClientAppScheduler
+from .simple_clientapp_scheduler_plugin import SimpleClientAppSchedulerPlugin
 
 __all__ = [
-    "SimpleClientAppScheduler",
+    "SimpleClientAppSchedulerPlugin",
 ]
