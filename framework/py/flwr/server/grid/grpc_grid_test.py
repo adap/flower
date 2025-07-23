@@ -113,26 +113,18 @@ class TestGrpcGrid(unittest.TestCase):
         msg2 = self._prep_message(Message(RecordDict(), 0, "query.B"))
 
         msgs = [msg1, msg2]
-        mock_response_msg1 = Mock(
-            message_ids=[msg1.object_id],
+        # The seconds ObjectIDs doesn't contain the object ID of the emtpy RecordDict
+        # because it is the same as the one in msg1.
+        mock_response = Mock(
+            message_ids=[msg1.object_id, msg2.object_id],
             objects_to_push={
                 msg1.object_id: ObjectIDs(
                     object_ids=[msg1.object_id, RecordDict().object_id]
                 ),
+                msg2.object_id: ObjectIDs(object_ids=[msg2.object_id]),
             },
         )
-        mock_response_msg2 = Mock(
-            message_ids=[msg2.object_id],
-            objects_to_push={
-                msg2.object_id: ObjectIDs(
-                    object_ids=[msg2.object_id, RecordDict().object_id]
-                ),
-            },
-        )
-        self.mock_stub.PushMessages.side_effect = [
-            mock_response_msg1,
-            mock_response_msg2,
-        ]
+        self.mock_stub.PushMessages.return_value = mock_response
         self.mock_stub.PushObject.return_value = Mock(stored=True)
 
         # Execute
