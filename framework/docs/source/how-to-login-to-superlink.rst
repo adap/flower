@@ -78,10 +78,10 @@ Save this file as ``user-auth-config.yaml``. Then pass it to the SuperLink via t
 Login to the SuperLink
 ----------------------
 
-Once a SuperLink with user authentication and authorization is up and running, you can
-interface with it by installing the ``flwr`` PyPI package. Then, ensure that the
+Once a SuperLink with user authentication and authorization is up and running, a user can
+interface with it after installing the ``flwr`` PyPI package via the Flower CLI. Then, ensure that the
 ``enable-user-auth`` field is set to ``true`` in the federation section in the
-``pyproject.toml`` of your Flower app:
+``pyproject.toml`` of the Flower app you want to run:
 
 .. code-block:: toml
 
