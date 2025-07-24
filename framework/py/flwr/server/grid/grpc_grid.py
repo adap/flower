@@ -29,6 +29,7 @@ from flwr.common.constant import (
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.inflatable import (
+    InflatableObject,
     get_all_nested_objects,
     get_object_tree,
     iterate_object_tree,
@@ -223,10 +224,10 @@ class GrpcGrid(Grid):
         # Prepare all Messages to be sent in a single request
         proto_messages = []
         object_trees = []
-        all_objects = {}
+        all_objects: dict[str, InflatableObject] = {}
         for msg in messages:
             proto_messages.append(message_to_proto(remove_content_from_message(msg)))
-            all_objects[msg.object_id] = get_all_nested_objects(msg)
+            all_objects.update(get_all_nested_objects(msg))
             object_trees.append(get_object_tree(msg))
             del msg
 
@@ -240,19 +241,15 @@ class GrpcGrid(Grid):
         )
 
         # Push objects
-        # If Message was added to the LinkState correctly
-        for msg_id in res.message_ids:
-            obj_ids_to_push = set(res.objects_to_push[msg_id].object_ids)
-            # Push only object that are not in the store
-            push_objects(
-                all_objects[msg_id],
-                push_object_fn=make_push_object_fn_protobuf(
-                    push_object_protobuf=self._stub.PushObject,
-                    node=self.node,
-                    run_id=run_id,
-                ),
-                object_ids_to_push=obj_ids_to_push,
-            )
+        push_objects(
+            all_objects,
+            push_object_fn=make_push_object_fn_protobuf(
+                push_object_protobuf=self._stub.PushObject,
+                node=self.node,
+                run_id=run_id,
+            ),
+            object_ids_to_push=set(res.objects_to_push),
+        )
         return cast(list[str], res.message_ids)
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
