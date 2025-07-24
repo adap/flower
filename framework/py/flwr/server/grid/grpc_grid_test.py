@@ -19,7 +19,7 @@ import threading
 import time
 import unittest
 from contextlib import AbstractContextManager
-from typing import Any, Callable
+from typing import Any
 from unittest.mock import Mock, patch
 
 import grpc
@@ -319,7 +319,7 @@ class TestGrpcGrid(unittest.TestCase):
     @parameterized.expand(  # type: ignore
         [
             (
-                lambda: patch.object(  # make test hit PULL_MAX_TRIES_PER_OBJECT
+                patch.object(  # make test hit PULL_MAX_TRIES_PER_OBJECT
                     threading.Event,
                     "wait",
                     new=lambda self, timeout=None: original_wait(
@@ -328,12 +328,12 @@ class TestGrpcGrid(unittest.TestCase):
                 ),
             ),
             (  # make test hit PULL_MAX_TIME
-                lambda: patch("time.monotonic", side_effect=[0, PULL_MAX_TIME + 1]),
+                patch("time.monotonic", side_effect=[0, PULL_MAX_TIME + 1]),
             ),
         ]
     )
     def test_timeout_pulling_object_creates_message_with_error(
-        self, patch_ctx: Callable[[], AbstractContextManager[Any]]
+        self, patcher: AbstractContextManager[Any]
     ) -> None:
         """Test that pulling an object with a timeout creates a message with an
         error."""
@@ -359,7 +359,7 @@ class TestGrpcGrid(unittest.TestCase):
         self.mock_stub.PullObject.return_value = response
 
         # Execute
-        with patch_ctx():
+        with patcher:
             # Depending on the patch context, this will either hit the timeout or
             # the limit of pulling attempts for a given object
             msgs = list(self.grid.pull_messages([ins1.object_id]))
