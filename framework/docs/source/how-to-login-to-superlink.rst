@@ -1,3 +1,7 @@
+:og:description: Configure SuperLink for user authentication and authorization. Private-by-default runs securely with OIDC and OpenFGA.
+.. meta::
+    :description: Configure SuperLink for user authentication and authorization. Private-by-default runs securely with OIDC and OpenFGA.
+
 Login to SuperLink
 ==================
 
