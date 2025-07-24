@@ -18,7 +18,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from flwr.proto.run_pb2 import GetRunRequest
+from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
 from flwr.proto.run_pb2 import Run as ProtoRun  # pylint: disable=E0611
 from flwr.supercore.scheduler.run_scheduler import run_app_scheduler
 
@@ -27,6 +27,7 @@ class MockError(Exception):
     """Custom exception for termination."""
 
 
+# pylint: disable=too-many-instance-attributes
 class TestRunAppScheduler(unittest.TestCase):
     """Test the run_app_scheduler function."""
 

@@ -63,7 +63,7 @@ def run_app_scheduler(
     register_exit_handlers(
         event_type=EventType.FLWR_APP_SCHEDULER_RUN_LEAVE,
         exit_message="Flower app scheduler terminated gracefully.",
-        exit_handlers=[lambda: channel.close()],
+        exit_handlers=[lambda: channel.close()],  # pytlint:disable=W0108
     )
 
     # Create the gRPC stub for the AppIO API
