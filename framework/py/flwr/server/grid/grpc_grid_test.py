@@ -36,6 +36,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PullAppMessagesRequest,
     PushAppMessagesRequest,
 )
+import threading
 from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -336,7 +337,14 @@ class TestGrpcGrid(unittest.TestCase):
         self.mock_stub.PullObject.return_value = response
 
         # Execute
-        with patch("time.monotonic", side_effect=[0, PULL_MAX_TIME + 1]):
+        original_wait = threading.Event.wait
+        
+        def mock_wait(self, timeout=None):
+            if timeout is not None:
+                timeout *= 1e-6
+            return original_wait(self, timeout)
+        
+        with patch.object(threading.Event, "wait", new=mock_wait):
             # This will cause the PullObject to timeout
             msgs = list(self.grid.pull_messages([ins1.object_id]))
 
