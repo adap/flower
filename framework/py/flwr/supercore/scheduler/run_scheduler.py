@@ -18,6 +18,7 @@
 import time
 from typing import Optional
 
+from flwr.common.config import get_flwr_dir
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.serde import run_from_proto
