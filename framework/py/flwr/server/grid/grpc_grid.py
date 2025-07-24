@@ -264,15 +264,15 @@ class GrpcGrid(Grid):
         run_id = cast(Run, self._run).run_id
         message_ids: list[str] = []
         try:
-            for msg in messages:
-                # Populate metadata
-                msg.metadata.__dict__["_run_id"] = run_id
-                msg.metadata.__dict__["_src_node_id"] = self.node.node_id
-                msg.metadata.__dict__["_message_id"] = msg.object_id
-                # Check message
-                self._check_message(msg)
-                # Try pushing message and its objects
-                with no_object_id_recompute():
+            with no_object_id_recompute():
+                for msg in messages:
+                    # Populate metadata
+                    msg.metadata.__dict__["_run_id"] = run_id
+                    msg.metadata.__dict__["_src_node_id"] = self.node.node_id
+                    msg.metadata.__dict__["_message_id"] = msg.object_id
+                    # Check message
+                    self._check_message(msg)
+                    # Try pushing message and its objects
                     message_ids.append(self._try_push_message(run_id, msg))
 
         except grpc.RpcError as e:
