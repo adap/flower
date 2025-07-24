@@ -237,8 +237,7 @@ def start_client_internal(
                 ]
                 subprocess.run(command, check=False)
 
-            # This is to ensure that only one message is processed at a time
-            # The `_push_messages` function will wait until a reply message is available
+            # No message has been pulled therefore we can skip the push stage.
             if run_id is None:
                 # If no message was received, wait for a while
                 time.sleep(3)
