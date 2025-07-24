@@ -93,11 +93,11 @@ export class RemoteEngine extends BaseEngine {
         topP,
         maxCompletionTokens,
         responseFormat,
+        tools,
         onStreamEvent,
         signal
       );
-      if (!response.ok) return response;
-      return { ok: true, message: { role: 'assistant', content: response.value } };
+      return response;
     } else {
       const requestData = this.createRequestData(
         messages,
@@ -185,9 +185,10 @@ export class RemoteEngine extends BaseEngine {
     topP?: number,
     maxCompletionTokens?: number,
     responseFormat?: ResponseFormat,
+    tools?: Tool[],
     onStreamEvent?: (event: StreamEvent) => void,
     signal?: AbortSignal
-  ): Promise<Result<string>> {
+  ): Promise<ChatResponseResult> {
     const requestData = this.createRequestData(
       messages,
       model,
@@ -196,7 +197,7 @@ export class RemoteEngine extends BaseEngine {
       maxCompletionTokens,
       responseFormat,
       true,
-      undefined,
+      tools,
       encrypt
     );
     const response = await sendRequest(
@@ -212,6 +213,8 @@ export class RemoteEngine extends BaseEngine {
     const reader = response.value.body?.getReader();
     const decoder = new TextDecoder('utf-8');
     let accumulatedResponse = '';
+
+    const pendingToolCalls: Record<string, { name: string; buffer: string }> = {};
 
     if (signal) {
       signal.addEventListener('abort', () => {
@@ -260,12 +263,74 @@ export class RemoteEngine extends BaseEngine {
 
         if (isStreamChunk(parsed)) {
           for (const choice of parsed.choices) {
-            const delta = choice.delta.content;
-            if (!delta) continue;
+            const delta = choice.delta;
+            if (delta.tool_calls) {
+              const finalTools: ToolCall[] = [];
+              for (const t of delta.tool_calls) {
+                const callId = String(t.index);
+                const fn = t.function;
+                const name = fn.name ?? '';
 
-            let content = delta;
+                // start the buffer if first fragment
+                if (!(callId in pendingToolCalls)) {
+                  pendingToolCalls[callId] = {
+                    name,
+                    buffer: '',
+                  };
+                }
+                const fragment = fn.arguments ?? '';
+                let buf = pendingToolCalls[callId].buffer;
+
+                // if the model starts a new JSON blob (e.g. it emits "{"…),
+                // discard any old buffer and start fresh
+                if (fragment.trim().startsWith('{')) {
+                  buf = fragment;
+                } else {
+                  buf += fragment;
+                }
+                pendingToolCalls[callId].buffer = buf;
+
+                try {
+                  const args = JSON.parse(pendingToolCalls[callId].buffer) as Record<
+                    string,
+                    string
+                  >;
+                  onStreamEvent?.({
+                    toolCall: {
+                      index: callId,
+                      name: pendingToolCalls[callId].name,
+                      arguments: args,
+                      complete: true,
+                    },
+                  });
+                  finalTools.push({
+                    function: {
+                      name: pendingToolCalls[callId].name,
+                      arguments: args,
+                    },
+                  });
+                  continue;
+                } catch {
+                  // not complete yet, wait for more chunks
+                  onStreamEvent?.({
+                    toolCall: { index: callId, name, arguments: buf, complete: false },
+                  });
+                }
+              }
+              return {
+                ok: true,
+                message: {
+                  role: 'assistant',
+                  content: '',
+                  toolCalls: finalTools,
+                },
+              };
+            }
+            if (!delta.content) continue;
+
+            let content = delta.content;
             if (encrypt) {
-              const decrypted = await this.cryptoHandler.decryptMessage(delta);
+              const decrypted = await this.cryptoHandler.decryptMessage(delta.content);
               if (!decrypted.ok) return decrypted;
               content = decrypted.value;
             }
@@ -291,7 +356,7 @@ export class RemoteEngine extends BaseEngine {
       }
     }
 
-    return { ok: true, value: accumulatedResponse };
+    return { ok: true, message: { role: 'assistant', content: accumulatedResponse } };
   }
 
   async extractOutput(
@@ -732,10 +797,21 @@ interface Choice {
   message: ChoiceMessage;
 }
 
+interface StreamingToolCall {
+  id?: string;
+  type?: 'function';
+  index: number;
+  function: {
+    name?: string;
+    arguments?: string;
+  };
+}
+
 interface StreamChoice {
   index: number;
   delta: {
-    content: string;
+    content?: string;
+    tool_calls?: StreamingToolCall[];
     role: string;
   };
 }
