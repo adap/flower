@@ -199,6 +199,7 @@ class ErrorCode:
     MESSAGE_UNAVAILABLE = 3
     REPLY_MESSAGE_UNAVAILABLE = 4
     NODE_UNAVAILABLE = 5
+    OBJECT_UNAVAILABLE = 6
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
