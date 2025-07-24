@@ -237,6 +237,13 @@ def start_client_internal(
                 ]
                 subprocess.run(command, check=False)
 
+            # This is to ensure that only one message is processed at a time
+            # The `_push_messages` function will wait until a reply message is available
+            if run_id is None:
+                # If no message was received, wait for a while
+                time.sleep(3)
+                continue
+
             _push_messages(
                 state=state,
                 object_store=store,
@@ -358,6 +365,7 @@ def _push_messages(
     push_object: Callable[[int, str, bytes], None],
 ) -> None:
     """Push reply messages to the SuperLink."""
+    # This is to ensure that only one message is processed at a time
     # Wait until a reply message is available
     while not (reply_messages := state.get_messages(is_reply=True)):
         time.sleep(0.5)
