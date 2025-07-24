@@ -1,3 +1,7 @@
+:og:description: Configure SuperLink for event/audit logging to capture store events such as user interactions and application behavior.
+.. meta::
+    :description: Configure SuperLink for event/audit logging to capture store events such as user interactions and application behavior.
+
 Event Logging
 =============
 
