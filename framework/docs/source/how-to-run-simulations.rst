@@ -1,29 +1,42 @@
+Run simulations
+===============
+
 :og:description: Run federated learning simulations in Flower using the VirtualClientEngine for scalable, resource-aware, and multi-node simulations on any system configuration.
 .. meta::
     :description: Run federated learning simulations in Flower using the VirtualClientEngine for scalable, resource-aware, and multi-node simulations on any system configuration.
 
-.. |clientapp_link| replace:: ``ClientApp``
+Debugging Flower Simulations with IDEs
+--------------------------------------
 
-.. |message_link| replace:: ``Message``
+Flower supports debugging your simulation code using IDEs such as VSCode or PyCharm. This is especially useful for setting breakpoints in your `server_app.py` or `client_app.py` and stepping through the code interactively.
 
-.. |context_link| replace:: ``Context``
+To enable debugging:
 
-.. |flwr_run_link| replace:: ``flwr run``
+1. **Install debugpy** (if not already installed):
 
-.. |flwr_new_link| replace:: ``flwr new``
+   .. code-block:: shell
 
-.. _clientapp_link: ref-api/flwr.client.ClientApp.html
+      pip install debugpy
 
-.. _context_link: ref-api/flwr.common.Context.html
+2. **Run your simulation with the `--debug` flag:**
 
-.. _flwr_new_link: ref-api-cli.html#flwr-new
+   .. code-block:: shell
 
-.. _flwr_run_link: ref-api-cli.html#flwr-run
+      flwr run --debug .
 
-.. _message_link: ref-api/flwr.common.Message.html
+   When `--debug` is set, Flower will wait for a debugger to attach on port 5678 before running user code.
 
-Run simulations
-===============
+3. **Attach your IDE debugger:**
+   - In VSCode, open the Command Palette and select "Python: Attach using Process ID" or use the "Attach" configuration in your `launch.json` with port 5678.
+   - In PyCharm, use the "Attach to Process" feature or configure a remote debug configuration for port 5678.
+
+4. **Set breakpoints** in your user code (e.g., `server_app.py`, `client_app.py`).
+
+5. **Continue execution** in your IDE to step through the code as usual.
+
+.. note::
+
+   The `--debug` flag is intended for development and debugging only. Do not use it in production environments.
 
 Simulating Federated Learning workloads is useful for a multitude of use cases: you
 might want to run your workload on a large cohort of clients without having to source,

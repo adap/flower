@@ -31,6 +31,7 @@ else:
 To install the necessary dependencies, install `flwr` with the `simulation` extra:
 
     pip install -U "flwr[simulation]"
+
 """
 
     def start_simulation(*args, **kwargs):  # type: ignore
