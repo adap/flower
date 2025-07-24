@@ -364,7 +364,7 @@ class TestGrpcGrid(unittest.TestCase):
             # the limit of pulling attempts for a given object
             msgs = list(self.grid.pull_messages([ins1.object_id]))
 
-        # Assert if msgs doesn't contain a single error message
+        # Assert: `msgs` should contain a single error message
         self.assertEqual(len(msgs), 1)
         self.assertEqual(msgs[0].has_content(), False)
         self.assertEqual(msgs[0].error.code, ErrorCode.MESSAGE_UNAVAILABLE)
