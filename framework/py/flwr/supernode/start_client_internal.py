@@ -251,9 +251,6 @@ def start_client_internal(
                 push_object=push_object,
             )
 
-            # Sleep for 3 seconds before the next iteration
-            time.sleep(3)
-
 
 def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     state: NodeState,
