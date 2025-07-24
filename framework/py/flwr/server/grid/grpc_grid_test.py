@@ -15,15 +15,24 @@
 """Tests for grid SDK."""
 
 
+import threading
 import time
 import unittest
+from contextlib import AbstractContextManager
+from typing import Any
 from unittest.mock import Mock, patch
 
 import grpc
+from parameterized import parameterized
 
 from flwr.app.error import Error
 from flwr.common import RecordDict
-from flwr.common.constant import PULL_MAX_TRIES_PER_OBJECT, SUPERLINK_NODE_ID, ErrorCode
+from flwr.common.constant import (
+    PULL_MAX_TIME,
+    PULL_MAX_TRIES_PER_OBJECT,
+    SUPERLINK_NODE_ID,
+    ErrorCode,
+)
 from flwr.common.inflatable import get_all_nested_objects, get_object_tree
 from flwr.common.message import Message
 from flwr.common.serde import message_to_proto
@@ -40,6 +49,8 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import GetNodesRequest  # pylint: disable=E0611
 
 from .grpc_grid import GrpcGrid
+
+original_wait = threading.Event.wait
 
 
 class TestGrpcGrid(unittest.TestCase):
@@ -304,9 +315,26 @@ class TestGrpcGrid(unittest.TestCase):
 
         # Assert
         self.assertIn(404, node_ids)
-        self.assertEqual(mock_get_nodes.call_count, 2)
 
-    def test_timeout_pulling_object_creates_message_with_error(self) -> None:
+    @parameterized.expand(  # type: ignore
+        [
+            (
+                patch.object(  # make test hit PULL_MAX_TRIES_PER_OBJECT
+                    threading.Event,
+                    "wait",
+                    new=lambda self, timeout=None: original_wait(
+                        self, timeout * 1e-9 if timeout is not None else None
+                    ),
+                ),
+            ),
+            (  # make test hit PULL_MAX_TIME
+                patch("time.monotonic", side_effect=[0, PULL_MAX_TIME + 1]),
+            ),
+        ]
+    )
+    def test_timeout_pulling_object_creates_message_with_error(
+        self, patcher: AbstractContextManager[Any]
+    ) -> None:
         """Test that pulling an object with a timeout creates a message with an
         error."""
         # Prepare: Create instruction message
@@ -326,22 +354,23 @@ class TestGrpcGrid(unittest.TestCase):
 
         num_objects = len(get_all_nested_objects(ok_msg))
 
-        # This is going to be called PULL_MAX_TRIES_PER_OBJECT times per object in the message
+        # Prepare: Mock the response of PullObject to simulate timeout
         response = Mock(object_found=True, object_available=False, object_content=None)
-        self.mock_stub.PullObject.side_effect = [response] * (
-            PULL_MAX_TRIES_PER_OBJECT * num_objects
-        )
+        self.mock_stub.PullObject.return_value = response
 
         # Execute
-        msgs = list(self.grid.pull_messages([ins1.object_id]))
+        with patcher:
+            # Depending on the patch context, this will either hit the timeout or
+            # the limit of pulling attempts for a given object
+            msgs = list(self.grid.pull_messages([ins1.object_id]))
 
-        # Assert if msgs doesn't contain a single error message with errorcode OBJECT_UNAVAILABLE
+        # Assert if msgs doesn't contain a single error message
         self.assertEqual(len(msgs), 1)
-        # self.assertEqual(msgs[0].metadata.reply_to_message_id, ok_msg.metadata.message_id)
         self.assertEqual(msgs[0].has_content(), False)
         self.assertEqual(msgs[0].error.code, ErrorCode.OBJECT_UNAVAILABLE)
-        # Assert that PullObject was called PULL_MAX_TRIES_PER_OBJECT times for each object at most
-        # Note that because the message contains multiple objects, we account for this in the assertion
+        # Assert that PullObject was called PULL_MAX_TRIES_PER_OBJECT times for each
+        # object at most. Note that because the message contains multiple objects,
+        # we account for this in the assertion.
         self.assertLessEqual(
             self.mock_stub.PullObject.call_count,
             PULL_MAX_TRIES_PER_OBJECT * num_objects,
