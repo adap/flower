@@ -342,7 +342,7 @@ class GrpcGrid(Grid):
                                 created_at=now().timestamp(),
                             ),
                             error=Error(
-                                code=ErrorCode.OBJECT_UNAVAILABLE, reason=(str(e))
+                                code=ErrorCode.MESSAGE_UNAVAILABLE, reason=(str(e))
                             ),
                         )
                     )

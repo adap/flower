@@ -367,7 +367,7 @@ class TestGrpcGrid(unittest.TestCase):
         # Assert if msgs doesn't contain a single error message
         self.assertEqual(len(msgs), 1)
         self.assertEqual(msgs[0].has_content(), False)
-        self.assertEqual(msgs[0].error.code, ErrorCode.OBJECT_UNAVAILABLE)
+        self.assertEqual(msgs[0].error.code, ErrorCode.MESSAGE_UNAVAILABLE)
         # Assert that PullObject was called PULL_MAX_TRIES_PER_OBJECT times for each
         # object at most. Note that because the message contains multiple objects,
         # we account for this in the assertion.
