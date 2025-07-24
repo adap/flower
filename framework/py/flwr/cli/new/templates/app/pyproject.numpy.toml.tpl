@@ -34,7 +34,7 @@ clientapp = "$import_name.client_app:app"
 # Both the ClientApp and SeverApp can load these values at
 # runtime through the context. In your app do:
 #
-#   num_server_rounds = context.run_config["num-server-rounds"]
+#   server_rounds = context.run_config["num-server-rounds"]
 #
 # You can as many config values as your FlowerApp needs and access
 # them as shown above via the Context.
@@ -57,7 +57,6 @@ options.num-supernodes = 10 # This federation defines 10 SuperNodes. This means 
 
 # To run your FlowerApp using the Flower Deployment Runtime
 # (https://flower.ai/docs/framework/deploy.html)
-# you need to set 
 [tool.flwr.federations.remote-federation]
 address = "<SUPERLINK-ADDRESS>:9093"     # Address of the SuperLink Exec API
 insecure = true                          # Remove this if you want to run with TLS and specify `root-certificates`
