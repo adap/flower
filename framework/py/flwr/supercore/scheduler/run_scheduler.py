@@ -79,7 +79,7 @@ def run_app_scheduler(
     # Create the scheduler plugin instance
     plugin = plugin_class(
         appio_api_address=appio_api_address,
-        flwr_dir=flwr_dir,
+        flwr_dir=str(get_flwr_dir(flwr_dir)),
         get_run=get_run,
     )
 
