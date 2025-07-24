@@ -31,6 +31,9 @@ service ClientAppIo {
   // Request token
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
 
+  // Get run details
+  rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
+
   // Pull client app inputs
   rpc PullClientAppInputs(PullAppInputsRequest)
       returns (PullAppInputsResponse) {}
