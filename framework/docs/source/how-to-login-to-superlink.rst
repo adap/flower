@@ -107,7 +107,7 @@ Click on it and authenticate directly against the OIDC provider.
     Loading project configuration...
     Success
     Creating a new `.gitignore` with `.credentials` entry...
-    Please login with your user credentials here: https://account.flower.ai/realms/flower/device?user_code=DRVT-YQMA
+    Please login with your user credentials here: https://account.flower.ai/realms/flower/device?user_code=...
     # [... user follows URL and logs in ... in the meantime the CLI will wait ...]
     ✅ Login successful.
 
@@ -120,7 +120,7 @@ will relay them to OIDC provider to perform the authentication checks.
 Run authorized ``flwr`` CLI commands
 ------------------------------------
 
-With the above steps completed, you can now run ``flwr`` CLI commands that require
+With the above steps completed, you can now run ``flwr`` CLI commands against a SuperLink setup with user
 authentication and authorization. For example, as an authorized user, you can run the
 ``flwr run`` command to start a Flower app:
 
