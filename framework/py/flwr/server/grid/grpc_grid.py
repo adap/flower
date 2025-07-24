@@ -228,6 +228,7 @@ class GrpcGrid(Grid):
             proto_messages.append(message_to_proto(remove_content_from_message(msg)))
             all_objects[msg.object_id] = get_all_nested_objects(msg)
             object_trees.append(get_object_tree(msg))
+            del msg
 
         # Call GrpcServerAppIoStub method
         res: PushAppMessagesResponse = self._stub.PushMessages(
