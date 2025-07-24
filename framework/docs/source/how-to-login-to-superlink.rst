@@ -8,9 +8,9 @@ Login to SuperLink
     features for your organization.
 
 In this guide, you'll learn how to configure SuperLink with user-level authentication
-and authorization, and how to log in to the SuperLink using the ``flwr`` CLI. Once
-logged in, any users that are authorized on the SuperLink can run Flower CLI commands
-that interact with the SuperLink.
+and authorization, and how to log in using the ``flwr`` CLI. Once logged in, any users
+that are authorized on the SuperLink can run Flower CLI commands that interact with the
+SuperLink.
 
 .. important::
 
@@ -27,12 +27,8 @@ To enable user authentication and authorization, the SuperLink must be deployed 
 <https://openfga.dev/>`_ server. The OIDC provider is used for user authentication,
 while OpenFGA is used for fine-grained access control. This means an authenticated user
 can only run ``flwr`` CLI commands on the SuperLink if they have been granted the
-necessary permissions by the SuperLink administrator.
-
-.. note::
-
-    When enabled, both user authentication and authorization must be configured on the
-    SuperLink.
+necessary permissions by the SuperLink administrator. When enabled, both user
+authentication and authorization must be configured on the SuperLink.
 
 Enable User Authentication and Authorization on the SuperLink
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,10 +74,10 @@ Save this file as ``user-auth-config.yaml``. Then pass it to the SuperLink via t
 Login to the SuperLink
 ----------------------
 
-Once a SuperLink with user authentication and authorization is up and running, a user can
-interface with it after installing the ``flwr`` PyPI package via the Flower CLI. Then, ensure that the
-``enable-user-auth`` field is set to ``true`` in the federation section in the
-``pyproject.toml`` of the Flower app you want to run:
+Once a SuperLink with user authentication and authorization is up and running, a user
+can interface with it after installing the ``flwr`` PyPI package via the Flower CLI.
+Then, ensure that the ``enable-user-auth`` field is set to ``true`` in the federation
+section in the ``pyproject.toml`` of the Flower app you want to run:
 
 .. code-block:: toml
 
@@ -120,9 +116,9 @@ will relay them to OIDC provider to perform the authentication checks.
 Run authorized ``flwr`` CLI commands
 ------------------------------------
 
-With the above steps completed, you can now run ``flwr`` CLI commands against a SuperLink setup with user
-authentication and authorization. For example, as an authorized user, you can run the
-``flwr run`` command to start a Flower app:
+With the above steps completed, you can now run ``flwr`` CLI commands against a
+SuperLink setup with user authentication and authorization. For example, as an
+authorized user, you can run the ``flwr run`` command to start a Flower app:
 
 .. code-block:: bash
 
