@@ -8,10 +8,12 @@ Event Logging
     features for your organization.
 
 In this guide, you'll learn how to configure SuperLink with event logging. Event logging
-allows you to capture and store events that occur in the SuperLink, such as 
-valuable insights into the application's behavior and performance.
+allows you to capture and store events that occur in the SuperLink, such as valuable
+insights into the application's behavior and performance.
 
-The event logging feature brings JSON-formatted log outputs to Flower. It can be activated for the `SuperLink` to record user, application, and (in the near future) system events. By default, the output schema is as follows:
+The event logging feature brings JSON-formatted log outputs to Flower. It can be
+activated for the SuperLink to record user and application events. By default, the
+output schema is as follows:
 
 .. code-block:: json
 
@@ -32,29 +34,50 @@ The event logging feature brings JSON-formatted log outputs to Flower. It can be
 
 where,
 
-- ``timestamp`` = Timestamp of the event in UTC format and RFC-3339 compliant
-- ``actor.id`` = Flower account ID (when called by a `flwr` CLI user) or SuperNode ID (when called by a SuperNode)
-- ``actor.description`` = Keycloak username or "SuperNode"
-- ``actor.ip_address`` = IPv4 or IPv6 address of the actor
-- ``event.action`` = Name of the servicer method, e.g. ``ExecServicer.StartRun``/``FleetServicer.PullMessages``
-- ``event.run_id`` = The run ID of the Flower workflow
-- ``event.fab_hash`` = The FAB hash of the Flower app
-- ``status`` = A string describing whether the action is started, completed or failed
+.. list-table::
+    :header-rows: 1
 
-User events occur when a Flower user interacts with SuperLink, such as logging in, starting a run, or querying the list of runs on the SuperLink. These events capture the interaction of the user via the `flwr` CLI and the SuperLink.
+    - - Field
+      - Description
+    - - ``timestamp``
+      - Timestamp of the event in UTC format and RFC-3339 compliant
+    - - ``actor.id``
+      - Flower account ID (when called by a ``flwr`` CLI user) or SuperNode ID (when
+        called by a SuperNode)
+    - - ``actor.description``
+      - Username registered on the OIDC provider or ``SuperNode``
+    - - ``actor.ip_address``
+      - IPv4 or IPv6 address of the actor
+    - - ``event.action``
+      - Name of the servicer method, e.g.
+        ``ExecServicer.StartRun``/``FleetServicer.PullMessages``
+    - - ``event.run_id``
+      - The run ID of the Flower workflow
+    - - ``event.fab_hash``
+      - The FAB hash of the Flower app
+    - - ``status``
+      - A string describing whether the action is started, completed or failed
 
-Application events occur when the Flower components interact with one another, specifically, between the SuperLink and SuperNodes. These events will show, for example, when messages/FAB are pushed and pulled from/to the SuperLink.
+User events occur when a Flower user interacts with SuperLink, such as logging in,
+starting a run, or querying the list of runs on the SuperLink. These events capture the
+interaction of the user via the ``flwr`` CLI and the SuperLink.
+
+Application events occur when the Flower components interact with one another,
+specifically, between the SuperLink and SuperNodes. These events will show, for example,
+when messages/FAB are pushed and pulled from/to the SuperLink.
 
 Enable Event Logging
 --------------------
 
-To enable event logging, start the SuperLink with the argument ``--enable-event-log`` as follows:
+To enable event logging, start the SuperLink with the argument ``--enable-event-log`` as
+follows:
 
 .. code-block:: shell
 
     ➜ flower-superlink --enable-event-log <other flags>
 
-Note that the event logging feature can only be activated with the [user authentication feature]
+Note that the event logging feature can only be activated with the :doc:`user
+authentication feature <how-to-login-to-superlink>`.
 
 Here is an example output when a user runs ``flwr run``:
 
@@ -64,7 +87,7 @@ Here is an example output when a user runs ``flwr run``:
     INFO :      ExecServicer.StartRun
     INFO :      [AUDIT] {"timestamp": "2025-07-12T10:24:21Z", "actor": {"actor_id": "...", "description": "flowerlabs", "ip_address": "..."}, "event": {"action": "ExecServicer.StartRun", "run_id": "...", "fab_hash": "..."}, "status": "completed"}
 
-``flwr ls``:
+Here is another example output when a user runs ``flwr ls``:
 
 .. code-block:: shell
 
@@ -72,11 +95,10 @@ Here is an example output when a user runs ``flwr run``:
     INFO :      ExecServicer.List
     INFO :      [AUDIT] {"timestamp": "2025-07-12T10:26:35Z", "actor": {"actor_id": "...", "description": "flowerlabs", "ip_address": "..."}, "event": {"action": "ExecServicer.ListRuns", "run_id": null, "fab_hash": null}, "status": "completed"}
 
-And when a SuperNode pulls a message from the SuperLink:
+And here is an example when a SuperNode pulls a message from the SuperLink:
 
 .. code-block:: shell
 
     INFO :      [AUDIT] {"timestamp": "2025-07-14T10:27:02Z", "actor": {"actor_id": "...", "description": "SuperNode", "ip_address": "..."}, "event": {"action": "FleetServicer.PullMessages", "run_id": null, "fab_hash": null}, "status": "started"}
     INFO :      [Fleet.PullMessages] node_id=...
     INFO :      [AUDIT] {"timestamp": "2025-07-14T10:27:02Z", "actor": {"actor_id": "...", "description": "SuperNode", "ip_address": "..."}, "event": {"action": "FleetServicer.PullMessages", "run_id": null, "fab_hash": null}, "status": "completed"}
-
