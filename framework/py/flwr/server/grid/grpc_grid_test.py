@@ -31,7 +31,6 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PullAppMessagesRequest,
     PushAppMessagesRequest,
 )
-from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
@@ -117,12 +116,7 @@ class TestGrpcGrid(unittest.TestCase):
         # because it is the same as the one in msg1.
         mock_response = Mock(
             message_ids=[msg1.object_id, msg2.object_id],
-            objects_to_push={
-                msg1.object_id: ObjectIDs(
-                    object_ids=[msg1.object_id, RecordDict().object_id]
-                ),
-                msg2.object_id: ObjectIDs(object_ids=[msg2.object_id]),
-            },
+            objects_to_push=[msg1.object_id, RecordDict().object_id, msg2.object_id],
         )
         self.mock_stub.PushMessages.return_value = mock_response
         self.mock_stub.PushObject.return_value = Mock(stored=True)
@@ -197,11 +191,7 @@ class TestGrpcGrid(unittest.TestCase):
         msg = self._prep_message(Message(RecordDict(), 0, "query"))
         self.mock_stub.PushMessages.return_value = Mock(
             message_ids=[msg.object_id],
-            objects_to_push={
-                msg.object_id: ObjectIDs(
-                    object_ids=[msg.object_id, RecordDict().object_id]
-                ),
-            },
+            objects_to_push=[msg.object_id, RecordDict().object_id],
         )
         self.mock_stub.PushObject.return_value = Mock(stored=True)
 
@@ -231,11 +221,7 @@ class TestGrpcGrid(unittest.TestCase):
         sleep_fn = time.sleep
         mock_response = Mock(
             message_ids=[msg.object_id],
-            objects_to_push={
-                msg.object_id: ObjectIDs(
-                    object_ids=[msg.object_id, RecordDict().object_id]
-                ),
-            },
+            objects_to_push=[msg.object_id, RecordDict().object_id],
         )
         self.mock_stub.PushMessages.return_value = mock_response
         self.mock_stub.PushObject.return_value = Mock(stored=True)
