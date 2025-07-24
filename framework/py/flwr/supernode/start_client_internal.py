@@ -358,8 +358,9 @@ def _push_messages(
     push_object: Callable[[int, str, bytes], None],
 ) -> None:
     """Push reply messages to the SuperLink."""
-    # Get messages to send
-    reply_messages = state.get_messages(is_reply=True)
+    # Wait until a reply message is available
+    while not (reply_messages := state.get_messages(is_reply=True)):
+        time.sleep(0.5)
 
     for message in reply_messages:
         # Log message sending
