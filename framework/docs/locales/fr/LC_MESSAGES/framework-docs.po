@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-07-18 00:08+0000\n"
+"POT-Creation-Date: 2025-07-24 00:08+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -392,10 +392,10 @@ msgstr "Amélioration de la documentation"
 #: ../../source/ref-exit-codes/000.rst:5 ../../source/ref-exit-codes/001.rst:5
 #: ../../source/ref-exit-codes/002.rst:5 ../../source/ref-exit-codes/003.rst:5
 #: ../../source/ref-exit-codes/100.rst:5 ../../source/ref-exit-codes/101.rst:5
-#: ../../source/ref-exit-codes/102.rst:5 ../../source/ref-exit-codes/300.rst:5
-#: ../../source/ref-exit-codes/301.rst:5 ../../source/ref-exit-codes/302.rst:5
-#: ../../source/ref-exit-codes/600.rst:5 ../../source/ref-exit-codes/601.rst:5
-#: ../../source/ref-exit-codes/602.rst:5
+#: ../../source/ref-exit-codes/102.rst:5 ../../source/ref-exit-codes/103.rst:5
+#: ../../source/ref-exit-codes/300.rst:5 ../../source/ref-exit-codes/301.rst:5
+#: ../../source/ref-exit-codes/302.rst:5 ../../source/ref-exit-codes/600.rst:5
+#: ../../source/ref-exit-codes/601.rst:5 ../../source/ref-exit-codes/602.rst:5
 #, fuzzy
 msgid "Description"
 msgstr "Dépréciations"
@@ -30429,8 +30429,9 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-exit-codes/100.rst:19
-#: ../../source/ref-exit-codes/101.rst:16
+#: ../../source/ref-exit-codes/101.rst:17
 #: ../../source/ref-exit-codes/102.rst:10
+#: ../../source/ref-exit-codes/103.rst:10
 #: ../../source/ref-exit-codes/300.rst:11
 #: ../../source/ref-exit-codes/301.rst:16
 #: ../../source/ref-exit-codes/302.rst:16
@@ -30449,7 +30450,8 @@ msgid "Ensure the SuperLink's configuration is correct."
 msgstr ""
 
 #: ../../source/ref-exit-codes/100.rst:23
-#: ../../source/ref-exit-codes/101.rst:20
+#: ../../source/ref-exit-codes/101.rst:22
+#: ../../source/ref-exit-codes/103.rst:16
 msgid "If the issue persists, please contact support for further assistance."
 msgstr ""
 
@@ -30468,23 +30470,29 @@ msgid "Possible causes of invalid license include:"
 msgstr ""
 
 #: ../../source/ref-exit-codes/101.rst:11
-msgid ""
-"``FLWR_LICENSE_KEY`` environment variable not set. This is required when "
-"starting the SuperLink Enterprise version."
-msgstr ""
-
-#: ../../source/ref-exit-codes/101.rst:13
 msgid "``FLWR_LICENSE_KEY`` environment variable set to an invalid license key."
 msgstr ""
 
-#: ../../source/ref-exit-codes/101.rst:18
+#: ../../source/ref-exit-codes/101.rst:12
 msgid ""
-"Set the ``FLWR_LICENSE_KEY`` as an environment variable when starting the"
-" SuperLink."
+"The SuperLink failed to reach the public key endpoint from the license "
+"server."
+msgstr ""
+
+#: ../../source/ref-exit-codes/101.rst:13
+msgid ""
+"The fetched public key is malformed (wrong PEM encoding or key type) or "
+"its signature failed verification against signing key."
 msgstr ""
 
 #: ../../source/ref-exit-codes/101.rst:19
-msgid "Ensure the license key is valid."
+msgid "Ensure that the ``FLWR_LICENSE_KEY`` is valid."
+msgstr ""
+
+#: ../../source/ref-exit-codes/101.rst:20
+msgid ""
+"Ensure that the correct public key endpoint is used and is reachable by "
+"the SuperLink."
 msgstr ""
 
 #: ../../source/ref-exit-codes/102.rst:2
@@ -30501,6 +30509,28 @@ msgstr ""
 msgid ""
 "Set the `FLWR_LICENSE_KEY` environment variable with a valid license key "
 "when starting the SuperLink."
+msgstr ""
+
+#: ../../source/ref-exit-codes/103.rst:2
+msgid "[103] SUPERLINK_LICENSE_URL_INVALID"
+msgstr ""
+
+#: ../../source/ref-exit-codes/103.rst:7
+msgid ""
+"The SuperLink license URL is invalid, causing it to exit prematurely on "
+"startup."
+msgstr ""
+
+#: ../../source/ref-exit-codes/103.rst:12
+msgid ""
+"Set the `FLWR_LICENSE_URL` environment variable with a valid license URL "
+"when starting the SuperLink."
+msgstr ""
+
+#: ../../source/ref-exit-codes/103.rst:14
+msgid ""
+"Ensure that the URL points to a valid license server that can provide the"
+" necessary license information."
 msgstr ""
 
 #: ../../source/ref-exit-codes/300.rst:2
@@ -35492,7 +35522,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|7d728a54553a433a88f45356344afb8e|"
+msgid "|abf214ea9e0f4b50a1640e6e6417bd8d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -35511,7 +35541,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|f9c4f489e9e14412b756262111e9eee4|"
+msgid "|14bef6e6736844bebc680805406a79c6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -35543,7 +35573,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|3450ca269c194766b744d9b3901bba44|"
+msgid "|23f8cc0b06b440bb901f94afac26b3e7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -35564,7 +35594,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|84f34d42d2334dd081280c0e1f73eb96|"
+msgid "|3980fe2dcb974cdbbefa7ec199dadcda|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -35586,7 +35616,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|468c05b4e49d4820a2cee468a23173b5|"
+msgid "|cd7304d9aff64e5d93c2afb644f49006|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -35607,7 +35637,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|bb495222283e485c985020449f7829cd|"
+msgid "|c97e4782ef9f4a03ad2033469fed7335|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -35633,7 +35663,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|74647fee6eea4516a78c7d869deb7c46|"
+msgid "|fb20379f55f14e3dbec2be42bfe50a2d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -35652,7 +35682,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|393dd38092e34f5e9579757b15fe8eb8|"
+msgid "|35cc8dd5e27d47ffa5902fd89cef0c09|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -35883,7 +35913,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|2cb3eac40dd64841b80a3af6a6bf151a|"
+msgid "|69c282cf6ddc491283db5cb6ee1338e1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -35918,7 +35948,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|a131ee2e5e044947808a0eee84ea1653|"
+msgid "|1c83c06845364ef0aec9e9086e082ceb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -35951,7 +35981,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|999f128dc3cb40a0a6e30aa183e17257|"
+msgid "|d8b480068a224fec892766329137f7ba|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -35982,7 +36012,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|092143f39286443b887b59228bbecbba|"
+msgid "|6c438616cf2f459987c9e7d3190af659|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -36042,7 +36072,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|05279604174540d195a7342584808109|"
+msgid "|8fdbc3ecaece46caac7718b04735bc37|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -36186,7 +36216,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|155f796db77342c0a7bd5209eb448982|"
+msgid "|372a348111ed4a5eb69894e2df3670a7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -54078,5 +54108,62 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|7a5a9d002a514d8a9843386e653cf6ee|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``FLWR_LICENSE_KEY`` environment variable not "
+#~ "set. This is required when starting "
+#~ "the SuperLink Enterprise version."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Set the ``FLWR_LICENSE_KEY`` as an "
+#~ "environment variable when starting the "
+#~ "SuperLink."
+#~ msgstr ""
+
+#~ msgid "Ensure the license key is valid."
+#~ msgstr ""
+
+#~ msgid "|7d728a54553a433a88f45356344afb8e|"
+#~ msgstr ""
+
+#~ msgid "|f9c4f489e9e14412b756262111e9eee4|"
+#~ msgstr ""
+
+#~ msgid "|3450ca269c194766b744d9b3901bba44|"
+#~ msgstr ""
+
+#~ msgid "|84f34d42d2334dd081280c0e1f73eb96|"
+#~ msgstr ""
+
+#~ msgid "|468c05b4e49d4820a2cee468a23173b5|"
+#~ msgstr ""
+
+#~ msgid "|bb495222283e485c985020449f7829cd|"
+#~ msgstr ""
+
+#~ msgid "|74647fee6eea4516a78c7d869deb7c46|"
+#~ msgstr ""
+
+#~ msgid "|393dd38092e34f5e9579757b15fe8eb8|"
+#~ msgstr ""
+
+#~ msgid "|2cb3eac40dd64841b80a3af6a6bf151a|"
+#~ msgstr ""
+
+#~ msgid "|a131ee2e5e044947808a0eee84ea1653|"
+#~ msgstr ""
+
+#~ msgid "|999f128dc3cb40a0a6e30aa183e17257|"
+#~ msgstr ""
+
+#~ msgid "|092143f39286443b887b59228bbecbba|"
+#~ msgstr ""
+
+#~ msgid "|05279604174540d195a7342584808109|"
+#~ msgstr ""
+
+#~ msgid "|155f796db77342c0a7bd5209eb448982|"
 #~ msgstr ""
 
