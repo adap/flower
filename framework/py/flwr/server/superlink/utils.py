@@ -21,9 +21,6 @@ import grpc
 
 from flwr.common.constant import Status, SubStatus
 from flwr.common.typing import RunStatus
-from flwr.proto.appio_pb2 import PushAppMessagesRequest  # pylint: disable=E0611
-from flwr.proto.fleet_pb2 import PushMessagesRequest  # pylint: disable=E0611
-from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState
 from flwr.supercore.object_store import ObjectStore
 
@@ -73,27 +70,3 @@ def abort_if(
     """Abort context if status of the provided `run_id` is in `abort_status_list`."""
     msg = check_abort(run_id, abort_status_list, state, store)
     abort_grpc_context(msg, context)
-
-
-def store_mapping_and_register_objects(
-    store: ObjectStore, request: Union[PushAppMessagesRequest, PushMessagesRequest]
-) -> dict[str, ObjectIDs]:
-    """Store Message object to descendants mapping and preregister objects."""
-    if not request.messages_list:
-        return {}
-
-    objects_to_push: dict[str, ObjectIDs] = {}
-
-    # Get run_id from the first message in the list
-    # All messages of a request should in the same run
-    run_id = request.messages_list[0].metadata.run_id
-
-    for object_tree in request.message_object_trees:
-        # Preregister
-        object_ids_just_registered = store.preregister(run_id, object_tree)
-        # Keep track of objects that need to be pushed
-        objects_to_push[object_tree.object_id] = ObjectIDs(
-            object_ids=object_ids_just_registered
-        )
-
-    return objects_to_push
