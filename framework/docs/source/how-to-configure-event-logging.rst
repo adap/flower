@@ -13,11 +13,24 @@ Event Logging
 
 In this guide, you'll learn how to configure SuperLink with event logging. Event logging
 allows you to capture and store events that occur in the SuperLink, such as valuable
-insights into the application's behavior and performance, and when a user interfaces with the system.
+insights into the application's behavior and performance, and when a user interfaces
+with the system.
 
 The event logging feature brings JSON-formatted log outputs to Flower. It can be
-activated for the SuperLink to record user and application events. By default, the
-output schema is as follows:
+activated for the SuperLink to record events when users or SuperNodes interact with the
+SuperLink. System administrators can then configure a logging backend to systematically
+capture these events in a database e.g. for audit purposes.
+
+User events occur when a Flower user interacts with SuperLink, such as logging in,
+starting a run, or querying the list of runs on the SuperLink. These events capture the
+interaction of the user via the ``flwr`` CLI and the SuperLink.
+
+Application events occur when the Flower components interact with one another,
+specifically, between the SuperLink and SuperNodes. These events will show, for example,
+when messages are pushed and pulled from/to the SuperLink and when a SuperNode
+establishes a connection with the SuperLink.
+
+By default, the output schema is as follows:
 
 .. code-block:: json
 
@@ -62,15 +75,6 @@ where,
     - - ``status``
       - A string describing whether the action is started, completed or failed
 
-User events occur when a Flower user interacts with SuperLink, such as logging in,
-starting a run, or querying the list of runs on the SuperLink. These events capture the
-interaction of the user via the ``flwr`` CLI and the SuperLink.
-
-Application events occur when the Flower components interact with one another,
-specifically, between the SuperLink and SuperNodes. These events will show, for example,
-when messages are pushed and pulled from/to the SuperLink and when a SuperNode establishes
-a connection with the SuperLink.
-
 Enable Event Logging
 --------------------
 
@@ -84,7 +88,8 @@ follows:
 Note that the event logging feature can only be activated with the :doc:`user
 authentication feature <how-to-login-to-superlink>`.
 
-Here is an example output when a user runs ``flwr run`` (note the ``"action": "ExecServicer.StartRun"``) :
+Here is an example output when a user runs ``flwr run`` (note the ``"action":
+"ExecServicer.StartRun"``) :
 
 .. code-block:: shell
 
