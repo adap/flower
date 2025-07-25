@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower App Scheduler."""
+"""Flower command line interface for shared infrastructure components."""
 
 
-from .plugin import SchedulerPlugin
-from .run_scheduler import run_app_scheduler
+from .flwr_app_scheduler import flwr_app_scheduler
 
 __all__ = [
-    "SchedulerPlugin",
-    "run_app_scheduler",
+    "flwr_app_scheduler",
 ]
