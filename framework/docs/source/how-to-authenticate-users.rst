@@ -1,13 +1,13 @@
-:og:description: Configure SuperLink for user authentication and authorization. Private-by-default runs securely with OIDC and OpenFGA.
+:og:description: Configure SuperLink for user authentication and authorization. Private-by-default runs securely with OpenID Connect and OpenFGA.
 .. meta::
-    :description: Configure SuperLink for user authentication and authorization. Private-by-default runs securely with OIDC and OpenFGA.
+    :description: Configure SuperLink for user authentication and authorization. Private-by-default runs securely with OpenID Connect and OpenFGA.
 
-Authenticate Users via OIDC
-===========================
+Authenticate Users via OpenID Connect
+=====================================
 
 .. note::
 
-    OIDC Authentication is a Flower Enterprise feature. See `Flower Enterprise
+    OpenID Connect Authentication is a Flower Enterprise feature. See `Flower Enterprise
     <https://flower.ai/enterprise>`_ for details.
 
 In this guide, you'll learn how to configure SuperLink with user-level authentication
@@ -26,12 +26,12 @@ Prerequisites
 -------------
 
 To enable user authentication and authorization, the SuperLink must be deployed with an
-`OIDC <https://openid.net/developers/how-connect-works/>`_ provider and an `OpenFGA
-<https://openfga.dev/>`_ server. The OIDC provider is used for user authentication,
-while OpenFGA is used for fine-grained access control. This means an authenticated user
-can only run ``flwr`` CLI commands on the SuperLink if they have been granted the
-necessary permissions by the SuperLink administrator. When enabled, both user
-authentication and authorization must be configured on the SuperLink.
+`OpenID Connect (OIDC) <https://openid.net/developers/how-connect-works/>`_ provider and
+an `OpenFGA <https://openfga.dev/>`_ server. The OIDC provider is used for user
+authentication, while OpenFGA is used for fine-grained access control. This means an
+authenticated user can only run ``flwr`` CLI commands on the SuperLink if they have been
+granted the necessary permissions by the SuperLink administrator. When enabled, both
+user authentication and authorization must be configured on the SuperLink.
 
 Enable User Authentication and Authorization on the SuperLink
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
