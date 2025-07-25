@@ -2,15 +2,15 @@
 .. meta::
     :description: Configure SuperLink for audit logging to capture or store events such as user interactions and application behavior.
 
-Event Logging
-=============
+Configure Audit Logging
+=======================
 
 .. note::
 
     Audit logging is a Flower Enterprise feature. See `Flower Enterprise
     <https://flower.ai/enterprise>`_ for details.
 
-In this guide, you'll learn how to configure SuperLink with audit logging. Event logging
+In this guide, you'll learn how to configure SuperLink with audit logging. Audit logging
 allows you to capture and store events that occur in the SuperLink, such as valuable
 insights into the application's behavior and performance, and when a user interfaces
 with the system.
@@ -74,8 +74,8 @@ where,
     - - ``status``
       - A string describing whether the action is started, completed or failed
 
-Enable Event Logging
---------------------
+Prerequisites
+-------------
 
 To enable audit logging, start the SuperLink with the argument ``--enable-event-log`` as
 follows:
@@ -87,8 +87,11 @@ follows:
 Note that the audit logging feature can only be activated with the :doc:`user
 authentication feature <how-to-authenticate-users>`.
 
+Example Outputs
+---------------
+
 Here is an example output when a user runs ``flwr run`` (note the ``"action":
-"ExecServicer.StartRun"``) :
+"ExecServicer.StartRun"``):
 
 .. code-block:: shell
 
