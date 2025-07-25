@@ -1,3 +1,8 @@
+# ======================================
+# For the full TOML configuration guide,
+# please check out the README.
+# ======================================
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -7,6 +12,7 @@ name = "$package_name"
 version = "1.0.0"
 description = ""
 license = "Apache-2.0"
+# Dependencies for your Flower App
 dependencies = [
     "flwr[simulation]>=1.20.0",
     "flwr-datasets>=0.5.0",
@@ -27,10 +33,13 @@ packages = ["."]
 [tool.flwr.app]
 publisher = "$username"
 
+# Points to your ServerApp and ClientApp objects
+# Format: "<module>:<object>"
 [tool.flwr.app.components]
 serverapp = "$import_name.server_app:app"
 clientapp = "$import_name.client_app:app"
 
+# Custom config values accessible via `context.run_config`
 [tool.flwr.app.config]
 model.name = "mistralai/Mistral-7B-v0.3"
 model.quantization = 4
@@ -59,9 +68,11 @@ num-server-rounds = 200
 [tool.flwr.app.config.static]
 dataset.name = "$dataset_name"
 
+# Default federation to use when running the app
 [tool.flwr.federations]
 default = "local-simulation"
 
+# Local simulation federation with $num_clients virtual SuperNodes
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = $num_clients
 options.backend.client-resources.num-cpus = 6
