@@ -21,8 +21,7 @@ Project dependencies are defined in `pyproject.toml`. Install them in an activat
 pip install -e .
 ```
 
-> \[!TIP\]
-> Learn more about how `pyproject.toml` files are used in Flower Apps in [this guide](https://flower.ai/docs/framework/how-to-configure-toml.html).
+> **Tip:** Learn how to configure your `pyproject.toml` file for Flower apps in [this guide](https://flower.ai/docs/framework/how-to-configure-toml.html).
 
 ## Experimental setup
 

@@ -29,7 +29,7 @@ packages = ["."]
 [tool.flwr.app]
 publisher = "$username"
 
-# Points to your ServerApp and ClientApp objects
+# Point to your ServerApp and ClientApp objects
 # Format: "<module>:<object>"
 [tool.flwr.app.components]
 serverapp = "$import_name.server_app:app"
