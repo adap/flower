@@ -74,7 +74,7 @@ default = "local-simulation"
 options.num-supernodes = 10
 ```
 
-By default, a federation named `"local-simulation"` is provided and set as the default via the `default = "local-simulation"` line in your TOML file. You can rename federations to anything you like. The example above sets up a local simulation federation with 10 virtual SuperNodes via the line `options.num-supernodes = 10`. Learn more about customizing your simulation in the [Flower documentation](https://flower.ai/docs/framework/how-to-run-simulations.html).
+By default, a federation named `"local-simulation"` is provided and set as the default via the `default = "local-simulation"` line in your TOML file. You can rename federations to anything you like. The example above sets up a local simulation federation with 10 virtual SuperNodes via the line `options.num-supernodes = 10`. Learn more about customizing your simulation in the [How to Run Simulations](https://flower.ai/docs/framework/how-to-run-simulations.html).
 
 You can define multiple federations here, including configurations for remote deployments:
 
