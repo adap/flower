@@ -20,3 +20,4 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-run-flower-on-gcp
     how-to-run-flower-on-azure
     docker/index
+    helm/index
