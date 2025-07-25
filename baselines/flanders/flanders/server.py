@@ -102,7 +102,9 @@ class EnhancedServer(Server):
 
         # Initialize parameters
         log(INFO, "Initializing global parameters")
-        self.parameters = self._get_initial_parameters(timeout=timeout)
+        self.parameters = self._get_initial_parameters(
+            timeout=timeout, server_round=num_rounds
+        )
         log(INFO, "Evaluating initial parameters")
         res = self.strategy.evaluate(0, parameters=self.parameters)
 
@@ -245,6 +247,7 @@ class EnhancedServer(Server):
             client_instructions=client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
+            group_id=server_round,
         )
         log(
             DEBUG,

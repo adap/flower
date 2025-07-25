@@ -14,7 +14,7 @@
 # ==============================================================================
 """Utils tests."""
 import unittest
-from typing import Dict, List, Tuple, Union
+from typing import Union
 
 from parameterized import parameterized_class
 
@@ -62,8 +62,8 @@ from flwr_datasets.utils import concatenate_divisions, divide_dataset
 class UtilsTests(unittest.TestCase):
     """Utils for tests."""
 
-    partition_division: Union[List[float], Tuple[float, ...], Dict[str, float]]
-    sizes: Tuple[int]
+    partition_division: Union[list[float], tuple[float, ...], dict[str, float]]
+    sizes: tuple[int]
     division_id: Union[int, str]
     expected_concatenation_size: int
 
