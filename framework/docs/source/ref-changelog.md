@@ -1,6 +1,166 @@
 # Changelog
 
-## Unreleased
+## v1.20.0 (2025-07-29)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Robert Steiner`, `William Lindskog`, `Yan Gao` <!---TOKEN_v1.20.0-->
+
+
+### Large model support
+- **feat(framework) Introduce** `Array` **slicing** ([#5552](https://github.com/adap/flower/pull/5552))
+- **feat(framework) Introduce** `ArrayChunk` **class and tests** ([#5550](https://github.com/adap/flower/pull/5550))
+- **feat(framework) Allow empty** `Array` ([#5600](https://github.com/adap/flower/pull/5600))
+- **feat(framework) Allow caching chunks in** `Array` ([#5611](https://github.com/adap/flower/pull/5611))
+
+### Improve messaging system
+- **feat(framework) Use** `GetRunIdsWithPendingMessages` **and** `RequestToken` **in** `flwr-clientapp` ([#5540](https://github.com/adap/flower/pull/5540))
+- **feat(framework) Add** `pull_and_inflate_object_from_tree` **and** `make_confirm_message_received_fn_protobuf` ([#5595](https://github.com/adap/flower/pull/5595))
+- **feat(framework) Update** `send` **and** `receive` **, and use object-based communication for SuperNode** ([#5606](https://github.com/adap/flower/pull/5606))
+- **feat(framework) Store the received message from** `SuperLink` **in** `SuperNode` **'s** `ObjectStore` ([#5582](https://github.com/adap/flower/pull/5582))
+- **feat(framework) Make ClientApp pull objects** ([#5599](https://github.com/adap/flower/pull/5599))
+- **feat(framework) Decouple message and** `ObjecStore` **by storing tree structures in pre-registration** ([#5586](https://github.com/adap/flower/pull/5586))
+- **feat(framework) Add** `push_object_contents_from_iterable` **function** ([#5607](https://github.com/adap/flower/pull/5607))
+- **feat(framework) Add** `PullObject` **,** `PushObject` **, and** `ConfirmMessageReceived` **RPCs to ClientAppIo API** ([#5598](https://github.com/adap/flower/pull/5598))
+- **feat(framework) Make ClientApp push objects** ([#5602](https://github.com/adap/flower/pull/5602))
+- **feat(framework) Add** `push_object` **,** `pull_object` **, and** `confirm_message_received` **to Fleet connection** ([#5605](https://github.com/adap/flower/pull/5605))
+
+### Limit fab size
+- **feat(framework) Limit the maximum size of FAB file** ([#5493](https://github.com/adap/flower/pull/5493))
+
+### License check
+- **feat(framework) Introduce license plugin ABC** ([#5554](https://github.com/adap/flower/pull/5554))
+- **feat(framework) Add license interceptor** ([#5557](https://github.com/adap/flower/pull/5557))
+- **feat(framework) Add error code for missing license key** ([#5565](https://github.com/adap/flower/pull/5565))
+- **docs(framework) Add exit code 103 for invalid license URL** ([#5621](https://github.com/adap/flower/pull/5621))
+
+### SuperNode refactoring
+- **feat(framework) Save ClientApp outputs in** `NodeState` ([#5542](https://github.com/adap/flower/pull/5542))
+- **feat(framework) Add and implement** `NodeState.get_run_id_by_token` **method** ([#5535](https://github.com/adap/flower/pull/5535))
+- **feat(framework) Make SuperNode wait for the reply message** ([#5628](https://github.com/adap/flower/pull/5628))
+- **feat(framework) Add two new RPCs to** `ClientAppIo` **service** ([#5537](https://github.com/adap/flower/pull/5537))
+
+### Scheduler
+- **feat(framework) Add** `GetRun` **RPC to** `ClientAppIo` ([#5620](https://github.com/adap/flower/pull/5620))
+- **feat(framework) Add** `SimpleClientAppSchedulerPlugin` ([#5619](https://github.com/adap/flower/pull/5619))
+- **feat(framework) Introduce** `SchedulerPlugin` **ABC** ([#5546](https://github.com/adap/flower/pull/5546))
+
+
+- **feat(examples) Add Flower-CatBoost example** ([#5564](https://github.com/adap/flower/pull/5564))
+
+- **feat(framework) Add health servicer by default when starting gRPC servers** ([#5591](https://github.com/adap/flower/pull/5591))
+
+### General
+- **feat(framework) Hide partially the tokens used by** `flwr-clientapp` ([#5543](https://github.com/adap/flower/pull/5543))
+- **feat(framework) Restrict gRPC interceptors to the target service** ([#5594](https://github.com/adap/flower/pull/5594))
+
+### Bugfixes
+- **fix(framework) Fix** `GrpcAdapterServicer` **by supporting the** `ConfirmMessageReceived` **RPC** ([#5567](https://github.com/adap/flower/pull/5567))
+
+### New features
+
+### Documentation improvements
+
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5558](https://github.com/adap/flower/pull/5558))
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5603](https://github.com/adap/flower/pull/5603))
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5538](https://github.com/adap/flower/pull/5538))
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5626](https://github.com/adap/flower/pull/5626))
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5566](https://github.com/adap/flower/pull/5566))
+- **docs(framework:skip) Update source texts for translations (automated)** ([#5553](https://github.com/adap/flower/pull/5553))
+- **docs(framework) Add 1.19.0 versions to Docker Readmes** ([#5588](https://github.com/adap/flower/pull/5588))
+- **docs(:skip) Add Flower AI Day 2025 banner to documentation and** `README.md` ([#5549](https://github.com/adap/flower/pull/5549))
+- **docs(framework) Update SuperLink exit code** `101` ([#5618](https://github.com/adap/flower/pull/5618))
+- **docs(framework) Fix database path** ([#5612](https://github.com/adap/flower/pull/5612))
+
+- **docs(framework) Add user authentication guide** ([#5630](https://github.com/adap/flower/pull/5630))
+
+### Incompatible changes
+
+### Other changes
+
+
+- **fix(framework) Close the grpc connection once the ServerApp finishes to prevent hanging** ([#5545](https://github.com/adap/flower/pull/5545))
+
+- **refactor(framework) Ignore** `.mypy_cache` **to enable local testing** ([#5560](https://github.com/adap/flower/pull/5560))
+
+- **refactor(framework) Remove** `__init__` **from** `ArrayChunk` ([#5614](https://github.com/adap/flower/pull/5614))
+
+- **refactor(framework) Send and receive messages separately in** `ClientAppIo` ([#5581](https://github.com/adap/flower/pull/5581))
+
+- **fix(framework) Bump Alpine version to 3.22** ([#5533](https://github.com/adap/flower/pull/5533))
+
+- **refactor(framework) Remove the unused** `GetToken` **RPC** ([#5541](https://github.com/adap/flower/pull/5541))
+
+- **refactor(framework) Update CODEOWNERS** ([#5544](https://github.com/adap/flower/pull/5544))
+
+- **fix(:skip) Handle packages vulnerabilities** ([#5548](https://github.com/adap/flower/pull/5548))
+
+- **refactor(framework) Prepare decoupling of send/receive of** `Message` **in** `ClientAppIo` ([#5577](https://github.com/adap/flower/pull/5577))
+
+- **refactor(framework) Handle** `ObjectUnavailableError` **in** `GrpcGrid` ([#5623](https://github.com/adap/flower/pull/5623))
+
+- **refactor(framework) Increase the timestamp tolerance to 5 min** ([#5615](https://github.com/adap/flower/pull/5615))
+
+- **refactor(framework) Simplify license check ABC** ([#5576](https://github.com/adap/flower/pull/5576))
+
+- **refactor(framework) Remove support for non-** `grpc-bidi` **transport in** `start_client` **API** ([#5593](https://github.com/adap/flower/pull/5593))
+
+- **ci(:skip) Bump versions to** `v1.20.0` ([#5531](https://github.com/adap/flower/pull/5531))
+
+- **refactor(framework) Unify the grpc and rest utils for objects** ([#5589](https://github.com/adap/flower/pull/5589))
+
+- **refactor(framework) Use messages in** `appio.proto` **in** `ClientAppIo` ([#5592](https://github.com/adap/flower/pull/5592))
+
+- **refactor(framework) Remove** `ObjectStore.set/get/delete_message_descedant_ids` ([#5587](https://github.com/adap/flower/pull/5587))
+
+- **fix(examples) Update example dependency** ([#5555](https://github.com/adap/flower/pull/5555))
+
+- **refactor(framework) Remove duplicated function** ([#5629](https://github.com/adap/flower/pull/5629))
+
+- **fix(framework) Add** `try` **-** `except` **to** `run.py` **for graceful exit** ([#5534](https://github.com/adap/flower/pull/5534))
+
+- **refactor(framework) Create** `utils.py` **for** `ObjectStore` ([#5604](https://github.com/adap/flower/pull/5604))
+
+- **refactor(framework) Make CPU count upper limit for** `pull_objects` **and** `push_objects` `ThreadPoolExecutor` ([#5583](https://github.com/adap/flower/pull/5583))
+
+- **refactor(examples) Update** `app-pytorch` **example** ([#5571](https://github.com/adap/flower/pull/5571))
+
+- **ci(:skip) Add** `## Unreleased` **header to the changelog** ([#5532](https://github.com/adap/flower/pull/5532))
+
+- **refactor(framework) Rename messages in** `appio.proto` **phasing out serverapp-side terminology** ([#5585](https://github.com/adap/flower/pull/5585))
+
+- **refactor(framework) Move** `ffs` **module to** `flwr.supercore` ([#5536](https://github.com/adap/flower/pull/5536))
+
+- **refactor(framework) Remove message content when pushing from** `flwr-clientapp` ([#5609](https://github.com/adap/flower/pull/5609))
+
+- **fix(framework) Allow SuperNode to wait until the object is ready before pushing** ([#5610](https://github.com/adap/flower/pull/5610))
+
+- **refactor(framework) Use** `ObjectTree` **instead of** `ObjectIDs` **in the pull message response** ([#5590](https://github.com/adap/flower/pull/5590))
+
+- **fix(framework) Make** `SuperNode` **push objects not present in** `LinkState` ([#5616](https://github.com/adap/flower/pull/5616))
+
+- **refactor(framework) Introduce** `appio.proto` ([#5584](https://github.com/adap/flower/pull/5584))
+
+- **fix(framework) Fix caching of object IDs when** `GrpcGrid` **pushes** `Messages` ([#5617](https://github.com/adap/flower/pull/5617))
+
+- **refactor(framework) Make** `Array` **use one** `ArrayChunk` **to carry all its data** ([#5551](https://github.com/adap/flower/pull/5551))
+
+- **ci(framework) Send GH info to correct Slack channel** ([#5547](https://github.com/adap/flower/pull/5547))
+
+- **fix(framework) Fix relative path generation during** `FAB` **build** ([#5608](https://github.com/adap/flower/pull/5608))
+
+- **fix(framework) Wait for content before pushing** ([#5613](https://github.com/adap/flower/pull/5613))
+
+- **refactor(framework) Improve user-facing error message when permission is denied** ([#5563](https://github.com/adap/flower/pull/5563))
+
+- **refactor(framework) Update** `PullAppMessagesResponse` **signature** ([#5597](https://github.com/adap/flower/pull/5597))
+
+- **ci(:skip) Fix delays in** `tensorflow` **E2E test** ([#5578](https://github.com/adap/flower/pull/5578))
+
+
+### Unknown changes
 
 ## v1.19.0 (2025-06-17)
 
