@@ -213,6 +213,7 @@ export class RemoteEngine extends BaseEngine {
     const reader = response.value.body?.getReader();
     const decoder = new TextDecoder('utf-8');
     let accumulatedResponse = '';
+    let finalTools: ToolCall[] | null = null;
 
     const pendingToolCalls: Record<string, { name: string; buffer: string }> = {};
 
@@ -265,7 +266,9 @@ export class RemoteEngine extends BaseEngine {
           for (const choice of parsed.choices) {
             const delta = choice.delta;
             if (delta.tool_calls) {
-              const finalTools: ToolCall[] = [];
+              if (!finalTools) {
+                finalTools = [];
+              }
               for (const t of delta.tool_calls) {
                 const callId = String(t.index);
                 const fn = t.function;
@@ -317,14 +320,6 @@ export class RemoteEngine extends BaseEngine {
                   });
                 }
               }
-              return {
-                ok: true,
-                message: {
-                  role: 'assistant',
-                  content: '',
-                  toolCalls: finalTools,
-                },
-              };
             }
             if (!delta.content) continue;
 
@@ -356,6 +351,16 @@ export class RemoteEngine extends BaseEngine {
       }
     }
 
+    if (finalTools) {
+      return {
+        ok: true,
+        message: {
+          role: 'assistant',
+          content: '',
+          toolCalls: finalTools,
+        },
+      };
+    }
     return { ok: true, message: { role: 'assistant', content: accumulatedResponse } };
   }
 
