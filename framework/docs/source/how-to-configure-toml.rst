@@ -27,7 +27,7 @@ App Metadata and Dependencies
     ]
 
     [tool.flwr.app]
-    publisher = "pan"
+    publisher = "your-name-or-organization"
 
 - ``name``\*: The name of your Flower app.
 - ``version``\*: The current version of your app, used for packaging and distribution.
