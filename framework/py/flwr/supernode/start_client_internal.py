@@ -237,15 +237,18 @@ def start_client_internal(
                 ]
                 subprocess.run(command, check=False)
 
+            # No message has been pulled therefore we can skip the push stage.
+            if run_id is None:
+                # If no message was received, wait for a while
+                time.sleep(3)
+                continue
+
             _push_messages(
                 state=state,
                 object_store=store,
                 send=send,
                 push_object=push_object,
             )
-
-            # Sleep for 3 seconds before the next iteration
-            time.sleep(3)
 
 
 def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
@@ -358,8 +361,10 @@ def _push_messages(
     push_object: Callable[[int, str, bytes], None],
 ) -> None:
     """Push reply messages to the SuperLink."""
-    # Get messages to send
-    reply_messages = state.get_messages(is_reply=True)
+    # This is to ensure that only one message is processed at a time
+    # Wait until a reply message is available
+    while not (reply_messages := state.get_messages(is_reply=True)):
+        time.sleep(0.5)
 
     for message in reply_messages:
         # Log message sending

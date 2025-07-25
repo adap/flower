@@ -22,10 +22,13 @@ from typing import Optional, cast
 
 import grpc
 
-from flwr.common import Message, RecordDict
+from flwr.app.error import Error
+from flwr.common import Message, Metadata, RecordDict, now
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
+    ErrorCode,
+    MessageType,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.inflatable import (
@@ -39,12 +42,13 @@ from flwr.common.inflatable_protobuf_utils import (
     make_push_object_fn_protobuf,
 )
 from flwr.common.inflatable_utils import (
+    ObjectUnavailableError,
     inflate_object_from_contents,
     pull_objects,
     push_objects,
 )
 from flwr.common.logger import log, warn_deprecated_feature
-from flwr.common.message import remove_content_from_message
+from flwr.common.message import make_message, remove_content_from_message
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
@@ -307,16 +311,42 @@ class GrpcGrid(Grid):
             inflated_msgs: list[Message] = []
             for msg_proto, msg_tree in zip(res.messages_list, res.message_object_trees):
                 msg_id = msg_proto.metadata.message_id
-                all_object_contents = pull_objects(
-                    object_ids=[
-                        tree.object_id for tree in iterate_object_tree(msg_tree)
-                    ],
-                    pull_object_fn=make_pull_object_fn_protobuf(
-                        pull_object_protobuf=self._stub.PullObject,
-                        node=self.node,
-                        run_id=run_id,
-                    ),
-                )
+                try:
+                    all_object_contents = pull_objects(
+                        object_ids=[
+                            tree.object_id for tree in iterate_object_tree(msg_tree)
+                        ],
+                        pull_object_fn=make_pull_object_fn_protobuf(
+                            pull_object_protobuf=self._stub.PullObject,
+                            node=self.node,
+                            run_id=run_id,
+                        ),
+                    )
+                except ObjectUnavailableError as e:
+                    # An ObjectUnavailableError indicates that the object is not yet
+                    # available. If this point has been reached, it means that the
+                    # Grid has tried to pull the object for the maximum number of times
+                    # or for the maximum time allowed, so we return an inflated message
+                    # with an error
+                    inflated_msgs.append(
+                        make_message(
+                            metadata=Metadata(
+                                run_id=run_id,
+                                message_id="",
+                                src_node_id=self.node.node_id,
+                                dst_node_id=self.node.node_id,
+                                message_type=MessageType.SYSTEM,
+                                group_id="",
+                                ttl=0,
+                                reply_to_message_id=msg_proto.metadata.reply_to_message_id,
+                                created_at=now().timestamp(),
+                            ),
+                            error=Error(
+                                code=ErrorCode.MESSAGE_UNAVAILABLE, reason=(str(e))
+                            ),
+                        )
+                    )
+                    continue
 
                 # Confirm that the message has been received
                 self._stub.ConfirmMessageReceived(
