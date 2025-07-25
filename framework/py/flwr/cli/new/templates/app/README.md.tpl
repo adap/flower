@@ -38,7 +38,7 @@ dependencies = [
 ]
 ```
 
-Add any Python packages your app needs here. These will be installed when you run ``pip install -e .``.
+Add any Python packages your app needs here. These will be installed when you run `pip install -e . `.
 
 ### App Components
 
