@@ -93,17 +93,17 @@ Here is an example output when a user runs ``flwr run`` (note the ``"action":
 
 .. code-block:: shell
 
-    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:24:21Z", "actor": {"actor_id": "...", "description": "flowerlabs", "ip_address": "..."}, "event": {"action": "ExecServicer.StartRun", "run_id": "...", "fab_hash": "..."}, "status": "started"}
+    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:24:21Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ExecServicer.StartRun", "run_id": "...", "fab_hash": "..."}, "status": "started"}
     INFO :      ExecServicer.StartRun
-    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:24:21Z", "actor": {"actor_id": "...", "description": "flowerlabs", "ip_address": "..."}, "event": {"action": "ExecServicer.StartRun", "run_id": "...", "fab_hash": "..."}, "status": "completed"}
+    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:24:21Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ExecServicer.StartRun", "run_id": "...", "fab_hash": "..."}, "status": "completed"}
 
 Here is another example output when a user runs ``flwr ls``:
 
 .. code-block:: shell
 
-    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:26:35Z", "actor": {"actor_id": "...", "description": "flowerlabs", "ip_address": "..."}, "event": {"action": "ExecServicer.ListRuns", "run_id": null, "fab_hash": null}, "status": "started"}
+    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:26:35Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ExecServicer.ListRuns", "run_id": null, "fab_hash": null}, "status": "started"}
     INFO :      ExecServicer.List
-    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:26:35Z", "actor": {"actor_id": "...", "description": "flowerlabs", "ip_address": "..."}, "event": {"action": "ExecServicer.ListRuns", "run_id": null, "fab_hash": null}, "status": "completed"}
+    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:26:35Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ExecServicer.ListRuns", "run_id": null, "fab_hash": null}, "status": "completed"}
 
 And here is an example when a SuperNode pulls a message from the SuperLink:
 
