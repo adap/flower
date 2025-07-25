@@ -231,10 +231,10 @@ User permissions file ``tuples.fga``
 ::
 
     ```yaml
-    - user: flwr_aid:<KEYCLOAK_SUB_1>
+    - user: flwr_aid:<OIDC_SUB_1>
       relation: has_access
       object: service:<your_grid_name>
-    - user: flwr_aid:<KEYCLOAK_SUB_2>
+    - user: flwr_aid:<OIDC_SUB_2>
       relation: has_access
       object: service:<your_grid_name>
     ```
