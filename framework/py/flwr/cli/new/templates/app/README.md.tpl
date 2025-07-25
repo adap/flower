@@ -61,7 +61,7 @@ any-name-you-like = "any value supported by TOML"
 Define any configuration values you want to make available to your app at runtime. You can access them in your code using `context.run_config`, for example:
 
 ```python
-context.run_config["num-server-rounds"]
+server_rounds = context.run_config["num-server-rounds"]
 ```
 
 ### Federation Configuration
