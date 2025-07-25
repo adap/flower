@@ -21,6 +21,9 @@ Project dependencies are defined in `pyproject.toml`. Install them in an activat
 pip install -e .
 ```
 
+> \[!TIP\]
+> Learn more about how `pyproject.toml` files are used in Flower Apps in [this guide](https://flower.ai/docs/framework/how-to-configure-toml.html).
+
 ## Experimental setup
 
 The dataset is divided into $num_clients partitions in an IID fashion, a partition is assigned to each ClientApp.

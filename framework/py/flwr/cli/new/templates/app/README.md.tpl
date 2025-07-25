@@ -8,8 +8,8 @@ The dependencies are listed in the `pyproject.toml` and you can install them as 
 pip install -e .
 ```
 
-> \[!NOTE]
-> Your `pyproject.toml` let's you defined more than just the dependencies of your Flower App, it also allows you to specify hyperparameters for your run and control what Flower Runtime is used when running it. By default it will run with the Simulation Runtime, but you can also run it in deployement. Check the FLOWER DOCUMENTATION LINK to learn more on how to customize your `pyproject.toml`.
+> \[!TIP\]
+> Your `pyproject.toml` let's you defined more than just the dependencies of your Flower App, it also allows you to specify hyperparameters for your run and control what Flower Runtime is used when running it. By default it will run with the Simulation Runtime, but you can also run it in deployement. Check the [`pyproject` guide](https://flower.ai/docs/framework/how-to-configure-toml.html) to learn more on how to customize your `pyproject.toml`.
 
 ## Run with the Simulation Engine
 

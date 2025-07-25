@@ -1,7 +1,7 @@
-# ======================================
-# For the full TOML configuration guide,
-# please check out the README.
-# ======================================
+# ============================================================
+# For a full TOML configuration guide, check the Flower docs:
+# https://flower.ai/docs/framework/how-to-configure-toml.html
+# ============================================================
 
 [build-system]
 requires = ["hatchling"]
