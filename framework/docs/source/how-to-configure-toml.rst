@@ -1,6 +1,6 @@
-:og:description: TODO
+:og:description: Learn how to configure your Flower app using the pyproject.toml file, including dependencies, components, runtime settings, and federation setup.
 .. meta::
-    :description: TODO
+    :description: Learn how to configure your Flower app using the pyproject.toml file, including dependencies, components, runtime settings, and federation setup.
 
 Configure the ``pyproject.toml`` file
 =====================================
