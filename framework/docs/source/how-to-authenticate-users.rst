@@ -2,14 +2,13 @@
 .. meta::
     :description: Configure SuperLink for user authentication and authorization. Private-by-default runs securely with OIDC and OpenFGA.
 
-Login to SuperLink
-==================
+Authenticate Users via OIDC
+===========================
 
 .. note::
 
-    This guide describes a Flower Enterprise feature. Subscribe to the `Flower
-    Enterprise plan <https://flower.ai/enterprise>`_ to get access to the advanced
-    features for your organization.
+    OIDC Authentication is a Flower Enterprise feature. See `Flower Enterprise
+    <https://flower.ai/enterprise>`_ for details.
 
 In this guide, you'll learn how to configure SuperLink with user-level authentication
 and authorization, and how to log in using the ``flwr`` CLI. Once logged in, any users
