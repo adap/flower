@@ -32,7 +32,7 @@ message PushAppMessagesRequest {
 }
 message PushAppMessagesResponse {
   repeated string message_ids = 1;
-  map<string, ObjectIDs> objects_to_push = 2;
+  repeated string objects_to_push = 2;
 }
 
 // PullAppMessages messages

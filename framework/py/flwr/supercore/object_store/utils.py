@@ -19,30 +19,25 @@ from typing import Union
 
 from flwr.proto.appio_pb2 import PushAppMessagesRequest  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import PushMessagesRequest  # pylint: disable=E0611
-from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 
 from . import ObjectStore
 
 
 def store_mapping_and_register_objects(
     store: ObjectStore, request: Union[PushAppMessagesRequest, PushMessagesRequest]
-) -> dict[str, ObjectIDs]:
+) -> set[str]:
     """Store Message object to descendants mapping and preregister objects."""
     if not request.messages_list:
-        return {}
-
-    objects_to_push: dict[str, ObjectIDs] = {}
-
+        return set()
+    objects_to_push: set[str] = set()
     # Get run_id from the first message in the list
     # All messages of a request should in the same run
     run_id = request.messages_list[0].metadata.run_id
 
     for object_tree in request.message_object_trees:
         # Preregister
-        object_ids_just_registered = store.preregister(run_id, object_tree)
+        unavailable_obj_ids = store.preregister(run_id, object_tree)
         # Keep track of objects that need to be pushed
-        objects_to_push[object_tree.object_id] = ObjectIDs(
-            object_ids=object_ids_just_registered
-        )
+        objects_to_push |= set(unavailable_obj_ids)
 
     return objects_to_push

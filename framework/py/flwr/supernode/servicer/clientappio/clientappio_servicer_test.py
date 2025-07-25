@@ -35,7 +35,6 @@ from flwr.proto.appio_pb2 import (  # pylint:disable=E0611
 )
 from flwr.proto.message_pb2 import Context as ProtoContext  # pylint:disable=E0611
 from flwr.proto.message_pb2 import (  # pylint:disable=E0611
-    ObjectIDs,
     PullObjectResponse,
     PushObjectRequest,
     PushObjectResponse,
@@ -129,7 +128,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         all_obj_ids = [tree.object_id for tree in iterate_object_tree(object_tree)]
         self.mock_stub.PushMessage.return_value = PushAppMessagesResponse(
             message_ids=[message.object_id],
-            objects_to_push={message.object_id: ObjectIDs(object_ids=all_obj_ids)},
+            objects_to_push=all_obj_ids,
         )
 
         # Prepare: Mock PushObject RPC calls
