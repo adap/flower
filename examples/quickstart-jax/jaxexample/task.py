@@ -7,51 +7,49 @@ import jax.numpy as jnp
 import numpy as np
 import optax
 from datasets.utils.logging import disable_progress_bar
-from flax import linen as nn
+from flax import nnx
+from functools import partial
 from flax.training.train_state import TrainState
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
 disable_progress_bar()
 
-rng = jax.random.PRNGKey(0)
-rng, init_rng = jax.random.split(rng)
+rng = nnx.Rngs(0)
 
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
-class CNN(nn.Module):
+class CNN(nnx.Module):
     """A simple CNN model."""
 
-    @nn.compact
+    def __init__(self, *, rngs: nnx.Rngs) -> None:
+        self.conv1 = nnx.Conv(1, 32, kernel_size=(5, 5), rngs=rngs)
+        self.conv2 = nnx.Conv(32, 64, kernel_size=(5, 5), rngs=rngs)
+        self.avg_pool = partial(nnx.avg_pool, window_shape=(2, 2), strides=(2, 2))
+        self.linear1 = nnx.Linear(64 * 4 * 4, 120, rngs=rngs)
+        self.linear2 = nnx.Linear(120, 84, rngs=rngs)
+        self.linear3 = nnx.Linear(84, 10, rngs=rngs)
+
     def __call__(self, x):
-        x = nn.Conv(features=6, kernel_size=(5, 5))(x)
-        x = nn.relu(x)
-        x = nn.avg_pool(x, window_shape=(2, 2), strides=(2, 2))
-        x = nn.Conv(features=16, kernel_size=(5, 5))(x)
-        x = nn.relu(x)
-        x = nn.avg_pool(x, window_shape=(2, 2), strides=(2, 2))
+        x = self.avg_pool(nnx.relu(self.conv1(x)))
+        x = self.avg_pool(nnx.relu(self.conv2(x)))
         x = x.reshape((x.shape[0], -1))  # flatten
-        x = nn.Dense(features=120)(x)
-        x = nn.relu(x)
-        x = nn.Dense(features=84)(x)
-        x = nn.relu(x)
-        x = nn.Dense(features=10)(x)
+        x = nnx.relu(self.linear1(x))
+        x = nnx.relu(self.linear2(x))
+        x = nnx.relu(self.linear3(x))
         return x
-
-
-def create_model(rng):
-    cnn = CNN()
-    return cnn, cnn.init(rng, jnp.ones([1, 28, 28, 1]))["params"]
 
 
 def create_train_state(learning_rate: float):
     """Creates initial `TrainState`."""
 
     tx = optax.sgd(learning_rate, momentum=0.9)
-    model, model_params = create_model(rng)
-    return TrainState.create(apply_fn=model.apply, params=model_params, tx=tx)
+    model = CNN(rngs=rng)
+    model.train()
+    graphdef, params, _ = nnx.split(model, nnx.Param, ...)
+    return TrainState.create(apply_fn=graphdef.apply, params=params, tx=tx)
 
 
 def get_params(params):
@@ -72,10 +70,8 @@ def apply_model(state, images, labels):
     """Computes gradients, loss and accuracy for a single batch."""
 
     def loss_fn(params):
-        logits = state.apply_fn({"params": params}, images)
-        one_hot = jax.nn.one_hot(labels, 10)
-        loss = jnp.mean(optax.softmax_cross_entropy(logits=logits, labels=one_hot))
-        return loss, logits
+        logits, (graphdef, new_state) = state.apply_fn(params)(images)
+        return optax.softmax_cross_entropy_with_integer_labels(logits, labels).mean()
 
     grad_fn = jax.value_and_grad(loss_fn, has_aux=True)
     (loss, logits), grads = grad_fn(state.params)
