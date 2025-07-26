@@ -6,6 +6,7 @@ import abc
 import flwr.proto.appio_pb2
 import flwr.proto.clientappio_pb2
 import flwr.proto.message_pb2
+import flwr.proto.run_pb2
 import grpc
 
 class ClientAppIoStub:
@@ -19,6 +20,11 @@ class ClientAppIoStub:
         flwr.proto.clientappio_pb2.RequestTokenRequest,
         flwr.proto.clientappio_pb2.RequestTokenResponse]
     """Request token"""
+
+    GetRun: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunRequest,
+        flwr.proto.run_pb2.GetRunResponse]
+    """Get run details"""
 
     PullClientAppInputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PullAppInputsRequest,
@@ -71,6 +77,14 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.clientappio_pb2.RequestTokenResponse:
         """Request token"""
+        pass
+
+    @abc.abstractmethod
+    def GetRun(self,
+        request: flwr.proto.run_pb2.GetRunRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetRunResponse:
+        """Get run details"""
         pass
 
     @abc.abstractmethod
