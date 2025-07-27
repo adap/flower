@@ -1,7 +1,7 @@
-import { FailureCode, Message, ResponseFormat, Result, Tool } from '../../typing';
-import { ChatCompletionsRequest } from './typing';
+import { EmbeddingInput, FailureCode, Message, ResponseFormat, Result, Tool } from '../../typing';
+import { ChatCompletionsRequest, EmbedRequest } from './typing';
 
-export function createRequestData(
+export function createChatRequestData(
   messages: Message[],
   model: string,
   temperature?: number,
@@ -28,8 +28,15 @@ export function createRequestData(
   };
 }
 
+export function createEmbedRequestData(input: EmbeddingInput, model: string): EmbedRequest {
+  return {
+    model,
+    input,
+  };
+}
+
 export async function sendRequest(
-  requestData: ChatCompletionsRequest,
+  requestData: ChatCompletionsRequest | EmbedRequest,
   endpoint: string,
   baseUrl: string,
   headers: Record<string, string>,

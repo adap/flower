@@ -16,6 +16,8 @@
 import { REMOTE_URL } from '../constants';
 import {
   ChatResponseResult,
+  Embedding,
+  EmbeddingInput,
   FailureCode,
   Message,
   Progress,
@@ -25,10 +27,15 @@ import {
   Tool,
 } from '../typing';
 import { BaseEngine } from './engine';
-import { ChatCompletionsResponse } from './remoteEngine/typing';
+import { ChatCompletionsResponse, EmbedResponse } from './remoteEngine/typing';
 import { CryptographyHandler } from './remoteEngine/cryptoHandler';
-import { createRequestData, getHeaders, sendRequest } from './remoteEngine/remoteUtils';
-import { chatStream, extractOutput } from './remoteEngine/chat';
+import {
+  createChatRequestData,
+  createEmbedRequestData,
+  getHeaders,
+  sendRequest,
+} from './remoteEngine/remoteUtils';
+import { chatStream, extractChatOutput, extractEmbedOutput } from './remoteEngine/chat';
 
 export class RemoteEngine extends BaseEngine {
   private baseUrl: string;
@@ -83,7 +90,7 @@ export class RemoteEngine extends BaseEngine {
       if (!response.ok) return response;
       return { ok: true, message: { role: 'assistant', content: response.value } };
     } else {
-      const requestData = createRequestData(
+      const requestData = createChatRequestData(
         messages,
         model,
         temperature,
@@ -106,8 +113,23 @@ export class RemoteEngine extends BaseEngine {
         return response;
       }
       const chatResponse = (await response.value.json()) as ChatCompletionsResponse;
-      return await extractOutput(chatResponse, encrypt, this.cryptoHandler);
+      return await extractChatOutput(chatResponse, encrypt, this.cryptoHandler);
     }
+  }
+
+  async embed(model: string, input: EmbeddingInput): Promise<Result<Embedding[]>> {
+    const requestData = createEmbedRequestData(input, model);
+    const response = await sendRequest(
+      requestData,
+      'v1/embeddings',
+      this.baseUrl,
+      getHeaders(this.apiKey)
+    );
+    if (!response.ok) {
+      return response;
+    }
+    const embedResponse = (await response.value.json()) as EmbedResponse;
+    return extractEmbedOutput(embedResponse);
   }
 
   async fetchModel(_model: string, _callback: (progress: Progress) => void): Promise<Result<void>> {

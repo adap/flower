@@ -1,4 +1,4 @@
-import { Message, Tool, ToolCall } from '../../typing';
+import { EmbeddingInput, Message, Tool, ToolCall } from '../../typing';
 
 interface ChoiceMessage {
   role: string;
@@ -9,6 +9,12 @@ interface ChoiceMessage {
 interface Choice {
   index: number;
   message: ChoiceMessage;
+}
+
+interface Data {
+  index: number;
+  embedding: number[];
+  object: string;
 }
 
 interface StreamChoice {
@@ -26,6 +32,18 @@ interface Usage {
   prompt_eval_duration: number; // time spent in nanoseconds evaluating the prompt
   eval_count: number; // number of tokens in the response
   eval_duration: number; // time in nanoseconds spent generating the response
+}
+
+export interface EmbedRequest {
+  model: string;
+  input: EmbeddingInput;
+}
+
+export interface EmbedResponse {
+  object: string;
+  model: string;
+  data: Data[];
+  usage: Usage;
 }
 
 export interface ChatCompletionsRequest {

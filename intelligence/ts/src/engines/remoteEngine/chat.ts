@@ -1,5 +1,6 @@
 import {
   ChatResponseResult,
+  Embedding,
   Failure,
   FailureCode,
   Message,
@@ -8,9 +9,10 @@ import {
   StreamEvent,
 } from '../../typing';
 import { CryptographyHandler } from './cryptoHandler';
-import { createRequestData, getHeaders, sendRequest } from './remoteUtils';
+import { createChatRequestData, getHeaders, sendRequest } from './remoteUtils';
 import {
   ChatCompletionsResponse,
+  EmbedResponse,
   isFinalChunk,
   isGenericError,
   isHTTPError,
@@ -31,7 +33,7 @@ export async function chatStream(
   onStreamEvent?: (event: StreamEvent) => void,
   signal?: AbortSignal
 ): Promise<Result<string>> {
-  const requestData = createRequestData(
+  const requestData = createChatRequestData(
     messages,
     model,
     temperature,
@@ -189,7 +191,7 @@ class StreamProcessingError extends Error {
   }
 }
 
-export async function extractOutput(
+export async function extractChatOutput(
   response: ChatCompletionsResponse,
   encrypt: boolean,
   cryptoHandler: CryptographyHandler
@@ -214,5 +216,14 @@ export async function extractOutput(
       content: content,
       ...(toolCalls && { toolCalls: toolCalls }),
     },
+  };
+}
+
+export function extractEmbedOutput(response: EmbedResponse): Result<Embedding[]> {
+  const embeddings = response.data.map((value) => value.embedding);
+
+  return {
+    ok: true,
+    value: embeddings,
   };
 }
