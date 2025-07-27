@@ -277,7 +277,7 @@ def concatenate_divisions(
     """Create a dataset by concatenation of divisions from all partitions.
 
     The divisions are created based on the `partition_division` and accessed based
-    on the `division_id`. This fuction can be used to create e.g. centralized dataset
+    on the `division_id`. This function can be used to create e.g. centralized dataset
     from federated on-edge test sets.
 
     Parameters

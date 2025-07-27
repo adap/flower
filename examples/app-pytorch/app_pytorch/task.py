@@ -1,7 +1,5 @@
 """app-pytorch: A Flower / PyTorch app."""
 
-from collections import OrderedDict
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,10 +7,6 @@ from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
-
-from flwr.common.typing import NDArray
-from flwr.common.record import Array, ParametersRecord
-from flwr.common import array_from_numpy
 
 
 class Net(nn.Module):
@@ -67,11 +61,11 @@ def load_data(partition_id: int, num_partitions: int):
     return trainloader, testloader
 
 
-def train(net, trainloader, epochs, device):
+def train(net, trainloader, epochs, lr, device):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(net.parameters(), lr=lr)
     net.train()
     running_loss = 0.0
     for _ in range(epochs):
@@ -103,22 +97,3 @@ def test(net, testloader, device):
     accuracy = correct / len(testloader.dataset)
     loss = loss / len(testloader)
     return loss, accuracy
-
-
-def pytorch_to_parameter_record(pytorch_module: torch.nn.Module):
-    """Serialise your PyTorch model."""
-    state_dict = pytorch_module.state_dict()
-
-    for k, v in state_dict.items():
-        state_dict[k] = array_from_numpy(v.numpy())
-
-    return ParametersRecord(state_dict)
-
-
-def parameters_to_pytorch_state_dict(params_record: ParametersRecord):
-    """Reconstruct PyTorch state_dict from its serialised representation."""
-    state_dict = {}
-    for k, arr in params_record.items():
-        state_dict[k] = torch.from_numpy(arr.numpy())
-
-    return state_dict

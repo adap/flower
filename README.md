@@ -2,14 +2,15 @@
 
 <p align="center">
   <a href="https://flower.ai/">
-    <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
+    <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflwr-head.4d68867a.png&w=384&q=75" width="140px" alt="Flower Website" />
   </a>
 </p>
 <p align="center">
     <a href="https://flower.ai/">Website</a> |
     <a href="https://flower.ai/blog">Blog</a> |
     <a href="https://flower.ai/docs/">Docs</a> |
-    <a href="https://flower.ai/conf/flower-summit-2022">Conference</a> |
+    <a href="https://flower.ai/events/flower-ai-summit-2025">Summit</a> |
+    <a href="https://flower.ai/events/flower-ai-day-2025">AI Day</a> |
     <a href="https://flower.ai/join-slack">Slack</a>
     <br /><br />
 </p>
@@ -34,7 +35,7 @@ design of Flower is based on a few guiding principles:
 
 - **Framework-agnostic**: Different machine learning frameworks have different
   strengths. Flower can be used with any machine learning framework, for
-  example, [PyTorch](https://pytorch.org), [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [MONAI](https://docs.monai.io/en/latest/index.html), [fastai](https://www.fast.ai/), [MLX](https://ml-explore.github.io/mlx/build/html/index.html), [XGBoost](https://xgboost.readthedocs.io/en/stable/), [LeRobot](https://github.com/huggingface/lerobot) for federated robots, [Pandas](https://pandas.pydata.org/) for federated analytics, or even raw [NumPy](https://numpy.org/)
+  example, [PyTorch](https://pytorch.org), [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [MONAI](https://docs.monai.io/en/latest/index.html), [fastai](https://www.fast.ai/), [MLX](https://ml-explore.github.io/mlx/build/html/index.html), [XGBoost](https://xgboost.readthedocs.io/en/stable/), [CatBoost](https://catboost.ai/), [LeRobot](https://github.com/huggingface/lerobot) for federated robots, [Pandas](https://pandas.pydata.org/) for federated analytics, or even raw [NumPy](https://numpy.org/)
   for users who enjoy computing gradients by hand.
 
 - **Understandable**: Flower is written with maintainability in mind. The
@@ -138,6 +139,7 @@ Quickstart examples:
 - [Quickstart (iOS [CoreML])](https://github.com/adap/flower/tree/main/examples/ios)
 - [Quickstart (MLX)](https://github.com/adap/flower/tree/main/examples/quickstart-mlx)
 - [Quickstart (XGBoost)](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
+- [Quickstart (CatBoost)](https://github.com/adap/flower/tree/main/examples/quickstart-catboost)
 
 Other [examples](https://github.com/adap/flower/tree/main/examples):
 

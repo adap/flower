@@ -17,8 +17,11 @@ examples/**/dataset/**
 # Flower Baselines
 baselines/datasets/leaf
 
+# Swift auto-generated documentation
+Documentation
+
 # Exclude ee package
-src/py/flwr/ee
+framework/py/flwr/ee
 
 # macOS
 .DS_Store
@@ -168,6 +171,9 @@ poetry.lock
 
 # iOS
 xcuserdata/
+.swiftpm/
+.build/
+Package.resolved
 
 # Android
 .gradle
@@ -189,3 +195,6 @@ app/src/main/assets
 
 # Pyright
 pyrightconfig.json
+
+# ruff Python linter
+.ruff_cache/
