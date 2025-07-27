@@ -75,8 +75,10 @@ App Metadata and Dependencies
 
         \* Required fields
 
+        These fields follow the standard ``pyproject.toml`` metadata format, commonly used by tools like ``uv``, ``poetry``, and others. Flower reuses these for configuration and packaging.
+
     - ``name``\*: The name of your Flower app.
-    - ``version``\*: The current version of your app, used for packaging and distribution.
+    - ``version``\*: The current version of your app, used for packaging and distribution. Must follow Semantic Versioning (e.g., "1.0.0").
     - ``description``: A short summary of what your app does.
     - ``license``: The license your app is distributed under (e.g., Apache-2.0).
     - ``dependencies``\*: A list of Python packages required to run your app.
@@ -84,7 +86,11 @@ App Metadata and Dependencies
 
 Specify the metadata, including the app name, version, etc., in these sections. Add any
 Python packages your app needs under ``dependencies``. These will be installed when you
-run: ``pip install -e .``
+run:
+
+.. code-block:: shell
+
+    pip install -e .
 
 App Components
 --------------
