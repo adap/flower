@@ -29,7 +29,7 @@ from flwr_datasets.utils import (
 )
 
 
-# flake8: noqa: E501
+# noqa: E501
 # pylint: disable=line-too-long
 class FederatedDataset:
     """Representation of a dataset for federated learning/evaluation/analytics.
@@ -69,7 +69,7 @@ class FederatedDataset:
         entropy will be pulled from the OS. Defaults to 42.
     load_dataset_kwargs : Any
         Additional keyword arguments passed to `datasets.load_dataset` function.
-        Currently used paramters used are dataset => path (in load_dataset),
+        Currently used parameters used are dataset => path (in load_dataset),
         subset => name (in load_dataset). You can pass e.g., `num_proc=4`,
         `trust_remote_code=True`. Do not pass any parameters that modify the
         return type such as another type than DatasetDict is returned.

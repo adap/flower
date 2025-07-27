@@ -1,16 +1,11 @@
 """fedprox: A Flower Baseline."""
 
 import json
-from typing import Callable, Dict, List, Optional, Tuple
+from collections.abc import Callable
 
 import torch
 from torch.utils.data import DataLoader
 
-from fedprox.dataset import prepare_test_loader
-from fedprox.model import get_weights, instantiate_model, set_weights, test
-from fedprox.server import ResultsSaverServer, history_saver
-from fedprox.strategy import FedAvgWithStragglerDrop
-from fedprox.utils import context_to_easydict
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.common.typing import NDArrays, Scalar
 from flwr.server import (
@@ -20,13 +15,19 @@ from flwr.server import (
     SimpleClientManager,
 )
 
+from .dataset import prepare_test_loader
+from .model import get_weights, instantiate_model, set_weights, test
+from .server import ResultsSaverServer, history_saver
+from .strategy import FedAvgWithStragglerDrop
+from .utils import context_to_easydict
+
 
 def gen_evaluate_fn(
     testloader: DataLoader,
     device: torch.device,
     run_config: dict,
 ) -> Callable[
-    [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
+    [int, NDArrays, dict[str, Scalar]], tuple[float, dict[str, Scalar]] | None
 ]:
     """Generate the function for centralized evaluation.
 
@@ -45,8 +46,8 @@ def gen_evaluate_fn(
     """
 
     def evaluate(
-        server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        server_round: int, parameters_ndarrays: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[float, dict[str, Scalar]] | None:
         # pylint: disable=unused-argument
         """Use the entire MNIST test set for evaluation."""
         net = instantiate_model(run_config)
@@ -66,7 +67,7 @@ def gen_evaluate_fn(
 
 
 # Define metric aggregation function
-def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+def weighted_average(metrics: list[tuple[int, Metrics]]) -> Metrics:
     """Do weighted average of accuracy metric."""
     # Multiply accuracy of each client by number of examples used
     accuracies = [num_examples * float(m["accuracy"]) for num_examples, m in metrics]
@@ -81,7 +82,7 @@ def server_fn(context: Context):
     # Read from config
     print("### BEGIN: Experiment Config ###")
     configs = context_to_easydict(context)
-    run_config = configs.run_config
+    run_config = configs.run_config  # pylint: disable=E1101
     print(json.dumps(run_config, indent=4))
     print("### END: Experiment Config ###")
     # Initialize model parameters
@@ -99,9 +100,13 @@ def server_fn(context: Context):
         return fit_config_fn
 
     device = torch.device("cpu")
-    testloader = prepare_test_loader(configs.run_config.dataset)
+    testloader = prepare_test_loader(
+        configs.run_config.dataset  # pylint: disable=E1101
+    )  # for server-side evaluation
     evaluate_fn = gen_evaluate_fn(
-        testloader, device=device, run_config=configs.run_config
+        testloader,
+        device=device,
+        run_config=configs.run_config,  # pylint: disable=E1101
     )
     # Define strategy
     strategy = FedAvgWithStragglerDrop(

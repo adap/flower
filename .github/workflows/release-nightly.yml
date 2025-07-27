@@ -26,6 +26,7 @@ jobs:
         id: release
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        working-directory: framework
         run: |
           RESULT=$(./dev/publish-nightly.sh)
           if [ "$RESULT" == "There were no commits in the last 24 hours." ]; then

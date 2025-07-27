@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ class EventType(str, Enum):
     # This method combined with auto() will set the property value to
     # the property name e.g.
     # `START_CLIENT = auto()` becomes `START_CLIENT = "START_CLIENT"`
-    # The type signature is not compatible with mypy, pylint and flake8
+    # The type signature is not compatible with mypy and pylint
     # so each of those needs to be disabled for this line.
     # pylint: disable-next=no-self-argument,arguments-differ,line-too-long
     def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:  # type: ignore # noqa: E501

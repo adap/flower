@@ -8,10 +8,10 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.15.2",
+    "flwr[simulation]>=1.18.0",
     "flwr-datasets[vision]>=0.5.0",
-    "torch==2.5.1",
-    "torchvision==0.20.1",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
     "easydict==1.11"
 ]
 
@@ -53,7 +53,7 @@ strict = false
 plugins = "numpy.typing.mypy_plugin"
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "duplicate-code,too-few-public-methods,useless-import-alias,maybe-no-member,wrong-import-order"
+disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,_,x,y,X,Y,K,N"
 max-args = 10
 max-attributes = 15
@@ -133,7 +133,6 @@ fraction-fit = 0.01
 fraction-evaluate= 0.0
 min-evaluate-clients= 0
 min-available-clients= 1000
-min-fit-clients= 1000
 local-epochs = 10
 stragglers-fraction = 0.9
 learning-rate = 0.03
@@ -141,6 +140,7 @@ mu = 1.0
 num-clients = 1000 # This parameter is used by the Server only, and does not change the size of the federation.
 
 [tool.flwr.app.config.dataset]
+path = "ylecun/mnist"
 power-law = true
 num-unique-labels-per-partition = 2
 num-unique-labels = 10
@@ -170,3 +170,8 @@ options.backend.client-resources.num-gpus = 0.0
 options.num-supernodes = 1000
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0.25
+
+[tool.flwr.federations.femnist-federation]
+options.num-supernodes = 200
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.0
