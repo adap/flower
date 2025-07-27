@@ -15,7 +15,6 @@
 
 import {
   ChatResponseResult,
-  Embedding,
   Failure,
   FailureCode,
   Message,
@@ -27,7 +26,6 @@ import { CryptographyHandler } from './cryptoHandler';
 import { createChatRequestData, getHeaders, sendRequest } from './remoteUtils';
 import {
   ChatCompletionsResponse,
-  EmbedResponse,
   isFinalChunk,
   isGenericError,
   isHTTPError,
@@ -231,14 +229,5 @@ export async function extractChatOutput(
       content: content,
       ...(toolCalls && { toolCalls: toolCalls }),
     },
-  };
-}
-
-export function extractEmbedOutput(response: EmbedResponse): Result<Embedding[]> {
-  const embeddings = response.data.map((value) => value.embedding);
-
-  return {
-    ok: true,
-    value: embeddings,
   };
 }

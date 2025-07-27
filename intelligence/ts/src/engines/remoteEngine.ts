@@ -35,7 +35,8 @@ import {
   getHeaders,
   sendRequest,
 } from './remoteEngine/remoteUtils';
-import { chatStream, extractChatOutput, extractEmbedOutput } from './remoteEngine/chat';
+import { chatStream, extractChatOutput } from './remoteEngine/chat';
+import { extractEmbedOutput } from './remoteEngine/embed';
 
 export class RemoteEngine extends BaseEngine {
   private baseUrl: string;
