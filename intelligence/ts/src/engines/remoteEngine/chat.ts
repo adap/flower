@@ -1,5 +1,6 @@
 import {
   ChatResponseResult,
+  Failure,
   FailureCode,
   Message,
   ResponseFormat,
@@ -51,90 +52,141 @@ export async function chatStream(
   );
 
   if (!response.ok) return response;
+  const body = response.value.body;
+  if (!body) {
+    return {
+      ok: false,
+      failure: {
+        code: FailureCode.ConnectionError,
+        description: 'No response body received.',
+      },
+    };
+  }
+  try {
+    const resultText = await processStream(body, cryptoHandler, encrypt, onStreamEvent, signal);
+    return { ok: true, value: resultText };
+  } catch (error) {
+    return handleStreamError(error);
+  }
+}
 
-  const reader = response.value.body?.getReader();
+async function processStream(
+  body: ReadableStream<Uint8Array>,
+  cryptoHandler: CryptographyHandler,
+  encrypt: boolean,
+  onStreamEvent?: (event: StreamEvent) => void,
+  signal?: AbortSignal
+): Promise<string> {
   const decoder = new TextDecoder('utf-8');
-  let accumulatedResponse = '';
+  const reader = body.getReader();
+  let accumulated = '';
+  let done = false;
+  const abortListener = () => void reader.cancel();
 
-  if (signal) {
-    signal.addEventListener('abort', () => {
-      void reader?.cancel();
+  signal?.addEventListener('abort', abortListener);
+
+  try {
+    while (!done && !signal?.aborted) {
+      const { done: streamDone, value } = await reader.read();
+      done = streamDone;
+
+      const text = decoder.decode(value, { stream: true });
+      for (const part of splitJsonChunks(text)) {
+        accumulated += await processChunk(part, cryptoHandler, encrypt, onStreamEvent);
+      }
+    }
+    return accumulated;
+  } finally {
+    signal?.removeEventListener('abort', abortListener);
+  }
+}
+
+function splitJsonChunks(text: string): string[] {
+  return text.split(/(?<=})\s*(?={)/g).filter((s) => s.trim());
+}
+
+async function processChunk(
+  chunk: string,
+  cryptoHandler: CryptographyHandler,
+  encrypt: boolean,
+  onStreamEvent?: (event: StreamEvent) => void
+): Promise<string> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(chunk);
+  } catch {
+    console.error('Invalid JSON chunk:', chunk);
+    return '';
+  }
+
+  if (isStreamChunk(parsed)) {
+    let text = '';
+    for (const choice of parsed.choices) {
+      const delta = choice.delta.content;
+      if (!delta) continue;
+
+      let content = delta;
+      if (encrypt) {
+        const decrypted = await cryptoHandler.decryptMessage(content);
+        if (!decrypted.ok) {
+          throw new StreamProcessingError(decrypted.failure);
+        }
+        content = decrypted.value;
+      }
+
+      onStreamEvent?.({ chunk: content });
+      text += content;
+    }
+    return text;
+  }
+
+  if (isFinalChunk(parsed)) {
+    return '';
+  }
+
+  if (isHTTPError(parsed)) {
+    throw new StreamProcessingError({
+      code: FailureCode.ConnectionError,
+      description: parsed.detail,
     });
   }
 
-  while (reader) {
-    if (signal?.aborted) {
-      break;
-    }
-    let result;
-    try {
-      result = await reader.read();
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        break;
-      }
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        break;
-      }
-      return {
-        ok: false,
-        failure: {
-          code: FailureCode.RequestAborted,
-          description: 'Request was aborted by the user.',
-        },
-      };
-    }
-    const { done, value } = result;
-    if (done) break;
-
-    const text = decoder.decode(value, { stream: true });
-    const parts = text.split(/(?<=})\s*(?={)/g);
-
-    for (const part of parts) {
-      if (!part.trim()) continue;
-
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(part);
-      } catch (err) {
-        console.error('Invalid JSON chunk:', part, err);
-        continue;
-      }
-
-      if (isStreamChunk(parsed)) {
-        for (const choice of parsed.choices) {
-          const delta = choice.delta.content;
-          if (!delta) continue;
-
-          let content = delta;
-          if (encrypt) {
-            const decrypted = await cryptoHandler.decryptMessage(delta);
-            if (!decrypted.ok) return decrypted;
-            content = decrypted.value;
-          }
-
-          onStreamEvent?.({ chunk: content });
-          accumulatedResponse += content;
-        }
-      } else if (isFinalChunk(parsed)) {
-        break;
-      } else if (isHTTPError(parsed)) {
-        return {
-          ok: false,
-          failure: { code: FailureCode.ConnectionError, description: parsed.detail },
-        };
-      } else if (isGenericError(parsed)) {
-        return {
-          ok: false,
-          failure: { code: FailureCode.RemoteError, description: parsed.error },
-        };
-      } else {
-        console.warn('Unknown stream shape:', parsed);
-      }
-    }
+  if (isGenericError(parsed)) {
+    throw new StreamProcessingError({
+      code: FailureCode.RemoteError,
+      description: parsed.error,
+    });
   }
 
-  return { ok: true, value: accumulatedResponse };
+  console.warn('Unknown chunk type', parsed);
+  return '';
+}
+
+function handleStreamError(error: unknown): Result<string> {
+  if (error instanceof StreamProcessingError) {
+    return { ok: false, failure: error.failure };
+  }
+
+  if (
+    (error instanceof Error && error.name === 'AbortError') ||
+    (error instanceof DOMException && error.name === 'AbortError')
+  ) {
+    return {
+      ok: false,
+      failure: {
+        code: FailureCode.RequestAborted,
+        description: 'Request was aborted by the user.',
+      },
+    };
+  }
+
+  return { ok: false, failure: { code: FailureCode.RemoteError, description: String(error) } };
+}
+
+class StreamProcessingError extends Error {
+  constructor(public failure: Failure) {
+    super();
+  }
 }
 
 export async function extractOutput(
