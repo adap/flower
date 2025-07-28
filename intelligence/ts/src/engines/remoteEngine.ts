@@ -279,8 +279,8 @@ export class RemoteEngine extends BaseEngine {
           return {
             ok: false,
             failure: {
-              code: FailureCode.ConnectionError,
-              description: `Error code: ${parsed.detail.code}, description: ${parsed.detail.message}`,
+              code: FailureCode.RemoteError,
+              description: parsed.detail.message,
             },
           };
         } else if (isHTTPError(parsed)) {
