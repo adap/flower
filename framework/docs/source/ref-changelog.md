@@ -8,6 +8,8 @@ We would like to give our special thanks to all the contributors who made the ne
 
 `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Robert Steiner`, `William Lindskog`, `Yan Gao` <!---TOKEN_v1.20.0-->
 
+### What's new?
+
 - **Enable large model support by introducing Array chunking** ([#5552](https://github.com/adap/flower/pull/5552), [#5550](https://github.com/adap/flower/pull/5550), [#5600](https://github.com/adap/flower/pull/5600), [#5611](https://github.com/adap/flower/pull/5611), [#5614](https://github.com/adap/flower/pull/5614), [#5551](https://github.com/adap/flower/pull/5551))
 
   Introduces `ArrayChunk` and enables `Array` slicing to stay within the 2GB gRPC message limit. Supports empty arrays and optional chunk caching. This enables full support for large model weights.
