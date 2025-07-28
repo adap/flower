@@ -34,6 +34,7 @@ from .constant import (
     PULL_MAX_TIME,
     PULL_MAX_TRIES_PER_OBJECT,
 )
+from .exit_handlers import add_exit_handler
 from .inflatable import (
     InflatableObject,
     UnexpectedObjectContentError,
@@ -59,6 +60,22 @@ inflatable_class_registry: dict[str, type[InflatableObject]] = {
 }
 
 T = TypeVar("T", bound=InflatableObject)
+
+
+# Allow thread pool executors to be shut down gracefully
+_thread_pool_executors: set[concurrent.futures.ThreadPoolExecutor] = set()
+_lock = threading.Lock()
+
+
+def _shutdown_thread_pool_executors() -> None:
+    """Shutdown all thread pool executors gracefully."""
+    with _lock:
+        for executor in _thread_pool_executors:
+            executor.shutdown(wait=False, cancel_futures=True)
+        _thread_pool_executors.clear()
+
+
+add_exit_handler(_shutdown_thread_pool_executors)
 
 
 class ObjectUnavailableError(Exception):
@@ -156,16 +173,26 @@ def push_object_contents_from_iterable(
         The maximum number of concurrent pushes to perform.
     """
 
-    def push(args: tuple[str, bytes]) -> None:
+    def push(_obj_id: str, _obj_content: bytes) -> None:
         """Push a single object."""
-        obj_id, obj_content = args
         # Push the object using the provided function
-        push_object_fn(obj_id, obj_content)
+        push_object_fn(_obj_id, _obj_content)
 
     # Push all object contents concurrently
     num_workers = get_num_workers(max_concurrent_pushes)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
-        list(executor.map(push, object_contents))
+        # Ensure that the thread pool executors are tracked for graceful shutdown
+        with _lock:
+            _thread_pool_executors.add(executor)
+
+        # Submit push tasks for each object content
+        for obj_id, obj_content in object_contents:
+            executor.submit(push, obj_id, obj_content)
+            del obj_content  # Delete the reference after submission
+
+    # Remove the executor from the list of tracked executors
+    with _lock:
+        _thread_pool_executors.discard(executor)
 
 
 def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
@@ -262,13 +289,21 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
     # Submit all pull tasks concurrently
     num_workers = get_num_workers(max_concurrent_pulls)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
-        futures = {
-            executor.submit(pull_with_retries, obj_id): obj_id for obj_id in object_ids
-        }
+        # Ensure that the thread pool executors are tracked for graceful shutdown
+        with _lock:
+            _thread_pool_executors.add(executor)
 
-        # Wait for completion
-        concurrent.futures.wait(futures)
+        # Submit pull tasks for each object ID
+        for obj_id in object_ids:
+            executor.submit(pull_with_retries, obj_id)  # Non-blocking submit
 
+        # The context manager will block until all submitted tasks have completed
+
+    # Remove the executor from the list of tracked executors
+    with _lock:
+        _thread_pool_executors.discard(executor)
+
+    # If an error occurred during pulling, raise it
     if err_to_raise is not None:
         raise err_to_raise
 
