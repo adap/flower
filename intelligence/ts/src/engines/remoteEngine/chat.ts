@@ -19,8 +19,9 @@ import {
   FailureCode,
   Message,
   ResponseFormat,
-  Result,
   StreamEvent,
+  Tool,
+  ToolCall,
 } from '../../typing';
 import { CryptographyHandler } from './cryptoHandler';
 import { createChatRequestData, getHeaders, sendRequest } from './remoteUtils';
@@ -29,6 +30,7 @@ import {
   isFinalChunk,
   isGenericError,
   isHTTPError,
+  isPlatformHttpError,
   isStreamChunk,
 } from './typing';
 
@@ -43,9 +45,10 @@ export async function chatStream(
   topP?: number,
   maxCompletionTokens?: number,
   responseFormat?: ResponseFormat,
+  tools?: Tool[],
   onStreamEvent?: (event: StreamEvent) => void,
   signal?: AbortSignal
-): Promise<Result<string>> {
+): Promise<ChatResponseResult> {
   const requestData = createChatRequestData(
     messages,
     model,
@@ -54,7 +57,7 @@ export async function chatStream(
     maxCompletionTokens,
     responseFormat,
     true,
-    undefined,
+    tools,
     encrypt,
     cryptoHandler.encryptionId
   );
@@ -78,8 +81,7 @@ export async function chatStream(
     };
   }
   try {
-    const resultText = await processStream(body, cryptoHandler, encrypt, onStreamEvent, signal);
-    return { ok: true, value: resultText };
+    return await processStream(body, cryptoHandler, encrypt, onStreamEvent, signal);
   } catch (error) {
     return handleStreamError(error);
   }
@@ -91,10 +93,12 @@ async function processStream(
   encrypt: boolean,
   onStreamEvent?: (event: StreamEvent) => void,
   signal?: AbortSignal
-): Promise<string> {
+): Promise<ChatResponseResult> {
   const decoder = new TextDecoder('utf-8');
   const reader = body.getReader();
   let accumulated = '';
+  let finalTools: ToolCall[] | null = null;
+  const pendingToolCalls: Record<string, { name: string; buffer: string }> = {};
   let done = false;
   const abortListener = () => void reader.cancel();
 
@@ -107,10 +111,42 @@ async function processStream(
 
       const text = decoder.decode(value, { stream: true });
       for (const part of splitJsonChunks(text)) {
-        accumulated += await processChunk(part, cryptoHandler, encrypt, onStreamEvent);
+        const chunkResult = await processChunk(
+          part,
+          finalTools,
+          pendingToolCalls,
+          cryptoHandler,
+          encrypt,
+          onStreamEvent
+        );
+        if (!chunkResult.ok) {
+          return chunkResult;
+        }
+        if (chunkResult.toolsUpdated && chunkResult.message.toolCalls) {
+          finalTools = chunkResult.message.toolCalls;
+        }
+        accumulated += chunkResult.message.content;
       }
     }
-    return accumulated;
+
+    if (finalTools) {
+      return {
+        ok: true,
+        message: {
+          role: 'assistant',
+          content: '',
+          toolCalls: finalTools,
+        },
+      };
+    }
+
+    return {
+      ok: true,
+      message: {
+        role: 'assistant',
+        content: accumulated,
+      },
+    };
   } finally {
     signal?.removeEventListener('abort', abortListener);
   }
@@ -122,27 +158,87 @@ function splitJsonChunks(text: string): string[] {
 
 async function processChunk(
   chunk: string,
+  finalTools: ToolCall[] | null,
+  pendingToolCalls: Record<string, { name: string; buffer: string }>,
   cryptoHandler: CryptographyHandler,
   encrypt: boolean,
   onStreamEvent?: (event: StreamEvent) => void
-): Promise<string> {
+): Promise<ChatResponseResult & { toolsUpdated?: boolean }> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(chunk);
   } catch {
-    console.error('Invalid JSON chunk:', chunk);
-    return '';
+    return {
+      ok: false,
+      failure: { code: FailureCode.RemoteError, description: 'Invalid JSON chunk received.' },
+    };
   }
 
   if (isStreamChunk(parsed)) {
     let text = '';
-    for (const choice of parsed.choices) {
-      const delta = choice.delta.content;
-      if (!delta) continue;
+    let toolsUpdated = false;
 
-      let content = delta;
+    for (const choice of parsed.choices) {
+      const delta = choice.delta;
+      if (delta.tool_calls) {
+        if (!finalTools) {
+          finalTools = [];
+        }
+        for (const t of delta.tool_calls) {
+          const callId = String(t.index);
+          const fn = t.function;
+          const name = fn.name ?? '';
+
+          // start the buffer if first fragment
+          if (!(callId in pendingToolCalls)) {
+            pendingToolCalls[callId] = {
+              name,
+              buffer: '',
+            };
+          }
+          const fragment = fn.arguments ?? '';
+          let buf = pendingToolCalls[callId].buffer;
+
+          // if the model starts a new JSON blob (e.g. it emits "{"…),
+          // discard any old buffer and start fresh
+          if (fragment.trim().startsWith('{')) {
+            buf = fragment;
+          } else {
+            buf += fragment;
+          }
+          pendingToolCalls[callId].buffer = buf;
+
+          try {
+            const args = JSON.parse(pendingToolCalls[callId].buffer) as Record<string, string>;
+            onStreamEvent?.({
+              toolCall: {
+                index: callId,
+                name: pendingToolCalls[callId].name,
+                arguments: args,
+                complete: true,
+              },
+            });
+            finalTools.push({
+              function: {
+                name: pendingToolCalls[callId].name,
+                arguments: args,
+              },
+            });
+            toolsUpdated = true;
+            continue;
+          } catch {
+            // not complete yet, wait for more chunks
+            onStreamEvent?.({
+              toolCall: { index: callId, name, arguments: buf, complete: false },
+            });
+          }
+        }
+      }
+      if (!delta.content) continue;
+
+      let content = delta.content;
       if (encrypt) {
-        const decrypted = await cryptoHandler.decryptMessage(content);
+        const decrypted = await cryptoHandler.decryptMessage(delta.content);
         if (!decrypted.ok) {
           throw new StreamProcessingError(decrypted.failure);
         }
@@ -152,11 +248,23 @@ async function processChunk(
       onStreamEvent?.({ chunk: content });
       text += content;
     }
-    return text;
+
+    return {
+      ok: true,
+      message: { role: 'assistant', content: text, ...(finalTools && { toolCalls: finalTools }) },
+      toolsUpdated,
+    };
   }
 
   if (isFinalChunk(parsed)) {
-    return '';
+    return { ok: true, message: { role: 'assistant', content: '' } };
+  }
+
+  if (isPlatformHttpError(parsed)) {
+    throw new StreamProcessingError({
+      code: FailureCode.RemoteError,
+      description: parsed.detail.message,
+    });
   }
 
   if (isHTTPError(parsed)) {
@@ -173,11 +281,13 @@ async function processChunk(
     });
   }
 
-  console.warn('Unknown chunk type', parsed);
-  return '';
+  return {
+    ok: false,
+    failure: { code: FailureCode.RemoteError, description: 'Unknown chunk type received.' },
+  };
 }
 
-function handleStreamError(error: unknown): Result<string> {
+function handleStreamError(error: unknown): ChatResponseResult {
   if (error instanceof StreamProcessingError) {
     return { ok: false, failure: error.failure };
   }

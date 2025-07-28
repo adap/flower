@@ -85,11 +85,11 @@ export class RemoteEngine extends BaseEngine {
         topP,
         maxCompletionTokens,
         responseFormat,
+        tools,
         onStreamEvent,
         signal
       );
-      if (!response.ok) return response;
-      return { ok: true, message: { role: 'assistant', content: response.value } };
+      return response;
     } else {
       const requestData = createChatRequestData(
         messages,

@@ -32,10 +32,21 @@ interface Data {
   object: string;
 }
 
+interface StreamingToolCall {
+  id?: string;
+  type?: 'function';
+  index: number;
+  function: {
+    name?: string;
+    arguments?: string;
+  };
+}
+
 interface StreamChoice {
   index: number;
   delta: {
-    content: string;
+    content?: string;
+    tool_calls?: StreamingToolCall[];
     role: string;
   };
 }
@@ -98,6 +109,27 @@ interface HTTPError {
 
 interface GenericError {
   error: string;
+}
+
+interface PlatformHttpError {
+  detail: {
+    code: string;
+    message: string;
+  };
+}
+
+export function isPlatformHttpError(o: unknown): o is PlatformHttpError {
+  return (
+    typeof o === 'object' &&
+    o !== null &&
+    'detail' in o &&
+    typeof o.detail === 'object' &&
+    o.detail !== null &&
+    'code' in o.detail &&
+    typeof o.detail.code === 'string' &&
+    'message' in o.detail &&
+    typeof o.detail.message === 'string'
+  );
 }
 
 export function isStreamChunk(o: unknown): o is StreamChunk {
