@@ -335,7 +335,15 @@ export class RemoteEngine extends BaseEngine {
           }
         } else if (isFinalChunk(parsed)) {
           break;
-        } else if (isHTTPError(parsed)) {
+        } else if (isPlatformHttpError(parsed)) {
+          return {
+            ok: false,
+            failure: {
+              code: FailureCode.RemoteError,
+              description: parsed.detail.message,
+            },
+          };
+        } else if (isHttpError(parsed)) {
           return {
             ok: false,
             failure: { code: FailureCode.ConnectionError, description: parsed.detail },
@@ -861,8 +869,15 @@ interface FinalChunk {
   };
 }
 
-interface HTTPError {
+interface HttpError {
   detail: string;
+}
+
+interface PlatformHttpError {
+  detail: {
+    code: string;
+    message: string;
+  };
 }
 
 interface GenericError {
@@ -885,8 +900,22 @@ function isFinalChunk(o: unknown): o is FinalChunk {
   );
 }
 
-function isHTTPError(o: unknown): o is HTTPError {
+function isHttpError(o: unknown): o is HttpError {
   return typeof o === 'object' && o !== null && 'detail' in o && typeof o.detail === 'string';
+}
+
+function isPlatformHttpError(o: unknown): o is PlatformHttpError {
+  return (
+    typeof o === 'object' &&
+    o !== null &&
+    'detail' in o &&
+    typeof o.detail === 'object' &&
+    o.detail !== null &&
+    'code' in o.detail &&
+    typeof o.detail.code === 'string' &&
+    'message' in o.detail &&
+    typeof o.detail.message === 'string'
+  );
 }
 
 function isGenericError(o: unknown): o is GenericError {
