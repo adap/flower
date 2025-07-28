@@ -10,7 +10,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### What's new?
 
-- **Enable large model support by introducing Array chunking** ([#5552](https://github.com/adap/flower/pull/5552), [#5550](https://github.com/adap/flower/pull/5550), [#5600](https://github.com/adap/flower/pull/5600), [#5611](https://github.com/adap/flower/pull/5611), [#5614](https://github.com/adap/flower/pull/5614), [#5551](https://github.com/adap/flower/pull/5551))
+- **Send/receive arbitrarily large models** ([#5552](https://github.com/adap/flower/pull/5552), [#5550](https://github.com/adap/flower/pull/5550), [#5600](https://github.com/adap/flower/pull/5600), [#5611](https://github.com/adap/flower/pull/5611), [#5614](https://github.com/adap/flower/pull/5614), [#5551](https://github.com/adap/flower/pull/5551))
+
+  Flower 1.20 can send and receive arbitrarily large models like LLMs, way beyond the 2GB limit imposed by gRPC. It does so by chunking messages sent and received. The best part? This happens automatically without the user having to do anything.
 
   Introduces `ArrayChunk` and enables `Array` slicing to stay within the 2GB gRPC message limit. Supports empty arrays and optional chunk caching. This enables full support for large model weights.
 
@@ -68,7 +70,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### Incompatible changes
 
-- **Remove non-`grpc-bidi` transport support from `start_client`** ([#5593](https://github.com/adap/flower/pull/5593))
+- **Remove non-`grpc-bidi` transport support from deprecated `start_client`** ([#5593](https://github.com/adap/flower/pull/5593))
 
   Drops support for deprecated non-`grpc-bidi` transport in the `start_client` API. Pleaes use `flower-supernode` instead.
 
