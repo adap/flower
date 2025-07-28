@@ -295,13 +295,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             for obj_id in obj_ids.object_ids
         }  # descendants
         # Construct a single set with all object ids
-        requested_object_ids = {
-            obj_id
-            for obj_ids in response.objects_to_push.values()
-            for obj_id in obj_ids.object_ids
-        }
+        requested_object_ids = set(response.objects_to_push)
         assert expected_object_ids == requested_object_ids
-        assert response.objects_to_push.keys() == descendant_mapping.keys()
 
     def _assert_push_ins_messages_not_allowed(
         self, message: ProtoMessage, run_id: int
