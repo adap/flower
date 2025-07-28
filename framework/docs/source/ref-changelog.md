@@ -6,7 +6,7 @@
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Robert Steiner`, `William Lindskog`, `Yan Gao` <!---TOKEN_v1.20.0-->
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Kumbham Ajay Goud`, `Robert Steiner`, `William Lindskog`, `Yan Gao` <!---TOKEN_v1.20.0-->
 
 ### What's new?
 
@@ -42,6 +42,10 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Adds comments to the generated `pyproject.toml` and a new section in the `README.md`, both linking to the TOML explainer.
 
+- **Warn when running Ray backend on Windows and update simulation guide** ([#5579](https://github.com/adap/flower/pull/5579))
+
+  Logs a warning when using the Ray backend for simulation on Windows. Updates the simulation guide to include a corresponding note about limited Windows support.
+
 - **Add license check** ([#5554](https://github.com/adap/flower/pull/5554), [#5557](https://github.com/adap/flower/pull/5557), [#5565](https://github.com/adap/flower/pull/5565), [#5576](https://github.com/adap/flower/pull/5576), [#5621](https://github.com/adap/flower/pull/5621))
 
   Implements a license validation system using a plugin interface and runtime interceptor. Adds error handling for missing or invalid keys, with corresponding exit codes and documentation updates.
@@ -58,7 +62,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Improve and update documentation** ([#5558](https://github.com/adap/flower/pull/5558), [#5603](https://github.com/adap/flower/pull/5603), [#5538](https://github.com/adap/flower/pull/5538), [#5626](https://github.com/adap/flower/pull/5626), [#5566](https://github.com/adap/flower/pull/5566), [#5553](https://github.com/adap/flower/pull/5553), [#5588](https://github.com/adap/flower/pull/5588), [#5549](https://github.com/adap/flower/pull/5549), [#5618](https://github.com/adap/flower/pull/5618), [#5612](https://github.com/adap/flower/pull/5612))
 
-- **General improvements** ([#5543](https://github.com/adap/flower/pull/5543), [#5594](https://github.com/adap/flower/pull/5594), [#5623](https://github.com/adap/flower/pull/5623), [#5615](https://github.com/adap/flower/pull/5615), [#5629](https://github.com/adap/flower/pull/5629), [#5571](https://github.com/adap/flower/pull/5571), [#5617](https://github.com/adap/flower/pull/5617), [#5563](https://github.com/adap/flower/pull/5563), [#5620](https://github.com/adap/flower/pull/5620), [#5619](https://github.com/adap/flower/pull/5619), [#5546](https://github.com/adap/flower/pull/5546), [#5601](https://github.com/adap/flower/pull/5601))
+- **General improvements** ([#5543](https://github.com/adap/flower/pull/5543), [#5594](https://github.com/adap/flower/pull/5594), [#5623](https://github.com/adap/flower/pull/5623), [#5615](https://github.com/adap/flower/pull/5615), [#5629](https://github.com/adap/flower/pull/5629), [#5571](https://github.com/adap/flower/pull/5571), [#5617](https://github.com/adap/flower/pull/5617), [#5563](https://github.com/adap/flower/pull/5563), [#5620](https://github.com/adap/flower/pull/5620), [#5619](https://github.com/adap/flower/pull/5619), [#5546](https://github.com/adap/flower/pull/5546), [#5601](https://github.com/adap/flower/pull/5601), [#5641](https://github.com/adap/flower/pull/5641))
 
   As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
