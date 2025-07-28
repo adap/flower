@@ -1,7 +1,7 @@
-# ============================================================
+# =====================================================================
 # For a full TOML configuration guide, check the Flower docs:
-# https://flower.ai/docs/framework/how-to-configure-toml.html
-# ============================================================
+# https://flower.ai/docs/framework/how-to-configure-pyproject-toml.html
+# =====================================================================
 
 [build-system]
 requires = ["hatchling"]

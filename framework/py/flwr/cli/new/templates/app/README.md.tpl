@@ -9,7 +9,7 @@ pip install -e .
 ```
 
 > **Tip:** Your `pyproject.toml` file can define more than just the dependencies of your Flower app. You can also use it to specify hyperparameters for your runs and control which Flower Runtime is used. By default, it uses the Simulation Runtime, but you can switch to the Deployment Runtime when needed.
-> Learn more in the [TOML configuration guide](https://flower.ai/docs/framework/how-to-configure-toml.html).
+> Learn more in the [TOML configuration guide](https://flower.ai/docs/framework/how-to-configure-pyproject-toml.html).
 
 ## Run with the Simulation Engine
 
