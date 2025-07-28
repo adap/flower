@@ -65,6 +65,7 @@ strategy.fraction-fit = $fraction_fit
 strategy.fraction-evaluate = 0.0
 num-server-rounds = 200
 
+# Dataset config (static for FlowerTune LLM Leaderboard)
 [tool.flwr.app.config.static]
 dataset.name = "$dataset_name"
 
