@@ -96,6 +96,8 @@ async function processStream(
   const decoder = new TextDecoder('utf-8');
   const reader = body.getReader();
   let accumulated = '';
+  let finalTools: ToolCall[] | null = null;
+  const pendingToolCalls: Record<string, { name: string; buffer: string }> = {};
   let done = false;
   const abortListener = () => void reader.cancel();
 
@@ -108,17 +110,28 @@ async function processStream(
 
       const text = decoder.decode(value, { stream: true });
       for (const part of splitJsonChunks(text)) {
-        const chunkResult = await processChunk(part, cryptoHandler, encrypt, onStreamEvent);
+        const chunkResult = await processChunk(part, finalTools, pendingToolCalls, cryptoHandler, encrypt, onStreamEvent);
         if (!chunkResult.ok) {
           return chunkResult;
         }
-        if (chunkResult.message.toolCalls) {
-          return chunkResult;
+        if (chunkResult.toolsUpdated && chunkResult.message.toolCalls) {
+          finalTools = chunkResult.message.toolCalls;
         }
         accumulated += chunkResult.message.content;
       }
     }
-    
+
+    if (finalTools) {
+      return {
+        ok: true,
+        message: {
+          role: 'assistant',
+          content: '',
+          toolCalls: finalTools,
+        },
+      };
+    }
+
     return {
       ok: true,
       message: {
@@ -137,10 +150,12 @@ function splitJsonChunks(text: string): string[] {
 
 async function processChunk(
   chunk: string,
+  finalTools: ToolCall[] | null,
+  pendingToolCalls: Record<string, { name: string; buffer: string }>,
   cryptoHandler: CryptographyHandler,
   encrypt: boolean,
   onStreamEvent?: (event: StreamEvent) => void
-): Promise<ChatResponseResult> {
+): Promise<ChatResponseResult & { toolsUpdated?: boolean }> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(chunk);
@@ -153,9 +168,8 @@ async function processChunk(
 
   if (isStreamChunk(parsed)) {
     let text = '';
-    let finalTools: ToolCall[] | null = null;
+    let toolsUpdated = false;
 
-    const pendingToolCalls: Record<string, { name: string; buffer: string }> = {};
     for (const choice of parsed.choices) {
       const delta = choice.delta;
       if (delta.tool_calls) {
@@ -202,6 +216,7 @@ async function processChunk(
                 arguments: args,
               },
             });
+            toolsUpdated = true;
             continue;
           } catch {
             // not complete yet, wait for more chunks
@@ -225,17 +240,12 @@ async function processChunk(
       onStreamEvent?.({ chunk: content });
       text += content;
     }
-    if (finalTools) {
-      return {
-        ok: true,
-        message: {
-          role: 'assistant',
-          content: '',
-          toolCalls: finalTools,
-        },
-      };
-    }
-    return { ok: true, message: { role: 'assistant', content: text } };
+    
+    return { 
+      ok: true, 
+      message: { role: 'assistant', content: text, ...(finalTools && { toolCalls: finalTools }) },
+      toolsUpdated 
+    };
   }
 
   if (isFinalChunk(parsed)) {
