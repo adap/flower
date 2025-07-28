@@ -38,6 +38,10 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Adds a guide explaining how to configure a Flower app using its `pyproject.toml` file. The documentation is available [here](https://flower.ai/docs/framework/how-to-configure-pyproject-toml.html).
 
+- **Improve `flwr new` templates with TOML comments and README links** ([#5635](https://github.com/adap/flower/pull/5635))
+
+  Adds comments to the generated `pyproject.toml` and a new section in the `README.md`, both linking to the TOML explainer.
+
 - **Add license check** ([#5554](https://github.com/adap/flower/pull/5554), [#5557](https://github.com/adap/flower/pull/5557), [#5565](https://github.com/adap/flower/pull/5565), [#5576](https://github.com/adap/flower/pull/5576), [#5621](https://github.com/adap/flower/pull/5621))
 
   Implements a license validation system using a plugin interface and runtime interceptor. Adds error handling for missing or invalid keys, with corresponding exit codes and documentation updates.
