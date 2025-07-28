@@ -22,3 +22,4 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-authenticate-users
     how-to-configure-audit-logging
     docker/index
+    helm/index
