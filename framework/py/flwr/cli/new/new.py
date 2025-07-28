@@ -297,7 +297,7 @@ def new(
     )
 
     prompt += typer.style(
-        "💡 Check the README of your app to learn how to customize\n "
+        "💡 Check the README of your app to learn how to customize\n"
         "it and how to run it using the Deployment Runtime.\n",
         fg=typer.colors.GREEN,
         bold=True,
