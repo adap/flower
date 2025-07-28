@@ -124,7 +124,8 @@ App Configuration
     any-name-you-like = "any value supported by TOML"
 
 Define configuration values that should be available to your app at runtime. You can
-specify any number of key-value pairs in this section.
+specify any number of key-value pairs in this section. All the configuration values in
+this section are optional.
 
 Access these values in your code using ``context.run_config``. For example:
 
@@ -179,8 +180,8 @@ You can also configure federations for remote deployment. For example:
 
     [tool.flwr.federations.remote-deployment]
     address = "<SUPERLINK-ADDRESS>:<PORT>"
-    insecure = true
-    # root-certificate = "path/to/root/cert.pem"  # Optional, for TLS
+    root-certificate = "path/to/root/cert.pem"  # Optional, for TLS
+    # insecure = true  # Disable TLS (not recommended for production)
 
 .. dropdown:: Understanding each field
 
@@ -189,8 +190,8 @@ You can also configure federations for remote deployment. For example:
         \* Required fields
 
     - ``address``\*: The address of the SuperLink Exec API to connect to.
-    - ``insecure``: Set to ``true`` to disable TLS (not recommended for production). Defaults to ``false``.
     - ``root-certificate``: Path to the root certificate file for TLS. Ignored if ``insecure`` is ``true``. If omitted, Flower uses the default gRPC root certificate.
+    - ``insecure``: Set to ``true`` to disable TLS (not recommended for production). Defaults to ``false``, if omitted.
 
 Refer to the `deployment documentation <https://flower.ai/docs/framework/deploy.html>`_
 for TLS setup and advanced configurations.
@@ -198,13 +199,14 @@ for TLS setup and advanced configurations.
 Running a Federation
 ~~~~~~~~~~~~~~~~~~~~
 
-To run a specific federation, either:
-
-- Set it as the default in ``pyproject.toml``, or
-- Provide the federation name in the command:
+To run a specific federation, use the following command:
 
 .. code-block:: shell
 
     flwr run <path-to-your-app> <your-federation-name>
 
-You can run ``flwr run --help`` to view all available options.
+Both positional arguments—the app path and the federation name—are optional. If omitted,
+the current directory is used as the app path, and the default federation specified in
+the ``pyproject.toml`` file is used.
+
+You can run ``flwr run --help`` for more details.
