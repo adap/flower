@@ -30,6 +30,7 @@ import {
   isFinalChunk,
   isGenericError,
   isHTTPError,
+  isPlatformHttpError,
   isStreamChunk,
 } from './typing';
 
@@ -110,7 +111,14 @@ async function processStream(
 
       const text = decoder.decode(value, { stream: true });
       for (const part of splitJsonChunks(text)) {
-        const chunkResult = await processChunk(part, finalTools, pendingToolCalls, cryptoHandler, encrypt, onStreamEvent);
+        const chunkResult = await processChunk(
+          part,
+          finalTools,
+          pendingToolCalls,
+          cryptoHandler,
+          encrypt,
+          onStreamEvent
+        );
         if (!chunkResult.ok) {
           return chunkResult;
         }
@@ -240,16 +248,23 @@ async function processChunk(
       onStreamEvent?.({ chunk: content });
       text += content;
     }
-    
-    return { 
-      ok: true, 
+
+    return {
+      ok: true,
       message: { role: 'assistant', content: text, ...(finalTools && { toolCalls: finalTools }) },
-      toolsUpdated 
+      toolsUpdated,
     };
   }
 
   if (isFinalChunk(parsed)) {
     return { ok: true, message: { role: 'assistant', content: '' } };
+  }
+
+  if (isPlatformHttpError(parsed)) {
+    throw new StreamProcessingError({
+      code: FailureCode.RemoteError,
+      description: parsed.detail.message,
+    });
   }
 
   if (isHTTPError(parsed)) {

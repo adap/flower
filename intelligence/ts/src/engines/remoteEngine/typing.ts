@@ -93,6 +93,27 @@ interface GenericError {
   error: string;
 }
 
+interface PlatformHttpError {
+  detail: {
+    code: string;
+    message: string;
+  };
+}
+
+export function isPlatformHttpError(o: unknown): o is PlatformHttpError {
+  return (
+    typeof o === 'object' &&
+    o !== null &&
+    'detail' in o &&
+    typeof o.detail === 'object' &&
+    o.detail !== null &&
+    'code' in o.detail &&
+    typeof o.detail.code === 'string' &&
+    'message' in o.detail &&
+    typeof o.detail.message === 'string'
+  );
+}
+
 export function isStreamChunk(o: unknown): o is StreamChunk {
   return typeof o === 'object' && o !== null && 'choices' in o && Array.isArray(o.choices);
 }
