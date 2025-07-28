@@ -42,31 +42,16 @@ global___PushAppMessagesRequest = PushAppMessagesRequest
 
 class PushAppMessagesResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    class ObjectsToPushEntry(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
-        key: typing.Text
-        @property
-        def value(self) -> flwr.proto.message_pb2.ObjectIDs: ...
-        def __init__(self,
-            *,
-            key: typing.Text = ...,
-            value: typing.Optional[flwr.proto.message_pb2.ObjectIDs] = ...,
-            ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
-
     MESSAGE_IDS_FIELD_NUMBER: builtins.int
     OBJECTS_TO_PUSH_FIELD_NUMBER: builtins.int
     @property
     def message_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     @property
-    def objects_to_push(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.message_pb2.ObjectIDs]: ...
+    def objects_to_push(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     def __init__(self,
         *,
         message_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
-        objects_to_push: typing.Optional[typing.Mapping[typing.Text, flwr.proto.message_pb2.ObjectIDs]] = ...,
+        objects_to_push: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["message_ids",b"message_ids","objects_to_push",b"objects_to_push"]) -> None: ...
 global___PushAppMessagesResponse = PushAppMessagesResponse
