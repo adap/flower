@@ -59,10 +59,12 @@ from flwr.proto.message_pb2 import (
     PushObjectRequest,
     PushObjectResponse,
 )
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
 # pylint: disable=E0601
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
+from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 from flwr.supernode.nodestate import NodeStateFactory
 
 
@@ -116,6 +118,23 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
 
         # Return the token
         return RequestTokenResponse(token=token)
+
+    def GetRun(
+        self, request: GetRunRequest, context: grpc.ServicerContext
+    ) -> GetRunResponse:
+        """Get run information."""
+        log(DEBUG, "ClientAppIo.GetRun")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Retrieve run information
+        run = state.get_run(request.run_id)
+
+        if run is None:
+            return GetRunResponse()
+
+        return GetRunResponse(run=run_to_proto(run))
 
     def PullClientAppInputs(
         self, request: PullAppInputsRequest, context: grpc.ServicerContext
@@ -178,8 +197,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self, request: PullAppMessagesRequest, context: grpc.ServicerContext
     ) -> PullAppMessagesResponse:
         """Pull one Message."""
-        # Initialize state and ffs connection
+        # Initialize state and store connection
         state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Validate the token
         run_id = state.get_run_id_by_token(request.token)
@@ -193,14 +213,21 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Retrieve message for this run
         message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
 
-        return PullAppMessagesResponse(messages_list=[message_to_proto(message)])
+        # Retrieve the object tree for the message
+        object_tree = store.get_object_tree(message.metadata.message_id)
+
+        return PullAppMessagesResponse(
+            messages_list=[message_to_proto(message)],
+            message_object_trees=[object_tree],
+        )
 
     def PushMessage(
         self, request: PushAppMessagesRequest, context: grpc.ServicerContext
     ) -> PushAppMessagesResponse:
         """Push one Message."""
-        # Initialize state connection
+        # Initialize state and store connection
         state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Validate the token
         run_id = state.get_run_id_by_token(request.token)
@@ -214,7 +241,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Save the message to the state
         state.store_message(message_from_proto(request.messages_list[0]))
 
-        return PushAppMessagesResponse()
+        # Store Message object to descendants mapping and preregister objects
+        objects_to_push = store_mapping_and_register_objects(store, request=request)
+
+        return PushAppMessagesResponse(objects_to_push=objects_to_push)
 
     def PushObject(
         self, request: PushObjectRequest, context: grpc.ServicerContext

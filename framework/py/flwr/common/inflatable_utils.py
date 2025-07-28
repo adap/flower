@@ -19,7 +19,10 @@ import os
 import random
 import threading
 import time
-from typing import Callable, Optional
+from collections.abc import Iterable, Iterator
+from typing import Callable, Optional, TypeVar
+
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 from .constant import (
     HEAD_BODY_DIVIDER,
@@ -38,6 +41,7 @@ from .inflatable import (
     get_object_head_values_from_object_content,
     get_object_id,
     is_valid_sha256_hash,
+    iterate_object_tree,
 )
 from .message import Message
 from .record import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
@@ -53,6 +57,8 @@ inflatable_class_registry: dict[str, type[InflatableObject]] = {
     MetricRecord.__qualname__: MetricRecord,
     RecordDict.__qualname__: RecordDict,
 }
+
+T = TypeVar("T", bound=InflatableObject)
 
 
 class ObjectUnavailableError(Exception):
@@ -105,24 +111,61 @@ def push_objects(
     max_concurrent_pushes : int (default: MAX_CONCURRENT_PUSHES)
         The maximum number of concurrent pushes to perform.
     """
-    if object_ids_to_push is not None:
-        # Filter objects to push only those with IDs in the set
-        objects = {k: v for k, v in objects.items() if k in object_ids_to_push}
-
     lock = threading.Lock()
 
-    def push(obj_id: str) -> None:
-        """Push a single object."""
-        object_content = objects[obj_id].deflate()
-        if not keep_objects:
-            with lock:
-                del objects[obj_id]
-        push_object_fn(obj_id, object_content)
+    def iter_dict_items() -> Iterator[tuple[str, bytes]]:
+        """Iterate over the dictionary items."""
+        for obj_id in list(objects.keys()):
+            # Skip the object if no need to push it
+            if object_ids_to_push is not None and obj_id not in object_ids_to_push:
+                continue
 
-    # Push all objects concurrently
+            # Deflate the object content
+            object_content = objects[obj_id].deflate()
+            if not keep_objects:
+                with lock:
+                    del objects[obj_id]
+
+            yield obj_id, object_content
+
+    push_object_contents_from_iterable(
+        iter_dict_items(),
+        push_object_fn,
+        max_concurrent_pushes=max_concurrent_pushes,
+    )
+
+
+def push_object_contents_from_iterable(
+    object_contents: Iterable[tuple[str, bytes]],
+    push_object_fn: Callable[[str, bytes], None],
+    *,
+    max_concurrent_pushes: int = MAX_CONCURRENT_PUSHES,
+) -> None:
+    """Push multiple object contents to the servicer.
+
+    Parameters
+    ----------
+    object_contents : Iterable[tuple[str, bytes]]
+        An iterable of `(object_id, object_content)` pairs.
+        `object_id` is the object ID, and `object_content` is the object content.
+    push_object_fn : Callable[[str, bytes], None]
+        A function that takes an object ID and its content as bytes, and pushes
+        it to the servicer. This function should raise `ObjectIdNotPreregisteredError`
+        if the object ID is not pre-registered.
+    max_concurrent_pushes : int (default: MAX_CONCURRENT_PUSHES)
+        The maximum number of concurrent pushes to perform.
+    """
+
+    def push(args: tuple[str, bytes]) -> None:
+        """Push a single object."""
+        obj_id, obj_content = args
+        # Push the object using the provided function
+        push_object_fn(obj_id, obj_content)
+
+    # Push all object contents concurrently
     num_workers = get_num_workers(max_concurrent_pushes)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
-        list(executor.map(push, list(objects.keys())))
+        list(executor.map(push, object_contents))
 
 
 def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
@@ -348,3 +391,75 @@ def validate_object_content(content: bytes) -> None:
         raise UnexpectedObjectContentError(
             object_id=get_object_id(content), reason=str(err)
         ) from err
+
+
+def pull_and_inflate_object_from_tree(  # pylint: disable=R0913
+    object_tree: ObjectTree,
+    pull_object_fn: Callable[[str], bytes],
+    confirm_object_received_fn: Callable[[str], None],
+    *,
+    return_type: type[T] = InflatableObject,  # type: ignore
+    max_concurrent_pulls: int = MAX_CONCURRENT_PULLS,
+    max_time: Optional[float] = PULL_MAX_TIME,
+    max_tries_per_object: Optional[int] = PULL_MAX_TRIES_PER_OBJECT,
+    initial_backoff: float = PULL_INITIAL_BACKOFF,
+    backoff_cap: float = PULL_BACKOFF_CAP,
+) -> T:
+    """Pull and inflate the head object from the provided object tree.
+
+    Parameters
+    ----------
+    object_tree : ObjectTree
+        The object tree containing the object ID and its descendants.
+    pull_object_fn : Callable[[str], bytes]
+        A function that takes an object ID and returns the object content as bytes.
+    confirm_object_received_fn : Callable[[str], None]
+        A function to confirm that the object has been received.
+    return_type : type[T] (default: InflatableObject)
+        The type of the object to return. Must be a subclass of `InflatableObject`.
+    max_concurrent_pulls : int (default: MAX_CONCURRENT_PULLS)
+        The maximum number of concurrent pulls to perform.
+    max_time : Optional[float] (default: PULL_MAX_TIME)
+        The maximum time to wait for all pulls to complete. If `None`, waits
+        indefinitely.
+    max_tries_per_object : Optional[int] (default: PULL_MAX_TRIES_PER_OBJECT)
+        The maximum number of attempts to pull each object. If `None`, pulls
+        indefinitely until the object is available.
+    initial_backoff : float (default: PULL_INITIAL_BACKOFF)
+        The initial backoff time in seconds for retrying pulls after an
+        `ObjectUnavailableError`.
+    backoff_cap : float (default: PULL_BACKOFF_CAP)
+        The maximum backoff time in seconds. Backoff times will not exceed this value.
+
+    Returns
+    -------
+    T
+        An instance of the specified return type containing the inflated object.
+    """
+    # Pull the main object and all its descendants
+    pulled_object_contents = pull_objects(
+        [tree.object_id for tree in iterate_object_tree(object_tree)],
+        pull_object_fn,
+        max_concurrent_pulls=max_concurrent_pulls,
+        max_time=max_time,
+        max_tries_per_object=max_tries_per_object,
+        initial_backoff=initial_backoff,
+        backoff_cap=backoff_cap,
+    )
+
+    # Confirm that all objects were pulled
+    confirm_object_received_fn(object_tree.object_id)
+
+    # Inflate the main object
+    inflated_object = inflate_object_from_contents(
+        object_tree.object_id, pulled_object_contents, keep_object_contents=False
+    )
+
+    # Check if the inflated object is of the expected type
+    if not isinstance(inflated_object, return_type):
+        raise TypeError(
+            f"Expected object of type {return_type.__name__}, "
+            f"but got {type(inflated_object).__name__}."
+        )
+
+    return inflated_object

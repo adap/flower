@@ -123,7 +123,7 @@ AUTHZ_TYPE_YAML_KEY = "authz_type"  # For key name in YAML file
 PUBLIC_KEY_HEADER = "flwr-public-key-bin"  # Must end with "-bin" for binary data
 SIGNATURE_HEADER = "flwr-signature-bin"  # Must end with "-bin" for binary data
 TIMESTAMP_HEADER = "flwr-timestamp"
-TIMESTAMP_TOLERANCE = 10  # General tolerance for timestamp verification
+TIMESTAMP_TOLERANCE = 300  # General tolerance for timestamp verification
 SYSTEM_TIME_TOLERANCE = 5  # Allowance for system time drift
 
 # Constants for grpc retry

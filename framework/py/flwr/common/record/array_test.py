@@ -220,7 +220,10 @@ class TestArray(unittest.TestCase):
         self.assertRaises(ValueError, Array.inflate, arr_b)
         # Inflate passing non-existant children raises ValueError
         self.assertRaises(
-            ValueError, Array.inflate, arr_b, children={"123": ArrayChunk(b"")}
+            ValueError,
+            Array.inflate,
+            arr_b,
+            children={"123": ArrayChunk(memoryview(b""))},
         )
 
     def test_deflate_and_inflate_empty_array(self) -> None:
