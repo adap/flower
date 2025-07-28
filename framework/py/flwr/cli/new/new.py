@@ -271,27 +271,35 @@ def new(
 
     prompt = typer.style(
         "🎊 Flower App creation successful.\n\n"
-        "To run your Flower App, use the following command:\n\n",
+        "To run your Flower App, first install its dependencies:\n\n",
         fg=typer.colors.GREEN,
         bold=True,
     )
 
     _add = "	huggingface-cli login\n" if llm_challenge_str else ""
+
     prompt += typer.style(
-        _add + f"	flwr run {package_name}\n\n",
+        f"	cd {package_name} && pip install -e .\n" + _add + "\n",
         fg=typer.colors.BRIGHT_CYAN,
         bold=True,
     )
 
     prompt += typer.style(
-        "If you haven't installed all dependencies yet, follow these steps:\n\n",
+        "then, run the app:\n\n ",
         fg=typer.colors.GREEN,
         bold=True,
     )
 
     prompt += typer.style(
-        f"	cd {package_name}\n" + "	pip install -e .\n" + _add + "	flwr run .\n",
+        "\tflwr run .\n\n",
         fg=typer.colors.BRIGHT_CYAN,
+        bold=True,
+    )
+
+    prompt += typer.style(
+        "💡 Check the README in your app directory to learn how to\n"
+        "customize it and how to run it using the Deployment Runtime.\n",
+        fg=typer.colors.GREEN,
         bold=True,
     )
 
