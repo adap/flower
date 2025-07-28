@@ -100,12 +100,12 @@ export class FlowerIntelligence {
    * @param input, text to embed, encoded as a string or array of tokens. To embed multiple inputs in a single request, pass an array of strings or array of token arrays. The input must not exceed the max input tokens for the model (8192 tokens for all embedding models), cannot be an empty string, and any array must be 2048 dimensions or less.
    * @returns A {@link Result} containing either a {@link Failure} (containing `code: number` and `description: string`) if `ok` is false or, if `ok` is true (meaning the loading was successful), a value which is a list of embedding vectors, which are lists of floats. The length of vector depends on the model.
    */
-  async embed(model: string, input: EmbeddingInput): Promise<Result<Embedding[]>> {
-    const engineResult = await this.getEngine(model, false, false);
+  async embed(options: { model: string; input: EmbeddingInput }): Promise<Result<Embedding[]>> {
+    const engineResult = this.getOrCreateRemoteEngine();
     if (!engineResult.ok) {
       return engineResult;
     } else {
-      return await engineResult.value.embed(model, input);
+      return await engineResult.value.embed(options.model, options.input);
     }
   }
 

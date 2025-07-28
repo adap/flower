@@ -122,7 +122,7 @@ export class RemoteEngine extends BaseEngine {
     const requestData = createEmbedRequestData(input, model);
     const response = await sendRequest(
       requestData,
-      'v1/embeddings',
+      '/v1/embeddings',
       this.baseUrl,
       getHeaders(this.apiKey)
     );
