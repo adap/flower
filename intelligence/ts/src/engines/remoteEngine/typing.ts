@@ -26,10 +26,21 @@ interface Choice {
   message: ChoiceMessage;
 }
 
+interface StreamingToolCall {
+  id?: string;
+  type?: 'function';
+  index: number;
+  function: {
+    name?: string;
+    arguments?: string;
+  };
+}
+
 interface StreamChoice {
   index: number;
   delta: {
-    content: string;
+    content?: string;
+    tool_calls?: StreamingToolCall[];
     role: string;
   };
 }
