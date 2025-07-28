@@ -179,69 +179,34 @@ tuples) into OpenFGA. Run these once the OpenFGA instance is deployed.
 
 Setup the authorization model and tuples:
 
-.. raw:: html
+.. dropdown:: Authorization model file ``model.fga``
 
-    <details>
+    .. code-block:: yaml
 
-.. raw:: html
+        model
+          # We are using the 1.1 schema with type restrictions
+          schema 1.1
 
-    <summary>
+        # Define the 'flwr_aid' type to represent individual users in the system.
+        type flwr_aid
 
-Authorization model file ``model.fga``
+        # Define the 'service' type to group users.
+        type service
+          relations
+            # The 'has_access' relation defines users who have access to this service.
+            define has_access: [flwr_aid]
 
-.. raw:: html
+.. dropdown:: User permissions file ``tuples.fga``
 
-    </summary>
+    .. code-block:: yaml
 
-::
+        - user: flwr_aid:<OIDC_SUB_1>
+          relation: has_access
+          object: service:<your_grid_name>
+        - user: flwr_aid:<OIDC_SUB_2>
+          relation: has_access
+          object: service:<your_grid_name>
 
-    ```
-    model
-      # We are using the 1.1 schema with type restrictions
-      schema 1.1
-
-    # Define the 'flwr_aid' type to represent individual users in the system.
-    type flwr_aid
-
-    # Define the 'service' type to group users.
-    type service
-      relations
-        # The 'has_access' relation defines users who have access to this service.
-        define has_access: [flwr_aid]
-    ```
-
-.. raw:: html
-
-    </details>
-
-.. raw:: html
-
-    <details>
-
-.. raw:: html
-
-    <summary>
-
-User permissions file ``tuples.fga``
-
-.. raw:: html
-
-    </summary>
-
-::
-
-    ```yaml
-    - user: flwr_aid:<OIDC_SUB_1>
-      relation: has_access
-      object: service:<your_grid_name>
-    - user: flwr_aid:<OIDC_SUB_2>
-      relation: has_access
-      object: service:<your_grid_name>
-    ```
-
-.. raw:: html
-
-    </details>
 
 Create store:
 
