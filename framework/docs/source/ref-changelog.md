@@ -20,7 +20,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Refactor SuperNode to use NodeState exclusively** ([#5535](https://github.com/adap/flower/pull/5535), [#5536](https://github.com/adap/flower/pull/5536), [#5537](https://github.com/adap/flower/pull/5537), [#5541](https://github.com/adap/flower/pull/5541), [#5542](https://github.com/adap/flower/pull/5542), [#5610](https://github.com/adap/flower/pull/5610), [#5628](https://github.com/adap/flower/pull/5628))
 
-  Refactors SuperNode to rely solely on `NodeState` for managing all information, decoupling internal components for improved maintainability and clearer state handling. RPCs of the `ClientAppIo` API has been refactored accordingly, laying the groundwork for future concurrent ClientApps support.
+  Refactors SuperNode to rely solely on `NodeState` for managing all information, decoupling internal components for improved maintainability and clearer state handling. RPCs of the `ClientAppIo` API have been refactored accordingly, laying the groundwork for future concurrent ClientApps support.
 
 - **Enforce maximum size limit for FAB files** ([#5493](https://github.com/adap/flower/pull/5493))
 
@@ -34,7 +34,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Fixes `flwr run` failure on Windows when connecting to a remote SuperLink by correcting path handling.
 
-- **Add explainer for TOML configuration** ([#5636](https://github.com/adap/flower/pull/5636))
+- **Add explainer for `pyproject.toml` configuration** ([#5636](https://github.com/adap/flower/pull/5636))
 
   Adds a guide explaining how to configure a Flower app using its `pyproject.toml` file. The documentation is available [here](https://flower.ai/docs/framework/how-to-configure-pyproject-toml.html).
 
