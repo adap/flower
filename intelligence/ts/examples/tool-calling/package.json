@@ -10,7 +10,7 @@
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@flwr/flwr": "file:../../../"
+    "@flwr/flwr": "file:../../"
   },
   "devDependencies": {
     "@types/node": "^22.7.9",
