@@ -32,7 +32,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Fix Windows path issue in FAB builds** ([#5608](https://github.com/adap/flower/pull/5608))
 
-  Fixes `flwr run` failure on Windows when connecting to a remote SuperLink by correcting path handling.
+  Updates the way FAB files represent relative paths to their internal files to ensure consistency across different operating systems. This fixes an issue where a FAB built on Windows would fail integrity checks when run on UNIX-based systems (e.g., Ubuntu).
 
 - **Add explainer for `pyproject.toml` configuration** ([#5636](https://github.com/adap/flower/pull/5636))
 
