@@ -68,7 +68,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Remove non-`grpc-bidi` transport support from deprecated `start_client`** ([#5593](https://github.com/adap/flower/pull/5593))
 
-  Drops support for deprecated non-`grpc-bidi` transport in the `start_client` API. Pleaes use `flower-supernode` instead.
+  Drops support for non-`grpc-bidi` transport in the deprecated `start_client` API. Pleaes use `flower-supernode` instead.
 
 ## v1.19.0 (2025-06-17)
 
