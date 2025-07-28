@@ -207,7 +207,6 @@ Setup the authorization model and tuples:
           relation: has_access
           object: service:<your_grid_name>
 
-
 Create store:
 
 .. code-block:: shell
