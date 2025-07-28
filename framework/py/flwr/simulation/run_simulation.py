@@ -64,14 +64,14 @@ def _replace_keys(d: Any, match: str, target: str) -> Any:
     return d
 
 
-def _check_ray_support(backend_name: str):
+def _check_ray_support(backend_name: str) -> None:
     if backend_name.lower() == "ray":
         if platform.system() == "Windows":
             log(
                 WARNING,
-                "Warning: Ray support on Windows is experimental "
+                "Ray support on Windows is experimental "
                 "and may not work as expected. "
-                "For best support use WSL2: "
+                "On Windows, Flower Simulations run best in WSL2: "
                 "https://learn.microsoft.com/en-us/windows/wsl/about",
             )
 
