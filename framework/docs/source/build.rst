@@ -14,6 +14,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     :titlesonly:
 
     how-to-install-flower
+    how-to-configure-pyproject-toml
     how-to-configure-clients
     how-to-design-stateful-clients
     how-to-use-strategies
