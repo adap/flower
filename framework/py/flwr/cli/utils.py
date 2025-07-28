@@ -28,7 +28,12 @@ import typer
 
 from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.constant import AUTH_TYPE_JSON_KEY, CREDENTIALS_DIR, FLWR_DIR
+from flwr.common.constant import (
+    AUTH_TYPE_JSON_KEY,
+    CREDENTIALS_DIR,
+    FLWR_DIR,
+    RUN_ID_NOT_FOUND_MESSAGE,
+)
 from flwr.common.grpc import (
     GRPC_MAX_MESSAGE_LENGTH,
     create_channel,
@@ -315,8 +320,19 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
             typer.secho(
-                "❌ Authorization failed. Please contact your administrator"
-                " to check your permissions.",
+                "❌ Permission denied.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            # pylint: disable=E1101
+            typer.secho(e.details(), fg=typer.colors.RED, bold=True)
+            raise typer.Exit(code=1) from None
+        if (
+            e.code() == grpc.StatusCode.NOT_FOUND
+            and e.details() == RUN_ID_NOT_FOUND_MESSAGE
+        ):
+            typer.secho(
+                "❌ Run ID not found.",
                 fg=typer.colors.RED,
                 bold=True,
             )

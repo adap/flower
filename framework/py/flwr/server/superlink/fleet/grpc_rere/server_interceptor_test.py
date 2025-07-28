@@ -28,7 +28,9 @@ from flwr.common.constant import (
     PUBLIC_KEY_HEADER,
     SIGNATURE_HEADER,
     SUPERLINK_NODE_ID,
+    SYSTEM_TIME_TOLERANCE,
     TIMESTAMP_HEADER,
+    TIMESTAMP_TOLERANCE,
     Status,
 )
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -61,9 +63,9 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_res_message
+from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
 from .server_interceptor import AuthenticateServerInterceptor
@@ -179,7 +181,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _make_metadata_with_invalid_timestamp(self) -> list[Any]:
         """Create metadata with invalid timestamp."""
-        timestamp = (now() - datetime.timedelta(seconds=99)).isoformat()
+        timestamp = (
+            now()
+            - datetime.timedelta(seconds=TIMESTAMP_TOLERANCE + SYSTEM_TIME_TOLERANCE)
+        ).isoformat()
         signature = sign_message(self.node_sk, timestamp.encode("ascii"))
         return [
             (PUBLIC_KEY_HEADER, public_key_to_bytes(self.node_pk)),

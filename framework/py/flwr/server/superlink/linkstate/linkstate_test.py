@@ -110,7 +110,7 @@ class StateTest(unittest.TestCase):
         )
 
         # Execute
-        run_ids = state.get_run_ids()
+        run_ids = state.get_run_ids(None)
 
         # Assert
         assert run_id1 in run_ids
@@ -122,10 +122,49 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
 
         # Execute
-        run_ids = state.get_run_ids()
+        run_ids = state.get_run_ids(None)
 
         # Assert
         assert len(run_ids) == 0
+
+    def test_get_run_ids_with_flwr_aid(self) -> None:
+        """When a specific flwr_aid is passed, only its run_ids are returned."""
+        state = self.state_factory()
+
+        # Prepare - Create three runs with different flwr_aid values
+        run_id1 = state.create_run(None, None, "hash1", {}, ConfigRecord(), "userA")
+        run_id2 = state.create_run(None, None, "hash2", {}, ConfigRecord(), "userB")
+        run_id3 = state.create_run(None, None, "hash3", {}, ConfigRecord(), "userA")
+
+        # Execute - Only the runs for "userA" should be returned
+        result_userA = state.get_run_ids("userA")
+
+        # Assert
+        assert result_userA == {run_id1, run_id3}
+
+        # Execute - Only the run for "userB" should be returned
+        result_userB = state.get_run_ids("userB")
+
+        # Assert
+        assert result_userB == {run_id2}
+
+    def test_get_run_ids_with_unknown_flwr_aid(self) -> None:
+        """If an unknown flwr_aid is passed, get_run_ids returns an empty set."""
+        state = self.state_factory()
+
+        # Prepare - Seed with one run under "existing"
+        existing_id = state.create_run(
+            None, None, "somehash", {}, ConfigRecord(), "existing"
+        )
+
+        # Execute - Query with a flwr_aid that has no runs
+        result = state.get_run_ids("nonexistent")
+
+        # Assert
+        assert result == set()
+
+        # Sanity check that the existing run is still retrievable by its own aid
+        assert state.get_run_ids("existing") == {existing_id}
 
     def test_get_pending_run_id(self) -> None:
         """Test if get_pending_run_id works correctly."""
@@ -1362,10 +1401,10 @@ def create_ins_message(
     run_id: int,
 ) -> ProtoMessage:
     """Create a Message for testing."""
-    return ProtoMessage(
+    proto = ProtoMessage(
         metadata=ProtoMetadata(
             run_id=run_id,
-            message_id=str(uuid4()),
+            message_id="",
             src_node_id=src_node_id,
             dst_node_id=dst_node_id,
             group_id="",
@@ -1375,6 +1414,8 @@ def create_ins_message(
         ),
         content=ProtoRecordDict(),
     )
+    proto.metadata.message_id = message_from_proto(proto).object_id
+    return proto
 
 
 def create_res_message(
@@ -1393,7 +1434,7 @@ def create_res_message(
         out_msg = Message(error, reply_to=in_msg)
     else:
         out_msg = Message(RecordDict(), reply_to=in_msg)
-
+    out_msg.metadata.__dict__["_message_id"] = out_msg.object_id
     return message_to_proto(out_msg)
 
 

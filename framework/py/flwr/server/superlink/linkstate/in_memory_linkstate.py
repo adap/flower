@@ -18,6 +18,7 @@
 import threading
 import time
 from bisect import bisect_right
+from collections import defaultdict
 from dataclasses import dataclass, field
 from logging import ERROR, WARNING
 from typing import Optional
@@ -78,6 +79,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.message_ins_store: dict[str, Message] = {}
         self.message_res_store: dict[str, Message] = {}
         self.message_ins_id_to_message_res_id: dict[str, str] = {}
+
+        # Map flwr_aid to run_ids for O(1) reverse index lookup
+        self.flwr_aid_to_run_ids: dict[str, set[int]] = defaultdict(set)
 
         self.node_public_keys: set[bytes] = set()
 
@@ -245,7 +249,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 inquired_in_message_ids=message_ids,
                 found_in_message_dict=self.message_ins_store,
                 node_id_to_online_until={
-                    node_id: self.node_ids[node_id][0] for node_id in dst_node_ids
+                    node_id: self.node_ids[node_id][0]
+                    for node_id in dst_node_ids
+                    if node_id in self.node_ids
                 },
                 current_time=current,
             )
@@ -426,6 +432,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     ),
                 )
                 self.run_ids[run_id] = run_record
+                # Add run_id to the flwr_aid_to_run_ids mapping if flwr_aid is provided
+                if flwr_aid:
+                    self.flwr_aid_to_run_ids[flwr_aid].add(run_id)
 
                 # Record federation options. Leave empty if not passed
                 self.federation_options[run_id] = federation_options
@@ -453,9 +462,15 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             return self.node_public_keys.copy()
 
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified.
+
+        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
+        """
         with self.lock:
+            if flwr_aid is not None:
+                # Return run IDs for the specified flwr_aid
+                return set(self.flwr_aid_to_run_ids.get(flwr_aid, ()))
             return set(self.run_ids.keys())
 
     def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
@@ -465,7 +480,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if they have not sent a heartbeat before `active_until`.
         """
         current = now()
-        for record in [self.run_ids[run_id] for run_id in run_ids]:
+        for record in (self.run_ids.get(run_id) for run_id in run_ids):
+            if record is None:
+                continue
             with record.lock:
                 if record.run.status.status in (Status.STARTING, Status.RUNNING):
                     if record.active_until < current.timestamp():

@@ -21,16 +21,17 @@ import unittest
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigRecord, Message
+from flwr.common import ConfigRecord
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     SUPERLINK_NODE_ID,
     Status,
 )
 from flwr.common.inflatable import (
-    get_descendant_object_ids,
+    get_all_nested_objects,
     get_object_id,
     get_object_tree,
+    iterate_object_tree,
 )
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
@@ -43,6 +44,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushMessagesResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
     ObjectTree,
     PullObjectRequest,
     PullObjectResponse,
@@ -52,13 +55,13 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import (
     create_ins_message,
     create_res_message,
 )
 from flwr.server.superlink.utils import _STATUS_TO_MSG
+from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
 
@@ -119,6 +122,11 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.Fleet/PullObject",
             request_serializer=PullObjectRequest.SerializeToString,
             response_deserializer=PullObjectResponse.FromString,
+        )
+        self._confirm_message_received = self._channel.unary_unary(
+            "/flwr.proto.Fleet/ConfirmMessageReceived",
+            request_serializer=ConfirmMessageReceivedRequest.SerializeToString,
+            response_deserializer=ConfirmMessageReceivedResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -214,22 +222,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         self._assert_push_messages_not_allowed(node_id, run_id)
 
-    def _register_in_object_store(self, message: Message) -> list[str]:
-        # When pulling a Message, the response also must include the IDs of the objects
-        # to pull. To achieve this, we need to at least register the Objects in the
-        # message into the store. Note this would normally be done when the
-        # servicer handles a PushMessageRequest
-        descendants = list(get_descendant_object_ids(message))
-        message_obj_id = message.metadata.message_id
-        # Store mapping
-        self.store.set_message_descendant_ids(
-            msg_object_id=message_obj_id, descendant_ids=descendants
-        )
-        # Preregister
-        obj_ids_registered = self.store.preregister(get_object_tree(message))
-
-        return obj_ids_registered
-
     @parameterized.expand(
         [
             (True,),
@@ -260,7 +252,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         self.state.store_message_ins(message=message_ins)
         obj_ids_registered: list[str] = []
         if register_in_store:
-            obj_ids_registered = self._register_in_object_store(message_ins)
+            obj_ids_registered = self.store.preregister(
+                run_id, get_object_tree(message_ins)
+            )
 
         request = PullMessagesRequest(node=Node(node_id=node_id))
 
@@ -271,17 +265,18 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, PullMessagesResponse)
         assert call.code() == grpc.StatusCode.OK
 
-        object_ids_in_response = {
-            obj_id
-            for obj_ids in response.objects_to_pull.values()
-            for obj_id in obj_ids.object_ids
-        }
         if register_in_store:
+            object_tree = response.message_object_trees[0]
+            object_ids_in_response = [
+                tree.object_id for tree in iterate_object_tree(object_tree)
+            ]
             # Assert expected object_ids
-            assert set(obj_ids_registered) == object_ids_in_response
-            assert message_ins.object_id == list(response.objects_to_pull.keys())[0]
+            assert set(obj_ids_registered) == set(object_ids_in_response)
+            # Assert the root node of the object tree is the message
+            assert message_ins.object_id == object_tree.object_id
         else:
-            assert set() == object_ids_in_response
+            assert len(response.messages_list) == 0
+            assert len(response.message_object_trees) == 0
             # Ins message was deleted
             assert self.state.num_message_ins() == 0
 
@@ -392,7 +387,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         self._transition_run_status(run_id, 2)
 
         # Pre-register object
-        self.store.preregister(get_object_tree(obj))
+        self.store.preregister(run_id, get_object_tree(obj))
 
         # Execute
         req = PushObjectRequest(
@@ -436,7 +431,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Push valid object but its hash doesnt match the one passed in the request
         # Preregister under a different object-id
         fake_object_id = get_object_id(b"1234")
-        self.store.preregister(ObjectTree(object_id=fake_object_id))
+        self.store.preregister(run_id, ObjectTree(object_id=fake_object_id))
 
         # Execute
         req = PushObjectRequest(
@@ -460,7 +455,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         obj_b = obj.deflate()
 
         # Preregister object
-        self.store.preregister(get_object_tree(obj))
+        self.store.preregister(run_id, get_object_tree(obj))
 
         # Pull
         req = PullObjectRequest(
@@ -503,3 +498,39 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         res: PullObjectResponse = self._pull_object(req)
         # Empty response
         assert not res.object_found
+
+    def test_confirm_message_received_successful(self) -> None:
+        """Test `ConfirmMessageReceived` functionality."""
+        # Prepare
+        node_id = self.state.create_node(heartbeat_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        self._transition_run_status(run_id, 2)
+
+        # Prepare: Create a message
+        msg_proto = create_res_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+        )
+        message = message_from_proto(msg_proto)
+        # pylint: disable-next=E1137
+        message.content["test_config"] = ConfigRecord({"a": 123, "b": [4, 5, 6]})
+        message.metadata.__dict__["_message_id"] = message.object_id
+
+        # Prepare: Store message in ObjectStore
+        all_objects = get_all_nested_objects(message)
+        self.store.preregister(run_id, get_object_tree(message))
+        for obj_id, obj in all_objects.items():
+            self.store.put(object_id=obj_id, object_content=obj.deflate())
+
+        # Assert: Message is in ObjectStore
+        assert len(self.store) == len(all_objects)
+
+        # Execute: Confirm message received
+        req = ConfirmMessageReceivedRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            message_object_id=message.object_id,
+        )
+        self._confirm_message_received(request=req)
+
+        # Assert: Message is removed from ObjectStore
+        assert len(self.store) == 0

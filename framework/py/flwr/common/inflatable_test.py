@@ -18,7 +18,6 @@
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass
 from unittest.mock import patch
 
 import pytest
@@ -33,6 +32,7 @@ from .inflatable import (
     get_all_nested_objects,
     get_descendant_object_ids,
     get_object_body,
+    get_object_children_ids_from_object_content,
     get_object_head_values_from_object_content,
     get_object_id,
     get_object_type_from_object_content,
@@ -42,35 +42,41 @@ from .inflatable import (
 from .inflatable_utils import validate_object_content
 
 
-@dataclass
 class CustomDataClass(InflatableObject):
     """A dummy dataclass to test Inflatable features."""
 
-    data: bytes
-    _children = None
+    def __init__(
+        self, data: bytes, children: list[InflatableObject] | None = None
+    ) -> None:
+        self.data = data
+        self._children = children or []
 
-    def deflate(self) -> bytes:  # noqa: D102
+    def deflate(self) -> bytes:
+        """Deflate object."""
         obj_body = self.data
         return add_header_to_object_body(object_body=obj_body, obj=self)
 
     @classmethod
-    def inflate(  # noqa: D102
+    def inflate(
         cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
     ) -> CustomDataClass:
-        if children is not None:
-            raise ValueError("`CustomDataClass` does not have children.")
+        """Inflate the object from bytes."""
+        children_ids = get_object_children_ids_from_object_content(object_content)
         object_body = get_object_body(object_content, cls)
-        return cls(data=object_body)
+        input_children = None
+        if children_ids:
+            if children is None or len(children_ids) != len(children):
+                raise ValueError("Invalid children for this object.")
+            input_children = [children[child_id] for child_id in children_ids]
+        elif children:
+            raise ValueError("This object does not have children.")
+
+        return cls(data=object_body, children=input_children)
 
     @property
-    def children(self) -> dict[str, InflatableObject] | None:
-        """Get children."""
-        return self._children
-
-    @children.setter
-    def children(self, children: dict[str, InflatableObject]) -> None:
-        """Set children only for testing purposes."""
-        self._children = children
+    def children(self) -> dict[str, InflatableObject]:
+        """Return children objects."""
+        return {child.object_id: child for child in self._children}
 
 
 def test_deflate_and_inflate() -> None:
@@ -130,8 +136,7 @@ def test_get_object_body() -> None:
 def test_add_header_to_object_body(children: list[InflatableObject]) -> None:
     """Test helper function that adds the header to the object body."""
     data = b"this is a test"
-    obj = CustomDataClass(data)
-    obj.children = {child.object_id: child for child in children}
+    obj = CustomDataClass(data, children)
     obj_b = obj.deflate()
 
     # Expected object head
@@ -160,8 +165,7 @@ def test_get_head_values_from_object_content(children: list[InflatableObject]) -
     """Test helper function that extracts the values of the object head."""
     # Prepare
     data = b"this is a test"
-    obj = CustomDataClass(data)
-    obj.children = {child.object_id: child for child in children}
+    obj = CustomDataClass(data, children)
     obj_b = obj.deflate()
 
     # Execute
@@ -212,9 +216,7 @@ def test_is_valid_sha256_hash_invalid() -> None:
 def test_get_desdendants(children: list[InflatableObject]) -> None:
     """Test computing list of object IDs for all descendants."""
     data = b"this is a test"
-    obj = CustomDataClass(data)
-
-    obj.children = {child.object_id: child for child in children}
+    obj = CustomDataClass(data, children)
 
     # Assert
     assert get_descendant_object_ids(obj) == {child.object_id for child in children}
@@ -269,13 +271,9 @@ def test_object_content_validator() -> None:
 def test_get_all_nested_object_ids() -> None:
     """Test getting all nested object IDs."""
     # Prepare
-    obj = CustomDataClass(b"this is a test")
     child1 = CustomDataClass(b"child1 data")
     child2 = CustomDataClass(b"child2 data")
-    obj.children = {
-        child1.object_id: child1,
-        child2.object_id: child2,
-    }
+    obj = CustomDataClass(b"this is a test", children=[child1, child2])
     expected_objects = {
         child1.object_id: child1,
         child2.object_id: child2,

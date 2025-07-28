@@ -20,8 +20,8 @@ import subprocess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
+from functools import partial
 from logging import INFO, WARN
-from os import urandom
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -39,7 +39,6 @@ from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_SUBPROCESS,
     MAX_RETRY_DELAY,
-    RUN_ID_NUM_BYTES,
     SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -47,15 +46,23 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.exit import ExitCode, flwr_exit
+from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
+from flwr.common.inflatable import iterate_object_tree
+from flwr.common.inflatable_utils import (
+    pull_objects,
+    push_object_contents_from_iterable,
+)
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
+from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
-from flwr.server.superlink.ffs import Ffs, FfsFactory
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
+from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
-from flwr.supernode.servicer.clientappio import ClientAppInputs, ClientAppIoServicer
+from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
@@ -132,15 +139,26 @@ def start_client_internal(
     if insecure is None:
         insecure = root_certificates is None
 
-    _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
-        address=clientappio_api_address,
-        certificates=None,
-    )
-
     # Initialize factories
     state_factory = NodeStateFactory()
     ffs_factory = FfsFactory(get_flwr_dir(flwr_path) / "supernode" / "ffs")  # type: ignore
     object_store_factory = ObjectStoreFactory()
+
+    # Launch ClientAppIo API server
+    clientappio_server = run_clientappio_api_grpc(
+        address=clientappio_api_address,
+        state_factory=state_factory,
+        ffs_factory=ffs_factory,
+        objectstore_factory=object_store_factory,
+        certificates=None,
+    )
+
+    # Register handlers for graceful shutdown
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERNODE_LEAVE,
+        exit_message="SuperNode terminated gracefully.",
+        grpc_servers=[clientappio_server],
+    )
 
     # Initialize NodeState, Ffs, and ObjectStore
     state = state_factory.state()
@@ -156,7 +174,17 @@ def start_client_internal(
         max_retries=max_retries,
         max_wait_time=max_wait_time,
     ) as conn:
-        receive, send, create_node, _, get_run, get_fab = conn
+        (
+            receive,
+            send,
+            create_node,
+            _,
+            get_run,
+            get_fab,
+            pull_object,
+            push_object,
+            confirm_message_received,
+        ) = conn
 
         # Call create_node fn to register node
         # and store node_id in state
@@ -176,97 +204,63 @@ def start_client_internal(
                 receive=receive,
                 get_run=get_run,
                 get_fab=get_fab,
+                pull_object=pull_object,
+                confirm_message_received=confirm_message_received,
             )
 
+            # Two isolation modes:
+            # 1. `subprocess`: SuperNode is starting the ClientApp
+            #    process as a subprocess.
+            # 2. `process`: ClientApp process gets started separately
+            #    (via `flwr-clientapp`), for example, in a separate
+            #    Docker container.
+
+            # Mode 1: SuperNode starts ClientApp as subprocess
+            start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
+
+            if start_subprocess and run_id is not None:
+                _octet, _colon, _port = clientappio_api_address.rpartition(":")
+                io_address = (
+                    f"{CLIENT_OCTET}:{_port}"
+                    if _octet == SERVER_OCTET
+                    else clientappio_api_address
+                )
+                # Start ClientApp subprocess
+                command = [
+                    "flwr-clientapp",
+                    "--clientappio-api-address",
+                    io_address,
+                    "--parent-pid",
+                    str(os.getpid()),
+                    "--insecure",
+                    "--run-once",
+                ]
+                subprocess.run(command, check=False)
+
+            # No message has been pulled therefore we can skip the push stage.
             if run_id is None:
-                time.sleep(3)  # Wait for 3s before asking again
+                # If no message was received, wait for a while
+                time.sleep(3)
                 continue
 
-            try:
-                # Retrieve message, context, run and fab for this run
-                message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
-                context = cast(Context, state.get_context(run_id))
-                run = cast(Run, state.get_run(run_id))
-                fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0])  # type: ignore
-
-                # Two isolation modes:
-                # 1. `subprocess`: SuperNode is starting the ClientApp
-                #    process as a subprocess.
-                # 2. `process`: ClientApp process gets started separately
-                #    (via `flwr-clientapp`), for example, in a separate
-                #    Docker container.
-
-                # Generate SuperNode token
-                token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
-
-                # Mode 1: SuperNode starts ClientApp as subprocess
-                start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
-
-                # Share Message and Context with servicer
-                clientappio_servicer.set_inputs(
-                    clientapp_input=ClientAppInputs(
-                        message=message,
-                        context=context,
-                        run=run,
-                        fab=fab,
-                        token=token,
-                    ),
-                    token_returned=start_subprocess,
-                )
-
-                if start_subprocess:
-                    _octet, _colon, _port = clientappio_api_address.rpartition(":")
-                    io_address = (
-                        f"{CLIENT_OCTET}:{_port}"
-                        if _octet == SERVER_OCTET
-                        else clientappio_api_address
-                    )
-                    # Start ClientApp subprocess
-                    command = [
-                        "flwr-clientapp",
-                        "--clientappio-api-address",
-                        io_address,
-                        "--token",
-                        str(token),
-                        "--parent-pid",
-                        str(os.getpid()),
-                        "--insecure",
-                    ]
-                    subprocess.run(command, check=False)
-                else:
-                    # Wait for output to become available
-                    while not clientappio_servicer.has_outputs():
-                        time.sleep(0.1)
-
-                outputs = clientappio_servicer.get_outputs()
-                reply_message, context = outputs.message, outputs.context
-
-                # Update node state
-                state.store_context(context)
-
-                # Send
-                send(reply_message)
-                log(INFO, "Sent reply")
-
-            except RunNotRunningException:
-                log(INFO, "")
-                log(
-                    INFO,
-                    "SuperNode aborted sending the reply message. "
-                    "Run ID %s is not in `RUNNING` status.",
-                    run_id,
-                )
-                log(INFO, "")
+            _push_messages(
+                state=state,
+                object_store=store,
+                send=send,
+                push_object=push_object,
+            )
 
 
 def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     state: NodeState,
     ffs: Ffs,
-    object_store: ObjectStore,  # pylint: disable=unused-argument
+    object_store: ObjectStore,
     node_config: UserConfig,
-    receive: Callable[[], Optional[Message]],
+    receive: Callable[[], Optional[tuple[Message, ObjectTree]]],
     get_run: Callable[[int], Run],
     get_fab: Callable[[str, int], Fab],
+    pull_object: Callable[[int, str], bytes],
+    confirm_message_received: Callable[[int, str], None],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -278,8 +272,9 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     message = None
     try:
         # Pull message
-        if (message := receive()) is None:
+        if (recv := receive()) is None:
             return None
+        message, object_tree = recv
 
         # Log message reception
         log(INFO, "")
@@ -323,8 +318,23 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             )
             state.store_context(run_ctx)
 
-        # Store the message in the state
+        # Preregister the object tree of the message
+        obj_ids_to_pull = object_store.preregister(run_id, object_tree)
+
+        # Store the message in the state (note this message has no content)
         state.store_message(message)
+
+        # Pull and store objects of the message in the ObjectStore
+        obj_contents = pull_objects(
+            obj_ids_to_pull,
+            pull_object_fn=lambda obj_id: pull_object(run_id, obj_id),
+        )
+        for obj_id in list(obj_contents.keys()):
+            object_store.put(obj_id, obj_contents.pop(obj_id))
+
+        # Confirm that the message was received
+        confirm_message_received(run_id, message.metadata.message_id)
+
     except RunNotRunningException:
         if message is None:
             log(
@@ -344,6 +354,93 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     return run_id
 
 
+def _push_messages(
+    state: NodeState,
+    object_store: ObjectStore,
+    send: Callable[[Message, ObjectTree], set[str]],
+    push_object: Callable[[int, str, bytes], None],
+) -> None:
+    """Push reply messages to the SuperLink."""
+    # This is to ensure that only one message is processed at a time
+    # Wait until a reply message is available
+    while not (reply_messages := state.get_messages(is_reply=True)):
+        time.sleep(0.5)
+
+    for message in reply_messages:
+        # Log message sending
+        log(INFO, "")
+        if message.metadata.group_id:
+            log(
+                INFO,
+                "[RUN %s, ROUND %s]",
+                message.metadata.run_id,
+                message.metadata.group_id,
+            )
+        else:
+            log(INFO, "[RUN %s]", message.metadata.run_id)
+        log(
+            INFO,
+            "Sending: %s message",
+            message.metadata.message_type,
+        )
+
+        # Get the object tree for the message
+        object_tree = object_store.get_object_tree(message.metadata.message_id)
+
+        # Define the iterator for yielding object contents
+        # This will yield (object_id, content) pairs
+        def yield_object_contents(
+            _obj_tree: ObjectTree, obj_id_set: set[str]
+        ) -> Iterator[tuple[str, bytes]]:
+            for tree in iterate_object_tree(_obj_tree):
+                if tree.object_id not in obj_id_set:
+                    continue
+                while (content := object_store.get(tree.object_id)) == b"":
+                    # Wait for the content to be available
+                    time.sleep(0.5)
+                # At this point, content is guaranteed to be available
+                # therefore we can yield it after casting it to bytes
+                yield tree.object_id, cast(bytes, content)
+
+        # Send the message
+        try:
+            # Send the reply message with its ObjectTree
+            # Get the IDs of objects to send
+            ids_obj_to_send = send(message, object_tree)
+
+            # Push object contents from the ObjectStore
+            run_id = message.metadata.run_id
+            push_object_contents_from_iterable(
+                yield_object_contents(object_tree, ids_obj_to_send),
+                # Use functools.partial to bind run_id explicitly,
+                # avoiding late binding issues and satisfying flake8 (B023)
+                # Equivalent to:
+                # lambda object_id, content: push_object(run_id, object_id, content)
+                push_object_fn=partial(push_object, run_id),
+            )
+            log(INFO, "Sent successfully")
+        except RunNotRunningException:
+            log(
+                INFO,
+                "Run ID %s is not in `RUNNING` status. Ignoring reply message %s.",
+                message.metadata.run_id,
+                message.metadata.message_id,
+            )
+        finally:
+            # Delete the message from the state
+            state.delete_messages(
+                message_ids=[
+                    message.metadata.message_id,
+                    message.metadata.reply_to_message_id,
+                ]
+            )
+
+            # Delete all its objects from the ObjectStore
+            # No need to delete objects of the message it replies to, as it is
+            # already deleted when the ClientApp calls `ConfirmMessageReceived`
+            object_store.delete(message.metadata.message_id)
+
+
 @contextmanager
 def _init_connection(  # pylint: disable=too-many-positional-arguments
     transport: str,
@@ -357,12 +454,15 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
     max_wait_time: Optional[float] = None,
 ) -> Iterator[
     tuple[
-        Callable[[], Optional[Message]],
-        Callable[[Message], None],
+        Callable[[], Optional[tuple[Message, ObjectTree]]],
+        Callable[[Message, ObjectTree], set[str]],
         Callable[[], Optional[int]],
         Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
+        Callable[[int, str], bytes],
+        Callable[[int, str, bytes], None],
+        Callable[[int, str], None],
     ]
 ]:
     """Establish a connection to the Fleet API server at SuperLink."""
@@ -463,10 +563,17 @@ def _make_fleet_connection_retry_invoker(
 
 def run_clientappio_api_grpc(
     address: str,
+    state_factory: NodeStateFactory,
+    ffs_factory: FfsFactory,
+    objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
-) -> tuple[grpc.Server, ClientAppIoServicer]:
+) -> grpc.Server:
     """Run ClientAppIo API gRPC server."""
-    clientappio_servicer: grpc.Server = ClientAppIoServicer()
+    clientappio_servicer: grpc.Server = ClientAppIoServicer(
+        state_factory=state_factory,
+        ffs_factory=ffs_factory,
+        objectstore_factory=objectstore_factory,
+    )
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
     clientappio_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(
@@ -479,4 +586,4 @@ def run_clientappio_api_grpc(
     )
     log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
     clientappio_grpc_server.start()
-    return clientappio_grpc_server, clientappio_servicer
+    return clientappio_grpc_server

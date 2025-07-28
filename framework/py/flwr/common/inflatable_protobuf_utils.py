@@ -18,6 +18,8 @@
 from typing import Callable
 
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -27,9 +29,13 @@ from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
 from .inflatable_utils import ObjectIdNotPreregisteredError, ObjectUnavailableError
 
+ConfirmMessageReceivedProtobuf = Callable[
+    [ConfirmMessageReceivedRequest], ConfirmMessageReceivedResponse
+]
 
-def make_pull_object_fn_grpc(
-    pull_object_grpc: Callable[[PullObjectRequest], PullObjectResponse],
+
+def make_pull_object_fn_protobuf(
+    pull_object_protobuf: Callable[[PullObjectRequest], PullObjectResponse],
     node: Node,
     run_id: int,
 ) -> Callable[[str], bytes]:
@@ -37,8 +43,9 @@ def make_pull_object_fn_grpc(
 
     Parameters
     ----------
-    pull_object_grpc : Callable[[PullObjectRequest], PullObjectResponse]
-        The gRPC function to pull objects, e.g., `FleetStub.PullObject`.
+    pull_object_protobuf : Callable[[PullObjectRequest], PullObjectResponse]
+        A callable that takes a `PullObjectRequest` and returns a `PullObjectResponse`.
+        This function is typically backed by a gRPC client stub.
     node : Node
         The node making the request.
     run_id : int
@@ -54,7 +61,7 @@ def make_pull_object_fn_grpc(
 
     def pull_object_fn(object_id: str) -> bytes:
         request = PullObjectRequest(node=node, run_id=run_id, object_id=object_id)
-        response: PullObjectResponse = pull_object_grpc(request)
+        response: PullObjectResponse = pull_object_protobuf(request)
         if not response.object_found:
             raise ObjectIdNotPreregisteredError(object_id)
         if not response.object_available:
@@ -64,8 +71,8 @@ def make_pull_object_fn_grpc(
     return pull_object_fn
 
 
-def make_push_object_fn_grpc(
-    push_object_grpc: Callable[[PushObjectRequest], PushObjectResponse],
+def make_push_object_fn_protobuf(
+    push_object_protobuf: Callable[[PushObjectRequest], PushObjectResponse],
     node: Node,
     run_id: int,
 ) -> Callable[[str, bytes], None]:
@@ -73,8 +80,9 @@ def make_push_object_fn_grpc(
 
     Parameters
     ----------
-    push_object_grpc : Callable[[PushObjectRequest], PushObjectResponse]
-        The gRPC function to push objects, e.g., `FleetStub.PushObject`.
+    push_object_protobuf : Callable[[PushObjectRequest], PushObjectResponse]
+        A callable that takes a `PushObjectRequest` and returns a `PushObjectResponse`.
+        This function is typically backed by a gRPC client stub.
     node : Node
         The node making the request.
     run_id : int
@@ -92,8 +100,42 @@ def make_push_object_fn_grpc(
         request = PushObjectRequest(
             node=node, run_id=run_id, object_id=object_id, object_content=object_content
         )
-        response: PushObjectResponse = push_object_grpc(request)
+        response: PushObjectResponse = push_object_protobuf(request)
         if not response.stored:
             raise ObjectIdNotPreregisteredError(object_id)
 
     return push_object_fn
+
+
+def make_confirm_message_received_fn_protobuf(
+    confirm_message_received_protobuf: ConfirmMessageReceivedProtobuf,
+    node: Node,
+    run_id: int,
+) -> Callable[[str], None]:
+    """Create a confirm message received function that uses protobuf.
+
+    Parameters
+    ----------
+    confirm_message_received_protobuf : ConfirmMessageReceivedProtobuf
+        A callable that takes a `ConfirmMessageReceivedRequest` and returns a
+        `ConfirmMessageReceivedResponse`, confirming message receipt.
+        This function is typically backed by a gRPC client stub.
+    node : Node
+        The node making the request.
+    run_id : int
+        The run ID for the current message.
+
+    Returns
+    -------
+    Callable[[str], None]
+        A wrapper function that takes an object ID and confirms that
+        the message has been received.
+    """
+
+    def confirm_message_received_fn(object_id: str) -> None:
+        request = ConfirmMessageReceivedRequest(
+            node=node, run_id=run_id, message_object_id=object_id
+        )
+        confirm_message_received_protobuf(request)
+
+    return confirm_message_received_fn

@@ -74,6 +74,7 @@ FAB_ALLOWED_EXTENSIONS = {".py", ".toml", ".md"}
 FAB_CONFIG_FILE = "pyproject.toml"
 FAB_DATE = (2024, 10, 1, 0, 0, 0)
 FAB_HASH_TRUNCATION = 8
+FAB_MAX_SIZE = 10 * 1024 * 1024  # 10 MB
 FLWR_DIR = ".flwr"  # The default Flower directory: ~/.flwr/
 FLWR_HOME = "FLWR_HOME"  # If set, override the default Flower directory
 
@@ -122,7 +123,7 @@ AUTHZ_TYPE_YAML_KEY = "authz_type"  # For key name in YAML file
 PUBLIC_KEY_HEADER = "flwr-public-key-bin"  # Must end with "-bin" for binary data
 SIGNATURE_HEADER = "flwr-signature-bin"  # Must end with "-bin" for binary data
 TIMESTAMP_HEADER = "flwr-timestamp"
-TIMESTAMP_TOLERANCE = 10  # General tolerance for timestamp verification
+TIMESTAMP_TOLERANCE = 300  # General tolerance for timestamp verification
 SYSTEM_TIME_TOLERANCE = 5  # Allowance for system time drift
 
 # Constants for grpc retry
@@ -134,6 +135,7 @@ GC_THRESHOLD = 200_000_000  # 200 MB
 # Constants for Inflatable
 HEAD_BODY_DIVIDER = b"\x00"
 HEAD_VALUE_DIVIDER = " "
+MAX_ARRAY_CHUNK_SIZE = 20_971_520  # 20 MB
 
 # Constants for serialization
 INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
@@ -148,6 +150,10 @@ PULL_MAX_TIME = 7200  # Default maximum time to wait for pulling objects
 PULL_MAX_TRIES_PER_OBJECT = 500  # Default maximum number of tries to pull an object
 PULL_INITIAL_BACKOFF = 1  # Initial backoff time for pulling objects
 PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
+
+
+# ExecServicer constants
+RUN_ID_NOT_FOUND_MESSAGE = "Run ID not found"
 
 
 class MessageType:

@@ -1,0 +1,22 @@
+[101] SUPERLINK_LICENSE_INVALID
+===============================
+
+Description
+-----------
+
+The license of the SuperLink is invalid, causing it to exit prematurely on startup.
+
+Possible causes of invalid license include:
+
+1. ``FLWR_LICENSE_KEY`` environment variable set to an invalid license key.
+2. The SuperLink failed to reach the public key endpoint from the license server.
+3. The fetched public key is malformed (wrong PEM encoding or key type) or its signature
+   failed verification against signing key.
+
+How to Resolve
+--------------
+
+1. Ensure that the ``FLWR_LICENSE_KEY`` is valid.
+2. Ensure that the correct public key endpoint is used and is reachable by the
+   SuperLink.
+3. If the issue persists, please contact support for further assistance.

@@ -22,7 +22,8 @@ import tempfile
 import unittest
 from abc import abstractmethod
 
-from flwr.server.superlink.ffs import DiskFfs, Ffs
+from .disk_ffs import DiskFfs
+from .ffs import Ffs
 
 
 class FfsTest(unittest.TestCase):

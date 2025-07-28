@@ -22,40 +22,50 @@ from typing import Optional, cast
 
 import grpc
 
-from flwr.common import Message, RecordDict
+from flwr.app.error import Error
+from flwr.common import Message, Metadata, RecordDict, now
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
+    ErrorCode,
+    MessageType,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.inflatable import (
     get_all_nested_objects,
     get_object_tree,
+    iterate_object_tree,
     no_object_id_recompute,
 )
-from flwr.common.inflatable_grpc_utils import (
-    make_pull_object_fn_grpc,
-    make_push_object_fn_grpc,
+from flwr.common.inflatable_protobuf_utils import (
+    make_pull_object_fn_protobuf,
+    make_push_object_fn_protobuf,
 )
 from flwr.common.inflatable_utils import (
+    ObjectUnavailableError,
     inflate_object_from_contents,
     pull_objects,
     push_objects,
 )
 from flwr.common.logger import log, warn_deprecated_feature
-from flwr.common.message import remove_content_from_message
+from flwr.common.message import make_message, remove_content_from_message
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullAppMessagesRequest,
+    PullAppMessagesResponse,
+    PushAppMessagesRequest,
+    PushAppMessagesResponse,
+)
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullResMessagesRequest,
-    PullResMessagesResponse,
-    PushInsMessagesRequest,
-    PushInsMessagesResponse,
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
@@ -220,8 +230,8 @@ class GrpcGrid(Grid):
         object_tree = get_object_tree(message)
 
         # Call GrpcServerAppIoStub method
-        res: PushInsMessagesResponse = self._stub.PushMessages(
-            PushInsMessagesRequest(
+        res: PushAppMessagesResponse = self._stub.PushMessages(
+            PushAppMessagesRequest(
                 messages_list=[message_to_proto(remove_content_from_message(message))],
                 run_id=run_id,
                 message_object_trees=[object_tree],
@@ -235,8 +245,8 @@ class GrpcGrid(Grid):
             # Push only object that are not in the store
             push_objects(
                 all_objects,
-                push_object_fn=make_push_object_fn_grpc(
-                    push_object_grpc=self._stub.PushObject,
+                push_object_fn=make_push_object_fn_protobuf(
+                    push_object_protobuf=self._stub.PushObject,
                     node=self.node,
                     run_id=run_id,
                 ),
@@ -254,15 +264,15 @@ class GrpcGrid(Grid):
         run_id = cast(Run, self._run).run_id
         message_ids: list[str] = []
         try:
-            for msg in messages:
-                # Populate metadata
-                msg.metadata.__dict__["_run_id"] = run_id
-                msg.metadata.__dict__["_src_node_id"] = self.node.node_id
-                msg.metadata.__dict__["_message_id"] = msg.object_id
-                # Check message
-                self._check_message(msg)
-                # Try pushing message and its objects
-                with no_object_id_recompute():
+            with no_object_id_recompute():
+                for msg in messages:
+                    # Populate metadata
+                    msg.metadata.__dict__["_run_id"] = run_id
+                    msg.metadata.__dict__["_src_node_id"] = self.node.node_id
+                    msg.metadata.__dict__["_message_id"] = msg.object_id
+                    # Check message
+                    self._check_message(msg)
+                    # Try pushing message and its objects
                     message_ids.append(self._try_push_message(run_id, msg))
 
         except grpc.RpcError as e:
@@ -291,23 +301,58 @@ class GrpcGrid(Grid):
         run_id = cast(Run, self._run).run_id
         try:
             # Pull Messages
-            res: PullResMessagesResponse = self._stub.PullMessages(
-                PullResMessagesRequest(
+            res: PullAppMessagesResponse = self._stub.PullMessages(
+                PullAppMessagesRequest(
                     message_ids=message_ids,
                     run_id=run_id,
                 )
             )
             # Pull Messages from store
             inflated_msgs: list[Message] = []
-            for msg_proto in res.messages_list:
+            for msg_proto, msg_tree in zip(res.messages_list, res.message_object_trees):
                 msg_id = msg_proto.metadata.message_id
-                all_object_contents = pull_objects(
-                    list(res.objects_to_pull[msg_id].object_ids) + [msg_id],
-                    pull_object_fn=make_pull_object_fn_grpc(
-                        pull_object_grpc=self._stub.PullObject,
-                        node=self.node,
-                        run_id=run_id,
-                    ),
+                try:
+                    all_object_contents = pull_objects(
+                        object_ids=[
+                            tree.object_id for tree in iterate_object_tree(msg_tree)
+                        ],
+                        pull_object_fn=make_pull_object_fn_protobuf(
+                            pull_object_protobuf=self._stub.PullObject,
+                            node=self.node,
+                            run_id=run_id,
+                        ),
+                    )
+                except ObjectUnavailableError as e:
+                    # An ObjectUnavailableError indicates that the object is not yet
+                    # available. If this point has been reached, it means that the
+                    # Grid has tried to pull the object for the maximum number of times
+                    # or for the maximum time allowed, so we return an inflated message
+                    # with an error
+                    inflated_msgs.append(
+                        make_message(
+                            metadata=Metadata(
+                                run_id=run_id,
+                                message_id="",
+                                src_node_id=self.node.node_id,
+                                dst_node_id=self.node.node_id,
+                                message_type=MessageType.SYSTEM,
+                                group_id="",
+                                ttl=0,
+                                reply_to_message_id=msg_proto.metadata.reply_to_message_id,
+                                created_at=now().timestamp(),
+                            ),
+                            error=Error(
+                                code=ErrorCode.MESSAGE_UNAVAILABLE, reason=(str(e))
+                            ),
+                        )
+                    )
+                    continue
+
+                # Confirm that the message has been received
+                self._stub.ConfirmMessageReceived(
+                    ConfirmMessageReceivedRequest(
+                        node=self.node, run_id=run_id, message_object_id=msg_id
+                    )
                 )
                 message = cast(
                     Message, inflate_object_from_contents(msg_id, all_object_contents)

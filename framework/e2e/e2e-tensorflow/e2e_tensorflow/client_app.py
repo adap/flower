@@ -1,29 +1,43 @@
 import os
 
-import numpy as np
 import tensorflow as tf
-from datasets import load_dataset
+import tensorflow_datasets as tfds
 
 from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
-SUBSET_SIZE = 1000
+# Set subset sizes
+TRAIN_SUBSET_SIZE = 100
+TEST_SUBSET_SIZE = 10
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-# Load CIFAR-10 from Hugging Face
-dataset = load_dataset("uoft-cs/cifar10")
 
-# Convert to NumPy arrays
-x_train = np.stack(dataset["train"]["img"]).astype("float32") / 255.0
-y_train = np.array(dataset["train"]["label"])
+# Load CIFAR-10 as supervised (returns (img, label))
+ds_train, ds_test = tfds.load("cifar10", split=["train", "test"], as_supervised=True)
 
-x_test = np.stack(dataset["test"]["img"]).astype("float32") / 255.0
-y_test = np.array(dataset["test"]["label"])
 
-x_train, y_train = x_train[:SUBSET_SIZE], y_train[:SUBSET_SIZE]
-x_test, y_test = x_test[:10], y_test[:10]
+# Define one fast preprocessing function
+@tf.function
+def preprocess_sample(image, label):
+    image = tf.cast(image, tf.float32) / 255.0
+    return image, label
+
+
+def preprocess(split, subset_size):
+    return (
+        split.take(subset_size)
+        .map(preprocess_sample, num_parallel_calls=tf.data.AUTOTUNE)
+        .batch(32)
+        .prefetch(tf.data.AUTOTUNE)
+    )
+
+
+# Preprocess datasets
+ds_train = preprocess(ds_train, TRAIN_SUBSET_SIZE)
+ds_test = preprocess(ds_test, TEST_SUBSET_SIZE)
+
 
 # Load model (MobileNetV2, CIFAR-10)
 model = tf.keras.applications.MobileNetV2(
@@ -39,13 +53,13 @@ class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
         model.set_weights(parameters)
-        model.fit(x_train, y_train, epochs=1, batch_size=32)
-        return model.get_weights(), len(x_train), {}
+        model.fit(ds_train, epochs=1, batch_size=32)
+        return model.get_weights(), len(ds_train), {}
 
     def evaluate(self, parameters, config):
         model.set_weights(parameters)
-        loss, accuracy = model.evaluate(x_test, y_test)
-        return loss, len(x_test), {"accuracy": accuracy}
+        loss, accuracy = model.evaluate(ds_test)
+        return loss, len(ds_test), {"accuracy": accuracy}
 
 
 def client_fn(context: Context):

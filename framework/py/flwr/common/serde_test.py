@@ -27,7 +27,6 @@ from flwr.common.date import now
 from flwr.common.message import make_message
 
 # pylint: disable=E0611
-from flwr.proto import clientappio_pb2
 from flwr.proto import transport_pb2 as pb2
 from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
@@ -57,8 +56,6 @@ from .serde import (
     array_record_from_proto,
     array_record_to_proto,
     array_to_proto,
-    clientappstatus_from_proto,
-    clientappstatus_to_proto,
     config_record_from_proto,
     config_record_to_proto,
     context_from_proto,
@@ -481,37 +478,3 @@ def test_run_serialization_deserialization() -> None:
     # Assert
     assert isinstance(proto, ProtoRun)
     assert original == deserialized
-
-
-def test_clientappstatus_to_proto() -> None:
-    """Test ClientApp status message (de-)serialization."""
-    # Prepare
-    # pylint: disable=E1101
-    code_msg = clientappio_pb2.ClientAppOutputCode.SUCCESS
-    status_msg = clientappio_pb2.ClientAppOutputStatus(code=code_msg, message="Success")
-
-    code = typing.ClientAppOutputCode.SUCCESS
-    status = typing.ClientAppOutputStatus(code=code, message="Success")
-
-    # Execute
-    actual_status_msg = clientappstatus_to_proto(status=status)
-
-    # Assert
-    assert actual_status_msg == status_msg
-
-
-def test_clientappstatus_from_proto() -> None:
-    """Test ClientApp status message (de-)serialization."""
-    # Prepare
-    # pylint: disable=E1101
-    code_msg = clientappio_pb2.ClientAppOutputCode.SUCCESS
-    status_msg = clientappio_pb2.ClientAppOutputStatus(code=code_msg, message="Success")
-
-    code = typing.ClientAppOutputCode.SUCCESS
-    status = typing.ClientAppOutputStatus(code=code, message="Success")
-
-    # Execute
-    actual_status = clientappstatus_from_proto(msg=status_msg)
-
-    # Assert
-    assert actual_status == status

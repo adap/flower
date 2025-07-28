@@ -71,11 +71,11 @@ from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.server.serverapp.app import flwr_serverapp
 from flwr.simulation.app import flwr_simulation
+from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
 
-from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
@@ -91,7 +91,6 @@ P = TypeVar("P", ExecAuthPlugin, ExecAuthzPlugin)
 try:
     from flwr.ee import (
         add_ee_args_superlink,
-        get_dashboard_server,
         get_exec_auth_plugins,
         get_exec_authz_plugins,
         get_exec_event_log_writer_plugins,
@@ -178,6 +177,7 @@ def run_superlink() -> None:
         address=exec_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
+        objectstore_factory=objectstore_factory,
         executor=executor,
         certificates=certificates,
         config=parse_config_args(
@@ -331,17 +331,6 @@ def run_superlink() -> None:
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
-
-    # Add Dashboard server if available
-    if dashboard_address := getattr(args, "dashboard_address", None):
-        dashboard_address_str, _, _ = _format_address(dashboard_address)
-        dashboard_server = get_dashboard_server(
-            address=dashboard_address_str,
-            state_factory=state_factory,
-            certificates=None,
-        )
-
-        grpc_servers.append(dashboard_server)
 
     # Graceful shutdown
     register_exit_handlers(
