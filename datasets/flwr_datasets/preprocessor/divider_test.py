@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 """Divider tests."""
 
 import unittest
-from typing import Dict, Union
+from typing import Union
 
 from parameterized import parameterized_class
 
@@ -84,14 +84,14 @@ class TestDivider(unittest.TestCase):
     """Divider tests."""
 
     divide_config: Union[
-        Dict[str, float],
-        Dict[str, int],
-        Dict[str, Dict[str, float]],
-        Dict[str, Dict[str, int]],
+        dict[str, float],
+        dict[str, int],
+        dict[str, dict[str, float]],
+        dict[str, dict[str, int]],
     ]
     divide_split: str
     drop_remaining_splits: bool
-    split_name_to_size: Dict[str, int]
+    split_name_to_size: dict[str, int]
 
     def setUp(self) -> None:
         """Set up the dataset with 3 splits for tests."""
@@ -186,7 +186,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
             _ = divider(self.dataset_dict)
 
     def test_sample_sizes_sum_up_to_more_than_dataset_size_single_split(self) -> None:
-        """Test if resplitting raises when samples size sum up to > len(datset) ."""
+        """Test if resplitting raises when samples size sum up to > len(dataset) ."""
         divide_config = {"train": {"train_1": 20, "train_2": 25}}
         divide_split = None
         drop_remaining_splits = False
@@ -195,7 +195,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
             _ = divider(self.dataset_dict)
 
     def test_sample_sizes_sum_up_to_more_than_dataset_size_multisplit(self) -> None:
-        """Test if resplitting raises when samples size sum up to > len(datset) ."""
+        """Test if resplitting raises when samples size sum up to > len(dataset) ."""
         divide_config = {"train_1": 20, "train_2": 25}
         divide_split = "train"
         drop_remaining_splits = False

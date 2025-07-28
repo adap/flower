@@ -16,7 +16,7 @@
 
 
 import warnings
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import pandas as pd
 
@@ -55,7 +55,7 @@ def compute_counts(
     dataframe: pd.DataFrame
         DataFrame where the row index represent the partition id and the column index
         represent the unique values found in column specified by `column_name`
-        (e.g. represeting the labels). The value of the dataframe.loc[i, j] represents
+        (e.g. representing the labels). The value of the dataframe.loc[i, j] represents
         the count of the label j, in the partition of index i.
 
     Examples
@@ -170,7 +170,7 @@ def compute_frequencies(
     dataframe: pd.DataFrame
         DataFrame where the row index represent the partition id and the column index
         represent the unique values found in column specified by `column_name`
-        (e.g. represeting the labels). The value of the dataframe.loc[i, j] represnt
+        (e.g. representing the labels). The value of the dataframe.loc[i, j] represent
         the ratio of the label j to the total number of sample of in partition i.
 
     Examples
@@ -206,7 +206,7 @@ def compute_frequencies(
 
 
 def _compute_counts(
-    labels: Union[List[int], List[str]], unique_labels: Union[List[int], List[str]]
+    labels: Union[list[int], list[str]], unique_labels: Union[list[int], list[str]]
 ) -> pd.Series:
     """Compute the count of labels when taking into account all possible labels.
 
@@ -237,7 +237,7 @@ def _compute_counts(
 
 
 def _compute_frequencies(
-    labels: Union[List[int], List[str]], unique_labels: Union[List[int], List[str]]
+    labels: Union[list[int], list[str]], unique_labels: Union[list[int], list[str]]
 ) -> pd.Series:
     """Compute the distribution of labels when taking into account all possible labels.
 

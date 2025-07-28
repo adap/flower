@@ -15,7 +15,7 @@
 """FederatedDataset."""
 
 
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
@@ -29,7 +29,7 @@ from flwr_datasets.utils import (
 )
 
 
-# flake8: noqa: E501
+# noqa: E501
 # pylint: disable=line-too-long
 class FederatedDataset:
     """Representation of a dataset for federated learning/evaluation/analytics.
@@ -69,7 +69,7 @@ class FederatedDataset:
         entropy will be pulled from the OS. Defaults to 42.
     load_dataset_kwargs : Any
         Additional keyword arguments passed to `datasets.load_dataset` function.
-        Currently used paramters used are dataset => path (in load_dataset),
+        Currently used parameters used are dataset => path (in load_dataset),
         subset => name (in load_dataset). You can pass e.g., `num_proc=4`,
         `trust_remote_code=True`. Do not pass any parameters that modify the
         return type such as another type than DatasetDict is returned.
@@ -113,8 +113,8 @@ class FederatedDataset:
         *,
         dataset: str,
         subset: Optional[str] = None,
-        preprocessor: Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]] = None,
-        partitioners: Dict[str, Union[Partitioner, int]],
+        preprocessor: Optional[Union[Preprocessor, dict[str, tuple[str, ...]]]] = None,
+        partitioners: dict[str, Union[Partitioner, int]],
         shuffle: bool = True,
         seed: Optional[int] = 42,
         **load_dataset_kwargs: Any,
@@ -125,9 +125,10 @@ class FederatedDataset:
         self._preprocessor: Optional[Preprocessor] = _instantiate_merger_if_needed(
             preprocessor
         )
-        self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
+        self._partitioners: dict[str, Partitioner] = _instantiate_partitioners(
             partitioners
         )
+        self._check_partitioners_correctness()
         self._shuffle = shuffle
         self._seed = seed
         #  _dataset is prepared lazily on the first call to `load_partition`
@@ -161,6 +162,11 @@ class FederatedDataset:
             not need to provide this argument, but if `partitioners={"train": 10,
             "test": 100}`, you need to set it to differentiate which partitioner should
             be used.
+            The split names you can choose from vary from dataset to dataset. You need
+            to check the dataset on the `Hugging Face Hub`<https://huggingface.co/
+            datasets>_ to see which splits are available. You can resplit the dataset
+            by using the `preprocessor` parameter (to rename, merge, divide, etc. the
+            available splits).
 
         Returns
         -------
@@ -203,6 +209,11 @@ class FederatedDataset:
         ----------
         split : str
             Split name of the downloaded dataset (e.g. "train", "test").
+            The split names you can choose from vary from dataset to dataset. You need
+            to check the dataset on the `Hugging Face Hub`<https://huggingface.co/
+            datasets>_ to see which splits are available. You can resplit the dataset
+            by using the `preprocessor` parameter (to rename, merge, divide, etc. the
+            available splits).
 
         Returns
         -------
@@ -230,7 +241,7 @@ class FederatedDataset:
         return dataset_split
 
     @property
-    def partitioners(self) -> Dict[str, Partitioner]:
+    def partitioners(self) -> dict[str, Partitioner]:
         """Dictionary mapping each split to its associated partitioner.
 
         The returned partitioners have the splits of the dataset assigned to them.
@@ -307,7 +318,8 @@ class FederatedDataset:
             raise ValueError(
                 "Probably one of the specified parameter in `load_dataset_kwargs` "
                 "change the return type of the datasets.load_dataset function. "
-                "Make sure to use parameter such that the return type is DatasetDict."
+                "Make sure to use parameter such that the return type is DatasetDict. "
+                f"The return type is currently: {type(self._dataset)}."
             )
         if self._shuffle:
             # Note it shuffles all the splits. The self._dataset is DatasetDict
@@ -325,3 +337,20 @@ class FederatedDataset:
                 "Please set the `split` argument. You can only omit the split keyword "
                 "if there is exactly one partitioner specified."
             )
+
+    def _check_partitioners_correctness(self) -> None:
+        """Check if the partitioners are correctly specified.
+
+        Check if each partitioner is a different Python object. Using the same
+        partitioner for different splits is not allowed.
+        """
+        partitioners_keys = list(self._partitioners.keys())
+        for i, first_split in enumerate(partitioners_keys):
+            for j in range(i + 1, len(partitioners_keys)):
+                second_split = partitioners_keys[j]
+                if self._partitioners[first_split] is self._partitioners[second_split]:
+                    raise ValueError(
+                        f"The same partitioner object is used for multiple splits: "
+                        f"('{first_split}', '{second_split}'). "
+                        "Each partitioner should be a separate object."
+                    )

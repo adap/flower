@@ -15,7 +15,7 @@
 """Label distribution plotting."""
 
 
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import matplotlib.colors as mcolors
 import pandas as pd
@@ -32,7 +32,7 @@ from flwr_datasets.visualization.utils import _validate_parameters
 # pylint: disable=too-many-arguments,too-many-locals
 
 
-def plot_label_distributions(
+def plot_label_distributions(  # pylint: disable=R0917
     partitioner: Partitioner,
     label_name: str,
     plot_type: str = "bar",
@@ -40,15 +40,15 @@ def plot_label_distributions(
     max_num_partitions: Optional[int] = None,
     partition_id_axis: str = "x",
     axis: Optional[Axes] = None,
-    figsize: Optional[Tuple[float, float]] = None,
+    figsize: Optional[tuple[float, float]] = None,
     title: str = "Per Partition Label Distribution",
     cmap: Optional[Union[str, mcolors.Colormap]] = None,
     legend: bool = False,
     legend_title: Optional[str] = None,
     verbose_labels: bool = True,
-    plot_kwargs: Optional[Dict[str, Any]] = None,
-    legend_kwargs: Optional[Dict[str, Any]] = None,
-) -> Tuple[Figure, Axes, pd.DataFrame]:
+    plot_kwargs: Optional[dict[str, Any]] = None,
+    legend_kwargs: Optional[dict[str, Any]] = None,
+) -> tuple[Figure, Axes, pd.DataFrame]:
     """Plot the label distribution of the partitions.
 
     Parameters
@@ -245,5 +245,7 @@ def plot_label_distributions(
             plot_kwargs,
             legend_kwargs,
         )
-    assert axis is not None
-    return axis.figure, axis, dataframe
+    assert axis is not None, "axis is None after plotting"
+    figure = axis.figure
+    assert isinstance(figure, Figure), "figure extraction from axes is not a Figure"
+    return figure, axis, dataframe

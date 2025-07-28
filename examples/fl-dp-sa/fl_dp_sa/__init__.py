@@ -1,1 +1,1 @@
-"""fl_dp_sa: A Flower / PyTorch app."""
+"""fl_dp_sa: Flower Example using Differential Privacy and Secure Aggregation."""

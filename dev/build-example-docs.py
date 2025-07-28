@@ -21,14 +21,14 @@ import subprocess
 from pathlib import Path
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-INDEX = os.path.join(ROOT, "examples", "doc", "source", "index.rst")
+INDEX = os.path.join(ROOT, "examples", "docs", "source", "index.rst")
 
 initial_text = """
 Flower Examples Documentation
 -----------------------------
 
 Welcome to Flower Examples' documentation. `Flower <https://flower.ai>`_ is
-a friendly federated learning framework.
+a friendly federated AI framework.
 
 Join the Flower Community
 -------------------------
@@ -64,13 +64,13 @@ categories = {
 urls = {
     # Frameworks
     "Android": "https://www.android.com/",
+    "catboost": "https://catboost.ai/docs/en/",
     "C++": "https://isocpp.org/",
     "Docker": "https://www.docker.com/",
     "JAX": "https://jax.readthedocs.io/en/latest/",
     "Java": "https://www.java.com/",
     "Keras": "https://keras.io/",
     "Kotlin": "https://kotlinlang.org/",
-    "mlcube": "https://docs.mlcommons.org/mlcube/",
     "MLX": "https://ml-explore.github.io/mlx/build/html/index.html",
     "MONAI": "https://monai.io/",
     "PEFT": "https://huggingface.co/docs/peft/index",
@@ -83,7 +83,6 @@ urls = {
     "opacus": "https://opacus.ai/",
     "pandas": "https://pandas.pydata.org/",
     "scikit-learn": "https://scikit-learn.org/",
-    "tabnet": "https://github.com/titu1994/tf-TabNet",
     "tensorboard": "https://www.tensorflow.org/tensorboard",
     "tensorflow": "https://www.tensorflow.org/",
     "torch": "https://pytorch.org/",
@@ -180,14 +179,14 @@ def _copy_markdown_files(example):
         if file.endswith(".md"):
             src = os.path.join(example, file)
             dest = os.path.join(
-                ROOT, "examples", "doc", "source", os.path.basename(example) + ".md"
+                ROOT, "examples", "docs", "source", os.path.basename(example) + ".md"
             )
             shutil.copyfile(src, dest)
 
 
 def _add_gh_button(example):
     gh_text = f'[<img src="_static/view-gh.png" alt="View on GitHub" width="200"/>](https://github.com/adap/flower/blob/main/examples/{example})'
-    readme_file = os.path.join(ROOT, "examples", "doc", "source", example + ".md")
+    readme_file = os.path.join(ROOT, "examples", "docs", "source", example + ".md")
     with open(readme_file, "r+") as f:
         content = f.read()
         if gh_text not in content:
@@ -201,7 +200,7 @@ def _add_gh_button(example):
 
 def _copy_images(example):
     static_dir = os.path.join(example, "_static")
-    dest_dir = os.path.join(ROOT, "examples", "doc", "source", "_static")
+    dest_dir = os.path.join(ROOT, "examples", "docs", "source", "_static")
     if os.path.isdir(static_dir):
         for file in os.listdir(static_dir):
             if file.endswith((".jpg", ".png", ".jpeg")):
@@ -214,7 +213,7 @@ def _add_all_entries():
     examples_dir = os.path.join(ROOT, "examples")
     for example in sorted(os.listdir(examples_dir)):
         example_path = os.path.join(examples_dir, example)
-        if os.path.isdir(example_path) and example != "doc":
+        if os.path.isdir(example_path) and example != "docs":
             _copy_markdown_files(example_path)
             _add_gh_button(example)
             _copy_images(example)
@@ -230,7 +229,7 @@ def _main():
     examples_dir = os.path.join(ROOT, "examples")
     for example in sorted(os.listdir(examples_dir)):
         example_path = os.path.join(examples_dir, example)
-        if os.path.isdir(example_path) and example != "doc":
+        if os.path.isdir(example_path) and example != "docs":
             _copy_markdown_files(example_path)
             _add_gh_button(example)
             _copy_images(example_path)
@@ -280,4 +279,4 @@ def _main():
 
 if __name__ == "__main__":
     _main()
-    subprocess.call(f"cd {ROOT}/examples/doc && make html", shell=True)
+    subprocess.call(f"cd {ROOT}/examples/docs && make html", shell=True)

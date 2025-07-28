@@ -3,7 +3,6 @@
 import os
 import warnings
 from typing import Dict, Tuple
-from collections import OrderedDict
 
 import torch
 from flwr.client import ClientApp, NumPyClient
@@ -12,7 +11,6 @@ from flwr.common.config import unflatten_dict
 from flwr.common.typing import NDArrays, Scalar
 from omegaconf import DictConfig
 
-from peft import get_peft_model_state_dict, set_peft_model_state_dict
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
@@ -24,6 +22,8 @@ from flowertune_llm.dataset import (
 from flowertune_llm.models import (
     cosine_annealing,
     get_model,
+    set_parameters,
+    get_parameters,
 )
 
 # Avoid warnings
@@ -49,7 +49,7 @@ class FlowerClient(NumPyClient):
     ):  # pylint: disable=too-many-arguments
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.train_cfg = train_cfg
-        self.training_argumnets = TrainingArguments(**train_cfg.training_arguments)
+        self.training_arguments = TrainingArguments(**train_cfg.training_arguments)
         self.tokenizer = tokenizer
         self.formatting_prompts_func = formatting_prompts_func
         self.data_collator = data_collator
@@ -72,14 +72,14 @@ class FlowerClient(NumPyClient):
             self.train_cfg.learning_rate_min,
         )
 
-        self.training_argumnets.learning_rate = new_lr
-        self.training_argumnets.output_dir = config["save_path"]
+        self.training_arguments.learning_rate = new_lr
+        self.training_arguments.output_dir = config["save_path"]
 
         # Construct trainer
         trainer = SFTTrainer(
             model=self.model,
             tokenizer=self.tokenizer,
-            args=self.training_argumnets,
+            args=self.training_arguments,
             max_seq_length=self.train_cfg.seq_length,
             train_dataset=self.trainset,
             formatting_func=self.formatting_prompts_func,
@@ -94,20 +94,6 @@ class FlowerClient(NumPyClient):
             len(self.trainset),
             {"train_loss": results.training_loss},
         )
-
-
-def set_parameters(model, parameters: NDArrays) -> None:
-    """Change the parameters of the model using the given ones."""
-    peft_state_dict_keys = get_peft_model_state_dict(model).keys()
-    params_dict = zip(peft_state_dict_keys, parameters)
-    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-    set_peft_model_state_dict(model, state_dict)
-
-
-def get_parameters(model) -> NDArrays:
-    """Return the parameters of the current net."""
-    state_dict = get_peft_model_state_dict(model)
-    return [val.cpu().numpy() for _, val in state_dict.items()]
 
 
 def client_fn(context: Context) -> FlowerClient:
