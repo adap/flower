@@ -275,7 +275,7 @@ export class RemoteEngine extends BaseEngine {
           }
         } else if (isFinalChunk(parsed)) {
           break;
-        } else if (isPlatformHTTPError(parsed)) {
+        } else if (isPlatformHttpError(parsed)) {
           return {
             ok: false,
             failure: {
@@ -283,7 +283,7 @@ export class RemoteEngine extends BaseEngine {
               description: parsed.detail.message,
             },
           };
-        } else if (isHTTPError(parsed)) {
+        } else if (isHttpError(parsed)) {
           return {
             ok: false,
             failure: { code: FailureCode.ConnectionError, description: parsed.detail },
@@ -788,11 +788,11 @@ interface FinalChunk {
   };
 }
 
-interface HTTPError {
+interface HttpError {
   detail: string;
 }
 
-interface PlatformHTTPError {
+interface PlatformHttpError {
   detail: {
     code: string;
     message: string;
@@ -819,11 +819,11 @@ function isFinalChunk(o: unknown): o is FinalChunk {
   );
 }
 
-function isHTTPError(o: unknown): o is HTTPError {
+function isHttpError(o: unknown): o is HttpError {
   return typeof o === 'object' && o !== null && 'detail' in o && typeof o.detail === 'string';
 }
 
-function isPlatformHTTPError(o: unknown): o is PlatformHTTPError {
+function isPlatformHttpError(o: unknown): o is PlatformHttpError {
   return (
     typeof o === 'object' &&
     o !== null &&
