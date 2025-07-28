@@ -3,7 +3,7 @@ import { FlowerIntelligence } from '@flwr/flwr';
 async function sendChatCompletion() {
   const fi = FlowerIntelligence.instance;
   fi.remoteHandoff = true;
-  fi.apiKey = process.env.FLWR_API_KEY ?? '';
+  fi.apiKey = process.env.FI_API_KEY ?? '';
 
   const response = await fi.chat({
     model: 'mistralai/mistral-small-3.1-24b',
