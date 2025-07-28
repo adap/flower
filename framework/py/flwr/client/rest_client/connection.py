@@ -369,8 +369,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             raise ValueError("PushMessagesResponse is None.")
 
         # Get and return the object IDs to push
-        object_ids_to_push = res.objects_to_push[object_tree.object_id]
-        return set(object_ids_to_push.object_ids)
+        return set(res.objects_to_push)
 
     def get_run(run_id: int) -> Run:
         # Construct the request
