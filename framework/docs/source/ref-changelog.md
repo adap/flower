@@ -48,23 +48,19 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Logs a warning when using the Ray backend for simulation on Windows. Updates the simulation guide to include a corresponding note about limited Windows support.
 
-- **Add license check** ([#5554](https://github.com/adap/flower/pull/5554), [#5557](https://github.com/adap/flower/pull/5557), [#5565](https://github.com/adap/flower/pull/5565), [#5576](https://github.com/adap/flower/pull/5576), [#5621](https://github.com/adap/flower/pull/5621))
-
-  Implements a license validation system using a plugin interface and runtime interceptor. Adds error handling for missing or invalid keys, with corresponding exit codes and documentation updates.
-
 - **Add docs for user authentication and audit logging** ([#5630](https://github.com/adap/flower/pull/5630))
 
   Introduces documentation for configuring user authentication ([User Authentication Guide](https://flower.ai/docs/framework/how-to-authenticate-users.html)) and audit logging ([Audit Logging Guide](https://flower.ai/docs/framework/how-to-configure-audit-logging.html)) in Flower.
 
 - **Support gRPC health check by default** ([#5591](https://github.com/adap/flower/pull/5591))
 
-- **Fix bugs and stability issues** ([#5567](https://github.com/adap/flower/pull/5567), [#5545](https://github.com/adap/flower/pull/5545), [#5534](https://github.com/adap/flower/pull/5534), [#5555](https://github.com/adap/flower/pull/5555), [#5533](https://github.com/adap/flower/pull/5533), [#5548](https://github.com/adap/flower/pull/5548))
+- **Bugfixes** ([#5567](https://github.com/adap/flower/pull/5567), [#5545](https://github.com/adap/flower/pull/5545), [#5534](https://github.com/adap/flower/pull/5534))
 
 - **Improve CI/CD** ([#5560](https://github.com/adap/flower/pull/5560), [#5544](https://github.com/adap/flower/pull/5544), [#5531](https://github.com/adap/flower/pull/5531), [#5532](https://github.com/adap/flower/pull/5532), [#5547](https://github.com/adap/flower/pull/5547), [#5578](https://github.com/adap/flower/pull/5578))
 
 - **Improve and update documentation** ([#5558](https://github.com/adap/flower/pull/5558), [#5603](https://github.com/adap/flower/pull/5603), [#5538](https://github.com/adap/flower/pull/5538), [#5626](https://github.com/adap/flower/pull/5626), [#5566](https://github.com/adap/flower/pull/5566), [#5553](https://github.com/adap/flower/pull/5553), [#5588](https://github.com/adap/flower/pull/5588), [#5549](https://github.com/adap/flower/pull/5549), [#5618](https://github.com/adap/flower/pull/5618), [#5612](https://github.com/adap/flower/pull/5612))
 
-- **General improvements** ([#5543](https://github.com/adap/flower/pull/5543), [#5594](https://github.com/adap/flower/pull/5594), [#5623](https://github.com/adap/flower/pull/5623), [#5615](https://github.com/adap/flower/pull/5615), [#5629](https://github.com/adap/flower/pull/5629), [#5571](https://github.com/adap/flower/pull/5571), [#5617](https://github.com/adap/flower/pull/5617), [#5563](https://github.com/adap/flower/pull/5563), [#5620](https://github.com/adap/flower/pull/5620), [#5619](https://github.com/adap/flower/pull/5619), [#5546](https://github.com/adap/flower/pull/5546), [#5601](https://github.com/adap/flower/pull/5601), [#5641](https://github.com/adap/flower/pull/5641))
+- **General improvements** ([#5543](https://github.com/adap/flower/pull/5543), [#5594](https://github.com/adap/flower/pull/5594), [#5623](https://github.com/adap/flower/pull/5623), [#5615](https://github.com/adap/flower/pull/5615), [#5629](https://github.com/adap/flower/pull/5629), [#5571](https://github.com/adap/flower/pull/5571), [#5617](https://github.com/adap/flower/pull/5617), [#5563](https://github.com/adap/flower/pull/5563), [#5620](https://github.com/adap/flower/pull/5620), [#5619](https://github.com/adap/flower/pull/5619), [#5546](https://github.com/adap/flower/pull/5546), [#5601](https://github.com/adap/flower/pull/5601), [#5641](https://github.com/adap/flower/pull/5641), [#5555](https://github.com/adap/flower/pull/5555), [#5533](https://github.com/adap/flower/pull/5533), [#5548](https://github.com/adap/flower/pull/5548))
 
   As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
