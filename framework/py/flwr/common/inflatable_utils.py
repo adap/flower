@@ -75,6 +75,18 @@ def _shutdown_thread_pool_executors() -> None:
         _thread_pool_executors.clear()
 
 
+def _track_executor(executor: concurrent.futures.ThreadPoolExecutor) -> None:
+    """Track a thread pool executor for graceful shutdown."""
+    with _lock:
+        _thread_pool_executors.add(executor)
+
+
+def _untrack_executor(executor: concurrent.futures.ThreadPoolExecutor) -> None:
+    """Untrack a thread pool executor."""
+    with _lock:
+        _thread_pool_executors.discard(executor)
+
+
 add_exit_handler(_shutdown_thread_pool_executors)
 
 
@@ -182,8 +194,7 @@ def push_object_contents_from_iterable(
     num_workers = get_num_workers(max_concurrent_pushes)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         # Ensure that the thread pool executors are tracked for graceful shutdown
-        with _lock:
-            _thread_pool_executors.add(executor)
+        _track_executor(executor)
 
         # Submit push tasks for each object content
         for obj_id, obj_content in object_contents:
@@ -191,8 +202,7 @@ def push_object_contents_from_iterable(
             del obj_content  # Delete the reference after submission
 
     # Remove the executor from the list of tracked executors
-    with _lock:
-        _thread_pool_executors.discard(executor)
+    _untrack_executor(executor)
 
 
 def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
@@ -290,8 +300,7 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
     num_workers = get_num_workers(max_concurrent_pulls)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         # Ensure that the thread pool executors are tracked for graceful shutdown
-        with _lock:
-            _thread_pool_executors.add(executor)
+        _track_executor(executor)
 
         # Submit pull tasks for each object ID
         for obj_id in object_ids:
@@ -300,8 +309,7 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
         # The context manager will block until all submitted tasks have completed
 
     # Remove the executor from the list of tracked executors
-    with _lock:
-        _thread_pool_executors.discard(executor)
+    _untrack_executor(executor)
 
     # If an error occurred during pulling, raise it
     if err_to_raise is not None:
