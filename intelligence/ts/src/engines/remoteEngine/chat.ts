@@ -24,7 +24,7 @@ import {
   ToolCall,
 } from '../../typing';
 import { CryptographyHandler } from './cryptoHandler';
-import { createRequestData, getHeaders, sendRequest } from './remoteUtils';
+import { createChatRequestData, getHeaders, sendRequest } from './remoteUtils';
 import {
   ChatCompletionsResponse,
   isFinalChunk,
@@ -49,7 +49,7 @@ export async function chatStream(
   onStreamEvent?: (event: StreamEvent) => void,
   signal?: AbortSignal
 ): Promise<ChatResponseResult> {
-  const requestData = createRequestData(
+  const requestData = createChatRequestData(
     messages,
     model,
     temperature,
@@ -314,7 +314,7 @@ class StreamProcessingError extends Error {
   }
 }
 
-export async function extractOutput(
+export async function extractChatOutput(
   response: ChatCompletionsResponse,
   encrypt: boolean,
   cryptoHandler: CryptographyHandler
